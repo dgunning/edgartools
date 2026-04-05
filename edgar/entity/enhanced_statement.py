@@ -17,7 +17,6 @@ from typing import Any, Dict, List, Optional
 import pandas as pd
 from rich import box
 from rich.console import Group
-from rich.padding import Padding
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
@@ -25,13 +24,14 @@ from rich.text import Text
 from edgar.core import log
 from edgar.entity.mappings_loader import (
     get_all_statements_for_concept,
-    get_industry_for_sic,
+    get_industry,
     get_primary_statement,
     load_industry_extension,
     load_learned_mappings,
     load_virtual_trees,
 )
 from edgar.entity.models import FinancialFact
+from edgar.entity.utils import normalize_period_to_statement
 
 from edgar.display import get_statement_styles, SYMBOLS, get_style
 from edgar.richtools import repr_rich
@@ -185,6 +185,7 @@ class MultiPeriodStatement:
 
     # Metadata
     company_name: Optional[str] = None
+    ticker: Optional[str] = None
     cik: Optional[str] = None
     canonical_coverage: float = 0.0
 
@@ -203,26 +204,35 @@ class MultiPeriodStatement:
             'CashFlow': 'Cash Flow Statement'
         }
 
-        # Build title hierarchy (like XBRL statements)
+        # Build centered header like actual SEC filings:
+        # Line 1: Company name (ticker) (bold)
+        # Line 2: Statement name (bold)
+        # Line 3: Period range (dim)
         statement_display = statement_names.get(self.statement_type, self.statement_type)
         period_range = f"{self.periods[-1]} to {self.periods[0]}" if len(self.periods) > 1 else self.periods[0] if self.periods else ""
 
-        title_lines = [
-            Text(statement_display, style=styles["header"]["statement_title"]),
-            Text(period_range, style=styles["metadata"]["period_range"]),
-            Text("Amounts in USD", style=styles["metadata"]["units"]),
-        ]
-        title = Text("\n").join(title_lines)
-
-        # Build footer with company info and source attribution
-        footer_parts = []
+        header_lines = []
         if self.company_name:
-            footer_parts.append((self.company_name, styles["header"]["company_name"]))
-            footer_parts.append(("  ", ""))
-            footer_parts.append((SYMBOLS["bullet"], styles["structure"]["separator"]))
-            footer_parts.append(("  ", ""))
-        footer_parts.append(("Source: ", styles["metadata"]["source"]))
-        footer_parts.append(("EntityFacts", styles["metadata"]["source_entity_facts"]))
+            company_line = Text(self.company_name.upper(), style=styles["header"]["company_name"])
+            if self.ticker:
+                company_line.append("  ")
+                company_line.append(f" {self.ticker.upper()} ", style=styles["header"]["ticker_badge"])
+            header_lines.append(company_line)
+        header_lines.append(Text(statement_display.upper(), style=styles["header"]["statement_title"]))
+        if period_range:
+            header_lines.append(Text(period_range, style="dim"))
+
+        title = Text("\n").join(header_lines)
+
+        # Build footer with source and units note
+        footer_parts = [
+            ("Source: ", styles["metadata"]["source"]),
+            ("EntityFacts", styles["metadata"]["source_entity_facts"]),
+            ("  ", ""),
+            (SYMBOLS["bullet"], styles["structure"]["separator"]),
+            ("  ", ""),
+            ("Amounts in USD", styles["metadata"]["units"]),
+        ]
         footer = Text.assemble(*footer_parts)
 
         # Main table with multiple period columns
@@ -316,18 +326,16 @@ class MultiPeriodStatement:
         for item in self.items:
             add_item_to_table(item)
 
-        # Combine content
-        content_parts = [
-            Padding("", (1, 0, 0, 0)),
+        # Combine content with title inside for proper multi-line rendering
+        # Header is centered like actual SEC filings
+        from rich.align import Align
+        content = Group(
+            Align.center(title),
             stmt_table
-        ]
-
-        content = Group(*content_parts)
+        )
 
         return Panel(
             content,
-            title=title,
-            title_align="left",
             subtitle=footer,
             subtitle_align="left",
             border_style=styles["structure"]["border"],
@@ -900,6 +908,8 @@ class MultiPeriodStatement:
                 if item['change_percent']:
                     print(f"{item['label']}: {item['change_percent']:.1%} change")
         """
+        period1 = normalize_period_to_statement(period1)  # accept "2023-FY" too
+        period2 = normalize_period_to_statement(period2)
         if period1 not in self.periods or period2 not in self.periods:
             raise ValueError(f"Periods must be in {self.periods}")
 
@@ -1110,6 +1120,7 @@ class MultiPeriodItem:
         Returns:
             Formatted value string
         """
+        period = normalize_period_to_statement(period)  # accept "2023-FY" too
         value = self.values.get(period)
 
         if value is not None:
@@ -1426,7 +1437,7 @@ class EnhancedStatementBuilder:
         'PaymentsForRepurchaseOfEquity': 'PaymentsForRepurchaseOfCommonStock'
     }
 
-    def __init__(self, sic_code: Optional[str] = None):
+    def __init__(self, sic_code: Optional[str] = None, ticker: Optional[str] = None):
         """
         Initialize the statement builder.
 
@@ -1434,16 +1445,20 @@ class EnhancedStatementBuilder:
             sic_code: Optional SIC code for industry-specific extensions.
                      If provided and matches a known industry, industry-specific
                      concepts will be merged into the virtual trees.
+            ticker: Optional ticker symbol for industry lookup. Used for industries
+                   like payment_networks where SIC codes don't map cleanly.
+                   Ticker-based lookup takes priority over SIC-based lookup.
         """
         self.learned_mappings = load_learned_mappings()
         self.virtual_trees = load_virtual_trees()
         self.sic_code = sic_code
+        self.ticker = ticker
         self.industry = None
         self.industry_extension = None
 
-        # Load industry extension if SIC code provided
-        if sic_code:
-            self.industry = get_industry_for_sic(sic_code)
+        # Load industry extension using ticker (for curated industries) or SIC code
+        if ticker or sic_code:
+            self.industry = get_industry(sic_code=sic_code, ticker=ticker)
             if self.industry:
                 self.industry_extension = load_industry_extension(self.industry)
                 if self.industry_extension:

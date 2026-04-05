@@ -1,0 +1,30 @@
+{
+    "schema_version": "1.0",
+    "description": "Track mapping validation across multiple fiscal periods for trust promotion",
+    "tiers": {
+        "1": "Trusted - verified across 3+ periods, skip yfinance validation",
+        "2": "Verifying - new mapping, compare with yfinance",
+        "3": "Discrepancy - known mismatch, documented and accepted"
+    },
+    "companies": {
+        "NVDA": {
+            "ShortTermDebt": {
+                "concept": "us-gaap:LongTermDebtCurrent",
+                "tier": 1,
+                "periods_verified": [
+                    "2024-FY",
+                    "2023-FY",
+                    "2022-FY"
+                ],
+                "values": {
+                    "2024-FY": 0,
+                    "2023-FY": 0,
+                    "2022-FY": 0
+                },
+                "yoy_change_pct": 0,
+                "notes": "NVDA has no short-term debt. Mapping is consistent.",
+                "promoted_date": "2026-01-09"
+            }
+        }
+    }
+}

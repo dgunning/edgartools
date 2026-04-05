@@ -1,0 +1,419 @@
+{
+  "run_id": "e2e_industrial_2026-03-04T12:34:56.636292",
+  "timestamp": "2026-03-04T12:34:56.636302",
+  "config": {
+    "group": "industrial_33",
+    "workers": 1,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": null,
+    "tickers": [
+      "NEE"
+    ],
+    "snapshot_mode": true
+  },
+  "overall_summary": {
+    "10k_total": 18,
+    "10k_passed": 9,
+    "10k_skipped": 0,
+    "10q_total": 17,
+    "10q_passed": 10,
+    "10q_skipped": 0
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Insurance": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Utilities": {
+      "10k_total": 18,
+      "10k_passed": 9,
+      "10k_skipped": 0,
+      "10q_total": 17,
+      "10q_passed": 10,
+      "10q_skipped": 0
+    },
+    "Real_Estate": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 16,
+  "skipped_count": 0,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000753308-25-000011",
+      "metric": "Revenue",
+      "xbrl_value": 1000000.0,
+      "ref_value": 24753000000.0,
+      "variance_pct": 100.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:DisposalGroupNotDiscontinuedOperationGainLossOnDisposal",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000753308-25-000011",
+      "metric": "COGS",
+      "xbrl_value": 17626000000.0,
+      "ref_value": 9886000000.0,
+      "variance_pct": 78.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:OperatingExpenses",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000753308-25-000011",
+      "metric": "Capex",
+      "xbrl_value": -6835000000.0,
+      "ref_value": -8514000000.0,
+      "variance_pct": 19.7,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CapitalExpendituresIncurredButNotYetPaid",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000753308-25-000011",
+      "metric": "TotalAssets",
+      "xbrl_value": 98141000000.0,
+      "ref_value": 190144000000.0,
+      "variance_pct": 48.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Assets",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000753308-25-000011",
+      "metric": "Goodwill",
+      "xbrl_value": 2965000000.0,
+      "ref_value": 4866000000.0,
+      "variance_pct": 39.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000753308-25-000011",
+      "metric": "IntangibleAssets",
+      "xbrl_value": 3102000000.0,
+      "ref_value": 6581000000.0,
+      "variance_pct": 52.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000753308-25-000011",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 1695000000.0,
+      "ref_value": 9948000000.0,
+      "variance_pct": 83.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtCurrent",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000753308-25-000011",
+      "metric": "LongTermDebt",
+      "xbrl_value": 436000000.0,
+      "ref_value": 72385000000.0,
+      "variance_pct": 99.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtNoncurrent",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000753308-25-000011",
+      "metric": "AccountsPayable",
+      "xbrl_value": 631000000.0,
+      "ref_value": 6982000000.0,
+      "variance_pct": 91.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:AccountsPayableCurrentAndNoncurrent",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000753308-25-000056",
+      "metric": "Revenue",
+      "xbrl_value": 0.0,
+      "ref_value": 7966000000.0,
+      "variance_pct": 100.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:IncomeLossFromEquityMethodInvestments",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000753308-25-000056",
+      "metric": "Capex",
+      "xbrl_value": -1233000000.0,
+      "ref_value": -2482000000.0,
+      "variance_pct": 50.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CapitalExpendituresIncurredButNotYetPaid",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000753308-25-000056",
+      "metric": "TotalAssets",
+      "xbrl_value": 103614000000.0,
+      "ref_value": 204354000000.0,
+      "variance_pct": 49.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Assets",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000753308-25-000056",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 4271000000.0,
+      "ref_value": 8953000000.0,
+      "variance_pct": 52.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtCurrent",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000753308-25-000056",
+      "metric": "LongTermDebt",
+      "xbrl_value": 192000000.0,
+      "ref_value": 84169000000.0,
+      "variance_pct": 99.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtNoncurrent",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000753308-25-000056",
+      "metric": "DividendsPaid",
+      "xbrl_value": -7199000000.0,
+      "ref_value": -1167000000.0,
+      "variance_pct": 516.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsOfDividends",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000753308-25-000056",
+      "metric": "AccountsPayable",
+      "xbrl_value": 50000000.0,
+      "ref_value": 4976000000.0,
+      "variance_pct": 99.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:AccountsPayableCurrentAndNoncurrent",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    }
+  ],
+  "skipped": [],
+  "errors": []
+}

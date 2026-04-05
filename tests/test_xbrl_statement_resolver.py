@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 from edgar.xbrl.xbrl import XBRL
-from edgar.xbrl.statement_resolver import StatementResolver, statement_registry
+from edgar.xbrl.statement_resolver import StatementResolver, statement_registry, _ENUM_TO_REGISTRY
 
 
 @pytest.fixture
@@ -144,6 +144,71 @@ def test_custom_namespace_detection(simple_resolver):
     
     # Fail if none of the patterns match our test concept
     assert False, f"No pattern matched the custom namespace concept: {fake_concept}"
+
+class TestStatementTypeEnumCompatibility:
+    """Test that StatementType enum snake_case values resolve correctly (issue edgartools-6ujh)."""
+
+    @pytest.mark.fast
+    def test_enum_to_registry_mapping_complete(self):
+        """All enum mappings point to valid registry keys."""
+        for snake_case, pascal_case in _ENUM_TO_REGISTRY.items():
+            assert pascal_case in statement_registry, (
+                f"Mapping {snake_case!r} -> {pascal_case!r} not in statement_registry"
+            )
+
+    @pytest.mark.fast
+    def test_find_statement_with_snake_case(self, tsla_xbrl):
+        """find_statement accepts snake_case enum values and resolves them."""
+        from edgar.enums import StatementType as EnumStatementType
+
+        # Income statement via enum value
+        matching, role, actual_type = tsla_xbrl.find_statement(EnumStatementType.INCOME_STATEMENT)
+        assert matching
+        assert role is not None
+        assert actual_type == "IncomeStatement"
+
+    @pytest.mark.fast
+    def test_find_statement_with_all_primary_enums(self, aapl_xbrl):
+        """All primary enum values find the right statement."""
+        from edgar.enums import StatementType as EnumStatementType
+
+        cases = [
+            (EnumStatementType.BALANCE_SHEET, "BalanceSheet"),
+            (EnumStatementType.INCOME_STATEMENT, "IncomeStatement"),
+            (EnumStatementType.CASH_FLOW, "CashFlowStatement"),
+        ]
+        for enum_val, expected_type in cases:
+            matching, role, actual_type = aapl_xbrl.find_statement(enum_val)
+            assert matching, f"No match for {enum_val}"
+            assert actual_type == expected_type, f"Expected {expected_type}, got {actual_type}"
+
+    @pytest.mark.fast
+    def test_get_statement_with_enum(self, aapl_xbrl):
+        """get_statement works end-to-end with enum values."""
+        from edgar.enums import StatementType as EnumStatementType
+
+        data = aapl_xbrl.get_statement(EnumStatementType.BALANCE_SHEET)
+        assert data
+        assert len(data) > 0
+
+        # Verify we got balance sheet data (should contain Assets)
+        concepts = [item.get('concept', '') for item in data]
+        assert any('Assets' in c for c in concepts)
+
+    @pytest.mark.fast
+    def test_pascal_case_still_works(self, tsla_xbrl):
+        """PascalCase strings continue to work as before."""
+        matching, role, actual_type = tsla_xbrl.find_statement("BalanceSheet")
+        assert matching
+        assert actual_type == "BalanceSheet"
+
+    @pytest.mark.fast
+    def test_unknown_string_passes_through(self, tsla_xbrl):
+        """Unknown strings are not mangled by the normalization."""
+        from edgar.xbrl.exceptions import StatementNotFound
+        with pytest.raises(StatementNotFound):
+            tsla_xbrl.find_statement("SomethingUnknown")
+
 
 def test_detection_of_financial_statements(unp_xbrl):
     income_statement = unp_xbrl.render_statement("IncomeStatement")

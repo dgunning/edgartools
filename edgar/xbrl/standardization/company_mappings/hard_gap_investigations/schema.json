@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hard Gap Investigation",
+  "description": "Structured investigation report for XBRL metric gaps that resist automated resolution",
+  "type": "object",
+  "required": ["ticker", "metric", "investigation_id", "diagnosis", "evidence", "methodology_assessment", "recommendations"],
+  "properties": {
+    "ticker": {
+      "type": "string",
+      "description": "Company ticker symbol"
+    },
+    "metric": {
+      "type": "string",
+      "description": "Standardized metric name (e.g., CashAndEquivalents)"
+    },
+    "investigation_id": {
+      "type": "string",
+      "description": "Unique ID: hgi_{YYYYMMDD}_{ticker}_{metric}",
+      "pattern": "^hgi_\\d{8}_[A-Z]+_\\w+$"
+    },
+    "investigated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of investigation"
+    },
+    "diagnosis": {
+      "type": "object",
+      "required": ["root_cause_category", "is_framework_solvable", "confidence"],
+      "properties": {
+        "root_cause_category": {
+          "type": "string",
+          "enum": [
+            "composite_mismatch",
+            "dimensional_reporting",
+            "definition_difference",
+            "consolidation_issue",
+            "timing_difference",
+            "structural_gap",
+            "yfinance_methodology_gap"
+          ]
+        },
+        "is_framework_solvable": {
+          "type": "boolean",
+          "description": "Can this be resolved with config-only changes?"
+        },
+        "framework_limitation": {
+          "type": "string",
+          "description": "If not solvable, what framework change is needed?"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Confidence in the diagnosis (0-1)"
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "xbrl_facts_examined": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "concept": { "type": "string" },
+              "value": { "type": ["number", "null"] },
+              "period": { "type": "string" },
+              "unit": { "type": "string" }
+            }
+          }
+        },
+        "reference_breakdown": {
+          "type": "object",
+          "properties": {
+            "yfinance_value": { "type": ["number", "null"] },
+            "likely_formula": { "type": "string" },
+            "formula_components": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "multi_period_data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "period": { "type": "string" },
+              "xbrl_value": { "type": ["number", "null"] },
+              "reference_value": { "type": ["number", "null"] },
+              "variance_pct": { "type": ["number", "null"] }
+            }
+          }
+        },
+        "cross_company_patterns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ticker": { "type": "string" },
+              "same_issue": { "type": "boolean" },
+              "concept_used": { "type": "string" },
+              "notes": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "methodology_assessment": {
+      "type": "object",
+      "properties": {
+        "solver_strategies_exhausted": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of strategies already tried (e.g., add_concept, add_standardization)"
+        },
+        "why_solver_fails": {
+          "type": "string",
+          "description": "Explanation of why automated solvers cannot resolve this"
+        },
+        "model_consultations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["model", "suggestion", "feasibility"],
+            "properties": {
+              "model": {
+                "type": "string",
+                "description": "Model name (e.g., gpt-5.4, gemini-3.1)"
+              },
+              "suggestion": {
+                "type": "string",
+                "description": "What the model suggested"
+              },
+              "feasibility": {
+                "type": "string",
+                "enum": ["config_only", "needs_python", "infeasible"],
+                "description": "Whether the suggestion can be implemented"
+              },
+              "proposed_change": {
+                "type": "object",
+                "description": "Optional ConfigChange if feasibility is config_only",
+                "properties": {
+                  "file": { "type": "string" },
+                  "change_type": { "type": "string" },
+                  "yaml_path": { "type": "string" },
+                  "new_value": {},
+                  "rationale": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "recommendations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action", "priority", "effort"],
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "Recommended action"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["P0_critical", "P1_high", "P2_medium", "P3_low"],
+            "description": "Priority level"
+          },
+          "effort": {
+            "type": "string",
+            "enum": ["config_only", "minor_python", "major_python", "architecture"],
+            "description": "Implementation effort required"
+          },
+          "expected_cqs_impact": {
+            "type": "number",
+            "description": "Expected CQS improvement (e.g., 0.002)"
+          },
+          "proposed_config_change": {
+            "type": "object",
+            "description": "Concrete ConfigChange if effort is config_only"
+          }
+        }
+      }
+    }
+  }
+}

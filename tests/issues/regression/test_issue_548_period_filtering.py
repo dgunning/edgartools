@@ -53,7 +53,7 @@ class TestIssue548PeriodFiltering:
             "concept", "label", "level", "abstract", "dimension", "dimension_label",
             "balance", "weight", "preferred_sign", "parent_concept", "parent_abstract_concept",
             "unit", "point_in_time", "is_breakdown", "dimension_axis", "dimension_member",
-            "dimension_member_label"
+            "dimension_member_label", "standard_concept"
         ]]
         assert len(numeric_cols) > 0, "Should have period columns"
 
@@ -73,7 +73,7 @@ class TestIssue548PeriodFiltering:
             "concept", "label", "level", "abstract", "dimension", "dimension_label",
             "balance", "weight", "preferred_sign", "parent_concept", "parent_abstract_concept",
             "unit", "point_in_time", "is_breakdown", "dimension_axis", "dimension_member",
-            "dimension_member_label"
+            "dimension_member_label", "standard_concept"
         ]]
         assert len(numeric_cols) > 0, "Should fall back to default periods"
 
@@ -97,7 +97,7 @@ class TestIssue548PeriodFiltering:
             "concept", "label", "level", "abstract", "dimension", "dimension_label",
             "balance", "weight", "preferred_sign", "parent_concept", "parent_abstract_concept",
             "unit", "point_in_time", "is_breakdown", "dimension_axis", "dimension_member",
-            "dimension_member_label"
+            "dimension_member_label", "standard_concept"
         ]]
         assert len(numeric_cols) == 1, f"Should have exactly one period column, got: {numeric_cols}"
 
@@ -124,7 +124,7 @@ class TestIssue548PeriodFiltering:
             "concept", "label", "level", "abstract", "dimension", "dimension_label",
             "balance", "weight", "preferred_sign", "parent_concept", "parent_abstract_concept",
             "unit", "point_in_time", "is_breakdown", "dimension_axis", "dimension_member",
-            "dimension_member_label"
+            "dimension_member_label", "standard_concept"
         ]]
         assert len(numeric_cols) >= 1, "Should have period columns"
 

@@ -1,0 +1,110 @@
+{
+  "ticker": "SPGI",
+  "cik": 64040,
+  "company_name": "S&P Global Inc.",
+  "archetype": "A",
+  "sic_code": "7320",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  SPGI:\n    name: \"S&P Global Inc.\"\n    cik: 64040\n    exclude_metrics:\n      - COGS\n      - Capex\n      - CurrentAssets\n      - CurrentLiabilities\n      - Goodwill\n      - GrossProfit\n      - IntangibleAssets\n      - Inventory\n      - OperatingIncome\n      - SGA",
+  "metrics_passed": [
+    "Revenue",
+    "NetIncome",
+    "OperatingCashFlow",
+    "TotalAssets",
+    "Goodwill",
+    "IntangibleAssets",
+    "ShortTermDebt",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "AccountsReceivable",
+    "AccountsPayable",
+    "DepreciationAmortization",
+    "InterestExpense",
+    "IncomeTaxExpense",
+    "EarningsPerShareDiluted",
+    "EarningsPerShareBasic",
+    "StockholdersEquity",
+    "RetainedEarnings",
+    "InvestingCashFlow",
+    "FinancingCashFlow",
+    "ShareRepurchases"
+  ],
+  "metrics_failed": [
+    "PretaxIncome",
+    "Inventory",
+    "ResearchAndDevelopment",
+    "TotalLiabilities",
+    "PropertyPlantEquipment",
+    "DividendPerShare"
+  ],
+  "metrics_excluded": [
+    "COGS",
+    "Inventory",
+    "Goodwill",
+    "IntangibleAssets",
+    "SGA",
+    "OperatingIncome",
+    "Capex",
+    "GrossProfit",
+    "CurrentAssets",
+    "CurrentLiabilities"
+  ],
+  "failures": {
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 5308000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "Inventory": {
+      "metric": "Inventory",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "ResearchAndDevelopment": {
+      "metric": "ResearchAndDevelopment",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "TotalLiabilities": {
+      "metric": "TotalLiabilities",
+      "reason": "Variance: 18.7% (tolerance: 15%)",
+      "xbrl_value": 26965000000.0,
+      "reference_value": 22713000000.0,
+      "variance_pct": 18.72055650948796,
+      "pattern": "unknown"
+    },
+    "PropertyPlantEquipment": {
+      "metric": "PropertyPlantEquipment",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 678000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "DividendPerShare": {
+      "metric": "DividendPerShare",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 3.64,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": false,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-04-04T09:59:04.315360"
+}

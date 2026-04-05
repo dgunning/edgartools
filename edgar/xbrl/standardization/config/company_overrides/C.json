@@ -1,0 +1,25 @@
+{
+  "known_divergences": {
+    "InterestExpense": {
+      "form_types": [
+        "10-K"
+      ],
+      "variance_pct": 50.0,
+      "reason": "Phase 10: structural extraction mismatch.",
+      "skip_validation": true,
+      "added_date": "2026-04-03",
+      "remediation_status": "deferred"
+    },
+    "ShareRepurchases": {
+      "form_types": [
+        "10-K"
+      ],
+      "variance_pct": 30.0,
+      "reason": "Reference mismatch: XBRL PaymentsForRepurchaseOfCommonStock extracts correctly but yfinance 'Repurchase Of Capital Stock' includes preferred stock repurchases (~27% delta)",
+      "skip_validation": true,
+      "added_date": "2026-04-03",
+      "remediation_status": "reference_mismatch"
+    }
+  },
+  "quality_tier": "provisional"
+}

@@ -1,0 +1,114 @@
+[
+  {
+    "gap": {
+      "ticker": "LIN",
+      "metric": "ShortTermDebt",
+      "gap_type": "validation_failure",
+      "estimated_impact": 0.03571428571428571,
+      "reference_value": 6306000000.0,
+      "xbrl_value": 10532000000.0,
+      "hv_subtype": null,
+      "current_variance": 67.01554075483666,
+      "graveyard_count": 0,
+      "notes": "Synthesized from 3 components via Fallback"
+    },
+    "proposal": {
+      "file": "metrics.yaml",
+      "change_type": "add_standardization",
+      "yaml_path": "metrics.ShortTermDebt.standardization",
+      "old_value": null,
+      "new_value": {
+        "scope": "company:LIN",
+        "components": [
+          "LongTermDebtAndCapitalLeaseObligationsCurrent",
+          "ShortTermBorrowings"
+        ],
+        "notes": "Auto-solver company-specific via LIN, 2/3 periods, 0/3 companies"
+      },
+      "rationale": "Auto-solver: LongTermDebtAndCapitalLeaseObligationsCurrent + ShortTermBorrowings (0.0% var, 2/3 periods, company-specific)",
+      "target_metric": "ShortTermDebt",
+      "target_companies": "LIN"
+    },
+    "decision": {
+      "decision": "KEEP",
+      "cqs_before": 0.9577928262880069,
+      "cqs_after": 0.9847405316731529,
+      "reason": "CQS improved by 0.0269",
+      "duration_seconds": 250.77879786491394
+    },
+    "worker_id": "worker_2"
+  },
+  {
+    "gap": {
+      "ticker": "PANW",
+      "metric": "IntangibleAssets",
+      "gap_type": "validation_failure",
+      "estimated_impact": 0.03571428571428571,
+      "reference_value": 5329300000.0,
+      "xbrl_value": 762700000.0,
+      "hv_subtype": null,
+      "current_variance": 85.68855196742537,
+      "graveyard_count": 0,
+      "notes": "Synthesized from 2 components via Fallback"
+    },
+    "proposal": {
+      "file": "metrics.yaml",
+      "change_type": "add_standardization",
+      "yaml_path": "metrics.IntangibleAssets.standardization",
+      "old_value": null,
+      "new_value": {
+        "scope": "company:PANW",
+        "components": [
+          "ShortTermInvestments",
+          "AccountsReceivableNetCurrent",
+          "NotesAndLoansReceivableNetCurrent",
+          "NotesAndLoansReceivableNetNoncurrent"
+        ],
+        "notes": "Auto-solver company-specific via PANW, 2/3 periods, 0/3 companies"
+      },
+      "rationale": "Auto-solver: ShortTermInvestments + AccountsReceivableNetCurrent + NotesAndLoansReceivableNetCurrent + NotesAndLoansReceivableNetNoncurrent (0.2% var, 2/3 periods, company-specific)",
+      "target_metric": "IntangibleAssets",
+      "target_companies": "PANW"
+    },
+    "decision": {
+      "decision": "KEEP",
+      "cqs_before": 0.9847405316731529,
+      "cqs_after": 0.9867387589039249,
+      "reason": "CQS improved by 0.0020",
+      "duration_seconds": 264.72252321243286
+    },
+    "worker_id": "worker_2"
+  },
+  {
+    "gap": {
+      "ticker": "PANW",
+      "metric": "DividendsPaid",
+      "gap_type": "unmapped",
+      "estimated_impact": 0.023809523809523808,
+      "reference_value": null,
+      "xbrl_value": null,
+      "hv_subtype": null,
+      "current_variance": null,
+      "graveyard_count": 0,
+      "notes": "No mapping found"
+    },
+    "proposal": {
+      "file": "companies.yaml",
+      "change_type": "add_exclusion",
+      "yaml_path": "companies.PANW.exclude_metrics",
+      "old_value": null,
+      "new_value": "DividendsPaid",
+      "rationale": "No reference value for DividendsPaid \u2014 structural gap for PANW",
+      "target_metric": "DividendsPaid",
+      "target_companies": "PANW"
+    },
+    "decision": {
+      "decision": "KEEP",
+      "cqs_before": 0.9867387589039249,
+      "cqs_after": 0.9870959017610677,
+      "reason": "CQS improved by 0.0004",
+      "duration_seconds": 256.16924810409546
+    },
+    "worker_id": "worker_2"
+  }
+]

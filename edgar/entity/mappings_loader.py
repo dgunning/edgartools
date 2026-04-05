@@ -200,6 +200,61 @@ def get_industry_for_sic(sic_code: str) -> Optional[str]:
     return None
 
 
+def get_industry_for_ticker(ticker: str) -> Optional[str]:
+    """
+    Determine industry category from ticker symbol.
+
+    This is used for industries with curated ticker lists (like payment_networks)
+    where SIC codes don't map cleanly to the industry.
+
+    Args:
+        ticker: Stock ticker symbol (e.g., "V", "MA", "PYPL")
+
+    Returns:
+        Industry name (e.g., "payment_networks") or None if no match
+    """
+    if not ticker:
+        return None
+
+    ticker_upper = ticker.upper()
+    mappings = load_industry_mappings()
+    industries = mappings.get('industries', {})
+
+    for industry_key, industry_info in industries.items():
+        curated_tickers = industry_info.get('curated_tickers')
+        if isinstance(curated_tickers, list) and ticker_upper in curated_tickers:
+            return industry_key
+
+    return None
+
+
+def get_industry(sic_code: Optional[str] = None, ticker: Optional[str] = None) -> Optional[str]:
+    """
+    Determine industry category from SIC code or ticker symbol.
+
+    Tries ticker-based lookup first (for curated industries like payment_networks),
+    then falls back to SIC-based lookup.
+
+    Args:
+        sic_code: SIC code as string (e.g., "6021")
+        ticker: Stock ticker symbol (e.g., "V", "MA")
+
+    Returns:
+        Industry name or None if no match
+    """
+    # Try ticker-based lookup first (for curated industries)
+    if ticker:
+        industry = get_industry_for_ticker(ticker)
+        if industry:
+            return industry
+
+    # Fall back to SIC-based lookup
+    if sic_code:
+        return get_industry_for_sic(sic_code)
+
+    return None
+
+
 @lru_cache(maxsize=10)
 def load_industry_extension(industry: str) -> Dict[str, Any]:
     """
@@ -331,6 +386,269 @@ _FALLBACK_CONCEPT_MAPPINGS = {
 }
 
 
+# =============================================================================
+# IFRS Concept Mappings for Foreign Private Issuers
+# =============================================================================
+# These are standard IFRS concepts used by Foreign Private Issuers (FPIs)
+# who file 20-F instead of 10-K (e.g., Novo Nordisk, ASML, Toyota, SAP)
+
+_IFRS_FALLBACK_MAPPINGS = {
+    # =========================================================================
+    # Income Statement (Statement of Profit or Loss)
+    # =========================================================================
+    'Revenue': 'IncomeStatement',
+    'CostOfSales': 'IncomeStatement',
+    'GrossProfit': 'IncomeStatement',
+    'AdministrativeExpense': 'IncomeStatement',
+    'SellingGeneralAndAdministrativeExpense': 'IncomeStatement',
+    'ResearchAndDevelopmentExpense': 'IncomeStatement',
+    'OtherOperatingIncomeExpense': 'IncomeStatement',
+    'OtherOperatingIncome': 'IncomeStatement',
+    'OtherOperatingExpense': 'IncomeStatement',
+    'ProfitLossFromOperatingActivities': 'IncomeStatement',
+    'FinanceIncome': 'IncomeStatement',
+    'FinanceCosts': 'IncomeStatement',
+    'FinanceIncomeExpense': 'IncomeStatement',
+    'InterestExpense': 'IncomeStatement',
+    'InterestIncome': 'IncomeStatement',
+    'ShareOfProfitLossOfAssociatesAndJointVenturesAccountedForUsingEquityMethod': 'IncomeStatement',
+    'ProfitLossBeforeTax': 'IncomeStatement',
+    'IncomeTaxExpenseContinuingOperations': 'IncomeStatement',
+    'ProfitLoss': 'IncomeStatement',
+    'ProfitLossAttributableToOwnersOfParent': 'IncomeStatement',
+    'ProfitLossAttributableToNoncontrollingInterests': 'IncomeStatement',
+    'BasicEarningsLossPerShare': 'IncomeStatement',
+    'DilutedEarningsLossPerShare': 'IncomeStatement',
+    'EmployeeBenefitsExpense': 'IncomeStatement',
+    'DepreciationAndAmortisationExpense': 'IncomeStatement',
+    'DepreciationAmortisationAndImpairmentLossReversalOfImpairmentLossRecognisedInProfitOrLoss': 'IncomeStatement',
+    'ImpairmentLossRecognisedInProfitOrLossGoodwill': 'IncomeStatement',
+    'ImpairmentLossRecognisedInProfitOrLossIntangibleAssetsOtherThanGoodwill': 'IncomeStatement',
+    'NetForeignExchangeLoss': 'IncomeStatement',
+    'NetForeignExchangeGain': 'IncomeStatement',
+    'PostemploymentBenefitExpenseDefinedBenefitPlans': 'IncomeStatement',
+    'PostemploymentBenefitExpenseDefinedContributionPlans': 'IncomeStatement',
+
+    # =========================================================================
+    # Balance Sheet (Statement of Financial Position)
+    # =========================================================================
+    # Assets
+    'Assets': 'BalanceSheet',
+    'CurrentAssets': 'BalanceSheet',
+    'NoncurrentAssets': 'BalanceSheet',
+    'CashAndCashEquivalents': 'BalanceSheet',
+    'TradeAndOtherCurrentReceivables': 'BalanceSheet',
+    'TradeAndOtherReceivables': 'BalanceSheet',
+    'Inventories': 'BalanceSheet',
+    'OtherCurrentFinancialAssets': 'BalanceSheet',
+    'OtherCurrentAssets': 'BalanceSheet',
+    'PropertyPlantAndEquipment': 'BalanceSheet',
+    'IntangibleAssetsOtherThanGoodwill': 'BalanceSheet',
+    'Goodwill': 'BalanceSheet',
+    'InvestmentProperty': 'BalanceSheet',
+    'InvestmentsAccountedForUsingEquityMethod': 'BalanceSheet',
+    'DeferredTaxAssets': 'BalanceSheet',
+    'OtherNoncurrentFinancialAssets': 'BalanceSheet',
+    'OtherNoncurrentAssets': 'BalanceSheet',
+    'RightofuseAssets': 'BalanceSheet',
+
+    # Liabilities
+    'Liabilities': 'BalanceSheet',
+    'CurrentLiabilities': 'BalanceSheet',
+    'NoncurrentLiabilities': 'BalanceSheet',
+    'TradeAndOtherCurrentPayables': 'BalanceSheet',
+    'TradeAndOtherPayables': 'BalanceSheet',
+    'CurrentBorrowings': 'BalanceSheet',
+    'NoncurrentBorrowings': 'BalanceSheet',
+    'CurrentProvisions': 'BalanceSheet',
+    'NoncurrentProvisions': 'BalanceSheet',
+    'DeferredTaxLiabilities': 'BalanceSheet',
+    'CurrentTaxLiabilitiesCurrent': 'BalanceSheet',
+    'CurrentTaxAssetsCurrent': 'BalanceSheet',
+    'LeaseLiabilities': 'BalanceSheet',
+    'CurrentLeaseLiabilities': 'BalanceSheet',
+    'NoncurrentLeaseLiabilities': 'BalanceSheet',
+    'EmployeeBenefitsLiabilities': 'BalanceSheet',
+    'OtherCurrentLiabilities': 'BalanceSheet',
+    'OtherNoncurrentLiabilities': 'BalanceSheet',
+
+    # Equity
+    'Equity': 'BalanceSheet',
+    'EquityAttributableToOwnersOfParent': 'BalanceSheet',
+    'NoncontrollingInterests': 'BalanceSheet',
+    'IssuedCapital': 'BalanceSheet',
+    'SharePremium': 'BalanceSheet',
+    'RetainedEarnings': 'BalanceSheet',
+    'TreasuryShares': 'BalanceSheet',
+    'OtherReserves': 'BalanceSheet',
+    'ReserveOfExchangeDifferencesOnTranslation': 'BalanceSheet',
+    'ReserveOfCashFlowHedges': 'BalanceSheet',
+
+    # =========================================================================
+    # Cash Flow Statement
+    # =========================================================================
+    # Operating Activities
+    'CashFlowsFromUsedInOperatingActivities': 'CashFlowStatement',
+    'AdjustmentsForDepreciationAndAmortisationExpenseAndImpairmentLossReversalOfImpairmentLossRecognisedInProfitOrLoss': 'CashFlowStatement',
+    'AdjustmentsForIncomeTaxExpense': 'CashFlowStatement',
+    'AdjustmentsForFinanceCosts': 'CashFlowStatement',
+    'AdjustmentsForFinanceIncome': 'CashFlowStatement',
+    'AdjustmentsForUndistributedProfitsOfAssociates': 'CashFlowStatement',
+    'AdjustmentsForUnrealisedForeignExchangeLossesGains': 'CashFlowStatement',
+    'AdjustmentsForGainLossOnDisposalOfInvestmentsInSubsidiariesJointVenturesAndAssociates': 'CashFlowStatement',
+    'OtherAdjustmentsToReconcileProfitLoss': 'CashFlowStatement',
+    'IncreaseDecreaseInTradeAndOtherReceivables': 'CashFlowStatement',
+    'IncreaseDecreaseInInventories': 'CashFlowStatement',
+    'IncreaseDecreaseInTradeAndOtherPayables': 'CashFlowStatement',
+    'IncreaseDecreaseInOtherOperatingLiabilities': 'CashFlowStatement',
+    'IncreaseDecreaseInOtherOperatingAssets': 'CashFlowStatement',
+    'InterestPaidClassifiedAsOperatingActivities': 'CashFlowStatement',
+    'InterestReceivedClassifiedAsOperatingActivities': 'CashFlowStatement',
+    'IncomeTaxesPaidRefundClassifiedAsOperatingActivities': 'CashFlowStatement',
+
+    # Investing Activities
+    'CashFlowsFromUsedInInvestingActivities': 'CashFlowStatement',
+    'PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities': 'CashFlowStatement',
+    'ProceedsFromSalesOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities': 'CashFlowStatement',
+    'PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities': 'CashFlowStatement',
+    'CashFlowsUsedInObtainingControlOfSubsidiariesOrOtherBusinessesClassifiedAsInvestingActivities': 'CashFlowStatement',
+    'CashFlowsFromLosingControlOfSubsidiariesOrOtherBusinessesClassifiedAsInvestingActivities': 'CashFlowStatement',
+    'PurchaseOfInterestsInAssociates': 'CashFlowStatement',
+    'DividendsReceivedFromAssociatesClassifiedAsInvestingActivities': 'CashFlowStatement',
+    'ProceedsFromSalesOfInvestmentsOtherThanInvestmentsAccountedForUsingEquityMethod': 'CashFlowStatement',
+    'PurchaseOfFinancialAssetsMeasuredAtFairValueThroughProfitOrLossClassifiedAsInvestingActivities': 'CashFlowStatement',
+    'ProceedsFromDisposalOrMaturityOfAvailableforsaleFinancialAssets': 'CashFlowStatement',
+
+    # Financing Activities
+    'CashFlowsFromUsedInFinancingActivities': 'CashFlowStatement',
+    'ProceedsFromBorrowingsClassifiedAsFinancingActivities': 'CashFlowStatement',
+    'RepaymentsOfBorrowingsClassifiedAsFinancingActivities': 'CashFlowStatement',
+    'PaymentsOfLeaseLiabilitiesClassifiedAsFinancingActivities': 'CashFlowStatement',
+    'DividendsPaidClassifiedAsFinancingActivities': 'CashFlowStatement',
+    'DividendsPaid': 'CashFlowStatement',
+    'PaymentsToAcquireOrRedeemEntitysShares': 'CashFlowStatement',
+    'ProceedsFromIssuingShares': 'CashFlowStatement',
+    'InterestPaidClassifiedAsFinancingActivities': 'CashFlowStatement',
+
+    # Net Change in Cash
+    'IncreaseDecreaseInCashAndCashEquivalents': 'CashFlowStatement',
+    'EffectOfExchangeRateChangesOnCashAndCashEquivalents': 'CashFlowStatement',
+    'CashAndCashEquivalentsAtBeginningOfPeriod': 'CashFlowStatement',
+    'CashAndCashEquivalentsAtEndOfPeriod': 'CashFlowStatement',
+
+    # Additional Cash Flow Adjustments
+    'AdjustmentsForCurrentTaxOfPriorPeriod': 'CashFlowStatement',
+    'AdjustmentsForDeferredTaxOfPriorPeriods': 'CashFlowStatement',
+    'AdjustmentsForDecreaseIncreaseInInventories': 'CashFlowStatement',
+    'AdjustmentsForDecreaseIncreaseInTradeAccountReceivable': 'CashFlowStatement',
+    'AdjustmentsForIncreaseDecreaseInOtherLiabilities': 'CashFlowStatement',
+    'AdjustmentsForIncreaseDecreaseInTradeAccountPayable': 'CashFlowStatement',
+    'AdjustmentsForProvisions': 'CashFlowStatement',
+    'AdjustmentsForSharebasedPayments': 'CashFlowStatement',
+
+    # =========================================================================
+    # Comprehensive Income
+    # =========================================================================
+    'ComprehensiveIncome': 'ComprehensiveIncome',
+    'OtherComprehensiveIncome': 'ComprehensiveIncome',
+    'OtherComprehensiveIncomeNetOfTaxExchangeDifferencesOnTranslation': 'ComprehensiveIncome',
+    'OtherComprehensiveIncomeNetOfTaxGainsLossesOnRemeasurementsOfDefinedBenefitPlans': 'ComprehensiveIncome',
+    'OtherComprehensiveIncomeThatWillBeReclassifiedToProfitOrLossNetOfTax': 'ComprehensiveIncome',
+    'OtherComprehensiveIncomeThatWillNotBeReclassifiedToProfitOrLossBeforeTax': 'ComprehensiveIncome',
+    'GainsLossesOnCashFlowHedgesNetOfTax': 'ComprehensiveIncome',
+    'GainsLossesOnCashFlowHedgesBeforeTax': 'ComprehensiveIncome',
+    'ReclassificationAdjustmentsOnCashFlowHedgesNetOfTax': 'ComprehensiveIncome',
+
+    # =========================================================================
+    # Tax-Related Concepts (Income Statement)
+    # =========================================================================
+    'CurrentTaxExpenseIncome': 'IncomeStatement',
+    'DeferredTaxExpenseIncome': 'IncomeStatement',
+    'DeferredTaxExpenseIncomeRecognisedInProfitOrLoss': 'IncomeStatement',
+    'ApplicableTaxRate': 'IncomeStatement',
+    'AverageEffectiveTaxRate': 'IncomeStatement',
+    'TaxRateEffectOfForeignTaxRates': 'IncomeStatement',
+
+    # =========================================================================
+    # Additional Income Statement Items
+    # =========================================================================
+    'DonationsAndSubsidiesExpense': 'IncomeStatement',
+    'ProfessionalFeesExpense': 'IncomeStatement',
+    'OtherEmployeeExpense': 'IncomeStatement',
+    'OtherFinanceCost': 'IncomeStatement',
+    'ExpenseFromSharebasedPaymentTransactionsWithEmployees': 'IncomeStatement',
+    'ExpenseRelatingToLeasesOfLowvalueAssetsForWhichRecognitionExemptionHasBeenUsed': 'IncomeStatement',
+    'ExpenseRelatingToShorttermLeasesForWhichRecognitionExemptionHasBeenUsed': 'IncomeStatement',
+    'ExpenseRelatingToVariableLeasePaymentsNotIncludedInMeasurementOfLeaseLiabilities': 'IncomeStatement',
+    'InterestExpenseOnLeaseLiabilities': 'IncomeStatement',
+    'OperatingLeaseIncome': 'IncomeStatement',
+    'DepreciationPropertyPlantAndEquipmentIncludingRightofuseAssets': 'IncomeStatement',
+    'DepreciationRightofuseAssets': 'IncomeStatement',
+    'ImpairmentLossReversalOfImpairmentLossRecognisedInProfitOrLoss': 'IncomeStatement',
+    'ImpairmentLossRecognisedInProfitOrLossPropertyPlantAndEquipmentIncludingRightofuseAssets': 'IncomeStatement',
+    'GainsLossesRecognisedWhenControlInSubsidiaryIsLost': 'IncomeStatement',
+    'RevenueFromInterest': 'IncomeStatement',
+
+    # =========================================================================
+    # Additional Balance Sheet Items
+    # =========================================================================
+    'AllowanceAccountForCreditLossesOfFinancialAssets': 'BalanceSheet',
+    'CurrentFinancialAssetsAtFairValueThroughProfitOrLoss': 'BalanceSheet',
+    'CurrentValueAddedTaxPayables': 'BalanceSheet',
+    'DeferredTaxLiabilityAsset': 'BalanceSheet',
+    'NetDefinedBenefitLiabilityAsset': 'BalanceSheet',
+    'OtherProvisions': 'BalanceSheet',
+    'RentDeferredIncomeClassifiedAsCurrent': 'BalanceSheet',
+
+    # =========================================================================
+    # Metadata/Disclosure Items (often not mapped to specific statements)
+    # =========================================================================
+    'AverageNumberOfEmployees': 'IncomeStatement',
+    'AuditorsRemuneration': 'IncomeStatement',
+    'AuditorsRemunerationForAuditServices': 'IncomeStatement',
+    'AuditorsRemunerationForOtherServices': 'IncomeStatement',
+    'AuditorsRemunerationForTaxServices': 'IncomeStatement',
+    'DividendsPaidOrdinarySharesPerShare': 'CashFlowStatement',
+    'DividendsProposedOrDeclaredBeforeFinancialStatementsAuthorisedForIssueButNotRecognisedAsDistributionToOwners': 'CashFlowStatement',
+    'DividendsRecognisedAsDistributionsToOwnersOfParentRelatingToCurrentYear': 'CashFlowStatement',
+    'DividendsRecognisedAsDistributionsToOwnersOfParentRelatingToPriorYears': 'CashFlowStatement',
+
+    # Share-based payment concepts
+    'NumberOfOtherEquityInstrumentsOutstandingInSharebasedPaymentArrangement': 'BalanceSheet',
+    'AdjustedWeightedAverageShares': 'IncomeStatement',
+
+    # Additional Cash Flow Adjustments
+    'IncreaseDecreaseInCashAndCashEquivalentsBeforeEffectOfExchangeRateChanges': 'CashFlowStatement',
+    'IncreaseDecreaseInWorkingCapital': 'CashFlowStatement',
+    'OtherAdjustmentsForNoncashItems': 'CashFlowStatement',
+    'PurchaseOfTreasuryShares': 'CashFlowStatement',
+    'IncreaseDecreaseThroughSharebasedPaymentTransactions': 'BalanceSheet',
+    'DecreaseIncreaseThroughTaxOnSharebasedPaymentTransactions': 'BalanceSheet',
+    'IncreaseDecreaseThroughBusinessCombinationsDeferredTaxLiabilityAsset': 'BalanceSheet',
+    'IncreaseDecreaseThroughNetExchangeDifferencesDeferredTaxLiabilityAsset': 'BalanceSheet',
+
+    # Additional Comprehensive Income
+    'IncomeTaxRelatingToComponentsOfOtherComprehensiveIncome': 'ComprehensiveIncome',
+    'CurrentTaxRelatingToItemsChargedOrCreditedDirectlyToEquity': 'ComprehensiveIncome',
+    'DeferredTaxRelatingToItemsChargedOrCreditedDirectlyToEquity': 'ComprehensiveIncome',
+    'CurrentAndDeferredTaxRelatingToItemsChargedOrCreditedDirectlyToEquity': 'ComprehensiveIncome',
+    'GainsLossesOnChangeInValueOfForeignCurrencyBasisSpreadsNetOfTax': 'ComprehensiveIncome',
+    'GainsLossesOnChangeInValueOfForwardElementsOfForwardContractsNetOfTax': 'ComprehensiveIncome',
+    'GainsLossesRecognisedInOtherComprehensiveIncomeFairValueMeasurementAssets': 'ComprehensiveIncome',
+    'GainsLossesOnAvailableforsaleFinancialAssets': 'ComprehensiveIncome',
+    'ReclassificationAdjustmentsOnCashFlowHedgesBeforeTax': 'ComprehensiveIncome',
+    'AmountRemovedFromReserveOfCashFlowHedgesAndIncludedInInitialCostOrOtherCarryingAmountOfNonfinancialAssetLiabilityOrFirmCommitmentForWhichFairValueHedgeAccountingIsApplied': 'ComprehensiveIncome',
+    'ActuarialGainsLossesArisingFromChangesInFinancialAssumptionsNetDefinedBenefitLiabilityAsset': 'ComprehensiveIncome',
+
+    # Disclosure/Metadata
+    'KeyManagementPersonnelCompensation': 'IncomeStatement',
+    'NumberOfEmployees': 'IncomeStatement',
+    'SocialSecurityContributions': 'IncomeStatement',
+    'UnusedTaxLossesForWhichNoDeferredTaxAssetRecognised': 'BalanceSheet',
+    'IncreaseDecreaseInCurrentTaxExpenseIncomeDueToRateRegulation': 'IncomeStatement',
+}
+
+
 @lru_cache(maxsize=1)
 def _build_concept_statement_index() -> Dict[str, Dict[str, Any]]:
     """
@@ -383,6 +701,15 @@ def _build_concept_statement_index() -> Dict[str, Dict[str, Any]]:
 
     # 3. Add fallback mappings for common concepts not in JSON files
     for concept, stmt_type in _FALLBACK_CONCEPT_MAPPINGS.items():
+        if concept not in index:
+            index[concept] = {
+                'primary_statement': stmt_type,
+                'statements': [stmt_type],
+                'statement_details': {}
+            }
+
+    # 4. Add IFRS fallback mappings for Foreign Private Issuers
+    for concept, stmt_type in _IFRS_FALLBACK_MAPPINGS.items():
         if concept not in index:
             index[concept] = {
                 'primary_statement': stmt_type,

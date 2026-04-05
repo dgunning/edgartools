@@ -1,0 +1,102 @@
+{
+  "ticker": "AMT",
+  "cik": 1053507,
+  "company_name": "AMERICAN TOWER CORP /MA/",
+  "archetype": "D",
+  "sic_code": "6798",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  AMT:\n    name: \"AMERICAN TOWER CORP /MA/\"\n    cik: 1053507\n    exclude_metrics:\n      - COGS\n      - Inventory\n    known_divergences:\n      OperatingIncome:\n        form_types: [\"10-K\"]\n        variance_pct: 76.1\n        reason: \"Variance: 76.1% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-04-04\"",
+  "metrics_passed": [
+    "Revenue",
+    "NetIncome",
+    "OperatingCashFlow",
+    "Capex",
+    "TotalAssets",
+    "Goodwill",
+    "IntangibleAssets",
+    "ShortTermDebt",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "AccountsReceivable",
+    "AccountsPayable",
+    "DepreciationAmortization",
+    "GrossProfit",
+    "InterestExpense",
+    "IncomeTaxExpense",
+    "EarningsPerShareDiluted",
+    "EarningsPerShareBasic",
+    "CurrentAssets",
+    "CurrentLiabilities",
+    "TotalLiabilities",
+    "StockholdersEquity",
+    "PropertyPlantEquipment",
+    "RetainedEarnings",
+    "InvestingCashFlow",
+    "FinancingCashFlow",
+    "ShareRepurchases"
+  ],
+  "metrics_failed": [
+    "SGA",
+    "OperatingIncome",
+    "PretaxIncome",
+    "ResearchAndDevelopment",
+    "DividendPerShare"
+  ],
+  "metrics_excluded": [
+    "COGS",
+    "Inventory",
+    "Capex",
+    "ShortTermDebt",
+    "AccountsPayable"
+  ],
+  "failures": {
+    "SGA": {
+      "metric": "SGA",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 933400000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "OperatingIncome": {
+      "metric": "OperatingIncome",
+      "reason": "Variance: 76.1% (tolerance: 15%)",
+      "xbrl_value": 1080100000.0,
+      "reference_value": 4516500000.0,
+      "variance_pct": 76.08546440828074,
+      "pattern": "unknown"
+    },
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 3624800000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "ResearchAndDevelopment": {
+      "metric": "ResearchAndDevelopment",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "DividendPerShare": {
+      "metric": "DividendPerShare",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 6.56,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": false,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-04-04T09:56:43.827332"
+}

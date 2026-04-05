@@ -86,6 +86,9 @@ class TerminalFormatter:
             lines.append(f"  cryptography:       {result.environment.cryptography_version}")
         else:
             lines.append(f"  cryptography:       {self._color('Not installed', 'yellow')}")
+        if result.environment.truststore_version:
+            active = " (active)" if result.http_client_state.use_system_certs else ""
+            lines.append(f"  truststore:         {result.environment.truststore_version}{active}")
         lines.append("")
 
         # Certificate configuration
@@ -281,6 +284,9 @@ class NotebookFormatter:
             env_rows.append(("certifi version", result.environment.certifi_version))
         crypto_ver = result.environment.cryptography_version or "<span style='color: orange;'>Not installed</span>"
         env_rows.append(("cryptography", crypto_ver))
+        if result.environment.truststore_version:
+            active = " <span style='color: green;'>(active)</span>" if result.http_client_state.use_system_certs else ""
+            env_rows.append(("truststore", f"{result.environment.truststore_version}{active}"))
 
         for label, value in env_rows:
             html_parts.append(

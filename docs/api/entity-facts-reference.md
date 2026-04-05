@@ -182,7 +182,7 @@ Get cash flow statement facts.
 
 ```python
 # Annual cash flow trends
-stmt = facts.cash_flow(periods=5, annual=True)
+stmt = facts.cashflow_statement(periods=5, annual=True)
 ```
 
 **Parameters:**

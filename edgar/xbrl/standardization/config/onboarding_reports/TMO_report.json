@@ -1,0 +1,58 @@
+{
+  "ticker": "TMO",
+  "cik": 97745,
+  "company_name": "THERMO FISHER SCIENTIFIC INC.",
+  "archetype": "A",
+  "sic_code": "3829",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  TMO:\n    name: \"THERMO FISHER SCIENTIFIC INC.\"\n    cik: 97745\n    known_divergences:\n      IntangibleAssets:\n        form_types: [\"10-K\"]\n        variance_pct: 66.9\n        reason: \"Variance: 66.9% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"",
+  "metrics_passed": [
+    "Revenue",
+    "COGS",
+    "SGA",
+    "OperatingIncome",
+    "PretaxIncome",
+    "NetIncome",
+    "OperatingCashFlow",
+    "Capex",
+    "TotalAssets",
+    "ShortTermDebt",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "Inventory",
+    "AccountsReceivable",
+    "AccountsPayable",
+    "DepreciationAmortization"
+  ],
+  "metrics_failed": [
+    "Goodwill",
+    "IntangibleAssets"
+  ],
+  "metrics_excluded": [],
+  "failures": {
+    "Goodwill": {
+      "metric": "Goodwill",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 45853000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "IntangibleAssets": {
+      "metric": "IntangibleAssets",
+      "reason": "Variance: 66.9% (tolerance: 15%)",
+      "xbrl_value": 20317000000.0,
+      "reference_value": 61386000000.0,
+      "variance_pct": 66.90287687746391,
+      "pattern": "unknown"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": true,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-03-04T19:22:02.135729"
+}

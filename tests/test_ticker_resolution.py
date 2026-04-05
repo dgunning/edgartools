@@ -173,13 +173,10 @@ class TestPrivateResolutionMethods:
             assert result == "TSLA"
             mock_cusip.assert_called_once_with("88160R101")
 
-    def test_resolve_via_cusip_exception_handling(self):
-        """Test exception handling in CUSIP resolution"""
+    def test_resolve_via_cusip_placeholder_cusip(self):
+        """Test that placeholder CUSIPs like 000000000 return None without lookup"""
         with patch('edgar.funds.ticker_resolution.get_ticker_from_cusip') as mock_cusip:
-            mock_cusip.side_effect = Exception("Test exception")
+            result = TickerResolutionService._resolve_via_cusip("000000000")
 
-            with patch('edgar.funds.ticker_resolution.log') as mock_log:
-                result = TickerResolutionService._resolve_via_cusip("594918104")
-
-                assert result is None
-                mock_log.warning.assert_called_once()
+            assert result is None
+            mock_cusip.assert_not_called()

@@ -1,4 +1,8 @@
-# Form D Data Object Guide
+---
+description: Extract private offering data from SEC Form D filings including offering amounts, investor counts, and exemption types.
+---
+
+# Form D: Parse Private Placement and Regulation D Filings
 
 ## Overview
 

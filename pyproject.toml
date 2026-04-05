@@ -4,11 +4,17 @@ build-backend = "hatchling.build"
 
 [project]
 name = "edgartools"
-description = 'Navigate Edgar filings with ease'
+description = 'Python library to access and analyze SEC Edgar filings, XBRL financial statements, 10-K, 10-Q, and 8-K reports'
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
-keywords = ["sec", "edgar", "filings", "company", "python", "finance", "financial", "reports"]
+keywords = [
+    "sec", "edgar", "filings", "sec filings", "edgar filings",
+    "10-K", "10-Q", "8-K", "xbrl", "financial statements",
+    "sec api", "edgar api", "python", "finance", "financial data",
+    "stock filings", "company filings", "annual report", "quarterly report",
+    "institutional holdings", "13F", "insider trading", "form 4"
+]
 authors = [
   { name = "Dwight Gunning", email = "dgunning@gmail.com" },
 ]
@@ -23,6 +29,12 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
   "License :: OSI Approved :: MIT License",
+  "Intended Audience :: Financial and Insurance Industry",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "Topic :: Office/Business :: Financial",
+  "Topic :: Office/Business :: Financial :: Investment",
+  "Topic :: Scientific/Engineering :: Information Analysis",
 ]
 dependencies = [
   "httpx>=0.25.0",
@@ -43,8 +55,10 @@ dependencies = [
   "tqdm>=4.62.0",
   "nest-asyncio>=1.5.1",
   "jinja2>=3.1.0",
-  "hishel==0.1.3",
-  "httpxthrottlecache>=0.1.6",
+  "pyrate-limiter>=3.0.0",
+  "httpxthrottlecache>=0.3.0",
+  "truststore>=0.9.0",
+  "pyyaml>=6.0",
 ]
 dynamic = ["version"]
 
@@ -61,6 +75,7 @@ ai-dev = [
 
 data = [
     "duckdb>=1.0.0",            # SQL interface for company datasets
+    "zstandard>=0.20.0",        # Decompress datamule tar content
 ]
 
 test-harness = [
@@ -95,12 +110,14 @@ all-cloud = [
 ]
 
 [project.urls]
+Homepage = "https://github.com/dgunning/edgartools"
 Documentation = "https://dgunning.github.io/edgartools/"
 Issues = "https://github.com/dgunning/edgartools/issues"
 Source = "https://github.com/dgunning/edgartools"
+Changelog = "https://github.com/dgunning/edgartools/releases"
 
 [project.scripts]
-edgartools-mcp = "edgar.ai.mcp_server:main"
+edgartools-mcp = "edgar.ai.mcp.server:main"
 edgar-test = "tests.harness.cli:cli"
 
 [tool.hatch.version]
@@ -111,6 +128,8 @@ include = [
   "edgar/**/*.py",
   "edgar/**/templates/*.html",
   "edgar/**/docs/*.md",
+  "edgar/ai/skills/**/*.yaml",
+  "edgar/ai/skills/*.yaml",
   "edgar/ai/skills/core/*.md",
   "edgar/reference/data/*",
   "edgar/entity/data/*",
@@ -154,19 +173,19 @@ features = [
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=edgar --cov=tests --ignore=tests/legacy {args}"
 no-cov = "cov --no-cov {args}"
 lint = "ruff check edgar"
-smoke-filings = "python tests/batch/batch_filings.py {args}"
+smoke-filings = "python scripts/batch/batch_filings.py {args}"
 # Test categorization commands (sequential execution)
 test-fast = "pytest -m 'fast' {args}"
 test-slow = "pytest -m 'slow' {args}"
 test-network = "pytest -m 'network' {args}"
-test-core = "pytest -m 'not (slow or network or performance or batch)' --ignore=tests/manual --ignore=tests/perf {args}"
+test-core = "pytest -m 'not (slow or network or performance or batch)' --ignore=tests/perf {args}"
 
 # Parallel test commands (selective parallelization for SEC rate limit safety)
 # - Fast tests: Full parallelization (no network calls)
 # - Network/slow: Sequential (respects SEC rate limits)
 # - Core: Limited parallelization (mixed tests)
 test-fast-parallel = "pytest -n auto -m 'fast' {args}"
-test-core-parallel = "pytest -n 2 -m 'not (slow or network or performance or batch)' --ignore=tests/manual --ignore=tests/perf {args}"
+test-core-parallel = "pytest -n 2 -m 'not (slow or network or performance or batch)' --ignore=tests/perf {args}"
 test-parallel-safe = "pytest -n auto -m 'fast' {args}"
 
 # Parallel CI test strategy (skip regression tests for faster feedback)
@@ -176,22 +195,22 @@ test-parallel-safe = "pytest -n auto -m 'fast' {args}"
 # 2. Path-based: --ignore=tests/issues/regression excludes entire folder
 # 3. Auto-marking: conftest.py automatically marks tests as fast/network based on filename
 # 4. Selective parallel: Only parallelize tests safe from SEC rate limits
-# 5. Combined coverage: CI combines coverage from fast/network/slow groups for 70% threshold
+# 5. Combined coverage: CI combines coverage from fast/network/slow groups for 65% threshold
 #
 # Note: "core" group removed from CI - auto-marking leaves 0 tests without markers
 
 test-ci-fast = "pytest -n auto --cov --cov-report=xml -m 'fast and not regression' {args}"
 test-ci-network = "pytest --cov --cov-report=xml -m 'network and not slow and not regression' {args}"
 test-ci-slow = "pytest --cov --cov-report=xml -m 'slow and not regression' {args}"
-test-ci-all = "pytest --cov --cov-report=xml -m 'not regression' --ignore=tests/manual --ignore=tests/perf --ignore=tests/issues/regression {args}"
+test-ci-all = "pytest --cov --cov-report=xml -m 'not regression' --ignore=tests/perf --ignore=tests/issues/regression {args}"
 
 # Regression tests (run separately/on-demand for comprehensive bug prevention)
 test-regression = "pytest --cov --cov-report=xml -m regression {args}"
 
 # Other test categories  
-test-batch = "pytest tests/batch/ -m 'batch' {args}"
+test-batch = "pytest scripts/batch/ -m 'batch' {args}"
 test-reproduction = "pytest tests/issues/reproductions/ -m 'reproduction' {args}"
-test-full = "pytest --ignore=tests/manual --ignore=tests/perf {args}"
+test-full = "pytest --ignore=tests/perf {args}"
 
 [tool.hatch.envs.test]
 dependencies = [
@@ -207,9 +226,31 @@ python = ["39", "310", "311", "312"]
 [tool.coverage.run]
 branch = true
 parallel = true
+source = ["edgar"]
 omit = [
   "edgar/__about__.py",
-  "tests/perf/*"
+  # Example and demo files (not part of core library)
+  "edgar/**/examples.py",
+  "edgar/**/examples/*.py",
+  "edgar/display/demo.py",
+  # Training scripts (ML training utilities, not runtime code)
+  "edgar/entity/training/*",
+  # Migration utilities (one-time migration helpers)
+  "edgar/documents/migration.py",
+  "edgar/documents/migration_example.py",
+  # CLI entry points (tested via integration, not unit tests)
+  "edgar/**/__main__.py",
+  # MCP server (optional external integration, requires MCP runtime)
+  "edgar/ai/mcp/*",
+  # AI evaluation framework (dev tooling: LLM-as-judge, A/B skill testing)
+  "edgar/ai/evaluation/*",
+  # AI exporters (CLI tooling for skill packaging)
+  "edgar/ai/exporters/*",
+  # Experimental AI features
+  "edgar/ai/formats.py",
+  "edgar/ai/helpers.py",
+  # SSL diagnostics (CLI tool, not library code)
+  "edgar/diagnose_ssl/*",
 ]
 
 [tool.coverage.report]
@@ -219,7 +260,7 @@ exclude_lines = [
   "if TYPE_CHECKING:",
 ]
 # Coverage threshold moved to CI combined coverage check
-# Individual test groups don't meet 70% alone, only combined
+# Individual test groups don't meet 65% alone, only combined
 
 
 [tool.ruff]

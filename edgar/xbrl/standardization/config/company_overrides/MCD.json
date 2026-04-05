@@ -1,0 +1,46 @@
+{
+  "exclude_metrics": {
+    "ResearchAndDevelopment": {
+      "reason": "not_applicable",
+      "notes": "No R&D line item"
+    }
+  },
+  "metric_overrides": {
+    "WeightedAverageSharesDiluted": {
+      "preferred_concept": "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding",
+      "scale_factor": 1000000,
+      "notes": "MCD reports shares in millions in iXBRL (scale=6). Parser stores raw 721.9 instead of 721900000."
+    }
+  },
+  "known_divergences": {
+    "GrossProfit": {
+      "form_types": [
+        "10-K"
+      ],
+      "variance_pct": 15.0,
+      "reason": "Phase 10: structural extraction mismatch.",
+      "skip_validation": true,
+      "added_date": "2026-04-03",
+      "remediation_status": "deferred"
+    },
+    "PropertyPlantEquipment": {
+      "form_types": [
+        "10-K"
+      ],
+      "variance_pct": 35.0,
+      "reason": "Phase 11: yfinance includes OperatingLeaseRightOfUseAsset in PPE. XBRL excludes it.",
+      "skip_validation": true,
+      "added_date": "2026-04-03"
+    },
+    "DepreciationAmortization": {
+      "form_types": [
+        "10-K"
+      ],
+      "variance_pct": 80.0,
+      "reason": "Phase 11: yfinance D&A scope differs from XBRL concept.",
+      "skip_validation": true,
+      "added_date": "2026-04-03"
+    }
+  },
+  "quality_tier": "provisional"
+}

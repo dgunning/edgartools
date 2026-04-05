@@ -33,13 +33,13 @@ Use existing test scripts to compare OLD vs NEW parsers:
 
 ```bash
 # Full comparison with metrics
-python tests/manual/check_parser_comparison.py
+python scripts/manual/check_parser_comparison.py
 
 # Table-focused comparison with rendering
-python tests/manual/check_tables.py
+python scripts/manual/check_tables.py
 
 # Or run on specific file
-python tests/manual/check_html_rewrite.py
+python scripts/manual/check_html_rewrite.py
 ```
 
 **Outputs to review**:
@@ -133,25 +133,25 @@ Simple command-line tool for the quality improvement loop:
 
 ```bash
 # Quick overview comparison (using shortcuts!)
-python tests/manual/compare_parsers.py aapl
+python scripts/manual/compare_parsers.py aapl
 
 # See all tables in a document
-python tests/manual/compare_parsers.py aapl --tables
+python scripts/manual/compare_parsers.py aapl --tables
 
 # Compare specific table (OLD vs NEW side-by-side)
-python tests/manual/compare_parsers.py aapl --table 5
+python scripts/manual/compare_parsers.py aapl --table 5
 
 # Compare text extraction
-python tests/manual/compare_parsers.py msft --text
+python scripts/manual/compare_parsers.py msft --text
 
 # See section detection
-python tests/manual/compare_parsers.py orcl --sections
+python scripts/manual/compare_parsers.py orcl --sections
 
 # Test with 10-Q filings
-python tests/manual/compare_parsers.py 'aapl 10-q'
+python scripts/manual/compare_parsers.py 'aapl 10-q'
 
 # Run all test files at once
-python tests/manual/compare_parsers.py --all
+python scripts/manual/compare_parsers.py --all
 ```
 
 **Shortcuts available**:
@@ -170,10 +170,10 @@ python tests/manual/compare_parsers.py --all
 
 Additional tools for specific testing:
 
-- `tests/manual/check_parser_comparison.py` - Full comparison with metrics
-- `tests/manual/check_tables.py` - Table-specific comparison with rendering
-- `tests/manual/check_html_rewrite.py` - General HTML parsing checks
-- `tests/manual/check_html_parser_real_files.py` - Real filing tests
+- `scripts/manual/check_parser_comparison.py` - Full comparison with metrics
+- `scripts/manual/check_tables.py` - Table-specific comparison with rendering
+- `scripts/manual/check_html_rewrite.py` - General HTML parsing checks
+- `scripts/manual/check_html_parser_real_files.py` - Real filing tests
 
 ## Quick Reference
 

@@ -1,0 +1,2526 @@
+{
+  "run_id": "e2e_2026-01-20T23:20:05.400039",
+  "timestamp": "2026-01-20T23:20:05.400049",
+  "config": {
+    "group": "sp25",
+    "workers": 4,
+    "years": 2,
+    "quarters": 2
+  },
+  "summary": {
+    "sp25": {
+      "10k_total": 436,
+      "10k_passed": 398,
+      "10q_total": 510,
+      "10q_passed": 401
+    },
+    "sp50": {
+      "10k_total": 436,
+      "10k_passed": 398,
+      "10q_total": 510,
+      "10q_passed": 401
+    }
+  },
+  "failure_count": 147,
+  "failures": [
+    {
+      "ticker": "AAPL",
+      "form": "10-Q",
+      "filing_date": "2025-06-28",
+      "accession_no": "0000320193-25-000073",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 81754000000.0,
+      "ref_value": 27867000000.0,
+      "variance_pct": 193.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AAPL",
+      "form": "10-Q",
+      "filing_date": "2025-06-28",
+      "accession_no": "0000320193-25-000073",
+      "metric": "Capex",
+      "xbrl_value": -9473000000.0,
+      "ref_value": -3462000000.0,
+      "variance_pct": 173.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AAPL",
+      "form": "10-Q",
+      "filing_date": "2025-03-29",
+      "accession_no": "0000320193-25-000057",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 53887000000.0,
+      "ref_value": 23952000000.0,
+      "variance_pct": 125.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AAPL",
+      "form": "10-Q",
+      "filing_date": "2025-03-29",
+      "accession_no": "0000320193-25-000057",
+      "metric": "Capex",
+      "xbrl_value": -6011000000.0,
+      "ref_value": -3071000000.0,
+      "variance_pct": 95.7,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "GOOG",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0001652044-24-000022",
+      "metric": "LongTermDebt",
+      "xbrl_value": 14862000000.0,
+      "ref_value": 11870000000.0,
+      "variance_pct": 25.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebt",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "GOOG",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001652044-25-000091",
+      "metric": "Revenue",
+      "xbrl_value": 468893000000.0,
+      "ref_value": 102346000000.0,
+      "variance_pct": 358.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "GOOG",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001652044-25-000091",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 112311000000.0,
+      "ref_value": 48414000000.0,
+      "variance_pct": 132.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "GOOG",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001652044-25-000091",
+      "metric": "Capex",
+      "xbrl_value": -63596000000.0,
+      "ref_value": -23953000000.0,
+      "variance_pct": 165.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "GOOG",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001652044-25-000091",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 4995000000.0,
+      "ref_value": NaN,
+      "variance_pct": NaN,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtCurrent",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "GOOG",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0001652044-25-000062",
+      "metric": "Revenue",
+      "xbrl_value": 443503000000.0,
+      "ref_value": 96428000000.0,
+      "variance_pct": 359.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "GOOG",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0001652044-25-000062",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 63897000000.0,
+      "ref_value": 27747000000.0,
+      "variance_pct": 130.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "GOOG",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0001652044-25-000062",
+      "metric": "Capex",
+      "xbrl_value": -39643000000.0,
+      "ref_value": -22446000000.0,
+      "variance_pct": 76.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "GOOG",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0001652044-25-000062",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 4000000000.0,
+      "ref_value": NaN,
+      "variance_pct": NaN,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtCurrent",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AMZN",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001018724-25-000123",
+      "metric": "NetIncome",
+      "xbrl_value": 76482000000.0,
+      "ref_value": 21187000000.0,
+      "variance_pct": 261.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetIncomeLoss",
+      "industry": "retail",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AMZN",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001018724-25-000123",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 130691000000.0,
+      "ref_value": 35525000000.0,
+      "variance_pct": 267.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "retail",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AMZN",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001018724-25-000123",
+      "metric": "Capex",
+      "xbrl_value": -120131000000.0,
+      "ref_value": -35095000000.0,
+      "variance_pct": 242.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquireProductiveAssets",
+      "industry": "retail",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AMZN",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0001018724-25-000086",
+      "metric": "NetIncome",
+      "xbrl_value": 70623000000.0,
+      "ref_value": 18164000000.0,
+      "variance_pct": 288.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetIncomeLoss",
+      "industry": "retail",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AMZN",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0001018724-25-000086",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 121137000000.0,
+      "ref_value": 32515000000.0,
+      "variance_pct": 272.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "retail",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AMZN",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0001018724-25-000086",
+      "metric": "Capex",
+      "xbrl_value": -107656000000.0,
+      "ref_value": -32183000000.0,
+      "variance_pct": 234.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquireProductiveAssets",
+      "industry": "retail",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NVDA",
+      "form": "10-K",
+      "filing_date": "2025-01-26",
+      "accession_no": "0001045810-25-000023",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 0.0,
+      "ref_value": NaN,
+      "variance_pct": NaN,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:DebtCurrent",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NVDA",
+      "form": "10-Q",
+      "filing_date": "2025-10-26",
+      "accession_no": "0001045810-25-000230",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 66530000000.0,
+      "ref_value": 23751000000.0,
+      "variance_pct": 180.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NVDA",
+      "form": "10-Q",
+      "filing_date": "2025-10-26",
+      "accession_no": "0001045810-25-000230",
+      "metric": "Capex",
+      "xbrl_value": -4758000000.0,
+      "ref_value": -1636000000.0,
+      "variance_pct": 190.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquireProductiveAssets",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NVDA",
+      "form": "10-Q",
+      "filing_date": "2025-07-27",
+      "accession_no": "0001045810-25-000209",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 42779000000.0,
+      "ref_value": 15365000000.0,
+      "variance_pct": 178.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NVDA",
+      "form": "10-Q",
+      "filing_date": "2025-07-27",
+      "accession_no": "0001045810-25-000209",
+      "metric": "Capex",
+      "xbrl_value": -3122000000.0,
+      "ref_value": -1895000000.0,
+      "variance_pct": 64.7,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquireProductiveAssets",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "META",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001628280-25-047240",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 79586000000.0,
+      "ref_value": 29999000000.0,
+      "variance_pct": 165.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "META",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001628280-25-047240",
+      "metric": "Capex",
+      "xbrl_value": -48308000000.0,
+      "ref_value": -18829000000.0,
+      "variance_pct": 156.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "META",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001628280-25-047240",
+      "metric": "IntangibleAssets",
+      "xbrl_value": 24337000000.0,
+      "ref_value": 21158000000.0,
+      "variance_pct": 15.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "META",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0001628280-25-036791",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 49587000000.0,
+      "ref_value": 25561000000.0,
+      "variance_pct": 94.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "META",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0001628280-25-036791",
+      "metric": "Capex",
+      "xbrl_value": -29479000000.0,
+      "ref_value": -16538000000.0,
+      "variance_pct": 78.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "TSLA",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0001628280-25-003063",
+      "metric": "IntangibleAssets",
+      "xbrl_value": 394000000.0,
+      "ref_value": 1470000000.0,
+      "variance_pct": 73.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "automotive",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "TSLA",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0001628280-25-003063",
+      "metric": "LongTermDebt",
+      "xbrl_value": 2456000000.0,
+      "ref_value": 5535000000.0,
+      "variance_pct": 55.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:tsla_LongTermDebtAndFinanceLeasesCurrent",
+      "industry": "automotive",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "TSLA",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001628280-25-045968",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 10934000000.0,
+      "ref_value": 6238000000.0,
+      "variance_pct": 75.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "automotive",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "TSLA",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001628280-25-045968",
+      "metric": "Capex",
+      "xbrl_value": -6134000000.0,
+      "ref_value": -2248000000.0,
+      "variance_pct": 172.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "automotive",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "TSLA",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0001628280-25-035806",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 4696000000.0,
+      "ref_value": 2540000000.0,
+      "variance_pct": 84.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "automotive",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "TSLA",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0001628280-25-035806",
+      "metric": "Capex",
+      "xbrl_value": -3886000000.0,
+      "ref_value": -2394000000.0,
+      "variance_pct": 62.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "automotive",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "TSLA",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0001628280-25-035806",
+      "metric": "LongTermDebt",
+      "xbrl_value": 2040000000.0,
+      "ref_value": 4994000000.0,
+      "variance_pct": 59.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:tsla_LongTermDebtAndFinanceLeasesCurrent",
+      "industry": "automotive",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "JPM",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000019617-25-000270",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 21800000000.0,
+      "ref_value": 64475000000.0,
+      "variance_pct": 66.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "JPM",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000019617-25-000270",
+      "metric": "LongTermDebt",
+      "xbrl_value": 3615690000000.0,
+      "ref_value": 389836000000.0,
+      "variance_pct": 827.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "JPM",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000019617-25-000270",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": -882000000.0,
+      "ref_value": 469317000000.0,
+      "variance_pct": 99.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTaxParent",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "JPM",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001628280-25-048859",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": -267506000000.0,
+      "ref_value": -45214000000.0,
+      "variance_pct": 491.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "JPM",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001628280-25-048859",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 314000000.0,
+      "ref_value": 303436000000.0,
+      "variance_pct": 99.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTaxParent",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "JPM",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000019617-25-000615",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": -222292000000.0,
+      "ref_value": 29547000000.0,
+      "variance_pct": 652.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "JPM",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000019617-25-000615",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 1529000000.0,
+      "ref_value": 420327000000.0,
+      "variance_pct": 99.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTaxParent",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "V",
+      "form": "10-K",
+      "filing_date": "2024-09-30",
+      "accession_no": "0001403161-24-000058",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 0.0,
+      "ref_value": NaN,
+      "variance_pct": NaN,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtCurrent",
+      "industry": "business_services",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "V",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0001403161-25-000052",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 16821000000.0,
+      "ref_value": 6730000000.0,
+      "variance_pct": 149.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "business_services",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "V",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0001403161-25-000052",
+      "metric": "Capex",
+      "xbrl_value": -1093000000.0,
+      "ref_value": -421000000.0,
+      "variance_pct": 159.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquireProductiveAssets",
+      "industry": "business_services",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "V",
+      "form": "10-Q",
+      "filing_date": "2025-03-31",
+      "accession_no": "0001403161-25-000037",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 10091000000.0,
+      "ref_value": 4695000000.0,
+      "variance_pct": 114.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "business_services",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "V",
+      "form": "10-Q",
+      "filing_date": "2025-03-31",
+      "accession_no": "0001403161-25-000037",
+      "metric": "Capex",
+      "xbrl_value": -672000000.0,
+      "ref_value": -327000000.0,
+      "variance_pct": 105.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquireProductiveAssets",
+      "industry": "business_services",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "MA",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0001141391-25-000011",
+      "metric": "Capex",
+      "xbrl_value": -474000000.0,
+      "ref_value": -1194000000.0,
+      "variance_pct": 60.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "business_services",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "MA",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0001141391-25-000011",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 57292000000.0,
+      "ref_value": 750000000.0,
+      "variance_pct": 7538.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtCurrent",
+      "industry": "business_services",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "MA",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0001141391-24-000022",
+      "metric": "Capex",
+      "xbrl_value": -371000000.0,
+      "ref_value": -1088000000.0,
+      "variance_pct": 65.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "business_services",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "MA",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0001141391-24-000022",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 1675000000.0,
+      "ref_value": 1337000000.0,
+      "variance_pct": 25.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtCurrent",
+      "industry": "business_services",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "MA",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001141391-25-000193",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 12646000000.0,
+      "ref_value": 5663000000.0,
+      "variance_pct": 123.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "business_services",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "MA",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001141391-25-000193",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 0.0,
+      "ref_value": NaN,
+      "variance_pct": NaN,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtCurrent",
+      "industry": "business_services",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "MA",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0001141391-25-000172",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 6983000000.0,
+      "ref_value": 4603000000.0,
+      "variance_pct": 51.7,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "business_services",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "MA",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0001141391-25-000172",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 0.0,
+      "ref_value": NaN,
+      "variance_pct": NaN,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtCurrent",
+      "industry": "business_services",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "BAC",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000070858-25-000139",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 4613000000.0,
+      "ref_value": 296486000000.0,
+      "variance_pct": 98.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "BAC",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000070858-25-000405",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 35558000000.0,
+      "ref_value": 46874000000.0,
+      "variance_pct": 24.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "BAC",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000070858-25-000405",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 636000000.0,
+      "ref_value": 254719000000.0,
+      "variance_pct": 99.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTaxParent",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "BAC",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000070858-25-000268",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": -11316000000.0,
+      "ref_value": -9132000000.0,
+      "variance_pct": 23.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "BAC",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000070858-25-000268",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 1196000000.0,
+      "ref_value": 275388000000.0,
+      "variance_pct": 99.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTaxParent",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000072971-25-000066",
+      "metric": "Revenue",
+      "xbrl_value": 63522000000.0,
+      "ref_value": 82296000000.0,
+      "variance_pct": 22.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000072971-25-000066",
+      "metric": "IntangibleAssets",
+      "xbrl_value": 25240000000.0,
+      "ref_value": 32946000000.0,
+      "variance_pct": 23.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000072971-25-000066",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 108806000000.0,
+      "ref_value": 13571000000.0,
+      "variance_pct": 701.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000072971-24-000064",
+      "metric": "Revenue",
+      "xbrl_value": 56032000000.0,
+      "ref_value": 82597000000.0,
+      "variance_pct": 32.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000072971-24-000064",
+      "metric": "IntangibleAssets",
+      "xbrl_value": 25293000000.0,
+      "ref_value": 33683000000.0,
+      "variance_pct": 24.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000072971-24-000064",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 89559000000.0,
+      "ref_value": 11883000000.0,
+      "variance_pct": 653.7,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000072971-25-000253",
+      "metric": "Revenue",
+      "xbrl_value": 17343000000.0,
+      "ref_value": 21436000000.0,
+      "variance_pct": 19.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000072971-25-000253",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": -23122000000.0,
+      "ref_value": -869000000.0,
+      "variance_pct": 2560.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000072971-25-000253",
+      "metric": "IntangibleAssets",
+      "xbrl_value": 25932000000.0,
+      "ref_value": 31854000000.0,
+      "variance_pct": 18.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000072971-25-000253",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 230649000000.0,
+      "ref_value": 36409000000.0,
+      "variance_pct": 533.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000072971-25-000201",
+      "metric": "Revenue",
+      "xbrl_value": 16207000000.0,
+      "ref_value": 20569000000.0,
+      "variance_pct": 21.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000072971-25-000201",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": -22253000000.0,
+      "ref_value": -11216000000.0,
+      "variance_pct": 98.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000072971-25-000201",
+      "metric": "IntangibleAssets",
+      "xbrl_value": 25973000000.0,
+      "ref_value": 32119000000.0,
+      "variance_pct": 19.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000072971-25-000201",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 187995000000.0,
+      "ref_value": 33984000000.0,
+      "variance_pct": 453.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "GS",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000886982-25-000005",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 69709000000.0,
+      "ref_value": 90624000000.0,
+      "variance_pct": 23.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CommercialPaper",
+      "industry": "securities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "GS",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000886982-25-001411",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": -28878000000.0,
+      "ref_value": 2680000000.0,
+      "variance_pct": 977.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "securities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "GS",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000886982-25-001411",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 72385000000.0,
+      "ref_value": 88449000000.0,
+      "variance_pct": 18.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": "securities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "GS",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000886982-25-000022",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": -31558000000.0,
+      "ref_value": 5672000000.0,
+      "variance_pct": 456.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "securities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "GS",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000886982-25-000022",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 69004000000.0,
+      "ref_value": 84282000000.0,
+      "variance_pct": 18.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": "securities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "MS",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000895421-25-000304",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 105386000000.0,
+      "ref_value": 75743000000.0,
+      "variance_pct": 39.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "industry": "securities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "MS",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000895421-25-000539",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": -15479000000.0,
+      "ref_value": -3332000000.0,
+      "variance_pct": 364.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "securities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "MS",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000895421-25-000539",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 103734000000.0,
+      "ref_value": 73473000000.0,
+      "variance_pct": 41.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "industry": "securities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "MS",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000895421-25-000440",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 109130000000.0,
+      "ref_value": 78156000000.0,
+      "variance_pct": 39.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "industry": "securities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AXP",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000004962-25-000222",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 15361000000.0,
+      "ref_value": 6233000000.0,
+      "variance_pct": 146.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "finance_services",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AXP",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000004962-25-000083",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 9128000000.0,
+      "ref_value": 4364000000.0,
+      "variance_pct": 109.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "finance_services",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "BLK",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001193125-25-267043",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 1650000000.0,
+      "ref_value": 1414000000.0,
+      "variance_pct": 16.7,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "securities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "BLK",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000950170-25-103780",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 236000000.0,
+      "ref_value": 1364000000.0,
+      "variance_pct": 82.7,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "securities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "C",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000831001-25-000067",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 19589000000.0,
+      "ref_value": 48505000000.0,
+      "variance_pct": 59.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CommercialPaper",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "C",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000831001-25-000067",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 1186000000.0,
+      "ref_value": 276532000000.0,
+      "variance_pct": 99.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTaxParent",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "C",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000831001-25-000154",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": -94187000000.0,
+      "ref_value": 1100000000.0,
+      "variance_pct": 8462.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "C",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000831001-25-000154",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 35369000000.0,
+      "ref_value": 54760000000.0,
+      "variance_pct": 35.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CommercialPaper",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "C",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000831001-25-000154",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 25000000.0,
+      "ref_value": 348060000000.0,
+      "variance_pct": 100.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTaxParent",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "C",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000831001-25-000131",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": -95287000000.0,
+      "ref_value": -36579000000.0,
+      "variance_pct": 160.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "C",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000831001-25-000131",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 33228000000.0,
+      "ref_value": 55560000000.0,
+      "variance_pct": 40.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CommercialPaper",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "C",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000831001-25-000131",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 72000000.0,
+      "ref_value": 337473000000.0,
+      "variance_pct": 100.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTaxParent",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "UNH",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000731766-25-000063",
+      "metric": "Revenue",
+      "xbrl_value": 335273000000.0,
+      "ref_value": 400278000000.0,
+      "variance_pct": 16.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "UNH",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000731766-24-000081",
+      "metric": "Revenue",
+      "xbrl_value": 296767000000.0,
+      "ref_value": 371622000000.0,
+      "variance_pct": 20.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "UNH",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000731766-25-000305",
+      "metric": "Revenue",
+      "xbrl_value": 89622000000.0,
+      "ref_value": 113161000000.0,
+      "variance_pct": 20.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "UNH",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000731766-25-000305",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 18589000000.0,
+      "ref_value": 5945000000.0,
+      "variance_pct": 212.7,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "UNH",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000731766-25-000305",
+      "metric": "Capex",
+      "xbrl_value": -2674000000.0,
+      "ref_value": -890000000.0,
+      "variance_pct": 200.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "UNH",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000731766-25-000236",
+      "metric": "Revenue",
+      "xbrl_value": 87901000000.0,
+      "ref_value": 111616000000.0,
+      "variance_pct": 21.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "UNH",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000731766-25-000236",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 12644000000.0,
+      "ref_value": 7188000000.0,
+      "variance_pct": 75.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "UNH",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000731766-25-000236",
+      "metric": "Capex",
+      "xbrl_value": -1784000000.0,
+      "ref_value": -886000000.0,
+      "variance_pct": 101.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "JNJ",
+      "form": "10-K",
+      "filing_date": "2024-12-29",
+      "accession_no": "0000200406-25-000038",
+      "metric": "OperatingIncome",
+      "xbrl_value": 36640000000.0,
+      "ref_value": 21249000000.0,
+      "variance_pct": 72.4,
+      "mapping_source": "tree",
+      "concept_used": null,
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "JNJ",
+      "form": "10-K",
+      "filing_date": "2024-12-29",
+      "accession_no": "0000200406-25-000038",
+      "metric": "Capex",
+      "xbrl_value": -4424000000.0,
+      "ref_value": -6207000000.0,
+      "variance_pct": 28.7,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "JNJ",
+      "form": "10-K",
+      "filing_date": "2024-12-29",
+      "accession_no": "0000200406-25-000038",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 11332000000.0,
+      "ref_value": 5983000000.0,
+      "variance_pct": 89.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtCurrent",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "JNJ",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000200406-24-000013",
+      "metric": "OperatingIncome",
+      "xbrl_value": -7398000000.0,
+      "ref_value": 22009000000.0,
+      "variance_pct": 66.4,
+      "mapping_source": "tree",
+      "concept_used": null,
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "JNJ",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000200406-24-000013",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 4920000000.0,
+      "ref_value": 3451000000.0,
+      "variance_pct": 42.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtCurrent",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "JNJ",
+      "form": "10-Q",
+      "filing_date": "2025-09-28",
+      "accession_no": "0000200406-25-000209",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 17221000000.0,
+      "ref_value": 9169000000.0,
+      "variance_pct": 87.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "JNJ",
+      "form": "10-Q",
+      "filing_date": "2025-09-28",
+      "accession_no": "0000200406-25-000209",
+      "metric": "Capex",
+      "xbrl_value": -2995000000.0,
+      "ref_value": -1173000000.0,
+      "variance_pct": 155.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "JNJ",
+      "form": "10-Q",
+      "filing_date": "2025-06-29",
+      "accession_no": "0000200406-25-000178",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 8052000000.0,
+      "ref_value": 3878000000.0,
+      "variance_pct": 107.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "JNJ",
+      "form": "10-Q",
+      "filing_date": "2025-06-29",
+      "accession_no": "0000200406-25-000178",
+      "metric": "Capex",
+      "xbrl_value": -1838000000.0,
+      "ref_value": -1398000000.0,
+      "variance_pct": 31.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "LLY",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000059478-25-000067",
+      "metric": "Capex",
+      "xbrl_value": -5057800000.0,
+      "ref_value": -8403600000.0,
+      "variance_pct": 39.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquireOtherPropertyPlantAndEquipment",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "LLY",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000059478-24-000065",
+      "metric": "Capex",
+      "xbrl_value": -3447600000.0,
+      "ref_value": -7392100000.0,
+      "variance_pct": 53.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquireOtherPropertyPlantAndEquipment",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "LLY",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000059478-25-000254",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 13588400000.0,
+      "ref_value": 8835900000.0,
+      "variance_pct": 53.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "LLY",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000059478-25-000254",
+      "metric": "Capex",
+      "xbrl_value": -5294300000.0,
+      "ref_value": -2808200000.0,
+      "variance_pct": 88.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquireOtherPropertyPlantAndEquipment",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "LLY",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000059478-25-000204",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 4752500000.0,
+      "ref_value": 3086900000.0,
+      "variance_pct": 54.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "LLY",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000059478-25-000204",
+      "metric": "Capex",
+      "xbrl_value": -3206600000.0,
+      "ref_value": -1803900000.0,
+      "variance_pct": 77.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquireOtherPropertyPlantAndEquipment",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "PFE",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000078003-25-000054",
+      "metric": "Revenue",
+      "xbrl_value": 884000000.0,
+      "ref_value": 63627000000.0,
+      "variance_pct": 98.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "PFE",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000078003-25-000054",
+      "metric": "OperatingIncome",
+      "xbrl_value": -17941000000.0,
+      "ref_value": 14830000000.0,
+      "variance_pct": 21.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationBeforeTax",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "PFE",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000078003-24-000039",
+      "metric": "OperatingIncome",
+      "xbrl_value": -18665000000.0,
+      "ref_value": 4223000000.0,
+      "variance_pct": 342.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationBeforeTax",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "PFE",
+      "form": "10-Q",
+      "filing_date": "2025-09-28",
+      "accession_no": "0000078003-25-000150",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 6356000000.0,
+      "ref_value": 4603000000.0,
+      "variance_pct": 38.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "PFE",
+      "form": "10-Q",
+      "filing_date": "2025-09-28",
+      "accession_no": "0000078003-25-000150",
+      "metric": "Capex",
+      "xbrl_value": -1784000000.0,
+      "ref_value": -602000000.0,
+      "variance_pct": 196.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "PFE",
+      "form": "10-Q",
+      "filing_date": "2025-06-29",
+      "accession_no": "0000078003-25-000138",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 1753000000.0,
+      "ref_value": -582000000.0,
+      "variance_pct": 201.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "PFE",
+      "form": "10-Q",
+      "filing_date": "2025-06-29",
+      "accession_no": "0000078003-25-000138",
+      "metric": "Capex",
+      "xbrl_value": -1182000000.0,
+      "ref_value": -618000000.0,
+      "variance_pct": 91.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "MRK",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000310158-25-000059",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 13615000000.0,
+      "ref_value": 7822000000.0,
+      "variance_pct": 74.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "MRK",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000310158-25-000059",
+      "metric": "Capex",
+      "xbrl_value": -3079000000.0,
+      "ref_value": -987000000.0,
+      "variance_pct": 212.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "MRK",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000310158-25-000014",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 5793000000.0,
+      "ref_value": 3293000000.0,
+      "variance_pct": 75.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "MRK",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000310158-25-000014",
+      "metric": "Capex",
+      "xbrl_value": -2092000000.0,
+      "ref_value": -764000000.0,
+      "variance_pct": 173.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "ABBV",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0001551152-25-000020",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 0.0,
+      "ref_value": 6804000000.0,
+      "variance_pct": 100.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ProceedsFromShortTermDebt",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "ABBV",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0001551152-24-000011",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 1700000000.0,
+      "ref_value": 7191000000.0,
+      "variance_pct": 76.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "ABBV",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001551152-25-000049",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 13812000000.0,
+      "ref_value": 7024000000.0,
+      "variance_pct": 96.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "ABBV",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001551152-25-000049",
+      "metric": "Capex",
+      "xbrl_value": -885000000.0,
+      "ref_value": -381000000.0,
+      "variance_pct": 132.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "ABBV",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001551152-25-000049",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 3790000000.0,
+      "ref_value": 5772000000.0,
+      "variance_pct": 34.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "ABBV",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0001551152-25-000040",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 6788000000.0,
+      "ref_value": 5153000000.0,
+      "variance_pct": 31.7,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "ABBV",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0001551152-25-000040",
+      "metric": "Capex",
+      "xbrl_value": -504000000.0,
+      "ref_value": -269000000.0,
+      "variance_pct": 87.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "ABBV",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0001551152-25-000040",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 5556000000.0,
+      "ref_value": 7522000000.0,
+      "variance_pct": 26.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "TMO",
+      "form": "10-Q",
+      "filing_date": "2025-09-27",
+      "accession_no": "0000097745-25-000159",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 4361000000.0,
+      "ref_value": 2239000000.0,
+      "variance_pct": 94.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "TMO",
+      "form": "10-Q",
+      "filing_date": "2025-09-27",
+      "accession_no": "0000097745-25-000159",
+      "metric": "Capex",
+      "xbrl_value": -1060000000.0,
+      "ref_value": -404000000.0,
+      "variance_pct": 162.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "TMO",
+      "form": "10-Q",
+      "filing_date": "2025-06-28",
+      "accession_no": "0000097745-25-000101",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 2122000000.0,
+      "ref_value": 1399000000.0,
+      "variance_pct": 51.7,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "TMO",
+      "form": "10-Q",
+      "filing_date": "2025-06-28",
+      "accession_no": "0000097745-25-000101",
+      "metric": "Capex",
+      "xbrl_value": -656000000.0,
+      "ref_value": -294000000.0,
+      "variance_pct": 123.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DHR",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000313616-24-000052",
+      "metric": "OperatingIncome",
+      "xbrl_value": 1337000000.0,
+      "ref_value": 5202000000.0,
+      "variance_pct": 74.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:OperatingIncomeLoss",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DHR",
+      "form": "10-Q",
+      "filing_date": "2025-09-26",
+      "accession_no": "0000313616-25-000182",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 4299000000.0,
+      "ref_value": 1662000000.0,
+      "variance_pct": 158.7,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DHR",
+      "form": "10-Q",
+      "filing_date": "2025-09-26",
+      "accession_no": "0000313616-25-000182",
+      "metric": "Capex",
+      "xbrl_value": -785000000.0,
+      "ref_value": -292000000.0,
+      "variance_pct": 168.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DHR",
+      "form": "10-Q",
+      "filing_date": "2025-06-27",
+      "accession_no": "0000313616-25-000153",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 2637000000.0,
+      "ref_value": 1338000000.0,
+      "variance_pct": 97.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DHR",
+      "form": "10-Q",
+      "filing_date": "2025-06-27",
+      "accession_no": "0000313616-25-000153",
+      "metric": "Capex",
+      "xbrl_value": -493000000.0,
+      "ref_value": -248000000.0,
+      "variance_pct": 98.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    }
+  ]
+}

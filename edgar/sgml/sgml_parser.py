@@ -1,6 +1,7 @@
+import logging
 import re
 import warnings
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from io import BytesIO
 from typing import Iterator, Optional
@@ -9,7 +10,27 @@ from edgar.core import has_html_content
 from edgar.sgml.tools import get_content_between_tags
 from edgar.vendored import uu
 
+log = logging.getLogger(__name__)
+
+# Maximum content size (500MB). Larger inputs are rejected to prevent OOM.
+# Some real SEC filings (e.g., 10-Ks with embedded images) can exceed 300MB.
+_MAX_CONTENT_SIZE = 500 * 1024 * 1024
+
 __all__ = ['SGMLParser', 'SGMLFormatType', 'SGMLDocument', 'SECIdentityError', 'SECFilingNotFoundError', 'SECHTMLResponseError']
+
+# Pre-compiled patterns for content extraction
+_TEXT_RE = re.compile(r'<TEXT>([\s\S]*?)</TEXT>', re.DOTALL | re.IGNORECASE)
+_XML_RE = re.compile(r'<XML>([\s\S]*?)</XML>', re.DOTALL | re.IGNORECASE)
+_HTML_RE = re.compile(r'<HTML>([\s\S]*?)</HTML>', re.DOTALL | re.IGNORECASE)
+_XBRL_RE = re.compile(r'<XBRL>([\s\S]*?)</XBRL>', re.DOTALL | re.IGNORECASE)
+
+# Document metadata tags and their lengths
+_DOC_META_TAGS = (
+    ('<TYPE>', 6),
+    ('<SEQUENCE>', 10),
+    ('<FILENAME>', 10),
+    ('<DESCRIPTION>', 13),
+)
 
 
 class SECIdentityError(Exception):
@@ -31,43 +52,90 @@ class SGMLFormatType(Enum):
     SUBMISSION = "submission"  # <SUBMISSION>...<FILER> style
 
 
+def _extract_tag_value(content: str, tag: str, tag_len: int, search_start: int, search_end: int) -> str:
+    """Extract value after a tag using str.find(). Returns empty string if not found."""
+    idx = content.find(tag, search_start, search_end)
+    if idx < 0:
+        return ''
+    val_start = idx + tag_len
+    val_end = content.find('\n', val_start, search_end)
+    if val_end < 0:
+        return content[val_start:search_end].strip()
+    return content[val_start:val_end].strip()
+
+
+def _extract_doc_metadata(content: str, start: int, end: int) -> dict:
+    """Extract TYPE, SEQUENCE, FILENAME, DESCRIPTION from first ~500 chars of a document."""
+    search_end = min(start + 500, end)
+    return {
+        'type': _extract_tag_value(content, '<TYPE>', 6, start, search_end),
+        'sequence': _extract_tag_value(content, '<SEQUENCE>', 10, start, search_end),
+        'filename': _extract_tag_value(content, '<FILENAME>', 10, start, search_end),
+        'description': _extract_tag_value(content, '<DESCRIPTION>', 13, start, search_end),
+    }
+
+
 @dataclass
 class SGMLDocument:
     type: str
     sequence: str
     filename: str
     description: str
-    raw_content: str = ""
+    # Lazy content: store reference + offsets instead of copying
+    _content_ref: str = field(default="", repr=False)
+    _content_start: int = field(default=0, repr=False)
+    _content_end: Optional[int] = field(default=None, repr=False)
+
+    @classmethod
+    def from_content_ref(cls, metadata: dict, content_ref: str, start: int, end: int) -> 'SGMLDocument':
+        """Create document with lazy content reference (zero-copy)."""
+        return cls(
+            type=metadata['type'],
+            sequence=metadata['sequence'],
+            filename=metadata['filename'],
+            description=metadata['description'],
+            _content_ref=content_ref,
+            _content_start=start,
+            _content_end=end,
+        )
 
     @classmethod
     def from_parsed_data(cls, data: dict) -> 'SGMLDocument':
-        """Create document from parser output"""
+        """Create document from parser output (legacy compatibility)."""
+        content = data['content']
         return cls(
             type=data['type'],
             sequence=data['sequence'],
             filename=data['filename'],
             description=data['description'],
-            raw_content=data['content']
+            _content_ref=content,
+            _content_start=0,
+            _content_end=len(content),
         )
+
+    @property
+    def raw_content(self) -> str:
+        """Content materialized from reference on access."""
+        if self._content_end is None:
+            return self._content_ref
+        return self._content_ref[self._content_start:self._content_end]
+
+    @raw_content.setter
+    def raw_content(self, value: str):
+        """Allow direct assignment for backward compatibility."""
+        self._content_ref = value
+        self._content_start = 0
+        self._content_end = len(value)
 
     @property
     def content(self):
         raw_content = get_content_between_tags(self.raw_content)
         if raw_content:
             if raw_content.startswith("begin"):
-                # Create input and output streams
-                # Suppress the binascii warning
-
                 warnings.filterwarnings('ignore')
-
-                # Create input and output streams
                 input_stream = BytesIO(raw_content.encode("utf-8"))
                 output_stream = BytesIO()
-
-                # Decode the UU content
                 uu.decode(input_stream, output_stream, quiet=True)
-
-                # Get the decoded bytes
                 return output_stream.getvalue()
             return raw_content
 
@@ -76,22 +144,22 @@ class SGMLDocument:
 
     def text(self) -> str:
         """Extract content between <TEXT> tags."""
-        match = re.search(r'<TEXT>([\s\S]*?)</TEXT>', self.raw_content, re.DOTALL | re.IGNORECASE)
+        match = _TEXT_RE.search(self.raw_content)
         return match.group(1).strip() if match else ""
 
     def xml(self) -> Optional[str]:
         """Extract content between <XML> tags if present."""
-        match = re.search(r'<XML>([\s\S]*?)</XML>', self.raw_content, re.DOTALL | re.IGNORECASE)
+        match = _XML_RE.search(self.raw_content)
         return match.group(1).strip() if match else None
 
     def html(self) -> Optional[str]:
         """Extract content between <HTML> tags if present."""
-        match = re.search(r'<HTML>([\s\S]*?)</HTML>', self.raw_content, re.DOTALL | re.IGNORECASE)
+        match = _HTML_RE.search(self.raw_content)
         return match.group(1).strip() if match else None
 
     def xbrl(self) -> Optional[str]:
         """Extract content between <XBRL> tags if present."""
-        match = re.search(r'<XBRL>([\s\S]*?)</XBRL>', self.raw_content, re.DOTALL | re.IGNORECASE)
+        match = _XBRL_RE.search(self.raw_content)
         return match.group(1).strip() if match else None
 
     def get_content_type(self) -> str:
@@ -99,11 +167,12 @@ class SGMLDocument:
         Determine the primary content type of the document.
         Returns: 'xml', 'html', 'xbrl', or 'text'
         """
-        if self.xml():
+        raw = self.raw_content
+        if _XML_RE.search(raw):
             return 'xml'
-        elif self.html():
+        elif _HTML_RE.search(raw):
             return 'html'
-        elif self.xbrl():
+        elif _XBRL_RE.search(raw):
             return 'xbrl'
         return 'text'
 
@@ -177,8 +246,19 @@ class SGMLParser:
 
         raise ValueError("Unknown SGML format")
 
-    def parse(self, content) -> dict:
-        """Main entry point for parsing"""
+    def parse(self, content: str) -> dict:
+        """Main entry point for parsing.
+
+        Returns a dict with keys: format, header, documents.
+        For SUBMISSION format, also includes parsed header structure (FILER, etc.).
+        Documents are dicts with: type, sequence, filename, description, content,
+        plus _content_start and _content_end offsets into the original content string.
+        """
+        if len(content) > _MAX_CONTENT_SIZE:
+            raise ValueError(
+                f"Content size ({len(content):,} bytes) exceeds maximum ({_MAX_CONTENT_SIZE:,} bytes). "
+                "This may indicate corrupted input."
+            )
         format_type = self.detect_format(content)
 
         if format_type == SGMLFormatType.SUBMISSION:
@@ -195,353 +275,229 @@ class SGMLParser:
         return parser.parse(content)
 
 
+# Known section tags that can contain nested content (SUBMISSION format)
+_SECTION_TAGS = frozenset({
+    'FILER',
+    'OWNER-DATA',
+    'COMPANY-DATA',
+    'REPORTING-OWNER',
+    'ISSUER',
+    'DEPOSITOR',
+    'SECURITIZER',
+    'UNDERWRITER',
+    'ISSUING_ENTITY',
+    'FORMER-COMPANY',
+    'SUBJECT-COMPANY',
+    'FILED-BY',
+    'FORMER-NAME',
+    'FILING-VALUES',
+    'BUSINESS-ADDRESS',
+    'MAIL-ADDRESS',
+    'CLASS-CONTRACT',
+    'SERIES',
+    'NEW-SERIES',
+    'NEW-CLASSES-CONTRACTS',
+    'ACQUIRING-DATA',
+    'TARGET-DATA',
+    'SERIAL-COMPANY',
+    'MERGER',
+    'SERIES-AND-CLASSES-CONTRACTS-DATA',
+    'NEW-SERIES-AND-CLASSES-CONTRACTS',
+    'MERGER-SERIES-AND-CLASSES-CONTRACTS',
+    'EXISTING-SERIES-AND-CLASSES-CONTRACTS',
+    'RULE',
+    'ITEM'
+})
+
+# Tags that can appear multiple times and should be stored as lists
+_REPEATABLE_TAGS = frozenset({
+    'FILER',
+    'REPORTING-OWNER',
+    'UNDERWRITER',
+    'SERIES',
+    'CLASS-CONTRACT',
+    'FORMER-COMPANY',
+    'SUBJECT-COMPANY',
+    'ITEM'
+})
+
+
 class SubmissionFormatParser:
+    """Parser for <SUBMISSION> style SGML (modern format).
+
+    The header section (before <DOCUMENT>) is parsed line-by-line to build
+    a hierarchical dict structure. Documents are extracted using str.find()
+    offset scanning for performance.
+    """
+
     def __init__(self):
-        # Initialize main data structure
         self.data = {
             'format': SGMLFormatType.SUBMISSION,
             'header': '',
             'documents': [],
         }
-
-        # Parser state
         self.current_path = []  # Stack to track current position in hierarchy
-        self.header_lines = []  # Collect header lines
+        self.header_lines = []
         self.in_documents = False
-
-        # Known section tags that can contain nested content
-        self.SECTION_TAGS = {
-            'FILER',
-            'OWNER-DATA',
-            'COMPANY-DATA',
-            'REPORTING-OWNER',
-            'ISSUER',
-            'DEPOSITOR',
-            'SECURITIZER',
-            'UNDERWRITER',
-            'ISSUING_ENTITY',
-            'FORMER-COMPANY',
-            'SUBJECT-COMPANY',
-            'FILED-BY',
-            'FORMER-NAME',
-            'FILING-VALUES',
-            'BUSINESS-ADDRESS',
-            'MAIL-ADDRESS',
-            'CLASS-CONTRACT',
-            'SERIES',
-            'NEW-SERIES',
-            'NEW-CLASSES-CONTRACTS',
-            'ACQUIRING-DATA',
-            'TARGET-DATA',
-            'SERIAL-COMPANY',
-            'MERGER',
-            'SERIES-AND-CLASSES-CONTRACTS-DATA',
-            'NEW-SERIES-AND-CLASSES-CONTRACTS',
-            'MERGER-SERIES-AND-CLASSES-CONTRACTS',
-            'EXISTING-SERIES-AND-CLASSES-CONTRACTS',
-            'RULE',
-            'ITEM'
-        }
-
-        # Tags that can appear multiple times and should be stored as lists
-        self.REPEATABLE_TAGS = {
-            'FILER',
-            'REPORTING-OWNER',
-            'UNDERWRITER',
-            'SERIES',
-            'CLASS-CONTRACT',
-            'FORMER-COMPANY',
-            'SUBJECT-COMPANY',
-            'ITEM'
-        }
 
     def _get_current_context(self) -> dict:
         """Navigate to current position in data hierarchy."""
         context = self.data
-        for path_element in self.current_path:
-            tag, index = path_element
+        for tag, index in self.current_path:
             if index is not None:
                 context = context[tag][index]
             else:
                 context = context[tag]
         return context  # type: ignore[return-value]
 
-    def _is_unclosed_tag(self, line: str) -> bool:
-        """Check if line is an unclosed tag with value."""
-        line = line.strip()
-        if not (line.startswith('<') and '>' in line and not line.startswith('</')):
-            return False
+    def _handle_header_line(self, line: str) -> None:
+        """Classify and handle a single header line."""
+        stripped = line.strip()
+        if not stripped:
+            return
 
-        tag_end = line.index('>')
-        content_after = line[tag_end + 1:].strip()
-        return bool(content_after)
+        if stripped.startswith('</'):
+            # Section end
+            tag = stripped[2:-1]
+            if self.current_path:
+                current_tag, _ = self.current_path[-1]
+                if tag != current_tag:
+                    raise ValueError(f"Mismatched tags: expected </{current_tag}>, got </{tag}>")
+                self.current_path.pop()
+            return
 
-    def _is_section_end(self, line: str) -> bool:
-        """Check if line ends a section."""
-        return line.strip().startswith('</')
+        if stripped.startswith('<') and stripped.endswith('>'):
+            tag = stripped[1:-1]
+            if tag in _SECTION_TAGS:
+                # Section start
+                current_context = self._get_current_context()
+                if tag not in current_context:
+                    current_context[tag] = [] if tag in _REPEATABLE_TAGS else {}
+                if tag in _REPEATABLE_TAGS:
+                    current_context[tag].append({})
+                    self.current_path.append((tag, len(current_context[tag]) - 1))
+                else:
+                    self.current_path.append((tag, None))
+                return
+            # Empty tag (not a section, no value)
+            current_context = self._get_current_context()
+            current_context[tag] = ""
+            return
 
-    def _is_section_start(self, line: str) -> bool:
-        """Identifies if a line starts a new nested section."""
-        line = line.strip()
-        if not line.startswith('<') or not line.endswith('>'):
-            return False
+        if stripped.startswith('<') and '>' in stripped and not stripped.startswith('</'):
+            # Data tag: <TAG>value or unclosed tag like <ITEMS>06b
+            tag_end = stripped.index('>')
+            tag = stripped[1:tag_end]
+            value = stripped[tag_end + 1:].strip()
 
-        tag = line[1:-1]  # Remove < and >
-        return tag in self.SECTION_TAGS
-
-    def _is_data_tag(self, line: str) -> bool:
-        """Identifies if a line contains a tag with a value."""
-        line = line.strip()
-        if not line.startswith('<'):
-            return False
-
-        parts = line.split('>')
-        return len(parts) == 2 and bool(parts[1].strip())
-
-    def _is_empty_tag(self, line: str) -> bool:
-        """Identifies if a line is an empty tag."""
-        line = line.strip()
-        return (line.startswith('<') and
-                line.endswith('>') and
-                not line.startswith('</') and
-                not self._is_section_start(line) and
-                not self._is_data_tag(line))
-
-    def _handle_section_start(self, line: str) -> None:
-        """Handle start of nested section."""
-        tag = line.strip()[1:-1]  # Remove < and >
-
-        current_context = self._get_current_context()
-
-        # Initialize tag in current context if needed
-        if tag not in current_context:
-            if tag in self.REPEATABLE_TAGS:
-                current_context[tag] = []
+            current_context = self._get_current_context()
+            if tag in current_context:
+                if not isinstance(current_context[tag], list):
+                    current_context[tag] = [current_context[tag]]
+                current_context[tag].append(value)
             else:
-                current_context[tag] = {}
-
-        # For repeatable tags, append new dict and track index
-        if tag in self.REPEATABLE_TAGS:
-            current_context[tag].append({})
-            self.current_path.append((tag, len(current_context[tag]) - 1))
-        else:
-            self.current_path.append((tag, None))
-
-    def _handle_section_end(self, line: str) -> None:
-        """Handle end of nested section."""
-        tag = line.strip()[2:-1]  # Remove </ and >
-
-        # Verify we're closing the correct tag
-        current_tag, _ = self.current_path[-1]
-        if tag != current_tag:
-            raise ValueError(f"Mismatched tags: expected </{current_tag}>, got </{tag}>")
-
-        # Pop the current section from the path
-        self.current_path.pop()
-
-    def _handle_data_tag(self, line: str) -> None:
-        """Handle tags with values."""
-        line = line.strip()
-        tag_end = line.index('>')
-        tag = line[1:tag_end]
-        value = line[tag_end + 1:].strip()
-
-        current_context = self._get_current_context()
-
-        # Handle repeated tags
-        if tag in current_context:
-            if not isinstance(current_context[tag], list):
-                current_context[tag] = [current_context[tag]]
-            current_context[tag].append(value)
-        else:
-            current_context[tag] = value
-
-    def _handle_empty_tag(self, line: str) -> None:
-        """Handle empty tags."""
-        tag = line.strip()[1:-1]  # Remove < and >
-        current_context = self._get_current_context()
-        current_context[tag] = ""
-
-    def _handle_unclosed_tag(self, line: str) -> None:
-        """Handle tags like <ITEMS>value."""
-        line = line.strip()
-        tag_end = line.index('>')
-        tag = line[1:tag_end]
-        value = line[tag_end + 1:].strip()
-
-        current_context = self._get_current_context()
-
-        if tag in current_context:
-            if not isinstance(current_context[tag], list):
-                current_context[tag] = [current_context[tag]]
-            current_context[tag].append(value)
-        else:
-            current_context[tag] = value
+                current_context[tag] = value
 
     def parse(self, content: str) -> dict:
-        """Parse SGML content in SUBMISSION format."""
-        document_buffer = None
+        """Parse SGML content in SUBMISSION format.
 
-        for line in content.splitlines():
-            # Check for document section
-            if '<DOCUMENT>' in line:
-                self.data['header'] = '\n'.join(self.header_lines)
-                self.in_documents = True
-                document_buffer = [line]
-                continue
+        Header is parsed line-by-line for structure.
+        Documents are extracted using fast str.find() scanning.
+        """
+        # Find the first <DOCUMENT> to split header from documents
+        first_doc = content.find('<DOCUMENT>')
 
-            if self.in_documents:
-                if '</DOCUMENT>' in line:
-                    document_buffer.append(line)
-                    doc_content = '\n'.join(document_buffer)
-                    doc_data = self._parse_document_section(doc_content)
-                    if doc_data:
-                        self.data['documents'].append(doc_data)
-                    document_buffer = None
-                elif document_buffer is not None:
-                    document_buffer.append(line)
-            else:
-                # Header section parsing
-                self.header_lines.append(line)
-                line = line.strip()
+        # Parse header section line-by-line (typically small, <2KB)
+        if first_doc >= 0:
+            header_text = content[:first_doc]
+        else:
+            header_text = content
 
-                if not line:
-                    continue
+        self.data['header'] = header_text
+        for line in header_text.splitlines():
+            self.header_lines.append(line)
+            self._handle_header_line(line)
 
-                if self._is_section_start(line):
-                    self._handle_section_start(line)
-                elif self._is_section_end(line):
-                    self._handle_section_end(line)
-                elif self._is_data_tag(line):
-                    self._handle_data_tag(line)
-                elif self._is_empty_tag(line):
-                    self._handle_empty_tag(line)
-                elif self._is_unclosed_tag(line):
-                    self._handle_unclosed_tag(line)
+        # Extract documents using str.find() offset scanning
+        if first_doc >= 0:
+            self.data['documents'] = _extract_all_documents(content, first_doc)
 
         return self.data
 
-    def _parse_document_section(self, content: str) -> dict:
-        """Parse a single document section."""
-        doc_data = {
-            'type': '',
-            'sequence': '',
-            'filename': '',
-            'description': '',
-            'content': content
-        }
-
-        # Extract document metadata
-        type_match = re.search(r'<TYPE>([^<\n]+)', content)
-        if type_match:
-            doc_data['type'] = type_match.group(1).strip()
-
-        sequence_match = re.search(r'<SEQUENCE>([^<\n]+)', content)
-        if sequence_match:
-            doc_data['sequence'] = sequence_match.group(1).strip()
-
-        filename_match = re.search(r'<FILENAME>([^<\n]+)', content)
-        if filename_match:
-            doc_data['filename'] = filename_match.group(1).strip()
-
-        description_match = re.search(r'<DESCRIPTION>([^<\n]+)', content)
-        if description_match:
-            doc_data['description'] = description_match.group(1).strip()
-
-        return doc_data
 
 class SecDocumentFormatParser:
-    """Parser for <SEC-DOCUMENT> style SGML"""
+    """Parser for <SEC-DOCUMENT> style SGML (older format).
+
+    Uses str.find() for header boundary and document extraction.
+    """
 
     def __init__(self):
-        self.in_header = False
         self.data = {
             'format': SGMLFormatType.SEC_DOCUMENT,
             'header': '',
             'documents': [],
             'filer': {}
         }
-        self.current_document = {}
-        self.header_text = []
 
     def parse(self, content: str) -> dict:
-        """Parse SGML content in SEC-DOCUMENT format
+        """Parse SGML content in SEC-DOCUMENT format."""
+        # Extract header using str.find()
+        for hdr_start_tag, hdr_end_tag in (
+            ('<SEC-HEADER>', '</SEC-HEADER>'),
+            ('<IMS-HEADER>', '</IMS-HEADER>'),
+        ):
+            hdr_start = content.find(hdr_start_tag)
+            if hdr_start >= 0:
+                hdr_end = content.find(hdr_end_tag, hdr_start)
+                if hdr_end >= 0:
+                    # Extract header text (skip the tag line itself)
+                    inner_start = content.find('\n', hdr_start)
+                    if inner_start >= 0 and inner_start < hdr_end:
+                        self.data['header'] = content[inner_start + 1:hdr_end]
+                    else:
+                        self.data['header'] = content[hdr_start + len(hdr_start_tag):hdr_end]
+                break
 
-        Args:
-            content: The full SGML content as string
-
-        Returns:
-            dict containing parsed header and documents
-        """
-        document_buffer = []
-
-        for line in content.splitlines():
-            if '<SEC-HEADER>' in line or '<IMS-HEADER>' in line:
-                self.in_header = True
-                continue
-            elif '</SEC-HEADER>' in line or '</IMS-HEADER>' in line:
-                self.in_header = False
-                self.data['header'] = '\n'.join(self.header_text)
-                continue
-
-            if self.in_header:
-                # Collect header text
-                self.header_text.append(line)
-
-            # Handle document sections
-            if '<DOCUMENT>' in line:
-                document_buffer = []  # Start new document
-            elif '</DOCUMENT>' in line and document_buffer:
-                # Parse completed document
-                doc_content = '\n'.join(document_buffer)
-                doc_data = self._parse_document_section(doc_content)
-                if doc_data:
-                    self.data['documents'].append(doc_data)
-                document_buffer = []
-            elif document_buffer is not None:  # Currently collecting document content
-                document_buffer.append(line)
+        # Extract documents using str.find() offset scanning
+        first_doc = content.find('<DOCUMENT>')
+        if first_doc >= 0:
+            self.data['documents'] = _extract_all_documents(content, first_doc)
 
         return self.data
 
-    def _parse_document_section(self, content: str) -> dict:
-        """Parse a single document section
 
-        Args:
-            content: Content between <DOCUMENT> tags
+def _extract_all_documents(content: str, start_pos: int = 0) -> list:
+    """Extract all documents from content using str.find() offset scanning.
 
-        Returns:
-            dict with document metadata and content
-        """
-        doc_data = {
-            'type': '',
-            'sequence': '',
-            'filename': '',
-            'description': '',
-            'content': content
-        }
-
-        # Extract document metadata using regex
-        type_match = re.search(r'<TYPE>([^<\n]+)', content)
-        if type_match:
-            doc_data['type'] = type_match.group(1).strip()
-
-        sequence_match = re.search(r'<SEQUENCE>([^<\n]+)', content)
-        if sequence_match:
-            doc_data['sequence'] = sequence_match.group(1).strip()
-
-        filename_match = re.search(r'<FILENAME>([^<\n]+)', content)
-        if filename_match:
-            doc_data['filename'] = filename_match.group(1).strip()
-
-        description_match = re.search(r'<DESCRIPTION>([^<\n]+)', content)
-        if description_match:
-            doc_data['description'] = description_match.group(1).strip()
-
-        return doc_data
-
-def list_documents(content:str) -> list[SGMLDocument]:
+    Returns list of dicts with metadata + content reference offsets.
     """
-    Convenience method to parse all documents from a source into a list.
+    documents = []
+    pos = start_pos
+
+    while True:
+        doc_start = content.find('<DOCUMENT>', pos)
+        if doc_start < 0:
+            break
+        doc_end = content.find('</DOCUMENT>', doc_start)
+        if doc_end < 0:
+            log.warning("Truncated SGML: <DOCUMENT> at offset %d has no matching </DOCUMENT>", doc_start)
+            break
+
+        inner_start = doc_start + 10  # len('<DOCUMENT>')
+        metadata = _extract_doc_metadata(content, inner_start, doc_end)
+        metadata['content'] = content  # reference, not copy
+        metadata['_content_start'] = inner_start
+        metadata['_content_end'] = doc_end
+
+        documents.append(metadata)
+        pos = doc_end + 11  # len('</DOCUMENT>')
+
+    return documents
+
+
+def list_documents(content: str) -> list[SGMLDocument]:
+    """
+    Convenience method to parse all documents from content into a list.
 
     Args:
         content: The content string to parse
@@ -551,43 +507,43 @@ def list_documents(content:str) -> list[SGMLDocument]:
     """
     return list(iter_documents(content))
 
-def iter_documents(content:str) -> Iterator[SGMLDocument]:
+
+def iter_documents(content: str) -> Iterator[SGMLDocument]:
     """
-    Stream SGML documents from either a URL or file path, yielding parsed documents.
+    Yield SGMLDocument objects from SGML content using fast str.find() scanning.
 
     Args:
         content: The content string to parse
 
     Yields:
         SGMLDocument objects containing the parsed content
-
-    Raises:
-        ValueError: If the source is invalid
-        ConnectionError: If URL retrieval fails after retries
-        FileNotFoundError: If the file path doesn't exist
     """
-    document_pattern = re.compile(r'<DOCUMENT>([\s\S]*?)</DOCUMENT>')
+    pos = 0
+    while True:
+        doc_start = content.find('<DOCUMENT>', pos)
+        if doc_start < 0:
+            break
+        doc_end = content.find('</DOCUMENT>', doc_start)
+        if doc_end < 0:
+            break
 
-    for match in document_pattern.finditer(content):
-        document = parse_document(match.group(1))
-        if document:
-            yield document
+        inner_start = doc_start + 10
+        metadata = _extract_doc_metadata(content, inner_start, doc_end)
+        yield SGMLDocument.from_content_ref(metadata, content, inner_start, doc_end)
+        pos = doc_end + 11
 
 
 def parse_document(document_str: str) -> SGMLDocument:
     """
     Parse a single SGML document section, maintaining raw content.
     """
-    # Extract individual fields with separate patterns
-    type_match = re.search(r'<TYPE>([^<\n]+)', document_str)
-    sequence_match = re.search(r'<SEQUENCE>([^<\n]+)', document_str)
-    filename_match = re.search(r'<FILENAME>([^<\n]+)', document_str)
-    description_match = re.search(r'<DESCRIPTION>([^<\n]+)', document_str)
-
+    metadata = _extract_doc_metadata(document_str, 0, len(document_str))
     return SGMLDocument(
-        type=type_match.group(1).strip() if type_match else "",
-        sequence=sequence_match.group(1).strip() if sequence_match else "",
-        filename=filename_match.group(1).strip() if filename_match else "",
-        description=description_match.group(1).strip() if description_match else "",
-        raw_content=document_str
+        type=metadata['type'],
+        sequence=metadata['sequence'],
+        filename=metadata['filename'],
+        description=metadata['description'],
+        _content_ref=document_str,
+        _content_start=0,
+        _content_end=len(document_str),
     )

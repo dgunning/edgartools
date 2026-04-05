@@ -7,7 +7,9 @@ from rich import print
 import pytest
 from edgar._filings import Filing
 from edgar.ownership import *
-from edgar.ownership.core import compute_average_price, compute_total_value, format_amount, is_numeric, safe_numeric
+from edgar.ownership.core import (
+    compute_average_price, compute_total_value, format_amount, is_numeric, safe_numeric, detect_10b5_1_plan
+)
 from edgar.core import has_html_content
 
 pd.options.display.max_columns = None
@@ -15,8 +17,10 @@ pd.options.display.max_columns = None
 snow_form3 = Ownership.from_xml(Path('data/ownership/form3.snow.xml').read_text())
 snow_form3_nonderiv = Ownership.from_xml(Path('data/form3.snow.nonderiv.xml').read_text())
 snow_form4 = Ownership.from_xml(Path('data/form4.snow.xml').read_text())
-aapl_form4: Ownership = Filing(company='Apple Inc.', cik=320193, form='4', filing_date='2023-10-03',
-                               accession_no='0000320193-23-000089').obj()
+@pytest.fixture(scope="module")
+def aapl_form4():
+    return Filing(company='Apple Inc.', cik=320193, form='4', filing_date='2023-10-03',
+                  accession_no='0000320193-23-000089').obj()
 
 @pytest.fixture
 def dayone_filing():
@@ -43,6 +47,28 @@ def test_is_numeric():
     assert not is_numeric(pd.Series([1.0, 2.0, 3.0, 'None']))
     assert is_numeric(pd.Series([1.0, 2.0, 3.0, 'nan']))
     assert is_numeric(pd.Series([1.0, 2.0, 3.0, 'NAN']))
+
+
+def test_detect_10b5_1_plan():
+    """Test detection of Rule 10b5-1 trading plan references in footnotes"""
+    # Returns None for empty/missing footnotes
+    assert detect_10b5_1_plan(None) is None
+    assert detect_10b5_1_plan('') is None
+    assert detect_10b5_1_plan('   ') is None
+
+    # Returns True for 10b5-1 references
+    assert detect_10b5_1_plan('Transaction pursuant to Rule 10b5-1 trading plan') is True
+    assert detect_10b5_1_plan('Sold under a 10b5-1 plan') is True
+    assert detect_10b5_1_plan('Made pursuant to 10b-5-1 plan adopted June 2024') is True
+    assert detect_10b5_1_plan('RULE 10B5-1 TRADING PLAN') is True  # Case insensitive
+    assert detect_10b5_1_plan('Rule 10b5 plan') is True
+    assert detect_10b5_1_plan('Sale under Rule 10b-5 plan') is True
+
+    # Returns False for footnotes without 10b5-1 references
+    assert detect_10b5_1_plan('Regular quarterly grant of stock options') is False
+    assert detect_10b5_1_plan('Shares held by family trust') is False
+    assert detect_10b5_1_plan('Tax withholding') is False
+
 
 def test_translate():
     assert translate_ownership('I') == 'Indirect'
@@ -346,7 +372,7 @@ def test_correct_number_of_transactions_for_form4(dayone_form4, capsys):
     with capsys.disabled():
         assert "Day One Biopharmaceuticals" in out
 
-def test_form4_common_trades(dayone_form4):
+def test_form4_common_trades(dayone_form4, aapl_form4):
     form4: Form4 = dayone_form4
     print()
 
@@ -414,7 +440,7 @@ def test_form5_common_transactions():
 
 
 
-def test_form4_derivative_trades():
+def test_form4_derivative_trades(aapl_form4):
     # Get exercised trades from the non derivative table
     exercised_trades = aapl_form4.non_derivative_table.exercised_trades
     assert not exercised_trades.empty
@@ -552,7 +578,7 @@ def test_insider_transaction_buy():
                     accession_no='0000950170-24-005448')
     form4: Ownership = filing.obj()
     insider_transaction = form4.get_ownership_summary()
-    assert insider_transaction.insider_name == 'Phillip Frost MD ET AL / Gamma Investments Trust Frost'
+    assert insider_transaction.insider_name == 'Phillip Frost MD ET AL / Frost Gamma Investments Trust'
     assert insider_transaction.position == 'CEO & Chairman'
     print()
     print(form4)

@@ -1,0 +1,33 @@
+{
+  "run_id": "e2e_2026-01-21T12:45:57.442434",
+  "timestamp": "2026-01-21T12:45:57.442443",
+  "config": {
+    "group": "custom",
+    "workers": 8,
+    "years": 5,
+    "quarters": 6,
+    "metrics": null
+  },
+  "summary": {
+    "sp25": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10q_total": 0,
+      "10q_passed": 0
+    },
+    "sp50": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10q_total": 0,
+      "10q_passed": 0
+    },
+    "custom": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10q_total": 0,
+      "10q_passed": 0
+    }
+  },
+  "failure_count": 0,
+  "failures": []
+}

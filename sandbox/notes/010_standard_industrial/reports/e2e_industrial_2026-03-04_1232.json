@@ -1,0 +1,203 @@
+{
+  "run_id": "e2e_industrial_2026-03-04T12:32:39.100148",
+  "timestamp": "2026-03-04T12:32:39.100157",
+  "config": {
+    "group": "industrial_33",
+    "workers": 1,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": null,
+    "tickers": [
+      "AIG"
+    ],
+    "snapshot_mode": true
+  },
+  "overall_summary": {
+    "10k_total": 13,
+    "10k_passed": 10,
+    "10k_skipped": 0,
+    "10q_total": 12,
+    "10q_passed": 11,
+    "10q_skipped": 0
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Insurance": {
+      "10k_total": 13,
+      "10k_passed": 10,
+      "10k_skipped": 0,
+      "10q_total": 12,
+      "10q_passed": 11,
+      "10q_skipped": 0
+    },
+    "Utilities": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Real_Estate": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 4,
+  "skipped_count": 0,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "AIG",
+      "sector": "Insurance",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000005272-25-000012",
+      "metric": "LongTermDebt",
+      "xbrl_value": 0.0,
+      "ref_value": 8922000000.0,
+      "variance_pct": 100.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebt",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AIG",
+      "sector": "Insurance",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000005272-25-000012",
+      "metric": "AccountsReceivable",
+      "xbrl_value": 1931000000.0,
+      "ref_value": 10463000000.0,
+      "variance_pct": 81.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ReceivablesNetCurrent",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AIG",
+      "sector": "Insurance",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000005272-25-000012",
+      "metric": "AccountsPayable",
+      "xbrl_value": 1031000000.0,
+      "ref_value": 6052000000.0,
+      "variance_pct": 83.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:AccountsPayableCurrent",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AIG",
+      "sector": "Insurance",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000005272-25-000160",
+      "metric": "AccountsReceivable",
+      "xbrl_value": 3314000000.0,
+      "ref_value": 11264000000.0,
+      "variance_pct": 70.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:FinancingReceivableExcludingAccruedInterestAfterAllowanceForCreditLoss",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    }
+  ],
+  "skipped": [],
+  "errors": []
+}

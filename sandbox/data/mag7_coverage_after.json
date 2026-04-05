@@ -1,0 +1,1123 @@
+[
+  {
+    "ticker": "GOOG",
+    "total_periods": 66,
+    "metric_coverage": {
+      "Revenue": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "RevenueFromContractWithCustomerExcludingAssessedTax",
+          "SalesRevenueNet",
+          "Revenues"
+        ]
+      },
+      "COGS": {
+        "found": 59,
+        "coverage_pct": 89.4,
+        "matched_concepts": [
+          "CostOfRevenue"
+        ]
+      },
+      "SGA": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "SellingAndMarketingExpense",
+          "GeneralAndAdministrativeExpense"
+        ]
+      },
+      "OperatingIncome": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "OperatingIncomeLoss"
+        ]
+      },
+      "PretaxIncome": {
+        "found": 0,
+        "coverage_pct": 0.0,
+        "matched_concepts": []
+      },
+      "NetIncome": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "NetIncomeLoss"
+        ]
+      },
+      "OperatingCashFlow": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "NetCashProvidedByUsedInOperatingActivities"
+        ]
+      },
+      "Capex": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "PaymentsToAcquirePropertyPlantAndEquipment"
+        ]
+      },
+      "TotalAssets": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "Assets"
+        ]
+      },
+      "Goodwill": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "Goodwill"
+        ]
+      },
+      "IntangibleAssets": {
+        "found": 58,
+        "coverage_pct": 87.9,
+        "matched_concepts": [
+          "IntangibleAssetsNetExcludingGoodwill",
+          "FiniteLivedIntangibleAssetsNet",
+          "IndefiniteLivedIntangibleAssetsExcludingGoodwill"
+        ]
+      },
+      "ShortTermDebt": {
+        "found": 27,
+        "coverage_pct": 40.9,
+        "matched_concepts": [
+          "ShortTermBorrowings",
+          "DebtCurrent"
+        ]
+      },
+      "LongTermDebt": {
+        "found": 45,
+        "coverage_pct": 68.2,
+        "matched_concepts": [
+          "LongTermDebt",
+          "LongTermDebtNoncurrent"
+        ]
+      },
+      "CashAndEquivalents": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "CashAndCashEquivalentsAtCarryingValue"
+        ]
+      }
+    },
+    "unmapped_concepts": [
+      "AccruedIncomeTaxesCurrent",
+      "AccruedIncomeTaxesNoncurrent",
+      "AccruedIncomeTaxesPayable",
+      "AccruedLiabilities",
+      "AccruedLiabilitiesCurrent",
+      "AccumulatedOtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax",
+      "AccumulatedOtherComprehensiveIncomeLossCumulativeChangesInNetGainLossFromCashFlowHedgesEffectNetOfTax",
+      "AccumulatedOtherComprehensiveIncomeLossForeignCurrencyTranslationAdjustmentNetOfTax",
+      "AccumulatedOtherComprehensiveIncomeLossNetOfTax",
+      "AcquiredFiniteLivedIntangibleAssetWeightedAverageUsefulLife",
+      "AdjustmentsNoncashItemsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesOther",
+      "AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation",
+      "AdjustmentsToAdditionalPaidInCapitalTaxEffectFromShareBasedCompensation",
+      "AdvertisingRevenue",
+      "AllocatedShareBasedCompensationExpense",
+      "AmortizationOfAcquiredIntangibleAssets",
+      "AmortizationOfIntangibleAssets",
+      "AssetsCurrent",
+      "AssetsHeldForSaleCurrent",
+      "AssetsNoncurrent",
+      "AssetsOfDisposalGroupIncludingDiscontinuedOperationCurrent",
+      "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedGainBeforeTax",
+      "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedLossBeforeTax",
+      "AvailableForSaleDebtSecuritiesAmortizedCostBasis",
+      "AvailableForSaleSecuritiesAmortizedCost",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAccumulatedLoss",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAggregateLosses",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionAccumulatedLoss",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionAggregateLosses",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionFairValue",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionLessThan12MonthsAccumulatedLoss",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionLessThan12MonthsAggregateLosses",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionLessThanTwelveMonthsFairValue",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionTwelveMonthsOrLongerFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesAfterFiveThroughTenYearsFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesAfterTenYearsFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearFairValue",
+      "AvailableForSaleSecuritiesDebtSecurities",
+      "AvailableForSaleSecuritiesGrossRealizedGainLossNet",
+      "AvailableForSaleSecuritiesGrossRealizedLosses",
+      "AvailableForSaleSecuritiesGrossUnrealizedLosses1",
+      "AvailableforsaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAggregateLosses1",
+      "AvailableforsaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAggregateLosses2",
+      "AvailableforsaleSecuritiesContinuousUnrealizedLossPositionAggregateLosses1",
+      "AvailableforsaleSecuritiesContinuousUnrealizedLossPositionAggregateLosses2",
+      "AvailableforsaleSecuritiesContinuousUnrealizedLossPositionLessThan12MonthsAggregateLosses1",
+      "AvailableforsaleSecuritiesContinuousUnrealizedLossPositionLessThan12MonthsAggregateLosses2",
+      "BusinessAcquisitionCostOfAcquiredEntityPurchasePrice"
+    ],
+    "total_unmapped": 444
+  },
+  {
+    "ticker": "AMZN",
+    "total_periods": 66,
+    "metric_coverage": {
+      "Revenue": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "RevenueFromContractWithCustomerExcludingAssessedTax",
+          "SalesRevenueNet"
+        ]
+      },
+      "COGS": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "CostOfGoodsAndServicesSold"
+        ]
+      },
+      "SGA": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "GeneralAndAdministrativeExpense"
+        ]
+      },
+      "OperatingIncome": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "OperatingIncomeLoss"
+        ]
+      },
+      "PretaxIncome": {
+        "found": 0,
+        "coverage_pct": 0.0,
+        "matched_concepts": []
+      },
+      "NetIncome": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "NetIncomeLoss"
+        ]
+      },
+      "OperatingCashFlow": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "NetCashProvidedByUsedInOperatingActivities"
+        ]
+      },
+      "Capex": {
+        "found": 32,
+        "coverage_pct": 48.5,
+        "matched_concepts": [
+          "PaymentsToAcquirePropertyPlantAndEquipment"
+        ]
+      },
+      "TotalAssets": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "Assets"
+        ]
+      },
+      "Goodwill": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "Goodwill"
+        ]
+      },
+      "IntangibleAssets": {
+        "found": 15,
+        "coverage_pct": 22.7,
+        "matched_concepts": [
+          "IntangibleAssetsNetExcludingGoodwill",
+          "FiniteLivedIntangibleAssetsNet",
+          "IndefiniteLivedIntangibleAssetsExcludingGoodwill"
+        ]
+      },
+      "ShortTermDebt": {
+        "found": 12,
+        "coverage_pct": 18.2,
+        "matched_concepts": [
+          "ShortTermBorrowings"
+        ]
+      },
+      "LongTermDebt": {
+        "found": 60,
+        "coverage_pct": 90.9,
+        "matched_concepts": [
+          "LongTermDebt",
+          "LongTermDebtNoncurrent"
+        ]
+      },
+      "CashAndEquivalents": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "CashAndCashEquivalentsAtCarryingValue"
+        ]
+      }
+    },
+    "unmapped_concepts": [
+      "AccruedLiabilities",
+      "AccruedLiabilitiesCurrent",
+      "AccruedLiabilitiesForUnredeeemedGiftCards",
+      "AccumulatedOtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax",
+      "AccumulatedOtherComprehensiveIncomeLossForeignCurrencyTranslationAdjustmentNetOfTax",
+      "AccumulatedOtherComprehensiveIncomeLossNetOfTax",
+      "AcquiredFiniteLivedIntangibleAssetWeightedAverageUsefulLife",
+      "AdjustmentsNoncashItemsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesOther",
+      "AdjustmentsToAdditionalPaidInCapitalTaxEffectFromShareBasedCompensation",
+      "AdvertisingExpense",
+      "AllocatedShareBasedCompensationExpense",
+      "AmortizationOfAcquiredIntangibleAssets",
+      "AmortizationOfIntangibleAssets",
+      "AmortizationOfLeasedAsset",
+      "AssetImpairmentCharges",
+      "AssetsCurrent",
+      "AvailableForSaleDebtSecuritiesAmortizedCostBasis",
+      "AvailableForSaleSecuritiesDebtMaturitiesAfterFiveThroughTenYearsAmortizedCost",
+      "AvailableForSaleSecuritiesDebtMaturitiesAfterFiveThroughTenYearsFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsAmortizedCost",
+      "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesAfterTenYearsAmortizedCost",
+      "AvailableForSaleSecuritiesDebtMaturitiesAfterTenYearsFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesSingleMaturityDate",
+      "AvailableForSaleSecuritiesDebtMaturitiesSingleMaturityDateAmortizedCostBasis",
+      "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearAmortizedCost",
+      "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearFairValue",
+      "AvailableForSaleSecuritiesDebtSecurities",
+      "AvailableForSaleSecuritiesGrossRealizedLosses",
+      "BusinessAcquisitionCostOfAcquiredEntityCashPaid",
+      "BusinessAcquisitionCostOfAcquiredEntityEquityInterestsIssuedAndIssuable",
+      "BusinessAcquisitionCostOfAcquiredEntityOtherNoncashConsideration",
+      "BusinessAcquisitionCostOfAcquiredEntityPurchasePrice",
+      "BusinessAcquisitionPurchasePriceAllocationAmortizableIntangibleAssets",
+      "BusinessAcquisitionPurchasePriceAllocationAssetsAcquiredLiabilitiesAssumedNet",
+      "BusinessAcquisitionPurchasePriceAllocationCurrentLiabilitiesAccountsPayable",
+      "BusinessAcquisitionPurchasePriceAllocationNoncurrentLiabilitiesLongTermDebt",
+      "BusinessAcquisitionPurchasePriceAllocationOtherNoncurrentAssets",
+      "BusinessAcquisitionPurchasePriceAllocationOtherNoncurrentLiabilities",
+      "BusinessAcquisitionsProFormaNetIncomeLoss",
+      "BusinessAcquisitionsProFormaRevenue",
+      "BusinessCombinationConsiderationTransferredLiabilitiesIncurred",
+      "BusinessCombinationProFormaInformationEarningsOrLossOfAcquireeSinceAcquisitionDateActual",
+      "BusinessCombinationProFormaInformationRevenueOfAcquireeSinceAcquisitionDateActual",
+      "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedDeferredTaxAssetsNoncurrent",
+      "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedDeferredTaxLiabilitiesNoncurrent",
+      "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles",
+      "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedNet",
+      "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedNoncurrentLiabilitiesOther",
+      "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedOtherNoncurrentAssets"
+    ],
+    "total_unmapped": 360
+  },
+  {
+    "ticker": "AAPL",
+    "total_periods": 66,
+    "metric_coverage": {
+      "Revenue": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "RevenueFromContractWithCustomerExcludingAssessedTax",
+          "SalesRevenueNet",
+          "Revenues"
+        ]
+      },
+      "COGS": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "CostOfGoodsAndServicesSold"
+        ]
+      },
+      "SGA": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "SellingGeneralAndAdministrativeExpense",
+          "SellingAndMarketingExpense",
+          "GeneralAndAdministrativeExpense"
+        ]
+      },
+      "OperatingIncome": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "OperatingIncomeLoss"
+        ]
+      },
+      "PretaxIncome": {
+        "found": 0,
+        "coverage_pct": 0.0,
+        "matched_concepts": []
+      },
+      "NetIncome": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "NetIncomeLoss"
+        ]
+      },
+      "OperatingCashFlow": {
+        "found": 54,
+        "coverage_pct": 81.8,
+        "matched_concepts": [
+          "NetCashProvidedByUsedInOperatingActivities"
+        ]
+      },
+      "Capex": {
+        "found": 44,
+        "coverage_pct": 66.7,
+        "matched_concepts": [
+          "PaymentsToAcquirePropertyPlantAndEquipment"
+        ]
+      },
+      "TotalAssets": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "Assets"
+        ]
+      },
+      "Goodwill": {
+        "found": 35,
+        "coverage_pct": 53.0,
+        "matched_concepts": [
+          "Goodwill"
+        ]
+      },
+      "IntangibleAssets": {
+        "found": 35,
+        "coverage_pct": 53.0,
+        "matched_concepts": [
+          "IntangibleAssetsNetExcludingGoodwill",
+          "FiniteLivedIntangibleAssetsNet",
+          "IndefiniteLivedIntangibleAssetsExcludingGoodwill"
+        ]
+      },
+      "ShortTermDebt": {
+        "found": 0,
+        "coverage_pct": 0.0,
+        "matched_concepts": []
+      },
+      "LongTermDebt": {
+        "found": 50,
+        "coverage_pct": 75.8,
+        "matched_concepts": [
+          "LongTermDebt",
+          "LongTermDebtNoncurrent"
+        ]
+      },
+      "CashAndEquivalents": {
+        "found": 66,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "CashAndCashEquivalentsAtCarryingValue"
+        ]
+      }
+    },
+    "unmapped_concepts": [
+      "AccruedIncomeTaxesCurrent",
+      "AccruedIncomeTaxesNoncurrent",
+      "AccruedLiabilities",
+      "AccruedLiabilitiesCurrent",
+      "AccruedMarketingCostsCurrent",
+      "AccumulatedOtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax",
+      "AccumulatedOtherComprehensiveIncomeLossCumulativeChangesInNetGainLossFromCashFlowHedgesEffectNetOfTax",
+      "AccumulatedOtherComprehensiveIncomeLossForeignCurrencyTranslationAdjustmentNetOfTax",
+      "AccumulatedOtherComprehensiveIncomeLossNetOfTax",
+      "AdjustmentsToAdditionalPaidInCapitalTaxEffectFromShareBasedCompensation",
+      "AdvertisingExpense",
+      "AllocatedShareBasedCompensationExpense",
+      "AmortizationOfIntangibleAssets",
+      "AssetsCurrent",
+      "AssetsNoncurrent",
+      "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedGainBeforeTax",
+      "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedLossBeforeTax",
+      "AvailableForSaleDebtSecuritiesAmortizedCostBasis",
+      "AvailableForSaleSecuritiesAccumulatedGrossUnrealizedGainBeforeTax",
+      "AvailableForSaleSecuritiesAccumulatedGrossUnrealizedLossBeforeTax",
+      "AvailableForSaleSecuritiesAmortizedCost",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAccumulatedLoss",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionAccumulatedLoss",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionFairValue",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionLessThan12MonthsAccumulatedLoss",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionLessThanTwelveMonthsFairValue",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionTwelveMonthsOrLongerFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesRollingAfterYearTenFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesRollingYearSixThroughTenFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesRollingYearTwoThroughFiveFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesSingleMaturityDate",
+      "AvailableForSaleSecuritiesDebtSecurities",
+      "AvailableForSaleSecuritiesDebtSecuritiesCurrent",
+      "AvailableForSaleSecuritiesDebtSecuritiesNoncurrent",
+      "AvailableForSaleSecuritiesGrossUnrealizedLosses1",
+      "BusinessAcquisitionCostOfAcquiredEntityPurchasePrice",
+      "BusinessAcquisitionPurchasePriceAllocationAmortizableIntangibleAssets",
+      "BusinessAcquisitionPurchasePriceAllocationLiabilitiesAssumed",
+      "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibleAssetsOtherThanGoodwill",
+      "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedLiabilities",
+      "Cash",
+      "CashAndCashEquivalentsPeriodIncreaseDecrease",
+      "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+      "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+      "CashEquivalentsAtCarryingValue",
+      "ChangeInUnrealizedGainLossOnFairValueHedgingInstruments",
+      "CommonStockDividendsPerShareCashPaid",
+      "ComprehensiveIncomeNetOfTax",
+      "ContractWithCustomerLiability",
+      "ContractWithCustomerLiabilityCurrent"
+    ],
+    "total_unmapped": 340
+  },
+  {
+    "ticker": "MSFT",
+    "total_periods": 65,
+    "metric_coverage": {
+      "Revenue": {
+        "found": 65,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "RevenueFromContractWithCustomerExcludingAssessedTax",
+          "SalesRevenueNet",
+          "Revenues"
+        ]
+      },
+      "COGS": {
+        "found": 65,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "CostOfGoodsAndServicesSold",
+          "CostOfRevenue",
+          "CostOfGoodsSold"
+        ]
+      },
+      "SGA": {
+        "found": 65,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "SellingAndMarketingExpense",
+          "GeneralAndAdministrativeExpense"
+        ]
+      },
+      "OperatingIncome": {
+        "found": 65,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "OperatingIncomeLoss"
+        ]
+      },
+      "PretaxIncome": {
+        "found": 0,
+        "coverage_pct": 0.0,
+        "matched_concepts": []
+      },
+      "NetIncome": {
+        "found": 65,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "NetIncomeLoss"
+        ]
+      },
+      "OperatingCashFlow": {
+        "found": 48,
+        "coverage_pct": 73.8,
+        "matched_concepts": [
+          "NetCashProvidedByUsedInOperatingActivities"
+        ]
+      },
+      "Capex": {
+        "found": 65,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "PaymentsToAcquirePropertyPlantAndEquipment"
+        ]
+      },
+      "TotalAssets": {
+        "found": 65,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "Assets"
+        ]
+      },
+      "Goodwill": {
+        "found": 65,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "Goodwill"
+        ]
+      },
+      "IntangibleAssets": {
+        "found": 65,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "IntangibleAssetsNetExcludingGoodwill",
+          "FiniteLivedIntangibleAssetsNet"
+        ]
+      },
+      "ShortTermDebt": {
+        "found": 27,
+        "coverage_pct": 41.5,
+        "matched_concepts": [
+          "ShortTermBorrowings"
+        ]
+      },
+      "LongTermDebt": {
+        "found": 65,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "LongTermDebt",
+          "LongTermDebtNoncurrent"
+        ]
+      },
+      "CashAndEquivalents": {
+        "found": 65,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "CashAndCashEquivalentsAtCarryingValue"
+        ]
+      }
+    },
+    "unmapped_concepts": [
+      "AccruedIncomeTaxesCurrent",
+      "AccruedIncomeTaxesNoncurrent",
+      "AccumulatedOtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax",
+      "AccumulatedOtherComprehensiveIncomeLossCumulativeChangesInNetGainLossFromCashFlowHedgesEffectNetOfTax",
+      "AccumulatedOtherComprehensiveIncomeLossForeignCurrencyTranslationAdjustmentNetOfTax",
+      "AccumulatedOtherComprehensiveIncomeLossNetOfTax",
+      "AcquiredFiniteLivedIntangibleAssetAmount",
+      "AcquiredFiniteLivedIntangibleAssetWeightedAverageUsefulLife",
+      "AdvertisingExpense",
+      "AllocatedShareBasedCompensationExpense",
+      "AmortizationOfIntangibleAssets",
+      "AssetImpairmentCharges",
+      "AssetsCurrent",
+      "AssetsFairValueDisclosureRecurring",
+      "AvailableForSaleDebtSecuritiesAmortizedCostBasis",
+      "AvailableForSaleSecuritiesAccumulatedGrossUnrealizedGainBeforeTax",
+      "AvailableForSaleSecuritiesAccumulatedGrossUnrealizedLossBeforeTax",
+      "AvailableForSaleSecuritiesAmortizedCost",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAccumulatedLoss",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionAccumulatedLoss",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionFairValue",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionLessThan12MonthsAccumulatedLoss",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionLessThanTwelveMonthsFairValue",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionTwelveMonthsOrLongerFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesAfterFiveThroughTenYearsAmortizedCost",
+      "AvailableForSaleSecuritiesDebtMaturitiesAfterFiveThroughTenYearsFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsAmortizedCost",
+      "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesAfterTenYearsAmortizedCost",
+      "AvailableForSaleSecuritiesDebtMaturitiesAfterTenYearsFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesAmortizedCost",
+      "AvailableForSaleSecuritiesDebtMaturitiesFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesNextRollingTwelveMonthsAmortizedCostBasis",
+      "AvailableForSaleSecuritiesDebtMaturitiesNextRollingTwelveMonthsFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesRollingAfterYearTenAmortizedCostBasis",
+      "AvailableForSaleSecuritiesDebtMaturitiesRollingAfterYearTenFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesRollingYearSixThroughTenAmortizedCostBasis",
+      "AvailableForSaleSecuritiesDebtMaturitiesRollingYearSixThroughTenFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesRollingYearTwoThroughFiveAmortizedCostBasis",
+      "AvailableForSaleSecuritiesDebtMaturitiesRollingYearTwoThroughFiveFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearAmortizedCost",
+      "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearFairValue",
+      "AvailableForSaleSecuritiesDebtSecurities",
+      "AvailableForSaleSecuritiesGrossRealizedLosses",
+      "AvailableForSaleSecuritiesGrossUnrealizedLosses1",
+      "AvailableforsaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAggregateLosses1",
+      "AvailableforsaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAggregateLosses2",
+      "AvailableforsaleSecuritiesContinuousUnrealizedLossPositionAggregateLosses1",
+      "AvailableforsaleSecuritiesContinuousUnrealizedLossPositionAggregateLosses2",
+      "AvailableforsaleSecuritiesContinuousUnrealizedLossPositionLessThan12MonthsAggregateLosses1"
+    ],
+    "total_unmapped": 371
+  },
+  {
+    "ticker": "NVDA",
+    "total_periods": 62,
+    "metric_coverage": {
+      "Revenue": {
+        "found": 62,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "RevenueFromContractWithCustomerExcludingAssessedTax",
+          "Revenues"
+        ]
+      },
+      "COGS": {
+        "found": 62,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "CostOfGoodsAndServicesSold",
+          "CostOfRevenue"
+        ]
+      },
+      "SGA": {
+        "found": 62,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "SellingGeneralAndAdministrativeExpense"
+        ]
+      },
+      "OperatingIncome": {
+        "found": 62,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "OperatingIncomeLoss"
+        ]
+      },
+      "PretaxIncome": {
+        "found": 0,
+        "coverage_pct": 0.0,
+        "matched_concepts": []
+      },
+      "NetIncome": {
+        "found": 62,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "NetIncomeLoss"
+        ]
+      },
+      "OperatingCashFlow": {
+        "found": 62,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "NetCashProvidedByUsedInOperatingActivities"
+        ]
+      },
+      "Capex": {
+        "found": 25,
+        "coverage_pct": 40.3,
+        "matched_concepts": [
+          "PaymentsToAcquirePropertyPlantAndEquipment"
+        ]
+      },
+      "TotalAssets": {
+        "found": 62,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "Assets"
+        ]
+      },
+      "Goodwill": {
+        "found": 62,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "Goodwill"
+        ]
+      },
+      "IntangibleAssets": {
+        "found": 62,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "IntangibleAssetsNetExcludingGoodwill",
+          "FiniteLivedIntangibleAssetsNet"
+        ]
+      },
+      "ShortTermDebt": {
+        "found": 18,
+        "coverage_pct": 29.0,
+        "matched_concepts": [
+          "DebtCurrent"
+        ]
+      },
+      "LongTermDebt": {
+        "found": 44,
+        "coverage_pct": 71.0,
+        "matched_concepts": [
+          "LongTermDebt",
+          "LongTermDebtNoncurrent"
+        ]
+      },
+      "CashAndEquivalents": {
+        "found": 62,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "CashAndCashEquivalentsAtCarryingValue"
+        ]
+      }
+    },
+    "unmapped_concepts": [
+      "AccruedIncomeTaxesNoncurrent",
+      "AccruedIncomeTaxesPayable",
+      "AccruedLiabilitiesCurrent",
+      "AccumulatedOtherComprehensiveIncomeLossCumulativeChangesInNetGainLossFromCashFlowHedgesEffectNetOfTax",
+      "AccumulatedOtherComprehensiveIncomeLossNetOfTax",
+      "AdjustmentsNoncashItemsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesOther",
+      "AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation",
+      "AdjustmentsToAdditionalPaidInCapitalConvertibleDebtWithConversionFeature",
+      "AdjustmentsToAdditionalPaidInCapitalEquityComponentOfConvertibleDebtSubsequentAdjustments",
+      "AdjustmentsToAdditionalPaidInCapitalTaxEffectFromShareBasedCompensation",
+      "AdvertisingExpense",
+      "AllocatedShareBasedCompensationExpense",
+      "AmortizationOfAcquiredIntangibleAssets",
+      "AmortizationOfDebtDiscountPremium",
+      "AmortizationOfFinancingCosts",
+      "AmortizationOfFinancingCostsAndDiscounts",
+      "AmortizationOfIntangibleAssets",
+      "AssetRetirementObligation",
+      "AssetRetirementObligationsNoncurrent",
+      "AssetsCurrent",
+      "AssetsHeldForSaleCurrent",
+      "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedGainBeforeTax",
+      "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedLossBeforeTax",
+      "AvailableForSaleDebtSecuritiesAmortizedCostBasis",
+      "AvailableForSaleSecuritiesAccumulatedGrossUnrealizedGainBeforeTax",
+      "AvailableForSaleSecuritiesAmortizedCost",
+      "AvailableForSaleSecuritiesChangeInNetUnrealizedHoldingGainLossNetOfTax",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAccumulatedLoss",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAggregateLosses",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionAccumulatedLoss",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionAggregateLosses",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionFairValue",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionLessThan12MonthsAccumulatedLoss",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionLessThan12MonthsAggregateLosses",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionLessThanTwelveMonthsFairValue",
+      "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionTwelveMonthsOrLongerFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsAmortizedCost",
+      "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesAmortizedCost",
+      "AvailableForSaleSecuritiesDebtMaturitiesFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearAmortizedCost",
+      "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesWithoutSingleMaturityDateAmortizedCost",
+      "AvailableForSaleSecuritiesDebtMaturitiesWithoutSingleMaturityDateFairValue",
+      "AvailableForSaleSecuritiesDebtSecurities",
+      "AvailableForSaleSecuritiesGrossRealizedGainLossNet",
+      "AvailableForSaleSecuritiesGrossUnrealizedLoss",
+      "AvailableForSaleSecuritiesGrossUnrealizedLosses1",
+      "AvailableForSaleSecuritiesInUnrealizedLossPositionsQualitativeDisclosureNumberOfPositions",
+      "AvailableforsaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAggregateLosses1"
+    ],
+    "total_unmapped": 389
+  },
+  {
+    "ticker": "TSLA",
+    "total_periods": 58,
+    "metric_coverage": {
+      "Revenue": {
+        "found": 58,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "RevenueFromContractWithCustomerExcludingAssessedTax",
+          "Revenues"
+        ]
+      },
+      "COGS": {
+        "found": 58,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "CostOfRevenue",
+          "CostOfGoodsSold"
+        ]
+      },
+      "SGA": {
+        "found": 58,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "SellingGeneralAndAdministrativeExpense"
+        ]
+      },
+      "OperatingIncome": {
+        "found": 58,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "OperatingIncomeLoss"
+        ]
+      },
+      "PretaxIncome": {
+        "found": 0,
+        "coverage_pct": 0.0,
+        "matched_concepts": []
+      },
+      "NetIncome": {
+        "found": 58,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "NetIncomeLoss",
+          "ProfitLoss"
+        ]
+      },
+      "OperatingCashFlow": {
+        "found": 42,
+        "coverage_pct": 72.4,
+        "matched_concepts": [
+          "NetCashProvidedByUsedInOperatingActivities"
+        ]
+      },
+      "Capex": {
+        "found": 58,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "PaymentsToAcquirePropertyPlantAndEquipment"
+        ]
+      },
+      "TotalAssets": {
+        "found": 58,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "Assets"
+        ]
+      },
+      "Goodwill": {
+        "found": 35,
+        "coverage_pct": 60.3,
+        "matched_concepts": [
+          "Goodwill"
+        ]
+      },
+      "IntangibleAssets": {
+        "found": 36,
+        "coverage_pct": 62.1,
+        "matched_concepts": [
+          "IntangibleAssetsNetExcludingGoodwill",
+          "FiniteLivedIntangibleAssetsNet",
+          "IndefiniteLivedIntangibleAssetsExcludingGoodwill"
+        ]
+      },
+      "ShortTermDebt": {
+        "found": 36,
+        "coverage_pct": 62.1,
+        "matched_concepts": [
+          "DebtCurrent"
+        ]
+      },
+      "LongTermDebt": {
+        "found": 51,
+        "coverage_pct": 87.9,
+        "matched_concepts": [
+          "LongTermDebt",
+          "LongTermDebtNoncurrent"
+        ]
+      },
+      "CashAndEquivalents": {
+        "found": 58,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "CashAndCashEquivalentsAtCarryingValue"
+        ]
+      }
+    },
+    "unmapped_concepts": [
+      "AccrualForEnvironmentalLossContingencies",
+      "AccrualForEnvironmentalLossContingenciesPayments",
+      "AccruedEnvironmentalLossContingenciesCurrent",
+      "AccruedEnvironmentalLossContingenciesNoncurrent",
+      "AccruedLiabilitiesCurrent",
+      "AccumulatedOtherComprehensiveIncomeLossNetOfTax",
+      "AdjustmentsNoncashItemsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivities",
+      "AdjustmentsToAdditionalPaidInCapitalEquityComponentOfConvertibleDebt",
+      "AdjustmentsToAdditionalPaidInCapitalTaxEffectFromShareBasedCompensation",
+      "AdvertisingRevenueCost",
+      "AllocatedShareBasedCompensationExpense",
+      "AmortizationOfDebtDiscountPremium",
+      "AmortizationOfFinancingCosts",
+      "AmortizationOfFinancingCostsAndDiscounts",
+      "AmortizationOfIntangibleAssets",
+      "AssetBackedSecuritiesAtCarryingValue",
+      "AssetRetirementObligationsNoncurrent",
+      "AssetsCurrent",
+      "AssetsFairValueDisclosure",
+      "AssetsHeldByInsuranceRegulators",
+      "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedGainBeforeTax",
+      "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedLossBeforeTax",
+      "AvailableForSaleDebtSecuritiesAmortizedCostBasis",
+      "AvailableForSaleDebtSecuritiesGrossUnrealizedGain",
+      "AvailableForSaleDebtSecuritiesGrossUnrealizedLoss",
+      "AvailableForSaleSecuritiesAmortizedCost",
+      "AvailableForSaleSecuritiesDebtMaturitiesNextRollingTwelveMonthsAmortizedCostBasis",
+      "AvailableForSaleSecuritiesDebtMaturitiesNextRollingTwelveMonthsFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesRollingAfterYearTenAmortizedCostBasis",
+      "AvailableForSaleSecuritiesDebtMaturitiesRollingYearSixThroughTenAmortizedCostBasis",
+      "AvailableForSaleSecuritiesDebtMaturitiesRollingYearSixThroughTenFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesRollingYearTwoThroughFiveAmortizedCostBasis",
+      "AvailableForSaleSecuritiesDebtMaturitiesRollingYearTwoThroughFiveFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesSingleMaturityDate",
+      "AvailableForSaleSecuritiesDebtMaturitiesSingleMaturityDateAmortizedCostBasis",
+      "AvailableForSaleSecuritiesDebtSecurities",
+      "AvailableForSaleSecuritiesGrossUnrealizedLosses1",
+      "BusinessCombinationConsiderationTransferredEquityInterestsIssuedAndIssuable",
+      "BusinessExitCosts1",
+      "CapitalLeasedAssetsGross",
+      "CapitalLeasesBalanceSheetAssetsByMajorClassNet",
+      "CapitalLeasesLesseeBalanceSheetAssetsByMajorClassAccumulatedDeprecation",
+      "CashAndCashEquivalentsPeriodIncreaseDecrease",
+      "CashCashEquivalentsAndShortTermInvestments",
+      "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+      "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations",
+      "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+      "ComprehensiveIncomeNetOfTax",
+      "ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest",
+      "ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest"
+    ],
+    "total_unmapped": 371
+  },
+  {
+    "ticker": "META",
+    "total_periods": 54,
+    "metric_coverage": {
+      "Revenue": {
+        "found": 54,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "RevenueFromContractWithCustomerExcludingAssessedTax",
+          "Revenues"
+        ]
+      },
+      "COGS": {
+        "found": 54,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "CostOfRevenue"
+        ]
+      },
+      "SGA": {
+        "found": 54,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "SellingAndMarketingExpense",
+          "GeneralAndAdministrativeExpense"
+        ]
+      },
+      "OperatingIncome": {
+        "found": 54,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "OperatingIncomeLoss"
+        ]
+      },
+      "PretaxIncome": {
+        "found": 0,
+        "coverage_pct": 0.0,
+        "matched_concepts": []
+      },
+      "NetIncome": {
+        "found": 54,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "NetIncomeLoss"
+        ]
+      },
+      "OperatingCashFlow": {
+        "found": 54,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "NetCashProvidedByUsedInOperatingActivities"
+        ]
+      },
+      "Capex": {
+        "found": 54,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "PaymentsToAcquirePropertyPlantAndEquipment"
+        ]
+      },
+      "TotalAssets": {
+        "found": 54,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "Assets"
+        ]
+      },
+      "Goodwill": {
+        "found": 54,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "Goodwill"
+        ]
+      },
+      "IntangibleAssets": {
+        "found": 52,
+        "coverage_pct": 96.3,
+        "matched_concepts": [
+          "IntangibleAssetsNetExcludingGoodwill",
+          "FiniteLivedIntangibleAssetsNet",
+          "IndefiniteLivedIntangibleAssetsExcludingGoodwill"
+        ]
+      },
+      "ShortTermDebt": {
+        "found": 0,
+        "coverage_pct": 0.0,
+        "matched_concepts": []
+      },
+      "LongTermDebt": {
+        "found": 18,
+        "coverage_pct": 33.3,
+        "matched_concepts": [
+          "LongTermDebt",
+          "LongTermDebtNoncurrent"
+        ]
+      },
+      "CashAndEquivalents": {
+        "found": 54,
+        "coverage_pct": 100.0,
+        "matched_concepts": [
+          "CashAndCashEquivalentsAtCarryingValue"
+        ]
+      }
+    },
+    "unmapped_concepts": [
+      "AccountsPayableAndOtherAccruedLiabilitiesCurrent",
+      "AccruedIncomeTaxesCurrent",
+      "AccruedIncomeTaxesNoncurrent",
+      "AccruedLiabilitiesCurrent",
+      "AccumulatedOtherComprehensiveIncomeLossForeignCurrencyTranslationAdjustmentNetOfTax",
+      "AccumulatedOtherComprehensiveIncomeLossNetOfTax",
+      "AdjustmentToAdditionalPaidInCapitalIncomeTaxEffectFromShareBasedCompensationNet",
+      "AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation",
+      "AdjustmentsToAdditionalPaidInCapitalTaxEffectFromShareBasedCompensation",
+      "AdvertisingExpense",
+      "AdvertisingRevenue",
+      "AllocatedShareBasedCompensationExpense",
+      "AmortizationOfIntangibleAssets",
+      "AssetImpairmentCharges",
+      "AssetsCurrent",
+      "AssetsFairValueDisclosure",
+      "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedGainBeforeTax",
+      "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedLossBeforeTax",
+      "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesNextRollingTwelveMonthsFairValue",
+      "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearFairValue",
+      "AvailableForSaleSecuritiesDebtSecuritiesCurrent",
+      "AvailableforsaleSecuritiesInUnrealizedLossPositionsQualitativeDisclosureNumberOfPositions1",
+      "BusinessAcquisitionCostOfAcquiredEntityCashPaid",
+      "BusinessAcquisitionCostOfAcquiredEntityPurchasePrice",
+      "BusinessAcquisitionEquityInterestsIssuedOrIssuableNumberOfSharesIssued",
+      "BusinessAcquisitionPurchasePriceAllocationAssetsAcquiredLiabilitiesAssumedNet",
+      "BusinessAcquisitionPurchasePriceAllocationDeferredTaxLiabilitiesNoncurrent",
+      "BusinessAcquisitionPurchasePriceAllocationGoodwillExpectedTaxDeductibleAmount",
+      "BusinessCombinationContingentConsiderationArrangementsChangeInAmountOfContingentConsiderationLiability1",
+      "BusinessCombinationContingentConsiderationLiability",
+      "BusinessCombinationContingentConsiderationLiabilityCurrent",
+      "BusinessCombinationContingentConsiderationLiabilityNoncurrent",
+      "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedDeferredTaxLiabilitiesNoncurrent",
+      "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedNet",
+      "BusinessCombinationRecognizedIdentifiableAssetsAcquiredGoodwillAndLiabilitiesAssumedNet",
+      "BusinessExitCosts",
+      "CapitalLeasedAssetsGross",
+      "CapitalLeasesLesseeBalanceSheetAssetsByMajorClassAccumulatedDeprecation",
+      "Cash",
+      "CashAndCashEquivalentsFairValueDisclosure",
+      "CashAndCashEquivalentsPeriodIncreaseDecrease",
+      "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+      "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+      "ComprehensiveIncomeNetOfTax",
+      "ContractWithCustomerLiability",
+      "ContractWithCustomerLiabilityCurrent",
+      "ContractWithCustomerRefundLiability",
+      "CostsAndExpenses",
+      "CurrentFederalTaxExpenseBenefit"
+    ],
+    "total_unmapped": 280
+  }
+]

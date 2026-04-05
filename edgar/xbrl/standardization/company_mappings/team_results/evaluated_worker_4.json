@@ -1,0 +1,137 @@
+[
+  {
+    "gap": {
+      "ticker": "D",
+      "metric": "OperatingIncome",
+      "gap_type": "validation_failure",
+      "estimated_impact": 0.03571428571428571,
+      "reference_value": 4414000000.0,
+      "xbrl_value": 756000000.0,
+      "hv_subtype": null,
+      "current_variance": 82.8726778432261,
+      "graveyard_count": 0,
+      "notes": "Industry Logic Extraction (Unmapped Fallback)"
+    },
+    "proposal": {
+      "file": "metrics.yaml",
+      "change_type": "add_standardization",
+      "yaml_path": "metrics.OperatingIncome.standardization",
+      "old_value": null,
+      "new_value": {
+        "scope": "company:D",
+        "components": [
+          "OperatingIncomeLoss",
+          "IncomeLossFromDiscontinuedOperationsNetOfTax"
+        ],
+        "notes": "Auto-solver company-specific via D, 2/3 periods, 0/3 companies"
+      },
+      "rationale": "Auto-solver: OperatingIncomeLoss + IncomeLossFromDiscontinuedOperationsNetOfTax (0.1% var, 2/3 periods, company-specific)",
+      "target_metric": "OperatingIncome",
+      "target_companies": "D"
+    },
+    "decision": {
+      "decision": "KEEP",
+      "cqs_before": 0.9366717089584289,
+      "cqs_after": 0.9590686560681082,
+      "reason": "CQS improved by 0.0224",
+      "duration_seconds": 342.8923020362854
+    },
+    "worker_id": "worker_4"
+  },
+  {
+    "gap": {
+      "ticker": "SPG",
+      "metric": "ShortTermDebt",
+      "gap_type": "unmapped",
+      "estimated_impact": 0.027777777777777776,
+      "reference_value": null,
+      "xbrl_value": null,
+      "hv_subtype": null,
+      "current_variance": null,
+      "graveyard_count": 0,
+      "notes": "No mapping found"
+    },
+    "proposal": {
+      "file": "companies.yaml",
+      "change_type": "add_exclusion",
+      "yaml_path": "companies.SPG.exclude_metrics",
+      "old_value": null,
+      "new_value": "ShortTermDebt",
+      "rationale": "No reference value for ShortTermDebt \u2014 structural gap for SPG",
+      "target_metric": "ShortTermDebt",
+      "target_companies": "SPG"
+    },
+    "decision": {
+      "decision": "KEEP",
+      "cqs_before": 0.9590686560681082,
+      "cqs_after": 0.9594608129308533,
+      "reason": "CQS improved by 0.0004",
+      "duration_seconds": 316.35998940467834
+    },
+    "worker_id": "worker_4"
+  },
+  {
+    "gap": {
+      "ticker": "SPG",
+      "metric": "AccountsPayable",
+      "gap_type": "unmapped",
+      "estimated_impact": 0.027777777777777776,
+      "reference_value": null,
+      "xbrl_value": null,
+      "hv_subtype": null,
+      "current_variance": null,
+      "graveyard_count": 0,
+      "notes": "No mapping found"
+    },
+    "proposal": {
+      "file": "companies.yaml",
+      "change_type": "add_exclusion",
+      "yaml_path": "companies.SPG.exclude_metrics",
+      "old_value": null,
+      "new_value": "AccountsPayable",
+      "rationale": "No reference value for AccountsPayable \u2014 structural gap for SPG",
+      "target_metric": "AccountsPayable",
+      "target_companies": "SPG"
+    },
+    "decision": {
+      "decision": "KEEP",
+      "cqs_before": 0.9594608129308533,
+      "cqs_after": 0.9599019894014416,
+      "reason": "CQS improved by 0.0004",
+      "duration_seconds": 265.75226497650146
+    },
+    "worker_id": "worker_4"
+  },
+  {
+    "gap": {
+      "ticker": "CMCSA",
+      "metric": "Inventory",
+      "gap_type": "unmapped",
+      "estimated_impact": 0.023809523809523808,
+      "reference_value": null,
+      "xbrl_value": null,
+      "hv_subtype": null,
+      "current_variance": null,
+      "graveyard_count": 0,
+      "notes": "No mapping found"
+    },
+    "proposal": {
+      "file": "companies.yaml",
+      "change_type": "add_exclusion",
+      "yaml_path": "companies.CMCSA.exclude_metrics",
+      "old_value": null,
+      "new_value": "Inventory",
+      "rationale": "No reference value for Inventory \u2014 structural gap for CMCSA",
+      "target_metric": "Inventory",
+      "target_companies": "CMCSA"
+    },
+    "decision": {
+      "decision": "KEEP",
+      "cqs_before": 0.9599019894014416,
+      "cqs_after": 0.9601579417823939,
+      "reason": "CQS improved by 0.0003",
+      "duration_seconds": 181.37036681175232
+    },
+    "worker_id": "worker_4"
+  }
+]

@@ -4,7 +4,7 @@ Tests for storage management functionality
 
 import pytest
 from pathlib import Path
-from edgar.storage_management import storage_info, StorageInfo, _scan_storage
+from edgar.storage._management import storage_info, StorageInfo, _scan_storage
 from edgar.core import get_edgar_data_directory
 import time
 
@@ -27,8 +27,8 @@ def test_storage_info_returns_valid_data():
 def test_storage_info_caching():
     """Test that storage_info caches results"""
     # Clear cache
-    import edgar.storage_management
-    edgar.storage_management._storage_cache = None
+    import edgar.storage._management
+    edgar.storage._management._storage_cache = None
 
     # First call
     info1 = storage_info()
@@ -79,7 +79,7 @@ def test_storage_info_rich_display():
 def test_check_filing_not_exists():
     """Test check_filing returns False for non-existing filing"""
     from edgar._filings import Filing
-    from edgar.storage_management import check_filing
+    from edgar.storage._management import check_filing
 
     filing = Filing(
         cik=9999999,
@@ -95,7 +95,7 @@ def test_check_filing_not_exists():
 def test_check_filings_batch():
     """Test check_filings_batch returns dict with availability"""
     from edgar import get_filings
-    from edgar.storage_management import check_filings_batch
+    from edgar.storage._management import check_filings_batch
     import time
 
     # Get some filings
@@ -115,7 +115,7 @@ def test_check_filings_batch():
 def test_availability_summary():
     """Test availability_summary returns formatted string"""
     from edgar import get_filings
-    from edgar.storage_management import availability_summary
+    from edgar.storage._management import availability_summary
 
 
     filings = list(get_filings(filing_date="2025-01-15").head(10))
@@ -132,7 +132,7 @@ def test_availability_summary():
 @pytest.mark.slow
 def test_analyze_storage_returns_analysis():
     """Test that analyze_storage returns StorageAnalysis"""
-    from edgar.storage_management import analyze_storage, StorageAnalysis
+    from edgar.storage._management import analyze_storage, StorageAnalysis
 
     analysis = analyze_storage()
 
@@ -150,7 +150,7 @@ def test_analyze_storage_rich_display():
     """Test that StorageAnalysis has working __rich__ method"""
     from rich.console import Console
     from io import StringIO
-    from edgar.storage_management import analyze_storage
+    from edgar.storage._management import analyze_storage
 
     analysis = analyze_storage()
 
@@ -168,7 +168,7 @@ def test_analyze_storage_rich_display():
 @pytest.mark.fast
 def test_optimize_storage_dry_run():
     """Test optimize_storage with dry_run=True"""
-    from edgar.storage_management import optimize_storage
+    from edgar.storage._management import optimize_storage
 
     result = optimize_storage(dry_run=True)
 
@@ -183,7 +183,7 @@ def test_optimize_storage_dry_run():
 @pytest.mark.fast
 def test_cleanup_storage_dry_run():
     """Test cleanup_storage with dry_run=True"""
-    from edgar.storage_management import cleanup_storage
+    from edgar.storage._management import cleanup_storage
 
     result = cleanup_storage(days=365, dry_run=True)
 
@@ -198,7 +198,7 @@ def test_cleanup_storage_dry_run():
 @pytest.mark.fast
 def test_clear_cache_dry_run():
     """Test clear_cache with dry_run=True"""
-    from edgar.storage_management import clear_cache
+    from edgar.storage._management import clear_cache
 
     result = clear_cache(dry_run=True)
 
@@ -214,7 +214,7 @@ def test_clear_cache_dry_run():
 @pytest.mark.fast
 def test_clear_cache_obsolete_only():
     """Test clear_cache with obsolete_only parameter"""
-    from edgar.storage_management import clear_cache
+    from edgar.storage._management import clear_cache
 
     # Test dry run with obsolete_only
     result = clear_cache(dry_run=True, obsolete_only=True)
@@ -231,7 +231,7 @@ def test_clear_cache_obsolete_only():
 @pytest.mark.slow
 def test_analyze_storage_detects_obsolete_cache(tmp_path):
     """Test that analyze_storage detects obsolete _pcache directory"""
-    from edgar.storage_management import analyze_storage
+    from edgar.storage._management import analyze_storage
     from edgar.core import get_edgar_data_directory
     import os
 
@@ -266,7 +266,7 @@ def test_storage_info_cache_labels():
     """Test that StorageInfo displays descriptive labels for cache directories"""
     from rich.console import Console
     from io import StringIO
-    from edgar.storage_management import storage_info
+    from edgar.storage._management import storage_info
 
     info = storage_info()
 

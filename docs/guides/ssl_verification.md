@@ -4,27 +4,29 @@ This guide covers SSL verification, proxy configuration, and network troubleshoo
 
 ## Quick Fix: SSL Verification Errors
 
-If you're getting SSL certificate errors, use `configure_http()`:
+If you're getting SSL certificate errors, the best solution is to use your OS certificate store:
 
 ```python
 from edgar import configure_http
 
-# Disable SSL verification (use only in trusted networks)
-configure_http(verify_ssl=False)
+# Use your OS certificate store (recommended)
+configure_http(use_system_certs=True)
 
 # Now use edgartools normally
 from edgar import Company
 company = Company("AAPL")
 ```
 
+This works because corporate networks add their CA certificates to your operating system's trust store. The `truststore` library (included with edgartools) lets Python use those certificates instead of its own bundled ones.
+
 ## Understanding SSL Issues
 
 ### Common Causes
 
-1. **Corporate VPN with SSL inspection** - Your organization intercepts HTTPS traffic
+1. **Corporate VPN with SSL inspection** - Your organization intercepts HTTPS traffic and re-signs it with their own CA certificate
 2. **Corporate proxy servers** - Traffic routed through a proxy that modifies certificates
 3. **Self-signed certificates** - Development or testing environments
-4. **Outdated CA certificates** - System certificate store is outdated
+4. **Outdated CA certificates** - Python's bundled certificate store is outdated
 
 ### Error Messages
 
@@ -35,50 +37,68 @@ You might see errors like:
 
 ## Configuration Options
 
-### Option 1: Runtime Configuration (Recommended)
+### Option 1: Use OS Certificate Store (Recommended)
 
-Use `configure_http()` to change settings at any time, even after importing:
+The most secure fix for corporate environments. Uses your operating system's native certificate store, which your IT department manages:
 
 ```python
-from edgar import configure_http, get_http_config
+from edgar import configure_http
 
-# Disable SSL verification
-configure_http(verify_ssl=False)
-
-# Configure a proxy
-configure_http(proxy="http://proxy.company.com:8080")
-
-# Configure both at once
-configure_http(verify_ssl=False, proxy="http://proxy:8080")
-
-# Check current configuration
-print(get_http_config())
-# {'verify_ssl': False, 'proxy': 'http://proxy:8080', 'timeout': ...}
+configure_http(use_system_certs=True)
 ```
 
-### Option 2: Environment Variable (Before Import)
+Or via environment variable (set **before** importing edgartools):
 
-Set the environment variable **before** importing edgartools:
+```bash
+export EDGAR_USE_SYSTEM_CERTS=true
+python your_script.py
+```
 
 ```python
 import os
-os.environ['EDGAR_VERIFY_SSL'] = 'false'
+os.environ['EDGAR_USE_SYSTEM_CERTS'] = 'true'
 
 # IMPORTANT: Set env var BEFORE this import!
 from edgar import Company
 ```
 
-Or in your shell:
+### Option 2: Custom CA Certificate
+
+If your IT department provides a specific CA certificate file:
+
 ```bash
-export EDGAR_VERIFY_SSL=false
-python your_script.py
+export REQUESTS_CA_BUNDLE="/path/to/company-ca-bundle.crt"
+export SSL_CERT_FILE="/path/to/company-ca-bundle.crt"
 ```
 
-**Common Mistake**: Setting the environment variable *after* importing edgar has no effect because the HTTP client is initialized at import time. Use `configure_http()` instead if you've already imported.
+### Option 3: Disable SSL Verification (Last Resort)
 
-### Option 3: System Proxy Environment Variables
+Only use this if Options 1 and 2 don't work. Disabling SSL verification removes protection against man-in-the-middle attacks:
 
-Edgartools respects standard proxy environment variables:
+```python
+from edgar import configure_http
+
+# WARNING: Reduces security. Use only on trusted networks.
+configure_http(verify_ssl=False)
+```
+
+Or via environment variable:
+
+```bash
+export EDGAR_VERIFY_SSL=false
+```
+
+### Option 4: Proxy Configuration
+
+If your network requires a proxy:
+
+```python
+from edgar import configure_http
+
+configure_http(proxy="http://proxy.company.com:8080")
+```
+
+Standard proxy environment variables are also respected:
 
 ```bash
 export HTTP_PROXY="http://proxy.company.com:8080"
@@ -100,8 +120,8 @@ Your IT department inspects HTTPS traffic, causing certificate errors:
 ```python
 from edgar import configure_http, Company
 
-# Disable SSL verification for corporate VPN
-configure_http(verify_ssl=False)
+# Use OS certs — your IT department's CA is already trusted by your OS
+configure_http(use_system_certs=True)
 
 company = Company("AAPL")
 filings = company.get_filings(form="10-K")
@@ -114,8 +134,10 @@ Traffic must go through a proxy:
 ```python
 from edgar import configure_http, Company
 
-# Configure proxy
-configure_http(proxy="http://proxy.company.com:8080")
+configure_http(
+    use_system_certs=True,
+    proxy="http://proxy.company.com:8080"
+)
 
 company = Company("AAPL")
 ```
@@ -127,9 +149,8 @@ Common in enterprise environments:
 ```python
 from edgar import configure_http, Company
 
-# Configure everything
 configure_http(
-    verify_ssl=False,
+    use_system_certs=True,
     proxy="http://proxy.company.com:8080",
     timeout=60.0  # Longer timeout for slow proxies
 )
@@ -137,18 +158,42 @@ configure_http(
 company = Company("AAPL")
 ```
 
-### Scenario 4: Custom CA Certificates
+### Scenario 4: Nothing Else Works
 
-If your organization uses custom CA certificates, you can configure the system:
+If system certs and custom CA bundles don't resolve the issue:
 
-```bash
-# Add your organization's CA certificate to the system trust store
-# Then set the certificate bundle path
-export REQUESTS_CA_BUNDLE="/path/to/company-ca-bundle.crt"
-export SSL_CERT_FILE="/path/to/company-ca-bundle.crt"
+```python
+from edgar import configure_http, Company
+
+# Last resort — disables SSL verification entirely
+configure_http(
+    verify_ssl=False,
+    proxy="http://proxy.company.com:8080",
+    timeout=60.0
+)
+
+company = Company("AAPL")
 ```
 
 ## Troubleshooting
+
+### Run SSL Diagnostics
+
+EdgarTools includes a built-in diagnostic tool:
+
+```python
+from edgar import diagnose_ssl
+
+# Displays a comprehensive report
+result = diagnose_ssl()
+
+# Or get structured data for programmatic use
+result = diagnose_ssl(display=False)
+if not result.ssl_ok:
+    print(result.diagnosis)
+    for rec in result.recommendations:
+        print(f"- {rec.title}")
+```
 
 ### Check Current Configuration
 
@@ -157,6 +202,7 @@ from edgar import get_http_config
 
 config = get_http_config()
 print(f"SSL Verification: {config['verify_ssl']}")
+print(f"System Certs: {config['use_system_certs']}")
 print(f"Proxy: {config['proxy']}")
 print(f"Timeout: {config['timeout']}")
 ```
@@ -192,13 +238,23 @@ company = Company("AAPL")  # Will show detailed HTTP logs
 
 ## Security Considerations
 
-Disabling SSL verification reduces security by making connections vulnerable to man-in-the-middle attacks. Only use these options when:
+| Approach | Security | When to Use |
+|----------|----------|-------------|
+| `use_system_certs=True` | Full SSL verification | Corporate networks (recommended) |
+| `REQUESTS_CA_BUNDLE` | Full SSL verification | When IT provides a cert file |
+| `verify_ssl=False` | No SSL verification | Last resort only |
 
-1. You're on a **trusted corporate network**
-2. You understand the security implications
-3. You have no alternative (e.g., can't install corporate CA certificates)
+Disabling SSL verification makes connections vulnerable to man-in-the-middle attacks. Always prefer `use_system_certs=True` — it keeps SSL verification active while using the certificates your OS trusts.
 
-**Best Practice**: Work with your IT department to properly install corporate CA certificates rather than disabling SSL verification.
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `EDGAR_USE_SYSTEM_CERTS` | `false` | Use OS native certificate store |
+| `EDGAR_VERIFY_SSL` | `true` | Enable/disable SSL verification |
+| `EDGAR_RATE_LIMIT_PER_SEC` | `9` | Request rate limit |
+
+`EDGAR_USE_SYSTEM_CERTS=true` takes precedence over `EDGAR_VERIFY_SSL` when both are set.
 
 ## API Reference
 
@@ -207,6 +263,7 @@ Disabling SSL verification reduces security by making connections vulnerable to 
 ```python
 def configure_http(
     verify_ssl: bool = None,
+    use_system_certs: bool = None,
     proxy: str = None,
     timeout: float = None,
 ) -> None
@@ -215,9 +272,12 @@ def configure_http(
 Configure HTTP client settings at runtime.
 
 **Parameters:**
-- `verify_ssl`: Enable/disable SSL certificate verification
+- `use_system_certs`: Use OS native certificate store (recommended for corporate networks)
+- `verify_ssl`: Enable/disable SSL certificate verification (last resort)
 - `proxy`: HTTP/HTTPS proxy URL (e.g., "http://proxy.company.com:8080")
 - `timeout`: Request timeout in seconds
+
+**Note:** `use_system_certs=True` takes precedence over `verify_ssl` when both are set.
 
 ### `get_http_config()`
 
@@ -227,10 +287,10 @@ def get_http_config() -> dict
 
 Returns current HTTP configuration as a dictionary with keys:
 - `verify_ssl`: Current SSL verification setting
+- `use_system_certs`: Whether OS certificate store is active
 - `proxy`: Current proxy URL (or None)
 - `timeout`: Current timeout setting
 
 ## See Also
 
-- [Configuration Guide](../configuration.md) - Full configuration options
 - [Troubleshooting](../resources/troubleshooting.md) - Common issues and solutions

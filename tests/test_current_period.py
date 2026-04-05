@@ -267,23 +267,25 @@ class TestCurrentPeriodView:
 
     @pytest.mark.fast
     def test_notes_access(self, mock_xbrl):
-        """Test notes sections retrieval."""
+        """Test notes sections retrieval returns Statement objects."""
+        from edgar.xbrl.statements import Statement
         current_period = CurrentPeriodView(mock_xbrl)
         notes = current_period.notes()
-        
+
         assert isinstance(notes, list)
         assert len(notes) == 1
-        assert notes[0]['section_name'] == 'Notes to Financial Statements'
-        assert notes[0]['type'] == 'Notes'
+        assert isinstance(notes[0], Statement)
 
     @pytest.mark.fast
     def test_notes_specific_section(self, mock_xbrl):
         """Test retrieval of specific note section."""
+        from edgar.xbrl.statements import Statement
         current_period = CurrentPeriodView(mock_xbrl)
         notes = current_period.notes('financial')
-        
+
         assert isinstance(notes, list)
-        assert len(notes) == 1  # Should match "Notes to Financial Statements"
+        assert len(notes) == 1
+        assert isinstance(notes[0], Statement)
 
     @pytest.mark.fast
     def test_get_fact_standard_concept(self, mock_xbrl):

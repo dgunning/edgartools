@@ -1,5 +1,8 @@
+---
+description: Python library for SEC EDGAR filings. Extract financial statements, track insider trading, analyze 13F holdings, and parse XBRL data.
+---
 
-# EdgarTools
+# EdgarTools: The Python Library for SEC EDGAR Data
 
 **Powerful Python library for SEC data analysis and financial research**
 
@@ -8,6 +11,18 @@ EdgarTools makes it simple to access, analyze, and extract insights from SEC fil
 ---
 
 ## What You Can Do
+
+**Get Key Company Data**
+
+Access shares outstanding, public float, and other key data points with simple properties.
+
+```python
+company = Company("AAPL")
+company.shares_outstanding   # 15115785000.0
+company.public_float          # 2899948348000.0
+```
+
+> **[See Apple on edgar.tools — filings, financials, and insider trades in a web UI →](https://app.edgar.tools/companies/AAPL?utm_source=edgartools-docs&utm_medium=see-live&utm_content=index)**
 
 **Analyze Company Financials**
 
@@ -29,6 +44,17 @@ transactions = pd.concat([f.obj()
                          .to_dataframe()
                          .fillna('')
                 for f in filings])
+```
+
+**Analyze Executive Compensation**
+
+Get CEO pay, pay-vs-performance, and 5-year compensation trends from proxy statements.
+
+```python
+proxy = company.get_filings(form="DEF 14A").latest().obj()
+proxy.peo_name                # "Mr. Cook"
+proxy.peo_total_comp          # 74609802
+proxy.executive_compensation  # 5-year DataFrame
 ```
 
 **Research Investment Funds**
@@ -102,10 +128,18 @@ set_identity("your.name@email.com")
 
 ```python
 company = Company("TSLA")
-latest_10k = company.get_filings(form="10-K").latest()
-financials = latest_10k.obj().financials()
+financials = company.get_financials()
+financials.income_statement()
 ```
-`
+
+!!! tip "See it live on edgar.tools"
+    Everything above runs locally. **[edgar.tools](https://app.edgar.tools?utm_source=edgartools-docs&utm_medium=see-live&utm_content=general)** puts the same data in a web UI with AI enrichment on top — no code required.
+
+    - **[Browse Apple's filings, financials, and insider trades →](https://app.edgar.tools/companies/AAPL?utm_source=edgartools-docs&utm_medium=see-live&utm_content=general)**
+    - **[Watch filings arrive in real time →](https://app.edgar.tools/filings?utm_source=edgartools-docs&utm_medium=see-live&utm_content=general)**
+    - **[Search disclosures across 12 XBRL topics →](https://app.edgar.tools/disclosures?utm_source=edgartools-docs&utm_medium=see-live&utm_content=general)**
+
+    Also includes a REST API (20+ endpoints), hosted MCP server, and data exports. Free tier: 100 API calls/day.
 
 ## Popular Use Cases
 
@@ -164,25 +198,15 @@ Your support helps maintain and improve EdgarTools for the entire community!
 
 ## What's Next?
 
-**[Installation Guide](installation.md)**
+**[Quick Start](quickstart.md)** - Your first analysis in 5 minutes
 
-Complete setup instructions and troubleshooting
+**[Financial Data](guides/financial-data.md)** - Get income statements, balance sheets, cash flow
 
-**[Quick Start Tutorial](quick-guide.md)**
+**[Filing Types](data-objects.md)** - Work with 10-K, 8-K, 13F, and more
 
-Your first analysis in 5 minutes
+**[API Reference](api/company.md)** - Complete documentation
 
-**[API Reference](company.md)**
-
-Complete documentation of all classes and methods
-
-**[Examples & Recipes](examples.md)**
-
-Real-world analysis patterns and code templates
-
-**[Advanced Search](advanced-search.md)**
-
-BM25 ranking, semantic search, and intelligent caching
+**[Examples](examples.md)** - Real-world code patterns
 
 ---
 

@@ -1,0 +1,124 @@
+{
+  "ticker": "INTC",
+  "cik": 50863,
+  "company_name": "INTEL CORP",
+  "archetype": "C",
+  "sic_code": "3674",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  INTC:\n    name: \"INTEL CORP\"\n    cik: 50863\n    exclude_metrics:\n      - COGS\n      - OperatingIncome\n    known_divergences:\n      IntangibleAssets:\n        form_types: [\"10-K\"]\n        variance_pct: 68.9\n        reason: \"Variance: 68.9% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"\n      ShortTermDebt:\n        form_types: [\"10-K\"]\n        variance_pct: 49.2\n        reason: \"Variance: 49.2% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"",
+  "metrics_passed": [
+    "SGA",
+    "PretaxIncome",
+    "OperatingCashFlow",
+    "TotalAssets",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "DividendsPaid",
+    "Inventory",
+    "AccountsReceivable",
+    "DepreciationAmortization"
+  ],
+  "metrics_failed": [
+    "Revenue",
+    "COGS",
+    "OperatingIncome",
+    "NetIncome",
+    "Capex",
+    "Goodwill",
+    "IntangibleAssets",
+    "ShortTermDebt",
+    "StockBasedCompensation",
+    "AccountsPayable"
+  ],
+  "metrics_excluded": [
+    "COGS"
+  ],
+  "failures": {
+    "Revenue": {
+      "metric": "Revenue",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 52853000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "COGS": {
+      "metric": "COGS",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 34478000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "OperatingIncome": {
+      "metric": "OperatingIncome",
+      "reason": "Structural divergence (427% variance)",
+      "xbrl_value": -11678000000.0,
+      "reference_value": -2214000000.0,
+      "variance_pct": 427.46160794941284,
+      "pattern": "structural"
+    },
+    "NetIncome": {
+      "metric": "NetIncome",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": -267000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "Capex": {
+      "metric": "Capex",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": -14646000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "Goodwill": {
+      "metric": "Goodwill",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 23912000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "IntangibleAssets": {
+      "metric": "IntangibleAssets",
+      "reason": "Variance: 68.9% (tolerance: 15%)",
+      "xbrl_value": 8310000000.0,
+      "reference_value": 26684000000.0,
+      "variance_pct": 68.85774246739619,
+      "pattern": "unknown"
+    },
+    "ShortTermDebt": {
+      "metric": "ShortTermDebt",
+      "reason": "Variance: 49.2% (tolerance: 15%)",
+      "xbrl_value": 3729000000.0,
+      "reference_value": 2499000000.0,
+      "variance_pct": 49.21968787515006,
+      "pattern": "unknown"
+    },
+    "StockBasedCompensation": {
+      "metric": "StockBasedCompensation",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 2434000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "AccountsPayable": {
+      "metric": "AccountsPayable",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 9882000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    }
+  },
+  "remediation_complexity": "structural",
+  "snapshot_created": true,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-03-04T19:20:26.359352"
+}

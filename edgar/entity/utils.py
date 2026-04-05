@@ -4,12 +4,36 @@ Utility functions for entity processing.
 This module contains utility functions used throughout the entity package
 for data processing, normalization, and validation.
 """
+import re
 from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     import pyarrow
 
 from edgar.entity.constants import COMPANY_FORMS
+
+_ENTITY_FACTS_PATTERN = re.compile(r"^(\d{4})-(FY|Q[1-4])$")   # "2023-FY"
+_STATEMENT_PATTERN = re.compile(r"^(FY|Q[1-4])\s+(\d{4})$")    # "FY 2023"
+
+
+def normalize_period_to_entity_facts(period: str) -> str:
+    """Normalize to '2023-FY' format (EntityFacts). Passes unknown formats through."""
+    if _ENTITY_FACTS_PATTERN.match(period):
+        return period
+    m = _STATEMENT_PATTERN.match(period)
+    if m:
+        return f"{m.group(2)}-{m.group(1)}"
+    return period
+
+
+def normalize_period_to_statement(period: str) -> str:
+    """Normalize to 'FY 2023' format (MultiPeriodStatement). Passes unknown formats through."""
+    if _STATEMENT_PATTERN.match(period):
+        return period
+    m = _ENTITY_FACTS_PATTERN.match(period)
+    if m:
+        return f"{m.group(2)} {m.group(1)}"
+    return period
 
 
 def has_company_filings(filings_form_array: 'pyarrow.ChunkedArray', max_filings: int = 50) -> bool:

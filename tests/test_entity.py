@@ -60,6 +60,12 @@ def test_entity_is_company():
     # Jeronimo Martins
     assert Entity(1438077).is_company
 
+    # Elon Musk
+    assert Entity(1494730).is_individual
+
+    # Reed Hastings
+    assert Entity('1033331').is_individual
+
 @pytest.mark.network
 def test_warren_buffett():
     # Warren Buffett

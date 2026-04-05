@@ -1,0 +1,322 @@
+{
+  "ticker": "MMC",
+  "cik": 62709,
+  "company_name": "MARSH & MCLENNAN COMPANIES, INC.",
+  "archetype": "E",
+  "sic_code": "6411",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  MMC:\n    name: \"MARSH & MCLENNAN COMPANIES, INC.\"\n    cik: 62709\n    exclude_metrics:\n      - COGS\n      - GrossProfit\n      - Inventory\n      - OperatingIncome",
+  "metrics_passed": [],
+  "metrics_failed": [
+    "Revenue",
+    "SGA",
+    "PretaxIncome",
+    "NetIncome",
+    "OperatingCashFlow",
+    "Capex",
+    "TotalAssets",
+    "Goodwill",
+    "IntangibleAssets",
+    "ShortTermDebt",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "AccountsReceivable",
+    "AccountsPayable",
+    "DepreciationAmortization",
+    "ResearchAndDevelopment",
+    "InterestExpense",
+    "IncomeTaxExpense",
+    "EarningsPerShareDiluted",
+    "EarningsPerShareBasic",
+    "CurrentAssets",
+    "CurrentLiabilities",
+    "TotalLiabilities",
+    "StockholdersEquity",
+    "PropertyPlantEquipment",
+    "RetainedEarnings",
+    "InvestingCashFlow",
+    "FinancingCashFlow",
+    "ShareRepurchases",
+    "DividendPerShare"
+  ],
+  "metrics_excluded": [
+    "COGS",
+    "OperatingIncome",
+    "Inventory",
+    "GrossProfit"
+  ],
+  "failures": {
+    "Revenue": {
+      "metric": "Revenue",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 24458000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "SGA": {
+      "metric": "SGA",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 5480000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "NetIncome": {
+      "metric": "NetIncome",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 4060000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "OperatingCashFlow": {
+      "metric": "OperatingCashFlow",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 4302000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "Capex": {
+      "metric": "Capex",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 316000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "TotalAssets": {
+      "metric": "TotalAssets",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 56481000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "Goodwill": {
+      "metric": "Goodwill",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 23306000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "IntangibleAssets": {
+      "metric": "IntangibleAssets",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 28126000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "ShortTermDebt": {
+      "metric": "ShortTermDebt",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 519000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "LongTermDebt": {
+      "metric": "LongTermDebt",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 19428000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "CashAndEquivalents": {
+      "metric": "CashAndEquivalents",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 2398000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "WeightedAverageSharesDiluted": {
+      "metric": "WeightedAverageSharesDiluted",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 496000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "StockBasedCompensation": {
+      "metric": "StockBasedCompensation",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 368000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "DividendsPaid": {
+      "metric": "DividendsPaid",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 1513000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "AccountsReceivable": {
+      "metric": "AccountsReceivable",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 7156000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "AccountsPayable": {
+      "metric": "AccountsPayable",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 3402000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "DepreciationAmortization": {
+      "metric": "DepreciationAmortization",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 369000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "ResearchAndDevelopment": {
+      "metric": "ResearchAndDevelopment",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "InterestExpense": {
+      "metric": "InterestExpense",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "IncomeTaxExpense": {
+      "metric": "IncomeTaxExpense",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 1363000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "EarningsPerShareDiluted": {
+      "metric": "EarningsPerShareDiluted",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 8.18,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "EarningsPerShareBasic": {
+      "metric": "EarningsPerShareBasic",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 8.26,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "CurrentAssets": {
+      "metric": "CurrentAssets",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 22117000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "CurrentLiabilities": {
+      "metric": "CurrentLiabilities",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 19518000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "TotalLiabilities": {
+      "metric": "TotalLiabilities",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 42946000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "StockholdersEquity": {
+      "metric": "StockholdersEquity",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 13535000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "PropertyPlantEquipment": {
+      "metric": "PropertyPlantEquipment",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 859000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "RetainedEarnings": {
+      "metric": "RetainedEarnings",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 25306000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "InvestingCashFlow": {
+      "metric": "InvestingCashFlow",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": -8821000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "FinancingCashFlow": {
+      "metric": "FinancingCashFlow",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 4455000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "ShareRepurchases": {
+      "metric": "ShareRepurchases",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 900000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "DividendPerShare": {
+      "metric": "DividendPerShare",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 3.05,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": false,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-04-04T09:58:01.919603"
+}

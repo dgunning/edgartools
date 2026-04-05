@@ -1,3 +1,9 @@
+---
+description: Parse XBRL financial data from SEC EDGAR filings. Access structured financial statements and individual facts.
+---
+
+# Getting XBRL Data from SEC Filings
+
 ## Overview
 
 The `edgar.xbrl` module provides a powerful yet user-friendly API for processing **XBRL (eXtensible Business Reporting Language)** financial data from SEC filings. 
@@ -63,6 +69,9 @@ stitched_statements = xbrls.statements
 income_trend = stitched_statements.income_statement()
 balance_sheet_trend = stitched_statements.balance_sheet()
 cashflow_trend = stitched_statements.cashflow_statement()
+
+# Use view="detailed" to include dimensional breakdowns across periods
+income_detailed = stitched_statements.income_statement(view="detailed")
 ```
 
 ## User-Friendly Features
@@ -150,12 +159,16 @@ The rendering system offers several customization options:
 
 | Option | Description |
 | ------ | ----------- |
-| `standard=True` | Use standardized labels for cross-company comparison (default) |
-| `standard=False` | Use company-specific labels as reported in the filing |
+| `standard=True` | Add `standard_concept` metadata for cross-company analysis (default). Labels remain as company-reported. |
+| `standard=False` | Skip standardization metadata entirely |
 | `show_date_range=True` | Show complete date ranges for duration periods (e.g., "Jan 1 - Mar 31, 2023") |
 | `show_date_range=False` | Show only end dates for cleaner presentation (default) |
 | `period_view="Name"` | Select a predefined period view ("Annual Comparison", "Quarterly Comparison", etc.) |
 | `period_filter="duration_..."` | Filter to a specific period by period key |
+
+> **Note**: Labels always show the company's original presentation. The `standard_concept` column
+> maps each line item to a standard category (e.g., "Revenue", "CommonEquity") for filtering and
+> cross-company aggregation. Use `df.groupby('standard_concept').sum()` to aggregate by standard concepts.
 
 ### The `RenderedStatement` Class
 
@@ -186,14 +199,17 @@ The rendering engine automatically handles:
 - Fiscal period indicators in statement titles
 - Unit notes (e.g., "In millions, except per share data")
 
-For stitched multi-period statements, you can control the number of periods and date formatting:
+For stitched multi-period statements, you can control periods, date formatting, and dimensional detail:
 
 ```python
 # Get 3-year comparison with full date ranges
 annual_trend = stitched_statements.income_statement(
-    max_periods=3, 
+    max_periods=3,
     show_date_range=True
 )
+
+# Include dimensional breakdowns (e.g., cost by segment across years)
+detailed_trend = stitched_statements.income_statement(view="detailed")
 ```
 
 ## Advanced Features

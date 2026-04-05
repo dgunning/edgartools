@@ -1,4 +1,8 @@
-# Quick Guide
+# Cheat Sheet
+
+Common EdgarTools operations at a glance. For a step-by-step introduction, see the [Quick Start](quickstart.md).
+
+### Setup
 
 |                                      | Code                                                  |
 |--------------------------------------|-------------------------------------------------------|
@@ -8,7 +12,39 @@
 | Set identity in Python               | `set_identity("email@domain.com")`         |
 | Importing the library                | `from edgar import *`                                 |
 
+### Working with a company 🏢
+
+> See also: [Find a Company](guides/finding-companies.md)
+
+|                                          | Code                                                          |
+|------------------------------------------|---------------------------------------------------------------|
+| 🔍 Get a company by ticker              | `company = Company("AAPL")`                                   |
+| 🔍 Get a company by CIK                 | `company = Company("0000320193")`                             |
+| 🔎 Find filings by form and ticker      | `find(form="10-K", ticker="AAPL")`                            |
+| 📊 Get shares outstanding               | `company.shares_outstanding`                                  |
+| 💰 Get public float                     | `company.public_float`                                        |
+| 🏭 Get industry                         | `company.industry`                                            |
+| 📋 Get company facts                    | `company.get_facts()`                                         |
+| 🐼 Get company facts as a DataFrame     | `company.get_facts().to_pandas()`                             |
+
+### Financial statements 💵
+
+> See also: [Financial Statements Guide](guides/financial-data.md)
+
+|                                          | Code                                                          |
+|------------------------------------------|---------------------------------------------------------------|
+| 📊 Get a company's financials            | `financials = company.get_financials()`                       |
+| 📈 Get the income statement              | `financials.income_statement()`                               |
+| 🏦 Get the balance sheet                 | `financials.balance_sheet()`                                  |
+| 💸 Get the cash flow statement           | `financials.cashflow_statement()`                             |
+| 💰 Get revenue                           | `financials.get_revenue()`                                    |
+| 💵 Get net income                        | `financials.get_net_income()`                                 |
+| 📊 Get operating income                  | `financials.get_operating_income()`                           |
+| 🐼 Export statement to DataFrame         | `financials.income_statement().to_dataframe()`                |
+
 ### Working with filings 📁
+
+> See also: [Working with Filings](guides/working-with-filing.md) · [Search & Filter](guides/searching-filings.md)
 
 #### 🔍 Getting Filings
 
@@ -49,11 +85,25 @@
 | 🔚 Get the last n filings            | `filings.tail(20)`    |
 | 🕒 Get the latest n filings by date  | `filings.latest(20)`  |
 | 🎲 Get a random sample of filings    | `filings.sample(20)`  |
-| 🐼 Get filings as a pandas dataframe | `filings.to_pandas()` |
+| 🐼 Get filings as a pandas DataFrame | `filings.to_pandas()` |
+
+### Company filings 📂
+
+> See also: [Find a Company](guides/finding-companies.md)
+
+|                                          | Code                                                          |
+|------------------------------------------|---------------------------------------------------------------|
+| 📁 Get company filings                   | `company.get_filings()`                                       |
+| 📝 Get company filings by form           | `company.get_filings(form="10-K")`                            |
+| 🕒 Get the latest 10-Q                   | `company.latest("10-Q")`                                      |
+| 📑 Get the last 5 10-Qs                  | `company.get_filings(form="10-Q").head(5)`                    |
+| 🔢 Get a filing by accession number      | `company.get_filing(accession_number="0000320193-21-000139")` |
 
 ### Working with a filing 📄
 
-#### 🔍 Accessing and viewing a Filing
+> See also: [Working with Filings](guides/working-with-filing.md)
+
+#### 🔍 Accessing and Viewing a Filing
 
 |                                     | Code                                                      |
 |-------------------------------------|-----------------------------------------------------------|
@@ -72,10 +122,11 @@
 | 📊 Get the XBRL of the filing       | `filing.xbrl()`              |
 | 📝 Get the filing as markdown       | `filing.markdown()`          |
 | 📄 Get the full submission text     | `filing.full_text_submission()` |
+| 🔍 Preview data object type         | `filing.obj_type`            |
 | 🔢 Get and parse filing data object | `filing.obj()`               |
 | 📑 Get filing header                | `filing.header`              |
 
-#### 🔎 Searching inside a Filing
+#### 🔎 Searching Inside a Filing
 
 |                             | Code                                    |
 |-----------------------------|----------------------------------------|
@@ -85,6 +136,8 @@
 
 #### 📎 Working with Attachments
 
+> See also: [Filing Attachments](guides/filing-attachments.md)
+
 |                               | Code                                 |
 |-------------------------------|--------------------------------------|
 | 📁 Get all filing attachments | `filing.attachments`                 |
@@ -92,20 +145,29 @@
 | 🌐 Open attachment in browser | `attachment.open()`                  |
 | ⬇️ Download an attachment     | `content = attachment.download()`    |
 
-### Working with a company
+### 10-K Annual Report data 📊
+
+> See also: [Working with Filings](guides/working-with-filing.md)
 
 |                                          | Code                                                          |
 |------------------------------------------|---------------------------------------------------------------|
-| Get a company by ticker                  | `company = Company("AAPL")`                                   |
-| Get a company by CIK                     | `company = Company("0000320193")`                             |
-| Get company facts                        | `company.get_facts()`                                         |
-| Get company facts as a pandas dataframe  | `company.get_facts().to_pandas()`                             |
-| Get company filings                      | `company.get_filings()`                                       |
-| Get company filings by form              | `company.get_filings(form="10-K")`                            |
-| Get the latest 10-Q                      | `company.latest("10-Q")`                                      |
-| Get the last 5 10-Q's                    | `company.get_filings(form="10-Q", 5)`                         |
-| Get a company filing by accession_number | `company.get_filing(accession_number="0000320193-21-000139")` |
-| Get the company's financials             | `company.get_financials()`                                    |
-| Get the company's balance sheet          | `company.financials.balance_sheet()`                          |
-| Get the company's income statement       | `company.financials.income_statement()`                       |
-| Get the company's cash flow statement    | `company.financials.cashflow_statement()`                     |
+| 📄 Get 10-K as data object              | `tenk = company.get_filings(form="10-K").latest().obj()`      |
+| 🏢 Get auditor information              | `tenk.auditor`                                                |
+| 🏢 Get auditor name                     | `tenk.auditor.name`                                           |
+| 🔢 Get PCAOB firm ID                    | `tenk.auditor.firm_id`                                        |
+| 🏗️ Get subsidiaries                     | `tenk.subsidiaries`                                           |
+| 🐼 Subsidiaries as DataFrame            | `tenk.subsidiaries.to_dataframe()`                            |
+
+### Proxy statements (executive compensation) 💼
+
+> See also: [Proxy Statements Guide](guides/proxystatement-data-object-guide.md)
+
+|                                          | Code                                                          |
+|------------------------------------------|---------------------------------------------------------------|
+| 📋 Get latest proxy statement            | `proxy = company.get_filings(form="DEF 14A").latest().obj()`  |
+| 👤 Get CEO name                          | `proxy.peo_name`                                              |
+| 💰 Get CEO total compensation            | `proxy.peo_total_comp`                                        |
+| 📊 Get 5-year exec compensation DataFrame| `proxy.executive_compensation`                                |
+| 📈 Get pay vs performance DataFrame      | `proxy.pay_vs_performance`                                    |
+| 📉 Get company TSR                       | `proxy.total_shareholder_return`                               |
+| 📉 Get peer group TSR                    | `proxy.peer_group_tsr`                                        |

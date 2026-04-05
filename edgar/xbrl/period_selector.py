@@ -73,7 +73,15 @@ def select_periods(xbrl, statement_type: str, max_periods: int = 4) -> List[Tupl
             return periods_with_data
         else:
             # If no periods have sufficient data, return the candidates anyway
-            logger.warning("No periods with sufficient data found for %s %s, returning all candidates", xbrl.entity_name, statement_type)
+            # Issue #585: Downgrade to debug - this is a normal fallback, not a user-actionable warning
+            fiscal_year = xbrl.entity_info.get('fiscal_year_end', 'Unknown')
+            period_of_report = xbrl.period_of_report or 'Unknown'
+            logger.debug(
+                "Period filtering fallback for %s %s: No periods met data thresholds. "
+                "Returning %d candidate periods. Period: %s | Fiscal Year End: %s",
+                xbrl.entity_name, statement_type, len(candidate_periods),
+                period_of_report, fiscal_year
+            )
             return candidate_periods
 
     except Exception as e:
@@ -233,8 +241,22 @@ def _select_duration_periods(periods: List[Dict], entity_info: Dict[str, Any], m
     fiscal_year_end_month = entity_info.get('fiscal_year_end_month')
     fiscal_year_end_day = entity_info.get('fiscal_year_end_day')
 
+    # Issue #600: Also check document_type and annual_report flag
+    # Some filings (like GE 2015 10-K) report fiscal_period='Q4' even for annual reports
+    is_annual_report = entity_info.get('annual_report', False)
+    document_type = entity_info.get('document_type', '')
+    annual_form_types = (
+        '10-K', '10-K/A', '10-KT', '10-KT/A',  # Standard and transition annual reports
+        '10-KSB', '10-KSB/A',                   # Small business (legacy)
+        '20-F', '20-F/A',                       # Foreign private issuers
+        '40-F', '40-F/A',                       # Canadian issuers
+    )
+
+    # Consider it annual if: fiscal_period == 'FY' OR it's flagged as annual OR it's an annual form type
+    is_annual = fiscal_period == 'FY' or is_annual_report or document_type in annual_form_types
+
     # Filter for annual periods if this is an annual report
-    if fiscal_period == 'FY':
+    if is_annual:
         annual_periods = _get_annual_periods(duration_periods)
         if annual_periods:
             # Apply fiscal year alignment scoring

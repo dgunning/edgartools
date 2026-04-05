@@ -1,4 +1,8 @@
-# Working with Current Filings
+---
+description: Access the latest SEC filings as they are published. Filter by form type and monitor real-time EDGAR activity.
+---
+
+# Get Today's SEC Filings: Real-Time EDGAR Filing Access
 
 ## Overview
 

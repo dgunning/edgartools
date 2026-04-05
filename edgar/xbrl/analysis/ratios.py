@@ -39,10 +39,11 @@ def _clean_series_data(series: pd.Series) -> pd.Series:
     cleaned = series.copy()
 
     # Convert empty strings to NaN
-    if cleaned.dtype == object:
+    # Use pd.api.types for pandas 2.x/3.x compatibility
+    if pd.api.types.is_object_dtype(cleaned) or pd.api.types.is_string_dtype(cleaned):
         # Replace empty strings and whitespace-only strings with NaN
-        cleaned = cleaned.replace(r'^\s*$', np.nan, regex=True).infer_objects(copy=False)
-        cleaned = cleaned.replace('', np.nan).infer_objects(copy=False)
+        cleaned = cleaned.replace(r'^\s*$', np.nan, regex=True)
+        cleaned = cleaned.replace('', np.nan)
 
         # Try to convert to numeric, coercing errors to NaN
         cleaned = pd.to_numeric(cleaned, errors='coerce')

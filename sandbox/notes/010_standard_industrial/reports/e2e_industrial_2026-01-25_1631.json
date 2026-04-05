@@ -1,0 +1,382 @@
+{
+  "run_id": "e2e_industrial_2026-01-25T16:31:07.293896",
+  "timestamp": "2026-01-25T16:31:07.293908",
+  "config": {
+    "group": "industrial_33",
+    "workers": 6,
+    "years": 2,
+    "quarters": 2,
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": null,
+    "tickers": [
+      "AAPL",
+      "MSFT",
+      "GOOG",
+      "AMZN",
+      "META",
+      "NVDA",
+      "TSLA",
+      "CAT",
+      "GE",
+      "HON",
+      "DE",
+      "MMM",
+      "EMR",
+      "RTX",
+      "ASTE",
+      "PG",
+      "KO",
+      "PEP",
+      "WMT",
+      "COST",
+      "HSY",
+      "XOM",
+      "CVX",
+      "COP",
+      "SLB",
+      "PBF",
+      "JNJ",
+      "UNH",
+      "LLY",
+      "PFE",
+      "UPS",
+      "FDX",
+      "BA"
+    ]
+  },
+  "overall_summary": {
+    "10k_total": 62,
+    "10k_passed": 48,
+    "10k_skipped": 0,
+    "10q_total": 39,
+    "10q_passed": 39,
+    "10q_skipped": 0
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 12,
+      "10k_passed": 12,
+      "10k_skipped": 0,
+      "10q_total": 14,
+      "10q_passed": 14,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 16,
+      "10k_passed": 12,
+      "10k_skipped": 0,
+      "10q_total": 8,
+      "10q_passed": 8,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 12,
+      "10k_passed": 12,
+      "10k_skipped": 0,
+      "10q_total": 9,
+      "10q_passed": 9,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 10,
+      "10k_passed": 4,
+      "10k_skipped": 0,
+      "10q_total": 2,
+      "10q_passed": 2,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 6,
+      "10k_passed": 2,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 6,
+      "10k_passed": 6,
+      "10k_skipped": 0,
+      "10q_total": 6,
+      "10q_passed": 6,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 14,
+  "skipped_count": 0,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "GE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000040545-24-000027",
+      "metric": "OperatingIncome",
+      "xbrl_value": -10770000000.0,
+      "ref_value": 4717000000.0,
+      "variance_pct": 128.3,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:OperatingIncome",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "filing_date": "2025-11-02",
+      "accession_no": "0001104659-25-122321",
+      "metric": "OperatingIncome",
+      "xbrl_value": 2671000000.0,
+      "ref_value": 8416000000.0,
+      "variance_pct": 68.3,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:OperatingIncome",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "filing_date": "2024-10-27",
+      "accession_no": "0001558370-24-016169",
+      "metric": "OperatingIncome",
+      "xbrl_value": 9039000000.0,
+      "ref_value": 11427000000.0,
+      "variance_pct": 20.9,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:OperatingIncome",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "EMR",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "filing_date": "2024-09-30",
+      "accession_no": "0000032604-24-000041",
+      "metric": "OperatingIncome",
+      "xbrl_value": -3552000000.0,
+      "ref_value": 2666000000.0,
+      "variance_pct": 33.2,
+      "mapping_source": "tree",
+      "concept_used": null,
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "XOM",
+      "sector": "Energy",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000034088-25-000010",
+      "metric": "OperatingIncome",
+      "xbrl_value": -55569000000.0,
+      "ref_value": 39652000000.0,
+      "variance_pct": 40.1,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:OperatingIncome",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "XOM",
+      "sector": "Energy",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000034088-24-000018",
+      "metric": "OperatingIncome",
+      "xbrl_value": -35344000000.0,
+      "ref_value": 44461000000.0,
+      "variance_pct": 20.5,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:OperatingIncome",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0001163165-25-000012",
+      "metric": "OperatingIncome",
+      "xbrl_value": 39154000000.0,
+      "ref_value": 12783000000.0,
+      "variance_pct": 206.3,
+      "mapping_source": "tree",
+      "concept_used": null,
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0001163165-24-000010",
+      "metric": "OperatingIncome",
+      "xbrl_value": 39726000000.0,
+      "ref_value": 15026000000.0,
+      "variance_pct": 164.4,
+      "mapping_source": "tree",
+      "concept_used": null,
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "SLB",
+      "sector": "Energy",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000950170-25-007638",
+      "metric": "OperatingIncome",
+      "xbrl_value": 15923000000.0,
+      "ref_value": 6326000000.0,
+      "variance_pct": 151.7,
+      "mapping_source": "tree",
+      "concept_used": null,
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "SLB",
+      "sector": "Energy",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000950170-24-006884",
+      "metric": "OperatingIncome",
+      "xbrl_value": 6523000000.0,
+      "ref_value": 5488000000.0,
+      "variance_pct": 18.9,
+      "mapping_source": "tree",
+      "concept_used": null,
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "JNJ",
+      "sector": "Healthcare_Pharma",
+      "form": "10-K",
+      "filing_date": "2024-12-29",
+      "accession_no": "0000200406-25-000038",
+      "metric": "OperatingIncome",
+      "xbrl_value": 36640000000.0,
+      "ref_value": 21249000000.0,
+      "variance_pct": 72.4,
+      "mapping_source": "tree",
+      "concept_used": null,
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "JNJ",
+      "sector": "Healthcare_Pharma",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000200406-24-000013",
+      "metric": "OperatingIncome",
+      "xbrl_value": -7398000000.0,
+      "ref_value": 22009000000.0,
+      "variance_pct": 66.4,
+      "mapping_source": "tree",
+      "concept_used": null,
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "PFE",
+      "sector": "Healthcare_Pharma",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000078003-25-000054",
+      "metric": "OperatingIncome",
+      "xbrl_value": -17941000000.0,
+      "ref_value": 14830000000.0,
+      "variance_pct": 21.0,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:OperatingIncome",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "PFE",
+      "sector": "Healthcare_Pharma",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000078003-24-000039",
+      "metric": "OperatingIncome",
+      "xbrl_value": -18665000000.0,
+      "ref_value": 4223000000.0,
+      "variance_pct": 342.0,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:OperatingIncome",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    }
+  ],
+  "skipped": [],
+  "errors": []
+}

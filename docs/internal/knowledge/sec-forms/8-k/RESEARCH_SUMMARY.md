@@ -102,7 +102,7 @@ decimal_item_pattern = r"^(Item\s{1,3}[0-9]{1,2}\.[0-9]{2})\.?"
 - *Need to add*: Legacy and mid-period tests
 
 **Related:**
-- `/tests/batch/batch_eightk.py` (Batch testing infrastructure)
+- `/scripts/batch/batch_eightk.py` (Batch testing infrastructure)
 
 ## Next Actions
 

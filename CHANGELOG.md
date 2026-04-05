@@ -7,6 +7,858 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.19.0] - 2026-02-28
+
+### Added
+
+- **FundShareholderReport Data Object (N-CSR/N-CSRS)** — Parse fund shareholder reports into structured data ([099d09d](https://github.com/dgunning/edgartools/commit/099d09d))
+
+- **EX-21 Subsidiaries Parser** for 10-K filings — Extract subsidiary lists from Exhibit 21 ([bea2632](https://github.com/dgunning/edgartools/commit/bea2632))
+
+- **Auditor Property on CompanyReport** — Access auditor information directly from report objects ([6174620](https://github.com/dgunning/edgartools/commit/6174620))
+
+- **Reports Property on CompanyReport** — Access XBRL viewer pages from report objects ([63953db](https://github.com/dgunning/edgartools/commit/63953db))
+
+- **`to_facts_dataframe()` on EarningsRelease and FinancialTable** — Convert 8-K earnings data to structured DataFrames for analysis ([f866ce8](https://github.com/dgunning/edgartools/commit/f866ce8))
+
+### Fixed
+
+- **8-K Income Statement Classification** — Fixed classification failing for 56% of filings ([#633](https://github.com/dgunning/edgartools/issues/633))
+
+- **XBRL Label Truncation in FortyF** — Fixed statements label truncation when nested inside FortyF panel ([95155c3](https://github.com/dgunning/edgartools/commit/95155c3))
+
+## [5.18.0] - 2026-02-26
+
+### Added
+
+- **FortyF Data Object (40-F Canadian MJDS)** — New data object for Form 40-F annual reports filed by ~200 Canadian cross-listed companies (Shopify, Royal Bank, Barrick Gold, etc.). Unlike 10-K filings, the 40-F wrapper is an iXBRL shell — the actual business content lives in the Annual Information Form (AIF) exhibit. FortyF identifies the AIF via a 5-tier priority chain and extracts NI 51-102 sections with regex-based detection and three-layer disambiguation (TOC entries, cross-references, page footers). Validated across 24 Canadian filers with 92% business extraction and 100% items detection.
+  - Named section properties: `.business`, `.risk_factors`, `.corporate_structure`, `.dividends`, `.capital_structure`, `.directors_and_officers`, `.legal_proceedings`
+  - Fuzzy section lookup: `forty_f["business"]` matches "Description Of The Business"
+  - Raw document access: `.aif_html`, `.aif_text` for downstream rendering and LLM input
+  - MD&A exhibit discovery: `.mda_attachment`, `.mda_html`, `.mda_text` for filers that include a separate MD&A (e.g. Manulife)
+  - Rich display with NI 51-102 section tree and `to_context()` for LLM agents
+  - **Files**: `edgar/company_reports/forty_f.py`
+
+- **EntityFacts Discovery Methods** — New `search_concepts()` and `available_periods()` methods on EntityFacts let users explore what concepts and periods a company actually has before querying, instead of guessing names and getting silent None returns ([20ba29d](https://github.com/dgunning/edgartools/commit/20ba29d))
+
+- **Helpful Warnings on Silent None Returns** — `get_fact()`, `get_annual_fact()`, and `get_concept()` now emit `UserWarning` with fuzzy "did you mean?" suggestions via `difflib` and tips pointing to `search_concepts()` / `available_periods()` when they return None ([2837d4e](https://github.com/dgunning/edgartools/commit/2837d4e))
+
+- **XBRL Notes/Disclosures Access** — Five new convenience methods on the XBRL object (`.notes`, `.disclosures`, `.list_tables()`, `.get_table()`, `.get_disclosure()`) so users can discover and access all XBRL tables directly without navigating through Statements first ([7006bc9](https://github.com/dgunning/edgartools/commit/7006bc9))
+
+- **`Filing.obj_type` Property** — Preview what `.obj()` will return (e.g. `'TenK'`, `'Form4'`) without parsing the filing. Returns None for unsupported form types ([618519b](https://github.com/dgunning/edgartools/commit/618519b))
+
+- **`get_operating_income()` on Financials** — XBRL concept-first lookup with label fallback, matching the `get_revenue()` pattern ([#663](https://github.com/dgunning/edgartools/issues/663))
+
+- **`cash_flow_statement()` Alias** — Added `cash_flow_statement()` as an alias for `cashflow_statement()` on all surfaces (Company, Financials, XBRL) for discoverability ([b8558eb](https://github.com/dgunning/edgartools/commit/b8558eb))
+
+- **Period Format Normalization** — Either `"2023-FY"` or `"FY 2023"` now works everywhere. EntityFacts and MultiPeriodStatement used different formats, causing silent failures when passing periods between APIs. Both formats are now accepted transparently at API boundaries ([f33d02a](https://github.com/dgunning/edgartools/commit/f33d02a))
+
+### Fixed
+
+- **8-K Parenthesized Negative Values** — Fixed negative sign loss when 8-K earnings tables render values like `$(0.09)` as separate `<td>` cells for `$`, `(`, `0.09`, `)`. The parentheses are now reassembled correctly ([26902468](https://github.com/dgunning/edgartools/commit/26902468))
+
+## [5.17.1] - 2026-02-25
+
+### Fixed
+
+- **MCP outputSchema mismatch** — All MCP tool calls were failing because tools advertised `outputSchema` in their definitions but returned `TextContent` (text), causing clients to reject every response. Tools no longer advertise structured output when they return text ([#662](https://github.com/dgunning/edgartools/issues/662))
+
+- **MTD balance sheet resolution** — Essential-concept validation now applies across all cascade steps in `find_statement()`, not just `_match_by_standard_name`. Prevents mislabeled roles (e.g. MTD's StatementOfFinancialPositionClassified containing only Schedule II) from being re-discovered by later matching strategies ([#659](https://github.com/dgunning/edgartools/issues/659))
+
+## [5.17.0] - 2026-02-24
+
+### Added
+
+- **MCP Tool Expansion** — Major expansion of the MCP tool suite from 5 to 10 tools:
+  - `edgar_monitor`: real-time SEC filings feed via `get_current_filings()`
+  - `edgar_trends`: XBRL-sourced financial time series with YoY growth and CAGR
+  - `edgar_screen`: company discovery by industry/SIC, exchange, and state using local reference data (zero API calls)
+  - `edgar_text_search`: SEC EFTS full-text search with query, form type, company, and date range filters
+  - `portfolio_diff` analysis type on `edgar_ownership` for quarter-over-quarter 13F holdings changes
+  - 4 analysis prompts: `due_diligence`, `earnings_analysis`, `industry_overview`, `insider_monitor`
+  - All tools now declare `outputSchema` describing the shared `ToolResponse` envelope
+
+- **`search_filings()` Library API** — Full-text search extracted from MCP into a proper library function at `edgar.search.efts`. Rich display, iteration, indexing, and `.get_filing()` on results. Exported from top-level: `from edgar import search_filings`
+
+- **MCP Filing Support for 20-F/6-K** — Section maps for foreign private issuer filings, enabling extraction of business, risk_factors, MD&A, financials, directors, shareholders, and controls sections. Includes IFRS concept-to-statement-type fallback mappings for ~200 standard IFRS concepts ([#660](https://github.com/dgunning/edgartools/issues/660), contributor: [@mscilipoti](https://github.com/mscilipoti))
+
+- **`view` Parameter for Stitched Statements** — `StitchedStatement` and `MultiFinancials` accept `view='detailed'` to surface dimensional breakdowns (e.g. ERIE cost of operations sub-line items)
+
+- **MCP `edgar_compare` Metrics Filtering** — `edgar_compare` now extracts specific values (revenue, assets, margins) via EntityFacts getters with derived metrics (margins, YoY growth) instead of dumping raw statements
+
+- **MCP `edgar_company` Enriched Profile** — Profile now includes exchanges, industry, SIC description, business category, filer status, SRC/EGC flags, foreign filer info, shares outstanding, and public float
+
+### Fixed
+
+- **STZ income statement resolution** — Fixed ComprehensiveIncome fallback being incorrectly filtered when the P&L-containing statement is a ComprehensiveIncome candidate. Now validates directly against IncomeStatement criteria ([#659](https://github.com/dgunning/edgartools/issues/659))
+
+- **DIS cash flow stitching** — Fixed stitching failure when companies switch between aggregate and continuing-operations cash flow concepts across filing years. Added standard concept mappings for equivalent rows and fixed period_type variable shadowing ([#646](https://github.com/dgunning/edgartools/issues/646))
+
+- **RenderedStatement serialization** — Replaced unpicklable closures (`format_func`, lambda) with picklable callable classes (`CellFormatter`, `PreformattedValue`), and handle `ElementCatalog` objects in `to_dict()` so `json.dumps()` succeeds when dimension metadata is present
+
+- **MCP `edgar_ownership`** — Removed broken `institutions` analysis type that returned a hardcoded apology message
+
+- **MCP entry point** — Fixed package entry point for MCP server
+
+## [5.16.3] - 2026-02-21
+
+### Added
+
+- **RenderedStatement serialization** — `RenderedStatement` now supports `to_dict()` / `from_dict()` for JSON-safe serialization of rendered financial statements. Cell formatters are pre-applied on serialize; passthrough lambdas are used on deserialize, enabling round-trip transport of rendered statements without requiring XBRL context.
+
+- **TTM period control in MCP tool** — The `edgar_company` MCP tool now accepts `period='ttm'` to request trailing-twelve-month income and cash flow statements directly from the tool interface.
+
+### Fixed
+
+- **TTM `max_periods` threading** — `Company.income_statement()` and `Company.cashflow_statement()` now correctly forward the `periods` parameter through to the TTM statement builder. Previously, `max_periods` was ignored when `period='ttm'`, always returning the default number of periods ([PR #650](https://github.com/dgunning/edgartools/pull/650), contributor: [@baqamisaif](https://github.com/baqamisaif))
+
+### Performance
+
+- **XBRL pipeline optimizations** — Significant speed and memory improvements to the XBRL statement rendering pipeline:
+  - Reverse index in `xbrl.py` reduces `_find_facts_for_element()` from O(nodes * contexts) to O(nodes)
+  - Two presentation-tree loops in `facts.py` merged into one with early exit
+  - Currency resolved at closure-creation time so formatter closures no longer retain a reference to the entire XBRL object
+  - Net savings: ~15-25 ms per statement pipeline; ~4-11 MB per `RenderedStatement`
+
+## [5.16.1] - 2026-02-18
+
+### Fixed
+
+- **Stitching: standard_concept propagation** — Stitched statements now correctly propagate `standard_concept` metadata through the pipeline, fixing missing column in DataFrames ([#649](https://github.com/dgunning/edgartools/issues/649))
+
+- **Stitching: duplicate row merging** — When multiple filings map different tags to the same `standard_concept`, rows are now merged instead of duplicated (e.g., BRO equity showing two lines) ([#643](https://github.com/dgunning/edgartools/issues/643))
+
+- **Stitching: current/noncurrent debt disambiguation** — Added tag-name hints so long-term debt is no longer incorrectly reclassified as current debt during stitching (e.g., FOX) ([#644](https://github.com/dgunning/edgartools/issues/644))
+
+- **DECK Income Before Tax mapping** — Removed incorrect exclusion and added GAAP mapping for DECK's income-before-tax tag ([#648](https://github.com/dgunning/edgartools/issues/648))
+
+- **EarningsRelease: split-cell negative signs** — Fixed parenthesized negative notation not being detected when split across table cells ([#633](https://github.com/dgunning/edgartools/issues/633))
+
+- **EarningsRelease: duplicate column names** — Fixed crash in `scaled_dataframe` when earnings tables contain duplicate column headers
+
+- **matches_form: double /A appending** — Fixed `matches_form()` incorrectly appending `/A` twice for amendment matching
+
+## [5.16.0] - 2026-02-14
+
+### Added
+
+- **MoneyMarketFund Data Object** — New data object for N-MFP2 and N-MFP3 money market fund filings. Supports both N-MFP3 (June 2024+, daily time series) and N-MFP2 (2010–mid 2024, weekly Friday snapshots). Includes portfolio securities, repo collateral, share class data, and yield/NAV/liquidity time series.
+  - **Files**: `edgar/funds/nmfp3.py`
+
+- **FundCensus Data Object** — New data object for N-CEN annual fund census filings. Parses 280+ XML elements into 12 Pydantic models covering fund series, service providers, governance, ETF mechanics, broker commissions, and securities lending.
+  - **Files**: `edgar/funds/ncen.py`
+
+- **Truststore SSL Support** — Corporate VPN users can now use their OS native certificate store instead of disabling SSL verification. Enable via `configure_http(use_system_certs=True)` or `EDGAR_USE_SYSTEM_CERTS=true` environment variable. Truststore added as a core dependency.
+  - **Files**: `edgar/httpclient.py`, `edgar/diagnose_ssl/`
+
+- **Datamule Storage Backend** — Optional alternative filing source using datamule for faster SEC filing retrieval. Includes document/metadata readers and SGML fallback integration.
+  - **Files**: `edgar/storage/datamule/`
+
+- **Exhibit Type Descriptions** — Filing attachments now include human-readable descriptions based on standard SEC exhibit type codes (EX-10.1, EX-21, etc.).
+  - **Files**: `edgar/attachments.py`
+
+### Fixed
+
+- **CompanyNotFoundError** — `Company("INVALID")` now raises `CompanyNotFoundError` with fuzzy-match suggestions instead of silently returning a placeholder entity with CIK -999999999 ([#c418a7d](https://github.com/dgunning/edgartools/commit/c418a7d9))
+
+- **Disclosure Notes NaN Values** — Fixed balance-sheet-type disclosure notes (PPE, Accrued Liabilities) returning NaN by adding instant-period fallback for duration lookups ([#635](https://github.com/dgunning/edgartools/issues/635))
+
+- **Local Storage Pagination** — Fixed `get_filings()` returning only the most recent page when local storage was enabled but pagination files weren't present ([#639](https://github.com/dgunning/edgartools/issues/639))
+
+- **Entity.latest() Incomplete Results** — Fixed `Entity.latest(form, n)` returning fewer results than requested for large `n` values by falling back to full filing load when the fast path is insufficient
+
+## [5.15.3] - 2026-02-12
+
+### Fixed
+
+- **pyrate-limiter 4.0 Compatibility** — Fixed import failure with pyrate-limiter 4.0+ ([#640](https://github.com/dgunning/edgartools/issues/640))
+  - pyrate-limiter 4.0 removed `max_delay`, `raise_when_fail`, and `retry_until_max_delay` parameters from `Limiter.__init__()`
+  - Created compatibility shim that handles both pyrate-limiter 3.x and 4.x APIs
+  - Relaxed dependency constraint from `pyrate-limiter==3.9.0` to `pyrate-limiter>=3.0.0`
+
+## [5.15.0] - 2026-02-08
+
+### Added
+
+- **AI Skills Architecture** — Complete redesign of AI agent skills system with modular YAML-based architecture
+  - New skill evaluation framework with LLM-as-judge for A/B testing
+  - Intent-based MCP tools: `edgar_company`, `edgar_search`, `edgar_filing`, `edgar_compare`, `edgar_ownership`
+  - 82% reduction in skill file size through consolidation to lean YAML format
+  - 5 specialized skills: core, financials, holdings, ownership, reports, xbrl
+  - Symlink-based skill installation for auto-sync with package updates
+  - `.docs` API discovery pattern for agent learning
+  - **Files**: `edgar/ai/skills/`, `edgar/ai/mcp/`, `edgar/ai/evaluation/`
+
+- **XBRL Statement Discovery** — New methods for accessing XBRL financial statements
+  - Added `income_statement()`, `balance_sheet()`, `cashflow_statement()`, `equity_statement()`
+  - Redesigned XBRL and Statements rich display to match design language
+  - New `to_context()` method on Statements for LLM-optimized text representation
+  - Enhanced XBRL statement summaries with improved topic extraction
+  - **Files**: `edgar/xbrl/xbrl.py`, `edgar/xbrl/statements.py`
+
+- **LLM-Friendly String Representations** — Added `__str__()` and `to_context()` methods for AI agent integration
+  - `Company.__str__()` provides concise company overview
+  - `Financials.__str__()` and `to_context()` for financial data
+  - `Filings.__str__()` and `EntityFilings.__str__()` for filing lists
+  - Optimized for LLM context windows and agent workflows
+  - **Files**: `edgar/entity/core.py`, `edgar/xbrl/financials.py`, `edgar/_filings.py`
+
+### Fixed
+
+- **Entity Classification** — Fixed entity misclassification issues
+  - Elon Musk and other individuals no longer misclassified as companies due to CORRESP filings ([#624](https://github.com/dgunning/edgartools/issues/624))
+  - `resolve_company()` now rejects invalid company identifiers
+
+- **XBRL Statements** — Fixed XBRL statement classification and rendering issues
+  - Fixed OperatingExpenses mislabeled as 'Other' with flat hierarchy
+  - Fixed ALL-CAPS topic splitting in statement classification
+  - Removed redundant Name column from Statements rich display
+
+- **Filing Serialization** — Fixed `Filing.save()`/`load()` to serialize SGML content before pickling ([#631](https://github.com/dgunning/edgartools/issues/631))
+
+### Changed
+
+- **API Consistency** — Renamed `cash_flow()` to `cashflow_statement()` for consistency with other statement methods
+
+- **Document Size Limit** — Increased max document size from 500MB to 160MB for large filings with embedded content
+
+- **Stock Split Detection** — Prefer 8-K instant facts for stock split date detection ([Discussion #613](https://github.com/dgunning/edgartools/discussions/613))
+
+### Removed
+
+- **Legacy MCP Handlers** — Removed deprecated legacy MCP handlers and utilities
+  - Cleaned up `company_research.py`, `financial_analysis.py`, `industry_analysis.py`
+  - All functionality moved to intent-based tools in redesigned architecture
+
+### Documentation
+
+- **AI Integration** — Updated AI integration documentation with current tool names and promoted in navigation
+- **Stock Splits** — Added comprehensive stock split detection and EPS normalization documentation
+- **Skills** — Rewrote skills README for YAML architecture with improved clarity and completeness
+
+## [5.14.0] - 2026-02-03
+
+### Performance
+
+- **SGML Parser 10x Faster** — Rewrote SGML parser from line-by-line to offset scanning with lazy content references. Parse times drop from 52ms to 5.5ms for large filings (Apple 10-K, 9.3MB). Peak memory reduced 275x (23.4MB to 0.1MB). Form 4 parsing is 71x faster (96ms to 1.3ms) by removing a network call from header parsing.
+
+- **SGML Max File Size** — Raised max content size from 200MB to 500MB to handle large filings with embedded images.
+
+### Improved
+
+- **Entity Classification** — `is_individual` / `is_company` now uses a 9-signal priority chain for more accurate classification of SEC entities. Catches holding companies, old/inactive companies, and institutional investors that were previously misclassified as individuals. ([#624](https://github.com/dgunning/edgartools/issues/624))
+  - Insider transaction flags (`insiderTransactionForIssuerExists`) used as the strongest company signal
+  - Name-based heuristics detect company keywords (INC, CORP, LLC, FUND, etc.) with word-boundary matching to avoid false positives on personal names
+  - Ampersand (`&`) in entity names detected as a company/partnership signal
+  - Expanded recognized company forms from ~50 to 94 (adds small business, amendments, investment company, and proxy forms)
+
+### Fixed
+
+- **XBRL API Docs** — Corrected financials API examples in StatementType quick reference and quickstart docs. ([#580](https://github.com/dgunning/edgartools/issues/580), [#619](https://github.com/dgunning/edgartools/issues/619))
+
+- **Facts Query** — Added `is_dimensioned` column to facts query DataFrame output. ([#612](https://github.com/dgunning/edgartools/issues/612))
+
+## [5.13.1] - 2026-02-01
+
+### Fixed
+
+- **XBRL Fiscal Period Queries** — `get_facts_by_fiscal_period()` and `get_facts_by_fiscal_year()` now return data instead of empty DataFrames. Reporting periods were missing the `fiscal_year` and `fiscal_period` fields needed for these queries. ([#622](https://github.com/dgunning/edgartools/issues/622))
+
+- **13F Holdings Rendering** — Fixed crashes when issuer or ticker values contain NaN in holdings comparison and holdings history views.
+
+- **Entity Classification** — SC 13D filings no longer incorrectly classify an entity as a company.
+
+### Performance
+
+- **N-PORT Parsing 10x Faster** — Rewrote N-PORT fund report XML parsing from BeautifulSoup to lxml. Parse times drop from 2.4s to 245ms for large funds (3,800+ holdings). Memory usage reduced by 6x.
+
+- **CUSIP Ticker Resolution 10x Faster** — Replaced DataFrame lookups with dict-based resolution for CUSIP-to-ticker mapping. Eliminates noisy log warnings for placeholder CUSIPs used by foreign-domiciled securities.
+
+## [5.13.0] - 2026-01-29
+
+### Added
+
+- **13F Holdings Comparison**
+  - New `compare_holdings()` method for quarter-over-quarter analysis
+  - Returns `HoldingsComparison` view object with share and value deltas
+  - Status labels: NEW, CLOSED, INCREASED, DECREASED, UNCHANGED
+  - Includes percentage changes for both shares and values
+  - **Files**: `edgar/thirteenf/models.py`
+
+- **13F Holdings History**
+  - New `holding_history(periods=4)` method for multi-quarter trends
+  - Returns `HoldingsHistory` view object with up to 12 quarters of data
+  - Unicode sparkline visualization for trend analysis
+  - Automatic deduplication by report period
+  - **Files**: `edgar/thirteenf/models.py`, `edgar/thirteenf/rendering.py`
+
+- **13F View Objects**
+  - New `holdings_view()` method returns `HoldingsView` object
+  - All view objects are iterable (yield dicts), sliceable, and Rich-renderable
+  - View objects have `.data` property for underlying DataFrame access
+  - Configurable `display_limit` parameter for Rich rendering
+  - **Files**: `edgar/thirteenf/models.py`
+
+### Performance
+
+- **13F XML Parsing Optimization**
+  - Implemented lxml-based XML parser for 8x performance improvement
+  - Reduces parsing time from ~0.8s to ~0.1s for large filings
+  - Maintains backward compatibility with existing API
+  - **Files**: `edgar/thirteenf/parsers/infotable_xml.py`
+
+### Fixed
+
+- **13F Related Filings**
+  - Fixed `_related_filings` to filter only 13F forms
+  - Improved related filings scope and deduplication
+  - Updated test assertions for related filings behavior
+  - **Files**: `edgar/thirteenf/models.py`, `tests/test_thirteenf.py`
+
+- **13F Holdings Rendering**
+  - Fixed NaN handling in holdings display
+  - Fixed missing column handling in rendering logic
+  - Improved sparkline scaling with mean-centered ±50% range
+  - **Files**: `edgar/thirteenf/rendering.py`
+
+## [5.12.3] - 2026-01-29
+
+### Fixed
+
+- **Ticker/CIK Lookup Compatibility**
+  - Fixed CIK type conversion to work across different pandas/PyArrow versions
+  - Resolves `find_cik()` returning string CIKs instead of integers in some environments
+  - Fixes PyArrow conversion errors in GitHub Actions and other environments
+  - **Files**: `edgar/reference/tickers.py`
+  - **Issues**: #620, #621
+
+- **Data Staleness Warnings**
+  - Reduced false positive warnings when querying recent filings
+  - Refined warning threshold from 6 months to 5 days
+  - Simplified warning messages for clarity
+  - **Files**: `edgar/_filings.py`
+  - **Issues**: #620
+
+### Changed
+
+- **Reference Data Update**
+  - Updated company tickers from 10,196 to 10,532 companies (+336 new companies)
+  - Added recently public companies including DCX (CIK 1957413) and VTIX (CIK 1606242)
+  - Data is now 50 days fresher than previous version
+  - **Files**: `edgar/reference/data/company_tickers.parquet`
+  - **Issues**: #621
+
+## [5.12.2] - 2026-01-26
+
+### Fixed
+
+- **8-K Earnings Table Parsing**
+  - Fixed three bugs in earnings table dtype handling
+  - Handle pandas StringDtype columns correctly in earnings parser
+  - Prevent dtype errors when processing financial statement tables
+  - **Files**: `edgar/earnings.py`
+
+## [5.12.1] - 2026-01-25
+
+### Fixed
+
+- **Pandas Compatibility**
+  - Added pandas 3.0 compatibility while maintaining Python 3.10 support
+  - Fixed regex compatibility for pandas 2.1+ in date validation
+  - **Files**: `edgar/`, test files
+
+- **Date Handling**
+  - Fixed date comparison with NaN in pivot_by_period operations
+  - Prevents errors when handling missing date values in financial data
+  - **Files**: `edgar/` (pivot operations)
+
+- **Table Parsing**
+  - Improved column header extraction for tables without `<thead>` elements
+  - Fixed column header extraction for single-row table headers
+  - Handle split date rows in earnings table headers correctly
+  - **Files**: `edgar/earnings.py`, `edgar/documents/`
+
+- **Earnings Detection**
+  - Made `has_earnings` property consistent with `earnings` property behavior
+  - **Files**: `edgar/company_reports/current_report.py`
+
+- **Testing**
+  - Fixed mock attachments in issue 332 regression test
+  - Improved test mocks for pandas compatibility
+  - **Files**: test files
+
+### Changed
+
+- **Documentation**
+  - Removed website fields from docs (SEC API no longer provides this data)
+  - Fixed PeriodType documentation for clarity
+  - Improvements to README.md for better onboarding
+  - **Files**: `README.md`, `docs/`, docstrings
+
+## [5.12.0] - 2026-01-23
+
+### Added
+
+- **8-K Earnings Parser**
+  - New `edgar/earnings.py` module for extracting financial tables from 8-K earnings releases
+  - Uses Document parser to handle complex HTML table structures with colspan/rowspan patterns
+  - Automatic statement type classification (income statement, balance sheet, cash flow)
+  - Scale detection (units, thousands, millions, billions)
+  - Multiple output formats: `to_context()`, `to_html()`, `to_json()`, `to_markdown()`
+  - Token-efficient context generation with minimal/standard/full detail levels for AI analysis
+  - EightK integration: `has_earnings`, `earnings` property, statement shortcuts
+  - Safe accessors: `get_income_statement()`, `get_balance_sheet()`, `get_cash_flow_statement()`
+  - **Files**: `edgar/earnings.py`, `edgar/company_reports/current_report.py`
+
+- **Business Development Company (BDC) Support**
+  - Comprehensive BDC module for analyzing closed-end investment companies
+  - `BDCEntity` class for individual BDC analysis with filings and SOI access
+  - `BDCEntities` collection with `get_by_cik()` and `get_by_ticker()` methods
+  - `PortfolioInvestment` model for individual holdings with PIK rate support
+  - Facts-based extraction for portfolio investments
+  - Cross-BDC portfolio company search to find which BDCs hold a specific company
+  - SEC DERA BDC Data Sets integration
+  - Fuzzy search for BDCs by name or ticker
+  - `is_active` property and visual status indicators
+  - `DataQuality` metrics and data availability checks
+  - **Files**: `edgar/bdc/` module
+
+### Fixed
+
+- **Financials Dimension Parameter**
+  - Fixed the default for the dimension parameter when passed from the financials object
+  - **Files**: `edgar/financials.py`
+
+- **HTTP Error Handling**
+  - Improved `TooManyRequestsError` with actionable guidance for users
+  - Added `RemoteProtocolError` to retryable exceptions for bulk downloads
+  - **Files**: `edgar/httprequests.py`
+
+### Changed
+
+- **Dependencies**
+  - Upgraded `httpxthrottlecache` from >=0.1.6 to >=0.3.0
+  - Removed `hishel` dependency (no longer needed in httpxthrottlecache v0.3.0)
+  - httpxthrottlecache v0.3.0 uses FileCache as default backend instead of Hishel
+  - Better suited for Edgar's large immutable file downloads
+  - **Files**: `pyproject.toml`, `docs/configuration.md`
+
+- **Performance Improvements**
+  - Improved HTTP connection reuse and bulk download timeouts
+  - Increased maximum document size when streaming HTML
+  - **Files**: `edgar/httprequests.py`
+
+- **Reference Data**
+  - Updated CUSIP-Ticker mappings for December 2025
+  - **Files**: `edgar/reference/data/`
+
+## [5.11.2] - 2026-01-22
+
+### Fixed
+
+- **EntityFacts Revenue Extraction**
+  - Fixed `get_revenue()` and other financial methods returning None for companies like TSLA
+  - Root cause: Abstract header rows matched label patterns before actual data rows
+  - Solution: Added concept-based search using standardization mappings, filters abstract rows
+  - Now uses XBRL concept names (e.g., `us-gaap_RevenueFromContractWithCustomer...`) instead of fragile label matching
+  - Falls back to label-based search for edge cases
+  - **Files**: `edgar/financials.py`
+
+- **Amended Filing Handling**
+  - Fixed `latest_tenk` and `latest_tenq` returning amended filings (10-K/A, 10-Q/A) which often lack complete XBRL data
+  - Solution: Added `amendments=False` filter to exclude amended filings
+  - **Files**: `edgar/entity/core.py`
+
+### Changed
+
+- **⚠️ BEHAVIORAL CHANGE: EntityFacts Default Period Selection**
+  - **EntityFacts financial methods now default to annual (FY) periods instead of most recent**
+  - Affected methods: `get_revenue()`, `get_net_income()`, `get_total_assets()`, `get_total_liabilities()`, `get_shareholders_equity()`, `get_operating_income()`, `get_gross_profit()`, and their `_detailed()` variants
+  - **Before**: `facts.get_revenue()` returned most recent fact (could be quarterly Q3 data)
+  - **After**: `facts.get_revenue()` returns most recent annual FY data (falls back to most recent if no annual available)
+  - **Migration**:
+    - To get the old behavior (most recent regardless of period): `facts.get_revenue(annual=False)`
+    - To explicitly request quarterly: `facts.get_revenue(period="2024-Q3")`
+    - To explicitly request annual: `facts.get_revenue(period="2024-FY")` or `facts.get_revenue(annual=True)` (default)
+  - **Rationale**: Annual facts are more meaningful for financial analysis and consistent with `get_financials()` behavior
+  - **Files**: `edgar/entity/entity_facts.py`
+
+- **Dependencies**
+  - Pinned `pyrate-limiter` to version 3.9.0 to avoid API breakage in 4.0
+  - **Files**: `pyproject.toml`
+
+## [5.11.1] - 2026-01-21
+
+### Fixed
+
+- **Timezone Handling**
+  - Replaced pytz with stdlib zoneinfo for timezone handling
+  - Removed undeclared pytz dependency
+  - Uses standard library for better compatibility
+  - **Files**: `edgar/` (various timezone-related files)
+
+- **Pandas 3.0 Compatibility**
+  - Pinned pandas to <3.0 to avoid breaking changes
+  - Fixed NaN handling in balance tests
+  - Ensures stability until pandas 3.0 migration is complete
+  - **Files**: `pyproject.toml`, test files
+
+- **Income Statement Selection** (Issue #608)
+  - Fixed incorrect income statement selection when multiple ComprehensiveIncome roles exist
+  - Resolves issue where OCI (Other Comprehensive Income) items were returned instead of P&L data
+  - Affects companies like STZ (Constellation Brands) with complex financial statement structures
+  - **Files**: `edgar/xbrl/statements.py` or related XBRL parsing files
+
+## [5.11.0] - 2026-01-20
+
+### Added
+
+- **Trailing Twelve Months (TTM) Calculations**
+  - Added comprehensive TTM calculations integrated into Company class
+  - Automatic Q4 derivation from annual and quarterly data
+  - Stock split adjustment support for accurate historical comparisons
+  - Robust input validation and data quality handling
+  - Methods for calculating TTM metrics from EntityFacts
+  - **Files**: `edgar/entity/ttm.py`, `edgar/entity/core.py`
+
+- **XBRL Concept Discovery**
+  - Added `list_concepts()` method to Company class for exploring available XBRL concepts
+  - New `ConceptList` class with rich display formatting for concept browsing
+  - Enables users to discover what financial data is available before querying
+  - **Files**: `edgar/entity/core.py`
+
+- **Currency Conversion for Foreign Filers**
+  - Added `CurrencyConverter` utility class for handling IFRS and foreign currency filings
+  - Supports automatic conversion of foreign currencies to USD
+  - Essential for analyzing international companies and IFRS reporters
+  - **Files**: `edgar/xbrl/currency.py`
+
+- **Rule 10b5-1 Trading Plan Detection**
+  - Added detection of Rule 10b5-1 trading plans in insider transactions
+  - Identifies pre-arranged trading plans vs. discretionary trades
+  - Enhanced transparency for insider trading analysis
+  - **Files**: `edgar/insider_transactions.py`
+
+- **Expanded Industry Classification**
+  - Expanded SIC code ranges for banking, healthcare, and energy industries
+  - Improved industry categorization accuracy
+  - Better support for sector-specific analysis
+  - **Files**: `edgar/reference/data/sic_ranges.py`
+
+### Fixed
+
+- **TTM Calculation Robustness**
+  - Added comprehensive input validation for TTM calculations
+  - Fixed division by zero and None comparison edge cases
+  - Replaced bare Exception catches with specific exception types
+  - Improved error messages and data quality handling
+  - **Files**: `edgar/entity/ttm.py`
+
+### Changed
+
+- **Test Coverage Requirements**
+  - Lowered coverage threshold to 65% to accommodate new experimental features
+  - Allows for faster feature development while maintaining core stability
+  - **Files**: `pyproject.toml`
+
+## [5.10.1] - 2026-01-17
+
+### Fixed
+
+- **Non-Deterministic XBRL Parsing** (Issue #601)
+  - Fixed non-deterministic results when loading Filing from pickle across Python processes
+  - Root cause: Set iteration order varies with Python hash randomization (PYTHONHASHSEED)
+  - Solution: Sort root_elements before iteration in calculation/presentation/rendering parsers
+  - Ensures identical DataFrame output regardless of Python's hash seed
+  - Critical for data pipelines requiring reproducible results
+  - **Files**: `edgar/xbrl/parsers/calculation.py`, `edgar/xbrl/parsers/presentation.py`, `edgar/xbrl/rendering.py`
+
+- **Incorrect Dimension Member Labels** (Issue #603)
+  - Fixed dimension_member_label showing incorrect values for multi-dimensional breakdowns
+  - Root cause: Used LAST dimension instead of PRIMARY (first) dimension
+  - Solution: Use dim_metadata[0] for primary_dim instead of dim_metadata[-1]
+  - Affects companies like GOOGL with multi-dimensional revenue breakdowns (YouTube ads, Google Network, etc.)
+  - Now consistent with dimension_axis and dimension_member which already use first dimension
+  - **Files**: `edgar/xbrl/statements.py`
+
+## [5.10.0] - 2026-01-15
+
+### Added
+
+- **Shares Outstanding API** (Issue #587)
+  - Added `get_shares_outstanding_basic()` and `get_shares_outstanding_diluted()` methods to Financials API
+  - New `_get_concept_value()` helper method for XBRL concept-based search (more reliable than label matching)
+  - Shares now included in `get_financial_metrics()` dictionary output
+  - Supports both annual and quarterly financials with period offset functionality
+  - Example: `financials.get_shares_outstanding_basic(period_offset=0)`
+  - **Files**: `edgar/financials.py`
+
+- **Filing.parse() Method** (Issue #598)
+  - Added `filing.parse()` convenience method returning structured Document object for DocumentSearch compatibility
+  - Method is cached with lru_cache for performance
+  - Returns None if HTML is not available (graceful edge case handling)
+  - Complements existing filing methods: `filing.html()`, `filing.text()`, `filing.xbrl()`
+  - Updated documentation in docs/advanced-search.md with correct usage examples
+  - **Files**: `edgar/_filings.py`, `docs/advanced-search.md`
+
+- **Table Width Control for AI Processing** (Issue #596)
+  - Added `table_max_col_width` parameter to TextExtractor, Document.text(), and get_text()
+  - Allows control over table column width to prevent truncation of long labels
+  - Default raised from 200 to 500 for AI/LLM processing (doc.text())
+  - Terminal display (print(doc)) uses 200 for readability
+  - Enables complete information extraction for AI analysis
+  - **Files**: `edgar/documents/document.py`, `edgar/documents/extractors/text_extractor.py`, `edgar/documents/renderers/fast_table.py`, `edgar/documents/migration.py`
+
+### Fixed
+
+- **Pandas FutureWarning in Statement Presentation** (Issue #599)
+  - Fixed incomplete metadata_cols list in _apply_presentation() causing FutureWarning
+  - Added missing metadata columns to exclusion list: standard_concept, is_breakdown, dimension_axis, dimension_member, dimension_member_label, dimension_label
+  - Boolean columns like is_breakdown were incorrectly processed through numeric transformation
+  - Added explicit numeric conversion before masked assignment for safety
+  - **Files**: `edgar/xbrl/statements.py`
+
+- **Empty Income Statements for 10-K Filings** (Issue #600)
+  - Fixed period selector using only fiscal_period == 'FY' to identify annual reports
+  - Some 10-K filings (like GE 2015) have fiscal_period='Q4' in XBRL metadata
+  - Now also checks document_type and annual_report flag for correct identification
+  - Prevents selector from choosing quarterly periods instead of annual periods (4-7% vs 70%+ data density)
+  - Affected filings: GE 2015/2016, CHTR 2017/2018, KHC 2015, WMB 2018, YUM 2016/2017, XOM 2015/2016
+  - Expanded annual form types to include 10-KT, 10-KT/A, 10-KSB, 10-KSB/A
+  - **Files**: `edgar/xbrl/period_selector.py`
+
+- **Dimension Member Labels in Facts API** (Issue #597)
+  - Dimensional facts now display their dimension member label (e.g., "Corporate Joint Venture") instead of parent concept label (e.g., "Total Assets")
+  - Makes Facts API consistent with Statement API behavior
+  - **Files**: `edgar/xbrl/facts.py`
+
+## [5.9.1] - 2026-01-14
+
+### Added
+
+- **Statement View Control** (edgartools-766g)
+  - Added `view` parameter to all Financials statement methods (income_statement, balance_sheet, cashflow_statement, etc.)
+  - Supports three view modes: STANDARD (face presentation), DETAILED (all dimensional data), SUMMARY (non-dimensional totals)
+  - Enables control over dimensional data display at the statement method level
+  - **Files**: `edgar/financials.py`, `edgar/xbrl/statements.py`
+
+- **Statement Row Breakdown Detection**
+  - Added `is_breakdown` boolean field to StatementRow dataclass
+  - Distinguishes face dimensions from breakdown dimensions in rendered statements
+  - Included in DataFrame output via `to_dataframe()`
+  - **Files**: `edgar/xbrl/statements.py`, `edgar/xbrl/rendering.py`
+
+- **Enhanced Statement Display**
+  - Aligned XBRL and EntityFacts statement displays with SEC filing format
+  - Added centered headers with company name and ticker badge
+  - Moved units note from header to footer for cleaner presentation
+  - Added ticker badge style (bold black on green) to design language
+  - Pass ticker to MultiPeriodStatement for display
+  - **Files**: `edgar/xbrl/rendering.py`, `edgar/entity/enhanced_statement.py`, `edgar/display/styles.py`, `edgar/entity/entity_facts.py`
+
+### Fixed
+
+- **10-K Section Extraction Improvements**
+  - Fixed TOC anchors pointing to PART headers instead of actual Item content (e.g., NovoCure filing)
+  - Now searches for actual ITEM headers when TOC returns suspiciously short content (<200 chars)
+  - Prefer part-based section keys (e.g., 'part_i_item_1') over direct keys (e.g., 'Item 1') in TenK lookup
+  - Fixes Snowflake case where both keys existed pointing to different sections
+  - **Files**: `edgar/company_reports/ten_k.py`, `edgar/documents/extractors/toc_section_extractor.py`
+
+- **Pattern Extractor TOC Confusion**
+  - Fixed pattern extractor matching Table of Contents entries instead of actual section headers
+  - Added TOC boundary detection and position-based filtering
+  - Prefer case-sensitive "ITEM" matches over case-insensitive matches
+  - Fixes extraction for filings without internal anchor links (Park Aerospace, SUIC Worldwide)
+  - **Files**: `edgar/documents/extractors/pattern_section_extractor.py`, `edgar/documents/utils/toc_analyzer.py`
+
+### Changed
+
+- **Unified Statement Rendering Styles**
+  - Migrated Statement matrix rendering from get_xbrl_styles() to get_statement_styles()
+  - Ensures consistency across all statement displays using unified design language
+  - **Files**: `edgar/xbrl/rendering.py`
+
+## [5.9.0] - 2026-01-12
+
+### Changed
+
+- **Standardization Now Preserves Original Labels** (Breaking Change)
+  - `standard=True` no longer replaces labels with standardized names
+  - Labels now always show the company's original presentation (fidelity to filing)
+  - New `standard_concept` column added to DataFrames for programmatic analysis
+  - This fixes duplicate label issues where multiple concepts mapped to the same standard name
+  - **Migration**: Use `df.groupby('standard_concept')` for cross-company aggregation
+  - **Files**: `edgar/xbrl/standardization/core.py`, `edgar/xbrl/rendering.py`, `edgar/xbrl/statements.py`
+
+### Added
+
+- **Statement._to_df() Debug Helper**
+  - Convenience method for viewing statement DataFrames with nice formatting
+  - Numbers formatted with commas (no scientific notation)
+  - Configurable columns: `show_concept`, `show_standard_concept`, `max_rows`
+  - Example: `bs._to_df(view='summary', max_rows=20)`
+
+## [5.8.3] - 2026-01-07
+
+### Fixed
+
+- **Combined Operations and Comprehensive Income Statements** (Issue #584)
+  - Statement resolver was incorrectly penalizing all roles containing "comprehensiveincome"
+  - This excluded valid combined statements like "CONSOLIDATEDSTATEMENTSOFOPERATIONSANDCOMPREHENSIVEINCOME"
+  - Caused REGN 2024 10-K to return only 3 rows instead of 78 for `income_statement()`
+  - Now only penalizes pure comprehensive income statements, not combined ones
+  - **Files**: `edgar/xbrl/statement_resolver.py`
+  - **Impact**: Correct income statement selection for companies using combined formats
+
+- **Statement of Equity Labels and Dimensional Value Matching** (Issue #583)
+  - Fixed dimensional items showing identical values for beginning/ending balance rows
+  - Track occurrences by (concept, label) tuple instead of concept only
+  - Added label standardization to transform "Ending balances" → semantic labels
+  - Added " - Beginning balance" / " - Ending balance" suffixes for multi-occurrence items
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Accurate equity statement with proper beginning/ending balance differentiation
+
+- **Period Selection Logging Noise** (Issue #585)
+  - Downgraded period selection fallback from warning to debug level
+  - This was logging noise, not a user-actionable warning - data retrieval is correct
+  - Added context (fiscal year, period of report, candidate count) for debugging
+  - **Files**: `edgar/xbrl/period_selector.py`
+  - **Impact**: Cleaner logs without spurious warnings
+
+## [5.8.2] - 2026-01-06
+
+### Added
+
+- **TwentyF Convenience Properties**
+  - Added properties for common 20-F sections matching TenK API style
+  - `business` / `company_information` → Item 4 (Information on the Company)
+  - `risk_factors` / `key_information` → Item 3 (Key Information)
+  - `management_discussion` / `operating_review` → Item 5 (Operating and Financial Review)
+  - `directors_and_employees` → Item 6
+  - `major_shareholders` → Item 7
+  - `financial_information` → Item 8
+  - `controls_and_procedures` → Item 15
+  - **Files**: `edgar/company_reports/twenty_f.py`
+
+- **Industry Extensions**
+  - Payment Networks industry with ticker-based lookup (V, MA, PYPL, etc.)
+  - Semiconductors industry extension (SIC 3674)
+  - Expanded Securities industry to include full Broker-Dealers range
+  - **Files**: `edgar/reference/industry_extensions/`
+
+### Fixed
+
+- **20-F Section Extraction** (edgartools-vvzd related)
+  - Fixed pattern extractor selecting cross-references instead of main section headers
+  - Cross-references like "See Item 4..." were incorrectly detected as section starts
+  - Now prefers uppercase main headers (e.g., "ITEM 4") over mixed-case cross-references
+  - **Files**: `edgar/documents/extractors/pattern_section_extractor.py`
+  - **Impact**: 20-F sections now return full content instead of truncated snippets
+
+- **Section Boundary Artifacts**
+  - Removed trailing page numbers from extracted section text (e.g., "\n\n  100")
+  - Removed next section headers bleeding into current section (e.g., "\n\n  PART IV\n\nItem 15")
+  - **Files**: `edgar/documents/document.py`
+  - **Impact**: Cleaner section text extraction for all filing types
+
+## [5.8.1] - 2026-01-05
+
+### Fixed
+
+- **Income Statement Resolver Tax Disclosure Issue** (Issue #581, edgartools-8wlx)
+  - Fixed resolver incorrectly selecting tax disclosure statements instead of main income statement
+  - Affected companies with both income statement and tax disclosure in same filing (e.g., MCHP 2016)
+  - **Files**: `edgar/xbrl/statement_resolver.py`
+  - **Impact**: Correct income statement selection for affected filings
+
+- **DataFrame Conversion None Value Handling** (Issue #582)
+  - Prevented None values from overwriting valid data during DataFrame conversion
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Accurate data preservation in statement DataFrames
+
+- **Schedule 13 Hierarchical Ownership Calculation**
+  - Fixed `total_shares` and `total_percent` for corporate control chain filings
+  - Previously summed all reporting persons (e.g., 393% total), now correctly detects hierarchical
+    ownership when percentages sum > 100.5% and returns the max (top of hierarchy)
+  - Caps `total_percent` at 100% to handle rounding artifacts in source data
+  - **Files**: `edgar/beneficial_ownership/schedule13.py`
+  - **Impact**: Accurate beneficial ownership totals for complex corporate structures
+
+## [5.8.0] - 2026-01-04
+
+### Added
+
+- **StatementView Enum for Semantic Dimension Filtering** (Issue #574, edgartools-dvel)
+  - New `StatementView` enum replaces confusing `include_dimensions` boolean
+  - Three presentation modes: STANDARD (face presentation), DETAILED (all dimensions), SUMMARY (totals only)
+  - Different defaults per use case: STANDARD for rendering, DETAILED for DataFrames
+  - Backward compatible with deprecation warning for `include_dimensions` (removed in v6.0)
+  - **Files**: `edgar/xbrl/presentation.py`, `edgar/xbrl/statements.py`
+  - **Impact**: Clearer, more semantic API for dimension filtering
+
+- **Enhanced Dimension Labels** (Issue #574)
+  - Added `dimension_member_label` column with just the member label (e.g., "Products")
+  - For multi-dimensional items, uses LAST (most specific) dimension's member label
+  - Structured dimension fields now available in XBRL facts queries
+  - `dimension_label` preserves original full format for backward compatibility
+  - **Files**: `edgar/xbrl/statements.py`, `edgar/xbrl/facts.py`
+  - **Impact**: Better disambiguation of dimensional data
+
+- **Matrix Rendering for Statement of Equity** (Issue #574, edgartools-uqg7)
+  - Opt-in matrix format via `to_dataframe(matrix=True)`
+  - Components as columns, activities as rows for cleaner visualization
+  - Works well for simple structures (AAPL, GOOGL, MSFT)
+  - Default remains standard list format for reliability across all companies
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Enhanced equity statement presentation for opt-in users
+
+### Fixed
+
+- **Statement of Equity Roll-Forward Period Matching** (Issue #572, edgartools-096c)
+  - Beginning balance rows now correctly use instant_{start_date - 1 day} values
+  - Ending balance rows use instant_{end_date} values
+  - Tracks concept occurrences to distinguish first vs. later appearances
+  - Consistent with render() behavior from Issue #450
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Correct balance values in Statement of Equity DataFrames
+
+- **Balance Sheet Concept Names** (Issue #570, edgartools-17ow)
+  - Fixed recognition and rendering of balance sheet items with certain concept patterns
+  - **Files**: `edgar/xbrl/statements.py`
+  - **Impact**: Complete balance sheet item display
+
+- **ORCL Statement Resolver** (edgartools-8ad8)
+  - Prefer main equity statements over parentheticals
+  - Added roll-forward concept pattern matching
+  - -80 score penalty for parenthetical statements ensures correct selection
+  - **Files**: `edgar/xbrl/statement_resolver.py`
+  - **Impact**: Correct statement selection for Oracle and similar companies
+
+- **XBRL Structural Element Filtering**
+  - Filters empty structural element rows (ProductMember, ServiceMember) from rendered statements
+  - Combined with dimension filtering for cleaner output
+  - **Files**: `edgar/xbrl/rendering.py`
+  - **Impact**: Cleaner statement rendering without empty XBRL artifacts
+
+- **Test Suite**
+  - Fixed mock test to account for new `view` parameter in Statement constructor
+  - **Files**: `tests/test_xbrl_statement_error_handling.py`
+  - **Impact**: All tests passing
+
+### Deprecated
+
+- **include_dimensions parameter**
+  - Use `view=StatementView.DETAILED` instead of `include_dimensions=True`
+  - Use `view=StatementView.STANDARD` instead of `include_dimensions=False`
+  - Deprecation warning raised when used
+  - Will be removed in v6.0.0
+  - **Impact**: Migration path provided with clear warnings
+
+### Summary
+
+Release 5.8.0 is a feature release introducing the StatementView enum for clearer dimension filtering semantics, enhanced dimension labels with better multi-dimensional handling, opt-in matrix rendering for Statement of Equity, and critical fixes for equity statement period matching and balance sheet rendering. The release maintains full backward compatibility while providing a clear migration path away from the deprecated `include_dimensions` parameter.
+
 ## [5.7.4] - 2026-01-03
 
 ### Added

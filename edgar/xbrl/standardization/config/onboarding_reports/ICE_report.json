@@ -1,0 +1,91 @@
+{
+  "ticker": "ICE",
+  "cik": 1571949,
+  "company_name": "Intercontinental Exchange, Inc.",
+  "archetype": "B",
+  "sic_code": "6200",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  ICE:\n    name: \"Intercontinental Exchange, Inc.\"\n    cik: 1571949\n    exclude_metrics:\n      - COGS\n      - Capex\n      - CurrentAssets\n      - CurrentLiabilities\n      - GrossProfit\n      - Inventory\n      - OperatingIncome\n      - SGA\n      - ShortTermDebt",
+  "metrics_passed": [
+    "Revenue",
+    "NetIncome",
+    "OperatingCashFlow",
+    "TotalAssets",
+    "Goodwill",
+    "IntangibleAssets",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "AccountsReceivable",
+    "AccountsPayable",
+    "DepreciationAmortization",
+    "InterestExpense",
+    "IncomeTaxExpense",
+    "EarningsPerShareDiluted",
+    "EarningsPerShareBasic",
+    "TotalLiabilities",
+    "StockholdersEquity",
+    "PropertyPlantEquipment",
+    "RetainedEarnings",
+    "InvestingCashFlow",
+    "FinancingCashFlow"
+  ],
+  "metrics_failed": [
+    "PretaxIncome",
+    "ResearchAndDevelopment",
+    "ShareRepurchases",
+    "DividendPerShare"
+  ],
+  "metrics_excluded": [
+    "COGS",
+    "SGA",
+    "OperatingIncome",
+    "Capex",
+    "ShortTermDebt",
+    "Inventory",
+    "GrossProfit",
+    "CurrentAssets",
+    "CurrentLiabilities"
+  ],
+  "failures": {
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 3628000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "ResearchAndDevelopment": {
+      "metric": "ResearchAndDevelopment",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "ShareRepurchases": {
+      "metric": "ShareRepurchases",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": -81000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "DividendPerShare": {
+      "metric": "DividendPerShare",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 1.8,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": false,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-04-04T09:57:27.684930"
+}

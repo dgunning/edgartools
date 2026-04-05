@@ -1,0 +1,263 @@
+# Industry-Specific Metric Mapping Configuration
+# Maps standard metrics to industry counterparts
+
+version: "1.0.0"
+
+# Banking (SIC 6020-6099)
+banking:
+  sic_ranges: [[6020, 6099]]
+
+  # Metrics that don't apply to banks — auto-exclude for banking companies
+  forbidden_metrics:
+    - COGS                    # Banks don't have cost of goods sold
+    - Inventory               # Banks don't hold inventory
+    - GrossProfit             # Replaced by NetInterestIncome
+    - Capex                   # Minimal/different for banks
+    - PropertyPlantEquipment  # Not meaningful for banks
+    - ResearchAndDevelopment  # Banks don't have R&D
+    - CurrentAssets           # Banks use liquidity-based balance sheets, not current/non-current
+    - CurrentLiabilities      # Banks use liquidity-based balance sheets, not current/non-current
+    - SGA                     # Banks use NonInterestExpense instead (see concept_mapping)
+    - AccountsPayable         # Banks don't have traditional accounts payable
+    - AccountsReceivable      # Banks don't have traditional accounts receivable
+
+  # Metrics that banks use instead of standard ones
+  required_alternatives:
+    InterestExpense:
+      replaces: COGS
+      notes: "Bank raw material cost is interest paid to depositors"
+    NetInterestIncome:
+      replaces: GrossProfit
+      notes: "InterestIncome - InterestExpense"
+    PPNR:
+      replaces: OperatingIncome
+      notes: "Pre-Provision Net Revenue"
+
+  concept_mapping:
+    COGS:
+      counterpart: InterestExpense
+      xbrl_concepts:
+        - InterestExpense
+        - InterestExpenseTotal
+      notes: "Bank raw material cost is interest paid to depositors"
+
+    GrossProfit:
+      counterpart: NetInterestIncome
+      calculation: "InterestIncome - InterestExpense"
+
+    OperatingIncome:
+      counterpart: PPNR
+      calculation: "NetInterestIncome + NonInterestIncome - NonInterestExpense"
+      notes: "Pre-Provision Net Revenue - excludes credit loss provisions"
+
+    SGA:
+      counterpart: NonInterestExpense
+      xbrl_concepts:
+        - NoninterestExpense
+
+    # Street View: Economic Liquidity (not statutory cash)
+    CashAndEquivalents:
+      extraction_strategy: "street_cash_composite"
+      fallback_to_tree: false
+      primary_concepts:
+        - CashAndDueFromBanks
+        - InterestBearingDepositsInBanks  # Critical for BK/STT custodial banks
+        - CashAndSecuritiesSegregatedUnderFederalAndOtherRegulations  # GS regulatory
+      fallback_concepts:
+        - CashAndCashEquivalentsAtCarryingValue
+        - CashAndCashEquivalents
+      notes: "Street View: Economic liquidity, not statutory cash"
+
+    # Street View: Wholesale Funding (Strict Component Summation)
+    ShortTermDebt:
+      extraction_strategy: "wholesale_funding_composite"
+      fallback_to_tree: false
+      include_concepts:
+        - CommercialPaper
+        - OtherShortTermBorrowings
+        - FederalHomeLoanBankAdvancesCurrent  # Critical for PNC/USB regional
+        - SecuritiesSoldUnderAgreementsToRepurchase  # Dealers only (net of matched book)
+      exclude_concepts:
+        - TradingLiabilities
+        - PayablesToBrokerDealersAndClearingOrganizations
+      aggregate_fallback: ShortTermBorrowings
+      notes: "Street View: Wholesale funding, Strict Component Summation to avoid double-count"
+
+# Insurance (SIC 6300-6399)
+insurance:
+  sic_ranges: [[6300, 6399]]
+
+  forbidden_metrics:
+    - COGS
+    - Inventory
+    - GrossProfit
+    - Capex                   # Insurance companies have minimal/different capital expenditures
+    - ResearchAndDevelopment  # Insurance companies don't have R&D
+
+  required_alternatives:
+    LossesAndAdjustments:
+      replaces: COGS
+      notes: "Insurance cost analog"
+    UnderwritingIncome:
+      replaces: OperatingIncome
+      notes: "Underwriting result"
+
+  concept_mapping:
+    COGS:
+      counterpart: LossesAndAdjustments
+      xbrl_concepts:
+        - BenefitsLossesAndExpenses
+        - PolicyholderBenefitsAndClaimsIncurredNet
+
+    OperatingIncome:
+      counterpart: UnderwritingIncome
+      calculation: "Premiums - Claims - UnderwritingExpenses"
+
+# REITs (SIC 6500-6553, 6798)
+reits:
+  sic_ranges: [[6500, 6553], [6798, 6798]]
+
+  forbidden_metrics:
+    - COGS
+    - Inventory
+    - ResearchAndDevelopment  # REITs don't have R&D expense
+
+  required_alternatives:
+    FFO:
+      replaces: NetIncome
+      notes: "Funds From Operations — excludes depreciation (phantom expense for RE)"
+    NOI:
+      replaces: OperatingIncome
+      notes: "Net Operating Income"
+
+  concept_mapping:
+    COGS:
+      counterpart: PropertyOperatingExpenses
+      xbrl_concepts:
+        - RealEstateOperatingExpenses
+        - DirectCostsOfRealEstateAndRentalOperations
+
+    OperatingIncome:
+      counterpart: NOI
+      calculation: "Revenue - PropertyOperatingExpenses"
+      notes: "Excludes depreciation (phantom expense for RE)"
+
+# Energy (SIC 1300-1389, 2911-2999)
+energy:
+  sic_ranges: [[1300, 1389], [2911, 2999]]
+
+  forbidden_metrics:
+    - GrossProfit             # Energy companies use cost structure that doesn't map to standard GrossProfit
+    - OperatingIncome         # Replaced by industry-specific operating measures
+
+  required_alternatives:
+    ExplorationExpense:
+      replaces: ResearchAndDevelopment
+      notes: "E&P exploration costs"
+
+  concept_mapping:
+    COGS:
+      counterpart: ProductionCosts
+      xbrl_concepts:
+        - ProductionRelatedExpenses
+        - CrudeOilAndNaturalGasProductionExpenses
+      notes: "Energy cost of extraction/production"
+
+# Securities / Brokerage (SIC 6200-6299) — e.g. SCHW
+securities:
+  sic_ranges: [[6200, 6299]]
+  forbidden_metrics:
+    - COGS
+    - SGA
+    - OperatingIncome
+    - Capex
+    - Inventory
+    - GrossProfit
+    - CurrentAssets
+    - CurrentLiabilities
+    - ResearchAndDevelopment  # Securities/brokerage firms don't have R&D
+
+# Asset Management (SIC 6726) — e.g. BLK
+asset_management:
+  sic_ranges: [[6726, 6726]]
+  forbidden_metrics:
+    - COGS
+    - Capex
+    - CurrentAssets
+    - CurrentLiabilities
+    - GrossProfit
+
+# Financial Services (SIC 6140-6199) — e.g. AXP, DE
+financial_services:
+  sic_ranges: [[6140, 6199]]
+  forbidden_metrics:
+    - COGS
+    - SGA
+    - CurrentAssets
+    - CurrentLiabilities
+    - GrossProfit
+    - ResearchAndDevelopment  # Financial services companies don't have R&D
+
+# Telecom (SIC 4800-4899) — e.g. T
+telecom:
+  sic_ranges: [[4800, 4899]]
+  forbidden_metrics:
+    - COGS
+    - GrossProfit
+    - Inventory
+    - ResearchAndDevelopment  # Telecom companies don't have R&D expense
+
+# Utilities (SIC 4900-4999) — e.g. NEE
+utilities:
+  sic_ranges: [[4900, 4999]]
+  forbidden_metrics:
+    - GrossProfit
+    - Inventory
+    - ResearchAndDevelopment  # Utilities don't have R&D expense
+
+# Transportation (SIC 4200-4299) — e.g. UPS
+transportation:
+  sic_ranges: [[4200, 4299]]
+  forbidden_metrics:
+    - COGS
+    - ResearchAndDevelopment  # Transportation companies don't have R&D expense
+
+# Franchise / Quick-Service Restaurants (SIC 5812) — e.g. MCD
+franchise:
+  sic_ranges: [[5812, 5812]]
+  forbidden_metrics:
+    - GrossProfit
+    - COGS
+
+# Health Insurance (SIC 6321-6399) — e.g. UNH
+health_insurance:
+  sic_ranges: [[6321, 6399]]
+  forbidden_metrics:
+    - GrossProfit
+    - ResearchAndDevelopment
+
+# Retail (SIC 5200-5999)
+retail:
+  sic_ranges: [[5200, 5999]]
+  forbidden_metrics:
+    - ResearchAndDevelopment  # Retailers don't have R&D expense
+
+# Healthcare / Biopharma (SIC 2830-2836)
+healthcare:
+  sic_ranges: [[2830, 2836]]
+  forbidden_metrics:
+    - COGS                    # Biopharma uses cost structure that doesn't map to standard COGS
+
+# Default (All other sectors)
+default:
+  concept_mapping:
+    Capex:
+      components:
+        - PaymentsToAcquirePropertyPlantAndEquipment
+        - PaymentsToAcquireIntangibleAssets
+        - PaymentsToDevelopSoftware
+      notes: "Expanded to include intangible investments"
+
+    OperatingIncome:
+      primary: OperatingIncomeLoss
+      fallback_calculation: "GrossProfit - ResearchAndDevelopmentExpense - SellingGeneralAndAdministrativeExpense"

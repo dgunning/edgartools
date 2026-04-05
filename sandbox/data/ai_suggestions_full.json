@@ -1,0 +1,919 @@
+[
+  {
+    "suggested_mapping": "IncomeTaxExpense",
+    "confidence": "medium",
+    "reasoning": "Label contains 'IncomeTaxes' which suggests a relationship to income tax expense, though 'Accrued' and 'Current' may imply a liability rather than expense.",
+    "concept": "AccruedIncomeTaxesCurrent",
+    "label": "AccruedIncomeTaxesCurrent"
+  },
+  {
+    "suggested_mapping": "IncomeTaxExpense",
+    "confidence": "medium",
+    "reasoning": "The concept relates to income taxes, but 'AccruedIncomeTaxesNoncurrent' is a balance sheet item, while 'IncomeTaxExpense' is an income statement item. The closest match is 'IncomeTaxExpense' due to the tax-related nature.",
+    "concept": "AccruedIncomeTaxesNoncurrent",
+    "label": "AccruedIncomeTaxesNoncurrent"
+  },
+  {
+    "suggested_mapping": "AccruedLiabilities",
+    "confidence": "medium",
+    "reasoning": "The label 'AccruedIncomeTaxesPayable' suggests a liability related to income taxes, which is a type of accrued liability.",
+    "concept": "AccruedIncomeTaxesPayable",
+    "label": "AccruedIncomeTaxesPayable"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to accumulated other comprehensive income, which is not listed in the provided standard concepts.",
+    "concept": "AccumulatedOtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax",
+    "label": "AccumulatedOtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to accumulated other comprehensive income, which is not listed in the available standard concepts.",
+    "concept": "AccumulatedOtherComprehensiveIncomeLossCumulativeChangesInNetGainLossFromCashFlowHedgesEffectNetOfTax",
+    "label": "AccumulatedOtherComprehensiveIncomeLossCumulativeChangesInNetGainLossFromCashFlowHedgesEffectNetOfTax"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to accumulated other comprehensive income, which is not listed in the available standard concepts.",
+    "concept": "AccumulatedOtherComprehensiveIncomeLossForeignCurrencyTranslationAdjustmentNetOfTax",
+    "label": "AccumulatedOtherComprehensiveIncomeLossForeignCurrencyTranslationAdjustmentNetOfTax"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "AccumulatedOtherComprehensiveIncomeLossNetOfTax is a component of equity but does not match any of the provided standard concepts.",
+    "concept": "AccumulatedOtherComprehensiveIncomeLossNetOfTax",
+    "label": "AccumulatedOtherComprehensiveIncomeLossNetOfTax"
+  },
+  {
+    "suggested_mapping": "IntangibleAssets",
+    "confidence": "medium",
+    "reasoning": "The concept relates to intangible assets, though it specifically refers to the weighted average useful life of acquired finite-lived intangible assets, which is a more detailed aspect of IntangibleAssets.",
+    "concept": "AcquiredFiniteLivedIntangibleAssetWeightedAverageUsefulLife",
+    "label": "AcquiredFiniteLivedIntangibleAssetWeightedAverageUsefulLife"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to non-cash adjustments in the cash flow reconciliation, which does not directly correspond to any of the provided standard financial metrics.",
+    "concept": "AdjustmentsNoncashItemsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesOther",
+    "label": "AdjustmentsNoncashItemsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesOther"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept is highly specific to tax withholding adjustments for share-based compensation and does not clearly align with any of the provided standard financial metrics.",
+    "concept": "AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation",
+    "label": "AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to tax effects from share-based compensation adjustments to additional paid-in capital, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AdjustmentsToAdditionalPaidInCapitalTaxEffectFromShareBasedCompensation",
+    "label": "AdjustmentsToAdditionalPaidInCapitalTaxEffectFromShareBasedCompensation"
+  },
+  {
+    "suggested_mapping": "SGA",
+    "confidence": "medium",
+    "reasoning": "Share-based compensation is typically part of Selling, General, and Administrative expenses, though the exact allocation may vary.",
+    "concept": "AllocatedShareBasedCompensationExpense",
+    "label": "AllocatedShareBasedCompensationExpense"
+  },
+  {
+    "suggested_mapping": "TotalCurrentAssets",
+    "confidence": "medium",
+    "reasoning": "Assets held for sale are typically classified as current assets, but the concept is more specific than the general 'TotalCurrentAssets' category.",
+    "concept": "AssetsHeldForSaleCurrent",
+    "label": "AssetsHeldForSaleCurrent"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "AssetsNoncurrent is not explicitly listed in the standard concepts, and while it relates to assets, it does not match any specific standard concept provided.",
+    "concept": "AssetsNoncurrent",
+    "label": "AssetsNoncurrent"
+  },
+  {
+    "suggested_mapping": "TotalCurrentAssets",
+    "confidence": "medium",
+    "reasoning": "The concept refers to current assets of a disposal group, which is a subset of total current assets.",
+    "concept": "AssetsOfDisposalGroupIncludingDiscontinuedOperationCurrent",
+    "label": "AssetsOfDisposalGroupIncludingDiscontinuedOperationCurrent"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to unrealized gains on available-for-sale debt securities, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedGainBeforeTax",
+    "label": "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedGainBeforeTax"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to unrealized losses on available-for-sale debt securities, which is not covered by the provided standard concepts.",
+    "concept": "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedLossBeforeTax",
+    "label": "AvailableForSaleDebtSecuritiesAccumulatedGrossUnrealizedLossBeforeTax"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to the amortized cost basis of available-for-sale debt securities, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleDebtSecuritiesAmortizedCostBasis",
+    "label": "AvailableForSaleDebtSecuritiesAmortizedCostBasis"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "AvailableForSaleSecuritiesAmortizedCost is a specific accounting line item related to investments, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesAmortizedCost",
+    "label": "AvailableForSaleSecuritiesAmortizedCost"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to unrealized losses on available-for-sale securities, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAccumulatedLoss",
+    "label": "AvailableForSaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAccumulatedLoss"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to unrealized losses on available-for-sale securities, which is not covered by the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAggregateLosses",
+    "label": "AvailableForSaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAggregateLosses"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to unrealized losses on available-for-sale securities, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionAccumulatedLoss",
+    "label": "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionAccumulatedLoss"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to unrealized losses on available-for-sale securities, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionAggregateLosses",
+    "label": "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionAggregateLosses"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to unrealized losses on available-for-sale securities, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionFairValue",
+    "label": "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionFairValue"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to unrealized losses on available-for-sale securities, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionLessThan12MonthsAccumulatedLoss",
+    "label": "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionLessThan12MonthsAccumulatedLoss"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to unrealized losses on available-for-sale securities, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionLessThan12MonthsAggregateLosses",
+    "label": "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionLessThan12MonthsAggregateLosses"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to a specific position in available-for-sale securities with unrealized losses, which does not align with any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionLessThanTwelveMonthsFairValue",
+    "label": "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionLessThanTwelveMonthsFairValue"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to a specific fair value measurement of securities with unrealized losses, which does not align with any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionTwelveMonthsOrLongerFairValue",
+    "label": "AvailableForSaleSecuritiesContinuousUnrealizedLossPositionTwelveMonthsOrLongerFairValue"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to a specific maturity bucket of available-for-sale debt securities, which does not match any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesAfterFiveThroughTenYearsFairValue",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesAfterFiveThroughTenYearsFairValue"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to the fair value of available-for-sale debt securities with specific maturities, which does not align with any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsFairValue",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsFairValue"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to the fair value of available-for-sale debt securities with maturities after ten years, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesAfterTenYearsFairValue",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesAfterTenYearsFairValue"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to the fair value of debt securities classified as available-for-sale, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesFairValue",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesFairValue"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to the fair value of debt securities maturing within one year, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearFairValue",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearFairValue"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to a specific type of investment (available-for-sale debt securities) which does not directly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtSecurities",
+    "label": "AvailableForSaleSecuritiesDebtSecurities"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to gains/losses on available-for-sale securities, which is not clearly represented in the provided standard concepts.",
+    "concept": "AvailableForSaleSecuritiesGrossRealizedGainLossNet",
+    "label": "AvailableForSaleSecuritiesGrossRealizedGainLossNet"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "AvailableForSaleSecuritiesGrossRealizedLosses is a specific investment-related item not covered by the provided standard concepts.",
+    "concept": "AvailableForSaleSecuritiesGrossRealizedLosses",
+    "label": "AvailableForSaleSecuritiesGrossRealizedLosses"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to unrealized losses on available-for-sale securities, which does not match any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesGrossUnrealizedLosses1",
+    "label": "AvailableForSaleSecuritiesGrossUnrealizedLosses1"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to unrealized losses on available-for-sale securities, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableforsaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAggregateLosses1",
+    "label": "AvailableforsaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAggregateLosses1"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to unrealized losses on available-for-sale securities, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableforsaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAggregateLosses2",
+    "label": "AvailableforsaleSecuritiesContinuousUnrealizedLossPosition12MonthsOrLongerAggregateLosses2"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to unrealized losses on available-for-sale securities, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableforsaleSecuritiesContinuousUnrealizedLossPositionAggregateLosses1",
+    "label": "AvailableforsaleSecuritiesContinuousUnrealizedLossPositionAggregateLosses1"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to unrealized losses on available-for-sale securities, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableforsaleSecuritiesContinuousUnrealizedLossPositionAggregateLosses2",
+    "label": "AvailableforsaleSecuritiesContinuousUnrealizedLossPositionAggregateLosses2"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to unrealized losses on available-for-sale securities, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableforsaleSecuritiesContinuousUnrealizedLossPositionLessThan12MonthsAggregateLosses1",
+    "label": "AvailableforsaleSecuritiesContinuousUnrealizedLossPositionLessThan12MonthsAggregateLosses1"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to unrealized losses on available-for-sale securities, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableforsaleSecuritiesContinuousUnrealizedLossPositionLessThan12MonthsAggregateLosses2",
+    "label": "AvailableforsaleSecuritiesContinuousUnrealizedLossPositionLessThan12MonthsAggregateLosses2"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to the purchase price of an acquired entity, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "BusinessAcquisitionCostOfAcquiredEntityPurchasePrice",
+    "label": "BusinessAcquisitionCostOfAcquiredEntityPurchasePrice"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "AssetImpairmentCharges is a specific expense item not directly listed in the standard concepts provided.",
+    "concept": "AssetImpairmentCharges",
+    "label": "AssetImpairmentCharges"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to a specific maturity bucket of available-for-sale securities, which does not align with any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesAfterFiveThroughTenYearsAmortizedCost",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesAfterFiveThroughTenYearsAmortizedCost"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to a specific maturity breakdown of available-for-sale debt securities, which does not align with any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsAmortizedCost",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsAmortizedCost"
+  },
+  {
+    "suggested_mapping": "LongTermDebt",
+    "confidence": "medium",
+    "reasoning": "The concept refers to debt securities with maturities after ten years, which aligns with long-term debt, though the 'AvailableForSale' and 'AmortizedCost' aspects introduce some ambiguity.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesAfterTenYearsAmortizedCost",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesAfterTenYearsAmortizedCost"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to debt maturities of available-for-sale securities, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesSingleMaturityDate",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesSingleMaturityDate"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to a specific classification of debt securities, which does not align with any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesSingleMaturityDateAmortizedCostBasis",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesSingleMaturityDateAmortizedCostBasis"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to a specific classification of debt securities maturing within one year, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearAmortizedCost",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearAmortizedCost"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to cash paid for business acquisitions, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "BusinessAcquisitionCostOfAcquiredEntityCashPaid",
+    "label": "BusinessAcquisitionCostOfAcquiredEntityCashPaid"
+  },
+  {
+    "suggested_mapping": "Goodwill",
+    "confidence": "medium",
+    "reasoning": "The concept relates to the cost of equity interests issued in a business acquisition, which is often associated with goodwill in financial reporting.",
+    "concept": "BusinessAcquisitionCostOfAcquiredEntityEquityInterestsIssuedAndIssuable",
+    "label": "BusinessAcquisitionCostOfAcquiredEntityEquityInterestsIssuedAndIssuable"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to noncash consideration in business acquisitions, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "BusinessAcquisitionCostOfAcquiredEntityOtherNoncashConsideration",
+    "label": "BusinessAcquisitionCostOfAcquiredEntityOtherNoncashConsideration"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to business acquisition purchase price allocation, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "BusinessAcquisitionPurchasePriceAllocationAssetsAcquiredLiabilitiesAssumedNet",
+    "label": "BusinessAcquisitionPurchasePriceAllocationAssetsAcquiredLiabilitiesAssumedNet"
+  },
+  {
+    "suggested_mapping": "IntangibleAssets",
+    "confidence": "medium",
+    "reasoning": "The concept relates to noncurrent assets from business acquisitions, which often include intangible assets, though the mapping is not perfectly precise.",
+    "concept": "BusinessAcquisitionPurchasePriceAllocationOtherNoncurrentAssets",
+    "label": "BusinessAcquisitionPurchasePriceAllocationOtherNoncurrentAssets"
+  },
+  {
+    "suggested_mapping": "TotalLiabilities",
+    "confidence": "medium",
+    "reasoning": "The concept relates to liabilities from business acquisitions, but it is not a direct match to any standard concept. 'TotalLiabilities' is the closest broad category.",
+    "concept": "BusinessAcquisitionPurchasePriceAllocationOtherNoncurrentLiabilities",
+    "label": "BusinessAcquisitionPurchasePriceAllocationOtherNoncurrentLiabilities"
+  },
+  {
+    "suggested_mapping": "NetIncome",
+    "confidence": "medium",
+    "reasoning": "The concept refers to pro forma net income/loss from business acquisitions, which is related to net income but may not be a direct match.",
+    "concept": "BusinessAcquisitionsProFormaNetIncomeLoss",
+    "label": "BusinessAcquisitionsProFormaNetIncomeLoss"
+  },
+  {
+    "suggested_mapping": "Revenue",
+    "confidence": "medium",
+    "reasoning": "Label contains 'Revenue' but is specifically related to pro forma revenue from acquisitions, which is a subset of total revenue.",
+    "concept": "BusinessAcquisitionsProFormaRevenue",
+    "label": "BusinessAcquisitionsProFormaRevenue"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to liabilities incurred in a business combination, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "BusinessCombinationConsiderationTransferredLiabilitiesIncurred",
+    "label": "BusinessCombinationConsiderationTransferredLiabilitiesIncurred"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to pro forma earnings/loss of an acquiree, which is a specialized disclosure not directly mappable to standard financial metrics.",
+    "concept": "BusinessCombinationProFormaInformationEarningsOrLossOfAcquireeSinceAcquisitionDateActual",
+    "label": "BusinessCombinationProFormaInformationEarningsOrLossOfAcquireeSinceAcquisitionDateActual"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept is highly specific to deferred tax assets from business combinations and does not clearly map to any of the provided standard financial metrics.",
+    "concept": "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedDeferredTaxAssetsNoncurrent",
+    "label": "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedDeferredTaxAssetsNoncurrent"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept is highly specific to deferred tax liabilities from business combinations and does not match any of the provided standard financial metrics.",
+    "concept": "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedDeferredTaxLiabilitiesNoncurrent",
+    "label": "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedDeferredTaxLiabilitiesNoncurrent"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to business combination accounting and does not clearly map to any of the provided standard financial metrics.",
+    "concept": "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedNet",
+    "label": "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedNet"
+  },
+  {
+    "suggested_mapping": "LongTermDebt",
+    "confidence": "medium",
+    "reasoning": "The concept refers to noncurrent liabilities assumed in a business combination, which often includes long-term debt.",
+    "concept": "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedNoncurrentLiabilitiesOther",
+    "label": "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedNoncurrentLiabilitiesOther"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to assets acquired and liabilities assumed in a business combination, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedOtherNoncurrentAssets",
+    "label": "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedOtherNoncurrentAssets"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to unrealized gains on available-for-sale securities, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesAccumulatedGrossUnrealizedGainBeforeTax",
+    "label": "AvailableForSaleSecuritiesAccumulatedGrossUnrealizedGainBeforeTax"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to unrealized losses on available-for-sale securities, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesAccumulatedGrossUnrealizedLossBeforeTax",
+    "label": "AvailableForSaleSecuritiesAccumulatedGrossUnrealizedLossBeforeTax"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to fair value of debt securities with specific maturities, which does not match any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesRollingAfterYearTenFairValue",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesRollingAfterYearTenFairValue"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to the fair value of available-for-sale debt securities with specific maturities, which does not align with any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesRollingYearSixThroughTenFairValue",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesRollingYearSixThroughTenFairValue"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to a specific maturity breakdown of available-for-sale debt securities, which does not align with any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesRollingYearTwoThroughFiveFairValue",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesRollingYearTwoThroughFiveFairValue"
+  },
+  {
+    "suggested_mapping": "TotalCurrentAssets",
+    "confidence": "medium",
+    "reasoning": "Available-for-sale debt securities classified as current are part of current assets, though the mapping is not perfectly precise.",
+    "concept": "AvailableForSaleSecuritiesDebtSecuritiesCurrent",
+    "label": "AvailableForSaleSecuritiesDebtSecuritiesCurrent"
+  },
+  {
+    "suggested_mapping": "LongTermDebt",
+    "confidence": "medium",
+    "reasoning": "The concept refers to noncurrent debt securities classified as available-for-sale, which are typically part of long-term investments or liabilities, but not a perfect match for any standard concept.",
+    "concept": "AvailableForSaleSecuritiesDebtSecuritiesNoncurrent",
+    "label": "AvailableForSaleSecuritiesDebtSecuritiesNoncurrent"
+  },
+  {
+    "suggested_mapping": "TotalLiabilities",
+    "confidence": "medium",
+    "reasoning": "The concept refers to liabilities assumed in a business acquisition, which is a component of total liabilities.",
+    "concept": "BusinessAcquisitionPurchasePriceAllocationLiabilitiesAssumed",
+    "label": "BusinessAcquisitionPurchasePriceAllocationLiabilitiesAssumed"
+  },
+  {
+    "suggested_mapping": "TotalLiabilities",
+    "confidence": "medium",
+    "reasoning": "The concept refers to liabilities assumed in a business combination, which is a component of total liabilities.",
+    "concept": "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedLiabilities",
+    "label": "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedLiabilities"
+  },
+  {
+    "suggested_mapping": "CashAndEquivalents",
+    "confidence": "medium",
+    "reasoning": "Label 'Cash' is a common component of 'CashAndEquivalents', but without additional context, the mapping is not definitive.",
+    "concept": "Cash",
+    "label": "Cash"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept represents the change in cash and cash equivalents, which is not directly listed in the standard concepts provided.",
+    "concept": "CashAndCashEquivalentsPeriodIncreaseDecrease",
+    "label": "CashAndCashEquivalentsPeriodIncreaseDecrease"
+  },
+  {
+    "suggested_mapping": "OperatingCashFlow",
+    "confidence": "medium",
+    "reasoning": "The concept relates to changes in cash and cash equivalents, which is a component of operating cash flow, but the label is overly specific and includes restricted cash.",
+    "concept": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+    "label": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to unrealized gains/losses on hedging instruments, which is not directly represented in the provided standard concepts.",
+    "concept": "ChangeInUnrealizedGainLossOnFairValueHedgingInstruments",
+    "label": "ChangeInUnrealizedGainLossOnFairValueHedgingInstruments"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept 'CommonStockDividendsPerShareCashPaid' is a dividend-related metric, which is not listed in the provided standard concepts.",
+    "concept": "CommonStockDividendsPerShareCashPaid",
+    "label": "CommonStockDividendsPerShareCashPaid"
+  },
+  {
+    "suggested_mapping": "NetIncome",
+    "confidence": "medium",
+    "reasoning": "Comprehensive income net of tax is related to net income but includes other comprehensive income items, making it a broader concept.",
+    "concept": "ComprehensiveIncomeNetOfTax",
+    "label": "ComprehensiveIncomeNetOfTax"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept 'AssetsFairValueDisclosureRecurring' is a disclosure item and does not directly map to any of the provided standard financial metrics.",
+    "concept": "AssetsFairValueDisclosureRecurring",
+    "label": "AssetsFairValueDisclosureRecurring"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to debt securities maturities at amortized cost, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesAmortizedCost",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesAmortizedCost"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to a specific maturity schedule of available-for-sale debt securities, which does not align with any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesNextRollingTwelveMonthsAmortizedCostBasis",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesNextRollingTwelveMonthsAmortizedCostBasis"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to the fair value of debt securities maturing in the next twelve months, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesNextRollingTwelveMonthsFairValue",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesNextRollingTwelveMonthsFairValue"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to a specific classification of debt securities maturities, which does not align with any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesRollingAfterYearTenAmortizedCostBasis",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesRollingAfterYearTenAmortizedCostBasis"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to a specific maturity bucket of available-for-sale debt securities, which does not align with any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesRollingYearSixThroughTenAmortizedCostBasis",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesRollingYearSixThroughTenAmortizedCostBasis"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to a specific maturity breakdown of available-for-sale debt securities, which does not align with any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesRollingYearTwoThroughFiveAmortizedCostBasis",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesRollingYearTwoThroughFiveAmortizedCostBasis"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to adjustments in additional paid-in capital for convertible debt, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AdjustmentsToAdditionalPaidInCapitalConvertibleDebtWithConversionFeature",
+    "label": "AdjustmentsToAdditionalPaidInCapitalConvertibleDebtWithConversionFeature"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to adjustments in equity components of convertible debt, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AdjustmentsToAdditionalPaidInCapitalEquityComponentOfConvertibleDebtSubsequentAdjustments",
+    "label": "AdjustmentsToAdditionalPaidInCapitalEquityComponentOfConvertibleDebtSubsequentAdjustments"
+  },
+  {
+    "suggested_mapping": "InterestExpense",
+    "confidence": "medium",
+    "reasoning": "Amortization of debt discount/premium is typically part of interest expense, though not a perfect match.",
+    "concept": "AmortizationOfDebtDiscountPremium",
+    "label": "AmortizationOfDebtDiscountPremium"
+  },
+  {
+    "suggested_mapping": "InterestExpense",
+    "confidence": "medium",
+    "reasoning": "Amortization of financing costs is typically related to interest expenses, though not a perfect match.",
+    "concept": "AmortizationOfFinancingCosts",
+    "label": "AmortizationOfFinancingCosts"
+  },
+  {
+    "suggested_mapping": "InterestExpense",
+    "confidence": "medium",
+    "reasoning": "Amortization of financing costs is typically part of interest expense, though not a perfect match.",
+    "concept": "AmortizationOfFinancingCostsAndDiscounts",
+    "label": "AmortizationOfFinancingCostsAndDiscounts"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "AssetRetirementObligation is a specific liability not listed in the standard concepts provided.",
+    "concept": "AssetRetirementObligation",
+    "label": "AssetRetirementObligation"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "AssetRetirementObligationsNoncurrent is a specific liability not listed in the standard concepts provided.",
+    "concept": "AssetRetirementObligationsNoncurrent",
+    "label": "AssetRetirementObligationsNoncurrent"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to unrealized gains/losses on available-for-sale securities, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesChangeInNetUnrealizedHoldingGainLossNetOfTax",
+    "label": "AvailableForSaleSecuritiesChangeInNetUnrealizedHoldingGainLossNetOfTax"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to a specific classification of debt securities, which does not align with any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesWithoutSingleMaturityDateAmortizedCost",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesWithoutSingleMaturityDateAmortizedCost"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to fair value of debt securities without a single maturity date, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesDebtMaturitiesWithoutSingleMaturityDateFairValue",
+    "label": "AvailableForSaleSecuritiesDebtMaturitiesWithoutSingleMaturityDateFairValue"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to unrealized losses on available-for-sale securities, which is not directly represented in the provided list of standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesGrossUnrealizedLoss",
+    "label": "AvailableForSaleSecuritiesGrossUnrealizedLoss"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to a qualitative disclosure about the number of positions in unrealized loss, which does not align with any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleSecuritiesInUnrealizedLossPositionsQualitativeDisclosureNumberOfPositions",
+    "label": "AvailableForSaleSecuritiesInUnrealizedLossPositionsQualitativeDisclosureNumberOfPositions"
+  },
+  {
+    "suggested_mapping": "AccruedLiabilities",
+    "confidence": "medium",
+    "reasoning": "The concept represents a liability accrual, and 'AccruedLiabilities' is the closest standard concept for contingent liabilities.",
+    "concept": "AccrualForEnvironmentalLossContingencies",
+    "label": "AccrualForEnvironmentalLossContingencies"
+  },
+  {
+    "suggested_mapping": "AccruedLiabilities",
+    "confidence": "medium",
+    "reasoning": "The concept represents an accrual for potential liabilities, which aligns with the nature of accrued liabilities, though the environmental specificity is not standard.",
+    "concept": "AccrualForEnvironmentalLossContingenciesPayments",
+    "label": "AccrualForEnvironmentalLossContingenciesPayments"
+  },
+  {
+    "suggested_mapping": "AccruedLiabilities",
+    "confidence": "medium",
+    "reasoning": "The concept refers to accrued liabilities, specifically environmental loss contingencies, which are noncurrent. While not a perfect match, 'AccruedLiabilities' is the closest standard concept.",
+    "concept": "AccruedEnvironmentalLossContingenciesNoncurrent",
+    "label": "AccruedEnvironmentalLossContingenciesNoncurrent"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to non-cash adjustments in the cash flow reconciliation, which does not directly correspond to any of the provided standard financial metrics.",
+    "concept": "AdjustmentsNoncashItemsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivities",
+    "label": "AdjustmentsNoncashItemsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivities"
+  },
+  {
+    "suggested_mapping": "TotalEquity",
+    "confidence": "medium",
+    "reasoning": "The concept relates to adjustments in equity components, which is part of total equity, though the specific nature of the adjustment is unclear.",
+    "concept": "AdjustmentsToAdditionalPaidInCapitalEquityComponentOfConvertibleDebt",
+    "label": "AdjustmentsToAdditionalPaidInCapitalEquityComponentOfConvertibleDebt"
+  },
+  {
+    "suggested_mapping": "SellingAndMarketing",
+    "confidence": "medium",
+    "reasoning": "AdvertisingRevenueCost likely relates to marketing expenses, which are part of SellingAndMarketing.",
+    "concept": "AdvertisingRevenueCost",
+    "label": "AdvertisingRevenueCost"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "AssetBackedSecuritiesAtCarryingValue is a specific type of asset not listed in the standard concepts provided.",
+    "concept": "AssetBackedSecuritiesAtCarryingValue",
+    "label": "AssetBackedSecuritiesAtCarryingValue"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "AssetsFairValueDisclosure is a disclosure item, not a financial metric, and does not match any of the provided standard concepts.",
+    "concept": "AssetsFairValueDisclosure",
+    "label": "AssetsFairValueDisclosure"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "AssetsHeldByInsuranceRegulators is a highly specific concept not covered by the standard list.",
+    "concept": "AssetsHeldByInsuranceRegulators",
+    "label": "AssetsHeldByInsuranceRegulators"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to unrealized gains on available-for-sale debt securities, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleDebtSecuritiesGrossUnrealizedGain",
+    "label": "AvailableForSaleDebtSecuritiesGrossUnrealizedGain"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to unrealized losses on available-for-sale debt securities, which does not match any of the provided standard financial metrics.",
+    "concept": "AvailableForSaleDebtSecuritiesGrossUnrealizedLoss",
+    "label": "AvailableForSaleDebtSecuritiesGrossUnrealizedLoss"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to equity interests issued in business combinations, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "BusinessCombinationConsiderationTransferredEquityInterestsIssuedAndIssuable",
+    "label": "BusinessCombinationConsiderationTransferredEquityInterestsIssuedAndIssuable"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "BusinessExitCosts1 does not clearly correspond to any of the provided standard financial metrics.",
+    "concept": "BusinessExitCosts1",
+    "label": "BusinessExitCosts1"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "CapitalLeasedAssetsGross is a specific asset category not directly represented in the provided standard concepts.",
+    "concept": "CapitalLeasedAssetsGross",
+    "label": "CapitalLeasedAssetsGross"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to capital leases on the balance sheet, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "CapitalLeasesBalanceSheetAssetsByMajorClassNet",
+    "label": "CapitalLeasesBalanceSheetAssetsByMajorClassNet"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to accumulated depreciation on capital leases, which is not explicitly listed in the standard concepts provided.",
+    "concept": "CapitalLeasesLesseeBalanceSheetAssetsByMajorClassAccumulatedDeprecation",
+    "label": "CapitalLeasesLesseeBalanceSheetAssetsByMajorClassAccumulatedDeprecation"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to comprehensive income attributable to noncontrolling interest, which is not directly represented in the provided standard concepts.",
+    "concept": "ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest",
+    "label": "ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest"
+  },
+  {
+    "suggested_mapping": "NetIncome",
+    "confidence": "medium",
+    "reasoning": "Comprehensive income includes net income but is broader; however, 'NetIncome' is the closest standard concept available.",
+    "concept": "ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest",
+    "label": "ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest"
+  },
+  {
+    "suggested_mapping": "TotalCurrentLiabilities",
+    "confidence": "medium",
+    "reasoning": "The label includes 'AccountsPayable' and 'AccruedLiabilities', which are components of current liabilities, but the exact mapping is unclear without more context.",
+    "concept": "AccountsPayableAndOtherAccruedLiabilitiesCurrent",
+    "label": "AccountsPayableAndOtherAccruedLiabilitiesCurrent"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to an income tax effect from share-based compensation, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "AdjustmentToAdditionalPaidInCapitalIncomeTaxEffectFromShareBasedCompensationNet",
+    "label": "AdjustmentToAdditionalPaidInCapitalIncomeTaxEffectFromShareBasedCompensationNet"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to a qualitative disclosure about the number of positions in unrealized loss, which does not align with any of the provided standard financial metrics.",
+    "concept": "AvailableforsaleSecuritiesInUnrealizedLossPositionsQualitativeDisclosureNumberOfPositions1",
+    "label": "AvailableforsaleSecuritiesInUnrealizedLossPositionsQualitativeDisclosureNumberOfPositions1"
+  },
+  {
+    "suggested_mapping": "CommonStock",
+    "confidence": "medium",
+    "reasoning": "The concept relates to shares issued in a business acquisition, which is associated with common stock, though the context is more specific.",
+    "concept": "BusinessAcquisitionEquityInterestsIssuedOrIssuableNumberOfSharesIssued",
+    "label": "BusinessAcquisitionEquityInterestsIssuedOrIssuableNumberOfSharesIssued"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept is highly specific to deferred tax liabilities from business acquisitions and does not match any of the provided standard financial metrics.",
+    "concept": "BusinessAcquisitionPurchasePriceAllocationDeferredTaxLiabilitiesNoncurrent",
+    "label": "BusinessAcquisitionPurchasePriceAllocationDeferredTaxLiabilitiesNoncurrent"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to changes in contingent consideration liability from business combinations, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "BusinessCombinationContingentConsiderationArrangementsChangeInAmountOfContingentConsiderationLiability1",
+    "label": "BusinessCombinationContingentConsiderationArrangementsChangeInAmountOfContingentConsiderationLiability1"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept refers to a specific liability related to contingent consideration in business combinations, which does not clearly map to any of the provided standard financial metrics.",
+    "concept": "BusinessCombinationContingentConsiderationLiability",
+    "label": "BusinessCombinationContingentConsiderationLiability"
+  },
+  {
+    "suggested_mapping": "TotalCurrentLiabilities",
+    "confidence": "medium",
+    "reasoning": "The concept refers to a current liability related to contingent consideration in business combinations, which would be part of total current liabilities.",
+    "concept": "BusinessCombinationContingentConsiderationLiabilityCurrent",
+    "label": "BusinessCombinationContingentConsiderationLiabilityCurrent"
+  },
+  {
+    "suggested_mapping": "LongTermDebt",
+    "confidence": "medium",
+    "reasoning": "The concept refers to a noncurrent liability related to contingent consideration in business combinations, which is often classified under long-term debt or other long-term liabilities.",
+    "concept": "BusinessCombinationContingentConsiderationLiabilityNoncurrent",
+    "label": "BusinessCombinationContingentConsiderationLiabilityNoncurrent"
+  },
+  {
+    "suggested_mapping": "Goodwill",
+    "confidence": "medium",
+    "reasoning": "The label references 'Goodwill' in the context of business combinations, but the full concept is broader and includes other assets and liabilities.",
+    "concept": "BusinessCombinationRecognizedIdentifiableAssetsAcquiredGoodwillAndLiabilitiesAssumedNet",
+    "label": "BusinessCombinationRecognizedIdentifiableAssetsAcquiredGoodwillAndLiabilitiesAssumedNet"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "BusinessExitCosts does not clearly correspond to any of the provided standard financial metrics.",
+    "concept": "BusinessExitCosts",
+    "label": "BusinessExitCosts"
+  },
+  {
+    "suggested_mapping": "DeferredRevenue",
+    "confidence": "medium",
+    "reasoning": "ContractWithCustomerRefundLiability is likely related to deferred revenue, as it represents a liability for potential refunds to customers.",
+    "concept": "ContractWithCustomerRefundLiability",
+    "label": "ContractWithCustomerRefundLiability"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "low",
+    "reasoning": "CostsAndExpenses is too broad and could include multiple standard concepts like COGS, SGA, or ResearchAndDevelopment without further context.",
+    "concept": "CostsAndExpenses",
+    "label": "CostsAndExpenses"
+  }
+]

@@ -1,0 +1,60 @@
+{
+  "ticker": "AVGO",
+  "cik": 1730168,
+  "company_name": "Broadcom Inc.",
+  "archetype": "C",
+  "sic_code": "3674",
+  "fiscal_year_end": "November",
+  "draft_yaml": "  AVGO:\n    name: \"Broadcom Inc.\"\n    cik: 1730168\n    fiscal_year_end: \"November\"\n    exclude_metrics:\n      - COGS\n    known_divergences:\n      IntangibleAssets:\n        form_types: [\"10-K\"]\n        variance_pct: 55.2\n        reason: \"Variance: 55.2% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"",
+  "metrics_passed": [
+    "Revenue",
+    "COGS",
+    "SGA",
+    "OperatingIncome",
+    "PretaxIncome",
+    "NetIncome",
+    "OperatingCashFlow",
+    "Capex",
+    "TotalAssets",
+    "ShortTermDebt",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "Inventory",
+    "AccountsReceivable",
+    "AccountsPayable",
+    "DepreciationAmortization"
+  ],
+  "metrics_failed": [
+    "Goodwill",
+    "IntangibleAssets"
+  ],
+  "metrics_excluded": [
+    "COGS"
+  ],
+  "failures": {
+    "Goodwill": {
+      "metric": "Goodwill",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 97801000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "IntangibleAssets": {
+      "metric": "IntangibleAssets",
+      "reason": "Variance: 55.2% (tolerance: 15%)",
+      "xbrl_value": 58286000000.0,
+      "reference_value": 130074000000.0,
+      "variance_pct": 55.19012254562787,
+      "pattern": "unknown"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": true,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-03-04T19:20:44.518443"
+}

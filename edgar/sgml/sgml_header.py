@@ -16,6 +16,12 @@ from edgar.display.formatting import datefmt, reverse_name
 from edgar.reference import describe_form, states
 from edgar.richtools import repr_rich
 
+# Pre-compiled regex patterns
+_SGML_TAG_RE = re.compile(r'^[A-Z0-9\-]+$')
+_DATE_14_RE = re.compile(r'^(20|19)\d{12}$')
+_DATE_8_RE = re.compile(r'^(20|19)\d{6}$')
+_ACCEPTANCE_RE = re.compile(r'<ACCEPTANCE-DATETIME>(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})')
+
 # Title text
 mailing_address_title = "\U0001F4EC Mailing Address"
 business_address_title = "\U0001F4EC Business Address"
@@ -75,10 +81,9 @@ class FilingMetadata:
     def get(self, key: str):
         value = self.metadata.get(key)
         if value:
-            # Adjusted regular expressions to match correct date formats
-            if re.match(r"^(20|19)\d{12}$", value):  # YYYY-MM-DD HH:MM:SS
+            if _DATE_14_RE.match(value):
                 value = datefmt(value, "%Y-%m-%d %H:%M:%S")
-            elif re.match(r"^(20|19)\d{6}$", value):  # YYYY-MM-DD
+            elif _DATE_8_RE.match(value):
                 value = datefmt(value, "%Y-%m-%d")
         return value
 
@@ -194,10 +199,54 @@ class Filer:
         return repr_rich(self.__rich__())
 
 
-@dataclass(frozen=True)
 class Owner:
-    name: str
-    cik: str
+    """SEC reporting owner with lazy name reversal.
+
+    SEC-DOCUMENT format stores names as "LAST FIRST MIDDLE" for individuals.
+    On first access of .name, checks Entity(cik).is_company to decide
+    whether to reverse the name to "First Middle Last" format.
+    SUBMISSION format names are already in the correct order.
+    """
+    __slots__ = ('_raw_name', 'cik', '_resolved_name', '_needs_reversal')
+
+    def __init__(self, name: str, cik: str, needs_reversal: bool = False):
+        self._raw_name = name
+        self.cik = cik
+        self._resolved_name: Optional[str] = None
+        self._needs_reversal = needs_reversal
+
+    @property
+    def name(self) -> str:
+        if self._resolved_name is not None:
+            return self._resolved_name
+        if not self._needs_reversal or not self._raw_name or not self.cik:
+            self._resolved_name = self._raw_name or ''
+            return self._resolved_name
+        try:
+            from edgar.entity import Entity
+            entity = Entity(self.cik)
+            if entity.data.is_company:
+                # Corporate entity - keep name as-is
+                self._resolved_name = self._raw_name
+            else:
+                # Individual - reverse "Last First" to "First Last"
+                self._resolved_name = reverse_name(self._raw_name)
+        except Exception:
+            # If Entity lookup fails, fall back to reversing
+            # (most reporting owners are individuals)
+            self._resolved_name = reverse_name(self._raw_name)
+        return self._resolved_name
+
+    def __repr__(self):
+        return f"Owner(name={self.name!r}, cik={self.cik!r})"
+
+    def __eq__(self, other):
+        if not isinstance(other, Owner):
+            return NotImplemented
+        return self.cik == other.cik and self._raw_name == other._raw_name
+
+    def __hash__(self):
+        return hash((self._raw_name, self.cik))
 
 
 @dataclass(frozen=True)
@@ -665,9 +714,7 @@ class FilingHeader:
         if tag != tag.upper():
             return False
 
-        # Additional check: Should contain only letters, numbers, and hyphens
-        import re
-        if not re.match(r'^[A-Z0-9\-]+$', tag):
+        if not _SGML_TAG_RE.match(tag):
             return False
 
         return True
@@ -846,11 +893,9 @@ class FilingHeader:
                     name = reporting_owner_values['COMPANY DATA'].get('COMPANY CONFORMED NAME')
                     cik = reporting_owner_values['COMPANY DATA'].get('CENTRAL INDEX KEY')
                 if cik:
-                    from edgar.entity import Entity
-                    entity: Entity = Entity(cik)
-                    if entity and not entity.data.is_company:
-                        name = reverse_name(name)
-                    owner = Owner(name=name, cik=cik)
+                    # SEC-DOCUMENT format stores names as "Last First Middle"
+                    # Owner.name will lazily reverse for individuals
+                    owner = Owner(name=name, cik=cik, needs_reversal=True)
 
                 # Company Information
                 company_information = CompanyInformation(
@@ -979,8 +1024,8 @@ class FilingHeader:
                            if isinstance(value, str) and value}
 
         # The header text contains <ACCEPTANCE-DATETIME>20230612172243. Replace with the formatted date
-        header_text = re.sub(r'<ACCEPTANCE-DATETIME>(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})',
-                             r'ACCEPTANCE-DATETIME:            \1-\2-\3 \4:\5:\6', header_text)
+        header_text = _ACCEPTANCE_RE.sub(
+            r'ACCEPTANCE-DATETIME:            \1-\2-\3 \4:\5:\6', header_text)
 
         # Remove empty lines from header_text
         header_text = '\n'.join([line for line in header_text.split('\n') if line.strip()])

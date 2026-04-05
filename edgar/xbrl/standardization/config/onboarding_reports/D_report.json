@@ -1,0 +1,132 @@
+{
+  "ticker": "D",
+  "cik": 715957,
+  "company_name": "DOMINION ENERGY, INC",
+  "archetype": "A",
+  "sic_code": "4911",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  D:\n    name: \"DOMINION ENERGY, INC\"\n    cik: 715957\n    exclude_metrics:\n      - GrossProfit\n      - Inventory\n    known_divergences:\n      OperatingIncome:\n        form_types: [\"10-K\"]\n        variance_pct: 88.0\n        reason: \"Variance: 88.0% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-04-04\"",
+  "metrics_passed": [
+    "Revenue",
+    "COGS",
+    "NetIncome",
+    "OperatingCashFlow",
+    "Capex",
+    "TotalAssets",
+    "Goodwill",
+    "IntangibleAssets",
+    "ShortTermDebt",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "DividendsPaid",
+    "AccountsReceivable",
+    "AccountsPayable",
+    "InterestExpense",
+    "EarningsPerShareDiluted",
+    "EarningsPerShareBasic",
+    "CurrentAssets",
+    "CurrentLiabilities",
+    "TotalLiabilities",
+    "StockholdersEquity",
+    "PropertyPlantEquipment",
+    "InvestingCashFlow",
+    "FinancingCashFlow",
+    "ShareRepurchases"
+  ],
+  "metrics_failed": [
+    "SGA",
+    "OperatingIncome",
+    "PretaxIncome",
+    "StockBasedCompensation",
+    "DepreciationAmortization",
+    "ResearchAndDevelopment",
+    "IncomeTaxExpense",
+    "RetainedEarnings",
+    "DividendPerShare"
+  ],
+  "metrics_excluded": [
+    "Inventory",
+    "GrossProfit",
+    "COGS"
+  ],
+  "failures": {
+    "SGA": {
+      "metric": "SGA",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 731000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "OperatingIncome": {
+      "metric": "OperatingIncome",
+      "reason": "Variance: 88.0% (tolerance: 15%)",
+      "xbrl_value": 391000000.0,
+      "reference_value": 3247000000.0,
+      "variance_pct": 87.95811518324608,
+      "pattern": "unknown"
+    },
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 2182000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "StockBasedCompensation": {
+      "metric": "StockBasedCompensation",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 53000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "DepreciationAmortization": {
+      "metric": "DepreciationAmortization",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 2345000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "ResearchAndDevelopment": {
+      "metric": "ResearchAndDevelopment",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "IncomeTaxExpense": {
+      "metric": "IncomeTaxExpense",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 411000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "RetainedEarnings": {
+      "metric": "RetainedEarnings",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 1641000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "DividendPerShare": {
+      "metric": "DividendPerShare",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 2.67,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": false,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-04-04T09:55:39.147982"
+}

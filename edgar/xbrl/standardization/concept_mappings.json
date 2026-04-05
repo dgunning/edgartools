@@ -4,7 +4,9 @@
     "us-gaap_Revenue",
     "us-gaap_Revenues",
     "us-gaap_SalesRevenueNet",
-    "us-gaap_OperatingRevenue"
+    "us-gaap_OperatingRevenue",
+    "AdvertisingRevenue",
+    "BusinessCombinationProFormaInformationRevenueOfAcquireeSinceAcquisitionDateActual"
   ],
   "Contract Revenue": [
     "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax",
@@ -46,7 +48,9 @@
     "us-gaap_GrossProfit"
   ],
   "Operating Expenses": [
-    "us-gaap_NoninterestExpense",
+    "us-gaap_NoninterestExpense"
+  ],
+  "Total Operating Expenses": [
     "us-gaap_OperatingCostsAndExpenses",
     "us-gaap_OperatingExpenses"
   ],
@@ -84,7 +88,7 @@
     "us-gaap_InterestExpense",
     "us-gaap_InterestIncomeExpenseNet"
   ],
-    "Interest Expense (operating)": [
+  "Interest Expense (operating)": [
     "us-gaap_InterestExpenseOperating"
   ],
   "Interest Expense (non-operating)": [
@@ -122,7 +126,7 @@
   "Basic Net Income Available to Common Shareholders": [
     "us-gaap_NetIncomeLossAvailableToCommonStockholdersBasic"
   ],
-    "Diluted Net Income Available to Common Shareholders": [
+  "Diluted Net Income Available to Common Shareholders": [
     "us-gaap_NetIncomeLossAvailableToCommonStockholdersDiluted"
   ],
   "Accumulated Other Comprehensive Income/Loss": [
@@ -177,7 +181,7 @@
   "Total Current Assets": [
     "us-gaap_AssetsCurrent"
   ],
-    "Total Non Current Assets": [
+  "Total Non Current Assets": [
     "us-gaap_AssetsNoncurrent"
   ],
   "Property, Plant and Equipment": [
@@ -186,7 +190,8 @@
     "us-gaap_FixedAssets"
   ],
   "Goodwill": [
-    "us-gaap_Goodwill"
+    "us-gaap_Goodwill",
+    "BusinessAcquisitionPurchasePriceAllocationGoodwillExpectedTaxDeductibleAmount"
   ],
   "Intangible Assets": [
     "us-gaap_IntangibleAssetsNetIncludingGoodwill",
@@ -217,7 +222,7 @@
   "Total Current Liabilities": [
     "us-gaap_LiabilitiesCurrent"
   ],
-    "Total Non Current Liabilities": [
+  "Total Non Current Liabilities": [
     "us-gaap_LiabilitiesNoncurrent"
   ],
   "Long Term Debt": [
@@ -337,9 +342,8 @@
   ],
   "Other Liabilities": [
     "us-gaap_OtherLiabilities"
-
   ],
-    "Other Current Liabilities": [
+  "Other Current Liabilities": [
     "us-gaap_OtherLiabilitiesCurrent"
   ],
   "Other Non Current Liabilities": [
@@ -349,5 +353,49 @@
     "us-gaap_AmortizationOfIntangibleAssets",
     "us-gaap_Depreciation",
     "us-gaap_DepreciationAndAmortization"
+  ],
+  "AccruedLiabilities": [
+    "AccruedLiabilities",
+    "AccruedLiabilitiesCurrent",
+    "AccruedLiabilitiesForUnredeeemedGiftCards",
+    "AccruedEnvironmentalLossContingenciesCurrent"
+  ],
+  "DepreciationAndAmortization": [
+    "AmortizationOfAcquiredIntangibleAssets",
+    "AmortizationOfIntangibleAssets",
+    "AmortizationOfLeasedAsset"
+  ],
+  "TotalCurrentAssets": [
+    "AssetsCurrent"
+  ],
+  "SellingAndMarketing": [
+    "AdvertisingExpense",
+    "AccruedMarketingCostsCurrent"
+  ],
+  "IntangibleAssets": [
+    "BusinessAcquisitionPurchasePriceAllocationAmortizableIntangibleAssets",
+    "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles",
+    "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibleAssetsOtherThanGoodwill",
+    "AcquiredFiniteLivedIntangibleAssetAmount"
+  ],
+  "AccountsPayable": [
+    "BusinessAcquisitionPurchasePriceAllocationCurrentLiabilitiesAccountsPayable"
+  ],
+  "LongTermDebt": [
+    "BusinessAcquisitionPurchasePriceAllocationNoncurrentLiabilitiesLongTermDebt"
+  ],
+  "CashAndEquivalents": [
+    "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+    "CashEquivalentsAtCarryingValue",
+    "CashCashEquivalentsAndShortTermInvestments",
+    "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations",
+    "CashAndCashEquivalentsFairValueDisclosure"
+  ],
+  "DeferredRevenue": [
+    "ContractWithCustomerLiability",
+    "ContractWithCustomerLiabilityCurrent"
+  ],
+  "IncomeTaxExpense": [
+    "CurrentFederalTaxExpenseBenefit"
   ]
 }

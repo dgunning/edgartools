@@ -1,0 +1,166 @@
+{
+  "ticker": "PLD",
+  "cik": 1045609,
+  "company_name": "Prologis, Inc.",
+  "archetype": "D",
+  "sic_code": "6798",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  PLD:\n    name: \"Prologis, Inc.\"\n    cik: 1045609\n    exclude_metrics:\n      - COGS\n      - IntangibleAssets\n      - Inventory\n      - ShortTermDebt\n    known_divergences:\n      OperatingIncome:\n        form_types: [\"10-K\"]\n        variance_pct: 67.8\n        reason: \"Variance: 67.8% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-04-04\"",
+  "metrics_passed": [
+    "Revenue",
+    "NetIncome",
+    "OperatingCashFlow",
+    "TotalAssets",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "AccountsReceivable",
+    "AccountsPayable",
+    "DepreciationAmortization",
+    "GrossProfit",
+    "InterestExpense",
+    "IncomeTaxExpense",
+    "EarningsPerShareDiluted",
+    "EarningsPerShareBasic",
+    "TotalLiabilities",
+    "StockholdersEquity",
+    "RetainedEarnings",
+    "InvestingCashFlow",
+    "FinancingCashFlow"
+  ],
+  "metrics_failed": [
+    "SGA",
+    "OperatingIncome",
+    "PretaxIncome",
+    "Capex",
+    "Goodwill",
+    "IntangibleAssets",
+    "ShortTermDebt",
+    "ResearchAndDevelopment",
+    "CurrentAssets",
+    "CurrentLiabilities",
+    "PropertyPlantEquipment",
+    "ShareRepurchases",
+    "DividendPerShare"
+  ],
+  "metrics_excluded": [
+    "COGS",
+    "Inventory",
+    "Capex",
+    "ShortTermDebt",
+    "AccountsPayable"
+  ],
+  "failures": {
+    "SGA": {
+      "metric": "SGA",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 418765000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "OperatingIncome": {
+      "metric": "OperatingIncome",
+      "reason": "Variance: 67.8% (tolerance: 15%)",
+      "xbrl_value": 1421256000.0,
+      "reference_value": 4415920000.0,
+      "variance_pct": 67.81517781119223,
+      "pattern": "unknown"
+    },
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 4114878000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "Capex": {
+      "metric": "Capex",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "Goodwill": {
+      "metric": "Goodwill",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "IntangibleAssets": {
+      "metric": "IntangibleAssets",
+      "reason": "Structural divergence (104% variance)",
+      "xbrl_value": 1562584000.0,
+      "reference_value": 764546000.0,
+      "variance_pct": 104.3806389674395,
+      "pattern": "structural"
+    },
+    "ShortTermDebt": {
+      "metric": "ShortTermDebt",
+      "reason": "Structural divergence (129% variance)",
+      "xbrl_value": 514223000.0,
+      "reference_value": 224966000.0,
+      "variance_pct": 128.5780962456549,
+      "pattern": "structural"
+    },
+    "ResearchAndDevelopment": {
+      "metric": "ResearchAndDevelopment",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "CurrentAssets": {
+      "metric": "CurrentAssets",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 2422879000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "CurrentLiabilities": {
+      "metric": "CurrentLiabilities",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 2642298000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "PropertyPlantEquipment": {
+      "metric": "PropertyPlantEquipment",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 920132000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "ShareRepurchases": {
+      "metric": "ShareRepurchases",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "DividendPerShare": {
+      "metric": "DividendPerShare",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 0.01,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    }
+  },
+  "remediation_complexity": "structural",
+  "snapshot_created": false,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-04-04T09:56:32.681301"
+}

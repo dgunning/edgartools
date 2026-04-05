@@ -1,0 +1,59 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - data.sec.gov
+    method: GET
+    uri: https://data.sec.gov/submissions/CIK0000940418.json
+  response:
+    body:
+      string: '{"cik":"0000940418","entityType":"other","sic":"8880","sicDescription":"American
+        Depositary Receipts","ownerOrg":"International Corp Fin","insiderTransactionForOwnerExists":1,"insiderTransactionForIssuerExists":0,"name":"SIEMENS
+        AG","tickers":[],"exchanges":[],"ein":"000000000","lei":null,"description":"","website":"","investorWebsite":"","category":"","fiscalYearEnd":"1231","stateOfIncorporation":"2M","stateOfIncorporationDescription":"Germany","addresses":{"mailing":{"street1":"SIEMENS
+        AKTIENGESELLSCHAFT","street2":"WERNER-VON-SIEMENS-STRASSE 1","city":"MUNICH","stateOrCountry":null,"zipCode":"80333","stateOrCountryDescription":null,"isForeignLocation":1,"foreignStateTerritory":"GERMANY","country":"Germany","countryCode":"2M"},"business":{"street1":"SIEMENS
+        AKTIENGESELLSCHAFT","street2":"WERNER-VON-SIEMENS-STRASSE 1","city":"MUNICH","stateOrCountry":null,"zipCode":"80333","stateOrCountryDescription":null,"isForeignLocation":1,"foreignStateTerritory":"GERMANY","country":"Germany","countryCode":"2M"}},"phone":"49
+        (89) 7805 32474","flags":"","formerNames":[],"filings":{"recent":{"accessionNumber":["0001193125-25-281447","0001021408-25-004265","0001021408-25-004263","0000950123-25-007987","0000950123-25-005365","0000950123-25-002232","0000950123-24-011461","0001193125-24-247675","0001193125-24-247672","0001021408-24-006152","0000950123-24-008387","0000950123-24-005218","0000950123-24-002317","0001193125-24-030122","0000950170-23-069422","0000950123-23-010608","0000950123-23-007847","0000950123-23-004943","0000950123-23-002809","0000950123-23-002807","0000950123-23-002805","0000950123-23-002803","0000950123-23-002727","0001193125-23-035738","0000899243-22-024767","0001193125-22-034459","0000899243-21-041978","0000899243-21-027790","0000899243-20-026440","0000947871-08-000005","0000947871-08-000004"],"filingDate":["2025-11-14","2025-08-29","2025-08-29","2025-08-14","2025-05-15","2025-02-14","2024-11-14","2024-10-30","2024-10-30","2024-08-30","2024-08-14","2024-05-15","2024-02-14","2024-02-09","2023-12-11","2023-11-14","2023-08-14","2023-05-15","2023-02-16","2023-02-16","2023-02-16","2023-02-16","2023-02-14","2023-02-13","2022-07-01","2022-02-10","2021-10-28","2021-07-07","2020-09-28","2008-01-02","2008-01-02"],"reportDate":["2025-09-30","2025-06-30","2024-06-30","2025-06-30","2025-03-31","2024-12-31","2024-09-30","","","2024-06-30","2024-06-30","2024-03-31","2023-12-31","","2023-12-08","2023-09-30","2023-06-30","2023-03-31","2022-06-30","2022-09-30","2022-03-31","2021-12-31","2022-12-31","","2022-06-30","","2021-10-28","2021-07-06","2020-09-23","",""],"acceptanceDateTime":["2025-11-14T06:52:19.000Z","2025-08-29T06:51:30.000Z","2025-08-29T06:44:07.000Z","2025-08-14T06:59:11.000Z","2025-05-15T06:14:47.000Z","2025-02-14T06:27:04.000Z","2024-11-14T07:30:02.000Z","2024-10-30T17:23:51.000Z","2024-10-30T17:21:58.000Z","2024-08-30T06:06:50.000Z","2024-08-14T07:07:20.000Z","2024-05-15T06:43:22.000Z","2024-02-14T11:37:46.000Z","2024-02-09T16:31:45.000Z","2023-12-11T16:30:11.000Z","2023-11-14T12:24:00.000Z","2023-08-14T11:54:53.000Z","2023-05-15T10:03:01.000Z","2023-02-16T12:17:02.000Z","2023-02-16T10:51:15.000Z","2023-02-16T10:51:01.000Z","2023-02-16T10:50:49.000Z","2023-02-15T08:15:38.000Z","2023-02-13T16:06:59.000Z","2022-07-01T16:51:09.000Z","2022-02-10T16:15:59.000Z","2021-10-28T21:08:52.000Z","2021-07-07T16:30:36.000Z","2020-09-28T21:58:19.000Z","2008-01-02T17:18:35.000Z","2008-01-02T17:16:03.000Z"],"act":["34","34","34","34","34","34","34","","","34","34","34","34","","34","34","34","34","34","34","34","34","34","","34","","34","34","34","34","34"],"form":["13F-HR","N-PX","N-PX/A","13F-HR","13F-HR","13F-HR","13F-HR","DFAN14A","DFAN14A","N-PX","13F-HR","13F-HR","13F-HR","SC
+        13G/A","4","13F-HR","13F-HR","13F-HR","13F-HR","13F-HR","13F-HR","13F-HR","13F-HR","SC
+        13G/A","4","SC 13G","3","4","3","SC 13G/A","SC 13G"],"fileNumber":["028-23102","028-23102","028-23102","028-23102","028-23102","028-23102","028-23102","","","028-23102","028-23102","028-23102","028-23102","","001-40978","028-23102","028-23102","028-23102","028-23102","028-23102","028-23102","028-23102","028-23102","","001-40978","","001-40978","001-39548","001-39548","005-83465","005-83465"],"filmNumber":["251481042","251275872","251275859","251214206","25948447","25623016","241457187","","","241265750","241204114","24947041","24634523","","231478522","231403160","231167688","23919269","23637692","23637495","23637494","23637493","23633688","","221062100","","211360244","211077751","201205930","08502729","08502701"],"items":["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],"core_type":["13F-HR","N-PX","N-PX/A","13F-HR","13F-HR","13F-HR","13F-HR","DFAN14A","DFAN14A","N-PX","13F-HR","13F-HR","13F-HR","SC
+        13G/A","4","13F-HR","13F-HR","13F-HR","13F-HR","13F-HR","13F-HR","13F-HR","13F-HR","SC
+        13G/A","4","SC 13G","3","4","3","SC 13G/A","SC 13G"],"size":[4408,4356,6342,4215,4235,4242,4716,7644678,47859,6085,4714,4713,4715,84957,7894,4660,4662,4659,4190,5134,4190,4190,4601,84665,13353,41991,6739,6682,5744,72318,72386],"isXBRL":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"isInlineXBRL":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"primaryDocument":["xslForm13F_X02/primary_doc.xml","xslN-PX_X01/primary_doc.xml","xslN-PX_X01/primary_doc.xml","xslForm13F_X02/primary_doc.xml","xslForm13F_X02/primary_doc.xml","xslForm13F_X02/primary_doc.xml","xslForm13F_X02/primary_doc.xml","d871465ddfan14a.htm","d820150ddfan14a.htm","xslN-PX_X01/primary_doc.xml","xslForm13F_X02/primary_doc.xml","xslForm13F_X02/primary_doc.xml","xslForm13F_X02/primary_doc.xml","d270178dsc13ga.htm","xslF345X05/ownership.xml","xslForm13F_X02/primary_doc.xml","xslForm13F_X02/primary_doc.xml","xslForm13F_X02/primary_doc.xml","xslForm13F_X02/primary_doc.xml","xslForm13F_X02/primary_doc.xml","xslForm13F_X02/primary_doc.xml","xslForm13F_X02/primary_doc.xml","xslForm13F_X02/primary_doc.xml","d281218dsc13ga.htm","xslF345X03/doc4.xml","d264767dsc13g.htm","xslF345X02/doc3.xml","xslF345X03/doc4.xml","xslF345X02/doc3.xml","sc13ga_010208-siemens.htm","sc13g_010208-siemens.htm"],"primaryDocDescription":["","","","","","","","DFAN14A","DFAN14A","","","","","SC
+        13G/A","4","","","","","","","","","SC 13G/A","FORM 4 SUBMISSION","SC 13G","FORM
+        3 SUBMISSION","FORM 4 SUBMISSION","FORM 3 SUBMISSION","",""]},"files":[]}}'
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Cache-Control:
+      - max-age=0, no-cache, no-store
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 08 Feb 2026 20:20:41 GMT
+      Expires:
+      - Sun, 08 Feb 2026 20:20:41 GMT
+      Pragma:
+      - no-cache
+      Strict-Transport-Security:
+      - max-age=31536000 ; preload
+      Vary:
+      - Accept-Encoding
+      X-Amzn-Trace-Id:
+      - Root=1-6988f018-5c3927a00e61382f7fcc7053
+      content-length:
+      - '6398'
+      x-amz-apigw-id:
+      - Yepz9FmEIAMEdWA=
+      x-amzn-RequestId:
+      - b6e26089-dc91-4687-83f8-872d8a790643
+    status:
+      code: 200
+      message: OK
+version: 1

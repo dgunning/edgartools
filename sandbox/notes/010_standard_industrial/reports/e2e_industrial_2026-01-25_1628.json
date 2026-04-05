@@ -1,0 +1,118 @@
+{
+  "run_id": "e2e_industrial_2026-01-25T16:28:41.675107",
+  "timestamp": "2026-01-25T16:28:41.675128",
+  "config": {
+    "group": "industrial_33",
+    "workers": 8,
+    "years": 1,
+    "quarters": 1,
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": null,
+    "tickers": [
+      "AAPL",
+      "CAT",
+      "XOM"
+    ]
+  },
+  "overall_summary": {
+    "10k_total": 3,
+    "10k_passed": 2,
+    "10k_skipped": 0,
+    "10q_total": 2,
+    "10q_passed": 2,
+    "10q_skipped": 0
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 1,
+      "10k_passed": 1,
+      "10k_skipped": 0,
+      "10q_total": 1,
+      "10q_passed": 1,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 1,
+      "10k_passed": 1,
+      "10k_skipped": 0,
+      "10q_total": 1,
+      "10q_passed": 1,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 1,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 1,
+  "skipped_count": 0,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "XOM",
+      "sector": "Energy",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000034088-25-000010",
+      "metric": "OperatingIncome",
+      "xbrl_value": -55569000000.0,
+      "ref_value": 39652000000.0,
+      "variance_pct": 40.1,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:OperatingIncome",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    }
+  ],
+  "skipped": [],
+  "errors": []
+}

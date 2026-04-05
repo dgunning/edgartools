@@ -142,7 +142,9 @@ class CalculationParser(BaseParser):
             to_map[to_element].append(rel)
 
         # Find root elements (appear as 'from' but not as 'to')
-        root_elements = set(from_map.keys()) - set(to_map.keys())
+        # Issue #601: Sort to ensure deterministic ordering across Python processes
+        # (set iteration order depends on hash randomization which varies per process)
+        root_elements = sorted(set(from_map.keys()) - set(to_map.keys()))
 
         if not root_elements:
             return  # No root elements found
@@ -151,7 +153,7 @@ class CalculationParser(BaseParser):
         tree = CalculationTree(
             role_uri=role,
             definition=self.calculation_roles[role]['definition'],
-            root_element_id=next(iter(root_elements)),
+            root_element_id=root_elements[0],  # Use first sorted element
             all_nodes={}
         )
 

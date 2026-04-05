@@ -35,12 +35,14 @@ def build_api_url(path: str) -> str:
 
 def build_submissions_url(cik: int) -> str:
     """Build a URL for company submissions data."""
-    return f"{SEC_DATA_URL}/submissions/CIK{cik:010d}.json"
+    cik_int = int(cik) if isinstance(cik, str) else cik
+    return f"{SEC_DATA_URL}/submissions/CIK{cik_int:010d}.json"
 
 
 def build_company_facts_url(cik: int) -> str:
     """Build a URL for company facts data."""
-    return f"{SEC_DATA_URL}/api/xbrl/companyfacts/CIK{cik:010d}.json"
+    cik_int = int(cik) if isinstance(cik, str) else cik
+    return f"{SEC_DATA_URL}/api/xbrl/companyfacts/CIK{cik_int:010d}.json"
 
 
 def build_full_index_url(year: int, quarter: int, index_type: str, file_type: str) -> str:

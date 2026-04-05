@@ -1,0 +1,124 @@
+{
+  "run_id": "e2e_2026-01-21T20:56:01.406001",
+  "timestamp": "2026-01-21T20:56:01.406009",
+  "config": {
+    "group": "custom",
+    "workers": 8,
+    "years": 2,
+    "quarters": 2,
+    "metrics": [
+      "ShortTermDebt",
+      "CashAndEquivalents"
+    ]
+  },
+  "summary": {
+    "sp25": {
+      "10k_total": 2,
+      "10k_passed": 1,
+      "10q_total": 4,
+      "10q_passed": 2
+    },
+    "sp50": {
+      "10k_total": 2,
+      "10k_passed": 1,
+      "10q_total": 4,
+      "10q_passed": 2
+    },
+    "custom": {
+      "10k_total": 8,
+      "10k_passed": 5,
+      "10q_total": 12,
+      "10q_passed": 10
+    }
+  },
+  "failure_count": 5,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "GS",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000886982-25-000005",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 170137000000.0,
+      "ref_value": 90624000000.0,
+      "variance_pct": 87.7,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "GS",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000886982-25-001411",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 182266000000.0,
+      "ref_value": 88449000000.0,
+      "variance_pct": 106.1,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "GS",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000886982-25-000022",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 173512000000.0,
+      "ref_value": 84282000000.0,
+      "variance_pct": 105.9,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "USB",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000036104-24-000018",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 8616000000.0,
+      "ref_value": 11455000000.0,
+      "variance_pct": 24.8,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "STT",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000093751-24-000498",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 1867000000.0,
+      "ref_value": 4637000000.0,
+      "variance_pct": 59.7,
+      "mapping_source": "tree",
+      "concept_used": null,
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    }
+  ],
+  "errors": []
+}

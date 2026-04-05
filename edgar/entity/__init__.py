@@ -8,6 +8,7 @@ for working with SEC filers.
 from edgar.entity.constants import COMPANY_FORMS
 from edgar.entity.core import (
     Company,
+    CompanyNotFoundError,
     Entity,
     SecFiler,
     get_company,
@@ -87,6 +88,7 @@ __all__ = [
     'get_company_facts',
 
     # Exceptions
+    'CompanyNotFoundError',
     'NoCompanyFactsFound',
 
     # Constants and utilities

@@ -123,11 +123,12 @@ class VirtualPresentationTree:
             concept_to_node = {node.concept: node for node in self.all_nodes.values()}
             label_to_node = {node.label: node for node in self.all_nodes.values()}
 
+            seen = set()
             for item in original_order:
-                if item in concept_to_node:
-                    nodes_in_order.append(concept_to_node[item])
-                elif item in label_to_node:
-                    nodes_in_order.append(label_to_node[item])
+                node = concept_to_node.get(item) or label_to_node.get(item)
+                if node and id(node) not in seen:
+                    nodes_in_order.append(node)
+                    seen.add(id(node))
 
             # Add any remaining nodes not in original order
             remaining_nodes = [node for node in self.all_nodes.values() 

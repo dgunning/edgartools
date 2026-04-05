@@ -1,0 +1,146 @@
+{
+    "schema_version": "1.1",
+    "description": "Known discrepancies between XBRL extracted values and reference data (yfinance)",
+    "statistics": {
+        "total": 4,
+        "by_classification": {
+            "definition_mismatch": 3,
+            "data_provider_adjustment": 1
+        },
+        "by_status": {
+            "accepted": 3,
+            "documented": 1
+        }
+    },
+    "discrepancies": [
+        {
+            "id": "KO-OperatingIncome-2024FY",
+            "ticker": "KO",
+            "metric": "OperatingIncome",
+            "fiscal_period": "2024-FY",
+            "created_date": "2026-01-20",
+            "xbrl": {
+                "value": 9992000000,
+                "concepts": [
+                    "us-gaap:OperatingIncomeLoss"
+                ],
+                "method": "direct"
+            },
+            "reference": {
+                "source": "yfinance",
+                "gaap_field": "Total Operating Income As Reported",
+                "gaap_value": 9992000000,
+                "calculated_field": "Operating Income",
+                "calculated_value": 14020000000
+            },
+            "variance_pct": 0.0,
+            "classification": "data_provider_adjustment",
+            "status": "documented",
+            "investigation": {
+                "date": "2026-01-20",
+                "root_cause": "Yahoo normalizes OperatingIncome by adding back special charges ($2.3B impairments, restructuring). The 'As Reported' field contains GAAP value matching XBRL.",
+                "yahoo_adjustment_items": [
+                    "Special Income Charges: -$2.30B",
+                    "Impairment Of Capital Assets: $0.89B",
+                    "Restructuring And Merger Acquisition: $2.25B"
+                ],
+                "verified_correct": true,
+                "verified_by": "agent"
+            },
+            "action": "use_gaap_field",
+            "notes": "First documented case of yfinance 'As Reported' pattern. See reference_validator.py YFINANCE_GAAP_FALLBACKS."
+        },
+        {
+            "id": "TSLA-IntangibleAssets-2024FY",
+            "ticker": "TSLA",
+            "metric": "IntangibleAssets",
+            "fiscal_period": "2024-FY",
+            "created_date": "2026-01-09",
+            "xbrl": {
+                "value": 390000000,
+                "concepts": [
+                    "us-gaap:Goodwill",
+                    "us-gaap:IntangibleAssetsNetExcludingGoodwill"
+                ],
+                "method": "composite_sum"
+            },
+            "reference": {
+                "source": "yfinance",
+                "field": "Goodwill And Other Intangible Assets",
+                "value": 1470000000
+            },
+            "variance_pct": 73.5,
+            "classification": "definition_mismatch",
+            "status": "accepted",
+            "investigation": {
+                "date": "2026-01-09",
+                "root_cause": "yfinance includes items that XBRL categorizes under different concepts. XBRL value is the sum of explicit balance sheet intangibles.",
+                "verified_correct": true,
+                "verified_by": "agent"
+            },
+            "action": "use_xbrl_value"
+        },
+        {
+            "id": "NVDA-ShortTermDebt-2024FY",
+            "ticker": "NVDA",
+            "metric": "ShortTermDebt",
+            "fiscal_period": "2024-FY",
+            "created_date": "2026-01-20",
+            "xbrl": {
+                "value": 1250000000,
+                "concepts": [
+                    "us-gaap:DebtCurrent",
+                    "us-gaap:LongTermDebtCurrent"
+                ],
+                "method": "direct"
+            },
+            "reference": {
+                "source": "yfinance",
+                "field": "Current Debt And Capital Lease Obligation",
+                "value": 290000000
+            },
+            "variance_pct": 331.0,
+            "classification": "definition_mismatch",
+            "status": "accepted",
+            "investigation": {
+                "date": "2026-01-20",
+                "root_cause": "yfinance 'Current Debt And Capital Lease Obligation' for NVDA is primarily operating lease liabilities ($0.29B), while XBRL DebtCurrent ($1.25B) is actual financial debt. Our XBRL value is more economically meaningful.",
+                "verified_correct": true,
+                "verified_by": "agent"
+            },
+            "action": "use_xbrl_value",
+            "notes": "yfinance includes operating leases in 'Current Debt'; XBRL separates financial debt from lease liabilities."
+        },
+        {
+            "id": "GOOG-ShortTermDebt-2024FY",
+            "ticker": "GOOG",
+            "metric": "ShortTermDebt",
+            "fiscal_period": "2024-FY",
+            "created_date": "2026-01-20",
+            "xbrl": {
+                "value": 1000000000,
+                "concepts": [
+                    "us-gaap:LongTermDebtCurrent"
+                ],
+                "method": "direct"
+            },
+            "reference": {
+                "source": "yfinance",
+                "field": "Current Debt And Capital Lease Obligation",
+                "value": 2890000000
+            },
+            "variance_pct": 65.4,
+            "classification": "definition_mismatch",
+            "status": "accepted",
+            "investigation": {
+                "date": "2026-01-20",
+                "root_cause": "yfinance 'Current Debt And Capital Lease Obligation' includes $2.89B operating lease liability current + $0.23B finance lease. XBRL LongTermDebtCurrent ($1.00B) is pure financial debt excluding leases.",
+                "note": "GOOG does not have 'Current Debt' field - only 'Current Debt And Capital Lease Obligation'",
+                "verified_correct": true,
+                "verified_by": "agent"
+            },
+            "action": "use_xbrl_value",
+            "notes": "yfinance includes operating leases; XBRL provides pure financial debt value."
+        }
+    ]
+}
