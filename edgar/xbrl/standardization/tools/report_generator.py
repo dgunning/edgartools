@@ -9,8 +9,11 @@ This module is standalone — no dependencies on other expansion pipeline module
 """
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass, field
+from datetime import datetime
+from pathlib import Path
 from typing import List, Optional
 
 
@@ -273,3 +276,65 @@ def parse_cohort_report(md: str) -> CohortReportData:
         fixes=fixes,
         unresolved=unresolved,
     )
+
+
+# ---------------------------------------------------------------------------
+# Evidence sidecar
+# ---------------------------------------------------------------------------
+
+def write_evidence_sidecar(
+    report_path: Path,
+    cohort_name: str,
+    gaps: List[UnresolvedGapEntry],
+) -> Path:
+    """Write companion JSON with evidence fields lost in markdown.
+
+    The sidecar file is named ``{report_path}.evidence.json``, e.g.
+    ``cohort-2026-04-05-test.md.evidence.json``.
+    """
+    sidecar: dict = {
+        "cohort_name": cohort_name,
+        "generated_at": datetime.utcnow().isoformat() + "Z",
+        "gaps": {},
+    }
+    for g in gaps:
+        key = f"{g.ticker}:{g.metric}"
+        sidecar["gaps"][key] = {
+            "reference_value": g.reference_value,
+            "xbrl_value": g.xbrl_value,
+            "components_found": g.components_found,
+            "components_needed": g.components_needed,
+            "variance_pct": g.variance,
+            "root_cause": g.root_cause,
+        }
+    sidecar_path = Path(str(report_path) + ".evidence.json")
+    sidecar_path.write_text(json.dumps(sidecar, indent=2))
+    return sidecar_path
+
+
+def load_evidence_sidecar(
+    report_path: Path,
+    gaps: List[UnresolvedGapEntry],
+) -> List[UnresolvedGapEntry]:
+    """Enrich parsed gaps with evidence from companion JSON.
+
+    Gracefully returns gaps unchanged if the sidecar is missing or corrupt.
+    """
+    sidecar_path = Path(str(report_path) + ".evidence.json")
+    if not sidecar_path.exists():
+        return gaps
+    try:
+        data = json.loads(sidecar_path.read_text())
+    except (json.JSONDecodeError, OSError):
+        return gaps
+
+    evidence_map = data.get("gaps", {})
+    for gap in gaps:
+        key = f"{gap.ticker}:{gap.metric}"
+        ev = evidence_map.get(key)
+        if ev:
+            gap.reference_value = ev.get("reference_value")
+            gap.xbrl_value = ev.get("xbrl_value")
+            gap.components_found = ev.get("components_found", 0)
+            gap.components_needed = ev.get("components_needed", 0)
+    return gaps

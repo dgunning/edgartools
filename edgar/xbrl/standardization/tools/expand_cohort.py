@@ -19,6 +19,7 @@ from edgar.xbrl.standardization.tools.report_generator import (
     AppliedFix,
     UnresolvedGapEntry,
     generate_cohort_report,
+    write_evidence_sidecar,
 )
 
 log = logging.getLogger(__name__)
@@ -107,6 +108,9 @@ def run_expand_cohort(
     md = generate_cohort_report(report_data)
     report_path = output_dir / f"cohort-{date_str}-{cohort_name}.md"
     report_path.write_text(md)
+
+    # Write evidence sidecar for downstream investigation
+    write_evidence_sidecar(report_path, report_data.name, unresolved)
 
     log.info(f"Cohort report written to {report_path}")
     return report_path

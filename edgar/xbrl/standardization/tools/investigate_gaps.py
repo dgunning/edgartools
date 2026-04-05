@@ -19,6 +19,7 @@ from edgar.xbrl.standardization.tools.report_generator import (
     AppliedFix,
     EscalatedGap,
     generate_escalation_report,
+    load_evidence_sidecar,
     parse_cohort_report,
 )
 
@@ -172,6 +173,9 @@ def run_investigation(
 
     # Parse cohort report
     cohort_data = parse_cohort_report(cohort_report_path.read_text())
+
+    # Enrich parsed gaps with evidence from sidecar
+    cohort_data.unresolved = load_evidence_sidecar(cohort_report_path, cohort_data.unresolved)
 
     # Enrich industry map from per-company JSON overrides
     resolve_dir = config_dir or Path(__file__).parent.parent / "config"

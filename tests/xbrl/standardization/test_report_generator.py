@@ -1,7 +1,12 @@
+import json
+from pathlib import Path
+
 from edgar.xbrl.standardization.tools.report_generator import (
     generate_cohort_report,
     generate_escalation_report,
+    load_evidence_sidecar,
     parse_cohort_report,
+    write_evidence_sidecar,
     CohortReportData,
     CompanyResult,
     AppliedFix,
@@ -149,3 +154,54 @@ def test_parse_cohort_report_with_none_variance():
     assert len(parsed.unresolved) == 2
     assert parsed.unresolved[0].variance is None
     assert parsed.unresolved[1].variance == 15.3
+
+
+def test_write_evidence_sidecar(tmp_path):
+    """Sidecar JSON preserves evidence fields lost in markdown."""
+    gaps = [UnresolvedGapEntry(
+        ticker="HD", metric="Revenue", gap_type="high_variance",
+        variance=5.3, root_cause="wrong_concept", graveyard=0,
+        reference_value=100.0, xbrl_value=94.7,
+        components_found=2, components_needed=3,
+    )]
+    report_path = tmp_path / "cohort-test.md"
+    write_evidence_sidecar(report_path, "test-cohort", gaps)
+
+    sidecar_path = Path(str(report_path) + ".evidence.json")
+    assert sidecar_path.exists()
+    data = json.loads(sidecar_path.read_text())
+    assert data["gaps"]["HD:Revenue"]["reference_value"] == 100.0
+    assert data["gaps"]["HD:Revenue"]["xbrl_value"] == 94.7
+    assert data["gaps"]["HD:Revenue"]["components_found"] == 2
+
+
+def test_load_evidence_sidecar_enriches_gaps(tmp_path):
+    """Loading sidecar restores evidence on parsed UnresolvedGapEntry."""
+    # Write sidecar with full evidence
+    gaps = [UnresolvedGapEntry(
+        ticker="HD", metric="Revenue", gap_type="high_variance",
+        variance=5.3, root_cause="wrong_concept", graveyard=0,
+        reference_value=100.0, xbrl_value=94.7,
+    )]
+    report_path = tmp_path / "cohort-test.md"
+    write_evidence_sidecar(report_path, "test", gaps)
+
+    # Simulate parse_cohort_report result: evidence fields are None
+    parsed_gap = UnresolvedGapEntry(
+        ticker="HD", metric="Revenue", gap_type="high_variance",
+        variance=5.3, root_cause="wrong_concept", graveyard=0,
+    )
+    # Load sidecar to restore evidence
+    enriched = load_evidence_sidecar(report_path, [parsed_gap])
+    assert enriched[0].reference_value == 100.0
+    assert enriched[0].xbrl_value == 94.7
+
+
+def test_load_evidence_sidecar_missing_graceful(tmp_path):
+    """Missing sidecar returns gaps unchanged (graceful fallback)."""
+    gap = UnresolvedGapEntry(
+        ticker="HD", metric="Revenue", gap_type="high_variance",
+        variance=5.3, root_cause="wrong_concept", graveyard=0,
+    )
+    enriched = load_evidence_sidecar(tmp_path / "nonexistent.md", [gap])
+    assert enriched[0].reference_value is None  # unchanged
