@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 import re
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional
 
@@ -294,11 +294,11 @@ def write_evidence_sidecar(
     """
     sidecar: dict = {
         "cohort_name": cohort_name,
-        "generated_at": datetime.utcnow().isoformat() + "Z",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "gaps": {},
     }
     for g in gaps:
-        key = f"{g.ticker}:{g.metric}"
+        key = f"{g.ticker}:{g.metric}:{g.gap_type}"
         sidecar["gaps"][key] = {
             "reference_value": g.reference_value,
             "xbrl_value": g.xbrl_value,
@@ -330,7 +330,7 @@ def load_evidence_sidecar(
 
     evidence_map = data.get("gaps", {})
     for gap in gaps:
-        key = f"{gap.ticker}:{gap.metric}"
+        key = f"{gap.ticker}:{gap.metric}:{gap.gap_type}"
         ev = evidence_map.get(key)
         if ev:
             gap.reference_value = ev.get("reference_value")

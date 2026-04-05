@@ -170,9 +170,9 @@ def test_write_evidence_sidecar(tmp_path):
     sidecar_path = Path(str(report_path) + ".evidence.json")
     assert sidecar_path.exists()
     data = json.loads(sidecar_path.read_text())
-    assert data["gaps"]["HD:Revenue"]["reference_value"] == 100.0
-    assert data["gaps"]["HD:Revenue"]["xbrl_value"] == 94.7
-    assert data["gaps"]["HD:Revenue"]["components_found"] == 2
+    assert data["gaps"]["HD:Revenue:high_variance"]["reference_value"] == 100.0
+    assert data["gaps"]["HD:Revenue:high_variance"]["xbrl_value"] == 94.7
+    assert data["gaps"]["HD:Revenue:high_variance"]["components_found"] == 2
 
 
 def test_load_evidence_sidecar_enriches_gaps(tmp_path):
