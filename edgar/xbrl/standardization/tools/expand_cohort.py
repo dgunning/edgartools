@@ -11,8 +11,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-import yaml
-
+from edgar.xbrl.standardization.config_loader import get_industry_sic_ranges
 from edgar.xbrl.standardization.tools.config_applier import apply_action_to_json
 from edgar.xbrl.standardization.tools.report_generator import (
     CohortReportData,
@@ -25,7 +24,6 @@ from edgar.xbrl.standardization.tools.report_generator import (
 log = logging.getLogger(__name__)
 
 _DEFAULT_OUTPUT_DIR = Path(__file__).parent.parent / "cohort-reports"
-_INDUSTRY_METRICS_PATH = Path(__file__).parent.parent / "config" / "industry_metrics.yaml"
 
 
 def run_expand_cohort(
@@ -227,7 +225,7 @@ def detect_archetype_gaps(company_infos: List[Dict]) -> Dict[str, str]:
     Returns:
         Dict of ticker -> reason string for companies with no industry coverage.
     """
-    industry_sic_ranges = _load_industry_sic_ranges()
+    industry_sic_ranges = get_industry_sic_ranges()
     flagged: Dict[str, str] = {}
 
     for info in company_infos:
@@ -258,18 +256,3 @@ def detect_archetype_gaps(company_infos: List[Dict]) -> Dict[str, str]:
 
     return flagged
 
-
-def _load_industry_sic_ranges() -> Dict[str, List[List[int]]]:
-    """Load SIC ranges from industry_metrics.yaml."""
-    if not _INDUSTRY_METRICS_PATH.exists():
-        return {}
-
-    with open(_INDUSTRY_METRICS_PATH) as f:
-        data = yaml.safe_load(f)
-
-    ranges: Dict[str, List[List[int]]] = {}
-    for industry, config in data.items():
-        if isinstance(config, dict) and "sic_ranges" in config:
-            ranges[industry] = config["sic_ranges"]
-
-    return ranges

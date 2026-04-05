@@ -35,6 +35,15 @@ def _load_industry_metrics() -> dict:
     return _industry_metrics_cache
 
 
+def get_industry_sic_ranges() -> Dict[str, List[List[int]]]:
+    """Get SIC ranges for all industries from cached industry_metrics.yaml."""
+    data = _load_industry_metrics()
+    return {
+        industry: config["sic_ranges"]
+        for industry, config in data.items()
+        if isinstance(config, dict) and "sic_ranges" in config
+    }
+
 
 @dataclass
 class MappingConfig:
