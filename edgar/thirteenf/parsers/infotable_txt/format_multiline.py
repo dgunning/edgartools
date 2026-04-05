@@ -1,11 +1,14 @@
-"""Parser for multiline TXT format (Format 1) used in some 2012 filings.
+"""Parser for multiline TXT format (Format 1) used in pre-2013 filings.
 
 This format has company names that can span multiple lines, with the CUSIP
 appearing on the same line as the continuation of the company name.
+Column positions are determined from the <S>/<C> marker line.
 
-Example:
-    AMERICAN
-      EXPRESS CO    COM    025816109  110999  1952142 Shared-Defined...
+Example raw data:
+    <S>             <C>      <C>         <C>            <C>         <C>  <C>     <C>     <C>                  <C>         <C>    <C>
+    American
+       Express Co.    Com    025816 10 9       697,973   17,225,400         X            4, 2, 5, 17           17,225,400
+                                               323,943    7,994,634         X            4, 13, 17              7,994,634
 """
 
 import re
@@ -16,13 +19,318 @@ from edgar.reference import cusip_ticker_mapping
 
 __all__ = ['parse_multiline_format']
 
+# Minimum number of columns expected in a holdings table marker line
+_MIN_HOLDINGS_COLUMNS = 6
+
+# Regex for a valid cleaned CUSIP: exactly 9 alphanumeric chars with at least one digit
+_CUSIP_RE = re.compile(r'^[A-Za-z0-9]{9}$')
+
+
+def _extract_column_specs(table_text: str):
+    """
+    Find the <S>/<C> marker line in a table and return column specs.
+
+    Returns:
+        Tuple of (colspecs, marker_line_index, lines) where colspecs is a list
+        of (start, end) tuples, or (None, None, None) if no marker found.
+    """
+    lines = table_text.split('\n')
+    for i, line in enumerate(lines):
+        line_upper = line.upper()
+        if '<S>' in line_upper and '<C>' in line_upper:
+            positions = [j for j, c in enumerate(line) if c == '<']
+            if len(positions) < _MIN_HOLDINGS_COLUMNS:
+                continue
+            specs = []
+            for k, start in enumerate(positions):
+                end = positions[k + 1] if k + 1 < len(positions) else None
+                specs.append((start, end))
+            return specs, i, lines
+    return None, None, None
+
+
+def _slice_col(line, start, end):
+    """Extract and strip a column value from a fixed-width line."""
+    if start >= len(line):
+        return ''
+    segment = line[start:end] if end is not None else line[start:]
+    return segment.strip()
+
+
+def _clean_cusip(raw):
+    """Strip spaces from a raw CUSIP field and validate."""
+    cleaned = raw.replace(' ', '').replace('-', '')
+    if len(cleaned) == 9 and _CUSIP_RE.match(cleaned) and any(c.isdigit() for c in cleaned):
+        return cleaned
+    return None
+
+
+def _is_separator_line(line):
+    """Check if line is a separator (dashes, equals, spaces only)."""
+    stripped = line.strip()
+    return bool(stripped) and all(c in '- =_' for c in stripped)
+
+
+def _is_header_or_skip_line(line):
+    """Check if a line should be skipped (headers, captions, separators)."""
+    stripped = line.strip()
+    if not stripped:
+        return True
+    upper = stripped.upper()
+    # Skip SGML tags
+    if '<CAPTION>' in upper or '<S>' in upper or '<C>' in upper or '<PAGE>' in upper:
+        return True
+    # Skip separator lines
+    if all(c in '- =_' for c in stripped):
+        return True
+    # Skip known header keywords
+    if any(kw in upper for kw in [
+        'COLUMN 1', 'COLUMN 2', 'VOTING AUTHORITY', 'SHRS OR',
+        'NAME OF ISSUER', 'FORM 13F', 'INFORMATION TABLE',
+        'TITLE OF', 'MARKET VALUE', 'INVESTMENT', 'PRINCIPAL',
+    ]):
+        return True
+    return False
+
+
+def _parse_after_cusip(data_parts):
+    """
+    Parse the numeric fields after the CUSIP column.
+
+    Expected order: VALUE SHARES [DISCRETION_FLAG] [MANAGERS...] [SOLE] [SHARED] [NONE]
+
+    Returns dict with Value, SharesPrnAmount, InvestmentDiscretion, SoleVoting, SharedVoting, NonVoting
+    or None if parsing fails.
+    """
+    if len(data_parts) < 2:
+        return None
+
+    try:
+        value_str = data_parts[0].replace(',', '').replace('$', '')
+        shares_str = data_parts[1].replace(',', '')
+
+        value = int(value_str) if value_str and value_str != '-' else 0
+        shares = float(shares_str) if shares_str and shares_str != '-' else 0
+
+        # Parse voting columns from the end (look for numeric values)
+        voting_values = []
+        for i in range(len(data_parts) - 1, 1, -1):
+            part = data_parts[i].replace(',', '').replace('.', '')
+            if part.replace('-', '').isdigit():
+                val_str = data_parts[i].replace(',', '')
+                try:
+                    voting_values.insert(0, float(val_str) if val_str != '-' else 0)
+                    if len(voting_values) == 3:
+                        break
+                except ValueError:
+                    break
+            else:
+                break
+
+        sole_voting = int(voting_values[0]) if len(voting_values) >= 1 else 0
+        shared_voting = int(voting_values[1]) if len(voting_values) >= 2 else 0
+        non_voting = int(voting_values[2]) if len(voting_values) >= 3 else 0
+
+        # Find investment discretion
+        investment_discretion = ''
+        num_voting_at_end = len(voting_values)
+        for i in range(2, len(data_parts) - num_voting_at_end):
+            part = data_parts[i]
+            if part and part not in ['-', 'SH', 'PRN'] and not part.replace(',', '').replace('.', '').isdigit():
+                investment_discretion = part
+                break
+
+        return {
+            'Value': value,
+            'SharesPrnAmount': shares,
+            'InvestmentDiscretion': investment_discretion,
+            'SoleVoting': sole_voting,
+            'SharedVoting': shared_voting,
+            'NonVoting': non_voting,
+        }
+    except (ValueError, IndexError):
+        return None
+
+
+def _extract_class_and_issuer(before_parts):
+    """
+    Split name+class parts into (issuer_name, title_class).
+
+    Common patterns:
+    - ["COMPANY", "NAME", "COM"] -> ("COMPANY NAME", "COM")
+    - ["COMPANY", "SPONSORED", "ADR"] -> ("COMPANY", "SPONSORED ADR")
+    - ["COMPANY", "CL", "A"] -> ("COMPANY", "CL A")
+    - ["COMPANY", "CLA", "SPL"] -> ("COMPANY", "CLA SPL")
+    """
+    if len(before_parts) < 2:
+        return None, None
+
+    if len(before_parts) >= 3 and before_parts[-2].upper() == 'SPONSORED' and before_parts[-1].upper() == 'ADR':
+        title_class = 'SPONSORED ADR'
+        issuer_parts = before_parts[:-2]
+    elif len(before_parts) >= 3 and before_parts[-2].upper() in ('CL', 'CLA'):
+        title_class = before_parts[-2] + ' ' + before_parts[-1]
+        issuer_parts = before_parts[:-2]
+    elif len(before_parts) >= 5 and ' '.join(before_parts[-4:]).upper().startswith('LIB CAP COM'):
+        title_class = ' '.join(before_parts[-4:])
+        issuer_parts = before_parts[:-4]
+    else:
+        title_class = before_parts[-1]
+        issuer_parts = before_parts[:-1]
+
+    issuer_name = ' '.join(issuer_parts)
+    return issuer_name if issuer_name else None, title_class
+
+
+def _parse_table_with_columns(table_text: str):
+    """
+    Parse a single <TABLE> block using column positions from the marker line.
+
+    Returns list of row dicts.
+    """
+    colspecs, marker_idx, lines = _extract_column_specs(table_text)
+    if colspecs is None:
+        return []
+
+    # Column indices (standard 13F layout):
+    # 0: Name of Issuer, 1: Title of Class, 2: CUSIP Number
+    # 3: Market Value, 4: Shares/Principal Amount
+    # 5+: Discretion fields, Other Managers, Voting Authority
+    NAME_COL = 0
+    CLASS_COL = 1
+    CUSIP_COL = 2
+    VALUE_COL = 3
+    SHARES_COL = 4
+
+    parsed_rows = []
+    pending_name_parts = []
+    current_issuer = ''
+    current_class = ''
+    current_cusip = ''
+
+    # Process data lines after the marker
+    for line_idx in range(marker_idx + 1, len(lines)):
+        raw_line = lines[line_idx]
+
+        if _is_header_or_skip_line(raw_line):
+            continue
+
+        # Check for end-of-table markers
+        stripped = raw_line.strip().upper()
+        if stripped.startswith('GRAND TOTAL'):
+            break
+
+        # Extract columns using fixed positions
+        name_raw = _slice_col(raw_line, colspecs[NAME_COL][0], colspecs[NAME_COL][1])
+        class_raw = _slice_col(raw_line, colspecs[CLASS_COL][0], colspecs[CLASS_COL][1]) if CLASS_COL < len(colspecs) else ''
+        cusip_raw = _slice_col(raw_line, colspecs[CUSIP_COL][0], colspecs[CUSIP_COL][1]) if CUSIP_COL < len(colspecs) else ''
+        value_raw = _slice_col(raw_line, colspecs[VALUE_COL][0], colspecs[VALUE_COL][1]) if VALUE_COL < len(colspecs) else ''
+        shares_raw = _slice_col(raw_line, colspecs[SHARES_COL][0], colspecs[SHARES_COL][1]) if SHARES_COL < len(colspecs) else ''
+
+        # Check for subtotal separator lines (dashes in value column)
+        if value_raw and all(c in '-=' for c in value_raw.replace(' ', '')):
+            break
+
+        cusip = _clean_cusip(cusip_raw)
+        has_cusip = cusip is not None
+        has_value = bool(value_raw and value_raw.replace(',', '').replace('$', '').replace('-', '').strip().isdigit())
+
+        if has_cusip:
+            # This line has a CUSIP — it's a primary data row
+            # Combine pending name parts with name on this line
+            name_parts = pending_name_parts[:]
+            if name_raw:
+                name_parts.append(name_raw)
+            pending_name_parts = []
+
+            # Extract class from this line
+            class_parts = []
+            if class_raw:
+                class_parts = class_raw.split()
+
+            # Build issuer name and class
+            if class_parts:
+                current_class = ' '.join(class_parts)
+                current_issuer = ' '.join(name_parts)
+            else:
+                # Class might be at end of name parts
+                all_parts = []
+                for part in name_parts:
+                    all_parts.extend(part.split())
+                if all_parts:
+                    issuer_name, title_class = _extract_class_and_issuer(all_parts)
+                    if issuer_name:
+                        current_issuer = issuer_name
+                        current_class = title_class or ''
+                    else:
+                        continue
+                else:
+                    continue
+
+            current_cusip = cusip
+
+            if not current_issuer:
+                continue
+
+            # Parse the numeric data after CUSIP
+            # Gather everything from the value column onward as text, then split
+            value_start = colspecs[VALUE_COL][0]
+            after_cusip_text = raw_line[value_start:].strip() if value_start < len(raw_line) else ''
+            data_parts = after_cusip_text.split()
+
+            parsed = _parse_after_cusip(data_parts)
+            if parsed is None:
+                continue
+
+            row_dict = {
+                'Issuer': current_issuer,
+                'Class': current_class,
+                'Cusip': current_cusip,
+                'Type': 'Shares',
+                'PutCall': '',
+                **parsed,
+            }
+            parsed_rows.append(row_dict)
+
+        elif has_value and not name_raw and not cusip_raw:
+            # Continuation row: same company/CUSIP, different manager assignment
+            if not current_cusip or not current_issuer:
+                continue
+
+            value_start = colspecs[VALUE_COL][0]
+            after_cusip_text = raw_line[value_start:].strip() if value_start < len(raw_line) else ''
+            data_parts = after_cusip_text.split()
+
+            parsed = _parse_after_cusip(data_parts)
+            if parsed is None:
+                continue
+
+            row_dict = {
+                'Issuer': current_issuer,
+                'Class': current_class,
+                'Cusip': current_cusip,
+                'Type': 'Shares',
+                'PutCall': '',
+                **parsed,
+            }
+            parsed_rows.append(row_dict)
+
+        elif name_raw and not has_cusip and not has_value:
+            # Name-only line: accumulate for multi-line company name
+            pending_name_parts.append(name_raw)
+
+        # else: skip unrecognizable lines
+
+    return parsed_rows
+
 
 def parse_multiline_format(infotable_txt: str) -> pd.DataFrame:
     """
     Parse multiline TXT format (Format 1) information table.
 
-    This parser handles the format where company names can span multiple lines,
-    with the CUSIP appearing on the line that contains the continuation.
+    Uses column positions from <S>/<C> marker lines to extract fields
+    via fixed-width slicing, correctly handling spaced CUSIPs and
+    multi-line company names.
 
     Args:
         infotable_txt: TXT content containing the information table
@@ -35,36 +343,23 @@ def parse_multiline_format(infotable_txt: str) -> pd.DataFrame:
     if not match:
         return pd.DataFrame()
 
-    # Extract all table content between <TABLE> and </TABLE> tags (case-insensitive)
-    # Note: Search from beginning since <TABLE> tag may come before the header text
+    # Extract all table content between <TABLE> and </TABLE> tags
     table_pattern = r'<TABLE>(.*?)</TABLE>'
     tables = re.findall(table_pattern, infotable_txt, re.DOTALL | re.IGNORECASE)
 
     if len(tables) == 0:
         return pd.DataFrame()
 
-    # Determine which tables to process:
-    # - If 2+ tables: Skip first table (usually managers list), process rest
-    # - If 1 table: Check if it has holdings data (CUSIPs), if so process it
-    if len(tables) >= 2:
-        holdings_tables = tables[1:]  # Skip first table (managers)
-    elif len(tables) == 1:
-        # Check if the single table has holdings data (contains CUSIPs with digits)
-        # Look for 9-char alphanumeric sequences (with or without spaces) that contain at least one digit
-        potential_cusips = re.findall(r'\b([A-Za-z0-9]{9})\b', tables[0])
-        # Also check for spaced CUSIPs
-        spaced_cusips = re.findall(r'\b([A-Za-z0-9 ]{9,15})\b', tables[0])
-        spaced_cusips_cleaned = [c.replace(' ', '') for c in spaced_cusips if len(c.replace(' ', '')) == 9]
+    # Filter tables: skip managers tables, keep holdings tables.
+    # A managers table has few columns (<6) or contains "FORM 13F FILE".
+    # A holdings table has 6+ columns in its marker line.
+    holdings_tables = []
+    for table_text in tables:
+        specs, _, _ = _extract_column_specs(table_text)
+        if specs and len(specs) >= _MIN_HOLDINGS_COLUMNS:
+            holdings_tables.append(table_text)
 
-        has_valid_cusips = (
-            any(any(c.isdigit() for c in cusip) for cusip in potential_cusips) or
-            any(any(c.isdigit() for c in cusip) for cusip in spaced_cusips_cleaned)
-        )
-        if has_valid_cusips:
-            holdings_tables = tables  # Process the single table
-        else:
-            return pd.DataFrame()  # No holdings data
-    else:
+    if not holdings_tables:
         return pd.DataFrame()
 
     parsed_rows = []
@@ -74,194 +369,9 @@ def parse_multiline_format(infotable_txt: str) -> pd.DataFrame:
         if len(holdings_table.strip()) < 200:
             continue
 
-        # Reset pending issuer parts for each table
-        pending_issuer_parts = []
+        rows = _parse_table_with_columns(holdings_table)
+        parsed_rows.extend(rows)
 
-        lines = holdings_table.split('\n')
-
-        for line in lines:
-            orig_line = line
-            line = line.strip()
-
-            # Skip empty lines, CAPTION lines, header rows (case-insensitive)
-            line_upper = line.upper()
-            if not line or '<CAPTION>' in line_upper or '<S>' in line_upper or '<C>' in line_upper:
-                continue
-
-            # Skip separator lines (made of dashes and spaces)
-            if all(c in '- ' for c in line):
-                continue
-
-            # Skip header/title rows
-            line_upper = line.upper()
-            if line.startswith(('Total', 'Title', 'Name of Issuer', 'of', 'Market Value')):
-                continue
-
-            # Skip column header rows (contain keywords like COLUMN, VOTING AUTHORITY, SHRS OR PRN, etc.)
-            if any(keyword in line_upper for keyword in ['COLUMN 1', 'COLUMN 2', 'VOTING AUTHORITY', 'SHRS OR', 'NAME OF ISSUER', 'FORM 13F', 'INFORMATION TABLE']):
-                continue
-
-            # Try to parse as a data row
-            # CUSIP is a reliable anchor - it's always 9 alphanumeric characters (case-insensitive)
-            # Must contain at least one digit to avoid matching company names like "Berkshire" or "SPONSORED"
-            # Some filings have spaces in CUSIPs: "00724F 10 1" should be "00724F101"
-            # Find ALL potential CUSIP sequences (with or without spaces), then pick the first valid one
-
-            # First try without spaces (faster path)
-            cusip_match = None
-            cusip = None
-            all_cusip_matches = re.finditer(r'\b([A-Za-z0-9]{9})\b', line)
-            for match in all_cusip_matches:
-                if any(c.isdigit() for c in match.group(1)):
-                    cusip_match = match
-                    cusip = match.group(1)
-                    break
-
-            # If not found, try matching with spaces and cleaning
-            if not cusip_match:
-                # Match sequences of 9-15 chars that might contain spaces
-                spaced_matches = re.finditer(r'\b([A-Za-z0-9 ]{9,15})\b', line)
-                for match in spaced_matches:
-                    cleaned = match.group(1).replace(' ', '')
-                    # Check if cleaned version is exactly 9 chars and has a digit
-                    if len(cleaned) == 9 and any(c.isdigit() for c in cleaned):
-                        cusip_match = match
-                        cusip = cleaned  # Use cleaned version
-                        break
-
-            if cusip_match:
-                # This line contains a CUSIP, so it has the main data
-                # cusip already set above (either from direct match or cleaned from spaced match)
-                cusip_pos = cusip_match.start()
-
-                # Everything before CUSIP is issuer name + class
-                before_cusip = line[:cusip_pos].strip()
-                # Everything after CUSIP is the numeric data
-                # Use match.end() to handle spaced CUSIPs correctly (e.g., "00724F 10 1")
-                after_cusip = line[cusip_match.end():].strip()
-
-                # Split before_cusip into issuer parts
-                # Combine with any pending issuer parts from previous line
-                before_parts = before_cusip.split()
-
-                # If we have pending parts, this completes a multi-line company name
-                if pending_issuer_parts:
-                    before_parts = pending_issuer_parts + before_parts
-                    pending_issuer_parts = []
-
-                if len(before_parts) < 2:
-                    # Not enough data, skip
-                    continue
-
-                # Extract class and issuer name
-                # Common patterns:
-                # - "COMPANY NAME COM" → class="COM", issuer="COMPANY NAME"
-                # - "COMPANY NAME SPONSORED ADR" → class="SPONSORED ADR", issuer="COMPANY NAME"
-                # - "COMPANY NAME CL A" → class="CL A", issuer="COMPANY NAME"
-
-                if len(before_parts) >= 3 and before_parts[-2] == 'SPONSORED' and before_parts[-1] == 'ADR':
-                    title_class = 'SPONSORED ADR'
-                    issuer_parts = before_parts[:-2]
-                elif len(before_parts) >= 3 and before_parts[-2] == 'CL':
-                    title_class = 'CL ' + before_parts[-1]
-                    issuer_parts = before_parts[:-2]
-                elif len(before_parts) >= 5 and ' '.join(before_parts[-4:]).startswith('LIB CAP COM'):
-                    # "LIBERTY MEDIA CORPORATION LIB CAP COM A"
-                    title_class = ' '.join(before_parts[-4:])
-                    issuer_parts = before_parts[:-4]
-                elif len(before_parts) >= 2:
-                    # Default: last word/token is the class
-                    title_class = before_parts[-1]
-                    issuer_parts = before_parts[:-1]
-                else:
-                    # Only one part - skip this row
-                    continue
-
-                issuer_name = ' '.join(issuer_parts)
-
-                # Skip if issuer name is empty
-                if not issuer_name:
-                    continue
-
-                # Parse the numeric data after CUSIP
-                # Flexible format handling since empty columns may not appear
-                # Expected order: VALUE SHARES [TYPE] [DISCRETION] [MANAGERS] [SOLE] [SHARED] [NONE]
-                data_parts = after_cusip.split()
-
-                if len(data_parts) < 2:  # At minimum need value and shares
-                    continue
-
-                try:
-                    # Value and Shares are always the first two fields
-                    value_str = data_parts[0].replace(',', '').replace('$', '')
-                    shares_str = data_parts[1].replace(',', '')
-
-                    value = int(value_str) if value_str and value_str != '-' else 0
-                    shares = float(shares_str) if shares_str and shares_str != '-' else 0
-
-                    # Parse voting columns from the end (look for numeric values)
-                    # Work backwards from end to find up to 3 numeric voting columns
-                    voting_values = []
-                    for i in range(len(data_parts) - 1, 1, -1):  # Start from end, skip first 2 (value/shares)
-                        part = data_parts[i].replace(',', '').replace('.', '')
-                        if part.replace('-', '').isdigit():
-                            # This is a numeric value (could be voting)
-                            val_str = data_parts[i].replace(',', '')
-                            try:
-                                voting_values.insert(0, float(val_str) if val_str != '-' else 0)
-                                if len(voting_values) == 3:
-                                    break
-                            except ValueError:
-                                break
-                        else:
-                            # Non-numeric, stop looking for voting columns
-                            break
-
-                    # Assign voting values (may have 0-3 values)
-                    sole_voting = int(voting_values[0]) if len(voting_values) >= 1 else 0
-                    shared_voting = int(voting_values[1]) if len(voting_values) >= 2 else 0
-                    non_voting = int(voting_values[2]) if len(voting_values) >= 3 else 0
-
-                    # Find investment discretion by looking for non-numeric field after position 2
-                    # It's typically "Shared-Defined", "SOLE", "Defined", etc.
-                    # Skip position 2 which might be TYPE (SH/PRN)
-                    investment_discretion = ''
-                    num_voting_at_end = len(voting_values)
-                    for i in range(2, len(data_parts) - num_voting_at_end):
-                        part = data_parts[i]
-                        # Investment discretion contains letters and is not a known type marker
-                        if part and part not in ['-', 'SH', 'PRN'] and not part.replace(',', '').replace('.', '').isdigit():
-                            investment_discretion = part
-                            break
-
-                    # Create row dict
-                    row_dict = {
-                        'Issuer': issuer_name,
-                        'Class': title_class,
-                        'Cusip': cusip,
-                        'Value': value,
-                        'SharesPrnAmount': shares,
-                        'Type': 'Shares',
-                        'PutCall': '',
-                        'InvestmentDiscretion': investment_discretion,
-                        'SoleVoting': sole_voting,
-                        'SharedVoting': shared_voting,
-                        'NonVoting': non_voting
-                    }
-
-                    parsed_rows.append(row_dict)
-
-                except (ValueError, IndexError):
-                    # Skip rows that don't parse correctly
-                    continue
-
-            else:
-                # No CUSIP on this line - might be first part of a multi-line company name
-                # Store it for the next line
-                if line and not line.startswith(('Total', 'Title')):
-                    pending_issuer_parts = line.split()
-
-    # Create DataFrame
     if not parsed_rows:
         return pd.DataFrame()
 
