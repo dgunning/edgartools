@@ -1656,8 +1656,8 @@ def update_company_tiers(
     Returns:
         Dict mapping ticker -> quality tier string.
     """
-    import json
     from pathlib import Path
+    from edgar.xbrl.standardization.tools.config_applier import _load_override, _save_override
 
     tiers = classify_company_tiers(cqs_result)
 
@@ -1667,18 +1667,12 @@ def update_company_tiers(
     if config_dir is None:
         config_dir = Path(__file__).parent.parent / "config"
 
-    overrides_dir = Path(config_dir) / "company_overrides"
-    overrides_dir.mkdir(parents=True, exist_ok=True)
+    config_dir = Path(config_dir)
 
     for ticker, tier in tiers.items():
-        json_path = overrides_dir / f"{ticker}.json"
-        # Preserve existing override content
-        if json_path.exists():
-            data = json.loads(json_path.read_text())
-        else:
-            data = {}
+        data = _load_override(ticker, config_dir)
         data["quality_tier"] = tier
-        json_path.write_text(json.dumps(data, indent=2) + "\n")
+        _save_override(ticker, data, config_dir)
 
     logger.info(f"Updated quality_tier for {len(tiers)} companies in JSON overrides")
     return tiers
