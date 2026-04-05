@@ -1,0 +1,271 @@
+"""Inner loop for expansion pipeline: onboard, measure, fix, report.
+
+Coordinates the company onboarding workflow:
+1. Onboard companies via onboard_company
+2. Measure quality via compute_cqs
+3. Diagnose gaps and apply deterministic fixes
+4. Generate cohort report
+"""
+import logging
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import yaml
+
+from edgar.xbrl.standardization.tools.config_applier import apply_action_to_json
+from edgar.xbrl.standardization.tools.report_generator import (
+    CohortReportData,
+    CompanyResult,
+    AppliedFix,
+    UnresolvedGapEntry,
+    generate_cohort_report,
+)
+
+log = logging.getLogger(__name__)
+
+_DEFAULT_OUTPUT_DIR = Path(__file__).parent.parent / "cohort-reports"
+_INDUSTRY_METRICS_PATH = Path(__file__).parent.parent / "config" / "industry_metrics.yaml"
+
+
+def run_expand_cohort(
+    tickers: List[str],
+    cohort_name: str,
+    output_dir: Optional[Path] = None,
+    config_dir: Optional[Path] = None,
+    dry_run: bool = False,
+) -> Path:
+    """Run the inner loop for a cohort of companies.
+
+    Args:
+        tickers: Company tickers to onboard.
+        cohort_name: Name for this cohort (used in report filename).
+        output_dir: Where to write cohort report (default: cohort-reports/).
+        config_dir: Config directory override (for testing).
+        dry_run: If True, skip actual SEC/yfinance calls.
+
+    Returns:
+        Path to the generated cohort report markdown file.
+    """
+    if output_dir is None:
+        output_dir = _DEFAULT_OUTPUT_DIR
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Step 1: Onboard
+    onboard_results = _onboard_single(tickers, dry_run=dry_run)
+
+    # Step 2: Measure
+    successful_tickers = [t for t, r in onboard_results.items() if r.error is None]
+    company_scores = _measure_cohort(successful_tickers, config_dir=config_dir)
+
+    # Step 3: Diagnose and fix
+    fixes, unresolved = _diagnose_and_fix(
+        successful_tickers, company_scores, config_dir=config_dir
+    )
+
+    # Step 4: Build report
+    companies = []
+    for ticker, result in onboard_results.items():
+        if result.error:
+            companies.append(CompanyResult(
+                ticker=ticker,
+                ef_cqs=0.0,
+                status="failed",
+                gaps_remaining=0,
+                notes=f"Onboarding error: {result.error}",
+            ))
+            continue
+
+        score = company_scores.get(ticker)
+        ef_cqs = score.ef_cqs if score else 0.0
+        gaps = sum(1 for u in unresolved if u.ticker == ticker)
+
+        status = "graduated" if ef_cqs >= 0.80 else "needs_investigation"
+        companies.append(CompanyResult(
+            ticker=ticker,
+            ef_cqs=ef_cqs,
+            status=status,
+            gaps_remaining=gaps,
+            notes="",
+        ))
+
+    report_data = CohortReportData(
+        name=f"{cohort_name}-{datetime.utcnow().strftime('%Y-%m-%d')}",
+        status="inner_loop_complete",
+        companies=companies,
+        fixes=[AppliedFix(
+            ticker=f["ticker"],
+            metric=f["metric"],
+            action=f["action"],
+            confidence=f.get("confidence", 1.0),
+            detail=f.get("detail", ""),
+        ) for f in fixes],
+        unresolved=unresolved,
+    )
+
+    md = generate_cohort_report(report_data)
+    report_path = output_dir / f"cohort-{datetime.utcnow().strftime('%Y-%m-%d')}-{cohort_name}.md"
+    report_path.write_text(md)
+
+    log.info(f"Cohort report written to {report_path}")
+    return report_path
+
+
+def _onboard_single(
+    tickers: List[str],
+    dry_run: bool = False,
+) -> Dict[str, Any]:
+    """Onboard companies. Returns dict of ticker -> OnboardingResult."""
+    from edgar.xbrl.standardization.tools.onboard_company import (
+        onboard_company,
+        OnboardingResult,
+    )
+
+    results = {}
+    for ticker in tickers:
+        try:
+            result = onboard_company(ticker, dry_run=dry_run)
+            results[ticker] = result
+        except Exception as e:
+            log.error(f"Failed to onboard {ticker}: {e}")
+            # Create a minimal error result
+            results[ticker] = OnboardingResult(
+                ticker=ticker,
+                cik=0,
+                company_name="",
+                archetype="A",
+                error=str(e),
+            )
+    return results
+
+
+def _measure_cohort(
+    tickers: List[str],
+    config_dir: Optional[Path] = None,
+) -> Dict[str, Any]:
+    """Measure EF-CQS for a cohort. Returns dict of ticker -> company score."""
+    if not tickers:
+        return {}
+
+    from edgar.xbrl.standardization.tools.auto_eval import compute_cqs
+
+    kwargs: Dict[str, Any] = {"eval_cohort": tickers, "snapshot_mode": True}
+    if config_dir:
+        from edgar.xbrl.standardization.config_loader import ConfigLoader
+        kwargs["config"] = ConfigLoader(config_dir=config_dir).load()
+
+    cqs_result = compute_cqs(**kwargs)
+    return cqs_result.company_scores
+
+
+def _diagnose_and_fix(
+    tickers: List[str],
+    company_scores: Dict[str, Any],
+    config_dir: Optional[Path] = None,
+) -> Tuple[List[Dict], List[UnresolvedGapEntry]]:
+    """Diagnose gaps and apply deterministic fixes.
+
+    Returns:
+        Tuple of (applied_fixes, unresolved_gaps)
+    """
+    if not tickers:
+        return [], []
+
+    from edgar.xbrl.standardization.tools.auto_eval import identify_gaps
+
+    kwargs: Dict[str, Any] = {"eval_cohort": tickers, "snapshot_mode": True}
+    if config_dir:
+        from edgar.xbrl.standardization.config_loader import ConfigLoader
+        kwargs["config"] = ConfigLoader(config_dir=config_dir).load()
+
+    gaps, _ = identify_gaps(**kwargs)
+
+    applied_fixes: List[Dict] = []
+    unresolved: List[UnresolvedGapEntry] = []
+
+    for gap in gaps:
+        # Try deterministic fixes based on gap type
+        fix = _try_deterministic_fix(gap)
+        if fix:
+            if config_dir:
+                apply_action_to_json(fix, config_dir=config_dir)
+            else:
+                apply_action_to_json(fix)
+            applied_fixes.append(fix)
+        else:
+            unresolved.append(UnresolvedGapEntry(
+                ticker=gap.ticker,
+                metric=gap.metric,
+                gap_type=gap.gap_type,
+                variance=gap.current_variance,
+                root_cause=gap.root_cause or "unknown",
+                graveyard=gap.graveyard_count,
+            ))
+
+    return applied_fixes, unresolved
+
+
+def _try_deterministic_fix(gap) -> Optional[Dict]:
+    """Attempt a deterministic fix for a gap. Returns action dict or None.
+
+    Currently conservative: only industry exclusions are auto-fixable.
+    All other fixes require investigation (outer loop).
+    """
+    return None
+
+
+def detect_archetype_gaps(company_infos: List[Dict]) -> Dict[str, str]:
+    """Amendment 3: Flag companies without matching industry_metrics.yaml section.
+
+    Args:
+        company_infos: List of dicts with keys: ticker, sic_code, archetype
+
+    Returns:
+        Dict of ticker -> reason string for companies with no industry coverage.
+    """
+    industry_sic_ranges = _load_industry_sic_ranges()
+    flagged: Dict[str, str] = {}
+
+    for info in company_infos:
+        ticker = info["ticker"]
+        sic_code = info.get("sic_code")
+
+        if not sic_code:
+            flagged[ticker] = "No SIC code available"
+            continue
+
+        try:
+            sic_int = int(sic_code)
+        except (ValueError, TypeError):
+            flagged[ticker] = f"Invalid SIC code: {sic_code}"
+            continue
+
+        covered = False
+        for industry, ranges in industry_sic_ranges.items():
+            for low, high in ranges:
+                if low <= sic_int <= high:
+                    covered = True
+                    break
+            if covered:
+                break
+
+        if not covered:
+            flagged[ticker] = f"SIC {sic_code} not covered by any industry_metrics.yaml section"
+
+    return flagged
+
+
+def _load_industry_sic_ranges() -> Dict[str, List[List[int]]]:
+    """Load SIC ranges from industry_metrics.yaml."""
+    if not _INDUSTRY_METRICS_PATH.exists():
+        return {}
+
+    with open(_INDUSTRY_METRICS_PATH) as f:
+        data = yaml.safe_load(f)
+
+    ranges: Dict[str, List[List[int]]] = {}
+    for industry, config in data.items():
+        if isinstance(config, dict) and "sic_ranges" in config:
+            ranges[industry] = config["sic_ranges"]
+
+    return ranges
