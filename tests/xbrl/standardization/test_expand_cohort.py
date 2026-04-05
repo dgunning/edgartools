@@ -9,6 +9,7 @@ from edgar.xbrl.standardization.tools.expand_cohort import (
     run_expand_cohort,
     detect_archetype_gaps,
     _diagnose_and_fix,
+    _try_deterministic_fix,
 )
 from edgar.xbrl.standardization.tools.auto_eval import ExtractionEvidence, MetricGap
 
@@ -118,3 +119,56 @@ def test_diagnose_and_fix_components_none_extraction_evidence():
     entry = unresolved[0]
     assert entry.components_found == 0
     assert entry.components_needed == 0
+
+
+def test_deterministic_fix_sign_error():
+    """Sign-inverted gap gets FIX_SIGN_CONVENTION action."""
+    gap = MetricGap(
+        ticker="HD",
+        metric="Depreciation",
+        gap_type="high_variance",
+        estimated_impact=0.05,
+        root_cause="sign_error",
+        reference_value=500.0,
+        xbrl_value=-500.0,
+    )
+    fix = _try_deterministic_fix(gap)
+    assert fix is not None
+    assert fix["action"] == "FIX_SIGN_CONVENTION"
+    assert fix["confidence"] >= 0.95
+
+
+def test_deterministic_fix_concept_absent_unmapped():
+    """Unmapped metric with missing_concept root cause gets EXCLUDE_METRIC."""
+    evidence = ExtractionEvidence(
+        metric="ResearchAndDevelopment",
+        ticker="HD",
+        components_used=[],
+        components_missing=[],
+    )
+    gap = MetricGap(
+        ticker="HD",
+        metric="ResearchAndDevelopment",
+        gap_type="unmapped",
+        estimated_impact=0.03,
+        root_cause="missing_concept",
+        extraction_evidence=evidence,
+    )
+    fix = _try_deterministic_fix(gap)
+    assert fix is not None
+    assert fix["action"] == "EXCLUDE_METRIC"
+
+
+def test_deterministic_fix_high_variance_escalates():
+    """High variance wrong_concept is NOT auto-fixed."""
+    gap = MetricGap(
+        ticker="HD",
+        metric="Revenue",
+        gap_type="high_variance",
+        estimated_impact=0.2,
+        root_cause="wrong_concept",
+        reference_value=100.0,
+        xbrl_value=50.0,
+    )
+    fix = _try_deterministic_fix(gap)
+    assert fix is None  # escalate

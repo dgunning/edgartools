@@ -200,8 +200,8 @@ def _diagnose_and_fix(
                 graveyard=gap.graveyard_count,
                 reference_value=getattr(gap, 'reference_value', None),
                 xbrl_value=getattr(gap, 'xbrl_value', None),
-                components_found=len(gap.extraction_evidence.components_used) if gap.extraction_evidence else 0,
-                components_needed=(len(gap.extraction_evidence.components_used) + len(gap.extraction_evidence.components_missing)) if gap.extraction_evidence else 0,
+                components_found=len(ev.components_used) if (ev := gap.extraction_evidence) else 0,
+                components_needed=(len(ev.components_used) + len(ev.components_missing)) if (ev := gap.extraction_evidence) else 0,
             ))
 
     return applied_fixes, unresolved
@@ -210,9 +210,45 @@ def _diagnose_and_fix(
 def _try_deterministic_fix(gap) -> Optional[Dict]:
     """Attempt a deterministic fix for a gap. Returns action dict or None.
 
-    Currently conservative: only industry exclusions are auto-fixable.
-    All other fixes require investigation (outer loop).
+    Only the two safest gap types are auto-fixed; all others escalate to
+    the outer loop (investigate-gaps).
+
+    Safe cases:
+    1. Sign errors — XBRL value is an exact negation of the reference value.
+       Unambiguous: ratio is within 5% of -1.0.
+    2. Concept absent — unmapped gap with no extraction evidence components.
+       The metric simply doesn't exist for this company/industry.
     """
+    # 1. Sign errors: exact negation is unambiguous
+    if gap.root_cause == "sign_error":
+        ref = gap.reference_value
+        xbrl = gap.xbrl_value
+        if ref and xbrl and ref != 0:
+            ratio = xbrl / ref
+            if abs(ratio + 1.0) < 0.05:  # within 5% of exact negation
+                return {
+                    "action": "FIX_SIGN_CONVENTION",
+                    "ticker": gap.ticker,
+                    "metric": gap.metric,
+                    "params": {},
+                    "confidence": 0.98,
+                    "detail": f"Auto-fixed sign inversion (ratio={ratio:.3f})",
+                }
+
+    # 2. Concept absent: unmapped + no extraction evidence = metric doesn't apply
+    if (gap.root_cause in ("missing_concept", "industry_structural")
+            and gap.gap_type == "unmapped"
+            and gap.extraction_evidence is not None
+            and not gap.extraction_evidence.components_used):
+        return {
+            "action": "EXCLUDE_METRIC",
+            "ticker": gap.ticker,
+            "metric": gap.metric,
+            "params": {"reason": "not_applicable", "notes": "Auto-excluded: concept absent from all XBRL sources"},
+            "confidence": 0.95,
+            "detail": "Concept not found in calc tree, facts, or element index",
+        }
+
     return None
 
 
