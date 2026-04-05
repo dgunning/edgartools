@@ -109,7 +109,6 @@ def run_expand_cohort(
     report_path = output_dir / f"cohort-{date_str}-{cohort_name}.md"
     report_path.write_text(md)
 
-    # Write evidence sidecar for downstream investigation
     write_evidence_sidecar(report_path, report_data.name, unresolved)
 
     log.info(f"Cohort report written to {report_path}")
@@ -195,6 +194,7 @@ def _diagnose_and_fix(
             apply_action_to_json(fix, **({"config_dir": config_dir} if config_dir else {}))
             applied_fixes.append(fix)
         else:
+            ev = gap.extraction_evidence
             unresolved.append(UnresolvedGapEntry(
                 ticker=gap.ticker,
                 metric=gap.metric,
@@ -204,8 +204,8 @@ def _diagnose_and_fix(
                 graveyard=gap.graveyard_count,
                 reference_value=getattr(gap, 'reference_value', None),
                 xbrl_value=getattr(gap, 'xbrl_value', None),
-                components_found=len(ev.components_used) if (ev := gap.extraction_evidence) else 0,
-                components_needed=(len(ev.components_used) + len(ev.components_missing)) if (ev := gap.extraction_evidence) else 0,
+                components_found=len(ev.components_used) if ev else 0,
+                components_needed=(len(ev.components_used) + len(ev.components_missing)) if ev else 0,
             ))
 
     return applied_fixes, unresolved

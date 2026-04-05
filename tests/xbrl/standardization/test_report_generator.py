@@ -167,7 +167,7 @@ def test_write_evidence_sidecar(tmp_path):
     report_path = tmp_path / "cohort-test.md"
     write_evidence_sidecar(report_path, "test-cohort", gaps)
 
-    sidecar_path = Path(str(report_path) + ".evidence.json")
+    sidecar_path = report_path.parent / (report_path.name + ".evidence.json")
     assert sidecar_path.exists()
     data = json.loads(sidecar_path.read_text())
     assert data["gaps"]["HD:Revenue:high_variance"]["reference_value"] == 100.0
