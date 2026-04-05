@@ -91,6 +91,11 @@ from edgar.xbrl.standardization.tools.auto_eval_loop import run_overnight
 from edgar.xbrl.standardization.tools.auto_eval_dashboard import show_dashboard
 ```
 
+**Expansion Pipeline:** Three skills for expanding company coverage:
+- `/expand-cohort [tickers]` — Onboard new companies, apply known patterns, measure quality (inner loop). Run in worktrees for parallel cohorts.
+- `/investigate-gaps [cohort]` — Investigate unresolved gaps, auto-apply confident fixes, escalate ambiguous cases (outer loop).
+- `/review-escalations [cohort]` — Interactive review of escalated gaps with human. Captures patterns into global config.
+
 ## Development
 
 | Task | Reference |
