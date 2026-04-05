@@ -1025,10 +1025,10 @@ def _format_period_labels(
                             final_label = format_date(end_date_obj)
 
                             # Add quarter info if available
-                            if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement']:
+                            if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement', 'StatementOfEquity', 'ComprehensiveIncome']:
                                 final_label = f"{final_label} ({q_num})"
                             # Add YTD indicator for year-to-date periods
-                            elif duration_days and statement_type in ['IncomeStatement', 'CashFlowStatement']:
+                            elif duration_days and statement_type in ['IncomeStatement', 'CashFlowStatement', 'StatementOfEquity', 'ComprehensiveIncome']:
                                 if 175 <= duration_days <= 190:  # ~6 months
                                     final_label = f"{final_label} (YTD)"
                                 elif 265 <= duration_days <= 285:  # ~9 months
@@ -1143,10 +1143,10 @@ def _format_period_labels(
                     final_label = f"{format_date(start_date_obj)} - {final_label}"
 
                 # If we have quarter info, ensure it's present for income/cash flow statements
-                if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement'] and f"({q_num})" not in final_label:
+                if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement', 'StatementOfEquity', 'ComprehensiveIncome'] and f"({q_num})" not in final_label:
                     final_label = f"{final_label} ({q_num})"
                 # Add YTD indicator for year-to-date periods if not already added
-                elif duration_days and statement_type in ['IncomeStatement', 'CashFlowStatement'] and "(YTD)" not in final_label:
+                elif duration_days and statement_type in ['IncomeStatement', 'CashFlowStatement', 'StatementOfEquity', 'ComprehensiveIncome'] and "(YTD)" not in final_label:
                     if 175 <= duration_days <= 190:  # ~6 months
                         final_label = f"{final_label} (YTD)"
                     elif 265 <= duration_days <= 285:  # ~9 months
@@ -1166,10 +1166,10 @@ def _format_period_labels(
                     final_label = f"{format_date(start_date_obj)} - {format_date(end_date_obj)}"
 
                     # Add quarter info if available
-                    if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement']:
+                    if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement', 'StatementOfEquity', 'ComprehensiveIncome']:
                         final_label = f"{final_label} ({q_num})"
                     # Add YTD indicator for year-to-date periods
-                    elif duration_days and statement_type in ['IncomeStatement', 'CashFlowStatement']:
+                    elif duration_days and statement_type in ['IncomeStatement', 'CashFlowStatement', 'StatementOfEquity', 'ComprehensiveIncome']:
                         if 175 <= duration_days <= 190:  # ~6 months
                             final_label = f"{final_label} (YTD)"
                         elif 265 <= duration_days <= 285:  # ~9 months
@@ -1178,10 +1178,10 @@ def _format_period_labels(
                     final_label = format_date(end_date_obj)
 
                     # Add quarter info if available
-                    if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement']:
+                    if q_num and statement_type in ['IncomeStatement', 'CashFlowStatement', 'StatementOfEquity', 'ComprehensiveIncome']:
                         final_label = f"{final_label} ({q_num})"
                     # Add YTD indicator for year-to-date periods
-                    elif duration_days and statement_type in ['IncomeStatement', 'CashFlowStatement']:
+                    elif duration_days and statement_type in ['IncomeStatement', 'CashFlowStatement', 'StatementOfEquity', 'ComprehensiveIncome']:
                         if 175 <= duration_days <= 190:  # ~6 months
                             final_label = f"{final_label} (YTD)"
                         elif 265 <= duration_days <= 285:  # ~9 months
