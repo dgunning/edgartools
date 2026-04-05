@@ -21,6 +21,7 @@ metrics:
       parent_pattern: OperatingIncome
       weight: 1.0
     universal: true
+    importance_tier: core
   COGS:
     description: Cost of goods/services sold
     standard_tag: CostOfGoodsAndServicesSold
@@ -39,6 +40,7 @@ metrics:
       weight: -1.0
     universal: false
     notes: Services companies (META, FDX) may not have traditional COGS
+    importance_tier: extended
   SGA:
     description: Selling, general, and administrative expenses
     standard_tag: SellingGeneralAndAdminExpenses
@@ -54,6 +56,7 @@ metrics:
       weight: 1.0
     universal: false
     notes: Often split into separate line items
+    importance_tier: extended
   OperatingIncome:
     description: Income from operations
     known_concepts:
@@ -65,6 +68,7 @@ metrics:
       parent_pattern: IncomeLossBeforeTax
       weight: 1.0
     universal: true
+    importance_tier: core
   PretaxIncome:
     description: Income before income taxes
     known_concepts:
@@ -78,6 +82,7 @@ metrics:
       parent_pattern: NetIncome
       weight: 1.0
     universal: true
+    importance_tier: extended
   NetIncome:
     description: Net income/loss
     standard_tag:
@@ -93,6 +98,7 @@ metrics:
       - OPERATIONS
       is_root: true
     universal: true
+    importance_tier: core
   OperatingCashFlow:
     description: Cash from operating activities
     standard_tag: NetCashFromOperatingActivities
@@ -103,6 +109,7 @@ metrics:
       - CASHFLOW
       section: operating
     universal: true
+    importance_tier: core
   Capex:
     description: Capital expenditures (including intangibles)
     standard_tag: CapitalExpenses
@@ -136,8 +143,8 @@ metrics:
       section: investing
       weight: -1.0
     universal: false
-    notes: Includes intangible investments for pharma/tech. Energy uses PaymentsToAcquireProductiveAssets.
-      Excludes M&A acquisitions.
+    notes: Includes intangible investments for pharma/tech. Energy uses PaymentsToAcquireProductiveAssets. Excludes M&A acquisitions.
+    importance_tier: extended
   TotalAssets:
     description: Total assets
     known_concepts:
@@ -149,6 +156,7 @@ metrics:
       - FINANCIAL_POSITION
       is_root: true
     universal: true
+    importance_tier: core
   Goodwill:
     description: Goodwill from acquisitions
     standard_tag: Goodwill
@@ -163,6 +171,7 @@ metrics:
       - BALANCE
       section: assets
     universal: true
+    importance_tier: exploratory
   IntangibleAssets:
     description: Goodwill and other intangible assets (matches yfinance)
     validation_tolerance: 25
@@ -184,9 +193,9 @@ metrics:
       section: assets
     universal: true
     notes: Sum of Goodwill + IntangibleAssetsNet to match yfinance. KO uses IndefiniteLivedTrademarks.
+    importance_tier: exploratory
   ShortTermDebt:
-    description: Short-term borrowings and current debt (matches yfinance Current
-      Debt)
+    description: Short-term borrowings and current debt (matches yfinance Current Debt)
     composite: true
     components:
     - LongTermDebtCurrent
@@ -213,6 +222,7 @@ metrics:
       section: liabilities_current
     universal: false
     notes: yfinance 'Current Debt' sums multiple short-term debt types
+    importance_tier: exploratory
   LongTermDebt:
     description: Long-term debt (non-current portion)
     standard_tag: LongTermDebt
@@ -226,6 +236,7 @@ metrics:
       section: liabilities_noncurrent
     universal: true
     notes: LongTermDebtNoncurrent preferred (excludes current portion)
+    importance_tier: extended
   CashAndEquivalents:
     description: Cash and cash equivalents
     standard_tag: CashAndCashEquivalents
@@ -249,6 +260,7 @@ metrics:
       - CASHFLOW
       section: assets_current
     universal: true
+    importance_tier: extended
   WeightedAverageSharesDiluted:
     description: Weighted average diluted shares outstanding for EPS calculation
     standard_tag: SharesFullyDilutedAverage
@@ -262,6 +274,7 @@ metrics:
       - INCOME
     universal: true
     notes: Essential for per-share valuation metrics
+    importance_tier: extended
   StockBasedCompensation:
     description: Stock-based compensation expense (non-cash)
     validation_tolerance: 20
@@ -277,6 +290,7 @@ metrics:
       section: operating
     universal: false
     notes: Critical for calculating 'Real' Free Cash Flow
+    importance_tier: exploratory
   DividendsPaid:
     description: Cash dividends paid to shareholders
     standard_tag: CommonDividendsPaid
@@ -292,6 +306,7 @@ metrics:
       weight: -1.0
     universal: false
     notes: For total shareholder return and payout ratio analysis
+    importance_tier: exploratory
   Inventory:
     description: Current inventory on hand
     standard_tag: Inventories
@@ -305,6 +320,7 @@ metrics:
       section: assets_current
     universal: false
     notes: Not applicable to service companies
+    importance_tier: exploratory
   AccountsReceivable:
     description: Trade accounts receivable (current)
     standard_tag: TradeReceivables
@@ -330,6 +346,7 @@ metrics:
       section: assets_current
     universal: false
     notes: Rising AR faster than revenue may signal quality issues
+    importance_tier: exploratory
   AccountsPayable:
     description: Trade accounts payable (current)
     standard_tag: TradePayables
@@ -347,6 +364,7 @@ metrics:
       section: liabilities_current
     universal: false
     notes: High AP indicates supplier leverage
+    importance_tier: exploratory
   DepreciationAmortization:
     description: Depreciation and amortization expense
     standard_tag: DepreciationExpense
@@ -377,8 +395,9 @@ metrics:
       - CASHFLOW
       section: operating
     universal: true
-    notes: Required for EBITDA calculation and maintenance capex analysis. Pharma/medical
-      companies often split into Depreciation + AmortizationOfIntangibleAssets.
+    notes: Required for EBITDA calculation and maintenance capex analysis. Pharma/medical companies often split into Depreciation
+      + AmortizationOfIntangibleAssets.
+    importance_tier: extended
   GrossProfit:
     description: Revenue minus cost of goods sold
     standard_tag: GrossProfit
@@ -400,6 +419,7 @@ metrics:
         - concept: CostOfGoodsAndServicesSold
           weight: -1.0
         notes: GrossProfit = Revenue - COGS (signed formula)
+    importance_tier: extended
   ResearchAndDevelopment:
     description: Research and development expense
     standard_tag: ResearchAndDevelopmentExpense
@@ -414,6 +434,7 @@ metrics:
     universal: false
     notes: Not all companies have R&D
     validation_tolerance: 20
+    importance_tier: exploratory
   InterestExpense:
     description: Interest expense on debt
     standard_tag: InterestExpense
@@ -427,6 +448,7 @@ metrics:
       - OPERATIONS
     universal: true
     validation_tolerance: 25
+    importance_tier: extended
   IncomeTaxExpense:
     description: Income tax provision (expense or benefit)
     standard_tag: IncomeTaxExpenseBenefit
@@ -438,6 +460,7 @@ metrics:
       - INCOME
     universal: true
     validation_tolerance: 25
+    importance_tier: extended
   EarningsPerShareDiluted:
     description: Diluted earnings per share
     standard_tag: EarningsPerShareDiluted
@@ -453,6 +476,7 @@ metrics:
         components:
         - EarningsPerShareDiluted
         notes: Auto-solver sector via V, 2/3 periods, 2/3 companies
+    importance_tier: core
   EarningsPerShareBasic:
     description: Basic earnings per share
     standard_tag: EarningsPerShareBasic
@@ -468,6 +492,7 @@ metrics:
         components:
         - EarningsPerShareBasic
         notes: Auto-solver sector via V, 2/3 periods, 2/3 companies
+    importance_tier: derived
   CurrentAssets:
     description: Total current assets
     standard_tag: AssetsCurrent
@@ -477,6 +502,7 @@ metrics:
       statements:
       - BALANCE
     universal: true
+    importance_tier: extended
   CurrentLiabilities:
     description: Total current liabilities
     standard_tag: LiabilitiesCurrent
@@ -486,6 +512,7 @@ metrics:
       statements:
       - BALANCE
     universal: true
+    importance_tier: extended
   TotalLiabilities:
     description: Total liabilities
     standard_tag: Liabilities
@@ -509,6 +536,7 @@ metrics:
           - StockholdersEquity
           weight: -1.0
         notes: TL = L&SE - SE (try NCI-inclusive first, fall back to StockholdersEquity)
+    importance_tier: core
   StockholdersEquity:
     description: Total stockholders equity including noncontrolling interest
     standard_tag: StockholdersEquity
@@ -520,6 +548,7 @@ metrics:
       statements:
       - BALANCE
     universal: true
+    importance_tier: core
   PropertyPlantEquipment:
     description: Net property, plant and equipment
     standard_tag: PropertyPlantAndEquipmentNet
@@ -532,6 +561,7 @@ metrics:
     universal: false
     notes: Not meaningful for banks/financial services
     validation_tolerance: 20
+    importance_tier: exploratory
   RetainedEarnings:
     description: Retained earnings (accumulated deficit)
     standard_tag: RetainedEarningsAccumulatedDeficit
@@ -542,6 +572,7 @@ metrics:
       - BALANCE
     universal: true
     validation_tolerance: 20
+    importance_tier: extended
   InvestingCashFlow:
     description: Net cash from investing activities
     standard_tag: NetCashProvidedByUsedInInvestingActivities
@@ -553,6 +584,7 @@ metrics:
       - CASHFLOW
     universal: true
     validation_tolerance: 25
+    importance_tier: exploratory
   FinancingCashFlow:
     description: Net cash from financing activities
     standard_tag: NetCashProvidedByUsedInFinancingActivities
@@ -564,6 +596,7 @@ metrics:
       - CASHFLOW
     universal: true
     validation_tolerance: 25
+    importance_tier: exploratory
   ShareRepurchases:
     description: Payments for stock buybacks
     standard_tag: PaymentsForRepurchaseOfCommonStock
@@ -577,6 +610,7 @@ metrics:
       - CASHFLOW
     universal: false
     validation_tolerance: 25
+    importance_tier: exploratory
   DividendPerShare:
     description: Dividends per share declared
     standard_tag: CommonStockDividendsPerShareDeclared
@@ -588,6 +622,7 @@ metrics:
       - INCOME
     universal: false
     validation_tolerance: 15
+    importance_tier: exploratory
 derived_metrics:
   FreeCashFlow:
     formula: OperatingCashFlow - Capex

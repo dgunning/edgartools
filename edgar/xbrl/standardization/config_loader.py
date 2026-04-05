@@ -35,60 +35,6 @@ def _load_industry_metrics() -> dict:
     return _industry_metrics_cache
 
 
-# Company → industry map for EXPANSION_COHORT_50+ companies.
-# This is the authoritative source, replacing per-company exclusion loops.
-# Industry names must match keys in industry_metrics.yaml.
-_COMPANY_INDUSTRY_MAP = {
-    # Banking (SIC 6020-6099)
-    "JPM": "banking", "BAC": "banking", "GS": "banking", "MS": "banking", "C": "banking",
-    "WFC": "banking", "USB": "banking", "BK": "banking", "STT": "banking", "PNC": "banking",
-    # Securities / Exchanges (SIC 6200-6299)
-    "SCHW": "securities", "ICE": "securities", "CME": "securities",
-    # Asset management (SIC 6726)
-    "BLK": "asset_management",
-    # Financial services (SIC 6140-6199)
-    "AXP": "financial_services", "DE": "financial_services",
-    "SPGI": "financial_services", "MCO": "financial_services",
-    # Insurance (SIC 6300-6399)
-    "UNH": "health_insurance", "AON": "insurance", "MMC": "insurance",
-    "BRK-B": "insurance",
-    "CI": "health_insurance", "CB": "insurance", "AIG": "insurance", "MET": "insurance",
-    # Energy (SIC 1300-1389, 2911-2999)
-    "XOM": "energy", "CVX": "energy", "COP": "energy", "SLB": "energy",
-    # REITs (SIC 6500-6599)
-    "PLD": "reits", "AMT": "reits", "EQIX": "reits", "SPG": "reits",
-    # Telecom (SIC 4800-4899)
-    "T": "telecom", "VZ": "telecom", "TMUS": "telecom", "CMCSA": "telecom",
-    # Utilities (SIC 4900-4999)
-    "NEE": "utilities", "DUK": "utilities", "SO": "utilities", "D": "utilities",
-    # Transportation (SIC 4200-4299)
-    "UPS": "transportation", "FDX": "transportation", "CSX": "transportation", "NSC": "transportation",
-    # Franchise (SIC 5812)
-    "MCD": "franchise",
-    # Payment services, Standard industrials — use default (no special industry)
-    # "V": None, "MA": None, "AMD": None, "QCOM": None, etc.
-}
-
-# Importance tier assignments — used as fallback when metrics.yaml lacks the field.
-# Core: highest-value metrics for financial analysis
-# Extended: important but less critical metrics
-# Derived: metrics that can be computed from others
-# Exploratory: niche or company-specific metrics
-_DEFAULT_IMPORTANCE_TIERS = {
-    # Core (8)
-    "Revenue": "core", "OperatingIncome": "core", "NetIncome": "core",
-    "OperatingCashFlow": "core", "TotalAssets": "core", "EarningsPerShareDiluted": "core",
-    "TotalLiabilities": "core", "StockholdersEquity": "core",
-    # Extended (14)
-    "COGS": "extended", "SGA": "extended", "PretaxIncome": "extended",
-    "Capex": "extended", "LongTermDebt": "extended", "CashAndEquivalents": "extended",
-    "WeightedAverageSharesDiluted": "extended", "DepreciationAmortization": "extended",
-    "GrossProfit": "extended", "InterestExpense": "extended", "IncomeTaxExpense": "extended",
-    "CurrentAssets": "extended", "CurrentLiabilities": "extended", "RetainedEarnings": "extended",
-    # Derived (1)
-    "EarningsPerShareBasic": "derived",
-}
-
 
 @dataclass
 class MappingConfig:
@@ -155,22 +101,17 @@ class MappingConfig:
         return result
     
     def _get_industry_for_company(self, ticker: str, company: Optional[CompanyConfig] = None, *, network: bool = True) -> Optional[str]:
-        """Get industry for a company, preferring in-memory lookups over network calls.
+        """Get industry for a company from YAML config or SEC SIC auto-detection.
 
         Priority:
-        1. _COMPANY_INDUSTRY_MAP (in-memory, authoritative for known companies)
-        2. Manual industry from company config in companies.yaml
-        3. Auto-detect from SEC SIC code (requires network — last resort, skipped when network=False)
+        1. companies.yaml industry field (authoritative)
+        2. Auto-detect from SEC SIC code (requires network — last resort, skipped when network=False)
 
         Args:
             network: If False, skip SEC API auto-detection. Use for scoring hot paths
-                     where speed matters and all known companies are in _COMPANY_INDUSTRY_MAP.
+                     where speed matters and all known companies are in companies.yaml.
         """
-        # Check in-memory map first (no network, no YAML dependency)
-        if ticker in _COMPANY_INDUSTRY_MAP:
-            return _COMPANY_INDUSTRY_MAP[ticker]
-
-        # Check manual config from companies.yaml
+        # Check YAML config (authoritative source after migration)
         if company and company.industry:
             return company.industry
 
@@ -232,7 +173,7 @@ class ConfigLoader:
                 standardization=data.get("standardization"),
                 known_variances=data.get("known_variances"),
                 sign_convention=data.get("sign_convention"),
-                importance_tier=data.get("importance_tier") or _DEFAULT_IMPORTANCE_TIERS.get(name, "exploratory"),
+                importance_tier=data.get("importance_tier", "exploratory"),
             )
 
         # Expand known_concepts using upstream GAAP mappings

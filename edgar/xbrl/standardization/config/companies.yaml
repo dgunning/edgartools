@@ -363,8 +363,8 @@ companies:
     exclude_metrics:
       ShortTermDebt:
         reason: extraction_failed
-        notes: 'Composite: needs ShortTermBorrowings + CommercialPaper + LongTermDebtCurrent.
-          yfinance CurrentDebt=12.6B. Phase C composite fix.'
+        notes: 'Composite: needs ShortTermBorrowings + CommercialPaper + LongTermDebtCurrent. yfinance CurrentDebt=12.6B.
+          Phase C composite fix.'
     known_divergences:
       ShortTermDebt:
         form_types:
@@ -669,6 +669,7 @@ companies:
           '
         review_date: '2026-06-03'
     notes: Agricultural and construction equipment manufacturer
+    industry: financial_services
   MMM:
     name: 3M Company
     cik: 66740
@@ -704,8 +705,8 @@ companies:
     exclude_metrics:
       ShortTermDebt:
         reason: extraction_failed
-        notes: 'ShortTermBorrowings=204M but yfinance CurrentDebt=3.6B. Likely missing
-          LongTermDebtCurrent component. Phase C composite fix.'
+        notes: ShortTermBorrowings=204M but yfinance CurrentDebt=3.6B. Likely missing LongTermDebtCurrent component. Phase
+          C composite fix.
     notes: Aerospace and defense company (formerly Raytheon Technologies)
   ASTE:
     name: Astec Industries, Inc.
@@ -725,8 +726,8 @@ companies:
     exclude_metrics:
       ShortTermDebt:
         reason: extraction_failed
-        notes: 'Composite: CommercialPaper=1.5B + OtherShortTermBorrowings=56M but yfinance
-          CurrentDebt=3.4B. Phase C composite fix.'
+        notes: 'Composite: CommercialPaper=1.5B + OtherShortTermBorrowings=56M but yfinance CurrentDebt=3.4B. Phase C composite
+          fix.'
     notes: Beverage company - nonalcoholic beverages
   PEP:
     name: PepsiCo, Inc.
@@ -1049,6 +1050,7 @@ companies:
         resolved_date: '2026-01-27'
     notes: 'Healthcare/insurance company. Revenue structure: Premiums ($309B) + Contract ($86B) + Investment ($5B) = $400B
       total.'
+    industry: health_insurance
   LLY:
     name: Eli Lilly and Company
     cik: 59478
@@ -1150,6 +1152,7 @@ companies:
           '
         resolved_date: '2026-01-27'
     notes: Package delivery and supply chain management
+    industry: transportation
   FDX:
     name: FedEx Corporation
     cik: 1048911
@@ -1178,6 +1181,7 @@ companies:
 
           '
     notes: Courier delivery services. Expense-by-nature income statement (no gross profit line).
+    industry: transportation
   BA:
     name: The Boeing Company
     cik: 12927
@@ -1373,6 +1377,7 @@ companies:
         remediation_status: deferred
         review_date: '2026-09-04'
     notes: Life insurance and financial services company
+    industry: insurance
   AIG:
     name: American International Group, Inc.
     cik: 5272
@@ -1423,6 +1428,7 @@ companies:
         remediation_status: deferred
         review_date: '2026-09-04'
     notes: Global insurance organization
+    industry: insurance
   NEE:
     name: NextEra Energy, Inc.
     cik: 753308
@@ -1436,8 +1442,8 @@ companies:
         notes: ''
       ShortTermDebt:
         reason: extraction_failed
-        notes: 'Composite: CommercialPaper=2.0B + OtherShortTermBorrowings=608M + LongTermDebtCurrent=9M
-          but yfinance CurrentDebt=6.1B. Phase C composite fix.'
+        notes: 'Composite: CommercialPaper=2.0B + OtherShortTermBorrowings=608M + LongTermDebtCurrent=9M but yfinance CurrentDebt=6.1B.
+          Phase C composite fix.'
     known_divergences:
       Revenue:
         form_types:
@@ -1564,6 +1570,7 @@ companies:
         review_date: '2026-09-04'
     notes: Electric power and energy infrastructure company. Utility holding company — XBRL extracts at subsidiary level,
       causing systematic undercount vs consolidated yfinance data.
+    industry: utilities
   DUK:
     name: Duke Energy Corporation
     cik: 1326160
@@ -1701,6 +1708,7 @@ companies:
         review_date: '2026-09-04'
     notes: Electric power holding company. Subsidiary-level XBRL extraction causes systematic undercount vs consolidated yfinance
       data.
+    industry: utilities
   SO:
     name: Southern Company
     cik: 92122
@@ -1816,6 +1824,7 @@ companies:
         review_date: '2026-09-04'
     notes: Electric utility holding company. Subsidiary-level XBRL extraction causes systematic undercount vs consolidated
       yfinance data.
+    industry: utilities
   AMT:
     name: American Tower Corporation
     cik: 1053507
@@ -1922,6 +1931,7 @@ companies:
         remediation_status: deferred
         review_date: '2026-09-04'
     notes: Real estate investment trust - wireless communications infrastructure
+    industry: reits
   PLD:
     name: Prologis, Inc.
     cik: 1045609
@@ -1956,6 +1966,7 @@ companies:
         remediation_status: deferred
         review_date: '2026-09-04'
     notes: Real estate investment trust - logistics real estate
+    industry: reits
   SPG:
     name: Simon Property Group, Inc.
     cik: 1063761
@@ -2011,6 +2022,7 @@ companies:
         remediation_status: deferred
         review_date: '2026-09-04'
     notes: Real estate investment trust - retail properties
+    industry: reits
   JPM:
     name: JPMorgan Chase & Co.
     cik: 19617
@@ -2338,8 +2350,8 @@ companies:
     exclude_metrics:
       ShortTermDebt:
         reason: extraction_failed
-        notes: 'Composite: CommercialPaper=4.5B but yfinance CurrentDebt=4.9B includes
-          LongTermDebtCurrent. Phase C composite fix.'
+        notes: 'Composite: CommercialPaper=4.5B but yfinance CurrentDebt=4.9B includes LongTermDebtCurrent. Phase C composite
+          fix.'
     known_divergences:
       IntangibleAssets:
         form_types:
@@ -2412,6 +2424,7 @@ companies:
         reason: 'Variance: 64.0% (tolerance: 15%)'
         skip_validation: true
         added_date: '2026-03-04'
+    industry: franchise
   TJX:
     name: TJX COMPANIES INC /DE/
     cik: 109198
@@ -2478,6 +2491,7 @@ companies:
   T:
     name: AT&T INC.
     cik: 732717
+    industry: telecom
   MA:
     name: Mastercard Inc
     cik: 1141391
@@ -2744,6 +2758,7 @@ companies:
       Inventory:
         reason: not_applicable
         notes: Services company — no physical inventory
+    industry: financial_services
   BLK:
     name: BlackRock, Inc.
     cik: 2012383
@@ -2766,6 +2781,7 @@ companies:
       ShortTermDebt:
         reason: not_applicable
         notes: ''
+    industry: asset_management
   SCHW:
     name: SCHWAB CHARLES CORP
     cik: 316709
@@ -2785,6 +2801,7 @@ companies:
       Inventory:
         reason: not_applicable
         notes: Banking company — Inventory not applicable
+    industry: securities
   CB:
     name: Chubb Ltd
     cik: 896159
@@ -2792,6 +2809,7 @@ companies:
       COGS:
         reason: not_applicable
         notes: Insurance/conglomerate — COGS not applicable
+    industry: insurance
   CI:
     name: Cigna Group
     cik: 1739940
@@ -2799,6 +2817,7 @@ companies:
       COGS:
         reason: not_applicable
         notes: ''
+    industry: health_insurance
   CME:
     name: CME GROUP INC.
     cik: 1156375
@@ -2815,6 +2834,7 @@ companies:
       SGA:
         reason: not_applicable
         notes: ''
+    industry: securities
   PYPL:
     name: PayPal Holdings, Inc.
     cik: 1633917
@@ -2851,6 +2871,7 @@ companies:
       Capex:
         reason: not_applicable
         notes: ''
+    industry: reits
   D:
     name: DOMINION ENERGY, INC
     cik: 715957
@@ -2869,6 +2890,7 @@ companies:
         reason: Current portion classification differs from yfinance
         skip_validation: true
         added_date: '2026-03-19'
+    industry: utilities
   CMCSA:
     name: COMCAST CORP
     cik: 1166691
@@ -2876,6 +2898,7 @@ companies:
       Inventory:
         reason: not_applicable
         notes: ''
+    industry: telecom
   VZ:
     name: VERIZON COMMUNICATIONS INC
     cik: 732712
@@ -2887,6 +2910,7 @@ companies:
         reason: Wireless spectrum licenses classification differs
         skip_validation: true
         added_date: '2026-03-19'
+    industry: telecom
   TMUS:
     name: T-Mobile US, Inc.
     cik: 1283699
@@ -2898,6 +2922,7 @@ companies:
         reason: Wireless spectrum licenses classification differs
         skip_validation: true
         added_date: '2026-03-19'
+    industry: telecom
   LMT:
     name: LOCKHEED MARTIN CORP
     cik: 936468
@@ -2914,6 +2939,7 @@ companies:
   CSX:
     name: CSX CORP
     cik: 277948
+    industry: transportation
   NSC:
     name: NORFOLK SOUTHERN CORP
     cik: 702165
@@ -2924,6 +2950,7 @@ companies:
       IntangibleAssets:
         reason: not_applicable
         notes: NSC reports minimal/no IntangibleAssets
+    industry: transportation
   ICE:
     name: Intercontinental Exchange, Inc.
     cik: 1571949
@@ -2943,6 +2970,7 @@ companies:
       ShortTermDebt:
         reason: not_applicable
         notes: ''
+    industry: securities
   AON:
     name: Aon plc
     cik: 315293
@@ -2953,6 +2981,7 @@ companies:
       Inventory:
         reason: not_applicable
         notes: ''
+    industry: insurance
   MMC:
     name: MARSH & MCLENNAN COMPANIES, INC.
     cik: 62709
@@ -2963,6 +2992,7 @@ companies:
       Inventory:
         reason: not_applicable
         notes: ''
+    industry: insurance
   TGT:
     name: TARGET CORP
     cik: 27419
@@ -3011,6 +3041,7 @@ companies:
   SPGI:
     name: S&P Global Inc.
     cik: 64040
+    industry: financial_services
   MCO:
     name: MOODYS CORP /DE/
     cik: 1059556
@@ -3018,6 +3049,7 @@ companies:
       Inventory:
         reason: not_applicable
         notes: ''
+    industry: financial_services
   ITW:
     name: ILLINOIS TOOL WORKS INC
     cik: 49826

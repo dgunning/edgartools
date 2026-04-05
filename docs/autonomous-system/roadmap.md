@@ -182,6 +182,13 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 - Phase 14 section added to roadmap. Future Phases renumbered to avoid confusion.
 - EF-CQS: 0.8544→0.9302 (+7.6pp). CQS: 0.8228→0.8235. 186 gaps remaining (167 Tier 1A, 3 Tier 1B, 16 Tier 3).
 
+**Run 021 (2026-04-05)** — Consensus 020/021/022 remaining items: NCI scope check + YAML migration
+- Stage 1: NCI scope-consistency check in `_compute_sa_composite()`. `_extract_formula_concept()` returns 3-tuple with resolved concept. WARNING-only diagnostic for TotalLiabilities NCI scope mismatches. Module-level constants `_NCI_INCLUSIVE`/`_NCI_EXCLUSIVE`.
+- Stage 2: `_DEFAULT_IMPORTANCE_TIERS` Python constant removed (19 lines). `importance_tier:` field added to all 37 metrics in `metrics.yaml`. ConfigLoader simplified to `data.get("importance_tier", "exploratory")`.
+- Stage 3: `_COMPANY_INDUSTRY_MAP` Python constant removed (33 lines). `industry:` field added to 32 companies in `companies.yaml` (47 total). `_get_industry_for_company()` now reads YAML as sole authority, SEC SIC auto-detection as fallback.
+- 17 new tests (8 NCI scope, 9 YAML migration). All pass. Pre-existing failures unchanged (test_signed_formula, test_closed_loop).
+- EF-CQS: 0.9302 (unchanged — config-only migration, no extraction changes). config_loader.py: ~52 lines removed.
+
 ---
 
 ## Consensus Sessions

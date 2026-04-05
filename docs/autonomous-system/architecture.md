@@ -23,8 +23,8 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 | Remaining Gaps | 186 (105 unmapped, 41 high_variance, 29 validation_failure, 11 explained_variance) | 2026-04-05 |
 | Company Tiers | 100 companies evaluated | 2026-04-05 |
 | Scoring Version | v2 + tier weighting (M8.1) + forbidden_by_ticker bug fix + Phase 14 exclusions | 2026-04-05 |
-| Industry Sections | 13 industry archetypes, 47 company mappings (+10 from Phase 14) | 2026-04-05 |
-| Config Architecture | Per-company JSON overrides (81 files), config_loader.py ~490 lines | 2026-04-05 |
+| Industry Sections | 13 industry archetypes, 47 company mappings in `companies.yaml` (`_COMPANY_INDUSTRY_MAP` removed) | 2026-04-05 |
+| Config Architecture | Per-company JSON overrides (81 files), config_loader.py ~440 lines (52 lines removed: industry map + importance tiers migrated to YAML) | 2026-04-05 |
 | Companies | 100 (100 evaluated) | |
 | Metrics | 37 base + 3 derived (8 core / 14 extended / 14 exploratory / 1 derived) | |
 | Reference | yfinance + SEC XBRL API (SEC-native primacy) | |
@@ -79,7 +79,7 @@ CQS = 0.45 * pass_rate
 
 ### Metric Importance Tiers (M8.1)
 
-Each metric has an `importance_tier` defined in `_DEFAULT_IMPORTANCE_TIERS` constant in `config_loader.py` (with YAML fallback):
+Each metric has an `importance_tier` field in `metrics.yaml` (sole authority — `_DEFAULT_IMPORTANCE_TIERS` Python constant removed):
 
 | Tier | Count | Weight | Target | Metrics |
 |------|-------|--------|--------|---------|
@@ -131,6 +131,8 @@ Stored as `quality_tier` field in `companies.yaml`. Updated via `update_company_
 **LIS (Localized Impact Score)** — target metric improved + zero regressions for that company. Implemented in `auto_eval_loop.py:compute_lis()`. CQS remains as monitoring metric, not a gate.
 
 **Signed Formula Engine** — `_compute_sa_composite()` supports weighted components with positive and negative signs (e.g., GrossProfit = Revenue - COGS). Enabled by Consensus 016 (O49-O52). `6fda5fad`.
+
+**NCI Scope-Consistency Check** — `_extract_formula_concept()` returns `(label, value, resolved_concept)` to track which fallback concept matched. For TotalLiabilities, detects when L&SE component is NCI-inclusive but SE component is NCI-exclusive (or vice versa). Logs `[NCI SCOPE MISMATCH]` WARNING — diagnostic only, not a blocker. Module-level constants `_NCI_INCLUSIVE` / `_NCI_EXCLUSIVE` in `reference_validator.py`.
 
 **Graveyard Replay** — `replay_graveyard_proposals()` re-evaluates previously rejected proposals after engine changes. Broke the 0% KEEP rate: 17/36 proposals flipped to KEEP with the signed engine.
 

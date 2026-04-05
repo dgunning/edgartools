@@ -27,6 +27,13 @@ from edgar import Company
 
 logger = logging.getLogger(__name__)
 
+# NCI (Noncontrolling Interest) scope classification for TotalLiabilities formula validation
+_NCI_INCLUSIVE = {
+    "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+    "LiabilitiesAndStockholdersEquity",
+}
+_NCI_EXCLUSIVE = {"StockholdersEquity", "Equity"}
+
 # Flow metrics that need quarterly derivation for 10-Q validation
 # 10-Q filings report YTD cumulative values, but yfinance expects quarterly period values
 # Includes both cash flow and income statement metrics (both can be YTD in XBRL)
@@ -2252,7 +2259,7 @@ class ReferenceValidator:
             weighted_total = 0.0
             weighted_found = 0
             for concept_or_list, weight in formula_components:
-                label, val = self._extract_formula_concept(xbrl, concept_or_list)
+                label, val, _ = self._extract_formula_concept(xbrl, concept_or_list)
                 if val is not None:
                     weighted_total += val * weight
                     weighted_found += 1
@@ -2500,16 +2507,23 @@ class ReferenceValidator:
         """Add us-gaap: prefix if no namespace present."""
         return concept if ':' in concept else f"us-gaap:{concept}"
 
-    def _extract_formula_concept(self, xbrl, concept_or_list) -> Tuple[str, Optional[float]]:
+    def _extract_formula_concept(self, xbrl, concept_or_list) -> Tuple[str, Optional[float], Optional[str]]:
         """Extract value for a formula concept (string or fallback list).
 
-        Returns (label, value) where label is the primary concept name for logging.
+        Returns (label, value, resolved_concept) where:
+        - label is the primary concept name for logging
+        - resolved_concept is the actual concept that matched (for scope checks)
         """
         if isinstance(concept_or_list, list):
-            candidates = [self._qualify_concept(c) for c in concept_or_list]
-            return concept_or_list[0], self._extract_xbrl_value(xbrl, candidates)
+            for c in concept_or_list:
+                qualified = self._qualify_concept(c)
+                val = self._extract_xbrl_value(xbrl, qualified)
+                if val is not None:
+                    return concept_or_list[0], val, c
+            return concept_or_list[0], None, None
         qualified = self._qualify_concept(concept_or_list)
-        return concept_or_list, self._extract_xbrl_value(xbrl, qualified)
+        val = self._extract_xbrl_value(xbrl, qualified)
+        return concept_or_list, val, concept_or_list if val is not None else None
 
     @staticmethod
     def _parse_component(component) -> Tuple[Union[str, List[str]], float]:
@@ -2604,12 +2618,25 @@ class ReferenceValidator:
         composite = 0.0
         components_found = 0
         component_values = {}
+        resolved_concepts = {}
         for concept_or_list, weight in formula_components:
-            label, val = self._extract_formula_concept(xbrl, concept_or_list)
+            label, val, resolved = self._extract_formula_concept(xbrl, concept_or_list)
             if val is not None:
                 composite += val * weight
                 components_found += 1
             component_values[label] = val
+            if resolved:
+                resolved_concepts[label] = resolved
+
+        # NCI scope-consistency check for TotalLiabilities
+        if metric == "TotalLiabilities" and resolved_concepts:
+            inclusive = [c for c in resolved_concepts.values() if c in _NCI_INCLUSIVE]
+            exclusive = [c for c in resolved_concepts.values() if c in _NCI_EXCLUSIVE]
+            if inclusive and exclusive:
+                logger.warning(
+                    "[NCI SCOPE MISMATCH] %s — inclusive=%s, exclusive=%s",
+                    ticker, inclusive, exclusive,
+                )
 
         logger.debug(
             "[SA COMPONENTS] %s:%s — %s",
