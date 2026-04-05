@@ -1,0 +1,574 @@
+{
+  "cohort_name": "expansion-validation-v1-2026-04-05",
+  "generated_at": "2026-04-05T23:44:23.409642+00:00",
+  "gaps": {
+    "CME:IntangibleAssets:validation_failure": {
+      "reference_value": 30483800000.0,
+      "xbrl_value": 13308500000.0,
+      "components_found": 2,
+      "components_needed": 2,
+      "variance_pct": 56.342385135711424,
+      "root_cause": "wrong_concept"
+    },
+    "CME:ShortTermDebt:validation_failure": {
+      "reference_value": 749800000.0,
+      "xbrl_value": 1499800000.0,
+      "components_found": 2,
+      "components_needed": 3,
+      "variance_pct": 100.02667377967458,
+      "root_cause": "wrong_concept"
+    },
+    "MET:ShortTermDebt:validation_failure": {
+      "reference_value": 465000000.0,
+      "xbrl_value": 1765000000.0,
+      "components_found": 2,
+      "components_needed": 3,
+      "variance_pct": 279.5698924731183,
+      "root_cause": "wrong_concept"
+    },
+    "MET:DepreciationAmortization:validation_failure": {
+      "reference_value": 714000000.0,
+      "xbrl_value": 209000000.0,
+      "components_found": 2,
+      "components_needed": 2,
+      "variance_pct": 70.72829131652661,
+      "root_cause": "wrong_concept"
+    },
+    "CMCSA:IntangibleAssets:validation_failure": {
+      "reference_value": 155706000000.0,
+      "xbrl_value": 83808000000.0,
+      "components_found": 2,
+      "components_needed": 2,
+      "variance_pct": 46.17548456706871,
+      "root_cause": "wrong_concept"
+    },
+    "AMT:OperatingIncome:validation_failure": {
+      "reference_value": 4516500000.0,
+      "xbrl_value": 1080100000.0,
+      "components_found": 0,
+      "components_needed": 0,
+      "variance_pct": 76.08546440828074,
+      "root_cause": "wrong_concept"
+    },
+    "D:OperatingIncome:validation_failure": {
+      "reference_value": 3247000000.0,
+      "xbrl_value": 391000000.0,
+      "components_found": 0,
+      "components_needed": 0,
+      "variance_pct": 87.95811518324608,
+      "root_cause": "wrong_concept"
+    },
+    "PLD:OperatingIncome:validation_failure": {
+      "reference_value": 4415920000.0,
+      "xbrl_value": 1421256000.0,
+      "components_found": 0,
+      "components_needed": 0,
+      "variance_pct": 67.81517781119223,
+      "root_cause": "wrong_concept"
+    },
+    "PLD:ShortTermDebt:validation_failure": {
+      "reference_value": 224966000.0,
+      "xbrl_value": 514223000.0,
+      "components_found": 1,
+      "components_needed": 3,
+      "variance_pct": 128.5780962456549,
+      "root_cause": "wrong_concept"
+    },
+    "PANW:IntangibleAssets:validation_failure": {
+      "reference_value": 5329300000.0,
+      "xbrl_value": 762700000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 85.68855196742537,
+      "root_cause": "wrong_concept"
+    },
+    "ACN:OperatingIncome:validation_failure": {
+      "reference_value": 10225664000.0,
+      "xbrl_value": 2049691000.0,
+      "components_found": 0,
+      "components_needed": 0,
+      "variance_pct": 79.95542392161526,
+      "root_cause": "wrong_concept"
+    },
+    "BMY:OperatingIncome:validation_failure": {
+      "reference_value": 5887000000.0,
+      "xbrl_value": 14759000000.0,
+      "components_found": 0,
+      "components_needed": 0,
+      "variance_pct": 150.70494309495498,
+      "root_cause": "wrong_concept"
+    },
+    "IBM:OperatingIncome:validation_failure": {
+      "reference_value": 10074000000.0,
+      "xbrl_value": 8384000000.0,
+      "components_found": 0,
+      "components_needed": 0,
+      "variance_pct": 16.775858646019458,
+      "root_cause": "wrong_concept"
+    },
+    "LIN:ShortTermDebt:validation_failure": {
+      "reference_value": 6280000000.0,
+      "xbrl_value": 10244000000.0,
+      "components_found": 3,
+      "components_needed": 3,
+      "variance_pct": 63.12101910828025,
+      "root_cause": "wrong_concept"
+    },
+    "BK:IntangibleAssets:high_variance": {
+      "reference_value": 22125000000.0,
+      "xbrl_value": 19449000000.0,
+      "components_found": 2,
+      "components_needed": 2,
+      "variance_pct": 12.09491525423729,
+      "root_cause": "wrong_concept"
+    },
+    "PNC:IntangibleAssets:high_variance": {
+      "reference_value": 14643000000.0,
+      "xbrl_value": 10932000000.0,
+      "components_found": 1,
+      "components_needed": 2,
+      "variance_pct": 25.34316738373284,
+      "root_cause": "partial_composite"
+    },
+    "ICE:ShareRepurchases:high_variance": {
+      "reference_value": -81000000.0,
+      "xbrl_value": -0.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 100.0,
+      "root_cause": "wrong_concept"
+    },
+    "CME:DepreciationAmortization:high_variance": {
+      "reference_value": 336800000.0,
+      "xbrl_value": 115100000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 65.82541567695962,
+      "root_cause": "wrong_concept"
+    },
+    "MCO:PropertyPlantEquipment:high_variance": {
+      "reference_value": 872000000.0,
+      "xbrl_value": 656000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 24.770642201834864,
+      "root_cause": "sector_specific"
+    },
+    "AIG:IntangibleAssets:high_variance": {
+      "reference_value": 3373000000.0,
+      "xbrl_value": 3743000000.0,
+      "components_found": 2,
+      "components_needed": 2,
+      "variance_pct": 10.96946338571005,
+      "root_cause": "wrong_concept"
+    },
+    "AON:DepreciationAmortization:high_variance": {
+      "reference_value": 686000000.0,
+      "xbrl_value": 183000000.0,
+      "components_found": 1,
+      "components_needed": 2,
+      "variance_pct": 73.32361516034986,
+      "root_cause": "partial_composite"
+    },
+    "AON:PropertyPlantEquipment:high_variance": {
+      "reference_value": 1348000000.0,
+      "xbrl_value": 637000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 52.74480712166172,
+      "root_cause": "sector_specific"
+    },
+    "CB:IntangibleAssets:high_variance": {
+      "reference_value": 29179000000.0,
+      "xbrl_value": 25956000000.0,
+      "components_found": 2,
+      "components_needed": 2,
+      "variance_pct": 11.045614997086945,
+      "root_cause": "wrong_concept"
+    },
+    "CB:DividendPerShare:high_variance": {
+      "reference_value": 3.59,
+      "xbrl_value": 3.15,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 12.256267409470752,
+      "root_cause": "wrong_concept"
+    },
+    "MET:AccountsReceivable:high_variance": {
+      "reference_value": 29761000000.0,
+      "xbrl_value": 238000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 99.20029568898894,
+      "root_cause": "wrong_concept"
+    },
+    "NSC:AccountsReceivable:high_variance": {
+      "reference_value": 787000000.0,
+      "xbrl_value": 1069000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 35.83227445997459,
+      "root_cause": "wrong_concept"
+    },
+    "NSC:AccountsPayable:high_variance": {
+      "reference_value": 985000000.0,
+      "xbrl_value": 1704000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 72.99492385786802,
+      "root_cause": "wrong_concept"
+    },
+    "CSX:AccountsReceivable:high_variance": {
+      "reference_value": 996000000.0,
+      "xbrl_value": 1326000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 33.13253012048193,
+      "root_cause": "wrong_concept"
+    },
+    "CSX:AccountsPayable:high_variance": {
+      "reference_value": 1118000000.0,
+      "xbrl_value": 1290000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 15.384615384615385,
+      "root_cause": "wrong_concept"
+    },
+    "D:IncomeTaxExpense:high_variance": {
+      "reference_value": 411000000.0,
+      "xbrl_value": 308000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 25.060827250608277,
+      "root_cause": "wrong_concept"
+    },
+    "D:RetainedEarnings:high_variance": {
+      "reference_value": 1641000000.0,
+      "xbrl_value": 2035000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 24.00975015234613,
+      "root_cause": "wrong_concept"
+    },
+    "FDX:PropertyPlantEquipment:high_variance": {
+      "reference_value": 58095000000.0,
+      "xbrl_value": 41642000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 28.32085377399088,
+      "root_cause": "wrong_concept"
+    },
+    "NOW:EarningsPerShareDiluted:high_variance": {
+      "reference_value": 1.368,
+      "xbrl_value": 6.84,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 399.99999999999994,
+      "root_cause": "wrong_concept"
+    },
+    "NOW:EarningsPerShareBasic:high_variance": {
+      "reference_value": 1.384,
+      "xbrl_value": 6.92,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 400.0,
+      "root_cause": "wrong_concept"
+    },
+    "NOW:PropertyPlantEquipment:high_variance": {
+      "reference_value": 2456000000.0,
+      "xbrl_value": 1763000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 28.216612377850165,
+      "root_cause": "wrong_concept"
+    },
+    "PLD:PropertyPlantEquipment:high_variance": {
+      "reference_value": 920132000.0,
+      "xbrl_value": 212318000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 76.92526724426494,
+      "root_cause": "wrong_concept"
+    },
+    "ORLY:WeightedAverageSharesDiluted:high_variance": {
+      "reference_value": 880575000.0,
+      "xbrl_value": 58705000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 93.33333333333333,
+      "root_cause": "wrong_concept"
+    },
+    "ORLY:EarningsPerShareDiluted:high_variance": {
+      "reference_value": 2.710667,
+      "xbrl_value": 40.66,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 1399.9998155435544,
+      "root_cause": "wrong_concept"
+    },
+    "ORLY:EarningsPerShareBasic:high_variance": {
+      "reference_value": 2.727333,
+      "xbrl_value": 40.91,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 1400.0001833292818,
+      "root_cause": "wrong_concept"
+    },
+    "ORLY:PropertyPlantEquipment:high_variance": {
+      "reference_value": 7929794000.0,
+      "xbrl_value": 5605156000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 29.315238201648114,
+      "root_cause": "wrong_concept"
+    },
+    "PANW:PropertyPlantEquipment:high_variance": {
+      "reference_value": 734300000.0,
+      "xbrl_value": 387300000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 47.25588996323029,
+      "root_cause": "wrong_concept"
+    },
+    "PBF:IntangibleAssets:high_variance": {
+      "reference_value": 9600000.0,
+      "xbrl_value": 8100000.0,
+      "components_found": 1,
+      "components_needed": 2,
+      "variance_pct": 15.625,
+      "root_cause": "partial_composite"
+    },
+    "PBF:InterestExpense:high_variance": {
+      "reference_value": 123200000.0,
+      "xbrl_value": 72000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 41.55844155844156,
+      "root_cause": "wrong_concept"
+    },
+    "PBF:PropertyPlantEquipment:high_variance": {
+      "reference_value": 5913000000.0,
+      "xbrl_value": 5067700000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 14.295619820733977,
+      "root_cause": "wrong_concept"
+    },
+    "ACN:PropertyPlantEquipment:high_variance": {
+      "reference_value": 4306695000.0,
+      "xbrl_value": 1566374000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 63.62932596805672,
+      "root_cause": "wrong_concept"
+    },
+    "AMD:AccountsPayable:high_variance": {
+      "reference_value": 2466000000.0,
+      "xbrl_value": 1990000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 19.302514193025143,
+      "root_cause": "wrong_concept"
+    },
+    "BMY:PropertyPlantEquipment:high_variance": {
+      "reference_value": 8360000000.0,
+      "xbrl_value": 7136000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 14.641148325358852,
+      "root_cause": "wrong_concept"
+    },
+    "DIS:AccountsReceivable:high_variance": {
+      "reference_value": 10434000000.0,
+      "xbrl_value": 13217000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 26.672417097949015,
+      "root_cause": "sector_specific"
+    },
+    "HSY:AccountsPayable:high_variance": {
+      "reference_value": 807918000.0,
+      "xbrl_value": 1159177000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 43.47706079082283,
+      "root_cause": "wrong_concept"
+    },
+    "INTU:Capex:high_variance": {
+      "reference_value": -124000000.0,
+      "xbrl_value": 84000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 32.25806451612903,
+      "root_cause": "wrong_concept"
+    },
+    "INTU:DepreciationAmortization:high_variance": {
+      "reference_value": 809000000.0,
+      "xbrl_value": 653000000.0,
+      "components_found": 2,
+      "components_needed": 2,
+      "variance_pct": 19.283065512978986,
+      "root_cause": "wrong_concept"
+    },
+    "INTU:PropertyPlantEquipment:high_variance": {
+      "reference_value": 1502000000.0,
+      "xbrl_value": 961000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 36.01864181091877,
+      "root_cause": "wrong_concept"
+    },
+    "MMM:ResearchAndDevelopment:high_variance": {
+      "reference_value": 1085000000.0,
+      "xbrl_value": 700000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 35.483870967741936,
+      "root_cause": "wrong_concept"
+    },
+    "CSCO:DepreciationAmortization:high_variance": {
+      "reference_value": 2811000000.0,
+      "xbrl_value": 700000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 75.09782995375312,
+      "root_cause": "wrong_concept"
+    },
+    "CSCO:ShareRepurchases:high_variance": {
+      "reference_value": -7222000000.0,
+      "xbrl_value": -6000000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 16.92052063140404,
+      "root_cause": "wrong_concept"
+    },
+    "EMR:PropertyPlantEquipment:high_variance": {
+      "reference_value": 3508000000.0,
+      "xbrl_value": 2871000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 18.158494868871152,
+      "root_cause": "sector_specific"
+    },
+    "IBM:Capex:high_variance": {
+      "reference_value": -1685000000.0,
+      "xbrl_value": 1048000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 37.804154302670625,
+      "root_cause": "wrong_concept"
+    },
+    "IBM:PropertyPlantEquipment:high_variance": {
+      "reference_value": 8929000000.0,
+      "xbrl_value": 5731000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 35.81588083771979,
+      "root_cause": "wrong_concept"
+    },
+    "ITW:DepreciationAmortization:high_variance": {
+      "reference_value": 402000000.0,
+      "xbrl_value": 301000000.0,
+      "components_found": 1,
+      "components_needed": 2,
+      "variance_pct": 25.12437810945274,
+      "root_cause": "partial_composite"
+    },
+    "ITW:PropertyPlantEquipment:high_variance": {
+      "reference_value": 2302000000.0,
+      "xbrl_value": 2036000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 11.55516941789748,
+      "root_cause": "sector_specific"
+    },
+    "LIN:LongTermDebt:high_variance": {
+      "reference_value": 15343000000.0,
+      "xbrl_value": 17400000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 13.406765300136868,
+      "root_cause": "sector_specific"
+    },
+    "LIN:InterestExpense:high_variance": {
+      "reference_value": 487000000.0,
+      "xbrl_value": 555000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 13.963039014373715,
+      "root_cause": "sector_specific"
+    },
+    "LMT:IntangibleAssets:high_variance": {
+      "reference_value": 14948000000.0,
+      "xbrl_value": 13082000000.0,
+      "components_found": 2,
+      "components_needed": 2,
+      "variance_pct": 12.483275354562483,
+      "root_cause": "wrong_concept"
+    },
+    "NOC:PropertyPlantEquipment:high_variance": {
+      "reference_value": 12306000000.0,
+      "xbrl_value": 10536000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 14.383227693807898,
+      "root_cause": "sector_specific"
+    },
+    "BRK-B:Revenue:explained_variance": {
+      "reference_value": 424232000000.0,
+      "xbrl_value": 371433000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 12.445784382130533,
+      "root_cause": "explained_variance"
+    },
+    "BRK-B:IntangibleAssets:explained_variance": {
+      "reference_value": 118518000000.0,
+      "xbrl_value": 102780000000.0,
+      "components_found": 2,
+      "components_needed": 2,
+      "variance_pct": 13.27899559560573,
+      "root_cause": "explained_variance"
+    },
+    "DUK:AccountsReceivable:explained_variance": {
+      "reference_value": 4672000000.0,
+      "xbrl_value": 1889000000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 59.567636986301366,
+      "root_cause": "explained_variance"
+    },
+    "NOW:WeightedAverageSharesDiluted:explained_variance": {
+      "reference_value": 1040000000.0,
+      "xbrl_value": 208423000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 79.95932692307693,
+      "root_cause": "explained_variance"
+    },
+    "PLD:IntangibleAssets:explained_variance": {
+      "reference_value": 764546000.0,
+      "xbrl_value": 1562584000.0,
+      "components_found": 1,
+      "components_needed": 2,
+      "variance_pct": 104.3806389674395,
+      "root_cause": "explained_variance"
+    },
+    "PBF:DepreciationAmortization:explained_variance": {
+      "reference_value": 643000000.0,
+      "xbrl_value": 358300000.0,
+      "components_found": 1,
+      "components_needed": 1,
+      "variance_pct": 44.27682737169518,
+      "root_cause": "explained_variance"
+    },
+    "DIS:OperatingIncome:explained_variance": {
+      "reference_value": 13832000000.0,
+      "xbrl_value": 17551000000.0,
+      "components_found": 0,
+      "components_needed": 0,
+      "variance_pct": 26.886928860613068,
+      "root_cause": "explained_variance"
+    }
+  }
+}
