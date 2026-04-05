@@ -64,3 +64,113 @@ def test_update_company_tiers_writes_json_not_yaml(tmp_path):
     # companies.yaml should NOT have quality_tier
     yaml_data = yaml.safe_load((tmp_path / "companies.yaml").read_text())
     assert "quality_tier" not in yaml_data["companies"]["AAPL"]
+
+
+def test_apply_exclusion_to_json(tmp_path):
+    """Apply EXCLUDE_METRIC writes to per-company JSON override."""
+    overrides_dir = tmp_path / "company_overrides"
+    overrides_dir.mkdir()
+
+    from edgar.xbrl.standardization.tools.config_applier import apply_action_to_json
+
+    action = {
+        "action": "EXCLUDE_METRIC",
+        "ticker": "HD",
+        "metric": "ResearchAndDevelopment",
+        "params": {"reason": "not_applicable", "notes": "Retail company, no R&D"},
+    }
+    apply_action_to_json(action, config_dir=tmp_path)
+
+    data = json.loads((overrides_dir / "HD.json").read_text())
+    assert "ResearchAndDevelopment" in data["exclude_metrics"]
+    assert data["exclude_metrics"]["ResearchAndDevelopment"]["reason"] == "not_applicable"
+
+
+def test_apply_divergence_to_json(tmp_path):
+    """Apply DOCUMENT_DIVERGENCE writes to per-company JSON override."""
+    overrides_dir = tmp_path / "company_overrides"
+    overrides_dir.mkdir()
+
+    from edgar.xbrl.standardization.tools.config_applier import apply_action_to_json
+
+    action = {
+        "action": "DOCUMENT_DIVERGENCE",
+        "ticker": "HD",
+        "metric": "PropertyPlantEquipment",
+        "params": {"reason": "Operating lease ROU assets included in yfinance", "variance_pct": 18.3},
+    }
+    apply_action_to_json(action, config_dir=tmp_path)
+
+    data = json.loads((overrides_dir / "HD.json").read_text())
+    assert "PropertyPlantEquipment" in data["known_divergences"]
+    assert data["known_divergences"]["PropertyPlantEquipment"]["variance_pct"] == 18.3
+
+
+def test_apply_concept_override_to_json(tmp_path):
+    """Apply MAP_CONCEPT for high_variance writes preferred_concept override."""
+    overrides_dir = tmp_path / "company_overrides"
+    overrides_dir.mkdir()
+
+    from edgar.xbrl.standardization.tools.config_applier import apply_action_to_json
+
+    action = {
+        "action": "MAP_CONCEPT",
+        "ticker": "HD",
+        "metric": "CashAndEquivalents",
+        "params": {"concept": "CashAndCashEquivalentsAtCarryingValue"},
+    }
+    apply_action_to_json(action, config_dir=tmp_path)
+
+    data = json.loads((overrides_dir / "HD.json").read_text())
+    assert data["metric_overrides"]["CashAndEquivalents"]["preferred_concept"] == "CashAndCashEquivalentsAtCarryingValue"
+
+
+def test_apply_preserves_existing_json(tmp_path):
+    """Applying new action preserves existing JSON content."""
+    overrides_dir = tmp_path / "company_overrides"
+    overrides_dir.mkdir()
+    (overrides_dir / "HD.json").write_text(json.dumps({
+        "quality_tier": "provisional",
+        "exclude_metrics": {"Inventory": {"reason": "not_applicable", "notes": "existing"}}
+    }))
+
+    from edgar.xbrl.standardization.tools.config_applier import apply_action_to_json
+
+    action = {
+        "action": "EXCLUDE_METRIC",
+        "ticker": "HD",
+        "metric": "ResearchAndDevelopment",
+        "params": {"reason": "not_applicable", "notes": "new"},
+    }
+    apply_action_to_json(action, config_dir=tmp_path)
+
+    data = json.loads((overrides_dir / "HD.json").read_text())
+    assert data["quality_tier"] == "provisional"
+    assert "Inventory" in data["exclude_metrics"]
+    assert "ResearchAndDevelopment" in data["exclude_metrics"]
+
+
+def test_revert_action(tmp_path):
+    """revert_action removes the specific change from JSON."""
+    overrides_dir = tmp_path / "company_overrides"
+    overrides_dir.mkdir()
+    (overrides_dir / "HD.json").write_text(json.dumps({
+        "exclude_metrics": {
+            "Inventory": {"reason": "not_applicable"},
+            "ResearchAndDevelopment": {"reason": "not_applicable"},
+        }
+    }))
+
+    from edgar.xbrl.standardization.tools.config_applier import revert_action
+
+    action = {
+        "action": "EXCLUDE_METRIC",
+        "ticker": "HD",
+        "metric": "ResearchAndDevelopment",
+        "params": {},
+    }
+    revert_action(action, config_dir=tmp_path)
+
+    data = json.loads((overrides_dir / "HD.json").read_text())
+    assert "Inventory" in data["exclude_metrics"]
+    assert "ResearchAndDevelopment" not in data["exclude_metrics"]
