@@ -277,6 +277,10 @@ class ConfigLoader:
             if data.get("quality_tier") and cc.quality_tier is None:
                 cc.quality_tier = data["quality_tier"]
 
+            # Set industry if not already set (Amendment 1: JSON fallback)
+            if data.get("industry") and not cc.industry:
+                cc.industry = data["industry"]
+
     def _load_gaap_mappings(self) -> Dict[str, List[str]]:
         """Load upstream GAAP mappings and build a reverse index: standard_tag -> [gaap_concept, ...].
 
