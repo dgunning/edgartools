@@ -38,6 +38,14 @@ def test_extraction_is_deterministic():
     Ground-truth assertion: every ticker in DETERMINISM_TEST_COHORT must have a
     per-company EF-CQS delta below DETERMINISM_THRESHOLD across two back-to-back
     runs of compute_cqs with snapshot_mode=True (no network, no clock dependence).
+
+    Asserts on BOTH the lenient ``ef_cqs`` (current decision gate) and the
+    observation-only ``ef_cqs_strict`` (future decision gate after the Sub-
+    project A cut-over). Lenient and strict share an ef_pass_count numerator
+    and should co-move, but pinning both pre-cutover guarantees the strict
+    field is also bit-identical — otherwise the first strict-mode run after
+    the gate flip could surprise us with nondeterminism that was hidden
+    behind the laundering denominator.
     """
     result_a = compute_cqs(eval_cohort=DETERMINISM_TEST_COHORT, snapshot_mode=True)
     result_b = compute_cqs(eval_cohort=DETERMINISM_TEST_COHORT, snapshot_mode=True)
@@ -49,28 +57,44 @@ def test_extraction_is_deterministic():
         f"Run B: {sorted(result_b.company_scores.keys())}."
     )
 
+    # Track lenient and strict deltas in parallel. Either field going
+    # non-deterministic fails the gate.
     deltas = []
     for ticker in DETERMINISM_TEST_COHORT:
-        a = result_a.company_scores[ticker].ef_cqs
-        b = result_b.company_scores[ticker].ef_cqs
-        deltas.append((ticker, abs(a - b), a, b))
+        ca = result_a.company_scores[ticker]
+        cb = result_b.company_scores[ticker]
+        lenient_delta = abs(ca.ef_cqs - cb.ef_cqs)
+        strict_delta = abs(ca.ef_cqs_strict - cb.ef_cqs_strict)
+        deltas.append(
+            (ticker, lenient_delta, strict_delta, ca.ef_cqs, cb.ef_cqs,
+             ca.ef_cqs_strict, cb.ef_cqs_strict)
+        )
 
-    max_delta = max(d[1] for d in deltas)
+    max_lenient_delta = max(d[1] for d in deltas)
+    max_strict_delta = max(d[2] for d in deltas)
+    max_delta = max(max_lenient_delta, max_strict_delta)
 
     # Print observed deltas so the noise floor is captured in CI logs.
     # This output is what informs the DETERMINISM_THRESHOLD constant.
-    print(f"\n[determinism] max per-company EF-CQS delta: {max_delta:.10f}")
+    print(f"\n[determinism] max per-company ef_cqs        delta: {max_lenient_delta:.10f}")
+    print(f"[determinism] max per-company ef_cqs_strict delta: {max_strict_delta:.10f}")
     print(f"[determinism] threshold: {DETERMINISM_THRESHOLD:.10f}")
-    for ticker, delta, a, b in sorted(deltas, key=lambda d: -d[1]):
-        marker = " <-- max" if delta == max_delta else ""
-        print(f"[determinism]   {ticker:<6} delta={delta:.10f}  a={a:.6f}  b={b:.6f}{marker}")
+    for ticker, ld, sd, la, lb, sa, sb in sorted(deltas, key=lambda d: -(max(d[1], d[2]))):
+        marker = " <-- max" if max(ld, sd) == max_delta else ""
+        print(
+            f"[determinism]   {ticker:<6} "
+            f"ef_cqs Δ={ld:.10f} (a={la:.6f} b={lb:.6f})  "
+            f"strict Δ={sd:.10f} (a={sa:.6f} b={sb:.6f}){marker}"
+        )
 
     assert max_delta < DETERMINISM_THRESHOLD, (
-        f"Determinism check failed: max per-company EF-CQS delta {max_delta:.6f} "
-        f"exceeds threshold {DETERMINISM_THRESHOLD:.6f}. "
+        f"Determinism check failed: max per-company delta {max_delta:.6f} "
+        f"exceeds threshold {DETERMINISM_THRESHOLD:.6f} "
+        f"(lenient max={max_lenient_delta:.6f}, strict max={max_strict_delta:.6f}). "
         f"Back-to-back runs with identical config produced different scores. "
         f"Either fix the determinism bug (FactQuery ordering, dict iteration, "
         f"FP reduction order) OR set EDGAR_DETERMINISM_DEGRADED=1 to widen the "
         f"chokepoint decision threshold from 0.005 to 0.01. "
-        f"Per-ticker deltas: {[(t, round(d, 10)) for t, d, _, _ in deltas]}"
+        f"Per-ticker deltas (ticker, lenient, strict): "
+        f"{[(t, round(ld, 10), round(sd, 10)) for t, ld, sd, *_ in deltas]}"
     )
