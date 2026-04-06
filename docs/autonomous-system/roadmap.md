@@ -47,8 +47,10 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 | 12: Config collapse | Scalable config | 2026-04-04 | 2026-04-04 | 0.8740 | 0.8740 | Consensus 021. config_loader 916→484 lines. 51 per-company JSON overrides. 8 new industry sections. TotalLiabilities composite. Pure EF metric. `docs/metric-definitions.md`. |
 | 13: Path to 0.95 | 100-co expansion | 2026-04-04 | 2026-04-04 | 0.8740 | 0.8544 (100-co) | TL composite fix (+2.82pp), 3 bug fixes (PFE/MCD/BAC-C), ShortTermDebt composite (5 cos), 50 new companies onboarded, 100-co quality gate passed (>= 0.85). |
 | 14: Subscription-grade pivot | Data contract + regression monitor | 2026-04-05 | 2026-04-05 | 0.8544 | 0.9302 (100-co) | Loop deprecated (Consensus 022 Option B). forbidden_by_ticker bug fix (+7.6pp), industry map 37→47, 30 not_applicable exclusions, data_dictionary.yaml complete, WSL YAML diagnostics passed. |
+| 15a: Sub-project A (safety net) | Determinism + strict CQS | 2026-04-06 | 2026-04-06 | 0.8492 lenient (123-co, Run 022) | 0.8537 lenient / 0.8151 strict (123-co, Run 025, Δ=+0.0386) | `ef_cqs_strict` parallel field (observation, gate unchanged). Determinism CI gate at 10-co cohort, measured noise 0.0, threshold 5e-05. `get_decision_threshold()` + `EDGAR_DETERMINISM_DEGRADED` escape hatch (unwired, for Sub-project B). 6 new unit tests + determinism integration test. |
 
 **Deferred items:** 3b (historical validation), 4a (S&P 500 expansion), 4c (event-driven processing).
+**In progress:** 15b (Sub-project B — chokepoint + baseline regression gate + loader hash registry + typed action), 15c (Sub-project C — grouped escalations + dual scoring).
 
 ---
 
@@ -198,6 +200,17 @@ Synthesized from a structured multi-model consensus session (GPT-5.4, Gemini 3.1
 - Bottom 5: MMC (0.18), STT (0.36), CI (0.69), D (0.76), XOM (0.78). MMC and STT are newly onboarded outliers.
 - Run 020's 0.9302 was on EXPANSION_COHORT_100 (50 deeply-tuned + 50 expansion). All-123 baseline is lower due to untuned outliers.
 - Pre-existing test failures: 20 (4 signed_formula, 15 golden_masters, 1 closed_loop_e2e). None caused by merge.
+
+**Run 025 (2026-04-06)** — Sub-project A: Strict EF-CQS rebaseline + determinism CI gate
+- Added `ef_cqs_strict` field on `CompanyCQS` and `CQSResult`. Counts `explained_variance_count` (known_divergences) as failures rather than free passes. Runs parallel to lenient `ef_cqs`; lenient stays the gate during the observation window. See [strict-cqs-rebaseline.md](strict-cqs-rebaseline.md).
+- All-123 cohort, snapshot_mode=True, 1642s runtime: **EF-CQS lenient = 0.8537** (vs Run 022 0.8492), **EF-CQS strict = 0.8151**, **delta = +0.0386** (~3.86 pp of laundering). 200 total `explained_variance_count` entries across 84 of 123 companies (68%) — larger than the pre-measurement estimate of 78.
+- Top laundering contributors (delta = lenient - strict): DUK (+0.2400, 10 ev), GE (+0.1911, 9 ev), SO (+0.1905, 8 ev), NEE (+0.1862, 8 ev), BRK-B (+0.1754, 7 ev), AMT (+0.1715, 8 ev), CAT (+0.1308, 6 ev). Utilities and conglomerates dominate. 39 of 123 companies have zero laundered divergences.
+- Cut-over criterion: gate flips from lenient → strict in a separate PR after at least 5 cohort runs producing parallel `(lenient, strict)` pairs AND zero determinism-CI regressions. This is Run 1 of 5.
+- Determinism CI gate landed at `tests/xbrl/standardization/test_determinism.py`. `DETERMINISM_TEST_COHORT` = 10 sector-spread companies. Measured noise on 2026-04-06: max per-company EF-CQS delta = 0.0000000000 (bit-identical) across all 10 tickers. `DETERMINISM_THRESHOLD = 5e-05` per the spec formula `5 × max(observed_noise, 0.00001)`. Marked `@pytest.mark.regression` so the existing nightly suite picks it up automatically.
+- Decision threshold escape hatch: `EDGAR_DETERMINISM_DEGRADED=1` widens chokepoint threshold from 0.005 to 0.01 (consumed by Sub-project B's chokepoint when it lands). `get_decision_threshold()` exported but unwired.
+- Verification: 21/21 scoring integrity tests pass (including 6 new `TestEfCqsStrict` / `TestEfCqsStrictAggregation` tests). 280/280 tests in the broader standardization suite pass (excluding pre-existing slow/golden-master failures).
+- Sub-project B (chokepoint, baseline regression gate, loader hash registry, typed action) and Sub-project C (grouped escalations, dual scoring) are unblocked.
+- Raw measurement output: `edgar/xbrl/standardization/escalation-reports/run_025_strict_rebaseline_2026-04-06.json`.
 
 ---
 

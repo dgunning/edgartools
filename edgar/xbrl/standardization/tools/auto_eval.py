@@ -13,6 +13,7 @@ Key design:
 """
 
 import logging
+import os
 import time
 from dataclasses import dataclass, field, fields, asdict
 from typing import Dict, List, Optional, Tuple
@@ -34,6 +35,34 @@ _EXCLUSION_REASON_MAP = {e.value: e for e in ExclusionReason}
 
 # 5-company quick-eval cohort: diverse archetypes for fast feedback
 QUICK_EVAL_COHORT = ["AAPL", "JPM", "XOM", "WMT", "JNJ"]
+
+# 10-company fixed cohort used by the determinism CI gate
+# (tests/xbrl/standardization/test_determinism.py). Sector-spread subset of
+# EXPANSION_COHORT_50 with stable baselines.
+DETERMINISM_TEST_COHORT = [
+    "AAPL", "MSFT", "JPM", "BAC", "XOM",
+    "WMT", "JNJ", "CAT", "V", "NEE",
+]
+
+# Threshold = 5 × max(observed_noise, 0.00001). Measured 2026-04-06: observed
+# per-company EF-CQS delta was 0.0 on all 10 cohort members, so the floor wins.
+# This is a regression gate for nondeterminism, not a quality target.
+DETERMINISM_THRESHOLD = 0.00005
+
+# Chokepoint auto-apply thresholds. ``get_decision_threshold()`` returns the
+# degraded value when ``EDGAR_DETERMINISM_DEGRADED=1`` — the documented escape
+# hatch the determinism CI gate points operators at on failure.
+_DECISION_THRESHOLD_NORMAL = 0.005
+_DECISION_THRESHOLD_DEGRADED = 0.01
+
+
+def get_decision_threshold() -> float:
+    """Return the chokepoint decision threshold, honoring degraded-mode env var."""
+    return (
+        _DECISION_THRESHOLD_DEGRADED
+        if os.environ.get("EDGAR_DETERMINISM_DEGRADED") == "1"
+        else _DECISION_THRESHOLD_NORMAL
+    )
 
 # Default parallelism for compute_cqs / identify_gaps.
 # Set to >1 to parallelize company evaluation across processes.
@@ -390,6 +419,10 @@ class CompanyCQS:
     extraction_failed_count: int = 0   # Count of extraction_failed exclusions
     # Tier-weighted EF-CQS (M8.1) — runs parallel to ef_cqs, does NOT replace it
     weighted_ef_cqs: float = 0.0       # EF pass rate weighted by metric importance tier
+    # ef_pass_count / (total - disputed_count - unverified_count). Unlike ef_cqs,
+    # the denominator keeps explained_variance_count as failures (no free pass for
+    # documented divergences). See docs/autonomous-system/strict-cqs-rebaseline.md.
+    ef_cqs_strict: float = 0.0
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -509,6 +542,8 @@ class CQSResult:
     total_extraction_failed: int = 0   # Total extraction_failed exclusions
     # Tier-weighted EF-CQS (M8.1)
     weighted_ef_cqs: float = 0.0       # EF pass rate weighted by metric importance tier
+    # Parallel observation field — see CompanyCQS.ef_cqs_strict and strict-cqs-rebaseline.md.
+    ef_cqs_strict: float = 0.0
 
     # Per-company breakdown
     company_scores: Dict[str, CompanyCQS] = field(default_factory=dict)
@@ -1453,6 +1488,10 @@ def _compute_company_cqs(
     # EF-CQS: extraction fidelity component (concept found correctly)
     ef_cqs = ef_pass_rate
 
+    # Strict denominator keeps explained_variance as failures (see strict-cqs-rebaseline.md).
+    strict_total = total - disputed_count - unverified_count
+    ef_cqs_strict = ef_pass_count / strict_total if strict_total > 0 else 0.0
+
     # SA-CQS: standardization alignment (value matches yfinance)
     sa_cqs = sa_pass_rate
 
@@ -1510,6 +1549,7 @@ def _compute_company_cqs(
         data_completeness=data_completeness,
         extraction_failed_count=extraction_failed_count,
         weighted_ef_cqs=weighted_ef_cqs,
+        ef_cqs_strict=ef_cqs_strict,
     )
 
 
@@ -1568,6 +1608,7 @@ def _aggregate_cqs(
     ef_cqs = sum(s.ef_cqs for s in scores) / n
     sa_cqs = sum(s.sa_cqs for s in scores) / n
     weighted_ef_cqs = sum(s.weighted_ef_cqs for s in scores) / n
+    ef_cqs_strict = sum(s.ef_cqs_strict for s in scores) / n
 
     # Scoring integrity aggregates (Consensus 018)
     agg_raw_cqs = sum(s.raw_cqs for s in scores) / n
@@ -1596,6 +1637,7 @@ def _aggregate_cqs(
         data_completeness=agg_data_completeness,
         total_extraction_failed=total_extraction_failed,
         weighted_ef_cqs=weighted_ef_cqs,
+        ef_cqs_strict=ef_cqs_strict,
         companies_evaluated=n,
         total_metrics=total_metrics,
         total_mapped=sum(s.metrics_mapped for s in scores),
@@ -2348,9 +2390,13 @@ def print_cqs_report(result: CQSResult):
     print("=" * 70)
 
     veto_str = " ** HARD VETO — REGRESSIONS DETECTED **" if result.vetoed else ""
-    # EF-CQS is the headline metric
     ef_status = "PASS" if result.ef_cqs >= 0.95 else "BELOW TARGET"
-    print(f"\n  EF-CQS (Extraction Fidelity):  {result.ef_cqs:.4f}  [{ef_status}]{veto_str}")
+    strict_delta = result.ef_cqs - result.ef_cqs_strict
+    print(f"\n  EF-CQS (lenient, current gate): {result.ef_cqs:.4f}  [{ef_status}]{veto_str}")
+    print(
+        f"  EF-CQS (strict, observed):      {result.ef_cqs_strict:.4f}  "
+        f"[parallel — Δ={strict_delta:+.4f} from explained_variance laundering]"
+    )
     print(f"  RFA Rate (Reported Fact):       {result.rfa_rate:.4f}")
     print(f"  SMA Rate (Semantic Mapping):    {result.sma_rate:.4f}")
     print(f"  SA-CQS (Standardization):       {result.sa_cqs:.4f}")
@@ -2384,12 +2430,16 @@ def print_cqs_report(result: CQSResult):
     if result.company_scores:
         print()
         print("  Per-Company Breakdown:")
-        print(f"    {'Ticker':<8} {'EF':>6} {'RFA':>6} {'SMA':>6} {'Pass':>6} {'Cov':>6} {'Var%':>6} {'Reg':>4}")
-        print("    " + "-" * 56)
+        print(
+            f"    {'Ticker':<8} {'EF':>6} {'EFstr':>6} {'RFA':>6} {'SMA':>6} "
+            f"{'Pass':>6} {'Cov':>6} {'Var%':>6} {'Reg':>4}"
+        )
+        print("    " + "-" * 63)
         for ticker in sorted(result.company_scores.keys()):
             cs = result.company_scores[ticker]
             print(
-                f"    {ticker:<8} {cs.ef_cqs:>5.1%} {cs.rfa_pass_rate:>5.1%} {cs.sma_pass_rate:>5.1%} "
+                f"    {ticker:<8} {cs.ef_cqs:>5.1%} {cs.ef_cqs_strict:>5.1%} "
+                f"{cs.rfa_pass_rate:>5.1%} {cs.sma_pass_rate:>5.1%} "
                 f"{cs.pass_rate:>5.1%} {cs.coverage_rate:>5.1%} "
                 f"{cs.mean_variance:>5.1f} {cs.regression_count:>4d}"
             )

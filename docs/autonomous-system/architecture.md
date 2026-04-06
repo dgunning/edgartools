@@ -15,10 +15,11 @@ The autonomous system applies the [autoresearch](https://github.com/karpathy/aut
 
 | Metric | Value | Updated |
 |--------|-------|---------|
-| CQS | 0.8235 (100-co) | 2026-04-05 |
-| EF-CQS | 0.9302 (100-co) | 2026-04-05 |
+| CQS | 0.8265 (123-co) | 2026-04-06 |
+| EF-CQS (lenient, current gate) | 0.8537 (123-co) | 2026-04-06 |
+| EF-CQS (strict, observed) | 0.8151 (123-co, Δ=+0.0386) | 2026-04-06 |
 | Pass Rate | 94.96% (100-co) | 2026-04-05 |
-| Headline EF | 88.6% (100-co) | 2026-04-05 |
+| Headline EF | 88.5% (123-co) | 2026-04-06 |
 | Extraction Failed | 0 | 2026-04-05 |
 | Remaining Gaps | 186 (105 unmapped, 41 high_variance, 29 validation_failure, 11 explained_variance) | 2026-04-05 |
 | Company Tiers | 100 companies evaluated | 2026-04-05 |
@@ -76,6 +77,7 @@ CQS = 0.45 * pass_rate
 - **EF-CQS** (Extraction Fidelity) — Did we find the right XBRL concept? Passes only for known_concepts, tree-resolved, or reference-confirmed.
 - **SA-CQS** (Standardization Alignment) — Can we reproduce yfinance's aggregated number? Uses composite formula evaluation.
 - **Weighted EF-CQS** (M8.1) — Tier-weighted variant of EF-CQS. Core metrics weighted 3x, extended 2x, exploratory 1x. Runs parallel to EF-CQS for comparison.
+- **EF-CQS strict** (Sub-project A) — Same numerator as EF-CQS, but the denominator does NOT subtract `explained_variance_count`. Counts documented divergences as failures rather than free passes. Runs parallel to EF-CQS during a 4+ run observation window; the gate stays on lenient EF-CQS until at least 5 cohort runs + zero determinism regressions (see [strict-cqs-rebaseline.md](strict-cqs-rebaseline.md)).
 
 ### Metric Importance Tiers (M8.1)
 
@@ -151,6 +153,7 @@ Safety invariants:
 - All changes are git-recoverable
 - Graveyard prevents loops (6+ failed attempts → skip)
 - Divergence requires prior concept attempts (prevents CQS inflation)
+- **Determinism gate (Sub-project A)** — `tests/xbrl/standardization/test_determinism.py` runs `compute_cqs` twice on `DETERMINISM_TEST_COHORT` and asserts max per-company EF-CQS delta < `DETERMINISM_THRESHOLD` (5e-05, measured 0.0 on 2026-04-06). Marked `@pytest.mark.regression` so the existing nightly suite picks it up. Escape hatch: `EDGAR_DETERMINISM_DEGRADED=1` widens the chokepoint decision threshold (`get_decision_threshold()` in `auto_eval.py`) from 0.005 to 0.01 — consumed by Sub-project B's chokepoint when it lands.
 
 ### Experiment Ledger
 
@@ -180,6 +183,7 @@ AI emits semantic intent via 7 finite action types. A deterministic compiler tra
 | Cohort | Size | Time | Purpose |
 |--------|------|------|---------|
 | `QUICK_EVAL_COHORT` | 5 companies | ~50s | Per-experiment fast eval |
+| `DETERMINISM_TEST_COHORT` | 10 companies | ~9min | Sub-project A determinism CI gate (back-to-back runs must be bit-identical) |
 | `VALIDATION_COHORT` | 20 companies | ~200s | Tournament stage-2 |
 | `EXPANSION_COHORT_50` | 50 companies | ~270s | Cross-sector quality |
 | `EXPANSION_COHORT_100` | 100 companies | ~600s | Production stress test |

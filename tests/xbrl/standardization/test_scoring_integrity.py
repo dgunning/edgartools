@@ -307,6 +307,120 @@ class TestScoringIntegrity:
         assert result.data_completeness == pytest.approx(2 / 3, abs=0.01)
 
 
+class TestEfCqsStrict:
+    """Tests for the strict EF-CQS field (Sub-project A).
+
+    The lenient ef_cqs subtracts explained_variance_count from BOTH numerator AND
+    denominator (laundering). ef_cqs_strict adds it back to the denominator only —
+    keeping documented divergences as failures.
+    """
+
+    def _compute(self, metrics, known_divergences=None):
+        from edgar.xbrl.standardization.tools.auto_eval import _compute_company_cqs
+        golden_set = set()
+        validations = {}
+        for m in metrics.values():
+            if m.validation_status == "valid" and m.source != MappingSource.CONFIG:
+                validations[m.metric] = MockValidation()
+        return _compute_company_cqs(
+            "TEST", metrics, golden_set, validations,
+            known_divergences=known_divergences,
+        )
+
+    def test_strict_equals_lenient_when_no_divergences(self):
+        """Without known_divergences, strict and lenient EF-CQS are identical."""
+        metrics = {
+            "Revenue": _make_mapping_result("Revenue"),
+            "NetIncome": _make_mapping_result("NetIncome"),
+        }
+        result = self._compute(metrics)
+
+        assert result.ef_cqs == pytest.approx(result.ef_cqs_strict, abs=1e-9)
+        # Both should be 1.0 (2 of 2 pass)
+        assert result.ef_cqs_strict == pytest.approx(1.0, abs=1e-9)
+
+    def test_strict_lower_than_lenient_with_divergences(self):
+        """With a known_divergence, strict is lower (denominator wider)."""
+        metrics = {
+            "Revenue": _make_mapping_result("Revenue"),
+            "NetIncome": _make_mapping_result("NetIncome"),
+            "Capex": _make_mapping_result("Capex"),  # Will be marked as known divergence
+        }
+        # Lenient: Capex skipped from both numerator and denominator → 2/2 = 1.0
+        # Strict:  Capex stays in denominator as failure → 2/3 ≈ 0.667
+        result = self._compute(metrics, known_divergences={"Capex"})
+
+        assert result.explained_variance_count == 1
+        assert result.ef_cqs == pytest.approx(1.0, abs=1e-9)
+        assert result.ef_cqs_strict == pytest.approx(2 / 3, abs=1e-9)
+        assert result.ef_cqs_strict < result.ef_cqs
+
+    def test_strict_zero_division_safe(self):
+        """Strict EF-CQS is 0.0 when strict denominator is 0 (degenerate case)."""
+        # All metrics are unverified — strict_total = 0
+        metrics = {
+            "Revenue": _make_mapping_result("Revenue", validation_status="unverified"),
+        }
+        result = self._compute(metrics)
+
+        assert result.ef_cqs_strict == 0.0
+
+
+class TestEfCqsStrictAggregation:
+    """Test that aggregate CQSResult includes ef_cqs_strict."""
+
+    def test_aggregate_ef_cqs_strict_is_mean_across_companies(self):
+        from edgar.xbrl.standardization.tools.auto_eval import _aggregate_cqs, CompanyCQS
+
+        scores = {
+            "AAPL": CompanyCQS(
+                ticker="AAPL", pass_rate=0.9, mean_variance=1.0,
+                coverage_rate=0.95, golden_master_rate=0.8, regression_count=0,
+                metrics_total=37, metrics_mapped=35, metrics_valid=33,
+                metrics_excluded=2, cqs=0.85,
+                ef_cqs=0.95, ef_cqs_strict=0.90,
+            ),
+            "JPM": CompanyCQS(
+                ticker="JPM", pass_rate=0.85, mean_variance=2.0,
+                coverage_rate=0.90, golden_master_rate=0.75, regression_count=0,
+                metrics_total=37, metrics_mapped=30, metrics_valid=28,
+                metrics_excluded=7, cqs=0.82,
+                ef_cqs=0.92, ef_cqs_strict=0.85,
+            ),
+        }
+        result = _aggregate_cqs(scores, baseline_cqs=None, duration=1.0)
+
+        assert result.ef_cqs == pytest.approx((0.95 + 0.92) / 2, abs=0.001)
+        assert result.ef_cqs_strict == pytest.approx((0.90 + 0.85) / 2, abs=0.001)
+        # Strict should be lower than lenient (the whole point of the field)
+        assert result.ef_cqs_strict < result.ef_cqs
+
+    def test_serialization_roundtrip_preserves_ef_cqs_strict(self):
+        from edgar.xbrl.standardization.tools.auto_eval import CQSResult, CompanyCQS
+
+        original = CQSResult(
+            pass_rate=0.9, mean_variance=1.0, coverage_rate=0.95,
+            golden_master_rate=0.8, regression_rate=0.0, cqs=0.85,
+            companies_evaluated=1, total_metrics=37, total_mapped=35,
+            total_valid=33, total_regressions=0,
+            ef_cqs=0.93, ef_cqs_strict=0.87,
+            company_scores={
+                "AAPL": CompanyCQS(
+                    ticker="AAPL", pass_rate=0.9, mean_variance=1.0,
+                    coverage_rate=0.95, golden_master_rate=0.8, regression_count=0,
+                    metrics_total=37, metrics_mapped=35, metrics_valid=33,
+                    metrics_excluded=2, cqs=0.85,
+                    ef_cqs=0.93, ef_cqs_strict=0.87,
+                ),
+            },
+        )
+        d = original.to_dict()
+        restored = CQSResult.from_dict(d)
+
+        assert restored.ef_cqs_strict == pytest.approx(0.87)
+        assert restored.company_scores["AAPL"].ef_cqs_strict == pytest.approx(0.87)
+
+
 class TestCQSResultAggregation:
     """Test that aggregate CQSResult includes scoring integrity fields."""
 

@@ -319,6 +319,7 @@ markers = [
     "integration: Integration tests",
     "data_quality: Data quality validation tests",
     "vcr: Tests using VCR cassettes for recorded HTTP responses",
+    "determinism: Determinism CI gate — back-to-back runs must produce bit-identical scores",
 ]
 
 [tool.pyright]
