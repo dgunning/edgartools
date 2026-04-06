@@ -92,7 +92,6 @@ def run_expand_cohort(
             ef_cqs=ef_cqs,
             status=status,
             gaps_remaining=gaps,
-            quality_tier=status,
             notes="",
         ))
 

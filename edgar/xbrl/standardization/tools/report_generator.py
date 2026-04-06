@@ -27,7 +27,6 @@ class CompanyResult:
     ef_cqs: float
     status: str       # "verified" | "provisional" | "needs_investigation" | "failed"
     gaps_remaining: int
-    quality_tier: str = ""  # "verified" | "provisional" | "needs_investigation"
     notes: str = ""
 
 
