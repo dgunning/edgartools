@@ -12,6 +12,8 @@ dist/
 .vscode/
 # Beads issue tracking (local state)
 .beads/
+# Git worktrees (isolated workspaces)
+.worktrees/
 data/.DS_Store
 **/**/.DS_Store
 **/**/**/.DS_Store
