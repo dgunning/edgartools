@@ -420,6 +420,58 @@ class TestEfCqsStrictAggregation:
         assert restored.ef_cqs_strict == pytest.approx(0.87)
         assert restored.company_scores["AAPL"].ef_cqs_strict == pytest.approx(0.87)
 
+    def test_from_dict_tolerates_legacy_payload_without_ef_cqs_strict(self):
+        """Backward compat: persisted ledger/graveyard JSON written before this
+        PR has no ``ef_cqs_strict`` key. ``from_dict`` must default it to 0.0
+        instead of raising KeyError — otherwise re-reading old run artifacts
+        (escalation-reports, auto_eval_checkpoint, etc.) would break.
+        """
+        from edgar.xbrl.standardization.tools.auto_eval import CQSResult
+
+        # Minimal legacy dict — exactly the shape Sub-project A predates.
+        # Contains all required fields but NO ef_cqs_strict key, and the
+        # nested CompanyCQS also lacks it.
+        legacy_payload = {
+            "pass_rate": 0.9,
+            "mean_variance": 1.0,
+            "coverage_rate": 0.95,
+            "golden_master_rate": 0.8,
+            "regression_rate": 0.0,
+            "cqs": 0.85,
+            "companies_evaluated": 1,
+            "total_metrics": 37,
+            "total_mapped": 35,
+            "total_valid": 33,
+            "total_regressions": 0,
+            "ef_cqs": 0.93,
+            # ef_cqs_strict intentionally absent
+            "company_scores": {
+                "AAPL": {
+                    "ticker": "AAPL",
+                    "pass_rate": 0.9,
+                    "mean_variance": 1.0,
+                    "coverage_rate": 0.95,
+                    "golden_master_rate": 0.8,
+                    "regression_count": 0,
+                    "metrics_total": 37,
+                    "metrics_mapped": 35,
+                    "metrics_valid": 33,
+                    "metrics_excluded": 2,
+                    "cqs": 0.85,
+                    "ef_cqs": 0.93,
+                    # ef_cqs_strict intentionally absent
+                },
+            },
+        }
+
+        # Must not raise; missing field defaults to 0.0 via dataclass default.
+        restored = CQSResult.from_dict(legacy_payload)
+        assert restored.ef_cqs_strict == 0.0
+        assert restored.company_scores["AAPL"].ef_cqs_strict == 0.0
+        # Pre-existing fields must still roundtrip correctly.
+        assert restored.ef_cqs == pytest.approx(0.93)
+        assert restored.company_scores["AAPL"].ef_cqs == pytest.approx(0.93)
+
 
 class TestCQSResultAggregation:
     """Test that aggregate CQSResult includes scoring integrity fields."""
