@@ -38,11 +38,12 @@ QUICK_EVAL_COHORT = ["AAPL", "JPM", "XOM", "WMT", "JNJ"]
 
 # 10-company fixed cohort used by the determinism CI gate
 # (tests/xbrl/standardization/test_determinism.py). Sector-spread subset of
-# EXPANSION_COHORT_50 with stable baselines.
-DETERMINISM_TEST_COHORT = [
+# EXPANSION_COHORT_50 with stable baselines. Frozen as a tuple so tests can't
+# accidentally mutate the gate's cohort.
+DETERMINISM_TEST_COHORT = (
     "AAPL", "MSFT", "JPM", "BAC", "XOM",
     "WMT", "JNJ", "CAT", "V", "NEE",
-]
+)
 
 # Threshold = 5 × max(observed_noise, 0.00001). Measured 2026-04-06: observed
 # per-company EF-CQS delta was 0.0 on all 10 cohort members, so the floor wins.
