@@ -1,8 +1,8 @@
 {
   "exclude_metrics": {
-    "DividendPerShare": {
+    "ShortTermDebt": {
       "reason": "not_applicable",
-      "notes": "Company does not pay dividends"
+      "notes": "Auto-excluded: concept absent from all XBRL sources"
     },
     "ShareRepurchases": {
       "reason": "not_applicable",

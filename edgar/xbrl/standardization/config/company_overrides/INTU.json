@@ -1,10 +1,10 @@
 {
   "exclude_metrics": {
-    "DividendPerShare": {
+    "Inventory": {
       "reason": "not_applicable",
-      "notes": "Company does not pay dividends"
+      "notes": "Auto-excluded: concept absent from all XBRL sources"
     },
-    "ShareRepurchases": {
+    "GrossProfit": {
       "reason": "not_applicable",
       "notes": "Auto-excluded: concept absent from all XBRL sources"
     }
