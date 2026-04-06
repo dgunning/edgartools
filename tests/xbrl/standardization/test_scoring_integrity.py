@@ -356,14 +356,48 @@ class TestEfCqsStrict:
         assert result.ef_cqs_strict < result.ef_cqs
 
     def test_strict_zero_division_safe(self):
-        """Strict EF-CQS is 0.0 when strict denominator is 0 (degenerate case)."""
-        # All metrics are unverified — strict_total = 0
-        metrics = {
+        """Strict denominator math is correct across degenerate AND mixed cases.
+
+        The zero-division guard alone is necessary but not sufficient — a weak
+        test that only asserts ``ef_cqs_strict == 0.0`` would still pass if the
+        strict arithmetic were broken (since 0/anything and anything/0 both hit
+        the 0.0 fallback). Two cases give the test real teeth:
+
+        Case A (degenerate) — all metrics unverified, strict_total = 0:
+            Guard must return 0.0 without raising ZeroDivisionError. Lenient
+            ef_cqs should also be 0.0 — asserting both proves the two paths
+            share the same fallback semantics.
+
+        Case B (mixed) — 1 passing + 1 explained_variance + 1 unverified:
+            total = 3, unverified_count = 1, explained_variance_count = 1
+            effective_total (lenient) = 3 - 0 - 1 - 1 = 1 → ef_cqs = 1/1 = 1.0
+            strict_total              = 3 - 0 - 1     = 2 → ef_cqs_strict = 1/2 = 0.5
+            This would fail loudly if the strict denominator were misspelled
+            (e.g. forgetting to subtract unverified_count, or accidentally
+            subtracting explained_variance_count).
+        """
+        # Case A: degenerate — only the zero-division guard runs.
+        degenerate = {
             "Revenue": _make_mapping_result("Revenue", validation_status="unverified"),
         }
-        result = self._compute(metrics)
+        result_a = self._compute(degenerate)
+        assert result_a.ef_cqs_strict == 0.0, "zero-division guard failed on strict"
+        assert result_a.ef_cqs == 0.0, "zero-division guard failed on lenient"
+        assert result_a.unverified_count == 1
 
-        assert result.ef_cqs_strict == 0.0
+        # Case B: mixed — both lenient and strict non-zero but different.
+        mixed = {
+            "Revenue": _make_mapping_result("Revenue"),
+            "Capex":   _make_mapping_result("Capex"),  # marked as known_divergence below
+            "R_and_D": _make_mapping_result("R_and_D", validation_status="unverified"),
+        }
+        result_b = self._compute(mixed, known_divergences={"Capex"})
+        assert result_b.explained_variance_count == 1
+        assert result_b.unverified_count == 1
+        # Lenient laundering: 1 pass / 1 effective = 1.0
+        assert result_b.ef_cqs == pytest.approx(1.0, abs=1e-9)
+        # Strict honesty: 1 pass / 2 strict_total = 0.5
+        assert result_b.ef_cqs_strict == pytest.approx(0.5, abs=1e-9)
 
 
 class TestEfCqsStrictAggregation:
