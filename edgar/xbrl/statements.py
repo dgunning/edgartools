@@ -1041,6 +1041,7 @@ class Statement:
         from edgar.xbrl.core import get_unit_display_name
         from edgar.xbrl.core import is_point_in_time as get_is_point_in_time
         from edgar.xbrl.periods import determine_periods_to_display
+        from edgar.xbrl.rendering import _is_html, html_to_text
 
         # Get raw statement data with view-based filtering
         raw_data = self.get_raw_data(period_filter=period_filter, view=view)
@@ -1252,6 +1253,12 @@ class Statement:
                 if value is None and period_key.startswith('duration_') and end_date:
                     instant_key = f"instant_{end_date}"
                     value = values_dict.get(instant_key)
+
+                # Issue #762: Sanitize HTML strings from TextBlock XBRL concepts
+                # Disclosure tables contain facts whose values are full HTML markup.
+                # Strip to plain text so DataFrame cells are usable.
+                if isinstance(value, str) and _is_html(value):
+                    value = html_to_text(value)
 
                 # Issue #582: Don't overwrite a valid value with None
                 # Multiple periods can map to the same column (e.g., transition periods for
