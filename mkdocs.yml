@@ -120,6 +120,7 @@ nav:
     - Company Facts: guides/company-facts.md
     - Multi-Period Analysis: guides/multi-year-financial-data-api.md
     - Stock Splits & EPS Normalization: guides/stock-splits-eps-normalization.md
+    - Equity Statement Data Layers: guides/equity-statement-data-layers.md
     - XBRL Deep Dive:
       - Overview: xbrl/index.md
       - Query XBRL Facts: xbrl-querying.md
