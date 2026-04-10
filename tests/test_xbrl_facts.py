@@ -41,16 +41,16 @@ def test_get_facts_by_concept(intc_xbrl: XBRL):
     facts: FactsView = intc_xbrl.facts
     print()
     results = facts.query().by_concept('Revenue').to_dataframe()
-    assert len(results) == 51
+    assert len(results) == 45
 
     # Test with full concept name
     results_full = facts.query().by_concept('us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax').to_dataframe()
-    assert len(results_full) == 48
+    assert len(results_full) == 42
     assert results_full.concept.drop_duplicates().to_list()[0] == 'us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax'
 
     # Test with a concept with '_' in the name instead of ':'
     results_underscore = facts.query().by_concept('us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax').to_dataframe()
-    assert len(results_underscore) == 48
+    assert len(results_underscore) == 42
     assert results_underscore.concept.drop_duplicates().to_list()[0] == 'us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax'
 
 

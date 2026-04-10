@@ -27,6 +27,22 @@ from edgar.xbrl.core import STANDARD_LABEL, parse_date
 from edgar.xbrl.models import select_display_label
 
 
+def _deduplicate_facts(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Remove true duplicate facts from a DataFrame.
+
+    SEC XBRL instance documents often contain the same fact tagged multiple times
+    (e.g. in the financial statements and again in the notes). This drops rows that
+    are identical on concept, context_ref, value, and decimals — keeping the first
+    occurrence. Rows that share concept+context but differ in value or decimals are
+    preserved, as they represent genuinely different taggings (e.g. precise vs rounded).
+    """
+    dedup_cols = ['concept', 'context_ref', 'value', 'decimals']
+    if all(col in df.columns for col in dedup_cols):
+        df = df.drop_duplicates(subset=dedup_cols, keep='first')
+    return df
+
+
 class FactQuery:
     """
     A query builder for XBRL facts that enables filtering by various attributes.
@@ -810,6 +826,7 @@ class FactQuery:
             return pd.DataFrame()
 
         df = pd.DataFrame(results)
+        df = _deduplicate_facts(df)
 
         # GH-607: When a specific dimension was requested via by_dimension(),
         # update dimension fields to reflect that dimension's member info
@@ -1229,6 +1246,7 @@ class FactsView:
 
         facts = self.get_facts()
         df = pd.DataFrame(facts)
+        df = _deduplicate_facts(df)
         self._facts_df_cache = df
         return df
 
