@@ -463,6 +463,8 @@ class FilingHeader:
         metadata = {
             "ACCESSION NUMBER": parsed_data.get("ACCESSION-NUMBER"),
             "CONFORMED SUBMISSION TYPE": parsed_data.get("TYPE"),
+            "PUBLIC DOCUMENT COUNT": parsed_data.get("PUBLIC-DOCUMENT-COUNT"),
+            "CONFORMED PERIOD OF REPORT": parsed_data.get("PERIOD"),
             "FILED AS OF DATE": parsed_data.get("FILING-DATE"),
             "DATE AS OF CHANGE": parsed_data.get("DATE-OF-FILING-DATE-CHANGE"),
             "EFFECTIVE DATE": parsed_data.get("EFFECTIVENESS-DATE"),

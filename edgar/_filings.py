@@ -1562,8 +1562,9 @@ class Filing:
         Get the period of report for the filing
         """
         period = self.sgml().period_of_report
-        if not period:
-            # Fallback: extract from homepage index page
+        if not period and not is_using_local_storage():
+            # Fallback: extract from homepage index page (network call)
+            # Skip when local storage is enabled to avoid unexpected network access
             try:
                 period = self.homepage.period_of_report
             except (httpx.TimeoutException, httpx.ConnectError, httpx.ReadTimeout,
@@ -1879,6 +1880,12 @@ class Filing:
                 self._sgml = get_datamule_filing(self.accession_no)
 
         if self._sgml is None:
+            if is_using_local_storage():
+                log.warning(
+                    f"Filing {self.accession_no} not found in local storage. "
+                    f"Falling back to network fetch. "
+                    f"Download this filing to avoid network calls when using local storage."
+                )
             try:
                 self._sgml = FilingSGML.from_filing(self)
             except (ValueError, Exception) as e:
