@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.28.5] - 2026-04-08
+
+### Fixed
+
+- **HTML markup in disclosure DataFrame output** — `to_dataframe()` now strips HTML from XBRL TextBlock facts in disclosure/notes statements, producing clean plain text instead of raw markup. Uses the existing `_is_html`/`html_to_text` utilities. Includes regression test ([#762](https://github.com/dgunning/edgartools/issues/762))
+
+- **Missing DividendsEquity standard concept for equity statement** — Added `DividendsEquity` to the equity vocabulary (`gaap_mappings.json`, `section_membership.json`, `display_names.json`), fixing GOOGL's `AdjustmentsToAdditionalPaidInCapitalDividendsInExcessOfRetainedEarnings` being unmapped on the equity statement ([#763](https://github.com/dgunning/edgartools/issues/763))
+
+- **Entity rich display alignment** — `Entity` rich display now follows the same design language as `Company`, ensuring consistent visual presentation
+
+### Documentation
+
+- **Equity statement data layers guide** — New guide explaining why face statement totals, component breakdowns, and disclosure note values differ across XBRL data layers
+
+## [5.28.4] - 2026-04-05
+
+### Fixed
+
+- **Q/YTD/FY period labels missing from equity and comprehensive income** — Equity and comprehensive income statements now receive the same Q1/Q2/Q3/Q4/YTD/FY column labels applied to income and cash flow statements ([#759](https://github.com/dgunning/edgartools/issues/759))
+
+- **Incorrect StockRepurchasesEquity mapping** — Removed erroneous `StockRepurchasesEquity` standard concept mapping for tax withholding on vested shares, which caused misclassification on equity statements ([#760](https://github.com/dgunning/edgartools/issues/760))
+
+- **Schedule 13D/G total\_shares and total\_percent overcounting** — Changed aggregation from `sum()` to `max()` to correctly represent reported totals rather than double-counting across rows
+
+- **13F-HR TXT parser for pre-2013 filings** — Rewrote the 13F-HR TXT parser to use column-position extraction, added regex fallback and decimal handling, achieving ~93% coverage of pre-2013 filings ([#476](https://github.com/dgunning/edgartools/issues/476))
+
+- **Standard concept name misspellings** — Corrected misspellings in standard concept names ([#758](https://github.com/dgunning/edgartools/issues/758))
+
+### Documentation
+
+- Document pre-2013 TXT format support and 93% coverage in 13F guides
+
 ## [5.28.3] - 2026-04-03
 
 ### Fixed
