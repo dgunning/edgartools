@@ -34,8 +34,8 @@ The AWS reference deployment for this warehouse uses Terraform CLI and HCL.
 
 Pinned toolchain:
 
-- Terraform CLI: `= 1.14.7`
-- AWS provider: `= 6.39.0`
+- Terraform CLI: `~> 1.14.7` (pessimistic constraint; allows patch releases e.g. 1.14.8)
+- AWS provider: `= 6.39.0` (exact pin)
 
 Repository layout:
 
@@ -50,11 +50,15 @@ AWS deployment rules:
 - use one immutable bronze bucket and one mutable warehouse bucket per account
 - use ECS Fargate for compute
 - use Step Functions plus EventBridge Scheduler for orchestration
-- use S3 backend lockfiles with `use_lockfile = true` for Terraform state locking
+- use S3 backend lockfiles with `use_lockfile = true` for Terraform state locking; commit `.terraform.lock.hcl` files
 - do not use Terraform workspaces for environments
 - do not provision DynamoDB in v1
 - do not provision Glue or Athena in v1
 - do not require private networking in v1
+- declare `blocked_encryption_types = ["SSE-C"]` explicitly in all S3 encryption rules to match account-level enforcement and keep plans clean
+- CloudWatch failure alarms must cover all five Step Functions state machines, not only scheduled ones
+- `container_image` must default to `null` with `coalesce(var.container_image, "scratch")` in task definitions to allow a first apply before the ECR image exists
+- S3 bucket tags must be declared via the `tags` argument on `aws_s3_bucket`; the resource type `aws_s3_bucket_tagging` does not exist in `hashicorp/aws`
 
 Required S3 layout:
 
@@ -67,8 +71,10 @@ Required S3 layout:
 Bucket rules:
 
 - bronze bucket versioning must be enabled
+- warehouse bucket versioning must be enabled
 - bronze and warehouse storage must be separate buckets
-- bronze objects are immutable by application contract
+- bronze objects are immutable by application contract; task role must have `GetObject` and `PutObject` only (no `DeleteObject`)
+- warehouse task role must have `GetObject`, `PutObject`, and `DeleteObject`
 - silver, gold, staging, and derived artifacts are mutable and live only in the warehouse bucket
 
 Operational constraints:
@@ -81,9 +87,11 @@ Container runtime rules:
 
 - deploy one container image for warehouse jobs
 - image build and push happen outside Terraform
-- Terraform deploys by image tag or digest
+- Terraform deploys by image tag or digest; use immutable digest (`sha256:...`) in production
 - the container must expose the `edgar-warehouse` CLI entrypoint
 - install the package with the `data` and `s3` extras in the AWS container image
+- ECR repository must use `image_tag_mutability = "IMMUTABLE"` and `scan_on_push = true`
+- the `.dockerignore` file must exclude `.git`, `.venv`, `tests/`, `infra/`, `**/.terraform`, `data/`, and `notebooks/` to keep the build context under 100 MB
 
 ### Identifier Classes
 
