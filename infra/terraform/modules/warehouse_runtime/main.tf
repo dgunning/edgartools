@@ -232,7 +232,7 @@ resource "aws_ecs_task_definition" "warehouse" {
   container_definitions = jsonencode([
     {
       name      = local.container_name
-      image     = var.container_image
+      image     = coalesce(var.container_image, "scratch")
       essential = true
       command   = ["--help"]
       environment = [
@@ -413,7 +413,7 @@ resource "aws_scheduler_schedule" "workflow" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "workflow_failures" {
-  for_each = local.scheduled_workflows
+  for_each = local.workflows
 
   alarm_name          = "${local.name_prefix}-${replace(each.key, "_", "-")}-failures"
   comparison_operator = "GreaterThanOrEqualToThreshold"

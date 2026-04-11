@@ -9,8 +9,9 @@ variable "aws_region" {
 }
 
 variable "container_image" {
-  description = "Warehouse container image tag or digest."
+  description = "Warehouse container image tag or digest. Omit or set to null on first apply before the image exists."
   type        = string
+  default     = null
 }
 
 variable "bronze_bucket_name" {

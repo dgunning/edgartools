@@ -166,6 +166,8 @@ nav:
       - Local Storage: guides/local-storage.md
       - Cloud Storage (S3): guides/cloud-storage.md
       - AWS Warehouse Deployment: guides/aws-warehouse-deployment.md
+      - Dev Instance Quickstart: guides/dev-deploy-quickstart.md
+      - Terraform Auto-Deploy Validation: guides/terraform-auto-deploy-validation.md
     - Advanced Search: advanced-search.md
     - Customizing Standardization: advanced/customizing-standardization.md
     - Reference:

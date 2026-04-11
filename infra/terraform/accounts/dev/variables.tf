@@ -7,6 +7,7 @@ variable "aws_region" {
 variable "container_image" {
   description = "Warehouse container image tag or digest."
   type        = string
+  default     = null
 }
 
 variable "bronze_bucket_name" {
