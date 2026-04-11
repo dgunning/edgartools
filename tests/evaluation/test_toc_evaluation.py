@@ -116,8 +116,13 @@ NOVAWORKS_FILINGS = [
 ALL_FILINGS = WORKIVA_FILINGS + DONNELLEY_FILINGS + TOPPAN_FILINGS + NOVAWORKS_FILINGS
 
 
-def evaluate_filing(test_case: FilingTestCase) -> FilingResult:
-    """Evaluate section detection for a single filing."""
+def evaluate_filing(test_case: FilingTestCase, force_generic: bool = False) -> FilingResult:
+    """Evaluate section detection for a single filing.
+
+    Args:
+        test_case: Filing to evaluate
+        force_generic: If True, bypass agent-aware parsing (for comparison)
+    """
     filing = Filing(
         cik=test_case.cik,
         company=test_case.company,
@@ -141,6 +146,17 @@ def evaluate_filing(test_case: FilingTestCase) -> FilingResult:
         config = ParserConfig(form='10-K', detect_sections=True)
         parser = HTMLParser(config)
         document = parser.parse(html_content)
+
+        if force_generic:
+            # Re-run section detection with agent=None to force generic parsing
+            from edgar.documents.extractors.toc_section_detector import TOCSectionDetector
+            from edgar.documents.document import Sections
+
+            toc_detector = TOCSectionDetector(document, agent=None)
+            sections_dict = toc_detector.detect()
+            if sections_dict:
+                document._sections = Sections(sections_dict)
+
         sections = document.sections
     except Exception as e:
         print(f"  ERROR parsing {test_case.ticker}: {e}")
@@ -262,3 +278,107 @@ class TestTOCEvaluation:
     def test_overall_summary(self, all_results: List[FilingResult]):
         """Print overall summary (always passes — this is for capturing the baseline)."""
         print_summary(all_results)
+
+
+def print_comparison(agent_results: List[FilingResult], generic_results: List[FilingResult]):
+    """Print before/after comparison table."""
+    print()
+    print("=" * 100)
+    print("COMPARISON: Agent-Aware vs Generic Parsing")
+    print("=" * 100)
+    print(f"{'Ticker':<8} {'Agent':<16} {'Generic':>8} {'Agent-Aware':>12} {'Delta':>7} {'GenCont':>8} {'AgCont':>8} {'CDelta':>7}")
+    print("-" * 100)
+
+    by_agent = defaultdict(lambda: {'agent': [], 'generic': []})
+
+    for ar, gr in zip(agent_results, generic_results):
+        ticker = ar.test_case.ticker
+        agent = ar.test_case.agent
+        a_det = ar.detection_rate
+        g_det = gr.detection_rate
+        a_cont = ar.content_rate
+        g_cont = gr.content_rate
+        det_delta = a_det - g_det
+        cont_delta = a_cont - g_cont
+
+        by_agent[agent]['agent'].append(ar)
+        by_agent[agent]['generic'].append(gr)
+
+        det_sym = '+' if det_delta > 0 else (' ' if det_delta == 0 else '')
+        cont_sym = '+' if cont_delta > 0 else (' ' if cont_delta == 0 else '')
+        print(
+            f"{ticker:<8} {agent:<16} {g_det:>7.0%}  {a_det:>11.0%}  {det_sym}{det_delta:>5.0%}"
+            f"  {g_cont:>7.0%}  {a_cont:>7.0%}  {cont_sym}{cont_delta:>5.0%}"
+        )
+
+    print("-" * 100)
+    print(f"\n{'Agent':<16} {'Gen Det':>8} {'Ag Det':>8} {'Delta':>7}  {'Gen Cont':>9} {'Ag Cont':>9} {'Delta':>7}")
+    print("-" * 70)
+    for agent in ['Workiva', 'Donnelley', 'Toppan Merrill', 'Novaworks']:
+        data = by_agent.get(agent)
+        if not data:
+            continue
+        g_avg = sum(r.detection_rate for r in data['generic']) / len(data['generic'])
+        a_avg = sum(r.detection_rate for r in data['agent']) / len(data['agent'])
+        g_cavg = sum(r.content_rate for r in data['generic']) / len(data['generic'])
+        a_cavg = sum(r.content_rate for r in data['agent']) / len(data['agent'])
+        d = a_avg - g_avg
+        cd = a_cavg - g_cavg
+        ds = '+' if d > 0 else (' ' if d == 0 else '')
+        cs = '+' if cd > 0 else (' ' if cd == 0 else '')
+        print(f"{agent:<16} {g_avg:>7.0%}  {a_avg:>7.0%}  {ds}{d:>5.0%}   {g_cavg:>8.0%}  {a_cavg:>8.0%}  {cs}{cd:>5.0%}")
+
+    g_all = sum(r.detection_rate for r in generic_results) / len(generic_results)
+    a_all = sum(r.detection_rate for r in agent_results) / len(agent_results)
+    gc_all = sum(r.content_rate for r in generic_results) / len(generic_results)
+    ac_all = sum(r.content_rate for r in agent_results) / len(agent_results)
+    dd = a_all - g_all
+    cdd = ac_all - gc_all
+    dds = '+' if dd > 0 else (' ' if dd == 0 else '')
+    cds = '+' if cdd > 0 else (' ' if cdd == 0 else '')
+    print(f"{'OVERALL':<16} {g_all:>7.0%}  {a_all:>7.0%}  {dds}{dd:>5.0%}   {gc_all:>8.0%}  {ac_all:>8.0%}  {cds}{cdd:>5.0%}")
+    print("=" * 100)
+
+
+@pytest.mark.network
+class TestTOCComparison:
+    """Compare agent-aware vs generic parsing — run with: pytest tests/evaluation/test_toc_evaluation.py::TestTOCComparison -xvs"""
+
+    @pytest.fixture(scope='class')
+    def comparison_results(self):
+        agent_results = []
+        generic_results = []
+        for tc in ALL_FILINGS:
+            print(f"\nComparing {tc.ticker} ({tc.agent})...")
+            ar = evaluate_filing(tc, force_generic=False)
+            gr = evaluate_filing(tc, force_generic=True)
+            print(f"  Agent-aware: {ar.found_items}/{ar.total_items}  Generic: {gr.found_items}/{gr.total_items}  Delta: {ar.found_items - gr.found_items:+d}")
+            agent_results.append(ar)
+            generic_results.append(gr)
+        print_comparison(agent_results, generic_results)
+        return agent_results, generic_results
+
+    def test_no_regressions(self, comparison_results):
+        """Agent-aware parsing should not find fewer sections than generic for any filing."""
+        agent_results, generic_results = comparison_results
+        regressions = []
+        for ar, gr in zip(agent_results, generic_results):
+            if ar.found_items < gr.found_items:
+                regressions.append(
+                    f"{ar.test_case.ticker}: agent={ar.found_items} < generic={gr.found_items}"
+                )
+        assert not regressions, f"Regressions detected:\n" + "\n".join(regressions)
+
+    def test_overall_improvement(self, comparison_results):
+        """Agent-aware parsing should improve or maintain overall detection rate."""
+        agent_results, generic_results = comparison_results
+        a_avg = sum(r.detection_rate for r in agent_results) / len(agent_results)
+        g_avg = sum(r.detection_rate for r in generic_results) / len(generic_results)
+        assert a_avg >= g_avg, (
+            f"Overall detection regressed: agent-aware {a_avg:.0%} < generic {g_avg:.0%}"
+        )
+
+    def test_comparison_summary(self, comparison_results):
+        """Print comparison (always passes)."""
+        agent_results, generic_results = comparison_results
+        print_comparison(agent_results, generic_results)

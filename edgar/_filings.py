@@ -2377,13 +2377,24 @@ class Filing:
         attachments = self.attachments
 
         # The filing information table
-        filing_info_table = Table("Accession Number", "Filing Date", "Period of Report", "Documents",
+        # Include agent column only if it's been detected (avoids triggering
+        # a network call just for display — agent is a cached_property)
+        agent_name = self.__dict__.get('agent')  # Check cache without triggering lookup
+        info_columns = ["Accession Number", "Filing Date", "Period of Report", "Documents"]
+        if agent_name:
+            info_columns.append("Agent")
+        filing_info_table = Table(*info_columns,
                                   header_style="dim",
                                   box=box.SIMPLE_HEAD)
-        filing_info_table.add_row(accession_number_text(self.accession_no),
-                                  Text(str(self.filing_date), "bold"),
-                                  Text(self.period_of_report or "-", "bold"),
-                                  f"{len(attachments)}")
+        info_row = [
+            accession_number_text(self.accession_no),
+            Text(str(self.filing_date), "bold"),
+            Text(self.period_of_report or "-", "bold"),
+            f"{len(attachments)}",
+        ]
+        if agent_name:
+            info_row.append(Text(agent_name, "cyan"))
+        filing_info_table.add_row(*info_row)
 
         # Build content elements
         elements = [filing_info_table]
