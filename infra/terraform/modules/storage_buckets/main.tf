@@ -38,6 +38,10 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "bronze" {
   bucket = aws_s3_bucket.bronze.id
 
   rule {
+    # SSE-C (customer-provided keys) is blocked at the account level.
+    # Declared explicitly so Terraform tracks it and plan stays clean.
+    blocked_encryption_types = ["SSE-C"]
+
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
     }
@@ -69,6 +73,10 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "warehouse" {
   bucket = aws_s3_bucket.warehouse.id
 
   rule {
+    # SSE-C (customer-provided keys) is blocked at the account level.
+    # Declared explicitly so Terraform tracks it and plan stays clean.
+    blocked_encryption_types = ["SSE-C"]
+
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
     }
