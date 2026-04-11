@@ -51,7 +51,8 @@ class TOCAnalyzer:
             (r'part\s+[ivx]+', 'part'),
         ]
 
-    def analyze_toc_structure(self, html_content: str, agent: Optional[str] = None) -> Dict[str, str]:
+    def analyze_toc_structure(self, html_content: str, agent: Optional[str] = None,
+                              tree=None) -> Dict[str, str]:
         """
         Analyze HTML content to extract section mappings from TOC.
 
@@ -62,31 +63,32 @@ class TOCAnalyzer:
         Args:
             html_content: Raw HTML content
             agent: Filing agent name (e.g., 'Workiva', 'Donnelley') or None
+            tree: Pre-parsed lxml tree to avoid redundant parsing (optional)
 
         Returns:
             Dict mapping normalized section names to anchor IDs
         """
         if agent == 'Workiva':
-            result = self._analyze_workiva_toc(html_content)
+            result = self._analyze_workiva_toc(html_content, tree=tree)
             if result:
                 return result
         elif agent == 'Donnelley':
-            result = self._analyze_dfin_toc(html_content)
+            result = self._analyze_dfin_toc(html_content, tree=tree)
             if result:
                 return result
         elif agent == 'Novaworks':
-            result = self._analyze_novaworks_toc(html_content)
+            result = self._analyze_novaworks_toc(html_content, tree=tree)
             if result:
                 return result
         elif agent == 'Toppan Merrill':
-            result = self._analyze_toppan_toc(html_content)
+            result = self._analyze_toppan_toc(html_content, tree=tree)
             if result:
                 return result
 
         # Generic fallback for unknown agents or when agent-specific parser returns empty
-        return self._analyze_generic_toc(html_content)
+        return self._analyze_generic_toc(html_content, tree=tree)
 
-    def _analyze_generic_toc(self, html_content: str) -> Dict[str, str]:
+    def _analyze_generic_toc(self, html_content: str, tree=None) -> Dict[str, str]:
         """
         Generic TOC analysis — the original strategy that scans all anchor links.
 
@@ -95,6 +97,7 @@ class TOCAnalyzer:
 
         Args:
             html_content: Raw HTML content
+            tree: Pre-parsed lxml tree (optional, avoids re-parsing)
 
         Returns:
             Dict mapping normalized section names to anchor IDs
@@ -102,11 +105,11 @@ class TOCAnalyzer:
         section_mapping = {}
 
         try:
-            # Handle XML declaration issues
-            if html_content.startswith('<?xml'):
-                html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
-
-            tree = lxml_html.fromstring(html_content)
+            if tree is None:
+                # Handle XML declaration issues
+                if html_content.startswith('<?xml'):
+                    html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
+                tree = lxml_html.fromstring(html_content)
 
             # Find all anchor links that could be TOC links
             anchor_links = tree.xpath('//a[@href]')
@@ -366,7 +369,16 @@ class TOCAnalyzer:
             return f"{part_key}_{item_key}"
         return item_name
 
-    def _analyze_workiva_toc(self, html_content: str) -> Dict[str, str]:
+    @staticmethod
+    def _ensure_tree(html_content: str, tree=None):
+        """Return the pre-parsed tree or parse from html_content."""
+        if tree is not None:
+            return tree
+        if html_content.startswith('<?xml'):
+            html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
+        return lxml_html.fromstring(html_content)
+
+    def _analyze_workiva_toc(self, html_content: str, tree=None) -> Dict[str, str]:
         """
         Workiva-specific TOC parser.
 
@@ -381,9 +393,7 @@ class TOCAnalyzer:
         4. Extract item number from combined text (anchor IDs are opaque UUIDs)
         """
         try:
-            if html_content.startswith('<?xml'):
-                html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
-            tree = lxml_html.fromstring(html_content)
+            tree = self._ensure_tree(html_content, tree)
 
             toc_table = self._find_best_toc_table(tree, ['TABLE OF CONTENTS'])
             if toc_table is None:
@@ -447,7 +457,7 @@ class TOCAnalyzer:
             logger.debug("Workiva TOC parser failed", exc_info=True)
             return {}
 
-    def _analyze_dfin_toc(self, html_content: str) -> Dict[str, str]:
+    def _analyze_dfin_toc(self, html_content: str, tree=None) -> Dict[str, str]:
         """
         Donnelley/DFIN-specific TOC parser.
 
@@ -462,9 +472,7 @@ class TOCAnalyzer:
         4. Fall back to text-based extraction when anchor doesn't contain item pattern
         """
         try:
-            if html_content.startswith('<?xml'):
-                html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
-            tree = lxml_html.fromstring(html_content)
+            tree = self._ensure_tree(html_content, tree)
 
             # DFIN typically uses "INDEX" but some use "TABLE OF CONTENTS"
             toc_table = self._find_toc_table(tree, ['INDEX', 'TABLE OF CONTENTS'])
@@ -550,7 +558,7 @@ class TOCAnalyzer:
 
         return mapping
 
-    def _analyze_novaworks_toc(self, html_content: str) -> Dict[str, str]:
+    def _analyze_novaworks_toc(self, html_content: str, tree=None) -> Dict[str, str]:
         """
         Novaworks-specific TOC parser.
 
@@ -567,9 +575,7 @@ class TOCAnalyzer:
         3. Handle shared Part/Item anchors by accepting #partN for Item 1
         """
         try:
-            if html_content.startswith('<?xml'):
-                html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
-            tree = lxml_html.fromstring(html_content)
+            tree = self._ensure_tree(html_content, tree)
 
             toc_table = self._find_best_toc_table(tree, ['INDEX', 'TABLE OF CONTENTS'])
             if toc_table is None:
@@ -615,7 +621,7 @@ class TOCAnalyzer:
             logger.debug("Novaworks TOC parser failed", exc_info=True)
             return {}
 
-    def _analyze_toppan_toc(self, html_content: str) -> Dict[str, str]:
+    def _analyze_toppan_toc(self, html_content: str, tree=None) -> Dict[str, str]:
         """
         Toppan Merrill-specific TOC parser.
 
@@ -631,9 +637,7 @@ class TOCAnalyzer:
         4. Combine texts and extract item number
         """
         try:
-            if html_content.startswith('<?xml'):
-                html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
-            tree = lxml_html.fromstring(html_content)
+            tree = self._ensure_tree(html_content, tree)
 
             toc_table = self._find_best_toc_table(tree, ['TABLE OF CONTENTS', 'INDEX'])
             if toc_table is None:
@@ -1128,19 +1132,21 @@ class TOCAnalyzer:
         return sorted(mapping.keys(), key=lambda x: self._get_section_type_and_order(x)[1])
 
 
-def analyze_toc_for_sections(html_content: str, agent: Optional[str] = None) -> Dict[str, str]:
+def analyze_toc_for_sections(html_content: str, agent: Optional[str] = None,
+                             tree=None) -> Dict[str, str]:
     """
     Convenience function to analyze TOC and return section mapping.
 
     Args:
         html_content: Raw HTML content
         agent: Filing agent name or None
+        tree: Pre-parsed lxml tree (optional)
 
     Returns:
         Dict mapping section names to anchor IDs
     """
     analyzer = TOCAnalyzer()
-    return analyzer.analyze_toc_structure(html_content, agent=agent)
+    return analyzer.analyze_toc_structure(html_content, agent=agent, tree=tree)
 
 
 def find_toc_boundaries(html_content: str) -> Tuple[int, int]:
