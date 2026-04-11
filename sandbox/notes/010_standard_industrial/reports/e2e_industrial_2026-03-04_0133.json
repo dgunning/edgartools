@@ -1,0 +1,259 @@
+{
+  "run_id": "e2e_industrial_2026-03-04T01:33:28.220138",
+  "timestamp": "2026-03-04T01:33:28.220147",
+  "config": {
+    "group": "industrial_33",
+    "workers": 1,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": null,
+    "tickers": [
+      "BRK-B",
+      "MET",
+      "AIG"
+    ],
+    "snapshot_mode": true
+  },
+  "overall_summary": {
+    "10k_total": 10,
+    "10k_passed": 3,
+    "10k_skipped": 0,
+    "10q_total": 0,
+    "10q_passed": 0,
+    "10q_skipped": 0
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Insurance": {
+      "10k_total": 10,
+      "10k_passed": 3,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Utilities": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Real_Estate": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 7,
+  "skipped_count": 0,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "BRK-B",
+      "sector": "Insurance",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000950170-25-025210",
+      "metric": "Revenue",
+      "xbrl_value": 321643000000.0,
+      "ref_value": 424232000000.0,
+      "variance_pct": 24.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Revenues",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "BRK-B",
+      "sector": "Insurance",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000950170-25-025210",
+      "metric": "TotalAssets",
+      "xbrl_value": 917772000000.0,
+      "ref_value": 1153881000000.0,
+      "variance_pct": 20.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Assets",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "BRK-B",
+      "sector": "Insurance",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000950170-25-025210",
+      "metric": "Goodwill",
+      "xbrl_value": 56860000000.0,
+      "ref_value": 83880000000.0,
+      "variance_pct": 32.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "BRK-B",
+      "sector": "Insurance",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000950170-25-025210",
+      "metric": "IntangibleAssets",
+      "xbrl_value": 91498000000.0,
+      "ref_value": 118518000000.0,
+      "variance_pct": 22.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "BRK-B",
+      "sector": "Insurance",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000950170-25-025210",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 1315000000.0,
+      "ref_value": 2438000000.0,
+      "variance_pct": 46.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "BRK-B",
+      "sector": "Insurance",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000950170-25-025210",
+      "metric": "AccountsReceivable",
+      "xbrl_value": 27798000000.0,
+      "ref_value": 43127000000.0,
+      "variance_pct": 35.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NotesReceivableNet",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "BRK-B",
+      "sector": "Insurance",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000950170-25-025210",
+      "metric": "DepreciationAmortization",
+      "xbrl_value": 411000000.0,
+      "ref_value": 12855000000.0,
+      "variance_pct": 96.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:DepreciationDepletionAndAmortization",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    }
+  ],
+  "skipped": [],
+  "errors": []
+}

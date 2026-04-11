@@ -1,0 +1,12 @@
+{
+  "exclude_metrics": {
+    "ResearchAndDevelopment": {
+      "reason": "not_applicable",
+      "notes": "Concept absent from XBRL filing"
+    },
+    "GrossProfit": {
+      "reason": "not_applicable",
+      "notes": "Auto-excluded: concept absent from all XBRL sources"
+    }
+  }
+}

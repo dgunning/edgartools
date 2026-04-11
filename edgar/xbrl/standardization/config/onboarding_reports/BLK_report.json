@@ -1,0 +1,51 @@
+{
+  "ticker": "BLK",
+  "cik": 2012383,
+  "company_name": "BlackRock, Inc.",
+  "archetype": "B",
+  "sic_code": "6211",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  BLK:\n    name: \"BlackRock, Inc.\"\n    cik: 2012383\n    exclude_metrics:\n      - COGS\n      - Capex\n      - OperatingIncome\n      - SGA",
+  "metrics_passed": [
+    "PretaxIncome",
+    "NetIncome",
+    "OperatingCashFlow",
+    "TotalAssets",
+    "Goodwill",
+    "IntangibleAssets",
+    "ShortTermDebt",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "Inventory",
+    "AccountsReceivable",
+    "AccountsPayable",
+    "DepreciationAmortization"
+  ],
+  "metrics_failed": [
+    "Revenue"
+  ],
+  "metrics_excluded": [
+    "COGS",
+    "SGA",
+    "OperatingIncome",
+    "Capex"
+  ],
+  "failures": {
+    "Revenue": {
+      "metric": "Revenue",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 20407000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": true,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-03-04T19:23:23.151753"
+}

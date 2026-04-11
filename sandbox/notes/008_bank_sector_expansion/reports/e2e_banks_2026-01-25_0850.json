@@ -1,0 +1,124 @@
+{
+  "run_id": "e2e_banks_2026-01-25T08:50:01.260973",
+  "timestamp": "2026-01-25T08:50:01.260987",
+  "config": {
+    "group": "banking",
+    "workers": 4,
+    "years": 2,
+    "quarters": 2,
+    "metrics": [
+      "ShortTermDebt"
+    ],
+    "tickers": [
+      "BK",
+      "C",
+      "GS",
+      "JPM",
+      "MS",
+      "PNC",
+      "STT",
+      "USB",
+      "WFC"
+    ]
+  },
+  "summary": {
+    "custom": {
+      "10k_total": 7,
+      "10k_passed": 4,
+      "10k_skipped": 2,
+      "10q_total": 13,
+      "10q_passed": 12,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 4,
+  "skipped_count": 2,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "STT",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000093751-24-000498",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 144020000000.0,
+      "ref_value": 4637000000.0,
+      "variance_pct": 3005.9,
+      "mapping_source": "tree",
+      "concept_used": null,
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "STT",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000093751-25-000425",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 12221000000.0,
+      "ref_value": 9844000000.0,
+      "variance_pct": 24.1,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000072971-25-000066",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 20834000000.0,
+      "ref_value": 13571000000.0,
+      "variance_pct": 53.5,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000072971-24-000064",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 17455000000.0,
+      "ref_value": 11883000000.0,
+      "variance_pct": 46.9,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    }
+  ],
+  "skipped": [
+    {
+      "ticker": "USB",
+      "form": "10-K",
+      "metric": "ShortTermDebt",
+      "variance_pct": 103.5,
+      "reason": "YFinance annual data (~$7.6B) differs significantly from quarterly (~$15B). Our 10-K extraction is consistent with quarterly. This is a yfinance data quality issue - their annual aggregation doesn't match their quarterly reports.\n"
+    },
+    {
+      "ticker": "USB",
+      "form": "10-K",
+      "metric": "ShortTermDebt",
+      "variance_pct": 33.4,
+      "reason": "YFinance annual data (~$7.6B) differs significantly from quarterly (~$15B). Our 10-K extraction is consistent with quarterly. This is a yfinance data quality issue - their annual aggregation doesn't match their quarterly reports.\n"
+    }
+  ],
+  "errors": []
+}

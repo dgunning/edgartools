@@ -1,0 +1,25 @@
+{
+  "known_divergences": {
+    "GrossProfit": {
+      "form_types": [
+        "10-K"
+      ],
+      "variance_pct": 15.0,
+      "reason": "Phase 10: structural extraction mismatch.",
+      "skip_validation": true,
+      "added_date": "2026-04-03",
+      "remediation_status": "deferred"
+    },
+    "OperatingIncome": {
+      "form_types": [
+        "10-K"
+      ],
+      "variance_pct": 25.0,
+      "reason": "XBRL OperatingIncomeLoss includes impairment/restructuring charges (write-downs, asset impairments, restructuring costs) that yfinance Operating Income excludes. XBRL=-17.94B vs yf=14.83B reflects structural scope difference, not extraction error.",
+      "skip_validation": true,
+      "added_date": "2026-04-03",
+      "remediation_status": "reference_mismatch"
+    }
+  },
+  "quality_tier": "provisional"
+}

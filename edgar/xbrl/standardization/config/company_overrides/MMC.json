@@ -1,0 +1,12 @@
+{
+  "exclude_metrics": {
+    "OperatingIncome": {
+      "reason": "not_applicable",
+      "notes": "Insurance broker \u2014 operating income not comparable"
+    }
+  },
+  "known_divergences": {
+    "_note": "All metrics fail validation because yfinance snapshot is empty (no reference data). Extraction itself works \u2014 32/33 concepts mapped."
+  },
+  "quality_tier": "provisional"
+}

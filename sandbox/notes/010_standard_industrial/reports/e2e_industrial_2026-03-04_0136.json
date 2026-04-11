@@ -1,0 +1,204 @@
+{
+  "run_id": "e2e_industrial_2026-03-04T01:36:39.557006",
+  "timestamp": "2026-03-04T01:36:39.557016",
+  "config": {
+    "group": "industrial_33",
+    "workers": 1,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": null,
+    "tickers": [
+      "CRM",
+      "ADBE"
+    ],
+    "snapshot_mode": true
+  },
+  "overall_summary": {
+    "10k_total": 27,
+    "10k_passed": 27,
+    "10k_skipped": 4,
+    "10q_total": 25,
+    "10q_passed": 25,
+    "10q_skipped": 5
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Insurance": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Utilities": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Real_Estate": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 0,
+  "skipped_count": 9,
+  "error_count": 0,
+  "failures": [],
+  "skipped": [
+    {
+      "ticker": "CRM",
+      "sector": "Unknown",
+      "form": "10-K",
+      "metric": "Revenue",
+      "variance_pct": 94.2,
+      "reason": "Tree parser extracts dimensional/segment sub-component (~$2.2B 10-K, $533M 10-Q) instead of consolidated total ($37.9B 10-K, $10.3B 10-Q). CRM reports revenue by segment (Subscription, Professional Services) with dimensional XBRL. RevenueFromContractWithCustomerExcludingAssessedTax returns segment values.\n"
+    },
+    {
+      "ticker": "CRM",
+      "sector": "Unknown",
+      "form": "10-K",
+      "metric": "StockBasedCompensation",
+      "variance_pct": 83.7,
+      "reason": "Extracting quarterly sub-period value ($518M 10-K, $129M 10-Q) instead of annual/full-period total ($3.18B 10-K, $819M 10-Q). Same dimensional/period extraction issue as Revenue.\n"
+    },
+    {
+      "ticker": "CRM",
+      "sector": "Unknown",
+      "form": "10-Q",
+      "metric": "Revenue",
+      "variance_pct": 94.8,
+      "reason": "Tree parser extracts dimensional/segment sub-component (~$2.2B 10-K, $533M 10-Q) instead of consolidated total ($37.9B 10-K, $10.3B 10-Q). CRM reports revenue by segment (Subscription, Professional Services) with dimensional XBRL. RevenueFromContractWithCustomerExcludingAssessedTax returns segment values.\n"
+    },
+    {
+      "ticker": "CRM",
+      "sector": "Unknown",
+      "form": "10-Q",
+      "metric": "Goodwill",
+      "variance_pct": 98.7,
+      "reason": "Extracting $704M instead of $52.5B. Likely extracting goodwill change (acquisition period adjustment) instead of total balance. Dimensional contamination from segment reporting.\n"
+    },
+    {
+      "ticker": "CRM",
+      "sector": "Unknown",
+      "form": "10-Q",
+      "metric": "IntangibleAssets",
+      "variance_pct": 92.5,
+      "reason": "Extracting $4.2B instead of $55.7B. Composite metric affected by same dimensional extraction issue as Goodwill component.\n"
+    },
+    {
+      "ticker": "CRM",
+      "sector": "Unknown",
+      "form": "10-Q",
+      "metric": "StockBasedCompensation",
+      "variance_pct": 84.2,
+      "reason": "Extracting quarterly sub-period value ($518M 10-K, $129M 10-Q) instead of annual/full-period total ($3.18B 10-K, $819M 10-Q). Same dimensional/period extraction issue as Revenue.\n"
+    },
+    {
+      "ticker": "ADBE",
+      "sector": "Unknown",
+      "form": "10-K",
+      "metric": "Goodwill",
+      "variance_pct": 69.6,
+      "reason": "Extracting $3.9B instead of $12.8B. ADBE goodwill may require GoodwillAcquiredDuringPeriod vs total Goodwill disambiguation. Tree parser selecting wrong period or dimensional value.\n"
+    },
+    {
+      "ticker": "ADBE",
+      "sector": "Unknown",
+      "form": "10-K",
+      "metric": "IntangibleAssets",
+      "variance_pct": 67.9,
+      "reason": "Extracting $4.35B instead of $13.6B. Composite metric affected by Goodwill under-extraction ($3.9B vs $12.8B).\n"
+    },
+    {
+      "ticker": "ADBE",
+      "sector": "Unknown",
+      "form": "10-Q",
+      "metric": "Revenue",
+      "variance_pct": 98.9,
+      "reason": "ADBE 10-Q Revenues concept returns $68M (segment sub-component) instead of $5.99B consolidated quarterly revenue. preferred_concept override to RevenueFromContractWithCustomerExcludingAssessedTax not found in tree for 10-Q. Tree parser falls through to Revenues which returns dimensional sub-value.\n"
+    }
+  ],
+  "errors": []
+}

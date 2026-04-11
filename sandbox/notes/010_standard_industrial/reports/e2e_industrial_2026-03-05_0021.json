@@ -1,0 +1,227 @@
+{
+  "run_id": "e2e_industrial_2026-03-05T00:21:47.800710",
+  "timestamp": "2026-03-05T00:21:47.800720",
+  "config": {
+    "group": "industrial_33",
+    "workers": 1,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": "MAG7",
+    "tickers": [
+      "AAPL",
+      "MSFT",
+      "GOOG",
+      "AMZN",
+      "META",
+      "NVDA",
+      "TSLA"
+    ],
+    "snapshot_mode": true
+  },
+  "overall_summary": {
+    "10k_total": 121,
+    "10k_passed": 119,
+    "10k_skipped": 0,
+    "10q_total": 122,
+    "10q_passed": 119,
+    "10q_skipped": 0
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 121,
+      "10k_passed": 119,
+      "10k_skipped": 0,
+      "10q_total": 122,
+      "10q_passed": 119,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Insurance": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Utilities": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Real_Estate": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 5,
+  "skipped_count": 0,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "MSFT",
+      "sector": "MAG7",
+      "form": "10-K",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000950170-25-100235",
+      "metric": "DepreciationAmortization",
+      "xbrl_value": 87831000000.0,
+      "ref_value": 34153000000.0,
+      "variance_pct": 157.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CostOfGoodsAndServicesSold",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "MSFT",
+      "sector": "MAG7",
+      "form": "10-Q",
+      "filing_date": "2025-12-31",
+      "accession_no": "0001193125-26-027207",
+      "metric": "DepreciationAmortization",
+      "xbrl_value": 25978000000.0,
+      "ref_value": 9198000000.0,
+      "variance_pct": 182.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CostOfGoodsAndServicesSold",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "META",
+      "sector": "MAG7",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001628280-25-047240",
+      "metric": "IntangibleAssets",
+      "xbrl_value": 24337000000.0,
+      "ref_value": 21158000000.0,
+      "variance_pct": 15.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NVDA",
+      "sector": "MAG7",
+      "form": "10-Q",
+      "filing_date": "2025-10-26",
+      "accession_no": "0001045810-25-000230",
+      "metric": "DividendsPaid",
+      "xbrl_value": -488000000.0,
+      "ref_value": -244000000.0,
+      "variance_pct": 100.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsOfDividends",
+      "industry": "semiconductors",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "TSLA",
+      "sector": "MAG7",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0001628280-26-003952",
+      "metric": "IntangibleAssets",
+      "xbrl_value": 381000000.0,
+      "ref_value": 1389000000.0,
+      "variance_pct": 72.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "automotive",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    }
+  ],
+  "skipped": [],
+  "errors": []
+}

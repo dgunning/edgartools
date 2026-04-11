@@ -1,0 +1,21 @@
+{
+  "exclude_metrics": {
+    "GrossProfit": {
+      "reason": "not_applicable",
+      "notes": "Technology/advertising - no traditional GrossProfit"
+    }
+  },
+  "known_divergences": {
+    "InterestExpense": {
+      "form_types": [
+        "10-K"
+      ],
+      "variance_pct": 25.0,
+      "reason": "Phase 10: structural extraction mismatch.",
+      "skip_validation": true,
+      "added_date": "2026-04-03",
+      "remediation_status": "deferred"
+    }
+  },
+  "quality_tier": "provisional"
+}

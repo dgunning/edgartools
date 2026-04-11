@@ -1,0 +1,8 @@
+{
+  "exclude_metrics": {
+    "CurrentLiabilities": {
+      "reason": "not_applicable",
+      "notes": "Auto-excluded: concept absent from all XBRL sources"
+    }
+  }
+}

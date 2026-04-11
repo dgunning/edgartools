@@ -1,0 +1,68 @@
+{
+  "ticker": "AXP",
+  "cik": 4962,
+  "company_name": "AMERICAN EXPRESS CO",
+  "archetype": "B",
+  "sic_code": "6199",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  AXP:\n    name: \"AMERICAN EXPRESS CO\"\n    cik: 4962\n    exclude_metrics:\n      - COGS\n      - Capex\n      - OperatingIncome\n      - SGA",
+  "metrics_passed": [
+    "Revenue",
+    "OperatingIncome",
+    "PretaxIncome",
+    "NetIncome",
+    "Goodwill",
+    "IntangibleAssets",
+    "ShortTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "Inventory",
+    "AccountsReceivable",
+    "AccountsPayable",
+    "DepreciationAmortization"
+  ],
+  "metrics_failed": [
+    "OperatingCashFlow",
+    "TotalAssets",
+    "LongTermDebt"
+  ],
+  "metrics_excluded": [
+    "COGS",
+    "SGA",
+    "OperatingIncome",
+    "Capex"
+  ],
+  "failures": {
+    "OperatingCashFlow": {
+      "metric": "OperatingCashFlow",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 18428000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "TotalAssets": {
+      "metric": "TotalAssets",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 300052000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "LongTermDebt": {
+      "metric": "LongTermDebt",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 56388000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": true,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-03-04T19:23:13.108669"
+}

@@ -1,0 +1,280 @@
+{
+  "run_id": "e2e_industrial_2026-03-05T00:30:13.332321",
+  "timestamp": "2026-03-05T00:30:13.332331",
+  "config": {
+    "group": "industrial_33",
+    "workers": 1,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": "Consumer_Staples",
+    "tickers": [
+      "PG",
+      "KO",
+      "PEP",
+      "WMT",
+      "COST",
+      "HSY"
+    ],
+    "snapshot_mode": true
+  },
+  "overall_summary": {
+    "10k_total": 108,
+    "10k_passed": 102,
+    "10k_skipped": 0,
+    "10q_total": 89,
+    "10q_passed": 87,
+    "10q_skipped": 0
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 108,
+      "10k_passed": 102,
+      "10k_skipped": 0,
+      "10q_total": 89,
+      "10q_passed": 87,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Insurance": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Utilities": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Real_Estate": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 8,
+  "skipped_count": 0,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "KO",
+      "sector": "Consumer_Staples",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0001628280-26-010047",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 1495000000.0,
+      "ref_value": 3373000000.0,
+      "variance_pct": 55.7,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CommercialPaper",
+      "industry": "consumergoods",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "KO",
+      "sector": "Consumer_Staples",
+      "form": "10-Q",
+      "filing_date": "2025-09-26",
+      "accession_no": "0001628280-25-046054",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 1992000000.0,
+      "ref_value": 4239000000.0,
+      "variance_pct": 53.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CommercialPaper",
+      "industry": "consumergoods",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "PEP",
+      "sector": "Consumer_Staples",
+      "form": "10-K",
+      "filing_date": "2025-12-27",
+      "accession_no": "0000077476-26-000007",
+      "metric": "AccountsReceivable",
+      "xbrl_value": 11506000000.0,
+      "ref_value": 9265000000.0,
+      "variance_pct": 24.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:AccountsNotesAndLoansReceivableNetCurrent",
+      "industry": "consumergoods",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "PEP",
+      "sector": "Consumer_Staples",
+      "form": "10-K",
+      "filing_date": "2025-12-27",
+      "accession_no": "0000077476-26-000007",
+      "metric": "DepreciationAmortization",
+      "xbrl_value": 3451000000.0,
+      "ref_value": 4178000000.0,
+      "variance_pct": 17.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:DepreciationDepletionAndAmortization",
+      "industry": "consumergoods",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "WMT",
+      "sector": "Consumer_Staples",
+      "form": "10-K",
+      "filing_date": "2025-01-31",
+      "accession_no": "0000104169-25-000021",
+      "metric": "IntangibleAssets",
+      "xbrl_value": 33292000000.0,
+      "ref_value": 28792000000.0,
+      "variance_pct": 15.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "retail",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "HSY",
+      "sector": "Consumer_Staples",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0001628280-26-008586",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 218546000.0,
+      "ref_value": 717374000.0,
+      "variance_pct": 69.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtCurrent",
+      "industry": "consumergoods",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "HSY",
+      "sector": "Consumer_Staples",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0001628280-26-008586",
+      "metric": "AccountsPayable",
+      "xbrl_value": 1255701000.0,
+      "ref_value": 831204000.0,
+      "variance_pct": 51.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:AccountsPayableCurrent",
+      "industry": "consumergoods",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "HSY",
+      "sector": "Consumer_Staples",
+      "form": "10-Q",
+      "filing_date": "2025-09-28",
+      "accession_no": "0001628280-25-047471",
+      "metric": "AccountsPayable",
+      "xbrl_value": 1459680000.0,
+      "ref_value": 803839000.0,
+      "variance_pct": 81.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:AccountsPayableCurrent",
+      "industry": "consumergoods",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    }
+  ],
+  "skipped": [],
+  "errors": []
+}

@@ -1,0 +1,101 @@
+{
+  "ticker": "APD",
+  "cik": 2969,
+  "company_name": "Air Products & Chemicals, Inc.",
+  "archetype": "A",
+  "sic_code": "2810",
+  "fiscal_year_end": "September",
+  "draft_yaml": "  APD:\n    name: \"Air Products & Chemicals, Inc.\"\n    cik: 2969\n    fiscal_year_end: \"September\"\n    exclude_metrics:\n      - COGS\n      - Goodwill\n      - IntangibleAssets\n      - Inventory",
+  "metrics_passed": [
+    "Revenue",
+    "COGS",
+    "OperatingIncome",
+    "NetIncome",
+    "OperatingCashFlow",
+    "Capex",
+    "TotalAssets",
+    "Goodwill",
+    "IntangibleAssets",
+    "ShortTermDebt",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "Inventory",
+    "AccountsReceivable",
+    "AccountsPayable",
+    "DepreciationAmortization",
+    "GrossProfit",
+    "ResearchAndDevelopment",
+    "InterestExpense",
+    "IncomeTaxExpense",
+    "EarningsPerShareDiluted",
+    "EarningsPerShareBasic",
+    "CurrentAssets",
+    "CurrentLiabilities",
+    "TotalLiabilities",
+    "StockholdersEquity",
+    "PropertyPlantEquipment",
+    "RetainedEarnings",
+    "InvestingCashFlow",
+    "FinancingCashFlow"
+  ],
+  "metrics_failed": [
+    "SGA",
+    "PretaxIncome",
+    "ShareRepurchases",
+    "DividendPerShare"
+  ],
+  "metrics_excluded": [
+    "COGS",
+    "Inventory",
+    "Goodwill",
+    "IntangibleAssets",
+    "SGA",
+    "OperatingIncome",
+    "Capex",
+    "GrossProfit",
+    "CurrentAssets",
+    "CurrentLiabilities"
+  ],
+  "failures": {
+    "SGA": {
+      "metric": "SGA",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 906100000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": -440700000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "ShareRepurchases": {
+      "metric": "ShareRepurchases",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "DividendPerShare": {
+      "metric": "DividendPerShare",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 7.14,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": false,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-04-04T09:56:43.794525"
+}

@@ -1,0 +1,377 @@
+{
+  "run_id": "e2e_industrial_2026-03-05T00:27:17.590139",
+  "timestamp": "2026-03-05T00:27:17.590147",
+  "config": {
+    "group": "industrial_33",
+    "workers": 1,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": "Industrial_Manufacturing",
+    "tickers": [
+      "CAT",
+      "GE",
+      "HON",
+      "DE",
+      "MMM",
+      "EMR",
+      "RTX",
+      "ASTE"
+    ],
+    "snapshot_mode": true
+  },
+  "overall_summary": {
+    "10k_total": 96,
+    "10k_passed": 92,
+    "10k_skipped": 9,
+    "10q_total": 116,
+    "10q_passed": 113,
+    "10q_skipped": 5
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 96,
+      "10k_passed": 92,
+      "10k_skipped": 9,
+      "10q_total": 116,
+      "10q_passed": 113,
+      "10q_skipped": 5
+    },
+    "Consumer_Staples": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Insurance": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Utilities": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Real_Estate": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 7,
+  "skipped_count": 14,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "DE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "filing_date": "2025-11-02",
+      "accession_no": "0001104659-25-122321",
+      "metric": "LongTermDebt",
+      "xbrl_value": 73000000.0,
+      "ref_value": 43544000000.0,
+      "variance_pct": 99.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:FinanceLeaseLiabilityNoncurrent",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "RTX",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0000101829-26-000006",
+      "metric": "Capex",
+      "xbrl_value": -2627000000.0,
+      "ref_value": -3119000000.0,
+      "variance_pct": 15.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "aerospace",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "RTX",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0000101829-26-000006",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 204000000.0,
+      "ref_value": 3616000000.0,
+      "variance_pct": 94.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CommercialPaper",
+      "industry": "aerospace",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "RTX",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0000101829-26-000006",
+      "metric": "StockBasedCompensation",
+      "xbrl_value": 519000000.0,
+      "ref_value": 1092000000.0,
+      "variance_pct": 52.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShareBasedCompensation",
+      "industry": "aerospace",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "RTX",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000101829-25-000042",
+      "metric": "Capex",
+      "xbrl_value": -614000000.0,
+      "ref_value": -735000000.0,
+      "variance_pct": 16.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "aerospace",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "RTX",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000101829-25-000042",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 215000000.0,
+      "ref_value": 799000000.0,
+      "variance_pct": 73.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CommercialPaper",
+      "industry": "aerospace",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "RTX",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000101829-25-000042",
+      "metric": "StockBasedCompensation",
+      "xbrl_value": 113000000.0,
+      "ref_value": 241000000.0,
+      "variance_pct": 53.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShareBasedCompensation",
+      "industry": "aerospace",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    }
+  ],
+  "skipped": [
+    {
+      "ticker": "CAT",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "Capex",
+      "variance_pct": 34.2,
+      "reason": "Cat Financial investing activities ($3.2B) included in consolidated capex but not in equipment segment PP&E ($2.0B). Same subsidiary contamination as debt metrics.\n"
+    },
+    {
+      "ticker": "CAT",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "ShortTermDebt",
+      "variance_pct": 56.4,
+      "reason": "Cat Financial subsidiary debt not included in ShortTermBorrowings. yfinance consolidates all debt; XBRL extracts industrial segment only.\n"
+    },
+    {
+      "ticker": "CAT",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "AccountsReceivable",
+      "variance_pct": 49.4,
+      "reason": "Cat Financial receivables (dealer/customer financing) not included in standard AccountsReceivableNetCurrent.\n"
+    },
+    {
+      "ticker": "CAT",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "metric": "Capex",
+      "variance_pct": 38.6,
+      "reason": "Cat Financial investing activities ($3.2B) included in consolidated capex but not in equipment segment PP&E ($2.0B). Same subsidiary contamination as debt metrics.\n"
+    },
+    {
+      "ticker": "CAT",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "metric": "AccountsReceivable",
+      "variance_pct": 50.4,
+      "reason": "Cat Financial receivables (dealer/customer financing) not included in standard AccountsReceivableNetCurrent.\n"
+    },
+    {
+      "ticker": "GE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "AccountsReceivable",
+      "variance_pct": 27.0,
+      "reason": "Post-Vernova spin-off balance sheet restructuring.\n"
+    },
+    {
+      "ticker": "GE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "AccountsPayable",
+      "variance_pct": 75.8,
+      "reason": "GE Aerospace AP ($7.9B) includes items yfinance excludes ($4.6B). Post-spin-off balance sheet structure differences.\n"
+    },
+    {
+      "ticker": "GE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "DepreciationAmortization",
+      "variance_pct": 29.3,
+      "reason": "Post-Vernova spin-off, D&A restated for aerospace-only. GE uses DepreciationAmortizationAndAccretionNet which captures a different scope than yfinance's D&A.\n"
+    },
+    {
+      "ticker": "GE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "metric": "AccountsReceivable",
+      "variance_pct": 25.4,
+      "reason": "Post-Vernova spin-off balance sheet restructuring.\n"
+    },
+    {
+      "ticker": "GE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "metric": "AccountsPayable",
+      "variance_pct": 28.2,
+      "reason": "GE Aerospace AP ($7.9B) includes items yfinance excludes ($4.6B). Post-spin-off balance sheet structure differences.\n"
+    },
+    {
+      "ticker": "GE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "metric": "DepreciationAmortization",
+      "variance_pct": 29.4,
+      "reason": "Post-Vernova spin-off, D&A restated for aerospace-only. GE uses DepreciationAmortizationAndAccretionNet which captures a different scope than yfinance's D&A.\n"
+    },
+    {
+      "ticker": "DE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 68.3,
+      "reason": "DE has financial services segment (John Deere Financial) that complicates OperatingIncome extraction. Equipment vs Financial segment reporting creates aggregation challenges.\n"
+    },
+    {
+      "ticker": "DE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "Capex",
+      "variance_pct": 67.8,
+      "reason": "John Deere Financial investing activities included in consolidated capex. Equipment segment capex ($1.4B) vs consolidated ($4.2B).\n"
+    },
+    {
+      "ticker": "DE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "ShortTermDebt",
+      "variance_pct": 32.2,
+      "reason": "John Deere Financial subsidiary debt inflates consolidated DebtCurrent. XBRL extracts $4.2B (equipment only) vs yfinance $20B+ (consolidated). Same financial subsidiary contamination as CAT.\n"
+    }
+  ],
+  "errors": []
+}

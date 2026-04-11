@@ -1,0 +1,19 @@
+{
+  "exclude_metrics": {
+    "OperatingIncome": {
+      "reason": "not_applicable",
+      "notes": "Auto-excluded: concept absent from all XBRL sources"
+    }
+  },
+  "known_divergences": {
+    "PropertyPlantEquipment": {
+      "form_types": [
+        "10-K"
+      ],
+      "variance_pct": 18,
+      "reason": "Phase 14: yfinance includes OperatingLeaseRightOfUseAsset in PPE. XBRL excludes it. Validated via composite formula across 7 of 15 cohort companies (FDX, ACN, PANW, INTU, EMR, IBM, AON) with exact match.",
+      "skip_validation": true,
+      "added_date": "2026-04-06"
+    }
+  }
+}

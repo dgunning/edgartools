@@ -1,0 +1,263 @@
+[
+  {
+    "timestamp": "2026-01-05T19:57:42.394039",
+    "action": "approve",
+    "concept": "AccruedLiabilities",
+    "maps_to": "AccruedLiabilities",
+    "original_suggestion": "AccruedLiabilities",
+    "confidence": "high",
+    "reasoning": "The XBRL concept label exactly matches the standard concept 'AccruedLiabilities'."
+  },
+  {
+    "timestamp": "2026-01-05T19:57:42.394082",
+    "action": "approve",
+    "concept": "AccruedLiabilitiesCurrent",
+    "maps_to": "AccruedLiabilities",
+    "original_suggestion": "AccruedLiabilities",
+    "confidence": "high",
+    "reasoning": "The label 'AccruedLiabilitiesCurrent' clearly indicates accrued liabilities, and the standard concept list includes 'AccruedLiabilities'."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966334",
+    "action": "approve",
+    "concept": "AccruedLiabilities",
+    "maps_to": "AccruedLiabilities",
+    "original_suggestion": "AccruedLiabilities",
+    "confidence": "high",
+    "reasoning": "The XBRL concept label exactly matches the standard concept 'AccruedLiabilities'."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966402",
+    "action": "approve",
+    "concept": "AccruedLiabilitiesCurrent",
+    "maps_to": "AccruedLiabilities",
+    "original_suggestion": "AccruedLiabilities",
+    "confidence": "high",
+    "reasoning": "The label 'AccruedLiabilitiesCurrent' clearly indicates it is a type of accrued liability, and the standard concept list includes 'AccruedLiabilities'."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966429",
+    "action": "approve",
+    "concept": "AdvertisingRevenue",
+    "maps_to": "Revenue",
+    "original_suggestion": "Revenue",
+    "confidence": "high",
+    "reasoning": "Label contains 'AdvertisingRevenue', which is a specific type of revenue."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966452",
+    "action": "approve",
+    "concept": "AmortizationOfAcquiredIntangibleAssets",
+    "maps_to": "DepreciationAndAmortization",
+    "original_suggestion": "DepreciationAndAmortization",
+    "confidence": "high",
+    "reasoning": "The label explicitly refers to amortization of intangible assets, which is a component of DepreciationAndAmortization."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966471",
+    "action": "approve",
+    "concept": "AmortizationOfIntangibleAssets",
+    "maps_to": "DepreciationAndAmortization",
+    "original_suggestion": "DepreciationAndAmortization",
+    "confidence": "high",
+    "reasoning": "The label 'AmortizationOfIntangibleAssets' is a component of 'DepreciationAndAmortization'."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966491",
+    "action": "approve",
+    "concept": "AssetsCurrent",
+    "maps_to": "TotalCurrentAssets",
+    "original_suggestion": "TotalCurrentAssets",
+    "confidence": "high",
+    "reasoning": "The label 'AssetsCurrent' directly corresponds to current assets, and 'TotalCurrentAssets' is the standard concept for this metric."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966511",
+    "action": "approve",
+    "concept": "AccruedLiabilitiesForUnredeeemedGiftCards",
+    "maps_to": "AccruedLiabilities",
+    "original_suggestion": "AccruedLiabilities",
+    "confidence": "high",
+    "reasoning": "The label clearly indicates a type of accrued liability, specifically for unredeemed gift cards, which falls under the broader category of AccruedLiabilities."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966533",
+    "action": "approve",
+    "concept": "AdvertisingExpense",
+    "maps_to": "SellingAndMarketing",
+    "original_suggestion": "SellingAndMarketing",
+    "confidence": "high",
+    "reasoning": "Advertising expense is a component of selling and marketing expenses."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966567",
+    "action": "approve",
+    "concept": "AmortizationOfLeasedAsset",
+    "maps_to": "DepreciationAndAmortization",
+    "original_suggestion": "DepreciationAndAmortization",
+    "confidence": "high",
+    "reasoning": "Amortization of leased assets is a component of depreciation and amortization expense."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966588",
+    "action": "approve",
+    "concept": "BusinessAcquisitionPurchasePriceAllocationAmortizableIntangibleAssets",
+    "maps_to": "IntangibleAssets",
+    "original_suggestion": "IntangibleAssets",
+    "confidence": "high",
+    "reasoning": "The label explicitly refers to 'AmortizableIntangibleAssets' in the context of business acquisition, which directly relates to IntangibleAssets."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966609",
+    "action": "approve",
+    "concept": "BusinessAcquisitionPurchasePriceAllocationCurrentLiabilitiesAccountsPayable",
+    "maps_to": "AccountsPayable",
+    "original_suggestion": "AccountsPayable",
+    "confidence": "high",
+    "reasoning": "The label explicitly contains 'AccountsPayable' and is related to current liabilities in a business acquisition context."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966630",
+    "action": "approve",
+    "concept": "BusinessAcquisitionPurchasePriceAllocationNoncurrentLiabilitiesLongTermDebt",
+    "maps_to": "LongTermDebt",
+    "original_suggestion": "LongTermDebt",
+    "confidence": "high",
+    "reasoning": "The label explicitly references 'LongTermDebt' in the context of business acquisition purchase price allocation."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966651",
+    "action": "approve",
+    "concept": "BusinessCombinationProFormaInformationRevenueOfAcquireeSinceAcquisitionDateActual",
+    "maps_to": "Revenue",
+    "original_suggestion": "Revenue",
+    "confidence": "high",
+    "reasoning": "The label explicitly references 'Revenue' in the context of business combination pro forma information."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966671",
+    "action": "approve",
+    "concept": "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibles",
+    "maps_to": "IntangibleAssets",
+    "original_suggestion": "IntangibleAssets",
+    "confidence": "high",
+    "reasoning": "The label explicitly references 'intangibles' in the context of business combinations, which directly relates to IntangibleAssets."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966693",
+    "action": "approve",
+    "concept": "AccruedMarketingCostsCurrent",
+    "maps_to": "SellingAndMarketing",
+    "original_suggestion": "SellingAndMarketing",
+    "confidence": "high",
+    "reasoning": "The label 'AccruedMarketingCostsCurrent' clearly relates to marketing expenses, which are typically part of Selling and Marketing costs."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966715",
+    "action": "approve",
+    "concept": "BusinessCombinationRecognizedIdentifiableAssetsAcquiredAndLiabilitiesAssumedIntangibleAssetsOtherThanGoodwill",
+    "maps_to": "IntangibleAssets",
+    "original_suggestion": "IntangibleAssets",
+    "confidence": "high",
+    "reasoning": "The label explicitly references 'IntangibleAssets' acquired in a business combination, excluding goodwill."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966737",
+    "action": "approve",
+    "concept": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+    "maps_to": "CashAndEquivalents",
+    "original_suggestion": "CashAndEquivalents",
+    "confidence": "high",
+    "reasoning": "Label explicitly includes 'Cash' and 'CashEquivalents', which directly matches the standard concept."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966758",
+    "action": "approve",
+    "concept": "CashEquivalentsAtCarryingValue",
+    "maps_to": "CashAndEquivalents",
+    "original_suggestion": "CashAndEquivalents",
+    "confidence": "high",
+    "reasoning": "The label 'CashEquivalentsAtCarryingValue' directly refers to cash equivalents, which is a standard financial metric."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966779",
+    "action": "approve",
+    "concept": "ContractWithCustomerLiability",
+    "maps_to": "DeferredRevenue",
+    "original_suggestion": "DeferredRevenue",
+    "confidence": "high",
+    "reasoning": "ContractWithCustomerLiability is a liability concept that typically represents deferred revenue, which is a standard financial metric."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966799",
+    "action": "approve",
+    "concept": "ContractWithCustomerLiabilityCurrent",
+    "maps_to": "DeferredRevenue",
+    "original_suggestion": "DeferredRevenue",
+    "confidence": "high",
+    "reasoning": "The label 'ContractWithCustomerLiabilityCurrent' is a common representation of deferred revenue, which is a liability."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966820",
+    "action": "approve",
+    "concept": "AcquiredFiniteLivedIntangibleAssetAmount",
+    "maps_to": "IntangibleAssets",
+    "original_suggestion": "IntangibleAssets",
+    "confidence": "high",
+    "reasoning": "The label clearly refers to acquired intangible assets with finite lives, which is a subset of IntangibleAssets."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966842",
+    "action": "approve",
+    "concept": "AccruedEnvironmentalLossContingenciesCurrent",
+    "maps_to": "AccruedLiabilities",
+    "original_suggestion": "AccruedLiabilities",
+    "confidence": "high",
+    "reasoning": "The label 'AccruedEnvironmentalLossContingenciesCurrent' clearly indicates a current liability, and 'AccruedLiabilities' is the most appropriate standard concept for such items."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966864",
+    "action": "approve",
+    "concept": "CashCashEquivalentsAndShortTermInvestments",
+    "maps_to": "CashAndEquivalents",
+    "original_suggestion": "CashAndEquivalents",
+    "confidence": "high",
+    "reasoning": "Label contains 'Cash' and 'Equivalents', which directly matches the standard concept 'CashAndEquivalents'."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966886",
+    "action": "approve",
+    "concept": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations",
+    "maps_to": "CashAndEquivalents",
+    "original_suggestion": "CashAndEquivalents",
+    "confidence": "high",
+    "reasoning": "The label explicitly includes 'Cash' and 'CashEquivalents', which directly maps to the standard concept 'CashAndEquivalents'."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966909",
+    "action": "approve",
+    "concept": "BusinessAcquisitionPurchasePriceAllocationGoodwillExpectedTaxDeductibleAmount",
+    "maps_to": "Goodwill",
+    "original_suggestion": "Goodwill",
+    "confidence": "high",
+    "reasoning": "The label explicitly references 'Goodwill' in the context of business acquisition purchase price allocation."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966933",
+    "action": "approve",
+    "concept": "CashAndCashEquivalentsFairValueDisclosure",
+    "maps_to": "CashAndEquivalents",
+    "original_suggestion": "CashAndEquivalents",
+    "confidence": "high",
+    "reasoning": "The label explicitly refers to cash and cash equivalents, which directly maps to the standard concept."
+  },
+  {
+    "timestamp": "2026-01-06T20:40:45.966963",
+    "action": "approve",
+    "concept": "CurrentFederalTaxExpenseBenefit",
+    "maps_to": "IncomeTaxExpense",
+    "original_suggestion": "IncomeTaxExpense",
+    "confidence": "high",
+    "reasoning": "The label 'CurrentFederalTaxExpenseBenefit' clearly relates to income tax expense, which is a standard financial metric."
+  }
+]

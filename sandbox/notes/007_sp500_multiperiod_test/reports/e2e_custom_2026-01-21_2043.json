@@ -1,0 +1,38 @@
+{
+  "run_id": "e2e_2026-01-21T20:43:28.202522",
+  "timestamp": "2026-01-21T20:43:28.202531",
+  "config": {
+    "group": "custom",
+    "workers": 8,
+    "years": 2,
+    "quarters": 2,
+    "metrics": [
+      "ShortTermDebt",
+      "CashAndEquivalents"
+    ]
+  },
+  "summary": {
+    "sp25": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10q_total": 0,
+      "10q_passed": 0
+    },
+    "sp50": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10q_total": 0,
+      "10q_passed": 0
+    },
+    "custom": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10q_total": 0,
+      "10q_passed": 0
+    }
+  },
+  "failure_count": 0,
+  "error_count": 0,
+  "failures": [],
+  "errors": []
+}

@@ -1,0 +1,304 @@
+{
+  "run_id": "e2e_industrial_2026-03-05T00:36:50.160844",
+  "timestamp": "2026-03-05T00:36:50.160853",
+  "config": {
+    "group": "industrial_33",
+    "workers": 1,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": "Energy",
+    "tickers": [
+      "XOM",
+      "CVX",
+      "COP",
+      "SLB",
+      "PBF"
+    ],
+    "snapshot_mode": true
+  },
+  "overall_summary": {
+    "10k_total": 59,
+    "10k_passed": 55,
+    "10k_skipped": 3,
+    "10q_total": 72,
+    "10q_passed": 68,
+    "10q_skipped": 0
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 59,
+      "10k_passed": 55,
+      "10k_skipped": 3,
+      "10q_total": 72,
+      "10q_passed": 68,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Insurance": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Utilities": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Real_Estate": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 8,
+  "skipped_count": 3,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "XOM",
+      "sector": "Energy",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0000034088-26-000045",
+      "metric": "COGS",
+      "xbrl_value": 1007000000.0,
+      "ref_value": 252665000000.0,
+      "variance_pct": 99.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ExplorationExpense",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "XOM",
+      "sector": "Energy",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0000034088-26-000045",
+      "metric": "LongTermDebt",
+      "xbrl_value": 34241000000.0,
+      "ref_value": 27928000000.0,
+      "variance_pct": 22.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "XOM",
+      "sector": "Energy",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000034088-25-000061",
+      "metric": "COGS",
+      "xbrl_value": 149000000.0,
+      "ref_value": 64497000000.0,
+      "variance_pct": 99.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ExplorationExpense",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "CVX",
+      "sector": "Energy",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000093410-25-000108",
+      "metric": "COGS",
+      "xbrl_value": 27398000000.0,
+      "ref_value": 33179000000.0,
+      "variance_pct": 17.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CostOfGoodsAndServicesSold",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0001163165-26-000009",
+      "metric": "COGS",
+      "xbrl_value": 22325000000.0,
+      "ref_value": 44156000000.0,
+      "variance_pct": 49.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CostOfGoodsAndServicesSold",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001163165-25-000058",
+      "metric": "COGS",
+      "xbrl_value": 5857000000.0,
+      "ref_value": 11406000000.0,
+      "variance_pct": 48.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CostOfGoodsAndServicesSold",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "SLB",
+      "sector": "Energy",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0001193125-26-021017",
+      "metric": "DepreciationAmortization",
+      "xbrl_value": 2643000000.0,
+      "ref_value": 2109000000.0,
+      "variance_pct": 25.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:DepreciationDepletionAndAmortization",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "SLB",
+      "sector": "Energy",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001193125-25-246028",
+      "metric": "Capex",
+      "xbrl_value": -409000000.0,
+      "ref_value": -577000000.0,
+      "variance_pct": 29.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check PaymentsToAcquireProductiveAssets vs PaymentsToAcquirePropertyPlantAndEquipment"
+      ]
+    }
+  ],
+  "skipped": [
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 214.3,
+      "reason": "COP uses E&P-specific cost structure. Tree parser selects concepts that include items yfinance excludes from OperatingIncome. Energy sector has non-standard income statement format.\n"
+    },
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "ShortTermDebt",
+      "variance_pct": 42.9,
+      "reason": "COP DebtCurrent ($1.03B) vs yfinance ($0.74B). E&P capital structure includes credit facilities that yfinance classifies differently.\n"
+    },
+    {
+      "ticker": "SLB",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 234.1,
+      "reason": "SLB (oilfield services) uses segment-based reporting that doesn't aggregate cleanly to a consolidated OperatingIncome. Tree parser selects incorrect concept for total operating income.\n"
+    }
+  ],
+  "errors": []
+}

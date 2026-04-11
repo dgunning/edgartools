@@ -1,0 +1,293 @@
+{
+  "run_id": "e2e_banks_2026-01-21T21:51:28.898628",
+  "timestamp": "2026-01-21T21:51:28.898640",
+  "config": {
+    "group": "banking",
+    "workers": 8,
+    "years": 2,
+    "quarters": 2,
+    "metrics": [
+      "ShortTermDebt",
+      "CashAndEquivalents"
+    ],
+    "tickers": [
+      "BK",
+      "C",
+      "GS",
+      "JPM",
+      "MS",
+      "PNC",
+      "STT",
+      "USB",
+      "WFC"
+    ]
+  },
+  "summary": {
+    "custom": {
+      "10k_total": 22,
+      "10k_passed": 15,
+      "10q_total": 30,
+      "10q_passed": 22
+    }
+  },
+  "failure_count": 15,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "C",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000831001-25-000067",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 109930000000.0,
+      "ref_value": 48505000000.0,
+      "variance_pct": 126.6,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "C",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000831001-25-000154",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 164152000000.0,
+      "ref_value": 54760000000.0,
+      "variance_pct": 199.8,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "C",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000831001-25-000131",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 166604000000.0,
+      "ref_value": 55560000000.0,
+      "variance_pct": 199.9,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "GS",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000886982-25-000005",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 170137000000.0,
+      "ref_value": 90624000000.0,
+      "variance_pct": 87.7,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "GS",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000886982-25-001411",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 182266000000.0,
+      "ref_value": 88449000000.0,
+      "variance_pct": 106.1,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "GS",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000886982-25-000022",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 173512000000.0,
+      "ref_value": 84282000000.0,
+      "variance_pct": 105.9,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "MS",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000895421-25-000304",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 105386000000.0,
+      "ref_value": 75743000000.0,
+      "variance_pct": 39.1,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:CashAndEquivalents",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "MS",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000895421-25-000539",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 103734000000.0,
+      "ref_value": 73473000000.0,
+      "variance_pct": 41.2,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:CashAndEquivalents",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "MS",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000895421-25-000440",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 109130000000.0,
+      "ref_value": 78156000000.0,
+      "variance_pct": 39.6,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:CashAndEquivalents",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "STT",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000093751-24-000498",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 1867000000.0,
+      "ref_value": 4637000000.0,
+      "variance_pct": 59.7,
+      "mapping_source": "tree",
+      "concept_used": null,
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "USB",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000036104-24-000018",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 8616000000.0,
+      "ref_value": 11455000000.0,
+      "variance_pct": 24.8,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000072971-25-000066",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 108806000000.0,
+      "ref_value": 13571000000.0,
+      "variance_pct": 701.8,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000072971-24-000064",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 89559000000.0,
+      "ref_value": 11883000000.0,
+      "variance_pct": 653.7,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000072971-25-000253",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 230649000000.0,
+      "ref_value": 36409000000.0,
+      "variance_pct": 533.5,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000072971-25-000201",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 187995000000.0,
+      "ref_value": 33984000000.0,
+      "variance_pct": 453.2,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    }
+  ],
+  "errors": []
+}

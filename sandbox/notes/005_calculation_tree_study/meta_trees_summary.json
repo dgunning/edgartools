@@ -1,0 +1,161 @@
+{
+  "total_trees": 26,
+  "trees": [
+    {
+      "name": "CONSOLIDATEDBALANCESHEETS",
+      "root": "Assets",
+      "node_count": 27,
+      "definition": "CONSOLIDATEDBALANCESHEETS"
+    },
+    {
+      "name": "CONSOLIDATEDSTATEMENTSOFINCOME",
+      "root": "NetIncomeLoss",
+      "node_count": 11,
+      "definition": "CONSOLIDATEDSTATEMENTSOFINCOME"
+    },
+    {
+      "name": "CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME",
+      "root": "ComprehensiveIncomeNetOfTax",
+      "node_count": 4,
+      "definition": "CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME"
+    },
+    {
+      "name": "CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+      "root": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+      "node_count": 33,
+      "definition": "CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+    },
+    {
+      "name": "EarningsperShareScheduleofNumeratorsandDenominatorsofBasicandDilutedEPSComputationsforCommonStockDetails",
+      "root": "NetIncomeLossAttributableToParentDiluted",
+      "node_count": 5,
+      "definition": "EarningsperShareScheduleofNumeratorsandDenominatorsofBasicandDilutedEPSComputationsforCommonStockDetails"
+    },
+    {
+      "name": "FinancialInstrumentsScheduleofAssetsMeasuredatFairValueonaRecurringBasisDetails",
+      "root": "AssetsFairValueDisclosure",
+      "node_count": 7,
+      "definition": "FinancialInstrumentsScheduleofAssetsMeasuredatFairValueonaRecurringBasisDetails"
+    },
+    {
+      "name": "FinancialInstrumentsAvailableforsaleMarketableSecuritiesDetails",
+      "root": "DebtSecuritiesAvailableForSaleUnrealizedLossPositionAccumulatedLoss",
+      "node_count": 6,
+      "definition": "FinancialInstrumentsAvailableforsaleMarketableSecuritiesDetails"
+    },
+    {
+      "name": "FinancialInstrumentsContractualMaturitiesofMarketableDebtSecuritiesDetails",
+      "root": "DebtSecuritiesAvailableForSaleExcludingAccruedInterest",
+      "node_count": 3,
+      "definition": "FinancialInstrumentsContractualMaturitiesofMarketableDebtSecuritiesDetails"
+    },
+    {
+      "name": "NonmarketableEquitySecuritiesScheduleofNonMarketableEquitySecuritiesDetails",
+      "root": "[custom] NonmarketableEquitySecuritiesCarryingValue",
+      "node_count": 3,
+      "definition": "NonmarketableEquitySecuritiesScheduleofNonMarketableEquitySecuritiesDetails"
+    },
+    {
+      "name": "PropertyandEquipmentScheduleofPropertyandEquipmentDetails",
+      "root": "PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization",
+      "node_count": 5,
+      "definition": "PropertyandEquipmentScheduleofPropertyandEquipmentDetails"
+    },
+    {
+      "name": "LeasesComponentsofLeaseCostandSupplementaryInfoDetails",
+      "root": "LeaseCost",
+      "node_count": 5,
+      "definition": "LeasesComponentsofLeaseCostandSupplementaryInfoDetails"
+    },
+    {
+      "name": "LeasesScheduleofMaturitiesofLeaseLiabilitiesDetails",
+      "root": "FinanceLeaseLiabilityPaymentsDue",
+      "node_count": 15,
+      "definition": "LeasesScheduleofMaturitiesofLeaseLiabilitiesDetails"
+    },
+    {
+      "name": "LeasesScheduleofMaturitiesofLeaseLiabilitiesDetails_1",
+      "root": "FinanceLeaseLiabilityPaymentsDue",
+      "node_count": 10,
+      "definition": "LeasesScheduleofMaturitiesofLeaseLiabilitiesDetails 1"
+    },
+    {
+      "name": "GoodwillandIntangibleAssetsScheduleofIntangibleAssetsDetails",
+      "root": "IntangibleAssetsGrossExcludingGoodwill",
+      "node_count": 6,
+      "definition": "GoodwillandIntangibleAssetsScheduleofIntangibleAssetsDetails"
+    },
+    {
+      "name": "GoodwillandIntangibleAssetsScheduleofIntangibleAssetsDetails_1",
+      "root": "IntangibleAssetsNetExcludingGoodwill",
+      "node_count": 3,
+      "definition": "GoodwillandIntangibleAssetsScheduleofIntangibleAssetsDetails 1"
+    },
+    {
+      "name": "GoodwillandIntangibleAssetsScheduleofAmortizationExpenseDetails",
+      "root": "FiniteLivedIntangibleAssetsNet",
+      "node_count": 7,
+      "definition": "GoodwillandIntangibleAssetsScheduleofAmortizationExpenseDetails"
+    },
+    {
+      "name": "LongtermDebtScheduleofCarryingValuesandEstimatedFairValuesofDebtInstrumentsDetails",
+      "root": "LongTermDebt",
+      "node_count": 3,
+      "definition": "LongtermDebtScheduleofCarryingValuesandEstimatedFairValuesofDebtInstrumentsDetails"
+    },
+    {
+      "name": "LongtermDebtScheduleofMaturitiesofLongTermDebtDetails",
+      "root": "DebtInstrumentCarryingAmount",
+      "node_count": 6,
+      "definition": "LongtermDebtScheduleofMaturitiesofLongTermDebtDetails"
+    },
+    {
+      "name": "AccruedExpensesandOtherCurrentLiabilitiesScheduleofAccruedExpensesandOtherCurrentLiabilitiesDetails",
+      "root": "AccruedLiabilitiesCurrent",
+      "node_count": 6,
+      "definition": "AccruedExpensesandOtherCurrentLiabilitiesScheduleofAccruedExpensesandOtherCurrentLiabilitiesDetails"
+    },
+    {
+      "name": "CommitmentsandContingenciesContractualCommitmentsDetails",
+      "root": "ContractualObligation",
+      "node_count": 7,
+      "definition": "CommitmentsandContingenciesContractualCommitmentsDetails"
+    },
+    {
+      "name": "InterestandOtherIncomeExpenseNetDetails",
+      "root": "NonoperatingIncomeExpense",
+      "node_count": 5,
+      "definition": "InterestandOtherIncomeExpenseNetDetails"
+    },
+    {
+      "name": "IncomeTaxesScheduleforIncomeBeforeIncomeTaxDetails",
+      "root": "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+      "node_count": 3,
+      "definition": "IncomeTaxesScheduleforIncomeBeforeIncomeTaxDetails"
+    },
+    {
+      "name": "IncomeTaxesScheduleofProvisionforIncomeTaxesDetails",
+      "root": "IncomeTaxExpenseBenefit",
+      "node_count": 9,
+      "definition": "IncomeTaxesScheduleofProvisionforIncomeTaxesDetails"
+    },
+    {
+      "name": "IncomeTaxesScheduleofEffectiveIncomeTaxRateReconciliationDetails",
+      "root": "EffectiveIncomeTaxRateContinuingOperations",
+      "node_count": 8,
+      "definition": "IncomeTaxesScheduleofEffectiveIncomeTaxRateReconciliationDetails"
+    },
+    {
+      "name": "IncomeTaxesScheduleofDeferredTaxAssetsandLiabilitiesDetails",
+      "root": "DeferredTaxAssetsLiabilitiesNet",
+      "node_count": 15,
+      "definition": "IncomeTaxesScheduleofDeferredTaxAssetsandLiabilitiesDetails"
+    },
+    {
+      "name": "SegmentandGeographicalInformationSegmentRevenueandIncomeforOperationsDetails",
+      "root": "OperatingIncomeLoss",
+      "node_count": 4,
+      "definition": "SegmentandGeographicalInformationSegmentRevenueandIncomeforOperationsDetails"
+    }
+  ]
+}

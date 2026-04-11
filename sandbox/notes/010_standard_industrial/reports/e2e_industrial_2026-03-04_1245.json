@@ -1,0 +1,204 @@
+{
+  "run_id": "e2e_industrial_2026-03-04T12:45:51.944934",
+  "timestamp": "2026-03-04T12:45:51.944943",
+  "config": {
+    "group": "industrial_33",
+    "workers": 1,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": null,
+    "tickers": [
+      "SNOW",
+      "NOW"
+    ],
+    "snapshot_mode": true
+  },
+  "overall_summary": {
+    "10k_total": 23,
+    "10k_passed": 23,
+    "10k_skipped": 6,
+    "10q_total": 26,
+    "10q_passed": 26,
+    "10q_skipped": 3
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Insurance": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Utilities": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Real_Estate": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 0,
+  "skipped_count": 9,
+  "error_count": 0,
+  "failures": [],
+  "skipped": [
+    {
+      "ticker": "SNOW",
+      "sector": "Unknown",
+      "form": "10-K",
+      "metric": "Capex",
+      "variance_pct": 38.9,
+      "reason": "PaymentsToAcquirePropertyPlantAndEquipment ($46M) vs yfinance ($76M). May exclude capitalized internal-use software or lease payments.\n"
+    },
+    {
+      "ticker": "SNOW",
+      "sector": "Unknown",
+      "form": "10-K",
+      "metric": "Goodwill",
+      "variance_pct": 98.6,
+      "reason": "XBRL Goodwill ($15M) vs yfinance ($1.06B). Tree extraction selecting wrong dimensional member or pre-acquisition value.\n"
+    },
+    {
+      "ticker": "SNOW",
+      "sector": "Unknown",
+      "form": "10-K",
+      "metric": "IntangibleAssets",
+      "variance_pct": 80.1,
+      "reason": "XBRL composite ($293M) vs yfinance ($1.47B). Inherits Goodwill extraction gap.\n"
+    },
+    {
+      "ticker": "SNOW",
+      "sector": "Unknown",
+      "form": "10-Q",
+      "metric": "WeightedAverageSharesDiluted",
+      "variance_pct": 100.0,
+      "reason": "XBRL returns 0 for 10-Q diluted shares. May be reporting issue or concept mismatch for loss companies (anti-dilutive).\n"
+    },
+    {
+      "ticker": "NOW",
+      "sector": "Unknown",
+      "form": "10-K",
+      "metric": "Revenue",
+      "variance_pct": 96.9,
+      "reason": "XBRL RevenueFromContractWithCustomer ($338M) captures only a small segment. yfinance ($11.0B) includes all subscription and services revenue. Tree extraction selecting wrong segment/dimensional member.\n"
+    },
+    {
+      "ticker": "NOW",
+      "sector": "Unknown",
+      "form": "10-K",
+      "metric": "WeightedAverageSharesDiluted",
+      "variance_pct": 80.0,
+      "reason": "XBRL shares ($208M) vs yfinance ($1.04B). Likely pre-stock-split value or dimensional extraction error (5:1 ratio suggests split adjustment).\n"
+    },
+    {
+      "ticker": "NOW",
+      "sector": "Unknown",
+      "form": "10-K",
+      "metric": "StockBasedCompensation",
+      "variance_pct": 85.7,
+      "reason": "XBRL ShareBasedCompensation ($250M) vs yfinance ($1.75B). Tree extraction getting subsidiary or segment-level SBC instead of consolidated.\n"
+    },
+    {
+      "ticker": "NOW",
+      "sector": "Unknown",
+      "form": "10-Q",
+      "metric": "WeightedAverageSharesDiluted",
+      "variance_pct": 80.0,
+      "reason": "XBRL shares ($208M) vs yfinance ($1.04B). Likely pre-stock-split value or dimensional extraction error (5:1 ratio suggests split adjustment).\n"
+    },
+    {
+      "ticker": "NOW",
+      "sector": "Unknown",
+      "form": "10-Q",
+      "metric": "StockBasedCompensation",
+      "variance_pct": 84.1,
+      "reason": "XBRL ShareBasedCompensation ($250M) vs yfinance ($1.75B). Tree extraction getting subsidiary or segment-level SBC instead of consolidated.\n"
+    }
+  ],
+  "errors": []
+}

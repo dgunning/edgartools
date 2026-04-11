@@ -7,109 +7,253 @@
   "industries": {
     "banking": {
       "name": "Banking & Financial Services",
-      "sic_ranges": [[6020, 6099]],
+      "sic_ranges": [
+        [
+          6020,
+          6099
+        ]
+      ],
       "extension_file": "banking.json",
       "description": "Commercial banks, savings institutions, credit unions, mortgage banks"
     },
     "tech": {
       "name": "Technology & Software",
-      "sic_ranges": [[7370, 7379], [3570, 3579]],
+      "sic_ranges": [
+        [
+          7370,
+          7379
+        ],
+        [
+          3570,
+          3579
+        ]
+      ],
       "extension_file": "tech.json",
       "description": "Software, computer services, hardware"
     },
     "healthcare": {
       "name": "Healthcare & Pharmaceuticals",
-      "sic_ranges": [[2833, 2836], [8000, 8099], [3841, 3845]],
+      "sic_ranges": [
+        [
+          2833,
+          2836
+        ],
+        [
+          8000,
+          8099
+        ],
+        [
+          3841,
+          3845
+        ]
+      ],
       "extension_file": "healthcare.json",
       "description": "Pharmaceuticals, biotechnology, health services, medical devices"
     },
     "energy": {
       "name": "Energy & Oil/Gas",
-      "sic_ranges": [[1300, 1399], [2911, 2911], [4610, 4619]],
+      "sic_ranges": [
+        [
+          1300,
+          1399
+        ],
+        [
+          2911,
+          2911
+        ],
+        [
+          4610,
+          4619
+        ]
+      ],
       "extension_file": "energy.json",
       "description": "Oil & gas extraction, refining, pipelines"
     },
     "insurance": {
       "name": "Insurance",
-      "sic_ranges": [[6300, 6399]],
+      "sic_ranges": [
+        [
+          6300,
+          6399
+        ]
+      ],
       "extension_file": "insurance.json",
       "description": "Insurance carriers and agents"
     },
     "investment_companies": {
       "name": "Investment Companies & Asset Management",
-      "sic_ranges": [[6720, 6799]],
+      "sic_ranges": [
+        [
+          6720,
+          6799
+        ]
+      ],
       "extension_file": "investment_companies.json",
       "description": "Asset managers, holding companies, investment trusts, private equity"
     },
     "retail": {
       "name": "Retail Trade",
-      "sic_ranges": [[5200, 5999]],
+      "sic_ranges": [
+        [
+          5200,
+          5999
+        ]
+      ],
       "extension_file": "retail.json",
       "description": "Retail stores, e-commerce"
     },
     "realestate": {
       "name": "Real Estate & REITs",
-      "sic_ranges": [[6500, 6553], [6798, 6798]],
+      "sic_ranges": [
+        [
+          6500,
+          6553
+        ],
+        [
+          6798,
+          6798
+        ]
+      ],
       "extension_file": "realestate.json",
       "description": "Real estate operators, REITs, property management"
     },
     "utilities": {
       "name": "Utilities",
-      "sic_ranges": [[4910, 4941]],
+      "sic_ranges": [
+        [
+          4910,
+          4941
+        ]
+      ],
       "extension_file": "utilities.json",
       "description": "Electric, gas, and combination utilities"
     },
     "consumergoods": {
       "name": "Consumer Goods",
-      "sic_ranges": [[2000, 2399]],
+      "sic_ranges": [
+        [
+          2000,
+          2399
+        ]
+      ],
       "extension_file": "consumergoods.json",
       "description": "Food, beverages, tobacco, textiles, apparel"
     },
     "telecom": {
       "name": "Telecommunications",
-      "sic_ranges": [[4810, 4899]],
+      "sic_ranges": [
+        [
+          4810,
+          4899
+        ]
+      ],
       "extension_file": "telecom.json",
       "description": "Telephone, cable, wireless communications"
     },
     "transportation": {
       "name": "Transportation",
-      "sic_ranges": [[4000, 4799]],
+      "sic_ranges": [
+        [
+          4000,
+          4799
+        ]
+      ],
       "extension_file": "transportation.json",
       "description": "Rail, trucking, air, water transportation"
     },
     "aerospace": {
       "name": "Aerospace & Defense",
-      "sic_ranges": [[3720, 3729], [3760, 3769]],
+      "sic_ranges": [
+        [
+          3720,
+          3729
+        ],
+        [
+          3760,
+          3769
+        ]
+      ],
       "extension_file": "aerospace.json",
       "description": "Aircraft, guided missiles, space vehicles"
     },
     "hospitality": {
       "name": "Hospitality",
-      "sic_ranges": [[7010, 7041]],
+      "sic_ranges": [
+        [
+          7010,
+          7041
+        ]
+      ],
       "extension_file": "hospitality.json",
       "description": "Hotels, motels, lodging"
     },
     "mining": {
       "name": "Mining & Materials",
-      "sic_ranges": [[1000, 1299], [1400, 1499]],
+      "sic_ranges": [
+        [
+          1000,
+          1299
+        ],
+        [
+          1400,
+          1499
+        ]
+      ],
       "extension_file": "mining.json",
       "description": "Metal, coal, mineral mining"
     },
     "automotive": {
       "name": "Automotive",
-      "sic_ranges": [[3710, 3716]],
+      "sic_ranges": [
+        [
+          3710,
+          3716
+        ]
+      ],
       "extension_file": "automotive.json",
       "description": "Motor vehicles and parts"
     },
     "securities": {
       "name": "Securities, Broker-Dealers & Asset Management",
-      "sic_ranges": [[6200, 6299]],
+      "sic_ranges": [
+        [
+          6200,
+          6299
+        ]
+      ],
       "extension_file": "securities.json",
       "description": "Security brokers, dealers, investment banks, asset managers (GS, MS, SCHW, etc.)"
     },
+    "finance_services": {
+      "name": "Finance Services",
+      "sic_ranges": [
+        [
+          6199,
+          6199
+        ]
+      ],
+      "extension_file": null,
+      "description": "Finance services including credit cards (AXP)"
+    },
+    "business_services": {
+      "name": "Business Services",
+      "sic_ranges": [
+        [
+          7389,
+          7389
+        ]
+      ],
+      "extension_file": null,
+      "description": "Payment networks, processing services (V, MA)"
+    },
     "semiconductors": {
       "name": "Semiconductors",
-      "sic_ranges": [[3674, 3674]],
+      "sic_ranges": [
+        [
+          3674,
+          3674
+        ]
+      ],
       "extension_file": "semiconductors.json",
       "description": "Semiconductor and related device manufacturing (NVDA, AMD, INTC, etc.)"
     },

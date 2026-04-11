@@ -1,0 +1,16 @@
+{
+  "exclude_metrics": {
+    "EarningsPerShareDiluted": {
+      "reason": "not_applicable",
+      "notes": "Auto-excluded: concept absent from all XBRL sources"
+    },
+    "CurrentAssets": {
+      "reason": "not_applicable",
+      "notes": "Auto-excluded: concept absent from all XBRL sources"
+    },
+    "DividendPerShare": {
+      "reason": "not_applicable",
+      "notes": "Auto-excluded: concept absent from all XBRL sources"
+    }
+  }
+}

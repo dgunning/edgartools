@@ -1,0 +1,106 @@
+{
+  "ticker": "MCD",
+  "cik": 63908,
+  "company_name": "MCDONALDS CORP",
+  "archetype": "A",
+  "sic_code": "5812",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  MCD:\n    name: \"MCDONALDS CORP\"\n    cik: 63908\n    known_divergences:\n      IntangibleAssets:\n        form_types: [\"10-K\"]\n        variance_pct: 41.1\n        reason: \"Variance: 41.1% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"\n      ShortTermDebt:\n        form_types: [\"10-K\"]\n        variance_pct: 64.0\n        reason: \"Variance: 64.0% (tolerance: 15%)\"\n        skip_validation: true\n        added_date: \"2026-03-04\"",
+  "metrics_passed": [
+    "COGS",
+    "SGA",
+    "OperatingIncome",
+    "PretaxIncome",
+    "NetIncome",
+    "OperatingCashFlow",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "Inventory",
+    "AccountsReceivable",
+    "AccountsPayable"
+  ],
+  "metrics_failed": [
+    "Revenue",
+    "Capex",
+    "TotalAssets",
+    "Goodwill",
+    "IntangibleAssets",
+    "ShortTermDebt",
+    "WeightedAverageSharesDiluted",
+    "DepreciationAmortization"
+  ],
+  "metrics_excluded": [],
+  "failures": {
+    "Revenue": {
+      "metric": "Revenue",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 25920000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "Capex": {
+      "metric": "Capex",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": -2775000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "TotalAssets": {
+      "metric": "TotalAssets",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 55182000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "Goodwill": {
+      "metric": "Goodwill",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 3145000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "IntangibleAssets": {
+      "metric": "IntangibleAssets",
+      "reason": "Variance: 41.1% (tolerance: 15%)",
+      "xbrl_value": 1851000000.0,
+      "reference_value": 3145000000.0,
+      "variance_pct": 41.14467408585056,
+      "pattern": "unknown"
+    },
+    "ShortTermDebt": {
+      "metric": "ShortTermDebt",
+      "reason": "Variance: 64.0% (tolerance: 15%)",
+      "xbrl_value": 790000000.0,
+      "reference_value": 2192000000.0,
+      "variance_pct": 63.95985401459854,
+      "pattern": "unknown"
+    },
+    "WeightedAverageSharesDiluted": {
+      "metric": "WeightedAverageSharesDiluted",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 716400000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "DepreciationAmortization": {
+      "metric": "DepreciationAmortization",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 2097000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": true,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-03-04T19:17:36.861435"
+}

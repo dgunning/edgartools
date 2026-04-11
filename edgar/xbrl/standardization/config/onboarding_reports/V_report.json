@@ -1,0 +1,41 @@
+{
+  "ticker": "V",
+  "cik": 1403161,
+  "company_name": "VISA INC.",
+  "archetype": "C",
+  "sic_code": "7389",
+  "fiscal_year_end": "September",
+  "draft_yaml": "  V:\n    name: \"VISA INC.\"\n    cik: 1403161\n    fiscal_year_end: \"September\"\n    exclude_metrics:\n      - COGS",
+  "metrics_passed": [
+    "Revenue",
+    "SGA",
+    "OperatingIncome",
+    "PretaxIncome",
+    "NetIncome",
+    "OperatingCashFlow",
+    "Capex",
+    "TotalAssets",
+    "Goodwill",
+    "IntangibleAssets",
+    "ShortTermDebt",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "Inventory",
+    "AccountsReceivable",
+    "AccountsPayable",
+    "DepreciationAmortization"
+  ],
+  "metrics_failed": [],
+  "metrics_excluded": [
+    "COGS"
+  ],
+  "failures": {},
+  "remediation_complexity": "clean",
+  "snapshot_created": true,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-03-04T19:15:32.417854"
+}

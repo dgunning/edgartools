@@ -1,0 +1,658 @@
+version: 1.0.0
+metrics:
+  Revenue:
+    description: Total revenue from operations
+    standard_tag: Revenue
+    known_concepts:
+    - Revenues
+    - RevenueFromContractWithCustomerExcludingAssessedTax
+    - SalesRevenueNet
+    - Revenue
+    - TotalRevenues
+    - NetSales
+    - PremiumsEarnedNet
+    - NetPremiumsEarned
+    - PremiumsEarned
+    - InsuranceServiceRevenue
+    tree_hints:
+      statements:
+      - INCOME
+      - OPERATIONS
+      parent_pattern: OperatingIncome
+      weight: 1.0
+    universal: true
+    importance_tier: core
+  COGS:
+    description: Cost of goods/services sold
+    standard_tag: CostOfGoodsAndServicesSold
+    known_concepts:
+    - CostOfGoodsAndServicesSold
+    - CostOfRevenue
+    - CostOfGoodsSold
+    - CostOfSales
+    - CostOfServices
+    - CrudeOilAndProductPurchases
+    tree_hints:
+      statements:
+      - INCOME
+      - OPERATIONS
+      parent_pattern: OperatingIncome
+      weight: -1.0
+    universal: false
+    notes: Services companies (META, FDX) may not have traditional COGS
+    importance_tier: extended
+  SGA:
+    description: Selling, general, and administrative expenses
+    standard_tag: SellingGeneralAndAdminExpenses
+    known_concepts:
+    - SellingGeneralAndAdministrativeExpense
+    - SellingAndMarketingExpense
+    - GeneralAndAdministrativeExpense
+    tree_hints:
+      statements:
+      - INCOME
+      - OPERATIONS
+      parent_pattern: CostsAndExpenses
+      weight: 1.0
+    universal: false
+    notes: Often split into separate line items
+    importance_tier: extended
+  OperatingIncome:
+    description: Income from operations
+    known_concepts:
+    - OperatingIncomeLoss
+    tree_hints:
+      statements:
+      - INCOME
+      - OPERATIONS
+      parent_pattern: IncomeLossBeforeTax
+      weight: 1.0
+    universal: true
+    importance_tier: core
+  PretaxIncome:
+    description: Income before income taxes
+    known_concepts:
+    - IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest
+    - IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments
+    - IncomeLossFromContinuingOperationsBeforeIncomeTaxes
+    tree_hints:
+      statements:
+      - INCOME
+      - OPERATIONS
+      parent_pattern: NetIncome
+      weight: 1.0
+    universal: true
+    importance_tier: extended
+  NetIncome:
+    description: Net income/loss
+    standard_tag:
+    - NetIncome
+    - ProfitLoss
+    known_concepts:
+    - NetIncomeLoss
+    - ProfitLoss
+    - NetIncome
+    tree_hints:
+      statements:
+      - INCOME
+      - OPERATIONS
+      is_root: true
+    universal: true
+    importance_tier: core
+  OperatingCashFlow:
+    description: Cash from operating activities
+    standard_tag: NetCashFromOperatingActivities
+    known_concepts:
+    - NetCashProvidedByUsedInOperatingActivities
+    tree_hints:
+      statements:
+      - CASHFLOW
+      section: operating
+    universal: true
+    importance_tier: core
+  Capex:
+    description: Capital expenditures (including intangibles)
+    standard_tag: CapitalExpenses
+    sign_convention: negate
+    validation_tolerance: 40
+    known_concepts:
+    - PaymentsToAcquirePropertyPlantAndEquipment
+    - PaymentsToAcquireProductiveAssets
+    - CapitalExpendituresIncurredButNotYetPaid
+    - PaymentsToAcquireIntangibleAssets
+    - PaymentsToDevelopSoftware
+    - PaymentsToAcquireOilAndGasPropertyAndEquipment
+    - PaymentsToAcquireOtherPropertyPlantAndEquipment
+    - PaymentsForCapitalImprovements
+    - CapitalExpenditures
+    - CapitalExpensesNet
+    - CapitalExpensesGross
+    - CapitalExpensesTotal
+    - CapitalExpensesCurrent
+    - CapitalExpensesNoncurrent
+    - TotalCapitalExpenses
+    - NetCapitalExpenses
+    exclude_patterns:
+    - Businesses
+    - Acquisitions
+    - NetOfCash
+    - InvestmentsInAffiliates
+    tree_hints:
+      statements:
+      - CASHFLOW
+      section: investing
+      weight: -1.0
+    universal: false
+    notes: Includes intangible investments for pharma/tech. Energy uses PaymentsToAcquireProductiveAssets. Excludes M&A acquisitions.
+    importance_tier: extended
+  TotalAssets:
+    description: Total assets
+    known_concepts:
+    - Assets
+    - TotalAssets
+    tree_hints:
+      statements:
+      - BALANCE
+      - FINANCIAL_POSITION
+      is_root: true
+    universal: true
+    importance_tier: core
+  Goodwill:
+    description: Goodwill from acquisitions
+    standard_tag: Goodwill
+    known_concepts:
+    - Goodwill
+    exclude_patterns:
+    - IncludingGoodwill
+    - Impaired
+    - Gross
+    tree_hints:
+      statements:
+      - BALANCE
+      section: assets
+    universal: true
+    importance_tier: exploratory
+  IntangibleAssets:
+    description: Goodwill and other intangible assets (matches yfinance)
+    validation_tolerance: 25
+    composite: true
+    components:
+    - Goodwill
+    - IntangibleAssetsNetExcludingGoodwill
+    - IndefiniteLivedTrademarks
+    known_concepts:
+    - Goodwill
+    - IntangibleAssetsNetExcludingGoodwill
+    - IndefiniteLivedTrademarks
+    - FiniteLivedIntangibleAssetsNet
+    - IndefiniteLivedIntangibleAssetsExcludingGoodwill
+    - OtherIntangibleAssetsNet
+    tree_hints:
+      statements:
+      - BALANCE
+      section: assets
+    universal: true
+    notes: Sum of Goodwill + IntangibleAssetsNet to match yfinance. KO uses IndefiniteLivedTrademarks.
+    importance_tier: exploratory
+  ShortTermDebt:
+    description: Short-term borrowings and current debt (matches yfinance Current Debt)
+    composite: true
+    components:
+    - LongTermDebtCurrent
+    - CommercialPaper
+    - ShortTermBorrowings
+    known_concepts:
+    - DebtCurrent
+    - ShortTermDebt
+    - ShortTermDebtAndCapitalLeaseObligationsCurrent
+    - LongTermDebtCurrent
+    - LongTermDebtAndCapitalLeaseObligationsCurrent
+    - LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths
+    - CommercialPaper
+    - ShortTermBorrowings
+    - NotesPayable
+    - CurrentPortionOfLongTermDebt
+    - OtherShortTermBorrowings
+    - ShortTermBankLoansAndNotesPayable
+    dimensional_handling:
+      mode: include_dimensional
+    tree_hints:
+      statements:
+      - BALANCE
+      section: liabilities_current
+    universal: false
+    notes: yfinance 'Current Debt' sums multiple short-term debt types
+    importance_tier: exploratory
+  LongTermDebt:
+    description: Long-term debt (non-current portion)
+    standard_tag: LongTermDebt
+    known_concepts:
+    - LongTermDebtNoncurrent
+    - LongTermDebt
+    - LongTermDebtAndCapitalLeaseObligations
+    tree_hints:
+      statements:
+      - BALANCE
+      section: liabilities_noncurrent
+    universal: true
+    notes: LongTermDebtNoncurrent preferred (excludes current portion)
+    importance_tier: extended
+  CashAndEquivalents:
+    description: Cash and cash equivalents
+    standard_tag: CashAndCashEquivalents
+    known_concepts:
+    - CashAndCashEquivalentsAtCarryingValue
+    - CashAndCashEquivalents
+    - Cash
+    - CashAndDueFromBanks
+    - CashAndCashEquivalentsNet
+    - CashAndCashEquivalentsGross
+    - CashAndCashEquivalentsTotal
+    - CashAndCashEquivalentsCurrent
+    - CashAndCashEquivalentsNoncurrent
+    - TotalCashAndCashEquivalents
+    - NetCashAndCashEquivalents
+    - CashCashEquivalentsAndShortTermInvestments
+    - CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents
+    tree_hints:
+      statements:
+      - BALANCE
+      - CASHFLOW
+      section: assets_current
+    universal: true
+    importance_tier: extended
+  WeightedAverageSharesDiluted:
+    description: Weighted average diluted shares outstanding for EPS calculation
+    standard_tag: SharesFullyDilutedAverage
+    validation_tolerance: 15
+    known_concepts:
+    - WeightedAverageNumberOfDilutedSharesOutstanding
+    - WeightedAverageNumberOfSharesOutstandingDiluted
+    - WeightedAverageNumberOfShareOutstandingBasicAndDiluted
+    tree_hints:
+      statements:
+      - INCOME
+    universal: true
+    notes: Essential for per-share valuation metrics
+    importance_tier: extended
+  StockBasedCompensation:
+    description: Stock-based compensation expense (non-cash)
+    validation_tolerance: 20
+    known_concepts:
+    - ShareBasedCompensation
+    - AllocatedShareBasedCompensationExpense
+    - StockCompensationExpense
+    - StockBasedCompensationNet
+    - ShareBasedCompensationIncludingDiscontinuedOperations
+    tree_hints:
+      statements:
+      - CASHFLOW
+      section: operating
+    universal: false
+    notes: Critical for calculating 'Real' Free Cash Flow
+    importance_tier: exploratory
+  DividendsPaid:
+    description: Cash dividends paid to shareholders
+    standard_tag: CommonDividendsPaid
+    sign_convention: negate
+    known_concepts:
+    - PaymentsOfDividends
+    - PaymentsOfDividendsCommonStock
+    - DividendsPaidCommonStock
+    tree_hints:
+      statements:
+      - CASHFLOW
+      section: financing
+      weight: -1.0
+    universal: false
+    notes: For total shareholder return and payout ratio analysis
+    importance_tier: exploratory
+  Inventory:
+    description: Current inventory on hand
+    standard_tag: Inventories
+    known_concepts:
+    - InventoryNet
+    - Inventories
+    - InventoryFinishedGoods
+    tree_hints:
+      statements:
+      - BALANCE
+      section: assets_current
+    universal: false
+    notes: Not applicable to service companies
+    importance_tier: exploratory
+  AccountsReceivable:
+    description: Trade accounts receivable (current)
+    standard_tag: TradeReceivables
+    validation_tolerance: 25
+    known_concepts:
+    - AccountsReceivableNetCurrent
+    - ReceivablesNetCurrent
+    - TradeAccountsReceivable
+    - AccountsReceivableNet
+    - AccountsNotesAndLoansReceivableNetCurrent
+    - AccountsAndOtherReceivablesNetCurrent
+    - NotesAndAccountsReceivableNet
+    - TradeReceivablesNet
+    - TradeReceivablesGross
+    - TradeReceivablesTotal
+    - TradeReceivablesCurrent
+    - TradeReceivablesNoncurrent
+    - TotalTradeReceivables
+    - NetTradeReceivables
+    tree_hints:
+      statements:
+      - BALANCE
+      section: assets_current
+    universal: false
+    notes: Rising AR faster than revenue may signal quality issues
+    importance_tier: exploratory
+  AccountsPayable:
+    description: Trade accounts payable (current)
+    standard_tag: TradePayables
+    known_concepts:
+    - AccountsPayableCurrent
+    - AccountsPayableTradeCurrent
+    - TradeAndOtherPayablesCurrent
+    - AccountsPayableAndAccruedLiabilitiesCurrent
+    - AccountsPayableAndAccruedLiabilities
+    exclude_patterns:
+    - Liabilities
+    tree_hints:
+      statements:
+      - BALANCE
+      section: liabilities_current
+    universal: false
+    notes: High AP indicates supplier leverage
+    importance_tier: exploratory
+  DepreciationAmortization:
+    description: Depreciation and amortization expense
+    standard_tag: DepreciationExpense
+    validation_tolerance: 30
+    composite: true
+    components:
+    - Depreciation
+    - AmortizationOfIntangibleAssets
+    known_concepts:
+    - DepreciationDepletionAndAmortization
+    - DepreciationAndAmortization
+    - DepreciationAmortizationAndAccretionNet
+    - Depreciation
+    - DepreciationAmortizationAndOther
+    - DepreciationExpenseNet
+    - DepreciationExpenseGross
+    - DepreciationExpenseTotal
+    - DepreciationExpenseCurrent
+    - DepreciationExpenseNoncurrent
+    - TotalDepreciationExpense
+    - NetDepreciationExpense
+    - AmortizationOfIntangibleAssets
+    - DepreciationNonproduction
+    exclude_patterns:
+    - Accumulated
+    tree_hints:
+      statements:
+      - CASHFLOW
+      section: operating
+    universal: true
+    notes: Required for EBITDA calculation and maintenance capex analysis. Pharma/medical companies often split into Depreciation
+      + AmortizationOfIntangibleAssets.
+    importance_tier: extended
+  GrossProfit:
+    description: Revenue minus cost of goods sold
+    standard_tag: GrossProfit
+    known_concepts:
+    - GrossProfit
+    tree_hints:
+      statements:
+      - INCOME
+      - OPERATIONS
+      parent_pattern: OperatingIncome
+      weight: 1.0
+    universal: false
+    notes: Not applicable to services companies or banks
+    standardization:
+      default:
+        components:
+        - concept: Revenues
+          weight: 1.0
+        - concept: CostOfGoodsAndServicesSold
+          weight: -1.0
+        notes: GrossProfit = Revenue - COGS (signed formula)
+    importance_tier: extended
+  ResearchAndDevelopment:
+    description: Research and development expense
+    standard_tag: ResearchAndDevelopmentExpense
+    known_concepts:
+    - ResearchAndDevelopmentExpense
+    - ResearchAndDevelopmentExpenseExcludingAcquiredInProcessCost
+    - ResearchAndDevelopmentExpenseSoftwareExcludingAcquiredInProcessCost
+    tree_hints:
+      statements:
+      - INCOME
+      - OPERATIONS
+    universal: false
+    notes: Not all companies have R&D
+    validation_tolerance: 20
+    importance_tier: exploratory
+  InterestExpense:
+    description: Interest expense on debt
+    standard_tag: InterestExpense
+    known_concepts:
+    - InterestExpense
+    - InterestExpenseDebt
+    - InterestAndDebtExpense
+    tree_hints:
+      statements:
+      - INCOME
+      - OPERATIONS
+    universal: true
+    validation_tolerance: 25
+    importance_tier: extended
+  IncomeTaxExpense:
+    description: Income tax provision (expense or benefit)
+    standard_tag: IncomeTaxExpenseBenefit
+    known_concepts:
+    - IncomeTaxExpenseBenefit
+    - CurrentIncomeTaxExpenseBenefit
+    tree_hints:
+      statements:
+      - INCOME
+    universal: true
+    validation_tolerance: 25
+    importance_tier: extended
+  EarningsPerShareDiluted:
+    description: Diluted earnings per share
+    standard_tag: EarningsPerShareDiluted
+    known_concepts:
+    - EarningsPerShareDiluted
+    tree_hints:
+      statements:
+      - INCOME
+    universal: true
+    validation_tolerance: 15
+    standardization:
+      default:
+        components:
+        - EarningsPerShareDiluted
+        notes: Auto-solver sector via V, 2/3 periods, 2/3 companies
+    importance_tier: core
+  EarningsPerShareBasic:
+    description: Basic earnings per share
+    standard_tag: EarningsPerShareBasic
+    known_concepts:
+    - EarningsPerShareBasic
+    tree_hints:
+      statements:
+      - INCOME
+    universal: true
+    validation_tolerance: 15
+    standardization:
+      default:
+        components:
+        - EarningsPerShareBasic
+        notes: Auto-solver sector via V, 2/3 periods, 2/3 companies
+    importance_tier: derived
+  CurrentAssets:
+    description: Total current assets
+    standard_tag: AssetsCurrent
+    known_concepts:
+    - AssetsCurrent
+    tree_hints:
+      statements:
+      - BALANCE
+    universal: true
+    importance_tier: extended
+  CurrentLiabilities:
+    description: Total current liabilities
+    standard_tag: LiabilitiesCurrent
+    known_concepts:
+    - LiabilitiesCurrent
+    tree_hints:
+      statements:
+      - BALANCE
+    universal: true
+    importance_tier: extended
+  TotalLiabilities:
+    description: Total liabilities
+    standard_tag: Liabilities
+    known_concepts:
+    - Liabilities
+    tree_hints:
+      statements:
+      - BALANCE
+    universal: true
+    composite: true
+    components:
+    - LiabilitiesAndStockholdersEquity
+    - StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest
+    standardization:
+      default:
+        components:
+        - concept: LiabilitiesAndStockholdersEquity
+          weight: 1.0
+        - concepts:
+          - StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest
+          - StockholdersEquity
+          weight: -1.0
+        notes: TL = L&SE - SE (try NCI-inclusive first, fall back to StockholdersEquity)
+    importance_tier: core
+  StockholdersEquity:
+    description: Total stockholders equity including noncontrolling interest
+    standard_tag: StockholdersEquity
+    known_concepts:
+    - StockholdersEquity
+    - StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest
+    - Equity
+    tree_hints:
+      statements:
+      - BALANCE
+    universal: true
+    importance_tier: core
+  PropertyPlantEquipment:
+    description: Net property, plant and equipment
+    standard_tag: PropertyPlantAndEquipmentNet
+    known_concepts:
+    - PropertyPlantAndEquipmentNet
+    - PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization
+    tree_hints:
+      statements:
+      - BALANCE
+    universal: false
+    notes: Not meaningful for banks/financial services
+    validation_tolerance: 20
+    importance_tier: exploratory
+  RetainedEarnings:
+    description: Retained earnings (accumulated deficit)
+    standard_tag: RetainedEarningsAccumulatedDeficit
+    known_concepts:
+    - RetainedEarningsAccumulatedDeficit
+    tree_hints:
+      statements:
+      - BALANCE
+    universal: true
+    validation_tolerance: 20
+    importance_tier: extended
+  InvestingCashFlow:
+    description: Net cash from investing activities
+    standard_tag: NetCashProvidedByUsedInInvestingActivities
+    known_concepts:
+    - NetCashProvidedByUsedInInvestingActivities
+    - NetCashProvidedByUsedInInvestingActivitiesContinuingOperations
+    tree_hints:
+      statements:
+      - CASHFLOW
+    universal: true
+    validation_tolerance: 25
+    importance_tier: exploratory
+  FinancingCashFlow:
+    description: Net cash from financing activities
+    standard_tag: NetCashProvidedByUsedInFinancingActivities
+    known_concepts:
+    - NetCashProvidedByUsedInFinancingActivities
+    - NetCashProvidedByUsedInFinancingActivitiesContinuingOperations
+    tree_hints:
+      statements:
+      - CASHFLOW
+    universal: true
+    validation_tolerance: 25
+    importance_tier: exploratory
+  ShareRepurchases:
+    description: Payments for stock buybacks
+    standard_tag: PaymentsForRepurchaseOfCommonStock
+    sign_convention: negate
+    known_concepts:
+    - PaymentsForRepurchaseOfCommonStock
+    - PaymentsForRepurchaseOfEquity
+    - StockRepurchasedAndRetiredDuringPeriodValue
+    tree_hints:
+      statements:
+      - CASHFLOW
+    universal: false
+    validation_tolerance: 25
+    importance_tier: exploratory
+  DividendPerShare:
+    description: Dividends per share declared
+    standard_tag: CommonStockDividendsPerShareDeclared
+    known_concepts:
+    - CommonStockDividendsPerShareDeclared
+    - CommonStockDividendsPerShareCashPaid
+    tree_hints:
+      statements:
+      - INCOME
+    universal: false
+    validation_tolerance: 15
+    importance_tier: exploratory
+derived_metrics:
+  FreeCashFlow:
+    formula: OperatingCashFlow - Capex
+    requires:
+    - OperatingCashFlow
+    - Capex
+  TangibleAssets:
+    formula: TotalAssets - Goodwill - IntangibleAssets
+    requires:
+    - TotalAssets
+    - Goodwill
+    - IntangibleAssets
+  NetDebt:
+    formula: ShortTermDebt + LongTermDebt - CashAndEquivalents
+    requires:
+    - ShortTermDebt
+    - LongTermDebt
+    - CashAndEquivalents
+  EBITDA:
+    formula: OperatingIncome + DepreciationAmortization
+    requires:
+    - OperatingIncome
+    - DepreciationAmortization
+  WorkingCapital:
+    formula: CurrentAssets - CurrentLiabilities
+    requires:
+    - CurrentAssets
+    - CurrentLiabilities
+  TotalDebt:
+    formula: ShortTermDebt + LongTermDebt
+    requires:
+    - ShortTermDebt
+    - LongTermDebt

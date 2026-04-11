@@ -1,0 +1,272 @@
+{
+  "run_id": "e2e_industrial_2026-01-27T13:34:55.408166",
+  "timestamp": "2026-01-27T13:34:55.408175",
+  "config": {
+    "group": "industrial_33",
+    "workers": 8,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": null,
+    "tickers": [
+      "COP",
+      "UNH",
+      "HON",
+      "PFE"
+    ]
+  },
+  "overall_summary": {
+    "10k_total": 61,
+    "10k_passed": 58,
+    "10k_skipped": 6,
+    "10q_total": 61,
+    "10q_passed": 59,
+    "10q_skipped": 3
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 18,
+      "10k_passed": 17,
+      "10k_skipped": 1,
+      "10q_total": 17,
+      "10q_passed": 17,
+      "10q_skipped": 1
+    },
+    "Consumer_Staples": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 13,
+      "10k_passed": 11,
+      "10k_skipped": 2,
+      "10q_total": 13,
+      "10q_passed": 12,
+      "10q_skipped": 1
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 30,
+      "10k_passed": 30,
+      "10k_skipped": 3,
+      "10q_total": 31,
+      "10q_passed": 30,
+      "10q_skipped": 1
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 5,
+  "skipped_count": 9,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0001163165-25-000012",
+      "metric": "COGS",
+      "xbrl_value": 20012000000.0,
+      "ref_value": 38362000000.0,
+      "variance_pct": 47.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CostOfGoodsAndServicesSold",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0001163165-25-000012",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 1035000000.0,
+      "ref_value": 743000000.0,
+      "variance_pct": 39.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:DebtCurrent",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001163165-25-000058",
+      "metric": "COGS",
+      "xbrl_value": 5857000000.0,
+      "ref_value": 11406000000.0,
+      "variance_pct": 48.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CostOfGoodsAndServicesSold",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "UNH",
+      "sector": "Healthcare_Pharma",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000731766-25-000305",
+      "metric": "DividendsPaid",
+      "xbrl_value": -2000000.0,
+      "ref_value": -2002000000.0,
+      "variance_pct": 99.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsOfDividendsCommonStock",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "HON",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000773840-25-000010",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 4273000000.0,
+      "ref_value": 5620000000.0,
+      "variance_pct": 24.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": "aerospace",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    }
+  ],
+  "skipped": [
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 162.0,
+      "reason": "COP uses E&P-specific cost structure. Tree parser selects concepts that include items yfinance excludes from OperatingIncome. Energy sector has non-standard income statement format.\n"
+    },
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "Capex",
+      "variance_pct": 913.2,
+      "reason": "INVESTIGATED 2026-01-27: COP uses company-extension concept cop:PaymentToAcquireProductiveAssetsAndInvestments ($12,118M) for capex. No standard us-gaap:PaymentsToAcquirePropertyPlantAndEquipment or us-gaap:PaymentsToAcquireProductiveAssets in calc trees or facts. Tree parser cannot match any known_concepts, then partial matching in facts fallback matches 'Assets' from us-gaap:Assets ($122.8B balance sheet total). All Capex known_concepts are us-gaap: namespace; COP's cop: namespace concept is invisible to the matcher.\n"
+    },
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-Q",
+      "metric": "Capex",
+      "variance_pct": 4173.3,
+      "reason": "INVESTIGATED 2026-01-27: COP uses company-extension concept cop:PaymentToAcquireProductiveAssetsAndInvestments ($12,118M) for capex. No standard us-gaap:PaymentsToAcquirePropertyPlantAndEquipment or us-gaap:PaymentsToAcquireProductiveAssets in calc trees or facts. Tree parser cannot match any known_concepts, then partial matching in facts fallback matches 'Assets' from us-gaap:Assets ($122.8B balance sheet total). All Capex known_concepts are us-gaap: namespace; COP's cop: namespace concept is invisible to the matcher.\n"
+    },
+    {
+      "ticker": "UNH",
+      "sector": "Healthcare_Pharma",
+      "form": "10-K",
+      "metric": "Revenue",
+      "variance_pct": 78.4,
+      "reason": "INVESTIGATED 2026-01-27: UNH 10-K (0000731766-25-000063) has us-gaap:Revenues = $400,278M as parent concept in calc tree. Children: PremiumsEarnedNet ($308,810M), RevenueFromContractWithCustomerExcludingAssessedTax (~$86B products+services), InvestmentIncomeInterestAndDividend ($5,202M). Tree parser selects RevenueFromContractWithCustomerExcludingAssessedTax (first known_concept match in calc tree) instead of parent Revenues ($400B). Same root cause as PFE: known_concepts priority puts sub-component first. PremiumsEarnedNet IS in known_concepts list but is listed after RevenueFromContractWithCustomerExcludingAssessedTax.\n"
+    },
+    {
+      "ticker": "UNH",
+      "sector": "Healthcare_Pharma",
+      "form": "10-Q",
+      "metric": "Revenue",
+      "variance_pct": 79.6,
+      "reason": "INVESTIGATED 2026-01-27: UNH 10-K (0000731766-25-000063) has us-gaap:Revenues = $400,278M as parent concept in calc tree. Children: PremiumsEarnedNet ($308,810M), RevenueFromContractWithCustomerExcludingAssessedTax (~$86B products+services), InvestmentIncomeInterestAndDividend ($5,202M). Tree parser selects RevenueFromContractWithCustomerExcludingAssessedTax (first known_concept match in calc tree) instead of parent Revenues ($400B). Same root cause as PFE: known_concepts priority puts sub-component first. PremiumsEarnedNet IS in known_concepts list but is listed after RevenueFromContractWithCustomerExcludingAssessedTax.\n"
+    },
+    {
+      "ticker": "HON",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "DepreciationAmortization",
+      "variance_pct": 49.7,
+      "reason": "INVESTIGATED 2026-01-27: HON has BOTH concepts in facts: us-gaap:Depreciation = $671M and us-gaap:DepreciationDepletionAndAmortization = $1,334M. Calc tree contains only us-gaap:Depreciation (in CONSOLIDATEDSTATEMENTOFCASHFLOWS, parent=NetCashProvidedByUsedInOperatingActivities). Also has us-gaap:AdjustmentForAmortization = $663M as separate cash flow line. DepreciationDepletionAndAmortization ($1,334M) exists in facts but NOT in calc trees. Tree parser matches Depreciation (3rd known_concept) via direct calc tree match. DDA is only found via facts fallback at lower confidence. Calc tree match (Depreciation, 0.95) wins over facts fallback (DDA, 0.85).\n"
+    },
+    {
+      "ticker": "HON",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "metric": "DepreciationAmortization",
+      "variance_pct": 51.9,
+      "reason": "INVESTIGATED 2026-01-27: HON has BOTH concepts in facts: us-gaap:Depreciation = $671M and us-gaap:DepreciationDepletionAndAmortization = $1,334M. Calc tree contains only us-gaap:Depreciation (in CONSOLIDATEDSTATEMENTOFCASHFLOWS, parent=NetCashProvidedByUsedInOperatingActivities). Also has us-gaap:AdjustmentForAmortization = $663M as separate cash flow line. DepreciationDepletionAndAmortization ($1,334M) exists in facts but NOT in calc trees. Tree parser matches Depreciation (3rd known_concept) via direct calc tree match. DDA is only found via facts fallback at lower confidence. Calc tree match (Depreciation, 0.95) wins over facts fallback (DDA, 0.85).\n"
+    },
+    {
+      "ticker": "PFE",
+      "sector": "Healthcare_Pharma",
+      "form": "10-K",
+      "metric": "Revenue",
+      "variance_pct": 99.3,
+      "reason": "INVESTIGATED 2026-01-27: Tree parser concept priority issue. PFE 2024 10-K (0000078003-25-000054) has us-gaap:Revenues = $63,627M as parent concept. Children: RevenueFromContractWithCustomerExcludingAssessedTax (product+royalty ~$55B) and RevenueFromCollaborativeArrangementExcludingRevenueFromContractWithCustomer ($8,388M alliance). Tree parser selects RevenueFromContractWithCustomerExcludingAssessedTax (first known_concept match in calc tree) instead of parent Revenues. Same tree structure in 2023 10-K. NOT year-specific - affects all years. PFE splits revenue into ASC 606 contract + collaborative arrangement components.\n"
+    },
+    {
+      "ticker": "PFE",
+      "sector": "Healthcare_Pharma",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 21.0,
+      "reason": "PFE has significant COVID vaccine related charges and R&D capitalization that affect OperatingIncome comparability. Industry logic calculation returns negative values due to incorrect expense aggregation.\n"
+    }
+  ],
+  "errors": []
+}

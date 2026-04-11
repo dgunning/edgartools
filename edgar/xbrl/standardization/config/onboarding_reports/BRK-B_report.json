@@ -1,0 +1,123 @@
+{
+  "ticker": "BRK-B",
+  "cik": 1067983,
+  "company_name": "BERKSHIRE HATHAWAY INC",
+  "archetype": "E",
+  "sic_code": "6331",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  BRK-B:\n    name: \"BERKSHIRE HATHAWAY INC\"\n    cik: 1067983\n    exclude_metrics:\n      - AccountsPayable\n      - COGS\n      - Capex\n      - GrossProfit\n      - Inventory\n      - LongTermDebt\n      - OperatingIncome\n      - StockBasedCompensation\n      - WeightedAverageSharesDiluted",
+  "metrics_passed": [
+    "Revenue",
+    "NetIncome",
+    "OperatingCashFlow",
+    "TotalAssets",
+    "Goodwill",
+    "IntangibleAssets",
+    "ShortTermDebt",
+    "CashAndEquivalents",
+    "AccountsReceivable",
+    "DepreciationAmortization",
+    "InterestExpense",
+    "IncomeTaxExpense",
+    "EarningsPerShareBasic",
+    "TotalLiabilities",
+    "StockholdersEquity",
+    "PropertyPlantEquipment",
+    "RetainedEarnings",
+    "InvestingCashFlow",
+    "FinancingCashFlow",
+    "ShareRepurchases"
+  ],
+  "metrics_failed": [
+    "SGA",
+    "PretaxIncome",
+    "DividendsPaid",
+    "ResearchAndDevelopment",
+    "EarningsPerShareDiluted",
+    "CurrentAssets",
+    "CurrentLiabilities",
+    "DividendPerShare"
+  ],
+  "metrics_excluded": [
+    "COGS",
+    "OperatingIncome",
+    "Capex",
+    "LongTermDebt",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "Inventory",
+    "AccountsPayable",
+    "GrossProfit"
+  ],
+  "failures": {
+    "SGA": {
+      "metric": "SGA",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 110376000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "DividendsPaid": {
+      "metric": "DividendsPaid",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "ResearchAndDevelopment": {
+      "metric": "ResearchAndDevelopment",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "EarningsPerShareDiluted": {
+      "metric": "EarningsPerShareDiluted",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 41.266687,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "CurrentAssets": {
+      "metric": "CurrentAssets",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "CurrentLiabilities": {
+      "metric": "CurrentLiabilities",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "DividendPerShare": {
+      "metric": "DividendPerShare",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": false,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-04-04T09:58:32.839106"
+}

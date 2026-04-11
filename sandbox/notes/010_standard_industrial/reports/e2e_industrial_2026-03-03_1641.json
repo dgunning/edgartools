@@ -1,0 +1,272 @@
+{
+  "run_id": "e2e_industrial_2026-03-03T16:41:01.134117",
+  "timestamp": "2026-03-03T16:41:01.134126",
+  "config": {
+    "group": "industrial_33",
+    "workers": 4,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": null,
+    "tickers": [
+      "CRM",
+      "ADBE",
+      "SNOW",
+      "NOW"
+    ],
+    "snapshot_mode": true
+  },
+  "overall_summary": {
+    "10k_total": 31,
+    "10k_passed": 27,
+    "10k_skipped": 0,
+    "10q_total": 30,
+    "10q_passed": 25,
+    "10q_skipped": 0
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 9,
+  "skipped_count": 0,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "CRM",
+      "sector": "Unknown",
+      "form": "10-K",
+      "filing_date": "2025-01-31",
+      "accession_no": "0001108524-25-000006",
+      "metric": "Revenue",
+      "xbrl_value": 2216000000.0,
+      "ref_value": 37895000000.0,
+      "variance_pct": 94.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "CRM",
+      "sector": "Unknown",
+      "form": "10-K",
+      "filing_date": "2025-01-31",
+      "accession_no": "0001108524-25-000006",
+      "metric": "StockBasedCompensation",
+      "xbrl_value": 518000000.0,
+      "ref_value": 3183000000.0,
+      "variance_pct": 83.7,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShareBasedCompensation",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "CRM",
+      "sector": "Unknown",
+      "form": "10-Q",
+      "filing_date": "2025-10-31",
+      "accession_no": "0001108524-25-000238",
+      "metric": "Revenue",
+      "xbrl_value": 533000000.0,
+      "ref_value": 10259000000.0,
+      "variance_pct": 94.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "CRM",
+      "sector": "Unknown",
+      "form": "10-Q",
+      "filing_date": "2025-10-31",
+      "accession_no": "0001108524-25-000238",
+      "metric": "Goodwill",
+      "xbrl_value": 704000000.0,
+      "ref_value": 52457000000.0,
+      "variance_pct": 98.7,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "CRM",
+      "sector": "Unknown",
+      "form": "10-Q",
+      "filing_date": "2025-10-31",
+      "accession_no": "0001108524-25-000238",
+      "metric": "IntangibleAssets",
+      "xbrl_value": 4195000000.0,
+      "ref_value": 55948000000.0,
+      "variance_pct": 92.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "CRM",
+      "sector": "Unknown",
+      "form": "10-Q",
+      "filing_date": "2025-10-31",
+      "accession_no": "0001108524-25-000238",
+      "metric": "StockBasedCompensation",
+      "xbrl_value": 129000000.0,
+      "ref_value": 819000000.0,
+      "variance_pct": 84.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShareBasedCompensation",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "ADBE",
+      "sector": "Unknown",
+      "form": "10-K",
+      "filing_date": "2024-11-29",
+      "accession_no": "0000796343-25-000004",
+      "metric": "Goodwill",
+      "xbrl_value": 3889000000.0,
+      "ref_value": 12788000000.0,
+      "variance_pct": 69.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "ADBE",
+      "sector": "Unknown",
+      "form": "10-K",
+      "filing_date": "2024-11-29",
+      "accession_no": "0000796343-25-000004",
+      "metric": "IntangibleAssets",
+      "xbrl_value": 4350000000.0,
+      "ref_value": 13570000000.0,
+      "variance_pct": 67.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "ADBE",
+      "sector": "Unknown",
+      "form": "10-Q",
+      "filing_date": "2025-08-29",
+      "accession_no": "0000796343-25-000107",
+      "metric": "Revenue",
+      "xbrl_value": 68000000.0,
+      "ref_value": 5988000000.0,
+      "variance_pct": 98.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Revenues",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    }
+  ],
+  "skipped": [],
+  "errors": []
+}

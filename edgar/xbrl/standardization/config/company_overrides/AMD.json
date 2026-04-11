@@ -1,0 +1,12 @@
+{
+  "exclude_metrics": {
+    "DividendPerShare": {
+      "reason": "not_applicable",
+      "notes": "Company does not pay dividends"
+    },
+    "ShareRepurchases": {
+      "reason": "not_applicable",
+      "notes": "Auto-excluded: concept absent from all XBRL sources"
+    }
+  }
+}

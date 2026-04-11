@@ -1,0 +1,109 @@
+{
+  "ticker": "SHW",
+  "cik": 89800,
+  "company_name": "SHERWIN WILLIAMS CO",
+  "archetype": "A",
+  "sic_code": "5200",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  SHW:\n    name: \"SHERWIN WILLIAMS CO\"\n    cik: 89800\n    exclude_metrics:\n      - COGS\n      - Goodwill\n      - IntangibleAssets\n      - Inventory",
+  "metrics_passed": [
+    "Revenue",
+    "COGS",
+    "OperatingIncome",
+    "NetIncome",
+    "OperatingCashFlow",
+    "Capex",
+    "TotalAssets",
+    "Goodwill",
+    "IntangibleAssets",
+    "ShortTermDebt",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "Inventory",
+    "AccountsReceivable",
+    "AccountsPayable",
+    "DepreciationAmortization",
+    "GrossProfit",
+    "InterestExpense",
+    "IncomeTaxExpense",
+    "EarningsPerShareDiluted",
+    "EarningsPerShareBasic",
+    "CurrentAssets",
+    "CurrentLiabilities",
+    "TotalLiabilities",
+    "StockholdersEquity",
+    "RetainedEarnings",
+    "InvestingCashFlow",
+    "FinancingCashFlow",
+    "ShareRepurchases"
+  ],
+  "metrics_failed": [
+    "SGA",
+    "PretaxIncome",
+    "ResearchAndDevelopment",
+    "PropertyPlantEquipment",
+    "DividendPerShare"
+  ],
+  "metrics_excluded": [
+    "COGS",
+    "Inventory",
+    "Goodwill",
+    "IntangibleAssets",
+    "SGA",
+    "OperatingIncome",
+    "Capex",
+    "GrossProfit",
+    "CurrentAssets",
+    "CurrentLiabilities"
+  ],
+  "failures": {
+    "SGA": {
+      "metric": "SGA",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 7422100000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 3451800000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "ResearchAndDevelopment": {
+      "metric": "ResearchAndDevelopment",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "PropertyPlantEquipment": {
+      "metric": "PropertyPlantEquipment",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 5487000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "DividendPerShare": {
+      "metric": "DividendPerShare",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 2.86,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": false,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-04-04T09:57:00.693530"
+}

@@ -1,0 +1,110 @@
+{
+  "ticker": "NOC",
+  "cik": 1133421,
+  "company_name": "NORTHROP GRUMMAN CORP /DE/",
+  "archetype": "A",
+  "sic_code": "3812",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  NOC:\n    name: \"NORTHROP GRUMMAN CORP /DE/\"\n    cik: 1133421\n    exclude_metrics:\n      - COGS\n      - GrossProfit\n      - Inventory",
+  "metrics_passed": [
+    "Revenue",
+    "COGS",
+    "OperatingIncome",
+    "NetIncome",
+    "OperatingCashFlow",
+    "Capex",
+    "TotalAssets",
+    "Goodwill",
+    "IntangibleAssets",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "Inventory",
+    "AccountsReceivable",
+    "AccountsPayable",
+    "DepreciationAmortization",
+    "InterestExpense",
+    "IncomeTaxExpense",
+    "EarningsPerShareDiluted",
+    "EarningsPerShareBasic",
+    "CurrentAssets",
+    "CurrentLiabilities",
+    "TotalLiabilities",
+    "StockholdersEquity",
+    "PropertyPlantEquipment",
+    "RetainedEarnings",
+    "InvestingCashFlow",
+    "FinancingCashFlow",
+    "ShareRepurchases"
+  ],
+  "metrics_failed": [
+    "SGA",
+    "PretaxIncome",
+    "ShortTermDebt",
+    "GrossProfit",
+    "ResearchAndDevelopment",
+    "DividendPerShare"
+  ],
+  "metrics_excluded": [
+    "Inventory",
+    "GrossProfit",
+    "COGS"
+  ],
+  "failures": {
+    "SGA": {
+      "metric": "SGA",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 3992000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 5016000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "ShortTermDebt": {
+      "metric": "ShortTermDebt",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 1582000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "GrossProfit": {
+      "metric": "GrossProfit",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 8362000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "ResearchAndDevelopment": {
+      "metric": "ResearchAndDevelopment",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 1100000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "DividendPerShare": {
+      "metric": "DividendPerShare",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 8.05,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": false,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-04-04T09:57:12.889742"
+}

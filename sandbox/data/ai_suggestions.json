@@ -1,0 +1,58 @@
+[
+  {
+    "suggested_mapping": "IncomeTaxExpense",
+    "confidence": "medium",
+    "reasoning": "Label contains 'IncomeTaxes' which suggests a tax-related expense, but 'Accrued' and 'Current' may not perfectly align with IncomeTaxExpense.",
+    "concept": "AccruedIncomeTaxesCurrent",
+    "label": "AccruedIncomeTaxesCurrent"
+  },
+  {
+    "suggested_mapping": "IncomeTaxExpense",
+    "confidence": "medium",
+    "reasoning": "The concept relates to income taxes, but 'AccruedIncomeTaxesNoncurrent' is a balance sheet item, while 'IncomeTaxExpense' is an income statement item. The closest match is 'IncomeTaxExpense' due to the tax-related nature.",
+    "concept": "AccruedIncomeTaxesNoncurrent",
+    "label": "AccruedIncomeTaxesNoncurrent"
+  },
+  {
+    "suggested_mapping": "AccruedLiabilities",
+    "confidence": "medium",
+    "reasoning": "The label 'AccruedIncomeTaxesPayable' suggests a liability related to taxes, which is a type of accrued liability.",
+    "concept": "AccruedIncomeTaxesPayable",
+    "label": "AccruedIncomeTaxesPayable"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to accumulated other comprehensive income, which is not listed in the provided standard concepts.",
+    "concept": "AccumulatedOtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax",
+    "label": "AccumulatedOtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to accumulated other comprehensive income, which is not listed in the available standard concepts.",
+    "concept": "AccumulatedOtherComprehensiveIncomeLossCumulativeChangesInNetGainLossFromCashFlowHedgesEffectNetOfTax",
+    "label": "AccumulatedOtherComprehensiveIncomeLossCumulativeChangesInNetGainLossFromCashFlowHedgesEffectNetOfTax"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "The concept relates to accumulated other comprehensive income, which is not listed in the available standard concepts.",
+    "concept": "AccumulatedOtherComprehensiveIncomeLossForeignCurrencyTranslationAdjustmentNetOfTax",
+    "label": "AccumulatedOtherComprehensiveIncomeLossForeignCurrencyTranslationAdjustmentNetOfTax"
+  },
+  {
+    "suggested_mapping": "UNKNOWN",
+    "confidence": "high",
+    "reasoning": "Accumulated other comprehensive income/loss is not listed in the provided standard concepts.",
+    "concept": "AccumulatedOtherComprehensiveIncomeLossNetOfTax",
+    "label": "AccumulatedOtherComprehensiveIncomeLossNetOfTax"
+  },
+  {
+    "suggested_mapping": "IntangibleAssets",
+    "confidence": "medium",
+    "reasoning": "The concept relates to intangible assets, specifically their useful life, but does not directly match the standard 'IntangibleAssets' metric.",
+    "concept": "AcquiredFiniteLivedIntangibleAssetWeightedAverageUsefulLife",
+    "label": "AcquiredFiniteLivedIntangibleAssetWeightedAverageUsefulLife"
+  }
+]

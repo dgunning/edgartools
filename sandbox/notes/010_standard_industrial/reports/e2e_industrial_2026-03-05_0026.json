@@ -1,0 +1,1075 @@
+{
+  "run_id": "e2e_industrial_2026-03-05T00:26:05.005409",
+  "timestamp": "2026-03-05T00:26:05.005418",
+  "config": {
+    "group": "industrial_33",
+    "workers": 1,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": null,
+    "tickers": [
+      "AAPL",
+      "MSFT",
+      "GOOG",
+      "AMZN",
+      "META",
+      "NVDA",
+      "TSLA",
+      "CAT",
+      "GE",
+      "HON",
+      "DE",
+      "MMM",
+      "EMR",
+      "RTX",
+      "ASTE",
+      "PG",
+      "KO",
+      "PEP",
+      "WMT",
+      "COST",
+      "HSY",
+      "XOM",
+      "CVX",
+      "COP",
+      "SLB",
+      "PBF",
+      "JNJ",
+      "UNH",
+      "LLY",
+      "PFE",
+      "UPS",
+      "FDX",
+      "BA",
+      "BRK-B",
+      "MET",
+      "AIG",
+      "NEE",
+      "DUK",
+      "SO",
+      "AMT",
+      "PLD",
+      "SPG"
+    ],
+    "snapshot_mode": true
+  },
+  "overall_summary": {
+    "10k_total": 525,
+    "10k_passed": 505,
+    "10k_skipped": 20,
+    "10q_total": 618,
+    "10q_passed": 603,
+    "10q_skipped": 14
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 121,
+      "10k_passed": 119,
+      "10k_skipped": 0,
+      "10q_total": 122,
+      "10q_passed": 119,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 96,
+      "10k_passed": 92,
+      "10k_skipped": 9,
+      "10q_total": 116,
+      "10q_passed": 113,
+      "10q_skipped": 5
+    },
+    "Consumer_Staples": {
+      "10k_total": 108,
+      "10k_passed": 102,
+      "10k_skipped": 0,
+      "10q_total": 89,
+      "10q_passed": 87,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 59,
+      "10k_passed": 55,
+      "10k_skipped": 3,
+      "10q_total": 72,
+      "10q_passed": 68,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 37,
+      "10k_passed": 37,
+      "10k_skipped": 1,
+      "10q_total": 68,
+      "10q_passed": 67,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 53,
+      "10k_passed": 51,
+      "10k_skipped": 0,
+      "10q_total": 52,
+      "10q_passed": 50,
+      "10q_skipped": 0
+    },
+    "Insurance": {
+      "10k_total": 21,
+      "10k_passed": 19,
+      "10k_skipped": 1,
+      "10q_total": 20,
+      "10q_passed": 20,
+      "10q_skipped": 1
+    },
+    "Utilities": {
+      "10k_total": 29,
+      "10k_passed": 29,
+      "10k_skipped": 6,
+      "10q_total": 45,
+      "10q_passed": 45,
+      "10q_skipped": 5
+    },
+    "Real_Estate": {
+      "10k_total": 1,
+      "10k_passed": 1,
+      "10k_skipped": 0,
+      "10q_total": 34,
+      "10q_passed": 34,
+      "10q_skipped": 3
+    }
+  },
+  "failure_count": 35,
+  "skipped_count": 34,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "MSFT",
+      "sector": "MAG7",
+      "form": "10-K",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000950170-25-100235",
+      "metric": "DepreciationAmortization",
+      "xbrl_value": 87831000000.0,
+      "ref_value": 34153000000.0,
+      "variance_pct": 157.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CostOfGoodsAndServicesSold",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "MSFT",
+      "sector": "MAG7",
+      "form": "10-Q",
+      "filing_date": "2025-12-31",
+      "accession_no": "0001193125-26-027207",
+      "metric": "DepreciationAmortization",
+      "xbrl_value": 25978000000.0,
+      "ref_value": 9198000000.0,
+      "variance_pct": 182.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CostOfGoodsAndServicesSold",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "META",
+      "sector": "MAG7",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001628280-25-047240",
+      "metric": "IntangibleAssets",
+      "xbrl_value": 24337000000.0,
+      "ref_value": 21158000000.0,
+      "variance_pct": 15.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "NVDA",
+      "sector": "MAG7",
+      "form": "10-Q",
+      "filing_date": "2025-10-26",
+      "accession_no": "0001045810-25-000230",
+      "metric": "DividendsPaid",
+      "xbrl_value": -488000000.0,
+      "ref_value": -244000000.0,
+      "variance_pct": 100.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsOfDividends",
+      "industry": "semiconductors",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "TSLA",
+      "sector": "MAG7",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0001628280-26-003952",
+      "metric": "IntangibleAssets",
+      "xbrl_value": 381000000.0,
+      "ref_value": 1389000000.0,
+      "variance_pct": 72.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "automotive",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "filing_date": "2025-11-02",
+      "accession_no": "0001104659-25-122321",
+      "metric": "LongTermDebt",
+      "xbrl_value": 73000000.0,
+      "ref_value": 43544000000.0,
+      "variance_pct": 99.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:FinanceLeaseLiabilityNoncurrent",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "RTX",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0000101829-26-000006",
+      "metric": "Capex",
+      "xbrl_value": -2627000000.0,
+      "ref_value": -3119000000.0,
+      "variance_pct": 15.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "aerospace",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "RTX",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0000101829-26-000006",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 204000000.0,
+      "ref_value": 3616000000.0,
+      "variance_pct": 94.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CommercialPaper",
+      "industry": "aerospace",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "RTX",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0000101829-26-000006",
+      "metric": "StockBasedCompensation",
+      "xbrl_value": 519000000.0,
+      "ref_value": 1092000000.0,
+      "variance_pct": 52.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShareBasedCompensation",
+      "industry": "aerospace",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "RTX",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000101829-25-000042",
+      "metric": "Capex",
+      "xbrl_value": -614000000.0,
+      "ref_value": -735000000.0,
+      "variance_pct": 16.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "aerospace",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "RTX",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000101829-25-000042",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 215000000.0,
+      "ref_value": 799000000.0,
+      "variance_pct": 73.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CommercialPaper",
+      "industry": "aerospace",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "RTX",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000101829-25-000042",
+      "metric": "StockBasedCompensation",
+      "xbrl_value": 113000000.0,
+      "ref_value": 241000000.0,
+      "variance_pct": 53.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShareBasedCompensation",
+      "industry": "aerospace",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "KO",
+      "sector": "Consumer_Staples",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0001628280-26-010047",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 1495000000.0,
+      "ref_value": 3373000000.0,
+      "variance_pct": 55.7,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CommercialPaper",
+      "industry": "consumergoods",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "KO",
+      "sector": "Consumer_Staples",
+      "form": "10-Q",
+      "filing_date": "2025-09-26",
+      "accession_no": "0001628280-25-046054",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 1992000000.0,
+      "ref_value": 4239000000.0,
+      "variance_pct": 53.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CommercialPaper",
+      "industry": "consumergoods",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "PEP",
+      "sector": "Consumer_Staples",
+      "form": "10-K",
+      "filing_date": "2025-12-27",
+      "accession_no": "0000077476-26-000007",
+      "metric": "AccountsReceivable",
+      "xbrl_value": 11506000000.0,
+      "ref_value": 9265000000.0,
+      "variance_pct": 24.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:AccountsNotesAndLoansReceivableNetCurrent",
+      "industry": "consumergoods",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "PEP",
+      "sector": "Consumer_Staples",
+      "form": "10-K",
+      "filing_date": "2025-12-27",
+      "accession_no": "0000077476-26-000007",
+      "metric": "DepreciationAmortization",
+      "xbrl_value": 3451000000.0,
+      "ref_value": 4178000000.0,
+      "variance_pct": 17.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:DepreciationDepletionAndAmortization",
+      "industry": "consumergoods",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "WMT",
+      "sector": "Consumer_Staples",
+      "form": "10-K",
+      "filing_date": "2025-01-31",
+      "accession_no": "0000104169-25-000021",
+      "metric": "IntangibleAssets",
+      "xbrl_value": 33292000000.0,
+      "ref_value": 28792000000.0,
+      "variance_pct": 15.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "retail",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "HSY",
+      "sector": "Consumer_Staples",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0001628280-26-008586",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 218546000.0,
+      "ref_value": 717374000.0,
+      "variance_pct": 69.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtCurrent",
+      "industry": "consumergoods",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "HSY",
+      "sector": "Consumer_Staples",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0001628280-26-008586",
+      "metric": "AccountsPayable",
+      "xbrl_value": 1255701000.0,
+      "ref_value": 831204000.0,
+      "variance_pct": 51.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:AccountsPayableCurrent",
+      "industry": "consumergoods",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "HSY",
+      "sector": "Consumer_Staples",
+      "form": "10-Q",
+      "filing_date": "2025-09-28",
+      "accession_no": "0001628280-25-047471",
+      "metric": "AccountsPayable",
+      "xbrl_value": 1459680000.0,
+      "ref_value": 803839000.0,
+      "variance_pct": 81.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:AccountsPayableCurrent",
+      "industry": "consumergoods",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "XOM",
+      "sector": "Energy",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0000034088-26-000045",
+      "metric": "COGS",
+      "xbrl_value": 1007000000.0,
+      "ref_value": 252665000000.0,
+      "variance_pct": 99.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ExplorationExpense",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "XOM",
+      "sector": "Energy",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0000034088-26-000045",
+      "metric": "LongTermDebt",
+      "xbrl_value": 34241000000.0,
+      "ref_value": 27928000000.0,
+      "variance_pct": 22.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "XOM",
+      "sector": "Energy",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000034088-25-000061",
+      "metric": "COGS",
+      "xbrl_value": 149000000.0,
+      "ref_value": 64497000000.0,
+      "variance_pct": 99.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ExplorationExpense",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "CVX",
+      "sector": "Energy",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000093410-25-000108",
+      "metric": "COGS",
+      "xbrl_value": 27398000000.0,
+      "ref_value": 33179000000.0,
+      "variance_pct": 17.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CostOfGoodsAndServicesSold",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0001163165-26-000009",
+      "metric": "COGS",
+      "xbrl_value": 22325000000.0,
+      "ref_value": 44156000000.0,
+      "variance_pct": 49.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CostOfGoodsAndServicesSold",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001163165-25-000058",
+      "metric": "COGS",
+      "xbrl_value": 5857000000.0,
+      "ref_value": 11406000000.0,
+      "variance_pct": 48.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CostOfGoodsAndServicesSold",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "SLB",
+      "sector": "Energy",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0001193125-26-021017",
+      "metric": "DepreciationAmortization",
+      "xbrl_value": 2643000000.0,
+      "ref_value": 2109000000.0,
+      "variance_pct": 25.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:DepreciationDepletionAndAmortization",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "SLB",
+      "sector": "Energy",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001193125-25-246028",
+      "metric": "Capex",
+      "xbrl_value": -409000000.0,
+      "ref_value": -577000000.0,
+      "variance_pct": 29.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check PaymentsToAcquireProductiveAssets vs PaymentsToAcquirePropertyPlantAndEquipment"
+      ]
+    },
+    {
+      "ticker": "PFE",
+      "sector": "Healthcare_Pharma",
+      "form": "10-Q",
+      "filing_date": "2025-09-28",
+      "accession_no": "0000078003-25-000150",
+      "metric": "DividendsPaid",
+      "xbrl_value": 0.0,
+      "ref_value": -2444000000.0,
+      "variance_pct": 100.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:DividendsCommonStockCash",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "UPS",
+      "sector": "Transportation",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0001628280-26-008432",
+      "metric": "COGS",
+      "xbrl_value": 2269000000.0,
+      "ref_value": 72631000000.0,
+      "variance_pct": 96.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CostOfOtherPropertyOperatingExpense",
+      "industry": "transportation",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "UPS",
+      "sector": "Transportation",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001628280-25-049661",
+      "metric": "COGS",
+      "xbrl_value": 548000000.0,
+      "ref_value": 17929000000.0,
+      "variance_pct": 96.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CostOfOtherPropertyOperatingExpense",
+      "industry": "transportation",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "BA",
+      "sector": "Transportation",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0001628280-26-004357",
+      "metric": "Inventory",
+      "xbrl_value": 720000000.0,
+      "ref_value": 84679000000.0,
+      "variance_pct": 99.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:InventoryForLongTermContractsOrPrograms",
+      "industry": "aerospace",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "BA",
+      "sector": "Transportation",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001628280-25-047023",
+      "metric": "Inventory",
+      "xbrl_value": 447000000.0,
+      "ref_value": 82425000000.0,
+      "variance_pct": 99.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:InventoryForLongTermContractsOrPrograms",
+      "industry": "aerospace",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "MET",
+      "sector": "Insurance",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0001099219-26-000013",
+      "metric": "AccountsReceivable",
+      "xbrl_value": 84558000000.0,
+      "ref_value": 49059000000.0,
+      "variance_pct": 72.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NotesReceivableNet",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AIG",
+      "sector": "Insurance",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0000005272-26-000023",
+      "metric": "IntangibleAssets",
+      "xbrl_value": 4119000000.0,
+      "ref_value": 3435000000.0,
+      "variance_pct": 19.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    }
+  ],
+  "skipped": [
+    {
+      "ticker": "CAT",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "Capex",
+      "variance_pct": 34.2,
+      "reason": "Cat Financial investing activities ($3.2B) included in consolidated capex but not in equipment segment PP&E ($2.0B). Same subsidiary contamination as debt metrics.\n"
+    },
+    {
+      "ticker": "CAT",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "ShortTermDebt",
+      "variance_pct": 56.4,
+      "reason": "Cat Financial subsidiary debt not included in ShortTermBorrowings. yfinance consolidates all debt; XBRL extracts industrial segment only.\n"
+    },
+    {
+      "ticker": "CAT",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "AccountsReceivable",
+      "variance_pct": 49.4,
+      "reason": "Cat Financial receivables (dealer/customer financing) not included in standard AccountsReceivableNetCurrent.\n"
+    },
+    {
+      "ticker": "CAT",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "metric": "Capex",
+      "variance_pct": 38.6,
+      "reason": "Cat Financial investing activities ($3.2B) included in consolidated capex but not in equipment segment PP&E ($2.0B). Same subsidiary contamination as debt metrics.\n"
+    },
+    {
+      "ticker": "CAT",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "metric": "AccountsReceivable",
+      "variance_pct": 50.4,
+      "reason": "Cat Financial receivables (dealer/customer financing) not included in standard AccountsReceivableNetCurrent.\n"
+    },
+    {
+      "ticker": "GE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "AccountsReceivable",
+      "variance_pct": 27.0,
+      "reason": "Post-Vernova spin-off balance sheet restructuring.\n"
+    },
+    {
+      "ticker": "GE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "AccountsPayable",
+      "variance_pct": 75.8,
+      "reason": "GE Aerospace AP ($7.9B) includes items yfinance excludes ($4.6B). Post-spin-off balance sheet structure differences.\n"
+    },
+    {
+      "ticker": "GE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "DepreciationAmortization",
+      "variance_pct": 29.3,
+      "reason": "Post-Vernova spin-off, D&A restated for aerospace-only. GE uses DepreciationAmortizationAndAccretionNet which captures a different scope than yfinance's D&A.\n"
+    },
+    {
+      "ticker": "GE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "metric": "AccountsReceivable",
+      "variance_pct": 25.4,
+      "reason": "Post-Vernova spin-off balance sheet restructuring.\n"
+    },
+    {
+      "ticker": "GE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "metric": "AccountsPayable",
+      "variance_pct": 28.2,
+      "reason": "GE Aerospace AP ($7.9B) includes items yfinance excludes ($4.6B). Post-spin-off balance sheet structure differences.\n"
+    },
+    {
+      "ticker": "GE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "metric": "DepreciationAmortization",
+      "variance_pct": 29.4,
+      "reason": "Post-Vernova spin-off, D&A restated for aerospace-only. GE uses DepreciationAmortizationAndAccretionNet which captures a different scope than yfinance's D&A.\n"
+    },
+    {
+      "ticker": "DE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 68.3,
+      "reason": "DE has financial services segment (John Deere Financial) that complicates OperatingIncome extraction. Equipment vs Financial segment reporting creates aggregation challenges.\n"
+    },
+    {
+      "ticker": "DE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "Capex",
+      "variance_pct": 67.8,
+      "reason": "John Deere Financial investing activities included in consolidated capex. Equipment segment capex ($1.4B) vs consolidated ($4.2B).\n"
+    },
+    {
+      "ticker": "DE",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "metric": "ShortTermDebt",
+      "variance_pct": 32.2,
+      "reason": "John Deere Financial subsidiary debt inflates consolidated DebtCurrent. XBRL extracts $4.2B (equipment only) vs yfinance $20B+ (consolidated). Same financial subsidiary contamination as CAT.\n"
+    },
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 214.3,
+      "reason": "COP uses E&P-specific cost structure. Tree parser selects concepts that include items yfinance excludes from OperatingIncome. Energy sector has non-standard income statement format.\n"
+    },
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "ShortTermDebt",
+      "variance_pct": 42.9,
+      "reason": "COP DebtCurrent ($1.03B) vs yfinance ($0.74B). E&P capital structure includes credit facilities that yfinance classifies differently.\n"
+    },
+    {
+      "ticker": "SLB",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 234.1,
+      "reason": "SLB (oilfield services) uses segment-based reporting that doesn't aggregate cleanly to a consolidated OperatingIncome. Tree parser selects incorrect concept for total operating income.\n"
+    },
+    {
+      "ticker": "JNJ",
+      "sector": "Healthcare_Pharma",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 56.9,
+      "reason": "JNJ's segment structure (pharma, devices, consumer) and significant one-time charges/gains create OperatingIncome variance. Tree parser selects concepts that don't match yfinance's normalized calculation.\n"
+    },
+    {
+      "ticker": "MET",
+      "sector": "Insurance",
+      "form": "10-K",
+      "metric": "ShortTermDebt",
+      "variance_pct": 77.3,
+      "reason": "XBRL ShortTermBorrowings ($133M) vs yfinance ($465M). Insurance subsidiary short-term obligations not fully captured.\n"
+    },
+    {
+      "ticker": "AIG",
+      "sector": "Insurance",
+      "form": "10-Q",
+      "metric": "AccountsReceivable",
+      "variance_pct": 70.6,
+      "reason": "XBRL ReceivablesNetCurrent ($1.9B) vs yfinance ($10.5B). Insurance receivables (premiums receivable, reinsurance recoverables) not captured by standard AR concepts.\n"
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "Revenue",
+      "variance_pct": 99.1,
+      "reason": "XBRL selects wrong concept (DisposalGroupGain/EquityMethodInvestments). Utility holding company revenue not captured by standard tree extraction.\n"
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "COGS",
+      "variance_pct": 87.5,
+      "reason": "XBRL OperatingExpenses ($17.6B) vs yfinance COGS ($9.9B). Wrong concept used \u2014 captures all opex instead of cost of goods.\n"
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "Capex",
+      "variance_pct": 17.6,
+      "reason": "XBRL CapitalExpendituresIncurredButNotYetPaid vs standard Capex concept. Subsidiary-level extraction captures partial capex.\n"
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "IntangibleAssets",
+      "variance_pct": 24.6,
+      "reason": "Inherits Goodwill subsidiary-level extraction gap.\n"
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "Revenue",
+      "variance_pct": 97.4,
+      "reason": "XBRL selects wrong concept (DisposalGroupGain/EquityMethodInvestments). Utility holding company revenue not captured by standard tree extraction.\n"
+    },
+    {
+      "ticker": "NEE",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "Capex",
+      "variance_pct": 50.3,
+      "reason": "XBRL CapitalExpendituresIncurredButNotYetPaid vs standard Capex concept. Subsidiary-level extraction captures partial capex.\n"
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "AccountsReceivable",
+      "variance_pct": 99.7,
+      "reason": "Subsidiary-level AR ($1.9B) vs consolidated ($4.7B).\n"
+    },
+    {
+      "ticker": "SO",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "ShortTermDebt",
+      "variance_pct": 89.6,
+      "reason": "XBRL ShortTermBorrowings ($0) vs yfinance ($6.1B). Subsidiary level.\n"
+    },
+    {
+      "ticker": "SO",
+      "sector": "Utilities",
+      "form": "10-K",
+      "metric": "Inventory",
+      "variance_pct": 88.1,
+      "reason": "XBRL EnergyRelatedInventoryNaturalGasInStorage ($388M) captures only gas inventory vs yfinance total inventory ($3.4B).\n"
+    },
+    {
+      "ticker": "SO",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "ShortTermDebt",
+      "variance_pct": 98.1,
+      "reason": "XBRL ShortTermBorrowings ($0) vs yfinance ($6.1B). Subsidiary level.\n"
+    },
+    {
+      "ticker": "SO",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "metric": "Inventory",
+      "variance_pct": 87.3,
+      "reason": "XBRL EnergyRelatedInventoryNaturalGasInStorage ($388M) captures only gas inventory vs yfinance total inventory ($3.4B).\n"
+    },
+    {
+      "ticker": "AMT",
+      "sector": "Real_Estate",
+      "form": "10-Q",
+      "metric": "DividendsPaid",
+      "variance_pct": 96.4,
+      "reason": "PaymentsOfDividendsMinorityInterest ($391M) captures only minority interest dividends vs yfinance total ($3.1B). REITs have high dividend payouts.\n"
+    },
+    {
+      "ticker": "SPG",
+      "sector": "Real_Estate",
+      "form": "10-Q",
+      "metric": "NetIncome",
+      "variance_pct": 15.8,
+      "reason": "ProfitLoss ($2.7B) vs yfinance NetIncomeLoss ($2.4B). XBRL uses ProfitLoss which includes non-controlling interest attributable to operating partnership.\n"
+    },
+    {
+      "ticker": "SPG",
+      "sector": "Real_Estate",
+      "form": "10-Q",
+      "metric": "DividendsPaid",
+      "variance_pct": 86.6,
+      "reason": "PaymentsOfDividendsMinorityInterest ($399M) captures only minority interest dividends vs yfinance total ($3.0B).\n"
+    }
+  ],
+  "errors": []
+}

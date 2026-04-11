@@ -1,0 +1,757 @@
+{
+  "run_id": "025",
+  "label": "Strict EF-CQS rebaseline (Sub-project A)",
+  "cohort_size": 123,
+  "duration_seconds": 1641.9950602054596,
+  "aggregate": {
+    "ef_cqs_lenient": 0.8537342210349735,
+    "ef_cqs_strict": 0.8150967957280726,
+    "delta": 0.03863742530690095,
+    "cqs": 0.8265482150542092,
+    "weighted_ef_cqs": 0.8456119535387823,
+    "headline_ef_rate": 0.8848432055749131,
+    "explained_variance_count": 200,
+    "companies_evaluated": 123,
+    "total_metrics": 4551
+  },
+  "per_company": {
+    "AAPL": {
+      "ef_cqs": 0.8888888888888888,
+      "ef_cqs_strict": 0.8888888888888888,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "ABBV": {
+      "ef_cqs": 0.9166666666666666,
+      "ef_cqs_strict": 0.8918918918918919,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "ABT": {
+      "ef_cqs": 0.8333333333333334,
+      "ef_cqs_strict": 0.8108108108108109,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "ACN": {
+      "ef_cqs": 0.8484848484848485,
+      "ef_cqs_strict": 0.7777777777777778,
+      "explained_variance_count": 3,
+      "metrics_total": 37
+    },
+    "ADBE": {
+      "ef_cqs": 0.9117647058823529,
+      "ef_cqs_strict": 0.8378378378378378,
+      "explained_variance_count": 3,
+      "metrics_total": 37
+    },
+    "AIG": {
+      "ef_cqs": 0.84375,
+      "ef_cqs_strict": 0.7714285714285715,
+      "explained_variance_count": 3,
+      "metrics_total": 37
+    },
+    "AMD": {
+      "ef_cqs": 0.9117647058823529,
+      "ef_cqs_strict": 0.8611111111111112,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "AMGN": {
+      "ef_cqs": 0.8888888888888888,
+      "ef_cqs_strict": 0.8648648648648649,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "AMT": {
+      "ef_cqs": 0.7931034482758621,
+      "ef_cqs_strict": 0.6216216216216216,
+      "explained_variance_count": 8,
+      "metrics_total": 37
+    },
+    "AMZN": {
+      "ef_cqs": 0.8571428571428571,
+      "ef_cqs_strict": 0.8108108108108109,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "AON": {
+      "ef_cqs": 0.9142857142857143,
+      "ef_cqs_strict": 0.8888888888888888,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "APD": {
+      "ef_cqs": 0.8285714285714286,
+      "ef_cqs_strict": 0.8055555555555556,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "ASTE": {
+      "ef_cqs": 0.8378378378378378,
+      "ef_cqs_strict": 0.8378378378378378,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "AVGO": {
+      "ef_cqs": 0.9393939393939394,
+      "ef_cqs_strict": 0.8611111111111112,
+      "explained_variance_count": 3,
+      "metrics_total": 37
+    },
+    "AXP": {
+      "ef_cqs": 0.8857142857142857,
+      "ef_cqs_strict": 0.8611111111111112,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "BA": {
+      "ef_cqs": 0.8787878787878788,
+      "ef_cqs_strict": 0.8529411764705882,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "BAC": {
+      "ef_cqs": 0.8857142857142857,
+      "ef_cqs_strict": 0.8378378378378378,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "BK": {
+      "ef_cqs": 0.8857142857142857,
+      "ef_cqs_strict": 0.8857142857142857,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "BLK": {
+      "ef_cqs": 0.9411764705882353,
+      "ef_cqs_strict": 0.8888888888888888,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "BMY": {
+      "ef_cqs": 0.8333333333333334,
+      "ef_cqs_strict": 0.8108108108108109,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "BRK-B": {
+      "ef_cqs": 0.8518518518518519,
+      "ef_cqs_strict": 0.6764705882352942,
+      "explained_variance_count": 7,
+      "metrics_total": 37
+    },
+    "C": {
+      "ef_cqs": 0.8823529411764706,
+      "ef_cqs_strict": 0.8333333333333334,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "CAT": {
+      "ef_cqs": 0.8064516129032258,
+      "ef_cqs_strict": 0.6756756756756757,
+      "explained_variance_count": 6,
+      "metrics_total": 37
+    },
+    "CB": {
+      "ef_cqs": 0.8529411764705882,
+      "ef_cqs_strict": 0.8529411764705882,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "CI": {
+      "ef_cqs": 0.6944444444444444,
+      "ef_cqs_strict": 0.6944444444444444,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "CL": {
+      "ef_cqs": 0.8108108108108109,
+      "ef_cqs_strict": 0.8108108108108109,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "CMCSA": {
+      "ef_cqs": 0.8918918918918919,
+      "ef_cqs_strict": 0.8918918918918919,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "CME": {
+      "ef_cqs": 0.918918918918919,
+      "ef_cqs_strict": 0.918918918918919,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "COP": {
+      "ef_cqs": 0.7878787878787878,
+      "ef_cqs_strict": 0.7428571428571429,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "COST": {
+      "ef_cqs": 0.8108108108108109,
+      "ef_cqs_strict": 0.8108108108108109,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "CRM": {
+      "ef_cqs": 0.8,
+      "ef_cqs_strict": 0.6857142857142857,
+      "explained_variance_count": 5,
+      "metrics_total": 37
+    },
+    "CSCO": {
+      "ef_cqs": 0.8857142857142857,
+      "ef_cqs_strict": 0.8378378378378378,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "CSX": {
+      "ef_cqs": 0.8857142857142857,
+      "ef_cqs_strict": 0.8857142857142857,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "CVX": {
+      "ef_cqs": 0.8823529411764706,
+      "ef_cqs_strict": 0.8333333333333334,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "D": {
+      "ef_cqs": 0.7647058823529411,
+      "ef_cqs_strict": 0.7222222222222222,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "DE": {
+      "ef_cqs": 0.8918918918918919,
+      "ef_cqs_strict": 0.8918918918918919,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "DHR": {
+      "ef_cqs": 0.8888888888888888,
+      "ef_cqs_strict": 0.8648648648648649,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "DIS": {
+      "ef_cqs": 0.8888888888888888,
+      "ef_cqs_strict": 0.8648648648648649,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "DUK": {
+      "ef_cqs": 0.84,
+      "ef_cqs_strict": 0.6,
+      "explained_variance_count": 10,
+      "metrics_total": 37
+    },
+    "EMR": {
+      "ef_cqs": 0.8857142857142857,
+      "ef_cqs_strict": 0.8611111111111112,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "EQIX": {
+      "ef_cqs": 0.8333333333333334,
+      "ef_cqs_strict": 0.8333333333333334,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "FDX": {
+      "ef_cqs": 0.8857142857142857,
+      "ef_cqs_strict": 0.8611111111111112,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "GE": {
+      "ef_cqs": 0.7857142857142857,
+      "ef_cqs_strict": 0.5945945945945946,
+      "explained_variance_count": 9,
+      "metrics_total": 37
+    },
+    "GILD": {
+      "ef_cqs": 0.8648648648648649,
+      "ef_cqs_strict": 0.8648648648648649,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "GOOG": {
+      "ef_cqs": 0.8823529411764706,
+      "ef_cqs_strict": 0.8571428571428571,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "GS": {
+      "ef_cqs": 0.8823529411764706,
+      "ef_cqs_strict": 0.8108108108108109,
+      "explained_variance_count": 3,
+      "metrics_total": 37
+    },
+    "HD": {
+      "ef_cqs": 0.8571428571428571,
+      "ef_cqs_strict": 0.8108108108108109,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "HON": {
+      "ef_cqs": 0.8857142857142857,
+      "ef_cqs_strict": 0.8378378378378378,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "HSY": {
+      "ef_cqs": 0.8055555555555556,
+      "ef_cqs_strict": 0.8055555555555556,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "IBM": {
+      "ef_cqs": 0.8823529411764706,
+      "ef_cqs_strict": 0.8333333333333334,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "ICE": {
+      "ef_cqs": 0.8918918918918919,
+      "ef_cqs_strict": 0.8918918918918919,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "INTC": {
+      "ef_cqs": 0.8823529411764706,
+      "ef_cqs_strict": 0.8333333333333334,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "INTU": {
+      "ef_cqs": 0.8571428571428571,
+      "ef_cqs_strict": 0.8108108108108109,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "ITW": {
+      "ef_cqs": 0.9090909090909091,
+      "ef_cqs_strict": 0.8823529411764706,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "JNJ": {
+      "ef_cqs": 0.9117647058823529,
+      "ef_cqs_strict": 0.8611111111111112,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "JPM": {
+      "ef_cqs": 0.8285714285714286,
+      "ef_cqs_strict": 0.7837837837837838,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "KHC": {
+      "ef_cqs": 0.8378378378378378,
+      "ef_cqs_strict": 0.8378378378378378,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "KO": {
+      "ef_cqs": 0.8571428571428571,
+      "ef_cqs_strict": 0.8108108108108109,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "LIN": {
+      "ef_cqs": 0.8888888888888888,
+      "ef_cqs_strict": 0.8648648648648649,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "LLY": {
+      "ef_cqs": 0.9142857142857143,
+      "ef_cqs_strict": 0.8648648648648649,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "LMT": {
+      "ef_cqs": 0.8333333333333334,
+      "ef_cqs_strict": 0.8333333333333334,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "LOW": {
+      "ef_cqs": 0.8787878787878788,
+      "ef_cqs_strict": 0.8529411764705882,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "MA": {
+      "ef_cqs": 0.8888888888888888,
+      "ef_cqs_strict": 0.8648648648648649,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "MCD": {
+      "ef_cqs": 0.90625,
+      "ef_cqs_strict": 0.8055555555555556,
+      "explained_variance_count": 4,
+      "metrics_total": 37
+    },
+    "MCO": {
+      "ef_cqs": 0.9444444444444444,
+      "ef_cqs_strict": 0.918918918918919,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "MDLZ": {
+      "ef_cqs": 0.8378378378378378,
+      "ef_cqs_strict": 0.8378378378378378,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "MDT": {
+      "ef_cqs": 0.8108108108108109,
+      "ef_cqs_strict": 0.8108108108108109,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "MET": {
+      "ef_cqs": 0.9090909090909091,
+      "ef_cqs_strict": 0.8333333333333334,
+      "explained_variance_count": 3,
+      "metrics_total": 37
+    },
+    "META": {
+      "ef_cqs": 0.8571428571428571,
+      "ef_cqs_strict": 0.8333333333333334,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "MMC": {
+      "ef_cqs": 0.17647058823529413,
+      "ef_cqs_strict": 0.17647058823529413,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "MMM": {
+      "ef_cqs": 0.8378378378378378,
+      "ef_cqs_strict": 0.8378378378378378,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "MRK": {
+      "ef_cqs": 0.9142857142857143,
+      "ef_cqs_strict": 0.8648648648648649,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "MS": {
+      "ef_cqs": 0.8888888888888888,
+      "ef_cqs_strict": 0.8648648648648649,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "MSFT": {
+      "ef_cqs": 0.8888888888888888,
+      "ef_cqs_strict": 0.8648648648648649,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "MU": {
+      "ef_cqs": 0.8108108108108109,
+      "ef_cqs_strict": 0.8108108108108109,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "NEE": {
+      "ef_cqs": 0.8148148148148148,
+      "ef_cqs_strict": 0.6285714285714286,
+      "explained_variance_count": 8,
+      "metrics_total": 37
+    },
+    "NFLX": {
+      "ef_cqs": 0.9393939393939394,
+      "ef_cqs_strict": 0.8378378378378378,
+      "explained_variance_count": 4,
+      "metrics_total": 37
+    },
+    "NKE": {
+      "ef_cqs": 0.9142857142857143,
+      "ef_cqs_strict": 0.8888888888888888,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "NOC": {
+      "ef_cqs": 0.8055555555555556,
+      "ef_cqs_strict": 0.7837837837837838,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "NOW": {
+      "ef_cqs": 0.9032258064516129,
+      "ef_cqs_strict": 0.8,
+      "explained_variance_count": 4,
+      "metrics_total": 37
+    },
+    "NSC": {
+      "ef_cqs": 0.8888888888888888,
+      "ef_cqs_strict": 0.8888888888888888,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "NVDA": {
+      "ef_cqs": 0.8571428571428571,
+      "ef_cqs_strict": 0.8108108108108109,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "ORCL": {
+      "ef_cqs": 0.8571428571428571,
+      "ef_cqs_strict": 0.8571428571428571,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "ORLY": {
+      "ef_cqs": 0.9142857142857143,
+      "ef_cqs_strict": 0.8888888888888888,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "PANW": {
+      "ef_cqs": 0.8484848484848485,
+      "ef_cqs_strict": 0.8,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "PBF": {
+      "ef_cqs": 0.8787878787878788,
+      "ef_cqs_strict": 0.8285714285714286,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "PEP": {
+      "ef_cqs": 0.8918918918918919,
+      "ef_cqs_strict": 0.8918918918918919,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "PFE": {
+      "ef_cqs": 0.9117647058823529,
+      "ef_cqs_strict": 0.8378378378378378,
+      "explained_variance_count": 3,
+      "metrics_total": 37
+    },
+    "PG": {
+      "ef_cqs": 0.8888888888888888,
+      "ef_cqs_strict": 0.8648648648648649,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "PLD": {
+      "ef_cqs": 0.875,
+      "ef_cqs_strict": 0.8235294117647058,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "PNC": {
+      "ef_cqs": 0.8611111111111112,
+      "ef_cqs_strict": 0.8611111111111112,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "PYPL": {
+      "ef_cqs": 0.8484848484848485,
+      "ef_cqs_strict": 0.8484848484848485,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "QCOM": {
+      "ef_cqs": 0.8333333333333334,
+      "ef_cqs_strict": 0.8108108108108109,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "REGN": {
+      "ef_cqs": 0.8235294117647058,
+      "ef_cqs_strict": 0.8235294117647058,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "ROST": {
+      "ef_cqs": 0.8285714285714286,
+      "ef_cqs_strict": 0.8285714285714286,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "RTX": {
+      "ef_cqs": 0.8571428571428571,
+      "ef_cqs_strict": 0.8108108108108109,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    },
+    "SBUX": {
+      "ef_cqs": 0.8648648648648649,
+      "ef_cqs_strict": 0.8648648648648649,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "SCHW": {
+      "ef_cqs": 0.9117647058823529,
+      "ef_cqs_strict": 0.8378378378378378,
+      "explained_variance_count": 3,
+      "metrics_total": 37
+    },
+    "SHW": {
+      "ef_cqs": 0.8888888888888888,
+      "ef_cqs_strict": 0.8888888888888888,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "SLB": {
+      "ef_cqs": 0.8857142857142857,
+      "ef_cqs_strict": 0.8611111111111112,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "SNOW": {
+      "ef_cqs": 0.9090909090909091,
+      "ef_cqs_strict": 0.8108108108108109,
+      "explained_variance_count": 4,
+      "metrics_total": 37
+    },
+    "SO": {
+      "ef_cqs": 0.8571428571428571,
+      "ef_cqs_strict": 0.6666666666666666,
+      "explained_variance_count": 8,
+      "metrics_total": 37
+    },
+    "SPG": {
+      "ef_cqs": 0.8064516129032258,
+      "ef_cqs_strict": 0.7352941176470589,
+      "explained_variance_count": 3,
+      "metrics_total": 37
+    },
+    "SPGI": {
+      "ef_cqs": 0.9428571428571428,
+      "ef_cqs_strict": 0.9428571428571428,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "STT": {
+      "ef_cqs": 0.36363636363636365,
+      "ef_cqs_strict": 0.35294117647058826,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "STZ": {
+      "ef_cqs": 0.8055555555555556,
+      "ef_cqs_strict": 0.8055555555555556,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "SYK": {
+      "ef_cqs": 0.8888888888888888,
+      "ef_cqs_strict": 0.8888888888888888,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "T": {
+      "ef_cqs": 0.8529411764705882,
+      "ef_cqs_strict": 0.7837837837837838,
+      "explained_variance_count": 3,
+      "metrics_total": 37
+    },
+    "TGT": {
+      "ef_cqs": 0.8378378378378378,
+      "ef_cqs_strict": 0.8378378378378378,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "TJX": {
+      "ef_cqs": 0.8108108108108109,
+      "ef_cqs_strict": 0.8108108108108109,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "TMO": {
+      "ef_cqs": 0.8529411764705882,
+      "ef_cqs_strict": 0.7837837837837838,
+      "explained_variance_count": 3,
+      "metrics_total": 37
+    },
+    "TMUS": {
+      "ef_cqs": 0.8611111111111112,
+      "ef_cqs_strict": 0.8378378378378378,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "TSLA": {
+      "ef_cqs": 0.8823529411764706,
+      "ef_cqs_strict": 0.8108108108108109,
+      "explained_variance_count": 3,
+      "metrics_total": 37
+    },
+    "TXN": {
+      "ef_cqs": 0.8918918918918919,
+      "ef_cqs_strict": 0.8918918918918919,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "UNH": {
+      "ef_cqs": 0.8787878787878788,
+      "ef_cqs_strict": 0.8055555555555556,
+      "explained_variance_count": 3,
+      "metrics_total": 37
+    },
+    "UPS": {
+      "ef_cqs": 0.8571428571428571,
+      "ef_cqs_strict": 0.8333333333333334,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "USB": {
+      "ef_cqs": 0.8333333333333334,
+      "ef_cqs_strict": 0.8108108108108109,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "V": {
+      "ef_cqs": 0.8108108108108109,
+      "ef_cqs_strict": 0.8108108108108109,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "VRTX": {
+      "ef_cqs": 0.8285714285714286,
+      "ef_cqs_strict": 0.8285714285714286,
+      "explained_variance_count": 0,
+      "metrics_total": 37
+    },
+    "VZ": {
+      "ef_cqs": 0.7941176470588235,
+      "ef_cqs_strict": 0.7714285714285715,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "WFC": {
+      "ef_cqs": 0.8333333333333334,
+      "ef_cqs_strict": 0.8108108108108109,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "WMT": {
+      "ef_cqs": 0.8611111111111112,
+      "ef_cqs_strict": 0.8378378378378378,
+      "explained_variance_count": 1,
+      "metrics_total": 37
+    },
+    "XOM": {
+      "ef_cqs": 0.78125,
+      "ef_cqs_strict": 0.7352941176470589,
+      "explained_variance_count": 2,
+      "metrics_total": 37
+    }
+  }
+}

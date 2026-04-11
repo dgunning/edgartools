@@ -1,0 +1,157 @@
+{
+  "run_id": "e2e_banks_2026-01-22T21:29:45.464553",
+  "timestamp": "2026-01-22T21:29:45.464562",
+  "config": {
+    "group": "banking",
+    "workers": 8,
+    "years": 2,
+    "quarters": 2,
+    "metrics": [
+      "ShortTermDebt",
+      "CashAndEquivalents"
+    ],
+    "tickers": [
+      "BK",
+      "C",
+      "GS",
+      "JPM",
+      "MS",
+      "PNC",
+      "STT",
+      "USB",
+      "WFC"
+    ]
+  },
+  "summary": {
+    "custom": {
+      "10k_total": 22,
+      "10k_passed": 18,
+      "10q_total": 30,
+      "10q_passed": 27
+    }
+  },
+  "failure_count": 7,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "GS",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000886982-25-000005",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 69709000000.0,
+      "ref_value": 90624000000.0,
+      "variance_pct": 23.1,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "STT",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000093751-24-000498",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 1867000000.0,
+      "ref_value": 4637000000.0,
+      "variance_pct": 59.7,
+      "mapping_source": "tree",
+      "concept_used": null,
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "USB",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000036104-25-000055",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 2180000000.0,
+      "ref_value": 15039000000.0,
+      "variance_pct": 85.5,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000072971-25-000066",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 6603000000.0,
+      "ref_value": 13571000000.0,
+      "variance_pct": 51.3,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000072971-24-000064",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 14640000000.0,
+      "ref_value": 11883000000.0,
+      "variance_pct": 23.2,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000072971-25-000253",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 79725000000.0,
+      "ref_value": 36409000000.0,
+      "variance_pct": 119.0,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-Q",
+      "filing_date": "2025-06-30",
+      "accession_no": "0000072971-25-000201",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 78631000000.0,
+      "ref_value": 33984000000.0,
+      "variance_pct": 131.4,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    }
+  ],
+  "errors": []
+}

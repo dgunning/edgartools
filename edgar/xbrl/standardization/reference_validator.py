@@ -1,0 +1,2746 @@
+"""
+Reference Validator
+
+Validates XBRL mappings against external data sources (yfinance).
+This does NOT copy values - it confirms our mappings are correct by
+comparing the XBRL extracted values with reference values.
+
+Key principle: We map XBRL concepts → extract XBRL values → validate against reference
+"""
+
+import logging
+import os
+from typing import Dict, List, Optional, Tuple, Union
+from datetime import datetime
+from dataclasses import dataclass, field
+
+try:
+    import yfinance as yf
+except ImportError:
+    yf = None
+
+from .config_loader import get_config, MappingConfig
+from .models import MappingResult, MappingSource, ConfidenceLevel, FailurePattern, EFPassReason
+from .extraction_rules import get_extraction_rule, get_concept_priority, get_composite_components, get_total_concepts, get_subcomponents
+from .layers.dimensional_aggregator import DimensionalAggregator
+from edgar import Company
+
+logger = logging.getLogger(__name__)
+
+# NCI (Noncontrolling Interest) scope classification for TotalLiabilities formula validation
+_NCI_INCLUSIVE = {
+    "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+    "LiabilitiesAndStockholdersEquity",
+}
+_NCI_EXCLUSIVE = {"StockholdersEquity", "Equity"}
+
+# Flow metrics that need quarterly derivation for 10-Q validation
+# 10-Q filings report YTD cumulative values, but yfinance expects quarterly period values
+# Includes both cash flow and income statement metrics (both can be YTD in XBRL)
+QUARTERLY_DERIVABLE_METRICS = [
+    # Cash flow metrics
+    'OperatingCashFlow',
+    'Capex',
+    'StockBasedCompensation',
+    'DividendsPaid',
+    'DepreciationAmortization',
+    # Income statement flow metrics (can be YTD in 10-Q XBRL)
+    'NetIncome',
+    'Revenue',
+    'COGS',
+    'SGA',
+    'OperatingIncome',
+    'PretaxIncome',
+]
+
+
+@dataclass
+class ValidationResult:
+    """Result of validating a mapping against reference data."""
+    metric: str
+    company: str
+    xbrl_value: Optional[float]      # Value from our XBRL mapping
+    reference_value: Optional[float]  # Value from yfinance
+    is_valid: bool                    # Do they match (within tolerance)?
+    variance_pct: Optional[float]     # Percentage difference
+    status: str                       # "match", "mismatch", "missing_xbrl", "missing_ref"
+    notes: Optional[str] = None
+    # Two-score architecture: Extraction Fidelity (EF) + Standardization Alignment (SA)
+    ef_pass: Optional[bool] = None    # Did we extract the right XBRL concept?
+    sa_pass: Optional[bool] = None    # Does standardized value match yfinance?
+    sa_value: Optional[float] = None  # Standardized (composite formula) value
+    sa_variance_pct: Optional[float] = None  # SA variance %
+    variance_type: str = "raw"        # "raw" | "explained" | "standardized"
+    # RFA/SMA sub-scores: finer-grained than EF
+    rfa_pass: Optional[bool] = None   # Reported Fact Accuracy: extracted value matches authoritative source
+    rfa_source: Optional[str] = None  # "sec_facts" | "yfinance" | None — which source confirmed the fact
+    sma_pass: Optional[bool] = None   # Standardized Metric Accuracy: concept is semantically correct for this metric
+    # Internal consistency validation
+    internal_status: Optional[str] = None    # "VALID_INTERNAL" | "INVALID_INTERNAL" | "VALID_PARTIAL" | "EQUATION_CONFLICT" | None
+    # Publish confidence: how trustworthy is this result for external consumption?
+    publish_confidence: str = "unverified"   # "high" | "medium" | "low" | "unverified"
+    # Fact provenance (captured from the XBRL fact used for extraction)
+    accession_number: Optional[str] = None
+    period_type: Optional[str] = None        # "instant" | "duration"
+    period_start: Optional[str] = None       # ISO date
+    period_end: Optional[str] = None         # ISO date
+    unit: Optional[str] = None               # "USD", "shares", "pure"
+    fact_decimals: Optional[int] = None      # XBRL decimals attribute
+    # Evidence tier: how the reference value was sourced
+    evidence_tier: str = "unverified"        # "sec_confirmed" | "yfinance_confirmed" | "self_validated" | "unverified"
+    # Extraction evidence for diagnostic drilling
+    resolution_type: str = "none"            # "direct" | "composite" | "industry" | "none"
+    components_used: Optional[list] = None   # XBRL concepts used in extraction
+    components_missing: Optional[list] = None  # Expected components not found
+    company_industry: Optional[str] = None   # Industry resolved for this company
+    # Consensus 020: EF-pass path tracking for scoring integrity diagnostics
+    ef_pass_reason: Optional[str] = None     # EFPassReason enum value (known_concept, tree_source, facts_search, none)
+
+
+@dataclass
+class MultiPeriodResult:
+    """Result of validating a mapping across multiple fiscal periods."""
+    ticker: str
+    metric: str
+    periods_checked: int           # How many periods we attempted
+    periods_passed: int            # How many passed validation
+    periods_failed: int            # How many failed validation
+    periods_missing: int           # How many had no data
+    is_stable: bool                # True if all checked periods pass
+    validated_fiscal_periods: List[str]   # List of fiscal period end dates that passed
+    period_details: List[Dict]     # Per-period detail: {period, value, ref_value, variance, pass}
+    detail: str                    # Human-readable summary
+
+
+@dataclass
+class FormulaValidationResult:
+    """Result of validating a composite formula across multiple fiscal periods (M9.3)."""
+    ticker: str
+    metric: str
+    periods_checked: int
+    periods_passed: int
+    is_stable: bool                                    # True if all checked periods pass
+    component_stability: Dict[str, Dict] = field(default_factory=dict)  # component -> {found, missing, values}
+    period_details: List[Dict] = field(default_factory=list)  # Per-period: {period, composite_value, ref_value, variance, components, pass}
+    formula_tier: str = "default"                       # "company" | "sector" | "default"
+    detail: str = ""
+
+
+@dataclass
+class ReferenceVerdict:
+    """Result of adjudicating between reference sources."""
+    status: str              # "trusted", "reference_disputed", "mismatch", "missing"
+    reference_value: Optional[float]
+    trust_source: str        # "xbrl", "golden_master", "yfinance", "none"
+    notes: str = ""
+
+
+class ReferenceAdjudicator:
+    """
+    Deterministic trust hierarchy for reference data.
+
+    Priority:
+    1. SEC XBRL filing (primary source -- what we extracted)
+    2. Prior stable golden master value
+    3. yfinance snapshot (check freshness/staleness)
+
+    When XBRL matches golden but not yfinance, the reference is "disputed"
+    and excluded from pass rate (but flagged for review).
+    """
+
+    def __init__(self, tolerance_pct: float = 15.0):
+        self.tolerance_pct = tolerance_pct
+
+    def adjudicate(
+        self,
+        xbrl_value: Optional[float],
+        reference_value: Optional[float],
+        golden_value: Optional[float],
+        metric: str,
+        ticker: str,
+    ) -> ReferenceVerdict:
+        """
+        Adjudicate between XBRL extraction, golden master, and yfinance.
+        """
+        if xbrl_value is None:
+            return ReferenceVerdict(
+                status="missing", reference_value=reference_value,
+                trust_source="none", notes="No XBRL value extracted",
+            )
+
+        if reference_value is None:
+            return ReferenceVerdict(
+                status="missing", reference_value=None,
+                trust_source="none", notes="No reference value available",
+            )
+
+        # Check if XBRL matches yfinance (within tolerance)
+        xbrl_ref_var = abs(xbrl_value - reference_value) / max(abs(reference_value), 1) * 100
+        if xbrl_ref_var <= self.tolerance_pct:
+            return ReferenceVerdict(
+                status="trusted", reference_value=reference_value,
+                trust_source="yfinance",
+                notes=f"XBRL matches yfinance ({xbrl_ref_var:.1f}% variance)",
+            )
+
+        # XBRL doesn't match yfinance -- check golden master
+        if golden_value is not None:
+            xbrl_golden_var = abs(xbrl_value - golden_value) / max(abs(golden_value), 1) * 100
+            if xbrl_golden_var <= self.tolerance_pct:
+                return ReferenceVerdict(
+                    status="reference_disputed",
+                    reference_value=golden_value,
+                    trust_source="golden_master",
+                    notes=(
+                        f"XBRL matches golden master ({xbrl_golden_var:.1f}%) "
+                        f"but not yfinance ({xbrl_ref_var:.1f}%). "
+                        f"yfinance may be stale or wrong."
+                    ),
+                )
+
+        # No golden to fall back on -- trust yfinance
+        return ReferenceVerdict(
+            status="mismatch", reference_value=reference_value,
+            trust_source="yfinance",
+            notes=f"XBRL vs yfinance variance: {xbrl_ref_var:.1f}%",
+        )
+
+
+class ReferenceValidator:
+    """
+    Validates XBRL mappings against external reference data.
+    
+    Uses yfinance as reference to:
+    1. Confirm our mapping is extracting the right concept
+    2. Identify cases where metric truly doesn't exist (AAPL Goodwill)
+    3. Flag potential mapping errors when values don't match
+    """
+    
+    # Mapping from our metrics to yfinance field names
+    #
+    # IMPORTANT: yfinance "As Reported" Pattern
+    # -----------------------------------------
+    # yfinance sometimes provides TWO values for the same metric:
+    #   - "<Metric>" = Yahoo-calculated/normalized value (may adjust for one-time items)
+    #   - "<Metric> As Reported" or "Total <Metric> As Reported" = GAAP value from filing
+    #
+    # For most companies, these are identical. But for companies with significant
+    # special charges (e.g., KO with $2.3B impairments), Yahoo "normalizes" the
+    # base metric by adding back these charges.
+    #
+    # Our strategy: Use GAAP fields ("As Reported") when available, fallback to
+    # calculated fields when not. See YFINANCE_GAAP_FALLBACKS below.
+    #
+    # Example (KO 2024):
+    #   - "Operating Income" = $14.02B (Yahoo adds back special charges)
+    #   - "Total Operating Income As Reported" = $9.99B (GAAP, matches XBRL)
+    #
+    # Search keywords: yfinance GAAP, As Reported, normalized, adjusted
+    #
+    YFINANCE_MAP = {
+        'Revenue': ('financials', 'Total Revenue'),
+        'COGS': ('financials', 'Cost Of Revenue'),
+        'SGA': ('financials', 'Selling General And Administrative'),
+        'OperatingIncome': ('financials', 'Total Operating Income As Reported'),  # GAAP field
+        'NetIncome': ('financials', 'Net Income'),
+        'OperatingCashFlow': ('cashflow', 'Operating Cash Flow'),
+        'Capex': ('cashflow', 'Capital Expenditure'),
+        'TotalAssets': ('balance_sheet', 'Total Assets'),
+        'Goodwill': ('balance_sheet', 'Goodwill'),
+        'IntangibleAssets': ('balance_sheet', 'Goodwill And Other Intangible Assets'),
+        'ShortTermDebt': ('balance_sheet', 'Current Debt'),
+        'LongTermDebt': ('balance_sheet', 'Long Term Debt'),
+        'CashAndEquivalents': ('balance_sheet', 'Cash And Cash Equivalents'),
+        # Universal additions
+        'WeightedAverageSharesDiluted': ('financials', 'Diluted Average Shares'),
+        'StockBasedCompensation': ('cashflow', 'Stock Based Compensation'),
+        'DividendsPaid': ('cashflow', 'Cash Dividends Paid'),
+        # Archetype A: Working capital
+        'Inventory': ('balance_sheet', 'Inventory'),
+        'AccountsReceivable': ('balance_sheet', 'Accounts Receivable'),
+        'AccountsPayable': ('balance_sheet', 'Accounts Payable'),
+        'DepreciationAmortization': ('cashflow', 'Depreciation And Amortization'),
+        # Phase 3 expansion: Income Statement
+        'GrossProfit': ('financials', 'Gross Profit'),
+        'ResearchAndDevelopment': ('financials', 'Research And Development'),
+        'InterestExpense': ('financials', 'Interest Expense'),
+        'IncomeTaxExpense': ('financials', 'Tax Provision'),
+        'EarningsPerShareDiluted': ('financials', 'Diluted EPS'),
+        'EarningsPerShareBasic': ('financials', 'Basic EPS'),
+        # Phase 3 expansion: Balance Sheet
+        'CurrentAssets': ('balance_sheet', 'Current Assets'),
+        'CurrentLiabilities': ('balance_sheet', 'Current Liabilities'),
+        'TotalLiabilities': ('balance_sheet', 'Total Liabilities Net Minority Interest'),
+        'StockholdersEquity': ('balance_sheet', 'Stockholders Equity'),
+        'PropertyPlantEquipment': ('balance_sheet', 'Net PPE'),
+        'RetainedEarnings': ('balance_sheet', 'Retained Earnings'),
+        # Phase 3 expansion: Cash Flow
+        'InvestingCashFlow': ('cashflow', 'Investing Cash Flow'),
+        'FinancingCashFlow': ('cashflow', 'Financing Cash Flow'),
+        'ShareRepurchases': ('cashflow', 'Repurchase Of Capital Stock'),
+    }
+    
+    # Fallback fields when GAAP "As Reported" field is not available
+    # Some companies only have the calculated field (e.g., NKE, LLY)
+    YFINANCE_GAAP_FALLBACKS = {
+        'OperatingIncome': ('financials', 'Operating Income'),  # Fallback if "As Reported" missing
+    }
+    
+    # Composite metrics: sum of multiple XBRL concepts
+    # These metrics require summing components to match yfinance definition
+    # NOTE: These are fallbacks. Prefer extraction_rules.py JSON config.
+    COMPOSITE_METRICS = {
+        # IntangibleAssets = Goodwill + (IntangibleAssetsNet OR IndefiniteLivedTrademarks)
+        # IndefiniteLivedTrademarks is a FALLBACK for IntangibleAssetsNet (via CONCEPT_PRIORITY)
+        'IntangibleAssets': ['Goodwill', 'IntangibleAssetsNetExcludingGoodwill'],
+        'ShortTermDebt': ['LongTermDebtCurrent', 'CommercialPaper', 'ShortTermBorrowings'],
+    }
+    
+    # DEPRECATED: Use extraction_rules.py instead
+    # Kept as fallback if JSON config not available
+    CONCEPT_PRIORITY = {
+        'Goodwill': ['Goodwill'],
+        'IntangibleAssetsNetExcludingGoodwill': [
+            'IntangibleAssetsNetExcludingGoodwill',
+            'IndefiniteLivedTrademarks',  # KO uses this instead
+            'OtherIntangibleAssetsNet',
+        ],
+        'LongTermDebtCurrent': [
+            'LongTermDebtCurrent',
+            'LongTermDebtAndCapitalLeaseObligationsCurrent',
+            'LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths',
+        ],
+        # Note: FiniteLivedIntangibleAssetsNet moved to subcomponents in _defaults.json
+        # (summed with IndefiniteLivedIntangibleAssetsExcludingGoodwill, not an alternative)
+    }
+    
+    def __init__(
+        self,
+        config: Optional[MappingConfig] = None,
+        tolerance_pct: float = 15.0,  # 15% tolerance for matching
+        snapshot_mode: bool = False,
+        use_sec_facts: bool = True,
+    ):
+        self.config = config or get_config()
+        self.tolerance = tolerance_pct / 100.0
+        self._yf_cache = {}  # Cache yfinance Stock objects by ticker
+        self._dimensional_aggregator = DimensionalAggregator()  # For dimensional value aggregation
+        self._snapshot_mode = snapshot_mode
+        self._use_sec_facts = use_sec_facts
+        self._sec_facts_cache = {}  # Cache EntityFacts objects by ticker
+        self._snapshot_cache = {}  # Cache loaded snapshot dicts by ticker
+
+        if yf is None and not snapshot_mode:
+            print("Warning: yfinance not installed. Install with: pip install yfinance")
+
+    @staticmethod
+    def _compute_variance_pct(actual: float, reference: float) -> float:
+        """Compute percentage variance between actual and reference values."""
+        if reference != 0:
+            return abs(actual - reference) / abs(reference) * 100
+        return 100.0 if actual != 0 else 0.0
+
+    def _get_metric_tolerance(self, metric: str) -> float:
+        """Get validation tolerance for a metric (from config or default 20%)."""
+        if self.config:
+            mc = self.config.get_metric(metric)
+            if mc and mc.validation_tolerance:
+                return mc.validation_tolerance
+        return 20.0
+
+    def _is_composite_metric(self, metric: str) -> bool:
+        """Check if a metric should use composite extraction.
+
+        Checks both the hardcoded COMPOSITE_METRICS dict and the config-driven
+        composite flag in metrics.yaml. Config-driven composites require both
+        composite: true AND non-empty components or total_concepts.
+        """
+        if metric in self.COMPOSITE_METRICS:
+            return True
+        metric_config = self.config.get_metric(metric) if self.config else None
+        if metric_config and metric_config.composite:
+            # Safeguard: only treat as composite if components or total_concepts are defined
+            if metric_config.components or get_total_concepts(getattr(self, '_current_ticker', '') or '', metric):
+                return True
+        return False
+
+    def _get_stock(self, ticker: str):
+        """
+        Get yfinance Stock object with caching.
+
+        Caches Stock objects to avoid redundant API calls when
+        validating after each layer.
+        """
+        if yf is None:
+            return None
+        
+        if ticker not in self._yf_cache:
+            self._yf_cache[ticker] = yf.Ticker(ticker)
+        
+        return self._yf_cache[ticker]
+    
+    def _try_industry_extraction(self, ticker: str, metric: str, xbrl) -> Optional[float]:
+        """
+        Try industry-specific extraction for special metrics.
+
+        Uses industry_logic module for:
+        - ShortTermDebt (banks): Excludes Repos/FedFunds
+        - OperatingIncome: Calculated fallback if tag missing
+
+        Returns None if industry extraction doesn't apply or fails.
+        """
+        try:
+            from .industry_logic import get_industry_extractor, BankingExtractor, DefaultExtractor
+            from edgar.entity.mappings_loader import get_industry_for_sic
+            from .extraction_rules import get_extraction_rule
+            from edgar import Company
+            import logging
+
+            logger = logging.getLogger(__name__)
+
+            # DATA INTEGRITY GATE (P0)
+            # Check for zero-fact or low-fact filings before proceeding
+            MIN_FACTS_THRESHOLD = 100  # Typical 10-K has 1000+ facts
+            facts_df = None
+            if xbrl and xbrl.facts:
+                facts_df = xbrl.facts.to_dataframe()
+
+            if facts_df is None or len(facts_df) == 0:
+                logger.warning(f"DATA INTEGRITY FAILURE: {ticker} filing has 0 facts - corrupt or unsupported format")
+                return None
+
+            if len(facts_df) < MIN_FACTS_THRESHOLD:
+                logger.warning(f"DATA INTEGRITY WARNING: {ticker} filing has only {len(facts_df)} facts (expected > {MIN_FACTS_THRESHOLD})")
+
+            # Get industry for this company
+            c = Company(ticker)
+            sic = c.data.sic
+            industry = get_industry_for_sic(sic) if sic else None
+            
+            # 1. Check for company-specific extraction rule (JSON config override)
+            # This handles LLY Capex, MSFT IntangibleAssets, etc. explicitly
+            rule = get_extraction_rule(ticker, metric, industry)
+            if rule and rule.get('method') == 'concept_priority':
+                priorities = rule.get('concept_priority', {}).get(metric, [])
+                for variant in priorities:
+                    # Handle namespaced concepts from rules
+                    concept = variant if ':' in variant else f"us-gaap:{variant}"
+                    val = self._extract_xbrl_value(xbrl, concept)
+                    if val is not None:
+                        return val
+            
+            # facts_df already extracted in DATA INTEGRITY GATE above
+
+            # Check for explicitly disabled tree fallback (Safety Guardrail)
+            # If industry logic returns None (extraction failed) and fallback_to_tree is False,
+            # we return a SENTINEL that prevents the Tree Mapper from taking over.
+            # We use float('nan') as a provisional sentinel or handle it in the caller.
+            # actually, a better way is to check the rule configs.
+            
+            # Load config for this metric
+            from .config_loader import get_config
+            conf = get_config()
+            
+            # Banking-specific extraction for ShortTermDebt
+            # Use GAAP mode for validation to prove we can reproduce yfinance values
+            if industry == 'banking' and metric == 'ShortTermDebt':
+                extractor = BankingExtractor()
+                # CRITICAL: Use mode='gaap' for yfinance validation
+                # Street View (mode='street') is for database, not validation
+                # PHASE 3 FIX: Pass ticker for config-based archetype lookup
+                result = extractor.extract_short_term_debt(xbrl, facts_df, mode='gaap', ticker=ticker)
+                if result.value is not None:
+                    return result.value
+                
+                # CHECK FALLBACK FLAG
+                # If extraction failed (value is None), should we fall back to Tree?
+                # We check the industry_metrics.yaml config via the extraction rules or direct config access
+                # For now, hardcode the check based on the plan or safer implementation
+                # But to follow the plan, we should read the config.
+                
+                # Quick access to industry config
+                # Note: Banking config has metrics directly under industry (no concept_mapping layer)
+                industry_conf = conf.data.get('industry_metrics', {}).get('banking', {})
+                metric_conf = industry_conf.get('ShortTermDebt', {})
+                if metric_conf.get('fallback_to_tree') is False:
+                     # Return a special indicator that validation failed/missing (e.g. -1.0 or raise)
+                     # But _try_industry_extraction signature is Optional[float].
+                     # If we return None, it falls back to Tree.
+                     # We need to signal "STOP".
+                     # Limitation: The current architecture falls back to Tree if None is returned.
+                     # We might need to return 0.0 or a specific small negative number if we want to force failure?
+                     # No, that's hacky.
+                     # The feedback said: "Explicitly return a sentinel... that doesn't proceed to Tree Mapping."
+                     # Since I cannot easily change the caller `validate_company` logic without reading it fully (I did separate read),
+                     # I will assume returning a specific "Missing" object or similar would break things.
+                     # Wait, I can raise an exception? No.
+                     # Let's look at `validate_company` (lines 583-585):
+                     # industry_value = self._try_industry_extraction(ticker, metric, xbrl)
+                     # if industry_value is not None: xbrl_value = industry_value
+                     # elif metric in COMPOSITE... extraction logic
+                     # else: ...
+                     
+                     # It doesn't seem to have a "Tree Mapping" step *inside* validate_company. 
+                     # `validate_company` takes `results` (which come from Tree).
+                     # Ah, `validate_company` is validating the *Tree Result*.
+                     # If `industry_value` is found, it overrides `xbrl_value` (which came from Tree result... wait).
+                     
+                     # Line 576: if result.is_mapped and xbrl: ...
+                     # The Tree Mapping has ALREADY happened before Validation.
+                     # The Validation stage is overriding the Tree value with Industry value if available.
+                     # If Industry Logic fails (returns None), it currently proceeds to use the Tree Mapped value (result.concept).
+                     
+                     # To "Disable Tree Fallback", we must INVALIDATE the Tree Result if Industry Logic fails!
+                     
+                     if metric_conf.get('fallback_to_tree') is False:
+                         # We verified Industry Logic returned None (failed).
+                         # We must now Tell the caller to discarding the Tree Result.
+                         # But this method only returns float.
+                         
+                         # CRITICAL ARCHITECTURE ADAPTATION:
+                         # We must return a Sentinel Float (NaN) to signal "STOP USE OF TREE".
+                         return float('nan') # Sentinel for "Hard Missing"
+
+            # Banking-specific extraction for CashAndEquivalents
+            # Use GAAP mode for validation to prove we can reproduce yfinance values
+            if industry == 'banking' and metric == 'CashAndEquivalents':
+                extractor = BankingExtractor()
+                # CRITICAL: Use mode='gaap' for yfinance validation
+                # Street View (mode='street') is for database, not validation
+                result = extractor.extract_cash_and_equivalents(xbrl, facts_df, mode='gaap')
+                if result.value is not None:
+                    return result.value
+                
+                # Fallback Check
+                # Note: Banking config has metrics directly under industry (no concept_mapping layer)
+                industry_conf = conf.data.get('industry_metrics', {}).get('banking', {})
+                metric_conf = industry_conf.get('CashAndEquivalents', {})
+                if metric_conf.get('fallback_to_tree') is False:
+                     return float('nan') # Sentinel to kill Tree Result
+            
+            # Calculated OperatingIncome for any industry
+            # Always return calculated value - handles companies like NKE/MRK
+            # that don't report OperatingIncomeLoss concept at all
+            if metric == 'OperatingIncome':
+                extractor = get_industry_extractor(industry) if industry else DefaultExtractor()
+                result = extractor.extract_operating_income(xbrl, facts_df)
+                if result.value is not None:
+                    return result.value
+            
+            return None
+            
+        except Exception:
+            return None
+    
+    def _get_tolerance_for_company(self, ticker: str) -> float:
+        """
+        Get validation tolerance for a specific company.
+        
+        Priority:
+        1. Company-specific tolerance (validation_tolerance_pct)
+        2. Industry-specific tolerance (from defaults.industry_tolerances)
+        3. Default tolerance (self.tolerance)
+        """
+        company_config = self.config.get_company(ticker.upper())
+        
+        if company_config:
+            # Check company-specific tolerance first
+            if company_config.validation_tolerance_pct is not None:
+                return company_config.validation_tolerance_pct / 100.0
+            
+            # Check industry-specific tolerance
+            if company_config.industry:
+                industry_tolerances = self.config.defaults.get('industry_tolerances', {})
+                industry_tolerance = industry_tolerances.get(company_config.industry)
+                if industry_tolerance is not None:
+                    return industry_tolerance / 100.0
+        
+        # Fall back to default tolerance
+        return self.tolerance
+    
+    def _check_dimensional_only(
+        self,
+        xbrl,
+        concept: str
+    ) -> Optional[Dict]:
+        """
+        Check if a concept has values ONLY with dimensions (no consolidated total).
+        
+        This helps identify cases like JPM's CommercialPaper which is reported
+        only under dimensional contexts (e.g., "Beneficial interests issued by
+        consolidated VIEs") with no non-dimensioned total.
+        
+        Args:
+            xbrl: XBRL object
+            concept: Concept name to check
+            
+        Returns:
+            Dict with dimensional breakdown if concept is dimensional-only,
+            None if concept has non-dimensioned values or doesn't exist.
+        """
+        try:
+            concept_name = concept.replace('us-gaap:', '').replace('us-gaap_', '')
+            facts = xbrl.facts
+            df = facts.get_facts_by_concept(concept_name)
+            
+            if df is None or len(df) == 0:
+                return None
+            
+            # Check for non-dimensioned and dimensioned values
+            if 'full_dimension_label' not in df.columns:
+                return None  # No dimension info available
+            
+            has_non_dim = len(df[df['full_dimension_label'].isna()]) > 0
+            has_dim = len(df[df['full_dimension_label'].notna()]) > 0
+            
+            if has_dim and not has_non_dim:
+                # This concept is ONLY reported with dimensions
+                dim_rows = df[df['full_dimension_label'].notna()]
+                return {
+                    'concept': concept,
+                    'dimensional_only': True,
+                    'dimension_count': len(dim_rows),
+                    'total_value': dim_rows['numeric_value'].sum() if 'numeric_value' in dim_rows.columns else None,
+                    'dimensions': dim_rows[['full_dimension_label', 'numeric_value']].head(5).to_dict('records')
+                }
+            
+            return None
+            
+        except Exception:
+            return None
+    
+    def _classify_failure(
+        self,
+        xbrl,
+        concept: str,
+        ticker: str
+    ) -> FailurePattern:
+        """
+        Classify why extraction failed for systematic handling.
+        
+        This enables the workflow to learn from failures by categorizing
+        them into known patterns that can be automatically fixed.
+        """
+        try:
+            concept_name = concept.replace('us-gaap:', '').replace('us-gaap_', '')
+            
+            # Check 1: Dimensional-only
+            dim_check = self._check_dimensional_only(xbrl, concept)
+            if dim_check:
+                return FailurePattern.DIMENSIONAL_ONLY
+            
+            # Check 2: Amended filing
+            if hasattr(self, '_current_filing') and self._current_filing:
+                form = getattr(self._current_filing, 'form', '')
+                if '/A' in str(form):
+                    return FailurePattern.AMENDED_FILING
+            
+            # Check 3: Concept exists but no numeric value
+            facts = xbrl.facts
+            df = facts.get_facts_by_concept(concept_name)
+            if df is not None and len(df) > 0:
+                if 'numeric_value' in df.columns:
+                    if df['numeric_value'].notna().sum() == 0:
+                        return FailurePattern.NO_VALUE
+                return FailurePattern.PERIOD_MISMATCH  # Has data but didn't match period
+            
+            # Check 4: Concept not in facts at all
+            return FailurePattern.CONCEPT_NOT_IN_FACTS
+            
+        except Exception:
+            return FailurePattern.UNKNOWN
+    
+    def _apply_fix_for_pattern(
+        self,
+        pattern: FailurePattern,
+        xbrl,
+        concept: str,
+        ticker: str
+    ) -> Optional[float]:
+        """
+        Apply known fix for classified failure pattern.
+        
+        Each pattern has a specific remediation strategy.
+        """
+        if pattern == FailurePattern.DIMENSIONAL_ONLY:
+            return self._extract_dimensional_sum(xbrl, concept)
+        
+        elif pattern == FailurePattern.CONCEPT_NOT_IN_FACTS:
+            # Try searching company facts API instead
+            return self._extract_from_company_facts(ticker, concept)
+        
+        # Other patterns don't have automatic fixes yet
+        return None
+    
+    def _calculate_period_days(self, period_key: str) -> int:
+        """Calculate days in a period from period_key like 'duration_2024-01-01_2024-12-31'.
+        
+        Used to differentiate annual periods (>300 days) from quarterly (<100 days).
+        """
+        try:
+            if not period_key.startswith('duration_'):
+                return 0
+            parts = period_key.replace('duration_', '').split('_')
+            if len(parts) == 2:
+                start = datetime.strptime(parts[0], '%Y-%m-%d')
+                end = datetime.strptime(parts[1], '%Y-%m-%d')
+                return (end - start).days
+        except Exception:
+            pass
+        return 0
+    
+    def _select_latest_filing(self, df) -> 'pd.DataFrame':
+        """
+        Select facts from the most recent filing for each period.
+        
+        Implements Point-in-Time (PiT) handling for restatements:
+        - If FY2023 was filed in 2024 and restated in 2025, use the 2025 restated value
+        - When multiple values exist for the same period, select MAX(filed_date)
+        
+        Args:
+            df: DataFrame of XBRL facts with 'period_key' column
+            
+        Returns:
+            DataFrame sorted by period_key (desc) with filing date precedence applied
+        """
+        if df is None or len(df) == 0:
+            return df
+        
+        # Check if 'filed' column exists (filing date)
+        # Common column names: 'filed', 'filing_date', 'filed_date'
+        filed_col = None
+        for col in ['filed', 'filing_date', 'filed_date']:
+            if col in df.columns:
+                filed_col = col
+                break
+        
+        if filed_col is not None:
+            # Parse filing date to datetime for proper sorting
+            df = df.copy()
+            try:
+                df['_filed_dt'] = df[filed_col].apply(self._parse_filing_date)
+                
+                # Sort by period_key (desc) first, then by filing date (desc)
+                # This gives us: most recent period + most recent filing for that period
+                df = df.sort_values(
+                    ['period_key', '_filed_dt'],
+                    ascending=[False, False]
+                )
+                
+                # For each unique period, keep only the row with the latest filing date
+                df = df.drop_duplicates(subset=['period_key'], keep='first')
+                
+                # Clean up temp column
+                df = df.drop(columns=['_filed_dt'])
+                
+            except Exception:
+                # Fallback to simple period_key sort if date parsing fails
+                df = df.sort_values('period_key', ascending=False)
+        else:
+            # No filing date column available, fallback to period_key sort
+            df = df.sort_values('period_key', ascending=False)
+        
+        return df
+    
+    def _parse_filing_date(self, date_val) -> datetime:
+        """
+        Parse filing date from various formats to datetime.
+        
+        Handles:
+        - datetime objects (passthrough)
+        - ISO 8601 strings ('2024-01-15')
+        - Common date strings ('2024-01-15T10:30:00')
+        """
+        if date_val is None:
+            return datetime.min
+        
+        if isinstance(date_val, datetime):
+            return date_val
+        
+        try:
+            date_str = str(date_val)
+            # Handle ISO 8601 with or without time
+            if 'T' in date_str:
+                date_str = date_str.split('T')[0]
+            return datetime.strptime(date_str, '%Y-%m-%d')
+        except Exception:
+            return datetime.min
+    
+    def _extract_dimensional_sum(self, xbrl, concept: str) -> Optional[float]:
+        """Extract sum of all dimensional values for a concept."""
+        try:
+            concept_name = concept.replace('us-gaap:', '').replace('us-gaap_', '')
+            facts = xbrl.facts
+            df = facts.get_facts_by_concept(concept_name)
+            
+            if df is None or len(df) == 0:
+                return None
+            
+            if 'full_dimension_label' not in df.columns:
+                return None
+            
+            dim_rows = df[df['full_dimension_label'].notna()]
+            dim_rows = dim_rows[dim_rows['numeric_value'].notna()]
+            
+            if len(dim_rows) == 0:
+                return None
+            
+            # Get latest period
+            if 'period_key' in dim_rows.columns:
+                dim_rows = dim_rows.sort_values('period_key', ascending=False)
+                latest_period = dim_rows.iloc[0]['period_key']
+                period_rows = dim_rows[dim_rows['period_key'] == latest_period]
+                return float(period_rows['numeric_value'].sum())
+            
+            return float(dim_rows['numeric_value'].sum())
+            
+        except Exception:
+            return None
+    
+    def _extract_from_company_facts(self, ticker: str, concept: str) -> Optional[float]:
+        """Extract value from company facts API as fallback."""
+        try:
+            from edgar import Company
+            concept_name = concept.replace('us-gaap:', '').replace('us-gaap_', '')
+            
+            c = Company(ticker)
+            facts = c.get_facts()
+            df = facts.to_dataframe()
+            
+            # Find matching concept
+            matches = df[df['concept'].str.contains(concept_name, case=False, na=False)]
+            if len(matches) > 0:
+                # Get latest value
+                matches = matches.sort_values('period', ascending=False)
+                val = matches.iloc[0].get('value') or matches.iloc[0].get('numeric_value')
+                if val is not None:
+                    return float(val)
+            return None
+            
+        except Exception:
+            return None
+    
+    def _is_balance_sheet_metric(self, metric: str) -> bool:
+        """Check if metric is Point-in-Time (Balance Sheet)."""
+        bs_metrics = {
+            'TotalAssets', 'limit_stock', 'StockholdersEquity',
+            'CashAndEquivalents', 'ShortTermDebt', 'LongTermDebt',
+            'Goodwill', 'IntangibleAssets', 'RestrictedCash',
+            # Working capital metrics
+            'Inventory', 'AccountsReceivable', 'AccountsPayable'
+        }
+        return metric in bs_metrics
+
+    def _is_flow_concept(self, concept: str) -> bool:
+        """Check if concept implies Duration/Flow (Cash Flow)."""
+        if not concept:
+            return False
+        flow_keywords = [
+            'Proceeds', 'Payments', 'Repayments', 'CashFlow', 
+            'NetChange', 'Increase', 'Decrease', 'Issuance', 'Retirement', 
+            'Acquisition', 'Disposal'
+        ]
+        concept_clean = concept.split(':')[-1]
+        return any(k.lower() in concept_clean.lower() for k in flow_keywords)
+
+    def validate_company(
+        self,
+        ticker: str,
+        results: Dict[str, MappingResult],
+        xbrl=None,
+        filing_date: Optional[Union[str, datetime]] = None,
+        form_type: Optional[str] = None
+    ) -> Dict[str, ValidationResult]:
+        """
+        Validate all mappings for a company against yfinance.
+        
+        Args:
+            ticker: Company ticker
+            results: Mapping results to validate
+            xbrl: Optional XBRL object to extract values
+            filing_date: Date of the filing (for historical matching)
+            form_type: Form type (10-K or 10-Q) for period-aware extraction
+            
+        Returns:
+            Dict of validation results per metric
+        """
+        if yf is None and not self._snapshot_mode:
+            return {}
+
+        # Get yfinance data (cached) — skip when using snapshots
+        stock = None if self._snapshot_mode else self._get_stock(ticker)
+
+        # Set ticker early so snapshot lookup can use it
+        self._current_ticker = ticker
+
+        validations = {}
+
+        for metric, result in results.items():
+            if result.source == MappingSource.CONFIG:
+                # Metric excluded for this company
+                validations[metric] = ValidationResult(
+                    metric=metric,
+                    company=ticker,
+                    xbrl_value=None,
+                    reference_value=None,
+                    is_valid=True,
+                    variance_pct=None,
+                    status="excluded",
+                    notes="Metric excluded in config"
+                )
+                continue
+            
+            # GUARDRAIL: Flow vs Stock Sieve (STT Fix)
+            # If Balance Sheet metric mapped to Flow tag, invalidate it immediately
+            # CPA Rule: Balance Sheet = Point-in-Time, Cash Flow = Duration.
+            if result.is_mapped and self._is_balance_sheet_metric(metric):
+                if self._is_flow_concept(result.concept):
+                    # Invalidate the mapping - prevents using semantically wrong tag
+                    result.concept = None 
+                    result.confidence = 0.0
+                    result.source = MappingSource.UNKNOWN
+            
+            # Get reference value from yfinance
+            ref_value = self._get_yfinance_value(stock, metric, target_date=filing_date)
+
+            # Evidence tracking — populated during extraction, attached to ValidationResult
+            _resolution_type = "none"
+            _components_used = []
+            _components_missing = []
+            _company_industry = None
+
+            # Get XBRL value (if we have a mapping and XBRL object)
+            xbrl_value = None
+            if result.is_mapped and xbrl:
+                # Set context for pattern classification and period-aware extraction
+                self._current_ticker = ticker
+                self._current_metric = metric
+                self._current_form_type = form_type  # For period filtering (10-K vs 10-Q)
+                
+                # Try industry-specific extraction first for special metrics
+                industry_value = self._try_industry_extraction(ticker, metric, xbrl)
+                if industry_value is not None:
+                    # Check for SENTINEL (NaN) -> Hard Failure of Industry Logic
+                    import math
+                    if isinstance(industry_value, float) and math.isnan(industry_value):
+                        # Sentinel received: Industry Logic Failed AND Tree Fallback Disabled
+                        # Invalidate the Tree Mapping to prevent "guessing"
+                        result.concept = None
+                        result.source = MappingSource.UNKNOWN
+                        xbrl_value = None
+                        # Proceed as if unmapped (will hit fallback logic, but that's fine as it won't use Tree)
+                    else:
+                        xbrl_value = industry_value
+                        # Update result to reflect industry extraction
+                        result.source = MappingSource.INDUSTRY
+                        result.concept = f"industry_logic:{metric}"
+                        result.confidence = 1.0
+                        _resolution_type = "industry"
+                # Check if metric is composite (sum of multiple concepts)
+                elif self._is_composite_metric(metric):
+                    # HYBRID LOGIC: If mapped to a "Total" concept, use direct extraction
+                    # This prevents using component sum when a direct total (like DebtCurrent) exists
+                    # Added LongTermDebtAndCapitalLeaseObligationsCurrent for KO (8.7% variance vs composite double-counting)
+                    if result.concept in [
+                        'us-gaap:DebtCurrent',
+                        'us-gaap:ShortTermDebt',
+                        'us-gaap:ShortTermDebtAndCapitalLeaseObligations', # Note: fixed name
+                        'us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent'
+                    ]:
+                        xbrl_value = self._extract_xbrl_value(xbrl, result.concept)
+                        _resolution_type = "direct"
+                        _components_used = [result.concept]
+                    else:
+                        xbrl_value, _components_used, _components_missing = \
+                            self._extract_composite_value_with_evidence(xbrl, metric)
+                        _resolution_type = "composite"
+                else:
+                    # Specialized Logic for 10-Q Flow Metrics (Derivation)
+                    if form_type == '10-Q' and metric in QUARTERLY_DERIVABLE_METRICS:
+                        # Force strict quarterly extraction (90 days)
+                        strict_val = self._extract_xbrl_value(xbrl, result.concept, target_days=90)
+                        
+                        if strict_val is not None:
+                            xbrl_value = strict_val
+                        else:
+                            # Strict extraction failed -> Quarterly fact missing -> Trigger Derivation
+                            # Get YTD value (fallback behavior)
+                            ytd_val = self._extract_xbrl_value(xbrl, result.concept, target_days=None)
+                            
+                            if ytd_val is not None:
+                                derived = self._derive_quarterly_value(
+                                    ticker, 
+                                    result.concept, 
+                                    filing_date, 
+                                    ytd_val
+                                )
+                                if derived is not None:
+                                    xbrl_value = derived
+                                else:
+                                    # If derivation fails (e.g. no prior filing), default to YTD
+                                    xbrl_value = ytd_val
+                            else:
+                                xbrl_value = None
+                    else:
+                        xbrl_value = self._extract_xbrl_value(xbrl, result.concept)
+                        _resolution_type = "direct"
+                        if result.concept:
+                            _components_used = [result.concept]
+
+            # FALLBACK: Industry/Calculated Logic when no mapping exists (or was invalidated)
+            elif not result.is_mapped and xbrl and ref_value:
+                # 1. Try Industry Extraction (OperatingIncome, Banking Debt/Cash, etc.)
+                # This covers STT Flow/Stock invalidated case - we still try industry logic!
+                industry_value = self._try_industry_extraction(ticker, metric, xbrl)
+                if industry_value is not None:
+                    xbrl_value = industry_value
+                    # Create a synthetic mapping for the calculated value
+                    result.concept = None  # Composite/Calculated
+                    result.confidence = 0.85
+                    result.source = MappingSource.TREE
+                    result.reasoning = "Industry Logic Extraction (Unmapped Fallback)"
+                    _resolution_type = "industry"
+
+                # 2. Try Composite Metrics Fallback
+                elif self._is_composite_metric(metric):
+                     composite_value, _components_used, _components_missing = \
+                         self._extract_composite_value_with_evidence(xbrl, metric)
+                     if composite_value is not None:
+                        xbrl_value = composite_value
+                        comp_names = self.COMPOSITE_METRICS.get(metric, _components_used)
+                        result.concept = f"Composite: {', '.join(comp_names)}"
+                        result.confidence = 0.85
+                        result.source = MappingSource.TREE
+                        result.reasoning = f"Synthesized from {len(comp_names)} components via Fallback"
+                        _resolution_type = "composite"
+            
+            # FALLBACK: Generalized Composite Metrics (ShortTermDebt, IntangibleAssets, etc.)
+            # Per Principal Architect: attempt composite construction before giving up
+            elif not result.is_mapped and xbrl and self._is_composite_metric(metric) and ref_value:
+                composite_value, _components_used, _components_missing = \
+                    self._extract_composite_value_with_evidence(xbrl, metric)
+                if composite_value is not None:
+                    xbrl_value = composite_value
+                    # Mark as synthesized composite
+                    comp_names = self.COMPOSITE_METRICS.get(metric, _components_used)
+                    result.concept = f"Composite: {', '.join(comp_names)}"
+                    result.confidence = 0.85
+                    result.source = MappingSource.TREE
+                    result.reasoning = f"Synthesized from {len(comp_names)} components via Fallback"
+                    _resolution_type = "composite"
+            
+            # SIGN CONVENTION: Capex is positive in XBRL but negative in yfinance
+            # Per Principal Architect: XBRL reports outflows as positive; Street models use negative
+            if metric == 'Capex' and xbrl_value is not None and ref_value is not None:
+                if xbrl_value > 0 and ref_value < 0:
+                    xbrl_value = -xbrl_value
+
+            # SIGN CONVENTION: DividendsPaid is positive in XBRL but negative in yfinance
+            # Cash dividends paid are cash outflows, reported as positive in XBRL but negative in yfinance
+            if metric == 'DividendsPaid' and xbrl_value is not None and ref_value is not None:
+                if xbrl_value > 0 and ref_value < 0:
+                    xbrl_value = -xbrl_value
+
+            # Validate
+            validation = self._compare_values(
+                metric, ticker, xbrl_value, ref_value, result
+            )
+
+            # SA SCORING: Compute composite value via standardization formula
+            if validation.variance_type == "standardized" and xbrl is not None and ref_value is not None:
+                logger.debug(
+                    "[SA GATE] %s:%s — variance_type=%s",
+                    ticker, metric, validation.variance_type,
+                )
+                sa_result = self._compute_sa_composite(metric, ticker, xbrl, ref_value)
+                if sa_result is None:
+                    logger.debug(
+                        "[SA GATE] %s:%s — sa_result=None (no components found)",
+                        ticker, metric,
+                    )
+                else:
+                    sa_composite_value, sa_variance_frac, sa_pass = sa_result
+                    validation.sa_value = sa_composite_value
+                    validation.sa_variance_pct = sa_variance_frac * 100
+                    validation.sa_pass = sa_pass
+
+                    # PROMOTE: If standardization formula gives a BETTER match than
+                    # raw extraction, use it as the primary result.
+                    # This makes ADD_STANDARDIZATION proposals actually affect CQS.
+                    raw_variance = abs(validation.variance_pct) if validation.variance_pct is not None else float('inf')
+                    formula_variance = sa_variance_frac * 100
+                    if formula_variance < raw_variance:
+                        old_status = validation.status
+                        validation.is_valid = sa_pass
+                        validation.xbrl_value = sa_composite_value
+                        validation.variance_pct = formula_variance
+                        validation.status = "match" if sa_pass else "mismatch"
+                        validation.notes = (
+                            f"Standardization formula: variance {formula_variance:.1f}% "
+                            f"(raw was {raw_variance:.1f}%)"
+                        )
+                        logger.info(
+                            f"[SA PROMOTE] {ticker}:{metric} — standardization formula promoted: "
+                            f"variance {raw_variance:.1f}% -> {formula_variance:.1f}%, "
+                            f"status {old_status} -> {validation.status}, "
+                            f"sa_pass={sa_pass}, value={sa_composite_value}"
+                        )
+                    else:
+                        logger.debug(
+                            f"[SA SKIP] {ticker}:{metric} — formula not better: "
+                            f"raw={raw_variance:.1f}% vs formula={formula_variance:.1f}%"
+                        )
+
+            # IDENTITY CHECK GUARDRAIL (Bank Sector Expansion)
+            # If OperatingIncome is extracted, cross-check against accounting identity
+            if metric == 'OperatingIncome' and xbrl_value is not None and xbrl:
+                try:
+                    from .industry_logic import get_industry_extractor, DefaultExtractor
+                    from edgar.entity.mappings_loader import get_industry_for_sic
+                    from edgar import Company
+                    
+                    c = Company(ticker)
+                    sic = c.data.sic
+                    industry = get_industry_for_sic(sic) if sic else None
+                    
+                    extractor = get_industry_extractor(industry) if industry else DefaultExtractor()
+                    
+                    # For performance, only get facts if not already extracted
+                    facts_df = None
+                    if xbrl and xbrl.facts:
+                        facts_df = xbrl.facts.to_dataframe()
+                        
+                    identity_warning = extractor.validate_accounting_identity(xbrl, facts_df, xbrl_value)
+                    
+                    if identity_warning:
+                        # Append warning to validation notes
+                        current_notes = validation.notes or ""
+                        validation.notes = f"{current_notes} | {identity_warning}" if current_notes else identity_warning
+                        # If identity completely fails (major logic error), consider downgrading status
+                        # For now, we just warn to gather data during Sprint 4
+                except Exception as e:
+                    pass
+
+            # Resolve company industry for evidence (cached via _try_industry_extraction)
+            if _company_industry is None:
+                try:
+                    from edgar.entity.mappings_loader import get_industry_for_sic
+                    from edgar import Company as _Co
+                    _c = _Co(ticker)
+                    _sic = _c.data.sic
+                    _company_industry = get_industry_for_sic(_sic) if _sic else None
+                except Exception:
+                    pass
+
+            # Attach extraction evidence to ValidationResult
+            validation.resolution_type = _resolution_type
+            validation.components_used = _components_used if _components_used else None
+            validation.components_missing = _components_missing if _components_missing else None
+            validation.company_industry = _company_industry
+
+            # Stamp fact-level provenance from the last extraction
+            provenance = getattr(self, '_last_extraction_provenance', {})
+            if provenance:
+                validation.period_type = provenance.get('period_type')
+                validation.period_start = provenance.get('period_start')
+                validation.period_end = provenance.get('period_end')
+                validation.unit = provenance.get('unit')
+                validation.fact_decimals = provenance.get('decimals')
+
+            validations[metric] = validation
+
+        return validations
+
+    def validate_and_update_mappings(
+        self,
+        ticker: str,
+        results: Dict[str, MappingResult],
+        xbrl=None,
+        filing_date: Optional[Union[str, datetime]] = None,
+        form_type: Optional[str] = None
+    ) -> Dict[str, ValidationResult]:
+        """
+        Validate mappings and update MappingResult objects with validation status.
+        
+        This implements the VALIDATION FEEDBACK LOOP:
+        - Pass: Mark mapping as validation_status="valid"
+        - Fail: Mark mapping as validation_status="invalid", confidence_level=INVALID
+        
+        Args:
+            ticker: Company ticker
+            results: Mapping results to validate (will be modified in place)
+            xbrl: Optional XBRL object to extract values
+            filing_date: Date of the filing (for historical matching)
+            form_type: Form type (10-K or 10-Q) for period-aware extraction
+            
+        Returns:
+            Dict of validation results per metric
+        """
+        # Run internal consistency validation BEFORE external
+        from edgar.xbrl.standardization.internal_validator import InternalConsistencyValidator
+        internal_validator = InternalConsistencyValidator()
+        extracted_values = {}
+        for metric, mapping_result in results.items():
+            if mapping_result.value is not None:
+                extracted_values[metric] = mapping_result.value
+        internal_result = internal_validator.get_internal_validity(extracted_values)
+
+        validations = self.validate_company(ticker, results, xbrl, filing_date=filing_date, form_type=form_type)
+
+        # Stamp each ValidationResult with internal status
+        # Use per-metric granularity: metrics involved in failed equations get EQUATION_CONFLICT
+        failed_metrics_set = internal_result.get_failed_metrics()
+        for metric_name, validation in validations.items():
+            if metric_name in failed_metrics_set:
+                validation.internal_status = "EQUATION_CONFLICT"
+            else:
+                validation.internal_status = internal_result.status
+
+        # SEC-Native Primacy: Try SEC facts FIRST for every metric.
+        # This pre-computes SEC reference values so they're available during
+        # the validation loop below. SEC facts are the authoritative source;
+        # yfinance is corroboration, not truth.
+        sec_values: Dict[str, Optional[float]] = {}
+        for metric in validations:
+            sec_values[metric] = self._get_sec_facts_value(ticker, metric)
+
+        # Update MappingResult objects based on validation
+        for metric, validation in validations.items():
+            if metric not in results:
+                continue
+
+            result = results[metric]
+            sec_value = sec_values.get(metric)
+            yf_value = validation.reference_value  # From validate_company (yfinance)
+
+            # --- Pre-compute SEC variance (used for evidence_tier and mismatch override) ---
+            sec_var = None
+            tol = self._get_metric_tolerance(metric)
+            if sec_value is not None and validation.xbrl_value is not None:
+                sec_var = self._compute_variance_pct(validation.xbrl_value, sec_value)
+            sec_confirms = sec_var is not None and sec_var <= tol
+
+            # --- Determine evidence_tier ---
+            if validation.status == "excluded":
+                validation.evidence_tier = "sec_confirmed"
+            elif sec_confirms:
+                validation.evidence_tier = "sec_confirmed"
+                if not validation.rfa_pass:
+                    validation.rfa_pass = True
+                    validation.rfa_source = "sec_facts"
+            elif sec_var is not None and not sec_confirms and yf_value is not None:
+                validation.evidence_tier = "yfinance_confirmed"
+            elif yf_value is not None:
+                validation.evidence_tier = "yfinance_confirmed"
+            else:
+                validation.evidence_tier = "unverified"
+
+            # --- Update validation status ---
+            if validation.status == "match":
+                result.validation_status = "valid"
+                result.validation_notes = "Value matches reference"
+            elif validation.status == "mismatch":
+                # SEC facts confirm our extraction — override yfinance mismatch
+                if sec_confirms:
+                        # SEC confirms our extraction — override yfinance mismatch
+                        validation.status = "match"
+                        validation.is_valid = True
+                        validation.rfa_pass = True
+                        validation.rfa_source = "sec_facts"
+                        validation.evidence_tier = "sec_confirmed"
+                        result.validation_status = "valid"
+                        result.validation_notes = f"SEC facts confirm extraction (sec_var {sec_var:.1f}%, yf mismatch)"
+                        logger.info(f"[SEC PRIMACY] {ticker}:{metric} — SEC confirms, overriding yf mismatch")
+                        continue
+
+                # SMART RETRY: For OperatingIncome, try calculation if direct tag failed
+                retry_successful = False
+                if metric == 'OperatingIncome' and xbrl is not None:
+                    retry_successful = self._retry_with_calculation(
+                        ticker, metric, result, validation, xbrl
+                    )
+
+                if not retry_successful:
+                    # INTERNAL OVERRIDE: If accounting equations pass but yfinance
+                    # disagrees, trust our extraction — the reference is likely stale
+                    if internal_result.status == "VALID_INTERNAL":
+                        result.validation_status = "valid"
+                        result.validation_notes = (
+                            "External mismatch but internal accounting equations pass — "
+                            "reference data likely stale or using different methodology"
+                        )
+                        validation.evidence_tier = "self_validated"
+                        logger.info(
+                            f"[INTERNAL OVERRIDE] {ticker}:{metric} — "
+                            f"internal pass overrides external mismatch"
+                        )
+                    else:
+                        # FEEDBACK LOOP: Mark as INVALID
+                        result.validation_status = "invalid"
+                        result.validation_notes = f"Value mismatch: {validation.notes}"
+                        result.confidence_level = ConfidenceLevel.INVALID
+            elif validation.status == "missing_ref":
+                # SEC facts as primary reference (already fetched above)
+                if sec_var is not None:
+                    validation.reference_value = sec_value
+                    validation.variance_pct = sec_var
+                    if sec_confirms:
+                        validation.status = "match"
+                        validation.is_valid = True
+                        validation.rfa_pass = True
+                        validation.rfa_source = "sec_facts"
+                        validation.evidence_tier = "sec_confirmed"
+                        result.validation_status = "valid"
+                        result.validation_notes = f"SEC facts reference match (variance {sec_var:.1f}%)"
+                        logger.info(f"[SEC FACTS] {ticker}:{metric} — SEC reference match ({sec_var:.1f}%)")
+                    else:
+                        validation.status = "mismatch"
+                        validation.is_valid = False
+                        validation.evidence_tier = "sec_confirmed"  # SEC had a value, just didn't match
+                        result.validation_status = "invalid"
+                        result.validation_notes = f"SEC facts reference mismatch (variance {sec_var:.1f}%)"
+                else:
+                    result.validation_status = "unverified"
+                    result.validation_notes = "No reference data available — cannot validate"
+                    validation.evidence_tier = "unverified"
+            elif validation.status == "mapping_needed":
+                result.validation_status = "pending"
+                result.validation_notes = "Mapping required"
+            elif validation.status == "pending_extraction":
+                result.validation_status = "pending"
+                result.validation_notes = "Value extraction pending"
+            elif validation.status == "excluded":
+                result.validation_status = "valid"
+                result.validation_notes = "Metric excluded for this company"
+
+        # Compute publish_confidence and stamp provenance for each validation result
+        accession = getattr(self, '_current_accession_number', None)
+        for metric, validation in validations.items():
+            result = results.get(metric)
+            validation.publish_confidence = self._compute_publish_confidence(
+                result, validation, ticker, metric
+            )
+            validation.accession_number = accession
+
+        return validations
+
+    def _compute_publish_confidence(
+        self,
+        result: Optional[MappingResult],
+        validation: ValidationResult,
+        ticker: str,
+        metric: str,
+    ) -> str:
+        """
+        Compute publish confidence level for a validation result.
+
+        Levels:
+        - high: Known concept + reference match + internal equations pass
+                (but NEVER for self_validated evidence — that's an internal override)
+        - medium: Known concept + reference match OR internal equations pass
+        - low: Mapped but unvalidated, or high variance
+        - unverified: No reference data, no internal validation
+        """
+        if result is None or not result.is_mapped:
+            return "unverified"
+
+        has_ref_match = validation.status == "match"
+        has_known_concept = False
+        if self.config:
+            mc = self.config.get_metric(metric)
+            if mc and result.concept and mc.matches_concept(result.concept):
+                has_known_concept = True
+
+        internal_ok = validation.internal_status in ("VALID_INTERNAL", "VALID_PARTIAL")
+
+        # Guardrail: internal override (self_validated) can never produce "high"
+        # confidence. If the only reason we're marking this "valid" is because
+        # internal accounting equations pass but external references disagree,
+        # cap at "medium" — it might be right, but we can't guarantee it.
+        is_self_validated = validation.evidence_tier == "self_validated"
+        # Also detect the internal override fingerprint in notes
+        if result.validation_notes and "internal accounting equations pass" in result.validation_notes:
+            is_self_validated = True
+
+        if has_ref_match and has_known_concept and internal_ok:
+            if is_self_validated:
+                return "medium"  # Capped: cannot trust internal-only for "high"
+            return "high"
+        elif has_ref_match:
+            return "medium"
+        elif result.is_mapped:
+            return "low"
+        else:
+            return "unverified"
+    
+    def _retry_with_calculation(
+        self,
+        ticker: str,
+        metric: str,
+        result: 'MappingResult',
+        validation: 'ValidationResult',
+        xbrl
+    ) -> bool:
+        """
+        Smart Retry: Attempt calculated value when direct tag fails validation.
+        
+        For OperatingIncome, if the XBRL tag exists but doesn't match yfinance,
+        try the GrossProfit - SGA - R&D formula instead.
+        
+        Returns True if calculation succeeds and is valid.
+        """
+        try:
+            from .industry_logic import get_industry_extractor, DefaultExtractor
+            from edgar.entity.mappings_loader import get_industry_for_sic
+            from edgar import Company
+            
+            # Get industry and facts
+            c = Company(ticker)
+            sic = c.data.sic
+            industry = get_industry_for_sic(sic) if sic else None
+            
+            facts_df = None
+            if xbrl and xbrl.facts:
+                facts_df = xbrl.facts.to_dataframe()
+            
+            # Get extractor and calculate
+            extractor = get_industry_extractor(industry) if industry else DefaultExtractor()
+            calc_result = extractor.extract_operating_income(xbrl, facts_df)
+            
+            # Only use if it was actually calculated (not direct tag)
+            if calc_result.value is None or calc_result.extraction_method.value == 'direct':
+                return False
+            
+            # Check if calculated value matches reference better
+            ref_value = validation.reference_value
+            if ref_value is None or ref_value == 0:
+                return False
+            
+            calc_variance = abs(calc_result.value - ref_value) / abs(ref_value) * 100
+            
+            # Success: variance within tolerance (15%)
+            if calc_variance <= 15.0:
+                # Overwrite mapping with calculated result
+                result.concept = None  # No single concept, it's calculated
+                result.confidence = 0.85
+                result.source = MappingSource.TREE  # Mark as derived
+                result.validation_status = "valid"
+                result.validation_notes = (
+                    f"Smart Retry: Calculated value ({calc_result.value/1e9:.2f}B) matches reference "
+                    f"({ref_value/1e9:.2f}B, variance={calc_variance:.1f}%). "
+                    f"Formula: {calc_result.notes}"
+                )
+                
+                # Log the swap
+                print(f"    [SMART RETRY] {ticker} {metric}: Swapped to calculated value "
+                      f"({calc_result.value/1e9:.2f}B vs tag {validation.xbrl_value/1e9:.2f}B)")
+                
+                return True
+            
+            # Calculation also fails validation
+            return False
+            
+        except Exception as e:
+            # Calculation failed, continue with original failure
+            return False
+    
+    def _get_yfinance_value(
+        self,
+        stock,
+        metric: str,
+        max_periods: int = 4,
+        target_date: Optional[Union[str, datetime]] = None
+    ) -> Optional[float]:
+        """Get a value from yfinance for a metric.
+
+        Uses GAAP "As Reported" fields when available, falls back to
+        calculated fields for companies that don't have the GAAP field.
+        When snapshot_mode is enabled, reads from on-disk JSON instead of live API.
+
+        Args:
+            stock: yfinance Ticker object (None when snapshot_mode)
+            metric: Metric name
+            max_periods: Max periods to search if no target_date
+            target_date: Optional specific date to match (within 7 days)
+
+        Returns:
+            Float value or None
+        """
+        if metric not in self.YFINANCE_MAP:
+            return None
+
+        # Snapshot mode: read from on-disk JSON instead of live yfinance
+        if self._snapshot_mode:
+            return self._get_snapshot_value(metric, max_periods, target_date)
+        
+        sheet_name, field_name = self.YFINANCE_MAP[metric]
+        
+        try:
+            # Dynamically get the dataframe (financials, quarterly_financials, etc.)
+            if hasattr(stock, sheet_name):
+                df = getattr(stock, sheet_name)
+            else:
+                return None
+            
+            if df is None or df.empty:
+                return None
+            
+            # Try primary field first, then fallback if not available
+            fields_to_try = [field_name]
+            if metric in self.YFINANCE_GAAP_FALLBACKS:
+                fallback_sheet, fallback_field = self.YFINANCE_GAAP_FALLBACKS[metric]
+                if fallback_sheet == sheet_name:
+                    fields_to_try.append(fallback_field)
+            
+            for try_field in fields_to_try:
+                if try_field not in df.index:
+                    continue
+                
+                # DATE MATCHING LOGIC
+                if target_date:
+                    # Ensure target_date is datetime
+                    if isinstance(target_date, str):
+                        try:
+                            # Handle YYYY-MM-DD or ISO format
+                            if 'T' in target_date:
+                                target_date = target_date.split('T')[0]
+                            t_date = datetime.strptime(target_date, '%Y-%m-%d')
+                        except:
+                            # Fallback if parsing fails - just use first avail
+                            t_date = None
+                    else:
+                        t_date = target_date
+                        
+                    if t_date:
+                        # Find column nearest to target date
+                        best_col = None
+                        min_diff = 365 # Start huge
+                        
+                        for col in df.columns:
+                            try:
+                                col_date = col if isinstance(col, datetime) else datetime.strptime(str(col).split(' ')[0], '%Y-%m-%d')
+                                diff = abs((col_date - t_date).days)
+                                
+                                # Match within 7 days window (accounting for filing lag vs period end)
+                                if diff <= 7 and diff < min_diff:
+                                    min_diff = diff
+                                    best_col = col
+                            except:
+                                continue
+                        
+                        if best_col is not None:
+                            val = df.loc[try_field, best_col]
+                            if val is not None and not (hasattr(val, 'isna') and val.isna()):
+                                return float(val)
+                        
+                        # If no date match found, return None (don't fallback to random other date)
+                        return None
+
+                # DEFAULT LOGIC (If no target_date or date parsing failed)
+                # Try multiple periods, use first non-NaN value
+                for col_idx in range(min(max_periods, len(df.columns))):
+                    val = df.loc[try_field].iloc[col_idx]
+                    if val is not None and not (hasattr(val, 'isna') and val.isna()):
+                        try:
+                            return float(val)
+                        except (ValueError, TypeError):
+                            continue
+                            
+        except Exception:
+            pass
+        
+        return None  # All periods NaN or error
+
+    def _get_snapshot_value(
+        self,
+        metric: str,
+        max_periods: int = 4,
+        target_date: Optional[Union[str, datetime]] = None
+    ) -> Optional[float]:
+        """Look up a reference value from on-disk JSON snapshot.
+
+        Loads the snapshot once per ticker (cached in self._snapshot_cache),
+        then delegates to yf_snapshot.get_snapshot_value for date matching.
+        Handles GAAP fallbacks the same way _get_yfinance_value does.
+        """
+        from .yf_snapshot import load_snapshot, get_snapshot_value
+
+        ticker = getattr(self, "_current_ticker", None)
+        if not ticker:
+            return None
+
+        # Load snapshot with instance-level caching
+        if ticker not in self._snapshot_cache:
+            self._snapshot_cache[ticker] = load_snapshot(ticker)
+        snapshot = self._snapshot_cache[ticker]
+        if snapshot is None:
+            return None
+
+        sheet_name, field_name = self.YFINANCE_MAP[metric]
+
+        # Try primary field
+        val = get_snapshot_value(snapshot, sheet_name, field_name, target_date, max_periods)
+        if val is not None:
+            return val
+
+        # Try GAAP fallback
+        if metric in self.YFINANCE_GAAP_FALLBACKS:
+            fb_sheet, fb_field = self.YFINANCE_GAAP_FALLBACKS[metric]
+            val = get_snapshot_value(snapshot, fb_sheet, fb_field, target_date, max_periods)
+            if val is not None:
+                return val
+
+        return None
+
+    def _get_sec_facts_value(self, ticker: str, metric: str, fiscal_year: Optional[int] = None) -> Optional[float]:
+        """Get reference value from SEC Company Facts API as yfinance fallback.
+
+        Uses the existing EntityFacts infrastructure to query data.sec.gov/api/xbrl/.
+        Tries known_concepts from metrics.yaml config until a value is found.
+        Results are cached per-ticker for the lifetime of this validator.
+
+        Args:
+            fiscal_year: If provided, returns the value for that specific fiscal year.
+                         If None, returns the most recent value (backwards compatible).
+        """
+        if not self._use_sec_facts:
+            return None
+
+        try:
+            # Cache EntityFacts per ticker
+            if ticker not in self._sec_facts_cache:
+                from edgar.reference.tickers import find_cik
+                cik = find_cik(ticker)
+                if cik is None:
+                    self._sec_facts_cache[ticker] = None
+                    return None
+                from edgar.entity.entity_facts import get_company_facts
+                self._sec_facts_cache[ticker] = get_company_facts(int(cik))
+
+            facts = self._sec_facts_cache[ticker]
+            if facts is None:
+                return None
+
+            # Get known concepts for this metric from config
+            metric_config = self.config.get_metric(metric) if self.config else None
+            if not metric_config or not metric_config.known_concepts:
+                return None
+
+            # Try each known concept until we find a value.
+            # get_annual_fact requires fully qualified names (e.g., "us-gaap:Revenues").
+            # known_concepts stores local names (e.g., "Revenues"), so prepend "us-gaap:".
+            for concept in metric_config.known_concepts[:5]:
+                qualified = f"us-gaap:{concept}" if ":" not in concept else concept
+                try:
+                    fact = facts.get_annual_fact(qualified, fiscal_year=fiscal_year)
+                    if fact is not None and getattr(fact, 'numeric_value', None) is not None:
+                        return float(fact.numeric_value)
+                except Exception as e:
+                    logger.debug(f"SEC facts concept {qualified} lookup failed for {ticker}: {e}")
+                    continue
+
+            return None
+        except Exception as e:
+            logger.debug(f"SEC facts lookup failed for {ticker}:{metric}: {e}")
+            self._sec_facts_cache[ticker] = None
+            return None
+
+    def validate_mapping_across_periods(
+        self,
+        ticker: str,
+        metric: str,
+        concept: str,
+        n_periods: int = 3,
+    ) -> 'MultiPeriodResult':
+        """
+        Validate a mapping across multiple fiscal periods (10-K filings).
+
+        For each of the N most recent 10-Ks, extracts the metric value using
+        the orchestrator pipeline and validates against SEC facts for that period.
+
+        Args:
+            ticker: Company ticker.
+            metric: Metric name (e.g., "Revenue").
+            concept: XBRL concept to validate.
+            n_periods: Number of fiscal periods to check (default 3).
+
+        Returns:
+            MultiPeriodResult with pass/fail for each period.
+        """
+        from edgar.xbrl.standardization.tools.validate_multi_period import get_last_n_10ks
+
+        period_details = []
+        validated_fiscal_periods = []
+
+        filings = get_last_n_10ks(ticker, n_periods)
+        if not filings:
+            return MultiPeriodResult(
+                ticker=ticker,
+                metric=metric,
+                periods_checked=0,
+                periods_passed=0,
+                periods_failed=0,
+                periods_missing=0,
+                is_stable=False,
+                validated_fiscal_periods=[],
+                period_details=[],
+                detail=f"No 10-K filings found for {ticker}",
+            )
+
+        periods_passed = 0
+        periods_failed = 0
+        periods_missing = 0
+
+        for filing in filings:
+            period_end = filing.period_of_report
+            period_key = period_end.strftime("%Y-%m-%d") if period_end else "unknown"
+
+            try:
+                xbrl_obj = filing.xbrl()
+                if not xbrl_obj:
+                    periods_missing += 1
+                    period_details.append({
+                        "period": period_key, "value": None, "ref_value": None,
+                        "variance": None, "pass": False, "reason": "no XBRL data",
+                    })
+                    continue
+
+                # Extract value using the same extraction logic
+                xbrl_value = self._extract_xbrl_value(xbrl_obj, concept)
+                if xbrl_value is None:
+                    periods_missing += 1
+                    period_details.append({
+                        "period": period_key, "value": None, "ref_value": None,
+                        "variance": None, "pass": False, "reason": "concept not found",
+                    })
+                    continue
+
+                # Get reference from SEC facts for this period (Consensus 020: pass fiscal year)
+                fy = period_end.year if period_end else None
+                sec_value = self._get_sec_facts_value(ticker, metric, fiscal_year=fy)
+                ref_value = sec_value
+
+                if ref_value is None:
+                    # Fallback to yfinance for this period
+                    stock = None if self._snapshot_mode else self._get_stock(ticker)
+                    self._current_ticker = ticker
+                    ref_value = self._get_yfinance_value(
+                        stock, metric, target_date=period_end
+                    )
+
+                if ref_value is None:
+                    periods_missing += 1
+                    period_details.append({
+                        "period": period_key, "value": xbrl_value, "ref_value": None,
+                        "variance": None, "pass": False, "reason": "no reference data",
+                    })
+                    continue
+
+                variance = self._compute_variance_pct(xbrl_value, ref_value)
+                passed = variance <= self._get_metric_tolerance(metric)
+
+                if passed:
+                    periods_passed += 1
+                    validated_fiscal_periods.append(period_key)
+                else:
+                    periods_failed += 1
+
+                period_details.append({
+                    "period": period_key, "value": xbrl_value, "ref_value": ref_value,
+                    "variance": round(variance, 1), "pass": passed,
+                    "reason": "match" if passed else f"variance {variance:.1f}%",
+                })
+
+            except Exception as e:
+                periods_missing += 1
+                period_details.append({
+                    "period": period_key, "value": None, "ref_value": None,
+                    "variance": None, "pass": False, "reason": f"error: {e}",
+                })
+
+        periods_checked = len(filings)
+        is_stable = periods_passed >= min(n_periods, periods_checked) and periods_failed == 0
+
+        detail_parts = [f"{periods_passed}/{periods_checked} periods passed"]
+        if periods_failed > 0:
+            detail_parts.append(f"{periods_failed} failed")
+        if periods_missing > 0:
+            detail_parts.append(f"{periods_missing} missing")
+
+        return MultiPeriodResult(
+            ticker=ticker,
+            metric=metric,
+            periods_checked=periods_checked,
+            periods_passed=periods_passed,
+            periods_failed=periods_failed,
+            periods_missing=periods_missing,
+            is_stable=is_stable,
+            validated_fiscal_periods=validated_fiscal_periods,
+            period_details=period_details,
+            detail="; ".join(detail_parts),
+        )
+
+    def validate_formula_across_periods(
+        self,
+        ticker: str,
+        metric: str,
+        fiscal_years: Optional[List[int]] = None,
+        tolerance_pct: float = 15.0,
+    ) -> FormulaValidationResult:
+        """Validate a composite formula across multiple fiscal years (M9.3).
+
+        Resolves the formula for the metric+ticker, then checks each fiscal year
+        to see if the summed components match the reference value.
+
+        Args:
+            ticker: Company ticker.
+            metric: Metric name (e.g. "ShortTermDebt").
+            fiscal_years: List of fiscal years to check. Defaults to last 3.
+            tolerance_pct: Variance tolerance for pass/fail.
+
+        Returns:
+            FormulaValidationResult with per-period details and stability assessment.
+        """
+        from edgar import Company
+
+        if fiscal_years is None:
+            fiscal_years = [2024, 2023, 2022]
+
+        formula_components = self._resolve_formula_components(metric, ticker)
+        formula_tier = "default"
+        if formula_components is None:
+            # No formula configured — check for preferred_concept in overrides
+            return FormulaValidationResult(
+                ticker=ticker, metric=metric,
+                periods_checked=0, periods_passed=0,
+                is_stable=False,
+                detail="No composite formula configured for this metric+ticker",
+            )
+
+        # Determine formula tier
+        metric_config = self.config.get_metric(metric) if self.config else None
+        if metric_config and metric_config.standardization:
+            std = metric_config.standardization
+            company_config = self.config.get_company(ticker) if self.config else None
+            if ticker in std.get("company_overrides", {}):
+                formula_tier = "company"
+            elif company_config and company_config.industry and company_config.industry.title() in std.get("sector_overrides", {}):
+                formula_tier = "sector"
+
+        period_details = []
+        component_tracker: Dict[str, Dict] = {}
+        periods_passed = 0
+
+        # Hoist invariants outside the loop
+        company = Company(ticker)
+        stock = None if self._snapshot_mode else self._get_stock(ticker)
+        self._current_ticker = ticker
+        ref_value = self._get_yfinance_value(stock, metric)
+
+        for fy in fiscal_years:
+            try:
+                filing = company.get_filings(form="10-K").filter(date=f"{fy}-01-01:{fy}-12-31")
+                if not filing or len(filing) == 0:
+                    period_details.append({"period": str(fy), "status": "missing", "notes": "No 10-K found"})
+                    continue
+
+                xbrl = filing[0].xbrl()
+                if xbrl is None:
+                    period_details.append({"period": str(fy), "status": "missing", "notes": "No XBRL data"})
+                    continue
+
+                # Extract each component
+                composite_value = 0.0
+                components_found = {}
+                components_missing = []
+
+                for concept, weight in formula_components:
+                    val = self._extract_xbrl_value(xbrl, concept)
+                    if val is not None:
+                        composite_value += weight * val
+                        components_found[concept] = val
+                        component_tracker.setdefault(concept, {"found": 0, "missing": 0, "values": []})
+                        component_tracker[concept]["found"] += 1
+                        component_tracker[concept]["values"].append(val)
+                    else:
+                        components_missing.append(concept)
+                        component_tracker.setdefault(concept, {"found": 0, "missing": 0, "values": []})
+                        component_tracker[concept]["missing"] += 1
+
+                variance = None
+                passed = False
+
+                if ref_value is not None and ref_value != 0:
+                    variance = abs(composite_value - ref_value) / abs(ref_value) * 100
+                    passed = variance <= tolerance_pct
+                    if passed:
+                        periods_passed += 1
+
+                period_details.append({
+                    "period": str(fy),
+                    "composite_value": composite_value,
+                    "ref_value": ref_value,
+                    "variance_pct": variance,
+                    "pass": passed,
+                    "components_found": components_found,
+                    "components_missing": components_missing,
+                })
+            except Exception as e:
+                period_details.append({"period": str(fy), "status": "error", "notes": str(e)})
+
+        periods_checked = sum(1 for d in period_details if d.get("status") != "missing" and d.get("status") != "error")
+        is_stable = periods_checked > 0 and periods_passed == periods_checked
+
+        return FormulaValidationResult(
+            ticker=ticker,
+            metric=metric,
+            periods_checked=periods_checked,
+            periods_passed=periods_passed,
+            is_stable=is_stable,
+            component_stability=component_tracker,
+            period_details=period_details,
+            formula_tier=formula_tier,
+            detail=f"{periods_passed}/{periods_checked} periods passed (tier={formula_tier})",
+        )
+
+    def _extract_xbrl_value(
+        self,
+        xbrl,
+        concept: str
+    ) -> Optional[float]:
+        """
+        Extract value from XBRL for a concept.
+
+        Finds the total (non-dimensioned) value for the most recent period.
+        """
+    def _extract_xbrl_value(self, xbrl, concept: Union[str, List[str]], target_days: Optional[int] = None) -> Optional[float]:
+        """
+        Extract value for a concept (or list of candidate concepts).
+        """
+        self._last_extraction_provenance = {}  # Reset per extraction
+        try:
+            if not xbrl:
+                return None
+            
+            concepts = [concept] if isinstance(concept, str) else concept
+            
+            for concept in concepts:
+                if not concept:
+                    continue
+                    
+                # Get facts for this concept
+                # We want exact matches or namespace matches
+                # Check if concept has prefix
+                concept_name = concept.split(':')[-1] if ':' in concept else concept
+                
+                df = xbrl.facts.get_facts_by_concept(concept)
+                if df is None or len(df) == 0:
+                    continue
+
+                # Filter for expected concept name to be safe
+                if 'concept' in df.columns:
+                    # Normalized compare (case-insensitive)
+                    expected_concepts = [
+                        concept.lower(),
+                        f"us-gaap:{concept.lower()}",
+                        f"ifrs-full:{concept.lower()}"
+                    ]
+                    df = df[df['concept'].str.lower().isin(expected_concepts)]
+
+                if len(df) == 0:
+                    return None
+
+                # Filter for non-dimensioned (total) values only.
+                # Support two column conventions:
+                #   1. 'full_dimension_label' (older path) — NaN means non-dimensioned
+                #   2. 'is_dimensioned' (newer query path) — False means non-dimensioned
+                if 'full_dimension_label' in df.columns:
+                    total_rows = df[df['full_dimension_label'].isna()]
+
+                    # Check if we're filtering out dimensional-only values
+                    if len(total_rows) == 0:
+                        dim_rows = df[df['full_dimension_label'].notna()]
+                        if len(dim_rows) > 0:
+                            # Determine target period days from form type OR override
+                            if target_days is not None:
+                                target_period_days = target_days
+                            else:
+                                form_type = getattr(self, '_current_form_type', None)
+                                target_period_days = 90 if form_type == '10-Q' else None
+
+                            # Use DimensionalAggregator for proper aggregation (with period filtering)
+                            aggregation_result = self._dimensional_aggregator.aggregate_if_missing(
+                                xbrl, concept_name, consolidated_value=None,
+                                target_period_days=target_period_days
+                            )
+
+                            if aggregation_result.aggregated_value is not None:
+                                # Store aggregation info for transparency
+                                if not hasattr(self, '_dimensional_aggregations'):
+                                    self._dimensional_aggregations = {}
+                                self._dimensional_aggregations[concept] = {
+                                    'value': aggregation_result.aggregated_value,
+                                    'dimension_count': aggregation_result.dimension_count,
+                                    'dimensions_used': aggregation_result.dimensions_used,
+                                    'method': aggregation_result.method,
+                                    'notes': aggregation_result.notes
+                                }
+                                return aggregation_result.aggregated_value
+
+                            # Log this dimensional-only case for investigation
+                            dim_sum = dim_rows['numeric_value'].sum() if 'numeric_value' in dim_rows.columns else None
+                            warning = {
+                                'concept': concept,
+                                'dimensional_only': True,
+                                'dimension_count': len(dim_rows),
+                                'dimensional_sum': dim_sum,
+                                'sample_dimensions': dim_rows['full_dimension_label'].head(3).tolist()
+                            }
+                            # Store warning for later retrieval
+                            if not hasattr(self, '_dimensional_warnings'):
+                                self._dimensional_warnings = {}
+                            self._dimensional_warnings[concept] = warning
+                        return None
+                elif 'is_dimensioned' in df.columns:
+                    # Newer facts format returned by xbrl.facts.query().to_dataframe()
+                    # and xbrl.facts.get_facts_by_concept() — uses boolean is_dimensioned flag
+                    total_rows = df[df['is_dimensioned'] == False]
+
+                    # If no non-dimensioned rows found, fall through to dimensional aggregation
+                    if len(total_rows) == 0:
+                        dim_rows = df[df['is_dimensioned'] == True]
+                        if len(dim_rows) > 0:
+                            if target_days is not None:
+                                target_period_days = target_days
+                            else:
+                                form_type = getattr(self, '_current_form_type', None)
+                                target_period_days = 90 if form_type == '10-Q' else None
+
+                            aggregation_result = self._dimensional_aggregator.aggregate_if_missing(
+                                xbrl, concept_name, consolidated_value=None,
+                                target_period_days=target_period_days
+                            )
+                            if aggregation_result.aggregated_value is not None:
+                                if not hasattr(self, '_dimensional_aggregations'):
+                                    self._dimensional_aggregations = {}
+                                self._dimensional_aggregations[concept] = {
+                                    'value': aggregation_result.aggregated_value,
+                                    'dimension_count': aggregation_result.dimension_count,
+                                    'dimensions_used': aggregation_result.dimensions_used,
+                                    'method': aggregation_result.method,
+                                    'notes': aggregation_result.notes
+                                }
+                                return aggregation_result.aggregated_value
+                        return None
+                else:
+                    total_rows = df
+
+                if len(total_rows) == 0:
+                    return None
+
+                # Filter for rows with actual numeric values
+                total_rows = total_rows[total_rows['numeric_value'].notna()]
+                if len(total_rows) == 0:
+                    return None
+
+                # Sort by period_key to get most recent
+                if 'period_key' in total_rows.columns:
+                    # Separate instant vs duration facts
+                    duration_mask = total_rows['period_key'].str.startswith('duration_')
+                    duration_rows = total_rows[duration_mask]
+                    instant_rows = total_rows[~duration_mask]
+                    
+                    if len(duration_rows) > 0:
+                        # For duration-based metrics (income/cashflow), prefer annual periods
+                        duration_rows = duration_rows.copy()
+                        duration_rows['period_days'] = duration_rows['period_key'].apply(
+                            self._calculate_period_days
+                        )
+
+                        # Exclude zero-day "point-in-time" facts (e.g. dividend declaration dates)
+                        # These are tagged as duration but represent a single event, not a period flow
+                        non_zero_rows = duration_rows[duration_rows['period_days'] > 0]
+                        if len(non_zero_rows) > 0:
+                            duration_rows = non_zero_rows
+
+                        # PERIOD-AWARE EXTRACTION: Filter by form type or override
+                        if target_days is not None:
+                             target_period_days = target_days
+                             # Use simple range overlap for matching
+                             filtered = duration_rows[
+                                (duration_rows['period_days'] >= target_period_days - 30) &
+                                (duration_rows['period_days'] <= target_period_days + 30)
+                             ]
+                             if len(filtered) > 0:
+                                 duration_rows = filtered
+                             # If strict and no match?
+                             # In IndustryLogic we made it strict.
+                             # Here, let's also be strict if override is provided.
+                             else:
+                                 # Checking if this is explicitly requested target
+                                 return None
+                        else:
+                            form_type = getattr(self, '_current_form_type', None)
+
+                            if form_type == '10-Q':
+                                # For 10-Q filings: filter for quarterly periods (~90 days)
+                                quarterly_rows = duration_rows[
+                                    (duration_rows['period_days'] >= 60) &
+                                    (duration_rows['period_days'] <= 100)
+                                ]
+                                if len(quarterly_rows) > 0:
+                                    duration_rows = quarterly_rows
+                            else:
+                                # For 10-K or unknown: prefer annual periods (>300 days)
+                                annual_rows = duration_rows[duration_rows['period_days'] > 300]
+                                if len(annual_rows) > 0:
+                                    duration_rows = annual_rows
+                        
+                        # PiT: Sort by period_key first, then by filed date (if available)
+                        duration_rows = self._select_latest_filing(duration_rows)
+                        if len(duration_rows) == 0:
+                            return None
+                        latest = duration_rows.iloc[0]
+                    elif len(instant_rows) > 0:
+                        # PiT: Apply filing date precedence to instant facts too
+                        instant_rows = self._select_latest_filing(instant_rows)
+                        if len(instant_rows) == 0:
+                             return None
+                        latest = instant_rows.iloc[0]
+                    else:
+                        latest = total_rows.iloc[0]
+                else:
+                    latest = total_rows.iloc[0]
+
+                # Get the value
+                value = float(latest['numeric_value'])
+
+                # Capture fact provenance from the selected row
+                self._last_extraction_provenance = {
+                    'period_type': latest.get('period_type') if hasattr(latest, 'get') else None,
+                    'period_start': str(latest.get('period_start', '')) or None,
+                    'period_end': str(latest.get('period_end', '')) or None,
+                    'unit': latest.get('unit_ref') if hasattr(latest, 'get') else None,
+                    'decimals': latest.get('decimals') if hasattr(latest, 'get') else None,
+                }
+
+                # Handle "placeholder zero"
+                if value == 0:
+                    aggregation_result = self._dimensional_aggregator.aggregate_if_missing(
+                        xbrl, concept_name, consolidated_value=value
+                    )
+                    if self._dimensional_aggregator.should_aggregate(value, aggregation_result.aggregated_value or 0):
+                        if not hasattr(self, '_dimensional_aggregations'):
+                            self._dimensional_aggregations = {}
+                        self._dimensional_aggregations[concept] = {
+                            'value': aggregation_result.aggregated_value,
+                            'dimension_count': aggregation_result.dimension_count,
+                            'dimensions_used': aggregation_result.dimensions_used,
+                            'method': aggregation_result.method,
+                            'notes': f'Placeholder zero replaced: consolidated=0, dimensional_sum={aggregation_result.aggregated_value}'
+                        }
+                        return aggregation_result.aggregated_value
+
+                # Handle absolute value for cash flows (some are negative in yfinance)
+                return value
+
+        except Exception as e:
+            # Try auto-fix for known patterns
+            if hasattr(self, '_current_ticker') and self._current_ticker:
+                pattern = self._classify_failure(xbrl, concept, self._current_ticker)
+                if pattern != FailurePattern.UNKNOWN:
+                    fixed_value = self._apply_fix_for_pattern(pattern, xbrl, concept, self._current_ticker)
+                    if fixed_value is not None:
+                        return fixed_value
+            return None
+        
+    def _derive_quarterly_value(
+        self, 
+        ticker: str, 
+        concept: str, 
+        current_filing_date: str, 
+        current_ytd_value: float
+    ) -> Optional[float]:
+        """
+        Derive quarterly value by subtracting Prior YTD from Current YTD.
+        Q3_Quarterly = Q3_YTD (Current) - Q2_YTD (Prior)
+        """
+        try:
+             # Need Company to fetch filings
+             company = Company(ticker)
+
+             # Fetch 10-Q/10-K filed BEFORE current filing date
+             # Use day before current date to exclude the current filing itself
+             date_str = str(current_filing_date).split(' ')[0]
+             from datetime import datetime as _dt, timedelta as _td
+             day_before = (_dt.strptime(date_str, '%Y-%m-%d') - _td(days=1)).strftime('%Y-%m-%d')
+             filings = company.get_filings(form=['10-Q', '10-K']).filter(date=f":{day_before}")
+
+             if not filings:
+                 return None
+
+             # Get immediate prior filing
+             prior_filing = filings.latest(1)
+             if not prior_filing:
+                 return None
+                 
+             # Extract Prior YTD
+             prior_xbrl = prior_filing.xbrl()
+             if not prior_xbrl:
+                  return None
+                  
+             # Extract Prior YTD (pass strict=None to allow finding YTD/Latest)
+             # We use the same concept as current
+             prior_ytd = self._extract_xbrl_value(prior_xbrl, concept, target_days=None)
+             
+             if prior_ytd is not None:
+                  # Calculate Delta
+                  quarterly_val = current_ytd_value - prior_ytd
+                  return quarterly_val
+                  
+             return None
+             
+        except Exception as e:
+             # Just log and fail gracefully
+             print(f"Derivation failed for {ticker} {concept}: {e}")
+             return None
+
+    
+    def _extract_composite_value(
+        self,
+        xbrl,
+        metric: str
+    ) -> Optional[float]:
+        """
+        Extract composite metric value by summing component concepts.
+
+        Uses extraction_rules.py JSON config with fallback to hardcoded values.
+        Priority: company-specific > industry > defaults > hardcoded
+
+        Strategy:
+        1. Try total_concepts first (e.g., IntangibleAssetsNetIncludingGoodwill)
+           — a single concept that gives the total directly
+        2. Fall back to component summation (e.g., Goodwill + IntangibleAssetsNetExcludingGoodwill)
+
+        Used for metrics like IntangibleAssets = Goodwill + IntangibleAssetsNetExcludingGoodwill
+        """
+        value, _, _ = self._extract_composite_value_with_evidence(xbrl, metric)
+        return value
+
+    def _extract_composite_value_with_evidence(
+        self,
+        xbrl,
+        metric: str
+    ) -> tuple:
+        """
+        Extract composite value and return evidence about which components were found/missing.
+
+        Returns:
+            (value, components_used, components_missing) tuple.
+            value is None if no components found.
+        """
+        ticker = getattr(self, '_current_ticker', None)
+        components_used = []
+        components_missing = []
+
+        # Strategy 1: Try total concepts directly (avoids dimensional component issues)
+        if ticker:
+            total_concepts = get_total_concepts(ticker, metric)
+            for total_concept in total_concepts:
+                concept = total_concept if ':' in total_concept else f"us-gaap:{total_concept}"
+                value = self._extract_xbrl_value(xbrl, concept)
+                if value is not None:
+                    return value, [total_concept], []
+
+        # Strategy 1.5: Weighted formula from standardization config
+        # (supports subtraction, e.g. TotalLiabilities = L&SE - SE)
+        formula_components = self._resolve_formula_components(metric, ticker) if ticker else None
+        if formula_components:
+            weighted_total = 0.0
+            weighted_found = 0
+            for concept_or_list, weight in formula_components:
+                label, val, _ = self._extract_formula_concept(xbrl, concept_or_list)
+                if val is not None:
+                    weighted_total += val * weight
+                    weighted_found += 1
+                    components_used.append(label)
+                else:
+                    components_missing.append(label)
+            # Only return if ALL components found (for subtraction formulas,
+            # partial results are wrong — e.g., just L&SE without SE)
+            if weighted_found == len(formula_components):
+                return weighted_total, components_used, components_missing
+
+        # Strategy 2: Component summation
+        components = get_composite_components(ticker, metric) if ticker else None
+
+        # Fall back to hardcoded if no config
+        if not components:
+            if metric not in self.COMPOSITE_METRICS:
+                return None, [], []
+            components = self.COMPOSITE_METRICS[metric]
+
+        total = 0.0
+        found_any = False
+
+        for component in components:
+            value = None
+
+            # Get priority from extraction_rules (JSON config)
+            if ticker:
+                priority_variants = get_concept_priority(ticker, metric, component)
+            else:
+                # Fallback to hardcoded priority
+                priority_variants = self.CONCEPT_PRIORITY.get(component, [component])
+
+            # Try each variant in priority order
+            for variant in priority_variants:
+                # Add us-gaap prefix if not present
+                concept = variant if ':' in variant else f"us-gaap:{variant}"
+                value = self._extract_xbrl_value(xbrl, concept)
+                if value is not None:
+                    break
+
+            # Subcomponent fallback: if no alternative matched, try summing sub-components
+            # e.g., IntangibleAssetsNetExcludingGoodwill = FiniteLived + IndefiniteLived
+            if value is None and ticker:
+                sub_concepts = get_subcomponents(ticker, metric, component)
+                if sub_concepts:
+                    sub_total = 0.0
+                    sub_found = False
+                    for sub_concept in sub_concepts:
+                        sc = sub_concept if ':' in sub_concept else f"us-gaap:{sub_concept}"
+                        sub_val = self._extract_xbrl_value(xbrl, sc)
+                        if sub_val is not None:
+                            sub_total += sub_val
+                            sub_found = True
+                    if sub_found:
+                        value = sub_total
+
+            if value is not None:
+                total += value
+                found_any = True
+                components_used.append(component)
+            else:
+                components_missing.append(component)
+
+        return (total if found_any else None), components_used, components_missing
+    
+    def _compare_values(
+        self,
+        metric: str,
+        ticker: str,
+        xbrl_value: Optional[float],
+        ref_value: Optional[float],
+        result: MappingResult
+    ) -> ValidationResult:
+        """Compare XBRL and reference values."""
+        
+        # Handle missing values
+        if ref_value is None:
+            return ValidationResult(
+                metric=metric,
+                company=ticker,
+                xbrl_value=xbrl_value,
+                reference_value=None,
+                is_valid=True,  # Can't validate, assume OK
+                variance_pct=None,
+                status="missing_ref",
+                notes="No reference data available (metric may not exist for this company)"
+            )
+        
+        # Only return mapping_needed if we have no mapping AND no calculated value
+        if not result.is_mapped and xbrl_value is None:
+            return ValidationResult(
+                metric=metric,
+                company=ticker,
+                xbrl_value=None,
+                reference_value=ref_value,
+                is_valid=False,
+                variance_pct=None,
+                status="mapping_needed",
+                notes=f"Reference shows value exists: {ref_value/1e9:.2f}B"
+            )
+        
+        if xbrl_value is None:
+            return ValidationResult(
+                metric=metric,
+                company=ticker,
+                xbrl_value=None,
+                reference_value=ref_value,
+                is_valid=True,  # Mapping exists, value extraction TBD
+                variance_pct=None,
+                status="pending_extraction",
+                notes="Mapping found, value extraction pending"
+            )
+        
+        # Apply sign convention and scale factor
+        metric_config = self.config.get_metric(metric) if self.config else None
+        company_config = self.config.get_company(ticker) if self.config else None
+        override = company_config.metric_overrides.get(metric) if company_config else None
+
+        if metric_config and metric_config.sign_convention == "negate":
+            xbrl_value = -xbrl_value
+        elif override and override.get('sign_negate'):
+            xbrl_value = -xbrl_value
+
+        if override:
+            sf = override.get('scale_factor')
+            if sf is not None:
+                xbrl_value = xbrl_value * sf
+
+        # Both values exist, compare using absolute values
+        # (sign conventions differ between XBRL and yfinance for cash flows)
+        abs_xbrl = abs(xbrl_value)
+        abs_ref = abs(ref_value)
+        variance = abs(abs_xbrl - abs_ref) / abs_ref if abs_ref != 0 else 0
+
+        # Dynamic tolerance per Principal Architect guidance:
+        # Priority: metric-level (from metrics.yaml) > debt override > company override > default 5%
+        base_tolerance = self._get_tolerance_for_company(ticker)
+
+        # Check metric-level tolerance first (from metrics.yaml validation_tolerance field)
+        # metric_config already looked up above for sign convention
+        if metric_config and metric_config.validation_tolerance is not None:
+            tolerance = max(base_tolerance, metric_config.validation_tolerance / 100.0)
+        elif metric in ['ShortTermDebt', 'LongTermDebt']:
+            tolerance = max(base_tolerance, 0.10)  # At least 10% for debt
+        else:
+            tolerance = max(base_tolerance, 0.05)
+
+        is_match = variance <= tolerance
+
+        # --- Two-Score Architecture: EF + SA ---
+        # EF (Extraction Fidelity): Did we find the RIGHT XBRL concept?
+        # EF passes only if: (a) concept is in known_concepts for this metric,
+        # (b) resolved via tree parser (Layer 1), or (c) validated against reference.
+        # Layer 2 (AI/facts search) and company formulas need validation confirmation.
+        ef_pass = False
+        ef_pass_reason = EFPassReason.NONE
+        _SOURCE_EF_REASON = {
+            MappingSource.TREE: EFPassReason.TREE_SOURCE,
+            MappingSource.FACTS_SEARCH: EFPassReason.FACTS_SEARCH,
+        }
+        if result.is_mapped:
+            if metric_config and result.concept and metric_config.matches_concept(result.concept):
+                ef_pass = True
+                ef_pass_reason = EFPassReason.KNOWN_CONCEPT
+            elif result.source in _SOURCE_EF_REASON:
+                ef_pass = True
+                ef_pass_reason = _SOURCE_EF_REASON[result.source]
+            # Consensus 020 (O60): yfinance value_match removed from EF scoring.
+            # EF measures extraction fidelity (did we find the right XBRL concept?),
+            # not yfinance compatibility. value_match backdoor was masking concept errors.
+        logger.debug("EF-PATH: %s:%s -> %s (source=%s, concept=%s)",
+                     ticker, metric, ef_pass_reason.value, result.source, result.concept)
+
+        # SA (Standardization Alignment): Does the value match yfinance?
+        # Check if we have a standardization formula or known_variance for this metric
+        sa_pass = None
+        sa_value = None
+        sa_variance_pct = None
+        variance_type = "raw"
+
+        if metric_config:
+            # Check for explained variance (known gap with documented reason)
+            if metric_config.known_variances and ticker in metric_config.known_variances:
+                kv = metric_config.known_variances[ticker]
+                kv_status = kv.get("status", "pending_investigation")
+                if kv_status in ("structural_exclusion", "formula_added"):
+                    # Explained variance — don't penalize CQS but track
+                    variance_type = "explained"
+
+        # Check company-specific known divergences
+        if company_config and metric in company_config.known_divergences:
+            variance_type = "explained"
+
+        if metric_config and variance_type != "explained":
+            # Check for standardization formula (composite value)
+            # Only override if not already explained by known_divergence
+            formula_components = self._resolve_formula_components(metric, ticker)
+            if formula_components:
+                variance_type = "standardized"
+                sa_pass = is_match
+
+        # SA defaults to raw match when no standardization formula exists
+        if sa_pass is None:
+            sa_pass = is_match
+
+        # --- RFA/SMA Sub-Scores ---
+        # RFA (Reported Fact Accuracy): does extracted value match an authoritative source?
+        rfa_pass = None
+        rfa_source = None
+        if result.is_mapped and is_match:
+            rfa_pass = True
+            rfa_source = "yfinance"  # Default; overridden if SEC facts matched later
+
+        # SMA (Standardized Metric Accuracy): is the concept semantically correct?
+        sma_pass = None
+        if result.is_mapped:
+            if metric_config and result.concept and metric_config.matches_concept(result.concept):
+                sma_pass = True   # Known canonical concept
+            elif result.source in (MappingSource.TREE, MappingSource.FACTS_SEARCH):
+                sma_pass = True   # Tree parser or facts search = semantic match
+
+        return ValidationResult(
+            metric=metric,
+            company=ticker,
+            xbrl_value=xbrl_value,
+            reference_value=ref_value,
+            is_valid=is_match,
+            variance_pct=variance * 100,
+            status="match" if is_match else "mismatch",
+            notes=f"Variance: {variance*100:.1f}% (tolerance: {tolerance*100:.0f}%)" if not is_match else f"Used {tolerance*100:.0f}% tolerance",
+            ef_pass=ef_pass,
+            sa_pass=sa_pass,
+            sa_value=sa_value,
+            sa_variance_pct=sa_variance_pct,
+            variance_type=variance_type,
+            rfa_pass=rfa_pass,
+            rfa_source=rfa_source,
+            sma_pass=sma_pass,
+            ef_pass_reason=ef_pass_reason.value,
+        )
+    
+    @staticmethod
+    def _qualify_concept(concept: str) -> str:
+        """Add us-gaap: prefix if no namespace present."""
+        return concept if ':' in concept else f"us-gaap:{concept}"
+
+    def _extract_formula_concept(self, xbrl, concept_or_list) -> Tuple[str, Optional[float], Optional[str]]:
+        """Extract value for a formula concept (string or fallback list).
+
+        Returns (label, value, resolved_concept) where:
+        - label is the primary concept name for logging
+        - resolved_concept is the actual concept that matched (for scope checks)
+        """
+        if isinstance(concept_or_list, list):
+            for c in concept_or_list:
+                qualified = self._qualify_concept(c)
+                val = self._extract_xbrl_value(xbrl, qualified)
+                if val is not None:
+                    return concept_or_list[0], val, c
+            return concept_or_list[0], None, None
+        qualified = self._qualify_concept(concept_or_list)
+        val = self._extract_xbrl_value(xbrl, qualified)
+        return concept_or_list, val, concept_or_list if val is not None else None
+
+    @staticmethod
+    def _parse_component(component) -> Tuple[Union[str, List[str]], float]:
+        """Parse a formula component into (concept_or_list, weight).
+
+        Supports:
+            str → (concept_name, +1.0)   (backward compatible)
+            dict {"concept": "X", "weight": -1.0} → ("X", -1.0)
+            dict {"concepts": ["X", "Y"], "weight": -1.0} → (["X", "Y"], -1.0)
+                 (first found in XBRL wins — fallback concept support)
+        """
+        if isinstance(component, str):
+            return (component, 1.0)
+        elif isinstance(component, dict):
+            # Support "concepts" (list) for fallback alternatives
+            if "concepts" in component:
+                return (component["concepts"], float(component.get("weight", 1.0)))
+            return (component["concept"], float(component.get("weight", 1.0)))
+        raise ValueError(f"Invalid component format: {component}")
+
+    def _resolve_formula_components(self, metric: str, ticker: str) -> Optional[List[Tuple[str, float]]]:
+        """
+        Resolve standardization formula components for a metric+ticker.
+
+        Resolution order: company override > sector override > default.
+
+        Returns:
+            List of (concept_name, weight) tuples, or None if no formula configured.
+        """
+        metric_config = self.config.get_metric(metric) if self.config else None
+        if not metric_config or not metric_config.standardization:
+            return None
+
+        std_config = metric_config.standardization
+        formula_components = None
+        tier = None
+
+        company_overrides = std_config.get("company_overrides", {})
+        if ticker in company_overrides:
+            formula_components = company_overrides[ticker].get("components")
+            if formula_components:
+                tier = "company"
+
+        if formula_components is None:
+            sector_overrides = std_config.get("sector_overrides", {})
+            company_config = self.config.get_company(ticker) if self.config else None
+            if company_config and company_config.industry:
+                sector_key = company_config.industry.title()
+                if sector_key in sector_overrides:
+                    formula_components = sector_overrides[sector_key].get("components")
+                    if formula_components:
+                        tier = "sector"
+
+        if formula_components is None:
+            default_formula = std_config.get("default", {})
+            formula_components = default_formula.get("components")
+            if formula_components:
+                tier = "default"
+
+        if formula_components:
+            logger.debug(
+                "[SA RESOLVE] %s:%s — tier=%s, components=%s",
+                ticker, metric, tier, formula_components,
+            )
+            return [self._parse_component(c) for c in formula_components]
+
+        return None
+
+    def _compute_sa_composite(
+        self,
+        metric: str,
+        ticker: str,
+        xbrl,
+        ref_value: float,
+        tolerance: float = 0.05,
+    ) -> Optional[Tuple[float, float, bool]]:
+        """
+        Compute the Standardization Alignment composite value.
+
+        Resolves the formula from config (company override > sector override > default),
+        sums component values from XBRL, and compares to the reference value.
+
+        Returns:
+            (composite_value, variance_fraction, sa_pass) or None if no formula/components.
+        """
+        formula_components = self._resolve_formula_components(metric, ticker)
+
+        if not formula_components:
+            return None
+
+        # Sum weighted component values (supports subtraction via negative weights)
+        composite = 0.0
+        components_found = 0
+        component_values = {}
+        resolved_concepts = {}
+        for concept_or_list, weight in formula_components:
+            label, val, resolved = self._extract_formula_concept(xbrl, concept_or_list)
+            if val is not None:
+                composite += val * weight
+                components_found += 1
+            component_values[label] = val
+            if resolved:
+                resolved_concepts[label] = resolved
+
+        # NCI scope-consistency check for TotalLiabilities
+        if metric == "TotalLiabilities" and resolved_concepts:
+            inclusive = [c for c in resolved_concepts.values() if c in _NCI_INCLUSIVE]
+            exclusive = [c for c in resolved_concepts.values() if c in _NCI_EXCLUSIVE]
+            if inclusive and exclusive:
+                logger.warning(
+                    "[NCI SCOPE MISMATCH] %s — inclusive=%s, exclusive=%s",
+                    ticker, inclusive, exclusive,
+                )
+
+        logger.debug(
+            "[SA COMPONENTS] %s:%s — %s",
+            ticker, metric, component_values,
+        )
+
+        if components_found == 0:
+            logger.debug(
+                "[SA COMPOSITE] %s:%s — ABORT: 0/%d components found",
+                ticker, metric, len(formula_components),
+            )
+            return None
+
+        # Variance: compare signed composite to signed reference
+        if ref_value == 0:
+            return (composite, 0.0, True)
+
+        variance_fraction = abs(composite - ref_value) / abs(ref_value)
+        sa_pass = variance_fraction <= tolerance
+
+        logger.debug(
+            "[SA COMPOSITE] %s:%s — composite=%.2f, ref=%.2f, "
+            "variance=%.4f, sa_pass=%s, found=%d/%d",
+            ticker, metric, composite, ref_value, variance_fraction,
+            sa_pass, components_found, len(formula_components),
+        )
+
+        return (composite, variance_fraction, sa_pass)
+
+    def check_metric_exists(
+        self,
+        ticker: str,
+        metric: str
+    ) -> Tuple[bool, Optional[float]]:
+        """
+        Quick check if a metric exists for a company in reference data.
+
+        Returns (exists, value).
+        """
+        if yf is None:
+            return (False, None)
+        
+        stock = self._get_stock(ticker)
+        value = self._get_yfinance_value(stock, metric)
+        
+        return (value is not None, value)
+    
+    def print_validation_report(
+        self,
+        validations: Dict[str, Dict[str, ValidationResult]]
+    ):
+        """Print a validation report."""
+        print("\n" + "=" * 70)
+        print("REFERENCE VALIDATION REPORT")
+        print("=" * 70)
+        
+        for ticker, metrics in validations.items():
+            print(f"\n{ticker}:")
+            
+            for metric, v in metrics.items():
+                if v.status == "excluded":
+                    print(f"  [SKIP] {metric}: excluded")
+                elif v.status == "missing_ref":
+                    print(f"  [N/A]  {metric}: no reference data")
+                elif v.status == "mapping_needed":
+                    val = v.reference_value / 1e9 if v.reference_value else 0
+                    print(f"  [NEED] {metric}: ref has {val:.2f}B but no mapping")
+                elif v.status == "pending_extraction":
+                    print(f"  [OK]   {metric}: mapped, awaiting value extraction")
+                elif v.status == "match":
+                    print(f"  [OK]   {metric}: values match")
+                elif v.status == "mismatch":
+                    print(f"  [ERR]  {metric}: values differ by {v.variance_pct:.1f}%")
+    
+    def get_dimensional_warnings(self) -> Dict[str, Dict]:
+        """
+        Get all dimensional-only warnings logged during validation.
+        
+        These are concepts that have values ONLY with dimensions,
+        with no non-dimensioned (consolidated) total.
+        
+        Returns:
+            Dict mapping concept name to warning details
+        """
+        return getattr(self, '_dimensional_warnings', {})
+    
+    def print_dimensional_warnings(self):
+        """Print any dimensional-only warnings logged during validation."""
+        warnings = self.get_dimensional_warnings()
+        if not warnings:
+            return
+        
+        print("\n" + "=" * 70)
+        print("DIMENSIONAL-ONLY CONCEPTS DETECTED")
+        print("=" * 70)
+        print("These concepts have values ONLY with dimensions (no consolidated total):")
+        print()
+        
+        for concept, info in warnings.items():
+            dim_sum_b = info.get('dimensional_sum', 0) / 1e9 if info.get('dimensional_sum') else 0
+            print(f"  {concept}:")
+            print(f"    Dimensional values sum: ${dim_sum_b:.2f}B")
+            print(f"    Dimension count: {info.get('dimension_count', 0)}")
+            sample_dims = info.get('sample_dimensions', [])[:2]
+            for dim in sample_dims:
+                print(f"      - {dim[:60]}..." if len(dim) > 60 else f"      - {dim}")
+        print()

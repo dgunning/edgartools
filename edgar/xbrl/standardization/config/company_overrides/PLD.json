@@ -1,0 +1,16 @@
+{
+  "exclude_metrics": {
+    "CurrentAssets": {
+      "reason": "not_applicable",
+      "notes": "Auto-excluded: concept absent from all XBRL sources"
+    },
+    "CurrentLiabilities": {
+      "reason": "not_applicable",
+      "notes": "Auto-excluded: concept absent from all XBRL sources"
+    },
+    "PropertyPlantEquipment": {
+      "reason": "not_applicable",
+      "notes": "REIT: primary assets are RealEstateInvestmentPropertyNet (~$90B). PropertyPlantAndEquipmentNet ($0.22B, in Disclosures only) does not correspond to yfinance Net PPE."
+    }
+  }
+}

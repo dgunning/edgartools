@@ -1,0 +1,216 @@
+{
+  "run_id": "e2e_industrial_2026-01-27T14:48:33.683924",
+  "timestamp": "2026-01-27T14:48:33.683939",
+  "config": {
+    "group": "industrial_33",
+    "workers": 8,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": null,
+    "tickers": [
+      "COP",
+      "UNH",
+      "HON",
+      "PFE"
+    ]
+  },
+  "overall_summary": {
+    "10k_total": 63,
+    "10k_passed": 60,
+    "10k_skipped": 2,
+    "10q_total": 62,
+    "10q_passed": 60,
+    "10q_skipped": 0
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 18,
+      "10k_passed": 17,
+      "10k_skipped": 0,
+      "10q_total": 17,
+      "10q_passed": 17,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 13,
+      "10k_passed": 11,
+      "10k_skipped": 1,
+      "10q_total": 13,
+      "10q_passed": 12,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 32,
+      "10k_passed": 32,
+      "10k_skipped": 1,
+      "10q_total": 32,
+      "10q_passed": 31,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 5,
+  "skipped_count": 2,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0001163165-25-000012",
+      "metric": "COGS",
+      "xbrl_value": 20012000000.0,
+      "ref_value": 38362000000.0,
+      "variance_pct": 47.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CostOfGoodsAndServicesSold",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0001163165-25-000012",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 1035000000.0,
+      "ref_value": 743000000.0,
+      "variance_pct": 39.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:DebtCurrent",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001163165-25-000058",
+      "metric": "COGS",
+      "xbrl_value": 5857000000.0,
+      "ref_value": 11406000000.0,
+      "variance_pct": 48.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CostOfGoodsAndServicesSold",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "UNH",
+      "sector": "Healthcare_Pharma",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000731766-25-000305",
+      "metric": "DividendsPaid",
+      "xbrl_value": -2000000.0,
+      "ref_value": -2002000000.0,
+      "variance_pct": 99.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsOfDividendsCommonStock",
+      "industry": "insurance",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "HON",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000773840-25-000010",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 4273000000.0,
+      "ref_value": 5620000000.0,
+      "variance_pct": 24.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": "aerospace",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    }
+  ],
+  "skipped": [
+    {
+      "ticker": "COP",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 162.0,
+      "reason": "COP uses E&P-specific cost structure. Tree parser selects concepts that include items yfinance excludes from OperatingIncome. Energy sector has non-standard income statement format.\n"
+    },
+    {
+      "ticker": "PFE",
+      "sector": "Healthcare_Pharma",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 21.0,
+      "reason": "PFE has significant COVID vaccine related charges and R&D capitalization that affect OperatingIncome comparability. Industry logic calculation returns negative values due to incorrect expense aggregation.\n"
+    }
+  ],
+  "errors": []
+}

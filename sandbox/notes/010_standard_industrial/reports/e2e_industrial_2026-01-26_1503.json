@@ -1,0 +1,126 @@
+{
+  "run_id": "e2e_industrial_2026-01-26T15:03:36.293854",
+  "timestamp": "2026-01-26T15:03:36.293869",
+  "config": {
+    "group": "industrial_33",
+    "workers": 4,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": null,
+    "tickers": [
+      "AAPL",
+      "CAT",
+      "KO",
+      "XOM",
+      "JNJ"
+    ]
+  },
+  "overall_summary": {
+    "10k_total": 3,
+    "10k_passed": 3,
+    "10k_skipped": 2,
+    "10q_total": 3,
+    "10q_passed": 3,
+    "10q_skipped": 0
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 1,
+      "10k_passed": 1,
+      "10k_skipped": 0,
+      "10q_total": 1,
+      "10q_passed": 1,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 1,
+      "10k_passed": 1,
+      "10k_skipped": 0,
+      "10q_total": 1,
+      "10q_passed": 1,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 1,
+      "10k_passed": 1,
+      "10k_skipped": 0,
+      "10q_total": 1,
+      "10q_passed": 1,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 1,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 1,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 0,
+  "skipped_count": 2,
+  "error_count": 0,
+  "failures": [],
+  "skipped": [
+    {
+      "ticker": "XOM",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 29.0,
+      "reason": "XOM uses company-specific XBRL concepts (xom:CrudeOilAndProductPurchases, xom:ProductionAndManufacturingExpenses) that don't map to standard GrossProfit. yfinance calculates OperatingIncome using proprietary normalization. XBRL extraction cannot reliably reproduce yfinance's calculation.\n"
+    },
+    {
+      "ticker": "JNJ",
+      "sector": "Healthcare_Pharma",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 72.4,
+      "reason": "JNJ's segment structure (pharma, devices, consumer) and significant one-time charges/gains create OperatingIncome variance. Tree parser selects concepts that don't match yfinance's normalized calculation.\n"
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,2570 @@
+"""
+AI Consultation Module: Step 2 of the two-step auto-eval architecture.
+
+.. deprecated::
+    AI dispatch achieved 0% KEEP rate — all AI-generated proposals were rejected
+    by CQS gates. Use manual investigation or regression_monitor.py instead.
+    See Consensus 022 for decision rationale.
+
+Reads a gap manifest (JSON) produced by run_overnight() Step 1, dispatches
+each unresolved gap to an AI model for proposal generation, then evaluates
+proposals through the standard CQS gates.
+
+Usage inside Claude Code:
+    from edgar.xbrl.standardization.tools.consult_ai_gaps import (
+        consult_ai_gaps, evaluate_ai_proposals,
+        build_agent_prompt, collect_agent_proposals,
+        save_agent_responses, load_agent_responses,
+        run_agent_benchmark, BenchmarkConfig, BenchmarkResult,
+        print_benchmark_comparison,
+        # AI caller factory
+        make_openrouter_caller, MODEL_REGISTRY, DEFAULT_API_MODEL,
+        # Typed action pipeline
+        TypedAction, ACTION_VOCABULARY,
+        parse_typed_action, compile_action, normalize_concept, validate_action_preflight,
+        build_typed_action_prompt, collect_typed_proposals,
+        # Phase 7: Closed-loop AI dispatch & evaluation
+        dispatch_ai_gaps, AIDispatchReport,
+        evaluate_ai_proposals_live, AIEvalReport,
+    )
+
+    # Step 2a: Generate AI proposals
+    caller, cost_tracker = make_openrouter_caller()
+    proposals = consult_ai_gaps(
+        manifest_path=Path("company_mappings/gap_manifests/manifest_xyz.json"),
+        ai_caller=caller,
+    )
+
+    # Step 2b: Evaluate through CQS gates
+    report = evaluate_ai_proposals(
+        proposals_path=Path("company_mappings/gap_manifests/ai_proposals_xyz.json"),
+    )
+"""
+
+import json
+import logging
+import os
+import re
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Tuple
+
+from edgar.xbrl.standardization.tools.auto_eval import (
+    CQSResult,
+    MetricGap,
+    compute_cqs,
+)
+import yaml
+
+from edgar.xbrl.standardization.tools.auto_eval_loop import (
+    ChangeType,
+    ConfigChange,
+    Decision,
+    ExperimentDecision,
+    OvernightReport,
+    ProposalRecord,
+    TIER1_CONFIGS,
+    UnresolvedGap,
+    evaluate_experiment,
+    get_config_fingerprint,
+    load_gap_manifest,
+    log_experiment,
+    save_proposals_to_json,
+    load_proposals_from_json,
+    GAP_MANIFESTS_DIR,
+    QUICK_EVAL_COHORT,
+    parse_gpt_response,
+)
+from edgar.xbrl.standardization.ledger.schema import ExperimentLedger
+
+logger = logging.getLogger(__name__)
+
+# =============================================================================
+# MODEL REGISTRY & AI CALLER FACTORY
+# =============================================================================
+
+MODEL_REGISTRY = {
+    "gemini-flash": "google/gemini-3-flash-preview",
+    "sonnet": "anthropic/claude-sonnet-4",
+    "opus": "anthropic/claude-opus-4",
+}
+DEFAULT_API_MODEL = "gemini-flash"
+
+
+def make_openrouter_caller(
+    default_model: str = DEFAULT_API_MODEL,
+    temperature: float = 0.1,
+    max_tokens: int = 4096,
+) -> Tuple[Callable[[str, str], Optional[str]], Dict]:
+    """Create an AI caller using OpenRouter API.
+
+    Returns (caller, cost_tracker) tuple where caller matches the
+    ai_caller contract: Callable[[str, str], Optional[str]].
+
+    Model parameter accepts abstract names (resolved via MODEL_REGISTRY)
+    or raw OpenRouter model IDs.
+
+    Requires OPENROUTER_API_KEY environment variable.
+    """
+    try:
+        from openai import OpenAI
+    except ImportError:
+        raise ImportError(
+            "openai package required for OpenRouter caller. "
+            "Install with: pip install openai"
+        )
+
+    api_key = os.environ.get("OPENROUTER_API_KEY")
+    if not api_key:
+        raise ValueError(
+            "OPENROUTER_API_KEY environment variable not set. "
+            "Get your key at: https://openrouter.ai/keys"
+        )
+
+    client = OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=api_key,
+    )
+
+    cost_tracker: Dict[str, Any] = {"total_cost": 0.0, "calls": 0}
+
+    def _call(prompt: str, model: str) -> Optional[str]:
+        resolved = MODEL_REGISTRY.get(model, model)
+        try:
+            response = client.chat.completions.create(
+                model=resolved,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+        except Exception as e:
+            logger.warning(f"  OpenRouter API error: {e}")
+            return None
+
+        content = response.choices[0].message.content if response.choices else None
+
+        # Extract cost from OpenRouter usage metadata
+        usage = getattr(response, "usage", None)
+        if usage:
+            raw = getattr(usage, "model_extra", None) or {}
+            call_cost = raw.get("cost", 0.0)
+            if call_cost:
+                cost_tracker["total_cost"] += call_cost
+                cost_tracker["calls"] += 1
+                logger.info(
+                    f"  API cost: ${call_cost:.4f} "
+                    f"(cumulative: ${cost_tracker['total_cost']:.4f})"
+                )
+            else:
+                cost_tracker["calls"] += 1
+
+        return content
+
+    return _call, cost_tracker
+
+
+def _strip_json_fences(text: str) -> str:
+    """Remove markdown ```json fences from AI response text."""
+    text = text.strip()
+    text = re.sub(r'^```(?:json)?\s*', '', text)
+    text = re.sub(r'\s*```$', '', text)
+    return text.strip()
+
+
+# =============================================================================
+# TYPED ACTION SCHEMA (Phase 1)
+# =============================================================================
+
+ACTION_VOCABULARY = {
+    "MAP_CONCEPT": {
+        "required_params": ["concept"],
+        "description": "Add an XBRL concept to the metric's known_concepts list",
+    },
+    "ADD_FORMULA": {
+        "required_params": ["components", "scope"],
+        "description": "Add a composite formula. Components: strings (weight=+1.0) or {'concept': 'X', 'weight': -1.0}. scope MUST be 'company' or 'global'. Max 3 components.",
+    },
+    "EXCLUDE_METRIC": {
+        "required_params": ["reason_code"],
+        "description": "Exclude this metric for this company",
+    },
+    "DOCUMENT_DIVERGENCE": {
+        "required_params": ["reason", "variance_pct"],
+        "description": "Document a known divergence between XBRL and yfinance",
+    },
+    "FIX_SIGN_CONVENTION": {
+        "required_params": [],
+        "description": "Apply sign negation for inverted XBRL/yfinance convention",
+    },
+    "SET_INDUSTRY": {
+        "required_params": ["industry"],
+        "description": "Set the company's industry classification",
+    },
+    "ESCALATE": {
+        "required_params": ["reason"],
+        "description": "Flag gap for human review or engine upgrade",
+    },
+}
+
+
+@dataclass
+class TypedAction:
+    """Structured intent from AI — no YAML paths, no file references."""
+    action: str
+    ticker: str
+    metric: str
+    params: Dict[str, Any] = field(default_factory=dict)
+    rationale: str = ""
+    confidence: float = 0.0
+
+
+def parse_typed_action(
+    response_text: str, ticker: str, metric: str,
+) -> Optional[TypedAction]:
+    """Parse AI response into a TypedAction.
+
+    Extracts JSON from response (handles markdown fences), validates action
+    is in ACTION_VOCABULARY, validates required params are present.
+    Returns None on parse failure.
+    """
+    try:
+        data = json.loads(_strip_json_fences(response_text))
+
+        action_name = data.get("action", "")
+        if action_name not in ACTION_VOCABULARY:
+            logger.warning(f"Unknown typed action: {action_name}")
+            return None
+
+        vocab_entry = ACTION_VOCABULARY[action_name]
+        params = data.get("params", {})
+
+        for req in vocab_entry["required_params"]:
+            if req not in params:
+                logger.warning(
+                    f"TypedAction {action_name} missing required param: {req}"
+                )
+                return None
+
+        # O42: Validate param values, not just presence
+        if action_name == "ADD_FORMULA":
+            scope = params.get("scope", "")
+            if scope not in ("company", "global"):
+                logger.warning(
+                    f"TypedAction ADD_FORMULA invalid scope: '{scope}' "
+                    f"(must be 'company' or 'global')"
+                )
+                return None
+            components = params.get("components", [])
+            if not isinstance(components, list) or len(components) > 4:
+                logger.warning(
+                    f"TypedAction ADD_FORMULA invalid components: "
+                    f"{len(components) if isinstance(components, list) else 'not a list'}"
+                )
+                return None
+            # Validate each component format: str or {"concept": "X", ...}
+            for c in components:
+                if isinstance(c, str):
+                    continue
+                if isinstance(c, dict) and "concept" in c:
+                    continue
+                logger.warning(f"TypedAction ADD_FORMULA invalid component: {c}")
+                return None
+
+        return TypedAction(
+            action=action_name,
+            ticker=data.get("ticker", ticker),
+            metric=data.get("metric", metric),
+            params=params,
+            rationale=data.get("rationale", ""),
+            confidence=float(data.get("confidence", 0.0)),
+        )
+
+    except json.JSONDecodeError as e:
+        logger.warning(f"Failed to parse typed action as JSON: {e}")
+        return None
+    except Exception as e:
+        logger.warning(f"Error parsing typed action: {e}")
+        return None
+
+
+# =============================================================================
+# ACTION COMPILER (Phase 2)
+# =============================================================================
+
+def normalize_concept(concept: str) -> str:
+    """Strip namespace prefix from XBRL concept for config storage.
+
+    Config stores bare names (e.g., 'GrossProfit' not 'us-gaap:GrossProfit')
+    because the tree parser strips namespaces when building its concept index.
+    """
+    return concept.split(':')[-1] if ':' in concept else concept
+
+
+def compile_action(action: TypedAction, gap: Optional['UnresolvedGap'] = None) -> Optional[ConfigChange]:
+    """Translate a TypedAction into a ConfigChange with correct YAML paths.
+
+    This is the layer that knows the config schema. The AI never needs to.
+    Returns None for ESCALATE actions (logged, not applied).
+
+    Args:
+        action: The typed action from AI or auto-resolve.
+        gap: Optional gap context for routing decisions. When provided,
+             high_variance gaps route MAP_CONCEPT to company-scoped overrides
+             instead of global concept additions.
+    """
+    if action.action == "MAP_CONCEPT":
+        concept = normalize_concept(action.params["concept"])
+
+        # O13: Route by gap type — high_variance needs company-scoped override
+        if gap is not None and gap.gap_type == "high_variance":
+            return ConfigChange(
+                file="companies.yaml",
+                change_type=ChangeType.ADD_COMPANY_OVERRIDE,
+                yaml_path=f"companies.{action.ticker}.metric_overrides.{action.metric}",
+                new_value={"preferred_concept": concept},
+                rationale=f"[AI/typed] {action.rationale}",
+                target_metric=action.metric,
+                target_companies=action.ticker,
+                source="ai_agent",
+            )
+
+        # Default (unmapped or no gap context): global concept addition
+        return ConfigChange(
+            file="metrics.yaml",
+            change_type=ChangeType.ADD_CONCEPT,
+            yaml_path=f"metrics.{action.metric}.known_concepts",
+            new_value=concept,
+            rationale=f"[AI/typed] {action.rationale}",
+            target_metric=action.metric,
+            target_companies=action.ticker,
+            source="ai_agent",
+        )
+
+    elif action.action == "ADD_FORMULA":
+        scope = action.params.get("scope", "default")
+        components = action.params["components"]
+
+        def _normalize_component(c):
+            """Normalize concept names in formula components (str or weighted dict)."""
+            if isinstance(c, str):
+                return normalize_concept(c)
+            elif isinstance(c, dict):
+                return {"concept": normalize_concept(c["concept"]), "weight": float(c.get("weight", 1.0))}
+            return c
+
+        # Normalize scope for consumer: "company" → "company:{ticker}"
+        if scope == "company":
+            normalized_scope = f"company:{action.ticker}"
+        else:
+            normalized_scope = scope
+        return ConfigChange(
+            file="metrics.yaml",
+            change_type=ChangeType.ADD_STANDARDIZATION,
+            yaml_path=f"metrics.{action.metric}.standardization",
+            new_value={
+                "scope": normalized_scope,
+                "components": [_normalize_component(c) for c in components],
+            },
+            rationale=f"[AI/typed] {action.rationale}",
+            target_metric=action.metric,
+            target_companies=action.ticker,
+            source="ai_agent",
+        )
+
+    elif action.action == "EXCLUDE_METRIC":
+        return ConfigChange(
+            file="companies.yaml",
+            change_type=ChangeType.ADD_EXCLUSION,
+            yaml_path=f"companies.{action.ticker}.exclude_metrics",
+            new_value=action.metric,
+            rationale=f"[AI/typed] {action.rationale}",
+            target_metric=action.metric,
+            target_companies=action.ticker,
+            source="ai_agent",
+        )
+
+    elif action.action == "DOCUMENT_DIVERGENCE":
+        return ConfigChange(
+            file="companies.yaml",
+            change_type=ChangeType.ADD_DIVERGENCE,
+            yaml_path=f"companies.{action.ticker}.known_divergences.{action.metric}",
+            new_value={
+                "reason": action.params["reason"],
+                "variance_pct": action.params["variance_pct"],
+            },
+            rationale=f"[AI/typed] {action.rationale}",
+            target_metric=action.metric,
+            target_companies=action.ticker,
+            source="ai_agent",
+        )
+
+    elif action.action == "FIX_SIGN_CONVENTION":
+        return ConfigChange(
+            file="companies.yaml",
+            change_type=ChangeType.ADD_COMPANY_OVERRIDE,
+            yaml_path=f"companies.{action.ticker}.metric_overrides.{action.metric}",
+            new_value={"sign_negate": True},
+            rationale=f"[AI/typed] {action.rationale}",
+            target_metric=action.metric,
+            target_companies=action.ticker,
+            source="ai_agent",
+        )
+
+    elif action.action == "SET_INDUSTRY":
+        return ConfigChange(
+            file="companies.yaml",
+            change_type=ChangeType.SET_INDUSTRY,
+            yaml_path=f"companies.{action.ticker}.industry",
+            new_value=action.params["industry"],
+            rationale=f"[AI/typed] {action.rationale}",
+            target_metric=action.metric,
+            target_companies=action.ticker,
+            source="ai_agent",
+        )
+
+    elif action.action == "ESCALATE":
+        logger.info(
+            f"ESCALATE for {action.ticker}:{action.metric} — "
+            f"{action.params.get('reason', 'no reason')}"
+        )
+        return None
+
+    else:
+        logger.warning(f"Unhandled typed action: {action.action}")
+        return None
+
+
+def _load_metrics_config() -> dict:
+    """Load and cache metrics.yaml. Cache is module-level, reset on file change."""
+    metrics_path = TIER1_CONFIGS["metrics.yaml"]
+    mtime = metrics_path.stat().st_mtime
+    if (
+        _load_metrics_config._cache is not None
+        and _load_metrics_config._mtime == mtime
+    ):
+        return _load_metrics_config._cache
+    with open(metrics_path) as f:
+        cfg = yaml.safe_load(f)
+    _load_metrics_config._cache = cfg
+    _load_metrics_config._mtime = mtime
+    return cfg
+
+_load_metrics_config._cache = None
+_load_metrics_config._mtime = None
+
+
+# =============================================================================
+# STATEMENT FAMILY HELPERS (O17, O18, O20)
+# =============================================================================
+
+# Maps metrics.yaml statement codes → human labels
+_STATEMENT_LABELS = {
+    "INCOME": "Income Statement",
+    "OPERATIONS": "Income Statement",
+    "BALANCE": "Balance Sheet",
+    "FINANCIAL_POSITION": "Balance Sheet",
+    "CASHFLOW": "Cash Flow Statement",
+}
+
+# Maps metrics.yaml codes to canonical families for comparison
+_STATEMENT_FAMILY_NORMALIZE = {
+    "OPERATIONS": "INCOME",
+    "FINANCIAL_POSITION": "BALANCE",
+}
+
+# Maps sections.py return values → canonical families
+_SECTION_TO_FAMILY = {
+    "IncomeStatement": "INCOME",
+    "BalanceSheet": "BALANCE",
+    "CashFlowStatement": "CASHFLOW",
+}
+
+# Expected concept class for each metric (used in O17 prompt context)
+_METRIC_CONCEPT_CLASS = {
+    "Revenue": "revenue / top-line sales",
+    "COGS": "cost of goods or services sold",
+    "SGA": "selling, general & administrative expense",
+    "OperatingIncome": "operating income / operating profit",
+    "PretaxIncome": "income before income taxes",
+    "NetIncome": "net income / net earnings",
+    "OperatingCashFlow": "cash from operating activities",
+    "Capex": "capital expenditures / purchases of PP&E",
+    "TotalAssets": "total assets",
+    "Goodwill": "goodwill (intangible asset from acquisitions)",
+    "IntangibleAssets": "intangible assets (patents, trademarks, etc.)",
+    "ShortTermDebt": "short-term borrowings / current debt",
+    "LongTermDebt": "long-term debt / non-current borrowings",
+    "CashAndEquivalents": "cash and cash equivalents",
+    "WeightedAverageSharesDiluted": "diluted weighted-average shares outstanding",
+    "StockBasedCompensation": "stock-based / share-based compensation expense",
+    "DividendsPaid": "cash dividends paid",
+    "Inventory": "inventory (raw materials, WIP, finished goods)",
+    "AccountsReceivable": "trade accounts receivable",
+    "AccountsPayable": "trade accounts payable",
+    "DepreciationAmortization": "depreciation and amortization expense",
+    "GrossProfit": "gross profit (revenue minus COGS)",
+    "ResearchAndDevelopment": "research and development expense",
+    "InterestExpense": "interest expense",
+    "IncomeTaxExpense": "income tax expense / provision",
+    "EarningsPerShareDiluted": "diluted earnings per share",
+    "EarningsPerShareBasic": "basic earnings per share",
+    "CurrentAssets": "total current assets",
+    "CurrentLiabilities": "total current liabilities",
+    "TotalLiabilities": "total liabilities",
+    "StockholdersEquity": "total stockholders' equity",
+    "PropertyPlantEquipment": "property, plant & equipment (net)",
+    "RetainedEarnings": "retained earnings / accumulated deficit",
+    "InvestingCashFlow": "cash from investing activities",
+    "FinancingCashFlow": "cash from financing activities",
+    "ShareRepurchases": "treasury stock repurchases",
+    "DividendPerShare": "dividends per share",
+    "FreeCashFlow": "free cash flow (operating CF minus capex)",
+    "TangibleAssets": "tangible assets (total assets minus intangibles)",
+    "NetDebt": "net debt (total debt minus cash)",
+    "EBITDA": "earnings before interest, taxes, depreciation & amortization",
+    "WorkingCapital": "working capital (current assets minus current liabilities)",
+    "TotalDebt": "total debt (short-term + long-term)",
+}
+
+
+def _get_statement_family_for_metric(metric: str) -> List[str]:
+    """Get the statement family codes for a metric from metrics.yaml tree_hints.
+
+    Returns normalized family codes (e.g., ["INCOME"]) with OPERATIONS→INCOME
+    and FINANCIAL_POSITION→BALANCE normalization applied. Falls back to [] if
+    the metric or tree_hints are not found.
+    """
+    try:
+        cfg = _load_metrics_config()
+        statements = (
+            cfg.get("metrics", {})
+            .get(metric, {})
+            .get("tree_hints", {})
+            .get("statements", [])
+        )
+        # Normalize: OPERATIONS→INCOME, FINANCIAL_POSITION→BALANCE
+        return list({
+            _STATEMENT_FAMILY_NORMALIZE.get(s, s) for s in statements
+        })
+    except Exception:
+        return []
+
+
+def _get_candidate_statement(concept: str) -> Optional[str]:
+    """Map an XBRL concept to its canonical statement family.
+
+    Uses sections.get_statement_for_concept() which returns strings like
+    "IncomeStatement", "BalanceSheet", "CashFlowStatement". Normalizes
+    to "INCOME"/"BALANCE"/"CASHFLOW" for comparison with metric families.
+
+    Returns None if the concept is unknown (caller should keep, not filter).
+    """
+    from edgar.xbrl.standardization.sections import get_statement_for_concept
+    try:
+        stmt = get_statement_for_concept(concept)
+        if stmt is None:
+            return None
+        return _SECTION_TO_FAMILY.get(stmt)
+    except Exception:
+        return None
+
+
+def validate_action_preflight(action: TypedAction, gap: Optional['UnresolvedGap'] = None) -> Optional[str]:
+    """Pre-CQS validation. Returns None if valid, error string if invalid.
+
+    Checks:
+    - Duplicate concept (already in known_concepts)
+    - O20: Identical to current mapping (no-op)
+    - O20: Cross-statement concept (statement family mismatch)
+    """
+    if action.action == "MAP_CONCEPT":
+        proposed = action.params.get("concept", "")
+
+        try:
+            metrics_cfg = _load_metrics_config()
+            existing = (
+                metrics_cfg.get("metrics", {})
+                .get(action.metric, {})
+                .get("known_concepts", [])
+            )
+            if proposed in existing:
+                return (
+                    f"Concept '{proposed}' already in "
+                    f"{action.metric}.known_concepts"
+                )
+        except Exception as e:
+            logger.debug(f"Preflight concept check failed: {e}")
+
+        # O20: Reject if identical to current mapping (no-op)
+        if gap is not None and gap.current_concept:
+            if normalize_concept(proposed) == normalize_concept(gap.current_concept):
+                return (
+                    f"Proposed concept '{proposed}' is identical to current mapping "
+                    f"'{gap.current_concept}' — would be a no-op"
+                )
+
+        # O20: Reject if concept belongs to wrong statement family
+        candidate_stmt = _get_candidate_statement(normalize_concept(proposed))
+        if candidate_stmt is not None:
+            metric_families = _get_statement_family_for_metric(action.metric)
+            if metric_families and candidate_stmt not in metric_families:
+                family_labels = [_STATEMENT_LABELS.get(f, f) for f in metric_families]
+                candidate_label = _STATEMENT_LABELS.get(candidate_stmt, candidate_stmt)
+                return (
+                    f"Concept '{proposed}' belongs to {candidate_label} "
+                    f"but metric {action.metric} requires {', '.join(family_labels)}"
+                )
+
+    return None
+
+
+# =============================================================================
+# SHARED PROMPT HELPERS
+# =============================================================================
+
+def _build_evidence_context(gap: UnresolvedGap) -> str:
+    """Build the extraction evidence section for AI prompts."""
+    lines = []
+    if gap.current_concept:
+        lines.append(f"- Currently mapped to: {gap.current_concept}")
+        if gap.xbrl_value is not None:
+            lines.append(f"- Current extracted value: {gap.xbrl_value:,.0f}")
+    if gap.resolution_type != "none":
+        lines.append(f"- Resolution type: {gap.resolution_type}")
+        lines.append(f"- Components used: {gap.components_used}")
+        lines.append(f"- Components missing: {gap.components_missing}")
+        lines.append(f"- Company industry: {gap.company_industry}")
+    if not lines:
+        return "- No extraction evidence available\n"
+    return "\n".join(lines) + "\n"
+
+
+def _build_graveyard_text(gap: UnresolvedGap) -> str:
+    """Format graveyard history for AI prompts."""
+    if not gap.graveyard_entries:
+        return "None"
+    entries = []
+    for entry in gap.graveyard_entries:
+        entries.append(
+            f"  - config_diff: {entry.get('config_diff', 'N/A')}\n"
+            f"    discard_reason: {entry.get('discard_reason', 'N/A')}\n"
+            f"    detail: {entry.get('detail', 'N/A')}"
+        )
+    return "\n".join(entries)
+
+
+def _build_difficulty_context(gap: UnresolvedGap) -> str:
+    """Build the difficulty assessment section for hard gaps."""
+    if gap.difficulty_tier != "hard":
+        return ""
+    reasons = []
+    if gap.graveyard_count >= 6:
+        reasons.append(f"{gap.graveyard_count} prior failures")
+    if gap.gap_type == "regression":
+        reasons.append("regression gap")
+    if gap.root_cause in ("extension_concept", "algebraic_coincidence"):
+        reasons.append(f"root cause: {gap.root_cause}")
+    return (
+        f"\n## Difficulty Assessment\n"
+        f"This is a HARD gap ({', '.join(reasons)}). "
+        f"Standard approaches have failed. Consider unconventional strategies.\n"
+    )
+
+
+def _build_metric_context(gap: UnresolvedGap) -> str:
+    """O17: Build metric context section with statement family and concept class."""
+    lines = []
+    families = _get_statement_family_for_metric(gap.metric)
+    if families:
+        labels = [_STATEMENT_LABELS.get(f, f) for f in families]
+        unique_labels = list(dict.fromkeys(labels))  # dedupe preserving order
+        lines.append(f"- Statement family: {', '.join(unique_labels)}")
+
+    concept_class = _METRIC_CONCEPT_CLASS.get(gap.metric)
+    if concept_class:
+        lines.append(f"- Expected concept class: {concept_class}")
+
+    if not lines:
+        return ""
+
+    constraint = (
+        "The proposed concept MUST belong to the same financial statement "
+        "as the target metric. A concept from a different statement is almost "
+        "certainly a coincidental numeric match, not a semantic match."
+    )
+    lines.append(f"- **Constraint**: {constraint}")
+
+    return "\n## Metric Context\n" + "\n".join(lines) + "\n"
+
+
+def _build_gap_type_guidance(gap: UnresolvedGap) -> str:
+    """O19: Build guidance specific to gap type (high_variance vs unmapped)."""
+    if gap.gap_type == "high_variance" and gap.current_concept:
+        var_str = f"{gap.current_variance:.1f}" if gap.current_variance is not None else "?"
+        return (
+            f"\n## Gap Type Guidance\n"
+            f"The current concept ({gap.current_concept}) is already extracting a value "
+            f"but differs from reference by {var_str}%.\n"
+            f"- If the current concept IS the most semantically accurate for this metric, "
+            f"use **DOCUMENT_DIVERGENCE** — the company's filing simply reports a different "
+            f"value than the reference source.\n"
+            f"- Only propose MAP_CONCEPT if you identify a concept that is both semantically "
+            f"correct AND closer to the reference value.\n"
+        )
+    elif gap.gap_type == "unmapped":
+        return (
+            "\n## Gap Type Guidance\n"
+            "No concept is currently mapped for this metric. "
+            "Find the best semantically matching concept from the candidates.\n"
+        )
+    return ""
+
+
+def _build_industry_constraints(gap: UnresolvedGap) -> str:
+    """O44: Build industry constraint warnings for banking and other archetypes."""
+    if not gap.company_industry:
+        return ""
+    industry = gap.company_industry.lower()
+    if industry != "banking":
+        return ""
+    industry_path = Path(__file__).parent.parent / "config" / "industry_metrics.yaml"
+    try:
+        with open(industry_path) as f:
+            industry_config = yaml.safe_load(f) or {}
+        forbidden = industry_config.get("banking", {}).get("forbidden_metrics", [])
+    except Exception:
+        forbidden = []
+    if gap.metric in forbidden:
+        return (
+            f"\n## Industry Constraint\n"
+            f"**WARNING:** {gap.metric} is on the banking forbidden_metrics list. "
+            f"Banking companies typically do not report this metric in a way that "
+            f"matches yfinance's definition. You should strongly consider ESCALATE.\n"
+        )
+    return f"\n## Industry Context\nCompany industry: banking\n"
+
+
+# =============================================================================
+# TYPED ACTION PROMPT (Phase 3)
+# =============================================================================
+
+def build_typed_action_prompt(gap: UnresolvedGap, candidates_text: str = "") -> str:
+    """Build an AI prompt that requests a TypedAction JSON response.
+
+    Key differences from build_consultation_prompt():
+    - Response format is TypedAction JSON, not ConfigChange JSON
+    - Lists available actions from ACTION_VOCABULARY
+    - Does NOT include file paths, YAML paths, or config structure
+    - Asks for confidence score (0-1)
+
+    Args:
+        gap: The unresolved gap to build a prompt for.
+        candidates_text: Optional O3 enrichment from discover_concepts().
+    """
+    evidence_context = _build_evidence_context(gap)
+    graveyard_text = _build_graveyard_text(gap)
+    difficulty_context = _build_difficulty_context(gap)
+    metric_context = _build_metric_context(gap)
+    gap_type_guidance = _build_gap_type_guidance(gap)
+    industry_constraints = _build_industry_constraints(gap)
+
+    action_lines = []
+    for name, spec in ACTION_VOCABULARY.items():
+        params_str = ", ".join(spec["required_params"]) if spec["required_params"] else "none"
+        action_lines.append(f"- **{name}** (params: {params_str}): {spec['description']}")
+    actions_section = "\n".join(action_lines)
+
+    prompt = f"""You are an XBRL standardization expert. A metric gap resists automated resolution.
+
+## Gap Details
+- Ticker: {gap.ticker}, Metric: {gap.metric}
+- Reference value (yfinance): {gap.reference_value}
+- Extracted value (XBRL): {gap.xbrl_value}
+- hv_subtype: {gap.hv_subtype}
+- Current variance: {gap.current_variance}%
+- Gap type: {gap.gap_type}
+- Root cause: {gap.root_cause}
+{evidence_context}
+{difficulty_context}
+{metric_context}
+{gap_type_guidance}
+{industry_constraints}
+## Prior Failed Attempts ({gap.graveyard_count} total)
+{graveyard_text}
+{candidates_text}
+
+## Available Actions
+{actions_section}
+
+## Engine Capabilities & Constraints
+- Sign negation: FIX_SIGN_CONVENTION (no params needed).
+- Composite formulas: ADD_FORMULA sums components ONLY. No subtraction. Max 3 components.
+  scope must be "company" (applies to this ticker only) or "global" (applies to all).
+- ESCALATE if no config change can resolve this gap.
+
+## Escalation Triggers — you MUST ESCALATE when:
+- reference_value is None (no ground truth to validate against)
+- The metric is structurally inapplicable to this company's industry (e.g., PPE for banks)
+- 4+ prior failed attempts with semantic regressions
+- No candidate concept is a genuine semantic match (value-only coincidences don't count)
+
+## Response Format (strict JSON only — no markdown fences)
+{{
+  "action": "MAP_CONCEPT",
+  "ticker": "{gap.ticker}",
+  "metric": "{gap.metric}",
+  "params": {{"concept": "us-gaap:ExampleConcept"}},
+  "rationale": "Why this will resolve the gap",
+  "confidence": 0.85
+}}
+
+## Worked Examples
+
+Example 1 — ADD_FORMULA (composite metric, company-scoped):
+{{
+  "action": "ADD_FORMULA",
+  "ticker": "CAT",
+  "metric": "IntangibleAssets",
+  "params": {{"components": ["us-gaap:Goodwill", "us-gaap:IntangibleAssetsNetExcludingGoodwill"], "scope": "company"}},
+  "rationale": "CAT splits intangibles into Goodwill + IntangibleAssetsNet on balance sheet",
+  "confidence": 0.90
+}}
+
+Example 2 — ESCALATE (banking forbidden metric):
+{{
+  "action": "ESCALATE",
+  "ticker": "JPM",
+  "metric": "PropertyPlantEquipment",
+  "params": {{"reason": "PPE is structurally inapplicable to banking; premises buried in OtherAssets"}},
+  "rationale": "Banking companies do not report PPE in a way that matches yfinance's industrial definition",
+  "confidence": 0.95
+}}
+
+IMPORTANT: Do NOT re-propose anything found in the prior failed attempts above.
+Return ONLY the JSON object."""
+
+    return prompt
+
+
+def collect_typed_proposals(
+    responses: List[Tuple[UnresolvedGap, Optional[str]]],
+    session_id: Optional[str] = None,
+) -> Tuple[List[ProposalRecord], int]:
+    """Convert raw AI responses into ProposalRecords via typed action pipeline.
+
+    Pipeline: raw response -> parse_typed_action() -> compile_action()
+    -> validate_action_preflight() -> ProposalRecord
+
+    Args:
+        responses: List of (gap, response_text) tuples.
+        session_id: If provided, auto-saves raw responses and parsed proposals.
+
+    Returns:
+        Tuple of (proposals, preflight_rejected_count).
+    """
+    proposals: List[ProposalRecord] = []
+    preflight_rejected = 0
+
+    for gap, response_text in responses:
+        if response_text is None:
+            logger.info(f"Skipping {gap.ticker}:{gap.metric} — no agent response")
+            continue
+
+        typed_action = parse_typed_action(response_text, gap.ticker, gap.metric)
+        if typed_action is None:
+            logger.info(f"Skipping {gap.ticker}:{gap.metric} — invalid typed action")
+            continue
+
+        change = compile_action(typed_action, gap=gap)
+        if change is None:
+            logger.info(
+                f"Skipping {gap.ticker}:{gap.metric} — "
+                f"action {typed_action.action} compiled to None (e.g. ESCALATE)"
+            )
+            continue
+
+        preflight_err = validate_action_preflight(typed_action, gap=gap)
+        if preflight_err is not None:
+            preflight_rejected += 1
+            logger.info(
+                f"Preflight rejected {gap.ticker}:{gap.metric}: {preflight_err}"
+            )
+            continue
+
+        change.ai_agent_type = gap.ai_agent_type
+
+        model = _select_model(gap)
+        worker_id = f"agent_{model}"
+
+        proposals.append(ProposalRecord(
+            gap=_metric_gap_from_unresolved(gap),
+            proposal=change,
+            worker_id=worker_id,
+        ))
+        logger.info(
+            f"Typed proposal for {gap.ticker}:{gap.metric}: "
+            f"{typed_action.action} -> {change.change_type.value} via {worker_id}"
+        )
+
+    logger.info(f"Collected {len(proposals)}/{len(responses)} typed proposals")
+
+    if session_id is not None:
+        save_agent_responses(session_id, responses)
+        if proposals:
+            output_path = GAP_MANIFESTS_DIR / f"ai_proposals_{session_id}.json"
+            save_proposals_to_json(proposals, output_path)
+
+    return proposals, preflight_rejected
+
+
+def _select_model(gap: UnresolvedGap) -> str:
+    """Select AI model based on gap difficulty and agent type.
+
+    Returns abstract model names resolved by MODEL_REGISTRY in make_openrouter_caller().
+    Standard gaps use gemini-flash (cheap/fast), hard gaps use sonnet (more capable).
+    """
+    if gap.difficulty_tier == "hard" or gap.ai_agent_type == "pattern_learner":
+        return "sonnet"
+    return "gemini-flash"
+
+
+def _metric_gap_from_unresolved(gap: UnresolvedGap) -> MetricGap:
+    """Project an UnresolvedGap back to a MetricGap for ProposalRecord."""
+    return MetricGap(
+        ticker=gap.ticker,
+        metric=gap.metric,
+        gap_type=gap.gap_type,
+        estimated_impact=gap.estimated_impact,
+        reference_value=gap.reference_value,
+        xbrl_value=gap.xbrl_value,
+        hv_subtype=gap.hv_subtype,
+        current_variance=gap.current_variance,
+        graveyard_count=gap.graveyard_count,
+        notes=gap.notes,
+    )
+
+
+def _gap_key(gap: UnresolvedGap) -> str:
+    """Stable cache key: ticker:metric."""
+    return f"{gap.ticker}:{gap.metric}"
+
+
+def save_agent_responses(
+    session_id: str,
+    responses: List[Tuple[UnresolvedGap, Optional[str]]],
+) -> Path:
+    """Save raw agent responses to JSON for caching.
+
+    Args:
+        session_id: Session identifier for the cache file.
+        responses: List of (gap, response_text) tuples. None responses
+            are saved as null (records that the attempt was made).
+
+    Returns:
+        Path to the saved JSON file.
+    """
+    data = [
+        {
+            "gap_key": _gap_key(gap),
+            "response_text": response_text,
+        }
+        for gap, response_text in responses
+    ]
+    output_path = GAP_MANIFESTS_DIR / f"agent_responses_{session_id}.json"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w") as f:
+        json.dump(data, f, indent=2)
+    logger.info(f"Saved {len(data)} agent responses to {output_path}")
+    return output_path
+
+
+def load_agent_responses(session_id: str) -> Dict[str, str]:
+    """Load cached agent responses.
+
+    Args:
+        session_id: Session identifier matching the cache file.
+
+    Returns:
+        Dict mapping gap_key -> response_text. Null responses are excluded
+        so that ``key in cache`` means a real answer exists.
+        Returns empty dict if the cache file doesn't exist.
+    """
+    cache_path = GAP_MANIFESTS_DIR / f"agent_responses_{session_id}.json"
+    if not cache_path.exists():
+        return {}
+    with open(cache_path, "r") as f:
+        data = json.load(f)
+    return {
+        entry["gap_key"]: entry["response_text"]
+        for entry in data
+        if entry["response_text"] is not None
+    }
+
+
+def build_consultation_prompt(gap: UnresolvedGap) -> str:
+    """Build a structured prompt for AI consultation.
+
+    Refactored from _consult_gpt() to work with denormalized UnresolvedGap
+    rather than requiring live MetricGap + SQLite access.
+    """
+    evidence_context = _build_evidence_context(gap)
+    graveyard_text = _build_graveyard_text(gap)
+    difficulty_context = _build_difficulty_context(gap)
+
+    prompt = f"""You are an XBRL standardization expert. A metric gap resists automated resolution.
+
+## Gap Details
+- Ticker: {gap.ticker}, Metric: {gap.metric}
+- Reference value (yfinance): {gap.reference_value}
+- Extracted value (XBRL): {gap.xbrl_value}
+- hv_subtype: {gap.hv_subtype}
+- Current variance: {gap.current_variance}%
+- Gap type: {gap.gap_type}
+- Root cause: {gap.root_cause}
+{evidence_context}
+{difficulty_context}
+## Prior Failed Attempts ({gap.graveyard_count} total)
+{graveyard_text}
+
+## Available Fix Strategies
+You may propose ONE of these ConfigChange types:
+1. ADD_CONCEPT: Add an XBRL concept to metrics.yaml known_concepts list
+2. ADD_STANDARDIZATION: Add a composite formula to metrics.yaml
+3. SET_INDUSTRY: Set industry field in companies.yaml
+4. ADD_COMPANY_OVERRIDE: Add metric_overrides in companies.yaml
+5. ADD_EXCLUSION: Exclude this metric for this company
+6. ADD_DIVERGENCE: Document a known divergence
+
+## Response Format (strict JSON only — no markdown fences)
+{{
+  "change_type": "one of the above (e.g. ADD_CONCEPT)",
+  "file": "metrics.yaml or companies.yaml",
+  "yaml_path": "dot.notation.path (e.g. metrics.Revenue.known_concepts)",
+  "new_value": "<value - string for ADD_CONCEPT, dict for others>",
+  "rationale": "why this will work"
+}}
+
+If you believe this gap is fundamentally unresolvable (structural mismatch
+between XBRL and yfinance), respond with ADD_EXCLUSION or ADD_DIVERGENCE."""
+
+    return prompt
+
+
+def build_agent_prompt(gap: UnresolvedGap) -> str:
+    """Build an enriched prompt for gap-solver or gap-investigator agents.
+
+    Extends build_consultation_prompt() with:
+    - Machine-readable gap JSON for structured parsing
+    - Tool usage instructions specific to the agent type
+    - Config file paths to read
+    - Explicit output format requirements
+    """
+    base_prompt = build_consultation_prompt(gap)
+    gap_json = json.dumps(gap.to_dict(), indent=2, default=str)
+
+    if gap.difficulty_tier == "hard":
+        tool_instructions = """## Tool Usage Instructions (Opus Investigation)
+
+You have access to powerful investigation tools. Use them IN ORDER:
+
+1. **Read config state** — check what's already mapped in metrics.yaml and companies.yaml
+2. **Analyze graveyard** — understand ALL prior failures before trying anything
+3. **discover_concepts(ticker, metric)** — find candidate XBRL concepts
+4. **verify_mapping(ticker, metric, concept)** — validate candidates against yfinance
+5. **learn_mappings(metric, tickers)** — discover cross-company patterns
+6. **Load XBRL filing** — examine calculation trees and dimensional data directly:
+   ```python
+   from edgar import Company
+   company = Company(TICKER)
+   filing = company.get_filings(form="10-K").latest()
+   xbrl = filing.xbrl()
+   ```
+
+IMPORTANT: Do NOT re-propose anything found in the graveyard entries above."""
+    else:
+        tool_instructions = """## Tool Usage Instructions (Sonnet Solver)
+
+Use these tools IN ORDER:
+
+1. **Read config** — check metrics.yaml for current known_concepts
+2. **discover_concepts(ticker, metric)** — find candidate XBRL concepts
+3. **verify_mapping(ticker, metric, concept)** — validate candidates (variance < 15%)
+4. **check_fallback_quality(metric, concept)** — ensure semantic quality before proposing
+
+IMPORTANT: Do NOT re-propose anything found in the graveyard entries above."""
+
+    config_paths = """## Config File Paths
+
+```
+edgar/xbrl/standardization/config/metrics.yaml
+edgar/xbrl/standardization/config/companies.yaml
+```"""
+
+    return f"""{base_prompt}
+
+{tool_instructions}
+
+{config_paths}
+
+## Machine-Readable Gap Context
+
+```json
+{gap_json}
+```
+
+## REMINDER: Return ONLY a JSON object. No markdown fences, no explanation outside the JSON."""
+
+
+def collect_agent_proposals(
+    responses: List[Tuple[UnresolvedGap, Optional[str]]],
+    session_id: Optional[str] = None,
+) -> List[ProposalRecord]:
+    """Convert raw agent response strings into validated ProposalRecords.
+
+    Args:
+        responses: List of (gap, response_text) tuples. response_text may be None
+            if the agent failed or returned nothing.
+        session_id: If provided, auto-saves raw responses and parsed proposals.
+
+    Returns:
+        List of ProposalRecord ready for save_proposals_to_json().
+    """
+    proposals: List[ProposalRecord] = []
+
+    for gap, response_text in responses:
+        if response_text is None:
+            logger.info(f"Skipping {gap.ticker}:{gap.metric} — no agent response")
+            continue
+
+        change = parse_gpt_response(response_text, gap.ticker, gap.metric)
+
+        if change is None:
+            logger.info(f"Skipping {gap.ticker}:{gap.metric} — invalid response")
+            continue
+
+        change.source = "ai_agent"
+        change.ai_agent_type = gap.ai_agent_type
+
+        model = _select_model(gap)
+        worker_id = f"agent_{model}"
+
+        proposals.append(ProposalRecord(
+            gap=_metric_gap_from_unresolved(gap),
+            proposal=change,
+            worker_id=worker_id,
+        ))
+        logger.info(
+            f"Collected proposal for {gap.ticker}:{gap.metric}: "
+            f"{change.change_type.value} via {worker_id}"
+        )
+
+    logger.info(f"Collected {len(proposals)}/{len(responses)} valid proposals")
+
+    # Auto-save when session_id is provided
+    if session_id is not None:
+        save_agent_responses(session_id, responses)
+        if proposals:
+            output_path = GAP_MANIFESTS_DIR / f"ai_proposals_{session_id}.json"
+            save_proposals_to_json(proposals, output_path)
+
+    return proposals
+
+
+def consult_ai_gaps(
+    manifest_path: Path,
+    ai_caller: Callable[[str, str], Optional[str]],
+    max_gaps: int = 0,
+) -> List[ProposalRecord]:
+    """Generate AI proposals for unresolved gaps from a manifest.
+
+    This is Step 2a of the two-step architecture. It reads a gap manifest,
+    builds prompts, calls the AI, and parses responses into ProposalRecords.
+
+    Args:
+        manifest_path: Path to the gap manifest JSON.
+        ai_caller: Callable(prompt, model) -> response_text.
+            Use make_openrouter_caller() for the default implementation.
+        max_gaps: Max gaps to process (0 = all).
+
+    Returns:
+        List of ProposalRecord for successfully parsed AI responses.
+    """
+    manifest = load_gap_manifest(manifest_path)
+
+    # Config drift check
+    current_fingerprint = get_config_fingerprint()
+    if current_fingerprint != manifest.config_fingerprint:
+        logger.warning(
+            f"Config fingerprint drifted since manifest was written "
+            f"({manifest.config_fingerprint} -> {current_fingerprint}). "
+            f"Proposals may be stale."
+        )
+
+    from edgar.xbrl.standardization.tools.capability_registry import filter_actionable_gaps
+
+    gaps = manifest.gaps
+    if max_gaps > 0:
+        gaps = gaps[:max_gaps]
+
+    gaps = filter_actionable_gaps(gaps)
+
+    proposals: List[ProposalRecord] = []
+    model_counts: Dict[str, int] = {"sonnet": 0, "opus": 0}
+
+    for i, gap in enumerate(gaps):
+        model = _select_model(gap)
+
+        logger.info(
+            f"[{i+1}/{len(gaps)}] Consulting {model} for "
+            f"{gap.ticker}:{gap.metric} ({gap.ai_agent_type})"
+        )
+
+        prompt = build_consultation_prompt(gap)
+
+        try:
+            response = ai_caller(prompt, model)
+        except Exception as e:
+            logger.warning(f"AI call failed for {gap.ticker}:{gap.metric}: {e}")
+            continue
+
+        if not response:
+            logger.warning(f"Empty AI response for {gap.ticker}:{gap.metric}")
+            continue
+
+        change = parse_gpt_response(response, gap.ticker, gap.metric)
+
+        if change is not None:
+            change.source = "ai_agent"
+            change.ai_agent_type = gap.ai_agent_type
+            proposals.append(ProposalRecord(
+                gap=_metric_gap_from_unresolved(gap),
+                proposal=change,
+                worker_id=f"agent_{model}",
+            ))
+            model_counts[model] += 1
+            logger.info(f"  -> Proposal: {change.change_type.value} on {change.yaml_path}")
+        else:
+            logger.info(f"  -> No valid proposal parsed")
+
+    logger.info(
+        f"AI consultation complete: {len(proposals)}/{len(gaps)} proposals "
+        f"(sonnet={model_counts.get('sonnet', 0)}, opus={model_counts.get('opus', 0)})"
+    )
+
+    # Save proposals
+    if proposals:
+        output_path = GAP_MANIFESTS_DIR / f"ai_proposals_{manifest.session_id}.json"
+        save_proposals_to_json(proposals, output_path)
+
+    return proposals
+
+
+def evaluate_ai_proposals(
+    proposals_path: Path,
+    eval_cohort: Optional[List[str]] = None,
+    max_workers: int = 2,
+    ledger: Optional[ExperimentLedger] = None,
+) -> OvernightReport:
+    """Evaluate AI-generated proposals through CQS gates.
+
+    This is Step 2b. It loads proposals from JSON (produced by consult_ai_gaps)
+    and evaluates each through the same evaluate_experiment() gates used by
+    deterministic proposals.
+
+    Args:
+        proposals_path: Path to the AI proposals JSON file.
+        eval_cohort: List of tickers. Defaults to QUICK_EVAL_COHORT.
+        max_workers: Parallel workers for CQS computation.
+        ledger: ExperimentLedger for experiment logging.
+
+    Returns:
+        OvernightReport summarizing the evaluation session.
+    """
+    if ledger is None:
+        ledger = ExperimentLedger()
+
+    cohort = eval_cohort or QUICK_EVAL_COHORT
+
+    proposals = load_proposals_from_json(proposals_path)
+    session_id = f"ai_eval_{Path(proposals_path).stem}"
+
+    # Compute baseline
+    logger.info(f"Computing baseline CQS on {len(cohort)} companies...")
+    baseline = compute_cqs(
+        eval_cohort=cohort,
+        snapshot_mode=True,
+        ledger=ledger,
+        max_workers=max_workers,
+    )
+
+    report = OvernightReport(
+        session_id=session_id,
+        started_at="",
+        finished_at="",
+        duration_hours=0,
+        focus_area="ai_consultation",
+        cqs_start=baseline.cqs,
+        cqs_peak=baseline.cqs,
+    )
+
+    current_baseline = baseline
+
+    for i, pr in enumerate(proposals):
+        change = pr.proposal
+        logger.info(
+            f"[{i+1}/{len(proposals)}] Evaluating: "
+            f"{change.change_type.value} for {change.target_metric}"
+        )
+
+        report.experiments_total += 1
+        result = evaluate_experiment(
+            change, current_baseline,
+            eval_cohort=cohort,
+            ledger=ledger,
+            max_workers=max_workers,
+        )
+
+        log_experiment(change, result, ledger, run_id=session_id)
+
+        if result.decision == Decision.KEEP:
+            report.experiments_kept += 1
+            report.config_diffs.append(change.to_diff_string())
+            if result.new_cqs_result is not None:
+                current_baseline = result.new_cqs_result
+            else:
+                current_baseline = compute_cqs(
+                    eval_cohort=cohort,
+                    snapshot_mode=True,
+                    ledger=ledger,
+                    max_workers=max_workers,
+                )
+            if current_baseline.cqs > report.cqs_peak:
+                report.cqs_peak = current_baseline.cqs
+            logger.info(f"  KEPT — CQS now {current_baseline.cqs:.4f}")
+
+        elif result.decision == Decision.VETO:
+            report.experiments_vetoed += 1
+            logger.warning(f"  VETOED — {result.reason}")
+
+        else:
+            report.experiments_discarded += 1
+            logger.info(f"  DISCARDED — {result.reason}")
+
+    report.cqs_end = current_baseline.cqs
+    logger.info(
+        f"AI evaluation complete: "
+        f"{report.experiments_kept}/{report.experiments_total} kept, "
+        f"CQS {report.cqs_start:.4f} -> {report.cqs_end:.4f}"
+    )
+
+    return report
+
+
+# =============================================================================
+# BENCHMARK FRAMEWORK
+# =============================================================================
+
+COP_OUT_TYPES = {ChangeType.ADD_DIVERGENCE, ChangeType.ADD_EXCLUSION}
+
+
+@dataclass
+class BenchmarkConfig:
+    """Configuration for a single benchmark arm."""
+    prompt_builder: Callable[[UnresolvedGap], str]
+    model: str      # Abstract name from MODEL_REGISTRY or raw model ID
+    label: str      # Human-readable name for comparison table
+    use_typed_actions: bool = False  # Use typed action pipeline
+    backend: str = "api"  # "api" (OpenRouter) or "agent" (Claude Code subagent)
+
+
+@dataclass
+class BenchmarkResult:
+    """Results from a single benchmark arm."""
+    config: BenchmarkConfig
+    total_gaps: int
+    valid_proposals: int
+    kept: int
+    discarded: int
+    vetoed: int
+    cop_outs: int
+    cqs_start: float
+    cqs_end: float
+    responses: List[Tuple[str, Optional[str]]] = field(default_factory=list)
+    preflight_rejected: int = 0
+
+    @property
+    def resolution_rate(self) -> float:
+        return self.kept / self.total_gaps if self.total_gaps > 0 else 0.0
+
+    @property
+    def cop_out_rate(self) -> float:
+        return self.cop_outs / self.valid_proposals if self.valid_proposals > 0 else 0.0
+
+    @property
+    def cqs_lift(self) -> float:
+        return self.cqs_end - self.cqs_start
+
+
+def _label_slug(label: str) -> str:
+    """Convert a human-readable label to a filesystem-safe slug."""
+    return re.sub(r"[^a-z0-9]+", "_", label.lower()).strip("_")
+
+
+def run_agent_benchmark(
+    manifest_path: Path,
+    configs: List[BenchmarkConfig],
+    ai_caller: Callable[[str, str], Optional[str]],
+    max_gaps: int = 0,
+    eval_cohort: Optional[List[str]] = None,
+    max_workers: int = 2,
+) -> List[BenchmarkResult]:
+    """Run a benchmark comparing (prompt_builder, model) combinations.
+
+    Each config arm is evaluated independently:
+    1. Load manifest, check response cache
+    2. For uncached gaps: call ai_caller(prompt, config.model)
+    3. Save responses to cache
+    4. Parse via collect_agent_proposals()
+    5. Count cop-outs, evaluate through CQS gates
+    6. Return BenchmarkResult per arm
+
+    Args:
+        manifest_path: Path to a gap manifest JSON.
+        configs: List of BenchmarkConfig arms to compare.
+        ai_caller: Callable(prompt, model) -> response_text.
+        max_gaps: Max gaps to process per arm (0 = all).
+        eval_cohort: Tickers for CQS evaluation. Defaults to QUICK_EVAL_COHORT.
+        max_workers: Parallel workers for CQS computation.
+
+    Returns:
+        List of BenchmarkResult, one per config arm.
+    """
+    manifest = load_gap_manifest(manifest_path)
+    cohort = eval_cohort or QUICK_EVAL_COHORT
+
+    from edgar.xbrl.standardization.tools.capability_registry import filter_actionable_gaps
+
+    gaps = manifest.gaps
+    if max_gaps > 0:
+        gaps = gaps[:max_gaps]
+
+    gaps = filter_actionable_gaps(gaps)
+
+    results: List[BenchmarkResult] = []
+
+    for config in configs:
+        slug = _label_slug(config.label)
+        cache_session = f"{manifest.session_id}_{slug}"
+
+        logger.info(f"=== Benchmark arm: {config.label} (model={config.model}) ===")
+
+        # Check response cache
+        cache = load_agent_responses(cache_session)
+
+        # Dispatch uncached gaps
+        arm_responses: List[Tuple[UnresolvedGap, Optional[str]]] = []
+        for gap in gaps:
+            key = _gap_key(gap)
+            if key in cache:
+                logger.info(f"  Cache hit: {key}")
+                arm_responses.append((gap, cache[key]))
+            else:
+                prompt = config.prompt_builder(gap)
+                try:
+                    response = ai_caller(prompt, config.model)
+                except Exception as e:
+                    logger.warning(f"  AI call failed for {key}: {e}")
+                    response = None
+                arm_responses.append((gap, response))
+
+        # Save all responses to cache
+        save_agent_responses(cache_session, arm_responses)
+
+        # Parse proposals — use typed action pipeline or raw pipeline
+        preflight_rejected = 0
+        if config.use_typed_actions:
+            proposals, preflight_rejected = collect_typed_proposals(arm_responses)
+        else:
+            proposals = collect_agent_proposals(arm_responses)
+
+        # Count cop-outs
+        cop_outs = sum(
+            1 for pr in proposals
+            if pr.proposal.change_type in COP_OUT_TYPES
+        )
+
+        # Compute baseline CQS
+        ledger = ExperimentLedger()
+        baseline = compute_cqs(
+            eval_cohort=cohort,
+            snapshot_mode=True,
+            ledger=ledger,
+            max_workers=max_workers,
+        )
+        cqs_start = baseline.cqs
+
+        # Evaluate each proposal through CQS gates
+        kept = 0
+        discarded = 0
+        vetoed = 0
+        current_baseline = baseline
+
+        for pr in proposals:
+            result = evaluate_experiment(
+                pr.proposal,
+                current_baseline,
+                eval_cohort=cohort,
+                ledger=ledger,
+                max_workers=max_workers,
+            )
+
+            if result.decision == Decision.KEEP:
+                kept += 1
+                if result.new_cqs_result is not None:
+                    current_baseline = result.new_cqs_result
+                else:
+                    current_baseline = compute_cqs(
+                        eval_cohort=cohort,
+                        snapshot_mode=True,
+                        ledger=ledger,
+                        max_workers=max_workers,
+                    )
+            elif result.decision == Decision.VETO:
+                vetoed += 1
+            else:
+                discarded += 1
+
+        cqs_end = current_baseline.cqs
+
+        # Store gap_key -> response for the result
+        response_pairs = [
+            (_gap_key(gap), resp)
+            for gap, resp in arm_responses
+        ]
+
+        results.append(BenchmarkResult(
+            config=config,
+            total_gaps=len(gaps),
+            valid_proposals=len(proposals),
+            kept=kept,
+            discarded=discarded,
+            vetoed=vetoed,
+            cop_outs=cop_outs,
+            cqs_start=cqs_start,
+            cqs_end=cqs_end,
+            responses=response_pairs,
+            preflight_rejected=preflight_rejected,
+        ))
+
+        logger.info(
+            f"  Arm '{config.label}': {kept}/{len(gaps)} kept, "
+            f"CQS {cqs_start:.4f} -> {cqs_end:.4f}"
+        )
+
+    return results
+
+
+def print_benchmark_comparison(results: List[BenchmarkResult]) -> None:
+    """Print a Rich comparison table of benchmark results."""
+    from rich.console import Console
+    from rich.table import Table
+
+    table = Table(title="Agent Benchmark Comparison")
+    table.add_column("Metric", style="bold")
+    for r in results:
+        table.add_column(r.config.label, justify="right")
+
+    rows = [
+        ("Model", [r.config.model for r in results]),
+        ("Total Gaps", [str(r.total_gaps) for r in results]),
+        ("Valid Proposals", [str(r.valid_proposals) for r in results]),
+        ("Kept", [str(r.kept) for r in results]),
+        ("Discarded", [str(r.discarded) for r in results]),
+        ("Vetoed", [str(r.vetoed) for r in results]),
+        ("Cop-outs", [str(r.cop_outs) for r in results]),
+        ("Preflight Rejected", [str(r.preflight_rejected) for r in results]),
+        ("Resolution Rate", [f"{r.resolution_rate:.1%}" for r in results]),
+        ("Cop-out Rate", [f"{r.cop_out_rate:.1%}" for r in results]),
+        ("CQS Start", [f"{r.cqs_start:.4f}" for r in results]),
+        ("CQS End", [f"{r.cqs_end:.4f}" for r in results]),
+        ("CQS Lift", [f"{r.cqs_lift:+.4f}" for r in results]),
+    ]
+
+    for label, values in rows:
+        table.add_row(label, *values)
+
+    Console().print(table)
+
+
+# =============================================================================
+# PHASE 7: CLOSED-LOOP AI DISPATCH & EVALUATION
+# =============================================================================
+
+# Retry eligibility: skip retry if gap impact < this threshold (1%)
+RETRY_IMPACT_THRESHOLD = 0.01
+# Structural failure marker — not retryable
+_STRUCTURAL_FAILURE_PREFIX = "Failed to apply"
+
+
+@dataclass
+class AIDispatchReport:
+    """Summary of dispatch_ai_gaps() — how many gaps were sent to AI and what came back."""
+    session_id: str
+    total_gaps: int
+    actionable_gaps: int
+    dead_end_skipped: int
+    cache_hits: int
+    api_calls: int
+    valid_proposals: int
+    preflight_rejected: int
+    escalated: int
+    model_counts: Dict[str, int] = field(default_factory=dict)
+    not_onboarded_skipped: int = 0
+    auto_resolved: int = 0
+
+
+AUTO_RESOLVE_VARIANCE_THRESHOLD = 2.0  # percent
+
+
+# =============================================================================
+# O11: DETERMINISTIC DOWNGRADE (global → company-scoped)
+# =============================================================================
+
+def _is_peer_regression(
+    decision: 'ExperimentDecision',
+    target_ticker: str,
+) -> bool:
+    """Detect: target company improved (or neutral) but peer(s) regressed.
+
+    This is the signature of a global ADD_CONCEPT that helps the target
+    but breaks other companies. The fix is to scope it to company-level.
+    """
+    if decision.decision != Decision.DISCARD:
+        return False
+    if not decision.company_deltas:
+        return False
+    target_delta = decision.company_deltas.get(target_ticker, 0.0)
+    if target_delta < -1.0:
+        return False  # Target itself regressed — not a scoping issue
+    for ticker, delta in decision.company_deltas.items():
+        if ticker != target_ticker and delta < -1.0:
+            return True
+    return False
+
+
+def _downgrade_to_company_scope(
+    original_change: 'ConfigChange',
+    target_ticker: str,
+) -> 'ConfigChange':
+    """O11: Convert global ADD_CONCEPT to company-scoped preferred_concept override.
+
+    Uses the battle-tested Strategy 0 mechanism (tree_parser.py:129-166)
+    which reads preferred_concept from companies.{ticker}.metric_overrides.{metric}.
+    """
+    concept = normalize_concept(original_change.new_value)
+    metric = original_change.target_metric
+    return ConfigChange(
+        file="companies.yaml",
+        change_type=ChangeType.ADD_COMPANY_OVERRIDE,
+        yaml_path=f"companies.{target_ticker}.metric_overrides.{metric}",
+        new_value={"preferred_concept": concept},
+        rationale=f"[O11 downgrade] Global caused peer regression; scoped to {target_ticker}",
+        target_metric=metric,
+        target_companies=target_ticker,
+        source=original_change.source,
+    )
+
+
+def _try_auto_resolve(
+    enriched_candidates: List['CandidateConcept'],
+    gap: 'UnresolvedGap',
+) -> Optional[str]:
+    """O9: Return JSON response string if auto-resolvable, else None.
+
+    Auto-resolves when a candidate has:
+    - extracted_value is not None
+    - delta_pct < AUTO_RESOLVE_VARIANCE_THRESHOLD (2%)
+    - concept starts with 'us-gaap:' (standard taxonomy only)
+
+    Returns a JSON string matching the typed action format so that
+    collect_typed_proposals() processes it identically to AI responses.
+    """
+    for c in enriched_candidates:
+        if c.extracted_value is None:
+            continue
+        if c.delta_pct is None or c.delta_pct >= AUTO_RESOLVE_VARIANCE_THRESHOLD:
+            continue
+        if not c.concept.startswith('us-gaap:'):
+            continue
+        # Auto-resolve: emit typed action JSON
+        return json.dumps({
+            "action": "MAP_CONCEPT",
+            "ticker": gap.ticker,
+            "metric": gap.metric,
+            "params": {"concept": c.concept},
+            "rationale": (
+                f"Auto-resolved via value match: extracted={c.extracted_value:,.0f}, "
+                f"delta={c.delta_pct:.1f}%"
+            ),
+            "confidence": 0.95,
+        })
+    return None
+
+
+def dispatch_ai_gaps(
+    manifest_path: Path,
+    ai_caller: Callable[[str, str], Optional[str]],
+    session_id: Optional[str] = None,
+    max_gaps: int = 0,
+    dead_end_threshold: int = 6,
+) -> Tuple[List[ProposalRecord], AIDispatchReport]:
+    """Read a GapManifest, filter gaps, call AI, return ProposalRecords.
+
+    Composes existing functions into a single dispatch pipeline:
+    load_gap_manifest -> filter_actionable_gaps -> dead-end filter ->
+    cache check -> build_typed_action_prompt -> ai_caller -> collect_typed_proposals.
+
+    Args:
+        manifest_path: Path to gap manifest JSON from run_overnight().
+        ai_caller: Callable(prompt, model) -> response_text.
+        session_id: Override session ID (defaults to manifest's session_id).
+        max_gaps: Max gaps to process (0 = all).
+        dead_end_threshold: Skip gaps with graveyard_count >= this value.
+
+    Returns:
+        Tuple of (proposals, AIDispatchReport).
+    """
+    manifest = load_gap_manifest(manifest_path)
+
+    # Config drift check
+    current_fingerprint = get_config_fingerprint()
+    if current_fingerprint != manifest.config_fingerprint:
+        logger.warning(
+            f"Config fingerprint drifted since manifest was written "
+            f"({manifest.config_fingerprint} -> {current_fingerprint}). "
+            f"Proposals may be stale."
+        )
+
+    sid = session_id or manifest.session_id
+
+    from edgar.xbrl.standardization.tools.capability_registry import filter_actionable_gaps
+
+    actionable = filter_actionable_gaps(manifest.gaps)
+    actionable_count = len(actionable)
+
+    dead_end_skipped = 0
+    filtered = []
+    for gap in actionable:
+        if gap.graveyard_count >= dead_end_threshold:
+            dead_end_skipped += 1
+            logger.info(
+                f"Dead-end skip: {gap.ticker}:{gap.metric} "
+                f"(graveyard={gap.graveyard_count} >= {dead_end_threshold})"
+            )
+        else:
+            filtered.append(gap)
+
+    # O2: Prerequisite-aware gap routing — skip not-onboarded companies
+    from edgar.xbrl.standardization.config_loader import get_config
+    onboarding_config = get_config()
+    not_onboarded_skipped = 0
+    gaps_by_ticker: Dict[str, List[UnresolvedGap]] = {}
+    for gap in filtered:
+        gaps_by_ticker.setdefault(gap.ticker, []).append(gap)
+
+    onboarded_filtered = []
+    for ticker, ticker_gaps in gaps_by_ticker.items():
+        if _is_company_onboarded(ticker, ticker_gaps, config=onboarding_config):
+            onboarded_filtered.extend(ticker_gaps)
+        else:
+            not_onboarded_skipped += len(ticker_gaps)
+            logger.info(
+                f"Not-onboarded skip: {ticker} ({len(ticker_gaps)} gaps) — "
+                f"company not in config or no resolved mappings"
+            )
+            print(
+                f"  SKIP {ticker}: not onboarded ({len(ticker_gaps)} gaps)",
+                flush=True,
+            )
+    filtered = onboarded_filtered
+
+    if max_gaps > 0:
+        filtered = filtered[:max_gaps]
+
+    cache = load_agent_responses(sid)
+    cache_hits = 0
+    api_calls = 0
+    escalated = 0
+    auto_resolved = 0
+    model_counts: Dict[str, int] = {}
+
+    responses: List[Tuple[UnresolvedGap, Optional[str]]] = []
+    for i, gap in enumerate(filtered):
+        key = _gap_key(gap)
+        model = _select_model(gap)
+        model_counts[model] = model_counts.get(model, 0) + 1
+
+        # Cache check
+        if key in cache:
+            cache_hits += 1
+            print(
+                f"  [{i+1}/{len(filtered)}] {gap.ticker}:{gap.metric} -> {model} (cached)",
+                flush=True,
+            )
+            responses.append((gap, cache[key]))
+            continue
+
+        # O3+O7: Prompt enrichment with value-aware candidates
+        candidates_text, enriched_candidates = _build_candidates_context(gap)
+
+        # O9: Auto-resolve if value search found a close us-gaap: match
+        auto_action = _try_auto_resolve(enriched_candidates, gap)
+        if auto_action is not None:
+            auto_resolved += 1
+            responses.append((gap, auto_action))
+            print(
+                f"  [{i+1}/{len(filtered)}] {gap.ticker}:{gap.metric} -> AUTO-RESOLVE",
+                flush=True,
+            )
+            continue
+
+        prompt = build_typed_action_prompt(gap, candidates_text=candidates_text)
+        print(
+            f"  [{i+1}/{len(filtered)}] {gap.ticker}:{gap.metric} -> {model} (api call)",
+            flush=True,
+        )
+
+        try:
+            response = ai_caller(prompt, model)
+        except Exception as e:
+            logger.warning(f"AI call failed for {gap.ticker}:{gap.metric}: {e}")
+            response = None
+
+        api_calls += 1
+        responses.append((gap, response))
+
+    # Parse into proposals (collect_typed_proposals handles save internally)
+    proposals, preflight_rejected = collect_typed_proposals(responses, sid)
+
+    # Count escalations by parsing JSON (not string matching)
+    for _gap, resp in responses:
+        if resp:
+            try:
+                data = json.loads(_strip_json_fences(resp))
+                if data.get("action") == "ESCALATE":
+                    escalated += 1
+            except (json.JSONDecodeError, AttributeError):
+                pass
+
+    report = AIDispatchReport(
+        session_id=sid,
+        total_gaps=len(manifest.gaps),
+        actionable_gaps=actionable_count,
+        dead_end_skipped=dead_end_skipped,
+        cache_hits=cache_hits,
+        api_calls=api_calls,
+        valid_proposals=len(proposals),
+        preflight_rejected=preflight_rejected,
+        escalated=escalated,
+        model_counts=model_counts,
+        not_onboarded_skipped=not_onboarded_skipped,
+        auto_resolved=auto_resolved,
+    )
+
+    return proposals, report
+
+
+@dataclass
+class AIEvalReport:
+    """Summary of evaluate_ai_proposals_live() — in-memory CQS gate results."""
+    session_id: str
+    proposals_total: int
+    kept: int
+    discarded: int
+    vetoed: int
+    cqs_start: float
+    cqs_end: float
+    ef_cqs_start: float
+    ef_cqs_end: float
+    stopped_early: bool = False
+    stop_reason: str = ""
+    config_diffs: List[str] = field(default_factory=list)
+    final_baseline: Optional['CQSResult'] = None
+    companies_exhausted: List[str] = field(default_factory=list)
+    retries: int = 0
+    retry_kept: int = 0
+    pre_screen_filtered: int = 0
+    downgrade_attempted: int = 0
+    downgrade_kept: int = 0
+
+
+def _format_candidate_concepts(metric: str, ticker: str, top_k: int = 5) -> str:
+    """Fetch concept candidates from filing and format for prompt inclusion.
+
+    Simplified version without value enrichment — used by retry logic (O5).
+    """
+    from edgar.xbrl.standardization.tools.discover_concepts import discover_concepts
+    try:
+        candidates = discover_concepts(metric_name=metric, ticker=ticker, top_k=top_k)
+        if not candidates:
+            return ""
+        lines = ["\n## Candidate Concepts (from filing data)"]
+        for c in candidates[:top_k]:
+            lines.append(
+                f"- **{c.concept}** (source: {c.source}, confidence: {c.confidence:.2f}): "
+                f"{c.reasoning}"
+            )
+        lines.append(
+            "\nChoose from these candidates when possible. "
+            "If none fit, propose a different concept.\n"
+        )
+        return "\n".join(lines)
+    except Exception as e:
+        logger.debug(f"discover_concepts failed for {ticker}:{metric}: {e}")
+        return ""
+
+
+# O7: Module-level cache for EntityFacts per ticker
+_sec_facts_cache: Dict[str, Optional[Any]] = {}
+
+
+def _extract_candidate_value(ticker: str, concept: str) -> Optional[float]:
+    """O7: Extract a concept's latest FY value from SEC Company Facts.
+
+    Caches EntityFacts per ticker (~0.5s first call, ~0ms thereafter).
+    Returns the numeric value if found, else None.
+    """
+    if ticker not in _sec_facts_cache:
+        try:
+            from edgar import Company
+            facts = Company(ticker).get_facts()
+            _sec_facts_cache[ticker] = facts
+        except Exception:
+            _sec_facts_cache[ticker] = None
+
+    facts = _sec_facts_cache[ticker]
+    if facts is None:
+        return None
+
+    try:
+        fact = facts.get_annual_fact(concept)
+        if fact is not None:
+            return float(fact.numeric_value)
+    except Exception:
+        pass
+    return None
+
+
+def _build_candidates_context(
+    gap: 'UnresolvedGap',
+) -> Tuple[str, List['CandidateConcept']]:
+    """O3+O7+O56: Build value-enriched candidate list and formatted text for AI prompt.
+
+    Calls discover_concepts with reference_value (O8), then enriches name-based
+    candidates missing extracted_value by looking up values from SEC Company Facts.
+
+    O56 additions: appends tree structure (parent/weight/statement), extension
+    concept warnings, and accounting relationship context to the evidence pack.
+
+    Returns:
+        Tuple of (formatted_text, enriched_candidates_list).
+    """
+    from edgar.xbrl.standardization.tools.discover_concepts import (
+        discover_concepts,
+        CandidateConcept,
+    )
+    try:
+        candidates = discover_concepts(
+            metric_name=gap.metric,
+            ticker=gap.ticker,
+            reference_value=gap.reference_value,
+            top_k=10,
+        )
+    except Exception as e:
+        logger.debug(f"discover_concepts failed for {gap.ticker}:{gap.metric}: {e}")
+        return "", []
+
+    if not candidates:
+        return "", []
+
+    # Enrich name-based candidates (up to 5 lookups) with extracted values
+    lookup_attempts = 0
+    for c in candidates:
+        if c.extracted_value is not None:
+            continue  # Already has value (e.g., from value_match)
+        if lookup_attempts >= 5:
+            break
+        value = _extract_candidate_value(gap.ticker, c.concept)
+        if value is not None:
+            c.extracted_value = value
+            if gap.reference_value and abs(gap.reference_value) > 0:
+                c.delta_pct = round(
+                    abs(value - gap.reference_value) / abs(gap.reference_value) * 100, 2
+                )
+        lookup_attempts += 1
+
+    # O18: Pre-filter candidates whose statement family doesn't match the metric
+    metric_families = _get_statement_family_for_metric(gap.metric)
+    if metric_families:
+        filtered = []
+        for c in candidates:
+            candidate_stmt = _get_candidate_statement(c.concept)
+            if candidate_stmt is not None and candidate_stmt not in metric_families:
+                logger.debug(
+                    f"O18 pre-filter: removing {c.concept} ({candidate_stmt}) "
+                    f"for metric {gap.metric} (requires {metric_families})"
+                )
+                continue
+            filtered.append(c)
+        candidates = filtered
+
+    # Format as evidence table
+    ref_val = gap.reference_value
+    lines = ["\n## Candidate Concepts (with extracted values)"]
+    lines.append("| Concept | Value | Ref Value | Delta% | Source |")
+    lines.append("|---------|-------|-----------|--------|--------|")
+    for c in candidates[:10]:
+        val_str = f"${c.extracted_value:,.0f}" if c.extracted_value is not None else "None"
+        ref_str = f"${ref_val:,.0f}" if ref_val is not None else "N/A"
+        delta_str = f"{c.delta_pct:.1f}%" if c.delta_pct is not None else "—"
+        lines.append(f"| {c.concept} | {val_str} | {ref_str} | {delta_str} | {c.source} |")
+    lines.append(
+        "\n**All candidates above were already evaluated by deterministic solvers "
+        "and did not resolve the gap.** Reasons include: concept not found in "
+        "calculation trees, cross-company regression risk, or variance exceeding "
+        "threshold. Your job is semantic adjudication — pick the best available "
+        "option or ESCALATE if none is semantically valid.\n"
+        "Low Delta% alone does not validate a concept — coincidental numeric "
+        "matches across unrelated line items are common.\n"
+    )
+
+    # O56: Tree structure section — parent→child relationships with weights
+    tree_lines = []
+    for c in candidates[:10]:
+        if c.tree_context:
+            parent = c.tree_context.get('parent')
+            weight = c.tree_context.get('weight', 1.0)
+            stmt = c.tree_context.get('statement', 'unknown')
+            parent_name = (
+                parent.element_id
+                if hasattr(parent, 'element_id')
+                else str(parent) if parent else 'ROOT'
+            )
+            sign = '+' if weight >= 0 else '-'
+            tree_lines.append(
+                f"  {sign} {c.concept} (parent: {parent_name}, statement: {stmt})"
+            )
+
+    if tree_lines:
+        lines.append("\n## Calculation Tree Structure")
+        lines.append(
+            "Shows parent→child relationships. "
+            "Sign indicates weight in parent's calculation."
+        )
+        lines.extend(tree_lines)
+
+    # O56: Extension concept flag — distinguish us-gaap from company extensions
+    extension_concepts = [
+        c for c in candidates[:10]
+        if ':' in c.concept and not c.concept.startswith('us-gaap')
+    ]
+    if extension_concepts:
+        lines.append("\n## Extension Concepts (company-specific)")
+        lines.append(
+            "These are NOT standard us-gaap concepts — "
+            "they are company-specific extensions:"
+        )
+        for c in extension_concepts:
+            prefix = (
+                c.concept.split(':')[0]
+                if ':' in c.concept
+                else c.concept.split('_')[0]
+            )
+            lines.append(f"  - {c.concept} (namespace: {prefix})")
+        lines.append(
+            "**Warning:** Extension concepts cannot be used "
+            "for cross-company standardization."
+        )
+
+    # O56: Accounting relationship context for AI
+    # Derived from derivation_planner.ACCOUNTING_IDENTITIES to avoid duplication
+    from edgar.xbrl.standardization.tools.derivation_planner import ACCOUNTING_IDENTITIES
+    related = [comp for comp, _sign in ACCOUNTING_IDENTITIES.get(gap.metric, [])]
+    if related:
+        lines.append("\n## Accounting Relationships")
+        lines.append(
+            f"{gap.metric} is typically derived from or related to: "
+            f"{', '.join(related)}"
+        )
+        lines.append(
+            "If the company already has mappings for these, "
+            "consider using a formula instead of a direct concept."
+        )
+
+    return "\n".join(lines), candidates
+
+
+def _select_model_for_gap(gap: MetricGap) -> str:
+    """Select AI model for a MetricGap (used by retry logic)."""
+    if gap.graveyard_count >= 3:
+        return "sonnet"
+    return "gemini-flash"
+
+
+def _build_retry_prompt(
+    gap: MetricGap,
+    original_change: ConfigChange,
+    discard_reason: str,
+    candidates_text: str,
+) -> str:
+    """O5: Build a retry prompt that includes prior attempt feedback."""
+    return f"""You are an XBRL standardization expert. A prior proposal was DISCARDED. Learn from the failure.
+
+## Gap Details
+- Ticker: {gap.ticker}, Metric: {gap.metric}
+- Reference value (yfinance): {gap.reference_value}
+- Extracted value (XBRL): {gap.xbrl_value}
+- Current variance: {gap.current_variance}%
+- Gap type: {gap.gap_type}
+
+## Prior Attempt (DISCARDED)
+- Action: {original_change.change_type.value}
+- Value: {original_change.new_value}
+- Rationale: {original_change.rationale}
+- **Discard reason: {discard_reason}**
+
+Do NOT re-propose the same concept or approach.
+{candidates_text}
+## Available Actions
+- MAP_CONCEPT (params: concept): Map metric to a specific XBRL concept
+- ADD_FORMULA (params: components): Define composite formula
+- FIX_SIGN_CONVENTION (params: none): Fix sign negation
+- ADD_EXCLUSION (params: none): Exclude metric for this company
+- ESCALATE (params: none): Flag for human review
+
+## Response Format (strict JSON only — no markdown fences)
+{{
+  "action": "MAP_CONCEPT",
+  "ticker": "{gap.ticker}",
+  "metric": "{gap.metric}",
+  "params": {{"concept": "us-gaap:ExampleConcept"}},
+  "rationale": "Why this different approach will work",
+  "confidence": 0.85
+}}
+
+Return ONLY the JSON object."""
+
+
+def _is_company_onboarded(ticker: str, gaps: List[UnresolvedGap], config=None) -> bool:
+    """O2: Check if a company has a functional mapping layer.
+
+    A company is "not onboarded" only if it's absent from the config entirely.
+    Companies in config with unresolved gaps are still considered onboarded —
+    those gaps are what the AI should attempt to fix.
+    """
+    if config is None:
+        from edgar.xbrl.standardization.config_loader import get_config
+        config = get_config()
+    return config.get_company(ticker) is not None
+
+
+def evaluate_ai_proposals_live(
+    proposals: List[ProposalRecord],
+    baseline_cqs: 'CQSResult',
+    eval_cohort: List[str],
+    ledger: Optional[ExperimentLedger] = None,
+    max_workers: int = 2,
+    session_id: str = "",
+    use_sec_facts: bool = True,
+    max_consecutive_failures: int = 10,
+    ai_caller: Optional[Callable[[str, str], Optional[str]]] = None,
+) -> AIEvalReport:
+    """Evaluate AI proposals in-memory through the standard CQS gate.
+
+    Like evaluate_ai_proposals() but takes proposals and baseline directly
+    (no disk I/O), adds per-company circuit breaker, in-memory pre-screen,
+    retry-with-feedback, and returns AIEvalReport with final_baseline for
+    chaining into the next pipeline stage.
+
+    Args:
+        proposals: ProposalRecords from dispatch_ai_gaps().
+        baseline_cqs: CQS result to use as starting baseline.
+        eval_cohort: Companies to evaluate on.
+        ledger: ExperimentLedger for experiment logging.
+        max_workers: Parallel workers for CQS computation.
+        session_id: Session identifier for logging.
+        use_sec_facts: Whether to use SEC XBRL facts.
+        max_consecutive_failures: Per-company circuit breaker threshold.
+        ai_caller: Optional AI caller for retry-with-feedback (O5).
+
+    Returns:
+        AIEvalReport with evaluation results and final_baseline.
+    """
+    from edgar.xbrl.standardization.tools.auto_eval_loop import (
+        evaluate_experiment_in_memory,
+        apply_change_to_config,
+    )
+    from edgar.xbrl.standardization.config_loader import get_config
+
+    if ledger is None:
+        ledger = ExperimentLedger()
+
+    # O6: Sort proposals by estimated_impact (highest first)
+    proposals.sort(key=lambda pr: -pr.gap.estimated_impact)
+
+    report = AIEvalReport(
+        session_id=session_id,
+        proposals_total=len(proposals),
+        kept=0,
+        discarded=0,
+        vetoed=0,
+        cqs_start=baseline_cqs.cqs,
+        cqs_end=baseline_cqs.cqs,
+        ef_cqs_start=baseline_cqs.ef_cqs,
+        ef_cqs_end=baseline_cqs.ef_cqs,
+    )
+
+    current_baseline = baseline_cqs
+
+    # O1: Per-company circuit breaker (replaces global consecutive_failures)
+    PER_COMPANY_THRESHOLD = max_consecutive_failures
+    failures_by_company: Dict[str, int] = {}
+    skipped_companies: set = set()
+    all_companies = {pr.proposal.target_companies.strip() for pr in proposals}
+
+    # O4: In-memory config baseline for pre-screen
+    baseline_config = get_config(reload=True)
+
+    # O5: Track retried gaps to prevent double-retry
+    retried_gaps: set = set()
+
+    for i, pr in enumerate(proposals):
+        change = pr.proposal
+        target = change.target_companies.strip()
+
+        # O1: Global circuit breaker — all companies exhausted
+        if skipped_companies and skipped_companies >= all_companies:
+            report.stopped_early = True
+            report.stop_reason = (
+                f"All companies exhausted: {sorted(skipped_companies)}"
+            )
+            print(f"  CIRCUIT BREAKER: {report.stop_reason}", flush=True)
+            break
+
+        # O1: Skip companies that have exhausted their circuit breaker
+        if target in skipped_companies:
+            print(
+                f"  [{i+1}/{len(proposals)}] SKIP (company exhausted): "
+                f"{target}:{change.target_metric}",
+                flush=True,
+            )
+            continue
+
+        print(
+            f"  [{i+1}/{len(proposals)}] Evaluating: "
+            f"{target}:{change.target_metric} "
+            f"[{change.change_type.value}]",
+            flush=True,
+        )
+
+        # O4: In-memory pre-screen before expensive disk eval
+        pre_screen_result = evaluate_experiment_in_memory(
+            change, current_baseline, baseline_config,
+            eval_cohort=eval_cohort,
+            ledger=ledger,
+            use_sec_facts=use_sec_facts,
+        )
+
+        if pre_screen_result.decision in (Decision.DISCARD, Decision.VETO):
+            report.pre_screen_filtered += 1
+            if pre_screen_result.decision == Decision.VETO:
+                report.vetoed += 1
+            else:
+                report.discarded += 1
+            failures_by_company[target] = failures_by_company.get(target, 0) + 1
+            if failures_by_company[target] >= PER_COMPANY_THRESHOLD:
+                skipped_companies.add(target)
+                report.companies_exhausted.append(target)
+                print(
+                    f"  PRE-SCREEN {pre_screen_result.decision.value.upper()}: "
+                    f"{target}:{change.target_metric} — {pre_screen_result.reason} "
+                    f"[company exhausted]",
+                    flush=True,
+                )
+            else:
+                print(
+                    f"  PRE-SCREEN {pre_screen_result.decision.value.upper()}: "
+                    f"{target}:{change.target_metric} — {pre_screen_result.reason}",
+                    flush=True,
+                )
+
+            # O11: Deterministic Downgrade for peer regression
+            if pre_screen_result.decision == Decision.DISCARD:
+                dg = _try_downgrade(
+                    change, target, pre_screen_result, current_baseline,
+                    baseline_config, eval_cohort, ledger, report,
+                    failures_by_company, max_workers, use_sec_facts, session_id,
+                )
+                if dg is not None:
+                    current_baseline, baseline_config = dg
+                    continue
+
+            # O5: Retry-with-feedback for high-impact discards
+            if (
+                pre_screen_result.decision == Decision.DISCARD
+                and ai_caller is not None
+                and pr.gap.estimated_impact > RETRY_IMPACT_THRESHOLD
+                and f"{target}:{change.target_metric}" not in retried_gaps
+                and target not in skipped_companies
+                and _STRUCTURAL_FAILURE_PREFIX not in (pre_screen_result.reason or "")
+            ):
+                _do_retry(
+                    pr, pre_screen_result.reason or "", current_baseline,
+                    baseline_config, eval_cohort, ledger, ai_caller,
+                    report, retried_gaps, failures_by_company,
+                    skipped_companies, PER_COMPANY_THRESHOLD,
+                    max_workers, use_sec_facts, session_id,
+                )
+            continue
+
+        # Pre-screen passed — run full disk-based evaluation
+        result = evaluate_experiment(
+            change, current_baseline,
+            eval_cohort=eval_cohort,
+            ledger=ledger,
+            max_workers=max_workers,
+            use_sec_facts=use_sec_facts,
+        )
+
+        log_experiment(change, result, ledger, run_id=session_id)
+
+        if result.decision == Decision.KEEP:
+            report.kept += 1
+            report.config_diffs.append(change.to_diff_string())
+            failures_by_company[target] = 0  # O1: reset on success
+            if result.new_cqs_result is not None:
+                current_baseline = result.new_cqs_result
+            else:
+                current_baseline = compute_cqs(
+                    eval_cohort=eval_cohort,
+                    snapshot_mode=True,
+                    ledger=ledger,
+                    max_workers=max_workers,
+                    use_sec_facts=use_sec_facts,
+                )
+            # O4: Keep in-memory config in sync
+            baseline_config = apply_change_to_config(change, baseline_config)
+            ef_delta = current_baseline.ef_cqs - report.ef_cqs_start
+            print(
+                f"  >>> AI KEEP #{report.kept}: "
+                f"{change.target_companies}:{change.target_metric} | "
+                f"EF-CQS {current_baseline.ef_cqs:.4f} ({ef_delta:+.4f})",
+                flush=True,
+            )
+
+        elif result.decision == Decision.VETO:
+            report.vetoed += 1
+            failures_by_company[target] = failures_by_company.get(target, 0) + 1
+            if failures_by_company[target] >= PER_COMPANY_THRESHOLD:
+                skipped_companies.add(target)
+                report.companies_exhausted.append(target)
+            print(f"  VETO: {change.target_metric} — {result.reason}", flush=True)
+
+        else:
+            report.discarded += 1
+            failures_by_company[target] = failures_by_company.get(target, 0) + 1
+            if failures_by_company[target] >= PER_COMPANY_THRESHOLD:
+                skipped_companies.add(target)
+                report.companies_exhausted.append(target)
+            print(
+                f"  DISC: {target}:{change.target_metric} "
+                f"— {result.reason}",
+                flush=True,
+            )
+
+            # O11: Deterministic Downgrade for peer regression (full eval path)
+            dg = _try_downgrade(
+                change, target, result, current_baseline,
+                baseline_config, eval_cohort, ledger, report,
+                failures_by_company, max_workers, use_sec_facts, session_id,
+            )
+            if dg is not None:
+                current_baseline, baseline_config = dg
+                continue
+
+            # O5: Retry-with-feedback for high-impact discards
+            if (
+                ai_caller is not None
+                and pr.gap.estimated_impact > RETRY_IMPACT_THRESHOLD
+                and f"{target}:{change.target_metric}" not in retried_gaps
+                and target not in skipped_companies
+                and _STRUCTURAL_FAILURE_PREFIX not in (result.reason or "")
+            ):
+                _do_retry(
+                    pr, result.reason or "", current_baseline,
+                    baseline_config, eval_cohort, ledger, ai_caller,
+                    report, retried_gaps, failures_by_company,
+                    skipped_companies, PER_COMPANY_THRESHOLD,
+                    max_workers, use_sec_facts, session_id,
+                )
+
+    report.cqs_end = current_baseline.cqs
+    report.ef_cqs_end = current_baseline.ef_cqs
+    report.final_baseline = current_baseline
+
+    return report
+
+
+def _try_downgrade(
+    change: ConfigChange,
+    target: str,
+    decision: 'ExperimentDecision',
+    current_baseline: 'CQSResult',
+    baseline_config,
+    eval_cohort: List[str],
+    ledger: ExperimentLedger,
+    report: AIEvalReport,
+    failures_by_company: Dict[str, int],
+    max_workers: int,
+    use_sec_facts: bool,
+    session_id: str,
+) -> Optional[Tuple['CQSResult', Any]]:
+    """O11: Try converting global ADD_CONCEPT to company-scoped override on peer regression.
+
+    Returns (new_baseline, new_config) on KEEP, None on failure.
+    Mutates report counters and failures_by_company in place.
+    """
+    from edgar.xbrl.standardization.tools.auto_eval_loop import (
+        evaluate_experiment_in_memory,
+        apply_change_to_config,
+    )
+
+    if change.change_type != ChangeType.ADD_CONCEPT:
+        return None
+    if not _is_peer_regression(decision, target):
+        return None
+
+    report.downgrade_attempted += 1
+    downgraded = _downgrade_to_company_scope(change, target)
+    dg_result = evaluate_experiment_in_memory(
+        downgraded, current_baseline, baseline_config,
+        eval_cohort=eval_cohort, ledger=ledger, use_sec_facts=use_sec_facts,
+    )
+    if dg_result.decision != Decision.KEEP:
+        print(f"  O11 DOWNGRADE DISC: {target}:{change.target_metric}", flush=True)
+        return None
+
+    full_result = evaluate_experiment(
+        downgraded, current_baseline,
+        eval_cohort=eval_cohort, ledger=ledger,
+        max_workers=max_workers, use_sec_facts=use_sec_facts,
+    )
+    log_experiment(downgraded, full_result, ledger, run_id=session_id)
+    if full_result.decision != Decision.KEEP:
+        print(f"  O11 DOWNGRADE DISC: {target}:{change.target_metric}", flush=True)
+        return None
+
+    report.kept += 1
+    report.downgrade_kept += 1
+    report.config_diffs.append(downgraded.to_diff_string())
+    failures_by_company[target] = 0
+    new_baseline = full_result.new_cqs_result if full_result.new_cqs_result is not None else current_baseline
+    new_config = apply_change_to_config(downgraded, baseline_config)
+    print(f"  >>> O11 DOWNGRADE KEEP: {target}:{change.target_metric}", flush=True)
+    return new_baseline, new_config
+
+
+def _do_retry(
+    pr: ProposalRecord,
+    discard_reason: str,
+    current_baseline: 'CQSResult',
+    baseline_config,
+    eval_cohort: List[str],
+    ledger: ExperimentLedger,
+    ai_caller: Callable[[str, str], Optional[str]],
+    report: AIEvalReport,
+    retried_gaps: set,
+    failures_by_company: Dict[str, int],
+    skipped_companies: set,
+    per_company_threshold: int,
+    max_workers: int,
+    use_sec_facts: bool,
+    session_id: str,
+) -> None:
+    """O5: Retry a discarded proposal with feedback and concept candidates.
+
+    Modifies report, retried_gaps, failures_by_company, skipped_companies in place.
+    """
+    from edgar.xbrl.standardization.tools.auto_eval_loop import (
+        evaluate_experiment_in_memory,
+        apply_change_to_config,
+    )
+
+    target = pr.proposal.target_companies.strip()
+    gap_key = f"{target}:{pr.proposal.target_metric}"
+    retried_gaps.add(gap_key)
+    report.retries += 1
+
+    # Build retry prompt with feedback
+    candidates_text = _format_candidate_concepts(pr.gap.metric, pr.gap.ticker)
+    retry_prompt = _build_retry_prompt(
+        pr.gap, pr.proposal, discard_reason, candidates_text,
+    )
+
+    model = _select_model_for_gap(pr.gap)
+    print(f"  RETRY: {gap_key} (impact={pr.gap.estimated_impact:.3f})", flush=True)
+
+    try:
+        response = ai_caller(retry_prompt, model)
+    except Exception as e:
+        logger.warning(f"Retry AI call failed for {gap_key}: {e}")
+        return
+
+    if response is None:
+        return
+
+    # Parse retry response through typed action pipeline
+    action = parse_typed_action(response, target, pr.proposal.target_metric)
+    if action is None:
+        return
+
+    change = compile_action(action)
+    if change is None:
+        return
+
+    preflight_err = validate_action_preflight(action)
+    if preflight_err is not None:
+        return
+
+    # Pre-screen the retry proposal
+    pre_screen = evaluate_experiment_in_memory(
+        change, current_baseline, baseline_config,
+        eval_cohort=eval_cohort,
+        ledger=ledger,
+        use_sec_facts=use_sec_facts,
+    )
+
+    if pre_screen.decision == Decision.KEEP:
+        # Full disk eval to confirm
+        result = evaluate_experiment(
+            change, current_baseline,
+            eval_cohort=eval_cohort,
+            ledger=ledger,
+            max_workers=max_workers,
+            use_sec_facts=use_sec_facts,
+        )
+        log_experiment(change, result, ledger, run_id=session_id)
+
+        if result.decision == Decision.KEEP:
+            report.kept += 1
+            report.retry_kept += 1
+            report.config_diffs.append(change.to_diff_string())
+            failures_by_company[target] = 0
+            print(
+                f"  >>> RETRY KEEP: {gap_key}",
+                flush=True,
+            )
+        else:
+            print(f"  RETRY DISC (full eval): {gap_key}", flush=True)
+    else:
+        print(f"  RETRY DISC (pre-screen): {gap_key}", flush=True)

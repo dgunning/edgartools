@@ -1,0 +1,205 @@
+{
+  "run_id": "e2e_industrial_2026-03-05T00:38:28.686756",
+  "timestamp": "2026-03-05T00:38:28.686767",
+  "config": {
+    "group": "industrial_33",
+    "workers": 1,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": "Transportation",
+    "tickers": [
+      "UPS",
+      "FDX",
+      "BA"
+    ],
+    "snapshot_mode": true
+  },
+  "overall_summary": {
+    "10k_total": 53,
+    "10k_passed": 51,
+    "10k_skipped": 0,
+    "10q_total": 52,
+    "10q_passed": 50,
+    "10q_skipped": 0
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 53,
+      "10k_passed": 51,
+      "10k_skipped": 0,
+      "10q_total": 52,
+      "10q_passed": 50,
+      "10q_skipped": 0
+    },
+    "Insurance": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Utilities": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Real_Estate": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 4,
+  "skipped_count": 0,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "UPS",
+      "sector": "Transportation",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0001628280-26-008432",
+      "metric": "COGS",
+      "xbrl_value": 2269000000.0,
+      "ref_value": 72631000000.0,
+      "variance_pct": 96.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CostOfOtherPropertyOperatingExpense",
+      "industry": "transportation",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "UPS",
+      "sector": "Transportation",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001628280-25-049661",
+      "metric": "COGS",
+      "xbrl_value": 548000000.0,
+      "ref_value": 17929000000.0,
+      "variance_pct": 96.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CostOfOtherPropertyOperatingExpense",
+      "industry": "transportation",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "BA",
+      "sector": "Transportation",
+      "form": "10-K",
+      "filing_date": "2025-12-31",
+      "accession_no": "0001628280-26-004357",
+      "metric": "Inventory",
+      "xbrl_value": 720000000.0,
+      "ref_value": 84679000000.0,
+      "variance_pct": 99.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:InventoryForLongTermContractsOrPrograms",
+      "industry": "aerospace",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "BA",
+      "sector": "Transportation",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001628280-25-047023",
+      "metric": "Inventory",
+      "xbrl_value": 447000000.0,
+      "ref_value": 82425000000.0,
+      "variance_pct": 99.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:InventoryForLongTermContractsOrPrograms",
+      "industry": "aerospace",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    }
+  ],
+  "skipped": [],
+  "errors": []
+}

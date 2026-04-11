@@ -1,0 +1,739 @@
+{
+  "run_id": "e2e_industrial_2026-01-26T15:18:01.994115",
+  "timestamp": "2026-01-26T15:18:01.994125",
+  "config": {
+    "group": "industrial_33",
+    "workers": 4,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": null,
+    "tickers": [
+      "AAPL",
+      "CAT",
+      "KO",
+      "XOM",
+      "JNJ"
+    ]
+  },
+  "overall_summary": {
+    "10k_total": 82,
+    "10k_passed": 72,
+    "10k_skipped": 2,
+    "10q_total": 82,
+    "10q_passed": 58,
+    "10q_skipped": 0
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 17,
+      "10k_passed": 17,
+      "10k_skipped": 0,
+      "10q_total": 17,
+      "10q_passed": 12,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 18,
+      "10k_passed": 14,
+      "10k_skipped": 0,
+      "10q_total": 18,
+      "10q_passed": 12,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 19,
+      "10k_passed": 17,
+      "10k_skipped": 0,
+      "10q_total": 19,
+      "10q_passed": 14,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 11,
+      "10k_passed": 9,
+      "10k_skipped": 1,
+      "10q_total": 11,
+      "10q_passed": 7,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 17,
+      "10k_passed": 15,
+      "10k_skipped": 1,
+      "10q_total": 17,
+      "10q_passed": 13,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 34,
+  "skipped_count": 2,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "AAPL",
+      "sector": "MAG7",
+      "form": "10-Q",
+      "filing_date": "2025-06-28",
+      "accession_no": "0000320193-25-000073",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 81754000000.0,
+      "ref_value": 27867000000.0,
+      "variance_pct": 193.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AAPL",
+      "sector": "MAG7",
+      "form": "10-Q",
+      "filing_date": "2025-06-28",
+      "accession_no": "0000320193-25-000073",
+      "metric": "Capex",
+      "xbrl_value": -9473000000.0,
+      "ref_value": -3462000000.0,
+      "variance_pct": 173.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AAPL",
+      "sector": "MAG7",
+      "form": "10-Q",
+      "filing_date": "2025-06-28",
+      "accession_no": "0000320193-25-000073",
+      "metric": "StockBasedCompensation",
+      "xbrl_value": 9680000000.0,
+      "ref_value": 3168000000.0,
+      "variance_pct": 205.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShareBasedCompensation",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AAPL",
+      "sector": "MAG7",
+      "form": "10-Q",
+      "filing_date": "2025-06-28",
+      "accession_no": "0000320193-25-000073",
+      "metric": "DividendsPaid",
+      "xbrl_value": 11559000000.0,
+      "ref_value": -3945000000.0,
+      "variance_pct": 193.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsOfDividends",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "AAPL",
+      "sector": "MAG7",
+      "form": "10-Q",
+      "filing_date": "2025-06-28",
+      "accession_no": "0000320193-25-000073",
+      "metric": "DepreciationAmortization",
+      "xbrl_value": 8571000000.0,
+      "ref_value": 2830000000.0,
+      "variance_pct": 202.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:DepreciationDepletionAndAmortization",
+      "industry": "tech",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "CAT",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000018230-25-000008",
+      "metric": "Capex",
+      "xbrl_value": -1988000000.0,
+      "ref_value": -3215000000.0,
+      "variance_pct": 38.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "CAT",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000018230-25-000008",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 4393000000.0,
+      "ref_value": 11058000000.0,
+      "variance_pct": 60.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "CAT",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000018230-25-000008",
+      "metric": "LongTermDebt",
+      "xbrl_value": 52803000000.0,
+      "ref_value": 27454000000.0,
+      "variance_pct": 92.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "CAT",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000018230-25-000008",
+      "metric": "AccountsReceivable",
+      "xbrl_value": 9282000000.0,
+      "ref_value": 18847000000.0,
+      "variance_pct": 50.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:AccountsReceivableNetCurrent",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "CAT",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000018230-25-000048",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 8148000000.0,
+      "ref_value": 3737000000.0,
+      "variance_pct": 118.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "CAT",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000018230-25-000048",
+      "metric": "Capex",
+      "xbrl_value": -1923000000.0,
+      "ref_value": -1071000000.0,
+      "variance_pct": 79.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "CAT",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000018230-25-000048",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 4509000000.0,
+      "ref_value": 13798000000.0,
+      "variance_pct": 67.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShortTermBorrowings",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "CAT",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000018230-25-000048",
+      "metric": "LongTermDebt",
+      "xbrl_value": 37025000000.0,
+      "ref_value": 27736000000.0,
+      "variance_pct": 33.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtAndCapitalLeaseObligations",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "CAT",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000018230-25-000048",
+      "metric": "DividendsPaid",
+      "xbrl_value": 2043000000.0,
+      "ref_value": -707000000.0,
+      "variance_pct": 189.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsOfDividendsCommonStock",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "CAT",
+      "sector": "Industrial_Manufacturing",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000018230-25-000048",
+      "metric": "AccountsReceivable",
+      "xbrl_value": 10146000000.0,
+      "ref_value": 20461000000.0,
+      "variance_pct": 50.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:AccountsReceivableNetCurrent",
+      "industry": null,
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "KO",
+      "sector": "Consumer_Staples",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000021344-25-000011",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 1139000000.0,
+      "ref_value": 2147000000.0,
+      "variance_pct": 46.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CommercialPaper",
+      "industry": "consumergoods",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "KO",
+      "sector": "Consumer_Staples",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000021344-25-000011",
+      "metric": "AccountsPayable",
+      "xbrl_value": 21715000000.0,
+      "ref_value": 5468000000.0,
+      "variance_pct": 297.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:AccountsPayableAndAccruedLiabilitiesCurrent",
+      "industry": "consumergoods",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "KO",
+      "sector": "Consumer_Staples",
+      "form": "10-Q",
+      "filing_date": "2025-09-26",
+      "accession_no": "0001628280-25-046054",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 3652000000.0,
+      "ref_value": 5043000000.0,
+      "variance_pct": 27.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "consumergoods",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "KO",
+      "sector": "Consumer_Staples",
+      "form": "10-Q",
+      "filing_date": "2025-09-26",
+      "accession_no": "0001628280-25-046054",
+      "metric": "Capex",
+      "xbrl_value": -1230000000.0,
+      "ref_value": -479000000.0,
+      "variance_pct": 156.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "consumergoods",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "KO",
+      "sector": "Consumer_Staples",
+      "form": "10-Q",
+      "filing_date": "2025-09-26",
+      "accession_no": "0001628280-25-046054",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 1992000000.0,
+      "ref_value": 4239000000.0,
+      "variance_pct": 53.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CommercialPaper",
+      "industry": "consumergoods",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "KO",
+      "sector": "Consumer_Staples",
+      "form": "10-Q",
+      "filing_date": "2025-09-26",
+      "accession_no": "0001628280-25-046054",
+      "metric": "StockBasedCompensation",
+      "xbrl_value": 204000000.0,
+      "ref_value": 74000000.0,
+      "variance_pct": 175.7,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShareBasedCompensation",
+      "industry": "consumergoods",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "KO",
+      "sector": "Consumer_Staples",
+      "form": "10-Q",
+      "filing_date": "2025-09-26",
+      "accession_no": "0001628280-25-046054",
+      "metric": "DividendsPaid",
+      "xbrl_value": 4391000000.0,
+      "ref_value": -2108000000.0,
+      "variance_pct": 108.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsOfDividends",
+      "industry": "consumergoods",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "XOM",
+      "sector": "Energy",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000034088-25-000010",
+      "metric": "Revenue",
+      "xbrl_value": 245143000000.0,
+      "ref_value": 339247000000.0,
+      "variance_pct": 27.7,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "XOM",
+      "sector": "Energy",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000034088-25-000010",
+      "metric": "AccountsPayable",
+      "xbrl_value": 61297000000.0,
+      "ref_value": 36145000000.0,
+      "variance_pct": 69.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:AccountsPayableAndAccruedLiabilitiesCurrent",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "XOM",
+      "sector": "Energy",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000034088-25-000061",
+      "metric": "Revenue",
+      "xbrl_value": 58992000000.0,
+      "ref_value": 83331000000.0,
+      "variance_pct": 29.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "XOM",
+      "sector": "Energy",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000034088-25-000061",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 39291000000.0,
+      "ref_value": 14788000000.0,
+      "variance_pct": 165.7,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "XOM",
+      "sector": "Energy",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000034088-25-000061",
+      "metric": "Capex",
+      "xbrl_value": -20908000000.0,
+      "ref_value": -8727000000.0,
+      "variance_pct": 139.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check PaymentsToAcquireProductiveAssets vs PaymentsToAcquirePropertyPlantAndEquipment"
+      ]
+    },
+    {
+      "ticker": "XOM",
+      "sector": "Energy",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0000034088-25-000061",
+      "metric": "DividendsPaid",
+      "xbrl_value": 12865000000.0,
+      "ref_value": -4242000000.0,
+      "variance_pct": 203.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsOfDividendsCommonStock",
+      "industry": "energy",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "JNJ",
+      "sector": "Healthcare_Pharma",
+      "form": "10-K",
+      "filing_date": "2024-12-29",
+      "accession_no": "0000200406-25-000038",
+      "metric": "Capex",
+      "xbrl_value": -4424000000.0,
+      "ref_value": -6207000000.0,
+      "variance_pct": 28.7,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "JNJ",
+      "sector": "Healthcare_Pharma",
+      "form": "10-K",
+      "filing_date": "2024-12-29",
+      "accession_no": "0000200406-25-000038",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 11332000000.0,
+      "ref_value": 5983000000.0,
+      "variance_pct": 89.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtCurrent",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "JNJ",
+      "sector": "Healthcare_Pharma",
+      "form": "10-Q",
+      "filing_date": "2025-09-28",
+      "accession_no": "0000200406-25-000209",
+      "metric": "OperatingCashFlow",
+      "xbrl_value": 17221000000.0,
+      "ref_value": 9169000000.0,
+      "variance_pct": 87.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "JNJ",
+      "sector": "Healthcare_Pharma",
+      "form": "10-Q",
+      "filing_date": "2025-09-28",
+      "accession_no": "0000200406-25-000209",
+      "metric": "Capex",
+      "xbrl_value": -2995000000.0,
+      "ref_value": -1173000000.0,
+      "variance_pct": 155.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "JNJ",
+      "sector": "Healthcare_Pharma",
+      "form": "10-Q",
+      "filing_date": "2025-09-28",
+      "accession_no": "0000200406-25-000209",
+      "metric": "StockBasedCompensation",
+      "xbrl_value": 1045000000.0,
+      "ref_value": 347000000.0,
+      "variance_pct": 201.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:ShareBasedCompensation",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "JNJ",
+      "sector": "Healthcare_Pharma",
+      "form": "10-Q",
+      "filing_date": "2025-09-28",
+      "accession_no": "0000200406-25-000209",
+      "metric": "DepreciationAmortization",
+      "xbrl_value": 5492000000.0,
+      "ref_value": 1777000000.0,
+      "variance_pct": 209.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:DepreciationDepletionAndAmortization",
+      "industry": "healthcare",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    }
+  ],
+  "skipped": [
+    {
+      "ticker": "XOM",
+      "sector": "Energy",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 29.0,
+      "reason": "XOM uses company-specific XBRL concepts (xom:CrudeOilAndProductPurchases, xom:ProductionAndManufacturingExpenses) that don't map to standard GrossProfit. yfinance calculates OperatingIncome using proprietary normalization. XBRL extraction cannot reliably reproduce yfinance's calculation.\n"
+    },
+    {
+      "ticker": "JNJ",
+      "sector": "Healthcare_Pharma",
+      "form": "10-K",
+      "metric": "OperatingIncome",
+      "variance_pct": 72.4,
+      "reason": "JNJ's segment structure (pharma, devices, consumer) and significant one-time charges/gains create OperatingIncome variance. Tree parser selects concepts that don't match yfinance's normalized calculation.\n"
+    }
+  ],
+  "errors": []
+}

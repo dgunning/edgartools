@@ -1,0 +1,92 @@
+{
+  "ticker": "SO",
+  "cik": 92122,
+  "company_name": "SOUTHERN CO",
+  "archetype": "A",
+  "sic_code": "4911",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  SO:\n    name: \"SOUTHERN CO\"\n    cik: 92122\n    exclude_metrics:\n      - GrossProfit\n      - Inventory",
+  "metrics_passed": [
+    "Revenue",
+    "COGS",
+    "OperatingIncome",
+    "NetIncome",
+    "OperatingCashFlow",
+    "Capex",
+    "TotalAssets",
+    "Goodwill",
+    "IntangibleAssets",
+    "ShortTermDebt",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "AccountsReceivable",
+    "AccountsPayable",
+    "DepreciationAmortization",
+    "InterestExpense",
+    "IncomeTaxExpense",
+    "EarningsPerShareDiluted",
+    "EarningsPerShareBasic",
+    "CurrentAssets",
+    "CurrentLiabilities",
+    "TotalLiabilities",
+    "StockholdersEquity",
+    "PropertyPlantEquipment",
+    "RetainedEarnings",
+    "InvestingCashFlow",
+    "FinancingCashFlow",
+    "ShareRepurchases"
+  ],
+  "metrics_failed": [
+    "SGA",
+    "PretaxIncome",
+    "ResearchAndDevelopment",
+    "DividendPerShare"
+  ],
+  "metrics_excluded": [
+    "Inventory",
+    "GrossProfit",
+    "COGS"
+  ],
+  "failures": {
+    "SGA": {
+      "metric": "SGA",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 1540000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 5229000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "ResearchAndDevelopment": {
+      "metric": "ResearchAndDevelopment",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "DividendPerShare": {
+      "metric": "DividendPerShare",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 2.86,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": false,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-04-04T09:55:20.183395"
+}

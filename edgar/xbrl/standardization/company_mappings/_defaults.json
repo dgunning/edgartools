@@ -1,0 +1,99 @@
+{
+    "schema_version": "1.0",
+    "description": "Default extraction rules applied to all companies unless overridden",
+    "extraction_rules": {
+        "IntangibleAssets": {
+            "method": "composite_sum",
+            "total_concepts": [
+                "us-gaap:IntangibleAssetsNetIncludingGoodwill"
+            ],
+            "components": [
+                "Goodwill",
+                "IntangibleAssetsNetExcludingGoodwill"
+            ],
+            "concept_priority": {
+                "Goodwill": [
+                    "us-gaap:Goodwill"
+                ],
+                "IntangibleAssetsNetExcludingGoodwill": [
+                    "us-gaap:IntangibleAssetsNetExcludingGoodwill",
+                    "us-gaap:IndefiniteLivedTrademarks",
+                    "us-gaap:OtherIntangibleAssetsNet"
+                ]
+            },
+            "subcomponents": {
+                "IntangibleAssetsNetExcludingGoodwill": [
+                    "us-gaap:FiniteLivedIntangibleAssetsNet",
+                    "us-gaap:IndefiniteLivedIntangibleAssetsExcludingGoodwill"
+                ]
+            },
+            "notes": "Try IntangibleAssetsNetIncludingGoodwill total first; fall back to Goodwill + Other Intangibles. If no single total concept exists, sum FiniteLived + IndefiniteLived sub-components."
+        },
+        "DepreciationAmortization": {
+            "method": "composite_sum",
+            "total_concepts": [
+                "us-gaap:DepreciationDepletionAndAmortization",
+                "us-gaap:DepreciationAndAmortization",
+                "us-gaap:DepreciationAmortizationAndAccretionNet"
+            ],
+            "components": [
+                "Depreciation",
+                "AmortizationOfIntangibleAssets"
+            ],
+            "concept_priority": {
+                "Depreciation": [
+                    "us-gaap:Depreciation",
+                    "us-gaap:DepreciationNonproduction"
+                ],
+                "AmortizationOfIntangibleAssets": [
+                    "us-gaap:AmortizationOfIntangibleAssets",
+                    "us-gaap:AmortizationOfFiniteLivedIntangibleAssets"
+                ]
+            },
+            "notes": "Try single D&A total first; fall back to summing Depreciation + AmortizationOfIntangibleAssets (common for pharma/medical companies)"
+        },
+        "ShortTermDebt": {
+            "method": "composite_sum",
+            "components": [
+                "LongTermDebtCurrent",
+                "CommercialPaper",
+                "ShortTermBorrowings"
+            ],
+            "concept_priority": {
+                "LongTermDebtCurrent": [
+                    "us-gaap:LongTermDebtCurrent",
+                    "us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent",
+                    "us-gaap:LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths"
+                ],
+                "CommercialPaper": [
+                    "us-gaap:CommercialPaper"
+                ],
+                "ShortTermBorrowings": [
+                    "us-gaap:ShortTermBorrowings"
+                ]
+            },
+            "notes": "Sum of current portion of LT debt + commercial paper + short-term borrowings. LongTermDebtCurrent fallbacks: many companies use LongTermDebtAndCapitalLeaseObligationsCurrent or LongTermDebtMaturitiesRepaymentsOfPrincipalInNextTwelveMonths instead."
+        }
+    },
+    "period_selection": {
+        "duration_metrics": [
+            "Revenue",
+            "NetIncome",
+            "GrossProfit",
+            "OperatingIncome",
+            "OperatingCashFlow",
+            "Capex",
+            "COGS",
+            "SGA",
+            "RnD"
+        ],
+        "prefer_annual": true,
+        "min_days_for_annual": 300,
+        "notes": "For income/cashflow metrics, prefer 12-month periods over quarterly"
+    },
+    "namespace_priority": [
+        "us-gaap:",
+        "ifrs-full:",
+        "dei:"
+    ]
+}

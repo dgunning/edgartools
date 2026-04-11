@@ -1,0 +1,117 @@
+{
+  "ticker": "REGN",
+  "cik": 872589,
+  "company_name": "REGENERON PHARMACEUTICALS, INC.",
+  "archetype": "C",
+  "sic_code": "2834",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  REGN:\n    name: \"REGENERON PHARMACEUTICALS, INC.\"\n    cik: 872589\n    exclude_metrics:\n      - COGS",
+  "metrics_passed": [
+    "Revenue",
+    "COGS",
+    "OperatingIncome",
+    "NetIncome",
+    "OperatingCashFlow",
+    "Capex",
+    "TotalAssets",
+    "IntangibleAssets",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "Inventory",
+    "AccountsReceivable",
+    "AccountsPayable",
+    "DepreciationAmortization",
+    "ResearchAndDevelopment",
+    "InterestExpense",
+    "IncomeTaxExpense",
+    "EarningsPerShareDiluted",
+    "EarningsPerShareBasic",
+    "CurrentAssets",
+    "CurrentLiabilities",
+    "TotalLiabilities",
+    "StockholdersEquity",
+    "PropertyPlantEquipment",
+    "RetainedEarnings",
+    "InvestingCashFlow",
+    "FinancingCashFlow"
+  ],
+  "metrics_failed": [
+    "SGA",
+    "PretaxIncome",
+    "Goodwill",
+    "ShortTermDebt",
+    "GrossProfit",
+    "ShareRepurchases",
+    "DividendPerShare"
+  ],
+  "metrics_excluded": [
+    "COGS",
+    "DividendsPaid"
+  ],
+  "failures": {
+    "SGA": {
+      "metric": "SGA",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 2954400000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 4779900000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "Goodwill": {
+      "metric": "Goodwill",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 1148600000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "ShortTermDebt": {
+      "metric": "ShortTermDebt",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "GrossProfit": {
+      "metric": "GrossProfit",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 12231500000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "ShareRepurchases": {
+      "metric": "ShareRepurchases",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": -3632400000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "DividendPerShare": {
+      "metric": "DividendPerShare",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": false,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-04-04T09:56:07.800956"
+}

@@ -1,0 +1,491 @@
+{
+  "run_id": "e2e_industrial_2026-03-04T12:35:55.975029",
+  "timestamp": "2026-03-04T12:35:55.975039",
+  "config": {
+    "group": "industrial_33",
+    "workers": 1,
+    "years": 1,
+    "quarters": 1,
+    "mode": "quick",
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "DepreciationAmortization",
+      "StockBasedCompensation",
+      "DividendsPaid",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "Inventory",
+      "AccountsReceivable",
+      "AccountsPayable",
+      "WeightedAverageSharesDiluted",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": null,
+    "tickers": [
+      "DUK"
+    ],
+    "snapshot_mode": true
+  },
+  "overall_summary": {
+    "10k_total": 18,
+    "10k_passed": 8,
+    "10k_skipped": 0,
+    "10q_total": 18,
+    "10q_passed": 8,
+    "10q_skipped": 0
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Insurance": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Utilities": {
+      "10k_total": 18,
+      "10k_passed": 8,
+      "10k_skipped": 0,
+      "10q_total": 18,
+      "10q_passed": 8,
+      "10q_skipped": 0
+    },
+    "Real_Estate": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 20,
+  "skipped_count": 0,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0001326160-25-000072",
+      "metric": "COGS",
+      "xbrl_value": 3251000000.0,
+      "ref_value": 15160000000.0,
+      "variance_pct": 78.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CostOfGoodsAndServicesSold",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0001326160-25-000072",
+      "metric": "Goodwill",
+      "xbrl_value": 3655000000.0,
+      "ref_value": 19303000000.0,
+      "variance_pct": 81.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0001326160-25-000072",
+      "metric": "IntangibleAssets",
+      "xbrl_value": 3932000000.0,
+      "ref_value": 19303000000.0,
+      "variance_pct": 79.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0001326160-25-000072",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 4596000000.0,
+      "ref_value": 7933000000.0,
+      "variance_pct": 42.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtCurrent",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0001326160-25-000072",
+      "metric": "LongTermDebt",
+      "xbrl_value": 1842000000.0,
+      "ref_value": 76340000000.0,
+      "variance_pct": 97.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtNoncurrent",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0001326160-25-000072",
+      "metric": "CashAndEquivalents",
+      "xbrl_value": 24000000.0,
+      "ref_value": 314000000.0,
+      "variance_pct": 92.4,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0001326160-25-000072",
+      "metric": "DividendsPaid",
+      "xbrl_value": -110000000.0,
+      "ref_value": -3213000000.0,
+      "variance_pct": 96.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Dividends",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0001326160-25-000072",
+      "metric": "Inventory",
+      "xbrl_value": 801000000.0,
+      "ref_value": 4509000000.0,
+      "variance_pct": 82.2,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:EnergyRelatedInventoryCoal",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0001326160-25-000072",
+      "metric": "AccountsReceivable",
+      "xbrl_value": 1889000000.0,
+      "ref_value": 4672000000.0,
+      "variance_pct": 59.6,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:AccountsReceivableNetCurrent",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0001326160-25-000072",
+      "metric": "AccountsPayable",
+      "xbrl_value": 214000000.0,
+      "ref_value": 5479000000.0,
+      "variance_pct": 96.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:AccountsPayableCurrent",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001326160-25-000192",
+      "metric": "COGS",
+      "xbrl_value": 706000000.0,
+      "ref_value": 4161000000.0,
+      "variance_pct": 83.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:CostOfGoodsAndServicesSold",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001326160-25-000192",
+      "metric": "Capex",
+      "xbrl_value": -30000000.0,
+      "ref_value": -3453000000.0,
+      "variance_pct": 99.1,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001326160-25-000192",
+      "metric": "Goodwill",
+      "xbrl_value": 3655000000.0,
+      "ref_value": 19010000000.0,
+      "variance_pct": 80.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001326160-25-000192",
+      "metric": "IntangibleAssets",
+      "xbrl_value": 3655000000.0,
+      "ref_value": 19010000000.0,
+      "variance_pct": 80.8,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Goodwill",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001326160-25-000192",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 3000000000.0,
+      "ref_value": 9337000000.0,
+      "variance_pct": 67.9,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtCurrent",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001326160-25-000192",
+      "metric": "LongTermDebt",
+      "xbrl_value": 2760000000.0,
+      "ref_value": 79301000000.0,
+      "variance_pct": 96.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:LongTermDebtNoncurrent",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001326160-25-000192",
+      "metric": "DividendsPaid",
+      "xbrl_value": -40000000.0,
+      "ref_value": -845000000.0,
+      "variance_pct": 95.3,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:Dividends",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001326160-25-000192",
+      "metric": "Inventory",
+      "xbrl_value": 718000000.0,
+      "ref_value": 4494000000.0,
+      "variance_pct": 84.0,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:EnergyRelatedInventoryCoal",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001326160-25-000192",
+      "metric": "AccountsReceivable",
+      "xbrl_value": 12000000.0,
+      "ref_value": 4018000000.0,
+      "variance_pct": 99.7,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:AccountsReceivableNetCurrent",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    },
+    {
+      "ticker": "DUK",
+      "sector": "Utilities",
+      "form": "10-Q",
+      "filing_date": "2025-09-30",
+      "accession_no": "0001326160-25-000192",
+      "metric": "AccountsPayable",
+      "xbrl_value": 273000000.0,
+      "ref_value": 4191000000.0,
+      "variance_pct": 93.5,
+      "mapping_source": "tree",
+      "concept_used": "us-gaap:AccountsPayableCurrent",
+      "industry": "utilities",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Manual investigation required"
+      ]
+    }
+  ],
+  "skipped": [],
+  "errors": []
+}

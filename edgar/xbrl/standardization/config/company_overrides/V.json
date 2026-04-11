@@ -1,0 +1,13 @@
+{
+  "exclude_metrics": {
+    "GrossProfit": {
+      "reason": "not_applicable",
+      "notes": "Payment services - no traditional GrossProfit"
+    },
+    "ResearchAndDevelopment": {
+      "reason": "not_applicable",
+      "notes": "No R&D line item"
+    }
+  },
+  "quality_tier": "provisional"
+}

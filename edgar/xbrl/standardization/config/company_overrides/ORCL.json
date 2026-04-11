@@ -1,0 +1,8 @@
+{
+  "exclude_metrics": {
+    "ShareRepurchases": {
+      "reason": "not_applicable",
+      "notes": "Auto-excluded: concept absent from all XBRL sources"
+    }
+  }
+}

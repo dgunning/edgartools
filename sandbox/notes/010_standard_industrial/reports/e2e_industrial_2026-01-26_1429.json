@@ -1,0 +1,130 @@
+{
+  "run_id": "e2e_industrial_2026-01-26T14:29:48.338135",
+  "timestamp": "2026-01-26T14:29:48.338152",
+  "config": {
+    "group": "industrial_33",
+    "workers": 4,
+    "years": 0,
+    "quarters": 4,
+    "mode": null,
+    "metrics": [
+      "Revenue",
+      "COGS",
+      "SGA",
+      "OperatingIncome",
+      "PretaxIncome",
+      "NetIncome",
+      "OperatingCashFlow",
+      "Capex",
+      "TotalAssets",
+      "Goodwill",
+      "IntangibleAssets",
+      "ShortTermDebt",
+      "LongTermDebt",
+      "CashAndEquivalents",
+      "FreeCashFlow",
+      "TangibleAssets",
+      "NetDebt"
+    ],
+    "sector": null,
+    "tickers": [
+      "AAPL",
+      "MSFT",
+      "GOOG",
+      "AMZN",
+      "META",
+      "NVDA",
+      "TSLA",
+      "CAT",
+      "GE",
+      "HON",
+      "DE",
+      "MMM",
+      "EMR",
+      "RTX",
+      "ASTE",
+      "PG",
+      "KO",
+      "PEP",
+      "WMT",
+      "COST",
+      "HSY",
+      "XOM",
+      "CVX",
+      "COP",
+      "SLB",
+      "PBF",
+      "JNJ",
+      "UNH",
+      "LLY",
+      "PFE",
+      "UPS",
+      "FDX",
+      "BA"
+    ]
+  },
+  "overall_summary": {
+    "10k_total": 0,
+    "10k_passed": 0,
+    "10k_skipped": 0,
+    "10q_total": 75,
+    "10q_passed": 75,
+    "10q_skipped": 0
+  },
+  "sector_summary": {
+    "MAG7": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 27,
+      "10q_passed": 27,
+      "10q_skipped": 0
+    },
+    "Industrial_Manufacturing": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 16,
+      "10q_passed": 16,
+      "10q_skipped": 0
+    },
+    "Consumer_Staples": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 16,
+      "10q_passed": 16,
+      "10q_skipped": 0
+    },
+    "Energy": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 4,
+      "10q_passed": 4,
+      "10q_skipped": 0
+    },
+    "Healthcare_Pharma": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 0,
+      "10q_passed": 0,
+      "10q_skipped": 0
+    },
+    "Transportation": {
+      "10k_total": 0,
+      "10k_passed": 0,
+      "10k_skipped": 0,
+      "10q_total": 12,
+      "10q_passed": 12,
+      "10q_skipped": 0
+    }
+  },
+  "failure_count": 0,
+  "skipped_count": 0,
+  "error_count": 0,
+  "failures": [],
+  "skipped": [],
+  "errors": []
+}

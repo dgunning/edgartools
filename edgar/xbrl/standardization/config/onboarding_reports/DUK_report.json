@@ -1,0 +1,108 @@
+{
+  "ticker": "DUK",
+  "cik": 1326160,
+  "company_name": "Duke Energy CORP",
+  "archetype": "A",
+  "sic_code": "4931",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  DUK:\n    name: \"Duke Energy CORP\"\n    cik: 1326160\n    exclude_metrics:\n      - GrossProfit\n      - Inventory",
+  "metrics_passed": [
+    "Revenue",
+    "COGS",
+    "OperatingIncome",
+    "NetIncome",
+    "OperatingCashFlow",
+    "Capex",
+    "TotalAssets",
+    "Goodwill",
+    "IntangibleAssets",
+    "ShortTermDebt",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "DividendsPaid",
+    "AccountsPayable",
+    "DepreciationAmortization",
+    "InterestExpense",
+    "IncomeTaxExpense",
+    "EarningsPerShareDiluted",
+    "EarningsPerShareBasic",
+    "CurrentAssets",
+    "CurrentLiabilities",
+    "TotalLiabilities",
+    "StockholdersEquity",
+    "PropertyPlantEquipment",
+    "RetainedEarnings",
+    "InvestingCashFlow",
+    "FinancingCashFlow",
+    "ShareRepurchases"
+  ],
+  "metrics_failed": [
+    "SGA",
+    "PretaxIncome",
+    "StockBasedCompensation",
+    "AccountsReceivable",
+    "ResearchAndDevelopment",
+    "DividendPerShare"
+  ],
+  "metrics_excluded": [
+    "Inventory",
+    "GrossProfit",
+    "COGS"
+  ],
+  "failures": {
+    "SGA": {
+      "metric": "SGA",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 1466000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 5194000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "StockBasedCompensation": {
+      "metric": "StockBasedCompensation",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 96000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "AccountsReceivable": {
+      "metric": "AccountsReceivable",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 4672000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "ResearchAndDevelopment": {
+      "metric": "ResearchAndDevelopment",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "DividendPerShare": {
+      "metric": "DividendPerShare",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 4.14,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": false,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-04-04T09:55:03.608366"
+}

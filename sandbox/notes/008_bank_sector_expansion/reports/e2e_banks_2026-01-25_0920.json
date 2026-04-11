@@ -1,0 +1,94 @@
+{
+  "run_id": "e2e_banks_2026-01-25T09:20:34.254185",
+  "timestamp": "2026-01-25T09:20:34.254196",
+  "config": {
+    "group": "banking",
+    "workers": 8,
+    "years": 2,
+    "quarters": 2,
+    "metrics": [
+      "ShortTermDebt"
+    ],
+    "tickers": [
+      "BK",
+      "C",
+      "GS",
+      "JPM",
+      "MS",
+      "PNC",
+      "STT",
+      "USB",
+      "WFC"
+    ]
+  },
+  "summary": {
+    "custom": {
+      "10k_total": 5,
+      "10k_passed": 4,
+      "10k_skipped": 4,
+      "10q_total": 12,
+      "10q_passed": 12,
+      "10q_skipped": 1
+    }
+  },
+  "failure_count": 1,
+  "skipped_count": 5,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "STT",
+      "form": "10-K",
+      "filing_date": "2023-12-31",
+      "accession_no": "0000093751-24-000498",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 144020000000.0,
+      "ref_value": 4637000000.0,
+      "variance_pct": 3005.9,
+      "mapping_source": "tree",
+      "concept_used": null,
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    }
+  ],
+  "skipped": [
+    {
+      "ticker": "STT",
+      "form": "10-Q",
+      "metric": "ShortTermDebt",
+      "variance_pct": 24.1,
+      "reason": "STT lacks granular STB components, forcing DebtCurrent fallback ($12.2B). yfinance uses narrower Current Debt definition (~$9.8B). $2.4B difference is repos/fed funds that yfinance excludes. Definition mismatch, not extraction bug.\n"
+    },
+    {
+      "ticker": "USB",
+      "form": "10-K",
+      "metric": "ShortTermDebt",
+      "variance_pct": 103.5,
+      "reason": "YFinance annual data (~$7.6B) differs significantly from quarterly (~$15B). Our 10-K extraction is consistent with quarterly. This is a yfinance data quality issue - their annual aggregation doesn't match their quarterly reports.\n"
+    },
+    {
+      "ticker": "USB",
+      "form": "10-K",
+      "metric": "ShortTermDebt",
+      "variance_pct": 33.4,
+      "reason": "YFinance annual data (~$7.6B) differs significantly from quarterly (~$15B). Our 10-K extraction is consistent with quarterly. This is a yfinance data quality issue - their annual aggregation doesn't match their quarterly reports.\n"
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-K",
+      "metric": "ShortTermDebt",
+      "variance_pct": 53.5,
+      "reason": "10-K uses Bottom-Up (CP + FHLB + OtherSTB + CPLTD = $20.8B). yfinance likely uses STB - Repos without CPLTD (~$13.6B). Methodological difference, not extraction bug. 10-Q passes perfectly (-0.9% variance).\n"
+    },
+    {
+      "ticker": "WFC",
+      "form": "10-K",
+      "metric": "ShortTermDebt",
+      "variance_pct": 46.9,
+      "reason": "10-K uses Bottom-Up (CP + FHLB + OtherSTB + CPLTD = $20.8B). yfinance likely uses STB - Repos without CPLTD (~$13.6B). Methodological difference, not extraction bug. 10-Q passes perfectly (-0.9% variance).\n"
+    }
+  ],
+  "errors": []
+}

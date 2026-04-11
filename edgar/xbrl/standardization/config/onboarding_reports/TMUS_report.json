@@ -1,0 +1,107 @@
+{
+  "ticker": "TMUS",
+  "cik": 1283699,
+  "company_name": "T-Mobile US, Inc.",
+  "archetype": "A",
+  "sic_code": "4812",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  TMUS:\n    name: \"T-Mobile US, Inc.\"\n    cik: 1283699\n    exclude_metrics:\n      - COGS\n      - GrossProfit\n      - Inventory\n    known_divergences:\n      IntangibleAssets:\n        form_types: [\"10-K\"]\n        variance_pct: 86.6\n        reason: \"Variance: 86.6% (tolerance: 25%)\"\n        skip_validation: true\n        added_date: \"2026-04-04\"",
+  "metrics_passed": [
+    "Revenue",
+    "OperatingIncome",
+    "NetIncome",
+    "OperatingCashFlow",
+    "Capex",
+    "TotalAssets",
+    "Goodwill",
+    "ShortTermDebt",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "AccountsReceivable",
+    "AccountsPayable",
+    "DepreciationAmortization",
+    "InterestExpense",
+    "IncomeTaxExpense",
+    "EarningsPerShareDiluted",
+    "EarningsPerShareBasic",
+    "CurrentAssets",
+    "CurrentLiabilities",
+    "TotalLiabilities",
+    "StockholdersEquity",
+    "RetainedEarnings",
+    "InvestingCashFlow",
+    "FinancingCashFlow",
+    "ShareRepurchases"
+  ],
+  "metrics_failed": [
+    "SGA",
+    "PretaxIncome",
+    "IntangibleAssets",
+    "ResearchAndDevelopment",
+    "PropertyPlantEquipment",
+    "DividendPerShare"
+  ],
+  "metrics_excluded": [
+    "Inventory",
+    "GrossProfit",
+    "COGS"
+  ],
+  "failures": {
+    "SGA": {
+      "metric": "SGA",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 20818000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 14712000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "IntangibleAssets": {
+      "metric": "IntangibleAssets",
+      "reason": "Variance: 86.6% (tolerance: 25%)",
+      "xbrl_value": 15517000000.0,
+      "reference_value": 116075000000.0,
+      "variance_pct": 86.63191901787637,
+      "pattern": "unknown"
+    },
+    "ResearchAndDevelopment": {
+      "metric": "ResearchAndDevelopment",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "PropertyPlantEquipment": {
+      "metric": "PropertyPlantEquipment",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 67022000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "DividendPerShare": {
+      "metric": "DividendPerShare",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 3.71,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": false,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-04-04T09:56:35.990718"
+}

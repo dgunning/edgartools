@@ -1,0 +1,55 @@
+{
+  "run_id": "e2e_2026-01-21T20:51:53.601105",
+  "timestamp": "2026-01-21T20:51:53.601113",
+  "config": {
+    "group": "custom",
+    "workers": 1,
+    "years": 1,
+    "quarters": 1,
+    "metrics": [
+      "ShortTermDebt"
+    ]
+  },
+  "summary": {
+    "sp25": {
+      "10k_total": 1,
+      "10k_passed": 0,
+      "10q_total": 1,
+      "10q_passed": 1
+    },
+    "sp50": {
+      "10k_total": 1,
+      "10k_passed": 0,
+      "10q_total": 1,
+      "10q_passed": 1
+    },
+    "custom": {
+      "10k_total": 1,
+      "10k_passed": 0,
+      "10q_total": 1,
+      "10q_passed": 1
+    }
+  },
+  "failure_count": 1,
+  "error_count": 0,
+  "failures": [
+    {
+      "ticker": "GS",
+      "form": "10-K",
+      "filing_date": "2024-12-31",
+      "accession_no": "0000886982-25-000005",
+      "metric": "ShortTermDebt",
+      "xbrl_value": 75819000000.0,
+      "ref_value": 90624000000.0,
+      "variance_pct": 16.3,
+      "mapping_source": "industry",
+      "concept_used": "industry_logic:ShortTermDebt",
+      "industry": "banking",
+      "alternative_concepts": [],
+      "suggested_actions": [
+        "Check dual-track extraction logic in industry_logic/"
+      ]
+    }
+  ],
+  "errors": []
+}

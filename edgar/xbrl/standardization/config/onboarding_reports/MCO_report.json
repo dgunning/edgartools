@@ -1,0 +1,101 @@
+{
+  "ticker": "MCO",
+  "cik": 1059556,
+  "company_name": "MOODYS CORP /DE/",
+  "archetype": "A",
+  "sic_code": "7320",
+  "fiscal_year_end": "December",
+  "draft_yaml": "  MCO:\n    name: \"MOODYS CORP /DE/\"\n    cik: 1059556\n    exclude_metrics:\n      - COGS\n      - Capex\n      - CurrentAssets\n      - CurrentLiabilities\n      - Goodwill\n      - GrossProfit\n      - IntangibleAssets\n      - Inventory\n      - OperatingIncome\n      - SGA",
+  "metrics_passed": [
+    "Revenue",
+    "NetIncome",
+    "OperatingCashFlow",
+    "TotalAssets",
+    "Goodwill",
+    "IntangibleAssets",
+    "ShortTermDebt",
+    "LongTermDebt",
+    "CashAndEquivalents",
+    "WeightedAverageSharesDiluted",
+    "StockBasedCompensation",
+    "DividendsPaid",
+    "AccountsReceivable",
+    "AccountsPayable",
+    "DepreciationAmortization",
+    "IncomeTaxExpense",
+    "EarningsPerShareDiluted",
+    "EarningsPerShareBasic",
+    "TotalLiabilities",
+    "StockholdersEquity",
+    "RetainedEarnings",
+    "InvestingCashFlow",
+    "FinancingCashFlow",
+    "ShareRepurchases"
+  ],
+  "metrics_failed": [
+    "PretaxIncome",
+    "ResearchAndDevelopment",
+    "InterestExpense",
+    "PropertyPlantEquipment",
+    "DividendPerShare"
+  ],
+  "metrics_excluded": [
+    "COGS",
+    "Inventory",
+    "Goodwill",
+    "IntangibleAssets",
+    "SGA",
+    "OperatingIncome",
+    "Capex",
+    "GrossProfit",
+    "CurrentAssets",
+    "CurrentLiabilities"
+  ],
+  "failures": {
+    "PretaxIncome": {
+      "metric": "PretaxIncome",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 2699000000.0,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "ResearchAndDevelopment": {
+      "metric": "ResearchAndDevelopment",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": null,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    },
+    "InterestExpense": {
+      "metric": "InterestExpense",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 339000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "PropertyPlantEquipment": {
+      "metric": "PropertyPlantEquipment",
+      "reason": "No XBRL value extracted but reference exists",
+      "xbrl_value": null,
+      "reference_value": 872000000.0,
+      "variance_pct": null,
+      "pattern": "extraction_error"
+    },
+    "DividendPerShare": {
+      "metric": "DividendPerShare",
+      "reason": "No reference data available (metric may not exist for this company)",
+      "xbrl_value": 3.4,
+      "reference_value": null,
+      "variance_pct": null,
+      "pattern": "unknown"
+    }
+  },
+  "remediation_complexity": "needs_review",
+  "snapshot_created": false,
+  "extraction_ran": true,
+  "error": null,
+  "timestamp": "2026-04-04T09:59:30.139626"
+}
