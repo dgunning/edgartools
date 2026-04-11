@@ -1,0 +1,42 @@
+{
+  "Comment": "Run an EdgarTools warehouse workflow on ECS Fargate.",
+  "StartAt": "RunWarehouseTask",
+  "States": {
+    "RunWarehouseTask": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::ecs:runTask.sync",
+      "Parameters": {
+        "LaunchType": "FARGATE",
+        "Cluster": "${cluster_arn}",
+        "TaskDefinition": "${task_definition_arn}",
+        "PropagateTags": "TASK_DEFINITION",
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "ENABLED",
+            "SecurityGroups": ${security_groups_json},
+            "Subnets": ${subnets_json}
+          }
+        },
+        "Overrides": {
+          "ContainerOverrides": [
+            {
+              "Name": "${container_name}",
+              "Command": ${command_json}
+            }
+          ]
+        }
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "States.TaskFailed"
+          ],
+          "IntervalSeconds": 60,
+          "BackoffRate": 2.0,
+          "MaxAttempts": 2
+        }
+      ],
+      "End": true
+    }
+  }
+}

@@ -1,0 +1,1 @@
+container_image = "123456789012.dkr.ecr.us-east-1.amazonaws.com/edgartools-prod-warehouse@sha256:replace-me"

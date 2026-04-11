@@ -120,6 +120,7 @@ Changelog = "https://github.com/dgunning/edgartools/releases"
 [project.scripts]
 edgartools-mcp = "edgar.ai.mcp.server:main"
 edgar-test = "tests.harness.cli:cli"
+edgar-warehouse = "edgar.warehouse.cli:main"
 
 [tool.hatch.version]
 path = "edgar/__about__.py"

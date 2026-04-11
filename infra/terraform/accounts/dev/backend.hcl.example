@@ -1,0 +1,5 @@
+bucket  = "edgartools-dev-tfstate"
+key     = "accounts/dev/terraform.tfstate"
+region  = "us-east-1"
+encrypt = true
+
