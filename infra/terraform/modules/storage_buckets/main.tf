@@ -12,6 +12,8 @@ locals {
 resource "aws_s3_bucket" "bronze" {
   bucket = var.bronze_bucket_name
 
+  tags = merge(local.tags, { Name = var.bronze_bucket_name, DataZone = "bronze" })
+
   lifecycle {
     prevent_destroy = true
   }
@@ -58,6 +60,8 @@ resource "aws_s3_bucket_ownership_controls" "bronze" {
 
 resource "aws_s3_bucket" "warehouse" {
   bucket = var.warehouse_bucket_name
+
+  tags = merge(local.tags, { Name = var.warehouse_bucket_name, DataZone = "warehouse" })
 }
 
 resource "aws_s3_bucket_public_access_block" "warehouse" {
@@ -99,15 +103,4 @@ resource "aws_s3_bucket_ownership_controls" "warehouse" {
   }
 }
 
-resource "aws_s3_bucket_tagging" "bronze" {
-  bucket = aws_s3_bucket.bronze.id
-
-  tag_set = merge(local.tags, { Name = var.bronze_bucket_name, DataZone = "bronze" })
-}
-
-resource "aws_s3_bucket_tagging" "warehouse" {
-  bucket = aws_s3_bucket.warehouse.id
-
-  tag_set = merge(local.tags, { Name = var.warehouse_bucket_name, DataZone = "warehouse" })
-}
 
