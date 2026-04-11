@@ -79,6 +79,11 @@ Statuses: `open`, `in_progress`, `blocked`, `closed`
 | Data objects | `edgar/ai/skills/core/data-objects.md` |
 | Workflows | `edgar/ai/skills/core/workflows.md` |
 
+Execution rules:
+
+- Use Git Bash for all verification, testing, build, Docker, and Terraform commands
+- Do not use PowerShell for testing, building, or deployment commands unless the user explicitly requires it
+
 ## Warehouse Work
 
 When working on the SEC warehouse or hosting design, treat these as the authoritative docs:

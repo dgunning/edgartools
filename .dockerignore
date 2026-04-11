@@ -1,5 +1,8 @@
+# Version control
 .git
 .github
+
+# Python virtual environments and caches
 .venv
 __pycache__
 *.pyc
@@ -11,9 +14,23 @@ __pycache__
 .coverage
 htmlcov
 site
-.terraform
-*.tfstate
-*.tfstate.backup
-*.log
+
+# Tests (not needed at runtime)
+tests/
+
+# Notebooks and local data
 notebooks
 data
+
+# Infrastructure (Terraform, not needed in container)
+infra/
+
+# Terraform generated files (belt-and-suspenders)
+**/.terraform
+*.tfstate
+*.tfstate.backup
+*.tfplan
+
+# Logs and temp files
+*.log
+pytest-cache-files-*/
