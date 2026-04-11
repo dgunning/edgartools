@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import argparse
-import json
-from typing import Any
+
+from edgar.warehouse.runtime import run_command
 
 
 def _parse_cik_list(value: str) -> list[int]:
@@ -60,53 +60,32 @@ def _add_common_bootstrap_args(parser: argparse.ArgumentParser, include_recent_l
         default=False,
         help="Force re-fetch and rebuild of the selected scope",
     )
-
-
-def _namespace_to_payload(args: argparse.Namespace) -> dict[str, Any]:
-    payload = vars(args).copy()
-    payload.pop("handler", None)
-    return payload
-
-
-def _not_implemented(command_name: str, args: argparse.Namespace) -> int:
-    payload = {
-        "command": command_name,
-        "arguments": _namespace_to_payload(args),
-        "message": (
-            "Warehouse CLI scaffolding is installed, but the runtime handlers "
-            "for this command are not implemented yet."
-        ),
-    }
-    print(json.dumps(payload, indent=2, sort_keys=True))
-    return 2
-
-
 def _handle_bootstrap_full(args: argparse.Namespace) -> int:
-    return _not_implemented("bootstrap-full", args)
+    return run_command("bootstrap-full", args)
 
 
 def _handle_bootstrap_recent_10(args: argparse.Namespace) -> int:
-    return _not_implemented("bootstrap-recent-10", args)
+    return run_command("bootstrap-recent-10", args)
 
 
 def _handle_daily_incremental(args: argparse.Namespace) -> int:
-    return _not_implemented("daily-incremental", args)
+    return run_command("daily-incremental", args)
 
 
 def _handle_load_daily_form_index_for_date(args: argparse.Namespace) -> int:
-    return _not_implemented("load-daily-form-index-for-date", args)
+    return run_command("load-daily-form-index-for-date", args)
 
 
 def _handle_catch_up_daily_form_index(args: argparse.Namespace) -> int:
-    return _not_implemented("catch-up-daily-form-index", args)
+    return run_command("catch-up-daily-form-index", args)
 
 
 def _handle_targeted_resync(args: argparse.Namespace) -> int:
-    return _not_implemented("targeted-resync", args)
+    return run_command("targeted-resync", args)
 
 
 def _handle_full_reconcile(args: argparse.Namespace) -> int:
-    return _not_implemented("full-reconcile", args)
+    return run_command("full-reconcile", args)
 
 
 def build_parser() -> argparse.ArgumentParser:
