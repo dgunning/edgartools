@@ -41,8 +41,9 @@ class SECSectionExtractor:
     between them. Works consistently for all SEC filings.
     """
 
-    def __init__(self, document: Document):
+    def __init__(self, document: Document, agent: Optional[str] = None):
         self.document = document
+        self.agent = agent
         self.section_map = {}  # Maps section names to canonical names
         self.section_boundaries = {}  # Maps section names to boundaries
         self.toc_analyzer = TOCAnalyzer()
@@ -60,8 +61,8 @@ class SECSectionExtractor:
         if not html_content:
             return
 
-        # Use TOC analysis to find sections
-        toc_mapping = self.toc_analyzer.analyze_toc_structure(html_content)
+        # Use TOC analysis to find sections (dispatch to agent-specific parser when known)
+        toc_mapping = self.toc_analyzer.analyze_toc_structure(html_content, agent=self.agent)
 
         if not toc_mapping:
             return  # No sections found
