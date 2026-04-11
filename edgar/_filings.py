@@ -1572,6 +1572,17 @@ class Filing:
                 pass  # Offline or network unavailable — return None
         return period
 
+    @cached_property
+    def agent(self) -> Optional[str]:
+        """Identify the filing agent that prepared this filing (e.g. Workiva, Donnelley)."""
+        from edgar.documents.agents import detect_filing_agent
+        doc = self.sgml().attachments.primary_html_document
+        if not doc:
+            doc = self.homepage.primary_html_document
+        if doc and doc.content:
+            return detect_filing_agent(doc.content)
+        return None
+
     @property
     def attachments(self):
         # Return all the attachments on the filing
