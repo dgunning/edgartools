@@ -805,6 +805,10 @@ class InstanceParser(BaseParser):
                 # Classify fiscal period from duration length
                 if 350 <= days <= 380:
                     period['fiscal_period'] = 'FY'
+                elif 260 <= days <= 290:
+                    period['fiscal_period'] = 'YTD9'  # 9-month YTD (Q3 10-Q)
+                elif 170 <= days <= 200:
+                    period['fiscal_period'] = 'YTD6'  # 6-month YTD (Q2 10-Q)
                 elif 85 <= days <= 95:
                     period['fiscal_period'] = _quarter_for_date(end_obj, fy_end_month)
 
