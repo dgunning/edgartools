@@ -797,11 +797,19 @@ class Company(Entity):
             >>> Company('JPM').business_category
             'Bank'
         """
-        from edgar.entity.categorization import BusinessCategory, classify_business_category
+        from edgar.entity.categorization import BusinessCategory, classify_business_category, sic_overrides_bdc
 
-        # Check authoritative BDC signal first (814- file number)
+        # Check authoritative BDC signal (814- file number), but only if
+        # SIC doesn't definitively indicate another category. Large asset
+        # managers (BX, KKR) and non-financial companies (NEE) can inherit
+        # 814- file numbers from BDC subsidiaries. (GH #774)
         if getattr(self.data, 'is_bdc', False):
-            return BusinessCategory.BDC.value
+            try:
+                sic_int = int(self.sic) if self.sic is not None else None
+            except (ValueError, TypeError):
+                sic_int = None
+            if not sic_overrides_bdc(sic_int):
+                return BusinessCategory.BDC.value
 
         form_types = self._get_form_types()
         entity_type = getattr(self.data, 'entity_type', None)
