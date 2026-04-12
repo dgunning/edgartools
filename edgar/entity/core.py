@@ -821,6 +821,39 @@ class Company(Entity):
             form_types=form_types
         )
 
+    @cached_property
+    def reit_subtype(self) -> Optional[str]:
+        """
+        Classify a REIT as equity or mortgage.
+
+        Mortgage REITs invest in mortgage-backed securities and loans,
+        reporting InterestIncomeExpenseNet as their dominant revenue.
+        Equity REITs own and operate real property.
+
+        Returns None immediately for non-REIT companies (no network call).
+
+        Returns:
+            'equity', 'mortgage', or None (non-REIT)
+
+        Example:
+            >>> Company('PLD').reit_subtype
+            'equity'
+            >>> Company('AGNC').reit_subtype
+            'mortgage'
+            >>> Company('AAPL').reit_subtype  # not a REIT
+        """
+        if self.business_category != 'REIT':
+            return None
+
+        facts = self.get_facts()
+        if not facts:
+            return None
+
+        by_concept = facts._fact_index.get('by_concept', {})
+        if 'us-gaap:InterestIncomeExpenseNet' in by_concept:
+            return 'mortgage'
+        return 'equity'
+
     def is_fund(self) -> bool:
         """
         Check if company is an investment fund (ETF, Mutual Fund, or Closed-End Fund).

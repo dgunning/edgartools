@@ -727,3 +727,54 @@ class TestIssue774NetworkIntegration:
         company = Company(ticker)
         assert company.business_category == expected, \
             f"{ticker} (SIC {company.sic}): expected {expected}, got {company.business_category}"
+
+
+# =============================================================================
+# REIT Subtype (edgartools-534c)
+# =============================================================================
+
+class TestREITSubtype:
+    """Tests for Company.reit_subtype property."""
+
+    def test_non_reit_returns_none(self):
+        """Non-REIT companies return None without any network call."""
+        from unittest.mock import patch, PropertyMock
+        company = Company.__new__(Company)
+        with patch.object(type(company), 'business_category', new_callable=PropertyMock, return_value='Operating Company'):
+            assert company.reit_subtype is None
+
+    def test_non_reit_does_not_fetch_facts(self):
+        """Verify get_facts is never called for non-REITs."""
+        from unittest.mock import patch, PropertyMock
+        company = Company.__new__(Company)
+        with patch.object(type(company), 'business_category', new_callable=PropertyMock, return_value='Bank'):
+            with patch.object(company, 'get_facts') as mock_facts:
+                result = company.reit_subtype
+                assert result is None
+                mock_facts.assert_not_called()
+
+    @pytest.mark.network
+    @pytest.mark.parametrize("ticker,expected", [
+        # Equity REITs
+        ("PLD", "equity"),     # Prologis (industrial)
+        ("AMT", "equity"),     # American Tower (cell towers)
+        ("EQR", "equity"),     # Equity Residential (apartments)
+        ("O", "equity"),       # Realty Income (net lease)
+        ("SPG", "equity"),     # Simon Property Group (malls)
+        # Mortgage REITs
+        ("AGNC", "mortgage"),  # AGNC Investment (agency MBS)
+        ("NLY", "mortgage"),   # Annaly Capital (agency MBS)
+        ("STWD", "mortgage"),  # Starwood Property Trust (commercial loans)
+        ("MFA", "mortgage"),   # MFA Financial (residential MBS)
+    ])
+    def test_reit_subtype(self, ticker, expected):
+        """Verify REIT subtype classification against live SEC data."""
+        company = Company(ticker)
+        assert company.reit_subtype == expected, \
+            f"{ticker}: expected {expected}, got {company.reit_subtype}"
+
+    @pytest.mark.network
+    def test_non_reit_live(self):
+        """Non-REIT returns None in live check."""
+        company = Company("AAPL")
+        assert company.reit_subtype is None
