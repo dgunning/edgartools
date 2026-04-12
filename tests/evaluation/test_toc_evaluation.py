@@ -231,7 +231,7 @@ def print_summary(results: List[FilingResult]):
 
 # ---- Tests ----
 
-@pytest.mark.network
+@pytest.mark.manual
 class TestTOCEvaluation:
     """Evaluation suite — run with: pytest tests/evaluation/test_toc_evaluation.py -xvs"""
 
@@ -340,7 +340,7 @@ def print_comparison(agent_results: List[FilingResult], generic_results: List[Fi
     print("=" * 100)
 
 
-@pytest.mark.network
+@pytest.mark.manual
 class TestTOCComparison:
     """Compare agent-aware vs generic parsing — run with: pytest tests/evaluation/test_toc_evaluation.py::TestTOCComparison -xvs"""
 

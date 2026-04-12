@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.29.0] - 2026-04-12
+
+### Added
+
+- **`exact` parameter for `FactQuery.by_date_range()`** — New `exact=True` option matches facts with period dates exactly equal to the specified date, instead of the default `<=`/`>=` range behavior ([#767](https://github.com/dgunning/edgartools/issues/767))
+
+- **`Company.reit_subtype` property** — New property distinguishes equity REITs from mortgage REITs by checking for mortgage-related XBRL concepts in the company's filings
+
+- **Filing agent fingerprinting** — Detect the filing agent (Donnelley, EDGAR Online, Workiva, Toppan Merrill) from HTML structure patterns, enabling agent-aware document parsing
+
+- **Agent-aware TOC parsing** — Table of contents section detection now uses agent-specific parsing strategies for the top 4 filing agents, improving section extraction accuracy
+
+- **TOC section detection evaluation suite** — Evaluation harness for measuring TOC section detection quality across a corpus of filings
+
+### Fixed
+
+- **Extra newlines in `viewer.search()` output** — Removed spurious blank lines between sections in `Concept` panel display ([#768](https://github.com/dgunning/edgartools/issues/768))
+
+- **`business_category` misclassifications** — Corrected 4 classification patterns for more accurate company categorization ([#774](https://github.com/dgunning/edgartools/issues/774))
+
+- **YTD periods missing `fiscal_period` classification** — Year-to-date periods in XBRL facts now receive proper fiscal period labels ([#771](https://github.com/dgunning/edgartools/issues/771))
+
+- **61 cash flow `gaap_mappings` defaulting to section totals** — Corrected mappings that incorrectly pointed to section-level totals instead of specific line items
+
+- **Duplicate facts in XBRL DataFrame** — Deduplicate identical facts in `facts.to_dataframe()` output ([#769](https://github.com/dgunning/edgartools/issues/769))
+
+- **`period_of_report` triggering network calls** — Resolved unintended network requests when accessing `period_of_report` for local storage users
+
+### Performance
+
+- **Cache parsed lxml tree** — Eliminate redundant HTML parsing by caching the parsed lxml tree across document operations
+
 ## [5.28.5] - 2026-04-08
 
 ### Fixed
