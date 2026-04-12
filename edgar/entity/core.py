@@ -849,9 +849,11 @@ class Company(Entity):
         if not facts:
             return None
 
-        by_concept = facts._fact_index.get('by_concept', {})
-        if 'us-gaap:InterestIncomeExpenseNet' in by_concept:
-            return 'mortgage'
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            if facts.get_fact('us-gaap:InterestIncomeExpenseNet') is not None:
+                return 'mortgage'
         return 'equity'
 
     def is_fund(self) -> bool:
