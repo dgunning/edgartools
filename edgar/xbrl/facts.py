@@ -227,37 +227,55 @@ class FactQuery:
         return self
 
     def by_date_range(self, start_date: Optional[str] = None,
-                      end_date: Optional[str] = None) -> FactQuery:
+                      end_date: Optional[str] = None,
+                      exact: bool = False) -> FactQuery:
         """
         Filter facts by date range.
 
         Args:
             start_date: Optional start date string in YYYY-MM-DD format
             end_date: Optional end date string in YYYY-MM-DD format
+            exact: If True, match dates exactly (== instead of >=/<= comparisons)
 
         Returns:
             Self for method chaining
         """
         if start_date and end_date:
-            # Match duration facts that fall within the date range
             start_obj = parse_date(start_date)
             end_obj = parse_date(end_date)
-            self._filters.append(lambda f:
-                                 ('period_start' in f and 'period_end' in f and
-                                  parse_date(f['period_start']) >= start_obj and
-                                  parse_date(f['period_end']) <= end_obj))
+            if exact:
+                self._filters.append(lambda f:
+                                     ('period_start' in f and 'period_end' in f and
+                                      parse_date(f['period_start']) == start_obj and
+                                      parse_date(f['period_end']) == end_obj))
+            else:
+                # Match duration facts that fall within the date range
+                self._filters.append(lambda f:
+                                     ('period_start' in f and 'period_end' in f and
+                                      parse_date(f['period_start']) >= start_obj and
+                                      parse_date(f['period_end']) <= end_obj))
         elif start_date:
-            # Match duration facts that start on or after start_date
             start_obj = parse_date(start_date)
-            self._filters.append(lambda f:
-                                 ('period_start' in f and
-                                  parse_date(f['period_start']) >= start_obj))
+            if exact:
+                self._filters.append(lambda f:
+                                     ('period_start' in f and
+                                      parse_date(f['period_start']) == start_obj))
+            else:
+                # Match duration facts that start on or after start_date
+                self._filters.append(lambda f:
+                                     ('period_start' in f and
+                                      parse_date(f['period_start']) >= start_obj))
         elif end_date:
-            # Match duration facts that end on or before end_date
             end_obj = parse_date(end_date)
-            self._filters.append(lambda f:
-                                 ('period_end' in f and
-                                  parse_date(f['period_end']) <= end_obj))
+            if exact:
+                self._filters.append(lambda f:
+                                     ('period_end' in f and
+                                      parse_date(f['period_end']) == end_obj))
+            else:
+                # Match duration facts that end on or before end_date
+                self._filters.append(lambda f:
+                                     ('period_end' in f and
+                                      parse_date(f['period_end']) <= end_obj))
         return self
 
     def by_dimension(self, dimension: Optional[str], value: Optional[str] = None) -> FactQuery:

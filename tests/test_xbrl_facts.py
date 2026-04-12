@@ -94,6 +94,18 @@ def test_numeric_sign_for_cashflow_values():
     assert inventory_facts[inventory_facts.period_end == '2022-12-31']['numeric_value'].values[0] == -111288000
 
 
+def test_by_date_range_exact(intc_xbrl: XBRL):
+    """exact=True on by_date_range filters to facts matching the date exactly, not <=/>= (GH #767)."""
+    revenue_range = intc_xbrl.facts.query().by_concept('Revenue').by_date_range(end_date='2024-12-28').to_dataframe()
+    revenue_exact = intc_xbrl.facts.query().by_concept('Revenue').by_date_range(end_date='2024-12-28', exact=True).to_dataframe()
+
+    # Range returns facts ending on or before the date (multiple years)
+    assert len(revenue_range['period_end'].unique()) == 3
+    # Exact returns only facts ending on that exact date
+    assert list(revenue_exact['period_end'].unique()) == ['2024-12-28']
+    assert len(revenue_exact) < len(revenue_range)
+
+
 def test_xbrl_query(intc_xbrl: XBRL):
 
     query = intc_xbrl.query(include_element_info=True)
