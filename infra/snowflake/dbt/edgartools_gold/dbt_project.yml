@@ -1,0 +1,32 @@
+name: edgartools_gold
+version: 1.0.0
+config-version: 2
+
+profile: edgartools_gold
+
+model-paths:
+  - models
+
+analysis-paths:
+  - analyses
+
+test-paths:
+  - tests
+
+seed-paths:
+  - seeds
+
+macro-paths:
+  - macros
+
+target-path: target
+clean-targets:
+  - target
+  - dbt_packages
+
+models:
+  edgartools_gold:
+    +database: "{{ env_var('DBT_SNOWFLAKE_DATABASE') }}"
+    gold:
+      +schema: EDGARTOOLS_GOLD
+      +materialized: view

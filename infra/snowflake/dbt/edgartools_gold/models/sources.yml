@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: edgartools_source
+    database: "{{ env_var('DBT_SNOWFLAKE_DATABASE') }}"
+    schema: EDGARTOOLS_SOURCE
+    tables:
+      - name: SNOWFLAKE_REFRESH_STATUS
+        description: Internal status table populated by SnowCLI bootstrap procedures and runtime wrappers.

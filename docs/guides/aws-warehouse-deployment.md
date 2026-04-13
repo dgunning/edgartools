@@ -2,24 +2,28 @@
 
 This guide documents the AWS reference deployment for the SEC warehouse described in [specification.md](C:/work/projects/edgartools/specification.md).
 
+The Snowflake mirror follow-on path is documented in [docs/guides/snowflake-gold-mirror.md](C:/work/projects/edgartools/docs/guides/snowflake-gold-mirror.md).
+
 ## Scope
 
 The AWS deployment covers the warehouse platform only:
 
 - immutable bronze storage
 - mutable staging, silver, gold, and artifact storage
+- dedicated Snowflake export storage
 - ECS Fargate execution for warehouse commands
+- private ECS Fargate execution for Snowflake sync
 - Step Functions orchestration
 - EventBridge Scheduler for recurring workflows
 - Secrets Manager for `EDGAR_IDENTITY`
-- CloudWatch logs and Step Functions failure alarms
+- Secrets Manager for Snowflake runtime metadata
+- CloudWatch logs, Step Functions failure alarms, and a Snowflake degraded alarm
 
 Explicitly out of scope in v1:
 
 - Glue Catalog
 - Athena
 - DynamoDB-based execution locking
-- private subnets, NAT, or VPC endpoints
 - CI/CD automation inside Terraform
 - always-on APIs, ALBs, or API Gateway
 
@@ -32,7 +36,7 @@ infra/terraform/
     dev/
     prod/
   modules/
-    network_public/
+    network_runtime/
     storage_buckets/
     warehouse_runtime/
 ```
@@ -53,11 +57,13 @@ Each account owns its own:
 - Terraform state bucket
 - bronze bucket
 - warehouse bucket
+- Snowflake export bucket
 - ECR repository
 - ECS cluster
 - Step Functions state machines
 - EventBridge schedules
 - Secrets Manager secret for `EDGAR_IDENTITY`
+- Secrets Manager secret for Snowflake runtime metadata
 - CloudWatch log group and alarms
 
 Deterministic names:
@@ -65,13 +71,17 @@ Deterministic names:
 - `edgartools-dev-tfstate`
 - `edgartools-dev-bronze`
 - `edgartools-dev-warehouse`
+- `edgartools-dev-snowflake-export`
 - `edgartools-prod-tfstate`
 - `edgartools-prod-bronze`
 - `edgartools-prod-warehouse`
+- `edgartools-prod-snowflake-export`
 
 ## Storage contract on AWS
 
 Bronze and warehouse data live in separate buckets per account.
+
+Snowflake export data lives in a third dedicated bucket per account.
 
 Bronze bucket:
 
@@ -84,6 +94,12 @@ Warehouse bucket:
 - stores mutable `staging`, `silver`, `gold`, and `artifacts` prefixes
 - is the only bucket that holds Parquet datasets
 
+Snowflake export bucket:
+
+- stores one export package per business table per run for the Snowflake mirror
+- is isolated from the canonical warehouse bucket
+- is read by the private Snowflake sync runner
+
 Required prefixes:
 
 - `s3://<bronze-bucket>/warehouse/bronze/...`
@@ -91,14 +107,47 @@ Required prefixes:
 - `s3://<warehouse-bucket>/warehouse/silver/sec/...`
 - `s3://<warehouse-bucket>/warehouse/gold/...`
 - `s3://<warehouse-bucket>/warehouse/artifacts/...`
+- `s3://<snowflake-export-bucket>/warehouse/artifacts/snowflake_exports/...`
 
 `bootstrap_full` and `bootstrap_recent_10` write to the same silver and gold prefixes. The only difference is row scope.
+
+Current runtime modes:
+
+- `infrastructure_validation` writes run manifests only
+- `bronze_capture` writes real bronze raw objects for reference files, daily index files, and submissions JSON while downstream layers remain staged
+- in `bronze_capture`, `daily_incremental` can derive impacted CIKs from the raw daily index and capture bounded main submissions JSON before tracked-universe state exists
+- `WAREHOUSE_BRONZE_CIK_LIMIT` is the temporary safety cap for that bounded daily capture path
+
+Bronze raw object paths now include:
+
+- `s3://<bronze-bucket>/warehouse/bronze/reference/sec/company_tickers/...`
+- `s3://<bronze-bucket>/warehouse/bronze/reference/sec/company_tickers_exchange/...`
+- `s3://<bronze-bucket>/warehouse/bronze/daily_index/sec/...`
+- `s3://<bronze-bucket>/warehouse/bronze/submissions/sec/...`
 
 ## Compute and orchestration
 
 The runtime uses one container image built from this repo and executed on ECS Fargate.
 
-The image installs the package with the `data` and `s3` extras and exposes the `edgar-warehouse` CLI entrypoint.
+The image installs the package without the full analysis dependency tree, then installs the curated warehouse runtime dependency set and exposes the `edgar-warehouse` CLI entrypoint.
+
+For the current AWS runtime contract, that warehouse dependency set includes:
+
+- `httpx`
+- `duckdb`
+- `pyarrow`
+- `zstandard`
+- `fsspec`
+- `s3fs`
+
+The Docker build should copy only runtime-needed files such as `pyproject.toml`, `README.md`, `LICENSE.txt`, and `edgar/`, not the full repo tree.
+
+Gold-affecting workflows use two ECS steps:
+
+1. canonical warehouse task in public subnets
+2. Snowflake sync task in private subnets
+
+Index-only workflows stay single-step and do not invoke Snowflake sync.
 
 Step Functions state machines:
 

@@ -1,0 +1,3 @@
+bucket = "edgartools-prod-tfstate"
+key    = "snowflake/prod/terraform.tfstate"
+region = "us-east-1"

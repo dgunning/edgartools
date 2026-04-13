@@ -1,0 +1,5 @@
+snowflake_organization_name = "replace-me"
+snowflake_account_name      = "replace-me"
+snowflake_user              = "replace-me"
+snowflake_authenticator     = "externalbrowser"
+snowflake_admin_role        = "ACCOUNTADMIN"

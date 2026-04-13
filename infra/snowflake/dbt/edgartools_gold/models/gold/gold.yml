@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: edgartools_gold_status
+    description: Business-facing freshness view for the Snowflake gold mirror.
+    columns:
+      - name: environment
+        tests:
+          - not_null
+      - name: status
+        tests:
+          - not_null
+      - name: updated_at
+        tests:
+          - not_null

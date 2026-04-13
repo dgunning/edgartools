@@ -15,6 +15,8 @@ The implementation verification plan is documented in [docs/sec-hosting-verifica
 
 The AWS deployment guide is documented in [docs/guides/aws-warehouse-deployment.md](C:/work/projects/edgartools/docs/guides/aws-warehouse-deployment.md).
 
+The Snowflake gold mirror guide is documented in [docs/guides/snowflake-gold-mirror.md](C:/work/projects/edgartools/docs/guides/snowflake-gold-mirror.md).
+
 ## Implementation Contract
 
 This section is normative for implementation. If it is more specific than a later generalized section, this section wins.
@@ -26,7 +28,8 @@ This section is normative for implementation. If it is more specific than a late
 - SEC payloads may contain non-ASCII data, but that data is external and must not be hard-coded in repo-authored files
 - v1 runtime is Python jobs or CLI in this repo, DuckDB, Parquet, and `fsspec`
 - supported storage backends are local filesystem, S3, and Azure Blob
-- Databricks and Snowflake are future-compatible targets, not v1 runtime dependencies
+- Databricks is a future-compatible target, not a v1 runtime dependency
+- Snowflake is an approved downstream gold mirror for analytics serving, not the canonical runtime for bronze or silver
 
 ### AWS Terraform Deployment Contract
 
@@ -89,9 +92,104 @@ Container runtime rules:
 - image build and push happen outside Terraform
 - Terraform deploys by image tag or digest; use immutable digest (`sha256:...`) in production
 - the container must expose the `edgar-warehouse` CLI entrypoint
-- install the package with the `data` and `s3` extras in the AWS container image
+- install the package without the full analysis dependency tree and then add the curated warehouse runtime dependency set
+- the warehouse runtime dependency set must include DuckDB, PyArrow, zstandard, `fsspec`, and the selected cloud filesystem package for the target environment
 - ECR repository must use `image_tag_mutability = "IMMUTABLE"` and `scan_on_push = true`
-- the `.dockerignore` file must exclude `.git`, `.venv`, `tests/`, `infra/`, `**/.terraform`, `data/`, and `notebooks/` to keep the build context under 100 MB
+- the Docker build must copy only the files required to install the package and execute `edgar-warehouse`
+- the `.dockerignore` file must exclude `.git`, `.venv`, `tests/`, `infra/`, `data/`, `docs/`, `examples/`, `scripts/`, `notebooks/`, local temp directories, and `**/.terraform` to keep the build context minimal
+
+### Snowflake Gold Mirror Contract
+
+Snowflake is a downstream serving mirror for the canonical warehouse. It must not become the source of
+truth for bronze, staging, silver, or canonical gold.
+
+Canonical boundary:
+
+- bronze remains immutable object storage
+- silver remains the canonical normalized lakehouse layer
+- canonical gold remains the warehouse contract in object storage
+- Snowflake mirrors selected gold-serving datasets for business access
+
+Repository layout:
+
+- `infra/terraform/snowflake/accounts/dev/`
+- `infra/terraform/snowflake/accounts/prod/`
+- `infra/terraform/snowflake/modules/`
+
+Baseline Snowflake object names:
+
+- databases: `EDGARTOOLS_DEV`, `EDGARTOOLS_PROD`
+- schemas: `EDGARTOOLS_SOURCE`, `EDGARTOOLS_GOLD`
+- roles: `EDGARTOOLS_<ENV>_DEPLOYER`, `EDGARTOOLS_<ENV>_REFRESHER`, `EDGARTOOLS_<ENV>_READER`
+- warehouses: `EDGARTOOLS_<ENV>_REFRESH_WH`, `EDGARTOOLS_<ENV>_READER_WH`
+
+Snowflake operating rules:
+
+- keep Snowflake Terraform state separate from AWS Terraform state
+- use Terraform for stable Snowflake platform objects and infrequent structural changes
+- use SnowCLI for Snowflake SQL execution and for bootstrap-only escape hatches when provider auth blocks Terraform
+- use dbt for ongoing Snowflake gold model changes, including new columns
+- use Snowflake dynamic tables for runtime refresh, not ad hoc manual SQL chains
+- trigger Snowflake refresh after every successful gold-affecting AWS warehouse run
+- if Snowflake refresh fails, mark the mirror stale and keep the canonical warehouse successful
+
+Current reference architecture:
+
+- canonical warehouse ECS tasks run in public subnets
+- Snowflake sync ECS tasks run in private subnets
+- AWS writes canonical bronze, staging, silver, and gold data into the warehouse S3 buckets
+- AWS writes one Snowflake export package per business table per run into a dedicated Snowflake export bucket
+- the Snowflake sync task reads runtime metadata from Secrets Manager and calls one public Snowflake wrapper
+- CloudWatch alarms separate true Step Functions failure from Snowflake stale or degraded mirror state
+
+```mermaid
+flowchart LR
+    sec["SEC EDGAR sources"] --> sfns["AWS Step Functions warehouse workflows"]
+    sfns --> wh["Public ECS warehouse task"]
+    wh --> bronze["Bronze bucket\nimmutable raw SEC artifacts"]
+    wh --> warehouse["Warehouse bucket\nstaging, silver, canonical gold, artifacts"]
+    wh --> export["Dedicated Snowflake export bucket\none package per business table per run"]
+    sfns --> sync["Private ECS Snowflake sync task"]
+    secret["Secrets Manager\nSnowflake runtime metadata"] --> sync
+    export --> sync
+    sync --> wrapper["Snowflake wrapper\nCALL EDGARTOOLS_GOLD.REFRESH_AFTER_LOAD(...)"]
+    wrapper --> source["Snowflake EDGARTOOLS_SOURCE\nstage, file format, status, source load"]
+    wrapper --> gold["Snowflake EDGARTOOLS_GOLD\ncurated business tables and status view"]
+    gold --> users["Business readers"]
+    sfns --> failalarm["CloudWatch workflow failure alarms"]
+    sync --> degradealarm["CloudWatch Snowflake degraded alarm"]
+```
+
+Snowflake build order:
+
+1. baseline platform objects: database, schemas, warehouses, account roles
+2. import path: storage integration, stage, file format, technical status table
+3. runtime SQL layer: source load procedure and public refresh wrapper
+4. dbt layer: business-facing models, dynamic tables, tests, and `EDGARTOOLS_GOLD_STATUS`
+5. runtime cutover: replace infrastructure-validation mode with real Snowflake import and refresh
+
+Preferred Snowflake E2E path:
+
+- AWS exports one package per business table per run into the dedicated Snowflake export bucket
+- Snowflake ingests from S3 through a Snowflake storage integration, not direct application credentials
+- one public wrapper call remains the AWS runtime contract:
+  - `CALL EDGARTOOLS_GOLD.REFRESH_AFTER_LOAD(workflow_name, run_id)`
+- business users see only curated `EDGARTOOLS_GOLD` objects and the freshness view `EDGARTOOLS_GOLD_STATUS`
+
+Current warehouse runtime modes:
+
+- `infrastructure_validation`: write run manifests only
+- `bronze_capture`: write real bronze raw objects for reference files, daily index files, and submissions JSON while silver and gold remain staged
+- in `bronze_capture`, `daily_incremental` may derive impacted CIKs from the raw daily index and capture main submissions JSON before silver state exists
+- `WAREHOUSE_BRONZE_CIK_LIMIT` may be used as a temporary bounded-validation cap until tracked-universe state exists
+
+Five-whys rationale for the preferred path:
+
+1. Why keep Snowflake downstream of the warehouse? Because the canonical warehouse must remain replayable even when Snowflake is unavailable.
+2. Why use S3 export plus Snowflake import instead of direct writes? Because exports are deterministic, replayable, and isolate AWS pipeline success from Snowflake outages.
+3. Why keep Terraform separate from dbt? Because structural platform changes are infrequent, while gold model changes happen continuously.
+4. Why use one refresh wrapper instead of many table-level commands? Because orchestration needs one stable contract with centralized retry, status, and cost control.
+5. Why use dynamic tables after the load rather than always-on refresh? Because post-load refresh gives better cost control and keeps freshness tied to canonical warehouse success.
 
 ### Identifier Classes
 
@@ -667,7 +765,8 @@ Examples:
 Recommended engines:
 
 - DuckDB for local and medium-scale analysis
-- Spark/Snowflake/BigQuery for large-scale workloads
+- Spark/BigQuery for large-scale canonical processing
+- Snowflake for large-scale downstream gold serving
 
 ## Required Data Assets
 
@@ -889,6 +988,12 @@ Use a deterministic object storage layout.
 bronze/reference/sec/company_tickers/{YYYY}/{MM}/{DD}/company_tickers.json
 bronze/reference/sec/company_tickers_exchange/{YYYY}/{MM}/{DD}/company_tickers_exchange.json
 bronze/reference/sec/current_feed/{YYYY}/{MM}/{DD}/{HH}/current_feed_atom.xml
+```
+
+### Daily Index
+
+```text
+bronze/daily_index/sec/{YYYY}/{MM}/{DD}/form.YYYYMMDD.idx
 ```
 
 ### Submissions
@@ -1301,7 +1406,7 @@ Apply these rules consistently.
 
 - Bronze: Azure Blob or S3
 - Silver and Gold: Delta or Iceberg
-- Compute: Spark or Snowflake
+- Compute: Spark for canonical processing, Snowflake for downstream gold serving
 - Search: OpenSearch
 
 ## Data Quality Rules
