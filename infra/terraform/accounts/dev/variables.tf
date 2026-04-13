@@ -10,6 +10,18 @@ variable "container_image" {
   default     = null
 }
 
+variable "warehouse_runtime_mode" {
+  description = "Canonical warehouse runtime mode for the dev ECS warehouse task."
+  type        = string
+  default     = "infrastructure_validation"
+}
+
+variable "warehouse_bronze_cik_limit" {
+  description = "Optional bounded-validation cap for daily bronze submissions capture in dev."
+  type        = number
+  default     = null
+}
+
 variable "bronze_bucket_name" {
   description = "Optional override for the bronze bucket name."
   type        = string
@@ -22,8 +34,32 @@ variable "warehouse_bucket_name" {
   default     = null
 }
 
+variable "snowflake_export_bucket_name" {
+  description = "Optional override for the Snowflake export bucket name."
+  type        = string
+  default     = null
+}
+
 variable "edgar_identity_secret_arn" {
   description = "Optional pre-existing EDGAR identity secret ARN."
+  type        = string
+  default     = null
+}
+
+variable "snowflake_runtime_secret_arn" {
+  description = "Optional pre-existing Snowflake runtime metadata secret ARN."
+  type        = string
+  default     = null
+}
+
+variable "snowflake_account_identifier" {
+  description = "Snowflake account identifier used by the runtime metadata secret."
+  type        = string
+  default     = null
+}
+
+variable "snowflake_storage_integration_name" {
+  description = "Snowflake storage integration used for S3 export imports."
   type        = string
   default     = null
 }
@@ -38,6 +74,12 @@ variable "public_subnet_cidrs" {
   description = "Public subnet CIDR blocks for dev."
   type        = list(string)
   default     = ["10.20.0.0/24", "10.20.1.0/24"]
+}
+
+variable "private_subnet_cidrs" {
+  description = "Private subnet CIDR blocks for the Snowflake sync runner in dev."
+  type        = list(string)
+  default     = ["10.20.10.0/24", "10.20.11.0/24"]
 }
 
 variable "availability_zones" {
@@ -79,9 +121,14 @@ variable "task_profile_by_workflow" {
   default     = {}
 }
 
+variable "snowflake_task_profile_name" {
+  description = "Task profile name for the Snowflake sync runner."
+  type        = string
+  default     = "small"
+}
+
 variable "tags" {
   description = "Additional tags applied to dev resources."
   type        = map(string)
   default     = {}
 }
-

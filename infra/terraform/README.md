@@ -9,6 +9,12 @@ bootstrap-state/
 accounts/
   dev/
   prod/
+snowflake/
+  accounts/
+    dev/
+    prod/
+  modules/
+    account_baseline/
 modules/
   network_public/
   storage_buckets/
@@ -30,3 +36,5 @@ modules/
 - S3 backend state locking uses `use_lockfile = true`.
 - Bronze and warehouse data use separate buckets.
 - No DynamoDB, Glue, Athena, or private networking is provisioned in v1.
+- Snowflake baseline objects are provisioned from `infra/terraform/snowflake/` and use separate
+  state keys from the AWS account roots.

@@ -18,6 +18,11 @@ output "edgar_identity_secret_arn" {
   value       = local.resolved_edgar_identity_secret_arn
 }
 
+output "snowflake_runtime_secret_arn" {
+  description = "Snowflake runtime metadata secret ARN used by the private sync runner."
+  value       = local.resolved_snowflake_runtime_secret_arn
+}
+
 output "state_machine_arns" {
   description = "State machine ARNs keyed by workflow."
   value       = { for name, workflow in aws_sfn_state_machine.workflow : name => workflow.arn }
@@ -28,3 +33,7 @@ output "log_group_name" {
   value       = aws_cloudwatch_log_group.ecs.name
 }
 
+output "step_functions_log_group_name" {
+  description = "CloudWatch log group for Step Functions workflow logs."
+  value       = aws_cloudwatch_log_group.step_functions.name
+}

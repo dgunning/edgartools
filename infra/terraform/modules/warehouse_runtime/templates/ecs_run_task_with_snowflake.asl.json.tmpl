@@ -1,0 +1,206 @@
+{
+  "Comment": "Run an EdgarTools warehouse workflow and then sync Snowflake gold on ECS Fargate.",
+  "StartAt": "RunWarehouseTask",
+  "States": {
+    "RunWarehouseTask": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::ecs:runTask.sync",
+      "Parameters": {
+        "LaunchType": "FARGATE",
+        "Cluster": "${cluster_arn}",
+        "TaskDefinition": "${warehouse_task_definition_arn}",
+        "PropagateTags": "TASK_DEFINITION",
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "ENABLED",
+            "SecurityGroups": ${public_security_groups_json},
+            "Subnets": ${public_subnets_json}
+          }
+        },
+        "Overrides": {
+          "ContainerOverrides": [
+            {
+              "Name": "${container_name}",
+              "Command.$": "${warehouse_command_expression}"
+            }
+          ]
+        }
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "States.TaskFailed"
+          ],
+          "IntervalSeconds": 60,
+          "BackoffRate": 2.0,
+          "MaxAttempts": 2
+        }
+      ],
+      "Next": "RunSnowflakeSyncAttempt1"
+    },
+    "RunSnowflakeSyncAttempt1": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::ecs:runTask.sync",
+      "Parameters": {
+        "LaunchType": "FARGATE",
+        "Cluster": "${cluster_arn}",
+        "TaskDefinition": "${snowflake_task_definition_arn}",
+        "PropagateTags": "TASK_DEFINITION",
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "DISABLED",
+            "SecurityGroups": ${private_security_groups_json},
+            "Subnets": ${private_subnets_json}
+          }
+        },
+        "Overrides": {
+          "ContainerOverrides": [
+            {
+              "Name": "${container_name}",
+              "Command.$": "${snowflake_command_expression}"
+            }
+          ]
+        }
+      },
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.snowflake_sync_error",
+          "Next": "WaitBeforeSnowflakeRetry1"
+        }
+      ],
+      "End": true
+    },
+    "WaitBeforeSnowflakeRetry1": {
+      "Type": "Wait",
+      "Seconds": 300,
+      "Next": "RunSnowflakeSyncAttempt2"
+    },
+    "RunSnowflakeSyncAttempt2": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::ecs:runTask.sync",
+      "Parameters": {
+        "LaunchType": "FARGATE",
+        "Cluster": "${cluster_arn}",
+        "TaskDefinition": "${snowflake_task_definition_arn}",
+        "PropagateTags": "TASK_DEFINITION",
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "DISABLED",
+            "SecurityGroups": ${private_security_groups_json},
+            "Subnets": ${private_subnets_json}
+          }
+        },
+        "Overrides": {
+          "ContainerOverrides": [
+            {
+              "Name": "${container_name}",
+              "Command.$": "${snowflake_command_expression}"
+            }
+          ]
+        }
+      },
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.snowflake_sync_error",
+          "Next": "WaitBeforeSnowflakeRetry2"
+        }
+      ],
+      "End": true
+    },
+    "WaitBeforeSnowflakeRetry2": {
+      "Type": "Wait",
+      "Seconds": 900,
+      "Next": "RunSnowflakeSyncAttempt3"
+    },
+    "RunSnowflakeSyncAttempt3": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::ecs:runTask.sync",
+      "Parameters": {
+        "LaunchType": "FARGATE",
+        "Cluster": "${cluster_arn}",
+        "TaskDefinition": "${snowflake_task_definition_arn}",
+        "PropagateTags": "TASK_DEFINITION",
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "DISABLED",
+            "SecurityGroups": ${private_security_groups_json},
+            "Subnets": ${private_subnets_json}
+          }
+        },
+        "Overrides": {
+          "ContainerOverrides": [
+            {
+              "Name": "${container_name}",
+              "Command.$": "${snowflake_command_expression}"
+            }
+          ]
+        }
+      },
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.snowflake_sync_error",
+          "Next": "WaitBeforeSnowflakeRetry3"
+        }
+      ],
+      "End": true
+    },
+    "WaitBeforeSnowflakeRetry3": {
+      "Type": "Wait",
+      "Seconds": 1800,
+      "Next": "RunSnowflakeSyncAttempt4"
+    },
+    "RunSnowflakeSyncAttempt4": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::ecs:runTask.sync",
+      "Parameters": {
+        "LaunchType": "FARGATE",
+        "Cluster": "${cluster_arn}",
+        "TaskDefinition": "${snowflake_task_definition_arn}",
+        "PropagateTags": "TASK_DEFINITION",
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "DISABLED",
+            "SecurityGroups": ${private_security_groups_json},
+            "Subnets": ${private_subnets_json}
+          }
+        },
+        "Overrides": {
+          "ContainerOverrides": [
+            {
+              "Name": "${container_name}",
+              "Command.$": "${snowflake_command_expression}"
+            }
+          ]
+        }
+      },
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.snowflake_sync_error",
+          "Next": "MarkSnowflakeSyncDegraded"
+        }
+      ],
+      "End": true
+    },
+    "MarkSnowflakeSyncDegraded": {
+      "Type": "Pass",
+      "Parameters": {
+        "snowflake_sync_status": "degraded",
+        "snowflake_sync_marker": "SNOWFLAKE_SYNC_DEGRADED",
+        "snowflake_sync_error.$": "$.snowflake_sync_error"
+      },
+      "End": true
+    }
+  }
+}

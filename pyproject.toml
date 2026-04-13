@@ -79,6 +79,14 @@ data = [
     "zstandard>=0.20.0",        # Decompress datamule tar content
 ]
 
+warehouse = [
+    "duckdb>=1.0.0",            # Canonical warehouse query engine
+    "httpx>=0.25.0",            # SEC download client for bronze raw capture
+    "pyarrow>=17.0.0",          # Parquet read/write support for warehouse storage
+    "zstandard>=0.20.0",        # Compressed warehouse artifact handling
+    "fsspec>=2023.1.0",         # Filesystem abstraction for local and object storage
+]
+
 test-harness = [
     "click>=8.0.0",              # CLI interface for test harness
 ]
@@ -120,7 +128,7 @@ Changelog = "https://github.com/dgunning/edgartools/releases"
 [project.scripts]
 edgartools-mcp = "edgar.ai.mcp.server:main"
 edgar-test = "tests.harness.cli:cli"
-edgar-warehouse = "edgar.warehouse.cli:main"
+edgar-warehouse = "edgar_warehouse.cli:main"
 
 [tool.hatch.version]
 path = "edgar/__about__.py"
@@ -128,6 +136,7 @@ path = "edgar/__about__.py"
 [tool.hatch.build]
 include = [
   "edgar/**/*.py",
+  "edgar_warehouse/**/*.py",
   "edgar/**/templates/*.html",
   "edgar/**/docs/*.md",
   "edgar/ai/skills/**/*.yaml",

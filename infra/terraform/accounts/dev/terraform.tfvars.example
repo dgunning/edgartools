@@ -1,2 +1,5 @@
 container_image = "123456789012.dkr.ecr.us-east-1.amazonaws.com/edgartools-dev-warehouse@sha256:replace-me"
-
+warehouse_runtime_mode = "bronze_capture"
+warehouse_bronze_cik_limit = 10
+snowflake_account_identifier      = "replace-me"
+snowflake_storage_integration_name = "replace-me"

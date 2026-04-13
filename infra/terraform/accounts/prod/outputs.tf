@@ -8,6 +8,11 @@ output "warehouse_bucket_name" {
   value       = module.storage.warehouse_bucket_name
 }
 
+output "snowflake_export_bucket_name" {
+  description = "Prod Snowflake export bucket name."
+  value       = module.storage.snowflake_export_bucket_name
+}
+
 output "ecr_repository_url" {
   description = "Prod ECR repository URL."
   value       = module.runtime.ecr_repository_url
@@ -28,3 +33,7 @@ output "state_machine_arns" {
   value       = module.runtime.state_machine_arns
 }
 
+output "snowflake_runtime_secret_arn" {
+  description = "Prod Snowflake runtime metadata secret ARN."
+  value       = module.runtime.snowflake_runtime_secret_arn
+}

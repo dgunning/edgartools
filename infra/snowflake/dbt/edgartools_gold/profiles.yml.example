@@ -1,0 +1,25 @@
+edgartools_gold:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('DBT_SNOWFLAKE_USER') }}"
+      password: "{{ env_var('DBT_SNOWFLAKE_PASSWORD') }}"
+      role: "{{ env_var('DBT_SNOWFLAKE_ROLE', 'EDGARTOOLS_DEV_DEPLOYER') }}"
+      database: "{{ env_var('DBT_SNOWFLAKE_DATABASE', 'EDGARTOOLS_DEV') }}"
+      warehouse: "{{ env_var('DBT_SNOWFLAKE_WAREHOUSE', 'EDGARTOOLS_DEV_REFRESH_WH') }}"
+      schema: EDGARTOOLS_GOLD
+      threads: 4
+      client_session_keep_alive: false
+    prod:
+      type: snowflake
+      account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('DBT_SNOWFLAKE_USER') }}"
+      password: "{{ env_var('DBT_SNOWFLAKE_PASSWORD') }}"
+      role: "{{ env_var('DBT_SNOWFLAKE_ROLE', 'EDGARTOOLS_PROD_DEPLOYER') }}"
+      database: "{{ env_var('DBT_SNOWFLAKE_DATABASE', 'EDGARTOOLS_PROD') }}"
+      warehouse: "{{ env_var('DBT_SNOWFLAKE_WAREHOUSE', 'EDGARTOOLS_PROD_REFRESH_WH') }}"
+      schema: EDGARTOOLS_GOLD
+      threads: 4
+      client_session_keep_alive: false

@@ -14,6 +14,18 @@ variable "container_image" {
   default     = null
 }
 
+variable "warehouse_runtime_mode" {
+  description = "Canonical warehouse runtime mode passed to the ECS warehouse task."
+  type        = string
+  default     = "infrastructure_validation"
+}
+
+variable "warehouse_bronze_cik_limit" {
+  description = "Optional bounded-validation cap for daily bronze submissions capture before tracked-universe state exists."
+  type        = number
+  default     = null
+}
+
 variable "bronze_bucket_name" {
   description = "Immutable bronze bucket name."
   type        = string
@@ -34,18 +46,61 @@ variable "warehouse_bucket_arn" {
   type        = string
 }
 
-variable "subnet_ids" {
-  description = "Public subnet IDs for ECS tasks."
+variable "snowflake_export_bucket_name" {
+  description = "Dedicated Snowflake export bucket name."
+  type        = string
+}
+
+variable "snowflake_export_bucket_arn" {
+  description = "Dedicated Snowflake export bucket ARN."
+  type        = string
+}
+
+variable "snowflake_export_kms_key_arn" {
+  description = "CMK ARN for Snowflake export artifacts and runtime metadata."
+  type        = string
+}
+
+variable "public_subnet_ids" {
+  description = "Public subnet IDs for canonical warehouse ECS tasks."
   type        = list(string)
 }
 
-variable "security_group_id" {
-  description = "Security group for warehouse ECS tasks."
+variable "private_subnet_ids" {
+  description = "Private subnet IDs for Snowflake sync ECS tasks."
+  type        = list(string)
+}
+
+variable "public_security_group_id" {
+  description = "Security group for public warehouse ECS tasks."
+  type        = string
+}
+
+variable "private_security_group_id" {
+  description = "Security group for private Snowflake sync ECS tasks."
   type        = string
 }
 
 variable "edgar_identity_secret_arn" {
   description = "Optional pre-existing EDGAR identity secret ARN."
+  type        = string
+  default     = null
+}
+
+variable "snowflake_runtime_secret_arn" {
+  description = "Optional pre-existing Snowflake runtime metadata secret ARN."
+  type        = string
+  default     = null
+}
+
+variable "snowflake_account_identifier" {
+  description = "Snowflake account identifier used for WIF runtime metadata."
+  type        = string
+  default     = null
+}
+
+variable "snowflake_storage_integration_name" {
+  description = "Snowflake storage integration used to import export artifacts from S3."
   type        = string
   default     = null
 }
@@ -83,9 +138,14 @@ variable "task_profile_by_workflow" {
   default     = {}
 }
 
+variable "snowflake_task_profile_name" {
+  description = "Task profile name for the Snowflake sync runner."
+  type        = string
+  default     = "small"
+}
+
 variable "tags" {
   description = "Additional tags applied to runtime resources."
   type        = map(string)
   default     = {}
 }
-

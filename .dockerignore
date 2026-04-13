@@ -18,9 +18,22 @@ site
 # Tests (not needed at runtime)
 tests/
 
+# Docs, examples, and support content (not needed at runtime)
+docs/
+examples/
+scripts/
+specification.md
+AGENTS.md
+CLAUDE.md
+CONTRIBUTING.md
+mkdocs.yml
+
 # Notebooks and local data
 notebooks
 data
+.tmp*
+.claude
+.pytest-tmp
 
 # Infrastructure (Terraform, not needed in container)
 infra/
@@ -34,3 +47,6 @@ infra/
 # Logs and temp files
 *.log
 pytest-cache-files-*/
+=
+[internal]
+transferring

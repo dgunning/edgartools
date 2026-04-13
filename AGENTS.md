@@ -92,6 +92,7 @@ When working on the SEC warehouse or hosting design, treat these as the authorit
 2. `docs/sec-company-filings-data-model.md`
 3. `docs/sec-hosting-verification-plan.md`
 4. `docs/guides/aws-warehouse-deployment.md`
+5. `docs/guides/snowflake-gold-mirror.md`
 
 Core warehouse rules:
 
@@ -131,6 +132,21 @@ Storage and authoring rules:
 - Generated partition keys like `cik_bucket` are storage helpers only, never business join keys
 - All repo-authored warehouse code, tests, SQL, comments, and docs must remain ASCII-only
 - AWS Terraform lives under `infra/terraform/` with separate `bootstrap-state`, `accounts/dev`, and `accounts/prod` roots
+- Warehouse runtime cutover is phased: `infrastructure_validation` writes manifests only, and `bronze_capture` is the first non-validation mode for raw reference, daily index, and submissions capture
+- `bronze_capture` daily incremental may use `WAREHOUSE_BRONZE_CIK_LIMIT` as a temporary bounded validation cap until tracked-universe state exists
+- Snowflake Terraform lives separately under `infra/terraform/snowflake/`
+- Snowflake is a gold mirror only; do not move canonical bronze or silver ownership into Snowflake
+- Keep the warehouse Docker image minimal: copy only runtime-needed files and add only the curated warehouse runtime dependency set
+- Do not pull the full Edgar analysis dependency tree into the warehouse image unless a warehouse command directly imports it
+- Preferred Snowflake E2E build order is:
+  1. baseline platform objects in `infra/terraform/snowflake/`
+  2. storage integration, stage, and source-side load objects
+  3. dbt-managed gold models, dynamic tables, and `EDGARTOOLS_GOLD_STATUS`
+  4. AWS runtime cutover from infrastructure validation to real Snowflake import and refresh
+- Prefer S3 export plus Snowflake import over direct writes from the runtime
+- Keep one public runtime contract for Snowflake refresh:
+  - `CALL EDGARTOOLS_GOLD.REFRESH_AFTER_LOAD(workflow_name, run_id)`
+- Use Terraform for stable Snowflake platform objects, SnowCLI for Snowflake SQL/bootstrap work, and dbt for ongoing gold model evolution
 
 ## Verification
 
