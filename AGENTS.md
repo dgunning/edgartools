@@ -79,6 +79,10 @@ Statuses: `open`, `in_progress`, `blocked`, `closed`
 | Data objects | `edgar/ai/skills/core/data-objects.md` |
 | Workflows | `edgar/ai/skills/core/workflows.md` |
 
+Git publishing rule:
+- Push this workspace only to `https://github.com/paulananth/edgartools`
+- Do not push this workspace to `dgunning/edgartools`
+
 Execution rules:
 
 - Use Git Bash for all verification, testing, build, Docker, and Terraform commands
