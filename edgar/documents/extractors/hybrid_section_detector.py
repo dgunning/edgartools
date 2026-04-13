@@ -48,9 +48,23 @@ class HybridSectionDetector:
         self.form = form
         self.thresholds = thresholds or DetectionThresholds()
 
+        # Detect filing agent from the original HTML for agent-aware TOC parsing
+        agent = self._detect_agent()
+
         # Initialize detection strategies
-        self.toc_detector = TOCSectionDetector(document)
+        self.toc_detector = TOCSectionDetector(document, agent=agent)
         self.pattern_extractor = SectionExtractor(form)
+
+    def _detect_agent(self) -> Optional[str]:
+        """Detect filing agent from the document's original HTML."""
+        html_content = getattr(self.document.metadata, 'original_html', None)
+        if not html_content:
+            return None
+        try:
+            from edgar.documents.agents import detect_filing_agent
+            return detect_filing_agent(html_content)
+        except Exception:
+            return None
 
     def detect_sections(self) -> Dict[str, Section]:
         """

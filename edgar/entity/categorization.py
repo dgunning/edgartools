@@ -22,6 +22,7 @@ from typing import Optional, Set, Union
 __all__ = [
     'BusinessCategory',
     'classify_business_category',
+    'sic_overrides_bdc',
     'SIC_CODES_REIT',
     'SIC_CODES_SPAC',
     'SIC_CODES_BANK',
@@ -246,11 +247,11 @@ def classify_business_category(
         return BusinessCategory.SPAC.value
 
     # Step 4: Check BDC signals (forms only — no name pattern)
-    if _is_bdc(entity_type, form_types):
+    if _is_bdc(entity_type, form_types, sic=sic_int):
         return BusinessCategory.BDC.value
 
     # Step 5: Check investment manager signals
-    if _is_investment_manager(sic_int, form_types):
+    if _is_investment_manager(sic_int, form_types, name_upper):
         return BusinessCategory.INVESTMENT_MANAGER.value
 
     # Step 6: Check holding company
@@ -271,12 +272,17 @@ def classify_business_category(
             return BusinessCategory.ETF.value
 
     # Step 9: Default to operating company
-    # Most SEC filers are operating companies unless classified otherwise
-    # entity_type='operating' or missing/empty entity_type defaults to Operating Company
+    # If we have a SIC code and nothing above matched, the entity is an
+    # operating company regardless of entity_type. This handles foreign/Canadian
+    # filers (entity_type='other') that have clear SIC codes.
+    if sic_int is not None:
+        return BusinessCategory.OPERATING_COMPANY.value
+
+    # entity_type='operating' with no SIC is still an operating company
     if entity_type in ('operating', '', None):
         return BusinessCategory.OPERATING_COMPANY.value
 
-    # Step 10: Unknown (rare - only for explicitly non-operating entities without other classification)
+    # Step 10: Unknown (no SIC and non-operating entity_type)
     return BusinessCategory.UNKNOWN.value
 
 
@@ -327,19 +333,63 @@ def _classify_investment_company_type(
     return BusinessCategory.MUTUAL_FUND.value
 
 
+def sic_overrides_bdc(sic: Optional[int]) -> bool:
+    """
+    Check if SIC code definitively indicates a non-BDC category.
+
+    BDC subsidiaries' 814- file numbers and N-2 forms can bleed into
+    parent entities on EDGAR. If the entity's SIC code clearly indicates
+    it's a bank, insurer, REIT, utility, manufacturer, etc., the BDC
+    signal should be overridden.
+
+    Args:
+        sic: SIC code as integer
+
+    Returns:
+        True if SIC indicates a non-BDC business
+    """
+    if sic is None:
+        return False
+
+    # Definitive SIC-based categories take priority over BDC
+    if sic in SIC_CODES_REIT:
+        return True
+    if sic in SIC_CODES_BANK:
+        return True
+    if sic in SIC_CODES_INSURANCE:
+        return True
+    if sic in SIC_CODES_SPAC:
+        return True
+
+    # Non-financial SIC codes (outside 6000-6999) are never BDCs
+    if sic < 6000 or sic >= 7000:
+        return True
+
+    # SIC 6282 (Investment Advice) — parent asset managers are not BDCs
+    # SIC 6211 (Security Brokers) — investment banks are not BDCs
+    if sic in SIC_CODES_INVESTMENT_MANAGER:
+        return True
+
+    return False
+
+
 def _is_bdc(
     entity_type: Optional[str],
-    form_types: Set[str]
+    form_types: Set[str],
+    sic: Optional[int] = None
 ) -> bool:
     """
     Check if company is a Business Development Company.
 
     BDCs are identified by filing BDC-specific forms (N-2, N-2ASR, N-23C-2)
-    while having entity_type='operating'.
+    while having entity_type='operating'. SIC codes that definitively
+    indicate another category (bank, insurance, REIT, non-financial) block
+    BDC classification even if BDC forms are present.
 
     Args:
         entity_type: Entity type from SEC
         form_types: Set of form types filed by this company
+        sic: SIC code as integer (used to block false positives)
 
     Returns:
         True if company appears to be a BDC
@@ -348,35 +398,60 @@ def _is_bdc(
     if entity_type != 'operating':
         return False
 
+    # SIC guardrail: definitive non-BDC SICs block BDC classification
+    if sic is not None and sic_overrides_bdc(sic):
+        return False
+
     # Check for BDC-specific forms only
     return bool(form_types & BDC_FORMS)
 
 
 def _is_investment_manager(
     sic: Optional[int],
-    form_types: Set[str]
+    form_types: Set[str],
+    name_upper: str = ''
 ) -> bool:
     """
     Check if company is an investment manager/asset manager.
 
-    Investment managers:
-    - File 13F-HR if managing $100M+ in equities
-    - SIC 6211 (Security Brokers) or 6282 (Investment Advice)
+    Investment managers are identified by:
+    - SIC 6282 (Investment Advice) — sufficient on its own
+    - SIC 6211 (Security Brokers/Dealers) — sufficient unless name
+      contains "Trust"/"Fund"/"ETF" (could be commodity ETF)
+    - 13F-HR filing + investment SIC (always sufficient)
+
+    By this point in the classification flow, entities that are BDCs,
+    ETFs, Mutual Funds, Closed-End Funds, and SPACs have already been
+    classified. So SIC 6282/6211 reaching here is a strong signal.
 
     Args:
         sic: SIC code as integer
         form_types: Set of form types filed by this company
+        name_upper: Uppercased company name for heuristic checks
 
     Returns:
         True if company appears to be an investment manager
     """
-    # Check for 13F filing (institutional investment managers)
-    has_13f = bool(form_types & INVESTMENT_MANAGER_FORMS)
-
-    # Check for investment-related SIC codes
     inv_sic = sic is not None and sic in SIC_CODES_INVESTMENT_MANAGER
 
-    # Require both 13F and investment SIC for confident classification.
-    # SIC alone is insufficient — SIC 6211 is shared by commodity trusts,
-    # crypto ETFs, and broker-dealers that aren't investment managers.
-    return has_13f and inv_sic
+    if not inv_sic:
+        return False
+
+    # With 13F: always Investment Manager (even if "Trust" in name)
+    has_13f = bool(form_types & INVESTMENT_MANAGER_FORMS)
+    if has_13f:
+        return True
+
+    # SIC 6282 alone is sufficient — these are investment advisers
+    if sic == 6282:
+        return True
+
+    # SIC 6211 without 13F: only if not a trust/fund (could be commodity ETF)
+    if sic == 6211:
+        if 'TRUST' in name_upper or 'FUND' in name_upper:
+            return False  # Let commodity trust/ETF logic handle it
+        if 'ETF' in name_upper:
+            return False  # Let ETF-in-name logic handle it
+        return True
+
+    return False

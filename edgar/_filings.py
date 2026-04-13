@@ -1562,14 +1562,26 @@ class Filing:
         Get the period of report for the filing
         """
         period = self.sgml().period_of_report
-        if not period:
-            # Fallback: extract from homepage index page
+        if not period and not is_using_local_storage():
+            # Fallback: extract from homepage index page (network call)
+            # Skip when local storage is enabled to avoid unexpected network access
             try:
                 period = self.homepage.period_of_report
             except (httpx.TimeoutException, httpx.ConnectError, httpx.ReadTimeout,
                     httpcore.TimeoutException, httpcore.ConnectError, httpcore.NetworkError):
                 pass  # Offline or network unavailable — return None
         return period
+
+    @cached_property
+    def agent(self) -> Optional[str]:
+        """Identify the filing agent that prepared this filing (e.g. Workiva, Donnelley)."""
+        from edgar.documents.agents import detect_filing_agent
+        doc = self.sgml().attachments.primary_html_document
+        if not doc:
+            doc = self.homepage.primary_html_document
+        if doc and doc.content:
+            return detect_filing_agent(doc.content)
+        return None
 
     @property
     def attachments(self):
@@ -1879,6 +1891,12 @@ class Filing:
                 self._sgml = get_datamule_filing(self.accession_no)
 
         if self._sgml is None:
+            if is_using_local_storage():
+                log.warning(
+                    f"Filing {self.accession_no} not found in local storage. "
+                    f"Falling back to network fetch. "
+                    f"Download this filing to avoid network calls when using local storage."
+                )
             try:
                 self._sgml = FilingSGML.from_filing(self)
             except (ValueError, Exception) as e:
@@ -2359,13 +2377,24 @@ class Filing:
         attachments = self.attachments
 
         # The filing information table
-        filing_info_table = Table("Accession Number", "Filing Date", "Period of Report", "Documents",
+        # Include agent column only if it's been detected (avoids triggering
+        # a network call just for display — agent is a cached_property)
+        agent_name = self.__dict__.get('agent')  # Check cache without triggering lookup
+        info_columns = ["Accession Number", "Filing Date", "Period of Report", "Documents"]
+        if agent_name:
+            info_columns.append("Agent")
+        filing_info_table = Table(*info_columns,
                                   header_style="dim",
                                   box=box.SIMPLE_HEAD)
-        filing_info_table.add_row(accession_number_text(self.accession_no),
-                                  Text(str(self.filing_date), "bold"),
-                                  Text(self.period_of_report or "-", "bold"),
-                                  f"{len(attachments)}")
+        info_row = [
+            accession_number_text(self.accession_no),
+            Text(str(self.filing_date), "bold"),
+            Text(self.period_of_report or "-", "bold"),
+            f"{len(attachments)}",
+        ]
+        if agent_name:
+            info_row.append(Text(agent_name, "cyan"))
+        filing_info_table.add_row(*info_row)
 
         # Build content elements
         elements = [filing_info_table]

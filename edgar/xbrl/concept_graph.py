@@ -244,12 +244,12 @@ class Concept:
 
         # Value
         if self.value:
-            parts.append(Text(f"\nValue: {self.value}", style="bold"))
+            parts.append(Text(f"Value: {self.value}", style="bold"))
 
         # Appears in
         report_names = self.report_names
         if report_names:
-            appears = Text("\nAppears in:", style="dim")
+            appears = Text("Appears in:", style="dim")
             for name in report_names[:5]:
                 appears.append(f"\n  · {name}")
             if len(report_names) > 5:
@@ -260,21 +260,21 @@ class Concept:
         if self.is_root:
             children = self.children
             if children:
-                calc_text = Text("\nCalculation root. Children:", style="dim")
+                calc_text = Text("Calculation root. Children:", style="dim")
                 for child in children[:8]:
                     weight_str = f"weight: {child.weight}" if child.weight else ""
                     crdr_str = child.crdr or "n/a"
                     calc_text.append(f"\n  + {child.label} ({crdr_str}, {weight_str})")
                 parts.append(calc_text)
         elif self.parent:
-            parts.append(Text(f"\nParent: {self.parent.label}", style="dim"))
+            parts.append(Text(f"Parent: {self.parent.label}", style="dim"))
 
         # Documentation (truncated)
         if self.documentation:
             doc = self.documentation
             if len(doc) > 200:
                 doc = doc[:200] + "..."
-            parts.append(Text(f"\n{doc}", style="italic dim"))
+            parts.append(Text(f"{doc}", style="italic dim"))
 
         from rich.console import Group
         return Panel(

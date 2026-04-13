@@ -33,15 +33,17 @@ class TOCSectionDetector:
     - Complete text extraction with proper boundary detection
     """
 
-    def __init__(self, document: Document):
+    def __init__(self, document: Document, agent: Optional[str] = None):
         """
         Initialize TOC-based detector.
 
         Args:
             document: Document to analyze (must have metadata.original_html)
+            agent: Filing agent name for agent-specific TOC parsing
         """
         self.document = document
-        self.extractor = SECSectionExtractor(document)
+        self.agent = agent
+        self.extractor = SECSectionExtractor(document, agent=agent)
 
     def detect(self) -> Optional[Dict[str, Section]]:
         """

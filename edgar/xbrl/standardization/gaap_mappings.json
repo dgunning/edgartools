@@ -6702,9 +6702,9 @@
   },
   "AdjustmentsForGainLossOnDisposalOfInvestmentsInSubsidiariesJointVenturesAndAssociates": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "GainLossOnAssetSalesCF"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Gain/Loss on Asset Sales (CF)",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -6718,9 +6718,9 @@
   },
   "AdjustmentsForGainLossOnDisposalsPropertyPlantAndEquipment": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "GainLossOnAssetSalesCF"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Gain/Loss on Asset Sales (CF)",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -13446,9 +13446,9 @@
   },
   "CapitalExpendituresIncurredButNotYetPaid": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "CapitalExpenses"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Capital Expenditures",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -40895,9 +40895,9 @@
   },
   "DividendsPaidToNoncontrollingInterestsClassifiedAsFinancingActivities": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "CommonDividendsPaid"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Dividends Paid",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -60193,9 +60193,9 @@
   },
   "IncreaseDecreaseInAccountsAndOtherReceivables": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInReceivables"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accounts Receivable",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -60612,9 +60612,9 @@
   },
   "IncreaseDecreaseInAccountsPayableAndOtherOperatingLiabilities": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInPayables"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accounts Payable",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -60628,9 +60628,9 @@
   },
   "IncreaseDecreaseInAccountsPayableRelatedParties": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInPayables"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accounts Payable",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -60644,9 +60644,9 @@
   },
   "IncreaseDecreaseInAccountsPayableTrade": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInPayables"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accounts Payable",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -61110,9 +61110,9 @@
   },
   "IncreaseDecreaseInAccountsReceivableRelatedParties": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInReceivables"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accounts Receivable",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -61126,9 +61126,9 @@
   },
   "IncreaseDecreaseInAccruedIncomeTaxesPayable": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInAccruedLiabilities"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accrued Liabilities",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -61142,9 +61142,9 @@
   },
   "IncreaseDecreaseInAccruedInterestReceivableNet": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInReceivables"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accounts Receivable",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -61174,9 +61174,9 @@
   },
   "IncreaseDecreaseInAccruedLiabilitiesAndOtherOperatingLiabilities": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInAccruedLiabilities"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accrued Liabilities",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -61190,9 +61190,9 @@
   },
   "IncreaseDecreaseInAccruedSalaries": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInAccruedLiabilities"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accrued Liabilities",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -61206,9 +61206,9 @@
   },
   "IncreaseDecreaseInAccruedTaxesPayable": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInAccruedLiabilities"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accrued Liabilities",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -62466,9 +62466,9 @@
   },
   "IncreaseDecreaseInIncomeTaxesPayableNetOfIncomeTaxesReceivable": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInReceivables"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accounts Receivable",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -62482,9 +62482,9 @@
   },
   "IncreaseDecreaseInIncomeTaxesReceivable": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInReceivables"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accounts Receivable",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -62848,9 +62848,9 @@
   },
   "IncreaseDecreaseInOtherAccountsPayable": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInPayables"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accounts Payable",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -62864,9 +62864,9 @@
   },
   "IncreaseDecreaseInOtherAccountsPayableAndAccruedLiabilities": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInAccruedLiabilities"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accrued Liabilities",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -62880,9 +62880,9 @@
   },
   "IncreaseDecreaseInOtherAccruedLiabilities": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInAccruedLiabilities"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accrued Liabilities",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -63350,9 +63350,9 @@
   },
   "IncreaseDecreaseInOtherReceivables": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInReceivables"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accounts Receivable",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -63796,9 +63796,9 @@
   },
   "IncreaseDecreaseInPrepaidExpense": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInOtherWorkingCapital"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Other Working Capital",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -63812,9 +63812,9 @@
   },
   "IncreaseDecreaseInPrepaidExpensesOther": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInOtherWorkingCapital"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Other Working Capital",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -63828,9 +63828,9 @@
   },
   "IncreaseDecreaseInPrepaidTaxes": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInOtherWorkingCapital"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Other Working Capital",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -63908,9 +63908,9 @@
   },
   "IncreaseDecreaseThroughAcquisitionOfSubsidiary": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "AcquisitionsNet"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Acquisitions, Net of Cash",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -98116,9 +98116,9 @@
   },
   "PaymentsForRepurchaseOfRedeemablePreferredStock": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "StockRepurchasePayments"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Stock Repurchase Payments",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -100093,9 +100093,9 @@
   },
   "PaymentsToAcquireEquityMethodInvestments": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentPurchases"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Purchases of Investments",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -100109,9 +100109,9 @@
   },
   "PaymentsToAcquireEquitySecuritiesFvNi": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentPurchases"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Purchases of Investments",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -100862,9 +100862,9 @@
   },
   "PaymentsToAcquireLoansHeldForInvestment": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentPurchases"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Purchases of Investments",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -100986,9 +100986,9 @@
   },
   "PaymentsToAcquireLongtermInvestments": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentPurchases"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Purchases of Investments",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -102061,9 +102061,9 @@
   },
   "PaymentsToAcquireRestrictedInvestments": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentPurchases"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Purchases of Investments",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -105716,9 +105716,9 @@
   },
   "ProceedsFromFederalHomeLoanBankBorrowings": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Debt Issuance",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -106448,9 +106448,9 @@
   },
   "ProceedsFromIssuanceOfConvertiblePreferredStock": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "StockIssuanceProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Stock Issuance",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -107200,9 +107200,9 @@
   },
   "ProceedsFromIssuanceOfOtherLongTermDebt": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Debt Issuance",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -107466,9 +107466,9 @@
   },
   "ProceedsFromIssuanceOfRedeemableConvertiblePreferredStock": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "StockIssuanceProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Stock Issuance",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -107482,9 +107482,9 @@
   },
   "ProceedsFromIssuanceOfSecuredDebt": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Debt Issuance",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -107530,9 +107530,9 @@
   },
   "ProceedsFromIssuanceOfSharesUnderIncentiveAndShareBasedCompensationPlans": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "StockIssuanceProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Stock Issuance",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -107546,9 +107546,9 @@
   },
   "ProceedsFromIssuanceOfSharesUnderIncentiveAndShareBasedCompensationPlansIncludingStockOptions": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "StockIssuanceProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Stock Issuance",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -107562,9 +107562,9 @@
   },
   "ProceedsFromIssuanceOfSubordinatedLongTermDebt": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Debt Issuance",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -107722,9 +107722,9 @@
   },
   "ProceedsFromIssuanceOfWarrants": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "StockIssuanceProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Stock Issuance",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -107934,9 +107934,9 @@
   },
   "ProceedsFromIssueOfOrdinaryShares": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "StockIssuanceProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Stock Issuance",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -108276,9 +108276,9 @@
   },
   "ProceedsFromMinorityShareholders": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "StockIssuanceProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Stock Issuance",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -108324,9 +108324,9 @@
   },
   "ProceedsFromOtherDebt": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Debt Issuance",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -108356,9 +108356,9 @@
   },
   "ProceedsFromOtherShortTermDebt": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Debt Issuance",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -108858,9 +108858,9 @@
   },
   "ProceedsFromRelatedPartyDebt": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Debt Issuance",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -109849,9 +109849,9 @@
   },
   "ProceedsFromSaleMaturityAndCollectionOfShorttermInvestments": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentProceeds"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Investments",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -110355,9 +110355,9 @@
   },
   "ProceedsFromSaleOfLongtermInvestments": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentProceeds"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Investments",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -110407,9 +110407,9 @@
   },
   "ProceedsFromSaleOfOtherInvestments": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentProceeds"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Investments",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -111052,9 +111052,9 @@
   },
   "ProceedsFromSalesOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "ProceedsFromSaleOfPPE"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Sale of PP&E",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -113485,9 +113485,9 @@
   },
   "PurchaseOfInterestsInInvestmentsAccountedForUsingEquityMethod": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentPurchases"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Purchases of Investments",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -115407,9 +115407,9 @@
   },
   "RepaymentsOfBankDebt": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtRepayments"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Repayments of Debt",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -115655,9 +115655,9 @@
   },
   "RepaymentsOfConvertibleDebt": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtRepayments"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Repayments of Debt",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -115991,9 +115991,9 @@
   },
   "RepaymentsOfDebtAndCapitalLeaseObligations": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtRepayments"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Repayments of Debt",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -116007,9 +116007,9 @@
   },
   "RepaymentsOfFederalHomeLoanBankBorrowings": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtRepayments"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Repayments of Debt",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -116460,9 +116460,9 @@
   },
   "RepaymentsOfLongTermDebtAndCapitalSecurities": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtRepayments"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Repayments of Debt",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -116524,9 +116524,9 @@
   },
   "RepaymentsOfOtherDebt": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtRepayments"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Repayments of Debt",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -116540,9 +116540,9 @@
   },
   "RepaymentsOfOtherLongTermDebt": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtRepayments"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Repayments of Debt",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -116556,9 +116556,9 @@
   },
   "RepaymentsOfOtherShortTermDebt": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtRepayments"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Repayments of Debt",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -116572,9 +116572,9 @@
   },
   "RepaymentsOfRelatedPartyDebt": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtRepayments"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Repayments of Debt",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -116588,9 +116588,9 @@
   },
   "RepaymentsOfSecuredDebt": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtRepayments"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Repayments of Debt",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -116636,9 +116636,9 @@
   },
   "RepaymentsOfSubordinatedDebt": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtRepayments"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Repayments of Debt",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -116652,9 +116652,9 @@
   },
   "RepaymentsOfUnsecuredDebt": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtRepayments"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Repayments of Debt",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,

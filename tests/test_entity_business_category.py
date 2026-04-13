@@ -460,3 +460,321 @@ class TestIssue561Misclassifications:
         )
         # SIC 6211 + 13F → Investment Manager (caught before fund/trust heuristic)
         assert result == 'Investment Manager'
+
+
+# =============================================================================
+# Issue #774 Regression Tests
+# =============================================================================
+
+class TestIssue774BDCFalsePositives:
+    """Regression tests for GH #774 patterns 1-2: BDC false positives.
+
+    Pattern 1: Major alt asset managers (BX, KKR) that manage BDC subsidiaries
+    were classified as BDC because 814- file numbers bled from subsidiaries.
+
+    Pattern 2: Non-financial companies (NEE, RCAT) with definitive SIC codes
+    were classified as BDC for the same reason.
+
+    The classifier (not the is_bdc short-circuit) should never return BDC
+    for entities whose SIC definitively indicates another category.
+    """
+
+    # Pattern 1: Alt asset managers with SIC 6282 should be Investment Manager
+    @pytest.mark.parametrize("name,sic,expected", [
+        ("Blackstone Inc", 6282, "Investment Manager"),
+        ("KKR & Co Inc", 6282, "Investment Manager"),
+        ("Brookfield Oaktree Holdings LLC", 6282, "Investment Manager"),
+        ("Brookfield Asset Management Ltd", 6282, "Investment Manager"),
+    ])
+    def test_alt_asset_managers_not_bdc(self, name, sic, expected):
+        """SIC 6282 entities that manage BDCs are not BDCs themselves."""
+        result = classify_business_category(
+            sic=sic, entity_type='operating', name=name,
+            form_types={'10-K', '10-Q', '8-K'}
+        )
+        assert result == expected
+
+    # Pattern 2: Non-financial companies should never be BDC
+    @pytest.mark.parametrize("name,sic,expected", [
+        ("NextEra Energy Inc", 4911, "Operating Company"),
+        ("Seaboard Corp", 5150, "Operating Company"),
+        ("Red Cat Holdings", 7372, "Operating Company"),
+        ("Silo Pharma Inc", 2834, "Operating Company"),
+        ("United Health Products", 3842, "Operating Company"),
+        ("Onassis Holdings", 4412, "Operating Company"),
+        ("Great Elm Group", 7372, "Operating Company"),
+        ("Newtekone Inc", 6021, "Bank"),
+        ("Prudential Financial", 6311, "Insurance Company"),
+        ("Assured Guaranty", 6351, "Insurance Company"),
+        ("Mackenzie Realty Capital", 6798, "REIT"),
+    ])
+    def test_non_financial_not_bdc(self, name, sic, expected):
+        """Companies with definitive non-BDC SIC codes must not be BDC."""
+        result = classify_business_category(
+            sic=sic, entity_type='operating', name=name,
+            form_types={'10-K', '10-Q', '8-K'}
+        )
+        assert result == expected
+
+    def test_bdc_forms_blocked_by_non_financial_sic(self):
+        """Even with N-2 forms, a non-financial SIC should block BDC."""
+        result = classify_business_category(
+            sic=4911, entity_type='operating', name='NextEra Energy Inc',
+            form_types={'10-K', '10-Q', 'N-2'}
+        )
+        assert result == 'Operating Company'
+
+    def test_bdc_forms_blocked_by_bank_sic(self):
+        """A bank SIC should override BDC forms."""
+        result = classify_business_category(
+            sic=6021, entity_type='operating', name='Newtekone Inc',
+            form_types={'10-K', '10-Q', 'N-2'}
+        )
+        assert result == 'Bank'
+
+
+class TestIssue774BDCGuards:
+    """Ensure legitimate BDCs are still classified correctly after #774 fixes."""
+
+    def test_real_bdc_with_n2_no_sic(self):
+        """BDC with N-2 forms and no SIC → BDC."""
+        result = classify_business_category(
+            sic=None, entity_type='operating', name='Ares Capital Corporation',
+            form_types={'10-K', '10-Q', 'N-2'}
+        )
+        assert result == 'BDC'
+
+    def test_real_bdc_main_street(self):
+        """Main Street Capital with N-2 → BDC."""
+        result = classify_business_category(
+            sic=None, entity_type='operating', name='Main Street Capital Corporation',
+            form_types={'10-K', '10-Q', 'N-2'}
+        )
+        assert result == 'BDC'
+
+    def test_real_bdc_financial_sic_no_override(self):
+        """A BDC with a generic financial SIC (not bank/insurance/REIT/investment manager)
+        should still be BDC — sic_overrides_bdc only blocks definitive non-BDC SICs."""
+        result = classify_business_category(
+            sic=6199, entity_type='operating', name='Some Capital Corp',
+            form_types={'10-K', '10-Q', 'N-2'}
+        )
+        assert result == 'BDC'
+
+    def test_sic_6282_with_n2_becomes_investment_manager(self):
+        """SIC 6282 + N-2 → Investment Manager, not BDC.
+        This is the correct behavior: SIC 6282 entities with N-2 forms are
+        asset managers that manage BDC subsidiaries, not BDCs themselves."""
+        result = classify_business_category(
+            sic=6282, entity_type='operating', name='Owl Rock Capital Corp',
+            form_types={'10-K', '10-Q', 'N-2'}
+        )
+        assert result == 'Investment Manager'
+
+    def test_holding_company_with_n2_stays_bdc(self):
+        """SIC 6719 (Holding Company) + N-2 → BDC.
+        Holding companies are not blocked by sic_overrides_bdc."""
+        result = classify_business_category(
+            sic=6719, entity_type='operating', name='Some Holdings',
+            form_types={'10-K', '10-Q', 'N-2'}
+        )
+        assert result == 'BDC'
+
+
+class TestIssue774InvestmentManagerFalseNegatives:
+    """Regression tests for GH #774 pattern 3: Investment Manager false negatives.
+
+    SIC 6282 (Investment Advice) and SIC 6211 (Security Brokers/Dealers)
+    companies were classified as Operating Company because the classifier
+    required both 13F filing AND investment SIC. SIC alone should suffice.
+    """
+
+    # Pattern 3a: SIC 6282 investment advisers — no 13F needed
+    @pytest.mark.parametrize("name,sic", [
+        ("Apollo Global Management", 6282),
+        ("Ares Management Corp", 6282),
+        ("Blue Owl Capital Inc", 6282),
+        ("TPG Inc", 6282),
+        ("Affiliated Managers Group", 6282),
+        ("T. Rowe Price Group", 6282),
+        ("Hamilton Lane Inc", 6282),
+        ("StepStone Group Inc", 6282),
+        ("Artisan Partners Asset Management", 6282),
+        ("Virtus Investment Partners", 6282),
+    ])
+    def test_sic_6282_classified_as_investment_manager(self, name, sic):
+        """SIC 6282 (Investment Advice) → Investment Manager even without 13F."""
+        result = classify_business_category(
+            sic=sic, entity_type='operating', name=name,
+            form_types={'10-K', '10-Q', '8-K'}
+        )
+        assert result == "Investment Manager"
+
+    # Pattern 3b: SIC 6211 broker-dealers / investment banks — no 13F needed
+    @pytest.mark.parametrize("name,sic", [
+        ("Goldman Sachs Group", 6211),
+        ("Morgan Stanley", 6211),
+        ("Charles Schwab Corp", 6211),
+        ("Interactive Brokers Group", 6211),
+    ])
+    def test_sic_6211_classified_as_investment_manager(self, name, sic):
+        """SIC 6211 (Security Brokers/Dealers) → Investment Manager even without 13F."""
+        result = classify_business_category(
+            sic=sic, entity_type='operating', name=name,
+            form_types={'10-K', '10-Q', '8-K'}
+        )
+        assert result == "Investment Manager"
+
+    # Guard: SIC 6211 commodity trusts must NOT become Investment Manager
+    @pytest.mark.parametrize("name,sic", [
+        ("GraniteShares Gold Trust", 6211),
+        ("Grayscale Bitcoin Cash Trust BCH", 6211),
+        ("WisdomTree Bitcoin Fund", 6211),
+    ])
+    def test_sic_6211_commodity_trust_stays_etf(self, name, sic):
+        """SIC 6211 + 'Trust'/'Fund' in name → ETF, not Investment Manager."""
+        result = classify_business_category(
+            sic=sic, entity_type='operating', name=name,
+            form_types={'10-K', '10-Q'}
+        )
+        assert result == 'ETF'
+
+    def test_sic_6211_etf_in_name_stays_etf(self):
+        """SIC 6211 + 'ETF' in name → ETF, not Investment Manager."""
+        result = classify_business_category(
+            sic=6211, entity_type='operating',
+            name='Goldman Sachs Physical Gold ETF',
+            form_types={'10-K', '10-Q'}
+        )
+        assert result == 'ETF'
+
+    def test_sic_6211_with_13f_and_trust_stays_investment_manager(self):
+        """SIC 6211 + 13F + 'Trust' in name → Investment Manager (13F wins)."""
+        result = classify_business_category(
+            sic=6211, entity_type='operating',
+            name='Morgan Stanley Securities Trust',
+            form_types={'10-K', '10-Q', '13F-HR'}
+        )
+        assert result == 'Investment Manager'
+
+
+class TestIssue774UnknownReduction:
+    """Regression tests for GH #774 pattern 4: high Unknown rate.
+
+    Foreign/Canadian filers with entity_type='other' and valid SIC codes
+    were classified as Unknown because Step 9 only accepted
+    entity_type in ('operating', '', None).
+    """
+
+    @pytest.mark.parametrize("name,sic,entity_type,expected", [
+        # Foreign manufacturer
+        ("Toyota Motor Corp", 3711, "other", "Operating Company"),
+        # Foreign pharma
+        ("Novo Nordisk A/S", 2834, "other", "Operating Company"),
+        # Foreign bank
+        ("HSBC Holdings plc", 6022, "other", "Bank"),
+        # Foreign insurer
+        ("AXA SA", 6311, "other", "Insurance Company"),
+        # Foreign REIT
+        ("Brookfield Real Estate Partners", 6798, "other", "REIT"),
+        # Foreign investment manager
+        ("Man Group plc", 6282, "other", "Investment Manager"),
+        # Foreign with no SIC → still Unknown
+        ("Unknown Foreign Corp", None, "other", "Unknown"),
+    ])
+    def test_foreign_filers_classified_by_sic(self, name, sic, entity_type, expected):
+        """Foreign filers (entity_type='other') should use SIC-based classification."""
+        result = classify_business_category(
+            sic=sic, entity_type=entity_type, name=name,
+            form_types={'20-F', '6-K'}
+        )
+        assert result == expected
+
+    def test_domestic_no_sic_still_operating(self):
+        """Domestic filer with no SIC → Operating Company (not Unknown)."""
+        result = classify_business_category(
+            sic=None, entity_type='operating', name='Some Corp',
+            form_types={'10-K', '10-Q'}
+        )
+        assert result == 'Operating Company'
+
+
+class TestIssue774NetworkIntegration:
+    """Network tests verifying real SEC data classifications for GH #774."""
+
+    @pytest.mark.network
+    @pytest.mark.parametrize("ticker,expected", [
+        # Pattern 1: Alt asset managers (were BDC, should be Investment Manager)
+        ("BX", "Investment Manager"),
+        ("KKR", "Investment Manager"),
+        # Pattern 2: Non-financial (were BDC, should be correct category)
+        ("NEE", "Operating Company"),
+        # Pattern 3: Investment advisers (were Operating, should be Investment Manager)
+        ("APO", "Investment Manager"),
+        ("TROW", "Investment Manager"),
+        ("GS", "Investment Manager"),
+        ("MS", "Investment Manager"),
+        # Guards: existing correct classifications unchanged
+        ("AAPL", "Operating Company"),
+        ("JPM", "Bank"),
+        ("O", "REIT"),
+        ("ALL", "Insurance Company"),
+        ("ARCC", "BDC"),
+        ("BLK", "Investment Manager"),
+    ])
+    def test_issue_774_classification(self, ticker, expected):
+        """Verify business_category against live SEC data."""
+        company = Company(ticker)
+        assert company.business_category == expected, \
+            f"{ticker} (SIC {company.sic}): expected {expected}, got {company.business_category}"
+
+
+# =============================================================================
+# REIT Subtype (edgartools-534c)
+# =============================================================================
+
+class TestREITSubtype:
+    """Tests for Company.reit_subtype property."""
+
+    def test_non_reit_returns_none(self):
+        """Non-REIT companies return None without any network call."""
+        from unittest.mock import patch, PropertyMock
+        company = Company.__new__(Company)
+        with patch.object(type(company), 'business_category', new_callable=PropertyMock, return_value='Operating Company'):
+            assert company.reit_subtype is None
+
+    def test_non_reit_does_not_fetch_facts(self):
+        """Verify get_facts is never called for non-REITs."""
+        from unittest.mock import patch, PropertyMock
+        company = Company.__new__(Company)
+        with patch.object(type(company), 'business_category', new_callable=PropertyMock, return_value='Bank'):
+            with patch.object(company, 'get_facts') as mock_facts:
+                result = company.reit_subtype
+                assert result is None
+                mock_facts.assert_not_called()
+
+    @pytest.mark.network
+    @pytest.mark.parametrize("ticker,expected", [
+        # Equity REITs
+        ("PLD", "equity"),     # Prologis (industrial)
+        ("AMT", "equity"),     # American Tower (cell towers)
+        ("EQR", "equity"),     # Equity Residential (apartments)
+        ("O", "equity"),       # Realty Income (net lease)
+        ("SPG", "equity"),     # Simon Property Group (malls)
+        # Mortgage REITs
+        ("AGNC", "mortgage"),  # AGNC Investment (agency MBS)
+        ("NLY", "mortgage"),   # Annaly Capital (agency MBS)
+        ("STWD", "mortgage"),  # Starwood Property Trust (commercial loans)
+        ("MFA", "mortgage"),   # MFA Financial (residential MBS)
+    ])
+    def test_reit_subtype(self, ticker, expected):
+        """Verify REIT subtype classification against live SEC data."""
+        company = Company(ticker)
+        assert company.reit_subtype == expected, \
+            f"{ticker}: expected {expected}, got {company.reit_subtype}"
+
+    @pytest.mark.network
+    def test_non_reit_live(self):
+        """Non-REIT returns None in live check."""
+        company = Company("AAPL")
+        assert company.reit_subtype is None

@@ -4,6 +4,7 @@ Table of Contents analyzer for SEC filings.
 This module analyzes the TOC structure to map section names to anchor IDs,
 enabling section extraction for API filings with generated anchor IDs.
 """
+import logging
 import re
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
@@ -11,6 +12,8 @@ from typing import Dict, List, Optional, Tuple
 from lxml import html as lxml_html
 
 from edgar.documents.utils.anchor_targets import find_anchor_targets
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -48,12 +51,53 @@ class TOCAnalyzer:
             (r'part\s+[ivx]+', 'part'),
         ]
 
-    def analyze_toc_structure(self, html_content: str) -> Dict[str, str]:
+    def analyze_toc_structure(self, html_content: str, agent: Optional[str] = None,
+                              tree=None) -> Dict[str, str]:
         """
         Analyze HTML content to extract section mappings from TOC.
 
+        When a filing agent is known, dispatches to an agent-specific parser
+        that understands the agent's particular TOC HTML structure. Falls back
+        to generic parsing for unknown agents.
+
         Args:
             html_content: Raw HTML content
+            agent: Filing agent name (e.g., 'Workiva', 'Donnelley') or None
+            tree: Pre-parsed lxml tree to avoid redundant parsing (optional)
+
+        Returns:
+            Dict mapping normalized section names to anchor IDs
+        """
+        if agent == 'Workiva':
+            result = self._analyze_workiva_toc(html_content, tree=tree)
+            if result:
+                return result
+        elif agent == 'Donnelley':
+            result = self._analyze_dfin_toc(html_content, tree=tree)
+            if result:
+                return result
+        elif agent == 'Novaworks':
+            result = self._analyze_novaworks_toc(html_content, tree=tree)
+            if result:
+                return result
+        elif agent == 'Toppan Merrill':
+            result = self._analyze_toppan_toc(html_content, tree=tree)
+            if result:
+                return result
+
+        # Generic fallback for unknown agents or when agent-specific parser returns empty
+        return self._analyze_generic_toc(html_content, tree=tree)
+
+    def _analyze_generic_toc(self, html_content: str, tree=None) -> Dict[str, str]:
+        """
+        Generic TOC analysis — the original strategy that scans all anchor links.
+
+        Works across all filing agents but may miss sections or pick up
+        non-TOC links for agents with unusual TOC structures.
+
+        Args:
+            html_content: Raw HTML content
+            tree: Pre-parsed lxml tree (optional, avoids re-parsing)
 
         Returns:
             Dict mapping normalized section names to anchor IDs
@@ -61,11 +105,11 @@ class TOCAnalyzer:
         section_mapping = {}
 
         try:
-            # Handle XML declaration issues
-            if html_content.startswith('<?xml'):
-                html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
-
-            tree = lxml_html.fromstring(html_content)
+            if tree is None:
+                # Handle XML declaration issues
+                if html_content.startswith('<?xml'):
+                    html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
+                tree = lxml_html.fromstring(html_content)
 
             # Find all anchor links that could be TOC links
             anchor_links = tree.xpath('//a[@href]')
@@ -131,6 +175,538 @@ class TOCAnalyzer:
             pass
 
         return section_mapping
+
+    # ---- Agent-specific TOC parsers ----
+
+    def _find_toc_table(self, tree, headings: List[str] = None) -> Optional[object]:
+        """
+        Locate the TOC <table> element by searching for a known heading.
+
+        Args:
+            tree: Parsed lxml HTML tree
+            headings: List of heading texts to search for (case-insensitive).
+                      Defaults to ["TABLE OF CONTENTS", "INDEX"].
+
+        Returns:
+            The first <table> element following the heading, or None.
+        """
+        if headings is None:
+            headings = ['TABLE OF CONTENTS', 'INDEX']
+
+        headings_upper = [h.upper() for h in headings]
+
+        def _find_table_in_siblings(element):
+            """Search following siblings (and their descendants) for a <table>."""
+            for following in element.itersiblings():
+                if not isinstance(following.tag, str):
+                    continue
+                if following.tag == 'table':
+                    return following
+                tables = following.xpath('.//table')
+                if tables:
+                    return tables[0]
+            return None
+
+        # Search block-level and inline-heading elements likely to contain a TOC heading.
+        # Restricting to these tags avoids calling text_content() on every node in a
+        # large document (which recursively traverses subtrees).
+        _heading_tags = ('p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                         'b', 'strong', 'span', 'td', 'th', 'center')
+        for el in tree.iter(*_heading_tags):
+            try:
+                text = (el.text_content() or '').strip().upper()
+            except (ValueError, AttributeError):
+                continue
+            if not text:
+                continue
+            # Check for exact or near-exact match
+            for heading in headings_upper:
+                if text == heading or text == heading + '.':
+                    # Walk up to 3 levels looking for a sibling table
+                    current = el
+                    for _ in range(3):
+                        table = _find_table_in_siblings(current)
+                        if table is not None:
+                            return table
+                        parent = current.getparent()
+                        if parent is None:
+                            break
+                        current = parent
+
+        return None
+
+    def _parse_item_from_text(self, text: str) -> Optional[str]:
+        """
+        Extract a normalized item/part name from TOC entry text.
+
+        Handles formats like:
+        - "Item 1." / "ITEM 1A." / "Item 1A. Risk Factors"
+        - "Part I" / "PART II."
+
+        Returns:
+            Normalized name like "Item 1A" or "Part II", or None.
+        """
+        text = text.strip()
+        # Strip zero-width spaces
+        text = text.replace('\u200b', '').replace('\u200c', '').replace('\u200d', '')
+
+        item_match = re.match(r'(?:item|ITEM)\s+(\d+[A-Za-z]?)', text, re.IGNORECASE)
+        if item_match:
+            return f"Item {item_match.group(1).upper()}"
+
+        part_match = re.match(r'(?:part|PART)\s+([IVXivx]+)', text, re.IGNORECASE)
+        if part_match:
+            return f"Part {part_match.group(1).upper()}"
+
+        return None
+
+    def _item_from_anchor(self, anchor_id: str) -> Optional[str]:
+        """
+        Extract a normalized item/part name from an anchor ID.
+
+        Handles patterns like:
+        - "item_1_business", "item_1a_risk_factors" (DFIN)
+        - "ITEM1BUSINESS_392371", "ITEM1ARISKFACTORS_986989" (Toppan Merrill)
+        - "item1a", "Item1C" (Novaworks)
+
+        Returns:
+            Normalized name like "Item 1A" or None.
+        """
+        anchor_lower = anchor_id.lower()
+
+        # Match item number + optional single letter suffix.
+        # The letter must NOT be followed by another letter (to avoid matching
+        # "item1business" as "Item 1B" — the "b" is part of "business", not a suffix).
+        item_match = re.search(r'item[_\s]*(\d+)([a-z]?)(?![a-z])', anchor_lower)
+        if item_match:
+            num = item_match.group(1)
+            letter = item_match.group(2).upper()
+            return f"Item {num}{letter}"
+
+        part_match = re.search(r'part[_\s]*([ivx]+)', anchor_lower)
+        if part_match:
+            return f"Part {part_match.group(1).upper()}"
+
+        return None
+
+    @staticmethod
+    def _count_item_links(table) -> int:
+        """Count how many internal links in a table look like item references."""
+        count = 0
+        for link in table.xpath('.//a[@href]'):
+            href = (link.get('href', '') or '').strip()
+            if not href.startswith('#'):
+                continue
+            text = (link.text_content() or '').strip()
+            if re.search(r'item\s+\d', text, re.IGNORECASE):
+                count += 1
+            elif re.search(r'item[_]?\d', href, re.IGNORECASE):
+                count += 1
+        return count
+
+    def _find_toc_table_by_links(self, tree) -> Optional[object]:
+        """
+        Fallback: locate the TOC table by finding the table with the most item links.
+
+        Used when _find_toc_table fails because there's no explicit heading
+        (some Toppan and Novaworks filings omit the heading).
+
+        Returns:
+            The table element with >= 5 item links, or None.
+        """
+        best_table = None
+        best_count = 0
+
+        for table in tree.xpath('//table'):
+            count = self._count_item_links(table)
+            if count > best_count:
+                best_count = count
+                best_table = table
+
+        # Require at least 5 item links to qualify as a TOC
+        return best_table if best_count >= 5 else None
+
+    def _find_best_toc_table(self, tree, headings: List[str]) -> Optional[object]:
+        """
+        Find the best TOC table using heading-based search with link-based fallback.
+
+        First tries heading-based search. If the found table has fewer than 5
+        item links, falls back to the link-based search which finds the table
+        with the highest concentration of item links.
+
+        Args:
+            tree: Parsed HTML tree
+            headings: Heading text patterns to search for
+
+        Returns:
+            Table element, or None.
+        """
+        toc_table = self._find_toc_table(tree, headings)
+        if toc_table is not None and self._count_item_links(toc_table) >= 5:
+            return toc_table
+        # Heading table was absent or too small — try link-based detection
+        return self._find_toc_table_by_links(tree)
+
+    @staticmethod
+    def _make_section_key(item_name: str, current_part: Optional[str]) -> str:
+        """
+        Build a section mapping key, adding part context when available.
+
+        For 10-K filings (no duplicate items across parts), part prefix is
+        cosmetic but harmless. For 10-Q filings, it's essential to distinguish
+        Item 1 in Part I from Item 1 in Part II.
+
+        Args:
+            item_name: Normalized item name like "Item 1A"
+            current_part: Current part context like "Part I", or None
+
+        Returns:
+            Key like "part_i_item_1a" or "Item 1A"
+        """
+        if current_part:
+            part_key = current_part.lower().replace(' ', '_')
+            item_key = item_name.lower().replace(' ', '_')
+            return f"{part_key}_{item_key}"
+        return item_name
+
+    @staticmethod
+    def _ensure_tree(html_content: str, tree=None):
+        """Return the pre-parsed tree or parse from html_content."""
+        if tree is not None:
+            return tree
+        if html_content.startswith('<?xml'):
+            html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
+        return lxml_html.fromstring(html_content)
+
+    def _analyze_workiva_toc(self, html_content: str, tree=None) -> Dict[str, str]:
+        """
+        Workiva-specific TOC parser.
+
+        Workiva TOCs use a 3-column table with split <a> tags sharing the same
+        UUID href: [Item label] [Title] [Page number]. Anchors are UUID-style
+        (e.g., #i719388195b384d85a4e238ad88eba90a_13).
+
+        Strategy:
+        1. Find TOC table after "TABLE OF CONTENTS" heading
+        2. Process each <tr> — group <a> tags by shared href
+        3. Combine text from grouped links to reassemble item + title
+        4. Extract item number from combined text (anchor IDs are opaque UUIDs)
+        """
+        try:
+            tree = self._ensure_tree(html_content, tree)
+
+            toc_table = self._find_best_toc_table(tree, ['TABLE OF CONTENTS'])
+            if toc_table is None:
+                return {}
+
+            mapping = {}
+            current_part = None
+            rows = toc_table.xpath('.//tr')
+
+            for row in rows:
+                links = row.xpath('.//a[@href]')
+                if not links:
+                    continue
+
+                # Group links by href
+                href_groups: Dict[str, List[str]] = {}
+                href_order = []
+                for link in links:
+                    href = link.get('href', '').strip()
+                    if not href.startswith('#'):
+                        continue
+                    text = (link.text_content() or '').strip()
+                    if not text:
+                        continue
+                    if href not in href_groups:
+                        href_groups[href] = []
+                        href_order.append(href)
+                    href_groups[href].append(text)
+
+                for href in href_order:
+                    texts = href_groups[href]
+                    anchor_id = href[1:]
+
+                    # Skip page-number-only entries (single short numeric text)
+                    if len(texts) == 1 and re.match(r'^\d{1,3}$', texts[0]):
+                        continue
+
+                    # Filter out page numbers from multi-text groups
+                    non_page_texts = [t for t in texts if not re.match(r'^\d{1,3}$', t)]
+                    combined = ' '.join(non_page_texts)
+
+                    # Try to parse an item/part name from the combined text
+                    parsed = self._parse_item_from_text(combined)
+                    if not parsed:
+                        continue
+
+                    # Track part context
+                    if parsed.startswith('Part'):
+                        current_part = parsed
+                        continue
+
+                    # Verify target exists
+                    if find_anchor_targets(tree, anchor_id):
+                        key = self._make_section_key(parsed, current_part)
+                        if key not in mapping:
+                            mapping[key] = anchor_id
+
+            return mapping
+
+        except Exception:
+            logger.debug("Workiva TOC parser failed", exc_info=True)
+            return {}
+
+    def _analyze_dfin_toc(self, html_content: str, tree=None) -> Dict[str, str]:
+        """
+        Donnelley/DFIN-specific TOC parser.
+
+        DFIN TOCs use semantic anchor IDs (e.g., #item_1_business) and may use
+        "INDEX" as the heading instead of "TABLE OF CONTENTS". Links are typically
+        one per cell with the title text (not split like Workiva/Toppan).
+
+        Strategy:
+        1. Find TOC region (try "INDEX" first, then "TABLE OF CONTENTS")
+        2. Extract all internal <a> links from the TOC table
+        3. Derive item number from the semantic anchor ID (most reliable for DFIN)
+        4. Fall back to text-based extraction when anchor doesn't contain item pattern
+        """
+        try:
+            tree = self._ensure_tree(html_content, tree)
+
+            # DFIN typically uses "INDEX" but some use "TABLE OF CONTENTS"
+            toc_table = self._find_toc_table(tree, ['INDEX', 'TABLE OF CONTENTS'])
+            if toc_table is None:
+                # DFIN may also have links without a formal TOC table — fall back
+                # to scanning all links but preferring semantic anchors
+                return self._analyze_dfin_links(tree)
+
+            mapping = {}
+            current_part = None
+            links = toc_table.xpath('.//a[@href]')
+
+            for link in links:
+                href = link.get('href', '').strip()
+                if not href.startswith('#'):
+                    continue
+                text = (link.text_content() or '').strip()
+                if not text:
+                    continue
+
+                anchor_id = href[1:]
+
+                # Skip page numbers
+                if re.match(r'^\d{1,3}$', text):
+                    continue
+
+                # DFIN anchors are semantic — extract item from anchor ID
+                parsed = self._item_from_anchor(anchor_id)
+
+                # Fall back to text if anchor doesn't have item pattern
+                if not parsed:
+                    parsed = self._parse_item_from_text(text)
+
+                if not parsed:
+                    continue
+
+                # Track part context
+                if parsed.startswith('Part'):
+                    current_part = parsed
+                    continue
+
+                if find_anchor_targets(tree, anchor_id):
+                    key = self._make_section_key(parsed, current_part)
+                    if key not in mapping:
+                        mapping[key] = anchor_id
+
+            return mapping
+
+        except Exception:
+            logger.debug("DFIN TOC parser failed", exc_info=True)
+            return {}
+
+    def _analyze_dfin_links(self, tree) -> Dict[str, str]:
+        """
+        Fallback for DFIN filings without a formal TOC table.
+
+        Scans all internal links for semantic anchor IDs like #item_1_business.
+        DFIN anchors are distinctive (underscore-separated, descriptive) so we can
+        identify TOC-like links by their anchor pattern alone.
+        """
+        mapping = {}
+        current_part = None
+
+        for link in tree.xpath('//a[@href]'):
+            href = link.get('href', '').strip()
+            if not href.startswith('#'):
+                continue
+            anchor_id = href[1:]
+
+            # Only accept semantic DFIN-style anchors (contain item_ or part_)
+            parsed = self._item_from_anchor(anchor_id)
+            if not parsed:
+                continue
+
+            if parsed.startswith('Part'):
+                current_part = parsed
+                continue
+
+            if find_anchor_targets(tree, anchor_id):
+                key = self._make_section_key(parsed, current_part)
+                if key not in mapping:
+                    mapping[key] = anchor_id
+
+        return mapping
+
+    def _analyze_novaworks_toc(self, html_content: str, tree=None) -> Dict[str, str]:
+        """
+        Novaworks-specific TOC parser.
+
+        Novaworks TOCs use combined text in single <a> tags (e.g.,
+        "ITEM 1A. Risk Factors") with short anchors (#item1a, #Item1C).
+        Known quirks:
+        - Item 1 often shares anchor with Part I (#part1)
+        - Anchor casing is inconsistent (#item1a vs #Item1C)
+        - Page numbers are separate <a> tags with class="tocPGNUM"
+
+        Strategy:
+        1. Find TOC table after heading
+        2. Parse combined "ITEM X. Title" text from each <a>
+        3. Handle shared Part/Item anchors by accepting #partN for Item 1
+        """
+        try:
+            tree = self._ensure_tree(html_content, tree)
+
+            toc_table = self._find_best_toc_table(tree, ['INDEX', 'TABLE OF CONTENTS'])
+            if toc_table is None:
+                return {}
+
+            mapping = {}
+            current_part = None
+            links = toc_table.xpath('.//a[@href]')
+
+            for link in links:
+                href = link.get('href', '').strip()
+                if not href.startswith('#'):
+                    continue
+                text = (link.text_content() or '').strip()
+                if not text:
+                    continue
+
+                anchor_id = href[1:]
+
+                # Skip page number links
+                if re.match(r'^\d{1,3}$', text):
+                    continue
+
+                # Parse item from the combined text (e.g., "ITEM 1A. Risk Factors")
+                parsed = self._parse_item_from_text(text)
+                if not parsed:
+                    continue
+
+                # Track part context
+                if parsed.startswith('Part'):
+                    current_part = parsed
+                    continue
+
+                # Verify target exists
+                if find_anchor_targets(tree, anchor_id):
+                    key = self._make_section_key(parsed, current_part)
+                    if key not in mapping:
+                        mapping[key] = anchor_id
+
+            return mapping
+
+        except Exception:
+            logger.debug("Novaworks TOC parser failed", exc_info=True)
+            return {}
+
+    def _analyze_toppan_toc(self, html_content: str, tree=None) -> Dict[str, str]:
+        """
+        Toppan Merrill-specific TOC parser.
+
+        Toppan TOCs split links across cells like Workiva: "ITEM 1." in one <td>,
+        "BUSINESS" in the next, both sharing the same href. Anchors are descriptive
+        with numeric suffixes (e.g., #ITEM1BUSINESS_392371). Text may contain
+        zero-width spaces (&#8203; / U+200B).
+
+        Strategy:
+        1. Find TOC table (may use "INDEX" or "TABLE OF CONTENTS" heading)
+        2. Group <a> tags per row by shared href
+        3. Strip zero-width spaces from text
+        4. Combine texts and extract item number
+        """
+        try:
+            tree = self._ensure_tree(html_content, tree)
+
+            toc_table = self._find_best_toc_table(tree, ['TABLE OF CONTENTS', 'INDEX'])
+            if toc_table is None:
+                return {}
+
+            mapping = {}
+            current_part = None
+            rows = toc_table.xpath('.//tr')
+
+            for row in rows:
+                links = row.xpath('.//a[@href]')
+                if not links:
+                    continue
+
+                # Group links by href
+                href_groups: Dict[str, List[str]] = {}
+                href_order = []
+                for link in links:
+                    href = link.get('href', '').strip()
+                    if not href.startswith('#'):
+                        continue
+                    text = (link.text_content() or '').strip()
+                    # Strip zero-width spaces
+                    text = text.replace('\u200b', '').replace('\u200c', '').replace('\u200d', '')
+                    text = text.replace('\xa0', ' ')  # non-breaking space
+                    text = text.strip()
+                    if not text:
+                        continue
+                    if href not in href_groups:
+                        href_groups[href] = []
+                        href_order.append(href)
+                    href_groups[href].append(text)
+
+                for href in href_order:
+                    texts = href_groups[href]
+                    anchor_id = href[1:]
+
+                    # Filter out page numbers
+                    non_page_texts = [t for t in texts if not re.match(r'^\d{1,3}$', t)]
+                    if not non_page_texts:
+                        continue
+
+                    combined = ' '.join(non_page_texts)
+
+                    # Try text first (e.g., "ITEM 1. BUSINESS")
+                    parsed = self._parse_item_from_text(combined)
+
+                    # Fall back to anchor ID (e.g., ITEM1BUSINESS_392371)
+                    if not parsed:
+                        parsed = self._item_from_anchor(anchor_id)
+
+                    if not parsed:
+                        continue
+
+                    # Track part context
+                    if parsed.startswith('Part'):
+                        current_part = parsed
+                        continue
+
+                    if find_anchor_targets(tree, anchor_id):
+                        key = self._make_section_key(parsed, current_part)
+                        if key not in mapping:
+                            mapping[key] = anchor_id
+
+            return mapping
+
+        except Exception:
+            logger.debug("Toppan Merrill TOC parser failed", exc_info=True)
+            return {}
 
     def _extract_preceding_item_label(self, link_element) -> str:
         """
@@ -556,18 +1132,21 @@ class TOCAnalyzer:
         return sorted(mapping.keys(), key=lambda x: self._get_section_type_and_order(x)[1])
 
 
-def analyze_toc_for_sections(html_content: str) -> Dict[str, str]:
+def analyze_toc_for_sections(html_content: str, agent: Optional[str] = None,
+                             tree=None) -> Dict[str, str]:
     """
     Convenience function to analyze TOC and return section mapping.
 
     Args:
         html_content: Raw HTML content
+        agent: Filing agent name or None
+        tree: Pre-parsed lxml tree (optional)
 
     Returns:
         Dict mapping section names to anchor IDs
     """
     analyzer = TOCAnalyzer()
-    return analyzer.analyze_toc_structure(html_content)
+    return analyzer.analyze_toc_structure(html_content, agent=agent, tree=tree)
 
 
 def find_toc_boundaries(html_content: str) -> Tuple[int, int]:

@@ -41,12 +41,23 @@ class SECSectionExtractor:
     between them. Works consistently for all SEC filings.
     """
 
-    def __init__(self, document: Document):
+    def __init__(self, document: Document, agent: Optional[str] = None):
         self.document = document
+        self.agent = agent
         self.section_map = {}  # Maps section names to canonical names
         self.section_boundaries = {}  # Maps section names to boundaries
         self.toc_analyzer = TOCAnalyzer()
+        self._tree = None  # Cached parsed lxml tree (set by _analyze_sections)
+        self._clean_html = None  # HTML with XML declaration stripped
         self._analyze_sections()
+
+    def _parse_html(self, html_content: str):
+        """Parse HTML once, stripping XML declaration. Cache the result."""
+        if html_content.startswith('<?xml'):
+            html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
+        self._clean_html = html_content
+        self._tree = lxml_html.fromstring(html_content)
+        return self._tree
 
     def _analyze_sections(self) -> None:
         """
@@ -60,22 +71,22 @@ class SECSectionExtractor:
         if not html_content:
             return
 
-        # Use TOC analysis to find sections
-        toc_mapping = self.toc_analyzer.analyze_toc_structure(html_content)
+        # Parse HTML once and cache the tree for reuse in section extraction
+        tree = self._parse_html(html_content)
+
+        # Use TOC analysis to find sections, passing the pre-parsed tree
+        # to avoid re-parsing the same HTML inside the analyzer
+        toc_mapping = self.toc_analyzer.analyze_toc_structure(
+            html_content, agent=self.agent, tree=tree
+        )
 
         if not toc_mapping:
             return  # No sections found
 
-        # Handle XML declaration issues
-        if html_content.startswith('<?xml'):
-            html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
-
-        tree = lxml_html.fromstring(html_content)
-
         sec_sections = {}
 
         for section_name, anchor_id in toc_mapping.items():
-            # Verify the anchor target exists
+            # Verify the anchor target exists (using cached tree)
             target_elements = find_anchor_targets(tree, anchor_id)
             if target_elements:
                 element = target_elements[0]
@@ -230,11 +241,12 @@ class SECSectionExtractor:
         Returns:
             Extracted section text
         """
-        # Handle XML declaration issues
-        if html_content.startswith('<?xml'):
-            html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
-
-        tree = lxml_html.fromstring(html_content)
+        # Reuse cached tree from _analyze_sections when available
+        tree = self._tree
+        if tree is None:
+            if html_content.startswith('<?xml'):
+                html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
+            tree = lxml_html.fromstring(html_content)
 
         # Verify start anchor exists
         start_elements = find_anchor_targets(tree, boundary.anchor_id)
