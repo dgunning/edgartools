@@ -491,6 +491,14 @@ resource "aws_ecs_task_definition" "warehouse" {
           {
             name  = "SNOWFLAKE_EXPORT_ROOT"
             value = local.snowflake_export_root
+          },
+          {
+            # Silver DuckDB must live on local container disk -- DuckDB cannot
+            # read/write S3 paths directly.  /tmp is always writable on Fargate
+            # and has 21 GB of ephemeral storage, which is more than enough for
+            # a single-run DuckDB file.
+            name  = "WAREHOUSE_SILVER_ROOT"
+            value = "/tmp/edgar-warehouse-silver"
           }
         ],
         var.warehouse_bronze_cik_limit == null ? [] : [
