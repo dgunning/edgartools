@@ -184,6 +184,19 @@ CREATE TABLE IF NOT EXISTS sec_filing_text (
     extracted_at        TIMESTAMPTZ NOT NULL,
     PRIMARY KEY (accession_number, text_version)
 );
+
+CREATE TABLE IF NOT EXISTS sec_parse_run (
+    parse_run_id       TEXT NOT NULL PRIMARY KEY,
+    accession_number   TEXT,
+    parser_name        TEXT NOT NULL,
+    parser_version     TEXT NOT NULL,
+    target_form_family TEXT NOT NULL,
+    status             TEXT NOT NULL,
+    started_at         TIMESTAMPTZ,
+    completed_at       TIMESTAMPTZ,
+    error_code         TEXT,
+    error_message      TEXT
+);
 """
 
 
@@ -833,6 +846,64 @@ class SilverDatabase:
         ).fetchall()
         cols = [d[0] for d in self._conn.description]
         return [dict(zip(cols, row)) for row in rows]
+
+    # ------------------------------------------------------------------
+    # sec_parse_run
+    # ------------------------------------------------------------------
+
+    def start_parse_run(self, row: dict) -> None:
+        """Insert a new parse run with status='running'."""
+        required = ["parse_run_id", "parser_name", "parser_version", "target_form_family"]
+        for f in required:
+            if not row.get(f):
+                raise ValueError(f"Missing required field: {f}")
+        started_at = row.get("started_at") or datetime.now(UTC)
+        self._conn.execute(
+            """
+            INSERT INTO sec_parse_run
+                (parse_run_id, accession_number, parser_name, parser_version,
+                 target_form_family, status, started_at)
+            VALUES (?, ?, ?, ?, ?, 'running', ?)
+            """,
+            [
+                row["parse_run_id"],
+                row.get("accession_number"),
+                row["parser_name"],
+                row["parser_version"],
+                row["target_form_family"],
+                started_at,
+            ],
+        )
+
+    def complete_parse_run(
+        self,
+        parse_run_id: str,
+        status: str = "succeeded",
+        error_code: str | None = None,
+        error_message: str | None = None,
+    ) -> None:
+        """Update an existing parse run to a terminal status."""
+        if not parse_run_id:
+            raise ValueError("parse_run_id must not be empty")
+        self._conn.execute(
+            """
+            UPDATE sec_parse_run
+            SET status = ?, completed_at = ?, error_code = ?, error_message = ?
+            WHERE parse_run_id = ?
+            """,
+            [status, datetime.now(UTC), error_code, error_message, parse_run_id],
+        )
+
+    def get_parse_run(self, parse_run_id: str) -> dict | None:
+        """Return the parse run row as a dict, or None if not found."""
+        cursor = self._conn.execute(
+            "SELECT * FROM sec_parse_run WHERE parse_run_id = ?", [parse_run_id]
+        )
+        row = cursor.fetchone()
+        if row is None:
+            return None
+        cols = [d[0] for d in cursor.description]
+        return dict(zip(cols, row))
 
 
 # ------------------------------------------------------------------
