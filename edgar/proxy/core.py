@@ -400,6 +400,37 @@ class ProxyStatement:
 
         return pd.DataFrame(rows)
 
+    # HTML Extraction Properties
+    @cached_property
+    def _filing_text(self) -> Optional[str]:
+        """Full text of the filing for HTML extraction."""
+        try:
+            return self._filing.markdown()
+        except Exception:
+            try:
+                return self._filing.text()
+            except Exception:
+                return None
+
+    @cached_property
+    def voting_proposals(self) -> List['VotingProposal']:
+        """
+        Voting proposals with board recommendations, extracted from HTML.
+
+        Each proposal includes the proposal number, description, board
+        recommendation (FOR/AGAINST/ABSTAIN), and classified type
+        (director_election, say_on_pay, auditor_ratification, etc.).
+
+        Returns:
+            List of VotingProposal dataclasses, sorted by proposal number.
+            Returns empty list if text extraction fails.
+        """
+        from edgar.proxy.html_extractor import extract_voting_proposals
+        text = self._filing_text
+        if not text:
+            return []
+        return extract_voting_proposals(text)
+
     # DataFrame Properties
     @cached_property
     def executive_compensation(self) -> pd.DataFrame:
@@ -642,11 +673,24 @@ class ProxyStatement:
         lines.append("  .named_executives        Named executive officers list")
         lines.append("  .performance_measures    Company performance measures")
         lines.append("  .awards_close_to_mnpi    Awards granted near MNPI disclosure")
+        lines.append("  .voting_proposals        Voting proposals with board recommendations")
 
         if detail == 'standard':
             return "\n".join(lines)
 
         # === FULL ===
+        # Voting proposals
+        try:
+            proposals = self.voting_proposals
+            if proposals:
+                lines.append("")
+                lines.append(f"VOTING PROPOSALS: {len(proposals)}")
+                for p in proposals:
+                    rec = f" (Board: {p.board_recommendation})" if p.board_recommendation else ""
+                    lines.append(f"  {p.number}. {p.description}{rec} [{p.proposal_type}]")
+        except Exception:
+            pass
+
         # Named executives
         try:
             if self.has_individual_executive_data:
@@ -822,6 +866,34 @@ class ProxyStatement:
                 gov_text.append("No Insider Trading Policy", style="red")
             elements.append(Text())
             elements.append(gov_text)
+
+        # Voting Proposals
+        try:
+            proposals = self.voting_proposals
+            if proposals:
+                prop_table = Table(
+                    title="Voting Proposals",
+                    box=box.SIMPLE,
+                    show_header=True,
+                )
+                prop_table.add_column("#", style="dim", width=3)
+                prop_table.add_column("Proposal", ratio=3)
+                prop_table.add_column("Type", style="dim", ratio=1)
+                prop_table.add_column("Board", justify="center", width=8)
+
+                for p in proposals:
+                    rec_style = "green" if p.board_recommendation == "FOR" else "red" if p.board_recommendation == "AGAINST" else ""
+                    rec_text = p.board_recommendation or "-"
+                    prop_table.add_row(
+                        str(p.number),
+                        p.description,
+                        p.proposal_type.replace('_', ' '),
+                        Text(rec_text, style=rec_style),
+                    )
+                elements.append(Text())
+                elements.append(prop_table)
+        except Exception:
+            pass
 
         # Performance Measures
         if self.performance_measures:
