@@ -76,6 +76,8 @@ def test_get_all_filing_texts_multiple_versions(db):
     db.upsert_filing_text(row_v2)
     results = db.get_all_filing_texts(_ACCESSION)
     assert len(results) == 2
+    assert results[0]["text_version"] == "generic_text_v1"
+    assert results[1]["text_version"] == "generic_text_v2"
 
 
 @pytest.mark.fast
