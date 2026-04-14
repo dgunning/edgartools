@@ -851,12 +851,12 @@ class SilverDatabase:
     # sec_parse_run
     # ------------------------------------------------------------------
 
-    def start_parse_run(self, row: dict) -> None:
+    def start_parse_run(self, row: dict[str, Any]) -> None:
         """Insert a new parse run with status='running'."""
         required = ["parse_run_id", "parser_name", "parser_version", "target_form_family"]
         for f in required:
-            if not row.get(f):
-                raise ValueError(f"Missing required field: {f}")
+            if row.get(f) is None:
+                raise ValueError(f"start_parse_run: required field '{f}' is missing or None")
         started_at = row.get("started_at") or datetime.now(UTC)
         self._conn.execute(
             """
@@ -894,16 +894,15 @@ class SilverDatabase:
             [status, datetime.now(UTC), error_code, error_message, parse_run_id],
         )
 
-    def get_parse_run(self, parse_run_id: str) -> dict | None:
+    def get_parse_run(self, parse_run_id: str) -> dict[str, Any] | None:
         """Return the parse run row as a dict, or None if not found."""
-        cursor = self._conn.execute(
+        result = self._conn.execute(
             "SELECT * FROM sec_parse_run WHERE parse_run_id = ?", [parse_run_id]
-        )
-        row = cursor.fetchone()
-        if row is None:
+        ).fetchone()
+        if result is None:
             return None
-        cols = [d[0] for d in cursor.description]
-        return dict(zip(cols, row))
+        cols = [d[0] for d in self._conn.description]
+        return dict(zip(cols, result))
 
 
 # ------------------------------------------------------------------

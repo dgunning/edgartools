@@ -3,10 +3,8 @@ Verify sec_parse_run lifecycle tracking.
 Fast tests only - no network calls.
 """
 import pytest
-from datetime import datetime, timezone
+from datetime import datetime
 from edgar_warehouse.silver import SilverDatabase
-
-_NOW = datetime(2025, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
 
 @pytest.fixture
 def db(tmp_path):
