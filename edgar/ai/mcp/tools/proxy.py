@@ -94,11 +94,13 @@ async def edgar_proxy(
     try:
         company = resolve_company(identifier)
 
-        # Get DEF 14A filings
+        # Get proxy filings — try DEF 14A first, then contested (DEFC14A) if none found
         filings = company.get_filings(form="DEF 14A")
         if filings is None or len(filings) == 0:
+            filings = company.get_filings(form=["DEFC14A", "DEFN14A"])
+        if filings is None or len(filings) == 0:
             return error(
-                f"No DEF 14A proxy filings found for '{identifier}'",
+                f"No proxy filings found for '{identifier}'",
                 suggestions=[
                     "This company may not file proxy statements (e.g., foreign private issuers use 20-F)",
                     "Try edgar_read with form='DEF 14A' to search more broadly",
@@ -111,7 +113,7 @@ async def edgar_proxy(
         filing_index = max(0, filing_index)
         if filing_index >= len(filings):
             return error(
-                f"Only {len(filings)} DEF 14A filings available, but index {filing_index} requested",
+                f"Only {len(filings)} proxy filings available, but index {filing_index} requested",
                 suggestions=[f"Use filing_index between 0 and {len(filings) - 1}"],
                 error_code="INVALID_ARGUMENTS"
             )
@@ -181,11 +183,23 @@ async def edgar_proxy(
         if pvp:
             result["pay_vs_performance"] = pvp
 
-        # Governance
+        # Governance and award timing
+        governance: dict[str, Any] = {}
         if proxy.insider_trading_policy_adopted is not None:
-            result["governance"] = {
-                "insider_trading_policy": proxy.insider_trading_policy_adopted,
-            }
+            governance["insider_trading_policy"] = proxy.insider_trading_policy_adopted
+        if proxy.award_timing_mnpi_considered is not None:
+            governance["award_timing_mnpi_considered"] = proxy.award_timing_mnpi_considered
+        if proxy.award_dates_predetermined is not None:
+            governance["award_dates_predetermined"] = proxy.award_dates_predetermined
+        if proxy.mnpi_disclosure_timed_for_comp_value is not None:
+            governance["mnpi_timed_for_comp_value"] = proxy.mnpi_disclosure_timed_for_comp_value
+        if governance:
+            result["governance"] = governance
+
+        # Awards close to MNPI
+        awards_df = proxy.awards_close_to_mnpi
+        if awards_df is not None and not awards_df.empty:
+            result["awards_close_to_mnpi"] = _df_to_records(awards_df, limit=20)
 
         # Performance measures
         if proxy.performance_measures:

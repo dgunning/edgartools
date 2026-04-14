@@ -2732,7 +2732,9 @@ def unicode_for_form(form: str) -> str:
         return '💬'  # Speech bubble for communications
 
     # Proxy statements
-    elif form in ['DEF 14A', 'PRE 14A', 'DEFA14A', 'DEFC14A']:
+    elif form in ['DEF 14A', 'PRE 14A', 'DEFA14A', 'DEFC14A', 'DEFM14A', 'DEFN14A',
+                  'DFAN14A', 'DEFR14A', 'DFRN14A', 'PREC14A', 'PREM14A', 'PREN14A',
+                  'PRER14A', 'PRRN14A', 'PX14A6G', 'PX14A6N']:
         return '📩'  # Envelope for shareholder communications
 
     # Default case - generic document
