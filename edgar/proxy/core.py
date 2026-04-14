@@ -403,12 +403,16 @@ class ProxyStatement:
     # HTML Extraction Properties
     @cached_property
     def _filing_text(self) -> Optional[str]:
-        """Full text of the filing for HTML extraction."""
+        """Full text of the filing for regex-based extraction.
+
+        Prefers text() over markdown() because markdown table formatting
+        (pipes, alignment characters) pollutes regex pattern matching.
+        """
         try:
-            return self._filing.markdown()
+            return self._filing.text()
         except Exception:
             try:
-                return self._filing.text()
+                return self._filing.markdown()
             except Exception:
                 return None
 

@@ -15,7 +15,7 @@ Lessons from edgartools-workers implementation (20-company eval):
 
 import logging
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Literal, Optional
 
 log = logging.getLogger(__name__)
@@ -91,8 +91,6 @@ def _extract_recommendation(text: str) -> Optional[str]:
 
 def _clean_description(desc: str) -> str:
     """Clean raw proposal description text."""
-    # Remove markdown table artifacts (pipes from table rendering)
-    desc = re.sub(r'\|', ' ', desc)
     # Collapse multiple spaces
     desc = re.sub(r'\s{2,}', ' ', desc)
     # Remove trailing page numbers
