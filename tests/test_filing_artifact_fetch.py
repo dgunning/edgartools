@@ -93,8 +93,7 @@ def test_upsert_raw_object_retains_fetched_at(db):
     fetched = result["fetched_at"]
     # compare as UTC-aware datetimes; DuckDB may return tz-aware or naive
     if fetched.tzinfo is None:
-        from datetime import timezone as tz
-        fetched = fetched.replace(tzinfo=tz.utc)
+        fetched = fetched.replace(tzinfo=timezone.utc)
     assert fetched == _NOW
 
 

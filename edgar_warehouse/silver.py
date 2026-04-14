@@ -170,6 +170,7 @@ CREATE TABLE IF NOT EXISTS sec_filing_attachment (
     document_url        TEXT        NOT NULL,
     is_primary          BOOLEAN     NOT NULL,
     raw_object_id       TEXT,
+    last_sync_run_id    TEXT,
     PRIMARY KEY (accession_number, document_name)
 );
 """
@@ -648,6 +649,9 @@ class SilverDatabase:
         fetched_at is set on first insert and never overwritten on conflict.
         All other mutable fields are updated on conflict.
         """
+        for required in ("raw_object_id", "source_url", "storage_path", "sha256", "fetched_at", "http_status"):
+            if row.get(required) is None:
+                raise ValueError(f"upsert_raw_object: required field '{required}' is missing or None")
         self._conn.execute(
             """
             INSERT INTO sec_raw_object
@@ -708,20 +712,24 @@ class SilverDatabase:
         """Upsert filing attachment rows. Returns row count."""
         count = 0
         for row in rows:
+            for required in ("accession_number", "document_name", "document_type", "document_url"):
+                if not row.get(required):
+                    raise ValueError(f"merge_filing_attachments: required field '{required}' is missing or None in row {row}")
             self._conn.execute(
                 """
                 INSERT INTO sec_filing_attachment
                     (accession_number, sequence_number, document_name,
                      document_type, document_description, document_url,
-                     is_primary, raw_object_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                     is_primary, raw_object_id, last_sync_run_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT (accession_number, document_name) DO UPDATE SET
                     sequence_number = excluded.sequence_number,
                     document_type = excluded.document_type,
                     document_description = excluded.document_description,
                     document_url = excluded.document_url,
                     is_primary = excluded.is_primary,
-                    raw_object_id = excluded.raw_object_id
+                    raw_object_id = excluded.raw_object_id,
+                    last_sync_run_id = excluded.last_sync_run_id
                 """,
                 [
                     row["accession_number"],
@@ -732,6 +740,7 @@ class SilverDatabase:
                     row.get("document_url"),
                     row.get("is_primary", False),
                     row.get("raw_object_id"),
+                    sync_run_id,
                 ],
             )
             count += 1
