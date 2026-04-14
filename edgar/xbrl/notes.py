@@ -561,6 +561,38 @@ class Notes:
         scored.sort(key=lambda x: x[0])
         return [note for _, note in scored]
 
+    def grep(self, pattern: str, *, regex: bool = False) -> 'GrepResult':
+        """
+        Grep note content for exact text matches.
+
+        Unlike search() which matches note titles, grep() searches the full
+        narrative text content of each note. Case-insensitive.
+
+        Args:
+            pattern: Text to search for (exact match, case-insensitive)
+            regex: If True, treat pattern as a regular expression
+
+        Returns:
+            GrepResult containing matches with note title as location
+
+        Examples:
+            >>> notes.grep("going concern")
+            >>> notes.grep("Level 3")
+            >>> notes.grep(r"right of first refusal", regex=True)
+        """
+        from edgar.search.grep import GrepResult, _grep_text
+
+        all_matches = []
+        for note in self._notes:
+            text = note.text
+            if not text:
+                continue
+            location = note.title or note.short_name or f"Note {note.number}"
+            matches = _grep_text(text, pattern, location, regex=regex)
+            all_matches.extend(matches)
+
+        return GrepResult(pattern, all_matches)
+
     @property
     def with_tables(self) -> List[Note]:
         """Notes that have child tables."""

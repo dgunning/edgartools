@@ -4,6 +4,7 @@ from functools import cached_property
 from typing import List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from edgar.search.grep import GrepResult
     from edgar.sgml.filing_summary import Reports
 
 from rich import print
@@ -76,6 +77,26 @@ class CompanyReport:
         except Exception as e:
             log.debug(f"Could not load FilingSummary for notes hierarchy: {e}")
         return Notes.from_xbrl(xbrl, filing_summary=filing_summary)
+
+    def grep(self, pattern: str, *, regex: bool = False, document: Optional[str] = None) -> 'GrepResult':
+        """
+        Grep for exact text matches across the filing.
+
+        Delegates to the underlying Filing.grep(). Case-insensitive.
+
+        Args:
+            pattern: Text to search for
+            regex: If True, treat pattern as a regular expression
+            document: Narrow to specific document ("primary", "EX-10.1", etc.)
+
+        Returns:
+            GrepResult with matches
+
+        Examples:
+            >>> tenk.grep("going concern")
+            >>> tenk.grep("Level 3", document="primary")
+        """
+        return self._filing.grep(pattern, regex=regex, document=document)
 
     @cached_property
     def reports(self) -> Optional['Reports']:

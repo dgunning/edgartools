@@ -2052,6 +2052,77 @@ class Filing:
             return self.__get_regex_search_index.search(query)
         return self.__get_bm25_search_index.search(query)
 
+    def grep(self, pattern: str, *, regex: bool = False, document: Optional[str] = None) -> 'GrepResult':
+        """
+        Grep for exact text matches across all filing documents.
+
+        Like `grep -ri` on a directory — searches the primary document and all
+        exhibits/attachments by default. Case-insensitive. Returns every match
+        with its location (which document) and surrounding context.
+
+        Args:
+            pattern: Text to search for (exact match, case-insensitive)
+            regex: If True, treat pattern as a regular expression
+            document: Narrow search to a specific document. Use "primary" for
+                     the main filing document, or a document type like "EX-10.1"
+
+        Returns:
+            GrepResult containing GrepMatch objects with location and context
+
+        Examples:
+            >>> filing.grep("going concern")
+            >>> filing.grep("Level 3", document="primary")
+            >>> filing.grep(r"Level\\s+3", regex=True)
+        """
+        from edgar.search.grep import GrepResult, _grep_text
+
+        all_matches = []
+
+        try:
+            attachments = self.attachments
+        except Exception:
+            return GrepResult(pattern, [])
+
+        for attachment in attachments:
+            # Filter by document if specified
+            if document:
+                if document.lower() == "primary":
+                    if attachment.sequence_number != "1":
+                        continue
+                else:
+                    # Match by document_type (e.g. "EX-10.1") or document filename
+                    doc_type = (attachment.document_type or "").upper()
+                    if document.upper() not in doc_type and document.lower() not in (attachment.document or "").lower():
+                        continue
+
+            # Skip binary/non-text attachments
+            if attachment.empty or attachment.is_binary():
+                continue
+
+            # Get text content
+            try:
+                text = attachment.text()
+            except Exception as e:
+                log.debug(f"grep: could not extract text from {attachment.document}: {e}")
+                continue
+
+            if not text:
+                continue
+
+            # Determine location label
+            doc_type = attachment.document_type or ""
+            if attachment.sequence_number == "1":
+                location = "primary"
+            elif doc_type:
+                location = doc_type
+            else:
+                location = attachment.document or f"doc-{attachment.sequence_number}"
+
+            matches = _grep_text(text, pattern, location, regex=regex)
+            all_matches.extend(matches)
+
+        return GrepResult(pattern, all_matches)
+
     @property
     def filing_url(self) -> str:
         return f"{self.base_dir}/{self.document.document}"
