@@ -78,6 +78,7 @@ nav:
   - Filings:
     - Working with Filings: guides/working-with-filing.md
     - Search & Filter: guides/searching-filings.md
+    - Full-Text Search & Grep: guides/full-text-search.md
     - Filter by Criteria: guides/filtering-filings.md
     - Current Filings: guides/current-filings.md
     - Attachments: guides/filing-attachments.md
