@@ -142,6 +142,36 @@ CREATE TABLE IF NOT EXISTS sec_daily_index_checkpoint (
     finalized_at              TIMESTAMPTZ,
     last_success_at           TIMESTAMPTZ
 );
+
+CREATE TABLE IF NOT EXISTS sec_raw_object (
+    raw_object_id       TEXT PRIMARY KEY,
+    source_type         TEXT,
+    cik                 BIGINT,
+    accession_number    TEXT,
+    form                TEXT,
+    source_url          TEXT,
+    storage_path        TEXT,
+    content_type        TEXT,
+    content_encoding    TEXT,
+    byte_size           BIGINT,
+    sha256              TEXT,
+    fetched_at          TIMESTAMPTZ,
+    http_status         INTEGER,
+    source_last_modified TIMESTAMPTZ,
+    source_etag         TEXT
+);
+
+CREATE TABLE IF NOT EXISTS sec_filing_attachment (
+    accession_number    TEXT,
+    sequence_number     TEXT,
+    document_name       TEXT,
+    document_type       TEXT,
+    document_description TEXT,
+    document_url        TEXT,
+    is_primary          BOOLEAN,
+    raw_object_id       TEXT,
+    PRIMARY KEY (accession_number, document_name)
+);
 """
 
 
@@ -607,6 +637,114 @@ class SilverDatabase:
             [up_to_date],
         ).fetchall()
         return [str(row[0]) for row in rows]
+
+    # ------------------------------------------------------------------
+    # sec_raw_object
+    # ------------------------------------------------------------------
+
+    def upsert_raw_object(self, row: dict[str, Any]) -> None:
+        """Insert or update a raw object row.
+
+        fetched_at is set on first insert and never overwritten on conflict.
+        All other mutable fields are updated on conflict.
+        """
+        self._conn.execute(
+            """
+            INSERT INTO sec_raw_object
+                (raw_object_id, source_type, cik, accession_number, form,
+                 source_url, storage_path, content_type, content_encoding,
+                 byte_size, sha256, fetched_at, http_status,
+                 source_last_modified, source_etag)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT (raw_object_id) DO UPDATE SET
+                source_type = excluded.source_type,
+                cik = excluded.cik,
+                accession_number = excluded.accession_number,
+                form = excluded.form,
+                source_url = excluded.source_url,
+                storage_path = excluded.storage_path,
+                content_type = excluded.content_type,
+                content_encoding = excluded.content_encoding,
+                byte_size = excluded.byte_size,
+                sha256 = excluded.sha256,
+                http_status = excluded.http_status,
+                source_last_modified = excluded.source_last_modified,
+                source_etag = excluded.source_etag
+            """,
+            [
+                row["raw_object_id"],
+                row.get("source_type"),
+                row.get("cik"),
+                row.get("accession_number"),
+                row.get("form"),
+                row.get("source_url"),
+                row.get("storage_path"),
+                row.get("content_type"),
+                row.get("content_encoding"),
+                row.get("byte_size"),
+                row.get("sha256"),
+                row.get("fetched_at"),
+                row.get("http_status"),
+                row.get("source_last_modified"),
+                row.get("source_etag"),
+            ],
+        )
+
+    def get_raw_object(self, raw_object_id: str) -> dict[str, Any] | None:
+        result = self._conn.execute(
+            "SELECT * FROM sec_raw_object WHERE raw_object_id = ?",
+            [raw_object_id],
+        ).fetchone()
+        if result is None:
+            return None
+        cols = [d[0] for d in self._conn.description]
+        return dict(zip(cols, result))
+
+    # ------------------------------------------------------------------
+    # sec_filing_attachment
+    # ------------------------------------------------------------------
+
+    def merge_filing_attachments(self, rows: list[dict[str, Any]], sync_run_id: str) -> int:
+        """Upsert filing attachment rows. Returns row count."""
+        count = 0
+        for row in rows:
+            self._conn.execute(
+                """
+                INSERT INTO sec_filing_attachment
+                    (accession_number, sequence_number, document_name,
+                     document_type, document_description, document_url,
+                     is_primary, raw_object_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT (accession_number, document_name) DO UPDATE SET
+                    sequence_number = excluded.sequence_number,
+                    document_type = excluded.document_type,
+                    document_description = excluded.document_description,
+                    document_url = excluded.document_url,
+                    is_primary = excluded.is_primary,
+                    raw_object_id = excluded.raw_object_id
+                """,
+                [
+                    row["accession_number"],
+                    row.get("sequence_number"),
+                    row["document_name"],
+                    row.get("document_type"),
+                    row.get("document_description"),
+                    row.get("document_url"),
+                    row.get("is_primary", False),
+                    row.get("raw_object_id"),
+                ],
+            )
+            count += 1
+        return count
+
+    def get_filing_attachments(self, accession_number: str) -> list[dict[str, Any]]:
+        """Return all attachment rows for the given accession number."""
+        rows = self._conn.execute(
+            "SELECT * FROM sec_filing_attachment WHERE accession_number = ?",
+            [accession_number],
+        ).fetchall()
+        cols = [d[0] for d in self._conn.description]
+        return [dict(zip(cols, row)) for row in rows]
 
 
 # ------------------------------------------------------------------
