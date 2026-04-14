@@ -46,6 +46,13 @@ variable "edgar_identity_secret_arn" {
   default     = null
 }
 
+variable "edgar_identity_value" {
+  description = "EDGAR identity string to store in Secrets Manager (e.g. 'MyApp admin@example.com')."
+  type        = string
+  sensitive   = true
+  default     = null
+}
+
 variable "snowflake_runtime_secret_arn" {
   description = "Optional pre-existing Snowflake runtime metadata secret ARN."
   type        = string

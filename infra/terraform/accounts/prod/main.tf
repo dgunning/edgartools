@@ -50,6 +50,7 @@ module "runtime" {
   public_security_group_id           = module.network.public_ecs_security_group_id
   private_security_group_id          = module.network.private_ecs_security_group_id
   edgar_identity_secret_arn          = var.edgar_identity_secret_arn
+  edgar_identity_value               = var.edgar_identity_value
   snowflake_runtime_secret_arn       = var.snowflake_runtime_secret_arn
   snowflake_account_identifier       = var.snowflake_account_identifier
   snowflake_storage_integration_name = var.snowflake_storage_integration_name

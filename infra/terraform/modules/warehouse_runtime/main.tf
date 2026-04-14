@@ -146,6 +146,13 @@ resource "aws_secretsmanager_secret" "edgar_identity" {
   tags = merge(local.tags, { Name = "${local.name_prefix}-edgar-identity" })
 }
 
+resource "aws_secretsmanager_secret_version" "edgar_identity" {
+  count = var.edgar_identity_secret_arn == null && var.edgar_identity_value != null ? 1 : 0
+
+  secret_id     = aws_secretsmanager_secret.edgar_identity[0].id
+  secret_string = var.edgar_identity_value
+}
+
 resource "aws_secretsmanager_secret" "snowflake_runtime" {
   count = var.snowflake_runtime_secret_arn == null ? 1 : 0
 
