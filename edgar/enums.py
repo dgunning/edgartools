@@ -77,6 +77,13 @@ class FormType(StrEnum):
     PRELIMINARY_PROXY = "PRE 14A"
     ADDITIONAL_PROXY = "DEFA14A"
     MERGER_PROXY = "DEFM14A"
+    CONTESTED_PROXY = "DEFC14A"
+    DISSIDENT_PROXY = "DEFN14A"
+    DISSIDENT_ADDITIONAL_PROXY = "DFAN14A"
+    REVISED_PROXY = "DEFR14A"
+    PRELIMINARY_CONTESTED_PROXY = "PREC14A"
+    PRELIMINARY_DISSIDENT_PROXY = "PREN14A"
+    REVISED_DISSIDENT_PROXY = "DFRN14A"
 
     # Foreign issuers
     FOREIGN_ANNUAL = "20-F"
@@ -680,11 +687,18 @@ PROXY_FORMS = [
     FormType.PROXY_STATEMENT,
     FormType.PRELIMINARY_PROXY,
     FormType.ADDITIONAL_PROXY,
-    FormType.MERGER_PROXY
+    FormType.MERGER_PROXY,
+    FormType.CONTESTED_PROXY,
+    FormType.DISSIDENT_PROXY,
+    FormType.DISSIDENT_ADDITIONAL_PROXY,
+    FormType.REVISED_PROXY,
+    FormType.PRELIMINARY_CONTESTED_PROXY,
+    FormType.PRELIMINARY_DISSIDENT_PROXY,
+    FormType.REVISED_DISSIDENT_PROXY,
 ]
 """
 Collection of proxy statement forms for shareholder voting and corporate governance.
-Includes definitive, preliminary, additional, and merger-related proxy statements.
+Includes definitive, preliminary, contested, dissident, and merger-related proxy statements.
 """
 
 REGISTRATION_FORMS = [

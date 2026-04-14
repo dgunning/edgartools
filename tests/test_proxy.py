@@ -58,10 +58,26 @@ class TestProxyStatementCreation:
 
     def test_proxy_forms_constant(self):
         """Test that PROXY_FORMS contains expected form types."""
+        # Management forms
         assert 'DEF 14A' in PROXY_FORMS
         assert 'DEF 14A/A' in PROXY_FORMS
         assert 'DEFA14A' in PROXY_FORMS
         assert 'DEFM14A' in PROXY_FORMS
+        assert 'DEFR14A' in PROXY_FORMS
+        # Contested forms
+        assert 'DEFC14A' in PROXY_FORMS
+        assert 'PREC14A' in PROXY_FORMS
+        # Dissident forms
+        assert 'DEFN14A' in PROXY_FORMS
+        assert 'DFAN14A' in PROXY_FORMS
+        assert 'DFRN14A' in PROXY_FORMS
+        # Preliminary forms
+        assert 'PRE 14A' in PROXY_FORMS
+        assert 'PREN14A' in PROXY_FORMS
+        assert 'PRRN14A' in PROXY_FORMS
+        # Exempt solicitations
+        assert 'PX14A6G' in PROXY_FORMS
+        assert 'PX14A6N' in PROXY_FORMS
 
 
 class TestProxyStatementMetadata:

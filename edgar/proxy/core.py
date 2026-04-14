@@ -57,7 +57,10 @@ class ProxyStatement:
         Args:
             filing: SEC Filing object for a DEF 14A form
         """
-        assert filing.form in PROXY_FORMS, f"Form {filing.form} is not a valid proxy form"
+        assert filing.form in PROXY_FORMS, (
+            f"Form '{filing.form}' is not a recognized proxy form. "
+            f"Expected one of: DEF 14A, DEFA14A, DEFC14A, DFAN14A, PRE 14A, PREC14A, etc."
+        )
         self._filing = filing
         self._xbrl = None
         self._facts_df = None
@@ -286,6 +289,117 @@ class ProxyStatement:
             return None
         return str(value).lower() in ('true', 'yes', '1', 'y')
 
+    # Award Timing Properties (SEC Rule 402(x) — since 2023)
+    @cached_property
+    def award_timing_mnpi_considered(self) -> Optional[bool]:
+        """Whether equity award timing decisions considered material nonpublic information."""
+        value = self._get_concept_value('ecd:AwardTmgMnpiCnsdrdFlag')
+        if value is None:
+            return None
+        return str(value).lower() in ('true', 'yes', '1', 'y')
+
+    @cached_property
+    def award_dates_predetermined(self) -> Optional[bool]:
+        """Whether equity award grant dates were predetermined."""
+        value = self._get_concept_value('ecd:AwardTmgPredtrmndFlag')
+        if value is None:
+            return None
+        return str(value).lower() in ('true', 'yes', '1', 'y')
+
+    @cached_property
+    def mnpi_disclosure_timed_for_comp_value(self) -> Optional[bool]:
+        """Whether MNPI disclosure was timed to affect compensation value."""
+        value = self._get_concept_value('ecd:MnpiDiscTimedForCompValFlag')
+        if value is None:
+            return None
+        return str(value).lower() in ('true', 'yes', '1', 'y')
+
+    @cached_property
+    def awards_close_to_mnpi(self) -> pd.DataFrame:
+        """
+        Awards granted within 4 business days of MNPI disclosure.
+
+        Required since 2023 for companies that granted equity awards close to
+        material nonpublic information disclosures. Each row represents one
+        award grant to a named executive officer.
+
+        Columns:
+            - grant_date: Date the award was granted
+            - executive: Executive member identifier
+            - award_type: Type of award (e.g., stock option)
+            - exercise_price: Exercise price of the award
+            - grant_date_fair_value: Fair value on grant date
+            - underlying_securities: Number of underlying securities
+            - market_price_change_pct: Percentage change in underlying security market price
+        """
+        if self._facts_dataframe is None:
+            return pd.DataFrame(columns=[
+                'grant_date', 'executive', 'award_type', 'exercise_price',
+                'grant_date_fair_value', 'underlying_securities', 'market_price_change_pct'
+            ])
+
+        df = self._facts_dataframe
+        names = df[df['concept'] == 'ecd:AwardsCloseToMnpiDiscIndName']
+
+        if len(names) == 0:
+            return pd.DataFrame(columns=[
+                'grant_date', 'executive', 'award_type', 'exercise_price',
+                'grant_date_fair_value', 'underlying_securities', 'market_price_change_pct'
+            ])
+
+        rows = []
+        for _, name_row in names.iterrows():
+            individual = name_row.get('dim_ecd_IndividualAxis')
+            award_type = name_row.get('dim_us-gaap_AwardTypeAxis')
+
+            # Build filter for matching dimensional rows
+            def _match(concept_df):
+                mask = concept_df['concept'].notna()
+                if individual is not None and 'dim_ecd_IndividualAxis' in concept_df.columns:
+                    mask = mask & (concept_df['dim_ecd_IndividualAxis'] == individual)
+                if award_type is not None and 'dim_us-gaap_AwardTypeAxis' in concept_df.columns:
+                    mask = mask & (concept_df['dim_us-gaap_AwardTypeAxis'] == award_type)
+                return concept_df[mask]
+
+            exercise_price = _match(df[df['concept'] == 'ecd:AwardExrcPrice'])
+            fair_value = _match(df[df['concept'] == 'ecd:AwardGrantDateFairValue'])
+            securities = _match(df[df['concept'] == 'ecd:AwardUndrlygSecuritiesAmt'])
+            pct_change = _match(df[df['concept'] == 'ecd:UndrlygSecurityMktPriceChngPct'])
+
+            # Clean up the executive identifier (e.g., "jnj:DuatoMember" → "DuatoMember")
+            exec_id = str(individual) if individual else None
+            if exec_id and ':' in exec_id:
+                exec_id = exec_id.split(':', 1)[1]
+            if exec_id and exec_id.endswith('Member'):
+                exec_id = exec_id[:-6]
+
+            # Clean up award type
+            award_type_str = str(award_type) if award_type else None
+            if award_type_str and ':' in award_type_str:
+                award_type_str = award_type_str.split(':', 1)[1]
+            if award_type_str and award_type_str.endswith('Member'):
+                award_type_str = award_type_str[:-6]
+
+            rows.append({
+                'grant_date': name_row['value'],
+                'executive': exec_id,
+                'award_type': award_type_str,
+                'exercise_price': self._decimal_or_none(
+                    exercise_price.iloc[0]['numeric_value'] if len(exercise_price) > 0 else None
+                ),
+                'grant_date_fair_value': self._decimal_or_none(
+                    fair_value.iloc[0]['numeric_value'] if len(fair_value) > 0 else None
+                ),
+                'underlying_securities': self._decimal_or_none(
+                    securities.iloc[0]['numeric_value'] if len(securities) > 0 else None
+                ),
+                'market_price_change_pct': self._decimal_or_none(
+                    pct_change.iloc[0]['numeric_value'] if len(pct_change) > 0 else None
+                ),
+            })
+
+        return pd.DataFrame(rows)
+
     # DataFrame Properties
     @cached_property
     def executive_compensation(self) -> pd.DataFrame:
@@ -506,6 +620,19 @@ class ProxyStatement:
             if ni is not None:
                 lines.append(f"  Net Income: {format_currency_short(float(ni))}")
 
+        # Award timing
+        mnpi_considered = self.award_timing_mnpi_considered
+        if mnpi_considered is not None:
+            lines.append("")
+            lines.append("AWARD TIMING:")
+            lines.append(f"  MNPI Considered: {'Yes' if mnpi_considered else 'No'}")
+            predetermined = self.award_dates_predetermined
+            if predetermined is not None:
+                lines.append(f"  Dates Predetermined: {'Yes' if predetermined else 'No'}")
+            mnpi_timed = self.mnpi_disclosure_timed_for_comp_value
+            if mnpi_timed is not None:
+                lines.append(f"  MNPI Timed for Comp Value: {'Yes' if mnpi_timed else 'No'}")
+
         # Available actions
         lines.append("")
         lines.append("AVAILABLE ACTIONS:")
@@ -514,6 +641,7 @@ class ProxyStatement:
         lines.append("  .peo_total_comp          CEO total compensation")
         lines.append("  .named_executives        Named executive officers list")
         lines.append("  .performance_measures    Company performance measures")
+        lines.append("  .awards_close_to_mnpi    Awards granted near MNPI disclosure")
 
         if detail == 'standard':
             return "\n".join(lines)
@@ -549,6 +677,21 @@ class ProxyStatement:
             if itp is not None:
                 lines.append("")
                 lines.append(f"Insider Trading Policy: {'Adopted' if itp else 'Not adopted'}")
+        except Exception:
+            pass
+
+        # Awards close to MNPI
+        try:
+            awards_df = self.awards_close_to_mnpi
+            if len(awards_df) > 0:
+                lines.append("")
+                lines.append(f"AWARDS CLOSE TO MNPI: {len(awards_df)} grants")
+                for _, row in awards_df.iterrows():
+                    exec_name = row.get('executive', 'Unknown')
+                    grant_date = row.get('grant_date', '')
+                    fair_value = row.get('grant_date_fair_value')
+                    fv_str = f" (FV: ${float(fair_value):,.0f})" if fair_value else ""
+                    lines.append(f"  {exec_name}: {grant_date}{fv_str}")
         except Exception:
             pass
 
@@ -647,6 +790,27 @@ class ProxyStatement:
 
             elements.append(Text())
             elements.append(pvp_table)
+
+        # Award Timing
+        mnpi_considered = self.award_timing_mnpi_considered
+        if mnpi_considered is not None:
+            timing_text = Text()
+            timing_text.append("Award Timing: ", style="bold")
+            parts = []
+            if mnpi_considered:
+                parts.append("MNPI considered")
+            predetermined = self.award_dates_predetermined
+            if predetermined:
+                parts.append("dates predetermined")
+            mnpi_timed = self.mnpi_disclosure_timed_for_comp_value
+            if mnpi_timed:
+                parts.append("MNPI timed for comp value")
+            if parts:
+                timing_text.append(", ".join(parts))
+            else:
+                timing_text.append("No MNPI timing concerns", style="green")
+            elements.append(Text())
+            elements.append(timing_text)
 
         # Governance indicators
         if self.insider_trading_policy_adopted is not None:

@@ -16,7 +16,19 @@ __all__ = [
 ]
 
 # Forms that map to ProxyStatement data object
-PROXY_FORMS = ['DEF 14A', 'DEF 14A/A', 'DEFA14A', 'DEFM14A']
+PROXY_FORMS = [
+    # Management definitive
+    'DEF 14A', 'DEF 14A/A', 'DEFA14A', 'DEFA14A/A', 'DEFM14A', 'DEFM14A/A', 'DEFR14A', 'DEFR14A/A',
+    # Contested solicitation (either party)
+    'DEFC14A', 'DEFC14A/A',
+    # Non-management / dissident
+    'DEFN14A', 'DEFN14A/A', 'DFAN14A', 'DFAN14A/A', 'DFRN14A', 'DFRN14A/A',
+    # Preliminary
+    'PRE 14A', 'PRE 14A/A', 'PREC14A', 'PREC14A/A', 'PREM14A', 'PREM14A/A',
+    'PREN14A', 'PREN14A/A', 'PRER14A', 'PRER14A/A', 'PRRN14A', 'PRRN14A/A',
+    # Exempt solicitations
+    'PX14A6G', 'PX14A6N',
+]
 
 
 @dataclass(frozen=True)
