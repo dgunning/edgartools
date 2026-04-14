@@ -134,6 +134,7 @@ class WarehouseCommandContext:
 
     bronze_root: StorageLocation
     storage_root: StorageLocation
+    silver_root: StorageLocation
     snowflake_export_root: StorageLocation | None
     identity: str
     runtime_mode: str
@@ -193,6 +194,18 @@ def _build_warehouse_context(command_name: str) -> WarehouseCommandContext:
     if bronze_root.root == storage_root.root:
         raise WarehouseRuntimeError("WAREHOUSE_BRONZE_ROOT and WAREHOUSE_STORAGE_ROOT must be different locations")
 
+    # Silver DuckDB must always be on local disk (DuckDB cannot run against S3/remote paths).
+    # WAREHOUSE_SILVER_ROOT overrides the default.  When WAREHOUSE_STORAGE_ROOT is remote
+    # (e.g. s3://) and no override is set, fall back to a well-known temp path that works on
+    # any container/VM including AWS ECS Fargate.
+    silver_root_value = os.environ.get("WAREHOUSE_SILVER_ROOT", "").strip()
+    if silver_root_value:
+        silver_root = StorageLocation(silver_root_value)
+    elif storage_root.is_remote:
+        silver_root = StorageLocation("/tmp/edgar-warehouse-silver")
+    else:
+        silver_root = storage_root
+
     snowflake_export_root = None
     if command_name in GOLD_AFFECTING_COMMANDS:
         snowflake_export_root_value = os.environ.get("SNOWFLAKE_EXPORT_ROOT", "").strip()
@@ -205,6 +218,7 @@ def _build_warehouse_context(command_name: str) -> WarehouseCommandContext:
     return WarehouseCommandContext(
         bronze_root=bronze_root,
         storage_root=storage_root,
+        silver_root=silver_root,
         snowflake_export_root=snowflake_export_root,
         identity=identity,
         runtime_mode=runtime_mode,
@@ -319,6 +333,7 @@ def _execute_warehouse_infrastructure_validation(
         "environment": {
             "bronze_root": context.bronze_root.root,
             "warehouse_root": context.storage_root.root,
+            "silver_root": context.silver_root.root,
             "identity_present": True,
             "snowflake_export_root": context.snowflake_export_root.root if context.snowflake_export_root else None,
         },
@@ -350,10 +365,10 @@ def _execute_warehouse_bronze_capture(
         now=now,
     )
 
-    # Write silver layer from staged submissions payloads (skipped for remote storage)
-    if silver_staging and not context.storage_root.is_remote:
+    # Write silver layer from staged submissions payloads.
+    if silver_staging:
         recent_limit = arguments.get("recent_limit")
-        db = _open_silver_database(context.storage_root)
+        db = _open_silver_database(context.silver_root)
         for cik, raw_object_id, main_payload, pagination_payloads in silver_staging:
             _apply_silver_from_submissions(
                 db=db,
@@ -420,6 +435,7 @@ def _execute_warehouse_bronze_capture(
         "environment": {
             "bronze_root": context.bronze_root.root,
             "warehouse_root": context.storage_root.root,
+            "silver_root": context.silver_root.root,
             "identity_present": True,
             "snowflake_export_root": context.snowflake_export_root.root if context.snowflake_export_root else None,
         },
@@ -438,14 +454,14 @@ def _execute_warehouse_bronze_capture(
     }
 
 
-def _open_silver_database(storage_root: StorageLocation) -> SilverDatabase:
-    """Open (or create) the silver DuckDB at the canonical path under storage_root."""
-    db_path = storage_root.join("silver", "sec", "silver.duckdb")
-    if storage_root.is_remote:
-        raise WarehouseRuntimeError(
-            "Silver DuckDB is not yet supported on remote storage roots. "
-            "Use a local path for WAREHOUSE_STORAGE_ROOT in bronze_capture mode."
-        )
+def _open_silver_database(silver_root: StorageLocation) -> SilverDatabase:
+    """Open (or create) the silver DuckDB at the canonical path under silver_root.
+
+    silver_root must always be a local path (DuckDB cannot run against S3/remote URIs).
+    Use WAREHOUSE_SILVER_ROOT to override the default, which falls back to
+    /tmp/edgar-warehouse-silver when WAREHOUSE_STORAGE_ROOT is remote.
+    """
+    db_path = silver_root.join("silver", "sec", "silver.duckdb")
     return SilverDatabase(db_path)
 
 
@@ -498,9 +514,7 @@ def _capture_bronze_raw(
         raw_writes.extend(_capture_reference_files(context=context, fetch_date=now.date()))
 
     if command_name == "daily-incremental":
-        db = None
-        if not context.storage_root.is_remote:
-            db = _open_silver_database(context.storage_root)
+        db = _open_silver_database(context.silver_root)
         impacted_ciks: list[int] = []
         for target_date in _date_range(
             start=date.fromisoformat(scope["business_date_start"]),
@@ -510,33 +524,32 @@ def _capture_bronze_raw(
                 daily_index_write, daily_index_ciks = _capture_daily_index_file(context=context, target_date=target_date)
                 raw_writes.append(daily_index_write)
                 impacted_ciks.extend(daily_index_ciks)
-                if db is not None:
-                    db.upsert_daily_index_checkpoint({
-                        "business_date": target_date.isoformat(),
-                        "source_key": f"date:{target_date.isoformat()}",
-                        "source_url": _build_daily_index_url(target_date),
-                        "expected_available_at": _expected_available_at(target_date),
-                        "last_attempt_at": now,
-                        "last_success_at": now,
-                        "raw_object_id": daily_index_write["sha256"],
-                        "last_sha256": daily_index_write["sha256"],
-                        "row_count": len(daily_index_ciks),
-                        "status": "succeeded",
-                    })
+                db.upsert_daily_index_checkpoint({
+                    "business_date": target_date.isoformat(),
+                    "source_key": f"date:{target_date.isoformat()}",
+                    "source_url": _build_daily_index_url(target_date),
+                    "expected_available_at": _expected_available_at(target_date),
+                    "last_attempt_at": now,
+                    "last_success_at": now,
+                    "raw_object_id": daily_index_write["sha256"],
+                    "last_sha256": daily_index_write["sha256"],
+                    "row_count": len(daily_index_ciks),
+                    "status": "succeeded",
+                })
             except WarehouseRuntimeError as exc:
-                if db is not None:
-                    db.upsert_daily_index_checkpoint({
-                        "business_date": target_date.isoformat(),
-                        "source_key": f"date:{target_date.isoformat()}",
-                        "source_url": _build_daily_index_url(target_date),
-                        "expected_available_at": _expected_available_at(target_date),
-                        "last_attempt_at": now,
-                        "status": "failed_retryable",
-                        "error_message": str(exc),
-                    })
-                raise
+                db.upsert_daily_index_checkpoint({
+                    "business_date": target_date.isoformat(),
+                    "source_key": f"date:{target_date.isoformat()}",
+                    "source_url": _build_daily_index_url(target_date),
+                    "expected_available_at": _expected_available_at(target_date),
+                    "last_attempt_at": now,
+                    "status": "failed_retryable",
+                    "error_message": str(exc),
+                })
+                raise  # fail-fast: stop processing remaining dates on first fetch failure
+        impacted_ciks = _dedupe_ints(impacted_ciks)
         impacted_ciks = _filter_ciks_to_universe(impacted_ciks, db)
-        selected_ciks = _apply_bronze_cik_limit(_dedupe_ints(impacted_ciks))
+        selected_ciks = _apply_bronze_cik_limit(impacted_ciks)
         if selected_ciks:
             writes, staging = _capture_submissions_scope(
                 context=context,
@@ -714,13 +727,7 @@ def _capture_catch_up_daily_form_index(
     Stops on the first fetch failure and updates checkpoint status accordingly.
     Returns (write_records, []) - no silver staging from daily index fetches alone.
     """
-    if context.storage_root.is_remote:
-        raise WarehouseRuntimeError(
-            "catch-up-daily-form-index in bronze_capture mode requires local storage root "
-            "(silver checkpoint is not yet supported on remote storage)"
-        )
-
-    db = _open_silver_database(context.storage_root)
+    db = _open_silver_database(context.silver_root)
     last_success = db.get_last_successful_checkpoint_date()
 
     if last_success is not None:
