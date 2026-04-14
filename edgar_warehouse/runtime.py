@@ -535,11 +535,7 @@ def _capture_bronze_raw(
                         "error_message": str(exc),
                     })
                 raise
-        if db is not None:
-            tracked = db.get_tracked_universe_ciks(status_filter="active")
-            if tracked:
-                tracked_set = set(tracked)
-                impacted_ciks = [c for c in impacted_ciks if c in tracked_set]
+        impacted_ciks = _filter_ciks_to_universe(impacted_ciks, db)
         selected_ciks = _apply_bronze_cik_limit(_dedupe_ints(impacted_ciks))
         if selected_ciks:
             writes, staging = _capture_submissions_scope(
@@ -918,6 +914,21 @@ def _pagination_file_names(submissions_document: dict[str, Any]) -> list[str]:
         if file_name:
             names.append(file_name)
     return names
+
+
+def _filter_ciks_to_universe(impacted_ciks: list[int], db: "SilverDatabase | None") -> list[int]:
+    """Return only CIKs that are in the active tracked universe.
+
+    Falls through to all impacted_ciks if the universe is empty (cold-start)
+    or if db is None (remote storage).
+    """
+    if db is None:
+        return impacted_ciks
+    tracked = db.get_tracked_universe_ciks(status_filter="active")
+    if not tracked:
+        return impacted_ciks  # cold-start: empty universe, pass all through
+    tracked_set = set(tracked)
+    return [c for c in impacted_ciks if c in tracked_set]
 
 
 def _extract_impacted_ciks_from_daily_index(payload: bytes, source_url: str) -> list[int]:

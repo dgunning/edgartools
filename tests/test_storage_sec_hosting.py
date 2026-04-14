@@ -14,7 +14,7 @@ from datetime import date, datetime, timezone
 
 import pytest
 
-from edgar_warehouse.runtime import StorageLocation, WarehouseRuntimeError
+from edgar_warehouse.runtime import StorageLocation, WarehouseRuntimeError, _filter_ciks_to_universe
 from edgar_warehouse.silver import SilverDatabase
 
 
@@ -265,29 +265,27 @@ def test_daily_index_checkpoint_written_on_success(db):
 @pytest.mark.fast
 def test_daily_incremental_filters_unknown_ciks(tmp_path):
     """Universe filter: only active CIKs from sec_tracked_universe are processed."""
-    from edgar_warehouse.silver import SilverDatabase
-
     db = SilverDatabase(str(tmp_path / "silver.duckdb"))
+    db.seed_tracked_universe({
+        "0": {"cik_str": 320193, "ticker": "AAPL", "exchange": "Nasdaq", "name": "Apple Inc."}
+    })
+    impacted = [320193, 789019, 1045810]
+    result = _filter_ciks_to_universe(impacted, db)
+    assert result == [320193]
 
-    # Seed only AAPL (CIK 320193) as active
-    db._conn.execute(
-        """
-        INSERT INTO sec_tracked_universe
-            (cik, input_ticker, universe_source, tracking_status, effective_from, added_at)
-        VALUES (320193, 'AAPL', 'test', 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-        """
-    )
 
-    # Simulate impacted_ciks coming from daily index (three CIKs)
-    impacted_ciks = [320193, 789019, 1045810]
+@pytest.mark.fast
+def test_filter_ciks_cold_start_fallthrough(tmp_path):
+    """Empty tracked universe must not filter out CIKs (cold-start safety)."""
+    db = SilverDatabase(str(tmp_path / "silver.duckdb"))
+    # Universe is empty - nothing seeded
+    impacted = [320193, 789019]
+    result = _filter_ciks_to_universe(impacted, db)
+    assert result == [320193, 789019]
 
-    # Apply the filter logic that the fixed daily-incremental branch uses
-    tracked = db.get_tracked_universe_ciks(status_filter="active")
-    if tracked:
-        tracked_set = set(tracked)
-        filtered_ciks = [c for c in impacted_ciks if c in tracked_set]
-    else:
-        # cold-start fall-through
-        filtered_ciks = impacted_ciks
 
-    assert filtered_ciks == [320193]
+@pytest.mark.fast
+def test_filter_ciks_none_db_fallthrough():
+    """None db (remote storage) must return all CIKs unchanged."""
+    result = _filter_ciks_to_universe([320193, 789019], None)
+    assert result == [320193, 789019]
