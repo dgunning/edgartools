@@ -15,6 +15,16 @@ from typing import Any
 
 import httpx
 
+from edgar_warehouse.loaders import (
+    stage_address_loader,
+    stage_company_loader,
+    stage_former_name_loader,
+    stage_manifest_loader,
+    stage_pagination_filing_loader,
+    stage_recent_filing_loader,
+)
+from edgar_warehouse.silver import SilverDatabase
+
 GOLD_AFFECTING_COMMANDS = {
     "bootstrap-full",
     "bootstrap-recent-10",
@@ -332,13 +342,29 @@ def _execute_warehouse_bronze_capture(
     command_path = command_name.replace("_", "-")
     scope = _resolve_scope(command_name=command_name, arguments=arguments, now=now)
 
-    raw_writes = _capture_bronze_raw(
+    raw_writes, silver_staging = _capture_bronze_raw(
         context=context,
         command_name=command_name,
         arguments=arguments,
         scope=scope,
         now=now,
     )
+
+    # Write silver layer from staged submissions payloads (skipped for remote storage)
+    if silver_staging and not context.storage_root.is_remote:
+        recent_limit = arguments.get("recent_limit")
+        db = _open_silver_database(context.storage_root)
+        for cik, raw_object_id, main_payload, pagination_payloads in silver_staging:
+            _apply_silver_from_submissions(
+                db=db,
+                sync_run_id=run_id,
+                cik=cik,
+                raw_object_id=raw_object_id,
+                load_mode=command_name.replace("-", "_"),
+                main_payload=main_payload,
+                pagination_payloads=pagination_payloads,
+                recent_limit=recent_limit,
+            )
 
     writes = []
     for layer, relative_path in _planned_writes(command_name=command_name, command_path=command_path, run_id=run_id, scope=scope).items():
@@ -412,80 +438,177 @@ def _execute_warehouse_bronze_capture(
     }
 
 
+def _open_silver_database(storage_root: StorageLocation) -> SilverDatabase:
+    """Open (or create) the silver DuckDB at the canonical path under storage_root."""
+    db_path = storage_root.join("silver", "sec", "silver.duckdb")
+    if storage_root.is_remote:
+        raise WarehouseRuntimeError(
+            "Silver DuckDB is not yet supported on remote storage roots. "
+            "Use a local path for WAREHOUSE_STORAGE_ROOT in bronze_capture mode."
+        )
+    return SilverDatabase(db_path)
+
+
+def _apply_silver_from_submissions(
+    db: SilverDatabase,
+    sync_run_id: str,
+    cik: int,
+    raw_object_id: str,
+    load_mode: str,
+    main_payload: dict[str, Any],
+    pagination_payloads: list[tuple[str, dict[str, Any]]],
+    recent_limit: int | None = None,
+) -> None:
+    """Write silver rows for one company from its parsed submissions JSON payloads."""
+    company_rows = stage_company_loader(main_payload, cik, sync_run_id, raw_object_id, load_mode)
+    address_rows = stage_address_loader(main_payload, cik, sync_run_id, raw_object_id, load_mode)
+    former_name_rows = stage_former_name_loader(main_payload, cik, sync_run_id, raw_object_id, load_mode)
+    manifest_rows = stage_manifest_loader(main_payload, cik, sync_run_id, raw_object_id, load_mode)
+    recent_rows = stage_recent_filing_loader(
+        main_payload, cik, sync_run_id, raw_object_id, load_mode, recent_limit=recent_limit
+    )
+
+    db.merge_company(company_rows, sync_run_id)
+    db.merge_addresses(address_rows, sync_run_id)
+    db.merge_former_names(former_name_rows, sync_run_id)
+    db.merge_submission_files(manifest_rows, sync_run_id)
+    db.merge_filings(recent_rows, sync_run_id)
+
+    for _file_name, pagination_payload in pagination_payloads:
+        pagination_rows = stage_pagination_filing_loader(pagination_payload, cik, sync_run_id, raw_object_id, load_mode)
+        db.merge_filings(pagination_rows, sync_run_id)
+
+
 def _capture_bronze_raw(
     context: WarehouseCommandContext,
     command_name: str,
     arguments: dict[str, Any],
     scope: dict[str, Any],
     now: datetime,
-) -> list[dict[str, Any]]:
+) -> tuple[list[dict[str, Any]], list[tuple[int, str, dict[str, Any], list[tuple[str, dict[str, Any]]]]]]:
+    """Capture raw bronze objects and return (write_records, silver_staging).
+
+    silver_staging is a list of (cik, raw_object_id, main_payload, pagination_payloads)
+    tuples suitable for passing to _apply_silver_from_submissions.
+    """
     raw_writes: list[dict[str, Any]] = []
+    silver_staging: list[tuple[int, str, dict[str, Any], list[tuple[str, dict[str, Any]]]]] = []
 
     if arguments.get("include_reference_refresh"):
         raw_writes.extend(_capture_reference_files(context=context, fetch_date=now.date()))
 
     if command_name == "daily-incremental":
+        db = None
+        if not context.storage_root.is_remote:
+            db = _open_silver_database(context.storage_root)
         impacted_ciks: list[int] = []
         for target_date in _date_range(
             start=date.fromisoformat(scope["business_date_start"]),
             end=date.fromisoformat(scope["business_date_end"]),
         ):
-            daily_index_write, daily_index_ciks = _capture_daily_index_file(context=context, target_date=target_date)
-            raw_writes.append(daily_index_write)
-            impacted_ciks.extend(daily_index_ciks)
+            try:
+                daily_index_write, daily_index_ciks = _capture_daily_index_file(context=context, target_date=target_date)
+                raw_writes.append(daily_index_write)
+                impacted_ciks.extend(daily_index_ciks)
+                if db is not None:
+                    db.upsert_daily_index_checkpoint({
+                        "business_date": target_date.isoformat(),
+                        "source_key": f"date:{target_date.isoformat()}",
+                        "source_url": _build_daily_index_url(target_date),
+                        "expected_available_at": _expected_available_at(target_date),
+                        "last_attempt_at": now,
+                        "last_success_at": now,
+                        "raw_object_id": daily_index_write["sha256"],
+                        "last_sha256": daily_index_write["sha256"],
+                        "row_count": len(daily_index_ciks),
+                        "status": "succeeded",
+                    })
+            except WarehouseRuntimeError as exc:
+                if db is not None:
+                    db.upsert_daily_index_checkpoint({
+                        "business_date": target_date.isoformat(),
+                        "source_key": f"date:{target_date.isoformat()}",
+                        "source_url": _build_daily_index_url(target_date),
+                        "expected_available_at": _expected_available_at(target_date),
+                        "last_attempt_at": now,
+                        "status": "failed_retryable",
+                        "error_message": str(exc),
+                    })
+                raise
+        if db is not None:
+            tracked = db.get_tracked_universe_ciks(status_filter="active")
+            if tracked:
+                tracked_set = set(tracked)
+                impacted_ciks = [c for c in impacted_ciks if c in tracked_set]
         selected_ciks = _apply_bronze_cik_limit(_dedupe_ints(impacted_ciks))
         if selected_ciks:
-            raw_writes.extend(
-                _capture_submissions_scope(
-                    context=context,
-                    ciks=selected_ciks,
-                    include_pagination=False,
-                    fetch_date=now.date(),
-                )
+            writes, staging = _capture_submissions_scope(
+                context=context,
+                ciks=selected_ciks,
+                include_pagination=False,
+                fetch_date=now.date(),
             )
-        return raw_writes
+            raw_writes.extend(writes)
+            silver_staging.extend(staging)
+        return raw_writes, silver_staging
 
     if command_name == "load-daily-form-index-for-date":
         daily_index_write, _ = _capture_daily_index_file(context=context, target_date=date.fromisoformat(scope["target_date"]))
         raw_writes.append(daily_index_write)
-        return raw_writes
+        return raw_writes, silver_staging
 
     if command_name == "bootstrap-recent-10":
         ciks = _require_cik_list(scope.get("cik_list"), command_name)
-        raw_writes.extend(_capture_submissions_scope(context=context, ciks=ciks, include_pagination=False, fetch_date=now.date()))
-        return raw_writes
+        writes, staging = _capture_submissions_scope(
+            context=context, ciks=ciks, include_pagination=False, fetch_date=now.date()
+        )
+        raw_writes.extend(writes)
+        silver_staging.extend(staging)
+        return raw_writes, silver_staging
 
     if command_name == "bootstrap-full":
         ciks = _require_cik_list(scope.get("cik_list"), command_name)
-        raw_writes.extend(_capture_submissions_scope(context=context, ciks=ciks, include_pagination=True, fetch_date=now.date()))
-        return raw_writes
+        writes, staging = _capture_submissions_scope(
+            context=context, ciks=ciks, include_pagination=True, fetch_date=now.date()
+        )
+        raw_writes.extend(writes)
+        silver_staging.extend(staging)
+        return raw_writes, silver_staging
 
     if command_name == "targeted-resync":
         scope_type = str(scope.get("scope_type", "")).strip()
         scope_key = str(scope.get("scope_key", "")).strip()
         if scope_type == "reference":
-            return raw_writes
+            return raw_writes, silver_staging
         if scope_type == "cik":
-            raw_writes.extend(
-                _capture_submissions_scope(
-                    context=context,
-                    ciks=[_parse_cik(scope_key)],
-                    include_pagination=True,
-                    fetch_date=now.date(),
-                )
+            writes, staging = _capture_submissions_scope(
+                context=context,
+                ciks=[_parse_cik(scope_key)],
+                include_pagination=True,
+                fetch_date=now.date(),
             )
-            return raw_writes
+            raw_writes.extend(writes)
+            silver_staging.extend(staging)
+            return raw_writes, silver_staging
         raise WarehouseRuntimeError("targeted-resync in bronze_capture mode does not yet support accession scope")
 
     if command_name == "full-reconcile":
         ciks = _require_cik_list(scope.get("cik_list"), command_name)
-        raw_writes.extend(_capture_submissions_scope(context=context, ciks=ciks, include_pagination=True, fetch_date=now.date()))
-        return raw_writes
+        writes, staging = _capture_submissions_scope(
+            context=context, ciks=ciks, include_pagination=True, fetch_date=now.date()
+        )
+        raw_writes.extend(writes)
+        silver_staging.extend(staging)
+        return raw_writes, silver_staging
 
     if command_name == "catch-up-daily-form-index":
-        raise WarehouseRuntimeError(
-            "catch-up-daily-form-index in bronze_capture mode requires sec_daily_index_checkpoint and is not implemented yet"
+        end_date = date.fromisoformat(scope["end_date"])
+        writes, staging = _capture_catch_up_daily_form_index(
+            context=context, end_date=end_date
         )
+        raw_writes.extend(writes)
+        silver_staging.extend(staging)
+        return raw_writes, silver_staging
 
     raise WarehouseRuntimeError(f"bronze_capture mode does not support {command_name}")
 
@@ -537,41 +660,134 @@ def _capture_submissions_scope(
     ciks: list[int],
     include_pagination: bool,
     fetch_date: date,
-) -> list[dict[str, Any]]:
+) -> tuple[list[dict[str, Any]], list[tuple[int, str, dict[str, Any], list[tuple[str, dict[str, Any]]]]]]:
+    """Download submissions JSON for each CIK, write to bronze, and return staging data.
+
+    Returns (write_records, silver_staging) where silver_staging is a list of
+    (cik, raw_object_id, main_payload_dict, pagination_payloads) tuples.
+    """
     day_parts = fetch_date.strftime("%Y/%m/%d")
     raw_writes: list[dict[str, Any]] = []
+    silver_staging: list[tuple[int, str, dict[str, Any], list[tuple[str, dict[str, Any]]]]] = []
+
     for cik in ciks:
         main_file_name = f"CIK{cik:010d}.json"
         main_url = _build_submissions_url(cik)
-        main_payload = _download_sec_bytes(url=main_url, identity=context.identity)
-        raw_writes.append(
-            _write_bronze_object(
-                context=context,
-                relative_path=f"submissions/sec/cik={cik}/main/{day_parts}/{main_file_name}",
-                source_name="submissions_main",
-                source_url=main_url,
-                payload=main_payload,
-                cik=cik,
-            )
+        main_payload_bytes = _download_sec_bytes(url=main_url, identity=context.identity)
+        write_record = _write_bronze_object(
+            context=context,
+            relative_path=f"submissions/sec/cik={cik}/main/{day_parts}/{main_file_name}",
+            source_name="submissions_main",
+            source_url=main_url,
+            payload=main_payload_bytes,
+            cik=cik,
         )
-        if not include_pagination:
+        raw_writes.append(write_record)
+        raw_object_id = write_record["sha256"]
+        main_document = _decode_json_bytes(main_payload_bytes, main_url)
+        pagination_payloads: list[tuple[str, dict[str, Any]]] = []
+
+        if include_pagination:
+            for file_name in _pagination_file_names(main_document):
+                pagination_url = _build_submission_pagination_url(file_name)
+                pagination_payload_bytes = _download_sec_bytes(url=pagination_url, identity=context.identity)
+                raw_writes.append(
+                    _write_bronze_object(
+                        context=context,
+                        relative_path=f"submissions/sec/cik={cik}/pagination/{day_parts}/{file_name}",
+                        source_name="submissions_pagination",
+                        source_url=pagination_url,
+                        payload=pagination_payload_bytes,
+                        cik=cik,
+                    )
+                )
+                pagination_payloads.append((file_name, _decode_json_bytes(pagination_payload_bytes, pagination_url)))
+
+        silver_staging.append((cik, raw_object_id, main_document, pagination_payloads))
+
+    return raw_writes, silver_staging
+
+
+def _capture_catch_up_daily_form_index(
+    context: WarehouseCommandContext,
+    end_date: date,
+) -> tuple[list[dict[str, Any]], list]:
+    """Fetch missing daily index files in ascending date order up to end_date.
+
+    Uses sec_daily_index_checkpoint to determine which dates still need loading.
+    Stops on the first fetch failure and updates checkpoint status accordingly.
+    Returns (write_records, []) - no silver staging from daily index fetches alone.
+    """
+    if context.storage_root.is_remote:
+        raise WarehouseRuntimeError(
+            "catch-up-daily-form-index in bronze_capture mode requires local storage root "
+            "(silver checkpoint is not yet supported on remote storage)"
+        )
+
+    db = _open_silver_database(context.storage_root)
+    last_success = db.get_last_successful_checkpoint_date()
+
+    if last_success is not None:
+        start_date = date.fromisoformat(last_success) + timedelta(days=1)
+    else:
+        start_date = end_date  # No history; only fetch the end date
+
+    raw_writes: list[dict[str, Any]] = []
+    now = datetime.now(UTC)
+
+    for target_date in _date_range(start_date, end_date):
+        if not _is_business_day(target_date):
+            continue
+        existing = db.get_daily_index_checkpoint(target_date.isoformat())
+        if existing and existing.get("status") == "succeeded":
             continue
 
-        main_document = _decode_json_bytes(main_payload, main_url)
-        for file_name in _pagination_file_names(main_document):
-            pagination_url = _build_submission_pagination_url(file_name)
-            pagination_payload = _download_sec_bytes(url=pagination_url, identity=context.identity)
-            raw_writes.append(
-                _write_bronze_object(
-                    context=context,
-                    relative_path=f"submissions/sec/cik={cik}/pagination/{day_parts}/{file_name}",
-                    source_name="submissions_pagination",
-                    source_url=pagination_url,
-                    payload=pagination_payload,
-                    cik=cik,
-                )
-            )
-    return raw_writes
+        source_url = _build_daily_index_url(target_date)
+        expected_available_at = _expected_available_at(target_date)
+
+        try:
+            write_record, _ = _capture_daily_index_file(context=context, target_date=target_date)
+            raw_writes.append(write_record)
+            db.upsert_daily_index_checkpoint({
+                "business_date": target_date.isoformat(),
+                "source_key": f"date:{target_date.isoformat()}",
+                "source_url": source_url,
+                "expected_available_at": expected_available_at,
+                "last_attempt_at": now,
+                "raw_object_id": write_record["sha256"],
+                "last_sha256": write_record["sha256"],
+                "row_count": None,
+                "status": "succeeded",
+                "last_success_at": now,
+            })
+        except WarehouseRuntimeError as exc:
+            db.upsert_daily_index_checkpoint({
+                "business_date": target_date.isoformat(),
+                "source_key": f"date:{target_date.isoformat()}",
+                "source_url": source_url,
+                "expected_available_at": expected_available_at,
+                "last_attempt_at": now,
+                "status": "failed_retryable",
+                "error_message": str(exc),
+            })
+            break  # Stop on first failure per spec
+
+    return raw_writes, []
+
+
+def _is_business_day(d: date) -> bool:
+    """Return True if d is Monday-Friday (US federal holidays not yet filtered)."""
+    return d.weekday() < 5  # 0=Monday, 4=Friday
+
+
+def _expected_available_at(business_date: date) -> datetime:
+    """Return the expected availability timestamp: 06:00 America/New_York on next calendar day.
+
+    Stored as UTC (06:00 EST = 11:00 UTC, 06:00 EDT = 10:00 UTC).
+    Using a conservative 11:00 UTC (EST) approximation.
+    """
+    next_day = business_date + timedelta(days=1)
+    return datetime(next_day.year, next_day.month, next_day.day, 11, 0, 0, tzinfo=UTC)
 
 
 def _write_bronze_object(
