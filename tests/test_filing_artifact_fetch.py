@@ -111,7 +111,8 @@ def test_get_raw_object_returns_none_for_unknown(db):
 
 @pytest.mark.fast
 def test_merge_filing_attachments_row_count(db):
-    db.merge_filing_attachments(_ATTACHMENT_ROWS, sync_run_id="run-001")
+    count = db.merge_filing_attachments(_ATTACHMENT_ROWS, sync_run_id="run-001")
+    assert count == 2
     results = db.get_filing_attachments(_ACCESSION)
     assert len(results) == 2
 

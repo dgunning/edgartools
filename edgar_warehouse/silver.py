@@ -149,14 +149,14 @@ CREATE TABLE IF NOT EXISTS sec_raw_object (
     cik                 BIGINT,
     accession_number    TEXT,
     form                TEXT,
-    source_url          TEXT,
-    storage_path        TEXT,
+    source_url          TEXT        NOT NULL,
+    storage_path        TEXT        NOT NULL,
     content_type        TEXT,
     content_encoding    TEXT,
     byte_size           BIGINT,
-    sha256              TEXT,
-    fetched_at          TIMESTAMPTZ,
-    http_status         INTEGER,
+    sha256              TEXT        NOT NULL,
+    fetched_at          TIMESTAMPTZ NOT NULL,
+    http_status         INTEGER     NOT NULL,
     source_last_modified TIMESTAMPTZ,
     source_etag         TEXT
 );
@@ -165,10 +165,10 @@ CREATE TABLE IF NOT EXISTS sec_filing_attachment (
     accession_number    TEXT,
     sequence_number     TEXT,
     document_name       TEXT,
-    document_type       TEXT,
+    document_type       TEXT        NOT NULL,
     document_description TEXT,
-    document_url        TEXT,
-    is_primary          BOOLEAN,
+    document_url        TEXT        NOT NULL,
+    is_primary          BOOLEAN     NOT NULL,
     raw_object_id       TEXT,
     PRIMARY KEY (accession_number, document_name)
 );
