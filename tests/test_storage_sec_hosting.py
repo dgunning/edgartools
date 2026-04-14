@@ -17,6 +17,8 @@ import pytest
 from edgar_warehouse.runtime import StorageLocation, WarehouseRuntimeError, _filter_ciks_to_universe
 from edgar_warehouse.silver import SilverDatabase
 
+_FAKE_SHA256 = "deadbeef" * 8  # 64-char hex string, valid SHA-256 length
+
 
 # ---------------------------------------------------------------------------
 # StorageLocation tests
@@ -251,8 +253,8 @@ def test_daily_index_checkpoint_written_on_success(db):
         "expected_available_at": _EXPECTED_AVAILABLE_AT,
         "last_attempt_at": _EXPECTED_AVAILABLE_AT,
         "last_success_at": _EXPECTED_AVAILABLE_AT,
-        "raw_object_id": "deadbeef" * 8,
-        "last_sha256": "deadbeef" * 8,
+        "raw_object_id": _FAKE_SHA256,
+        "last_sha256": _FAKE_SHA256,
         "row_count": 500,
         "status": "succeeded",
     })
@@ -289,3 +291,98 @@ def test_filter_ciks_none_db_fallthrough():
     """None db (remote storage) must return all CIKs unchanged."""
     result = _filter_ciks_to_universe([320193, 789019], None)
     assert result == [320193, 789019]
+
+
+# --- stg_daily_index_filing ---
+
+from edgar_warehouse.loaders import stage_daily_index_filing_loader  # noqa: E402
+
+_DAILY_IDX_PAYLOAD = b"""Form Type           Company Name                     CIK         Date Filed  Filename
+--------------------------------------------------------------------------------
+10-K                APPLE INC                        0000320193  20241101    edgar/data/320193/0000320193-24-000123-index.htm
+SC 13G/A            VANGUARD GROUP INC               0000092380  20241101    edgar/data/92380/0000092380-24-000456-index.htm
+8-K                 MICROSOFT CORP                   0000789019  20241101    edgar/data/789019/0000789019-24-000789-index.htm
+"""
+_DAILY_IDX_DATE = date(2024, 11, 1)
+_DAILY_IDX_SYNC_RUN_ID = "run-daily-001"
+_DAILY_IDX_RAW_OBJECT_ID = "raw-daily-001"
+_DAILY_IDX_SOURCE_URL = "https://www.sec.gov/Archives/edgar/daily-index/2024/QTR4/form.20241101.idx"
+
+
+def _load_daily_idx_rows():
+    return stage_daily_index_filing_loader(
+        payload=_DAILY_IDX_PAYLOAD,
+        business_date=_DAILY_IDX_DATE,
+        sync_run_id=_DAILY_IDX_SYNC_RUN_ID,
+        raw_object_id=_DAILY_IDX_RAW_OBJECT_ID,
+        source_url=_DAILY_IDX_SOURCE_URL,
+    )
+
+
+@pytest.mark.fast
+def test_stage_daily_index_filing_loader_row_count():
+    rows = _load_daily_idx_rows()
+    assert len(rows) == 3
+
+
+@pytest.mark.fast
+def test_stage_daily_index_filing_loader_accession_number():
+    rows = _load_daily_idx_rows()
+    assert rows[0]["accession_number"] == "0000320193-24-000123"
+
+
+@pytest.mark.fast
+def test_stage_daily_index_filing_loader_row_ordinal():
+    rows = _load_daily_idx_rows()
+    assert [r["row_ordinal"] for r in rows] == [1, 2, 3]
+
+
+@pytest.mark.fast
+def test_stage_daily_index_filing_loader_source_year_quarter():
+    rows = _load_daily_idx_rows()
+    assert rows[0]["source_year"] == 2024
+    assert rows[0]["source_quarter"] == 4
+
+
+@pytest.mark.fast
+def test_stage_daily_index_filing_loader_cik():
+    rows = _load_daily_idx_rows()
+    assert rows[0]["cik"] == 320193
+
+
+@pytest.mark.fast
+def test_stage_daily_index_filing_loader_form():
+    rows = _load_daily_idx_rows()
+    assert rows[0]["form"] == "10-K"
+
+
+@pytest.mark.fast
+def test_stage_daily_index_filing_loader_filing_txt_url():
+    rows = _load_daily_idx_rows()
+    assert rows[0]["filing_txt_url"] == "https://www.sec.gov/Archives/edgar/data/320193/0000320193-24-000123-index.htm"
+
+
+@pytest.mark.fast
+def test_merge_daily_index_filings_row_count(db):
+    rows = _load_daily_idx_rows()
+    db.merge_daily_index_filings(rows, _DAILY_IDX_SYNC_RUN_ID)
+    result = db.get_daily_index_filings("2024-11-01")
+    assert len(result) == 3
+
+
+@pytest.mark.fast
+def test_merge_daily_index_filings_idempotent(db):
+    rows = _load_daily_idx_rows()
+    db.merge_daily_index_filings(rows, _DAILY_IDX_SYNC_RUN_ID)
+    db.merge_daily_index_filings(rows, _DAILY_IDX_SYNC_RUN_ID)
+    result = db.get_daily_index_filings("2024-11-01")
+    assert len(result) == 3
+
+
+@pytest.mark.fast
+def test_merge_daily_index_filings_accession_stored(db):
+    rows = _load_daily_idx_rows()
+    db.merge_daily_index_filings(rows, _DAILY_IDX_SYNC_RUN_ID)
+    result = db.get_daily_index_filings("2024-11-01")
+    accessions = {r["accession_number"] for r in result}
+    assert "0000320193-24-000123" in accessions
