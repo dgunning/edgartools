@@ -173,6 +173,17 @@ CREATE TABLE IF NOT EXISTS sec_filing_attachment (
     last_sync_run_id    TEXT,
     PRIMARY KEY (accession_number, document_name)
 );
+
+CREATE TABLE IF NOT EXISTS sec_filing_text (
+    accession_number    TEXT        NOT NULL,
+    text_version        TEXT        NOT NULL,
+    source_document_name TEXT       NOT NULL,
+    text_storage_path   TEXT        NOT NULL,
+    text_sha256         TEXT        NOT NULL,
+    char_count          INTEGER     NOT NULL,
+    extracted_at        TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY (accession_number, text_version)
+);
 """
 
 
@@ -750,6 +761,74 @@ class SilverDatabase:
         """Return all attachment rows for the given accession number."""
         rows = self._conn.execute(
             "SELECT * FROM sec_filing_attachment WHERE accession_number = ?",
+            [accession_number],
+        ).fetchall()
+        cols = [d[0] for d in self._conn.description]
+        return [dict(zip(cols, row)) for row in rows]
+
+    # ------------------------------------------------------------------
+    # sec_filing_text
+    # ------------------------------------------------------------------
+
+    def upsert_filing_text(self, row: dict[str, Any]) -> None:
+        """Insert or update a filing text extraction row.
+
+        Raises ValueError if any required field is missing or None.
+        """
+        for required in (
+            "accession_number",
+            "text_version",
+            "source_document_name",
+            "text_storage_path",
+            "text_sha256",
+            "char_count",
+            "extracted_at",
+        ):
+            if row.get(required) is None:
+                raise ValueError(
+                    f"upsert_filing_text: required field '{required}' is missing or None"
+                )
+        self._conn.execute(
+            """
+            INSERT INTO sec_filing_text
+                (accession_number, text_version, source_document_name,
+                 text_storage_path, text_sha256, char_count, extracted_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT (accession_number, text_version) DO UPDATE SET
+                source_document_name = excluded.source_document_name,
+                text_storage_path = excluded.text_storage_path,
+                text_sha256 = excluded.text_sha256,
+                char_count = excluded.char_count,
+                extracted_at = excluded.extracted_at
+            """,
+            [
+                row["accession_number"],
+                row["text_version"],
+                row["source_document_name"],
+                row["text_storage_path"],
+                row["text_sha256"],
+                row["char_count"],
+                row["extracted_at"],
+            ],
+        )
+
+    def get_filing_text(
+        self, accession_number: str, text_version: str
+    ) -> dict[str, Any] | None:
+        """Return the filing text row for the given accession and version, or None."""
+        result = self._conn.execute(
+            "SELECT * FROM sec_filing_text WHERE accession_number = ? AND text_version = ?",
+            [accession_number, text_version],
+        ).fetchone()
+        if result is None:
+            return None
+        cols = [d[0] for d in self._conn.description]
+        return dict(zip(cols, result))
+
+    def get_all_filing_texts(self, accession_number: str) -> list[dict[str, Any]]:
+        """Return all text extraction rows for an accession, ordered by text_version."""
+        rows = self._conn.execute(
+            "SELECT * FROM sec_filing_text WHERE accession_number = ? ORDER BY text_version",
             [accession_number],
         ).fetchall()
         cols = [d[0] for d in self._conn.description]
