@@ -386,3 +386,27 @@ def test_merge_daily_index_filings_accession_stored(db):
     result = db.get_daily_index_filings("2024-11-01")
     accessions = {r["accession_number"] for r in result}
     assert "0000320193-24-000123" in accessions
+
+
+@pytest.mark.fast
+def test_stage_daily_index_filing_loader_source_name():
+    rows = stage_daily_index_filing_loader(
+        _DAILY_IDX_PAYLOAD, _DAILY_IDX_DATE, _DAILY_IDX_SYNC_RUN_ID,
+        _DAILY_IDX_RAW_OBJECT_ID, _DAILY_IDX_SOURCE_URL,
+    )
+    for row in rows:
+        assert row["source_name"] == "daily_form_index"
+
+
+@pytest.mark.fast
+def test_stage_daily_index_filing_loader_record_hash():
+    import hashlib
+    rows = stage_daily_index_filing_loader(
+        _DAILY_IDX_PAYLOAD, _DAILY_IDX_DATE, _DAILY_IDX_SYNC_RUN_ID,
+        _DAILY_IDX_RAW_OBJECT_ID, _DAILY_IDX_SOURCE_URL,
+    )
+    row = rows[0]
+    # Derive expected hash using same logic as loader
+    hash_input = f"{row['form']}|{row['company_name']}|{row['cik']}|{row['filing_date']}|{row['file_name']}"
+    expected = hashlib.sha256(hash_input.encode()).hexdigest()
+    assert row["record_hash"] == expected
