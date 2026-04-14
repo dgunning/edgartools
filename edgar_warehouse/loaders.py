@@ -316,15 +316,18 @@ def stage_daily_index_filing_loader(
         company_val = m.group("company").strip()
         cik_val = int(m.group("cik"))
         date_str = m.group("date")
-        if len(date_str) == 8:
-            filing_date_val = date.fromisoformat(
-                date_str[:4] + "-" + date_str[4:6] + "-" + date_str[6:]
-            )
-        else:
-            filing_date_val = date.fromisoformat(date_str)
+        try:
+            if len(date_str) == 8:
+                filing_date_val = date.fromisoformat(
+                    date_str[:4] + "-" + date_str[4:6] + "-" + date_str[6:]
+                )
+            else:
+                filing_date_val = date.fromisoformat(date_str)
+        except ValueError:
+            continue  # skip malformed line
         file_name_val = m.group("filename")
         acc_match = _ACCESSION_PATTERN.search(file_name_val)
-        accession_number_val = acc_match.group(1) if acc_match else None
+        accession_number_val = acc_match.group(1) if acc_match else file_name_val
         filing_txt_url_val = "https://www.sec.gov/Archives/" + file_name_val
         record_hash_val = hashlib.sha256(
             f"{form_val}|{company_val}|{cik_val}|{filing_date_val}|{file_name_val}".encode()

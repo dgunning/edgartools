@@ -478,6 +478,7 @@ class SilverDatabase:
                 ON CONFLICT (business_date, accession_number) DO UPDATE SET
                     sync_run_id = excluded.sync_run_id,
                     raw_object_id = excluded.raw_object_id,
+                    source_name = excluded.source_name,
                     source_url = excluded.source_url,
                     source_year = excluded.source_year,
                     source_quarter = excluded.source_quarter,
