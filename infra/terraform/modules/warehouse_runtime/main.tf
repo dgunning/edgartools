@@ -739,9 +739,21 @@ resource "aws_iam_role_policy" "scheduler_start_execution" {
 # Runner IAM user — may start and monitor Step Functions executions and read
 # ECS task logs.  Must NOT have any infrastructure or S3 write permissions.
 # Separate from the Terraform deployer account by design.
-# Access keys are created manually via:
+#
+# Access keys are created manually:
 #   aws iam create-access-key --user-name <runner-user-name>
+# then stored in Secrets Manager:
+#   secret name: <name_prefix>-runner-credentials
+#   format: {"aws_access_key_id":"...","aws_secret_access_key":"...","aws_region":"..."}
 # ---------------------------------------------------------------------------
+
+resource "aws_secretsmanager_secret" "runner_credentials" {
+  name                    = "${local.name_prefix}-runner-credentials"
+  description             = "AWS access key credentials for the ${local.name_prefix}-runner IAM user (Step Functions trigger only). Value set out-of-band after key creation."
+  recovery_window_in_days = 0
+
+  tags = merge(local.tags, { Name = "${local.name_prefix}-runner-credentials", Role = "runner" })
+}
 
 resource "aws_iam_user" "runner" {
   name = "${local.name_prefix}-runner"

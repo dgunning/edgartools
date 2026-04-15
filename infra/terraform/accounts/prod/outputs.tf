@@ -47,3 +47,8 @@ output "runner_user_arn" {
   description = "Prod runner IAM user ARN."
   value       = module.runtime.runner_user_arn
 }
+
+output "runner_credentials_secret_arn" {
+  description = "Prod runner credentials secret ARN."
+  value       = module.runtime.runner_credentials_secret_arn
+}

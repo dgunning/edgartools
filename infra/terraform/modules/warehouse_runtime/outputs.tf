@@ -47,3 +47,8 @@ output "runner_user_arn" {
   description = "IAM user ARN for the runner account."
   value       = aws_iam_user.runner.arn
 }
+
+output "runner_credentials_secret_arn" {
+  description = "Secrets Manager ARN holding the runner access key credentials."
+  value       = aws_secretsmanager_secret.runner_credentials.arn
+}
