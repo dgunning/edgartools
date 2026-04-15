@@ -217,7 +217,15 @@ async def edgar_proxy(
         if proxy.performance_measures:
             result["performance_measures"] = proxy.performance_measures
 
-        # Compensation history (multi-year DataFrame)
+        # Summary Compensation Table (per-NEO, from HTML)
+        try:
+            sct_df = proxy.summary_compensation_table
+            if sct_df is not None and not sct_df.empty:
+                result["summary_compensation_table"] = _df_to_records(sct_df, limit=30)
+        except Exception:
+            pass
+
+        # Compensation history (multi-year DataFrame, from XBRL)
         comp_df = proxy.executive_compensation
         if comp_df is not None and not comp_df.empty:
             result["compensation_history"] = _df_to_records(comp_df, limit=10)

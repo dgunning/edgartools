@@ -733,6 +733,7 @@ class ProxyStatement:
         lines.append("  .awards_close_to_mnpi    Awards granted near MNPI disclosure")
         lines.append("  .voting_proposals        Voting proposals with board recommendations")
         lines.append("  .ceo_pay_ratio           CEO pay ratio (CEO comp, median employee, ratio)")
+        lines.append("  .summary_compensation_table  Per-NEO compensation DataFrame (HTML)")
 
         if detail == 'standard':
             return "\n".join(lines)
@@ -749,6 +750,22 @@ class ProxyStatement:
                 if pay_ratio.median_employee_compensation:
                     lines.append(f"  Median Employee: ${pay_ratio.median_employee_compensation:,}")
                 lines.append(f"  Ratio: {pay_ratio.ratio}:1")
+        except Exception:
+            pass
+
+        # Summary Compensation Table
+        try:
+            sct = self.summary_compensation_table
+            if not sct.empty:
+                execs = sct['name'].nunique()
+                years = sct['year'].nunique()
+                lines.append("")
+                lines.append(f"SUMMARY COMPENSATION TABLE: {execs} executives, {years} years")
+                latest = sct['year'].max()
+                for _, row in sct[sct['year'] == latest].iterrows():
+                    total_str = f"${row['total']:,.0f}" if row.get('total') else '-'
+                    title_str = f" ({row['title']})" if row.get('title') else ''
+                    lines.append(f"  {row['name']}{title_str}: {total_str}")
         except Exception:
             pass
 
@@ -959,6 +976,35 @@ class ProxyStatement:
                 gov_text.append("No Insider Trading Policy", style="red")
             elements.append(Text())
             elements.append(gov_text)
+
+        # Summary Compensation Table
+        try:
+            sct = self.summary_compensation_table
+            if not sct.empty:
+                from edgar.display.formatting import format_currency_short
+                latest = sct['year'].max()
+                latest_rows = sct[sct['year'] == latest]
+                sct_table = Table(
+                    title=f"Summary Compensation ({latest})",
+                    box=box.SIMPLE,
+                    show_header=True,
+                )
+                sct_table.add_column("Name", ratio=2)
+                sct_table.add_column("Title", style="dim", ratio=1)
+                sct_table.add_column("Salary", justify="right")
+                sct_table.add_column("Stock Awards", justify="right")
+                sct_table.add_column("Total", justify="right")
+
+                for _, row in latest_rows.iterrows():
+                    salary = format_currency_short(row['salary']) if row.get('salary') else "-"
+                    stock = format_currency_short(row['stock_awards']) if row.get('stock_awards') else "-"
+                    total = format_currency_short(row['total']) if row.get('total') else "-"
+                    sct_table.add_row(row['name'], row.get('title', ''), salary, stock, total)
+
+                elements.append(Text())
+                elements.append(sct_table)
+        except Exception:
+            pass
 
         # Voting Proposals
         try:

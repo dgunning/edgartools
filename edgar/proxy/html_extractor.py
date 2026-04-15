@@ -513,7 +513,7 @@ def _parse_comp_dollar(text: str) -> Optional[int]:
         return None
 
     try:
-        value = int(float(cleaned))
+        value = round(float(cleaned))
         return -value if negative else value
     except ValueError:
         return None
@@ -583,6 +583,8 @@ def _split_name_title(cell: str) -> tuple[str, str]:
 def _find_sct_table(html: str):
     """Find the Summary Compensation Table in HTML.
 
+    Returns the BeautifulSoup table element, or None if not found.
+
     Strategy: find heading elements containing "summary compensation table"
     that are NOT inside a <table> (to skip TOC entries), then examine
     subsequent tables for SCT-like column structure.
@@ -591,7 +593,7 @@ def _find_sct_table(html: str):
         from bs4 import BeautifulSoup
     except ImportError:
         log.warning("BeautifulSoup not available for SCT extraction")
-        return None, None
+        return None
 
     soup = BeautifulSoup(html, 'lxml')
 
@@ -627,7 +629,7 @@ def _find_sct_table(html: str):
             break
 
     if not heading_tag:
-        return None, None
+        return None
 
     # Search up to 10 tables after the heading for the best SCT candidate
     candidates = []
@@ -669,11 +671,11 @@ def _find_sct_table(html: str):
             candidates.append((table, score, len(rows)))
 
     if not candidates:
-        return None, None
+        return None
 
     # Pick best: highest score, then most rows
     candidates.sort(key=lambda x: (x[1], x[2]), reverse=True)
-    return candidates[0][0], soup
+    return candidates[0][0]
 
 
 def _extract_table_data(table) -> tuple[list[str], list[list[str]]]:
@@ -741,7 +743,7 @@ def extract_summary_compensation(html: str) -> Optional[List[ExecutiveCompEntry]
     if not html:
         return None
 
-    table_el, soup = _find_sct_table(html)
+    table_el = _find_sct_table(html)
     if table_el is None:
         return None
 
