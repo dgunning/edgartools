@@ -1,16 +1,19 @@
 """
 Regression test for Issue #460: Quarterly income statement fiscal periods showing 1 year offset.
 
-This test verifies that quarterly period labels correctly reflect when the period occurred,
-not the SEC's forward-looking fiscal_year values. The SEC Facts API provides fiscal_year
-values that indicate which fiscal year the quarter contributes to, not the year for labeling.
+This test verifies that quarterly period labels use the standard fiscal year convention:
+fiscal years are named by the calendar year in which they end.
 
 For example, for Apple (fiscal year ends in September):
-- Q3 ending June 2024 should be labeled "Q3 2024" (not "Q3 2025")
-- Q1 ending December 2023 should be labeled "Q1 2024" (first quarter of FY 2024)
+- Q3 ending June 2024 should be labeled "Q3 2024" (FY2024 ends Sept 2024)
+- Q1 ending December 2023 should be labeled "Q1 2024" (first quarter of FY2024)
 
-The fix implements `calculate_fiscal_year_for_label()` which correctly calculates
-fiscal years from period_end dates based on the company's fiscal year end month.
+For NVIDIA/Autodesk (fiscal year ends in January):
+- Q1 ending April 2025 should be labeled "Q1 2026" (FY2026 ends Jan 2026)
+- Q3 ending October 2025 should be labeled "Q3 2026" (FY2026 ends Jan 2026)
+
+The fix implements `calculate_fiscal_year_for_label()` which derives the fiscal year
+from the period_end date and the company's fiscal year end month.
 """
 
 import pytest
@@ -253,6 +256,43 @@ class TestCalculateFiscalYearForLabel:
         # Q4 ending June 2024 → FY 2024
         assert calculate_fiscal_year_for_label(date(2024, 6, 30), 6) == 2024
 
+    def test_january_fy_end_quarters(self):
+        """Test NVIDIA/Autodesk-style January fiscal year end.
+
+        NVIDIA's FY2026 ends Jan 2026, so all quarters covering Feb 2025-Jan 2026
+        should be labeled 2026. This matches how NVIDIA labels its own earnings
+        ("First Quarter Fiscal 2026" for the quarter ending Apr 2025).
+        """
+        from edgar.entity.enhanced_statement import calculate_fiscal_year_for_label
+
+        # Q1 ending April 2025 → FY 2026 (FY ends Jan 2026)
+        assert calculate_fiscal_year_for_label(date(2025, 4, 27), 1) == 2026
+
+        # Q2 ending July 2025 → FY 2026
+        assert calculate_fiscal_year_for_label(date(2025, 7, 27), 1) == 2026
+
+        # Q3 ending October 2025 → FY 2026
+        assert calculate_fiscal_year_for_label(date(2025, 10, 26), 1) == 2026
+
+        # Q4 ending January 2026 → FY 2026
+        assert calculate_fiscal_year_for_label(date(2026, 1, 25), 1) == 2026
+
+    def test_february_fy_end_quarters(self):
+        """Test Dollar Tree-style February fiscal year end (FY ends ~Feb 1)."""
+        from edgar.entity.enhanced_statement import calculate_fiscal_year_for_label
+
+        # Q1 ending May 2025 → FY 2026 (FY ends Feb 2026)
+        assert calculate_fiscal_year_for_label(date(2025, 5, 3), 2) == 2026
+
+        # Q2 ending August 2025 → FY 2026
+        assert calculate_fiscal_year_for_label(date(2025, 8, 2), 2) == 2026
+
+        # Q3 ending November 2025 → FY 2026
+        assert calculate_fiscal_year_for_label(date(2025, 11, 1), 2) == 2026
+
+        # Q4 ending February 2026 → FY 2026
+        assert calculate_fiscal_year_for_label(date(2026, 2, 1), 2) == 2026
+
     def test_early_january_edge_case(self):
         """Test 52/53-week calendar edge case for early January periods."""
         from edgar.entity.enhanced_statement import calculate_fiscal_year_for_label
@@ -261,5 +301,5 @@ class TestCalculateFiscalYearForLabel:
         assert calculate_fiscal_year_for_label(date(2023, 1, 1), 12) == 2022
         assert calculate_fiscal_year_for_label(date(2023, 1, 7), 12) == 2022
 
-        # Late January uses current year
+        # Late January for Dec FYE: Jan is month 1, not > 12, so FY = 2023
         assert calculate_fiscal_year_for_label(date(2023, 1, 31), 12) == 2023
