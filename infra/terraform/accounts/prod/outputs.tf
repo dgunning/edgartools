@@ -37,3 +37,13 @@ output "snowflake_runtime_secret_arn" {
   description = "Prod Snowflake runtime metadata secret ARN."
   value       = module.runtime.snowflake_runtime_secret_arn
 }
+
+output "runner_user_name" {
+  description = "Prod runner IAM user name. Create access keys with: aws iam create-access-key --user-name <value>"
+  value       = module.runtime.runner_user_name
+}
+
+output "runner_user_arn" {
+  description = "Prod runner IAM user ARN."
+  value       = module.runtime.runner_user_arn
+}

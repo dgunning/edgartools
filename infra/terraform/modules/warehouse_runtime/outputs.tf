@@ -37,3 +37,13 @@ output "step_functions_log_group_name" {
   description = "CloudWatch log group for Step Functions workflow logs."
   value       = aws_cloudwatch_log_group.step_functions.name
 }
+
+output "runner_user_name" {
+  description = "IAM user name for the runner account (start/monitor Step Functions only). Create access keys with: aws iam create-access-key --user-name <value>"
+  value       = aws_iam_user.runner.name
+}
+
+output "runner_user_arn" {
+  description = "IAM user ARN for the runner account."
+  value       = aws_iam_user.runner.arn
+}

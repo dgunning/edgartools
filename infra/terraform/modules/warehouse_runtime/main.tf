@@ -735,6 +735,58 @@ resource "aws_iam_role_policy" "scheduler_start_execution" {
   })
 }
 
+# ---------------------------------------------------------------------------
+# Runner IAM user — may start and monitor Step Functions executions and read
+# ECS task logs.  Must NOT have any infrastructure or S3 write permissions.
+# Separate from the Terraform deployer account by design.
+# Access keys are created manually via:
+#   aws iam create-access-key --user-name <runner-user-name>
+# ---------------------------------------------------------------------------
+
+resource "aws_iam_user" "runner" {
+  name = "${local.name_prefix}-runner"
+  tags = merge(local.tags, { Name = "${local.name_prefix}-runner", Role = "runner" })
+}
+
+resource "aws_iam_user_policy" "runner" {
+  name = "${local.name_prefix}-runner"
+  user = aws_iam_user.runner.name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "StartWorkflows"
+        Effect = "Allow"
+        Action = ["states:StartExecution"]
+        Resource = [for workflow in aws_sfn_state_machine.workflow : workflow.arn]
+      },
+      {
+        Sid    = "MonitorWorkflows"
+        Effect = "Allow"
+        Action = [
+          "states:DescribeExecution",
+          "states:GetExecutionHistory",
+          "states:DescribeStateMachine",
+          "states:ListExecutions",
+          "states:ListStateMachines"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "ReadTaskLogs"
+        Effect = "Allow"
+        Action = [
+          "logs:GetLogEvents",
+          "logs:FilterLogEvents",
+          "logs:DescribeLogStreams"
+        ]
+        Resource = "${aws_cloudwatch_log_group.ecs.arn}:*"
+      }
+    ]
+  })
+}
+
 resource "aws_scheduler_schedule" "workflow" {
   for_each = local.scheduled_workflows
 

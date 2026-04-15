@@ -86,6 +86,18 @@ Operational constraints:
 - overlapping protection is operational and scheduler-driven, not enforced by DynamoDB
 - manual `bootstrap_*`, `targeted_resync`, and `full_reconcile` runs must be started only when no other mutating Step Functions execution is active
 
+IAM account separation:
+
+- the Terraform deployer account (`admin-user` or equivalent) must never be used to trigger Step Functions executions; it is for infrastructure changes only
+- each environment has a dedicated `<env>-runner` IAM user (`edgartools-dev-runner`, `edgartools-prod-runner`) for triggering and monitoring runs
+- runner permissions are exactly:
+  - `states:StartExecution` on all warehouse state machines in the environment
+  - `states:DescribeExecution`, `states:GetExecutionHistory`, `states:DescribeStateMachine`, `states:ListExecutions`, `states:ListStateMachines` (read-only, resource `*`)
+  - `logs:GetLogEvents`, `logs:FilterLogEvents`, `logs:DescribeLogStreams` on the ECS task log group only
+- runner must NOT have: IAM permissions, S3 write access, ECR push, ECS task definition registration, or Terraform state access
+- runner access keys are created manually after `terraform apply` via: `aws iam create-access-key --user-name <runner-user-name>`
+- runner user name and ARN are surfaced as Terraform outputs (`runner_user_name`, `runner_user_arn`)
+
 Container runtime rules:
 
 - deploy one container image for warehouse jobs
