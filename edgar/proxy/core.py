@@ -159,6 +159,26 @@ class ProxyStatement:
         except Exception:
             return None
 
+    @cached_property
+    def season(self) -> Optional['ProxySeason']:
+        """The proxy season for this filing's company.
+
+        Returns the latest ProxySeason for the company. Note: if this
+        ProxyStatement is from an older filing, the returned season may
+        be more recent. Use Company.proxy_season(index=N) to access
+        specific historical seasons.
+
+        Returns None if the filing's company cannot be resolved.
+        """
+        from edgar.proxy.season import ProxySeason
+        try:
+            entity = self._filing.get_entity()
+            if entity is None:
+                return None
+            return ProxySeason.for_company(entity)
+        except Exception:
+            return None
+
     # Basic Metadata
     @property
     def form(self) -> str:

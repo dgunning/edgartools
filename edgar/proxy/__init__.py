@@ -21,28 +21,43 @@ Usage:
     >>> df = proxy.executive_compensation  # 5-year DataFrame
 """
 
+from .contest import ProxyContest
 from .core import ProxyStatement
 from .html_extractor import AuditFees, BeneficialOwner, CEOPayRatio, DirectorCompEntry, ExecutiveCompEntry, VotingProposal
 from .models import (
+    ANCHOR_FORMS,
+    CONTEST_INDICATOR_FORMS,
+    DISSIDENT_ONLY_FORMS,
     PROXY_FORMS,
+    SeasonFiling,
     ExecutiveCompensation,
     NamedExecutive,
     PayVsPerformance,
+    classify_proxy_tier,
 )
+from .season import ProxySeason
 
 __all__ = [
-    # Main class
+    # Main classes
     'ProxyStatement',
+    'ProxySeason',
+    'ProxyContest',
     # Data models
     'ExecutiveCompensation',
     'PayVsPerformance',
     'NamedExecutive',
+    'SeasonFiling',
     'VotingProposal',
     'CEOPayRatio',
     'ExecutiveCompEntry',
     'BeneficialOwner',
     'DirectorCompEntry',
     'AuditFees',
+    # Functions
+    'classify_proxy_tier',
     # Constants
     'PROXY_FORMS',
+    'ANCHOR_FORMS',
+    'CONTEST_INDICATOR_FORMS',
+    'DISSIDENT_ONLY_FORMS',
 ]

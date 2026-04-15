@@ -919,6 +919,29 @@ class Company(Entity):
             return latest_10q.obj()
         return None
 
+    def proxy_season(self, index: int = 0) -> Optional['ProxySeason']:
+        """
+        Get a proxy season for this company.
+
+        A proxy season groups all proxy-related filings around one annual meeting,
+        including the management definitive proxy (DEF 14A or DEFC14A), supplemental
+        materials, preliminary filings, and any contest filings.
+
+        Args:
+            index: 0 = latest season, 1 = previous season, etc.
+
+        Returns:
+            ProxySeason if proxy filings found, None otherwise
+
+        Example:
+            >>> company = Company("AAPL")
+            >>> season = company.proxy_season()
+            >>> print(season.is_contested)
+            False
+        """
+        from edgar.proxy.season import ProxySeason
+        return ProxySeason.for_company(self, index=index)
+
     def get_icon(self):
         return get_icon_from_ticker(self.tickers[0])
 
