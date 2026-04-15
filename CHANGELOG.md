@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.30.0] - 2026-04-15
+
+### Added
+
+- **Proxy season analysis** — New `ProxySeason` and `ProxyContest` classes for grouping proxy filings by season and detecting contested elections. Market-wide discovery via `proxy_contests()` ([#773](https://github.com/dgunning/edgartools/issues/773))
+
+- **Proxy HTML data extractors** — Extract structured data from DEF 14A proxy statements:
+  - Summary Compensation Table (SCT) with executive pay details
+  - CEO pay ratio with footnote cross-validation
+  - Voting proposals with vote requirements and recommendations
+  - Beneficial ownership tables
+  - Director compensation tables
+  - Audit fees by category
+
+- **Full-text search enhancements** — Enriched EFTS search with relevance scores, aggregations, filtering, and pagination. New `.grep()` method for universal content search across filings
+
+### Fixed
+
+- **Fiscal year labels for non-calendar FYE companies** — Statement period labels for companies with early fiscal year ends (Jan–Mar) now use the industry-standard convention, matching the SEC, Bloomberg, and company earnings releases. NVIDIA Q3 ending Oct 2025 is now labeled "Q3 2026" (FY2026), not "Q3 2025" ([#779](https://github.com/dgunning/edgartools/issues/779))
+
+- **Empty statements from forward-looking schedule data** — Companies like CLSK with XBRL-tagged footnote disclosures (expected amortization schedules) no longer produce phantom future periods that displace real quarterly data ([#781](https://github.com/dgunning/edgartools/issues/781))
+
+- **Missing XBRL instance from SEC** — Fetch XBRL instance directly from SEC when local feed file lacks it ([#778](https://github.com/dgunning/edgartools/issues/778))
+
+- **XBRL parsing for bytes content** — Hardened XBRL parser to handle bytes content and missing entity info without errors
+
+- **Concept panel display in `viewer.search()`** — Restored section separator newlines inside Concept panels that were incorrectly removed in v5.29.0 ([#776](https://github.com/dgunning/edgartools/issues/776))
+
+### Performance
+
+- **Replace BeautifulSoup with lxml for proxy HTML** — Faster and more memory-efficient HTML parsing for proxy statement extraction
+
 ## [5.29.0] - 2026-04-12
 
 ### Added
