@@ -519,6 +519,39 @@ class ProxyStatement:
             for o in owners
         ])
 
+    @cached_property
+    def director_compensation_table(self) -> pd.DataFrame:
+        """
+        Non-employee director compensation extracted from HTML.
+
+        SEC Item 402(k) mandates this disclosure. Covers fees earned,
+        stock awards, option awards, and total for each non-employee director.
+
+        Columns:
+            name, fees_earned, stock_awards, option_awards,
+            non_equity_incentive, pension_change, other_compensation, total
+        """
+        from edgar.proxy.html_extractor import extract_director_compensation
+        try:
+            html = self._filing.html()
+        except Exception:
+            return pd.DataFrame()
+        if not html:
+            return pd.DataFrame()
+        entries = extract_director_compensation(html)
+        if not entries:
+            return pd.DataFrame()
+        return pd.DataFrame([
+            {
+                'name': e.name, 'fees_earned': e.fees_earned,
+                'stock_awards': e.stock_awards, 'option_awards': e.option_awards,
+                'non_equity_incentive': e.non_equity_incentive,
+                'pension_change': e.pension_change,
+                'other_compensation': e.other_compensation, 'total': e.total,
+            }
+            for e in entries
+        ])
+
     # DataFrame Properties
     @cached_property
     def executive_compensation(self) -> pd.DataFrame:
@@ -765,6 +798,7 @@ class ProxyStatement:
         lines.append("  .ceo_pay_ratio           CEO pay ratio (CEO comp, median employee, ratio)")
         lines.append("  .summary_compensation_table  Per-NEO compensation DataFrame (HTML)")
         lines.append("  .beneficial_ownership    Ownership table (5%+ holders, insiders)")
+        lines.append("  .director_compensation_table  Director compensation DataFrame (HTML)")
 
         if detail == 'standard':
             return "\n".join(lines)
@@ -812,6 +846,18 @@ class ProxyStatement:
                     pct = f"{row['percent_of_class']:.1f}%" if row.get('percent_of_class') and row['percent_of_class'] != 0.5 else '<1%' if row.get('percent_of_class') == 0.5 else '-'
                     shares = f"{row['shares']:,}" if row.get('shares') else '-'
                     lines.append(f"  {row['holder_name'][:40]}: {shares} shares ({pct})")
+        except Exception:
+            pass
+
+        # Director Compensation
+        try:
+            dir_comp = self.director_compensation_table
+            if not dir_comp.empty:
+                lines.append("")
+                lines.append(f"DIRECTOR COMPENSATION: {len(dir_comp)} directors")
+                for _, row in dir_comp.head(5).iterrows():
+                    total_str = f"${row['total']:,.0f}" if row.get('total') else '-'
+                    lines.append(f"  {row['name'][:35]}: {total_str}")
         except Exception:
             pass
 
@@ -1077,6 +1123,32 @@ class ProxyStatement:
                     )
                 elements.append(Text())
                 elements.append(own_table)
+        except Exception:
+            pass
+
+        # Director Compensation
+        try:
+            dir_comp = self.director_compensation_table
+            if not dir_comp.empty:
+                from edgar.display.formatting import format_currency_short
+                dir_table = Table(
+                    title="Director Compensation",
+                    box=box.SIMPLE,
+                    show_header=True,
+                )
+                dir_table.add_column("Name", ratio=2)
+                dir_table.add_column("Fees", justify="right")
+                dir_table.add_column("Stock Awards", justify="right")
+                dir_table.add_column("Total", justify="right")
+
+                for _, row in dir_comp.iterrows():
+                    fees = format_currency_short(row['fees_earned']) if row.get('fees_earned') else "-"
+                    stock = format_currency_short(row['stock_awards']) if row.get('stock_awards') else "-"
+                    total = format_currency_short(row['total']) if row.get('total') else "-"
+                    dir_table.add_row(row['name'][:30], fees, stock, total)
+
+                elements.append(Text())
+                elements.append(dir_table)
         except Exception:
             pass
 

@@ -233,6 +233,14 @@ async def edgar_proxy(
         except Exception:
             pass
 
+        # Director Compensation (from HTML)
+        try:
+            dir_df = proxy.director_compensation_table
+            if dir_df is not None and not dir_df.empty:
+                result["director_compensation"] = _df_to_records(dir_df, limit=20)
+        except Exception:
+            pass
+
         # Compensation history (multi-year DataFrame, from XBRL)
         comp_df = proxy.executive_compensation
         if comp_df is not None and not comp_df.empty:

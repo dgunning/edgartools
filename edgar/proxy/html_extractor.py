@@ -25,6 +25,7 @@ __all__ = [
     'extract_ceo_pay_ratio', 'CEOPayRatio',
     'extract_summary_compensation', 'ExecutiveCompEntry',
     'extract_beneficial_ownership', 'BeneficialOwner',
+    'extract_director_compensation', 'DirectorCompEntry',
 ]
 
 # ── Types ────────────────────────────────────────────────────────────
@@ -1152,3 +1153,230 @@ def _parse_percent_with_adjacent(row: list[str], col: int) -> Optional[float]:
     if col + 1 < len(row):
         return _parse_percent(row[col + 1])
     return None
+
+
+# ══════════════════════════════════════════════════════════════════════
+# Director Compensation Table Extractor
+# ══════════════════════════════════════════════════════════════════════
+
+@dataclass(frozen=True)
+class DirectorCompEntry:
+    """One row of the Director Compensation Table (one non-employee director)."""
+    name: str
+    fees_earned: Optional[int] = None
+    stock_awards: Optional[int] = None
+    option_awards: Optional[int] = None
+    non_equity_incentive: Optional[int] = None
+    pension_change: Optional[int] = None
+    other_compensation: Optional[int] = None
+    total: Optional[int] = None
+
+
+# ── Director comp column classification ──────────────────────────────
+
+_DIR_COMP_COLUMN_PATTERNS: list[tuple[str, re.Pattern]] = [
+    ('name', re.compile(r'name|director', re.I)),
+    ('stock_awards', re.compile(r'stock\s+award', re.I)),
+    ('option_awards', re.compile(r'option\s+award', re.I)),
+    ('non_equity_incentive', re.compile(r'non[- ]equity|incentive\s+plan', re.I)),
+    ('pension_change', re.compile(r'pension|nqdc|nonqualified\s+deferred|change\s+in\s+pension', re.I)),
+    ('other_compensation', re.compile(r'all\s+other|other\s+comp', re.I)),
+    ('total', re.compile(r'\btotal\b', re.I)),
+    ('fees_earned', re.compile(r'fees?\s+earned|fees?\s+paid|retainer', re.I)),
+]
+
+
+def _classify_dir_comp_column(header: str) -> Optional[str]:
+    """Classify a director compensation table column header."""
+    for col_name, pattern in _DIR_COMP_COLUMN_PATTERNS:
+        if pattern.search(header):
+            return col_name
+    return None
+
+
+# ── Director comp heading anchors ────────────────────────────────────
+
+_DIR_COMP_HEADING_ANCHORS = [
+    'director compensation table',
+    'director compensation—',
+    'director compensation -',
+    'director compensation for',
+]
+
+_DIR_COMP_HEADING_REJECTS = [
+    'discussion', 'analysis', 'committee', 'program', 'philosophy',
+    'process', 'overview', 'policy', 'guidelines',
+]
+
+
+def _find_director_comp_table(html: str):
+    """Find the Director Compensation Table in HTML.
+
+    Returns the BeautifulSoup table element, or None.
+    """
+    try:
+        from bs4 import BeautifulSoup
+    except ImportError:
+        return None
+
+    soup = BeautifulSoup(html, 'lxml')
+
+    heading_tag = None
+    for allow_in_table in [False, True]:
+        for tag in soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'span']):
+            text = tag.get_text(strip=True)
+            if not text or len(text) > 100:
+                continue
+            text_lower = text.lower()
+            if not any(anchor in text_lower for anchor in _DIR_COMP_HEADING_ANCHORS):
+                # Also match "YYYY Director Compensation" (year-prefixed)
+                if not re.match(r'(?:fiscal\s+(?:year\s+)?)?\d{4}\s+director\s+compensation\b', text_lower):
+                    continue
+            if any(reject in text_lower for reject in _DIR_COMP_HEADING_REJECTS):
+                continue
+            if tag.name == 'a' or tag.find_parent('a'):
+                continue
+            in_table = tag.find_parent('table') is not None
+            if not allow_in_table and in_table:
+                continue
+            if allow_in_table and in_table:
+                if re.search(r'\d{2,3}\s*$', text):
+                    continue
+            heading_tag = tag
+            break
+        if heading_tag:
+            break
+
+    if not heading_tag:
+        return None
+
+    # Find the best director comp table candidate
+    candidates = []
+    for table in heading_tag.find_all_next('table', limit=10):
+        rows = table.find_all('tr')
+        if len(rows) < 3:
+            continue
+
+        all_cells = []
+        for row in rows[:3]:
+            for cell in row.find_all(['td', 'th']):
+                text = cell.get_text(strip=True)
+                if text and len(text) > 1:
+                    all_cells.append(text)
+
+        header_text = ' '.join(all_cells).lower()
+        score = 0
+        has_fees = 'fees' in header_text or 'retainer' in header_text
+        if has_fees:
+            score += 3
+        if 'total' in header_text:
+            score += 2
+        if 'stock' in header_text and 'award' in header_text:
+            score += 2
+        if 'name' in header_text:
+            score += 1
+        if 'option' in header_text:
+            score += 1
+        # Reject SCT-like tables (salary column = executive comp, not director)
+        if 'salary' in header_text:
+            score = 0
+
+        if score >= 3 and has_fees:
+            candidates.append((table, score, len(rows)))
+
+    if not candidates:
+        return None
+
+    candidates.sort(key=lambda x: (x[1], x[2]), reverse=True)
+    return candidates[0][0]
+
+
+def extract_director_compensation(html: str) -> Optional[List[DirectorCompEntry]]:
+    """
+    Extract Director Compensation Table from proxy statement HTML.
+
+    Covers non-employee director compensation including fees earned,
+    stock awards, option awards, and total. SEC Item 402(k) mandates
+    this disclosure.
+
+    Args:
+        html: Raw HTML of the proxy statement filing.
+
+    Returns:
+        List of DirectorCompEntry, or None if the table was not found.
+    """
+    if not html:
+        return None
+
+    table_el = _find_director_comp_table(html)
+    if table_el is None:
+        return None
+
+    headers, data_rows = _extract_table_data(table_el)
+    if not data_rows:
+        return None
+
+    # Build column map
+    col_map: dict[str, int] = {}
+    for i, header in enumerate(headers):
+        col_type = _classify_dir_comp_column(header)
+        if col_type:
+            col_map[col_type] = i
+
+    # Fallback: scan first data rows
+    if len(col_map) < 3:
+        for row in data_rows[:2]:
+            for i, cell in enumerate(row):
+                col_type = _classify_dir_comp_column(cell)
+                if col_type and col_type not in col_map:
+                    col_map[col_type] = i
+
+    if len(col_map) < 3:
+        return None
+
+    name_col = col_map.get('name', 0)
+
+    def _get_dollar(row: list[str], col_name: str) -> Optional[int]:
+        idx = col_map.get(col_name, -1)
+        if idx < 0 or idx >= len(row):
+            return None
+        val = _parse_comp_dollar(row[idx])
+        if val is not None:
+            return val
+        if row[idx].strip() == '$' and idx + 1 < len(row):
+            return _parse_comp_dollar('$' + row[idx + 1])
+        if not row[idx].strip() and idx + 1 < len(row):
+            return _parse_comp_dollar(row[idx + 1])
+        return None
+
+    entries: list[DirectorCompEntry] = []
+    for row in data_rows:
+        if name_col >= len(row):
+            continue
+        name_cell = _ZERO_WIDTH_RE.sub('', row[name_col]).replace('\xa0', ' ').strip()
+        name_cell = _FOOTNOTE_RE.sub('', name_cell).strip()
+        if not name_cell or len(name_cell) < 2:
+            continue
+        # Skip total/summary rows and footnotes
+        if any(kw in name_cell.lower() for kw in ['total', 'footnote', 'note', '(1)', '(2)']):
+            continue
+
+        # Need at least one dollar value to be a valid row
+        fees = _get_dollar(row, 'fees_earned')
+        stock = _get_dollar(row, 'stock_awards')
+        total = _get_dollar(row, 'total')
+        if fees is None and stock is None and total is None:
+            continue
+
+        entries.append(DirectorCompEntry(
+            name=name_cell,
+            fees_earned=fees,
+            stock_awards=stock,
+            option_awards=_get_dollar(row, 'option_awards'),
+            non_equity_incentive=_get_dollar(row, 'non_equity_incentive'),
+            pension_change=_get_dollar(row, 'pension_change'),
+            other_compensation=_get_dollar(row, 'other_compensation'),
+            total=total,
+        ))
+
+    return entries if entries else None
