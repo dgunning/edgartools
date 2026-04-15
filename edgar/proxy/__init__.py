@@ -22,6 +22,7 @@ Usage:
 """
 
 from .contest import ProxyContest
+from .contests import ProxyContests, proxy_contests
 from .core import ProxyStatement
 from .html_extractor import AuditFees, BeneficialOwner, CEOPayRatio, DirectorCompEntry, ExecutiveCompEntry, VotingProposal
 from .models import (
@@ -42,6 +43,10 @@ __all__ = [
     'ProxyStatement',
     'ProxySeason',
     'ProxyContest',
+    'ProxyContests',
+    # Functions
+    'proxy_contests',
+    'classify_proxy_tier',
     # Data models
     'ExecutiveCompensation',
     'PayVsPerformance',
@@ -53,8 +58,6 @@ __all__ = [
     'BeneficialOwner',
     'DirectorCompEntry',
     'AuditFees',
-    # Functions
-    'classify_proxy_tier',
     # Constants
     'PROXY_FORMS',
     'ANCHOR_FORMS',

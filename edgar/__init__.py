@@ -68,7 +68,7 @@ from edgar.paths import (
     set_data_directory,
     set_test_directory,
 )
-from edgar.proxy import PROXY_FORMS, ProxyStatement
+from edgar.proxy import PROXY_FORMS, ProxyContests, ProxyStatement, proxy_contests
 from edgar.storage import (
     StorageAnalysis,
     StorageInfo,
