@@ -22,7 +22,7 @@ Usage:
 """
 
 from .core import ProxyStatement
-from .html_extractor import VotingProposal
+from .html_extractor import CEOPayRatio, VotingProposal
 from .models import (
     PROXY_FORMS,
     ExecutiveCompensation,
@@ -38,6 +38,7 @@ __all__ = [
     'PayVsPerformance',
     'NamedExecutive',
     'VotingProposal',
+    'CEOPayRatio',
     # Constants
     'PROXY_FORMS',
 ]

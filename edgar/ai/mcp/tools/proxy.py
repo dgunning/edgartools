@@ -201,6 +201,18 @@ async def edgar_proxy(
         if awards_df is not None and not awards_df.empty:
             result["awards_close_to_mnpi"] = _df_to_records(awards_df, limit=20)
 
+        # CEO Pay Ratio
+        try:
+            pay_ratio = proxy.ceo_pay_ratio
+            if pay_ratio and pay_ratio.ratio:
+                result["ceo_pay_ratio"] = {
+                    "ceo_compensation": pay_ratio.ceo_compensation,
+                    "median_employee_compensation": pay_ratio.median_employee_compensation,
+                    "ratio": pay_ratio.ratio,
+                }
+        except Exception:
+            pass
+
         # Performance measures
         if proxy.performance_measures:
             result["performance_measures"] = proxy.performance_measures

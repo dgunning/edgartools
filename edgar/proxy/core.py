@@ -435,6 +435,25 @@ class ProxyStatement:
             return []
         return extract_voting_proposals(text)
 
+    @cached_property
+    def ceo_pay_ratio(self) -> Optional['CEOPayRatio']:
+        """
+        CEO pay ratio disclosure extracted from HTML.
+
+        Returns CEOPayRatio with fields:
+            - ceo_compensation: CEO annual total compensation (int or None)
+            - median_employee_compensation: Median employee annual total comp (int or None)
+            - ratio: The pay ratio as an integer (e.g., 533 means 533:1), or None
+
+        Returns None if no pay ratio section found in the filing.
+        SRCs and EGCs are exempt from this disclosure.
+        """
+        from edgar.proxy.html_extractor import extract_ceo_pay_ratio
+        text = self._filing_text
+        if not text:
+            return None
+        return extract_ceo_pay_ratio(text)
+
     # DataFrame Properties
     @cached_property
     def executive_compensation(self) -> pd.DataFrame:
@@ -678,11 +697,26 @@ class ProxyStatement:
         lines.append("  .performance_measures    Company performance measures")
         lines.append("  .awards_close_to_mnpi    Awards granted near MNPI disclosure")
         lines.append("  .voting_proposals        Voting proposals with board recommendations")
+        lines.append("  .ceo_pay_ratio           CEO pay ratio (CEO comp, median employee, ratio)")
 
         if detail == 'standard':
             return "\n".join(lines)
 
         # === FULL ===
+        # CEO Pay Ratio
+        try:
+            pay_ratio = self.ceo_pay_ratio
+            if pay_ratio and pay_ratio.ratio:
+                lines.append("")
+                lines.append("CEO PAY RATIO:")
+                if pay_ratio.ceo_compensation:
+                    lines.append(f"  CEO Compensation: ${pay_ratio.ceo_compensation:,}")
+                if pay_ratio.median_employee_compensation:
+                    lines.append(f"  Median Employee: ${pay_ratio.median_employee_compensation:,}")
+                lines.append(f"  Ratio: {pay_ratio.ratio}:1")
+        except Exception:
+            pass
+
         # Voting proposals
         try:
             proposals = self.voting_proposals
@@ -859,6 +893,26 @@ class ProxyStatement:
                 timing_text.append("No MNPI timing concerns", style="green")
             elements.append(Text())
             elements.append(timing_text)
+
+        # CEO Pay Ratio
+        try:
+            pay_ratio = self.ceo_pay_ratio
+            if pay_ratio and pay_ratio.ratio:
+                from edgar.display.formatting import format_currency_short
+                ratio_text = Text()
+                ratio_text.append("Pay Ratio: ", style="bold")
+                ratio_text.append(f"{pay_ratio.ratio}:1")
+                parts = []
+                if pay_ratio.ceo_compensation:
+                    parts.append(f"CEO {format_currency_short(pay_ratio.ceo_compensation)}")
+                if pay_ratio.median_employee_compensation:
+                    parts.append(f"Median {format_currency_short(pay_ratio.median_employee_compensation)}")
+                if parts:
+                    ratio_text.append(f" ({' / '.join(parts)})", style="dim")
+                elements.append(Text())
+                elements.append(ratio_text)
+        except Exception:
+            pass
 
         # Governance indicators
         if self.insider_trading_policy_adopted is not None:
