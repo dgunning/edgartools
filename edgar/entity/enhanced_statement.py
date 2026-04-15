@@ -1636,6 +1636,17 @@ class EnhancedStatementBuilder:
                 if fiscal_period == 'FY':
                     continue
 
+                # Validate fiscal_year is consistent with period_end (Issue #781)
+                # This catches forward-looking schedule data (e.g., intangible amortization)
+                # tagged with real fp values but future end dates (fy=2021, end=2027)
+                fiscal_year = pk[0]
+                if not validate_fiscal_year_period_end(fiscal_year, period_end_date):
+                    log.debug(
+                        f"Skipping invalid fiscal_year={fiscal_year} for quarterly period_end={period_end_date} "
+                        f"(likely forward-looking schedule data - Issue #781)"
+                    )
+                    continue
+
                 # Validate period_end matches expected month for fiscal_period
                 if validate_quarterly_period_end(fiscal_period, period_end_date, fiscal_year_end_month):
                     valid_quarterly_periods.append((pk, info))
