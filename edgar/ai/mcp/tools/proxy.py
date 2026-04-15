@@ -241,6 +241,23 @@ async def edgar_proxy(
         except Exception:
             pass
 
+        # Audit Fees (from HTML)
+        try:
+            af = proxy.audit_fees
+            if af and af.current_year:
+                result["audit_fees"] = {
+                    "auditor_name": af.auditor_name,
+                    "current_year": af.current_year,
+                    "prior_year": af.prior_year,
+                    "audit": {"current": af.audit_fees_current, "prior": af.audit_fees_prior},
+                    "audit_related": {"current": af.audit_related_current, "prior": af.audit_related_prior},
+                    "tax": {"current": af.tax_fees_current, "prior": af.tax_fees_prior},
+                    "other": {"current": af.other_fees_current, "prior": af.other_fees_prior},
+                    "total": {"current": af.total_current, "prior": af.total_prior},
+                }
+        except Exception:
+            pass
+
         # Compensation history (multi-year DataFrame, from XBRL)
         comp_df = proxy.executive_compensation
         if comp_df is not None and not comp_df.empty:

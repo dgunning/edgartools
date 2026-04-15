@@ -26,6 +26,7 @@ __all__ = [
     'extract_summary_compensation', 'ExecutiveCompEntry',
     'extract_beneficial_ownership', 'BeneficialOwner',
     'extract_director_compensation', 'DirectorCompEntry',
+    'extract_audit_fees', 'AuditFees',
 ]
 
 # ── Types ────────────────────────────────────────────────────────────
@@ -1168,3 +1169,195 @@ def extract_director_compensation(tree) -> Optional[List[DirectorCompEntry]]:
         ))
 
     return entries if entries else None
+
+
+# ══════════════════════════════════════════════════════════════════════
+# Audit Fees Extractor
+# ══════════════════════════════════════════════════════════════════════
+
+@dataclass(frozen=True)
+class AuditFees:
+    """Audit fee disclosure data."""
+    auditor_name: str = ''
+    current_year: int = 0
+    prior_year: int = 0
+    audit_fees_current: Optional[int] = None
+    audit_fees_prior: Optional[int] = None
+    audit_related_current: Optional[int] = None
+    audit_related_prior: Optional[int] = None
+    tax_fees_current: Optional[int] = None
+    tax_fees_prior: Optional[int] = None
+    other_fees_current: Optional[int] = None
+    other_fees_prior: Optional[int] = None
+    total_current: Optional[int] = None
+    total_prior: Optional[int] = None
+
+
+def _classify_fee_row(label: str) -> Optional[str]:
+    """Classify a fee table row label. Most specific first."""
+    lc = label.lower()
+    if re.search(r'audit[- ]related', lc):
+        return 'audit_related'
+    if re.search(r'total|aggregate', lc):
+        return 'total'
+    if 'tax' in lc:
+        return 'tax'
+    if re.search(r'(?:all\s+)?other', lc) and 'audit' not in lc:
+        return 'other'
+    if 'audit' in lc and 'non-audit' not in lc:
+        return 'audit'
+    return None
+
+
+_YEAR_RE = re.compile(r'\b(20\d{2})\b')
+
+
+def _detect_year_columns(grid: list[list[str]]) -> Optional[tuple[int, int, int, int]]:
+    """Detect year columns. Returns (current_col, prior_col, current_year, prior_year)."""
+    for row in grid[:3]:
+        year_map: dict[int, int] = {}
+        for i, cell in enumerate(row):
+            m = _YEAR_RE.search(cell)
+            if m:
+                year = int(m.group(1))
+                if year not in year_map:
+                    year_map[year] = i
+        if len(year_map) >= 2:
+            sorted_years = sorted(year_map.items(), key=lambda x: -x[0])
+            current_year, current_col = sorted_years[0]
+            prior_year, prior_col = sorted_years[1]
+            current_col = _find_data_col(current_col, grid)
+            prior_col = _find_data_col(prior_col, grid)
+            return current_col, prior_col, current_year, prior_year
+    return None
+
+
+def _find_data_col(year_col: int, grid: list[list[str]]) -> int:
+    """Find the column with actual numeric data near a year header column."""
+    for offset in [0, 1, 2, -1, 3]:
+        col = year_col + offset
+        if col < 0:
+            continue
+        for row in grid:
+            if col < len(row):
+                val = row[col].strip()
+                if val and val not in ('\u200b', '$') and _parse_comp_dollar(val) is not None:
+                    return col
+    return year_col
+
+
+_THOUSANDS_RE = re.compile(r'\bin\s+thousands\b', re.I)
+_MILLIONS_RE = re.compile(r'\bin\s+millions\b', re.I)
+
+
+def _detect_multiplier(text: str) -> int:
+    if _THOUSANDS_RE.search(text):
+        return 1000
+    if _MILLIONS_RE.search(text):
+        return 1_000_000
+    return 1
+
+
+_AUDITOR_PATTERNS = [
+    re.compile(r'fees\s+(?:billed|paid|charged)\s+(?:by|to)\s+([A-Z][A-Za-z &,.\']+?(?:LLP|LLC|Inc\.|P\.?C\.?|PLLC|LP))', re.I),
+    re.compile(r'(?:appointed|engaged|retained|selected)\s+([A-Z][A-Za-z &,.\']+?(?:LLP|LLC|Inc\.|P\.?C\.?|PLLC|LP))', re.I),
+    re.compile(r'([A-Z][A-Za-z &,.\']+?(?:LLP|LLC|Inc\.|P\.?C\.?|PLLC|LP))\s*,?\s*(?:our|the|has|was|is)\s+(?:independent|principal)', re.I),
+]
+
+
+def _extract_auditor_name(text: str) -> str:
+    for pattern in _AUDITOR_PATTERNS:
+        m = pattern.search(text)
+        if m:
+            return m.group(1).strip()
+    return ''
+
+
+_AUDIT_HEADING_ANCHORS = [
+    'audit fees',
+    'fees paid to auditor',
+    'fees billed by',
+    'fees paid to',
+    'principal accountant fees',
+    'audit and non-audit fees',
+]
+_AUDIT_HEADING_REJECTS = ['pre-approval', 'committee report']
+
+
+def _score_audit_table(header_text: str) -> Tuple[int, bool]:
+    score = 0
+    if bool(_YEAR_RE.search(header_text)):
+        score += 3
+    if 'audit' in header_text:
+        score += 2
+    if 'total' in header_text:
+        score += 1
+    if 'tax' in header_text:
+        score += 1
+    return score, score >= 3
+
+
+def extract_audit_fees(tree) -> Optional[AuditFees]:
+    """Extract audit fees from a pre-parsed lxml HTML tree."""
+    if tree is None:
+        return None
+
+    table_el = _find_section_table(
+        tree, _AUDIT_HEADING_ANCHORS, _AUDIT_HEADING_REJECTS, _score_audit_table)
+    if table_el is None:
+        return None
+
+    grid = _extract_table_grid(table_el)
+    if not grid or len(grid) < 3:
+        return None
+
+    year_info = _detect_year_columns(grid)
+    if year_info is None:
+        return None
+
+    current_col, prior_col, current_year, prior_year = year_info
+
+    # Detect multiplier from surrounding text
+    parent = table_el.getparent()
+    context_text = (parent.text_content() or '') if parent is not None else ''
+    multiplier = _detect_multiplier(context_text[:2000])
+
+    fees: dict[str, tuple[Optional[int], Optional[int]]] = {}
+    for row in grid:
+        if not row:
+            continue
+        label = row[0] if row else ''
+        category = _classify_fee_row(label)
+        if not category:
+            continue
+
+        current_val = _parse_comp_dollar(row[current_col]) if current_col < len(row) else None
+        prior_val = _parse_comp_dollar(row[prior_col]) if prior_col < len(row) else None
+
+        if multiplier != 1:
+            if current_val is not None:
+                current_val = round(current_val * multiplier)
+            if prior_val is not None:
+                prior_val = round(prior_val * multiplier)
+
+        fees[category] = (current_val, prior_val)
+
+    if not fees:
+        return None
+
+    auditor_name = _extract_auditor_name(context_text[:3000])
+
+    return AuditFees(
+        auditor_name=auditor_name,
+        current_year=current_year, prior_year=prior_year,
+        audit_fees_current=fees.get('audit', (None, None))[0],
+        audit_fees_prior=fees.get('audit', (None, None))[1],
+        audit_related_current=fees.get('audit_related', (None, None))[0],
+        audit_related_prior=fees.get('audit_related', (None, None))[1],
+        tax_fees_current=fees.get('tax', (None, None))[0],
+        tax_fees_prior=fees.get('tax', (None, None))[1],
+        other_fees_current=fees.get('other', (None, None))[0],
+        other_fees_prior=fees.get('other', (None, None))[1],
+        total_current=fees.get('total', (None, None))[0],
+        total_prior=fees.get('total', (None, None))[1],
+    )

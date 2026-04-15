@@ -570,6 +570,21 @@ class ProxyStatement:
             for e in entries
         ])
 
+    @cached_property
+    def audit_fees(self) -> Optional['AuditFees']:
+        """
+        Audit fee disclosure extracted from HTML.
+
+        Returns AuditFees with auditor name and fee breakdown (audit,
+        audit-related, tax, other, total) for current and prior year.
+        Returns None if the section/table was not found.
+        """
+        from edgar.proxy.html_extractor import extract_audit_fees
+        tree = self._html_tree
+        if tree is None:
+            return None
+        return extract_audit_fees(tree)
+
     # DataFrame Properties
     @cached_property
     def executive_compensation(self) -> pd.DataFrame:
@@ -817,6 +832,7 @@ class ProxyStatement:
         lines.append("  .summary_compensation_table  Per-NEO compensation DataFrame (HTML)")
         lines.append("  .beneficial_ownership    Ownership table (5%+ holders, insiders)")
         lines.append("  .director_compensation_table  Director compensation DataFrame (HTML)")
+        lines.append("  .audit_fees              Audit fee breakdown (HTML)")
 
         if detail == 'standard':
             return "\n".join(lines)
@@ -876,6 +892,22 @@ class ProxyStatement:
                 for _, row in dir_comp.head(5).iterrows():
                     total_str = f"${row['total']:,.0f}" if row.get('total') else '-'
                     lines.append(f"  {row['name'][:35]}: {total_str}")
+        except Exception:
+            pass
+
+        # Audit Fees
+        try:
+            af = self.audit_fees
+            if af and af.current_year:
+                from edgar.display.formatting import format_currency_short
+                lines.append("")
+                lines.append(f"AUDIT FEES ({af.current_year}):")
+                if af.auditor_name:
+                    lines.append(f"  Auditor: {af.auditor_name}")
+                if af.audit_fees_current is not None:
+                    lines.append(f"  Audit: {format_currency_short(af.audit_fees_current)}")
+                if af.total_current is not None:
+                    lines.append(f"  Total: {format_currency_short(af.total_current)}")
         except Exception:
             pass
 
@@ -1167,6 +1199,22 @@ class ProxyStatement:
 
                 elements.append(Text())
                 elements.append(dir_table)
+        except Exception:
+            pass
+
+        # Audit Fees
+        try:
+            af = self.audit_fees
+            if af and af.current_year:
+                from edgar.display.formatting import format_currency_short
+                af_text = Text()
+                af_text.append(f"Audit Fees ({af.current_year}): ", style="bold")
+                if af.auditor_name:
+                    af_text.append(f"{af.auditor_name} — ")
+                if af.total_current is not None:
+                    af_text.append(f"Total {format_currency_short(af.total_current)}")
+                elements.append(Text())
+                elements.append(af_text)
         except Exception:
             pass
 
