@@ -38,6 +38,7 @@ __all__ = ['download_edgar_data',
            'get_edgar_data_directory',
            'use_local_storage',
            'is_using_local_storage',
+           'is_network_fallback_allowed',
            'set_local_storage_path',
            'download_filings',
            'local_filing_path',
@@ -61,7 +62,9 @@ class DirectoryBrowsingNotAllowed(Exception):
         super().__init__(f"{message} \nurl: {url}")
         self.url = url
 
-def use_local_storage(path_or_enable: Union[bool, str, Path, None] = True, use_local: Optional[bool] = None):
+def use_local_storage(path_or_enable: Union[bool, str, Path, None] = True,
+                      use_local: Optional[bool] = None,
+                      allow_network_fallback: bool = True):
     """
     Enable or disable local storage, optionally setting the storage path.
 
@@ -74,6 +77,10 @@ def use_local_storage(path_or_enable: Union[bool, str, Path, None] = True, use_l
             - None: Use default behavior
         use_local: Optional boolean to explicitly set enable/disable state.
                   Only used when path_or_enable is a path.
+        allow_network_fallback: If True (default), allow network requests when
+                  local data is incomplete (e.g. missing XBRL instance documents
+                  in pre-Oct 2020 SEC feed files). Network fallback is logged
+                  so you know when it happens. Set to False for strict offline mode.
 
     Raises:
         FileNotFoundError: If path is provided but does not exist.
@@ -93,6 +100,9 @@ def use_local_storage(path_or_enable: Union[bool, str, Path, None] = True, use_l
         >>> # Set path and explicitly control enable/disable
         >>> use_local_storage("/tmp/edgar", True)   # enable
         >>> use_local_storage("/tmp/edgar", False)  # set path but disable
+
+        >>> # Strict offline mode — no network requests at all
+        >>> use_local_storage("/tmp/edgar", allow_network_fallback=False)
     """
     # Determine the actual values based on parameter types
     if isinstance(path_or_enable, bool):
@@ -117,12 +127,24 @@ def use_local_storage(path_or_enable: Union[bool, str, Path, None] = True, use_l
     # Set the local storage flag
     os.environ['EDGAR_USE_LOCAL_DATA'] = "1" if enable else "0"
 
+    # Set the network fallback flag
+    os.environ['EDGAR_ALLOW_NETWORK_FALLBACK'] = "1" if allow_network_fallback else "0"
+
 
 def is_using_local_storage() -> bool:
     """
     Returns True if using local storage
     """
     return strtobool(os.getenv('EDGAR_USE_LOCAL_DATA', "False"))
+
+
+def is_network_fallback_allowed() -> bool:
+    """
+    Returns True if network fallback is allowed when local data is incomplete.
+    Defaults to True — network requests are permitted when local data is missing,
+    but each fallback is logged so the user knows when it happens.
+    """
+    return strtobool(os.getenv('EDGAR_ALLOW_NETWORK_FALLBACK', "True"))
 
 
 def set_local_storage_path(path: Union[str, Path]) -> None:

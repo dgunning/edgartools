@@ -57,15 +57,9 @@ class XBRLAttachments:
             for attachment in attachments.data_files:
                 if attachment.document_type in ["XML", 'EX-101.INS'] and attachment.extension.endswith(
                         ('.xml', '.XML')):
-                    try:
-                        content = attachment.content
-                        # Handle bytes content (e.g. UU-decoded binary)
-                        if isinstance(content, bytes):
-                            content = content.decode('utf-8', errors='replace')
-                        if content and '<xbrl' in content[:2000]:
-                            self._documents['instance'] = attachment
-                    except Exception as e:
-                        log.warning(f"Error reading potential XBRL instance {attachment.document}: {e}")
+                    content = attachment.content
+                    if content and '<xbrl' in content[:2000]:
+                        self._documents['instance'] = attachment
                 elif attachment.document_type == 'EX-101.SCH':
                     self._documents['schema'] = attachment
                 elif attachment.document_type == 'EX-101.DEF':
@@ -541,19 +535,29 @@ class XBRL:
             xbrl.parser.parse_definition_content(xbrl_attachments.get('definition').content)
 
         if xbrl_attachments.get('instance'):
-            instance_content = xbrl_attachments.get('instance').content
-            # Handle bytes content (e.g. UU-decoded from SGML bundle)
-            if isinstance(instance_content, bytes):
-                instance_content = instance_content.decode('utf-8', errors='replace')
-            if instance_content:
-                xbrl.parser.parse_instance_content(instance_content)
+            xbrl.parser.parse_instance_content(xbrl_attachments.get('instance').content)
+        elif not xbrl_attachments.empty:
+            # Instance document missing from local SGML — SEC feed files before ~Oct 2020
+            # did not include the extracted iXBRL instance document.
+            # Fall back to fetching it from the filing homepage if network fallback is allowed.
+            from edgar.storage import is_using_local_storage, is_network_fallback_allowed
+            if is_using_local_storage() and is_network_fallback_allowed():
+                homepage_xbrl = XBRLAttachments(filing.homepage.attachments)
+                if homepage_xbrl.get('instance'):
+                    log.info(
+                        f"Instance document not in local storage for {filing.accession_no}. "
+                        f"Fetching from SEC (network fallback)."
+                    )
+                    xbrl.parser.parse_instance_content(homepage_xbrl.get('instance').content)
+                else:
+                    log.warning(
+                        f"XBRL instance document not found for {filing.accession_no}. "
+                        f"Entity info and facts will be unavailable."
+                    )
             else:
-                log.warning(f"XBRL instance document found but content is empty for {filing}")
-        else:
-            if not xbrl_attachments.empty:
                 log.warning(
-                    f"XBRL linkbase files found but no instance document detected for {filing}. "
-                    f"Entity info and facts will be unavailable."
+                    f"XBRL instance document not in local storage for {filing.accession_no}. "
+                    f"Enable network fallback or re-download this filing to access XBRL data."
                 )
 
         # Capture SGML period_of_report for date discrepancy detection
