@@ -57,9 +57,15 @@ class XBRLAttachments:
             for attachment in attachments.data_files:
                 if attachment.document_type in ["XML", 'EX-101.INS'] and attachment.extension.endswith(
                         ('.xml', '.XML')):
-                    content = attachment.content
-                    if content and '<xbrl' in content[:2000]:
-                        self._documents['instance'] = attachment
+                    try:
+                        content = attachment.content
+                        # Handle bytes content (e.g. UU-decoded binary)
+                        if isinstance(content, bytes):
+                            content = content.decode('utf-8', errors='replace')
+                        if content and '<xbrl' in content[:2000]:
+                            self._documents['instance'] = attachment
+                    except Exception as e:
+                        log.warning(f"Error reading potential XBRL instance {attachment.document}: {e}")
                 elif attachment.document_type == 'EX-101.SCH':
                     self._documents['schema'] = attachment
                 elif attachment.document_type == 'EX-101.DEF':
@@ -535,7 +541,20 @@ class XBRL:
             xbrl.parser.parse_definition_content(xbrl_attachments.get('definition').content)
 
         if xbrl_attachments.get('instance'):
-            xbrl.parser.parse_instance_content(xbrl_attachments.get('instance').content)
+            instance_content = xbrl_attachments.get('instance').content
+            # Handle bytes content (e.g. UU-decoded from SGML bundle)
+            if isinstance(instance_content, bytes):
+                instance_content = instance_content.decode('utf-8', errors='replace')
+            if instance_content:
+                xbrl.parser.parse_instance_content(instance_content)
+            else:
+                log.warning(f"XBRL instance document found but content is empty for {filing}")
+        else:
+            if not xbrl_attachments.empty:
+                log.warning(
+                    f"XBRL linkbase files found but no instance document detected for {filing}. "
+                    f"Entity info and facts will be unavailable."
+                )
 
         # Capture SGML period_of_report for date discrepancy detection
         try:

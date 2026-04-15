@@ -1,8 +1,8 @@
 ---
-title: "Give Claude a Bloomberg Terminal: The EdgarTools MCP Server"
-description: "EdgarTools now ships an MCP server that gives Claude and other AI agents direct access to every SEC filing, financial statement, and company disclosure — no API key, no paywall, no setup beyond two lines of config."
-keywords: ["edgartools", "mcp server", "claude desktop", "sec edgar", "python", "sec filings", "model context protocol", "ai agent", "financial data", "xbrl", "sec edgar api", "claude mcp", "sec filing analysis", "insider trading", "institutional ownership", "edgar python", "mcp tools"]
-tags: ["mcp", "ai", "sec-edgar", "release"]
+title: "Give Claude a Bloomberg Terminal: The EdgarTools MCP Server for SEC Filings"
+description: "EdgarTools ships a free, open-source MCP server that connects Claude to SEC EDGAR — 13 tools for financial statements, insider trading, company filings, and live SEC data. No API key required. Python library with 2M+ downloads."
+keywords: ["edgartools", "mcp server", "claude desktop", "sec edgar", "python", "sec filings", "model context protocol", "ai agent", "financial data", "xbrl", "sec edgar api", "claude mcp", "sec filing analysis", "insider trading", "institutional ownership", "edgar python", "mcp tools", "sec edgar python library", "xbrl parser python", "claude desktop mcp server", "financial data api free", "sec filings api", "10-K parser", "form 4 insider trading", "13F institutional holdings"]
+tags: ["mcp", "ai", "sec-edgar", "python", "financial-data"]
 slug: edgartools-mcp-server
 date: 2026-03-25
 ---
@@ -13,17 +13,13 @@ date: 2026-03-25
 
 ---
 
-Here's something I've noticed over the past year: people don't want a Python library for SEC filings. They want *answers* about SEC filings. "What did Tesla's insiders do last quarter?" "How does Nvidia's revenue growth compare to AMD?" "What was just filed with the SEC in the last hour?"
+The question used to be "how do I pull data from SEC filings?" Now it's "why can't Claude do it for me?" Analysts, compliance teams, research desks — they've moved on. They're working inside AI tools, and they expect those tools to know what Apple reported last quarter. Instead they get hallucinated numbers, or a polite apology, or a suggestion to go check EDGAR themselves.
 
-The Python library gets you there. But increasingly, the person asking the question isn't writing Python — they're talking to Claude.
+The answer is [MCP](https://modelcontextprotocol.io/) — Model Context Protocol. An AI model only knows what's in its context window. It can't reach out and pull a 10-K. MCP is the standard that lets the scaffolding around the model do that on its behalf — fetch real data from external sources and feed it back in. You're reading this because you're the developer, the quant, the data engineer who's going to wire that up. You're the person who connects the model to the data your team is already asking it about.
 
-So we built an MCP server.
+[EdgarTools](https://github.com/dgunning/edgartools) — the most popular Python library for SEC EDGAR data — now ships an MCP server that does exactly that. 13 tools that give any MCP-compatible AI assistant — Claude Desktop, Claude Code, or your own internal application — structured access to every SEC filing, financial statement, and company disclosure. No API key, no paywall. The model stops guessing and starts pulling real data.
 
-## What MCP Is (and Why You Should Care)
-
-The [Model Context Protocol](https://modelcontextprotocol.io/) is an open standard from Anthropic that lets AI agents call external tools. Think of it as USB-C for AI: a single plug that connects Claude to any data source — databases, APIs, file systems, or in our case, every filing in the SEC's EDGAR database.
-
-Before MCP, getting Claude to analyze SEC filings meant copying and pasting text into the chat window. With MCP, Claude can *query the SEC directly*. It can pull filings, parse XBRL, compare companies, and monitor live filing activity — all without you lifting a finger.
+![How the EdgarTools MCP server connects Claude to SEC EDGAR](images/mcp-architecture.webp)
 
 ## 13 Tools, Organized by What You Actually Want to Do
 
@@ -57,11 +53,13 @@ Most API wrappers expose endpoints. We designed tools around **intent**. You don
 | **edgar_fund** | Mutual funds, ETFs, BDCs, money market funds — holdings, yields, performance. |
 | **edgar_proxy** | Executive compensation and pay-vs-performance from DEF 14A proxy statements. |
 
+![13 MCP tools organized by intent: Discover, Examine, Analyze](images/mcp-tool-organization.webp)
+
 The one that surprises people most is `edgar_monitor`. No other financial data MCP server offers a live filings feed. Claude can watch what's being filed *right now* and flag anything interesting — a new 8-K from a company you follow, a Form 4 insider purchase, a 13F portfolio disclosure.
 
 ## Setup: Two Minutes, No API Key
 
-Every SEC filing is public data. EDGAR is a free, open API maintained by the US government. You don't need a Bloomberg terminal, a FactSet subscription, or an API key. You need two lines of JSON.
+Every SEC filing is public data. The SEC EDGAR API is free and maintained by the US government. You don't need a Bloomberg terminal, a FactSet subscription, or a financial data API key. You need two lines of JSON.
 
 ### Claude Desktop
 
@@ -98,7 +96,7 @@ uvx --from "edgartools[ai]" edgartools-mcp --test
 ```
 
 ```
-✓ EdgarTools v5.26.0 imports successfully
+✓ EdgarTools v5.26.1 imports successfully
 ✓ MCP framework available
 ✓ 13 tools registered
 ✓ EDGAR_IDENTITY configured
@@ -107,27 +105,121 @@ uvx --from "edgartools[ai]" edgartools-mcp --test
 
 ## What This Looks Like in Practice
 
-Once the server is running, you just talk to Claude. No special syntax. No tool names to memorize.
+Once the server is running, you just talk to Claude. No special syntax. No tool names to memorize. Here's what actually comes back — real data from real SEC filings.
 
-**"What did Nvidia file this quarter?"**
+![Claude Desktop showing Tim Cook's compensation data pulled from SEC EDGAR via EdgarTools](images/claude-desktop-tim-cook-compensation.webp)
 
-Claude calls `edgar_company` with `identifier=NVDA` and `include=filings`, returning the latest 10-Q, 8-Ks, proxy statements, and insider transactions — all structured, not raw HTML.
+**"What is Apple's CEO compensation?"**
 
-**"Compare Microsoft and Google's revenue growth over the last 5 years"**
+Claude calls `edgar_proxy` and gets structured data from Apple's latest DEF 14A proxy statement — in under a second:
 
-Claude calls `edgar_trends` for both companies, pulls XBRL-sourced revenue data, computes year-over-year growth rates, and presents a side-by-side table. No scraping. No manual data entry.
+```json
+{
+  "company": "Apple Inc.",
+  "form": "DEF 14A",
+  "filing_date": "2026-01-08",
+  "ceo": {
+    "name": "Mr. Cook",
+    "total_comp": 74294811,
+    "actually_paid": 108423733
+  },
+  "pay_vs_performance": {
+    "company_tsr": 233.88,
+    "peer_tsr": 279.51,
+    "net_income": 112010000000
+  },
+  "performance_measures": ["Net Sales", "Operating Income", "Relative TSR"]
+}
+```
 
-**"Has any insider at CrowdStrike sold shares in the last 30 days?"**
+CEO total compensation, actually-paid comp, total shareholder return vs peers, and the company's own performance measures — all extracted from XBRL-tagged proxy statement data. The kind of executive compensation analysis that used to require manually reading a 60-page DEF 14A.
 
-Claude calls `edgar_ownership` with `analysis_type="insiders"` and `identifier="CRWD"`, returning Form 4 transactions — who sold, how many shares, at what price, and whether it was a planned 10b5-1 trade or a discretionary sale.
+---
+
+**"Compare Apple, Microsoft, and Google on revenue and margins"**
+
+Claude calls `edgar_compare` and pulls XBRL financials for all three companies:
+
+```json
+{
+  "companies": [
+    {"name": "Apple Inc.",      "revenue": 416161000000, "net_margin": "26.9%", "gross_margin": "46.9%"},
+    {"name": "MICROSOFT CORP",  "revenue": 375000000000, "net_margin": "27.2%", "gross_margin": "69.9%"},
+    {"name": "Alphabet Inc.",   "revenue": 405640000000, "net_margin": "27.8%", "gross_margin": "58.3%"}
+  ]
+}
+```
+
+Three companies, side-by-side, with computed margins. Each company also gets multi-period income statements for trend context. One tool call.
+
+---
+
+**"Show me Microsoft's revenue trend"**
+
+Claude calls `edgar_trends` and returns multi-year time series with growth rates:
+
+```json
+{
+  "company": "MICROSOFT CORP",
+  "trends": {
+    "revenue": {
+      "values": [
+        {"value": 375000000000, "period": "2025"},
+        {"value": 245122000000, "period": "2024"},
+        {"value": 211915000000, "period": "2023"}
+      ],
+      "growth_rates": [
+        {"period": "2025", "growth": "53.0%"},
+        {"period": "2024", "growth": "15.7%"}
+      ],
+      "cagr": "33.0%"
+    }
+  }
+}
+```
+
+Year-over-year growth rates and CAGR computed automatically from XBRL financial data. No web scraping. No manual data entry. No CSV downloads.
+
+---
 
 **"Show me what 8-Ks were filed in the last hour"**
 
-Claude calls `edgar_monitor` and filters for form 8-K. You get real-time awareness of material events — earnings releases, leadership changes, acquisitions — as they hit the SEC's servers.
+Claude calls `edgar_monitor` and returns what was *just filed today*:
 
-**"Read the risk factors from Tesla's latest 10-K"**
+```json
+{
+  "filings": [
+    {"form": "8-K", "filed": "2026-03-26", "company": "Haymaker Acquisition Corp. 4"},
+    {"form": "8-K", "filed": "2026-03-26", "company": "GUOCHUN INTERNATIONAL INC."},
+    {"form": "8-K", "filed": "2026-03-26", "company": "Quoin Pharmaceuticals, Ltd."}
+  ]
+}
+```
 
-Claude calls `edgar_filing` to find the latest 10-K, then `edgar_read` to extract Item 1A — Risk Factors. You get structured text, not a 200-page PDF.
+Real-time awareness of material events — earnings releases, leadership changes, acquisitions — as they hit the SEC's servers.
+
+---
+
+**"What does Apple's debt note say?"**
+
+Claude calls `edgar_notes` and drills into the financial statement disclosures:
+
+```json
+{
+  "company": "Apple Inc. [AAPL]",
+  "total_notes": 16,
+  "topic": "debt",
+  "notes": [{
+    "number": 9,
+    "title": "Debt",
+    "expands": ["Commercial paper", "Term debt"],
+    "expands_statements": ["BalanceSheet", "CashFlowStatement"],
+    "context": "The Company issues unsecured short-term promissory notes pursuant to a commercial paper program..."
+  }]
+}
+```
+
+Which statement line items the note explains, structured tables, and the narrative text. This is how Claude explains *why* a number is what it is — not just what the number is.
 
 ## Pre-Built Workflows
 
@@ -172,13 +264,13 @@ The server runs anywhere Python runs:
 | **Docker** | `docker run -i hackerdogs/edgartools-mcp` | Team servers, CI/CD |
 | **HTTP** | `edgartools-mcp --transport streamable-http --port 8000` | Remote / multi-user |
 
-The server is stateless — no database, no session storage, no persistent data. Every request goes directly to the SEC. You can run it behind a load balancer, scale it horizontally, or tear it down and restart it with zero consequences.
+The EdgarTools MCP server is stateless — no database, no session storage, no persistent data. Every request goes directly to the SEC. You can run it behind a load balancer, scale it horizontally, or tear it down and restart it with zero consequences.
 
 ## The Bigger Picture
 
-EdgarTools started as a Python library. Then it became the most popular way to access SEC data in Python — [2.3 million downloads](https://pypi.org/project/edgartools/) and counting. The MCP server is the next step: making that same data accessible to AI agents that are increasingly doing the analytical work that used to require a human with a Bloomberg terminal.
+EdgarTools started as a Python library for parsing SEC filings. Then it became the most popular way to access SEC EDGAR data in Python — [2.3 million downloads](https://pypi.org/project/edgartools/) and counting, used by hedge funds, academic researchers, and fintech teams. The MCP server is the next step: making that same data accessible to AI agents that are increasingly doing the analytical work that used to require a human with a Bloomberg terminal.
 
-The SEC files 500,000+ submissions a year. Every 10-K, every 8-K, every Form 4, every 13F — all of it is public data that tells you what's happening inside American companies. The hard part was never access. It was parsing, structuring, and making sense of it. That's what EdgarTools does, and now Claude can do it too.
+The SEC processes 500,000+ submissions a year. Every 10-K annual report, every 8-K material event, every Form 4 insider trade, every 13F institutional holdings disclosure — all of it is public data that tells you what's happening inside American companies. The hard part was never access. It was parsing XBRL, structuring financial statements, and making sense of it all. That's what EdgarTools does, and now Claude can do it too.
 
 ```bash
 # Start here
@@ -187,4 +279,21 @@ uvx --from "edgartools[ai]" edgartools-mcp --test
 
 ---
 
-*[EdgarTools](https://github.com/dgunning/edgartools) is open source under the MIT license. The MCP server is registered in the [official MCP registry](https://github.com/modelcontextprotocol/servers). Contributions, bug reports, and [GitHub stars](https://github.com/dgunning/edgartools/stargazers) are always welcome.*
+*[EdgarTools](https://github.com/dgunning/edgartools) is an open-source Python library for SEC EDGAR filings, available under the MIT license. Install with `pip install edgartools`. The MCP server is registered in the [official MCP registry](https://github.com/modelcontextprotocol/servers). Full [documentation](https://dgunning.github.io/edgartools/ai/), [PyPI package](https://pypi.org/project/edgartools/), and [source code](https://github.com/dgunning/edgartools) are available. Contributions, bug reports, and [GitHub stars](https://github.com/dgunning/edgartools/stargazers) are always welcome.*
+
+---
+
+**Want more from your MCP server?**
+
+The local edgartools MCP server queries EDGAR directly through Python. The **[edgar.tools hosted MCP server](https://app.edgar.tools/docs/mcp/setup?utm_source=edgartools-blog&utm_medium=see-live&utm_content=mcp-server-post)** adds AI-enriched data processed server-side:
+
+| Capability | Local (edgartools) | Hosted (edgar.tools) |
+|---|---|---|
+| Material events | Basic 8-K parsing | LLM-classified event types |
+| Disclosure search | — | 12 XBRL topic clusters, all years |
+| Insider data | Individual Form 4s | 802K+ transactions with sentiment |
+| Filing sections | Raw text | AI summaries and key takeaways |
+
+Free tier: truncated MCP responses. Professional ($24.99/mo): full results.
+
+**[Set up the hosted MCP server →](https://app.edgar.tools/docs/mcp/setup?utm_source=edgartools-blog&utm_medium=see-live&utm_content=mcp-server-post)**
