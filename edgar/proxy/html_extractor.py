@@ -20,7 +20,11 @@ from typing import List, Literal, Optional
 
 log = logging.getLogger(__name__)
 
-__all__ = ['extract_voting_proposals', 'VotingProposal', 'extract_ceo_pay_ratio', 'CEOPayRatio']
+__all__ = [
+    'extract_voting_proposals', 'VotingProposal',
+    'extract_ceo_pay_ratio', 'CEOPayRatio',
+    'extract_summary_compensation', 'ExecutiveCompEntry',
+]
 
 # ── Types ────────────────────────────────────────────────────────────
 
@@ -434,3 +438,400 @@ def extract_ceo_pay_ratio(text: str) -> Optional[CEOPayRatio]:
         median_employee_compensation=median_comp,
         ratio=ratio,
     )
+
+
+# ══════════════════════════════════════════════════════════════════════
+# Summary Compensation Table Extractor
+# ══════════════════════════════════════════════════════════════════════
+
+@dataclass(frozen=True)
+class ExecutiveCompEntry:
+    """One row of the Summary Compensation Table (one executive, one year)."""
+    name: str
+    title: str
+    year: int
+    salary: Optional[int] = None
+    bonus: Optional[int] = None
+    stock_awards: Optional[int] = None
+    option_awards: Optional[int] = None
+    non_equity_incentive: Optional[int] = None
+    pension_change: Optional[int] = None
+    other_compensation: Optional[int] = None
+    total: Optional[int] = None
+
+
+# ── Column classification ────────────────────────────────────────────
+
+_SCT_COLUMN_PATTERNS: list[tuple[str, re.Pattern]] = [
+    ('name', re.compile(r'name|principal\s+position', re.I)),
+    ('year', re.compile(r'\byear\b', re.I)),
+    ('stock_awards', re.compile(r'stock\s+award', re.I)),
+    ('option_awards', re.compile(r'option\s+award', re.I)),
+    ('non_equity_incentive', re.compile(r'non[- ]equity|incentive\s+plan', re.I)),
+    ('pension_change', re.compile(r'pension|nqdc|nonqualified\s+deferred|change\s+in\s+pension', re.I)),
+    ('other_compensation', re.compile(r'all\s+other|other\s+comp', re.I)),
+    ('total', re.compile(r'\btotal\b', re.I)),
+    ('salary', re.compile(r'\bsalary\b', re.I)),
+    ('bonus', re.compile(r'\bbonus\b', re.I)),
+]
+
+
+def _classify_sct_column(header: str) -> Optional[str]:
+    """Classify a column header to a compensation field. Most specific first."""
+    for col_name, pattern in _SCT_COLUMN_PATTERNS:
+        if pattern.search(header):
+            return col_name
+    return None
+
+
+# ── Dollar parsing for table cells ───────────────────────────────────
+
+_FOOTNOTE_RE = re.compile(r'(?:\(\d+\))+\s*$')
+_STAR_RE = re.compile(r'\*+\s*$')
+_DASH_RE = re.compile(r'^[\s\u2014\u2013\u2015\u2012\u2212\-]+$')
+_ZERO_WIDTH_RE = re.compile(r'[\u200b\u00ad\ufeff]')
+
+
+def _parse_comp_dollar(text: str) -> Optional[int]:
+    """Parse a dollar amount from an SCT cell. Returns None for dashes/empty."""
+    # Strip footnotes and zero-width chars
+    cleaned = _FOOTNOTE_RE.sub('', text)
+    cleaned = _STAR_RE.sub('', cleaned)
+    cleaned = _ZERO_WIDTH_RE.sub('', cleaned).strip()
+    if not cleaned or _DASH_RE.match(cleaned):
+        return None
+
+    # Handle accounting negatives: (1,234)
+    negative = False
+    if cleaned.startswith('(') and cleaned.endswith(')'):
+        cleaned = cleaned[1:-1]
+        negative = True
+
+    # Remove $, commas, spaces
+    cleaned = cleaned.replace('$', '').replace(',', '').replace(' ', '').strip()
+    if not cleaned:
+        return None
+
+    try:
+        value = int(float(cleaned))
+        return -value if negative else value
+    except ValueError:
+        return None
+
+
+# ── Name/title splitting ─────────────────────────────────────────────
+
+_TITLE_KEYWORDS = [
+    'officer', 'president', 'chairman', 'director', 'counsel', 'secretary',
+    'treasurer', 'controller', 'ceo', 'cfo', 'coo', 'cto', 'clo', 'svp', 'evp',
+    'vice president', 'general counsel', 'chief',
+]
+
+_TITLE_ABBREVIATIONS = {
+    'chief executive officer': 'CEO',
+    'chief financial officer': 'CFO',
+    'chief operating officer': 'COO',
+    'chief technology officer': 'CTO',
+    'president and chief executive officer': 'President & CEO',
+    'executive vice president': 'EVP',
+    'senior vice president': 'SVP',
+    'general counsel': 'General Counsel',
+    'principal executive officer': 'PEO',
+    'principal financial officer': 'PFO',
+}
+
+
+def _split_name_title(cell: str) -> tuple[str, str]:
+    """Split 'Tim Cook, Chief Executive Officer' → ('Tim Cook', 'CEO')."""
+    # Normalize whitespace
+    cell = cell.replace('\xa0', ' ').replace('\u200b', '').strip()
+    cell = re.sub(r'\s+', ' ', cell)
+
+    # Try splitting on comma or newline
+    for sep in [',', '\n']:
+        idx = cell.find(sep)
+        if idx == -1:
+            continue
+        before = cell[:idx].strip()
+        after = cell[idx + 1:].strip()
+        after_lower = after.lower()
+        if any(kw in after_lower for kw in _TITLE_KEYWORDS) and before:
+            # Abbreviate title
+            for full, abbrev in sorted(_TITLE_ABBREVIATIONS.items(), key=lambda x: -len(x[0])):
+                if full in after_lower:
+                    return before, abbrev
+            return before, after
+
+    # No separator — check if title is concatenated (common in SEC filings)
+    # "Tim CookChief Executive Officer" → split at case boundary before title keyword
+    for kw in ['Chief ', 'President', 'Senior Vice', 'Executive Vice', 'General Counsel']:
+        idx = cell.find(kw)
+        if idx > 3:
+            name = cell[:idx].strip()
+            title_text = cell[idx:].strip()
+            title_lower = title_text.lower()
+            for full, abbrev in sorted(_TITLE_ABBREVIATIONS.items(), key=lambda x: -len(x[0])):
+                if full in title_lower:
+                    return name, abbrev
+            return name, title_text
+
+    return cell, ''
+
+
+# ── SCT table finding ────────────────────────────────────────────────
+
+def _find_sct_table(html: str):
+    """Find the Summary Compensation Table in HTML.
+
+    Strategy: find heading elements containing "summary compensation table"
+    that are NOT inside a <table> (to skip TOC entries), then examine
+    subsequent tables for SCT-like column structure.
+    """
+    try:
+        from bs4 import BeautifulSoup
+    except ImportError:
+        log.warning("BeautifulSoup not available for SCT extraction")
+        return None, None
+
+    soup = BeautifulSoup(html, 'lxml')
+
+    # Find the SCT section heading
+    # Pass 1: headings NOT in tables (ideal — skips TOC)
+    # Pass 2: headings IN tables (layout-table documents like JNJ, PG)
+    heading_tag = None
+    for allow_in_table in [False, True]:
+        for tag in soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'span']):
+            text = tag.get_text(strip=True)
+            if not text or 'summary compensation table' not in text.lower():
+                continue
+            if len(text) > 100:
+                continue
+            if tag.name == 'a' or tag.find_parent('a'):
+                continue
+            in_table = tag.find_parent('table') is not None
+            if not allow_in_table and in_table:
+                continue
+            # In pass 2 (inside tables), require it to look like a heading
+            # not a TOC entry — must NOT contain page numbers or "....." patterns
+            if allow_in_table and in_table:
+                if re.search(r'\d{2,3}\s*$', text):  # ends with page number
+                    continue
+                if '.....' in text:
+                    continue
+                # Must be a relatively short, standalone heading
+                if len(text) > 60 and 'summary compensation table' not in text.lower()[:50]:
+                    continue
+            heading_tag = tag
+            break
+        if heading_tag:
+            break
+
+    if not heading_tag:
+        return None, None
+
+    # Search up to 10 tables after the heading for the best SCT candidate
+    candidates = []
+    for table in heading_tag.find_all_next('table', limit=10):
+        rows = table.find_all('tr')
+        if len(rows) < 3:
+            continue
+
+        # Check if this table has SCT-like columns
+        all_cells = []
+        for row in rows[:3]:
+            for cell in row.find_all(['td', 'th']):
+                text = cell.get_text(strip=True)
+                if text and len(text) > 2:
+                    all_cells.append(text)
+
+        header_text = ' '.join(all_cells).lower()
+        score = 0
+        has_salary = 'salary' in header_text
+        if has_salary:
+            score += 3
+        if 'total' in header_text:
+            score += 2
+        if 'year' in header_text:
+            score += 1
+        if 'stock' in header_text and 'award' in header_text:
+            score += 2
+        if 'name' in header_text or 'principal' in header_text:
+            score += 1
+        if 'bonus' in header_text:
+            score += 1
+        if 'option' in header_text:
+            score += 1
+        # Reject tables that look like Director Compensation (fees, not salary)
+        if 'fees earned' in header_text or 'fees paid' in header_text:
+            score = 0
+
+        if score >= 4 and has_salary:
+            candidates.append((table, score, len(rows)))
+
+    if not candidates:
+        return None, None
+
+    # Pick best: highest score, then most rows
+    candidates.sort(key=lambda x: (x[1], x[2]), reverse=True)
+    return candidates[0][0], soup
+
+
+def _extract_table_data(table) -> tuple[list[str], list[list[str]]]:
+    """Extract headers and rows from an HTML table, handling colspan."""
+    rows = table.find_all('tr')
+    if not rows:
+        return [], []
+
+    grid = []
+    for row in rows:
+        cells = row.find_all(['td', 'th'])
+        row_data = []
+        for cell in cells:
+            text = cell.get_text(strip=True)
+            text = _ZERO_WIDTH_RE.sub('', text).strip()
+            colspan = int(cell.get('colspan', 1) or 1)
+            row_data.append(text)
+            # Add empty cells for colspan
+            for _ in range(colspan - 1):
+                row_data.append('')
+        grid.append(row_data)
+
+    if not grid:
+        return [], []
+
+    # Find the header row: look for one containing 'Salary' or 'Year' or 'Total'
+    header_row_idx = -1
+    for i, row in enumerate(grid[:4]):
+        row_text = ' '.join(row).lower()
+        if ('salary' in row_text or 'year' in row_text) and 'total' in row_text:
+            header_row_idx = i
+            break
+
+    if header_row_idx < 0:
+        # Fallback: first row with multiple non-empty cells
+        for i, row in enumerate(grid[:4]):
+            non_empty = [c for c in row if c]
+            if len(non_empty) >= 3:
+                header_row_idx = i
+                break
+
+    if header_row_idx < 0:
+        return [], grid
+
+    headers = grid[header_row_idx]
+    data_rows = grid[header_row_idx + 1:]
+
+    return headers, data_rows
+
+
+def extract_summary_compensation(html: str) -> Optional[List[ExecutiveCompEntry]]:
+    """
+    Extract Summary Compensation Table from proxy statement HTML.
+
+    Finds the SEC-mandated SCT and extracts per-executive, per-year
+    compensation data including salary, bonus, stock awards, option awards,
+    non-equity incentive, pension/NQDC changes, other compensation, and total.
+
+    Args:
+        html: Raw HTML of the proxy statement filing.
+
+    Returns:
+        List of ExecutiveCompEntry, or None if the SCT was not found.
+    """
+    if not html:
+        return None
+
+    table_el, soup = _find_sct_table(html)
+    if table_el is None:
+        return None
+
+    headers, data_rows = _extract_table_data(table_el)
+    if not data_rows:
+        return None
+
+    # Build column map from headers
+    col_map: dict[str, int] = {}
+    for i, header in enumerate(headers):
+        col_type = _classify_sct_column(header)
+        if col_type:
+            col_map[col_type] = i
+
+    # If header-based classification failed, try scanning first data rows
+    if len(col_map) < 4:
+        for row in data_rows[:2]:
+            for i, cell in enumerate(row):
+                col_type = _classify_sct_column(cell)
+                if col_type and col_type not in col_map:
+                    col_map[col_type] = i
+
+    if len(col_map) < 4:
+        return None
+
+    name_col = col_map.get('name', 0)
+    year_col = col_map.get('year', -1)
+
+    def _get_dollar(row: list[str], col_name: str) -> Optional[int]:
+        """Get a dollar value from a row, handling split-cell patterns."""
+        idx = col_map.get(col_name, -1)
+        if idx < 0 or idx >= len(row):
+            return None
+        val = _parse_comp_dollar(row[idx])
+        if val is not None:
+            return val
+        # Split-cell: "$" in this cell, number in next
+        if row[idx].strip() == '$' and idx + 1 < len(row):
+            return _parse_comp_dollar('$' + row[idx + 1])
+        # Try next cell if current is empty
+        if not row[idx].strip() and idx + 1 < len(row):
+            return _parse_comp_dollar(row[idx + 1])
+        return None
+
+    # Parse rows
+    entries: list[ExecutiveCompEntry] = []
+    current_name = ''
+    current_title = ''
+
+    for row in data_rows:
+        # Check for name in name column
+        if name_col < len(row) and row[name_col]:
+            cell_text = row[name_col]
+            if cell_text and not cell_text.startswith('(') and len(cell_text) > 2:
+                name, title = _split_name_title(cell_text)
+                if name and not any(kw in name.lower() for kw in ['total', 'footnote', 'note']):
+                    current_name = name
+                    current_title = title
+
+        # Extract year
+        year = 0
+        if year_col >= 0 and year_col < len(row):
+            try:
+                year = int(re.sub(r'[^\d]', '', row[year_col])[:4])
+            except (ValueError, IndexError):
+                pass
+            # Split-cell: try next column
+            if (not year or year < 2000) and year_col + 1 < len(row):
+                try:
+                    year = int(re.sub(r'[^\d]', '', row[year_col + 1])[:4])
+                except (ValueError, IndexError):
+                    pass
+
+        if not year or year < 2000 or year > 2100:
+            continue
+        if not current_name:
+            continue
+
+        entries.append(ExecutiveCompEntry(
+            name=current_name,
+            title=current_title,
+            year=year,
+            salary=_get_dollar(row, 'salary'),
+            bonus=_get_dollar(row, 'bonus'),
+            stock_awards=_get_dollar(row, 'stock_awards'),
+            option_awards=_get_dollar(row, 'option_awards'),
+            non_equity_incentive=_get_dollar(row, 'non_equity_incentive'),
+            pension_change=_get_dollar(row, 'pension_change'),
+            other_compensation=_get_dollar(row, 'other_compensation'),
+            total=_get_dollar(row, 'total'),
+        ))
+
+    return entries if entries else None

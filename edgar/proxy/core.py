@@ -454,6 +454,41 @@ class ProxyStatement:
             return None
         return extract_ceo_pay_ratio(text)
 
+    @cached_property
+    def summary_compensation_table(self) -> pd.DataFrame:
+        """
+        Per-executive Summary Compensation Table extracted from HTML.
+
+        Contains individual NEO compensation broken down by component,
+        typically covering 3 fiscal years. This is the detailed data that
+        the XBRL PvP table only provides in aggregate.
+
+        Columns:
+            name, title, year, salary, bonus, stock_awards, option_awards,
+            non_equity_incentive, pension_change, other_compensation, total
+        """
+        from edgar.proxy.html_extractor import extract_summary_compensation
+        try:
+            html = self._filing.html()
+        except Exception:
+            return pd.DataFrame()
+        if not html:
+            return pd.DataFrame()
+        entries = extract_summary_compensation(html)
+        if not entries:
+            return pd.DataFrame()
+        return pd.DataFrame([
+            {
+                'name': e.name, 'title': e.title, 'year': e.year,
+                'salary': e.salary, 'bonus': e.bonus,
+                'stock_awards': e.stock_awards, 'option_awards': e.option_awards,
+                'non_equity_incentive': e.non_equity_incentive,
+                'pension_change': e.pension_change,
+                'other_compensation': e.other_compensation, 'total': e.total,
+            }
+            for e in entries
+        ])
+
     # DataFrame Properties
     @cached_property
     def executive_compensation(self) -> pd.DataFrame:
