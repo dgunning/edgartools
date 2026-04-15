@@ -904,6 +904,28 @@ class SilverDatabase:
         cols = [d[0] for d in self._conn.description]
         return dict(zip(cols, result))
 
+    def get_table_counts(self) -> dict[str, int]:
+        """Return current row count for every silver table, keyed by table name."""
+        tables = [
+            "sec_tracked_universe",
+            "sec_company",
+            "sec_company_address",
+            "sec_company_former_name",
+            "sec_company_submission_file",
+            "sec_company_filing",
+            "stg_daily_index_filing",
+            "sec_daily_index_checkpoint",
+            "sec_raw_object",
+            "sec_filing_attachment",
+            "sec_filing_text",
+            "sec_parse_run",
+        ]
+        counts: dict[str, int] = {}
+        for table in tables:
+            row = self._conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()
+            counts[table] = row[0] if row else 0
+        return counts
+
 
 # ------------------------------------------------------------------
 # Helpers

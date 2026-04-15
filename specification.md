@@ -109,6 +109,20 @@ Container runtime rules:
 - ECR repository must use `image_tag_mutability = "IMMUTABLE"` and `scan_on_push = true`
 - the Docker build must copy only the files required to install the package and execute `edgar-warehouse`
 - the `.dockerignore` file must exclude `.git`, `.venv`, `tests/`, `infra/`, `data/`, `docs/`, `examples/`, `scripts/`, `notebooks/`, local temp directories, and `**/.terraform` to keep the build context minimal
+- on Windows with Docker Desktop, the built-in HTTPS proxy (`192.168.65.1:3128`) drops large layer uploads (layers larger than ~40 MB); use `crane` (go-containerregistry) to push instead of `docker push` — save the image with `docker save <image> -o /tmp/image.tar` and push with `crane push /tmp/image.tar <ecr-uri>:<tag>`
+
+Step Functions input contract:
+
+- until `silver.sec_tracked_universe` seeding is implemented, `bootstrap_recent_10`, `bootstrap_full`, and `daily_incremental` state machines require a `cik_list` string field in the execution input (comma-separated CIK integers, e.g. `"320193,789019"`)
+- pass `cik_list` via the Step Functions console or CLI input JSON: `{"cik_list": "320193,789019,1045810"}`
+- once `sec_tracked_universe` is seeded from `company_tickers_exchange.json` (Phase A step 1), the `cik_list` requirement will be removed from the runtime and the state machine definitions updated to not require it
+- `load_daily_form_index_for_date` requires `{"target_date": "YYYY-MM-DD"}` in execution input
+- `targeted_resync` requires `{"scope_type": "<type>", "scope_key": "<key>"}` in execution input
+- `catch_up_daily_form_index`, `full_reconcile` require no input fields
+
+Runtime output contract:
+
+- all commands emit `silver_table_counts` (a dict of table name to row count) in the CloudWatch log output when the silver layer is written; counts are `null` when no silver staging occurred
 
 ### Snowflake Gold Mirror Contract
 
@@ -163,6 +177,7 @@ flowchart LR
     wh --> export["Dedicated Snowflake export bucket\none package per business table per run"]
     sfns --> sync["Private ECS Snowflake sync task"]
     secret["Secrets Manager\nSnowflake runtime metadata"] --> sync
+    privkey["Secrets Manager\nSnowflake private key"] --> sync
     export --> sync
     sync --> wrapper["Snowflake wrapper\nCALL EDGARTOOLS_GOLD.REFRESH_AFTER_LOAD(...)"]
     wrapper --> source["Snowflake EDGARTOOLS_SOURCE\nstage, file format, status, source load"]
@@ -177,8 +192,9 @@ Snowflake build order:
 1. baseline platform objects: database, schemas, warehouses, account roles
 2. import path: storage integration, stage, file format, technical status table
 3. runtime SQL layer: source load procedure and public refresh wrapper
-4. dbt layer: business-facing models, dynamic tables, tests, and `EDGARTOOLS_GOLD_STATUS`
-5. runtime cutover: replace infrastructure-validation mode with real Snowflake import and refresh
+4. authentication: generate RSA key pair, store private key in Secrets Manager, register public key on refresher user
+5. dbt layer: business-facing models, dynamic tables, tests, and `EDGARTOOLS_GOLD_STATUS`
+6. runtime cutover: replace infrastructure-validation mode with real Snowflake import and refresh
 
 Preferred Snowflake E2E path:
 
@@ -202,6 +218,64 @@ Five-whys rationale for the preferred path:
 3. Why keep Terraform separate from dbt? Because structural platform changes are infrequent, while gold model changes happen continuously.
 4. Why use one refresh wrapper instead of many table-level commands? Because orchestration needs one stable contract with centralized retry, status, and cost control.
 5. Why use dynamic tables after the load rather than always-on refresh? Because post-load refresh gives better cost control and keeps freshness tied to canonical warehouse success.
+
+### Snowflake Authentication
+
+The Snowflake sync ECS task authenticates using RSA key-pair authentication. No passwords, tokens, or static credentials are stored in the runtime metadata secret.
+
+Authentication model:
+
+- the ECS task's IAM role is the workload identity
+- the IAM role controls access to two Secrets Manager secrets:
+  - `SNOWFLAKE_RUNTIME_METADATA`: configuration-only (13 fields, no credentials)
+  - `SNOWFLAKE_PRIVATE_KEY`: PEM-encoded RSA private key for key-pair authentication
+- the `snowflake-connector-python` library uses key-pair auth with the user specified in the `refresher_user` metadata field
+- the matching RSA public key is registered on the Snowflake user via `ALTER USER ... SET RSA_PUBLIC_KEY`
+
+Secrets Manager layout per environment:
+
+| Secret | Contents | Managed by |
+|---|---|---|
+| `edgartools-<env>-snowflake-runtime` | JSON with 13 config fields | Terraform |
+| `edgartools-<env>-snowflake-private-key` | PEM-encoded RSA private key | Terraform (container), operator (value) |
+
+Key-pair lifecycle:
+
+- generate 2048-bit RSA key pair using `openssl genrsa` and `openssl pkcs8`
+- store private key PEM in Secrets Manager via `aws secretsmanager put-secret-value`
+- register public key on Snowflake user via `ALTER USER ... SET RSA_PUBLIC_KEY`
+- rotate using `RSA_PUBLIC_KEY_2` for zero-downtime key rotation
+- bootstrap script: `infra/snowflake/sql/bootstrap/05_refresher_keypair.sql`
+
+Runtime connector configuration:
+
+```python
+import snowflake.connector
+from cryptography.hazmat.primitives import serialization
+
+private_key = serialization.load_pem_private_key(pem_bytes, password=None)
+pkb = private_key.private_bytes(
+    encoding=serialization.Encoding.DER,
+    format=serialization.PrivateFormat.PKCS8,
+    encryption_algorithm=serialization.NoEncryption(),
+)
+
+conn = snowflake.connector.connect(
+    account=metadata["account"],
+    user=metadata["refresher_user"],
+    private_key=pkb,
+    role=metadata["runtime_role"],
+    warehouse=metadata["refresh_warehouse"],
+    database=metadata["database"],
+)
+```
+
+Rules:
+
+- `SNOWFLAKE_RUNTIME_METADATA` must never contain `password`, `private_key`, `token`, `secret`, or `client_secret` fields
+- `SNOWFLAKE_PRIVATE_KEY` is a dedicated secret injected as a separate ECS container secret
+- the private key is never logged, never included in runtime output, and never passed to Snowflake metadata validation
+- if `SNOWFLAKE_PRIVATE_KEY` is absent, the sync task must fail with a clear error, not fall back to password auth
 
 ### Identifier Classes
 

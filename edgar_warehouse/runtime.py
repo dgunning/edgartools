@@ -51,6 +51,7 @@ SNOWFLAKE_METADATA_FIELDS = (
     "gold_schema",
     "refresh_warehouse",
     "runtime_role",
+    "refresher_user",
     "storage_integration",
     "stage_name",
     "file_format_name",
@@ -366,6 +367,7 @@ def _execute_warehouse_bronze_capture(
     )
 
     # Write silver layer from staged submissions payloads.
+    silver_table_counts: dict[str, int] | None = None
     if silver_staging:
         recent_limit = arguments.get("recent_limit")
         db = _open_silver_database(context.silver_root)
@@ -380,6 +382,7 @@ def _execute_warehouse_bronze_capture(
                 pagination_payloads=pagination_payloads,
                 recent_limit=recent_limit,
             )
+        silver_table_counts = db.get_table_counts()
 
     writes = []
     for layer, relative_path in _planned_writes(command_name=command_name, command_path=command_path, run_id=run_id, scope=scope).items():
@@ -448,6 +451,7 @@ def _execute_warehouse_bronze_capture(
         "run_id": run_id,
         "runtime_mode": context.runtime_mode,
         "scope": scope,
+        "silver_table_counts": silver_table_counts,
         "started_at": now.isoformat().replace("+00:00", "Z"),
         "status": "ok",
         "writes": writes,

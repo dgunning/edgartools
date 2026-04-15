@@ -40,6 +40,12 @@ resource "snowflake_schema" "schemas" {
   name                        = each.value
   comment                     = "Baseline ${each.key} schema for the EdgarTools ${var.environment} gold mirror."
   data_retention_time_in_days = var.data_retention_time_in_days
+
+  lifecycle {
+    # is_transient drifts between "false" (Snowflake default) and "default" (provider default)
+    # when importing existing non-transient schemas.  Ignore to prevent forced replacement.
+    ignore_changes = [is_transient]
+  }
 }
 
 resource "snowflake_warehouse" "warehouses" {

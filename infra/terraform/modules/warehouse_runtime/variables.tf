@@ -106,6 +106,19 @@ variable "snowflake_account_identifier" {
   default     = null
 }
 
+variable "snowflake_private_key_secret_arn" {
+  description = "Optional pre-existing Secrets Manager ARN for the Snowflake RSA private key. When null, Terraform creates the secret."
+  type        = string
+  default     = null
+}
+
+variable "snowflake_private_key_pem" {
+  description = "PEM-encoded RSA private key for Snowflake key-pair authentication. Only used when snowflake_private_key_secret_arn is null (Terraform manages the secret). Populate after generating a key pair."
+  type        = string
+  sensitive   = true
+  default     = null
+}
+
 variable "snowflake_storage_integration_name" {
   description = "Snowflake storage integration used to import export artifacts from S3."
   type        = string
