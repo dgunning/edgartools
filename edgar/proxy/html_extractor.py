@@ -2,13 +2,13 @@
 HTML extraction from DEF 14A proxy statements.
 
 Extracts structured data from proxy statement HTML where XBRL is not available.
-Each extractor operates on the filing's full text representation and uses
-regex/text scanning rather than DOM traversal — SEC filing agents have enormous
-formatting latitude, making DOM-based approaches fragile.
+Text-based extractors (proposals, pay ratio) use regex scanning on filing text.
+Table-based extractors (SCT, ownership, director comp) use lxml DOM parsing on
+a pre-parsed HTML tree shared via ProxyStatement._html_tree.
 
 Lessons from edgartools-workers implementation (20-company eval):
-- Proposals: 85% success rate (highest reliability)
-- Section headers are NOT reliable DOM anchors — use text scanning
+- Proposals: 90% success rate (highest reliability)
+- Section headers are NOT reliable DOM anchors alone — use two-pass heading finder
 - Non-breaking spaces (\\u00a0) break regex — normalize first
 - First occurrence of proposal text is often in TOC — retry later occurrences
 """
@@ -16,7 +16,7 @@ Lessons from edgartools-workers implementation (20-company eval):
 import logging
 import re
 from dataclasses import dataclass
-from typing import List, Literal, Optional
+from typing import Callable, List, Literal, Optional, Tuple
 
 log = logging.getLogger(__name__)
 
@@ -580,139 +580,100 @@ def _split_name_title(cell: str) -> tuple[str, str]:
     return cell, ''
 
 
-# ── SCT table finding ────────────────────────────────────────────────
 
-def _find_sct_table(html: str):
-    """Find the Summary Compensation Table in HTML.
 
-    Returns the BeautifulSoup table element, or None if not found.
+# ══════════════════════════════════════════════════════════════════════
+# Shared lxml-based table extraction utilities
+# ══════════════════════════════════════════════════════════════════════
 
-    Strategy: find heading elements containing "summary compensation table"
-    that are NOT inside a <table> (to skip TOC entries), then examine
-    subsequent tables for SCT-like column structure.
+_HEADING_TAGS = {'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'div', 'span'}
+
+
+def _is_inside_table(el) -> bool:
+    """Check if an lxml element is inside a <table>."""
+    parent = el.getparent()
+    while parent is not None:
+        if parent.tag == 'table':
+            return True
+        parent = parent.getparent()
+    return False
+
+
+def _is_inside_link(el) -> bool:
+    """Check if an lxml element is inside an <a> tag."""
+    if el.tag == 'a':
+        return True
+    parent = el.getparent()
+    while parent is not None:
+        if parent.tag == 'a':
+            return True
+        parent = parent.getparent()
+    return False
+
+
+def _iter_following_tables(el, limit: int = 10):
+    """Yield up to `limit` <table> elements following `el` in document order.
+
+    Uses XPath following::table to find tables anywhere after the element,
+    regardless of nesting level.
     """
     try:
-        from bs4 import BeautifulSoup
-    except ImportError:
-        log.warning("BeautifulSoup not available for SCT extraction")
-        return None
-
-    soup = BeautifulSoup(html, 'lxml')
-
-    # Find the SCT section heading
-    # Pass 1: headings NOT in tables (ideal — skips TOC)
-    # Pass 2: headings IN tables (layout-table documents like JNJ, PG)
-    heading_tag = None
-    for allow_in_table in [False, True]:
-        for tag in soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'span']):
-            text = tag.get_text(strip=True)
-            if not text or 'summary compensation table' not in text.lower():
-                continue
-            if len(text) > 100:
-                continue
-            if tag.name == 'a' or tag.find_parent('a'):
-                continue
-            in_table = tag.find_parent('table') is not None
-            if not allow_in_table and in_table:
-                continue
-            # In pass 2 (inside tables), require it to look like a heading
-            # not a TOC entry — must NOT contain page numbers or "....." patterns
-            if allow_in_table and in_table:
-                if re.search(r'\d{2,3}\s*$', text):  # ends with page number
-                    continue
-                if '.....' in text:
-                    continue
-                # Must be a relatively short, standalone heading
-                if len(text) > 60 and 'summary compensation table' not in text.lower()[:50]:
-                    continue
-            heading_tag = tag
-            break
-        if heading_tag:
-            break
-
-    if not heading_tag:
-        return None
-
-    # Search up to 10 tables after the heading for the best SCT candidate
-    candidates = []
-    for table in heading_tag.find_all_next('table', limit=10):
-        rows = table.find_all('tr')
-        if len(rows) < 3:
-            continue
-
-        # Check if this table has SCT-like columns
-        all_cells = []
-        for row in rows[:3]:
-            for cell in row.find_all(['td', 'th']):
-                text = cell.get_text(strip=True)
-                if text and len(text) > 2:
-                    all_cells.append(text)
-
-        header_text = ' '.join(all_cells).lower()
-        score = 0
-        has_salary = 'salary' in header_text
-        if has_salary:
-            score += 3
-        if 'total' in header_text:
-            score += 2
-        if 'year' in header_text:
-            score += 1
-        if 'stock' in header_text and 'award' in header_text:
-            score += 2
-        if 'name' in header_text or 'principal' in header_text:
-            score += 1
-        if 'bonus' in header_text:
-            score += 1
-        if 'option' in header_text:
-            score += 1
-        # Reject tables that look like Director Compensation (fees, not salary)
-        if 'fees earned' in header_text or 'fees paid' in header_text:
-            score = 0
-
-        if score >= 4 and has_salary:
-            candidates.append((table, score, len(rows)))
-
-    if not candidates:
-        return None
-
-    # Pick best: highest score, then most rows
-    candidates.sort(key=lambda x: (x[1], x[2]), reverse=True)
-    return candidates[0][0]
+        tables = el.xpath('following::table')
+        for table in tables[:limit]:
+            yield table
+    except Exception:
+        # Fallback: walk siblings and their descendants
+        count = 0
+        for following in el.itersiblings():
+            if following.tag == 'table':
+                yield following
+                count += 1
+                if count >= limit:
+                    return
+            for desc in following.iter('table'):
+                yield desc
+                count += 1
+                if count >= limit:
+                    return
 
 
-def _extract_table_data(table) -> tuple[list[str], list[list[str]]]:
-    """Extract headers and rows from an HTML table, handling colspan."""
-    rows = table.find_all('tr')
-    if not rows:
-        return [], []
-
+def _extract_table_grid(table_el) -> list[list[str]]:
+    """Extract a 2D text grid from an lxml <table>, expanding colspan."""
     grid = []
-    for row in rows:
-        cells = row.find_all(['td', 'th'])
+    for tr in table_el.iter('tr'):
         row_data = []
-        for cell in cells:
-            text = cell.get_text(strip=True)
+        for cell in tr:
+            if cell.tag not in ('td', 'th'):
+                continue
+            text = (cell.text_content() or '').strip()
             text = _ZERO_WIDTH_RE.sub('', text).strip()
-            colspan = int(cell.get('colspan', 1) or 1)
+            colspan_str = cell.get('colspan', '1') or '1'
+            colspan = int(colspan_str) if colspan_str.isdigit() else 1
             row_data.append(text)
-            # Add empty cells for colspan
             for _ in range(colspan - 1):
                 row_data.append('')
         grid.append(row_data)
+    return grid
 
+
+def _split_header_data(
+    grid: list[list[str]],
+    header_keywords: Optional[list[str]] = None,
+) -> Tuple[list[str], list[list[str]]]:
+    """Split a grid into header row and data rows."""
     if not grid:
         return [], []
 
-    # Find the header row: look for one containing 'Salary' or 'Year' or 'Total'
     header_row_idx = -1
-    for i, row in enumerate(grid[:4]):
-        row_text = ' '.join(row).lower()
-        if ('salary' in row_text or 'year' in row_text) and 'total' in row_text:
-            header_row_idx = i
-            break
+    if header_keywords:
+        for i, row in enumerate(grid[:4]):
+            row_text = ' '.join(row).lower()
+            matches = sum(1 for kw in header_keywords if kw in row_text)
+            if matches >= 2:
+                header_row_idx = i
+                break
 
     if header_row_idx < 0:
-        # Fallback: first row with multiple non-empty cells
         for i, row in enumerate(grid[:4]):
             non_empty = [c for c in row if c]
             if len(non_empty) >= 3:
@@ -722,81 +683,177 @@ def _extract_table_data(table) -> tuple[list[str], list[list[str]]]:
     if header_row_idx < 0:
         return [], grid
 
-    headers = grid[header_row_idx]
-    data_rows = grid[header_row_idx + 1:]
-
-    return headers, data_rows
+    return grid[header_row_idx], grid[header_row_idx + 1:]
 
 
-def extract_summary_compensation(html: str) -> Optional[List[ExecutiveCompEntry]]:
-    """
-    Extract Summary Compensation Table from proxy statement HTML.
+def _find_section_table(
+    tree,
+    heading_anchors: list[str],
+    heading_rejects: list[str],
+    table_scorer: Callable[[str], Tuple[int, bool]],
+    max_tables: int = 10,
+):
+    """Find a table in a named section of a proxy statement using lxml.
 
-    Finds the SEC-mandated SCT and extracts per-executive, per-year
-    compensation data including salary, bonus, stock awards, option awards,
-    non-equity incentive, pension/NQDC changes, other compensation, and total.
+    Two-pass heading finder: pass 1 outside tables, pass 2 inside tables.
+    Then scores subsequent tables using the provided scorer function.
 
     Args:
-        html: Raw HTML of the proxy statement filing.
+        tree: Pre-parsed lxml HTML tree (from ProxyStatement._html_tree).
+        heading_anchors: Anchor strings to match in heading text (lowercase).
+        heading_rejects: Reject strings — skip headings containing these.
+        table_scorer: Function(header_text) -> (score, is_valid).
+        max_tables: Maximum tables to examine after heading.
 
     Returns:
-        List of ExecutiveCompEntry, or None if the SCT was not found.
+        lxml table element, or None.
     """
-    if not html:
+    if tree is None:
         return None
 
-    table_el = _find_sct_table(html)
-    if table_el is None:
+    heading_el = None
+    for allow_in_table in [False, True]:
+        for el in tree.iter():
+            if el.tag not in _HEADING_TAGS:
+                continue
+            text = (el.text_content() or '').strip()
+            if not text or len(text) > 150:
+                continue
+            text_lower = text.lower()
+
+            if not any(anchor in text_lower for anchor in heading_anchors):
+                continue
+            if any(reject in text_lower for reject in heading_rejects):
+                continue
+            if _is_inside_link(el):
+                continue
+
+            in_table = _is_inside_table(el)
+            if not allow_in_table and in_table:
+                continue
+            if allow_in_table and in_table:
+                if re.search(r'\d{2,3}\s*$', text):
+                    continue
+                if '.....' in text:
+                    continue
+
+            heading_el = el
+            break
+        if heading_el is not None:
+            break
+
+    if heading_el is None:
         return None
 
-    headers, data_rows = _extract_table_data(table_el)
-    if not data_rows:
+    candidates = []
+    for table_el in _iter_following_tables(heading_el, limit=max_tables):
+        trs = list(table_el.iter('tr'))
+        if len(trs) < 3:
+            continue
+
+        all_cells = []
+        for tr in trs[:3]:
+            for cell in tr:
+                if cell.tag in ('td', 'th'):
+                    text = (cell.text_content() or '').strip()
+                    if text and len(text) > 1:
+                        all_cells.append(text)
+
+        header_text = ' '.join(all_cells).lower()
+        score, is_valid = table_scorer(header_text)
+        if is_valid:
+            candidates.append((table_el, score, len(trs)))
+
+    if not candidates:
         return None
 
-    # Build column map from headers
+    candidates.sort(key=lambda x: (x[1], x[2]), reverse=True)
+    return candidates[0][0]
+
+
+def _build_column_map(
+    headers: list[str],
+    data_rows: list[list[str]],
+    classifier: Callable[[str], Optional[str]],
+    min_columns: int = 3,
+) -> dict[str, int]:
+    """Build a column index map from headers, with data-row fallback."""
     col_map: dict[str, int] = {}
     for i, header in enumerate(headers):
-        col_type = _classify_sct_column(header)
+        col_type = classifier(header)
         if col_type:
             col_map[col_type] = i
 
-    # If header-based classification failed, try scanning first data rows
-    if len(col_map) < 4:
+    if len(col_map) < min_columns:
         for row in data_rows[:2]:
             for i, cell in enumerate(row):
-                col_type = _classify_sct_column(cell)
+                col_type = classifier(cell)
                 if col_type and col_type not in col_map:
                     col_map[col_type] = i
 
+    return col_map
+
+
+def _get_dollar_from_row(row: list[str], col_map: dict[str, int], col_name: str) -> Optional[int]:
+    """Get a dollar value from a row, handling split-cell patterns."""
+    idx = col_map.get(col_name, -1)
+    if idx < 0 or idx >= len(row):
+        return None
+    val = _parse_comp_dollar(row[idx])
+    if val is not None:
+        return val
+    if row[idx].strip() == '$' and idx + 1 < len(row):
+        return _parse_comp_dollar('$' + row[idx + 1])
+    if not row[idx].strip() and idx + 1 < len(row):
+        return _parse_comp_dollar(row[idx + 1])
+    return None
+
+
+# ── SCT table scorer ────────────────────────────────────────────────
+
+def _score_sct_table(header_text: str) -> Tuple[int, bool]:
+    score = 0
+    has_salary = 'salary' in header_text
+    if has_salary: score += 3
+    if 'total' in header_text: score += 2
+    if 'year' in header_text: score += 1
+    if 'stock' in header_text and 'award' in header_text: score += 2
+    if 'name' in header_text or 'principal' in header_text: score += 1
+    if 'bonus' in header_text: score += 1
+    if 'option' in header_text: score += 1
+    if 'fees earned' in header_text or 'fees paid' in header_text:
+        score = 0; has_salary = False
+    return score, (score >= 4 and has_salary)
+
+
+def extract_summary_compensation(tree) -> Optional[List[ExecutiveCompEntry]]:
+    """Extract Summary Compensation Table from a pre-parsed lxml HTML tree."""
+    if tree is None:
+        return None
+
+    table_el = _find_section_table(
+        tree, ['summary compensation table'], [], _score_sct_table)
+    if table_el is None:
+        return None
+
+    grid = _extract_table_grid(table_el)
+    headers, data_rows = _split_header_data(
+        grid, header_keywords=['salary', 'total', 'year', 'name'])
+    if not data_rows:
+        return None
+
+    col_map = _build_column_map(headers, data_rows, _classify_sct_column, min_columns=4)
     if len(col_map) < 4:
         return None
 
     name_col = col_map.get('name', 0)
     year_col = col_map.get('year', -1)
 
-    def _get_dollar(row: list[str], col_name: str) -> Optional[int]:
-        """Get a dollar value from a row, handling split-cell patterns."""
-        idx = col_map.get(col_name, -1)
-        if idx < 0 or idx >= len(row):
-            return None
-        val = _parse_comp_dollar(row[idx])
-        if val is not None:
-            return val
-        # Split-cell: "$" in this cell, number in next
-        if row[idx].strip() == '$' and idx + 1 < len(row):
-            return _parse_comp_dollar('$' + row[idx + 1])
-        # Try next cell if current is empty
-        if not row[idx].strip() and idx + 1 < len(row):
-            return _parse_comp_dollar(row[idx + 1])
-        return None
-
-    # Parse rows
     entries: list[ExecutiveCompEntry] = []
     current_name = ''
     current_title = ''
 
     for row in data_rows:
-        # Check for name in name column
         if name_col < len(row) and row[name_col]:
             cell_text = row[name_col]
             if cell_text and not cell_text.startswith('(') and len(cell_text) > 2:
@@ -805,14 +862,12 @@ def extract_summary_compensation(html: str) -> Optional[List[ExecutiveCompEntry]
                     current_name = name
                     current_title = title
 
-        # Extract year
         year = 0
-        if year_col >= 0 and year_col < len(row):
+        if 0 <= year_col < len(row):
             try:
                 year = int(re.sub(r'[^\d]', '', row[year_col])[:4])
             except (ValueError, IndexError):
                 pass
-            # Split-cell: try next column
             if (not year or year < 2000) and year_col + 1 < len(row):
                 try:
                     year = int(re.sub(r'[^\d]', '', row[year_col + 1])[:4])
@@ -825,17 +880,15 @@ def extract_summary_compensation(html: str) -> Optional[List[ExecutiveCompEntry]
             continue
 
         entries.append(ExecutiveCompEntry(
-            name=current_name,
-            title=current_title,
-            year=year,
-            salary=_get_dollar(row, 'salary'),
-            bonus=_get_dollar(row, 'bonus'),
-            stock_awards=_get_dollar(row, 'stock_awards'),
-            option_awards=_get_dollar(row, 'option_awards'),
-            non_equity_incentive=_get_dollar(row, 'non_equity_incentive'),
-            pension_change=_get_dollar(row, 'pension_change'),
-            other_compensation=_get_dollar(row, 'other_compensation'),
-            total=_get_dollar(row, 'total'),
+            name=current_name, title=current_title, year=year,
+            salary=_get_dollar_from_row(row, col_map, 'salary'),
+            bonus=_get_dollar_from_row(row, col_map, 'bonus'),
+            stock_awards=_get_dollar_from_row(row, col_map, 'stock_awards'),
+            option_awards=_get_dollar_from_row(row, col_map, 'option_awards'),
+            non_equity_incentive=_get_dollar_from_row(row, col_map, 'non_equity_incentive'),
+            pension_change=_get_dollar_from_row(row, col_map, 'pension_change'),
+            other_compensation=_get_dollar_from_row(row, col_map, 'other_compensation'),
+            total=_get_dollar_from_row(row, col_map, 'total'),
         ))
 
     return entries if entries else None
@@ -854,29 +907,19 @@ class BeneficialOwner:
     percent_of_class: Optional[float] = None
 
 
-# ── Ownership column classification ──────────────────────────────────
-
 _OWNERSHIP_COLUMN_PATTERNS: list[tuple[str, re.Pattern]] = [
     ('name', re.compile(r'name|beneficial\s+owner', re.I)),
-    # Shares before percent — but patterns must not cross-match.
-    # "Number of Shares" → shares; "Percentage of Class" → percent
     ('shares', re.compile(r'\bshare|\bnumber\b|\bamount\b', re.I)),
     ('percent', re.compile(r'percent|%\s*of|of\s+class', re.I)),
 ]
 
-
 def _classify_ownership_column(header: str) -> Optional[str]:
-    """Classify an ownership table column header."""
     for col_name, pattern in _OWNERSHIP_COLUMN_PATTERNS:
         if pattern.search(header):
             return col_name
     return None
 
-
-# ── Share and percent parsing ────────────────────────────────────────
-
 def _parse_shares(text: str) -> Optional[int]:
-    """Parse a share count, stripping footnotes and zero-width chars."""
     cleaned = _FOOTNOTE_RE.sub('', text)
     cleaned = _STAR_RE.sub('', cleaned)
     cleaned = _ZERO_WIDTH_RE.sub('', cleaned).strip()
@@ -888,13 +931,10 @@ def _parse_shares(text: str) -> Optional[int]:
     except ValueError:
         return None
 
-
 def _parse_percent(text: str) -> Optional[float]:
-    """Parse a percentage. Handles '9.63%', 'less than 1%', '*'."""
     raw = text.strip()
     if not raw or _DASH_RE.match(raw):
         return None
-    # "less than 1%" or "*" → 0.5 (conventional representation)
     if re.search(r'less\s+than\s+1\s*%', raw, re.I) or raw == '*':
         return 0.5
     cleaned = _FOOTNOTE_RE.sub('', raw)
@@ -907,166 +947,67 @@ def _parse_percent(text: str) -> Optional[float]:
     except ValueError:
         return None
 
-
-# ── Holder type classification ───────────────────────────────────────
-
 _GROUP_RE = re.compile(
     r'directors?\s+and\s+(?:executive\s+)?officers?|'
     r'all\s+(?:named\s+)?executive\s+officers?\s+and\s+directors?|'
-    r'as\s+a\s+group',
-    re.I
-)
+    r'as\s+a\s+group', re.I)
 
 _SECTION_HEADER_RE = re.compile(
     r'^(?:named\s+executive\s+officers?|'
     r'directors?\s+(?:and|&)\s+(?:director\s+)?nominees?|'
     r'5%\s+(?:stock)?holders?|'
     r'beneficial\s+owners?\s+of\s+5%|'
-    r'principal\s+(?:stock)?holders?)',
-    re.I
-)
-
-
-# ── Ownership table finding ──────────────────────────────────────────
+    r'principal\s+(?:stock)?holders?)', re.I)
 
 _OWNERSHIP_HEADING_ANCHORS = [
-    # Most specific first
     'security ownership of certain beneficial owners',
     'security ownership of certain',
     'stock ownership of certain beneficial owners',
     'beneficial ownership of common stock',
     'beneficial ownership of shares',
-    'principal shareholders',
-    'principal shareowners',
+    'principal shareholders', 'principal shareowners',
     'stock ownership information',
     'director and executive officer stock ownership',
     'security ownership of management',
     'beneficial ownership',
 ]
+_OWNERSHIP_HEADING_REJECTS = ['guidelines', 'requirements', 'policy', 'robust']
 
-# Reject headings containing these (ownership guidelines, not the table)
-_OWNERSHIP_HEADING_REJECTS = [
-    'guidelines', 'requirements', 'policy', 'robust',
-]
+def _score_ownership_table(header_text: str) -> Tuple[int, bool]:
+    score = 0
+    if 'name' in header_text or 'beneficial owner' in header_text: score += 2
+    if 'share' in header_text or 'amount' in header_text or 'number' in header_text: score += 2
+    if 'percent' in header_text or '% of' in header_text or 'of class' in header_text: score += 2
+    if 'beneficially owned' in header_text: score += 1
+    return score, score >= 3
+
+def _parse_with_adjacent(row: list[str], col: int, parser) -> Optional:
+    if col < 0 or col >= len(row):
+        return None
+    val = parser(row[col])
+    if val is not None:
+        return val
+    if col + 1 < len(row):
+        return parser(row[col + 1])
+    return None
 
 
-def _find_ownership_table(html: str):
-    """Find the beneficial ownership table in HTML.
-
-    Returns the BeautifulSoup table element, or None.
-    """
-    try:
-        from bs4 import BeautifulSoup
-    except ImportError:
-        log.warning("BeautifulSoup not available for ownership extraction")
+def extract_beneficial_ownership(tree) -> Optional[List[BeneficialOwner]]:
+    """Extract beneficial ownership table from a pre-parsed lxml HTML tree."""
+    if tree is None:
         return None
 
-    soup = BeautifulSoup(html, 'lxml')
-
-    heading_tag = None
-    for allow_in_table in [False, True]:
-        for tag in soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'span']):
-            text = tag.get_text(strip=True)
-            if not text or len(text) > 150:
-                continue
-            text_lower = text.lower()
-            if not any(anchor in text_lower for anchor in _OWNERSHIP_HEADING_ANCHORS):
-                continue
-            # Reject "stock ownership guidelines" and similar
-            if any(reject in text_lower for reject in _OWNERSHIP_HEADING_REJECTS):
-                continue
-            if tag.name == 'a' or tag.find_parent('a'):
-                continue
-            in_table = tag.find_parent('table') is not None
-            if not allow_in_table and in_table:
-                continue
-            if allow_in_table and in_table:
-                if re.search(r'\d{2,3}\s*$', text):
-                    continue
-                if '.....' in text:
-                    continue
-            heading_tag = tag
-            break
-        if heading_tag:
-            break
-
-    if not heading_tag:
-        return None
-
-    # Find the best ownership table candidate
-    candidates = []
-    for table in heading_tag.find_all_next('table', limit=10):
-        rows = table.find_all('tr')
-        if len(rows) < 3:
-            continue
-
-        all_cells = []
-        for row in rows[:3]:
-            for cell in row.find_all(['td', 'th']):
-                text = cell.get_text(strip=True)
-                if text and len(text) > 1:
-                    all_cells.append(text)
-
-        header_text = ' '.join(all_cells).lower()
-        score = 0
-        if 'name' in header_text or 'beneficial owner' in header_text:
-            score += 2
-        if 'share' in header_text or 'amount' in header_text or 'number' in header_text:
-            score += 2
-        if 'percent' in header_text or '% of' in header_text or 'of class' in header_text:
-            score += 2
-        if 'beneficially owned' in header_text:
-            score += 1
-
-        if score >= 3:
-            candidates.append((table, score, len(rows)))
-
-    if not candidates:
-        return None
-
-    candidates.sort(key=lambda x: (x[1], x[2]), reverse=True)
-    return candidates[0][0]
-
-
-def extract_beneficial_ownership(html: str) -> Optional[List[BeneficialOwner]]:
-    """
-    Extract beneficial ownership table from proxy statement HTML.
-
-    Finds the "Security Ownership" section and extracts 5%+ holders,
-    directors, and officers with their share counts and percentages.
-
-    Args:
-        html: Raw HTML of the proxy statement filing.
-
-    Returns:
-        List of BeneficialOwner, or None if the table was not found.
-    """
-    if not html:
-        return None
-
-    table_el = _find_ownership_table(html)
+    table_el = _find_section_table(
+        tree, _OWNERSHIP_HEADING_ANCHORS, _OWNERSHIP_HEADING_REJECTS, _score_ownership_table)
     if table_el is None:
         return None
 
-    headers, data_rows = _extract_table_data(table_el)
+    grid = _extract_table_grid(table_el)
+    headers, data_rows = _split_header_data(grid)
     if not data_rows:
         return None
 
-    # Build column map
-    col_map: dict[str, int] = {}
-    for i, header in enumerate(headers):
-        col_type = _classify_ownership_column(header)
-        if col_type:
-            col_map[col_type] = i
-
-    # Fallback: scan first data rows for column names
-    if len(col_map) < 2:
-        for row in data_rows[:2]:
-            for i, cell in enumerate(row):
-                col_type = _classify_ownership_column(cell)
-                if col_type and col_type not in col_map:
-                    col_map[col_type] = i
-
+    col_map = _build_column_map(headers, data_rows, _classify_ownership_column, min_columns=2)
     name_col = col_map.get('name', 0)
     shares_col = col_map.get('shares', -1)
     percent_col = col_map.get('percent', -1)
@@ -1075,7 +1016,7 @@ def extract_beneficial_ownership(html: str) -> Optional[List[BeneficialOwner]]:
         return None
 
     owners: list[BeneficialOwner] = []
-    current_section = '5pct'  # Assume 5%+ holders listed first
+    current_section = '5pct'
 
     for row in data_rows:
         if name_col >= len(row):
@@ -1085,31 +1026,23 @@ def extract_beneficial_ownership(html: str) -> Optional[List[BeneficialOwner]]:
         if not name_cell or len(name_cell) < 2:
             continue
 
-        # Check for sub-section headers
         if _SECTION_HEADER_RE.match(name_cell):
             if re.search(r'director|officer|nominee|executive', name_cell, re.I):
                 current_section = 'insider'
             continue
 
-        # Check for group summary row
         if _GROUP_RE.search(name_cell):
-            shares = _parse_shares_with_adjacent(row, shares_col) if shares_col >= 0 else None
-            pct = _parse_percent_with_adjacent(row, percent_col) if percent_col >= 0 else None
+            shares = _parse_with_adjacent(row, shares_col, _parse_shares) if shares_col >= 0 else None
+            pct = _parse_with_adjacent(row, percent_col, _parse_percent) if percent_col >= 0 else None
             if shares is not None or pct is not None:
-                owners.append(BeneficialOwner(
-                    name=name_cell, holder_type='group',
-                    shares=shares, percent_of_class=pct,
-                ))
+                owners.append(BeneficialOwner(name=name_cell, holder_type='group', shares=shares, percent_of_class=pct))
             continue
 
-        # Parse data
-        shares = _parse_shares_with_adjacent(row, shares_col) if shares_col >= 0 else None
-        pct = _parse_percent_with_adjacent(row, percent_col) if percent_col >= 0 else None
-
+        shares = _parse_with_adjacent(row, shares_col, _parse_shares) if shares_col >= 0 else None
+        pct = _parse_with_adjacent(row, percent_col, _parse_percent) if percent_col >= 0 else None
         if shares is None and pct is None:
             continue
 
-        # Classify holder type
         if current_section == '5pct' and pct is not None and pct >= 5:
             holder_type = '5pct_holder'
         elif current_section == 'insider':
@@ -1123,36 +1056,9 @@ def extract_beneficial_ownership(html: str) -> Optional[List[BeneficialOwner]]:
         else:
             holder_type = '5pct_holder'
 
-        owners.append(BeneficialOwner(
-            name=name_cell, holder_type=holder_type,
-            shares=shares, percent_of_class=pct,
-        ))
+        owners.append(BeneficialOwner(name=name_cell, holder_type=holder_type, shares=shares, percent_of_class=pct))
 
     return owners if owners else None
-
-
-def _parse_shares_with_adjacent(row: list[str], col: int) -> Optional[int]:
-    """Parse shares, trying adjacent cell for split-cell pattern."""
-    if col < 0 or col >= len(row):
-        return None
-    val = _parse_shares(row[col])
-    if val is not None:
-        return val
-    if col + 1 < len(row):
-        return _parse_shares(row[col + 1])
-    return None
-
-
-def _parse_percent_with_adjacent(row: list[str], col: int) -> Optional[float]:
-    """Parse percentage, trying adjacent cell for split-cell pattern."""
-    if col < 0 or col >= len(row):
-        return None
-    val = _parse_percent(row[col])
-    if val is not None:
-        return val
-    if col + 1 < len(row):
-        return _parse_percent(row[col + 1])
-    return None
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -1172,8 +1078,6 @@ class DirectorCompEntry:
     total: Optional[int] = None
 
 
-# ── Director comp column classification ──────────────────────────────
-
 _DIR_COMP_COLUMN_PATTERNS: list[tuple[str, re.Pattern]] = [
     ('name', re.compile(r'name|director', re.I)),
     ('stock_awards', re.compile(r'stock\s+award', re.I)),
@@ -1185,171 +1089,59 @@ _DIR_COMP_COLUMN_PATTERNS: list[tuple[str, re.Pattern]] = [
     ('fees_earned', re.compile(r'fees?\s+earned|fees?\s+paid|retainer', re.I)),
 ]
 
-
 def _classify_dir_comp_column(header: str) -> Optional[str]:
-    """Classify a director compensation table column header."""
     for col_name, pattern in _DIR_COMP_COLUMN_PATTERNS:
         if pattern.search(header):
             return col_name
     return None
 
-
-# ── Director comp heading anchors ────────────────────────────────────
-
 _DIR_COMP_HEADING_ANCHORS = [
     'director compensation table',
-    'director compensation—',
+    'director compensation\u2014',
     'director compensation -',
     'director compensation for',
+    'director compensation',
 ]
-
 _DIR_COMP_HEADING_REJECTS = [
     'discussion', 'analysis', 'committee', 'program', 'philosophy',
     'process', 'overview', 'policy', 'guidelines',
 ]
 
+def _score_dir_comp_table(header_text: str) -> Tuple[int, bool]:
+    score = 0
+    has_fees = 'fees' in header_text or 'retainer' in header_text
+    if has_fees: score += 3
+    if 'total' in header_text: score += 2
+    if 'stock' in header_text and 'award' in header_text: score += 2
+    if 'name' in header_text: score += 1
+    if 'option' in header_text: score += 1
+    if 'salary' in header_text:
+        score = 0; has_fees = False
+    return score, (score >= 3 and has_fees)
 
-def _find_director_comp_table(html: str):
-    """Find the Director Compensation Table in HTML.
 
-    Returns the BeautifulSoup table element, or None.
-    """
-    try:
-        from bs4 import BeautifulSoup
-    except ImportError:
+def extract_director_compensation(tree) -> Optional[List[DirectorCompEntry]]:
+    """Extract Director Compensation Table from a pre-parsed lxml HTML tree."""
+    if tree is None:
         return None
 
-    soup = BeautifulSoup(html, 'lxml')
-
-    heading_tag = None
-    for allow_in_table in [False, True]:
-        for tag in soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'span']):
-            text = tag.get_text(strip=True)
-            if not text or len(text) > 100:
-                continue
-            text_lower = text.lower()
-            if not any(anchor in text_lower for anchor in _DIR_COMP_HEADING_ANCHORS):
-                # Also match "YYYY Director Compensation" (year-prefixed)
-                if not re.match(r'(?:fiscal\s+(?:year\s+)?)?\d{4}\s+director\s+compensation\b', text_lower):
-                    continue
-            if any(reject in text_lower for reject in _DIR_COMP_HEADING_REJECTS):
-                continue
-            if tag.name == 'a' or tag.find_parent('a'):
-                continue
-            in_table = tag.find_parent('table') is not None
-            if not allow_in_table and in_table:
-                continue
-            if allow_in_table and in_table:
-                if re.search(r'\d{2,3}\s*$', text):
-                    continue
-            heading_tag = tag
-            break
-        if heading_tag:
-            break
-
-    if not heading_tag:
-        return None
-
-    # Find the best director comp table candidate
-    candidates = []
-    for table in heading_tag.find_all_next('table', limit=10):
-        rows = table.find_all('tr')
-        if len(rows) < 3:
-            continue
-
-        all_cells = []
-        for row in rows[:3]:
-            for cell in row.find_all(['td', 'th']):
-                text = cell.get_text(strip=True)
-                if text and len(text) > 1:
-                    all_cells.append(text)
-
-        header_text = ' '.join(all_cells).lower()
-        score = 0
-        has_fees = 'fees' in header_text or 'retainer' in header_text
-        if has_fees:
-            score += 3
-        if 'total' in header_text:
-            score += 2
-        if 'stock' in header_text and 'award' in header_text:
-            score += 2
-        if 'name' in header_text:
-            score += 1
-        if 'option' in header_text:
-            score += 1
-        # Reject SCT-like tables (salary column = executive comp, not director)
-        if 'salary' in header_text:
-            score = 0
-
-        if score >= 3 and has_fees:
-            candidates.append((table, score, len(rows)))
-
-    if not candidates:
-        return None
-
-    candidates.sort(key=lambda x: (x[1], x[2]), reverse=True)
-    return candidates[0][0]
-
-
-def extract_director_compensation(html: str) -> Optional[List[DirectorCompEntry]]:
-    """
-    Extract Director Compensation Table from proxy statement HTML.
-
-    Covers non-employee director compensation including fees earned,
-    stock awards, option awards, and total. SEC Item 402(k) mandates
-    this disclosure.
-
-    Args:
-        html: Raw HTML of the proxy statement filing.
-
-    Returns:
-        List of DirectorCompEntry, or None if the table was not found.
-    """
-    if not html:
-        return None
-
-    table_el = _find_director_comp_table(html)
+    table_el = _find_section_table(
+        tree, _DIR_COMP_HEADING_ANCHORS, _DIR_COMP_HEADING_REJECTS, _score_dir_comp_table)
     if table_el is None:
         return None
 
-    headers, data_rows = _extract_table_data(table_el)
+    grid = _extract_table_grid(table_el)
+    headers, data_rows = _split_header_data(grid)
     if not data_rows:
         return None
 
-    # Build column map
-    col_map: dict[str, int] = {}
-    for i, header in enumerate(headers):
-        col_type = _classify_dir_comp_column(header)
-        if col_type:
-            col_map[col_type] = i
-
-    # Fallback: scan first data rows
-    if len(col_map) < 3:
-        for row in data_rows[:2]:
-            for i, cell in enumerate(row):
-                col_type = _classify_dir_comp_column(cell)
-                if col_type and col_type not in col_map:
-                    col_map[col_type] = i
-
+    col_map = _build_column_map(headers, data_rows, _classify_dir_comp_column, min_columns=3)
     if len(col_map) < 3:
         return None
 
     name_col = col_map.get('name', 0)
-
-    def _get_dollar(row: list[str], col_name: str) -> Optional[int]:
-        idx = col_map.get(col_name, -1)
-        if idx < 0 or idx >= len(row):
-            return None
-        val = _parse_comp_dollar(row[idx])
-        if val is not None:
-            return val
-        if row[idx].strip() == '$' and idx + 1 < len(row):
-            return _parse_comp_dollar('$' + row[idx + 1])
-        if not row[idx].strip() and idx + 1 < len(row):
-            return _parse_comp_dollar(row[idx + 1])
-        return None
-
     entries: list[DirectorCompEntry] = []
+
     for row in data_rows:
         if name_col >= len(row):
             continue
@@ -1357,25 +1149,21 @@ def extract_director_compensation(html: str) -> Optional[List[DirectorCompEntry]
         name_cell = _FOOTNOTE_RE.sub('', name_cell).strip()
         if not name_cell or len(name_cell) < 2:
             continue
-        # Skip total/summary rows and footnotes
         if any(kw in name_cell.lower() for kw in ['total', 'footnote', 'note', '(1)', '(2)']):
             continue
 
-        # Need at least one dollar value to be a valid row
-        fees = _get_dollar(row, 'fees_earned')
-        stock = _get_dollar(row, 'stock_awards')
-        total = _get_dollar(row, 'total')
+        fees = _get_dollar_from_row(row, col_map, 'fees_earned')
+        stock = _get_dollar_from_row(row, col_map, 'stock_awards')
+        total = _get_dollar_from_row(row, col_map, 'total')
         if fees is None and stock is None and total is None:
             continue
 
         entries.append(DirectorCompEntry(
-            name=name_cell,
-            fees_earned=fees,
-            stock_awards=stock,
-            option_awards=_get_dollar(row, 'option_awards'),
-            non_equity_incentive=_get_dollar(row, 'non_equity_incentive'),
-            pension_change=_get_dollar(row, 'pension_change'),
-            other_compensation=_get_dollar(row, 'other_compensation'),
+            name=name_cell, fees_earned=fees, stock_awards=stock,
+            option_awards=_get_dollar_from_row(row, col_map, 'option_awards'),
+            non_equity_incentive=_get_dollar_from_row(row, col_map, 'non_equity_incentive'),
+            pension_change=_get_dollar_from_row(row, col_map, 'pension_change'),
+            other_compensation=_get_dollar_from_row(row, col_map, 'other_compensation'),
             total=total,
         ))
 

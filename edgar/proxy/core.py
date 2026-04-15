@@ -417,6 +417,33 @@ class ProxyStatement:
                 return None
 
     @cached_property
+    def _filing_html(self) -> Optional[str]:
+        """Raw HTML of the filing, cached for shared use by HTML extractors."""
+        try:
+            return self._filing.html()
+        except Exception:
+            return None
+
+    @cached_property
+    def _html_tree(self):
+        """Parsed lxml HTML tree, shared across all DOM-based extractors.
+
+        Parsing a 1MB proxy statement takes ~100-200ms with lxml.
+        Caching avoids redundant parsing when multiple extractors are accessed.
+        """
+        html = self._filing_html
+        if not html:
+            return None
+        try:
+            import lxml.html
+            from edgar.documents.utils.html_utils import remove_xml_declaration
+            html = remove_xml_declaration(html)
+            parser = lxml.html.HTMLParser(remove_blank_text=True, remove_comments=True, recover=True)
+            return lxml.html.fromstring(html, parser=parser)
+        except Exception:
+            return None
+
+    @cached_property
     def voting_proposals(self) -> List['VotingProposal']:
         """
         Voting proposals with board recommendations, extracted from HTML.
@@ -468,13 +495,10 @@ class ProxyStatement:
             non_equity_incentive, pension_change, other_compensation, total
         """
         from edgar.proxy.html_extractor import extract_summary_compensation
-        try:
-            html = self._filing.html()
-        except Exception:
+        tree = self._html_tree
+        if tree is None:
             return pd.DataFrame()
-        if not html:
-            return pd.DataFrame()
-        entries = extract_summary_compensation(html)
+        entries = extract_summary_compensation(tree)
         if not entries:
             return pd.DataFrame()
         return pd.DataFrame([
@@ -502,13 +526,10 @@ class ProxyStatement:
             shares, percent_of_class
         """
         from edgar.proxy.html_extractor import extract_beneficial_ownership
-        try:
-            html = self._filing.html()
-        except Exception:
+        tree = self._html_tree
+        if tree is None:
             return pd.DataFrame()
-        if not html:
-            return pd.DataFrame()
-        owners = extract_beneficial_ownership(html)
+        owners = extract_beneficial_ownership(tree)
         if not owners:
             return pd.DataFrame()
         return pd.DataFrame([
@@ -532,13 +553,10 @@ class ProxyStatement:
             non_equity_incentive, pension_change, other_compensation, total
         """
         from edgar.proxy.html_extractor import extract_director_compensation
-        try:
-            html = self._filing.html()
-        except Exception:
+        tree = self._html_tree
+        if tree is None:
             return pd.DataFrame()
-        if not html:
-            return pd.DataFrame()
-        entries = extract_director_compensation(html)
+        entries = extract_director_compensation(tree)
         if not entries:
             return pd.DataFrame()
         return pd.DataFrame([
