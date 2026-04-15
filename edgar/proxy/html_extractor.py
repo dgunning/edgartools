@@ -24,6 +24,7 @@ __all__ = [
     'extract_voting_proposals', 'VotingProposal',
     'extract_ceo_pay_ratio', 'CEOPayRatio',
     'extract_summary_compensation', 'ExecutiveCompEntry',
+    'extract_beneficial_ownership', 'BeneficialOwner',
 ]
 
 # ── Types ────────────────────────────────────────────────────────────
@@ -837,3 +838,317 @@ def extract_summary_compensation(html: str) -> Optional[List[ExecutiveCompEntry]
         ))
 
     return entries if entries else None
+
+
+# ══════════════════════════════════════════════════════════════════════
+# Beneficial Ownership Table Extractor
+# ══════════════════════════════════════════════════════════════════════
+
+@dataclass(frozen=True)
+class BeneficialOwner:
+    """One row of the beneficial ownership table."""
+    name: str
+    holder_type: str  # '5pct_holder', 'director_officer', or 'group'
+    shares: Optional[int] = None
+    percent_of_class: Optional[float] = None
+
+
+# ── Ownership column classification ──────────────────────────────────
+
+_OWNERSHIP_COLUMN_PATTERNS: list[tuple[str, re.Pattern]] = [
+    ('name', re.compile(r'name|beneficial\s+owner', re.I)),
+    # Shares before percent — but patterns must not cross-match.
+    # "Number of Shares" → shares; "Percentage of Class" → percent
+    ('shares', re.compile(r'\bshare|\bnumber\b|\bamount\b', re.I)),
+    ('percent', re.compile(r'percent|%\s*of|of\s+class', re.I)),
+]
+
+
+def _classify_ownership_column(header: str) -> Optional[str]:
+    """Classify an ownership table column header."""
+    for col_name, pattern in _OWNERSHIP_COLUMN_PATTERNS:
+        if pattern.search(header):
+            return col_name
+    return None
+
+
+# ── Share and percent parsing ────────────────────────────────────────
+
+def _parse_shares(text: str) -> Optional[int]:
+    """Parse a share count, stripping footnotes and zero-width chars."""
+    cleaned = _FOOTNOTE_RE.sub('', text)
+    cleaned = _STAR_RE.sub('', cleaned)
+    cleaned = _ZERO_WIDTH_RE.sub('', cleaned).strip()
+    if not cleaned or _DASH_RE.match(cleaned):
+        return None
+    cleaned = cleaned.replace(',', '').replace('$', '').replace(' ', '')
+    try:
+        return int(cleaned)
+    except ValueError:
+        return None
+
+
+def _parse_percent(text: str) -> Optional[float]:
+    """Parse a percentage. Handles '9.63%', 'less than 1%', '*'."""
+    raw = text.strip()
+    if not raw or _DASH_RE.match(raw):
+        return None
+    # "less than 1%" or "*" → 0.5 (conventional representation)
+    if re.search(r'less\s+than\s+1\s*%', raw, re.I) or raw == '*':
+        return 0.5
+    cleaned = _FOOTNOTE_RE.sub('', raw)
+    cleaned = _ZERO_WIDTH_RE.sub('', cleaned).strip()
+    if not cleaned:
+        return None
+    cleaned = cleaned.replace('%', '').replace(',', '').strip()
+    try:
+        return float(cleaned)
+    except ValueError:
+        return None
+
+
+# ── Holder type classification ───────────────────────────────────────
+
+_GROUP_RE = re.compile(
+    r'directors?\s+and\s+(?:executive\s+)?officers?|'
+    r'all\s+(?:named\s+)?executive\s+officers?\s+and\s+directors?|'
+    r'as\s+a\s+group',
+    re.I
+)
+
+_SECTION_HEADER_RE = re.compile(
+    r'^(?:named\s+executive\s+officers?|'
+    r'directors?\s+(?:and|&)\s+(?:director\s+)?nominees?|'
+    r'5%\s+(?:stock)?holders?|'
+    r'beneficial\s+owners?\s+of\s+5%|'
+    r'principal\s+(?:stock)?holders?)',
+    re.I
+)
+
+
+# ── Ownership table finding ──────────────────────────────────────────
+
+_OWNERSHIP_HEADING_ANCHORS = [
+    # Most specific first
+    'security ownership of certain beneficial owners',
+    'security ownership of certain',
+    'stock ownership of certain beneficial owners',
+    'beneficial ownership of common stock',
+    'beneficial ownership of shares',
+    'principal shareholders',
+    'principal shareowners',
+    'stock ownership information',
+    'director and executive officer stock ownership',
+    'security ownership of management',
+    'beneficial ownership',
+]
+
+# Reject headings containing these (ownership guidelines, not the table)
+_OWNERSHIP_HEADING_REJECTS = [
+    'guidelines', 'requirements', 'policy', 'robust',
+]
+
+
+def _find_ownership_table(html: str):
+    """Find the beneficial ownership table in HTML.
+
+    Returns the BeautifulSoup table element, or None.
+    """
+    try:
+        from bs4 import BeautifulSoup
+    except ImportError:
+        log.warning("BeautifulSoup not available for ownership extraction")
+        return None
+
+    soup = BeautifulSoup(html, 'lxml')
+
+    heading_tag = None
+    for allow_in_table in [False, True]:
+        for tag in soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'span']):
+            text = tag.get_text(strip=True)
+            if not text or len(text) > 150:
+                continue
+            text_lower = text.lower()
+            if not any(anchor in text_lower for anchor in _OWNERSHIP_HEADING_ANCHORS):
+                continue
+            # Reject "stock ownership guidelines" and similar
+            if any(reject in text_lower for reject in _OWNERSHIP_HEADING_REJECTS):
+                continue
+            if tag.name == 'a' or tag.find_parent('a'):
+                continue
+            in_table = tag.find_parent('table') is not None
+            if not allow_in_table and in_table:
+                continue
+            if allow_in_table and in_table:
+                if re.search(r'\d{2,3}\s*$', text):
+                    continue
+                if '.....' in text:
+                    continue
+            heading_tag = tag
+            break
+        if heading_tag:
+            break
+
+    if not heading_tag:
+        return None
+
+    # Find the best ownership table candidate
+    candidates = []
+    for table in heading_tag.find_all_next('table', limit=10):
+        rows = table.find_all('tr')
+        if len(rows) < 3:
+            continue
+
+        all_cells = []
+        for row in rows[:3]:
+            for cell in row.find_all(['td', 'th']):
+                text = cell.get_text(strip=True)
+                if text and len(text) > 1:
+                    all_cells.append(text)
+
+        header_text = ' '.join(all_cells).lower()
+        score = 0
+        if 'name' in header_text or 'beneficial owner' in header_text:
+            score += 2
+        if 'share' in header_text or 'amount' in header_text or 'number' in header_text:
+            score += 2
+        if 'percent' in header_text or '% of' in header_text or 'of class' in header_text:
+            score += 2
+        if 'beneficially owned' in header_text:
+            score += 1
+
+        if score >= 3:
+            candidates.append((table, score, len(rows)))
+
+    if not candidates:
+        return None
+
+    candidates.sort(key=lambda x: (x[1], x[2]), reverse=True)
+    return candidates[0][0]
+
+
+def extract_beneficial_ownership(html: str) -> Optional[List[BeneficialOwner]]:
+    """
+    Extract beneficial ownership table from proxy statement HTML.
+
+    Finds the "Security Ownership" section and extracts 5%+ holders,
+    directors, and officers with their share counts and percentages.
+
+    Args:
+        html: Raw HTML of the proxy statement filing.
+
+    Returns:
+        List of BeneficialOwner, or None if the table was not found.
+    """
+    if not html:
+        return None
+
+    table_el = _find_ownership_table(html)
+    if table_el is None:
+        return None
+
+    headers, data_rows = _extract_table_data(table_el)
+    if not data_rows:
+        return None
+
+    # Build column map
+    col_map: dict[str, int] = {}
+    for i, header in enumerate(headers):
+        col_type = _classify_ownership_column(header)
+        if col_type:
+            col_map[col_type] = i
+
+    # Fallback: scan first data rows for column names
+    if len(col_map) < 2:
+        for row in data_rows[:2]:
+            for i, cell in enumerate(row):
+                col_type = _classify_ownership_column(cell)
+                if col_type and col_type not in col_map:
+                    col_map[col_type] = i
+
+    name_col = col_map.get('name', 0)
+    shares_col = col_map.get('shares', -1)
+    percent_col = col_map.get('percent', -1)
+
+    if shares_col < 0 and percent_col < 0:
+        return None
+
+    owners: list[BeneficialOwner] = []
+    current_section = '5pct'  # Assume 5%+ holders listed first
+
+    for row in data_rows:
+        if name_col >= len(row):
+            continue
+        name_cell = _ZERO_WIDTH_RE.sub('', row[name_col]).strip()
+        name_cell = _FOOTNOTE_RE.sub('', name_cell).strip()
+        if not name_cell or len(name_cell) < 2:
+            continue
+
+        # Check for sub-section headers
+        if _SECTION_HEADER_RE.match(name_cell):
+            if re.search(r'director|officer|nominee|executive', name_cell, re.I):
+                current_section = 'insider'
+            continue
+
+        # Check for group summary row
+        if _GROUP_RE.search(name_cell):
+            shares = _parse_shares_with_adjacent(row, shares_col) if shares_col >= 0 else None
+            pct = _parse_percent_with_adjacent(row, percent_col) if percent_col >= 0 else None
+            if shares is not None or pct is not None:
+                owners.append(BeneficialOwner(
+                    name=name_cell, holder_type='group',
+                    shares=shares, percent_of_class=pct,
+                ))
+            continue
+
+        # Parse data
+        shares = _parse_shares_with_adjacent(row, shares_col) if shares_col >= 0 else None
+        pct = _parse_percent_with_adjacent(row, percent_col) if percent_col >= 0 else None
+
+        if shares is None and pct is None:
+            continue
+
+        # Classify holder type
+        if current_section == '5pct' and pct is not None and pct >= 5:
+            holder_type = '5pct_holder'
+        elif current_section == 'insider':
+            holder_type = 'director_officer'
+        elif pct is not None and pct < 5:
+            holder_type = 'director_officer'
+            current_section = 'insider'
+        elif pct is None and any(o.holder_type == '5pct_holder' for o in owners):
+            holder_type = 'director_officer'
+            current_section = 'insider'
+        else:
+            holder_type = '5pct_holder'
+
+        owners.append(BeneficialOwner(
+            name=name_cell, holder_type=holder_type,
+            shares=shares, percent_of_class=pct,
+        ))
+
+    return owners if owners else None
+
+
+def _parse_shares_with_adjacent(row: list[str], col: int) -> Optional[int]:
+    """Parse shares, trying adjacent cell for split-cell pattern."""
+    if col < 0 or col >= len(row):
+        return None
+    val = _parse_shares(row[col])
+    if val is not None:
+        return val
+    if col + 1 < len(row):
+        return _parse_shares(row[col + 1])
+    return None
+
+
+def _parse_percent_with_adjacent(row: list[str], col: int) -> Optional[float]:
+    """Parse percentage, trying adjacent cell for split-cell pattern."""
+    if col < 0 or col >= len(row):
+        return None
+    val = _parse_percent(row[col])
+    if val is not None:
+        return val
+    if col + 1 < len(row):
+        return _parse_percent(row[col + 1])
+    return None

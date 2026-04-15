@@ -489,6 +489,36 @@ class ProxyStatement:
             for e in entries
         ])
 
+    @cached_property
+    def beneficial_ownership(self) -> pd.DataFrame:
+        """
+        Beneficial ownership table extracted from HTML.
+
+        Shows 5%+ institutional holders and insider (director/officer) ownership.
+        SEC Item 403 of Regulation S-K mandates this disclosure.
+
+        Columns:
+            holder_name, holder_type (5pct_holder/director_officer/group),
+            shares, percent_of_class
+        """
+        from edgar.proxy.html_extractor import extract_beneficial_ownership
+        try:
+            html = self._filing.html()
+        except Exception:
+            return pd.DataFrame()
+        if not html:
+            return pd.DataFrame()
+        owners = extract_beneficial_ownership(html)
+        if not owners:
+            return pd.DataFrame()
+        return pd.DataFrame([
+            {
+                'holder_name': o.name, 'holder_type': o.holder_type,
+                'shares': o.shares, 'percent_of_class': o.percent_of_class,
+            }
+            for o in owners
+        ])
+
     # DataFrame Properties
     @cached_property
     def executive_compensation(self) -> pd.DataFrame:
@@ -734,6 +764,7 @@ class ProxyStatement:
         lines.append("  .voting_proposals        Voting proposals with board recommendations")
         lines.append("  .ceo_pay_ratio           CEO pay ratio (CEO comp, median employee, ratio)")
         lines.append("  .summary_compensation_table  Per-NEO compensation DataFrame (HTML)")
+        lines.append("  .beneficial_ownership    Ownership table (5%+ holders, insiders)")
 
         if detail == 'standard':
             return "\n".join(lines)
@@ -766,6 +797,21 @@ class ProxyStatement:
                     total_str = f"${row['total']:,.0f}" if row.get('total') else '-'
                     title_str = f" ({row['title']})" if row.get('title') else ''
                     lines.append(f"  {row['name']}{title_str}: {total_str}")
+        except Exception:
+            pass
+
+        # Beneficial Ownership
+        try:
+            ownership = self.beneficial_ownership
+            if not ownership.empty:
+                holders = len(ownership)
+                pct5 = len(ownership[ownership['holder_type'] == '5pct_holder'])
+                lines.append("")
+                lines.append(f"BENEFICIAL OWNERSHIP: {holders} holders ({pct5} at 5%+)")
+                for _, row in ownership.head(5).iterrows():
+                    pct = f"{row['percent_of_class']:.1f}%" if row.get('percent_of_class') and row['percent_of_class'] != 0.5 else '<1%' if row.get('percent_of_class') == 0.5 else '-'
+                    shares = f"{row['shares']:,}" if row.get('shares') else '-'
+                    lines.append(f"  {row['holder_name'][:40]}: {shares} shares ({pct})")
         except Exception:
             pass
 
@@ -1003,6 +1049,34 @@ class ProxyStatement:
 
                 elements.append(Text())
                 elements.append(sct_table)
+        except Exception:
+            pass
+
+        # Beneficial Ownership
+        try:
+            ownership = self.beneficial_ownership
+            if not ownership.empty:
+                own_table = Table(
+                    title="Beneficial Ownership",
+                    box=box.SIMPLE,
+                    show_header=True,
+                )
+                own_table.add_column("Holder", ratio=3)
+                own_table.add_column("Type", style="dim", ratio=1)
+                own_table.add_column("Shares", justify="right")
+                own_table.add_column("%", justify="right", width=6)
+
+                for _, row in ownership.head(10).iterrows():
+                    shares_str = f"{row['shares']:,}" if row.get('shares') else "-"
+                    pct_str = f"{row['percent_of_class']:.1f}%" if row.get('percent_of_class') and row['percent_of_class'] != 0.5 else "<1%" if row.get('percent_of_class') == 0.5 else "-"
+                    own_table.add_row(
+                        row['holder_name'][:40],
+                        row['holder_type'].replace('_', ' '),
+                        shares_str,
+                        pct_str,
+                    )
+                elements.append(Text())
+                elements.append(own_table)
         except Exception:
             pass
 

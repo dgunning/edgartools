@@ -225,6 +225,14 @@ async def edgar_proxy(
         except Exception:
             pass
 
+        # Beneficial Ownership (from HTML)
+        try:
+            own_df = proxy.beneficial_ownership
+            if own_df is not None and not own_df.empty:
+                result["beneficial_ownership"] = _df_to_records(own_df, limit=30)
+        except Exception:
+            pass
+
         # Compensation history (multi-year DataFrame, from XBRL)
         comp_df = proxy.executive_compensation
         if comp_df is not None and not comp_df.empty:
