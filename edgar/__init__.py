@@ -51,6 +51,14 @@ from edgar.funds.ncsr import NCSR_FORMS, FundShareholderReport
 from edgar.funds.nmfp3 import MONEY_MARKET_FORMS, NMFP2_FORMS, NMFP3_FORMS, MoneyMarketFund
 from edgar.funds.prospectus497k import PROSPECTUS497K_FORMS, Prospectus497K
 from edgar.funds.reports import NPORT_FORMS, FundReport
+from edgar.ats import (
+    ATS_N_ALL_FORMS,
+    ATS_N_AMENDMENT_FORMS,
+    ATS_N_FORMS,
+    ATS_N_WITHDRAWAL_FORMS,
+    AlternativeTradingSystem,
+    AlternativeTradingSystemWithdrawal,
+)
 from edgar.bdc import BDCEntities, BDCEntity, get_bdc_list, get_active_bdc_ciks, is_bdc_cik
 
 # HTTP configuration functions for runtime SSL/proxy configuration
@@ -282,6 +290,8 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         'SBSE-A': ('XmlFiling', 'security-based swap entity registration (annual)'),
         'SBSE-W': ('XmlFiling', 'security-based swap entity withdrawal'),
         'ATS-N-C': ('XmlFiling', 'ATS cessation of operations'),
+        'ATS-N': ('AlternativeTradingSystem', 'alternative trading system disclosure'),
+        'ATS-N-W': ('AlternativeTradingSystemWithdrawal', 'alternative trading system withdrawal'),
         '24F-2NT': ('FundFeeNotice', 'annual notice of securities sold'),
         '497K': ('Prospectus497K', 'fund summary prospectus with fees and performance'),
     }
@@ -411,6 +421,12 @@ def obj(sec_filing: Filing) -> Optional[object]:
     elif matches_form(sec_filing, "24F-2NT"):
         from edgar.funds.twentyfourf import FundFeeNotice
         return FundFeeNotice.from_filing(sec_filing)
+
+    elif matches_form(sec_filing, ATS_N_WITHDRAWAL_FORMS):
+        return AlternativeTradingSystemWithdrawal.from_filing(sec_filing)
+
+    elif matches_form(sec_filing, ATS_N_FORMS + ATS_N_AMENDMENT_FORMS):
+        return AlternativeTradingSystem.from_filing(sec_filing)
 
     else:
         from edgar.xmlfiling import XML_FILING_FORMS, XmlFiling
