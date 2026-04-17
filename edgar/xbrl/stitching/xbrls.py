@@ -143,7 +143,8 @@ class XBRLS:
                      max_periods: int = 8,
                      standard: bool = True,
                      use_optimal_periods: bool = True,
-                     include_dimensions: bool = False) -> Dict[str, Any]:
+                     include_dimensions: bool = False,
+                     discrete_quarters: bool = False) -> Dict[str, Any]:
         """
         Get a stitched statement of the specified type.
 
@@ -153,12 +154,14 @@ class XBRLS:
             standard: Whether to use standardized concept labels
             use_optimal_periods: Whether to use entity info to determine optimal periods
             include_dimensions: Whether to include dimensional segment data (default: False for stitching)
+            discrete_quarters: If True and statement_type is CashFlowStatement, convert
+                              YTD cumulative periods into discrete quarter values (default: False)
 
         Returns:
             Dictionary with stitched statement data
         """
         # Check cache first
-        cache_key = f"{statement_type}_{max_periods}_{standard}_{use_optimal_periods}_{include_dimensions}"
+        cache_key = f"{statement_type}_{max_periods}_{standard}_{use_optimal_periods}_{include_dimensions}_{discrete_quarters}"
         if cache_key in self._statement_cache:
             return self._statement_cache[cache_key]
 
@@ -170,7 +173,8 @@ class XBRLS:
             max_periods=max_periods,
             standard=standard,
             use_optimal_periods=use_optimal_periods,
-            include_dimensions=include_dimensions
+            include_dimensions=include_dimensions,
+            discrete_quarters=discrete_quarters
         )
 
         # Cache the result

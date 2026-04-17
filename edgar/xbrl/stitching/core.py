@@ -101,7 +101,8 @@ class StatementStitcher:
         statements: List[Dict[str, Any]],
         period_type: Union[PeriodType, str] = PeriodType.RECENT_PERIODS,
         max_periods: Optional[int] = None,
-        standard: bool = True
+        standard: bool = True,
+        discrete_quarters: bool = False
     ) -> Dict[str, Any]:
         """
         Stitch multiple statements into a unified view.
@@ -111,6 +112,8 @@ class StatementStitcher:
             period_type: Type of period view to generate
             max_periods: Maximum number of periods to include
             standard: Whether to use standardized concept labels
+            discrete_quarters: If True and statement is CashFlowStatement, convert
+                              YTD cumulative periods into discrete quarter values
 
         Returns:
             Dictionary with stitched statement data
@@ -170,6 +173,13 @@ class StatementStitcher:
         # Merge known concept renames (Issue #711): handles cases where a company
         # switched to a completely different concept name across filing years.
         self._merge_known_concept_renames()
+
+        # Unaccumulate YTD cash flow periods into discrete quarters.
+        # SEC requires only YTD cash flows in 10-Q filings (Q2 = 6-month cumulative,
+        # Q3 = 9-month cumulative). This step derives the discrete quarter values
+        # by subtracting adjacent YTD periods.
+        if discrete_quarters and statement_type == 'CashFlowStatement':
+            self._unaccumulate_cashflow_ytd()
 
         # Format the stitched data
         return self._format_output_with_ordering(statements)
@@ -688,6 +698,174 @@ class StatementStitcher:
                     continue
                 self._merge_into(primary, secondary)
 
+    # ------------------------------------------------------------------
+    # YTD → discrete quarter unaccumulation (CashFlowStatement only)
+    # ------------------------------------------------------------------
+
+    def _unaccumulate_cashflow_ytd(self):
+        """Convert cumulative YTD cash flow periods into discrete quarters.
+
+        SEC 10-Q filings report cash flow on a year-to-date basis:
+          Q1: 3-month (discrete, ~90 days)
+          Q2: 6-month cumulative from fiscal year start (~180 days)
+          Q3: 9-month cumulative from fiscal year start (~270 days)
+          FY: 12-month annual (~365 days)
+
+        This method identifies YTD duration periods that share the same fiscal
+        year start date and derives discrete quarter values:
+          Q2_discrete = YTD_6M - Q1
+          Q3_discrete = YTD_9M - YTD_6M
+          Q4_discrete = FY - YTD_9M
+
+        The YTD periods are replaced in-place with the discrete quarter values.
+        """
+        from edgar.core import log
+
+        # 1. Parse duration periods into structured records
+        parsed = self._parse_duration_periods()
+        if not parsed:
+            return
+
+        # 2. Group by fiscal year start date so we can find YTD sequences
+        by_start = defaultdict(list)
+        for p in parsed:
+            by_start[p['start_date']].append(p)
+
+        # 3. For each fiscal year start, sort by duration and derive discrete quarters
+        for start_date, group in by_start.items():
+            # Sort shortest to longest (Q1 → Q2 YTD → Q3 YTD → FY)
+            group.sort(key=lambda p: p['duration_days'])
+
+            # Need at least 2 periods to unaccumulate
+            if len(group) < 2:
+                continue
+
+            # Work from longest to shortest, subtracting the next-shorter period
+            for i in range(len(group) - 1, 0, -1):
+                longer = group[i]
+                shorter = group[i - 1]
+
+                longer_pid = longer['period_id']
+                shorter_pid = shorter['period_id']
+
+                # Classify the longer period to determine what discrete quarter it yields
+                discrete_label = self._classify_discrete_quarter(longer, shorter)
+                if not discrete_label:
+                    continue
+
+                log.debug(
+                    f"Unaccumulating {discrete_label}: "
+                    f"{longer_pid} ({longer['duration_days']}d) - "
+                    f"{shorter_pid} ({shorter['duration_days']}d)"
+                )
+
+                # Subtract shorter from longer for every concept
+                self._subtract_periods(longer_pid, shorter_pid, discrete_label)
+
+    def _parse_duration_periods(self) -> List[Dict[str, Any]]:
+        """Parse duration period IDs into structured records with start/end dates and duration."""
+        parsed = []
+        for period_id in self.periods:
+            if not period_id.startswith('duration_'):
+                continue
+            parts = period_id.split('_')
+            if len(parts) < 3:
+                continue
+            try:
+                start_date = parse_date(parts[1])
+                end_date = parse_date(parts[2])
+                duration_days = (end_date - start_date).days
+                parsed.append({
+                    'period_id': period_id,
+                    'start_date': parts[1],  # keep as string for grouping
+                    'end_date': parts[2],
+                    'start_dt': start_date,
+                    'end_dt': end_date,
+                    'duration_days': duration_days,
+                })
+            except (ValueError, TypeError):
+                continue
+        return parsed
+
+    @staticmethod
+    def _classify_discrete_quarter(
+        longer: Dict[str, Any], shorter: Dict[str, Any]
+    ) -> Optional[str]:
+        """Determine what discrete quarter results from subtracting shorter from longer.
+
+        Uses duration ranges to classify:
+          Q1 ~80-100d, Q2 YTD ~170-200d, Q3 YTD ~250-290d, FY ~350-380d
+
+        Returns a label like 'Q2', 'Q3', 'Q4' or None if the pair doesn't
+        represent a valid YTD subtraction.
+        """
+        ld = longer['duration_days']
+        sd = shorter['duration_days']
+
+        # Q2 discrete: ~180d YTD minus ~90d Q1
+        if 170 <= ld <= 200 and 80 <= sd <= 100:
+            return 'Q2'
+        # Q3 discrete: ~270d YTD minus ~180d YTD
+        if 250 <= ld <= 290 and 170 <= sd <= 200:
+            return 'Q3'
+        # Q4 discrete: ~365d FY minus ~270d YTD
+        if 350 <= ld <= 380 and 250 <= sd <= 290:
+            return 'Q4'
+        return None
+
+    def _subtract_periods(
+        self,
+        longer_pid: str,
+        shorter_pid: str,
+        discrete_label: str,
+    ):
+        """Subtract shorter YTD values from longer YTD values in-place.
+
+        For each concept that has values in both the longer and shorter periods,
+        computes: discrete_value = longer_value - shorter_value.
+
+        The longer period entry is updated in-place with the discrete value.
+        The display label in self.period_dates is updated to reflect the discrete quarter.
+        """
+        from edgar.core import log
+
+        for concept_key in list(self.data.keys()):
+            longer_entry = self.data[concept_key].get(longer_pid)
+            shorter_entry = self.data[concept_key].get(shorter_pid)
+
+            if longer_entry is None:
+                continue
+
+            if shorter_entry is None:
+                # No shorter period data for this concept — keep the longer value as-is.
+                continue
+
+            longer_val = longer_entry.get('value')
+            shorter_val = shorter_entry.get('value')
+
+            if longer_val is None or shorter_val is None:
+                continue
+
+            # Skip non-numeric values
+            if not isinstance(longer_val, (int, float)) or not isinstance(shorter_val, (int, float)):
+                continue
+
+            discrete_val = longer_val - shorter_val
+
+            # Update the longer period entry in-place with the discrete value
+            self.data[concept_key][longer_pid] = {
+                'value': discrete_val,
+                'decimals': longer_entry.get('decimals', 0),
+            }
+
+        # Update the display label to indicate this is now a discrete quarter
+        old_label = self.period_dates.get(longer_pid, '')
+        if 'YTD' in old_label:
+            new_label = old_label.replace('YTD ', '')
+        else:
+            new_label = f"{discrete_label} {old_label}" if old_label else discrete_label
+        self.period_dates[longer_pid] = new_label
+
     def _format_output_with_ordering(self, statements: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
         Format the stitched data for rendering with intelligent ordering using virtual presentation tree.
@@ -776,7 +954,8 @@ def stitch_statements(
     standard: bool = True,
     use_optimal_periods: bool = True,
     include_dimensions: bool = False,
-    industry: Optional[str] = None
+    industry: Optional[str] = None,
+    discrete_quarters: bool = False
 ) -> Dict[str, Any]:
     """
     Stitch together statements from multiple XBRL objects.
@@ -791,6 +970,8 @@ def stitch_statements(
         include_dimensions: Whether to include dimensional segment data (default: False for stitching)
         industry: Optional Fama-French 48 industry code (e.g., "Banks").
                   If None, auto-detected from the first XBRL object's standardization cache.
+        discrete_quarters: If True and statement_type is CashFlowStatement, convert
+                          YTD cumulative periods into discrete quarter values (default: False)
 
     Returns:
         Stitched statement data
@@ -888,4 +1069,5 @@ def stitch_statements(
                 statements.append(statement)
 
     # Stitch the statements
-    return stitcher.stitch_statements(statements, period_type, max_periods, standard)
+    return stitcher.stitch_statements(statements, period_type, max_periods, standard,
+                                       discrete_quarters=discrete_quarters)
