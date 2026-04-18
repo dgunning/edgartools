@@ -9,9 +9,13 @@ sec-edgar-mcp) then blow up with "Invalid isoformat string: ...". The fix
 is to pick the block by matching its <div class="infoHead"> label instead
 of by position.
 """
+
+import pytest
 from bs4 import BeautifulSoup
 
 from edgar.attachments import Attachments, FilingHomepage
+
+pytestmark = pytest.mark.fast
 
 
 def _homepage_from_html(html: str) -> FilingHomepage:
