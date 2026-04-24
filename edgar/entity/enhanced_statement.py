@@ -2074,13 +2074,42 @@ class EnhancedStatementBuilder:
         # This preserves valid top-level concepts like weighted-average shares
         # that may be rooted outside IncomeStatementAbstract in learned trees.
         if items:
-            existing_root_concepts = {item.concept for item in items}
+            def _collect_concepts(item: MultiPeriodItem, seen: set):
+                if item.concept:
+                    seen.add(item.concept)
+                for child in item.children:
+                    _collect_concepts(child, seen)
+
+            # Track all concepts already represented in the promoted tree,
+            # not just top-level roots. This prevents duplicate branches like
+            # RevenuesAbstract -> Revenues from being re-added as extra roots.
+            existing_concepts = set()
+            for existing_item in items:
+                _collect_concepts(existing_item, existing_concepts)
+
+            def _prune_duplicate_subtree(item: MultiPeriodItem) -> Optional[MultiPeriodItem]:
+                pruned_children = []
+                for child in item.children:
+                    pruned_child = _prune_duplicate_subtree(child)
+                    if pruned_child:
+                        pruned_children.append(pruned_child)
+                item.children = pruned_children
+
+                if item.concept in existing_concepts or item.concept in promoted_added:
+                    # Keep abstract containers only when they still expose
+                    # unique descendants after duplicate pruning.
+                    if item.is_abstract and item.children:
+                        return item
+                    return None
+
+                return item
+
             for root_concept in virtual_tree.get('roots', []):
                 if root_concept == abstract_root:
                     continue
                 if root_concept in promoted_added:
                     continue
-                if root_concept in existing_root_concepts:
+                if root_concept in existing_concepts:
                     continue
 
                 root_item = self._build_canonical_item(
@@ -2092,8 +2121,11 @@ class EnhancedStatementBuilder:
                     statement_type=statement_type
                 )
                 if root_item:
+                    root_item = _prune_duplicate_subtree(root_item)
+
+                if root_item:
                     items.append(root_item)
-                    existing_root_concepts.add(root_concept)
+                    _collect_concepts(root_item, existing_concepts)
 
         # If no abstract root, just build normally
         if not items:
