@@ -235,6 +235,9 @@ omit = [
   "edgar/**/examples.py",
   "edgar/**/examples/*.py",
   "edgar/display/demo.py",
+  "edgar/thirteenf/demo_comparison.py",
+  # __main__-only data download stubs (not library code)
+  "edgar/reference/financials.py",
   # Training scripts (ML training utilities, not runtime code)
   "edgar/entity/training/*",
   # Migration utilities (one-time migration helpers)
