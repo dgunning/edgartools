@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Quarterly facts dropped for non-calendar FYE companies** — Fixed regression introduced in 5.30.0 where the schedule-fact filter from #781 incorrectly rejected Q1/Q2/Q3 facts for companies with non-calendar fiscal year ends (ADSK, WMT, NVDA, CSCO, MSFT). `Company('ADSK').income_statement(periods=4, annual=False)` returned only Q4 across years instead of Q1–Q4 of the most recent fiscal year. The fiscal-year/period-end validator is now FYE-aware. ([#779](https://github.com/dgunning/edgartools/issues/779))
 
+- **`download_submissions` not importable from `edgar.storage`** — Error messages in `edgar/reference/company_dataset.py` instructed users to run `from edgar.storage import download_submissions`, but the function was defined in `edgar/storage/_local.py` without being added to that module's `__all__`, so the star-import in `edgar/storage/__init__.py` did not re-export it. The advertised import path now works. ([#791](https://github.com/dgunning/edgartools/issues/791))
+
 ## [5.30.0] - 2026-04-15
 
 ### Added

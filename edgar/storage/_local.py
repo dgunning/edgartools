@@ -35,6 +35,8 @@ def _run_coroutine(coroutine):
 
 
 __all__ = ['download_edgar_data',
+           'download_submissions',
+           'download_submissions_async',
            'get_edgar_data_directory',
            'use_local_storage',
            'is_using_local_storage',
