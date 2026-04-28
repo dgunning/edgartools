@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **`facts.time_series()` returned indistinguishable rows for overlapping periods** — When a company reported the same concept in both quarterly and YTD form (e.g., AGNC's `NetIncomeLoss` for `period_end=2025-06-30` had a 3-month Q2 row and a 6-month H1 YTD row), `time_series()` returned both with identical `period_end / fiscal_period / fiscal_year`, leaving users no way to tell them apart. Output now includes `period_start` and a derived `duration_days` column. ([#792](https://github.com/dgunning/edgartools/issues/792))
 
+- **TTM income statement values labeled with wrong fiscal year for interim quarters** — When SEC re-filed comparative facts in next year's 10-Q (e.g., AGNC's Q1 2024 fact re-tagged with fiscal_year=2025 in a 2025 10-Q), `_deduplicate_by_period_end` kept the latest filing's version, and the TTM trend builder labeled the window with that comparative-shifted fiscal year. The result was duplicate column labels ("Q3 2025" appearing twice) that collided in the rendering layer's dict-keyed mapping, causing `Company('AGNC').income_statement(periods=12, period='ttm')` to display Q3 2024's TTM value under the "Q3 2025" column. The TTM calculator now derives the label fiscal year from `period_end + FYE` instead of the (potentially comparative-tagged) `as_of_fact.fiscal_year`. ([#793](https://github.com/dgunning/edgartools/issues/793))
+
 ## [5.30.0] - 2026-04-15
 
 ### Added

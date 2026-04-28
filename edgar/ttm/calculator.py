@@ -255,6 +255,19 @@ class TTMCalculator:
                 f"found {len(sorted_facts)} quarters"
             )
 
+        # Detect company FYE month so labels can be derived from period_end without
+        # relying on the as_of_fact's tagged fiscal_year. The SEC tags comparative
+        # facts in next-year filings with the FILING's fiscal_year, so a Q1 2024
+        # fact re-filed as a comparative in 2025 ends up with fy=2025. After
+        # _deduplicate_by_period_end keeps the most recently filed version, the
+        # as_of_fact carries that comparative-shifted fy and produces collided
+        # labels like "Q1 2025" for two distinct windows (GH #793).
+        from edgar.entity.enhanced_statement import (
+            calculate_fiscal_year_for_label,
+            detect_fiscal_year_end,
+        )
+        fiscal_year_end_month = detect_fiscal_year_end(self.facts)
+
         # 4. Calculate only the requested number of TTM windows (from most recent)
         # For YoY growth, we need 4 extra quarters, so calculate a few more if available
         results = []
@@ -277,17 +290,23 @@ class TTMCalculator:
                 if prior_ttm > 0:
                     yoy_growth = (ttm_value - prior_ttm) / prior_ttm
 
-            # Build result row
+            # Build result row. Derive the label fiscal_year from period_end + FYE
+            # rather than trusting as_of_fact.fiscal_year (see GH #793).
             as_of_fact = sorted_facts[i]
+            label_fy = calculate_fiscal_year_for_label(
+                as_of_fact.period_end, fiscal_year_end_month
+            )
             results.append({
-                'as_of_quarter': f"{as_of_fact.fiscal_period} {as_of_fact.fiscal_year}",
+                'as_of_quarter': f"{as_of_fact.fiscal_period} {label_fy}",
                 'ttm_value': ttm_value,
-                'fiscal_year': as_of_fact.fiscal_year,
+                'fiscal_year': label_fy,
                 'fiscal_period': as_of_fact.fiscal_period,
                 'as_of_date': as_of_fact.period_end,  # Add period_end for statement builder
                 'yoy_growth': yoy_growth,
                 'periods_included': [
-                    (q.fiscal_year, q.fiscal_period) for q in ttm_window
+                    (calculate_fiscal_year_for_label(q.period_end, fiscal_year_end_month),
+                     q.fiscal_period)
+                    for q in ttm_window
                 ]
             })
 
