@@ -1159,56 +1159,75 @@ class MultiPeriodItem:
             return "-"
 
 
-def validate_fiscal_year_period_end(fiscal_year: int, period_end: date) -> bool:
+def validate_fiscal_year_period_end(fiscal_year: int,
+                                    period_end: date,
+                                    fiscal_year_end_month: int = 12) -> bool:
     """
-    Validate that fiscal_year is reasonable given period_end.
+    Validate that fiscal_year is reasonable given period_end and the company's FYE.
 
     This handles SEC Facts API data quality issues where comparative periods
-    are mislabeled with incorrect fiscal_year values (Issue #452).
+    are mislabeled with incorrect fiscal_year values (Issue #452), and where
+    forward-looking schedule disclosures (e.g., expected amortization) are
+    tagged with future end dates inconsistent with their fiscal_year (Issue #781).
+
+    For non-calendar fiscal year-end companies, the SEC's ``fiscal_year`` is
+    forward-looking — Q1/Q2/Q3 of fiscal year N end in calendar year N-1 (Issue #779).
+    The validator must therefore know the company's FYE month to compute the
+    expected fiscal year correctly. Without this, non-calendar FYE companies
+    (e.g., ADSK, WMT, NVDA, MSFT) had their early-quarter facts incorrectly
+    rejected as "comparative period" data.
 
     Args:
         fiscal_year: The fiscal year from the fact
         period_end: The period end date
+        fiscal_year_end_month: Company's fiscal year end month (1-12, default 12)
 
     Returns:
         True if the fiscal_year/period_end combination is valid, False otherwise
 
     Examples:
-        >>> # Early January period (52/53-week calendar)
-        >>> validate_fiscal_year_period_end(2022, date(2023, 1, 1))
+        >>> # Calendar-year-end company (default FYE=12)
+        >>> validate_fiscal_year_period_end(2023, date(2023, 6, 30))
         True
-        >>> validate_fiscal_year_period_end(2023, date(2023, 1, 1))
+        >>> validate_fiscal_year_period_end(2025, date(2023, 6, 30))
+        False
+
+        >>> # 52/53-week calendar — early January period
+        >>> validate_fiscal_year_period_end(2022, date(2023, 1, 1))
         True
         >>> validate_fiscal_year_period_end(2024, date(2023, 1, 1))
         False
 
-        >>> # Late December period
+        >>> # Late December period — year-end shift tolerance
         >>> validate_fiscal_year_period_end(2023, date(2023, 12, 31))
         True
         >>> validate_fiscal_year_period_end(2024, date(2023, 12, 31))
         True
 
-        >>> # Normal period
-        >>> validate_fiscal_year_period_end(2023, date(2023, 6, 30))
+        >>> # Autodesk (Jan 31 FYE): Q1 FY2026 ends Apr 30, 2025
+        >>> validate_fiscal_year_period_end(2026, date(2025, 4, 30), 1)
         True
-        >>> validate_fiscal_year_period_end(2025, date(2023, 6, 30))
+        >>> # MSFT (Jun 30 FYE): Q1 FY2025 ends Sep 30, 2024
+        >>> validate_fiscal_year_period_end(2025, date(2024, 9, 30), 6)
+        True
+        >>> # AAPL (Sep 30 FYE): Q1 FY2025 ends Dec 28, 2024
+        >>> validate_fiscal_year_period_end(2025, date(2024, 12, 28), 9)
+        True
+
+        >>> # Schedule fact for Dec FYE company — fy=2021 paired with end=2027 (Issue #781)
+        >>> validate_fiscal_year_period_end(2021, date(2027, 6, 30), 12)
         False
     """
-    year_diff = fiscal_year - period_end.year
+    expected_fy = calculate_fiscal_year_for_label(period_end, fiscal_year_end_month)
+    year_diff = fiscal_year - expected_fy
 
-    # Early January (Jan 1-7): fiscal_year should be year-1 (52/53-week calendar) or year
-    # Example: Period ending Jan 1, 2023 → FY 2022 (most common) or FY 2023 (edge case)
-    if period_end.month == 1 and period_end.day <= 7:
-        return year_diff in (-1, 0)
-
-    # Late December (Dec 25-31): fiscal_year should be year or year+1
-    # Example: Period ending Dec 31, 2023 → FY 2023 (most common) or FY 2024 (year-end shifts)
-    elif period_end.month == 12 and period_end.day >= 25:
+    # 52/53-week calendar edge cases: periods ending in early January or late December
+    # may belong to either fy=expected or fy=expected+1 (year-end shifts, fiscal week 53)
+    if (period_end.month == 1 and period_end.day <= 7) or \
+       (period_end.month == 12 and period_end.day >= 25):
         return year_diff in (0, 1)
 
-    # All other dates: fiscal_year should match period_end.year exactly
-    else:
-        return year_diff == 0
+    return year_diff == 0
 
 
 def validate_quarterly_period_end(fiscal_period: str,
@@ -1636,11 +1655,14 @@ class EnhancedStatementBuilder:
                 if fiscal_period == 'FY':
                     continue
 
-                # Validate fiscal_year is consistent with period_end (Issue #781)
-                # This catches forward-looking schedule data (e.g., intangible amortization)
-                # tagged with real fp values but future end dates (fy=2021, end=2027)
+                # Validate fiscal_year is consistent with period_end (Issues #781, #779)
+                # Catches forward-looking schedule data (e.g., intangible amortization)
+                # tagged with real fp values but future end dates (fy=2021, end=2027).
+                # Must pass FYE month so non-calendar-FYE companies (ADSK, WMT, MSFT)
+                # don't have their forward-fiscal-year quarters incorrectly rejected.
                 fiscal_year = pk[0]
-                if not validate_fiscal_year_period_end(fiscal_year, period_end_date):
+                if not validate_fiscal_year_period_end(fiscal_year, period_end_date,
+                                                      fiscal_year_end_month):
                     log.debug(
                         f"Skipping invalid fiscal_year={fiscal_year} for quarterly period_end={period_end_date} "
                         f"(likely forward-looking schedule data - Issue #781)"

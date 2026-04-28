@@ -1445,16 +1445,23 @@ class EntityFacts:
     def _prepare_quarterly_facts(self, facts: List[FinancialFact]) -> List[FinancialFact]:
         """Enhance facts with derived quarter-level duration facts for TTM/quarterly views."""
         from edgar.ttm.calculator import TTMCalculator
-        from edgar.entity.enhanced_statement import validate_fiscal_year_period_end
+        from edgar.entity.enhanced_statement import (
+            detect_fiscal_year_end,
+            validate_fiscal_year_period_end,
+        )
 
-        # Filter out forward-looking schedule data before TTM derivation (Issue #781)
+        # Filter out forward-looking schedule data before TTM derivation (Issues #781, #779).
         # These are footnote disclosures (e.g., expected amortization) tagged with
         # real fp values but future end dates inconsistent with their fiscal_year.
         # Must be filtered here, before the TTM calculator derives quarters from them.
+        # Pass the company's FYE month so non-calendar-FYE companies (ADSK, WMT, MSFT)
+        # don't have their forward-fiscal-year quarters incorrectly rejected.
+        fiscal_year_end_month = detect_fiscal_year_end(facts)
         filtered_facts = []
         for fact in facts:
             if fact.period_end and fact.fiscal_year:
-                if not validate_fiscal_year_period_end(fact.fiscal_year, fact.period_end):
+                if not validate_fiscal_year_period_end(fact.fiscal_year, fact.period_end,
+                                                      fiscal_year_end_month):
                     continue
             filtered_facts.append(fact)
 
