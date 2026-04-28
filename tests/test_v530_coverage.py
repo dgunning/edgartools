@@ -151,12 +151,22 @@ class TestGrepResult:
         assert gr[2].location == "loc2"
 
     def test_repr_empty(self):
+        # GrepResult.__repr__ renders the rich panel via repr_rich(__rich__()),
+        # so the output contains the pattern and a "No matches found" placeholder
+        # rather than the old "GrepResult('revenue', 0 matches)" summary.
         gr = self._make_result(0)
-        assert repr(gr) == "GrepResult('revenue', 0 matches)"
+        text = repr(gr)
+        assert "revenue" in text
+        assert "No matches found" in text
 
     def test_repr_with_matches(self):
         gr = self._make_result(5)
-        assert repr(gr) == "GrepResult('revenue', 5 matches)"
+        text = repr(gr)
+        assert "revenue" in text
+        assert "5 matches" in text
+        # Locations from each match should appear in the rendered table
+        assert "loc0" in text
+        assert "loc4" in text
 
     def test_to_context_minimal(self):
         gr = self._make_result(2)
@@ -189,9 +199,15 @@ class TestGrepResult:
         ctx = gr.to_context()
         assert "0 matches" in ctx
 
-    def test_str_delegates_to_to_context(self):
+    def test_str_falls_back_to_rich_repr(self):
+        # __str__ has been removed in favor of a unified rich repr. Calling
+        # str() now falls back to __repr__ rather than to_context(); callers
+        # who want the prior plain-text output should call .to_context()
+        # directly. This test pins the new contract.
         gr = self._make_result(2)
-        assert str(gr) == gr.to_context()
+        assert str(gr) == repr(gr)
+        # to_context() remains the supported way to get a plain-text dump
+        assert "loc0" in gr.to_context()
 
 
 # ---------------------------------------------------------------------------
@@ -385,6 +401,61 @@ class TestEFTSSearch:
     def test_empty_property_false_when_results_present(self):
         s = _make_search()
         assert s.empty is False
+
+
+class TestSearchFilingsParamBuilding:
+    """Validate request-param construction in search_filings().
+
+    No network: we monkeypatch the page-fetcher and inspect the params dict
+    it receives. Covers the items= passthrough and the empty-query rule.
+    """
+
+    def _capture_params(self, monkeypatch):
+        captured = {}
+
+        def fake_fetch_page(params, offset=0, limit=100):
+            captured.update(params)
+            return [], 0, None
+
+        from edgar.search import efts
+        monkeypatch.setattr(efts, "_fetch_page", fake_fetch_page)
+        return captured
+
+    def test_items_string_forwarded_to_efts(self, monkeypatch):
+        from edgar.search.efts import search_filings
+        captured = self._capture_params(monkeypatch)
+        search_filings(forms="8-K", items="1.05",
+                       start_date="2023-12-01", end_date="2023-12-31")
+        assert captured["items"] == "1.05"
+        assert captured["forms"] == "8-K"
+        assert captured["q"] == ""  # empty query accepted with items
+
+    def test_items_list_joined_with_comma(self, monkeypatch):
+        from edgar.search.efts import search_filings
+        captured = self._capture_params(monkeypatch)
+        search_filings(forms="8-K", items=["1.05", "2.02"])
+        assert captured["items"] == "1.05,2.02"
+
+    def test_empty_query_and_no_items_raises(self):
+        from edgar.search.efts import search_filings
+        with pytest.raises(ValueError):
+            search_filings()
+        with pytest.raises(ValueError):
+            search_filings("   ")
+
+    def test_query_only_still_allowed(self, monkeypatch):
+        from edgar.search.efts import search_filings
+        captured = self._capture_params(monkeypatch)
+        search_filings("artificial intelligence")
+        assert captured["q"] == "artificial intelligence"
+        assert "items" not in captured
+
+    def test_query_plus_items_both_forwarded(self, monkeypatch):
+        from edgar.search.efts import search_filings
+        captured = self._capture_params(monkeypatch)
+        search_filings("ransomware", forms="8-K", items="1.05")
+        assert captured["q"] == "ransomware"
+        assert captured["items"] == "1.05"
 
 
 # ---------------------------------------------------------------------------

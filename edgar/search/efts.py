@@ -457,9 +457,10 @@ def _parse_aggregations(aggs_data: dict) -> EFTSAggregations:
 # ---------------------------------------------------------------------------
 
 def search_filings(
-    query: str,
+    query: str = "",
     *,
     forms: Optional[Union[str, List[str]]] = None,
+    items: Optional[Union[str, List[str]]] = None,
     cik: Optional[Union[str, int]] = None,
     ticker: Optional[str] = None,
     start_date: Optional[str] = None,
@@ -473,9 +474,14 @@ def search_filings(
     that mention specific topics, products, risks, legal terms, etc.
 
     Args:
-        query: Search query string (searches filing text content)
+        query: Search query string (searches filing text content). May be
+               empty when ``items`` is provided, for a pure structured
+               lookup (e.g. all 8-K filings with Item 1.05 in a date range).
         forms: Form type filter. Single string or list of strings.
                Examples: "10-K", ["10-K", "10-Q"], ["8-K"]
+        items: 8-K item filter. Single item or list of items.
+               Examples: "1.05", ["1.05", "2.02"]. Sent server-side to EFTS
+               so the long tail isn't lost to client-side pagination caps.
         cik: CIK number to scope results to a specific filer.
              Accepts int or string (with or without leading zeros).
         ticker: Company ticker to scope results. Resolved to CIK internally.
@@ -487,7 +493,7 @@ def search_filings(
         EFTSSearch object containing results
 
     Raises:
-        ValueError: If query is empty
+        ValueError: If neither ``query`` nor ``items`` is provided.
 
     Examples:
         >>> from edgar import search_filings
@@ -495,6 +501,9 @@ def search_filings(
         >>> results = search_filings("artificial intelligence")
         >>> # Scoped to form type
         >>> results = search_filings("cybersecurity incident", forms="8-K")
+        >>> # Structured: all 8-K Item 1.05 (cybersecurity) filings in a range
+        >>> results = search_filings(forms="8-K", items="1.05",
+        ...                          start_date="2023-12-01", end_date="2024-12-31")
         >>> # Scoped to a company
         >>> results = search_filings("supply chain", ticker="AAPL")
         >>> # Date range
@@ -510,21 +519,31 @@ def search_filings(
         >>> page2 = results.next()
         >>> all_results = results.fetch_more(200)
     """
-    if not query or not query.strip():
-        raise ValueError("Search query cannot be empty")
+    query = (query or "").strip()
+    has_query = bool(query)
+    has_items = bool(items)
+
+    if not has_query and not has_items:
+        raise ValueError(
+            "Provide a search query, or an items filter (e.g. items='1.05')."
+        )
 
     limit = min(max(limit, 1), 100)
 
-    # Build request parameters
-    params: dict = {
-        "q": query.strip(),
-    }
+    # Build request parameters. EFTS accepts q="" when other filters are set.
+    params: dict = {"q": query}
 
     # Form type filter
     if forms:
         if isinstance(forms, str):
             forms = [forms]
         params["forms"] = ",".join(forms)
+
+    # 8-K item filter (server-side)
+    if items:
+        if isinstance(items, str):
+            items = [items]
+        params["items"] = ",".join(items)
 
     # Date range
     if start_date or end_date:

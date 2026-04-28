@@ -14,6 +14,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from typing import List, Optional
+from edgar.richtools import repr_rich
 
 
 @dataclass
@@ -54,9 +55,7 @@ class GrepResult:
         return len(self.matches) > 0
 
     def __repr__(self):
-        if not self.matches:
-            return f"GrepResult('{self.pattern}', 0 matches)"
-        return f"GrepResult('{self.pattern}', {len(self.matches)} matches)"
+        return repr_rich(self.__rich__())
 
     def __rich__(self):
         from rich.table import Table
@@ -99,9 +98,6 @@ class GrepResult:
         if len(self.matches) > limit:
             lines.append(f"  ... {len(self.matches) - limit} more matches")
         return "\n".join(lines)
-
-    def __str__(self):
-        return self.to_context()
 
     def __repr_html__(self):
         from edgar.richtools import repr_rich
