@@ -715,22 +715,41 @@ class EntityFacts:
         """
         Get time series data for a concept.
 
+        Returned columns include ``period_start`` and ``duration_days`` so that
+        facts sharing a ``period_end`` but representing different reporting
+        windows (e.g., a 3-month Q2 vs. a 6-month YTD H1) remain distinguishable.
+
         Args:
             concept: Concept name or label
             periods: Number of periods to retrieve
 
         Returns:
-            DataFrame with time series data
+            DataFrame with columns ``[period_start, period_end, duration_days,
+            numeric_value, fiscal_period, fiscal_year]``.
         """
         from edgar.entity.query import FactQuery
         query = FactQuery(self._facts, self._fact_index)
 
-        # Get facts and limit
-        return query \
+        df = query \
             .by_concept(concept) \
             .sort_by('filing_date', ascending=False) \
-            .to_dataframe('period_end', 'numeric_value', 'fiscal_period', 'fiscal_year') \
+            .to_dataframe('period_start', 'period_end', 'numeric_value',
+                          'fiscal_period', 'fiscal_year') \
             .head(periods)
+
+        if not df.empty:
+            # Compute duration_days for duration facts; instant facts get None.
+            # Use a comprehension so date/datetime/None mixes are handled safely.
+            df = df.assign(
+                duration_days=[
+                    (e - s).days if (s is not None and e is not None) else None
+                    for s, e in zip(df['period_start'], df['period_end'])
+                ]
+            )
+            df = df[['period_start', 'period_end', 'duration_days',
+                     'numeric_value', 'fiscal_period', 'fiscal_year']]
+
+        return df
 
     # DEI (Document and Entity Information) helpers
     def dei_facts(self, as_of: Optional[date] = None) -> pd.DataFrame:

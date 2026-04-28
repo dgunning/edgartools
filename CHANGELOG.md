@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **`download_submissions` not importable from `edgar.storage`** — Error messages in `edgar/reference/company_dataset.py` instructed users to run `from edgar.storage import download_submissions`, but the function was defined in `edgar/storage/_local.py` without being added to that module's `__all__`, so the star-import in `edgar/storage/__init__.py` did not re-export it. The advertised import path now works. ([#791](https://github.com/dgunning/edgartools/issues/791))
 
+- **`facts.time_series()` returned indistinguishable rows for overlapping periods** — When a company reported the same concept in both quarterly and YTD form (e.g., AGNC's `NetIncomeLoss` for `period_end=2025-06-30` had a 3-month Q2 row and a 6-month H1 YTD row), `time_series()` returned both with identical `period_end / fiscal_period / fiscal_year`, leaving users no way to tell them apart. Output now includes `period_start` and a derived `duration_days` column. ([#792](https://github.com/dgunning/edgartools/issues/792))
+
 ## [5.30.0] - 2026-04-15
 
 ### Added
