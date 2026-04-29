@@ -5,7 +5,7 @@ This module provides functions for filtering pyarrow Tables containing SEC EDGAR
 based on various criteria like dates, forms, CIK numbers, etc.
 """
 import datetime
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Union
 
 import pyarrow as pa
 import pyarrow.compute as pc
@@ -15,13 +15,14 @@ from edgar.dates import extract_dates
 
 
 def filter_by_date(data: pa.Table,
-                   date: Union[str, datetime.datetime],
+                   date: Union[str, datetime.datetime, Tuple[Optional[str], Optional[str]]],
                    date_col: str) -> pa.Table:
     # If datetime convert to string
     if isinstance(date, datetime.date) or isinstance(date, datetime.datetime):
         date = date.strftime('%Y-%m-%d')
 
-    # Extract the date parts ... this should raise an exception if we cannot
+    # Extract the date parts. extract_dates() also accepts the (start, end)
+    # tuple form advertised by Entity.get_filings's type hint (GH #794).
     date_parts = extract_dates(date)
     start_date, end_date, is_range = date_parts
     if is_range:
