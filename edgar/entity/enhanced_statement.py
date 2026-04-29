@@ -1948,12 +1948,21 @@ class EnhancedStatementBuilder:
                 if item:
                     items.append(item)
 
-        # Collect all labels already in the tree to avoid duplicating them as orphans
+        # Collect both labels and concepts already present in the tree so the
+        # orphan dedup at line ~2456 catches matches by either. Tracking only
+        # labels missed cases where a promoted item carried the canonical
+        # display label ("Total Revenue") while the orphan candidate fact's
+        # label was the raw concept name ("Revenue") — the orphan check
+        # `(label or concept) in existing_labels` then failed to match.
+        # See test_income_statement_deduplication for the exact scenario.
         existing_labels = set()
         def _collect_labels(item_list):
             for it in item_list:
-                if not it.is_abstract and it.label:
-                    existing_labels.add(it.label)
+                if not it.is_abstract:
+                    if it.label:
+                        existing_labels.add(it.label)
+                    if it.concept:
+                        existing_labels.add(it.concept)
                 if it.children:
                     _collect_labels(it.children)
         _collect_labels(items)
