@@ -7,15 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.30.1] - 2026-04-29
+
 ### Fixed
+
+- **TTM income statement values labeled with wrong fiscal year for interim quarters** — When SEC re-filed comparative facts in next year's 10-Q (e.g., AGNC's Q1 2024 fact re-tagged with fiscal_year=2025 in a 2025 10-Q), `_deduplicate_by_period_end` kept the latest filing's version, and the TTM trend builder labeled the window with that comparative-shifted fiscal year. The result was duplicate column labels ("Q3 2025" appearing twice) that collided in the rendering layer's dict-keyed mapping, causing `Company('AGNC').income_statement(periods=12, period='ttm')` to display Q3 2024's TTM value under the "Q3 2025" column. The TTM calculator now derives the label fiscal year from `period_end + FYE` instead of the (potentially comparative-tagged) `as_of_fact.fiscal_year`. ([#793](https://github.com/dgunning/edgartools/issues/793))
 
 - **Quarterly facts dropped for non-calendar FYE companies** — Fixed regression introduced in 5.30.0 where the schedule-fact filter from #781 incorrectly rejected Q1/Q2/Q3 facts for companies with non-calendar fiscal year ends (ADSK, WMT, NVDA, CSCO, MSFT). `Company('ADSK').income_statement(periods=4, annual=False)` returned only Q4 across years instead of Q1–Q4 of the most recent fiscal year. The fiscal-year/period-end validator is now FYE-aware. ([#779](https://github.com/dgunning/edgartools/issues/779))
 
-- **`download_submissions` not importable from `edgar.storage`** — Error messages in `edgar/reference/company_dataset.py` instructed users to run `from edgar.storage import download_submissions`, but the function was defined in `edgar/storage/_local.py` without being added to that module's `__all__`, so the star-import in `edgar/storage/__init__.py` did not re-export it. The advertised import path now works. ([#791](https://github.com/dgunning/edgartools/issues/791))
-
 - **`facts.time_series()` returned indistinguishable rows for overlapping periods** — When a company reported the same concept in both quarterly and YTD form (e.g., AGNC's `NetIncomeLoss` for `period_end=2025-06-30` had a 3-month Q2 row and a 6-month H1 YTD row), `time_series()` returned both with identical `period_end / fiscal_period / fiscal_year`, leaving users no way to tell them apart. Output now includes `period_start` and a derived `duration_days` column. ([#792](https://github.com/dgunning/edgartools/issues/792))
 
-- **TTM income statement values labeled with wrong fiscal year for interim quarters** — When SEC re-filed comparative facts in next year's 10-Q (e.g., AGNC's Q1 2024 fact re-tagged with fiscal_year=2025 in a 2025 10-Q), `_deduplicate_by_period_end` kept the latest filing's version, and the TTM trend builder labeled the window with that comparative-shifted fiscal year. The result was duplicate column labels ("Q3 2025" appearing twice) that collided in the rendering layer's dict-keyed mapping, causing `Company('AGNC').income_statement(periods=12, period='ttm')` to display Q3 2024's TTM value under the "Q3 2025" column. The TTM calculator now derives the label fiscal year from `period_end + FYE` instead of the (potentially comparative-tagged) `as_of_fact.fiscal_year`. ([#793](https://github.com/dgunning/edgartools/issues/793))
+- **`download_submissions` not importable from `edgar.storage`** — Error messages in `edgar/reference/company_dataset.py` instructed users to run `from edgar.storage import download_submissions`, but the function was defined in `edgar/storage/_local.py` without being added to that module's `__all__`, so the star-import in `edgar/storage/__init__.py` did not re-export it. The advertised import path now works. ([#791](https://github.com/dgunning/edgartools/issues/791))
+
+### Added
+
+- **8-K item filtering in `search_filings()`** — `search_filings()` now accepts an `items` parameter that is forwarded server-side to EFTS, enabling structured Item-based queries without falling back to client-side filtering (which previously lost the long tail to pagination caps). The `query` parameter is now optional when `items` is provided, supporting pure-structured lookups such as `search_filings(forms="8-K", items="1.05", start_date="2023-12-01", end_date="2024-12-31")` for cybersecurity disclosures.
+
+### Changed
+
+- **`GrepResult` repr/str unified via rich panel** — `GrepResult.__repr__` now renders the same Rich Panel as `__repr_html__`, replacing the old compact `"GrepResult('pattern', N matches)"` summary. `__str__` has been removed; calling `str(result)` falls back to `__repr__`. Callers that want the prior plain-text dump should call `result.to_context()` explicitly.
 
 ## [5.30.0] - 2026-04-15
 
