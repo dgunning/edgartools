@@ -731,7 +731,7 @@ class EntityFacts:
         query = FactQuery(self._facts, self._fact_index)
 
         df = query \
-            .by_concept(concept, exact=True) \
+            .by_concept(concept, exact=":" in concept) \
             .sort_by('filing_date', ascending=False) \
             .to_dataframe('period_start', 'period_end', 'numeric_value',
                           'fiscal_period', 'fiscal_year') \
