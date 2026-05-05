@@ -187,13 +187,29 @@ def _extract_value(td: Tag) -> str:
 
 
 def _detect_level(td: Tag) -> int:
-    """Detect indentation level from padding-left style or nesting."""
+    """Detect indentation level from plN CSS class, padding-left style, or nesting.
+
+    SEC R*.htm files encode indentation via CSS class tokens (pl1, pl2, ... pl9)
+    on the label cell. These plN class tokens are the primary level signal.
+    Inline padding-left is used as a fallback for files without plN classes.
+    """
+    classes = td.get('class', [])
+    # Parse plN class tokens (e.g. "pl", "pl2", "pl3")
+    for cls in classes:
+        m = re.match(r'^pl([1-9])$', cls)
+        if m:
+            return int(m.group(1))
+    # Fallback: parse padding-left from style attribute with unit handling
     style = td.get('style', '')
-    # Some R*.htm files use padding-left for indentation
-    match = re.search(r'padding-left:\s*(\d+)', style)
+    match = re.search(r'padding-left:\s*(\d+)(pt|em|px)?', style)
     if match:
         px = int(match.group(1))
-        return max(0, px // 10)  # Rough estimate: 10px per level
+        unit = match.group(2) or 'px'
+        if unit == 'pt':
+            px = int(px * 1.33)
+        elif unit == 'em':
+            px = px * 16
+        return max(0, px // 10)
     return 0
 
 
