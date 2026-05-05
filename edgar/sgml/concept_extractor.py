@@ -187,14 +187,32 @@ def _extract_value(td: Tag) -> str:
 
 
 def _detect_level(td: Tag) -> int:
-    """Detect indentation level from padding-left style or nesting."""
+    """Detect indentation level from table nesting depth and padding-left style.
+
+    The primary signal is the number of ancestor <tr> elements within the report table,
+    which accurately reflects the hierarchical level of a row. This is more reliable
+    than padding-left style alone (some R*.htm files don't use explicit padding).
+
+    Args:
+        td: The table cell (<td> or <th>) element to analyze.
+
+    Returns:
+        Integer indentation level (0 = top-level, 1 = child, etc.).
+    """
+    # Primary: count ancestor <tr> elements within the report table
+    # This captures nested rows (e.g., US-GAAP detail rows under parent concepts)
+    tr_ancestors = td.find_parents('tr')
+    nesting_level = len(tr_ancestors) - 1  # subtract 1 since td is inside a tr
+
+    # Secondary: check padding-left as a fallback signal
+    # Some R*.htm files use pixel padding for visual indentation
     style = td.get('style', '')
-    # Some R*.htm files use padding-left for indentation
     match = re.search(r'padding-left:\s*(\d+)', style)
-    if match:
-        px = int(match.group(1))
-        return max(0, px // 10)  # Rough estimate: 10px per level
-    return 0
+    padding_level = max(0, int(match.group(1)) // 10) if match else 0
+
+    # Use the maximum of nesting and padding signals
+    # This handles cases where BOTH signals are present
+    return max(nesting_level, padding_level)
 
 
 def extract_concepts_from_report(html_content: str) -> ConceptReport:
