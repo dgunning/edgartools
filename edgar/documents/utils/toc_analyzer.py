@@ -483,41 +483,55 @@ class TOCAnalyzer:
 
             mapping = {}
             current_part = None
-            links = toc_table.xpath('.//a[@href]')
+            rows = toc_table.xpath('.//tr')
 
-            for link in links:
-                href = link.get('href', '').strip()
-                if not href.startswith('#'):
-                    continue
-                text = (link.text_content() or '').strip()
-                if not text:
-                    continue
+            # Walk rows in order so text-only "PART I"/"PART II" rows update
+            # part context for the item links that follow.
+            for row in rows:
+                row_text = (row.text_content() or '').strip()
+                links = row.xpath('.//a[@href]')
 
-                anchor_id = href[1:]
-
-                # Skip page numbers
-                if re.match(r'^\d{1,3}$', text):
-                    continue
-
-                # DFIN anchors are semantic — extract item from anchor ID
-                parsed = self._item_from_anchor(anchor_id)
-
-                # Fall back to text if anchor doesn't have item pattern
-                if not parsed:
-                    parsed = self._parse_item_from_text(text)
-
-                if not parsed:
+                if not links:
+                    # Text-only row — may be a part header like "PART I"
+                    if row_text:
+                        part_from_text = self._parse_item_from_text(row_text)
+                        if part_from_text and part_from_text.startswith('Part'):
+                            current_part = part_from_text
                     continue
 
-                # Track part context
-                if parsed.startswith('Part'):
-                    current_part = parsed
-                    continue
+                for link in links:
+                    href = link.get('href', '').strip()
+                    if not href.startswith('#'):
+                        continue
+                    text = (link.text_content() or '').strip()
+                    if not text:
+                        continue
 
-                if find_anchor_targets(tree, anchor_id):
-                    key = self._make_section_key(parsed, current_part)
-                    if key not in mapping:
-                        mapping[key] = anchor_id
+                    anchor_id = href[1:]
+
+                    # Skip page numbers
+                    if re.match(r'^\d{1,3}$', text):
+                        continue
+
+                    # DFIN anchors are semantic — extract item from anchor ID
+                    parsed = self._item_from_anchor(anchor_id)
+
+                    # Fall back to text if anchor doesn't have item pattern
+                    if not parsed:
+                        parsed = self._parse_item_from_text(text)
+
+                    if not parsed:
+                        continue
+
+                    # Track part context
+                    if parsed.startswith('Part'):
+                        current_part = parsed
+                        continue
+
+                    if find_anchor_targets(tree, anchor_id):
+                        key = self._make_section_key(parsed, current_part)
+                        if key not in mapping:
+                            mapping[key] = anchor_id
 
             return mapping
 
