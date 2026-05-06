@@ -1893,9 +1893,10 @@ class Filing:
         if self._sgml is None:
             if is_using_local_storage():
                 log.warning(
-                    f"Filing {self.accession_no} not found in local storage. "
-                    f"Falling back to network fetch. "
-                    f"Download this filing to avoid network calls when using local storage."
+                    f"Filing bundle {self.accession_no} not found in local storage "
+                    f"(was the {self.filing_date} feed file downloaded?). "
+                    f"Falling back to full network fetch. To avoid this, run "
+                    f"download_filings(filing_date='{self.filing_date}')."
                 )
             try:
                 self._sgml = FilingSGML.from_filing(self)

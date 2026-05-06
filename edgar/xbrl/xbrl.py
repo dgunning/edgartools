@@ -537,27 +537,34 @@ class XBRL:
         if xbrl_attachments.get('instance'):
             xbrl.parser.parse_instance_content(xbrl_attachments.get('instance').content)
         elif not xbrl_attachments.empty:
-            # Instance document missing from local SGML — SEC feed files before ~Oct 2020
-            # did not include the extracted iXBRL instance document.
-            # Fall back to fetching it from the filing homepage if network fallback is allowed.
+            # Filing bundle is in local storage AND has linkbases, but the XBRL
+            # instance document itself is missing. This is typical for iXBRL filings
+            # filed before SEC's Oct-2020 feed format change, when the inline-XBRL
+            # data was embedded in the .htm file but not extracted to a separate
+            # _htm.xml in the feed bundle. Fall back to fetching just the instance
+            # from the filing homepage if network fallback is allowed.
             from edgar.storage import is_using_local_storage, is_network_fallback_allowed
             if is_using_local_storage() and is_network_fallback_allowed():
                 homepage_xbrl = XBRLAttachments(filing.homepage.attachments)
                 if homepage_xbrl.get('instance'):
                     log.info(
-                        f"Instance document not in local storage for {filing.accession_no}. "
-                        f"Fetching from SEC (network fallback)."
+                        f"XBRL instance missing from local SGML for {filing.accession_no} "
+                        f"(common for iXBRL filings before SEC's Oct-2020 feed format change). "
+                        f"Fetching just the instance from the SEC homepage (network fallback)."
                     )
                     xbrl.parser.parse_instance_content(homepage_xbrl.get('instance').content)
                 else:
                     log.warning(
-                        f"XBRL instance document not found for {filing.accession_no}. "
-                        f"Entity info and facts will be unavailable."
+                        f"XBRL instance document not found for {filing.accession_no} — "
+                        f"missing from both local SGML and the SEC filing homepage. "
+                        f"Entity info and facts will be empty."
                     )
             else:
                 log.warning(
-                    f"XBRL instance document not in local storage for {filing.accession_no}. "
-                    f"Enable network fallback or re-download this filing to access XBRL data."
+                    f"XBRL instance missing from local SGML for {filing.accession_no} "
+                    f"and network fallback is disabled. Either re-enable fallback "
+                    f"(use_local_storage(..., allow_network_fallback=True)) or re-download "
+                    f"the filing — entity info and facts will be empty."
                 )
 
         # Capture SGML period_of_report for date discrepancy detection
