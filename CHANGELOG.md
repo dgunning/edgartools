@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.30.3] - 2026-05-06
+
+### Fixed
+
+- **`facts.time_series()` returned duplicate rows from fuzzy concept matching** — When called with a fully-qualified XBRL concept like `us-gaap:NetIncomeLoss`, the underlying `by_concept` query defaulted to fuzzy substring matching, so `us-gaap:NetIncomeLossAvailableToCommonStockholdersBasic` was silently included alongside it, producing duplicate rows for the same reporting period. `time_series()` now passes `exact=':' in concept`, so qualified names match exactly while bare names (`'Revenue'`) retain fuzzy/label discovery. ([#795](https://github.com/dgunning/edgartools/issues/795), PR [#798](https://github.com/dgunning/edgartools/pull/798) by @tjhub1983)
+
+- **Quarterly Q4 NetIncomeLoss off by ~1000× when proxy XBRL contained corrupt metadata** — DX's 2026 DEF 14A disclosed historical NetIncomeLoss figures with `fiscal_year=null, fiscal_period=null`, including a single FY 2025 value with a 1000× scaling error (319,065 instead of 319,066,000). The corrupt fact entered the ANNUAL duration bucket in `TTMCalculator._derive_q4_from_fy` and won the `period_end` dedup because the proxy was filed after the 10-K, producing a Q4 2025 value of −133,387,935 instead of +185,359,000. The TTM calculator now (a) requires valid `fiscal_period` (FY/Q3/Q2) for inputs to each derivation method, and (b) prefers periodic-report sources (10-K/Q, 20-F, 40-F, 6-K and amendments) over proxy/registration forms when deduplicating. ([#796](https://github.com/dgunning/edgartools/issues/796))
+
+- **DFIN-generated TOCs produced unprefixed item keys** — TOCs from DFIN's filing tool (e.g., Microsoft 10-K) place `PART I`/`PART II` headers in text-only `<tr>` rows without anchor links. The previous parser iterated flat over `<a>` links and only updated `current_part` from a parsed link's text, so it never saw the part headers and produced keys like `"Item 1"` instead of `"part_i_item_1"`. The parser now walks rows in document order so text-only rows update part context for item links that follow.
+
+- **Non-standard duration stubs distorted "Three Recent Periods" view** — PLTR's latest 10-Q exposes a 30-day stub context (`duration_2026-03-01_2026-03-31`, classified as `'Period'`) alongside the normal Q1 and FY durations. `get_period_views()` sorted all duration periods by end date and took the top 3, so the stub landed at `period_keys[0]` with no statement data and produced an all-null column. Period view generation now filters to durations whose `classify_duration()` bucket is a standard reporting period (Quarterly, Semi-Annual, Nine Months, Annual).
+
 ## [5.30.2] - 2026-04-29
 
 ### Fixed
