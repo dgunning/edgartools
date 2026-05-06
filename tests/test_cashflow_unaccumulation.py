@@ -408,3 +408,72 @@ class TestClassifyDiscreteQuarter:
         longer = {'duration_days': 182}
         shorter = {'duration_days': 92}
         assert StatementStitcher._classify_discrete_quarter(longer, shorter) == 'Q2'
+
+
+class TestCashflowUnaccumulationRealSEC:
+    """End-to-end ground-truth verification using real SEC filings.
+
+    Per the verification constitution, every new feature needs at least one
+    assertion against a real SEC filing. Pinned to specific accession numbers
+    so values stay deterministic as new AAPL filings are added.
+    """
+
+    @pytest.mark.network
+    def test_aapl_q2_fy2026_discrete_matches_ytd_minus_q1(self):
+        """Verify the unaccumulation math on real AAPL data.
+
+        Filings used (2 consecutive 10-Qs from AAPL fiscal 2026):
+          0000320193-26-000006 (filed 2026-01-30, period_of_report 2025-12-27)
+              AAPL Q1 FY2026, 3-month period - already discrete
+          0000320193-26-000013 (filed 2026-05-01, period_of_report 2026-03-28)
+              AAPL Q2 FY2026 10-Q, 6-month YTD period
+
+        Apple reports NetCashProvidedByUsedInOperatingActivities as:
+          Q1 FY26  (3-month):  $53,925M
+          H1 FY26  (6-month):  $82,627M
+
+        With discrete_quarters=True, the 6-month YTD column should be replaced
+        with the discrete Q2 value: 82,627 - 53,925 = $28,702M.
+        """
+        from edgar import find
+        from edgar.xbrl import XBRLS
+
+        q1_fy26 = find('0000320193-26-000006')
+        q2_fy26 = find('0000320193-26-000013')
+        # filter_amendments=False because XBRLS.from_filings(list, ...) calls
+        # list.filter() when filter_amendments=True (pre-existing list-input bug).
+        xbrls = XBRLS.from_filings([q2_fy26, q1_fy26], filter_amendments=False)
+
+        op_concept = 'NetCashProvidedByUsedInOperatingActivities'
+
+        # Baseline (YTD mode) - confirm we read the SEC-reported values correctly
+        ytd_df = xbrls.statements.cashflow_statement(discrete_quarters=False).to_dataframe()
+        ytd_op = ytd_df[ytd_df['concept'].str.contains(op_concept, na=False)]
+        assert not ytd_op.empty, f"{op_concept} not found in stitched cashflow"
+
+        q1_ytd_value = ytd_op.iloc[0]['2025-12-27']
+        h1_ytd_value = ytd_op.iloc[0]['2026-03-28']
+        assert q1_ytd_value == 53_925_000_000, (
+            f"Q1 FY26 baseline (3-month) mismatch - expected 53,925,000,000, "
+            f"got {q1_ytd_value:,}"
+        )
+        assert h1_ytd_value == 82_627_000_000, (
+            f"H1 FY26 YTD baseline (6-month) mismatch - expected 82,627,000,000, "
+            f"got {h1_ytd_value:,}"
+        )
+
+        # Unaccumulated (discrete mode) - Q2 should now hold the discrete 3-month value
+        discrete_df = xbrls.statements.cashflow_statement(discrete_quarters=True).to_dataframe()
+        disc_op = discrete_df[discrete_df['concept'].str.contains(op_concept, na=False)]
+        assert not disc_op.empty
+
+        # Q1 unchanged (was already 3-month, no shorter period to subtract)
+        assert disc_op.iloc[0]['2025-12-27'] == 53_925_000_000
+
+        # Q2 discrete = H1 YTD - Q1 = 82,627M - 53,925M = 28,702M
+        expected_q2_discrete = 82_627_000_000 - 53_925_000_000
+        assert disc_op.iloc[0]['2026-03-28'] == expected_q2_discrete, (
+            f"Q2 FY26 discrete should be {expected_q2_discrete:,} (H1 - Q1), "
+            f"got {disc_op.iloc[0]['2026-03-28']:,}"
+        )
+        assert expected_q2_discrete == 28_702_000_000  # sanity check on expected
