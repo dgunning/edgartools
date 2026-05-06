@@ -577,6 +577,10 @@ class TTMCalculator:
         for ytd6 in ytd_6m:
             if not self._is_additive_concept(ytd6):
                 continue
+            # Skip facts with corrupt/missing fiscal metadata (e.g., proxy
+            # statement historicals tagged with fiscal_period=''). See GH #796.
+            if ytd6.fiscal_period != 'Q2':
+                continue
             q1 = self._find_prior_quarter(quarters, before=ytd6.period_end)
             if q1:
                 q2_value = ytd6.numeric_value - q1.numeric_value
@@ -607,6 +611,10 @@ class TTMCalculator:
         derived = []
         for ytd9 in ytd_9m:
             if not self._is_additive_concept(ytd9):
+                continue
+            # Skip facts with corrupt/missing fiscal metadata (e.g., proxy
+            # statement historicals tagged with fiscal_period=''). See GH #796.
+            if ytd9.fiscal_period != 'Q3':
                 continue
             ytd6 = self._find_prior_ytd6(ytd_6m, before=ytd9.period_end)
             if ytd6:
@@ -646,6 +654,13 @@ class TTMCalculator:
         fiscal_year_end_month = detect_fiscal_year_end(self.facts)
         for fy in annual:
             if not self._is_additive_concept(fy):
+                continue
+            # Skip facts with corrupt/missing fiscal metadata (e.g., proxy
+            # statement historicals tagged with fiscal_period=''). See GH #796:
+            # DX DEF 14A had a 12-month NetIncomeLoss fact with fiscal_year=0,
+            # fiscal_period='' and a wrong scale, which got picked up as the
+            # FY 2025 input and produced Q4 = 319,065 - 133,707,000 = -133M.
+            if fy.fiscal_period != 'FY':
                 continue
             ytd9 = self._find_matching_ytd9(
                 ytd_9m, period_start=fy.period_start, before=fy.period_end
@@ -1071,14 +1086,32 @@ class TTMCalculator:
             calculation_context=derivation_method  # Mark as derived
         )
 
+    # Periodic reports are the canonical source for financials. Facts derived
+    # from these forms are preferred over facts derived from non-periodic forms
+    # (e.g., DEF 14A proxies, S-1 registrations) when both report the same
+    # period. See GH #796 for the failure mode this prevents.
+    _PERIODIC_FORMS = frozenset({
+        '10-K', '10-K/A', '10-KSB', '10-KSB/A',
+        '10-Q', '10-Q/A', '10-QSB', '10-QSB/A',
+        '20-F', '20-F/A', '40-F', '40-F/A', '6-K', '6-K/A',
+    })
+
+    @classmethod
+    def _form_tier(cls, form_type: str) -> int:
+        """Tier ranking for dedup: periodic > everything else."""
+        return 1 if form_type in cls._PERIODIC_FORMS else 0
+
     def _deduplicate_by_period_end(
         self,
         facts: List[FinancialFact]
     ) -> List[FinancialFact]:
-        """Keep latest fact per period_end (handles re-filings).
+        """Keep best fact per period_end (handles re-filings).
 
-        When multiple facts exist for the same period_end (due to amended
-        filings or derivation), keeps the most recently filed version.
+        When multiple facts exist for the same period_end, prefer in this order:
+        1. Facts from periodic reports (10-K, 10-Q, 20-F, etc.) over non-periodic
+           (DEF 14A, S-1, etc.)
+        2. Facts with a more recent filing_date
+        3. Facts with a filing_date over those without
 
         Args:
             facts: List of facts potentially containing duplicates
@@ -1091,16 +1124,18 @@ class TTMCalculator:
             >>> # Returns one fact per unique period_end date
 
         """
-        by_end = {}
+        def sort_key(fact: FinancialFact):
+            # Higher is better. Use a tuple so periodic-report status outranks
+            # filing_date, and filing_date breaks ties within the same tier.
+            return (
+                self._form_tier(fact.form_type or ''),
+                fact.filing_date or date.min,
+            )
+
+        by_end: dict = {}
         for fact in facts:
             key = fact.period_end
-            if key not in by_end:
-                by_end[key] = fact
-            elif fact.filing_date and by_end[key].filing_date and fact.filing_date > by_end[key].filing_date:
-                # Keep the more recently filed version
-                by_end[key] = fact
-            elif fact.filing_date and not by_end[key].filing_date:
-                # Prefer fact with filing_date over one without
+            if key not in by_end or sort_key(fact) > sort_key(by_end[key]):
                 by_end[key] = fact
         return sorted(by_end.values(), key=lambda f: f.period_end)
 

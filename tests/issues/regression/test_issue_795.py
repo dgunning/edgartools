@@ -63,7 +63,7 @@ def test_time_series_qualified_concept_uses_exact_matching():
                    date(2025, 4, 1), date(2025, 6, 30),
                    -1_800_000.0, fiscal_period='Q2', fiscal_year=2025),
     ]
-    ef = EntityFacts(cik=1234567890, entity_name='Test Corp', facts_list=facts_list)
+    ef = EntityFacts(cik=1234567890, name='Test Corp', facts=facts_list)
 
     result = ef.time_series('us-gaap:NetIncomeLoss', periods=10)
 
@@ -82,6 +82,6 @@ def test_time_series_unqualified_concept_still_allows_discovery():
                    date(2025, 1, 1), date(2025, 3, 31),
                    5_000_000.0, fiscal_period='Q1', fiscal_year=2025),
     ]
-    ef = EntityFacts(cik=1234567890, entity_name='Test Corp', facts_list=facts_list)
+    ef = EntityFacts(cik=1234567890, name='Test Corp', facts=facts_list)
     result = ef.time_series('Revenue', periods=10)
     assert isinstance(result, pd.DataFrame)
