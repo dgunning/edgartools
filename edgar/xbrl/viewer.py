@@ -162,8 +162,20 @@ class FilingViewer:
 
     @cached_property
     def financial_statements(self) -> List[ViewerReport]:
-        """Reports in the Statements category."""
-        return self._get_viewer_reports_by_category('Statements')
+        """Reports recognized as financial statements.
+
+        Returns the union of:
+          - FilingSummary.xml ``MenuCategory='Statements'``
+          - MetaLinks.json ``groupType='statement'``
+
+        The MetaLinks fallback salvages primary statements that filers
+        miscategorized in FilingSummary.xml (e.g., AbbVie's 2021 10-K placed
+        ``Consolidated Statements of Earnings`` under ``Uncategorized``;
+        MetaLinks correctly classifies it as a statement). Reports are
+        returned in FilingSummary position order, deduplicated by
+        ``html_file_name``.
+        """
+        return self._get_statement_viewer_reports()
 
     @cached_property
     def notes(self) -> List[ViewerReport]:
@@ -426,6 +438,32 @@ class FilingViewer:
         for report in fs_reports:
             vr = self._get_or_create_viewer_report(report)
             if vr:
+                result.append(vr)
+        return result
+
+    def _get_statement_viewer_reports(self) -> List[ViewerReport]:
+        """Walk all FilingSummary reports, returning those recognized as
+        financial statements via either FilingSummary MenuCategory or
+        MetaLinks groupType. Preserves filing position order; dedup by
+        html_file_name.
+        """
+        seen: set = set()
+        result: List[ViewerReport] = []
+        for report in self._filing_summary.reports:
+            fname = report.html_file_name
+            if not fname or fname in seen:
+                continue
+            is_stmt = report.menu_category == 'Statements'
+            if not is_stmt:
+                rkey = self._report_key(report)
+                meta = self._metalinks.get_report(rkey) if rkey else None
+                if meta and meta.group_type == 'statement':
+                    is_stmt = True
+            if not is_stmt:
+                continue
+            vr = self._get_or_create_viewer_report(report)
+            if vr:
+                seen.add(fname)
                 result.append(vr)
         return result
 
