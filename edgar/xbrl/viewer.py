@@ -44,10 +44,13 @@ class ViewerReport:
     def __init__(self,
                  filing_report: 'Report',
                  meta_report: Optional[MetaLinksReport],
-                 concept_report: Optional[ConceptReport]):
+                 concept_report: Optional[ConceptReport],
+                 viewer: Optional['FilingViewer'] = None):
         self._report = filing_report
         self._meta = meta_report
         self._concept_report = concept_report
+        self._viewer = viewer  # back-ref for lazy level enrichment (GH #799)
+        self._levels_enriched = False
 
     @property
     def short_name(self) -> str:
@@ -86,9 +89,18 @@ class ViewerReport:
     @property
     def concept_rows(self) -> list:
         """Concept-annotated rows from R*.htm."""
-        if self._concept_report:
-            return self._concept_report.rows
-        return []
+        if not self._concept_report:
+            return []
+        # Lazy level enrichment from XBRL presentation linkbase (GH #799).
+        # Deferred to first access so that initial viewer construction stays
+        # cheap and avoids re-entering FilingSummary iteration during XBRL parse.
+        if not self._levels_enriched:
+            self._levels_enriched = True
+            if self._viewer is not None:
+                self._viewer._enrich_levels_from_presentation_tree(
+                    self._concept_report, self._report.role
+                )
+        return self._concept_report.rows
 
     @property
     def concepts(self) -> List[str]:
@@ -151,12 +163,17 @@ class FilingViewer:
     def __init__(self,
                  sgml: 'FilingSGML',
                  filing_summary: 'FilingSummary',
-                 metalinks: MetaLinks):
+                 metalinks: MetaLinks,
+                 filing=None):
         self._sgml = sgml
         self._filing_summary = filing_summary
         self._metalinks = metalinks
+        self._filing = filing  # retained for lazy XBRL parse (level enrichment, GH #799)
         self._viewer_reports_cache: Dict[str, ViewerReport] = {}
         self._concept_reports_cache: Dict[str, ConceptReport] = {}
+        # Lazy XBRL — parsed only when concept_rows level enrichment is needed.
+        self._xbrl_loaded = False
+        self._xbrl = None
 
     # --- Report access by category (like SEC viewer tabs) ---
 
@@ -479,12 +496,16 @@ class FilingViewer:
         meta_report = self._metalinks.get_report(rkey) if rkey else None
         concept_report = self._get_or_create_concept_report(report)
 
-        vr = ViewerReport(report, meta_report, concept_report)
+        vr = ViewerReport(report, meta_report, concept_report, viewer=self)
         self._viewer_reports_cache[fname] = vr
         return vr
 
     def _get_or_create_concept_report(self, report: 'Report') -> Optional[ConceptReport]:
-        """Lazily parse R*.htm content into a ConceptReport."""
+        """Lazily parse R*.htm content into a ConceptReport.
+
+        Level enrichment (GH #799) is deferred to first concept_rows access
+        on the wrapping ViewerReport — see ViewerReport.concept_rows.
+        """
         fname = report.html_file_name
         if not fname:
             return None
@@ -496,6 +517,56 @@ class FilingViewer:
         cr = extract_concepts_from_report(content)
         self._concept_reports_cache[fname] = cr
         return cr
+
+    def _get_xbrl(self):
+        """Lazy-load the XBRL parser for presentation-tree access (GH #799).
+
+        Returns None if no Filing was supplied (e.g., legacy construction)
+        or if XBRL parsing fails. Caches both the success and failure cases
+        so we don't retry on every concept_rows access.
+        """
+        if self._xbrl_loaded:
+            return self._xbrl
+        self._xbrl_loaded = True
+        if self._filing is None:
+            return None
+        try:
+            from edgar.xbrl.xbrl import XBRL
+            self._xbrl = XBRL.from_filing(self._filing)
+        except Exception:
+            self._xbrl = None
+        return self._xbrl
+
+    def _enrich_levels_from_presentation_tree(self, cr: ConceptReport, role: Optional[str]) -> None:
+        """Populate ConceptRow.level from the XBRL presentation linkbase (GH #799).
+
+        SEC R*.htm files no longer encode hierarchy in HTML (no plN classes,
+        no padding-left, no row nesting on modern filings). The canonical
+        source is the XBRL presentation linkbase, which the parser already
+        loads as ``xbrl.presentation_trees[role].all_nodes[concept_id].depth``.
+
+        Levels are normalized so the smallest depth observed in the report
+        becomes 0 — e.g., a balance-sheet root abstract at depth 2 maps to
+        level 0, its children at depth 3 to level 1, etc.
+        """
+        if not role or not cr.rows:
+            return
+        xbrl = self._get_xbrl()
+        if xbrl is None:
+            return
+        tree = xbrl.presentation_trees.get(role)
+        if tree is None or not tree.all_nodes:
+            return
+
+        # Collect raw depths only for rows whose concept maps into this tree.
+        matched = [(row, tree.all_nodes[row.concept_id].depth)
+                   for row in cr.rows
+                   if row.concept_id in tree.all_nodes]
+        if not matched:
+            return
+        min_depth = min(depth for _, depth in matched)
+        for row, depth in matched:
+            row.level = depth - min_depth
 
     def _report_key(self, report: 'Report') -> Optional[str]:
         """Extract report key (e.g., 'R2') from html_file_name (e.g., 'R2.htm')."""
@@ -524,7 +595,7 @@ class FilingViewer:
         if not metalinks_content:
             return None
         metalinks = MetaLinks.parse(metalinks_content)
-        return cls(sgml, filing_summary, metalinks)
+        return cls(sgml, filing_summary, metalinks, filing=filing)
 
     @staticmethod
     def viewer_support(filing) -> str:
