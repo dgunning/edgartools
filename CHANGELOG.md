@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.31.0] - 2026-05-08
+
+### Added
+
+- **`include_quarterly` parameter on stitched XBRLS statements** — `XBRLS.from_filings()` previously emitted a single column per filing, preferring YTD/annual over the discrete-quarter period when both existed in the source XBRL (Issue #475 design). This created a parity gap with single-filing `XBRL`, which surfaces both. The new opt-in `include_quarterly=False` parameter on `XBRLS.get_statement()`, `StitchedStatement`, and `statements.income_statement()` / `cashflow_statement()` causes each 10-Q to contribute both a 90-day discrete column and the YTD column, and each 10-K to contribute both an annual column and its embedded Q4 column. Distinct from `discrete_quarters` (v5.30.3) which derives quarterly cash-flow values by subtraction; this surfaces facts already in the filing. Default behavior is preserved. Has no effect on Balance Sheet (instant periods only). ([#780](https://github.com/dgunning/edgartools/issues/780), reporter @AhmedShaker12)
+
+### Fixed
+
+- **`viewer.financial_statements` silently dropped income statements miscategorized in `FilingSummary.xml`** — AbbVie's 2021 10-K placed `Consolidated Statements of Earnings` under `MenuCategory='Uncategorized'` instead of `'Statements'` — a filer mistake that EdgarTools faithfully reflected, so the income statement disappeared from `viewer.financial_statements` while comparable 2019/2020/2022-2025 filings worked fine. The viewer now returns the union of FilingSummary `MenuCategory='Statements'` and MetaLinks `groupType='statement'`, deduplicated by HTML filename, in filing-position order. MetaLinks reflects XBRL taxonomy classification and is more reliable than filer-provided menu metadata. ([#797](https://github.com/dgunning/edgartools/issues/797), reporter @mpreiss9)
+
+- **`viewer.concept_rows[*].level` always returned 0** — Modern SEC R*.htm files don't encode hierarchy in the rendered HTML — empirically verified across 10 diverse 2025 10-Ks (AAPL, ABT, JPM, WMT, XOM, VZ, MSFT, GS, PFE, BRK.B): zero `plN` class tokens on primary statements, almost no `padding-left` styles, no row nesting. The canonical source is the XBRL **presentation linkbase**, which the existing parser already loads as `xbrl.presentation_trees[role].all_nodes[concept_id].depth`. The viewer now lazy-loads the parsed XBRL on first `concept_rows` access and populates `ConceptRow.level` from the presentation tree, normalized so the smallest depth observed in a report becomes 0. For the issue's canary case (ABT balance sheet) the level distribution went from `{0: 45}` to `{0: 15, 1: 26, 2: 4}`. ([#799](https://github.com/dgunning/edgartools/issues/799), reporter @mpreiss9, investigation by @tjhub1983)
+
+- **`XBRLS.from_filings(list, filter_amendments=True)` crashed with `AttributeError`** — The signature accepts `Union[Filings, List[Filing]]` and defaults `filter_amendments=True`, but the implementation called `filings.filter()` unconditionally — raising `AttributeError: 'list' object has no attribute 'filter'` whenever a plain list was passed. The implementation now branches on whether the input has a `.filter` method; for plain lists it falls back to a form-suffix check that drops forms ending in `/A`. (edgartools-6k96)
+
 ## [5.30.3] - 2026-05-06
 
 ### Fixed
