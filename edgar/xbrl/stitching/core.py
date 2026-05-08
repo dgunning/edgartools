@@ -955,7 +955,8 @@ def stitch_statements(
     use_optimal_periods: bool = True,
     include_dimensions: bool = False,
     industry: Optional[str] = None,
-    discrete_quarters: bool = False
+    discrete_quarters: bool = False,
+    include_quarterly: bool = False
 ) -> Dict[str, Any]:
     """
     Stitch together statements from multiple XBRL objects.
@@ -972,6 +973,10 @@ def stitch_statements(
                   If None, auto-detected from the first XBRL object's standardization cache.
         discrete_quarters: If True and statement_type is CashFlowStatement, convert
                           YTD cumulative periods into discrete quarter values (default: False)
+        include_quarterly: If True, surface discrete-quarter periods alongside YTD/annual
+            periods so 10-Qs contribute both 90-day and YTD columns and 10-Ks contribute
+            both annual and Q4 columns (GH #780). Default False preserves existing
+            YTD/annual-only behavior. Ignored for BalanceSheet (instant periods only).
 
     Returns:
         Stitched statement data
@@ -991,7 +996,10 @@ def stitch_statements(
     # If using optimal periods based on entity info
     if use_optimal_periods:
         # Use our utility function to determine the best periods
-        optimal_periods = determine_optimal_periods(xbrl_list, statement_type, max_periods=max_periods)
+        optimal_periods = determine_optimal_periods(
+            xbrl_list, statement_type, max_periods=max_periods,
+            include_quarterly=include_quarterly,
+        )
 
         # Limit to max_periods if needed
         if len(optimal_periods) > max_periods:

@@ -5,7 +5,7 @@ This module contains utility functions for rendering and converting stitched
 statement data.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import pandas as pd
 
@@ -73,11 +73,20 @@ def to_pandas(stitched_data: Dict[str, Any], presentation: bool = True) -> pd.Da
     # Extract periods and statement data
     statement_data = stitched_data['statement_data']
 
-    # Create ordered list of period column names (preserving the original ordering)
-    period_columns = []
-    for period_id, _period_label in stitched_data['periods']:
-        # Use the end_date in YYYY-MM-DD format as the column name
-        col = period_id[-10:]
+    # Create ordered list of period column names (preserving the original ordering).
+    # Default naming uses the end_date (YYYY-MM-DD); when two periods share the same
+    # end date (e.g., a 10-Q's discrete Q and YTD both end the same day under
+    # include_quarterly=True, GH #780), fall back to the disambiguated period_label.
+    end_date_counts: Dict[str, int] = {}
+    for period_id, _ in stitched_data['periods']:
+        end_date_counts[period_id[-10:]] = end_date_counts.get(period_id[-10:], 0) + 1
+
+    period_id_to_col: Dict[str, str] = {}
+    period_columns: List[str] = []
+    for period_id, period_label in stitched_data['periods']:
+        end_date = period_id[-10:]
+        col = end_date if end_date_counts[end_date] == 1 else period_label
+        period_id_to_col[period_id] = col
         period_columns.append(col)
 
     # Create a dictionary for the DataFrame with ordered columns
@@ -108,7 +117,7 @@ def to_pandas(stitched_data: Dict[str, Any], presentation: bool = True) -> pd.Da
 
         # Add values for each period in the correct order
         for period_id, _period_label in stitched_data['periods']:
-            col = period_id[-10:]
+            col = period_id_to_col[period_id]
             value = item['values'].get(period_id)
             # Apply preferred_sign if presentation mode is enabled
             if presentation and value is not None and ps is not None and ps != 0:

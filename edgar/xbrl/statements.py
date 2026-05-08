@@ -3073,7 +3073,8 @@ class StitchedStatement:
 
     def __init__(self, xbrls, statement_type: str, max_periods: int = 8, standard: bool = True,
                  use_optimal_periods: bool = True, include_dimensions: bool = False,
-                 view: ViewType = None, discrete_quarters: bool = False):
+                 view: ViewType = None, discrete_quarters: bool = False,
+                 include_quarterly: bool = False):
         """
         Initialize with XBRLS object and statement parameters.
 
@@ -3088,6 +3089,9 @@ class StitchedStatement:
                   'detailed' → include_dimensions=True, 'standard'/'summary' → include_dimensions=False.
             discrete_quarters: If True and statement is CashFlowStatement, convert
                               YTD cumulative periods into discrete quarter values (default: False)
+            include_quarterly: If True, surface discrete-quarter columns alongside YTD/annual
+                              columns from each filing (GH #780). Default False preserves
+                              existing one-column-per-filing behavior. Ignored for BalanceSheet.
         """
         self.xbrls = xbrls
         self.statement_type = statement_type
@@ -3095,6 +3099,7 @@ class StitchedStatement:
         self.standard = standard
         self.use_optimal_periods = use_optimal_periods
         self.discrete_quarters = discrete_quarters
+        self.include_quarterly = include_quarterly
         # If view is provided, derive include_dimensions from it
         if view is not None:
             normalized = normalize_view(view)
@@ -3132,7 +3137,8 @@ class StitchedStatement:
                 self.standard,
                 self.use_optimal_periods,
                 self.include_dimensions,
-                self.discrete_quarters
+                self.discrete_quarters,
+                self.include_quarterly,
             )
         return self._statement_data
 
@@ -3229,7 +3235,8 @@ class StitchedStatements:
 
     def income_statement(self, max_periods: int = 8, standard: bool = True,
                          use_optimal_periods: bool = True, show_date_range: bool = False,
-                         include_dimensions: bool = False, view: ViewType = None) -> Optional[StitchedStatement]:
+                         include_dimensions: bool = False, view: ViewType = None,
+                         include_quarterly: bool = False) -> Optional[StitchedStatement]:
         """
         Get a stitched income statement across multiple time periods.
 
@@ -3240,12 +3247,15 @@ class StitchedStatements:
             show_date_range: Whether to show full date ranges for duration periods
             include_dimensions: Whether to include dimensional segment data (default: False)
             view: StatementView controlling dimensional filtering. Overrides include_dimensions if provided.
+            include_quarterly: If True, surface discrete-quarter columns alongside YTD/annual
+                              columns from each filing (GH #780). Default False.
 
         Returns:
             StitchedStatement for the income statement
         """
         statement = StitchedStatement(self.xbrls, 'IncomeStatement', max_periods, standard,
-                                     use_optimal_periods, include_dimensions, view=view)
+                                     use_optimal_periods, include_dimensions, view=view,
+                                     include_quarterly=include_quarterly)
         if show_date_range:
             statement.show_date_range = show_date_range
         return statement
@@ -3253,7 +3263,8 @@ class StitchedStatements:
     def cashflow_statement(self, max_periods: int = 8, standard: bool = True,
                            use_optimal_periods: bool = True, show_date_range: bool = False,
                            include_dimensions: bool = False, view: ViewType = None,
-                           discrete_quarters: bool = False) -> Optional[StitchedStatement]:
+                           discrete_quarters: bool = False,
+                           include_quarterly: bool = False) -> Optional[StitchedStatement]:
         """
         Get a stitched cash flow statement across multiple time periods.
 
@@ -3266,13 +3277,19 @@ class StitchedStatements:
             view: StatementView controlling dimensional filtering. Overrides include_dimensions if provided.
             discrete_quarters: If True, convert YTD cumulative periods into discrete
                               quarter values (e.g. Q2 = 6-month YTD minus Q1). Default: False.
+            include_quarterly: If True, surface discrete-quarter columns alongside YTD/annual
+                              columns from each filing (GH #780). Distinct from
+                              ``discrete_quarters`` — this surfaces existing per-filing quarterly
+                              facts; ``discrete_quarters`` derives them from YTD by subtraction.
+                              Default False.
 
         Returns:
             StitchedStatement for the cash flow statement
         """
         statement = StitchedStatement(self.xbrls, 'CashFlowStatement', max_periods, standard,
                                      use_optimal_periods, include_dimensions, view=view,
-                                     discrete_quarters=discrete_quarters)
+                                     discrete_quarters=discrete_quarters,
+                                     include_quarterly=include_quarterly)
         if show_date_range:
             statement.show_date_range = show_date_range
         return statement
