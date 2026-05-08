@@ -409,8 +409,10 @@ label = cache.get_standard_label(
     {"statement_type": "IncomeStatement"}
 )
 
-# Standardize entire statement with caching
-raw_data = xbrl.get_statement_data("IncomeStatement")
+# Standardize entire statement with caching.
+# Note: pass the raw line-item list from get_statement(), NOT the dict
+# returned by get_statement_by_type() (that dict's `data` key holds the list).
+raw_data = xbrl.get_statement("IncomeStatement")
 standardized = cache.standardize_statement_data(raw_data, "IncomeStatement")
 
 # Check cache statistics
