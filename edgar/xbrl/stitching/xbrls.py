@@ -52,7 +52,10 @@ class XBRLS:
         Each filing should be the same form (e.g., 10-K, 10-Q) and from the same company.
 
         Args:
-            filings: List of Filing objects, should be from the same company
+            filings: A ``Filings`` collection or a plain list of ``Filing`` objects,
+                all from the same company.
+            filter_amendments: If True (default), drop amendments (forms ending in
+                ``/A``) before stitching. Works for both ``Filings`` and plain lists.
 
         Returns:
             XBRLS object with stitched data
@@ -60,7 +63,11 @@ class XBRLS:
         from edgar.xbrl.xbrl import XBRL
 
         if filter_amendments:
-            filtered_filings = filings.filter(amendments=False)
+            if hasattr(filings, 'filter'):
+                filtered_filings = filings.filter(amendments=False)
+            else:
+                # Plain list/iterable: drop amendments by form-suffix check (GH edgartools-6k96).
+                filtered_filings = [f for f in filings if not (f.form or '').endswith('/A')]
         else:
             filtered_filings = filings
 
