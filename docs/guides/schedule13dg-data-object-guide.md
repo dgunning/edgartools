@@ -67,7 +67,7 @@ When you call `filing.obj()` on a Schedule 13D filing, edgartools parses the XML
 | `reporting_persons` | `List[ReportingPerson]` | Beneficial owners filing the report |
 | `items` | `Schedule13DItems` | Items 1-7 narrative disclosures |
 | `signatures` | `List[Signature]` | Filing signatures |
-| `date_of_event` | `str` | Date that triggered the filing |
+| `date_of_event` | `str` | Date that triggered the filing. Also available as `event_date` for cross-13D/13G iteration. |
 | `previously_filed` | `bool` | Whether a prior filing exists |
 | `amendment_number` | `Optional[int]` | Amendment sequence number |
 | `is_amendment` | `bool` | Whether this is an amendment (`/A`) |
@@ -147,7 +147,7 @@ When you call `filing.obj()` on a Schedule 13G filing, edgartools parses the XML
 | `reporting_persons` | `List[ReportingPerson]` | Beneficial owners |
 | `items` | `Schedule13GItems` | Items 1-10 |
 | `signatures` | `List[Signature]` | Filing signatures |
-| `event_date` | `str` | Date that triggered the filing |
+| `event_date` | `str` | Date that triggered the filing. Also available as `date_of_event` for cross-13D/13G iteration. |
 | `rule_designation` | `Optional[str]` | SEC rule under which filing is made (e.g., "Rule 13d-1(c)") |
 | `is_amendment` | `bool` | Whether this is an amendment |
 | `filing_date` | `date` | Date filed with the SEC |
