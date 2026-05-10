@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Schedule 13D/13G event-date attribute name mismatch** — `Schedule13D` exposed the triggering-event date as `date_of_event` while `Schedule13G` exposed it as `event_date`, breaking duck-typing across a mixed list of 13D/13G filings and forcing callers to use `getattr` / `hasattr`. Both classes now accept either name; the underlying attribute is unchanged, so existing code keeps working. ([#804](https://github.com/dgunning/edgartools/issues/804))
+
 ## [5.31.0] - 2026-05-08
 
 ### Added

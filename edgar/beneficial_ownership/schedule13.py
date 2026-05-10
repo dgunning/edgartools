@@ -367,6 +367,11 @@ class Schedule13D:
         return self._filing.filing_date
 
     @property
+    def event_date(self) -> str:
+        """Alias for ``date_of_event`` for API consistency with ``Schedule13G``."""
+        return self.date_of_event
+
+    @property
     def total_shares(self) -> int:
         """
         Total beneficial ownership across all reporting persons.
@@ -798,6 +803,11 @@ class Schedule13G:
     def filing_date(self) -> date:
         """Get the filing date"""
         return self._filing.filing_date
+
+    @property
+    def date_of_event(self) -> str:
+        """Alias for ``event_date`` for API consistency with ``Schedule13D``."""
+        return self.event_date
 
     @property
     def total_shares(self) -> int:
