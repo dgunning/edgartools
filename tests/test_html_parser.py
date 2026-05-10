@@ -393,6 +393,51 @@ class TestPerformance:
         # The streaming parser currently has issues with iterparse
         # clearing elements before text can be extracted
 
+    def test_streaming_parser_size_check_uses_input_bytes(self):
+        """``StreamingParser.parse`` must size-check against input bytes.
+
+        Regression pin. Before commit 6b702bd9 the streaming loop
+        accumulated ``len(etree.tostring(elem))`` on every iteration,
+        which re-serialized nested subtrees and could falsely reject
+        documents whose actual size was within the configured limit.
+        That commit deferred the accounting around table subtrees but
+        kept the per-event accumulator otherwise — leaving the size
+        check coupled to lxml internals (sibling-pruning order, tail
+        attribution) instead of the input.
+
+        This test calls ``StreamingParser`` directly to bypass the
+        upstream ``HTMLParser._parse`` size guard and pins the
+        invariant: parsing succeeds when actual input size is within
+        ``max_document_size`` and raises ``DocumentTooLargeError``
+        only when it isn't, regardless of how the document is nested.
+        """
+        from edgar.documents.utils.streaming import StreamingParser
+
+        # Deeply-nested inline soup mirrors SEC inline-XBRL filings.
+        inner = "<p><b><i><u><em><strong>x</strong></em></u></i></b></p>"
+        rows = "".join(inner for _ in range(2000))
+        html = f"<html><body>{rows}</body></html>"
+        actual_size = len(html.encode("utf-8"))
+
+        # Cap just above actual size — accounting that reports more
+        # than actual bytes would falsely raise here.
+        config = ParserConfig(
+            streaming_threshold=actual_size // 2,
+            max_document_size=actual_size + 1024,
+        )
+        parser = StreamingParser(config, strategies={})
+        doc = parser.parse(html)
+        assert doc is not None
+
+        # Cap below actual size must still raise.
+        too_small = ParserConfig(
+            streaming_threshold=actual_size // 2,
+            max_document_size=actual_size // 2,
+        )
+        parser_small = StreamingParser(too_small, strategies={})
+        with pytest.raises(DocumentTooLargeError):
+            parser_small.parse(html)
+
 
 class TestXBRLExtraction:
     """Test XBRL extraction functionality."""

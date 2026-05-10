@@ -59,7 +59,6 @@ class StreamingParser:
         self.in_table = False
         self._table_depth = 0
         self.table_buffer = []
-        self.bytes_processed = 0
 
     def parse(self, html: str) -> "Document":
         """
@@ -80,10 +79,21 @@ class StreamingParser:
         # Store original HTML BEFORE parsing (needed for TOC-based section detection)
         original_html = html
 
+        # Size-check the input once, against the actual byte length.
+        # The previous per-event accumulator re-serialized each element
+        # on its `end` event via etree.tostring(elem), which double-
+        # counted nested subtrees and grew with table size (O(n²)).
+        # HTMLParser._parse already performs this check for the
+        # streaming entry point; this guard preserves the invariant
+        # for callers that invoke StreamingParser directly.
+        encoded = html.encode('utf-8')
+        if len(encoded) > self.config.max_document_size:
+            raise DocumentTooLargeError(len(encoded), self.config.max_document_size)
+
         try:
             # Create streaming parser
             parser = etree.iterparse(
-                io.BytesIO(html.encode('utf-8')),
+                io.BytesIO(encoded),
                 events=('start', 'end'),
                 html=True,
                 recover=True,
@@ -93,13 +103,6 @@ class StreamingParser:
             # Process events
             for event, elem in parser:
                 self._process_event(event, elem)
-
-                # Check size limit (only on end events outside tables to
-                # avoid repeatedly serializing growing table subtrees)
-                if event == 'end' and self._table_depth == 0:
-                    self.bytes_processed += len(etree.tostring(elem, encoding='unicode', method='html'))
-                if self.bytes_processed > self.config.max_document_size:
-                    raise DocumentTooLargeError(self.bytes_processed, self.config.max_document_size)
 
                 # Flush buffer if needed
                 if len(self.node_buffer) >= self.MAX_NODE_BUFFER:
