@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.31.1] - 2026-05-12
+
 ### Fixed
 
-- **Schedule 13D/13G event-date attribute name mismatch** — `Schedule13D` exposed the triggering-event date as `date_of_event` while `Schedule13G` exposed it as `event_date`, breaking duck-typing across a mixed list of 13D/13G filings and forcing callers to use `getattr` / `hasattr`. Both classes now accept either name; the underlying attribute is unchanged, so existing code keeps working. ([#804](https://github.com/dgunning/edgartools/issues/804))
+- **Schedule 13D/13G silently dropped CUSIPs with the new `<issuerCusips>` wrapper** — SEC began wrapping `<issuerCusipNumber>` inside an `<issuerCusips>` container element on some Schedule 13D/13G filings (e.g. CIK 1906837 13D, CIK 1425851 13G). The parser's BS4 `recursive=False` lookup at the top-level only matched the flat layout, so `subject_company.cusip` came back as `''` whenever the wrapper was present. Parsing now falls back to a recursive lookup when the flat probe misses, handling both wire formats. ([#802](https://github.com/dgunning/edgartools/issues/802), PR [#803](https://github.com/dgunning/edgartools/pull/803) by @HristoRaykov)
+
+- **Schedule 13D/13G event-date attribute name mismatch** — `Schedule13D` exposed the triggering-event date as `date_of_event` while `Schedule13G` exposed it as `event_date`, breaking duck-typing across a mixed list of 13D/13G filings and forcing callers to use `getattr` / `hasattr`. Both classes now accept either name; the underlying attribute is unchanged, so existing code keeps working. ([#804](https://github.com/dgunning/edgartools/issues/804), PR [#805](https://github.com/dgunning/edgartools/pull/805) by @0ywfe)
+
+- **Spurious `DocumentTooLargeError` from `StreamingParser` on legitimate documents** — The streaming HTML parser accumulated `len(etree.tostring(elem))` on every lxml `iterparse` `end` event. Because `tostring` serializes the full subtree and `end` fires for every closing tag, nested elements were counted multiple times — large nested HTML could trip `max_document_size` even though the source document was under the limit. The per-event accumulator is also redundant: `HTMLParser._parse` already validates `len(html.encode("utf-8"))` against `max_document_size` before invoking streaming mode. The accumulator and its state are removed; size is now checked once at the top of `StreamingParser.parse()` and the same encoded bytes are reused for `iterparse`. ([#806](https://github.com/dgunning/edgartools/pull/806) by @kevinchiu)
 
 ## [5.31.0] - 2026-05-08
 
