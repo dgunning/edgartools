@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`viewer.concept_report.currency_scaling` returned wrong scales for filers using non-Apple header formats** — `ConceptReport.currency_scaling` was derived from a narrow text match on the R*.htm `<th class='tl'>` header (`$ in millions` / `$in millions`). Filers using `In Millions`, `(in millions)`, `USD ($) in Millions`, or `Dollars in Millions` silently fell through to the default of `1`, producing scaling that disagreed across statements within a single filing (ALGN balance sheet vs income statement) and wrong values for whole multi-year ranges (ABNB showing `1` for 2023/2024 when the actual scale is millions). `ViewerReport.currency_scaling` now derives the scale from the XBRL `decimals` attribute on monetary facts mapped to the report's role in the presentation linkbase — filer-mandated and uniform (`-6` → millions, `-3` → thousands, `0` → units). The text-match value is retained as a fallback when XBRL is unavailable. The resolved scale is mirrored back onto `ConceptReport.currency_scaling` so existing code reading it via the concept-report path also benefits. Same precedent as GH #799 (level enrichment from XBRL). ([#807](https://github.com/dgunning/edgartools/issues/807), reporter @mpreiss9)
+
 ## [5.31.1] - 2026-05-12
 
 ### Fixed

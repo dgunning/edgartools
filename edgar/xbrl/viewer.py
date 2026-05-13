@@ -13,6 +13,7 @@ Access via ``filing.viewer()``:
     viewer.search('debt')           # Search all concepts
     viewer.validate()               # Check calculation trees
 """
+from collections import Counter
 from functools import cached_property
 from typing import Dict, List, Optional, TYPE_CHECKING
 
@@ -33,6 +34,49 @@ if TYPE_CHECKING:
 __all__ = ['FilingViewer', 'ViewerReport']
 
 
+# Concepts whose decimals attribute reflects shares / ratios / percentages —
+# excluded when inferring the report's currency scaling. Mirrors the keyword
+# list in edgar.xbrl.core.determine_dominant_scale.
+_NON_MONETARY_LABEL_KEYWORDS = (
+    'shares', 'share', 'stock', 'eps', 'earnings per share',
+    'weighted average', 'number of', 'per common share', 'per share',
+    'per basic', 'per diluted', 'outstanding', 'issued',
+    'ratio', 'margin', 'percentage', 'rate', 'per cent',
+)
+
+
+def _is_monetary_label(label: str) -> bool:
+    if not label:
+        return True
+    label_lower = label.lower()
+    return not any(kw in label_lower for kw in _NON_MONETARY_LABEL_KEYWORDS)
+
+
+def _multiplier_from_decimals(decimals_values: List[int]) -> int:
+    """Convert a sample of XBRL ``decimals`` attribute values into a positive multiplier.
+
+    XBRL convention: ``decimals="-6"`` means rounded to the nearest million,
+    so display values are in millions and the raw amount is ``display * 1_000_000``.
+    Buckets each input into {-9, -6, -3, 0} and returns the most common scaled
+    bucket (preferring scale over units). Returns 1 when the input is empty.
+    """
+    if not decimals_values:
+        return 1
+    counts: Counter = Counter()
+    for d in decimals_values:
+        if d <= -9:
+            counts[-9] += 1
+        elif d <= -6:
+            counts[-6] += 1
+        elif d <= -3:
+            counts[-3] += 1
+        else:
+            counts[0] += 1
+    scaled = [b for b in counts if b < 0]
+    best = max(scaled, key=lambda b: counts[b]) if scaled else 0
+    return 10 ** (-best)
+
+
 class ViewerReport:
     """
     A report in the viewer with concept annotations from R*.htm.
@@ -51,6 +95,8 @@ class ViewerReport:
         self._concept_report = concept_report
         self._viewer = viewer  # back-ref for lazy level enrichment (GH #799)
         self._levels_enriched = False
+        self._scaling_resolved = False
+        self._scaling: Optional[int] = None
 
     @property
     def short_name(self) -> str:
@@ -85,6 +131,37 @@ class ViewerReport:
     @property
     def concept_report(self) -> Optional[ConceptReport]:
         return self._concept_report
+
+    @property
+    def currency_scaling(self) -> int:
+        """Currency-scale multiplier for monetary values in this report.
+
+        ``1`` = units, ``1_000`` = thousands, ``1_000_000`` = millions,
+        ``1_000_000_000`` = billions. Multiplying a display value by this
+        factor yields the raw amount in dollars (or the reporting currency).
+
+        Derived from the XBRL ``decimals`` attribute on monetary facts mapped
+        to this statement's role in the presentation linkbase (GH #807). The
+        R*.htm header text-match value on ``concept_report.currency_scaling``
+        is used as a fallback when XBRL is unavailable.
+        """
+        # ConceptReport is falsy when rows is empty (it defines __len__), so we
+        # must distinguish "no concept report" from "empty rows" via ``is None``.
+        if self._concept_report is None:
+            return 1
+        if not self._scaling_resolved:
+            self._scaling_resolved = True
+            if self._viewer is not None:
+                self._scaling = self._viewer._resolve_currency_scaling(
+                    self._concept_report, self._report.role
+                )
+            else:
+                self._scaling = self._concept_report.currency_scaling
+            # Mirror the resolved value back onto ConceptReport so callers
+            # accessing it via concept_report.currency_scaling (the path
+            # reported in GH #807) also see the corrected value.
+            self._concept_report.currency_scaling = self._scaling
+        return self._scaling or 1
 
     @property
     def concept_rows(self) -> list:
@@ -536,6 +613,63 @@ class FilingViewer:
         except Exception:
             self._xbrl = None
         return self._xbrl
+
+    def _resolve_currency_scaling(self, cr: ConceptReport, role: Optional[str]) -> int:
+        """Resolve a report's currency-scale multiplier from XBRL decimals (GH #807).
+
+        Mirrors the GH #799 pattern for level enrichment: XBRL is the canonical
+        source. The ``decimals`` attribute on each monetary fact is filer-mandated
+        and uniform (``-6`` → millions, ``-3`` → thousands, ``0`` → units), unlike
+        the R*.htm ``<th class='tl'>`` header which only matches Apple-style
+        ``$ in Millions`` formatting and silently misses common variations
+        (``In Millions``, ``USD ($) in Millions``, ``(in millions)``, …).
+
+        Falls back to ``cr.currency_scaling`` (the R*.htm header match value)
+        when no XBRL is available, when the role is missing from the presentation
+        linkbase, or when no monetary facts produce a usable ``decimals`` value.
+        """
+        if cr is None:
+            return 1
+        if not cr.rows:
+            return cr.currency_scaling
+        xbrl = self._get_xbrl()
+        if xbrl is None or not role:
+            return cr.currency_scaling
+        tree = xbrl.presentation_trees.get(role)
+        if tree is None or not tree.all_nodes:
+            return cr.currency_scaling
+
+        decimals_values: List[int] = []
+        seen_concepts = set()
+        for row in cr.rows:
+            if row.is_abstract or row.is_header:
+                continue
+            if not _is_monetary_label(row.label):
+                continue
+            if row.concept_id in seen_concepts:
+                continue
+            seen_concepts.add(row.concept_id)
+            try:
+                facts = xbrl.facts.query().by_concept(row.concept_id, exact=True).execute()
+            except Exception:
+                continue
+            for fact in facts:
+                d = fact.get('decimals') if isinstance(fact, dict) else getattr(fact, 'decimals', None)
+                if d is None:
+                    continue
+                if isinstance(d, str):
+                    if d == 'INF':
+                        continue
+                    try:
+                        decimals_values.append(int(d))
+                    except ValueError:
+                        continue
+                elif isinstance(d, int):
+                    decimals_values.append(d)
+
+        if not decimals_values:
+            return cr.currency_scaling
+        return _multiplier_from_decimals(decimals_values)
 
     def _enrich_levels_from_presentation_tree(self, cr: ConceptReport, role: Optional[str]) -> None:
         """Populate ConceptRow.level from the XBRL presentation linkbase (GH #799).
