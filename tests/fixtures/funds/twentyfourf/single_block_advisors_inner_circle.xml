@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edgarSubmission xmlns="http://www.sec.gov/edgar/twentyfourf2filer" xmlns:feec="http://www.sec.gov/edgar/feecommon" xmlns:com="http://www.sec.gov/edgar/common">
+  <schemaVersion>X0102</schemaVersion>
+  <headerData>
+    <submissionType>24F-2NT</submissionType>
+    <filerInfo>
+      <liveTestFlag>LIVE</liveTestFlag>
+      <filer>
+        <issuerCredentials>
+          <cik>0000878719</cik>
+          <ccc>XXXXXXXX</ccc>
+        </issuerCredentials>
+      </filer>
+      <investmentCompanyType>N-1A</investmentCompanyType>
+    </filerInfo>
+  </headerData>
+  <formData>
+    <annualFilings>
+      <annualFilingInfo>
+        <item1>
+          <nameOfIssuer>ADVISORS' INNER CIRCLE FUND</nameOfIssuer>
+          <addressOfIssuer>
+            <street1>One Freedom Valley Drive</street1>
+            <city>Oaks</city>
+            <state>PA</state>
+            <country>X1</country>
+            <zipCode>19456</zipCode>
+          </addressOfIssuer>
+        </item1>
+        <item2>
+          <reportSeriesClass>
+            <rptSeriesClassInfo>
+              <seriesName>Hamlin High Dividend Equity Fund</seriesName>
+              <seriesId>S000036634</seriesId>
+              <includeAllClassesFlag>true</includeAllClassesFlag>
+            </rptSeriesClassInfo>
+            <rptSeriesClassInfo>
+              <seriesName>Sarofim Equity Fund</seriesName>
+              <seriesId>S000041278</seriesId>
+              <includeAllClassesFlag>true</includeAllClassesFlag>
+            </rptSeriesClassInfo>
+          </reportSeriesClass>
+        </item2>
+        <item3>
+          <investmentCompActFileNo>811-06400</investmentCompActFileNo>
+          <securitiesActFileNumbers>
+            <securitiesActFileNo>
+              <fileNumber>033-42484</fileNumber>
+            </securitiesActFileNo>
+          </securitiesActFileNumbers>
+        </item3>
+        <item4>
+          <lastDayOfFiscalYear>12/31/2025</lastDayOfFiscalYear>
+          <isThisFormBeingFiledLate>false</isThisFormBeingFiledLate>
+          <isThisTheLastTimeIssuerFilingThisForm>false</isThisTheLastTimeIssuerFilingThisForm>
+        </item4>
+        <item5>
+          <aggregateSalePriceOfSecuritiesSold>418915624</aggregateSalePriceOfSecuritiesSold>
+          <aggregatePriceOfSecuritiesRedeemedOrRepurchasedInFiscalYear>309040895.54</aggregatePriceOfSecuritiesRedeemedOrRepurchasedInFiscalYear>
+          <aggregatePriceOfSecuritiesRedeemedOrRepurchasedAnyPrior>0</aggregatePriceOfSecuritiesRedeemedOrRepurchasedAnyPrior>
+          <totalAvailableRedemptionCredits>309040895.54</totalAvailableRedemptionCredits>
+          <netSales>109874728.46</netSales>
+          <redemptionCreditsAvailableForUseInFutureYears>0</redemptionCreditsAvailableForUseInFutureYears>
+          <multiplierForDeterminingRegistrationFee>0.0001381</multiplierForDeterminingRegistrationFee>
+          <registrationFeeDue>15173.7</registrationFeeDue>
+        </item5>
+        <item6>
+          <interestDue>0</interestDue>
+        </item6>
+        <item7>
+          <totalOfRegistrationFeePlusAnyInterestDue>15173.7</totalOfRegistrationFeePlusAnyInterestDue>
+        </item7>
+        <signature>
+          <signature>Andrew Metzger</signature>
+          <nameAndTitle>Treasurer, Controller and
+Chief Financial Officer</nameAndTitle>
+          <signatureDate>03/27/2026</signatureDate>
+        </signature>
+      </annualFilingInfo>
+    </annualFilings>
+  </formData>
+</edgarSubmission>
