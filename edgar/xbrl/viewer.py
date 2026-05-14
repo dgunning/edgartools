@@ -35,8 +35,8 @@ __all__ = ['FilingViewer', 'ViewerReport']
 
 
 # Concepts whose decimals attribute reflects shares / ratios / percentages —
-# excluded when inferring the report's currency scaling. Mirrors the keyword
-# list in edgar.xbrl.core.determine_dominant_scale.
+# excluded when inferring the report's currency scaling.
+# Keep in sync with edgar.xbrl.core.determine_dominant_scale.
 _NON_MONETARY_LABEL_KEYWORDS = (
     'shares', 'share', 'stock', 'eps', 'earnings per share',
     'weighted average', 'number of', 'per common share', 'per share',
@@ -96,7 +96,7 @@ class ViewerReport:
         self._viewer = viewer  # back-ref for lazy level enrichment (GH #799)
         self._levels_enriched = False
         self._scaling_resolved = False
-        self._scaling: Optional[int] = None
+        self._scaling: int = 1  # default until first resolution
 
     @property
     def short_name(self) -> str:
@@ -161,7 +161,7 @@ class ViewerReport:
             # accessing it via concept_report.currency_scaling (the path
             # reported in GH #807) also see the corrected value.
             self._concept_report.currency_scaling = self._scaling
-        return self._scaling or 1
+        return self._scaling
 
     @property
     def concept_rows(self) -> list:
@@ -641,6 +641,10 @@ class FilingViewer:
 
         decimals_values: List[int] = []
         seen_concepts = set()
+        # Dedup is per-concept (avoid querying the same concept N times when it
+        # repeats across dimensional rows). Each query still returns one fact
+        # per period context, so a single concept can still contribute multiple
+        # decimals samples — that's intentional, the mode absorbs the variance.
         for row in cr.rows:
             if row.is_abstract or row.is_header:
                 continue

@@ -117,12 +117,28 @@ def test_canary_tickers_show_only_valid_monetary_scales():
 
 
 @pytest.mark.network
-def test_text_match_fallback_still_works():
-    """When XBRL is unavailable (legacy path), the text-match value on
-    ConceptReport.currency_scaling must still be surfaced via the new
-    ViewerReport property. AAPL's R*.htm headers DO match the original
-    text pattern (``$ in Millions``), so the two paths converge here."""
+def test_aapl_matches_canonical_million_scale():
+    """AAPL is the control: its R*.htm headers DO match the original
+    ``$ in Millions`` text pattern, so both the XBRL-derived path and the
+    text-match fallback path return the same answer. This pins the
+    no-regression baseline."""
     f = Company('AAPL').get_filings(form='10-K').latest()
     viewer = f.viewer
     stmt = viewer.financial_statements[0]
+    assert stmt.currency_scaling == 1_000_000
+
+
+@pytest.mark.network
+def test_xbrl_unavailable_falls_back_to_text_match():
+    """Force the XBRL path off by stubbing ``_get_xbrl`` to None; verify
+    the resolver returns the text-match value from ConceptReport (AAPL's
+    is 1_000_000 because its header matches the original pattern)."""
+    f = Company('AAPL').get_filings(form='10-K').latest()
+    viewer = f.viewer
+    # Disable XBRL lazy-load so _resolve_currency_scaling takes the fallback.
+    viewer._xbrl = None
+    viewer._xbrl_loaded = True
+    stmt = viewer.financial_statements[0]
+    # The text-match value on AAPL is 1_000_000 (it matches "$ in Millions").
+    assert stmt.currency_scaling == stmt.concept_report.currency_scaling
     assert stmt.currency_scaling == 1_000_000

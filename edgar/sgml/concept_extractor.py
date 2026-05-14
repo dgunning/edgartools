@@ -108,7 +108,16 @@ class ConceptRow:
 
 @dataclass
 class ConceptReport:
-    """A parsed R*.htm report with concept annotations extracted."""
+    """A parsed R*.htm report with concept annotations extracted.
+
+    Note on ``currency_scaling``: this default is populated by a narrow text
+    match on the R*.htm header (``$ in Millions`` only) and is unreliable
+    across the filer population (see GH #807). When this report is reached
+    via ``ViewerReport.currency_scaling``, the value is replaced in place by
+    a scale derived from the XBRL ``decimals`` attribute (filer-mandated,
+    uniform). Prefer ``ViewerReport.currency_scaling`` over reading this
+    field directly.
+    """
     title: str
     period_headers: List[str]
     rows: List[ConceptRow]
