@@ -71,6 +71,7 @@ class ConceptRow:
     is_header: bool
     level: int
     css_class: str
+    primary_period: Optional[str] = None
 
     @property
     def namespace(self) -> str:
@@ -91,10 +92,19 @@ class ConceptRow:
 
     @property
     def numeric_value(self) -> Optional[float]:
-        """First period value as a float, or None."""
-        if not self.values:
+        """Value for the primary (first) reporting period, parsed as a float.
+
+        Returns ``None`` when the primary period has no value in this row —
+        even when later periods do. This guards against silently returning a
+        prior-year value for concepts whose primary-period fact is absent
+        (GH #810). Use ``numeric_values`` for the full period→value map.
+
+        Rows constructed without ``primary_period`` set fall back to ``None``
+        rather than the legacy "first dict entry" behavior.
+        """
+        if self.primary_period is None:
             return None
-        return parse_numeric(next(iter(self.values.values())))
+        return parse_numeric(self.values.get(self.primary_period, ''))
 
     @property
     def numeric_values(self) -> Dict[str, Optional[float]]:
@@ -341,6 +351,7 @@ def extract_concepts_from_report(html_content: str) -> ConceptReport:
             is_header=is_header,
             level=level,
             css_class=row_class,
+            primary_period=period_headers[0] if period_headers else None,
         ))
 
     return ConceptReport(
