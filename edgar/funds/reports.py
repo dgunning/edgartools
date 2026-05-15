@@ -1007,9 +1007,19 @@ class FundReport:
                 nested_type = "Forward"
                 fwd = opt.nested_forward
 
-                # Calculate primary exposure in USD equivalent
-                sold_usd = abs(fwd.amount_sold) if fwd.currency_sold == 'USD' else None
-                purchased_usd = abs(fwd.amount_purchased) if fwd.currency_purchased == 'USD' else None
+                # Calculate primary exposure in USD equivalent. Both legs can
+                # be USD-denominated but null-valued in valid N-PORT XBRL
+                # (GH #811) — guard before calling abs().
+                sold_usd = (
+                    abs(fwd.amount_sold)
+                    if fwd.currency_sold == 'USD' and fwd.amount_sold is not None
+                    else None
+                )
+                purchased_usd = (
+                    abs(fwd.amount_purchased)
+                    if fwd.currency_purchased == 'USD' and fwd.amount_purchased is not None
+                    else None
+                )
                 primary_exposure_usd = sold_usd or purchased_usd
 
                 # Calculate exchange rate from forward amounts
