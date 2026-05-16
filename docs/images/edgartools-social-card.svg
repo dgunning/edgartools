@@ -1,0 +1,65 @@
+<svg width="1280" height="640" viewBox="0 0 1280 640" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- GitHub social card 1280×640 — hex mark + wordmark + tagline, white bg -->
+  <defs>
+    <linearGradient id="splitSocial" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#059669;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#059669;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#EA580C;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#EA580C;stop-opacity:1" />
+    </linearGradient>
+    <filter id="socialShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0.6" dy="1.0" stdDeviation="0.6"
+                    flood-color="#0a1a13" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <!-- White background -->
+  <rect width="1280" height="640" fill="white"/>
+
+  <!-- Hex mark + wordmark, vertically clustered in upper-mid -->
+  <!-- Hex mark scaled to 4× of 64-unit viewBox = 256px footprint, positioned at left-of-center -->
+  <g transform="translate(220, 180) scale(4)">
+    <path d="M32 4 L54 17 L54 43 L32 56 L10 43 L10 17 Z" fill="url(#splitSocial)" stroke="none"/>
+    <line x1="10" y1="17" x2="54" y2="43" stroke="white" stroke-width="1.5" opacity="0.3"/>
+    <g filter="url(#socialShadow)">
+      <polyline points="16,25 23,32 16,39"
+                stroke="white" stroke-width="2.6"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="miter"
+                stroke-miterlimit="10"
+                opacity="0.95"/>
+      <g transform="translate(35, 30)">
+        <rect x="-6" y="-8.5" width="12" height="2.6" fill="white" opacity="0.95"/>
+        <rect x="-6" y="-1.3" width="8.5" height="2.6" fill="white" opacity="0.95"/>
+        <rect x="-6" y="5.9" width="12" height="2.6" fill="white" opacity="0.95"/>
+        <rect x="-6" y="-8.5" width="2.6" height="17" fill="white" opacity="0.95"/>
+      </g>
+      <rect x="29" y="42" width="12" height="2.6" fill="white" opacity="0.95"/>
+    </g>
+  </g>
+
+  <!-- Wordmark "edgartools" to the right of the mark, baseline aligned to mark center -->
+  <text x="510" y="345"
+        font-family="-apple-system, BlinkMacSystemFont, 'Inter', 'Helvetica Neue', Arial, sans-serif"
+        font-size="128"
+        font-weight="800"
+        fill="#0f172a"
+        letter-spacing="-4">edgartools</text>
+
+  <!-- Tagline -->
+  <text x="640" y="500"
+        font-family="-apple-system, BlinkMacSystemFont, 'Inter', 'Helvetica Neue', Arial, sans-serif"
+        font-size="34"
+        font-weight="500"
+        fill="#374151"
+        text-anchor="middle">Read and analyze SEC EDGAR filings in Python</text>
+
+  <!-- Subtag with form coverage -->
+  <text x="640" y="550"
+        font-family="-apple-system, BlinkMacSystemFont, 'Inter', 'Helvetica Neue', Arial, sans-serif"
+        font-size="24"
+        font-weight="400"
+        fill="#6b7280"
+        text-anchor="middle">10-K · 8-K · XBRL · Form 3/4/5 · 13F · ADV   ·   MIT-licensed</text>
+</svg>
