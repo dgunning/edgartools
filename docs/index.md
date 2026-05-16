@@ -1,4 +1,5 @@
 ---
+title: Docs
 description: 'Documentation for edgartools, a Python library to read and analyze SEC EDGAR filings: 10-K, 8-K, XBRL financials, Form 3/4/5, 13F, ADV. Clean API, well-typed, MIT-licensed.'
 ---
 
