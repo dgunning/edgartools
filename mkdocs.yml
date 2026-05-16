@@ -20,6 +20,8 @@ markdown_extensions:
 
 theme:
   name: material
+  logo: images/edgartools-mark.svg
+  favicon: images/edgartools-mark.svg
   palette:
     - scheme: default
       toggle:
