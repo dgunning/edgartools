@@ -1,5 +1,5 @@
 site_name: EdgarTools - Python Library for SEC Data Analysis
-site_description: Access and analyze SEC filings, financial statements, insider trading, and investment fund data
+site_description: 'Documentation for edgartools, a Python library to read and analyze SEC EDGAR filings: 10-K, 8-K, XBRL financials, Form 3/4/5, 13F, ADV. Clean API, well-typed, MIT-licensed.'
 repo_url: https://github.com/dgunning/edgartools
 repo_name: dgunning/edgartools
 
