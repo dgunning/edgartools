@@ -1,13 +1,12 @@
-<p align="center">
 <a href="https://github.com/dgunning/edgartools">
-    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/edgartools-logo.png" alt="EdgarTools Python SEC EDGAR library logo" height="80">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/edgartools-mark.svg" alt="EdgarTools logo" align="left" height="80" hspace="20">
 </a>
-</p>
 
-<h1 align="center">EdgarTools - Python Library for SEC EDGAR Filings</h1>
-<h3 align="center">The simplest, most complete Python library for SEC EDGAR data</h3>
+# EdgarTools — Python Library for SEC EDGAR Filings
 
-<p align="center">
+<br clear="left">
+
+<p>
   <a href="https://pypi.org/project/edgartools"><img src="https://img.shields.io/pypi/v/edgartools.svg" alt="PyPI - Version"></a>
   <a href="https://github.com/dgunning/edgartools/actions"><img src="https://img.shields.io/github/actions/workflow/status/dgunning/edgartools/python-hatch-workflow.yml" alt="GitHub Workflow Status"></a>
   <a href="https://www.codefactor.io/repository/github/dgunning/edgartools"><img src="https://www.codefactor.io/repository/github/dgunning/edgartools/badge" alt="CodeFactor"></a>
@@ -16,20 +15,13 @@
   <a href="https://pypi.org/project/edgartools"><img src="https://img.shields.io/pypi/dm/edgartools" alt="PyPI - Downloads"></a>
 </p>
 
-<p align="center">
+<p>
   <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/badges/badge-ai-native.svg" alt="AI Native">
   <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/badges/badge-10x-faster.svg" alt="10x Faster">
-  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/badges/badge-zero-cost.svg" alt="Zero Cost">
-  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/badges/badge-production-ready.svg" alt="Production Ready">
   <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/badges/badge-open-source.svg" alt="Open Source">
-  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/badges/badge-financial-data.svg" alt="Financial Data">
 </p>
 
-<p align="center">
-  <b>Get financial statements, insider trades, fund holdings, and 20+ other filing types as structured Python objects — in a few lines of code. Free and open source.</b>
-</p>
-
-**EdgarTools** is a Python library for accessing SEC EDGAR filings as structured data. Parse financial statements, insider trades, fund holdings, proxy statements, and dozens of other filing types with a consistent Python API.
+**EdgarTools** is a Python library for accessing SEC EDGAR filings as structured data. Parse financial statements, insider trades, fund holdings, proxy statements, and 20+ other filing types with a consistent Python API — in a few lines of code. Free and open source.
 
 ![EdgarTools SEC filing data extraction demo](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/edgartools-demo.gif)
 
