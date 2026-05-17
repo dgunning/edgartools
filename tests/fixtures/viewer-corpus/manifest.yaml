@@ -230,7 +230,6 @@ entries:
       filer_type: large_us
       fiscal_year_end: nov
     bug_references: [gh-812]
-    xfail_until_fixed: true     # remove once edgartools-owsc closes
     notes: >
       R2.htm Consolidated Statements of Income carries 8 quarterly
       columns plus 3 annual columns under a stacked header (group:
