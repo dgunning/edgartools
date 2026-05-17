@@ -115,7 +115,9 @@
     "us-gaap_IncomeLossFromContinuingOperations"
   ],
   "Profit or Loss": [
-    "us-gaap_ProfitLoss"
+    "us-gaap_ProfitLoss",
+    "ifrs-full_ProfitLoss",
+    "ifrs-full_ProfitLossAttributableToOwnersOfParent"
   ],
   "Net Income Attributable to Noncontrolling Interest": [
     "us-gaap_NetIncomeLossAttributableToNonredeemableNoncontrollingInterest",

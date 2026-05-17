@@ -73,3 +73,55 @@ def test_helper_exact_concept_match_prefers_netincomeloss_over_nci():
         f"Helper expected -286M (us-gaap:NetIncomeLoss), got {value}. "
         f"+2M means substring-match regression to NCI row."
     )
+
+
+@pytest.mark.network
+@pytest.mark.regression
+def test_ifrs_filer_resolves_via_profit_or_loss_concept():
+    """get_net_income() must resolve for IFRS 20-F filers via ifrs-full_ProfitLoss.
+
+    Barclays FY2023 20-F is the canary: the canonical net-income row is tagged
+    ifrs-full_ProfitLoss and labeled 'Profit after tax' — no label pattern from
+    the US-centric fallback list would match. Resolution depends on:
+      (a) ifrs-full_ProfitLoss being present in the 'Profit or Loss' concept
+          mapping (concept_mappings.json),
+      (b) the helper stripping the 'ifrs-full_' namespace prefix in _strip_ns,
+      (c) get_net_income() falling through from 'Net Income' to 'Profit or Loss'.
+
+    Without (a)-(c), this filing returns None (regression).
+    """
+    filing = (
+        Company('BCS')
+        .get_filings(form='20-F', amendments=False)
+        .filter(accession_number='0000312069-24-000026')[0]
+    )
+    net_income = filing.obj().financials.get_net_income()
+    assert net_income == 5_323_000_000.0, (
+        f"BCS FY2023 20-F net income: expected 5,323,000,000 (ifrs-full:ProfitLoss "
+        f"'Profit after tax' row), got {net_income}. None means the IFRS concept "
+        f"mapping or namespace strip has regressed."
+    )
+
+
+@pytest.mark.network
+@pytest.mark.regression
+def test_concept_iteration_is_deterministic():
+    """Helper must iterate the mapped concept set in a deterministic order.
+
+    The standardizer stores mappings as a set, so without explicit sorting the
+    iteration order is hash-randomized. For filers (e.g. BCS) whose statement
+    contains multiple concepts mapped to the same standardized name, this would
+    cause get_net_income() to return different values across runs.
+    """
+    filing = (
+        Company('BCS')
+        .get_filings(form='20-F', amendments=False)
+        .filter(accession_number='0000312069-24-000026')[0]
+    )
+    fin = filing.obj().financials
+    results = {fin.get_net_income() for _ in range(3)}
+    assert len(results) == 1, (
+        f"Non-deterministic get_net_income() — got {results} across 3 calls. "
+        f"xbrl_concepts iteration order in _get_standardized_concept_by_xbrl "
+        f"is not sorted."
+    )
