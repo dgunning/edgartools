@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.31.3] - 2026-05-17
+
+### Fixed
+
+- **`viewer.financial_statements` returned wrong income statement for filings with multi-row period headers** (e.g. ADI 2019 10-K mislabeled annual columns as quarterly). The R*.htm header parser was rewritten to walk `<thead>` row by row and filter footnote markers. Affected most 10-K/10-Q filings silently. ([#812](https://github.com/dgunning/edgartools/issues/812), reporter @mpreiss9)
+
+- **`Financials.get_net_income()` returned wrong value (often wrong sign) for filers reporting a net loss with a separate noncontrolling-interest line** — for Micron Q2 2013 returned +$2M (the NCI row) instead of -$286M. Also fixes IFRS 20-F filers whose row label isn't "Net income" (e.g. Barclays "Profit after tax"). Concept lookup is now exact and IFRS-aware. ([#814](https://github.com/dgunning/edgartools/issues/814), reporter @wei-jianlin)
+
 ## [5.31.2] - 2026-05-15
 
 ### Fixed
