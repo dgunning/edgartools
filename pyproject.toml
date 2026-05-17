@@ -325,6 +325,7 @@ markers = [
     "data_quality: Data quality validation tests",
     "vcr: Tests using VCR cassettes for recorded HTTP responses",
     "manual: Manual-only tests, excluded from CI (slow evaluations, benchmarks)",
+    "viewer_corpus: SEC R*.htm viewer verification corpus (beads edgartools-doup)",
 ]
 
 [tool.pyright]
