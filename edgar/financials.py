@@ -198,6 +198,17 @@ class Financials:
 
             period_col = period_columns[period_offset]
 
+            def _strip_ns(name: str) -> str:
+                # Normalize 'us-gaap_NetIncomeLoss' / 'us-gaap:NetIncomeLoss' / 'NetIncomeLoss'
+                # to a bare local-name for exact comparison.
+                return (str(name)
+                        .replace('us-gaap_', '')
+                        .replace('us-gaap:', '')
+                        .replace('dei_', '')
+                        .replace('dei:', ''))
+
+            concept_local = df['concept'].astype(str).map(_strip_ns).str.lower()
+
             # Try each standard concept name in order
             for std_concept_name in standard_concept_names:
                 # Get all XBRL concepts that map to this standard concept
@@ -205,9 +216,12 @@ class Financials:
 
                 # Search for any of these concepts in the dataframe
                 for xbrl_concept in xbrl_concepts:
-                    # Match the concept name (handle both full name and base name)
-                    concept_pattern = xbrl_concept.replace('us-gaap_', '').replace('dei_', '')
-                    matches = df[df['concept'].str.contains(concept_pattern, case=False, na=False, regex=False)]
+                    # Exact local-name match (case-insensitive). Substring matching
+                    # is unsafe here: e.g. 'NetIncome' substring-matches the
+                    # NetIncomeLossAttributableToNoncontrollingInterest row and
+                    # produces wrong values (Issue #814).
+                    target = _strip_ns(xbrl_concept).lower()
+                    matches = df[concept_local == target]
 
                     if not matches.empty:
                         # Try each match until we find one with a valid value
@@ -344,7 +358,11 @@ class Financials:
 
     def get_net_income(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
-        Get net income from the income statement using standardized labels.
+        Get net income from the income statement using standardized XBRL concepts.
+
+        Concept-based lookup runs first so the canonical
+        ``us-gaap:NetIncomeLoss`` is preferred over rows that happen to be
+        labeled "Net income ..." (e.g. noncontrolling-interest lines).
 
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
@@ -357,13 +375,29 @@ class Financials:
             >>> financials = company.get_financials()
             >>> net_income = financials.get_net_income()
         """
+        # First try concept-based search using standardization mappings.
+        # 'Net Income' maps to us-gaap_NetIncome / us-gaap_NetIncomeLoss.
+        result = self._get_standardized_concept_by_xbrl(
+            'income',
+            ['Net Income'],
+            period_offset
+        )
+        if result is not None:
+            return result
+
+        # Fallback to label-based search for edge cases. Includes 'Net Loss'
+        # variants because filers reporting a loss typically label the row
+        # "Net loss attributable to ..." rather than "Net income ..." (Issue #814).
+        # Patterns explicitly exclude "noncontrolling" so we don't pick the NCI row.
         patterns = [
-            r'Net Income$',                    # Exact match
-            r'^Net Income',                    # Starts with
-            r'Net Income.*Common',             # Net income attributable to common
-            r'Net Income.*Shareholders',       # Net income attributable to shareholders
-            r'Profit.*Loss',                   # International variations
-            r'Net Earnings'                    # Alternative terminology
+            r'Net Income$',
+            r'^Net Income(?!.*[Nn]oncontrolling)',
+            r'^Net Loss(?!.*[Nn]oncontrolling)',
+            r'Net Income.*Common',
+            r'Net Income.*Shareholders',
+            r'Net Loss.*Common',
+            r'Net Loss.*Shareholders',
+            r'Net Earnings',
         ]
         return self._get_standardized_concept_value('income', patterns, period_offset)
 
