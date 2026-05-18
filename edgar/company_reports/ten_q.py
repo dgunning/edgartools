@@ -76,6 +76,84 @@ class TenQ(CompanyReport):
         assert filing.form in ['10-Q', '10-Q/A'], f"This form should be a 10-Q but was {filing.form}"
         super().__init__(filing)
 
+    def _is_valid_10q_section_key(self, key: str) -> bool:
+        """True if a section key corresponds to a valid 10-Q item per SEC form structure.
+
+        Used to suppress fabricated section keys produced by the TOC analyzer
+        when a page-number cell is interpreted as a bare item number (e.g., a
+        TOC row like "Notes to Condensed Consolidated Financial Statements ... 8"
+        causes a fake `part_i_item_8` key to appear, even though the 10-Q form
+        has no Item 8 in either Part).
+
+        Non-part-prefixed keys (TOC-based formats like "Item 1A") are treated
+        as valid here — those are handled by their own caller-side checks.
+        """
+        if not key.startswith('part_'):
+            return True
+        if key.startswith('part_i_item_'):
+            part_label = 'PART I'
+        elif key.startswith('part_ii_item_'):
+            part_label = 'PART II'
+        else:
+            return True
+
+        item_match = re.search(r'item_(\d+[a-z]?)$', key, re.IGNORECASE)
+        if not item_match:
+            return True
+
+        item_label = f"ITEM {item_match.group(1).upper()}"
+        return item_label in self.structure.structure.get(part_label, {})
+
+    def _section_text_with_merge(self, section, key: str) -> str:
+        """Return section text, folding fabricated-item content into Item 1.
+
+        For 10-Q the SEC form structure has no Item 8 (or higher) in Part I
+        and no Item 7+ in Part II. The TOC analyzer occasionally fabricates
+        such items from page-number cells; we suppress them from
+        :attr:`items` but their text content is preserved by appending it
+        here whenever the user retrieves Item 1 of the same Part. Item 1
+        is the right target because the most common fabrication pattern
+        is the Notes-to-Financial-Statements page reference, which
+        semantically belongs under Part I, Item 1.
+
+        Non-Item-1 keys are returned untouched.
+        """
+        base = section.text() if hasattr(section, 'text') else ""
+        if key == 'part_i_item_1':
+            extras = self._fabricated_section_texts_for_part('part_i')
+        elif key == 'part_ii_item_1':
+            extras = self._fabricated_section_texts_for_part('part_ii')
+        else:
+            return base
+        if not extras:
+            return base
+        return base + "".join("\n\n" + t for t in extras)
+
+    def _fabricated_section_texts_for_part(self, part_prefix: str) -> List[str]:
+        """Return text content of any fabricated section keys in the given part.
+
+        ``part_prefix`` is one of ``'part_i'`` / ``'part_ii'``.
+
+        Used by :meth:`__getitem__` to fold fabricated content back into the
+        valid Item 1 of the same Part. Item 1 is the right merge target
+        because the most common fabrication mode is the
+        Notes-to-Financial-Statements page reference, which semantically
+        belongs under Part I, Item 1 (Financial Statements).
+        """
+        if not self.sections:
+            return []
+        texts: List[str] = []
+        for key in self.sections:
+            if not key.startswith(f'{part_prefix}_item_'):
+                continue
+            if self._is_valid_10q_section_key(key):
+                continue
+            section = self.sections[key]
+            text = section.text() if hasattr(section, 'text') else None
+            if text:
+                texts.append(text)
+        return texts
+
     def __str__(self):
         return f"""TenQ('{self.company}')"""
 
@@ -261,6 +339,12 @@ class TenQ(CompanyReport):
             for key, section in self.sections.items():
                 # Handle pattern-based section keys: 'part_i_item_1' -> 'Part I, Item 1'
                 if key.startswith('part_'):
+                    # Skip fabricated items not present in the SEC 10-Q form
+                    # structure (e.g., a fake `part_i_item_8` produced from a
+                    # TOC page-number cell). Their text content is folded into
+                    # the valid Part-I/Part-II Item 1 in __getitem__.
+                    if not self._is_valid_10q_section_key(key):
+                        continue
                     part = 'Part I' if key.startswith('part_i_') else 'Part II'
                     # Extract item number from key (e.g., 'part_i_item_1a' -> '1a')
                     item_match = re.search(r'item_(\d+[a-z]?)', key, re.IGNORECASE)
@@ -317,7 +401,7 @@ class TenQ(CompanyReport):
         if self.sections:
             # Direct key lookup (e.g., 'part_i_item_1' or 'Item 1')
             if item_or_part in self.sections:
-                return self.sections[item_or_part].text()
+                return self._section_text_with_merge(self.sections[item_or_part], item_or_part)
 
             # Parse input to determine part and item
             normalized = item_or_part.lower().strip()
@@ -337,7 +421,7 @@ class TenQ(CompanyReport):
                 else:
                     key = f'part_ii_item_{item_num}'
                 if key in self.sections:
-                    return self.sections[key].text()
+                    return self._section_text_with_merge(self.sections[key], key)
 
             # Handle 'Item X' format
             item_match = re.match(r'item\s+(\d+[a-z]?)', normalized, re.IGNORECASE)
@@ -346,29 +430,29 @@ class TenQ(CompanyReport):
                 # Try pattern-based keys first (part-qualified)
                 key = f'part_i_item_{item_num}'
                 if key in self.sections:
-                    return self.sections[key].text()
+                    return self._section_text_with_merge(self.sections[key], key)
                 key = f'part_ii_item_{item_num}'
                 if key in self.sections:
-                    return self.sections[key].text()
+                    return self._section_text_with_merge(self.sections[key], key)
                 # Try TOC-based keys (e.g., 'Item 1', 'Item 1A')
                 for section_key in self.sections:
                     if section_key.lower() == f'item {item_num}' or section_key.lower() == f'item{item_num}':
-                        return self.sections[section_key].text()
+                        return self._section_text_with_merge(self.sections[section_key], section_key)
 
             # Handle simple number format (e.g., '1', '1a')
             if re.match(r'^\d+[a-z]?$', normalized):
                 # Try Part I first
                 key = f'part_i_item_{normalized}'
                 if key in self.sections:
-                    return self.sections[key].text()
+                    return self._section_text_with_merge(self.sections[key], key)
                 # Try Part II
                 key = f'part_ii_item_{normalized}'
                 if key in self.sections:
-                    return self.sections[key].text()
+                    return self._section_text_with_merge(self.sections[key], key)
                 # Try TOC-based keys
                 for section_key in self.sections:
                     if section_key.lower() == f'item {normalized}' or section_key.lower() == f'item{normalized}':
-                        return self.sections[section_key].text()
+                        return self._section_text_with_merge(self.sections[section_key], section_key)
 
         # Fallback to old chunked_document for backward compatibility
         if self.chunked_document:
@@ -426,7 +510,7 @@ class TenQ(CompanyReport):
                     item_num = item_match.group(1)
                     key = f'{part_prefix}_item_{item_num}'
                     if key in self.sections:
-                        return self.sections[key].text()
+                        return self._section_text_with_merge(self.sections[key], key)
 
         # Fallback to old implementations
         if not part:
