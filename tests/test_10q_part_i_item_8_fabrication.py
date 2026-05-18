@@ -92,10 +92,21 @@ def _make_tenq(sections: Dict[str, _FakeSection]):
 # ---------------------------------------------------------------------------
 
 class TestIsValid10qSectionKey:
+    """The "valid" predicate is whether a key should be kept in `items`.
+
+    For fabricated keys, the answer depends on whether a same-Part Item 1
+    sibling exists (the merge target). To make these tests deterministic
+    we set up sections that include BOTH Part I Item 1 and Part II Item 1,
+    so any fabricated key has a valid sibling and should be filtered.
+    The separate "no Item 1 sibling" path is tested below.
+    """
 
     @pytest.fixture
     def tenq(self):
-        return _make_tenq({})
+        return _make_tenq({
+            'part_i_item_1': _FakeSection("Item 1 body", part='I', item='1'),
+            'part_ii_item_1': _FakeSection("Item 1 body", part='II', item='1'),
+        })
 
     def test_valid_part_i_items(self, tenq):
         for key in ('part_i_item_1', 'part_i_item_2', 'part_i_item_3', 'part_i_item_4'):
@@ -104,7 +115,9 @@ class TestIsValid10qSectionKey:
     def test_invalid_part_i_items(self, tenq):
         for key in ('part_i_item_5', 'part_i_item_6', 'part_i_item_7',
                     'part_i_item_8', 'part_i_item_9', 'part_i_item_1a'):
-            assert not tenq._is_valid_10q_section_key(key), f"{key} should be invalid"
+            assert not tenq._is_valid_10q_section_key(key), (
+                f"{key} should be filtered when Item 1 sibling exists"
+            )
 
     def test_valid_part_ii_items(self, tenq):
         for key in ('part_ii_item_1', 'part_ii_item_1a', 'part_ii_item_2',
@@ -114,12 +127,53 @@ class TestIsValid10qSectionKey:
 
     def test_invalid_part_ii_items(self, tenq):
         for key in ('part_ii_item_7', 'part_ii_item_8', 'part_ii_item_1b'):
-            assert not tenq._is_valid_10q_section_key(key), f"{key} should be invalid"
+            assert not tenq._is_valid_10q_section_key(key), (
+                f"{key} should be filtered when Item 1 sibling exists"
+            )
 
     def test_non_part_keys_passthrough(self, tenq):
         """TOC-based keys not prefixed with `part_` are not filtered."""
         for key in ('item_1', 'Item 1', 'Item 1A', 'business', 'cybersecurity'):
             assert tenq._is_valid_10q_section_key(key), f"{key} should be considered valid"
+
+    def test_fabricated_key_kept_when_no_item_1_sibling(self):
+        """Real JPM regression case: `part_i_item_1` is missing from
+        sections but `part_i_item_8` exists with the only Financial
+        Statements content. Filtering would lose the content with no
+        merge target — keep the fabricated key visible instead.
+
+        Filing: JPM 10-Q `0001628280-26-029344` (filed 2026-05) — its
+        sections dict has no `part_i_item_1`. Earlier version of this
+        fix dropped `part_i_item_8` regardless, regressing `tenq.items`
+        from "9 items including content access" to "8 items with the
+        Financial Statements section unreachable."
+        """
+        sections = {
+            # No part_i_item_1 here — mirrors the real JPM filing shape.
+            'part_i_item_2': _FakeSection("MD&A", part='I', item='2'),
+            'part_i_item_3': _FakeSection("Market risk", part='I', item='3'),
+            'part_i_item_8': _FakeSection("Notes / Financial Statements content",
+                                          part='I', item='8'),
+            'part_ii_item_1': _FakeSection("Legal", part='II', item='1'),
+        }
+        tenq = _make_tenq(sections)
+        assert tenq._is_valid_10q_section_key('part_i_item_8'), (
+            "fabricated key must be kept when no Part I Item 1 exists to merge into"
+        )
+        # And `items` should include it so users can retrieve the content.
+        assert 'Part I, Item 8' in tenq.items, (
+            f"fabricated Part I, Item 8 must remain accessible; got: {tenq.items}"
+        )
+
+    def test_fabricated_key_filtered_when_item_1_sibling_present(self):
+        """Sanity counterpart: when valid Item 1 exists, fabricated key is filtered."""
+        sections = {
+            'part_i_item_1': _FakeSection("Financial statements", part='I', item='1'),
+            'part_i_item_8': _FakeSection("Notes (fabricated)", part='I', item='8'),
+        }
+        tenq = _make_tenq(sections)
+        assert not tenq._is_valid_10q_section_key('part_i_item_8')
+        assert 'Part I, Item 8' not in tenq.items
 
 
 # ---------------------------------------------------------------------------

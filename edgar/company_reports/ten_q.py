@@ -77,23 +77,31 @@ class TenQ(CompanyReport):
         super().__init__(filing)
 
     def _is_valid_10q_section_key(self, key: str) -> bool:
-        """True if a section key corresponds to a valid 10-Q item per SEC form structure.
+        """True if a section key should appear in :attr:`items`.
 
-        Used to suppress fabricated section keys produced by the TOC analyzer
-        when a page-number cell is interpreted as a bare item number (e.g., a
-        TOC row like "Notes to Condensed Consolidated Financial Statements ... 8"
-        causes a fake `part_i_item_8` key to appear, even though the 10-Q form
-        has no Item 8 in either Part).
+        Returns True (= keep) for:
+        - Any non-part-prefixed key (TOC-style like ``Item 1A``).
+        - Any part-prefixed key whose item number is in SEC 10-Q structure
+          (`TenQ.structure`).
+        - A part-prefixed key whose item number is NOT in SEC structure
+          (fabricated by the TOC analyzer from a page-number cell) **iff**
+          the same Part has no valid Item 1 — in that case the fabricated
+          key is the user's only access to that content, so we keep it
+          visible rather than dropping it.
 
-        Non-part-prefixed keys (TOC-based formats like "Item 1A") are treated
-        as valid here — those are handled by their own caller-side checks.
+        Returns False (= filter from :attr:`items`) only when the
+        fabricated key has a valid Item 1 sibling. In that case the
+        merge step in :meth:`__getitem__` folds the content back into
+        Item 1 with no data loss.
         """
         if not key.startswith('part_'):
             return True
         if key.startswith('part_i_item_'):
             part_label = 'PART I'
+            item_1_key = 'part_i_item_1'
         elif key.startswith('part_ii_item_'):
             part_label = 'PART II'
+            item_1_key = 'part_ii_item_1'
         else:
             return True
 
@@ -102,7 +110,16 @@ class TenQ(CompanyReport):
             return True
 
         item_label = f"ITEM {item_match.group(1).upper()}"
-        return item_label in self.structure.structure.get(part_label, {})
+        if item_label in self.structure.structure.get(part_label, {}):
+            return True
+
+        # Fabricated key. Only safe to filter if we have a valid Item 1
+        # sibling — otherwise the merge would have nowhere to put the
+        # content and we'd silently lose data (real regression observed
+        # on JPM 10-Q `0001628280-26-029344`, where `part_i_item_1` is
+        # not in sections and `part_i_item_8` is the only Financial
+        # Statements access point).
+        return item_1_key not in self.sections
 
     def _section_text_with_merge(self, section, key: str) -> str:
         """Return section text, folding fabricated-item content into Item 1.
