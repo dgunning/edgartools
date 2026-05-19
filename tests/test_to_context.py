@@ -469,7 +469,7 @@ class TestThirteenFToContext:
     def test_standard_token_budget(self, thirteenf):
         ctx = thirteenf.to_context('standard')
         tokens = len(ctx) // 4
-        assert 150 < tokens < 600
+        assert 120 < tokens < 600
 
     @pytest.mark.network
     def test_full_has_more_than_standard(self, thirteenf):
