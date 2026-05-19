@@ -334,11 +334,9 @@ See [AI Integration Guide](docs/ai-integration.md) for complete documentation.
 
 ## <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/emoji-heart.svg" width="24" height="24"> Support This Project
 
-EdgarTools replaces hundreds of hours of SEC parsing work — and it costs nothing to use. No API keys, no subscriptions, no rate limits. Free infrastructure for anyone working with SEC data.
+EdgarTools is used in production at hedge funds, fintechs, and research desks. It's MIT-licensed — no API keys, no rate limits, no subscriptions — and one person maintains it.
 
-But it doesn't maintain itself. The SEC updates filing formats every year. XBRL taxonomies change. New form types appear. One maintainer keeps all of it working, and your support makes that sustainable.
-
-Sponsors aren't just giving back — you're investing in a shared resource and helping shape what gets built next.
+The SEC ships a new XBRL taxonomy every year and amends filing types every quarter. Keeping 20+ parsers current, and adding new extractors as the SEC adds disclosure types, is the work sponsorship funds.
 
 <p align="center">
   <a href="https://github.com/sponsors/dgunning" target="_blank">
@@ -350,13 +348,29 @@ Sponsors aren't just giving back — you're investing in a shared resource and h
   </a>
 </p>
 
-**What your support enables:**
-- Continued maintenance as SEC formats evolve
-- New filing types and data objects
-- Fast bug fixes and community support
-- Free access for everyone, forever
+<p align="center">
+  <sub>Recurring sponsorship + corporate tiers via GitHub · One-time thanks via Buy Me a Coffee</sub>
+</p>
 
-**Corporate sponsors:** If your team depends on EdgarTools for compliance, financial analysis, or data pipelines, [GitHub Sponsors](https://github.com/sponsors/dgunning) offers tiers designed for organizations with mission-critical dependencies.
+**Recent maintenance shipped via sponsorship:**
+- NPORT-P fund portfolio extraction
+- MA-I municipal advisor parser
+- 424B prospectus family (B1–B8) extractors
+- XBRL taxonomy updates for the 2026 cycle
+
+---
+
+### For teams running EdgarTools in production
+
+If EdgarTools is in your data pipeline, [GitHub Sponsors](https://github.com/sponsors/dgunning) offers corporate tiers from **$250 to $1,500/mo** with:
+
+- Response SLAs (24h–48h first response on critical issues)
+- Quarterly strategy calls and roadmap input
+- Logo placement in this README
+- 7-day early access for internal regression testing
+- Annual invoicing through GitHub — procurement-friendly
+
+→ **[See sponsor tiers](https://github.com/sponsors/dgunning)**
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/dividers/divider-hexagons.svg" alt="">
