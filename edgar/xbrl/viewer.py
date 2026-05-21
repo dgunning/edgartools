@@ -591,7 +591,8 @@ class FilingViewer:
         content = report.content
         if not content:
             return None
-        cr = extract_concepts_from_report(content)
+        form = getattr(self._filing, 'form', None) if self._filing is not None else None
+        cr = extract_concepts_from_report(content, form=form)
         self._concept_reports_cache[fname] = cr
         return cr
 

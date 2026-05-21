@@ -428,12 +428,52 @@ def _detect_level(td: Tag) -> int:
     return 0
 
 
-def extract_concepts_from_report(html_content: str) -> ConceptReport:
+_ANNUAL_FORMS = frozenset({'10-K', '10-K/A', '20-F', '20-F/A', '40-F', '40-F/A'})
+_PERIOD_DURATION_RE = re.compile(r'^(\d+)\s+Months\s+Ended\s', re.IGNORECASE)
+
+
+def _pick_primary_period(period_headers: List[str], form: Optional[str]) -> Optional[str]:
+    """Choose the primary period header for ``ConceptRow.numeric_value``.
+
+    Default behaviour (and the behaviour for quarterly filings) is to pick
+    the first header — that's how the SEC viewer orders columns.
+
+    For annual filings (10-K, 20-F, 40-F), some companies (e.g. ADI 2019 10-K)
+    include a strip of quarterly columns BEFORE the annual columns. Picking
+    ``period_headers[0]`` then returns the most recent quarter rather than
+    the annual period the filing is reporting on. To avoid that silent
+    misclassification, prefer the longest-duration "X Months Ended …"
+    header. Headers without that prefix (balance sheets, point-in-time) fall
+    back to the first header. See GH #818.
+    """
+    if not period_headers:
+        return None
+    if form not in _ANNUAL_FORMS:
+        return period_headers[0]
+
+    best = period_headers[0]
+    best_duration = 0
+    for h in period_headers:
+        m = _PERIOD_DURATION_RE.match(h)
+        if not m:
+            continue
+        duration = int(m.group(1))
+        if duration > best_duration:
+            best_duration = duration
+            best = h
+    return best
+
+
+def extract_concepts_from_report(html_content: str, form: Optional[str] = None) -> ConceptReport:
     """
     Parse an R*.htm file and extract concept-annotated rows.
 
     Args:
         html_content: Raw HTML content of an R*.htm file
+        form: Optional SEC form type (e.g. "10-K", "10-Q"). Used to pick
+            the primary period header for ``ConceptRow.numeric_value``
+            when annual filings include both quarterly and annual columns
+            (see GH #818).
 
     Returns:
         ConceptReport with title, period headers, and concept-annotated rows
@@ -481,6 +521,8 @@ def extract_concepts_from_report(html_content: str) -> ConceptReport:
     # cells with colspan>1 that ARE the date (not a group). See GH #812.
     period_headers, semantic_columns = _extract_period_headers(report_table)
 
+    primary_period = _pick_primary_period(period_headers, form)
+
     # Extract data rows
     rows = []
     for tr in report_table.find_all('tr', recursive=False):
@@ -512,6 +554,17 @@ def extract_concepts_from_report(html_content: str) -> ConceptReport:
         is_abstract = _is_abstract_row(label_cell, value_cells)
         is_total = row_class in _TOTAL_CLASSES
         is_header = row_class in _HEADER_CLASSES
+
+        # Drop ``class="th"`` cells from the body row. In SEC R*.htm
+        # files these are non-data — typically empty spacer cells or
+        # footnote markers like ``[1]`` — and including them in
+        # ``value_cells`` shifts ``_data_cell_positions`` so values are
+        # bound to the wrong semantic columns. See GH #818 (ADSK 2019
+        # 10-K Net Revenue: FY2019 value bound to "Jan. 31, 2018" key).
+        value_cells = [
+            td for td in value_cells
+            if 'th' not in (td.get('class') or [])
+        ]
 
         # Map data cells to semantic columns by column position rather
         # than by index — necessary when header rows mix colspan-1 date
@@ -547,7 +600,7 @@ def extract_concepts_from_report(html_content: str) -> ConceptReport:
             is_header=is_header,
             level=level,
             css_class=row_class,
-            primary_period=period_headers[0] if period_headers else None,
+            primary_period=primary_period,
         ))
 
     return ConceptReport(
