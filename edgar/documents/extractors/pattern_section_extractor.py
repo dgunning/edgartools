@@ -39,6 +39,16 @@ class SectionExtractor:
                 (r'^Risk\s+Factors', 'Risk Factors'),
                 (r'^Factors\s+That\s+May\s+Affect', 'Risk Factors')
             ],
+            'unresolved_staff_comments': [
+                (r'^(Item|ITEM)\s+1B\.?\s*Unresolved\s+Staff\s+Comments',
+                 'Item 1B - Unresolved Staff Comments'),
+                (r'^Unresolved\s+Staff\s+Comments', 'Unresolved Staff Comments'),
+            ],
+            'cybersecurity': [
+                (r'^(Item|ITEM)\s+1C\.?\s*Cybersecurity', 'Item 1C - Cybersecurity'),
+                (r'^Cybersecurity\s+Risk\s+Management', 'Cybersecurity'),
+                (r'^Cybersecurity', 'Cybersecurity'),
+            ],
             'properties': [
                 (r'^(Item|ITEM)\s+2\.?\s*Properties', 'Item 2 - Properties'),
                 (r'^Properties', 'Properties'),
