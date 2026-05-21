@@ -430,6 +430,20 @@ def _detect_level(td: Tag) -> int:
 
 _ANNUAL_FORMS = frozenset({'10-K', '10-K/A', '20-F', '20-F/A', '40-F', '40-F/A'})
 _PERIOD_DURATION_RE = re.compile(r'^(\d+)\s+Months\s+Ended\s', re.IGNORECASE)
+_VALUE_CELL_CLASSES = frozenset({'nump', 'num', 'numD'})
+
+
+def _is_styling_only_th(classes: List[str]) -> bool:
+    """True when a body-row ``<td>`` has ``th`` styling and no value class.
+
+    See GH #818: SEC R*.htm body rows include empty ``class="th"`` spacer
+    cells and footnote-marker cells (``[1]``); they must be dropped before
+    column-position assignment. Numeric cells (``nump``/``num``/``numD``)
+    that happen to also carry ``th`` for styling are kept.
+    """
+    if 'th' not in classes:
+        return False
+    return not any(c in _VALUE_CELL_CLASSES for c in classes)
 
 
 def _pick_primary_period(period_headers: List[str], form: Optional[str]) -> Optional[str]:
@@ -555,15 +569,18 @@ def extract_concepts_from_report(html_content: str, form: Optional[str] = None) 
         is_total = row_class in _TOTAL_CLASSES
         is_header = row_class in _HEADER_CLASSES
 
-        # Drop ``class="th"`` cells from the body row. In SEC R*.htm
-        # files these are non-data — typically empty spacer cells or
-        # footnote markers like ``[1]`` — and including them in
+        # Drop ``class="th"`` cells from the body row when they carry
+        # no value class (``nump``/``num``/``numD``). In SEC R*.htm
+        # files such cells are non-data — typically empty spacer cells
+        # or footnote markers like ``[1]`` — and including them in
         # ``value_cells`` shifts ``_data_cell_positions`` so values are
         # bound to the wrong semantic columns. See GH #818 (ADSK 2019
         # 10-K Net Revenue: FY2019 value bound to "Jan. 31, 2018" key).
+        # The narrow filter preserves any hypothetical numeric cell
+        # that happens to also carry ``th`` for styling.
         value_cells = [
             td for td in value_cells
-            if 'th' not in (td.get('class') or [])
+            if not _is_styling_only_th(td.get('class') or [])
         ]
 
         # Map data cells to semantic columns by column position rather

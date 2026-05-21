@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.31.4] - 2026-05-21
+
+### Fixed
+
+- **`TenK['Item 1']` / `TenK.business` silently returned Part II content on Goldman Sachs's 2025 10-K** — when the section detector emitted a `part_ii_item_1` key for content that was actually MD&A, `TenK.__getitem__` walked Part I → Part II → Part III → Part IV looking for `Item 1`, found the mislabeled key, and returned 669 KB of MD&A instead of the Business section. The cross-Part probe is now SEC-form-aware: Item 1 is only looked up in Part I, Item 7 only in Part II, etc., per the immutable 10-K form definition. When the canonical-Part key is missing, the lookup falls through to the legacy `chunked_document` parser rather than silently surfacing wrong-Part content. The misleading `"Ambiguous section '…' in 10-Q filing"` error string that `Document.get_section()` raised on 10-K filings was also stripped. ([#821](https://github.com/dgunning/edgartools/issues/821), reporter @FlorinAndrei)
+
+- **`viewer.financial_statements[i].numeric_value` returned quarterly values on ADI's 2019 10-K, and the FY2019 column was empty on ADSK's 2019 10-K** — two distinct viewer bugs surfaced when iterating `ConceptRow`s instead of using `to_dataframe()`. ADI's R*.htm presents 8 quarterly columns BEFORE the 3 annual columns; `primary_period` was set unconditionally to `period_headers[0]`, so the most-recent quarter became the row's primary value. ADSK's body rows include an empty `class="th"` spacer cell that was kept in `value_cells`, shifting `_data_cell_positions` by one — FY2019 values were bound to the FY2018 label key, the FY2019 column got nothing, and the FY2017 value was dropped entirely. Added form-aware `_pick_primary_period` (10-K, 20-F, 40-F + amended variants prefer the longest `"X Months Ended"` duration; other forms keep `[0]`), and filter `class="th"` body cells that carry no value class out of `value_cells` before position assignment. Both fixes are pinned to ground-truth values from real ADI and ADSK R2.htm fixtures. ([#818](https://github.com/dgunning/edgartools/issues/818), reporter @mpreiss9)
+
+- **`Filing.search()` raised a bare `AssertionError` on pre-2001 SGML/text filings** — `Filing.sections()` asserted that `filing.html()` was non-null with no message, so `search()` on a text-only submission (e.g. PCG's 2000-03-08 10-K) crashed with no indication of cause. The assertion now raises a descriptive `ValueError` that names the accession and points users at `filing.text()` as the working workaround. Quick-win partial fix — `Filing.grep()` still silently returns zero matches on the same filings and proper text-filing support is scheduled for v5.32.0. ([#819](https://github.com/dgunning/edgartools/issues/819), reporter @shenker)
+
+### Added
+
+- **10-K section patterns for Item 1B (Unresolved Staff Comments) and Item 1C (Cybersecurity)** — `SECTION_PATTERNS['10-K']` was missing entries for both items, so when the pattern extractor was the active detection path inside `HybridSectionDetector` (TOC and heading detection both empty) the sections were silently absent from the resulting `sections` dict. Item 1C (mandatory for FY2024+ filings per SEC Release No. 33-11216) is the same rulemaking wave that already added 8-K Item 1.05 and 20-F Item 16K patterns to this file; 10-K Item 1C was missed in the original PR. Purely additive — follows the same shape as the existing entries. ([#813](https://github.com/dgunning/edgartools/pull/813), contributor @HonzaCuhel)
+
 ## [5.31.3] - 2026-05-17
 
 ### Fixed
