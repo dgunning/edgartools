@@ -2034,7 +2034,12 @@ class Filing:
     @lru_cache(maxsize=1)
     def sections(self) -> List[str]:
         html = self.html()
-        assert html is not None
+        if html is None:
+            raise ValueError(
+                f"Filing {self.accession_no} ({self.form}, filed {self.filing_date}) "
+                "has no HTML primary document — likely a pre-2001 SGML/text submission. "
+                "Use filing.text() to access the raw submission content."
+            )
         return html_sections(html)
 
     @cached_property
