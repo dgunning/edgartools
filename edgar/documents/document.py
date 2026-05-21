@@ -794,16 +794,14 @@ class Document:
             return section
 
         # If not found and looks like an item without part, check if we have multiple parts
-        # In that case, raise a helpful error
+        # In that case, raise a helpful error.
         if section_name.startswith("item_") or section_name.replace("_", "").startswith("item"):
-            # Check if we have part-aware sections (10-Q)
             matching_sections = [name for name in self.sections.keys()
                                if section_name in name and "part_" in name]
             if matching_sections:
-                # Multiple parts available - user needs to specify which one
                 parts = sorted(set(s.split("_")[1] for s in matching_sections if s.startswith("part_")))
                 raise ValueError(
-                    f"Ambiguous section '{section_name}' in 10-Q filing. "
+                    f"Ambiguous section '{section_name}'. "
                     f"Found in parts: {parts}. "
                     f"Please specify part: get_section('{section_name}', part='I') or part='II'"
                 )

@@ -46,6 +46,19 @@ _CROSS_REF_ITEM_MAP = {
 }
 
 
+# SEC 10-K item-to-part mapping. Each item number has exactly one valid Part
+# per SEC rules. Used to constrain section lookups so a missing Part I item
+# does not silently fall back to a wrong-Part section produced by a flaky
+# section detector. See GH #821 (GS 10-K Item 1 mis-mapped to part_ii_item_1).
+_ITEM_TO_PART_10K = {
+    '1': 'i', '1a': 'i', '1b': 'i', '1c': 'i', '2': 'i', '3': 'i', '4': 'i',
+    '5': 'ii', '6': 'ii', '7': 'ii', '7a': 'ii',
+    '8': 'ii', '9': 'ii', '9a': 'ii', '9b': 'ii', '9c': 'ii',
+    '10': 'iii', '11': 'iii', '12': 'iii', '13': 'iii', '14': 'iii',
+    '15': 'iv', '16': 'iv',
+}
+
+
 class TenK(CompanyReport):
     structure = FilingStructure({
         "PART I": {
@@ -557,30 +570,16 @@ class TenK(CompanyReport):
                 item_num = item_key[5:].strip().lower()
 
             if item_num:
-                # Try Part I first (most common for Items 1-4)
-                part_i_key = f'part_i_item_{item_num}'
-                if part_i_key in self.sections:
-                    text = self.sections[part_i_key].text()
-                    if text and text.strip():
-                        return text
-                # Try Part II for Items 5-9C
-                part_ii_key = f'part_ii_item_{item_num}'
-                if part_ii_key in self.sections:
-                    text = self.sections[part_ii_key].text()
-                    if text and text.strip():
-                        return text
-                # Try Part III for Items 10-14
-                part_iii_key = f'part_iii_item_{item_num}'
-                if part_iii_key in self.sections:
-                    text = self.sections[part_iii_key].text()
-                    if text and text.strip():
-                        return text
-                # Try Part IV for Items 15-16
-                part_iv_key = f'part_iv_item_{item_num}'
-                if part_iv_key in self.sections:
-                    text = self.sections[part_iv_key].text()
-                    if text and text.strip():
-                        return text
+                # Only check the SEC-canonical Part for this item — prevents
+                # silent fallback to wrong-Part content when the section
+                # detector mis-labels a section (GH #821).
+                canonical_part = _ITEM_TO_PART_10K.get(item_num)
+                if canonical_part:
+                    part_key = f'part_{canonical_part}_item_{item_num}'
+                    if part_key in self.sections:
+                        text = self.sections[part_key].text()
+                        if text and text.strip():
+                            return text
 
                 # PRIORITY 1.5: Try combined-items keys (e.g., "Items 1 and 2. Business and Properties")
                 # Some filings (energy, MLP, REIT) combine items under a single heading.
@@ -621,46 +620,20 @@ class TenK(CompanyReport):
                     if friendly_name in self.sections:
                         return self.sections[friendly_name].text()
 
-            # Legacy fallback: Try part-based naming convention again
-            # (This code path may not be reached now, but kept for safety)
+            # Legacy fallback: SEC-canonical Part lookup only.
+            # Items have exactly one valid Part per SEC rules — see GH #821.
+            legacy_item_num = None
             if normalized.startswith('Item '):
-                # Extract item number: "Item 1" -> "1", "Item 1A" -> "1a"
-                item_num = normalized[5:].strip().lower()
-                # Try Part I first (most common for Items 1-4)
-                part_i_key = f'part_i_item_{item_num}'
-                if part_i_key in self.sections:
-                    text = self.sections[part_i_key].text()
-                    # Only return if non-empty (otherwise fall back to chunked_document)
-                    if text and text.strip():
-                        return text
-                # Try Part II for Items 5-9C
-                part_ii_key = f'part_ii_item_{item_num}'
-                if part_ii_key in self.sections:
-                    text = self.sections[part_ii_key].text()
-                    if text and text.strip():
-                        return text
-                # Try Part III for Items 10-14
-                part_iii_key = f'part_iii_item_{item_num}'
-                if part_iii_key in self.sections:
-                    text = self.sections[part_iii_key].text()
-                    if text and text.strip():
-                        return text
-                # Try Part IV for Items 15-16
-                part_iv_key = f'part_iv_item_{item_num}'
-                if part_iv_key in self.sections:
-                    text = self.sections[part_iv_key].text()
-                    if text and text.strip():
-                        return text
-
-            # Also handle if user provides just a number like "1" or "1A"
+                legacy_item_num = normalized[5:].strip().lower()
             elif re.match(r'^\d+[a-z]?$', normalized, re.IGNORECASE):
-                item_num = normalized.lower()
-                # Try all parts
-                for part in ['i', 'ii', 'iii', 'iv']:
-                    part_key = f'part_{part}_item_{item_num}'
+                legacy_item_num = normalized.lower()
+
+            if legacy_item_num:
+                canonical_part = _ITEM_TO_PART_10K.get(legacy_item_num)
+                if canonical_part:
+                    part_key = f'part_{canonical_part}_item_{legacy_item_num}'
                     if part_key in self.sections:
                         text = self.sections[part_key].text()
-                        # Only return if non-empty
                         if text and text.strip():
                             return text
 
