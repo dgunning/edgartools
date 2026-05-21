@@ -2034,13 +2034,14 @@ class Filing:
     @lru_cache(maxsize=1)
     def sections(self) -> List[str]:
         html = self.html()
-        if html is None:
-            raise ValueError(
-                f"Filing {self.accession_no} ({self.form}, filed {self.filing_date}) "
-                "has no HTML primary document — likely a pre-2001 SGML/text submission. "
-                "Use filing.text() to access the raw submission content."
-            )
-        return html_sections(html)
+        if html is not None:
+            return html_sections(html)
+        # Old text-only filings (pre-2002) — chunk on <PAGE> markers.
+        text = self.text()
+        if not text:
+            return []
+        chunks = [c.strip() for c in re.split(r"<PAGE>|\n\s*\n", text) if len(c.strip()) >= 50]
+        return chunks if chunks else [text]
 
     @cached_property
     def __get_bm25_search_index(self):
@@ -2083,29 +2084,19 @@ class Filing:
         from edgar.search.grep import GrepResult, _grep_text
 
         all_matches = []
+        found_any_text = False
 
         try:
             attachments = self.attachments
         except Exception:
-            return GrepResult(pattern, [])
+            attachments = []
 
         for attachment in attachments:
-            # Filter by document if specified
-            if document:
-                if document.lower() == "primary":
-                    if attachment.sequence_number != "1":
-                        continue
-                else:
-                    # Match by document_type (e.g. "EX-10.1") or document filename
-                    doc_type = (attachment.document_type or "").upper()
-                    if document.upper() not in doc_type and document.lower() not in (attachment.document or "").lower():
-                        continue
-
-            # Skip binary/non-text attachments
+            if document and not self._attachment_matches(attachment, document):
+                continue
             if attachment.empty or attachment.is_binary():
                 continue
 
-            # Get text content
             try:
                 text = attachment.text()
             except Exception as e:
@@ -2115,19 +2106,48 @@ class Filing:
             if not text:
                 continue
 
-            # Determine location label
-            doc_type = attachment.document_type or ""
-            if attachment.sequence_number == "1":
-                location = "primary"
-            elif doc_type:
-                location = doc_type
-            else:
-                location = attachment.document or f"doc-{attachment.sequence_number}"
+            found_any_text = True
+            location = self._attachment_location(attachment)
+            all_matches.extend(_grep_text(text, pattern, location, regex=regex))
 
-            matches = _grep_text(text, pattern, location, regex=regex)
-            all_matches.extend(matches)
+        # Old text filings: SGML returns empty attachment shells, fall back to filing.text().
+        if not found_any_text and (document is None or document.lower() == "primary"):
+            all_matches.extend(self._grep_filing_text(pattern, regex))
 
         return GrepResult(pattern, all_matches)
+
+    @staticmethod
+    def _attachment_matches(attachment, document: str) -> bool:
+        """Whether `attachment` satisfies grep()'s `document` filter."""
+        if document.lower() == "primary":
+            return attachment.sequence_number == "1"
+        doc_type = (attachment.document_type or "").upper()
+        if document.upper() in doc_type:
+            return True
+        return document.lower() in (attachment.document or "").lower()
+
+    @staticmethod
+    def _attachment_location(attachment) -> str:
+        """Label for an attachment in grep result locations."""
+        if attachment.sequence_number == "1":
+            return "primary"
+        if attachment.document_type:
+            return attachment.document_type
+        return attachment.document or f"doc-{attachment.sequence_number}"
+
+    def _grep_filing_text(self, pattern: str, regex: bool) -> list:
+        """Grep the combined filing text as a 'primary' document.
+
+        Used by grep() when no attachment yields usable text — covers older
+        plain-text filings whose SGML decomposition emits empty shells.
+        """
+        from edgar.search.grep import _grep_text
+        try:
+            text = self.text()
+        except Exception as e:
+            log.debug(f"grep: could not extract filing text: {e}")
+            return []
+        return _grep_text(text, pattern, "primary", regex=regex) if text else []
 
     @property
     def filing_url(self) -> str:
