@@ -27,6 +27,33 @@ class TOCSection:
     part: Optional[str] = None  # NEW: "Part I", "Part II", or None for 10-K
 
 
+# Maximum valid bare item number per SEC form. Used by
+# `_extract_preceding_item_label` to filter page-number cells out of
+# the TOC-as-item-label inference path.
+#
+# Only 10-Q overrides the default; on that form valid items are 1-6
+# (Part I: 1-4; Part II: 1, 1A, 2-6) and the legacy cap of 15 leaked
+# common page-number cells through as phantom items (e.g. PPG
+# 0000079879-26-000170 produced a fake `part_i_item_8` from a
+# `<td>8</td>` page cell).
+#
+# 10-K and 20-F deliberately stay at the legacy default of 15 even
+# though their structural max would allow more — raising the cap on
+# those forms would simply trade the 10-Q false-positive class for
+# new ones (a 10-K page-16 cell would become "Item 16"; a 20-F
+# page-17 cell would become "Item 17"). Real Item 16 / Item 19 are
+# still detected via the explicit `Item N` regex earlier in the
+# function, which doesn't depend on this cap.
+_MAX_BARE_ITEM_BY_FORM = {
+    "10-Q": 6,
+    "10-Q/A": 6,
+}
+# Fallback when the form isn't specified, or for forms not in the
+# table above. 15 preserves the behaviour shipped before this kwarg
+# existed.
+_DEFAULT_MAX_BARE_ITEM = 15
+
+
 class TOCAnalyzer:
     """
     Analyzes Table of Contents structure to map section names to anchor IDs.
@@ -35,7 +62,16 @@ class TOCAnalyzer:
     rather than semantic (like API filings vs local HTML files).
     """
 
-    def __init__(self):
+    def __init__(self, form: Optional[str] = None):
+        """
+        Args:
+            form: SEC form type ('10-K', '10-Q', '20-F', etc.). Used to
+                  bound the bare-item-number TOC heuristic; without it
+                  the analyzer falls back to a conservative default
+                  that may treat small page numbers as item identifiers
+                  on forms with few items (e.g., 10-Q has only Items 1-6).
+        """
+        self.form = form
         # SEC section patterns for normalization
         self.section_patterns = [
             (r'(?:item|part)\s+\d+[a-z]?', 'item'),
@@ -770,12 +806,24 @@ class TOCAnalyzer:
                         if item_match:
                             return item_match.group(1)
 
-                        # Match bare item number: "1A" or "1" (only valid 10-K item numbers: 1-15)
-                        # This prevents page numbers (50, 108, etc.) from being treated as items
-                        bare_item_match = re.match(r'^([1-9]|1[0-5])([A-Z]?)\.?\s*$', prev_text, re.IGNORECASE)
-                        if bare_item_match:
+                        # Match bare item number: "1A" or "1". Page numbers
+                        # (50, 108, etc.) are filtered by capping the
+                        # accepted range to the form's known maximum.
+                        # Without `form` we fall back to 15 (legacy behaviour).
+                        # PPG 10-Q `0000079879-26-000170` triggered the bug
+                        # this guard fixes: a page-number `<td>8</td>` was
+                        # interpreted as "Item 8", producing a phantom
+                        # `part_i_item_8` on a form that has no Item 8.
+                        # Leading digit must be 1-9 (no zero-padded
+                        # forms like `08` or `01` — those are page
+                        # numbers, not item identifiers). Matches the
+                        # tight `[1-9]` prefix of the original regex
+                        # rather than allowing any `\d`.
+                        max_item_num = _MAX_BARE_ITEM_BY_FORM.get(self.form, _DEFAULT_MAX_BARE_ITEM)
+                        bare_item_match = re.match(r'^([1-9]\d?)([A-Za-z]?)\.?\s*$', prev_text, re.IGNORECASE)
+                        if bare_item_match and 1 <= int(bare_item_match.group(1)) <= max_item_num:
                             item_num = bare_item_match.group(1)
-                            item_letter = bare_item_match.group(2)
+                            item_letter = bare_item_match.group(2).upper()
                             return f"Item {item_num}{item_letter}"
 
                         # Match part: "Part I" or just "I"
@@ -979,8 +1027,41 @@ class TOCAnalyzer:
         if part_match:
             return f"Part {part_match.group(1).upper()}"
 
-        # Handle specific known sections by text
+        # Handle specific known sections by text. These mappings are
+        # 10-K-shaped (Item 1 = Business, Item 7 = MD&A, Item 8 =
+        # Financial Statements, etc.). Applying them to non-10-K forms
+        # is what produced the PPG 10-Q regression: a TOC link reading
+        # "Notes to Condensed Consolidated Financial Statements" was
+        # normalised to "Item 8", a section that doesn't exist on
+        # Form 10-Q. The higher-priority preceding-item / anchor-ID
+        # paths above are form-agnostic and already cover the cases
+        # where the explicit item number is recoverable from context.
         text_lower = text.lower()
+        if self.form in ("10-Q", "10-Q/A"):
+            # 10-Q has Risk Factors as Part II Item 1A — same Item
+            # label as 10-K. All other 10-K text mappings would
+            # produce wrong items on 10-Q (Business / Properties /
+            # Legal Proceedings / MD&A / Exhibits map to different
+            # numbers in the 10-Q form structure, and Financial
+            # Statements is Part I Item 1, not Item 8). Keep just the
+            # safe overlap; downstream `_build_section_mapping` adds
+            # the Part prefix from the surrounding scan.
+            #
+            # For text that doesn't match the safe overlap, return an
+            # empty string to signal "skip this row" — returning the
+            # raw text would let `_build_section_mapping` emit keys
+            # like `part_i_notes_to_condensed_consolidated_financial_statements`
+            # which `SECSectionExtractor` then mis-classifies as a Part
+            # header (because the key starts with `part_i_` but has no
+            # `item_` suffix), producing a bogus section with invalid
+            # boundaries.
+            if 'risk factors' in text_lower and 'item' not in text_lower:
+                return "Item 1A"
+            return ""
+        if self.form not in ("10-K", "10-K/A", None):
+            # Other non-10-K forms (e.g., 20-F): skip the 10-K-specific
+            # text fallback rather than ship misleading mappings.
+            return text
         if 'business' in text_lower and 'item' not in text_lower:
             return "Item 1"
         elif 'risk factors' in text_lower and 'item' not in text_lower:
@@ -1032,7 +1113,25 @@ class TOCAnalyzer:
             part_num = self._roman_to_int(part_roman)
             return 'part', part_num * 100  # Part I=100, Part II=200, etc.
 
-        # Known sections without explicit item numbers
+        # Known sections without explicit item numbers. These orderings
+        # are 10-K-shaped (Item 1 = Business, Item 7 = MD&A, Item 8 =
+        # Financial Statements). Applying them to non-10-K forms creates
+        # the same correctness landmine that `_normalize_section_name`
+        # was fixed for: a 10-Q "Notes to Condensed Consolidated
+        # Financial Statements" link would be sorted into Item 8's
+        # ordering slot (8000), even after the normalizer correctly
+        # returns the verbatim text. The mismatch between normalized
+        # name and sort order shows up downstream in
+        # `_build_section_mapping`.
+        if self.form in ("10-Q", "10-Q/A"):
+            # Mirror the surgical overlap kept in
+            # `_normalize_section_name`: 10-Q Risk Factors is Item 1A.
+            # Skip the rest of the 10-K-shaped table.
+            if 'risk factors' in text_lower:
+                return 'item', 1001
+            return 'other', 99999
+        if self.form not in ("10-K", "10-K/A", None):
+            return 'other', 99999
         if 'business' in text_lower:
             return 'item', 1000  # Item 1
         elif 'risk factors' in text_lower:
@@ -1086,6 +1185,14 @@ class TOCAnalyzer:
         seen_names = set()
 
         for section in toc_sections:
+            # Skip rows whose text didn't normalise to anything (the
+            # 10-Q text fallback returns "" for unrecognised section
+            # names — see `_normalize_section_name`). Without this
+            # guard, downstream would emit empty-tail keys like
+            # `part_i_` and a `SECSectionExtractor` Part-header
+            # mis-classification.
+            if not section.normalized_name:
+                continue
             # Generate part-aware section name for 10-Q filings
             if section.part:
                 # Convert "Part I" -> "part_i", "Part II" -> "part_ii"
@@ -1147,7 +1254,7 @@ class TOCAnalyzer:
 
 
 def analyze_toc_for_sections(html_content: str, agent: Optional[str] = None,
-                             tree=None) -> Dict[str, str]:
+                             tree=None, form: Optional[str] = None) -> Dict[str, str]:
     """
     Convenience function to analyze TOC and return section mapping.
 
@@ -1155,11 +1262,15 @@ def analyze_toc_for_sections(html_content: str, agent: Optional[str] = None,
         html_content: Raw HTML content
         agent: Filing agent name or None
         tree: Pre-parsed lxml tree (optional)
+        form: SEC form type ('10-K', '10-Q', '20-F', ...) used to bound
+              TOC heuristics. Without it, the analyzer falls back to
+              a conservative default that may mis-interpret page-number
+              cells as item identifiers on forms with few items.
 
     Returns:
         Dict mapping section names to anchor IDs
     """
-    analyzer = TOCAnalyzer()
+    analyzer = TOCAnalyzer(form=form)
     return analyzer.analyze_toc_structure(html_content, agent=agent, tree=tree)
 
 

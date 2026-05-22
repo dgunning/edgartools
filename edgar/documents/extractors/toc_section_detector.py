@@ -33,17 +33,24 @@ class TOCSectionDetector:
     - Complete text extraction with proper boundary detection
     """
 
-    def __init__(self, document: Document, agent: Optional[str] = None):
+    def __init__(self, document: Document, agent: Optional[str] = None,
+                 form: Optional[str] = None):
         """
         Initialize TOC-based detector.
 
         Args:
             document: Document to analyze (must have metadata.original_html)
             agent: Filing agent name for agent-specific TOC parsing
+            form: SEC form type ('10-K', '10-Q', '20-F', ...) used to
+                  scope the TOC analyzer's bare-item-number heuristic.
+                  Without it, the analyzer falls back to a conservative
+                  default that can mis-interpret page-number cells as
+                  item identifiers on forms with few items.
         """
         self.document = document
         self.agent = agent
-        self.extractor = SECSectionExtractor(document, agent=agent)
+        self.form = form
+        self.extractor = SECSectionExtractor(document, agent=agent, form=form)
 
     def detect(self) -> Optional[Dict[str, Section]]:
         """
@@ -156,7 +163,9 @@ def get_section_text(document: Document, section_name: str) -> Optional[str]:
         return None
 
     try:
-        extractor = SECSectionExtractor(document)
+        extractor = SECSectionExtractor(
+            document, form=getattr(document.metadata, 'form', None)
+        )
         return extractor.get_section_text(section_name)
     except Exception as e:
         logger.warning(f"Failed to get section text for {section_name}: {e}")
@@ -178,7 +187,9 @@ def get_available_sections(document: Document) -> list[str]:
         return []
 
     try:
-        extractor = SECSectionExtractor(document)
+        extractor = SECSectionExtractor(
+            document, form=getattr(document.metadata, 'form', None)
+        )
         return extractor.get_available_sections()
     except Exception as e:
         logger.warning(f"Failed to get available sections: {e}")

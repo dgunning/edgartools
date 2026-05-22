@@ -51,8 +51,12 @@ class HybridSectionDetector:
         # Detect filing agent from the original HTML for agent-aware TOC parsing
         agent = self._detect_agent()
 
-        # Initialize detection strategies
-        self.toc_detector = TOCSectionDetector(document, agent=agent)
+        # Initialize detection strategies. `form` flows through to the
+        # TOC analyzer so its bare-item-number heuristic can apply
+        # form-aware bounds (prevents page-number cells from being
+        # mis-interpreted as item identifiers on forms with few items
+        # like 10-Q).
+        self.toc_detector = TOCSectionDetector(document, agent=agent, form=form)
         self.pattern_extractor = SectionExtractor(form)
 
     def _detect_agent(self) -> Optional[str]:

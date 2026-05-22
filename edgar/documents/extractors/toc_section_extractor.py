@@ -41,12 +41,23 @@ class SECSectionExtractor:
     between them. Works consistently for all SEC filings.
     """
 
-    def __init__(self, document: Document, agent: Optional[str] = None):
+    def __init__(self, document: Document, agent: Optional[str] = None,
+                 form: Optional[str] = None):
+        """
+        Args:
+            document: Document to extract sections from.
+            agent: Filing agent name for agent-specific TOC parsing.
+            form: SEC form type ('10-K', '10-Q', etc.) used to scope the
+                  TOC analyzer's bare-item-number heuristic. Passing this
+                  prevents page-number cells from being mis-interpreted
+                  as item identifiers on forms with few items.
+        """
         self.document = document
         self.agent = agent
+        self.form = form
         self.section_map = {}  # Maps section names to canonical names
         self.section_boundaries = {}  # Maps section names to boundaries
-        self.toc_analyzer = TOCAnalyzer()
+        self.toc_analyzer = TOCAnalyzer(form=form)
         self._tree = None  # Cached parsed lxml tree (set by _analyze_sections)
         self._clean_html = None  # HTML with XML declaration stripped
         self._analyze_sections()
