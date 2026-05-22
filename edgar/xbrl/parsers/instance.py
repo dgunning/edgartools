@@ -840,9 +840,17 @@ def _quarter_for_date(end_date, fy_end_month: int) -> str:
 
     Quarters are counted from the start of the fiscal year.
     For AAPL (FY end Sep): Q1=Oct-Dec, Q2=Jan-Mar, Q3=Apr-Jun, Q4=Jul-Sep.
+
+    52/53-week filers (JNJ, PFE, AAPL, COST, etc.) pin quarter ends to a
+    weekday (e.g. Sunday nearest Jun 30), so the end_date can drift into the
+    first few days of the following calendar month — e.g. JNJ Q2 2023 ended
+    2023-07-02. A first-of-month classification puts those facts in the wrong
+    quarter (GH #816). Normalize by treating end dates in the first week of a
+    month as belonging to the previous month for quarter classification.
     """
-    # Months after fiscal year end determines the quarter
-    # Month offset: how many months past the FY end month
-    month_offset = (end_date.month - fy_end_month - 1) % 12
+    classification_month = end_date.month
+    if end_date.day <= 7:
+        classification_month = 12 if classification_month == 1 else classification_month - 1
+    month_offset = (classification_month - fy_end_month - 1) % 12
     quarter = (month_offset // 3) + 1
     return f"Q{quarter}"
