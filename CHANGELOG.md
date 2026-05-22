@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.31.5] - 2026-05-21
+
+### Fixed
+
+- **`xbrl.facts.to_dataframe()` mislabeled Q2/Q3 as Q3/Q4 for 52/53-week fiscal-year filers (JNJ, PFE, AAPL, COST)** — the XBRL instance parser's `_quarter_for_date` classified the fiscal quarter from the raw calendar month of the period end. 52/53-week issuers pin quarter ends to a weekday near the calendar quarter boundary, so the period_end can drift into the first days of the following month — JNJ Q2 2023 ended 2023-07-02, Q3 2023 ended 2023-10-01 — bucketing those facts into the next quarter. The EntityFacts layer already handled this via `calculate_fiscal_year_for_label`, but the XBRL parser has an independent fiscal classification path feeding `xbrl.facts.to_dataframe()` and `query().by_fiscal_period(...)`, silently misclassifying quarterly data for any RAG / analytics pipeline reading raw facts. End dates in the first 7 days of a month are now treated as belonging to the previous month for quarter classification; the 7-day window covers max drift for Sunday-nearest (≤3 days), Saturday-nearest (≤1 day), and last-Sat/Sun (no drift) patterns with safety margin. ([#816](https://github.com/dgunning/edgartools/issues/816), reporter @kmatosli)
+
 ## [5.31.4] - 2026-05-21
 
 ### Fixed
