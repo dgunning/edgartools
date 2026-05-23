@@ -133,6 +133,19 @@ def get_truststore_context():
     return truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 
 
+def get_edgar_http_timeout() -> float:
+    """
+    Default request timeout in seconds for the internal httpx client.
+
+    Without an explicit timeout, a stalled upstream or slow TLS handshake
+    can cause a blocking socket read that never returns — the process is
+    not interruptible until the syscall completes. Override via the
+    EDGAR_HTTP_TIMEOUT environment variable (seconds); pass an explicit
+    timeout to configure_http() to change it at runtime.
+    """
+    return float(os.environ.get("EDGAR_HTTP_TIMEOUT", "30.0"))
+
+
 def get_edgar_rate_limit_per_sec():
     """
     Returns the rate limit in requests per second.
@@ -185,6 +198,13 @@ def get_http_mgr(cache_enabled: bool = True, request_per_sec_limit: int = 9) -> 
     # Increase keepalive from default 5s to 30s for better connection reuse
     # This reduces TCP+TLS handshake overhead (~100ms) for interactive use
     http_mgr.httpx_params["limits"] = httpx.Limits(keepalive_expiry=30)
+
+    # Set a non-None default timeout so a stalled upstream cannot wedge
+    # a worker indefinitely. Override via EDGAR_HTTP_TIMEOUT env var or
+    # configure_http(timeout=...).
+    http_mgr.httpx_params["timeout"] = httpx.Timeout(
+        get_edgar_http_timeout(), connect=10.0
+    )
     return http_mgr
 
 

@@ -7,6 +7,7 @@ import pytest
 
 from edgar.httpclient import (
     async_http_client,
+    get_edgar_http_timeout,
     get_edgar_use_system_certs,
     get_edgar_verify_ssl,
     get_http_mgr,
@@ -222,6 +223,42 @@ def test_ssl_verification_applied_to_http_manager(monkeypatch):
     http_mgr = get_http_mgr()
     assert http_mgr.httpx_params["verify"] is True
     assert isinstance(http_mgr.httpx_params["verify"], bool), "verify should be a boolean, not a function"
+
+
+def test_default_http_timeout_is_set(monkeypatch):
+    """
+    HTTP_MGR must have a non-None default timeout so a stalled upstream
+    cannot wedge a worker indefinitely on a blocking socket read.
+
+    Regression for the pattern where edgar_discovery jobs ran 50+
+    minutes past their budget because get_current_filings() blocked
+    in a read with no timeout.
+    """
+    # Default — no env override
+    monkeypatch.delenv("EDGAR_HTTP_TIMEOUT", raising=False)
+    assert get_edgar_http_timeout() == 30.0
+
+    http_mgr = get_http_mgr()
+    timeout = http_mgr.httpx_params.get("timeout")
+    assert timeout is not None, "HTTP_MGR must have a default timeout"
+    assert isinstance(timeout, httpx.Timeout)
+    # Every phase must be bounded — None on any phase is the bug.
+    for phase in ("connect", "read", "write", "pool"):
+        assert getattr(timeout, phase) is not None, (
+            f"timeout.{phase} must not be None"
+        )
+    assert timeout.read == 30.0
+    assert timeout.connect == 10.0
+
+
+def test_default_http_timeout_env_override(monkeypatch):
+    """EDGAR_HTTP_TIMEOUT overrides the default at HTTP_MGR construction."""
+    monkeypatch.setenv("EDGAR_HTTP_TIMEOUT", "5")
+    assert get_edgar_http_timeout() == 5.0
+
+    http_mgr = get_http_mgr()
+    timeout = http_mgr.httpx_params["timeout"]
+    assert timeout.read == 5.0
 
 
 def test_is_ssl_error_detection():
