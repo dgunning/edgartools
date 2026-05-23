@@ -12,7 +12,7 @@ edgartools-internal, and re-emits it for user code so the deprecation
 notice is preserved where it matters.
 """
 
-import sys
+import inspect
 import warnings
 
 # Modules that are transparent to the caller check: the deprecated
@@ -41,7 +41,8 @@ def warn_legacy_html_usage(message: str) -> None:
     libraries, tests — receives the standard ``DeprecationWarning`` at
     its own call site.
     """
-    frame = sys._getframe(1)
+    current = inspect.currentframe()
+    frame = current.f_back if current is not None else None
     while frame is not None:
         mod_name = frame.f_globals.get('__name__', '')
         if mod_name in _TRANSPARENT_MODULES:
