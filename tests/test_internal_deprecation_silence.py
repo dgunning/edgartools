@@ -16,6 +16,7 @@ inside edgartools. User code that instantiates these classes still
 receives the standard DeprecationWarning.
 """
 
+import contextlib
 import subprocess
 import sys
 import warnings
@@ -96,13 +97,11 @@ def test_user_instantiation_of_chunked_document_warns():
 
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
-        try:
-            # ChunkedDocument's __init__ runs further processing that may
-            # surface unrelated issues on minimal HTML; the warning fires
-            # before any of that, so we tolerate downstream exceptions.
+        # ChunkedDocument's __init__ runs further processing that may
+        # surface unrelated AttributeErrors on minimal HTML; the warning
+        # fires before any of that, so we tolerate that specific error.
+        with contextlib.suppress(AttributeError):
             ChunkedDocument(html="<html><body><p>x</p></body></html>")
-        except Exception:
-            pass
 
     deprecations = [
         c for c in caught if issubclass(c.category, DeprecationWarning)
