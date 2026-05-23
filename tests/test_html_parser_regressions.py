@@ -158,6 +158,63 @@ class TestStreamingParserRegressions:
         doc = parse_html(html, config=config)
         assert doc is not None
 
+    def test_streaming_preserves_span_wrapped_paragraph_text(self):
+        """
+        Regression: Streaming parser dropped text from <span>-wrapped paragraphs.
+
+        Bug: The iterparse loop called elem.clear() on every event (both
+        start and end), and on every element regardless of whether an
+        enclosing structural element (p/h1-h6/section) had finished reading
+        its children. Because iterparse fires end events depth-first, the
+        inner <span>'s end event cleared its .text/.tail before <p>'s end
+        event ran _get_text_content(p). SEC filings wrap virtually every
+        word in <span style="..."> tags, so streaming-mode paragraphs
+        produced empty text — silently, with no warning.
+
+        Symptom in production: filings in the ~30MB–110MB band (which
+        cross the default 10MB streaming_threshold) returned text() output
+        20%+ shorter than the non-streaming path; for some filings,
+        nearly empty. No exception was raised.
+
+        Fix: edgar/documents/utils/streaming.py — clear only on end
+        events, and gate clearing on a content-depth counter that tracks
+        open p/h1-h6/section elements (matching the existing _table_depth
+        gate). This defers child cleanup until the enclosing structural
+        element has read its subtree.
+
+        Expected: Streaming-mode text() returns the full paragraph
+        content, including text inside nested <span> wrappers.
+        """
+        # Mimics SEC filing structure: every word inside its own <span>.
+        html = (
+            "<html><body>"
+            "<p><span>Alpha </span><span>beta </span><span>gamma</span></p>"
+            "<p><span>second </span><span>paragraph</span></p>"
+            "<h2><span>Risk Factors</span></h2>"
+            "<p><span>nested </span><span>spans </span><span>everywhere</span></p>"
+            "</body></html>"
+        )
+
+        # Force streaming mode regardless of size.
+        streaming_cfg = ParserConfig(
+            streaming_threshold=1,
+            max_document_size=10 * 1024 * 1024,
+        )
+        text = parse_html(html, config=streaming_cfg).text()
+
+        # All paragraph and heading content must survive the streaming path.
+        assert "Alpha" in text and "beta" in text and "gamma" in text
+        assert "second paragraph" in text
+        assert "Risk Factors" in text
+        assert "nested spans everywhere" in text
+
+        # Non-streaming baseline must agree on the same content.
+        normal_cfg = ParserConfig(streaming_threshold=10 * 1024 * 1024)
+        normal_text = parse_html(html, config=normal_cfg).text()
+        for needle in ("Alpha", "beta", "gamma", "second paragraph",
+                       "Risk Factors", "nested spans everywhere"):
+            assert needle in normal_text, f"baseline missing {needle!r}"
+
 
 class TestSectionDetectionRegressions:
     """Regression tests for section detection bugs."""
