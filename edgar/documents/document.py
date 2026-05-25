@@ -115,6 +115,40 @@ class Section:
         # Clean up boundary artifacts (page numbers, next section headers)
         return self._clean_boundary_artifacts(text)
 
+    def markdown(self) -> str:
+        """Render this section to Markdown.
+
+        Mirrors :meth:`text` but preserves syntax for tables (pipe
+        format) and lists (bullet / numbered markers) by routing
+        through the same renderer used by :meth:`Document.to_markdown`.
+
+        For heading/pattern-based sections the cached node tree is
+        rendered directly. For TOC-based sections (whose node has no
+        children — content is fetched lazily from the original HTML)
+        this method currently falls back to :meth:`text` because
+        correctly extracting a TOC section's HTML subtree without
+        leaking adjacent sections or losing structural wrappers
+        (``<table>``/``<tbody>``/etc.) is non-trivial — every shape of
+        anchor nesting requires careful handling. The fallback is
+        safe (no regression vs ``text()``) but does not deliver the
+        table/list-preserving benefit on TOC sections. Adding full
+        TOC markdown support is tracked as a follow-up.
+        """
+        if self.detection_method == 'toc' and self._text_extractor is not None:
+            # Conservative fallback — see docstring. Returns the same
+            # output as `Section.text()` so callers get correct text
+            # rather than risk leakage of adjacent-section markup.
+            return self.text()
+
+        # Heading/pattern-based sections: render the cached node tree.
+        # Apply the same boundary-artifact cleanup as `text()` so page
+        # numbers and bleed-in next-item headers don't leak into the
+        # markdown output.
+        from edgar.documents.renderers.markdown import MarkdownRenderer
+        renderer = MarkdownRenderer()
+        rendered = renderer.render_node(self.node)
+        return self._clean_boundary_artifacts(rendered)
+
     def _clean_boundary_artifacts(self, text: str) -> str:
         """
         Remove common artifacts at section boundaries.
@@ -134,10 +168,10 @@ class Section:
         # Pattern: page number followed by PART header followed by Item number
         # e.g., "\n\n  16\n\n  PART I\n\nItem 1A\n\n" (this is a page break artifact)
         text = re.sub(
-            r'\n\s*\d{1,3}\s*\n\s*PART\s+[IVX]+\s*\n\s*Item\s+\d+[A-Za-z]?(?:,\s*\d+[A-Za-z]?)?\s*\n',
+            r'\n\s*\d{1,3}\s*\n\s*(?:#{1,6}\s+|\*\*\s*)?PART\s+[IVX]+(?:\s*\*\*)?\s*\n\s*(?:#{1,6}\s+|\*\*\s*)?Item\s+\d+[A-Za-z]?(?:\\?\.)?(?:,\s*\d+[A-Za-z]?(?:\\?\.)?)?(?:\s*\*\*)?\s*\n',
             '\n\n',
             text,
-            flags=re.IGNORECASE
+            flags=re.IGNORECASE,
         )
 
         # 1b. Remove interior page headers for 20-F (Table of Contents format)
@@ -152,12 +186,15 @@ class Section:
 
         # 2a. Remove trailing page footer for 10-K/10-Q (PART + Item at end)
         # Pattern: page number + PART + Item header at end (next section bleeding in)
-        # e.g., "\n\n  29\n\n  PART I\n\nItem 1B, 1C" at end
+        # e.g., "\n\n  29\n\n  PART I\n\nItem 1B, 1C" at end. Optional
+        # markdown decorations (``#``, ``**``) and backslash-escaped
+        # periods accommodate ``MarkdownRenderer`` output where each
+        # of PART or Item may have been rendered as a heading or bold.
         text = re.sub(
-            r'\n\s*\d{1,3}\s*\n\s*PART\s+[IVX]+\s*\n\s*Item\s+\d+[A-Za-z]?(?:,\s*\d+[A-Za-z]?)?\s*$',
+            r'\n\s*\d{1,3}\s*\n\s*(?:#{1,6}\s+|\*\*\s*)?PART\s+[IVX]+(?:\s*\*\*)?\s*\n\s*(?:#{1,6}\s+|\*\*\s*)?Item\s+\d+[A-Za-z]?(?:\\?\.)?(?:,\s*\d+[A-Za-z]?(?:\\?\.)?)?(?:\s*\*\*)?\s*$',
             '',
             text,
-            flags=re.IGNORECASE
+            flags=re.IGNORECASE,
         )
 
         # 2b. Remove trailing page footer for 20-F (Table of Contents at end)
@@ -169,9 +206,31 @@ class Section:
         )
 
         # 3. Remove trailing Item headers if they appear at the very end
-        # (without preceding PART header)
-        # e.g., "\n\nItem 15" or "\n\nITEM 15."
-        text = re.sub(r'\n\s*Item\s+\d+[A-Za-z]?\.?\s*$', '', text, flags=re.IGNORECASE)
+        # (without preceding PART header). Matches:
+        #   - "Item 15", "ITEM 15."  (plain text)
+        #   - "Item 15\."            (markdown-escaped period)
+        #   - "# Item 15", "## Item 15"  (markdown heading)
+        #   - "**Item 15**", "**Item 15.**"  (markdown bold)
+        # The ``MarkdownRenderer`` can produce any of these depending on
+        # how the next-item bleed-in was structured in the HTML.
+        text = re.sub(
+            r'\n\s*#{1,6}\s*Item\s+\d+[A-Za-z]?(?:\\?\.)?\s*$',
+            '',
+            text,
+            flags=re.IGNORECASE,
+        )
+        text = re.sub(
+            r'\n\s*\*\*\s*Item\s+\d+[A-Za-z]?(?:\\?\.)?\s*\*\*\s*$',
+            '',
+            text,
+            flags=re.IGNORECASE,
+        )
+        text = re.sub(
+            r'\n\s*Item\s+\d+[A-Za-z]?(?:\\?\.)?\s*$',
+            '',
+            text,
+            flags=re.IGNORECASE,
+        )
 
         # 4. Remove trailing page numbers: whitespace followed by 1-3 digits at end
         # e.g., "\n\n  100" or "\n  92"
