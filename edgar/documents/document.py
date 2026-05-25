@@ -836,7 +836,10 @@ class Document:
         # Lazy-load section extractor
         if not hasattr(self, '_section_extractor'):
             from edgar.documents.extractors.toc_section_extractor import SECSectionExtractor
-            self._section_extractor = SECSectionExtractor(self)
+            self._section_extractor = SECSectionExtractor(
+                self,
+                form=(self.metadata.form if self.metadata else None),
+            )
 
         return self._section_extractor.get_section_text(
             section_name, include_subsections, clean
@@ -856,7 +859,10 @@ class Document:
         """
         if not hasattr(self, '_section_extractor'):
             from edgar.documents.extractors.toc_section_extractor import SECSectionExtractor
-            self._section_extractor = SECSectionExtractor(self)
+            self._section_extractor = SECSectionExtractor(
+                self,
+                form=(self.metadata.form if self.metadata else None),
+            )
 
         return self._section_extractor.get_available_sections()
 
@@ -872,7 +878,10 @@ class Document:
         """
         if not hasattr(self, '_section_extractor'):
             from edgar.documents.extractors.toc_section_extractor import SECSectionExtractor
-            self._section_extractor = SECSectionExtractor(self)
+            self._section_extractor = SECSectionExtractor(
+                self,
+                form=(self.metadata.form if self.metadata else None),
+            )
 
         return self._section_extractor.get_section_info(section_name)
 
