@@ -275,6 +275,40 @@ class StatementInfo:
     title: str
 
 
+@dataclass
+class ExtensionArc:
+    """An extension (filer-authored) concept linked into a statement via the
+    calculation linkbase but absent from the statement's presentation tree.
+
+    These concepts would not appear in the rendered statement today; this object
+    surfaces them with their us-gaap (or other standard) parent and signed weight.
+
+    Attributes:
+        concept: Local name (e.g., 'NetChangeInAdvancesToandInvestmentsInSubsidiaries').
+        concept_taxonomy: Filer prefix (e.g., 'jpm', 'tsla', 'met').
+        parent_concept: Local name of the calc parent (e.g., 'NetCashProvidedByUsedInInvestingActivities').
+        parent_taxonomy: Parent's taxonomy prefix (typically 'us-gaap').
+        weight: Signed calculation weight (+1.0 or -1.0 typically).
+        label: Standard label from the label linkbase, or '' if unavailable.
+        role_uri: Full extended-link role URI of the statement.
+        element_id: Original underscore-form ID used for fact lookup ('jpm_FooBar').
+        value: Numeric fact value when include_values=True; None otherwise.
+        period_key: Period key (e.g., 'duration_2023-01-01_2023-12-31') for the value.
+        context_ref: Context reference for the value's fact instance.
+    """
+    concept: str
+    concept_taxonomy: str
+    parent_concept: str
+    parent_taxonomy: str
+    weight: float
+    label: str
+    role_uri: str
+    element_id: str
+    value: Optional[float] = None
+    period_key: Optional[str] = None
+    context_ref: Optional[str] = None
+
+
 statement_to_concepts = {
     "IncomeStatement": StatementInfo(name="IncomeStatement",
                                      concept="us-gaap_IncomeStatementAbstract",
@@ -397,6 +431,109 @@ class Statement:
             True if the statement is segmented, False otherwise
         """
         return self.role_or_type.startswith("Segment")
+
+    def extension_arcs(self, include_values: bool = False) -> List[ExtensionArc]:
+        """Extension (filer-authored) concepts linked into this statement via the
+        calculation linkbase but absent from its presentation tree.
+
+        These concepts do not appear in `render()` output today because rendering
+        is driven by the presentation tree. Example: JPM's
+        ``jpm:NetBorrowingsFromSubsidiaries`` rolls up to
+        ``us-gaap:NetCashProvidedByUsedInFinancingActivities`` via the calc
+        linkbase but has no entry in the cash-flow presentation tree, so it
+        silently drops from the rendered statement.
+
+        Calling this method does not change `render()` output. It is purely
+        additive — an opt-in view for pipelines that want the full footprint.
+
+        Args:
+            include_values: When True, look up instance facts for each
+                extension concept and emit one ExtensionArc per (concept,
+                context). When False (default), return one ExtensionArc per
+                concept with `value`/`period_key`/`context_ref` left as None.
+
+        Returns:
+            List of :class:`ExtensionArc`. Empty list if the statement has no
+            calculation tree for its role, or no extension concepts in that
+            tree are absent from the presentation tree.
+
+        Example:
+            >>> stmt = filing.xbrl().statements.cash_flow_statement()
+            >>> for arc in stmt.extension_arcs(include_values=True):
+            ...     print(f"{arc.concept_taxonomy}:{arc.concept} "
+            ...           f"-> {arc.parent_taxonomy}:{arc.parent_concept} "
+            ...           f"w={arc.weight:+.1f} value={arc.value}")
+        """
+        from edgar.xbrl.core import STANDARD_TAXONOMIES, STANDARD_LABEL, split_element_id
+
+        # Resolve to the statement's role URI using the same path render() uses.
+        # find_statement() raises StatementNotFound for unresolvable inputs;
+        # this method should fail silent and return [] instead.
+        lookup_key = self.canonical_type if self.canonical_type else self.role_or_type
+        try:
+            _, role_uri, _ = self.xbrl.find_statement(lookup_key)
+        except StatementNotFound:
+            return []
+        if not role_uri:
+            return []
+
+        calc_tree = self.xbrl.calculation_trees.get(role_uri)
+        if not calc_tree:
+            return []
+
+        pres_tree = self.xbrl.presentation_trees.get(role_uri)
+        presented = set(pres_tree.all_nodes.keys()) if pres_tree else set()
+
+        arcs: List[ExtensionArc] = []
+        for element_id, node in calc_tree.all_nodes.items():
+            if node.parent is None or element_id in presented:
+                continue
+
+            concept_tax, concept_local = split_element_id(element_id)
+            if concept_tax in STANDARD_TAXONOMIES:
+                continue
+
+            parent_tax, parent_local = split_element_id(node.parent)
+            elem = self.xbrl.element_catalog.get(element_id)
+            label = ''
+            if elem and elem.labels:
+                label = elem.labels.get(STANDARD_LABEL, '') or ''
+
+            base_kwargs = dict(
+                concept=concept_local,
+                concept_taxonomy=concept_tax,
+                parent_concept=parent_local,
+                parent_taxonomy=parent_tax,
+                weight=node.weight,
+                label=label,
+                role_uri=role_uri,
+                element_id=element_id,
+            )
+
+            if not include_values:
+                arcs.append(ExtensionArc(**base_kwargs))
+                continue
+
+            # Values-joined: emit one arc per context with a fact.
+            contexts = self.xbrl.element_context_index.get(element_id, [])
+            if not contexts:
+                # No facts recorded — still emit the structural arc so callers
+                # can see the concept exists in the linkbase.
+                arcs.append(ExtensionArc(**base_kwargs))
+                continue
+
+            for ctx_ref in contexts:
+                fact = self.xbrl.parser.get_fact(element_id, ctx_ref)
+                if fact is None:
+                    continue
+                arcs.append(ExtensionArc(
+                    **base_kwargs,
+                    value=fact.numeric_value,
+                    period_key=self.xbrl.context_period_map.get(ctx_ref),
+                    context_ref=ctx_ref,
+                ))
+
+        return arcs
 
     def render(self, period_filter: Optional[str] = None,
                period_view: Optional[str] = None,
