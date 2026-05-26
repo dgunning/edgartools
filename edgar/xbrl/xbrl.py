@@ -29,7 +29,7 @@ from edgar.attachments import Attachments
 from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
 from edgar.richtools import repr_rich
-from edgar.xbrl.core import STANDARD_LABEL
+from edgar.xbrl.core import STANDARD_LABEL, STANDARD_TAXONOMIES, split_element_id
 from edgar.xbrl.models import PresentationNode
 from edgar.xbrl.parsers import XBRLParser
 from edgar.xbrl.period_selector import select_periods
@@ -297,6 +297,95 @@ class XBRL:
     @property
     def reporting_periods(self):
         return self.parser.reporting_periods
+
+    def calculation_linkbase(self, include_abstract: bool = False) -> pd.DataFrame:
+        """Return the filing's calculation linkbase as a DataFrame of arcs.
+
+        Each row is one parent→child calculation relationship with its weight,
+        role, and taxonomy attribution. Useful for building per-filer concept
+        hierarchies (e.g., mapping `jpm:AssetManagementFees → us-gaap:NoninterestIncome`)
+        without parsing `_cal.xml` directly.
+
+        Args:
+            include_abstract: When False (default), abstract concepts are excluded.
+                Set True to include structural/grouping concepts.
+
+        Returns:
+            DataFrame with columns:
+                concept, concept_taxonomy, parent_concept, parent_taxonomy,
+                weight, role_uri, role_short, menucat, is_abstract, label
+
+            Root nodes (those without a parent) are always excluded — they have
+            no arc. Returns an empty DataFrame (with the documented columns) if
+            the filing has no calculation linkbase.
+
+        Notes:
+            - `weight` preserves the XBRL `weight` attribute sign. Real filings
+              use `-1.0` for contra-account rollups (e.g., MET's amortization
+              entries); do not flatten the sign downstream.
+            - `concept_taxonomy` is the prefix before the first `_` in the
+              element ID (`us-gaap`, `dei`, `srt`, or the filer's own prefix
+              like `jpm`, `tsla`).
+            - `menucat` is the SEC FilingSummary report tier when available
+              (`S`=Statement, `D`=Details, `N`=Notes, `T`=Tables, `P`=Policies,
+              `C`=Cover). May be None for older filings without FilingSummary.
+
+        Example:
+            >>> from edgar import Company
+            >>> jpm_10k = Company("JPM").latest("10-K")
+            >>> calc = jpm_10k.xbrl().calculation_linkbase()
+            >>> # Find extension concepts that roll up to a us-gaap parent
+            >>> extensions = calc[
+            ...     (calc.concept_taxonomy == 'jpm') &
+            ...     (calc.parent_taxonomy == 'us-gaap')
+            ... ]
+        """
+        columns = [
+            'concept', 'concept_taxonomy', 'parent_concept', 'parent_taxonomy',
+            'weight', 'role_uri', 'role_short', 'menucat', 'is_abstract', 'label',
+        ]
+        rows = []
+
+        for role_uri, tree in self.calculation_trees.items():
+            # Prefer schema-declared role definition (human-authored) over
+            # the derived form CalculationTree.definition.
+            role_short = (
+                self.parser.role_types.get(role_uri, {}).get('definition')
+                or tree.definition
+            )
+            menucat = self._filing_summary_menu_categories.get(role_uri)
+
+            for element_id, node in tree.all_nodes.items():
+                if node.parent is None:
+                    # Root node — no arc to emit.
+                    continue
+
+                concept_tax, concept_local = split_element_id(element_id)
+                parent_tax, parent_local = split_element_id(node.parent)
+
+                elem = self.element_catalog.get(element_id)
+                is_abstract = bool(elem.abstract) if elem else False
+                if is_abstract and not include_abstract:
+                    continue
+
+                label = ''
+                if elem and elem.labels:
+                    label = elem.labels.get(STANDARD_LABEL, '') or ''
+
+                rows.append({
+                    'concept': concept_local,
+                    'concept_taxonomy': concept_tax,
+                    'parent_concept': parent_local,
+                    'parent_taxonomy': parent_tax,
+                    'weight': node.weight,
+                    'role_uri': role_uri,
+                    'role_short': role_short,
+                    'menucat': menucat,
+                    'is_abstract': is_abstract,
+                    'label': label,
+                })
+
+        return pd.DataFrame(rows, columns=columns)
 
     @property
     def period_of_report(self) -> Optional[str]:
