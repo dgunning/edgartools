@@ -9,15 +9,13 @@ from rich import box
 from rich.table import Table
 
 from edgar.datatools import clean_column_text, table_html_to_dataframe
+from edgar.files._deprecation import warn_legacy_html_usage
 from edgar.richtools import repr_rich
 
-# Deprecation warning for legacy HtmlDocument
-warnings.warn(
-    "edgar.files.html_documents module (including HtmlDocument) is deprecated and will be removed in v6.0. "
-    "Please use edgar.documents.HTMLParser instead. "
-    "See migration guide: https://edgartools.readthedocs.io/en/latest/migration/",
-    DeprecationWarning,
-    stacklevel=2
+_HTML_DOCUMENTS_DEPRECATION_MSG = (
+    "edgar.files.html_documents (including HtmlDocument) is deprecated and "
+    "will be removed in v6.0. Please use edgar.documents.HTMLParser instead. "
+    "See migration guide: https://edgartools.readthedocs.io/en/latest/migration/"
 )
 
 warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
@@ -346,6 +344,7 @@ class HtmlDocument:
                  blocks: List[Block],
                  data: Optional[DocumentData] = None,
                  ):
+        warn_legacy_html_usage(_HTML_DOCUMENTS_DEPRECATION_MSG)
         assert isinstance(blocks, list), "blocks must be a list of Block objects"
         self.blocks: List[Block] = blocks  # The text blocks
         self.data: Optional[DocumentData] = data  # Any data in the document
