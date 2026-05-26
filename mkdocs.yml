@@ -129,6 +129,7 @@ nav:
       - Query XBRL Facts: xbrl-querying.md
       - Getting XBRL Data: getting-xbrl.md
       - Multi-Period Analysis: xbrl/guides/multi-period-analysis.md
+      - Calculation Linkbase & Extensions: xbrl/guides/calculation-linkbase.md
       - Dimensions: xbrl/concepts/dimension-handling.md
       - Standardization: xbrl/concepts/standardization.md
       - Footnotes: guides/xbrl-footnotes.md
