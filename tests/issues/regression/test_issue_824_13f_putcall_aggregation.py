@@ -47,3 +47,23 @@ def test_infotable_unchanged_baseline():
     thirteenf = _sg_capital_thirteenf()
     puts = thirteenf.infotable.query("PutCall == 'Put'")
     assert len(puts) == 3
+
+
+@pytest.mark.network
+def test_putcall_column_position_preserved():
+    """PutCall must remain immediately after Ticker, not get bumped by groupby.
+
+    pandas groupby(['Cusip', 'PutCall'], as_index=False) places PutCall right
+    after Cusip in the output — which silently shifts the column layout. Any
+    positional column access (iloc, hardcoded notebook indices) and the table
+    rendering order depend on PutCall sitting after Ticker. Reviewed in #828.
+    """
+    thirteenf = _sg_capital_thirteenf()
+    holdings = thirteenf.holdings
+    cols = list(holdings.columns)
+    assert "PutCall" in cols
+    assert "Ticker" in cols
+    # PutCall must sit immediately after Ticker (contract, not just "somewhere later")
+    assert cols.index("PutCall") == cols.index("Ticker") + 1, (
+        f"PutCall position regressed: expected immediately after Ticker, got cols={cols}"
+    )
