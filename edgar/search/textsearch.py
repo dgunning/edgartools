@@ -183,13 +183,15 @@ class SearchResults:
         title = f"Searching for '{self.query}'"
         subtitle = f"{len(self)} result(s)" if not self.empty else "No results"
         sorted_sections = sorted(self.sections, key=lambda s: s.score, reverse=True)
-        for i, doc_section in enumerate(sorted_sections):
+        for doc_section in sorted_sections:
             if doc_section.doc.startswith("|  |") and self._show_tables:
                 table = convert_table(doc_section.doc)
                 section = table
             else:
                 section = Markdown(doc_section.doc + "\n\n---")
-            renderables.append(Panel(section, box=box.ROUNDED, title=f"{i}"))
+            # Title is the section index in the source corpus, not the display rank.
+            # Otherwise BM25 (sorts by score) and regex (no score) disagree on what "0" means.
+            renderables.append(Panel(section, box=box.ROUNDED, title=f"{doc_section.loc}"))
         return Panel(
             Group(*renderables), title=title, subtitle=subtitle, box=box.SIMPLE
         )
