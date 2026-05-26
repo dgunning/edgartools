@@ -155,7 +155,8 @@ jobs:
         coverage xml -o combined-coverage.xml
 
     - name: Upload combined coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v5
       with:
-        file: combined-coverage.xml
+        files: combined-coverage.xml
         fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}

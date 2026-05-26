@@ -43,9 +43,10 @@ jobs:
         pytest --cov --cov-report=xml -m regression
         
     - name: Upload coverage reports
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v5
       if: matrix.python-version == '3.11'
       with:
-        file: coverage.xml
+        files: coverage.xml
         fail_ci_if_error: false
         flags: regression
+        token: ${{ secrets.CODECOV_TOKEN }}
