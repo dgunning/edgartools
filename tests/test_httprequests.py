@@ -7,6 +7,7 @@ import pytest
 
 from edgar.httpclient import (
     async_http_client,
+    get_edgar_http_timeout,
     get_edgar_use_system_certs,
     get_edgar_verify_ssl,
     get_http_mgr,
@@ -222,6 +223,93 @@ def test_ssl_verification_applied_to_http_manager(monkeypatch):
     http_mgr = get_http_mgr()
     assert http_mgr.httpx_params["verify"] is True
     assert isinstance(http_mgr.httpx_params["verify"], bool), "verify should be a boolean, not a function"
+
+
+def test_default_http_timeout_is_set(monkeypatch):
+    """
+    HTTP_MGR must have a non-None default timeout so a stalled upstream
+    cannot wedge a worker indefinitely on a blocking socket read.
+
+    Regression for the pattern where edgar_discovery jobs ran 50+
+    minutes past their budget because get_current_filings() blocked
+    in a read with no timeout.
+    """
+    # Default — no env override
+    monkeypatch.delenv("EDGAR_HTTP_TIMEOUT", raising=False)
+    assert get_edgar_http_timeout() == 30.0
+
+    http_mgr = get_http_mgr()
+    timeout = http_mgr.httpx_params.get("timeout")
+    assert timeout is not None, "HTTP_MGR must have a default timeout"
+    assert isinstance(timeout, httpx.Timeout)
+    # Every phase must be bounded — None on any phase is the bug.
+    for phase in ("connect", "read", "write", "pool"):
+        assert getattr(timeout, phase) is not None, (
+            f"timeout.{phase} must not be None"
+        )
+    assert timeout.read == 30.0
+    assert timeout.connect == 10.0
+
+
+def test_default_http_timeout_env_override(monkeypatch):
+    """EDGAR_HTTP_TIMEOUT overrides the default at HTTP_MGR construction."""
+    monkeypatch.setenv("EDGAR_HTTP_TIMEOUT", "5")
+    assert get_edgar_http_timeout() == 5.0
+
+    http_mgr = get_http_mgr()
+    timeout = http_mgr.httpx_params["timeout"]
+    assert timeout.read == 5.0
+
+
+@pytest.mark.parametrize("value", ["", "none", "None", "NONE", "unlimited", "UNLIMITED", "0", "0.0", "-1"])
+def test_default_http_timeout_env_opt_out(monkeypatch, value):
+    """
+    EDGAR_HTTP_TIMEOUT routes empty / "none" / "unlimited" / non-positive
+    values through the unlimited path. The HTTP_MGR is constructed with
+    no "timeout" key in httpx_params, so httpx falls back to its built-in
+    default behaviour (no enforced read timeout from edgar's side).
+    Critically, EDGAR_HTTP_TIMEOUT=0 must NOT produce httpx.Timeout(0.0),
+    which httpx interprets as immediate-timeout on every I/O phase.
+    """
+    monkeypatch.setenv("EDGAR_HTTP_TIMEOUT", value)
+    assert get_edgar_http_timeout() is None
+
+    http_mgr = get_http_mgr()
+    assert "timeout" not in http_mgr.httpx_params, (
+        f"EDGAR_HTTP_TIMEOUT={value!r} must leave timeout unset, "
+        f"got {http_mgr.httpx_params.get('timeout')!r}"
+    )
+
+
+def test_disable_http_timeout_removes_timeout():
+    """
+    disable_http_timeout() is the documented escape hatch for opting out
+    of the default timeout at runtime. configure_http(timeout=None) is
+    intentionally a no-op (it matches the "leave unchanged" semantics of
+    the other configure_http parameters), so a dedicated function exists
+    to actually remove the timeout key.
+    """
+    from edgar.httpclient import configure_http, disable_http_timeout, HTTP_MGR
+
+    original_timeout = HTTP_MGR.httpx_params.get("timeout")
+    try:
+        # Ensure a timeout is set
+        configure_http(timeout=15.0)
+        assert "timeout" in HTTP_MGR.httpx_params
+
+        disable_http_timeout()
+        assert "timeout" not in HTTP_MGR.httpx_params
+
+        # configure_http(timeout=None) must NOT reinstate the default —
+        # None means "leave unchanged" for consistency with the other
+        # parameters; the timeout stays disabled.
+        configure_http(timeout=None)
+        assert "timeout" not in HTTP_MGR.httpx_params
+    finally:
+        if original_timeout is None:
+            HTTP_MGR.httpx_params.pop("timeout", None)
+        else:
+            HTTP_MGR.httpx_params["timeout"] = original_timeout
 
 
 def test_is_ssl_error_detection():
