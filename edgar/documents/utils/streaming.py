@@ -190,12 +190,20 @@ class StreamingParser:
             body_container = ContainerNode(tag_name='body')
             self.root.add_child(body_container)
             self.current_parent = body_container
+        elif tag == 'table':
+            self._start_table(elem)
+        elif self._table_depth > 0:
+            # Suppress structural-content handlers while inside a table.
+            # _end_table runs processor.process(elem) over the full table
+            # subtree and emits each cell's text as part of the TableNode;
+            # also emitting <p>/<h*>/<section> nodes here would produce the
+            # same text twice in document.text(). Symmetrical to the
+            # existing _table_depth gate on elem.clear() above.
+            pass
         elif tag in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
             self._start_heading(elem)
         elif tag == 'p':
             self._start_paragraph(elem)
-        elif tag == 'table':
-            self._start_table(elem)
         elif tag == 'section':
             self._start_section(elem)
 
@@ -208,12 +216,14 @@ class StreamingParser:
             self.tag_stack.pop()
 
         # Handle specific tags
-        if tag in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+        if tag == 'table':
+            self._end_table(elem)
+        elif self._table_depth > 0:
+            pass  # see _handle_start_tag: structural handlers are suppressed inside tables
+        elif tag in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
             self._end_heading(elem)
         elif tag == 'p':
             self._end_paragraph(elem)
-        elif tag == 'table':
-            self._end_table(elem)
         elif tag == 'section':
             self._end_section(elem)
         elif tag == 'body':
