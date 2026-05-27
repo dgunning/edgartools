@@ -133,7 +133,7 @@ def get_truststore_context():
     return truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 
 
-def get_edgar_http_timeout() -> float:
+def get_edgar_http_timeout() -> Optional[float]:
     """
     Default request timeout in seconds for the internal httpx client.
 
@@ -142,8 +142,20 @@ def get_edgar_http_timeout() -> float:
     not interruptible until the syscall completes. Override via the
     EDGAR_HTTP_TIMEOUT environment variable (seconds); pass an explicit
     timeout to configure_http() to change it at runtime.
+
+    Returns None for "unlimited" (no timeout set on the client), which is
+    signalled by the env var being empty or one of "none"/"unlimited"/"0"
+    (case-insensitive). Non-positive numerics also route through the
+    unlimited path so EDGAR_HTTP_TIMEOUT=0 cannot configure httpx with
+    a 0.0 read timeout (which httpx treats as immediate-timeout).
     """
-    return float(os.environ.get("EDGAR_HTTP_TIMEOUT", "30.0"))
+    raw = os.environ.get("EDGAR_HTTP_TIMEOUT", "30.0")
+    if raw.strip() == "" or raw.strip().lower() in ("none", "unlimited"):
+        return None
+    value = float(raw)
+    if value <= 0:
+        return None
+    return value
 
 
 def get_edgar_rate_limit_per_sec():
@@ -201,10 +213,11 @@ def get_http_mgr(cache_enabled: bool = True, request_per_sec_limit: int = 9) -> 
 
     # Set a non-None default timeout so a stalled upstream cannot wedge
     # a worker indefinitely. Override via EDGAR_HTTP_TIMEOUT env var or
-    # configure_http(timeout=...).
-    http_mgr.httpx_params["timeout"] = httpx.Timeout(
-        get_edgar_http_timeout(), connect=10.0
-    )
+    # configure_http(timeout=...). Set EDGAR_HTTP_TIMEOUT=none (or call
+    # disable_http_timeout() at runtime) to opt out entirely.
+    timeout = get_edgar_http_timeout()
+    if timeout is not None:
+        http_mgr.httpx_params["timeout"] = httpx.Timeout(timeout, connect=10.0)
     return http_mgr
 
 
@@ -249,7 +262,9 @@ def configure_http(
                          SSL inspection, as it uses certificates managed by your OS.
         proxy: HTTP/HTTPS proxy URL (e.g., "http://proxy.company.com:8080").
                Supports authentication: "http://user:pass@proxy.company.com:8080"
-        timeout: Request timeout in seconds (default: 30.0)
+        timeout: Request timeout in seconds (default: 30.0). Passing None
+                 leaves the current timeout unchanged — to disable the
+                 timeout entirely, call disable_http_timeout() instead.
 
     Examples:
         # Use OS certificate store (recommended for corporate networks)
@@ -305,6 +320,25 @@ def configure_http(
     # Force client recreation if settings changed and client already exists
     # This ensures new settings take effect even if client was already created
     if settings_changed and HTTP_MGR._client is not None:
+        HTTP_MGR._client.close()
+        HTTP_MGR._client = None
+
+
+def disable_http_timeout() -> None:
+    """Remove the default HTTP timeout — requests will wait indefinitely.
+
+    Use only when blocking reads on stalled upstreams is acceptable
+    (for example, long-running batch jobs with external supervision).
+    By default the client has a 30s read/write/pool timeout configured;
+    that timeout exists to prevent a single stalled SEC request from
+    wedging a worker forever, so removing it should be a deliberate choice.
+
+    `configure_http(timeout=None)` is intentionally a no-op (matches the
+    "leave unchanged" semantics of the other parameters), which is why
+    opting out lives behind this dedicated function.
+    """
+    HTTP_MGR.httpx_params.pop("timeout", None)
+    if HTTP_MGR._client is not None:
         HTTP_MGR._client.close()
         HTTP_MGR._client = None
 
