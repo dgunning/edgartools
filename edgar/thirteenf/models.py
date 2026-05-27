@@ -432,7 +432,11 @@ class ThirteenF:
             # No conversion needed - aggregate directly (saves 15 MB copy + 30ms)
             df = infotable
 
-        # Aggregate by CUSIP
+        # Group by CUSIP + PutCall so option positions stay distinct from equity (GH #824).
+        group_keys = ['Cusip']
+        if 'PutCall' in df.columns:
+            group_keys.append('PutCall')
+
         agg_dict = {}
 
         # Keep first value for ID columns
@@ -445,13 +449,23 @@ class ThirteenF:
             if col in df.columns:
                 agg_dict[col] = 'sum'
 
-        # Handle Type and PutCall - keep if consistent across managers, otherwise use first
-        for col in ['Type', 'PutCall']:
-            if col in df.columns:
-                agg_dict[col] = 'first'  # Use first value (typically consistent per CUSIP)
+        # Type keeps first; PutCall is now a grouping key so it's excluded from agg_dict.
+        if 'Type' in df.columns:
+            agg_dict['Type'] = 'first'
 
-        # Group by CUSIP and aggregate
-        holdings = df.groupby('Cusip', as_index=False).agg(agg_dict)
+        holdings = df.groupby(group_keys, as_index=False).agg(agg_dict)
+
+        # Restore PutCall column position. pandas groupby() with PutCall as a key
+        # places it as the second column (right after Cusip), silently shifting
+        # the column layout. This breaks positional column access, table
+        # rendering order, and notebook code with hardcoded indices. Re-insert
+        # PutCall after Ticker to preserve the pre-aggregation column contract.
+        if 'PutCall' in holdings.columns:
+            cols = [c for c in holdings.columns if c != 'PutCall']
+            insert_after = 'Ticker' if 'Ticker' in cols else (id_cols[-1] if id_cols[-1] in cols else cols[-1])
+            idx = cols.index(insert_after) + 1
+            cols.insert(idx, 'PutCall')
+            holdings = holdings[cols]
 
         # Optimize dtypes for low-cardinality columns (saves ~1-2 MB)
         # Include potential fillna values in categories for rendering compatibility
@@ -461,9 +475,10 @@ class ThirteenF:
                 categories=['Shares', 'Principal', '-']
             )
         if 'PutCall' in holdings.columns:
+            # SEC XML emits title-case ('Put', 'Call'); uppercase categories silently dropped values.
             holdings['PutCall'] = pd.Categorical(
                 holdings['PutCall'],
-                categories=['', 'PUT', 'CALL']
+                categories=['', 'Put', 'Call']
             )
 
         # Sort by value descending
