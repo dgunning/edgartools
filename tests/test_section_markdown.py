@@ -357,3 +357,73 @@ class TestSectionMarkdownAcrossDetectionPaths:
             b = section.markdown()
             assert a == b, "markdown() must be deterministic across calls"
             break
+
+
+class TestSectionMarkdownRealFiling:
+    """
+    Network-marked tests that exercise ``Section.markdown()`` against
+    production SEC HTML — synthetic fixtures only prove the renderer
+    wiring, not that the feature delivers value on real filings.
+
+    Pattern-detected sections (8-K Item 9.01 'Financial Statements and
+    Exhibits' is a reliable anchor — exhibit indices are almost always
+    rendered as HTML tables) are the path where ``markdown()`` actually
+    deviates from ``text()``. TOC-detected sections currently fall back
+    to ``text()`` by design; that contract is covered by the synthetic
+    ``test_toc_section_falls_back_to_text``.
+    """
+
+    @pytest.mark.network
+    def test_section_markdown_preserves_exhibit_table_on_real_8k(self):
+        """
+        Regression: pattern-detected 8-K Item 9.01 returns pipe-format
+        markdown for its exhibit table, where ``text()`` flattens it to
+        space-padded columns. Pinned to AAPL 0000320193-26-000011 (8-K
+        filed 2026-04-30) so the assertion targets a known table layout.
+        """
+        from edgar import Filing
+        from edgar.documents import HTMLParser
+        from edgar.documents.config import ParserConfig
+
+        filing = Filing(
+            company="Apple Inc.", cik=320193, form="8-K",
+            filing_date="2026-04-30",
+            accession_no="0000320193-26-000011",
+        )
+        doc = HTMLParser(ParserConfig(form=filing.form)).parse(filing.html())
+
+        section = doc.sections["item_901"]
+        # Anchor on the path that this PR actually changes.
+        assert section.detection_method == "pattern", (
+            f"expected pattern-detected section so markdown() goes through "
+            f"MarkdownRenderer rather than the TOC fallback; got "
+            f"detection_method={section.detection_method!r}. If this changes "
+            f"the test loses its meaning — pick a different anchor filing "
+            f"or section."
+        )
+
+        md = section.markdown()
+        txt = section.text()
+
+        # Structural assertion: pipe-table syntax must appear in markdown.
+        # Use a markdown-specific signature (header separator) rather than
+        # raw `|` count to avoid false positives from prose pipes.
+        assert "| --- |" in md, (
+            f"markdown() must emit pipe-format table for the exhibit list; "
+            f"got: {md[:400]!r}"
+        )
+
+        # Negative control: text() must NOT contain the markdown table
+        # separator. If this fires, the contrast the PR claims has
+        # evaporated — either text() started emitting markdown or
+        # markdown() stopped.
+        assert "| --- |" not in txt, (
+            f"text() unexpectedly contains markdown table syntax; got: {txt[:400]!r}"
+        )
+
+        # Content assertion: the exhibit content survives the renderer.
+        # 'Press release' is the standard Item 9.01 phrasing for an
+        # earnings-release 8-K; pinning on it locks in that we're
+        # extracting the right subtree, not just emitting a stub.
+        assert "Press release" in md
+        assert "Apple Inc." in md
