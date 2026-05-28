@@ -158,6 +158,127 @@ class TestStreamingParserRegressions:
         doc = parse_html(html, config=config)
         assert doc is not None
 
+    def test_streaming_preserves_span_wrapped_paragraph_text(self):
+        """
+        Regression: Streaming parser dropped text from <span>-wrapped paragraphs.
+
+        Bug: The iterparse loop called elem.clear() on every event (both
+        start and end), and on every element regardless of whether an
+        enclosing structural element (p/h1-h6/section) had finished reading
+        its children. Because iterparse fires end events depth-first, the
+        inner <span>'s end event cleared its .text/.tail before <p>'s end
+        event ran _get_text_content(p). SEC filings wrap virtually every
+        word in <span style="..."> tags, so streaming-mode paragraphs
+        produced empty text — silently, with no warning.
+
+        Symptom in production: filings in the ~30MB–110MB band (which
+        cross the default 10MB streaming_threshold) returned text() output
+        20%+ shorter than the non-streaming path; for some filings,
+        nearly empty. No exception was raised.
+
+        Fix: edgar/documents/utils/streaming.py — clear only on end
+        events, and gate clearing on a content-depth counter that tracks
+        open p/h1-h6/section elements (matching the existing _table_depth
+        gate). This defers child cleanup until the enclosing structural
+        element has read its subtree.
+
+        Expected: Streaming-mode text() returns the full paragraph
+        content, including text inside nested <span> wrappers.
+        """
+        # Mimics SEC filing structure: every word inside its own <span>.
+        html = (
+            "<html><body>"
+            "<p><span>Alpha </span><span>beta </span><span>gamma</span></p>"
+            "<p><span>second </span><span>paragraph</span></p>"
+            "<h2><span>Risk Factors</span></h2>"
+            "<p><span>nested </span><span>spans </span><span>everywhere</span></p>"
+            "</body></html>"
+        )
+
+        # Force streaming mode regardless of size.
+        streaming_cfg = ParserConfig(
+            streaming_threshold=1,
+            max_document_size=10 * 1024 * 1024,
+        )
+        text = parse_html(html, config=streaming_cfg).text()
+
+        # All paragraph and heading content must survive the streaming path.
+        assert "Alpha" in text and "beta" in text and "gamma" in text
+        assert "second paragraph" in text
+        assert "Risk Factors" in text
+        assert "nested spans everywhere" in text
+
+        # Non-streaming baseline must agree on the same content.
+        normal_cfg = ParserConfig(streaming_threshold=10 * 1024 * 1024)
+        normal_text = parse_html(html, config=normal_cfg).text()
+        for needle in ("Alpha", "beta", "gamma", "second paragraph",
+                       "Risk Factors", "nested spans everywhere"):
+            assert needle in normal_text, f"baseline missing {needle!r}"
+
+    def test_streaming_does_not_double_emit_table_cell_paragraphs(self):
+        """
+        Regression: Streaming parser emitted text inside <td><p>...</p></td>
+        twice — once as a free-standing ParagraphNode (because the <p>
+        start/end handlers fired unconditionally) and once as TableNode
+        cell text (because _end_table walks the full subtree via
+        processor.process(elem)). Same applies to <h*> and <section>
+        inside <td>.
+
+        This was masked before the span-bug fix because <p> handlers
+        produced empty paragraphs anyway. Once paragraph text was
+        recovered, the duplication showed up as 10-36% content overshoot
+        vs non-streaming on table-heavy filings — visible as the same
+        financial-statement labels ('Total', interest-income line items,
+        etc.) repeating dozens of times more in streaming output than
+        non-streaming output.
+
+        Fix: _handle_start_tag / _handle_end_tag gate <p>/<h1-6>/<section>
+        on _table_depth == 0, symmetrical to the existing _table_depth
+        gate on elem.clear(). The table processor remains the single
+        source of cell text.
+
+        Expected: each cell's text appears exactly once in streaming
+        output, matching non-streaming behaviour.
+        """
+        html = (
+            "<html><body>"
+            "<table>"
+            "<tr><td><p>Cell paragraph one</p></td>"
+            "    <td><p>Cell paragraph two</p></td></tr>"
+            "<tr><td><p>Row two A</p></td>"
+            "    <td><p>Row two B</p></td></tr>"
+            "</table>"
+            "</body></html>"
+        )
+
+        streaming_cfg = ParserConfig(
+            streaming_threshold=1,
+            max_document_size=10 * 1024 * 1024,
+        )
+        text = parse_html(html, config=streaming_cfg).text()
+
+        # Each cell must appear exactly once. Pre-fix this PR, each of
+        # these would appear twice (once as standalone paragraph, once
+        # as a table cell), and `text.count(...) == 2`.
+        for cell in ("Cell paragraph one", "Cell paragraph two",
+                     "Row two A", "Row two B"):
+            assert text.count(cell) == 1, (
+                f"{cell!r} appears {text.count(cell)} times in streaming "
+                f"output (expected 1) — table cell content is being "
+                f"double-emitted as both ParagraphNode and TableNode cell"
+            )
+
+        # And the non-streaming baseline must show the same single-emission
+        # behaviour, so the assertion isn't accidentally locking in a
+        # streaming-specific quirk.
+        normal_cfg = ParserConfig(streaming_threshold=10 * 1024 * 1024)
+        normal_text = parse_html(html, config=normal_cfg).text()
+        for cell in ("Cell paragraph one", "Cell paragraph two",
+                     "Row two A", "Row two B"):
+            assert normal_text.count(cell) == 1, (
+                f"baseline emits {cell!r} {normal_text.count(cell)} times"
+            )
+
 
 class TestSectionDetectionRegressions:
     """Regression tests for section detection bugs."""

@@ -58,6 +58,10 @@ class StreamingParser:
         self.text_buffer = []
         self.in_table = False
         self._table_depth = 0
+        # Depth counter for structural elements (p, h1-h6, section) that read
+        # their full subtree at end-tag time. Used to defer elem.clear() until
+        # the enclosing structural element has finished reading its children.
+        self._content_depth = 0
         self.table_buffer = []
 
     def parse(self, html: str) -> "Document":
@@ -108,10 +112,20 @@ class StreamingParser:
                 if len(self.node_buffer) >= self.MAX_NODE_BUFFER:
                     self._flush_buffer()
 
-                # Clean up processed elements to save memory.
-                # Skip clearing while inside a table — _end_table needs
-                # the full element tree (tr/td children) to extract data.
-                if self._table_depth == 0:
+                # Clean up processed elements to save memory. Two gates:
+                # - Only on `end` events: at `start`, lxml html-mode has
+                #   pre-populated children/text via lookahead and structural
+                #   handlers (e.g., _start_heading) read them; clearing at
+                #   start destroys that content.
+                # - Skip while inside a table or other structural content
+                #   element (p/h1-h6/section). _end_paragraph/_end_heading/
+                #   _end_section read the full child subtree via
+                #   _get_text_content; clearing children first (depth-first
+                #   end events fire for descendants before ancestors) wipes
+                #   their .text and .tail and produces empty text silently.
+                if (event == 'end'
+                        and self._table_depth == 0
+                        and self._content_depth == 0):
                     elem.clear()
                     while elem.getprevious() is not None:
                         parent = elem.getparent()
@@ -176,12 +190,20 @@ class StreamingParser:
             body_container = ContainerNode(tag_name='body')
             self.root.add_child(body_container)
             self.current_parent = body_container
+        elif tag == 'table':
+            self._start_table(elem)
+        elif self._table_depth > 0:
+            # Suppress structural-content handlers while inside a table.
+            # _end_table runs processor.process(elem) over the full table
+            # subtree and emits each cell's text as part of the TableNode;
+            # also emitting <p>/<h*>/<section> nodes here would produce the
+            # same text twice in document.text(). Symmetrical to the
+            # existing _table_depth gate on elem.clear() above.
+            pass
         elif tag in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
             self._start_heading(elem)
         elif tag == 'p':
             self._start_paragraph(elem)
-        elif tag == 'table':
-            self._start_table(elem)
         elif tag == 'section':
             self._start_section(elem)
 
@@ -194,12 +216,14 @@ class StreamingParser:
             self.tag_stack.pop()
 
         # Handle specific tags
-        if tag in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+        if tag == 'table':
+            self._end_table(elem)
+        elif self._table_depth > 0:
+            pass  # see _handle_start_tag: structural handlers are suppressed inside tables
+        elif tag in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
             self._end_heading(elem)
         elif tag == 'p':
             self._end_paragraph(elem)
-        elif tag == 'table':
-            self._end_table(elem)
         elif tag == 'section':
             self._end_section(elem)
         elif tag == 'body':
@@ -217,6 +241,7 @@ class StreamingParser:
         # Import node types at runtime to avoid circular imports
         from edgar.documents.nodes import HeadingNode
 
+        self._content_depth += 1
         level = int(elem.tag[1])
         text = self._get_text_content(elem)
 
@@ -246,12 +271,15 @@ class StreamingParser:
 
         # Clear any accumulated text buffer
         self.text_buffer.clear()
+        if self._content_depth > 0:
+            self._content_depth -= 1
 
     def _start_paragraph(self, elem: HtmlElement):
         """Start processing a paragraph."""
         # Import node types at runtime to avoid circular imports
         from edgar.documents.nodes import ParagraphNode
 
+        self._content_depth += 1
         para = ParagraphNode()
 
         # Get style if present
@@ -275,6 +303,8 @@ class StreamingParser:
 
         # Clear any accumulated text buffer
         self.text_buffer.clear()
+        if self._content_depth > 0:
+            self._content_depth -= 1
 
     def _start_table(self, elem: HtmlElement):
         """Start processing a table."""
@@ -311,6 +341,7 @@ class StreamingParser:
         # Import node types at runtime to avoid circular imports
         from edgar.documents.nodes import SectionNode
 
+        self._content_depth += 1
         section = SectionNode()
 
         # Get section attributes
@@ -328,6 +359,8 @@ class StreamingParser:
     def _end_section(self, elem: HtmlElement):
         """End processing a section."""
         self.current_section = None
+        if self._content_depth > 0:
+            self._content_depth -= 1
 
     def _flush_buffer(self):
         """Flush node buffer to document tree."""
