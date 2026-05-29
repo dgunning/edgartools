@@ -158,13 +158,23 @@ def test_statement_to_dataframe(aapl_xbrl):
     assert df[net_income_filter]['2021-09-25'].item() == 94680000000.0
 
     # Labels - now using original company labels (not standardized)
+    # edgartools-0609: the cash roll-forward renders distinct beginning/ending rows.
     labels = df.label.tolist()
-    assert labels[0] == 'Cash, cash equivalents and restricted cash, ending balances'
+    assert labels[0] == 'Cash, cash equivalents and restricted cash, beginning balances'
     assert labels[1] == 'Operating activities:'
     assert labels[2] == 'Net income'  # Original company label (lowercase)
     print(df[['label', '2023-09-30']])
 
     assert all(col in df.columns for col in ['2023-09-30', '2022-09-24', '2021-09-25'])
+
+    # edgartools-0609: beginning/ending cash balances must carry the correct instant
+    # values mapped onto the duration columns (not blank, not duplicated).
+    begin = df[df.label.str.endswith('beginning balances')].iloc[0]
+    end = df[df.label.str.endswith('ending balances')].iloc[0]
+    assert begin['2023-09-30'] == 24977000000.0   # = prior fiscal year-end cash
+    assert end['2023-09-30'] == 30737000000.0      # = FY2023 year-end cash
+    assert begin['2022-09-24'] == 35929000000.0
+    assert end['2022-09-24'] == 24977000000.0
 
 
 def test_xbrls_cashflow_to_dataframe(aapl_xbrl, aapl_xbrl_2022):

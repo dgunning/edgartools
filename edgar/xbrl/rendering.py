@@ -20,7 +20,14 @@ from edgar.display import get_statement_styles, get_style, SYMBOLS
 from edgar.display.formatting import cik_text
 from edgar.richtools import repr_rich, rich_to_text
 from edgar.xbrl import standardization
-from edgar.xbrl.core import determine_dominant_scale, format_date, format_value, parse_date
+from edgar.xbrl.core import (
+    PERIOD_END_LABEL,
+    PERIOD_START_LABEL,
+    determine_dominant_scale,
+    format_date,
+    format_value,
+    parse_date,
+)
 
 # Import color schemes from entity package
 try:
@@ -1838,7 +1845,15 @@ def render_statement(
 
         # Issue #450: For Statement of Equity, add "Beginning balance" / "Ending balance"
         # to labels when concept appears multiple times (e.g., Total Stockholders' Equity)
-        if statement_type == 'StatementOfEquity' and concept:
+        # edgartools-0609: skip non-dimensional rows that already carry a periodStart/
+        # periodEnd label from XBRL -- their label is already "...beginning/ending balances",
+        # so the suffix would be redundant. Dimensional rows still need it (they
+        # share the node label and can't be told apart otherwise).
+        already_roll_forward = (
+            not item.get('is_dimension')
+            and item.get('preferred_label') in (PERIOD_START_LABEL, PERIOD_END_LABEL)
+        )
+        if statement_type == 'StatementOfEquity' and concept and not already_roll_forward:
             total_occurrences = concept_occurrence_count.get(concept, 1)
             current_occurrence = concept_current_index.get(concept, 1)
 
@@ -1902,6 +1917,30 @@ def render_statement(
                 if value == "":
                     instant_key = f"instant_{period.end_date}"
                     value = item['values'].get(instant_key, "")
+
+            # edgartools-0609: General roll-forward mapping for periodStart/periodEnd
+            # balances (e.g. cash flow's "Cash, beginning/ending balances").
+            # These are instant facts shown against duration columns: the
+            # beginning balance is the instant at the day before the period start,
+            # the ending balance is the instant at the period end.
+            # Only non-dimensional rows carry a reliable per-reference label;
+            # dimensional rows share the node label and use the equity logic above.
+            item_preferred_label = None if item.get('is_dimension') else item.get('preferred_label')
+            if value == "" and period.end_date and item_preferred_label in (
+                    PERIOD_START_LABEL, PERIOD_END_LABEL):
+                if (item_preferred_label == PERIOD_START_LABEL
+                        and getattr(period, 'start_date', None)):
+                    from datetime import datetime, timedelta
+                    try:
+                        start_dt = datetime.strptime(period.start_date, '%Y-%m-%d')
+                        beginning_date = (start_dt - timedelta(days=1)).strftime('%Y-%m-%d')
+                        value = item['values'].get(f"instant_{beginning_date}", "")
+                        if value == "":
+                            value = item['values'].get(f"instant_{period.start_date}", "")
+                    except (ValueError, AttributeError):
+                        pass
+                if value == "" and item_preferred_label == PERIOD_END_LABEL:
+                    value = item['values'].get(f"instant_{period.end_date}", "")
 
             # Get comparison info for this item and period if available
             comparison_info = None

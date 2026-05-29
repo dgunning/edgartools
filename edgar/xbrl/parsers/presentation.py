@@ -264,8 +264,11 @@ class PresentationParser(BaseParser):
                         continue
                     seen_children.add(child_id)
 
-                # Add child to parent's children list
+                # Add child to parent's children list, tracking this reference's
+                # preferred label role positionally (edgartools-0609: roll-forward
+                # arcs reference the same concept twice with different label roles).
                 node.children.append(child_id)
+                node.child_preferred_labels.append(preferred_label)
 
                 # Recursively build child subtree
                 self._build_presentation_subtree(
