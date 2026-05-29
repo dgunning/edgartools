@@ -234,8 +234,21 @@ class PresentationParser(BaseParser):
             # Sort children by order
             children = sorted(from_map[element_id], key=lambda r: r['order'])
 
+            # Track child concepts already added under this parent. Some filers
+            # emit two presentation arcs from the same parent to the same concept
+            # (GH-825: CLW's balance sheet points AssetsAbstract at
+            # PropertyPlantAndEquipmentNet at both order 2 and order 4). Because
+            # nodes are keyed by element_id they collapse to a single node, so a
+            # duplicate child reference would render the identical line item twice.
+            # Keep the first occurrence (lowest order) and skip the rest.
+            seen_children = set()
+
             for rel in children:
                 child_id = rel['to_element']
+
+                if child_id in seen_children:
+                    continue
+                seen_children.add(child_id)
 
                 # Add child to parent's children list
                 node.children.append(child_id)
