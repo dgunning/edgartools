@@ -341,9 +341,23 @@ class Section:
                 if in_range:
                     collected_elements.append(el)
 
-            # Convert collected elements back to HTML string
+            # Convert collected elements back to HTML string. Only serialize
+            # top-level elements — those whose parent is NOT also in
+            # collected_elements — because tostring() already includes each
+            # element's full subtree. Re-serializing nested descendants would
+            # otherwise emit N copies of every <table> in the concatenated
+            # output (issue #826).
+            #
+            # id()-based membership is safe here because collected_elements
+            # holds a live reference to every proxy, so lxml returns the same
+            # proxy object (hence the same id) for getparent() of a collected
+            # element. Order is preserved (document order from iterwalk), which
+            # keeps the concatenated HTML faithful to the source.
+            collected_ids = {id(e) for e in collected_elements}
+            top_level = [e for e in collected_elements
+                         if id(e.getparent()) not in collected_ids]
             html_parts = []
-            for elem in collected_elements:
+            for elem in top_level:
                 try:
                     html_parts.append(lxml_html.tostring(elem, encoding='unicode'))
                 except (LxmlError, TypeError, AttributeError) as e:
