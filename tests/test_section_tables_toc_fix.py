@@ -52,9 +52,15 @@ def test_toc_section_tables_extraction():
     # Get tables from section
     tables = item8.tables()
 
-    # Should find tables (not empty)
+    # Should find tables (not empty) — the original bug returned 0.
     assert len(tables) > 0, f"TOC section should return tables (found {len(tables)})"
-    assert len(tables) >= 50, f"Expected 50+ tables in Item 8, got {len(tables)}"
+    # Item 8 (Financial Statements) is table-heavy. The previous >=50 threshold
+    # was inflated by a serialization bug (#826) that re-serialized nested
+    # elements, duplicating each table several times. Post-fix every table
+    # appears exactly once, so PLTR's latest 10-K Item 8 returns ~35 unique
+    # tables. Keep a substantial-count floor that guards the original
+    # "returns nothing" regression without re-encoding the duplication.
+    assert len(tables) >= 25, f"Expected a substantial number of tables in Item 8, got {len(tables)}"
 
     # Verify tables are TableNode objects
     from edgar.documents.table_nodes import TableNode
