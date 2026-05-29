@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.33.0] - 2026-05-29
+
+### Added
+
+- **`Filing.search()` highlights matched query terms in its output** — search results now mark the terms that matched within each section, so you can see *why* a section was returned rather than just *that* it was. Complements the BM25/regex section-index fix shipped for the same issue in 5.32.0. ([#765](https://github.com/dgunning/edgartools/issues/765))
+
+### Fixed
+
+- **`Section.tables()` returned each table up to ~24× on TOC-detected sections** — `Section._extract_section_html` walked the section subtree with `iterwalk` and re-serialized *every* collected element via `tostring()`. Because `tostring()` already includes an element's full subtree, a `<table>` nested under collected ancestors was emitted once for itself plus once inside each ancestor, and `_get_tables_from_toc_section` then wrapped each copy as a distinct `TableNode`. AAPL's 10-K Item 8 returned 123 tables for 34 unique; deeply nested 20-F sections hit ~24× per table. Only top-level collected elements are serialized now (a parent's serialization already covers its descendants), so each table appears exactly once. `Section.text()` is byte-identical before and after — no content drift. ([#826](https://github.com/dgunning/edgartools/issues/826), reporter @HonzaCuhel)
+
+- **XBRL statements rendered duplicate rows when a concept had repeated presentation arcs** — duplicate presentation arcs pointing at the same concept produced repeated lines in `render()`. Arcs to the same concept are now de-duplicated, with roll-forward (beginning/ending balance) arcs exempted so cash-flow and equity roll-forwards still render both their opening and closing balance rows. ([#825](https://github.com/dgunning/edgartools/issues/825))
+
+- **Embedded tables inside XBRL `TextBlock` report cells were dropped** — SGML/HTML tables nested within a TextBlock disclosure are now rendered in the report cell instead of being silently omitted. ([#755](https://github.com/dgunning/edgartools/issues/755))
+
+- **13F value-unit (thousands vs dollars) was inferred from a global filing-date cutoff** — the thousands/dollars scale is now detected per-filing from the filing's own data rather than a date heuristic, fixing misscaled holding values for filings near the cutoff boundary.
+
 ## [5.32.0] - 2026-05-28
 
 ### Added
