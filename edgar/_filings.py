@@ -2054,7 +2054,14 @@ class Filing:
     def search(self,
                query: str,
                regex=False):
-        """Search for the query string in the filing HTML"""
+        """Search for the query string in the filing HTML.
+
+        Returns a ``SearchResults`` whose rendered output highlights the matched
+        query terms in bold red. With ``regex=False`` (default, BM25 relevance
+        search) each query word is highlighted as a case-insensitive substring,
+        so "repurchase" also lights up "repurchases". With ``regex=True`` the
+        matches of the regex pattern itself are highlighted.
+        """
         if regex:
             return self.__get_regex_search_index.search(query)
         return self.__get_bm25_search_index.search(query)

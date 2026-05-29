@@ -116,3 +116,78 @@ def test_search_results_as_json():
     assert isinstance(json_results, dict)
     assert len(json_results['sections']) > 0
     assert json_results['query'] == "GPU"
+
+
+# --- Match highlighting in rendered output (issue #765 / edgartools-gnzy) ---
+
+# Rich emits these SGR sequences for the "bold red" highlight style.
+_BOLD_RED = ("\x1b[1;31m", "\x1b[31;1m")
+
+
+def _rendered_has_highlight(results: SearchResults) -> bool:
+    """Render the SearchResults to ANSI and report whether any match is bold-red."""
+    from rich.console import Console
+    console = Console(force_terminal=True, width=100)
+    with console.capture() as capture:
+        console.print(results)
+    out = capture.get()
+    return any(code in out for code in _BOLD_RED)
+
+
+@pytest.mark.fast
+def test_bm25_search_highlights_matches():
+    bm25 = BM25Search(document_sections)
+    results = bm25.search("financial")
+    assert len(results) > 0
+    assert results._highlight_pattern is not None
+    assert _rendered_has_highlight(results)
+
+
+@pytest.mark.fast
+def test_regex_search_highlights_matches():
+    regex_search = RegexSearch(document_sections)
+    results = regex_search.search(r"Item\s5.02")
+    assert len(results) > 0
+    assert results._regex is True
+    assert _rendered_has_highlight(results)
+
+
+@pytest.mark.fast
+def test_bm25_highlight_matches_substrings_case_insensitively():
+    # "repurchase" should also light up "Repurchases"/"repurchased".
+    sections = ["The company announced Repurchases and later repurchased more shares."]
+    results = BM25Search(sections).search("repurchase")
+    pattern = results._highlight_pattern
+    assert pattern is not None
+    assert len(pattern.findall(sections[0])) == 2
+
+
+@pytest.mark.fast
+def test_stopword_only_query_produces_no_highlight_pattern():
+    # All-stopword query must not crash and must not build a (match-everything) pattern.
+    results = SearchResults(query="the of and", sections=[])
+    assert results._highlight_pattern is None
+    assert _rendered_has_highlight(results) is False
+
+
+@pytest.mark.fast
+def test_invalid_regex_query_does_not_crash_highlighting():
+    results = SearchResults(query="[", sections=[], regex=True)
+    assert results._highlight_pattern is None  # invalid regex -> no highlight, no error
+
+
+@pytest.mark.fast
+def test_table_cells_are_highlighted():
+    # Table sections (markdown starting with "|  |") should highlight matched cells too.
+    table_md = "|  | Item | Amount |\n| Total repurchase | 100 |"
+    results = SearchResults(query="repurchase",
+                            sections=[],
+                            tables=True)
+    from rich.console import Console
+    from edgar._markdown import convert_table
+    table = convert_table(table_md, cell_highlighter=results._highlight)
+    console = Console(force_terminal=True, width=100)
+    with console.capture() as capture:
+        console.print(table)
+    out = capture.get()
+    assert any(code in out for code in _BOLD_RED)

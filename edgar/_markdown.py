@@ -26,16 +26,25 @@ def _empty(row):
     return chars == {'|'} or chars == {'-', '|'}
 
 
-def convert_table(table_markdown: str):
-    """Convert the markdown to a rich Table"""
+def convert_table(table_markdown: str, cell_highlighter=None):
+    """Convert the markdown to a rich Table.
+
+    Args:
+        table_markdown: The markdown source for the table.
+        cell_highlighter: Optional callable applied to each cell's text,
+            returning a rich renderable (e.g. a styled ``Text``). Used to
+            highlight search matches inside table cells.
+    """
     all_rows = table_markdown.replace("| |", "|\n|").split("\n")
 
     # Just output a simple table with no headers
     table = Table(" " * all_rows[0].count("|"), box=box.SIMPLE)
     for row in all_rows:
         if not _empty(row):
-            row = [cell.strip() for cell in row[1:-1].strip().split("|")]
-            table.add_row(*row)
+            cells = [cell.strip() for cell in row[1:-1].strip().split("|")]
+            if cell_highlighter is not None:
+                cells = [cell_highlighter(cell) for cell in cells]
+            table.add_row(*cells)
     return table
 
 
