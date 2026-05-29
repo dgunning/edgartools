@@ -57,3 +57,34 @@ def test_issue_825_no_duplicate_ppe_line():
     # The surviving line keeps the net (totalLabel) wording, not a bare "Property,
     # plant and equipment" that would read as gross.
     assert "net" in ppe_net[0]["label"].lower()
+
+
+@pytest.mark.regression
+def test_issue_825_roll_forward_arcs_not_deduped():
+    """
+    Guard for GH-755: the GH-825 dedup must NOT remove roll-forward arcs.
+
+    Cash flow statements legitimately point at the same cash concept twice using
+    ``periodStartLabel`` / ``periodEndLabel`` ("Cash, beginning/ending balances").
+    Both arcs collapse to one element_id node, but statement rendering relies on
+    the concept appearing twice in the parent's children (first = beginning,
+    later = ending). The dedup introduced for #825 wrongly removed one occurrence;
+    this verifies both are preserved.
+    """
+    from pathlib import Path
+
+    from edgar.xbrl.xbrl import XBRL
+
+    xbrl = XBRL.from_directory(Path("tests/fixtures/xbrl/aapl/10k_2023"))
+    line_items = xbrl.get_statement("CashFlowStatement")
+
+    cash_concept = "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+    cash_rows = [
+        item for item in line_items
+        if item.get("concept") == cash_concept and not item.get("is_dimension")
+    ]
+
+    assert len(cash_rows) == 2, (
+        "Cash roll-forward (beginning + ending balances) should produce two rows, "
+        f"found {len(cash_rows)} -- the #825 dedup must not collapse roll-forward arcs"
+    )
