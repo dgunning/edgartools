@@ -1193,7 +1193,8 @@ class XBRL:
                              path: Optional[List[str]] = None, should_display_dimensions: bool = False,
                              valid_dimensional_members: Optional[Dict[str, Set[str]]] = None,
                              view: Optional['StatementView'] = None,
-                             statement_role: Optional[str] = None) -> None:
+                             statement_role: Optional[str] = None,
+                             preferred_label_override: Optional[str] = None) -> None:
         """
         Recursively generate line items for a statement.
 
@@ -1211,6 +1212,10 @@ class XBRL:
                   DETAILED: Relaxed filtering - show all dimensional facts (fixes GH-574)
                   SUMMARY: No dimensional facts shown
             statement_role: Role URI of the statement being generated (GH-712)
+            preferred_label_override: Preferred label role for *this* reference to
+                the element, taken from the parent's child arc. Distinguishes
+                roll-forward references that share one node but use different label
+                roles (e.g. cash-flow periodStart vs periodEnd balances). (GH-0609)
         """
         from edgar.xbrl.presentation import StatementView
         if element_id not in nodes:
@@ -1225,8 +1230,26 @@ class XBRL:
         # Get node information
         node = nodes[element_id]
 
+        # GH-0609: Honor this reference's preferred label when it differs from the
+        # shared node's (roll-forward concepts referenced more than once).
+        effective_preferred_label = (
+            preferred_label_override
+            if preferred_label_override is not None
+            else node.preferred_label
+        )
+
         # Get label
-        label = node.display_label
+        if (preferred_label_override is not None
+                and preferred_label_override != node.preferred_label):
+            from edgar.xbrl.models import select_display_label
+            label = select_display_label(
+                labels=node.labels,
+                standard_label=node.standard_label,
+                preferred_label=effective_preferred_label,
+                element_id=element_id
+            )
+        else:
+            label = node.display_label
 
         # Get values and decimals across periods
         values = {}
@@ -1272,11 +1295,11 @@ class XBRL:
         # Calculate preferred_sign from preferred_label (for Issue #463)
         # This determines display transformation: -1 = negate, 1 = as-is, None = not specified
         preferred_sign_value = None
-        if node.preferred_label:
+        if effective_preferred_label:
             # Check if this is a negatedLabel (indicates value should be negated for display)
             # Use pattern matching to support any XBRL namespace version (2003, 2009, future versions)
             # Matches: 'negatedLabel', 'negatedTerseLabel', 'http://www.xbrl.org/YYYY/role/negated*Label', etc.
-            label_lower = node.preferred_label.lower()
+            label_lower = effective_preferred_label.lower()
             is_negated = 'negated' in label_lower and (
                 label_lower.startswith('negated') or  # Short form: 'negatedLabel'
                 '/role/negated' in label_lower        # Full URI: 'http://www.xbrl.org/*/role/negated*'
@@ -1534,7 +1557,7 @@ class XBRL:
                 'parent': node.parent,  # Presentation tree parent (may be abstract) (Issue #514)
                 'calculation_parent': calculation_parent,  # Calculation tree parent (metric) (Issue #514 refinement)
                 'level': node.depth,
-                'preferred_label': node.preferred_label,
+                'preferred_label': effective_preferred_label,
                 'is_abstract': node.is_abstract,  # Issue #450: Use node's actual abstract flag
                 'children': node.children,
                 'has_values': len(values) > 0,  # True if we have total values
@@ -1558,7 +1581,7 @@ class XBRL:
                 'parent': node.parent,  # Presentation tree parent (may be abstract) (Issue #514)
                 'calculation_parent': calculation_parent,  # Calculation tree parent (metric) (Issue #514 refinement)
                 'level': node.depth,
-                'preferred_label': node.preferred_label,
+                'preferred_label': effective_preferred_label,
                 'is_abstract': node.is_abstract,
                 'children': node.children,
                 'has_values': len(values) > 0,  # Flag to indicate if we found values
@@ -1680,10 +1703,16 @@ class XBRL:
             result.extend(dim_items_added)
 
         # Process children
-        for child_id in node.children:
+        # GH-0609: pass each child reference's own preferred label so roll-forward
+        # concepts (same element_id referenced twice) render with the correct
+        # periodStart/periodEnd label and value mapping.
+        child_labels = node.child_preferred_labels
+        for idx, child_id in enumerate(node.children):
+            child_override = child_labels[idx] if idx < len(child_labels) else None
             self._generate_line_items(child_id, nodes, result, period_filter, current_path,
                                       should_display_dimensions, valid_dimensional_members, view,
-                                      statement_role=statement_role)
+                                      statement_role=statement_role,
+                                      preferred_label_override=child_override)
 
     def _apply_member_hierarchy(self, dim_items: List[Dict[str, Any]]) -> None:
         """Adjust level of dimensional items based on definition linkbase member hierarchy.

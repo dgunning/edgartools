@@ -1358,6 +1358,33 @@ class Statement:
                 # Use raw value from instance document
                 value = values_dict.get(period_key)
 
+                # GH-0609: Roll-forward mapping for periodStart/periodEnd balances
+                # (e.g. cash flow / equity "beginning/ending balances"). These are
+                # instant facts shown against duration columns: the beginning
+                # balance is the instant at the day before the period start, the
+                # ending balance is the instant at the period end. Driven by the
+                # per-reference preferred label so it works regardless of statement
+                # type and keeps the DataFrame consistent with the rich view.
+                from edgar.xbrl.core import PERIOD_END_LABEL, PERIOD_START_LABEL
+                # Only non-dimensional rows carry a reliable per-reference label;
+                # dimensional rows share the node's label and use the occurrence-
+                # based equity logic below instead.
+                item_preferred_label = None if item.get('is_dimension') else item.get('preferred_label')
+                is_period_start = item_preferred_label == PERIOD_START_LABEL
+                if value is None and item_preferred_label in (PERIOD_START_LABEL, PERIOD_END_LABEL):
+                    if is_period_start and start_date:
+                        # Beginning balance: instant at the day before period start
+                        try:
+                            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
+                            beginning_date = (start_dt - timedelta(days=1)).strftime('%Y-%m-%d')
+                            value = values_dict.get(f"instant_{beginning_date}")
+                            if value is None:
+                                value = values_dict.get(f"instant_{start_date}")
+                        except (ValueError, AttributeError):
+                            pass
+                    if value is None and item_preferred_label == PERIOD_END_LABEL and end_date:
+                        value = values_dict.get(f"instant_{end_date}")
+
                 # Issue #572/#583: For Statement of Equity, match instant facts when duration key is empty
                 # This mirrors the logic in rendering.py (Issue #450) for consistent DataFrame output
                 # Roll-forward structure: first occurrence = beginning balance, later = ending balance
@@ -1378,8 +1405,9 @@ class Statement:
                         except (ValueError, AttributeError):
                             pass  # Fall through to try end_date
 
-                    # If still no value, try instant at end_date (ending balances and most facts)
-                    if value is None and end_date:
+                    # If still no value, try instant at end_date (ending balances and most facts).
+                    # GH-0609: never apply the period-end instant to a beginning row.
+                    if value is None and end_date and not is_period_start:
                         instant_key = f"instant_{end_date}"
                         value = values_dict.get(instant_key)
 
@@ -1387,7 +1415,10 @@ class Statement:
                 # Notes/disclosures default to duration period selection, but balance-sheet-type
                 # notes (PPE, Accrued Liabilities) have instant facts.
                 # Try the instant key at the duration's end date.
-                if value is None and period_key.startswith('duration_') and end_date:
+                # GH-0609: skip beginning-balance rows -- the period end instant is
+                # the *ending* balance and would mislabel the beginning row.
+                if (value is None and period_key.startswith('duration_') and end_date
+                        and not is_period_start):
                     instant_key = f"instant_{end_date}"
                     value = values_dict.get(instant_key)
 
