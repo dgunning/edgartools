@@ -383,6 +383,47 @@ class TestHelperMethods:
             assert 'part_i_part_ii' not in key
             assert key != 'Part I'
 
+    def test_build_section_mapping_drops_descriptive_noise(self):
+        """Regression (edgartools-3au1): the 10-K raw-text fallback leaks
+        descriptive titles and exhibit-index prose as top-level sections. Only
+        canonical items, bare 'Item N', and allowlisted named sections survive."""
+        from edgar.documents.utils.toc_analyzer import TOCSection
+        sections = [
+            TOCSection(name='Item 1', anchor_id='a1', normalized_name='Item 1',
+                       section_type='item', order=1, part='Part I'),
+            # Pure descriptive MD&A subsection \u2014 must drop
+            TOCSection(name='Risk Management', anchor_id='arm',
+                       normalized_name='Risk Management', section_type='other',
+                       order=2, part='Part II'),
+            # Exhibit-index prose that merely contains an item number \u2014 must drop
+            TOCSection(name=', Item 1A', anchor_id='ax',
+                       normalized_name=', Item 1A', section_type='item',
+                       order=3, part='Part IV'),
+            # Allowlisted named section \u2014 must keep
+            TOCSection(name='Signatures', anchor_id='asig',
+                       normalized_name='Signatures', section_type='other',
+                       order=4, part='Part IV'),
+            # Bare item (missing prefix) \u2014 valid content, must keep (3usf)
+            TOCSection(name='Item 8', anchor_id='a8', normalized_name='Item 8',
+                       section_type='item', order=5, part=None),
+        ]
+        mapping = self.analyzer._build_section_mapping(sections)
+        assert mapping == {
+            'part_i_item_1': 'a1',
+            'part_iv_signatures': 'asig',
+            'Item 8': 'a8',
+        }
+
+    def test_is_valid_section_key(self):
+        ok = self.analyzer._is_valid_section_key
+        assert ok('part_ii_item_7', 'Item 7')
+        assert ok('item_1a', 'Item 1A')
+        assert ok('Item 8', 'Item 8')                       # bare, missing prefix
+        assert ok('part_iv_signatures', 'Signatures')        # allowlisted named
+        assert not ok('part_ii_risk_management', 'Risk Management')
+        assert not ok('part_iv_,_item_1a', ', Item 1A')
+        assert not ok('part_ii_note_7:__share-based_compensation', 'Note 7: Share-Based Compensation')
+
     def test_parse_item_strips_zwsp(self):
         """Zero-width spaces should be transparent to parsing."""
         assert self.analyzer._parse_item_from_text('Item\u200b 1A.') == 'Item 1A'
