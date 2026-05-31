@@ -12,7 +12,6 @@ from pathlib import Path
 import pytest
 
 from edgar.documents.section_size_bands import (
-    ANOMALOUS_CONFIDENCE,
     SIZE_BANDS,
     band_for,
     evaluate_size,
@@ -114,17 +113,23 @@ def _sections(rel: str, form: str):
 
 
 @pytest.mark.slow
-def test_gs_oversized_business_is_flagged():
-    """Ground truth: GS 10-K maps Business to an oversized (668KB) section; the
-    guardrail must flag it and drop its confidence below 0.95 — not return it
-    silently as high-confidence wrong content."""
+def test_gs_business_correctly_bounded():
+    """Ground truth (edgartools-sldz): GS 10-K once mapped Business to a 668KB
+    over-captured section (item structure lived only in a link-less TOC). The
+    body-header detector now bounds it correctly to ~150KB, well within the
+    Item 1 band — so it is no longer flagged and keeps full TOC confidence."""
     sections = _sections("gs/10k/gs-10-k-2025-02-27.html", "10-K")
     item1 = [s for s in sections.values() if s.item == "1"]
     assert item1, "GS Item 1 not detected"
-    flagged = [s for s in item1 if s.warnings]
-    assert flagged, "GS oversized Item 1 was not flagged by the guardrail"
-    assert flagged[0].confidence <= ANOMALOUS_CONFIDENCE
-    assert "over-captured" in flagged[0].warnings[0]
+    # Exactly one canonical Business section, correctly keyed under Part I.
+    assert "part_i_item_1" in sections
+    s = item1[0]
+    length = (s.end_offset - s.start_offset) if (s.end_offset and s.start_offset is not None) else len(s.text() or "")
+    assert 50_000 < length < 321_384, f"GS Item 1 length {length} outside the healthy band"
+    assert not s.warnings, f"GS Item 1 unexpectedly flagged: {s.warnings}"
+    assert s.confidence >= 0.9
+    # The Business section starts with the real heading, not adjacent content.
+    assert s.text().lstrip().lower().startswith("item 1")
 
 
 @pytest.mark.slow
