@@ -156,6 +156,14 @@ class HybridSectionDetector:
         from edgar.documents.section_size_bands import ANOMALOUS_CONFIDENCE, evaluate_size
 
         for section in sections.values():
+            # Only TOC sections set end_offset to the extracted *text length*
+            # (start_offset == 0), which is what the bands are calibrated on.
+            # Pattern sections set end_offset to a *document character position*
+            # (a different, markup-inclusive yardstick) and heading sections set
+            # 0; applying text-length bands to either would mis-flag. The
+            # documented failures (GS/Citi-class) are all on the TOC path.
+            if section.detection_method != 'toc':
+                continue
             # Length proxy: TOC sections set end_offset to the extracted text
             # length (start_offset == 0). Skip when length is unknown (0).
             length = section.end_offset - section.start_offset
