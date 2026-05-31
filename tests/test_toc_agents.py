@@ -345,6 +345,19 @@ class TestHelperMethods:
         assert self.analyzer._item_from_anchor('part_ii') == 'Part II'
         assert self.analyzer._item_from_anchor('signatures') is None
 
+    def test_item_from_anchor_part_word_boundary(self):
+        """Regression (edgartools-dkq0): 'part' must be a real word boundary,
+        not a mid-word substring, or anchors like 'counterparties' pollute the
+        part context of every item parsed afterward."""
+        # Mid-word 'part' must NOT match
+        assert self.analyzer._item_from_anchor('counterparties') is None
+        assert self.analyzer._item_from_anchor('counterparty-risk') is None
+        assert self.analyzer._item_from_anchor('departments') is None
+        # Real part anchors still resolve, with any valid left delimiter
+        assert self.analyzer._item_from_anchor('part_i') == 'Part I'
+        assert self.analyzer._item_from_anchor('part_ii_item_1') == 'Item 1'
+        assert self.analyzer._item_from_anchor('#PARTI_658977') == 'Part I'
+
     def test_parse_item_strips_zwsp(self):
         """Zero-width spaces should be transparent to parsing."""
         assert self.analyzer._parse_item_from_text('Item\u200b 1A.') == 'Item 1A'
