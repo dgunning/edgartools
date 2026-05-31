@@ -33,25 +33,26 @@ from __future__ import annotations
 
 import pytest
 
-from edgar.documents.utils.toc_analyzer import (
-    TOCAnalyzer,
-    _DEFAULT_MAX_BARE_ITEM,
-    _MAX_BARE_ITEM_BY_FORM,
-)
+from edgar.documents.form_schema import get_form_schema
+from edgar.documents.utils.toc_analyzer import TOCAnalyzer
 
 
 class TestMaxBareItemByForm:
-    """Verify the per-form max-bare-item table matches SEC form structure."""
+    """Verify the per-form max-bare-item caps match SEC form structure.
+
+    The caps moved from module constants into the per-form schema
+    (edgartools-fhno); these assert the schema values.
+    """
 
     def test_ten_q_max_is_6(self):
         # 10-Q: Part I items 1-4, Part II items 1, 1A, 2-6. Max = 6.
-        assert _MAX_BARE_ITEM_BY_FORM["10-Q"] == 6
-        assert _MAX_BARE_ITEM_BY_FORM["10-Q/A"] == 6
+        assert get_form_schema("10-Q").max_bare_item == 6
+        assert get_form_schema("10-Q/A").max_bare_item == 6
 
     def test_default_is_15(self):
         # Preserves prior behaviour for callers that don't pass `form`
         # and for forms not in the override table.
-        assert _DEFAULT_MAX_BARE_ITEM == 15
+        assert get_form_schema(None).max_bare_item == 15
 
     def test_ten_k_and_twenty_f_use_default(self):
         # 10-K and 20-F deliberately stay at the legacy default of 15.
@@ -60,10 +61,10 @@ class TestMaxBareItemByForm:
         # cells on 20-F). Real higher-numbered items are still detected
         # via the explicit `Item N` regex, which doesn't depend on this
         # cap.
-        assert "10-K" not in _MAX_BARE_ITEM_BY_FORM
-        assert "10-K/A" not in _MAX_BARE_ITEM_BY_FORM
-        assert "20-F" not in _MAX_BARE_ITEM_BY_FORM
-        assert "20-F/A" not in _MAX_BARE_ITEM_BY_FORM
+        assert get_form_schema("10-K").max_bare_item == 15
+        assert get_form_schema("10-K/A").max_bare_item == 15
+        assert get_form_schema("20-F").max_bare_item == 15
+        assert get_form_schema("20-F/A").max_bare_item == 15
 
 
 class TestTOCAnalyzerFormParameter:
