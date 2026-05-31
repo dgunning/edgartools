@@ -1207,6 +1207,30 @@ class TOCAnalyzer:
 
         return result
 
+    # Named sections that legitimately carry no item number but should still be
+    # exposed. Everything else without an item number is descriptive free-text noise.
+    _KNOWN_NAMED_SECTIONS = frozenset({'signatures'})
+    # A canonical section key: item, optionally part-prefixed (part_ii_item_7).
+    _CANONICAL_ITEM_KEY = re.compile(r'^(part_[ivxlcdm]+_)?item_\d+[a-c]?$', re.IGNORECASE)
+    # A still-unprefixed bare item key ("Item 7") — valid content, wrong shape;
+    # the missing-part-prefix normalization is tracked separately (edgartools-3usf).
+    _BARE_ITEM_KEY = re.compile(r'^Item\s+\d+[A-C]?$', re.IGNORECASE)
+
+    @classmethod
+    def _is_known_named_section(cls, name: str) -> bool:
+        return (name or '').strip().lower() in cls._KNOWN_NAMED_SECTIONS
+
+    def _is_valid_section_key(self, section_name: str, normalized_name: str) -> bool:
+        """A section key is valid only if it names a canonical item (optionally
+        part-prefixed), a bare ``Item N`` (missing-prefix), or an allowlisted
+        named section. Everything else is descriptive free-text noise from the
+        raw-text fallback (edgartools-3au1)."""
+        if self._CANONICAL_ITEM_KEY.match(section_name):
+            return True
+        if self._BARE_ITEM_KEY.match(section_name):
+            return True
+        return self._is_known_named_section(normalized_name)
+
     def _build_section_mapping(self, toc_sections: List[TOCSection],
                                tree=None) -> Dict[str, str]:
         """Build final section mapping, handling duplicates intelligently.
@@ -1252,6 +1276,19 @@ class TOCAnalyzer:
             else:
                 # 10-K filings: use normalized name as-is
                 section_name = section.normalized_name
+
+            # Emit only well-formed keys. The 10-K raw-text fallback in
+            # _normalize_section_name returns link text verbatim when no
+            # Item/Part/keyword rule matches, leaking two kinds of noise as
+            # top-level sections: pure descriptive titles (part_ii_risk_management,
+            # "19. Deferred Compensation …") and Item-15 exhibit-index prose that
+            # merely *contains* an item number (part_iv_,_item_1a,
+            # "in Part II, Item 5 of this report …"). A canonical key is an item
+            # (optionally part-prefixed), a still-unprefixed bare "Item N" (the
+            # missing-part-prefix case, edgartools-3usf), or an allowlisted named
+            # section like Signatures (edgartools-3au1).
+            if not self._is_valid_section_key(section_name, section.normalized_name):
+                continue
 
             if section_name in seen_names:
                 # Duplicate: validate which anchor is better.
