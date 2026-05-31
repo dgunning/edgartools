@@ -358,6 +358,31 @@ class TestHelperMethods:
         assert self.analyzer._item_from_anchor('part_ii_item_1') == 'Item 1'
         assert self.analyzer._item_from_anchor('#PARTI_658977') == 'Part I'
 
+    def test_build_section_mapping_skips_part_as_section(self):
+        """Regression (edgartools-sldz): a Part label is navigation context, not a
+        content section. Bare 'Part X' entries (common in the Item 15 exhibit index,
+        which cross-references 'Part I, Item 1A \u2026') must not emit malformed keys
+        like 'part_iv_part_i', 'part_i_part_ii', or a bare 'Part I'."""
+        from edgar.documents.utils.toc_analyzer import TOCSection
+        sections = [
+            TOCSection(name='Item 1', anchor_id='a1', normalized_name='Item 1',
+                       section_type='item', order=1, part='Part I'),
+            # Part-as-section leaks \u2014 must be dropped
+            TOCSection(name='Part I', anchor_id='ap1', normalized_name='Part I',
+                       section_type='part', order=2, part='Part IV'),
+            TOCSection(name='Part II', anchor_id='ap2', normalized_name='Part II',
+                       section_type='part', order=3, part='Part I'),
+            TOCSection(name='Item 15', anchor_id='a15', normalized_name='Item 15',
+                       section_type='item', order=4, part='Part IV'),
+        ]
+        mapping = self.analyzer._build_section_mapping(sections)
+        assert mapping == {'part_i_item_1': 'a1', 'part_iv_item_15': 'a15'}
+        # No key contains a Part-as-section artifact
+        for key in mapping:
+            assert 'part_iv_part_i' not in key
+            assert 'part_i_part_ii' not in key
+            assert key != 'Part I'
+
     def test_parse_item_strips_zwsp(self):
         """Zero-width spaces should be transparent to parsing."""
         assert self.analyzer._parse_item_from_text('Item\u200b 1A.') == 'Item 1A'

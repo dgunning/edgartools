@@ -1124,6 +1124,14 @@ class TOCAnalyzer:
             # mis-classification.
             if not section.normalized_name:
                 continue
+            # A Part label is navigation context, never a content section. Some
+            # TOCs (and the Item 15 exhibit index, which cross-references "Part I,
+            # Item 1A …") feed bare "Part X" link text through normalization,
+            # which would otherwise emit malformed keys like `part_i_part_ii`,
+            # `part_iv_part_i`, or a bare `Part I`. Part context is already tracked
+            # via `current_part`, so dropping these loses no boundary (edgartools-sldz).
+            if re.match(r'^Part\s+[IVXLCDM]+$', section.normalized_name, re.IGNORECASE):
+                continue
             # Generate part-aware section name for 10-Q filings
             if section.part:
                 # Convert "Part I" -> "part_i", "Part II" -> "part_ii"
