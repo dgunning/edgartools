@@ -126,19 +126,19 @@ class Section:
         For heading/pattern-based sections the cached node tree is
         rendered directly. For TOC-based sections (whose node has no
         children — content is fetched lazily from the original HTML)
-        this method currently falls back to :meth:`text` because
-        correctly extracting a TOC section's HTML subtree without
-        leaking adjacent sections or losing structural wrappers
-        (``<table>``/``<tbody>``/etc.) is non-trivial — every shape of
-        anchor nesting requires careful handling. The fallback is
-        safe (no regression vs ``text()``) but does not deliver the
-        table/list-preserving benefit on TOC sections. Adding full
-        TOC markdown support is tracked as a follow-up.
+        the section's HTML subtree is sliced between its anchors via
+        :mod:`edgar.documents.utils.section_slicer` (which preserves
+        ``<table>``/``<tbody>`` structure and de-duplicates nested
+        tables), re-parsed, and rendered. If that slice yields nothing
+        usable, this falls back to :meth:`text` so callers never get a
+        regression versus the plain-text output.
         """
         if self.detection_method == 'toc' and self._text_extractor is not None:
-            # Conservative fallback — see docstring. Returns the same
-            # output as `Section.text()` so callers get correct text
-            # rather than risk leakage of adjacent-section markup.
+            rendered = self._markdown_from_toc_section()
+            if rendered:
+                return self._clean_boundary_artifacts(rendered)
+            # Slice produced nothing usable — fall back to plain text so
+            # callers get correct content rather than an empty string.
             return self.text()
 
         # Heading/pattern-based sections: render the cached node tree.
@@ -149,6 +149,34 @@ class Section:
         renderer = MarkdownRenderer()
         rendered = renderer.render_node(self.node)
         return self._clean_boundary_artifacts(rendered)
+
+    def _markdown_from_toc_section(self) -> Optional[str]:
+        """Render a TOC-based section to Markdown by slicing its HTML subtree.
+
+        Slices the section HTML between anchors (preserving table/list
+        structure via :mod:`section_slicer`), re-parses it into a node tree,
+        and renders that tree to Markdown. Returns ``None`` on any failure so
+        :meth:`markdown` can fall back to :meth:`text`.
+        """
+        if self._html_source is None or self._section_extractor is None:
+            return None
+        try:
+            from edgar.documents.config import ParserConfig
+            from edgar.documents.parser import HTMLParser
+            from edgar.documents.renderers.markdown import MarkdownRenderer
+
+            section_html = self._extract_section_html(self._section_extractor, self._html_source)
+            if not section_html:
+                return None
+
+            # Re-parse the section subtree into a node tree (section detection
+            # off — we already know this is one section) and render it.
+            parsed = HTMLParser(ParserConfig(detect_sections=False)).parse(section_html)
+            rendered = MarkdownRenderer().render_node(parsed.root)
+            return rendered or None
+        except Exception as e:  # noqa: BLE001 — markdown is best-effort; text() is the safety net
+            logger.debug(f"TOC markdown render failed for section '{self.name}': {e}")
+            return None
 
     def _clean_boundary_artifacts(self, text: str) -> str:
         """
@@ -298,74 +326,32 @@ class Section:
             return []
 
     def _extract_section_html(self, extractor, html_source: str) -> str:
-        """Extract HTML content for this section from full document HTML."""
+        """Extract HTML content for this section from full document HTML.
+
+        Delegates to the centralized anchor-to-anchor slicing primitive
+        (:mod:`edgar.documents.utils.section_slicer`), which handles the
+        top-level-only serialization that prevents nested-table duplication
+        (issue #826) and repairs orphaned table-row fragments so they survive
+        a round-trip through the parser. Reuses the extractor's cached lxml
+        tree when available.
+        """
         try:
             import lxml.html as lxml_html
-            from lxml import etree
-            import re
-
-            # Handle XML declaration
-            if html_source.startswith('<?xml'):
-                html_source = re.sub(r'<\?xml[^>]*\?>', '', html_source, count=1)
-
-            tree = lxml_html.fromstring(html_source)
+            from edgar.documents.utils.section_slicer import extract_section_html
 
             # Get section boundary info
             if self.name not in extractor.section_boundaries:
                 return ""
-
             boundary = extractor.section_boundaries[self.name]
 
-            # Find start anchor by id or legacy name attribute
-            start_elements = find_anchor_targets(tree, boundary.anchor_id)
-            if not start_elements:
-                return ""
+            # Reuse the extractor's cached tree; fall back to parsing.
+            tree = getattr(extractor, '_tree', None)
+            if tree is None:
+                if html_source.startswith('<?xml'):
+                    html_source = re.sub(r'<\?xml[^>]*\?>', '', html_source, count=1)
+                tree = lxml_html.fromstring(html_source)
 
-            # Collect all elements between start and end anchors
-            collected_elements = []
-            in_range = False
-
-            for event, el in etree.iterwalk(tree, events=('start',)):
-                if not hasattr(el, 'get'):
-                    continue
-
-                # Check if we've reached the start anchor
-                if is_anchor_match(el, boundary.anchor_id):
-                    in_range = True
-                    continue
-
-                # Check if we've reached the end boundary
-                if boundary.end_element_id and is_anchor_match(el, boundary.end_element_id):
-                    break
-
-                # Collect elements in range
-                if in_range:
-                    collected_elements.append(el)
-
-            # Convert collected elements back to HTML string. Only serialize
-            # top-level elements — those whose parent is NOT also in
-            # collected_elements — because tostring() already includes each
-            # element's full subtree. Re-serializing nested descendants would
-            # otherwise emit N copies of every <table> in the concatenated
-            # output (issue #826).
-            #
-            # id()-based membership is safe here because collected_elements
-            # holds a live reference to every proxy, so lxml returns the same
-            # proxy object (hence the same id) for getparent() of a collected
-            # element. Order is preserved (document order from iterwalk), which
-            # keeps the concatenated HTML faithful to the source.
-            collected_ids = {id(e) for e in collected_elements}
-            top_level = [e for e in collected_elements
-                         if id(e.getparent()) not in collected_ids]
-            html_parts = []
-            for elem in top_level:
-                try:
-                    html_parts.append(lxml_html.tostring(elem, encoding='unicode'))
-                except (LxmlError, TypeError, AttributeError) as e:
-                    logger.debug(f"Failed to serialize element in section '{self.name}': {e}")
-                    continue
-
-            return ''.join(html_parts)
+            return extract_section_html(tree, boundary.anchor_id, boundary.end_element_id)
 
         except (LxmlError, XMLSyntaxError, ValueError) as e:
             logger.debug(f"HTML extraction failed for section '{self.name}': {e}")
