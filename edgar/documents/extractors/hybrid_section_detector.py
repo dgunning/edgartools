@@ -134,6 +134,40 @@ class HybridSectionDetector:
         # Filter by confidence
         sections = self._filter_by_confidence(sections)
 
+        # Size guardrail — runs LAST so a confidence reduction here cannot cause
+        # the confidence filter to silently drop a flagged section. Flags
+        # anomalously-sized sections (wrong-content failures) rather than
+        # returning them at full confidence (edgartools-9hwf).
+        sections = self._apply_size_guardrail(sections)
+
+        return sections
+
+    def _apply_size_guardrail(self, sections: Dict[str, Section]) -> Dict[str, Section]:
+        """Flag sections whose extracted content size is anomalous for their item.
+
+        Uses the per-(form, item) bands in ``section_size_bands``. For
+        TOC-detected sections the content length is already known (stored in
+        ``end_offset`` by the detector), so this adds no extraction cost. A
+        section outside its band gets a human-readable ``warning`` and its
+        confidence reduced to ``ANOMALOUS_CONFIDENCE`` — the section is still
+        returned (callers can introspect ``.warnings``), it is just no longer
+        presented as high-confidence wrong content.
+        """
+        from edgar.documents.section_size_bands import ANOMALOUS_CONFIDENCE, evaluate_size
+
+        for section in sections.values():
+            # Length proxy: TOC sections set end_offset to the extracted text
+            # length (start_offset == 0). Skip when length is unknown (0).
+            length = section.end_offset - section.start_offset
+            if length <= 0:
+                continue
+            item_key = section.item
+            warning = evaluate_size(self.form, item_key, length)
+            if warning:
+                section.warnings.append(warning)
+                section.confidence = min(section.confidence, ANOMALOUS_CONFIDENCE)
+                logger.info(f"Section {section.name}: {warning}")
+
         return sections
 
     def _try_heading_detection(self) -> Optional[Dict[str, Section]]:

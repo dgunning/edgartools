@@ -97,6 +97,7 @@ class Section:
     validated: bool = False  # Cross-validated flag
     part: Optional[str] = None  # Part identifier for 10-Q: "I", "II", or None for 10-K
     item: Optional[str] = None  # Item identifier: "1", "1A", "2", etc.
+    warnings: list = field(default_factory=list)  # Extraction warnings (e.g. anomalous content size)
     _text_extractor: Optional[Any] = field(default=None, repr=False)  # Callback for lazy text extraction
     _html_source: Optional[str] = field(default=None, repr=False)  # HTML source for TOC table extraction
     _section_extractor: Optional[Any] = field(default=None, repr=False)  # Section extractor for TOC sections
