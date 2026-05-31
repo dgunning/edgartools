@@ -198,16 +198,17 @@ class TestDFINTOC:
 
     def test_finds_items_from_semantic_anchors(self):
         result = self.analyzer._analyze_dfin_toc(DFIN_TOC_HTML)
-        # DFIN test HTML has no Part headers, so keys lack part prefix
-        assert 'Item 1' in result
-        assert 'Item 1A' in result
-        assert 'Item 7' in result
-        assert 'Item 8' in result
+        # DFIN test HTML has no explicit Part headers, but the 10-K schema infers
+        # the canonical part from the item number (edgartools-3usf).
+        assert 'part_i_item_1' in result
+        assert 'part_i_item_1a' in result
+        assert 'part_ii_item_7' in result
+        assert 'part_ii_item_8' in result
 
     def test_semantic_anchors_preserved(self):
         result = self.analyzer._analyze_dfin_toc(DFIN_TOC_HTML)
-        assert result['Item 1'] == 'item_1_business'
-        assert result['Item 1A'] == 'item_1a_risk_factors'
+        assert result['part_i_item_1'] == 'item_1_business'
+        assert result['part_i_item_1a'] == 'item_1a_risk_factors'
 
     def test_excludes_non_item_links(self):
         """Signatures and other non-item links should be excluded."""
@@ -224,8 +225,8 @@ class TestDFINTOC:
         <div id="item_7_management">Content</div>
         </body></html>"""
         result = self.analyzer._analyze_dfin_toc(html)
-        assert 'Item 1' in result
-        assert 'Item 7' in result
+        assert 'part_i_item_1' in result
+        assert 'part_ii_item_7' in result
 
 
 class TestNovaworksTOC:
@@ -298,8 +299,8 @@ class TestTOCDispatch:
 
     def test_donnelley_dispatch(self):
         result = self.analyzer.analyze_toc_structure(DFIN_TOC_HTML, agent='Donnelley')
-        assert 'Item 1' in result
-        assert result['Item 1'] == 'item_1_business'
+        assert 'part_i_item_1' in result
+        assert result['part_i_item_1'] == 'item_1_business'
 
     def test_novaworks_dispatch(self):
         result = self.analyzer.analyze_toc_structure(NOVAWORKS_TOC_HTML, agent='Novaworks')
@@ -403,7 +404,8 @@ class TestHelperMethods:
             TOCSection(name='Signatures', anchor_id='asig',
                        normalized_name='Signatures', section_type='other',
                        order=4, part='Part IV'),
-            # Bare item (missing prefix) \u2014 valid content, must keep (3usf)
+            # Item with no detected part \u2014 the 10-K schema infers Part II from the
+            # item number, yielding a canonical key (edgartools-3usf).
             TOCSection(name='Item 8', anchor_id='a8', normalized_name='Item 8',
                        section_type='item', order=5, part=None),
         ]
@@ -411,7 +413,7 @@ class TestHelperMethods:
         assert mapping == {
             'part_i_item_1': 'a1',
             'part_iv_signatures': 'asig',
-            'Item 8': 'a8',
+            'part_ii_item_8': 'a8',
         }
 
     def test_is_valid_section_key(self):
@@ -423,6 +425,27 @@ class TestHelperMethods:
         assert not ok('part_ii_risk_management', 'Risk Management')
         assert not ok('part_iv_,_item_1a', ', Item 1A')
         assert not ok('part_ii_note_7:__share-based_compensation', 'Note 7: Share-Based Compensation')
+
+    def test_make_section_key_infers_part_for_10k(self):
+        """Regression (edgartools-3usf): with no detected part, a 10-K item gets
+        its canonical part inferred from the item number, so keys are consistent
+        instead of a bare 'Item N'."""
+        a = TOCAnalyzer(form='10-K')
+        assert a._make_section_key('Item 1', None) == 'part_i_item_1'
+        assert a._make_section_key('Item 4', None) == 'part_i_item_4'
+        assert a._make_section_key('Item 7', None) == 'part_ii_item_7'
+        assert a._make_section_key('Item 9A', None) == 'part_ii_item_9a'
+        assert a._make_section_key('Item 14', None) == 'part_iii_item_14'
+        assert a._make_section_key('Item 15', None) == 'part_iv_item_15'
+        # A detected part always wins over inference.
+        assert a._make_section_key('Item 7', 'Part II') == 'part_ii_item_7'
+
+    def test_make_section_key_no_inference_for_10q(self):
+        """10-Q items repeat across parts (Part I Item 1 \u2260 Part II Item 1), so the
+        part must be detected, never inferred \u2014 the bare key is kept."""
+        a = TOCAnalyzer(form='10-Q')
+        assert a._make_section_key('Item 1', None) == 'Item 1'
+        assert a._make_section_key('Item 1', 'Part II') == 'part_ii_item_1'
 
     def test_parse_item_strips_zwsp(self):
         """Zero-width spaces should be transparent to parsing."""

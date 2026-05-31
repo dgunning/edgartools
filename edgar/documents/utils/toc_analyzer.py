@@ -474,22 +474,27 @@ class TOCAnalyzer:
         # Heading table was absent or too small — try link-based detection
         return self._find_toc_table_by_links(tree)
 
-    @staticmethod
-    def _make_section_key(item_name: str, current_part: Optional[str]) -> str:
+    def _make_section_key(self, item_name: str, current_part: Optional[str]) -> str:
         """
         Build a section mapping key, adding part context when available.
 
-        For 10-K filings (no duplicate items across parts), part prefix is
-        cosmetic but harmless. For 10-Q filings, it's essential to distinguish
-        Item 1 in Part I from Item 1 in Part II.
+        When no part context was detected, infer the canonical part from the item
+        number for forms whose items are unique across parts (10-K: Items 1–4 are
+        Part I, 5–9 Part II, 10–14 Part III, 15–16 Part IV). This yields a
+        consistent ``part_ii_item_7`` key instead of a bare ``Item 7`` on filings
+        where the TOC lacked explicit Part headers (edgartools-3usf). 10-Q items
+        repeat across parts, so its schema supplies no ranges and the bare key is
+        kept — a 10-Q part must be detected, never inferred.
 
         Args:
             item_name: Normalized item name like "Item 1A"
             current_part: Current part context like "Part I", or None
 
         Returns:
-            Key like "part_i_item_1a" or "Item 1A"
+            Key like "part_i_item_1a", or a bare "Item 1A" when no part is known.
         """
+        if not current_part:
+            current_part = self.schema.part_for_item(item_name)
         if current_part:
             part_key = current_part.lower().replace(' ', '_')
             item_key = item_name.lower().replace(' ', '_')
@@ -1266,16 +1271,9 @@ class TOCAnalyzer:
             # via `current_part`, so dropping these loses no boundary (edgartools-sldz).
             if re.match(r'^Part\s+[IVXLCDM]+$', section.normalized_name, re.IGNORECASE):
                 continue
-            # Generate part-aware section name for 10-Q filings
-            if section.part:
-                # Convert "Part I" -> "part_i", "Part II" -> "part_ii"
-                part_key = section.part.lower().replace(' ', '_')
-                # Convert "Item 1" -> "item_1", "Item 1A" -> "item_1a"
-                item_key = section.normalized_name.lower().replace(' ', '_')
-                section_name = f"{part_key}_{item_key}"
-            else:
-                # 10-K filings: use normalized name as-is
-                section_name = section.normalized_name
+            # Build the key with part context — detected (section.part) or, when
+            # absent, inferred from the item number for 10-K (edgartools-3usf).
+            section_name = self._make_section_key(section.normalized_name, section.part)
 
             # Emit only well-formed keys. The 10-K raw-text fallback in
             # _normalize_section_name returns link text verbatim when no

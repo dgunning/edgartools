@@ -655,6 +655,24 @@ class Sections(Dict[str, Section]):
         # Not found - raise KeyError
         raise KeyError(key)
 
+    def __contains__(self, key) -> bool:
+        """Membership mirrors __getitem__'s flexible resolution.
+
+        A bare ``"Item 1"`` / ``"1A"`` or a ``(part, item)`` tuple counts as
+        present whenever the corresponding section exists, even though the stored
+        key is the canonical ``"part_i_item_1"`` form. This keeps
+        ``"Item 1" in sections`` working after item keys gained canonical part
+        prefixes (edgartools-3usf).
+        """
+        if isinstance(key, str):
+            if super().__contains__(key):
+                return True
+            return self.get_item(key) is not None
+        if isinstance(key, tuple) and len(key) == 2:
+            part, item = key
+            return self.get_item(item, part) is not None
+        return super().__contains__(key)
+
 
 @dataclass
 class Document:
