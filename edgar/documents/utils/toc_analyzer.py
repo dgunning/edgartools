@@ -297,7 +297,10 @@ class TOCAnalyzer:
             letter = item_match.group(2).upper()
             return f"Item {num}{letter}"
 
-        part_match = re.search(r'part[_\s]*([ivx]+)', anchor_lower)
+        # Require a left delimiter (start, separator, '#', or '-') so the 'part'
+        # token is a real word boundary — otherwise 'counterparties' matches as
+        # 'Part I' and pollutes the part context of every item parsed afterward.
+        part_match = re.search(r'(?:^|[_\s#-])part[_\s]*([ivx]+)', anchor_lower)
         if part_match:
             return f"Part {part_match.group(1).upper()}"
 
