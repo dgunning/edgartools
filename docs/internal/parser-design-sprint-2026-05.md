@@ -311,14 +311,17 @@ sections (`edgartools-4j6f`) and for 40-F section extraction (`edgartools-8zqq`)
 
 ## 7. Decision log
 
-| # | Decision | Recommendation | Status |
+**Signed off by maintainer (dwight), 2026-05-31.** All recommendations accepted as the
+agreed direction.
+
+| # | Decision | Accepted resolution | Status |
 |---|---|---|---|
-| D1 | Form-awareness location | Extractor owns *what sections exist* (via schema); renderer stays form-agnostic | proposed |
-| D2 | TOC primitive: slice vs heading-walk | Keep slicing, harden it; TOC for nav *and* content | proposed |
-| D3 | Boundary artifacts | Renderer-clean for new path; freeze regex on legacy path | proposed |
-| D4 | Silent-failure policy | Flag-and-return with introspectable confidence/warnings; typed accessors (`.business`) consult the flag | proposed |
-| D5 | Legacy fallback sunset | Lock v6.0 once JPM is on the primary path | proposed |
-| D6 | Equivalence definition | Byte-identical after whitespace normalization | proposed |
+| D1 | Form-awareness location | Extractor owns *what sections exist* via a declarative per-form schema; renderer stays form-agnostic. Implemented under `edgartools-fhno`. | **accepted** |
+| D2 | TOC primitive: slice vs heading-walk | Keep slicing, harden it; TOC for nav *and* content. Shipped (`section_slicer`, `edgartools-4j6f`). | **accepted** |
+| D3 | Boundary artifacts | Renderer-clean for new path; freeze `_clean_boundary_artifacts` regex on the legacy path. Tracked `edgartools-yr1z`. | **accepted** |
+| D4 | Silent-failure policy | Flag-and-return with introspectable confidence/`warnings`; typed accessors (`.business`) consult the flag. Guardrail shipped (`edgartools-9hwf`); accessor wiring is the residual. | **accepted** |
+| D5 | Legacy fallback sunset | Lock v6.0 once JPM is on the primary path. | **accepted** |
+| D6 | Equivalence definition | Byte-identical after whitespace normalization. Tracked `edgartools-z5pu`. | **accepted** |
 
 ---
 
@@ -331,9 +334,9 @@ sections (`edgartools-4j6f`) and for 40-F section extraction (`edgartools-8zqq`)
 
 ## 9. Acceptance criteria
 
-- [ ] This document reviewed by maintainer.
-- [ ] Cross-form fixture corpus exists and is wired into the benchmark.
-- [ ] `edgartools-sldz` updated with the agreed TOC-analyzer rewrite design and unblocked.
-- [ ] Decisions recorded (D1–D6) with chosen options.
-- [ ] v5.34 / v5.35 / v6.0 sequencing confirmed.
-- [ ] New issues filed: streaming/non-streaming equivalence; renderer-aware boundaries.
+- [x] This document reviewed by maintainer. *(Signed off 2026-05-31.)*
+- [x] Cross-form fixture corpus exists and is wired into the benchmark. *(`edgartools-h44r` — `tests/fixtures/parser_corpus/` + `tests/test_parser_corpus.py`.)*
+- [x] `edgartools-sldz` updated with the agreed TOC-analyzer rewrite design and unblocked. *(Fix path = `fhno` per-form schema + `9hwf` guardrail, recorded on the issue.)*
+- [x] Decisions recorded (D1–D6) with chosen options. *(§7, accepted.)*
+- [x] v5.34 / v5.35 / v6.0 sequencing confirmed.
+- [x] New issues filed: streaming/non-streaming equivalence (`z5pu`); renderer-aware boundaries (`yr1z`).
