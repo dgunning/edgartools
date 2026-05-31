@@ -22,6 +22,7 @@ separately.
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Dict, Optional, Tuple
 
@@ -62,12 +63,36 @@ class FormSchema:
     max_bare_item: int = 15
     text_rules: Tuple[TextItemRule, ...] = ()
     skip_unmatched_text: bool = False
+    # Inclusive item-number → Part ranges, e.g. (1, 4, "I"). Set only for forms
+    # whose items are *unique* across parts (10-K), enabling part inference when
+    # the TOC didn't surface explicit Part headers. Empty for forms where items
+    # repeat across parts (10-Q: Part I Item 1 ≠ Part II Item 1) — there a part
+    # must be detected, never inferred from the number.
+    item_part_ranges: Tuple[Tuple[int, int, str], ...] = ()
 
     def match_text(self, text_lower: str, use_exclusions: bool = True) -> Optional[str]:
         """Return the normalized item name for the first matching rule, else None."""
         for rule in self.text_rules:
             if rule.matches(text_lower, use_exclusions=use_exclusions):
                 return rule.item
+        return None
+
+    def part_for_item(self, item_name: str) -> Optional[str]:
+        """Infer the canonical Part ("Part II") for an item name ("Item 7").
+
+        Returns None when the form has no item→part mapping (items repeat across
+        parts, or unknown form) or the item number falls outside the ranges, so
+        callers fall back to whatever part context was actually detected.
+        """
+        if not self.item_part_ranges:
+            return None
+        m = re.match(r'item\s*(\d+)', item_name, re.IGNORECASE)
+        if not m:
+            return None
+        num = int(m.group(1))
+        for lo, hi, roman in self.item_part_ranges:
+            if lo <= num <= hi:
+                return f"Part {roman}"
         return None
 
 
@@ -92,7 +117,13 @@ _TEN_Q_RULES: Tuple[TextItemRule, ...] = (
     TextItemRule("Item 1A", ("risk factors",), ("item",)),
 )
 
-TEN_K_SCHEMA = FormSchema(max_bare_item=15, text_rules=_TEN_K_RULES, skip_unmatched_text=False)
+# Canonical 10-K item→part layout (items are unique across parts):
+# Part I: 1–4, Part II: 5–9, Part III: 10–14, Part IV: 15–16.
+_TEN_K_ITEM_PART_RANGES = ((1, 4, "I"), (5, 9, "II"), (10, 14, "III"), (15, 16, "IV"))
+
+TEN_K_SCHEMA = FormSchema(max_bare_item=15, text_rules=_TEN_K_RULES,
+                          skip_unmatched_text=False,
+                          item_part_ranges=_TEN_K_ITEM_PART_RANGES)
 TEN_Q_SCHEMA = FormSchema(max_bare_item=6, text_rules=_TEN_Q_RULES, skip_unmatched_text=True)
 # Forms without a 10-K-style item vocabulary (20-F, 40-F, S-1, ...): no text
 # fallback (raw text is returned), default bare-item cap.
