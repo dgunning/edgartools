@@ -82,25 +82,49 @@ class TOCAnalyzer:
         Returns:
             Dict mapping normalized section names to anchor IDs
         """
+        result: Dict[str, str] = {}
         if agent == 'Workiva':
             result = self._analyze_workiva_toc(html_content, tree=tree)
-            if result:
-                return result
         elif agent == 'Donnelley':
             result = self._analyze_dfin_toc(html_content, tree=tree)
-            if result:
-                return result
         elif agent == 'Novaworks':
             result = self._analyze_novaworks_toc(html_content, tree=tree)
-            if result:
-                return result
         elif agent == 'Toppan Merrill':
             result = self._analyze_toppan_toc(html_content, tree=tree)
-            if result:
-                return result
 
         # Generic fallback for unknown agents or when agent-specific parser returns empty
-        return self._analyze_generic_toc(html_content, tree=tree)
+        if not result:
+            result = self._analyze_generic_toc(html_content, tree=tree)
+
+        # Body-header fallback: some filers (Goldman Sachs, Citi — large bank
+        # 10-Ks) carry the SEC item structure only in a *link-less* TOC (page
+        # numbers, no anchors), so every link-based parser above finds few or no
+        # real items. But the document body marks each item with a bold
+        # "Item N. Title" heading preceded by an anchor. When the linked-TOC
+        # result is below the floor of items a healthy 10-K must have, scan the
+        # body headers and prefer them if they recover more canonical items.
+        if self._canonical_item_count(result) < self._expected_item_floor():
+            body = self._analyze_body_item_headers(html_content, tree=tree)
+            if self._canonical_item_count(body) > self._canonical_item_count(result):
+                return body
+        return result
+
+    @staticmethod
+    def _canonical_item_count(mapping: Optional[Dict[str, str]]) -> int:
+        """Count keys that name a canonical SEC item (optionally part-prefixed)."""
+        pat = re.compile(r'^(part_[ivxlcdm]+_)?item_\d+[a-c]?$', re.IGNORECASE)
+        return sum(1 for k in (mapping or {}) if pat.match(k))
+
+    def _expected_item_floor(self) -> int:
+        """Minimum canonical item count below which a 10-K TOC parse is suspect.
+
+        A real 10-K always carries well over a dozen items (1, 1A, 2, 3, 5, 7,
+        7A, 8, 9A, 10–15 …); a parse yielding only a handful means the linked
+        TOC was missed. Only 10-K is gated — the body-header signature
+        ("Item N. Title") is 10-K-shaped and the fallback is validated there.
+        Other forms return 0 (fallback never triggers).
+        """
+        return 8 if (self.form or '10-K').replace('/A', '') == '10-K' else 0
 
     def _analyze_generic_toc(self, html_content: str, tree=None) -> Dict[str, str]:
         """
@@ -189,6 +213,92 @@ class TOCAnalyzer:
             pass
 
         return section_mapping
+
+    # Matches a body section heading: "Item 1A. Risk Factors", "Item 8. Financial
+    # Statements …". The required title after the number (``\S``) is what separates
+    # a real heading from a bare "Item 1A" TOC cell and from inline prose
+    # cross-references like "… in Part II, Item 7 of this Form 10-K …" (which start
+    # with "Part", not "Item N.").
+    _BODY_ITEM_HEADER = re.compile(r'^Item\s+(\d+)([A-C]?)\.?\s+\S', re.IGNORECASE)
+    _BODY_PART_DIVIDER = re.compile(r'^Part\s+([IVX]+)\b', re.IGNORECASE)
+
+    def _analyze_body_item_headers(self, html_content: str, tree=None) -> Dict[str, str]:
+        """Map items from bold body headings instead of TOC links.
+
+        Some filers (notably Goldman Sachs and Citigroup — large bank 10-Ks)
+        carry the SEC item structure only in a *link-less* TOC (item labels and
+        page numbers, no anchors), so every anchor/link-based TOC parser finds
+        nothing usable. But the document body marks each item with a bold
+        heading like "Item 1A. Risk Factors", each immediately preceded by an
+        empty anchor ``<div id="…">``. This scans those headers in document
+        order, tracks Part context from sibling "PART II" dividers, and resolves
+        each item to its nearest preceding anchor id — returning the same
+        ``{section_key: anchor_id}`` contract as the link-based parsers, so the
+        standard boundary/slicing pipeline works unchanged (edgartools-sldz).
+        """
+        try:
+            tree = self._ensure_tree(html_content, tree)
+        except Exception:
+            logger.debug("Body-header scan: tree parse failed", exc_info=True)
+            return {}
+
+        mapping: Dict[str, str] = {}
+        current_part: Optional[str] = None
+        last_anchor_id: Optional[str] = None
+
+        for el in tree.iter():
+            tag = el.tag
+            if not isinstance(tag, str):
+                continue
+            # Track the most recent element carrying an id; for a body heading
+            # this is the empty anchor div placed immediately before it.
+            eid = el.get('id')
+            if eid:
+                last_anchor_id = eid
+
+            text = (el.text_content() or '').strip()
+            # A heading is short; an over-long text means we're looking at an
+            # ancestor container that wraps the heading plus its body — skip it
+            # and let the inner heading element match.
+            if not text or len(text) > 200:
+                continue
+            if not self._is_bold_header(el, tag):
+                continue
+
+            part_m = self._BODY_PART_DIVIDER.match(text)
+            if part_m and not re.search(r'item\s+\d', text, re.IGNORECASE):
+                current_part = f"Part {part_m.group(1).upper()}"
+                continue
+
+            item_m = self._BODY_ITEM_HEADER.match(text)
+            if not item_m:
+                continue
+            if not last_anchor_id:
+                continue
+            item_name = f"Item {item_m.group(1)}{item_m.group(2).upper()}"
+            key = self._make_section_key(item_name, current_part)
+            # First occurrence in document order wins (the body heading; a
+            # link-less TOC has no competing "Item N. Title" span).
+            mapping.setdefault(key, last_anchor_id)
+
+        return mapping
+
+    @staticmethod
+    def _is_bold_header(el, tag: str) -> bool:
+        """Heuristic: is this element styled as a heading?
+
+        True for semantic heading tags and for elements whose own inline style
+        is bold (``font-weight:700`` / ``bold``). Body prose is not bold, so this
+        plus the strict heading-text patterns keeps inline references out.
+        """
+        if tag in ('h1', 'h2', 'h3', 'h4', 'h5', 'h6'):
+            return True
+        style = (el.get('style') or '').lower()
+        m = re.search(r'font-weight:\s*(bold|\d+)', style)
+        if not m:
+            return False
+        val = m.group(1)
+        return val == 'bold' or (val.isdigit() and int(val) >= 600)
 
     # ---- Agent-specific TOC parsers ----
 
