@@ -60,10 +60,10 @@ on-camera expression. Viewers never see boilerplate.
 |------|------|--------|
 | `hero-reel.tape` | 🌟 Hero reel — 30s tour: Company → filings → 10-K (TOC) → financials | ✅ done |
 | `hero-income-statement.tape` | Focused hero — Apple income statement in three lines | ✅ done |
-| _(planned)_ | Insider trades (Form 4) — `Company("TSLA")…transactions` | todo |
-| _(planned)_ | 13F holdings — `get_filings("13F-HR")[0].obj().holdings` | todo |
-| _(planned)_ | Universal `find()` — ticker / CIK / accession | todo |
-| _(planned)_ | Live filings feed — `get_current_filings().filter(form="8-K")` | todo |
+| `insider-form4.tape` | Insider trades — Tesla's latest Form 4 as a structured object | ✅ done |
+| `thirteenf-holdings.tape` | 13F holdings — Berkshire's portfolio (`Company("BRK.B")…13F-HR`) | ✅ done |
+| `universal-find.tape` | Universal `find()` — ticker / CIK / accession, stacked | ✅ done |
+| `live-filings.tape` | Live feed — `get_current_filings()` (re-render in market hours) | ✅ done |
 
 ### Adding a clip
 
