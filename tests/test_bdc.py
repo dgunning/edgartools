@@ -50,11 +50,13 @@ class TestBDCReference:
         # All should be BDCEntity instances
         assert all(isinstance(bdc, BDCEntity) for bdc in bdcs)
 
-        # Check known BDC - Ares Capital Corp
-        arcc = next((b for b in bdcs if b.cik == 1287750), None)
-        assert arcc is not None
-        assert arcc.name == 'ARES CAPITAL CORP'
-        assert arcc.file_number == '814-00663'
+        # Check known BDC - Main Street Capital Corp. (Ares Capital, the former
+        # anchor, was dropped from the SEC's 2026 BDC report; MAIN is a stable,
+        # large BDC present across report years.)
+        main = next((b for b in bdcs if b.cik == 1396440), None)
+        assert main is not None
+        assert 'Main Street' in main.name
+        assert main.file_number == '814-00746'
 
     @pytest.mark.network
     def test_get_active_bdc_ciks(self):
@@ -65,13 +67,13 @@ class TestBDCReference:
         assert len(ciks) > 50
 
         # Known active BDC should be included
-        assert 1287750 in ciks  # ARCC
+        assert 1396440 in ciks  # MAIN (Main Street Capital)
 
     @pytest.mark.network
     def test_is_bdc_cik(self):
         """Test BDC CIK detection."""
         # Known BDCs
-        assert is_bdc_cik(1287750)  # ARCC (Ares Capital)
+        assert is_bdc_cik(17313)    # CSWC (Capital Southwest)
         assert is_bdc_cik(1396440)  # MAIN (Main Street Capital)
         assert is_bdc_cik(1280784)  # HTGC (Hercules Capital)
 
@@ -216,11 +218,11 @@ class TestBDCEntities:
         """Test getting BDC by CIK."""
         bdcs = get_bdc_list()
 
-        # Known BDC - Ares Capital
-        arcc = bdcs.get_by_cik(1287750)
-        assert arcc is not None
-        assert arcc.name == 'ARES CAPITAL CORP'
-        assert arcc.cik == 1287750
+        # Known BDC - Main Street Capital
+        main = bdcs.get_by_cik(1396440)
+        assert main is not None
+        assert 'Main Street' in main.name
+        assert main.cik == 1396440
 
         # Non-existent CIK
         none_result = bdcs.get_by_cik(999999999)
@@ -232,10 +234,6 @@ class TestBDCEntities:
         bdcs = get_bdc_list()
 
         # Known BDC tickers
-        arcc = bdcs.get_by_ticker('ARCC')
-        assert arcc is not None
-        assert arcc.name == 'ARES CAPITAL CORP'
-
         main = bdcs.get_by_ticker('MAIN')
         assert main is not None
         assert 'Main Street' in main.name
@@ -245,9 +243,9 @@ class TestBDCEntities:
         assert 'Hercules' in htgc.name
 
         # Lowercase should work too
-        arcc_lower = bdcs.get_by_ticker('arcc')
-        assert arcc_lower is not None
-        assert arcc_lower.cik == arcc.cik
+        main_lower = bdcs.get_by_ticker('main')
+        assert main_lower is not None
+        assert main_lower.cik == main.cik
 
         # Non-BDC ticker
         aapl = bdcs.get_by_ticker('AAPL')
@@ -304,21 +302,21 @@ class TestBDCIntegration:
     def test_bdc_entity_get_company(self):
         """Test BDCEntity.get_company() method."""
         bdcs = get_bdc_list()
-        arcc = next((b for b in bdcs if b.cik == 1287750), None)
-        assert arcc is not None
+        main = next((b for b in bdcs if b.cik == 1396440), None)
+        assert main is not None
 
-        company = arcc.get_company()
-        assert company.cik == 1287750
-        assert 'ARES' in company.name.upper()
+        company = main.get_company()
+        assert company.cik == 1396440
+        assert 'MAIN STREET' in company.name.upper()
 
     @pytest.mark.network
     def test_bdc_entity_get_filings(self):
         """Test BDCEntity.get_filings() method."""
         bdcs = get_bdc_list()
-        arcc = next((b for b in bdcs if b.cik == 1287750), None)
-        assert arcc is not None
+        main = next((b for b in bdcs if b.cik == 1396440), None)
+        assert main is not None
 
-        filings = arcc.get_filings(form='10-K')
+        filings = main.get_filings(form='10-K')
         assert len(filings) > 0
 
     @pytest.mark.network
@@ -1005,20 +1003,20 @@ class TestBDCSearch:
         """Test searching for BDC by name."""
         from edgar.bdc import find_bdc
 
-        results = find_bdc("Ares")
+        results = find_bdc("Main Street")
         assert len(results) > 0
-        # Should find Ares Capital
-        assert any("ARES" in r.name for r in results)
+        # Should find Main Street Capital
+        assert any("MAIN STREET" in r.name.upper() for r in results)
 
     @pytest.mark.network
     def test_find_bdc_by_ticker(self):
         """Test searching for BDC by ticker."""
         from edgar.bdc import find_bdc
 
-        results = find_bdc("ARCC")
+        results = find_bdc("MAIN")
         assert len(results) > 0
-        # First result should be Ares Capital
-        assert results[0].cik == 1287750
+        # First result should be Main Street Capital
+        assert results[0].cik == 1396440
 
     @pytest.mark.network
     def test_find_bdc_fuzzy_match(self):
@@ -1036,11 +1034,11 @@ class TestBDCSearch:
         """Test indexing into search results returns BDCEntity."""
         from edgar.bdc import find_bdc, BDCEntity
 
-        results = find_bdc("ARCC")
+        results = find_bdc("MAIN")
         assert len(results) > 0
         entity = results[0]
         assert isinstance(entity, BDCEntity)
-        assert entity.cik == 1287750
+        assert entity.cik == 1396440
 
     @pytest.mark.network
     def test_search_results_iteration(self):
