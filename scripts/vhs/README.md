@@ -1,0 +1,86 @@
+# EdgarTools demo recordings (VHS)
+
+Reproducible terminal demo clips for the README, docs, and social — real
+terminal, real Rich output, scripted with [VHS](https://github.com/charmbracelet/vhs).
+
+Each clip is defined by a `.tape` file and renders to **both a GIF and an MP4**
+from one source, so the same recording serves all three venues:
+
+- **GIF** → README + social autoplay
+- **MP4** → docs-page embeds + social with captions/voiceover added in post
+
+No Homebrew required. Everything runs in a Docker image that bundles
+`vhs` + `ttyd` + `ffmpeg` and a venv with `edgartools`.
+
+## One-time setup
+
+```bash
+# Build the recording image (installs edgartools inside the vhs image).
+docker build -t edgartools-vhs scripts/vhs
+```
+
+Rebuild only when `Dockerfile` / `pystartup.py` change or to pick up a newer
+edgartools release.
+
+## Render a clip
+
+From the repo root (uses your `EDGAR_IDENTITY` for SEC access):
+
+```bash
+docker run --rm \
+  -e EDGAR_IDENTITY="$EDGAR_IDENTITY" \
+  -v "$PWD:/vhs" -w /vhs \
+  edgartools-vhs scripts/vhs/hero-income-statement.tape
+```
+
+Outputs land in `scripts/vhs/out/`. Promote a final clip to the published
+location when happy (the README hero lives at `docs/images/`):
+
+```bash
+cp scripts/vhs/out/hero-income-statement.gif docs/images/
+```
+
+## How it's wired
+
+| File | Role |
+|------|------|
+| `Dockerfile` | `FROM` Charm's vhs image; adds a venv with `edgartools` + the prelude. |
+| `pystartup.py` | Off-camera REPL prelude: `set_identity`, pre-imports, and a Rich display hook so a bare expression renders the formatted table in colour at a fixed width (`VHS_CONSOLE_WIDTH`, default 100). |
+| `theme.tape` | Shared "set design" (font, size, theme, typing speed). `Source`d by every tape — edit once to restyle the series. |
+| `*.tape` | One clip each. |
+| `out/` | Rendered GIFs/MP4s (working dir; not the published location). |
+
+The tape pattern: launch `python -q` **hidden** (identity + imports load from
+`PYTHONSTARTUP`), `Ctrl+L` to a clean prompt, `Show`, then type the single
+on-camera expression. Viewers never see boilerplate.
+
+## Clips
+
+| Tape | Clip | Status |
+|------|------|--------|
+| `hero-reel.tape` | 🌟 Hero reel — 30s tour: Company → filings → 10-K (TOC) → financials | ✅ done |
+| `hero-income-statement.tape` | Focused hero — Apple income statement in three lines | ✅ done |
+| _(planned)_ | Insider trades (Form 4) — `Company("TSLA")…transactions` | todo |
+| _(planned)_ | 13F holdings — `get_filings("13F-HR")[0].obj().holdings` | todo |
+| _(planned)_ | Universal `find()` — ticker / CIK / accession | todo |
+| _(planned)_ | Live filings feed — `get_current_filings().filter(form="8-K")` | todo |
+
+### Adding a clip
+
+1. Copy `hero-income-statement.tape`.
+2. Change the two `Output` paths and the on-camera `Type` line.
+3. Adjust `Set Height` if the output is taller/shorter than the default 720
+   (the hero uses 860 because the income statement is a tall table).
+4. Tune the post-`Enter` `Sleep` to cover the live SEC fetch (≈8–10s cold).
+
+## Tips
+
+- **Frame height = fit the output, no scroll.** If a table scrolls, its header
+  is gone from the final hold frame. Raise `Set Height` until the whole result
+  fits (≈21.6px per line at FontSize 18, plus padding).
+- **Determinism.** `pystartup.py` pins the Rich console width so layout is
+  identical run to run regardless of PTY size. SEC values change over time —
+  re-render to refresh numbers.
+- **Inspect a frame** without opening the video:
+  `docker run --rm -v "$PWD:/vhs" -w /vhs --entrypoint ffmpeg edgartools-vhs \
+   -sseof -2.5 -i scripts/vhs/out/<clip>.mp4 -frames:v 1 -update 1 -y /tmp/f.png`
