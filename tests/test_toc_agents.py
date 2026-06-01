@@ -678,3 +678,35 @@ class TestCaterpillarItem1D:
         canon = TOCAnalyzer._CANONICAL_ITEM_KEY
         assert all(canon.match(k) for k in secs.keys()), \
             f"non-canonical: {[k for k in secs if not canon.match(k)]}"
+
+
+class TestSilentFailureObservability:
+    """The TOC analyzer must not swallow failures silently (edgartools-hk9w):
+    the agent-parser fallthrough and internal errors emit debug logs so the
+    degradation path is diagnosable."""
+
+    def test_agent_fallthrough_logs(self, caplog):
+        """When a named agent parser finds nothing and we degrade to the generic
+        scan, a debug log identifies which parser fell through."""
+        import logging
+        analyzer = TOCAnalyzer(form='10-K')
+        # HTML with no Workiva TOC structure -> _analyze_workiva_toc returns {} ->
+        # fallthrough to generic.
+        html = "<html><body><p>No table of contents here.</p></body></html>"
+        with caplog.at_level(logging.DEBUG, logger='edgar.documents.utils.toc_analyzer'):
+            analyzer.analyze_toc_structure(html, agent='Workiva')
+        assert any('Workiva' in r.message and 'generic' in r.message.lower()
+                   for r in caplog.records), \
+            f"no fallthrough log; records={[r.message for r in caplog.records]}"
+
+    def test_no_blanket_silent_except(self):
+        """Guard: no 'except Exception:' in the analyzer is immediately followed by
+        a bare 'pass' — every catch logs or is a narrowed typed catch."""
+        import re
+        from pathlib import Path
+        import edgar.documents.utils.toc_analyzer as mod
+        src = Path(mod.__file__).read_text().splitlines()
+        offenders = [i + 1 for i, line in enumerate(src)
+                     if line.strip() == 'except Exception:'
+                     and src[i + 1].strip() == 'pass']
+        assert not offenders, f"silent 'except Exception: pass' at lines {offenders}"

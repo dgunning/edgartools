@@ -94,6 +94,11 @@ class TOCAnalyzer:
 
         # Generic fallback for unknown agents or when agent-specific parser returns empty
         if not result:
+            if agent:
+                # The agent parser was tried and found nothing — make the
+                # degradation to the generic scan observable (edgartools-hk9w).
+                logger.debug("Agent parser %r returned no sections; "
+                             "falling back to generic TOC scan", agent)
             result = self._analyze_generic_toc(html_content, tree=tree)
 
         # Body-header fallback: some filers (Goldman Sachs, Citi — large bank
@@ -212,8 +217,9 @@ class TOCAnalyzer:
             section_mapping = self._build_section_mapping(toc_sections, tree=tree)
 
         except Exception:
-            # Return empty mapping on error - fallback to other methods
-            pass
+            # Degrade to other strategies, but record why the generic scan failed
+            # so the silent-fallback path stays diagnosable (edgartools-hk9w).
+            logger.debug("Generic TOC parser failed", exc_info=True)
 
         return section_mapping
 
@@ -951,7 +957,7 @@ class TOCAnalyzer:
                         return part_match.group(1)
 
         except Exception:
-            pass
+            logger.debug("Preceding-item-label extraction failed", exc_info=True)
 
         return ''
 
@@ -1015,6 +1021,7 @@ class TOCAnalyzer:
                 prev = prev.getprevious()
 
         except Exception:
+            logger.debug("Part inference from row context failed", exc_info=True)
             return None
 
         return None
@@ -1332,7 +1339,7 @@ class TOCAnalyzer:
                     if item_pattern in el_text:
                         return True
         except Exception:
-            pass
+            logger.debug("Anchor/heading match check failed", exc_info=True)
 
         return False
 
@@ -1475,6 +1482,6 @@ def _find_toc_table_start(html_content: str) -> int:
                         return pos
 
     except Exception:
-        pass
+        logger.debug("TOC table-start scan failed", exc_info=True)
 
     return -1
