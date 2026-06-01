@@ -37,42 +37,22 @@ Company("AAPL").get_financials().income_statement()
 <table align="center">
 <tr>
   <td align="center" width="33%">
-    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/icon-speed.svg" width="80" alt="Fast"><br>
-    <b>Pipeline Ready</b><br>
-    Rate-limit aware, smart caching<br>
-    Enterprise-mirror support
+    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/icon-data.svg" width="96" alt="Financial Statements"><br>
+    <b>Financial Statements</b><br>
+    Income, balance sheet, cash flow in one call<br>
+    XBRL-standardized for cross-company comparison
   </td>
   <td align="center" width="33%">
-    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/icon-ai.svg" width="80" alt="AI Ready"><br>
-    <b>AI Ready</b><br>
-    Built-in MCP server for Claude<br>
-    LLM-ready text for RAG
+    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/icon-filings.svg" width="96" alt="Every Filing Type"><br>
+    <b>Every Filing Type</b><br>
+    13F holdings, Form 4 insiders, 8-K events, funds, proxies<br>
+    Typed objects + pandas DataFrames for 20+ forms
   </td>
   <td align="center" width="33%">
-    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/icon-quality.svg" width="80" alt="Well Tested"><br>
-    <b>Well Tested</b><br>
-    1000+ verification tests<br>
-    Type hints throughout
-  </td>
-</tr>
-<tr>
-  <td align="center" width="33%">
-    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/icon-xbrl.svg" width="80" alt="XBRL Support"><br>
-    <b>XBRL Native</b><br>
-    Full XBRL standardization<br>
-    Cross-company comparisons
-  </td>
-  <td align="center" width="33%">
-    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/icon-data.svg" width="80" alt="20+ Filing Types"><br>
-    <b>20+ Filing Types</b><br>
-    Typed objects for every form<br>
-    Pandas-ready DataFrames
-  </td>
-  <td align="center" width="33%">
-    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/icon-community.svg" width="80" alt="Open Source"><br>
-    <b>Open Source</b><br>
-    MIT license, free forever<br>
-    No API keys, no rate limits
+    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/icon-ai.svg" width="96" alt="Built for Pipelines & AI"><br>
+    <b>Built for Pipelines &amp; AI</b><br>
+    Rate-limit aware, smart caching, enterprise mirrors<br>
+    Built-in MCP server + LLM-ready text for RAG
   </td>
 </tr>
 </table>
