@@ -112,7 +112,10 @@ class TOCAnalyzer:
     @staticmethod
     def _canonical_item_count(mapping: Optional[Dict[str, str]]) -> int:
         """Count keys that name a canonical SEC item (optionally part-prefixed)."""
-        pat = re.compile(r'^(part_[ivxlcdm]+_)?item_\d+[a-c]?$', re.IGNORECASE)
+        # A single letter suffix covers standard items (1A, 1B, 1C, 7A, 9A–9C) and
+        # legitimate company-specific ones (e.g. Caterpillar's Item 1D, Executive
+        # Officers) — not just a–c.
+        pat = re.compile(r'^(part_[ivxlcdm]+_)?item_\d+[a-z]?$', re.IGNORECASE)
         return sum(1 for k in (mapping or {}) if pat.match(k))
 
     def _expected_item_floor(self) -> int:
@@ -219,7 +222,7 @@ class TOCAnalyzer:
     # a real heading from a bare "Item 1A" TOC cell and from inline prose
     # cross-references like "… in Part II, Item 7 of this Form 10-K …" (which start
     # with "Part", not "Item N.").
-    _BODY_ITEM_HEADER = re.compile(r'^Item\s+(\d+)([A-C]?)\.?\s+\S', re.IGNORECASE)
+    _BODY_ITEM_HEADER = re.compile(r'^Item\s+(\d+)([A-Z]?)\.?\s+\S', re.IGNORECASE)
     _BODY_PART_DIVIDER = re.compile(r'^Part\s+([IVX]+)\b', re.IGNORECASE)
 
     def _analyze_body_item_headers(self, html_content: str, tree=None) -> Dict[str, str]:
@@ -1216,10 +1219,12 @@ class TOCAnalyzer:
     # exposed. Everything else without an item number is descriptive free-text noise.
     _KNOWN_NAMED_SECTIONS = frozenset({'signatures'})
     # A canonical section key: item, optionally part-prefixed (part_ii_item_7).
-    _CANONICAL_ITEM_KEY = re.compile(r'^(part_[ivxlcdm]+_)?item_\d+[a-c]?$', re.IGNORECASE)
+    # The single-letter suffix admits standard items (1A, 7A, 9A–9C) and
+    # legitimate company-specific ones (Caterpillar's Item 1D), not just a–c.
+    _CANONICAL_ITEM_KEY = re.compile(r'^(part_[ivxlcdm]+_)?item_\d+[a-z]?$', re.IGNORECASE)
     # A still-unprefixed bare item key ("Item 7") — valid content, wrong shape;
     # the missing-part-prefix normalization is tracked separately (edgartools-3usf).
-    _BARE_ITEM_KEY = re.compile(r'^Item\s+\d+[A-C]?$', re.IGNORECASE)
+    _BARE_ITEM_KEY = re.compile(r'^Item\s+\d+[A-Z]?$', re.IGNORECASE)
 
     @classmethod
     def _is_known_named_section(cls, name: str) -> bool:
