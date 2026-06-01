@@ -83,6 +83,23 @@ def test_ten_q_skips_unmatched_text():
     assert TEN_K_SCHEMA.skip_unmatched_text is False
 
 
+# --- seed part (repeating-item forms) ---------------------------------------
+
+def test_ten_q_seeds_part_i():
+    """A 10-Q's items repeat across parts, so a document-order TOC walk must open
+    in Part I — items before any Part header are Part I (edgartools-3usf)."""
+    assert TEN_Q_SCHEMA.repeating_parts == ("I", "II")
+    assert TEN_Q_SCHEMA.seed_part == "Part I"
+
+
+def test_unique_item_forms_have_no_seed_part():
+    """10-K (and unknown forms) infer the part from the item number, so their
+    walk starts with no part context — no seed."""
+    assert TEN_K_SCHEMA.repeating_parts == ()
+    assert TEN_K_SCHEMA.seed_part is None
+    assert DEFAULT_SCHEMA.seed_part is None
+
+
 # --- silence / other forms --------------------------------------------------
 
 def test_default_schema_has_no_rules():
