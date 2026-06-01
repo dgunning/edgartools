@@ -15,6 +15,24 @@ SEC_BASE_URL = "https://www.sec.gov"
 
 log = logging.getLogger(__name__)
 
+
+def _normalize_cik(value) -> str:
+    """Normalize a CIK to a zero-padded 10-digit string.
+
+    The SEC bulk fund dataset has at times typed the CIK column as numeric, so a
+    value can arrive as a float (``225323.0``) or int as well as a string.
+    Naively ``str(225323.0).zfill(10)`` yields ``"00225323.0"`` — a key no
+    clean lookup ("0000225323") can ever match, which silently broke every
+    company lookup. Coerce through int so ``225323.0``, ``225323`` and
+    ``"0000225323"`` all key identically; fall back to the raw string for
+    anything non-numeric (e.g. NaN).
+    """
+    try:
+        return str(int(float(value))).zfill(10)
+    except (TypeError, ValueError):
+        return str(value).strip().zfill(10)
+
+
 # Data classes for our normalized data model
 @dataclass
 class FundCompanyRecord:
@@ -119,7 +137,7 @@ class FundReferenceData:
         ].fillna('')
 
         for _, row in company_df.iterrows():
-            cik = str(row['cik']).zfill(10)  # Ensure CIK is properly formatted
+            cik = _normalize_cik(row['cik'])  # numeric-or-string CIK -> 10 digits
             self._companies[cik] = FundCompanyRecord(
                 cik=cik,
                 name=row['company_name'],
@@ -141,7 +159,7 @@ class FundReferenceData:
 
         for _, row in series_df.iterrows():
             series_id = row['series_id']
-            cik = str(row['cik']).zfill(10)
+            cik = _normalize_cik(row['cik'])
 
             # Skip if parent company doesn't exist
             if cik not in self._companies:
@@ -215,7 +233,7 @@ class FundReferenceData:
             FundCompanyRecord or None if not found
         """
         # Ensure consistent formatting of CIK
-        cik = str(cik).zfill(10)
+        cik = _normalize_cik(cik)
         return self._companies.get(cik)
 
     def get_series(self, series_id: str) -> Optional[FundSeriesRecord]:
@@ -267,7 +285,7 @@ class FundReferenceData:
         Returns:
             List of FundSeriesRecord objects
         """
-        cik = str(cik).zfill(10)
+        cik = _normalize_cik(cik)
         series_ids = self._series_by_company.get(cik, set())
         return [self._series[s_id] for s_id in series_ids if s_id in self._series]
 
@@ -370,7 +388,7 @@ class FundReferenceData:
 
         # Check if it's a CIK (10 digits with leading zeros)
         if isinstance(identifier, str) and (identifier.isdigit() or identifier.startswith('0')):
-            cik = str(identifier).zfill(10)
+            cik = _normalize_cik(identifier)
             company = self.get_company(cik)
             if company:
                 return company, None, None
