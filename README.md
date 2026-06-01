@@ -28,25 +28,10 @@
 
 SEC EDGAR has every filing back to 1994, free — and almost none of it is ready to use. EdgarTools turns any filing into a typed Python object, so a 10-K's revenue is one line instead of an afternoon of XBRL parsing.
 
-**Apple's latest income statement:**
-
 ```python
-# Raw EDGAR — and this only gets you to the filing
-import requests
-headers = {"User-Agent": "you@example.com"}
-tickers = requests.get("https://www.sec.gov/files/company_tickers.json",
-                       headers=headers).json()        # search this for AAPL's CIK
-subs = requests.get(f"https://data.sec.gov/submissions/CIK{cik:010}.json",
-                    headers=headers).json()
-# now: filter for the latest 10-K, fetch its XBRL instance doc, parse thousands
-# of contexts and facts, match the fiscal period, reconcile us-gaap tags...
-# (dozens more lines — and they break when the next filer lays it out differently)
-```
-
-```python
-# EdgarTools
+# Apple's latest income statement — rendered, standardized, done
 from edgar import Company
-Company("AAPL").get_financials().income_statement()   # rendered, standardized, done
+Company("AAPL").get_financials().income_statement()
 ```
 
 <table align="center">
