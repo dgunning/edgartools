@@ -69,6 +69,13 @@ class FormSchema:
     # repeat across parts (10-Q: Part I Item 1 ≠ Part II Item 1) — there a part
     # must be detected, never inferred from the number.
     item_part_ranges: Tuple[Tuple[int, int, str], ...] = ()
+    # Canonical, document-ordered Part sequence for forms whose items *repeat*
+    # across parts so the number alone can't name the part (10-Q: ("I", "II") —
+    # Part I Item 1 is Financial Statements, Part II Item 1 is Legal Proceedings).
+    # Used to fill a Part when the TOC didn't surface explicit Part headers, by
+    # locating the single Part I→Part II transition (see :meth:`infer_parts`).
+    # Empty for forms with unique items (10-K, which uses ``item_part_ranges``).
+    repeating_parts: Tuple[str, ...] = ()
 
     def match_text(self, text_lower: str, use_exclusions: bool = True) -> Optional[str]:
         """Return the normalized item name for the first matching rule, else None."""
@@ -94,6 +101,20 @@ class FormSchema:
             if lo <= num <= hi:
                 return f"Part {roman}"
         return None
+
+    @property
+    def seed_part(self) -> Optional[str]:
+        """The Part a document-order TOC walk starts in, before any Part header.
+
+        For forms whose items repeat across an ordered Part sequence (10-Q: Part I
+        then Part II), items appearing before any Part header belong to the first
+        Part — a 10-Q always opens with Part I. Seeding the walk with that Part
+        keeps Part I Item 1 (Financial Statements) from collapsing onto a bare
+        "Item 1" key that downstream then resolves to Part II Item 1 (Legal
+        Proceedings). Returns None for forms with unique items (10-K infers the
+        Part from the item number) so their walk is unchanged (edgartools-3usf).
+        """
+        return f"Part {self.repeating_parts[0]}" if self.repeating_parts else None
 
 
 # 10-K text vocabulary. Order mirrors the historical elif chain (first match
@@ -124,7 +145,8 @@ _TEN_K_ITEM_PART_RANGES = ((1, 4, "I"), (5, 9, "II"), (10, 14, "III"), (15, 16, 
 TEN_K_SCHEMA = FormSchema(max_bare_item=15, text_rules=_TEN_K_RULES,
                           skip_unmatched_text=False,
                           item_part_ranges=_TEN_K_ITEM_PART_RANGES)
-TEN_Q_SCHEMA = FormSchema(max_bare_item=6, text_rules=_TEN_Q_RULES, skip_unmatched_text=True)
+TEN_Q_SCHEMA = FormSchema(max_bare_item=6, text_rules=_TEN_Q_RULES, skip_unmatched_text=True,
+                          repeating_parts=("I", "II"))
 # Forms without a 10-K-style item vocabulary (20-F, 40-F, S-1, ...): no text
 # fallback (raw text is returned), default bare-item cap.
 DEFAULT_SCHEMA = FormSchema(max_bare_item=15, text_rules=(), skip_unmatched_text=False)

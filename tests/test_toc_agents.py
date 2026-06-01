@@ -565,3 +565,87 @@ class TestGoldmanSachsSections:
         assert 'goldman sachs' in secs['part_i_item_1'].text().lower()[:300]
         assert 'risk factors' in secs['part_i_item_1a'].text().lower()[:120]
         assert 'financial statements' in secs['part_ii_item_8'].text().lower()[:120]
+
+
+# A 10-Q TOC whose Part I items are listed before any "Part I" header (only the
+# "Part II" header is present as a link) — the jnj/pg shape that left Part I
+# items keyless. Both Part I and Part II carry an "Item 1", so a bare key is
+# ambiguous and downstream mis-resolves it (edgartools-3usf).
+TEN_Q_NO_PART_I_HEADER_HTML = """
+<html><body>
+<div>TABLE OF CONTENTS</div>
+<table>
+ <tr><td><a href="#anc_fin">Item 1.</a></td><td><a href="#anc_fin">Financial Statements</a></td><td>1</td></tr>
+ <tr><td><a href="#anc_mda">Item 2.</a></td><td><a href="#anc_mda">Management's Discussion</a></td><td>20</td></tr>
+ <tr><td><a href="#anc_mkt">Item 3.</a></td><td><a href="#anc_mkt">Market Risk</a></td><td>40</td></tr>
+ <tr><td><a href="#anc_ctl">Item 4.</a></td><td><a href="#anc_ctl">Controls and Procedures</a></td><td>41</td></tr>
+ <tr><td colspan="3"><a href="#anc_p2">Part II</a></td></tr>
+ <tr><td><a href="#anc_legal">Item 1.</a></td><td><a href="#anc_legal">Legal Proceedings</a></td><td>42</td></tr>
+ <tr><td><a href="#anc_exh">Item 6.</a></td><td><a href="#anc_exh">Exhibits</a></td><td>45</td></tr>
+</table>
+<div id="anc_fin"></div><div>Item 1. Financial Statements body</div>
+<div id="anc_mda"></div><div>Item 2. MD&amp;A body</div>
+<div id="anc_mkt"></div><div>Item 3. Market Risk body</div>
+<div id="anc_ctl"></div><div>Item 4. Controls body</div>
+<div id="anc_p2"></div>
+<div id="anc_legal"></div><div>Item 1. Legal Proceedings body</div>
+<div id="anc_exh"></div><div>Item 6. Exhibits body</div>
+</body></html>
+"""
+
+
+class TestTenQPartSeed:
+    """Part-I seeding for 10-Q TOC walks (edgartools-3usf, 10-Q half).
+
+    A 10-Q opens with Part I, so items before any Part header are Part I — never
+    a bare 'Item N' that downstream resolves to the Part II item of the same
+    number (Item 1: Financial Statements vs Legal Proceedings)."""
+
+    def test_pre_header_items_get_part_i(self):
+        mapping = TOCAnalyzer(form='10-Q').analyze_toc_structure(
+            TEN_Q_NO_PART_I_HEADER_HTML
+        )
+        # Part I items (before the only "Part II" header) are part_i_*, not bare.
+        assert mapping.get('part_i_item_1') == 'anc_fin'
+        assert mapping.get('part_i_item_2') == 'anc_mda'
+        assert mapping.get('part_i_item_4') == 'anc_ctl'
+        # Part II items (after the header) stay part_ii_*; Item 1 does not collide.
+        assert mapping.get('part_ii_item_1') == 'anc_legal'
+        assert mapping.get('part_ii_item_6') == 'anc_exh'
+        # No bare keys leak through.
+        assert not any(k.lower().startswith('item ') for k in mapping)
+
+    def test_10k_walk_unseeded(self):
+        """The seed is 10-Q-only; a 10-K walk still starts with no part context
+        (it infers the part from the item number instead)."""
+        a = TOCAnalyzer(form='10-K')
+        assert a.schema.seed_part is None
+
+
+class TestTenQGroundTruth:
+    """Ground-truth keys/content from real 10-Q fixtures (edgartools-3usf)."""
+
+    def _sections(self, ticker, fixture):
+        from pathlib import Path
+        from edgar.documents import parse_html
+        from edgar.documents.config import ParserConfig
+        path = Path(__file__).parent / "fixtures" / "html" / fixture
+        if not path.exists():
+            pytest.skip(f"{ticker} 10-Q fixture not available: {path}")
+        return parse_html(path.read_text(), ParserConfig(form="10-Q")).sections
+
+    def test_jnj_part_i_item_1_is_financial_statements(self):
+        secs = self._sections('jnj', 'jnj/10q/jnj-10-q-2025-07-24.html')
+        # Every key is canonically part-prefixed — no bare 'Item N'.
+        assert not any(k.lower().startswith('item ') for k in secs)
+        # The same item number resolves to different content in each part:
+        # Part I Item 1 = Financial Statements, Part II Item 1 = Legal Proceedings.
+        assert 'financial statements' in secs['part_i_item_1'].text().lower()[:60]
+        assert 'legal proceedings' in secs['part_ii_item_1'].text().lower()[:60]
+
+    def test_pg_item_1_no_longer_bare(self):
+        secs = self._sections('pg', 'pg/10q/pg-10-q-2025-04-24.html')
+        # No *raw* key is a bare 'Item N' (membership via __contains__ still
+        # resolves 'Item 1' → part_i_item_1 for backward compat — that's expected).
+        assert not any(k.lower().startswith('item ') for k in secs.keys())
+        assert 'financial statements' in secs['part_i_item_1'].text().lower()[:60]

@@ -153,7 +153,7 @@ class TOCAnalyzer:
             anchor_links = tree.xpath('//a[@href]')
 
             toc_sections = []
-            current_part = None  # Track current part context for 10-Q filings
+            current_part = self.schema.seed_part  # Track part context; seeds Part I for 10-Q
 
             for link in anchor_links:
                 href = link.get('href', '').strip()
@@ -532,7 +532,7 @@ class TOCAnalyzer:
                 return {}
 
             mapping = {}
-            current_part = None
+            current_part = self.schema.seed_part
             rows = toc_table.xpath('.//tr')
 
             for row in rows:
@@ -614,7 +614,7 @@ class TOCAnalyzer:
                 return self._analyze_dfin_links(tree)
 
             mapping = {}
-            current_part = None
+            current_part = self.schema.seed_part
             rows = toc_table.xpath('.//tr')
 
             # Walk rows in order so text-only "PART I"/"PART II" rows update
@@ -680,7 +680,7 @@ class TOCAnalyzer:
         identify TOC-like links by their anchor pattern alone.
         """
         mapping = {}
-        current_part = None
+        current_part = self.schema.seed_part
 
         for link in tree.xpath('//a[@href]'):
             href = link.get('href', '').strip()
@@ -728,7 +728,7 @@ class TOCAnalyzer:
                 return {}
 
             mapping = {}
-            current_part = None
+            current_part = self.schema.seed_part
             links = toc_table.xpath('.//a[@href]')
 
             for link in links:
@@ -790,7 +790,7 @@ class TOCAnalyzer:
                 return {}
 
             mapping = {}
-            current_part = None
+            current_part = self.schema.seed_part
             rows = toc_table.xpath('.//tr')
 
             for row in rows:
