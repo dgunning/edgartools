@@ -24,10 +24,6 @@
 
 ![EdgarTools SEC filing data extraction demo](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/edgartools-demo.gif)
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/dividers/divider-hexagons.svg" alt="">
-</p>
-
 ## Why EdgarTools?
 
 SEC EDGAR has every filing back to 1994, free — and almost none of it is ready to use. EdgarTools turns any filing into a typed Python object, so a 10-K's revenue is one line instead of an afternoon of XBRL parsing.
@@ -259,10 +255,6 @@ facts.query().by_concept("Revenue").to_dataframe()  # Revenue history as DataFra
 
 EdgarTools supports all SEC form types including **10-K annual reports**, **10-Q quarterly filings**, **8-K current reports**, **13F institutional holdings**, **Form 4 insider transactions**, **proxy statements (DEF 14A)**, **S-1 registration statements**, **N-CSR fund reports**, **N-MFP money market data**, **N-PORT fund portfolios**, **Schedule 13D/G ownership**, **Form D offerings**, **Form C crowdfunding**, and **Form 144 restricted stock**. Parse XBRL financial data, extract text sections, and convert filings to pandas DataFrames.
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/dividers/divider-hexagons.svg" alt="">
-</p>
-
 ## Comparison with Alternatives
 
 EdgarTools is a **Python library** that talks directly to SEC EDGAR. [sec-api](https://sec-api.io) is a **hosted API service** that returns JSON. Both parse SEC filings — the difference is how you work with the data.
@@ -329,10 +321,6 @@ Requires [uv](https://docs.astral.sh/uv/). Alternatively, `pip install "edgartoo
 See [AI Integration Guide](docs/ai-integration.md) for complete documentation.
 
 </details>
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/dividers/divider-hexagons.svg" alt="">
-</p>
 
 ## <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/emoji-heart.svg" width="24" height="24"> Support This Project
 
