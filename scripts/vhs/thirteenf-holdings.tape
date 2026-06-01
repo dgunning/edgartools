@@ -4,8 +4,11 @@
 #
 # Uses holdings_view(10) (value-sorted, deduped) instead of the raw object,
 # which would render ~98 alphabetical rows and scroll the headline off-screen.
-# Env widens the Rich console to 124 so issuer names and dollar values aren't
-# truncated; FontSize 16 keeps that width inside the standard 1280px frame.
+#
+# Width tuning: the Rich console must be <= the VHS terminal column count or the
+# panel's right border wraps and doubles. At FontSize 16 a 1320px frame gives
+# ~122 cols; console width 120 (the min that keeps issuer names/values unwrapped)
+# sits just inside it for a clean, edge-to-edge border.
 #
 # Render:
 #   docker run --rm -e EDGAR_IDENTITY="$EDGAR_IDENTITY" \
@@ -13,8 +16,9 @@
 
 Source scripts/vhs/theme.tape
 Set FontSize 16
+Set Width 1320
 Set Height 880
-Env VHS_CONSOLE_WIDTH "124"
+Env VHS_CONSOLE_WIDTH "120"
 
 Output scripts/vhs/out/thirteenf-holdings.gif
 Output scripts/vhs/out/thirteenf-holdings.mp4

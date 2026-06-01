@@ -83,6 +83,12 @@ on-camera expression. Viewers never see boilerplate.
   `Env VHS_CONSOLE_WIDTH "124"`.)
 - **Lines render tall (~40px at FontSize 16).** Budget height generously — a
   ~19-line panel needs `Set Height 880`, not the ~500 the arithmetic suggests.
+- **Console width must be ≤ the VHS terminal column count**, or a Rich panel's
+  right border wraps and doubles. The terminal is ~119 cols at FontSize 16 /
+  Width 1280; to fit a 120-col panel cleanly, widen the frame (`Set Width 1320`
+  → ~122 cols) and set `Env VHS_CONSOLE_WIDTH "120"`. Measure cols by running
+  `python3 -c "import shutil; print(shutil.get_terminal_size().columns)"` inside
+  a throwaway tape.
 - **Frame height = fit the output, no scroll.** If a table scrolls, its header
   is gone from the final hold frame. Raise `Set Height` until the whole result
   fits (≈21.6px per line at FontSize 18, plus padding).
