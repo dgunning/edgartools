@@ -1310,7 +1310,9 @@ class TestEntityFactsParser:
 class TestPeriodSelection:
 
     def test_statement_annual_periods(self):
-        c = Company("BACQ")
+        # Pin to CIK, not ticker: "BACQ" (Merlin, Inc.) churns out of SEC's
+        # company_tickers data, but the CIK is stable.
+        c = Company(2028707)
         entity_facts = c.get_facts()
         print()
         print(entity_facts)
