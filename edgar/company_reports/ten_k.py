@@ -59,6 +59,20 @@ _ITEM_TO_PART_10K = {
 }
 
 
+def _item_sort_key(item: str) -> tuple:
+    """Sort key producing canonical SEC 10-K item order.
+
+    Sorts by numeric item value first, then by the full token so letter
+    suffixes order correctly within a number (e.g. ``Item 1`` < ``Item 1A``
+    < ``Item 1B``, and ``Item 7`` < ``Item 7A``). Yields the canonical
+    sequence: 1, 1A, 1B, 1C, 2, 3, 4, 5, 6, 7, 7A, 8, 9, 9A, 9B, 9C,
+    10, 11, 12, 13, 14, 15, 16.
+    """
+    token = item.split()[-1]  # "Item 1A" -> "1A"
+    num = int(''.join(c for c in token if c.isdigit()) or '0')
+    return (num, token)
+
+
 class TenK(CompanyReport):
     structure = FilingStructure({
         "PART I": {
@@ -239,7 +253,8 @@ class TenK(CompanyReport):
         Falls back to old chunked_document if new parser returns no sections.
 
         Returns:
-            List of item titles (e.g., ['Item 1', 'Item 1A', 'Item 2', ...])
+            List of unique item titles in canonical SEC order
+            (e.g., ['Item 1', 'Item 1A', 'Item 1B', 'Item 2', ...]).
         """
         # Mapping from friendly section names to Item numbers
         section_to_item = {
@@ -268,6 +283,10 @@ class TenK(CompanyReport):
             'summary': 'Item 16'
         }
 
+        def _canonical(raw_items):
+            """Deduplicate and sort into canonical SEC 10-K item order."""
+            return sorted(dict.fromkeys(raw_items), key=_item_sort_key)
+
         # Try new parser first
         if self.sections:
             items = []
@@ -281,11 +300,13 @@ class TenK(CompanyReport):
                 # Handle keys that are already in "Item X" format
                 elif key.startswith('Item '):
                     items.append(key)
-            return items if items else (self.chunked_document.list_items() if self.chunked_document else [])
+            if items:
+                return _canonical(items)
+            return _canonical(self.chunked_document.list_items()) if self.chunked_document else []
 
         # Fallback to old parser for backward compatibility
         if self.chunked_document:
-            return self.chunked_document.list_items()
+            return _canonical(self.chunked_document.list_items())
 
         return []
 
@@ -439,24 +460,13 @@ class TenK(CompanyReport):
         except Exception:
             pass
 
-        # Sections
+        # Sections (items property is already deduplicated and canonically sorted)
         try:
             items = self.items
             if items:
-                # Deduplicate and sort by item number
-                seen = set()
-                unique_items = []
-                for item in items:
-                    if item not in seen:
-                        seen.add(item)
-                        unique_items.append(item)
-                unique_items.sort(key=lambda x: (
-                    int(''.join(c for c in x.split()[-1] if c.isdigit()) or '0'),
-                    x.split()[-1]
-                ))
                 lines.append("")
                 lines.append("SECTIONS:")
-                lines.append(f"  {', '.join(unique_items)}")
+                lines.append(f"  {', '.join(items)}")
         except Exception:
             pass
 
