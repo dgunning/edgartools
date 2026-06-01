@@ -422,6 +422,10 @@ class TestHelperMethods:
         assert ok('item_1a', 'Item 1A')
         assert ok('Item 8', 'Item 8')                       # bare, missing prefix
         assert ok('part_iv_signatures', 'Signatures')        # allowlisted named
+        # Company-specific item suffixes beyond a-c are valid (Caterpillar labels
+        # Executive Officers "Item 1D"); the recognizer admits any single letter.
+        assert ok('part_i_item_1d', 'Item 1D')
+        assert ok('Item 1D', 'Item 1D')
         assert not ok('part_ii_risk_management', 'Risk Management')
         assert not ok('part_iv_,_item_1a', ', Item 1A')
         assert not ok('part_ii_note_7:__share-based_compensation', 'Note 7: Share-Based Compensation')
@@ -649,3 +653,28 @@ class TestTenQGroundTruth:
         # resolves 'Item 1' → part_i_item_1 for backward compat — that's expected).
         assert not any(k.lower().startswith('item ') for k in secs.keys())
         assert 'financial statements' in secs['part_i_item_1'].text().lower()[:60]
+
+
+class TestCaterpillarItem1D:
+    """Company-specific item suffix from a real fixture (edgartools-sldz cat
+    follow-up). Caterpillar labels 'Information about our Executive Officers' as
+    Item 1D — a legitimate non-standard suffix the recognizer must accept."""
+
+    def test_cat_item_1d_is_canonical_and_correct(self):
+        from pathlib import Path
+        from edgar.documents import parse_html
+        from edgar.documents.config import ParserConfig
+        path = Path(__file__).parent / "fixtures" / "html" / "cat/10k/cat-10-k-2025-02-14.html"
+        if not path.exists():
+            pytest.skip(f"cat 10-K fixture not available: {path}")
+        secs = parse_html(path.read_text(), ParserConfig(form="10-K")).sections
+        # The full Part I item-1 family resolves, including the company-specific 1D.
+        for key in ['part_i_item_1', 'part_i_item_1a', 'part_i_item_1b',
+                    'part_i_item_1c', 'part_i_item_1d']:
+            assert key in secs, f"missing {key}; got {sorted(secs.keys())}"
+        # 1D is the Executive Officers section, correctly bounded (not a phantom).
+        assert 'executive officers' in secs['part_i_item_1d'].text().lower()[:80]
+        # Every key is now canonically shaped — no non-canonical leakage.
+        canon = TOCAnalyzer._CANONICAL_ITEM_KEY
+        assert all(canon.match(k) for k in secs.keys()), \
+            f"non-canonical: {[k for k in secs if not canon.match(k)]}"
