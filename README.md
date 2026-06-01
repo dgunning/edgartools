@@ -152,67 +152,33 @@ facts.query().by_concept("Revenue").to_dataframe()  # Revenue history as DataFra
   <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/sections/section-features.svg" alt="Key Features">
 </p>
 
-### Comprehensive SEC Data Access
-
 <table>
 <tr>
 <td width="50%" valign="top">
 
-**Financial Statements (XBRL)**
-- Balance Sheets, Income Statements, Cash Flows
-- Individual line items via XBRL tags
-- Multi-period comparisons with comparative periods
-- Standardized cross-company data
-- Automatic unit conversion
-- Metadata columns (dimensions, members, units)
-- Complete dimensional data support
+**Financial data**
+- Income, balance sheet, cash flow — XBRL-standardized for cross-company comparison
+- Individual line items, dimensional data, multi-period comparatives
+- Company Facts API: time-series for any concept across years
 
-**Fund & Investment Data**
-- 13F institutional holdings & portfolio analysis
-- N-PORT fund portfolio data
-- N-MFP money market fund holdings
-- N-CSR/N-CEN fund reports
+**Funds & ownership**
+- 13F holdings, N-PORT, N-MFP, N-CSR/N-CEN fund reports
+- Form 3/4/5 insider transactions; Schedule 13D/G ownership
 - Position tracking over time
-
-**Company Dataset & Reference Data**
-- Industry and state filtering
-- Company subsets with metadata
-- Standardized industry classifications
-- SEC ticker/CIK lookups
-- Exchange information
-
-**Insider Transactions**
-- Form 3, 4, 5 structured data
-- Transaction history by insider
-- Ownership changes
-- Grant and exercise details
-- Automatic parsing
 
 </td>
 <td width="50%" valign="top">
 
-**Filing Intelligence**
-- Any form type (10-K, 10-Q, 8-K, S-1, etc.)
-- Complete history since 1994
-- Typed data objects for 20+ form types
-- HTML to clean text extraction
-- Section extraction (Risk Factors, MD&A)
-- Subsidiaries (EX-21) and auditor extraction
+**Filings & text**
+- Typed objects for 20+ forms; complete history since 1994
+- Section extraction (Risk Factors, MD&A), EX-21 subsidiaries, auditor info
+- HTML → clean text + markdown for RAG; full-text search
+- Ticker/CIK lookup, industry & exchange filtering
 
-**Performance & Reliability**
-- Configurable rate limiting (enterprise mirrors supported)
-- Custom SEC data sources (corporate/academic mirrors)
-- Smart caching (30-second fresh filing cache)
-- Robust error handling
-- SSL verification with fail-fast retry
-- Type hints throughout
+**Built for production**
+- Configurable rate limiting + enterprise/academic mirrors
+- Smart caching, type hints throughout, 1000+ tests
 - [Enterprise configuration →](docs/configuration.md#enterprise-configuration)
-
-**Developer Experience**
-- Intuitive, consistent API
-- Pandas DataFrame integration
-- Rich terminal output
-- 1000+ tests
 
 </td>
 </tr>
