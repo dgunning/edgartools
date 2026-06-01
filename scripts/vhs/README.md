@@ -75,6 +75,14 @@ on-camera expression. Viewers never see boilerplate.
 
 ## Tips
 
+- **`Env` must come AFTER all `Set` directives** (and after `Source`). If an
+  `Env` line sits between `Source` and a `Set`, VHS silently drops the
+  following `Set` commands — e.g. `Set Height` reverts to the theme default and
+  the output is the wrong size. Order: `Source` → `Set ...` → `Env ...` →
+  `Output`. (`thirteenf-holdings.tape` widens the Rich console via
+  `Env VHS_CONSOLE_WIDTH "124"`.)
+- **Lines render tall (~40px at FontSize 16).** Budget height generously — a
+  ~19-line panel needs `Set Height 880`, not the ~500 the arithmetic suggests.
 - **Frame height = fit the output, no scroll.** If a table scrolls, its header
   is gone from the final hold frame. Raise `Set Height` until the whole result
   fits (≈21.6px per line at FontSize 18, plus padding).
