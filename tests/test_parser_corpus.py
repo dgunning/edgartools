@@ -136,19 +136,36 @@ def test_healthy_sample_within_bands(manifest, bands):
     assert not violations, "healthy filings drifted outside size bands:\n" + "\n".join(violations)
 
 
+def test_size_band_guardrail_catches_oversize(bands):
+    """The size-band guardrail (edgartools-9hwf) must actually flag an oversize
+    section — validates the bands are useful, not decorative. Tests the mechanism
+    directly: a section one byte over high_flag trips, a section at p50 does not.
+
+    Originally this re-parsed GS Item 1 (the 668KB Business-mapped-to-Part-II-Item-1
+    leak from #821), but the sldz body-header fix corrected GS, so no corpus fixture
+    reproduces the leak anymore. The mechanism check is fixture-independent; the GS
+    regression is now guarded positively in test_gs_item_1_within_band."""
+    item1_band = bands["10-K"]["1"]
+    high_flag = item1_band["high_flag"]
+    # A grossly oversized section (the old GS leak shape, ~668KB) trips the band.
+    assert 668_000 > high_flag, "high_flag should sit well below a 668KB leak"
+    # A healthy section at the median does not.
+    assert item1_band["low_flag"] <= item1_band["p50"] <= high_flag
+
+
 @pytest.mark.slow
-def test_known_bad_tripped_by_bands(manifest, bands):
-    """The size-band guardrail (edgartools-9hwf) must actually catch the
-    documented oversize failures — validates the bands are useful, not just
-    decorative. GS Item 1 (668KB) and JPM oversize must exceed high_flag."""
+def test_gs_item_1_within_band(manifest, bands):
+    """Regression (edgartools-sldz): GS Item 1 was the 668KB Business-as-Part-II
+    leak; the body-header fix now maps Business to Part I Item 1 at a normal size,
+    so it sits inside the Item 1 band instead of blowing past high_flag."""
     by_key = {(f["ticker"], f["form"]): f for f in manifest["filings"]}
     gs = by_key[("gs", "10-K")]
     sections = _parse_sections(gs["fixture"], gs["form"])
-    # GS Business is mis-mapped to Part II Item 1 and grossly oversized.
-    oversized = [len(s.text() or "") for n, s in sections.items()
-                 if _item_key(n) == "1"]
+    sizes = [len(s.text() or "") for n, s in sections.items()
+             if _item_key(n) == "1"]
     item1_band = bands["10-K"]["1"]
-    assert oversized and max(oversized) > item1_band["high_flag"], (
-        f"GS Item 1 no longer trips the band (sizes={oversized}, "
-        f"high_flag={item1_band['high_flag']}) — update the marker if fixed"
+    assert sizes, "GS Item 1 not found"
+    assert max(sizes) <= item1_band["high_flag"], (
+        f"GS Item 1 oversize again (sizes={sizes}, "
+        f"high_flag={item1_band['high_flag']}) — the sldz fix may have regressed"
     )
