@@ -59,13 +59,13 @@ Company("AAPL").get_financials().income_statement()
 
 ## How It Works
 
-Everything starts with a **`Company`** or a **`Filing`**. Ask a company for its filings, or pull filings directly by form type — then call **`.obj()`** and you get a typed object built for that form: a `TenK` knows risk factors and MD&A, a `Form4` knows insider transactions, a `ThirteenF` knows holdings. Financials come straight from XBRL, standardized for cross-company comparison, and everything hands back pandas DataFrames.
-
-The same typed output that reads cleanly in a notebook drops straight into a pipeline: DataFrames for your warehouse, LLM-ready text and an MCP server for your AI stack, rate-limit and enterprise-mirror aware for scale.
+Everything starts with a **`Company`** or a **`Filing`**. Call **`.obj()`** and you get a typed object built for that form — its data ready as pandas DataFrames and clean text.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/how-it-works.svg" alt="How EdgarTools Python library extracts SEC EDGAR filing data">
+  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/how-it-works.svg" alt="How EdgarTools turns any SEC filing into a typed Python object">
 </p>
+
+The same typed output that reads cleanly in a notebook drops straight into a pipeline: DataFrames for your warehouse, LLM-ready text and an MCP server for your AI stack, rate-limit and enterprise-mirror aware for scale.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/sections/section-quick-start.svg" alt="Quick Start">
