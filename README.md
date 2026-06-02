@@ -93,61 +93,45 @@ Company("AAPL").get_filings(form="4").latest().obj()
 
 ## Use Cases
 
-### Extract Financial Statements from 10-K and 10-Q Filings
-
-Get income statements, balance sheets, and cash flow statements from SEC annual and quarterly reports. Data is parsed from XBRL with standardized labels for cross-company comparison.
+### Financial statements from 10-K and 10-Q filings
 
 ```python
 financials = Company("MSFT").get_financials()
-financials.balance_sheet()     # Balance sheet with all line items
-financials.income_statement()  # Revenue, net income, EPS
+financials.balance_sheet()     # all line items
+financials.income_statement()  # revenue, net income, EPS
 ```
-
 [Financial Statements guide →](https://edgartools.readthedocs.io/en/latest/guides/financial-data/)
 
-### Track Insider Trading with SEC Form 4
-
-Monitor insider buying and selling activity from SEC Form 4 filings. See which executives are purchasing or selling shares, option exercises, and net position changes.
+### Insider trading from SEC Form 4
 
 ```python
-form4 = Company("TSLA").get_filings(form="4")[0].obj()
-form4.to_dataframe()  # Insider buy/sell transactions
+form4 = Company("TSLA").get_filings(form="4").latest().obj()
+form4.to_dataframe()  # insider buy/sell transactions
 ```
-
 [Insider Trades guide →](https://edgartools.readthedocs.io/en/latest/insider-filings/)
 
-### Analyze 13F Institutional Holdings & Hedge Fund Portfolios
-
-Track what hedge funds and institutional investors own by parsing SEC 13F filings. EdgarTools extracts complete portfolio holdings with position sizes, values, and quarter-over-quarter changes.
+### 13F institutional holdings & hedge fund portfolios
 
 ```python
-from edgar import get_filings
-thirteenf = get_filings(form="13F-HR")[0].obj()
-thirteenf.holdings  # DataFrame of all portfolio positions
+thirteenf = get_filings(form="13F-HR").latest().obj()
+thirteenf.holdings  # every portfolio position as a DataFrame
 ```
-
 [Institutional Holdings guide →](https://edgartools.readthedocs.io/en/latest/guides/thirteenf-data-object-guide/)
 
-### Parse 8-K Current Reports for Corporate Events
-
-Access material corporate events as they happen -- earnings releases, acquisitions, executive changes, and more. EdgarTools parses 8-K filings into structured items with full text extraction.
+### 8-K current reports & corporate events
 
 ```python
-eightk = get_filings(form="8-K")[0].obj()
-eightk.items  # List of reported event items
+eightk = get_filings(form="8-K").latest().obj()
+eightk.items  # reported event items
 ```
-
 [Current Events guide →](https://edgartools.readthedocs.io/en/latest/guides/eightk-data-object-guide/)
 
-### Query XBRL Financial Data Across Companies
-
-Access structured XBRL financial facts for any SEC filer. Query specific line items like revenue or total assets over time, and compare across companies using standardized concepts.
+### XBRL financial data across companies
 
 ```python
 facts = Company("AAPL").get_facts()
-facts.query().by_concept("Revenue").to_dataframe()  # Revenue history as DataFrame
+facts.query().by_concept("Revenue").to_dataframe()  # revenue history as a DataFrame
 ```
-
 [XBRL Deep Dive →](https://edgartools.readthedocs.io/en/latest/xbrl/)
 
 ## Key Features
