@@ -261,13 +261,6 @@ The SEC amends filing formats every quarter and ships a new XBRL taxonomy every 
 <p align="center">
   <sub>Recurring sponsorship + corporate tiers via GitHub · One-time thanks via Buy Me a Coffee</sub>
 </p>
-
-**Recent maintenance shipped via sponsorship:**
-- NPORT-P fund portfolio extraction
-- MA-I municipal advisor parser
-- 424B prospectus family (B1–B8) extractors
-- XBRL taxonomy updates for the 2026 cycle
-
 ---
 
 ### For teams running EdgarTools in production
