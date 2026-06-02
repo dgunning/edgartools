@@ -185,6 +185,14 @@ EdgarTools is a **Python library** that talks directly to SEC EDGAR. [sec-api](h
 
 **Bottom line:** in Python, EdgarTools gives you typed objects, AI-native output, and the full SEC corpus — free, open, and inspectable, with no keys or bills. `pip install edgartools` and you're querying filings in two lines.
 
+## Library or hosted?
+
+**EdgarTools** is the open-source library — SEC-filing primitives you compose in your own code, free and self-run.
+
+[**edgar.tools**](https://edgar.tools) is the hosted platform built on that same open engine: the full SEC corpus as a managed service, so your team gets the data without running the pipeline — and without the black box of a closed API.
+
+Reach for the library when you want control in your own stack; reach for **edgar.tools** when you'd rather not operate it yourself.
+
 ## AI Integration
 
 ### Use EdgarTools with Claude Code & Claude Desktop
