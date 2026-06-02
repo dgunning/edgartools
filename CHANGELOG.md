@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.34.0] - 2026-06-02
+
+SEC section extraction is now form-aware by design: form structure is declarative data rather than 10-K-shaped heuristics, link-less-TOC bank filings (Goldman Sachs, Citigroup) extract their items correctly, and wrong-content sections are flagged instead of trusted.
+
+### Added
+
+- **`Section.markdown()` now works on TOC-detected sections** — slices the section HTML and renders structure-preserving markdown (tables, lists) instead of falling back to flat text. Completes the `Section.markdown()` work from 5.32.0.
+- **Per-form section schema** — each form's extraction rules live in a declarative schema (`form_schema.py`) instead of branches in the TOC analyzer; supporting a new form is now a table entry.
+- **Body-header item recovery** — recovers canonical items from link-less-TOC 10-Ks (Goldman Sachs: 13 garbage sections → 21 correct items). Fires only when the linked-TOC parse is incomplete, so well-formed filings are untouched.
+- **`Section.warnings`** — flags sections whose content size is anomalous (truncated or over-captured) instead of returning them at high confidence.
+
+### Fixed
+
+- **`TenQ['Item 1']` returned Legal Proceedings instead of Financial Statements** — pre-header 10-Q items were keyed without their Part prefix, so lookups fell through to Part II.
+- **Fund `get_company()` silently returned `None`** — SEC now types fund CIKs as numeric (`225323.0`), which broke key matching; CIKs are normalized through `int` so all forms key identically.
+- **`TenK.items` now returns canonical SEC order** (`1, 1A, … 16`) on all paths, not detection order.
+- **Bare 10-K item keys get their canonical part prefix** inferred from the item number; `"Item 8" in sections` still works.
+- **Filer-specific item suffixes (e.g. Caterpillar "Item 1D") are accepted** instead of dropped as non-canonical.
+- **Descriptive free-text and bare Part labels no longer leak as sections** in the generic TOC path.
+- **`'part'` no longer false-matches inside words** like "counterparties" when inferring Part context.
+- **TOC analyzer logs internal failures** instead of silently degrading to the generic scraper.
+
+### Changed
+
+- **Refreshed bundled reference data** — `ct.pq` (CUSIP→ticker, 13F rendering) refreshed from SEC Fails-to-Deliver and merged to preserve coverage (68,512 CUSIPs); `company_tickers.parquet` (ticker↔CIK resolution) refreshed as a clean mirror of SEC's current data (10,365 entries).
+
 ## [5.33.0] - 2026-05-29
 
 ### Added
