@@ -87,7 +87,7 @@ form4 = Company("MSFT").get_filings(form="4")[0].obj()
 form4.to_dataframe()   # insider buy/sell transactions
 ```
 
-![Apple SEC Form 4 insider transaction data extraction with Python](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/aapl-insider.png)
+![Apple SEC Form 4 insider transactions parsed into a structured Python object](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/quickstart-form4.gif)
 
 ## Use Cases
 

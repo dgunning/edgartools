@@ -61,6 +61,7 @@ on-camera expression. Viewers never see boilerplate.
 | `hero-reel.tape` | 🌟 Hero reel — 30s tour: Company → filings → 10-K (TOC) → financials | ✅ done |
 | `hero-income-statement.tape` | Focused hero — Apple income statement in three lines | ✅ done |
 | `insider-form4.tape` | Insider trades — Tesla's latest Form 4 as a structured object | ✅ done |
+| `quickstart-form4.tape` | Quick Start — Apple Form 4 in three beats: `get_filings("4").head(5)` → `.obj().to_dataframe([...])` → the full panel (README Quick Start) | ✅ done |
 | `thirteenf-holdings.tape` | 13F holdings — `Company("BRK.A")` → top 10 (`holdings_view`) → quarter-over-quarter changes (`compare_holdings`) | ✅ done |
 | `universal-find.tape` | Universal `find()` — ticker / CIK / accession, stacked | ✅ done |
 | `live-filings.tape` | Live feed — `get_current_filings()` (re-render in market hours) | ✅ done |
