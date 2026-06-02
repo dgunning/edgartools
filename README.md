@@ -67,27 +67,34 @@ Everything starts with a **`Company`** or a **`Filing`**. Call **`.obj()`** and 
 
 The same typed output that reads cleanly in a notebook drops straight into a pipeline: DataFrames for your warehouse, LLM-ready text and an MCP server for your AI stack, rate-limit and enterprise-mirror aware for scale.
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/sections/section-quick-start.svg" alt="Quick Start">
-</p>
+## Quick Start
+
+**1. Install**
 
 ```bash
 pip install edgartools
 ```
 
+**2. Identify yourself to the SEC** — EDGAR requires an email with every request. No key, no signup, no rate-limit tier; set it once:
+
 ```python
 from edgar import *
-set_identity("your.name@example.com")   # SEC requires an identifying email
+set_identity("your.name@example.com")
+```
 
-# One line to a rendered, standardized balance sheet
-Company("AAPL").get_financials().balance_sheet()
+**3. Get data** — every filing is now a few lines away:
 
-# Browse a company's filings, parse insider transactions
-form4 = Company("MSFT").get_filings(form="4")[0].obj()
-form4.to_dataframe()   # insider buy/sell transactions
+```python
+# Standardized financial statements, straight from XBRL
+Company("AAPL").get_financials().income_statement()
+
+# The latest insider Form 4 as a structured object
+Company("AAPL").get_filings(form="4").latest().obj()
 ```
 
 ![Apple SEC Form 4 insider transactions parsed into a structured Python object](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/quickstart-form4.gif)
+
+**Next:** explore the [Use Cases](#use-cases) below, or dive into the [documentation](https://edgartools.readthedocs.io/) and [Quick Guide](https://edgartools.readthedocs.io/en/latest/quick-guide/).
 
 ## Use Cases
 
@@ -148,9 +155,7 @@ facts.query().by_concept("Revenue").to_dataframe()  # Revenue history as DataFra
 
 [XBRL Deep Dive →](https://edgartools.readthedocs.io/en/latest/xbrl/)
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/sections/section-features.svg" alt="Key Features">
-</p>
+## Key Features
 
 <table>
 <tr>
@@ -202,9 +207,7 @@ EdgarTools is a **Python library** that talks directly to SEC EDGAR. [sec-api](h
 | **Language** | Python | Any | Any |
 | **Open source** | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> Proprietary | N/A |
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/sections/section-ai-integration.svg" alt="AI Integration">
-</p>
+## AI Integration
 
 ### Use EdgarTools with Claude Code & Claude Desktop
 
@@ -253,7 +256,7 @@ See [AI Integration Guide](docs/ai-integration.md) for complete documentation.
 
 </details>
 
-## <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/emoji-heart.svg" width="24" height="24"> Support This Project
+## ❤️ Support This Project
 
 EdgarTools is used in production at hedge funds, fintechs, and research desks. It's MIT-licensed — no API keys, no rate limits, no subscriptions — and one person maintains it.
 
@@ -293,9 +296,7 @@ If EdgarTools is in your data pipeline, [GitHub Sponsors](https://github.com/spo
 
 → **[See sponsor tiers](https://github.com/sponsors/dgunning)**
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/sections/section-community.svg" alt="Community & Support">
-</p>
+## Community & Support
 
 ### Documentation & Resources
 
