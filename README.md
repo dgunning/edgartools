@@ -172,19 +172,18 @@ EdgarTools supports all SEC form types including **10-K annual reports**, **10-Q
 
 ## Comparison with Alternatives
 
-EdgarTools is a **Python library** that talks directly to SEC EDGAR. [sec-api](https://sec-api.io) is a **hosted API service** that returns JSON. Both parse SEC filings — the difference is how you work with the data.
+EdgarTools is a **Python library** that talks directly to SEC EDGAR. [sec-api](https://sec-api.io) is the best-known **hosted API** that returns JSON. Both parse filings — the difference is how you work with the data, and what it costs you.
 
-| | EdgarTools | sec-api | Raw EDGAR |
-|---|------------|---------|-----------|
-| **What it is** | Python library | REST API service | DIY |
-| **Cost** | Free (MIT) | $49+/mo | Free |
-| **Data format** | Typed Python objects | JSON | Raw XML/HTML |
-| **Parsed filing types** | 24 (10-K, 8-K, 13F, N-PORT, proxy, etc.) | 15+ structured APIs | — |
-| **Financials** | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> Parsed + standardized | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> Parsed (XBRL-to-JSON) | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> |
-| **Full-text search** | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> via EFTS | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> |
-| **AI/MCP integration** | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> |
-| **Language** | Python | Any | Any |
-| **Open source** | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> Proprietary | N/A |
+| | EdgarTools | sec-api |
+|---|------------|---------|
+| **Cost** | Free, MIT | $49+/mo |
+| **Data format** | Typed Python objects → DataFrames | JSON you parse yourself |
+| **Where it runs** | In your process — no key, no quotas, no vendor lock-in | Hosted API — key + rate tiers |
+| **Filing coverage** | 20+ typed forms (10-K, 8-K, 13F, N-PORT, proxy…) | 15+ structured endpoints |
+| **AI / MCP** | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> Built in | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> |
+| **Open source** | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> Inspect, fork, self-host | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> Proprietary |
+
+**Bottom line:** if you work in Python, EdgarTools gives you typed objects, AI-native output, and the full SEC corpus with no keys or bills — and you can read exactly how every filing is parsed. A hosted API earns its price when you need a language-agnostic REST endpoint for a non-Python stack. For everyone else: `pip install edgartools` and you're querying filings in two lines.
 
 ## AI Integration
 
