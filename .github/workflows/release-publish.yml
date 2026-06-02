@@ -1,0 +1,96 @@
+# Hardened PyPI publishing via Trusted Publishing (OIDC) — Posture B.
+#
+# ⚠️  INERT UNTIL ACTIVATED. This workflow does nothing useful until you:
+#   1. Register a PyPI Trusted Publisher for this repo (see docs/internal/release-publishing.md):
+#        Project: edgartools | Owner: dgunning | Repo: edgartools
+#        Workflow: release-publish.yml | Environment: pypi
+#   2. Create a GitHub Environment named "pypi" with a REQUIRED REVIEWER (you),
+#        so every publish needs a manual approval click.
+#   3. Remove the long-lived token from ~/.pypirc / keychain once you trust this path.
+#
+# Security properties (defeats the tj-actions / Ultralytics / template-injection breach classes):
+#   - No stored secret: PyPI auth is a short-lived OIDC token, minted per run, expires in <15 min.
+#   - Every action is pinned to a full commit SHA (mutable tags cannot be repointed under us).
+#   - permissions: {} at top level; id-token:write is granted ONLY to the isolated publish job.
+#   - Build (untrusted inputs) and publish (trusted, minimal) are separate jobs.
+#   - The "pypi" environment gate requires a human approval before publish runs.
+#   - PEP 740 Sigstore attestations are generated automatically (gh-action-pypi-publish >= v1.11).
+#
+# Trigger is manual (workflow_dispatch) so publishing is always a deliberate maintainer action.
+# To auto-publish when a GitHub release is created instead, uncomment the `release` trigger;
+# the environment approval gate keeps it safe either way.
+
+name: Publish to PyPI
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Tag or ref to build and publish (e.g. v5.34.0)"
+        required: true
+  # release:
+  #   types: [published]
+
+permissions: {}
+
+jobs:
+  build:
+    name: Build distributions
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
+
+      - name: Build wheel and sdist
+        run: |
+          python -m pip install --upgrade pip hatch
+          hatch build
+
+      - name: Verify version matches the ref
+        run: |
+          python - <<'PY'
+          import os, re, pathlib
+          ref = os.environ["REF"].lstrip("v")
+          about = pathlib.Path("edgar/__about__.py").read_text()
+          ver = re.search(r"__version__\s*=\s*['\"]([^'\"]+)['\"]", about).group(1)
+          assert ver == ref, f"__about__.py version {ver!r} != ref {ref!r}"
+          print(f"OK: building {ver}")
+          PY
+        env:
+          REF: ${{ inputs.ref }}
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dist
+          path: dist/
+          retention-days: 1
+          if-no-files-found: error
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi          # requires manual approval (configure a required reviewer)
+    permissions:
+      id-token: write          # OIDC token for Trusted Publishing — the ONLY elevated grant
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to PyPI (Trusted Publishing + attestations)
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
+        # attestations are generated and uploaded automatically (PEP 740); no token needed.
