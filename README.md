@@ -15,11 +15,6 @@
   <a href="https://pypi.org/project/edgartools"><img src="https://img.shields.io/pypi/dm/edgartools" alt="PyPI - Downloads"></a>
 </p>
 
-<p>
-  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/badges/badge-ai-native.svg" alt="AI Native">
-  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/badges/badge-open-source.svg" alt="Open Source">
-</p>
-
 **EdgarTools** is a Python library for accessing SEC EDGAR filings as structured data. Parse financial statements, insider trades, fund holdings, proxy statements, and 20+ other filing types with a consistent Python API — in a few lines of code. Free and open source.
 
 ![EdgarTools SEC filing data extraction demo](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/edgartools-demo.gif)
