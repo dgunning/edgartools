@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.35.0] - 2026-06-02
+
+BDC non-accrual extraction no longer depends on a filer phrasing its footnotes exactly the way our whitelist expected, and a parsing gap is now surfaced as a warning rather than read as a confirmed zero.
+
+### Added
+
+- **`edgar.__version__`** — the installed version is now exposed at the package root (`import edgar; edgar.__version__`), following the standard `pkg.__version__` convention so downstream consumers can detect which version they have without reading `edgar.__about__` or running `pip show`. ([#794](https://github.com/dgunning/edgartools/issues/794))
+- **`NonAccrualResult.warnings`** — flags a portfolio that produced no non-accrual signal from any extraction layer, and recognized flags that resolved no investments, so an LLM consumer never mistakes a parsing gap for a confirmed zero. Surfaced in `to_context`, mirroring the `Section.warnings` pattern.
+
+### Fixed
+
+- **BDC non-accrual footnote detection is now robust to wording drift** — the exact-phrase affirmative-pattern whitelist silently dropped any footnote a filer didn't phrase as an enumerated sentence. MAIN changed "Non-accrual *and* non-income producing…" to "…*or*…" and its 10-Q returned an empty list; PSEC's verb-less "Investment on non-accrual status as of the reporting date" matched nothing. The binary regex gate is replaced with a layered classifier (mention → negation → explicit pattern → structure-corroborated short label) that accepts short footnotes linked to specific investment facts regardless of exact phrasing, while long rollforward/policy footnotes stay excluded by length. Real-world impact: PSEC 0 → 5 non-accrual investments, GBDC now extracts footnote-level detail, MAIN/ARCC/FSK unchanged. ([#835](https://github.com/dgunning/edgartools/issues/835))
+
 ## [5.34.0] - 2026-06-02
 
 SEC section extraction is now form-aware by design: form structure is declarative data rather than 10-K-shaped heuristics, link-less-TOC bank filings (Goldman Sachs, Citigroup) extract their items correctly, and wrong-content sections are flagged instead of trusted.
