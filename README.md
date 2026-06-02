@@ -261,6 +261,7 @@ The SEC amends filing formats every quarter and ships a new XBRL taxonomy every 
 <p align="center">
   <sub>Recurring sponsorship + corporate tiers via GitHub · One-time thanks via Buy Me a Coffee</sub>
 </p>
+
 ---
 
 ### For teams running EdgarTools in production
