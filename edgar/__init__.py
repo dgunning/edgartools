@@ -5,6 +5,8 @@ import re
 from functools import lru_cache, partial
 from typing import List, Optional, Union
 
+from edgar.__about__ import __version__
+
 from edgar._filings import (
     Attachment,
     Attachments,
