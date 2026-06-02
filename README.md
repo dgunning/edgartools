@@ -244,17 +244,17 @@ See [AI Integration Guide](docs/ai-integration.md) for complete documentation.
 
 ## ❤️ Support This Project
 
-EdgarTools is used in production at hedge funds, fintechs, and research desks. It's MIT-licensed — no API keys, no rate limits, no subscriptions — and one person maintains it.
+EdgarTools runs in production at hedge funds, fintechs, and research desks — MIT-licensed, no keys, no subscriptions, and maintained by one person.
 
-The SEC ships a new XBRL taxonomy every year and amends filing types every quarter. Keeping 20+ parsers current, and adding new extractors as the SEC adds disclosure types, is the work sponsorship funds.
+The SEC amends filing formats every quarter and ships a new XBRL taxonomy every year. Sponsorship is what keeps 20+ parsers current and funds new extractors as fresh disclosure types appear.
 
 <p align="center">
   <a href="https://github.com/sponsors/dgunning" target="_blank">
-    <img src="https://img.shields.io/badge/sponsor-30363D?style=for-the-badge&logo=GitHub-Sponsors&logoColor=#EA4AAA" alt="GitHub Sponsors" height="40">
+    <img src="https://img.shields.io/badge/Sponsor-30363D?style=for-the-badge&logo=GitHub-Sponsors&logoColor=EA4AAA" alt="Sponsor on GitHub" height="44">
   </a>
   &nbsp;&nbsp;
   <a href="https://www.buymeacoffee.com/edgartools" target="_blank">
-    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="40">
+    <img src="https://img.shields.io/badge/Buy_me_a_coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Buy Me A Coffee" height="44">
   </a>
 </p>
 
