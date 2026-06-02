@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import logging
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
@@ -66,9 +66,14 @@ NEGATION_PATTERNS = [
 ]
 
 # Affirmative patterns — footnotes that directly state an investment is on non-accrual.
-# Uses a whitelist approach: a footnote must contain an explicit affirmative statement
-# to be treated as a non-accrual flag. This avoids false positives from rollforward
-# tables or policy disclosures that mention "non-accrual" in passing.
+# These are the high-precision sentence/label forms observed across BDC filings
+# (ARCC "Loan was on non-accrual status...", FSK "Asset is on non-accrual status.",
+# MAIN "Non-accrual and/or non-income producing debt investment.").
+#
+# They are NOT the whole story: the classifier below also accepts short,
+# investment-linked footnotes that mention non-accrual but don't match a
+# sentence pattern (e.g. PSEC "Investment on non-accrual status as of the
+# reporting date"). See _classify_nonaccrual_footnote for the full decision.
 AFFIRMATIVE_PATTERNS = [
     r'(?:was|were)\s+(?:on|placed\s+on)\s+non[- ]?accrual\s+status',
     r'(?:was|were)\s+(?:on|placed\s+on)\s+non[- ]?accrual(?:\s|[,.])',
@@ -76,9 +81,54 @@ AFFIRMATIVE_PATTERNS = [
     r'(?:is|are)\s+(?:on|currently\s+on)\s+non[- ]?accrual(?:\s|[,.])',
     r'(?:loan|debt|investment)\s+was\s+(?:on|placed\s+on)\s+non[- ]?accrual',
     r'(?:loan|debt|investment)\s+is\s+(?:on|currently\s+on)\s+non[- ]?accrual',
-    r'^non[- ]?accrual\s+and\s+non[- ]?income',
+    r'^non[- ]?accrual\s+(?:and|or)\s+non[- ]?income',
     r'the\s+investment\s+is\s+on\s+non[- ]?accrual',
 ]
+
+# A bare non-accrual mention (adjacency required, so "non-cash ... accrual" in a
+# narrative paragraph does not count).
+_NONACCRUAL_RE = re.compile(r'non[- ]?accrual')
+
+# Schedule-of-investments non-accrual markers are short labels (observed range:
+# 5-25 words across ARCC/FSK/GBDC/MAIN/PSEC). Footnotes that merely *mention*
+# non-accrual in passing — rollforward tables, policy notes — run 100+ words.
+# This threshold separates label-shaped footnotes from narrative ones.
+_LABEL_MAX_WORDS = 30
+
+
+def _classify_nonaccrual_footnote(text_lower: str, linked_to_investments: bool) -> bool:
+    """Decide whether a footnote flags non-accrual status for its linked investments.
+
+    Layered decision (precision first, then a structure-corroborated net):
+
+    1. Must mention non-accrual at all (adjacency-checked). Else not a flag.
+    2. An explicit denial (NEGATION_PATTERNS) always wins → not a flag.
+       Checked before any affirmative signal so "no investments on non-accrual"
+       is never read as a flag.
+    3. An explicit affirmative sentence/label (AFFIRMATIVE_PATTERNS) → flag.
+       Handles the long, well-formed forms (e.g. GBDC's 25-word sentence).
+    4. Structure-corroborated short label → flag. A footnote that annotates
+       specific investment facts (``linked_to_investments``) *and* is short
+       enough to be a marker label rather than a narrative is treated as a
+       non-accrual flag regardless of exact phrasing. This is what makes the
+       classifier robust to wording drift — it caught neither MAIN's and→or
+       change nor PSEC's verb-less "Investment on non-accrual status" via the
+       sentence patterns, but both are short, linked labels.
+
+    The short-label rule is safe precisely because it requires investment
+    linkage: long rollforward/policy footnotes that mention non-accrual are
+    excluded by length, and unlinked footnotes contribute nothing to Layer-1
+    extraction anyway (it resolves investments by following the linkage).
+    """
+    if not _NONACCRUAL_RE.search(text_lower):
+        return False
+    if any(re.search(p, text_lower) for p in NEGATION_PATTERNS):
+        return False
+    if any(re.search(p, text_lower) for p in AFFIRMATIVE_PATTERNS):
+        return True
+    if linked_to_investments and len(text_lower.split()) <= _LABEL_MAX_WORDS:
+        return True
+    return False
 
 
 @dataclass(frozen=True)
@@ -113,6 +163,16 @@ class NonAccrualResult:
     extraction_method: str  # 'footnote' | 'custom_concept' | 'aggregate_concept' | 'none'
     custom_concept_rate: Optional[float] = None
     aggregate_concept_value: Optional[Decimal] = None
+
+    # Non-fatal diagnostics — populated when the result looks suspicious
+    # (e.g. a portfolio with no non-accrual signal, or recognized non-accrual
+    # footnotes that resolved no investments). Lets callers distinguish
+    # "genuinely zero non-accruals" from "we may have failed to parse".
+    warnings: List[str] = field(default_factory=list)
+
+    @property
+    def has_warnings(self) -> bool:
+        return bool(self.warnings)
 
     @property
     def nonaccrual_rate(self) -> Optional[float]:
@@ -174,6 +234,12 @@ class NonAccrualResult:
         if self.total_portfolio_fair_value is not None:
             lines.append(f'Total Portfolio Fair Value: ${self.total_portfolio_fair_value:,.0f}')
         lines.append(f'Extraction Method: {self.extraction_method}')
+
+        # Data-quality warnings — surfaced at all detail levels so an LLM never
+        # mistakes a parsing gap for a confirmed zero.
+        if self.warnings:
+            for w in self.warnings:
+                lines.append(f'⚠ Warning: {w}')
 
         # Cross-validation: if we have both computed and stated rates
         if self.custom_concept_rate is not None:
@@ -331,7 +397,9 @@ def _extract_nonaccrual_from_xbrl(
     total_fv = _sum_portfolio_fair_value(all_facts, period)
 
     # --- Layer 1: Footnote extraction ---
-    nonaccrual_investments = _extract_from_footnotes(xbrl, fact_by_id, all_facts, period)
+    nonaccrual_investments, recognized_footnotes = _extract_from_footnotes(
+        xbrl, fact_by_id, all_facts, period
+    )
 
     # --- Layer 2: Custom concept search ---
     custom_concept_rate = _extract_custom_concept_rate(all_facts, period, total_fv)
@@ -360,6 +428,14 @@ def _extract_nonaccrual_from_xbrl(
         method = 'none'
         nonaccrual_fv = None
 
+    warnings = _build_warnings(
+        method=method,
+        total_fv=total_fv,
+        recognized_footnotes=recognized_footnotes,
+        num_investments=len(nonaccrual_investments),
+        period=period,
+    )
+
     return NonAccrualResult(
         cik=cik,
         entity_name=entity_name,
@@ -371,26 +447,89 @@ def _extract_nonaccrual_from_xbrl(
         extraction_method=method,
         custom_concept_rate=custom_concept_rate,
         aggregate_concept_value=aggregate_value,
+        warnings=warnings,
     )
+
+
+def _build_warnings(
+    method: str,
+    total_fv: Optional[Decimal],
+    recognized_footnotes: int,
+    num_investments: int,
+    period: str,
+) -> List[str]:
+    """Surface suspicious extraction outcomes so empty results aren't silent.
+
+    Two high-signal, low-false-positive checks:
+
+    * **Silence** — a real portfolio but no non-accrual signal from any layer.
+      Usually genuine (healthy BDC), but worth flagging because the original
+      #835 symptom looked exactly like this.
+    * **Linkage gap** — footnotes were recognized as non-accrual flags but none
+      of their linked investments resolved for *period* (likely a period or
+      linkage mismatch, not a true zero).
+    """
+    warnings: List[str] = []
+
+    if recognized_footnotes > 0 and num_investments == 0:
+        warnings.append(
+            f"Recognized {recognized_footnotes} non-accrual footnote(s) but "
+            f"resolved no investments for period {period}; investment-level "
+            f"detail may be incomplete (possible period or linkage mismatch)."
+        )
+
+    if method == 'none' and total_fv is not None and total_fv > 0:
+        warnings.append(
+            f"No non-accrual data extracted despite a portfolio of "
+            f"${total_fv:,.0f}; verify manually — this may indicate a parsing "
+            f"gap rather than genuinely zero non-accruals."
+        )
+
+    return warnings
 
 
 # ---------------------------------------------------------------------------
 # Layer 1: Footnote-based extraction
 # ---------------------------------------------------------------------------
 
+def _investment_fv_facts_for_footnote(
+    footnote,
+    fact_by_id: Dict[str, dict],
+) -> List[dict]:
+    """Enriched investment fair-value facts a footnote is linked to (any period)."""
+    facts: List[dict] = []
+    for fact_id in footnote.related_fact_ids:
+        enriched = fact_by_id.get(fact_id)
+        if enriched is None:
+            continue
+        if enriched.get(DIM_KEY) is None:
+            continue
+        if enriched.get('concept', '') != CONCEPT_FAIR_VALUE:
+            continue
+        facts.append(enriched)
+    return facts
+
+
 def _extract_from_footnotes(
     xbrl,
     fact_by_id: Dict[str, dict],
     all_facts: List[dict],
     period: str,
-) -> List[NonAccrualInvestment]:
-    """Scan XBRL footnotes for non-accrual text, follow links to investments."""
+) -> Tuple[List[NonAccrualInvestment], int]:
+    """Scan XBRL footnotes for non-accrual flags, follow links to investments.
+
+    Returns ``(investments, recognized_footnote_count)``. The count is the
+    number of footnotes classified as non-accrual flags (regardless of whether
+    their linkage resolved to investments for *period*); callers use it to tell
+    "no non-accrual footnotes" apart from "flags found but nothing resolved".
+    """
     footnotes = xbrl.footnotes
     if not footnotes:
-        return []
+        return [], 0
 
     seen_identifiers: set = set()
     investments: List[NonAccrualInvestment] = []
+    recognized = 0
 
     for fn_id, footnote in footnotes.items():
         # Only process English footnotes
@@ -400,32 +539,19 @@ def _extract_from_footnotes(
 
         text_lower = footnote.text.lower()
 
-        # Skip footnotes that explicitly deny non-accrual status.
-        # e.g., "there were no investments on non-accrual status"
-        if any(re.search(p, text_lower) for p in NEGATION_PATTERNS):
+        # Pre-compute investment linkage so the classifier can use structure
+        # as corroboration for wording it doesn't recognize.
+        linked_fv_facts = _investment_fv_facts_for_footnote(footnote, fact_by_id)
+        linked_to_investments = bool(linked_fv_facts)
+
+        if not _classify_nonaccrual_footnote(text_lower, linked_to_investments):
             continue
 
-        # Require an explicit affirmative statement about non-accrual status.
-        # This avoids false positives from rollforward tables or policy
-        # disclosures that mention "non-accrual" in passing.
-        if not any(re.search(p, text_lower) for p in AFFIRMATIVE_PATTERNS):
-            continue
+        recognized += 1
 
-        # This footnote affirms non-accrual status for linked investments.
-        # Follow related_fact_ids to find linked investment facts.
-        for fact_id in footnote.related_fact_ids:
-            enriched = fact_by_id.get(fact_id)
-            if enriched is None:
-                continue
-
-            # We want facts on the InvestmentIdentifierAxis with fair value concept
+        # This footnote flags non-accrual status for its linked investments.
+        for enriched in linked_fv_facts:
             inv_identifier = enriched.get(DIM_KEY)
-            if inv_identifier is None:
-                continue
-
-            concept = enriched.get('concept', '')
-            if concept != CONCEPT_FAIR_VALUE:
-                continue
 
             # Check period
             if enriched.get('period_instant') != period:
@@ -456,7 +582,7 @@ def _extract_from_footnotes(
                 footnote_text=footnote.text,
             ))
 
-    return investments
+    return investments, recognized
 
 
 # ---------------------------------------------------------------------------
