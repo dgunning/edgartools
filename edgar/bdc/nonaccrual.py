@@ -76,7 +76,7 @@ AFFIRMATIVE_PATTERNS = [
     r'(?:is|are)\s+(?:on|currently\s+on)\s+non[- ]?accrual(?:\s|[,.])',
     r'(?:loan|debt|investment)\s+was\s+(?:on|placed\s+on)\s+non[- ]?accrual',
     r'(?:loan|debt|investment)\s+is\s+(?:on|currently\s+on)\s+non[- ]?accrual',
-    r'^non[- ]?accrual\s+and\s+non[- ]?income',
+    r'^non[- ]?accrual\s+(?:and|or)\s+non[- ]?income',
     r'the\s+investment\s+is\s+on\s+non[- ]?accrual',
 ]
 
