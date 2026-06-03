@@ -288,7 +288,8 @@ class TOCAnalyzer:
             key = self._make_section_key(item_name, current_part)
             # First occurrence in document order wins (the body heading; a
             # link-less TOC has no competing "Item N. Title" span).
-            mapping.setdefault(key, last_anchor_id)
+            if key:
+                mapping.setdefault(key, last_anchor_id)
 
         return mapping
 
@@ -483,7 +484,26 @@ class TOCAnalyzer:
         # Heading table was absent or too small — try link-based detection
         return self._find_toc_table_by_links(tree)
 
-    def _make_section_key(self, item_name: str, current_part: Optional[str]) -> str:
+    @staticmethod
+    def _part_rank(label: Optional[str]) -> Optional[int]:
+        """Document-order rank of a Part label from its roman numeral.
+
+        "Part I" -> 1, "Part II" -> 2, "Part IV" -> 4. Tolerates formatting
+        differences ("IV", "part iv"). Returns None when no roman numeral is
+        present.
+        """
+        m = re.search(r'[ivxlcdm]+', label or '', re.IGNORECASE)
+        if not m:
+            return None
+        values = {'i': 1, 'v': 5, 'x': 10, 'l': 50, 'c': 100, 'd': 500, 'm': 1000}
+        total = prev = 0
+        for ch in reversed(m.group().lower()):
+            v = values[ch]
+            total += -v if v < prev else v
+            prev = max(prev, v)
+        return total
+
+    def _make_section_key(self, item_name: str, current_part: Optional[str]) -> Optional[str]:
         """
         Build a section mapping key, adding part context when available.
 
@@ -495,17 +515,43 @@ class TOCAnalyzer:
         repeat across parts, so its schema supplies no ranges and the bare key is
         kept — a 10-Q part must be detected, never inferred.
 
+        Rejects a spurious *back-reference* by returning ``None``: on a unique-item
+        form an item has exactly one valid Part, so when the detected
+        ``current_part`` comes *after* the item's canonical Part the anchor was
+        matched on a cross-reference, not the real heading — typically the Item 15
+        exhibit index in Part IV that cites "Item 1A …". Emitting a
+        ``part_iv_item_1`` key there would shadow the real Part I section in the
+        unconstrained ``sections.get_item("1")`` accessor and silently return Risk
+        Factors instead of Business (GH #836). Retrieval of a dropped section
+        falls through to the canonical-Part key or the legacy parser (same path as
+        GH #821, whose GS mislabel — Item 1 under Part II — is also a back-ref).
+
+        A detected part *before* the canonical Part is left untouched: that is a
+        coarse TOC with a single Part header preceding later-Part items (Item 7
+        listed under the lone "Part I" header), where the detected key is the
+        established behavior and dropping it would lose a real section.
+
         Args:
             item_name: Normalized item name like "Item 1A"
             current_part: Current part context like "Part I", or None
 
         Returns:
-            Key like "part_i_item_1a", or a bare "Item 1A" when no part is known.
+            Key like "part_i_item_1a", a bare "Item 1A" when no part is known, or
+            ``None`` when the detected part is later than the item's only valid
+            part (a back-reference).
         """
-        if not current_part:
-            current_part = self.schema.part_for_item(item_name)
+        canonical_part = self.schema.part_for_item(item_name)
         if current_part:
-            part_key = current_part.lower().replace(' ', '_')
+            if canonical_part:
+                cur_rank = self._part_rank(current_part)
+                can_rank = self._part_rank(canonical_part)
+                if cur_rank is not None and can_rank is not None and cur_rank > can_rank:
+                    return None
+            effective_part = current_part
+        else:
+            effective_part = canonical_part
+        if effective_part:
+            part_key = effective_part.lower().replace(' ', '_')
             item_key = item_name.lower().replace(' ', '_')
             return f"{part_key}_{item_key}"
         return item_name
@@ -589,7 +635,7 @@ class TOCAnalyzer:
                     # Verify target exists
                     if find_anchor_targets(tree, anchor_id):
                         key = self._make_section_key(parsed, current_part)
-                        if key not in mapping:
+                        if key and key not in mapping:
                             mapping[key] = anchor_id
 
             return mapping
@@ -671,7 +717,7 @@ class TOCAnalyzer:
 
                     if find_anchor_targets(tree, anchor_id):
                         key = self._make_section_key(parsed, current_part)
-                        if key not in mapping:
+                        if key and key not in mapping:
                             mapping[key] = anchor_id
 
             return mapping
@@ -708,7 +754,7 @@ class TOCAnalyzer:
 
             if find_anchor_targets(tree, anchor_id):
                 key = self._make_section_key(parsed, current_part)
-                if key not in mapping:
+                if key and key not in mapping:
                     mapping[key] = anchor_id
 
         return mapping
@@ -767,7 +813,7 @@ class TOCAnalyzer:
                 # Verify target exists
                 if find_anchor_targets(tree, anchor_id):
                     key = self._make_section_key(parsed, current_part)
-                    if key not in mapping:
+                    if key and key not in mapping:
                         mapping[key] = anchor_id
 
             return mapping
@@ -854,7 +900,7 @@ class TOCAnalyzer:
 
                     if find_anchor_targets(tree, anchor_id):
                         key = self._make_section_key(parsed, current_part)
-                        if key not in mapping:
+                        if key and key not in mapping:
                             mapping[key] = anchor_id
 
             return mapping
@@ -1297,7 +1343,7 @@ class TOCAnalyzer:
             # (optionally part-prefixed), a still-unprefixed bare "Item N" (the
             # missing-part-prefix case, edgartools-3usf), or an allowlisted named
             # section like Signatures (edgartools-3au1).
-            if not self._is_valid_section_key(section_name, section.normalized_name):
+            if section_name is None or not self._is_valid_section_key(section_name, section.normalized_name):
                 continue
 
             if section_name in seen_names:
