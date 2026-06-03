@@ -97,23 +97,32 @@ class TestTenQUnaffected:
 
 
 @pytest.mark.network
-class TestUNHEndToEnd:
-    """The reported filing: UNH FY2025 10-K, accession 0000731766-26-000062."""
+@pytest.mark.vcr
+def test_unh_2026_10k_no_spurious_part_iv_item_1():
+    """End-to-end on the reported filing: UNH FY2025 10-K.
 
-    def test_no_spurious_part_iv_item_1(self):
-        from edgar import Company
-        obj = Company("UNH").latest("10-K").obj()
-        secs = obj.document.sections
+    Pinned by accession (not ``.latest()``) so the regression stays anchored to
+    the document that exhibited the bug even after UNH files its next 10-K, and
+    VCR-backed for determinism. Before the fix, ``sections.get_item("1")``
+    returned a 220,642-char Part IV Risk-Factors slab; it now returns the real
+    46,852-char Item 1 Business section.
+    """
+    from edgar import Filing
 
-        assert "part_iv_item_1" not in secs
-        assert "part_iv_item_1a" not in secs
+    filing = Filing(form='10-K', filing_date='2026-03-02',
+                    company='UNITEDHEALTH GROUP INC', cik=731766,
+                    accession_no='0000731766-26-000062')
+    obj = filing.obj()
+    secs = obj.document.sections
 
-        # get_item("1") returns the real Part I Business section (~47K), not the
-        # 220K Risk-Factors slab.
-        business = secs.get_item("1")
-        assert business is not None
-        assert business.part == "I"
-        assert 40_000 < len(business.text()) < 60_000
+    assert "part_iv_item_1" not in secs
+    assert "part_iv_item_1a" not in secs
 
-        # The high-level accessor is unchanged (the #821 fix).
-        assert 40_000 < len(obj.business) < 60_000
+    # get_item("1") returns the real Part I Business section, not the 220K slab.
+    business = secs.get_item("1")
+    assert business is not None
+    assert business.part == "I"
+    assert len(business.text()) == 46_852
+
+    # The high-level accessor is unchanged (the #821 fix).
+    assert len(obj.business) == 46_852
