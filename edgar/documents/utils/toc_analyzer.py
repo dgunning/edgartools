@@ -392,6 +392,18 @@ class TOCAnalyzer:
         if part_match:
             return f"Part {part_match.group(1).upper()}"
 
+        # Keyword fallback (Business → Item 1, Risk Factors → Item 1A, …). Agent
+        # TOCs sometimes split the "Item N" label and its title into separate
+        # cells with different hrefs, so a row grouped by shared href carries only
+        # the title ("Business"). The generic parser resolves these via the
+        # per-form keyword vocabulary; without this the agent parsers silently
+        # drop the row, losing Item 1 on Workiva 10-Ks (GH #837). Explicit Item/
+        # Part matches above keep priority, so "Item 1A. Risk Factors" still
+        # resolves to Item 1A, not Item 1A-via-keyword.
+        matched = self.schema.match_text(text.lower(), use_exclusions=True)
+        if matched:
+            return matched
+
         return None
 
     def _item_from_anchor(self, anchor_id: str) -> Optional[str]:

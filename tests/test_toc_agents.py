@@ -331,7 +331,15 @@ class TestHelperMethods:
         assert self.analyzer._parse_item_from_text('ITEM 1A.') == 'Item 1A'
         assert self.analyzer._parse_item_from_text('Item 7A. Quantitative') == 'Item 7A'
         assert self.analyzer._parse_item_from_text('Part II') == 'Part II'
-        assert self.analyzer._parse_item_from_text('Business') is None
+        # Keyword fallback: a title-only row (the "Item N" label split into a
+        # different cell) resolves via the schema vocabulary, matching the
+        # generic parser, so agent parsers don't drop Item 1 (GH #837).
+        assert self.analyzer._parse_item_from_text('Business') == 'Item 1'
+        assert self.analyzer._parse_item_from_text('Risk Factors') == 'Item 1A'
+        # Explicit "Item N" still wins over the keyword in the same string.
+        assert self.analyzer._parse_item_from_text('Item 1A. Risk Factors') == 'Item 1A'
+        # Genuinely unmatchable text still returns None.
+        assert self.analyzer._parse_item_from_text('21') is None
 
     def test_item_from_anchor(self):
         # DFIN style (underscore-separated)
