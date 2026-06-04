@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.35.1] - 2026-06-04
+
+10-K section detection and agent TOC parsing receive two targeted fixes that close gaps introduced in 5.34.0.
+
+### Fixed
+
+- **Spurious Part IV Item 1/1A keys no longer appear in 10-K section maps** — the section detector emitted duplicate entries for Items 1 and 1A under the Part IV heading of certain 10-Ks; the keys are now dropped so lookups return the correct Part I sections. ([#836](https://github.com/dgunning/edgartools/issues/836))
+- **Agent TOC parsers no longer drop Item 1 on title-only rows** — when a TOC row contained only a title with no page number or hyperlink, the parser silently skipped Item 1; the row is now accepted and keyed correctly. ([#837](https://github.com/dgunning/edgartools/issues/837))
+
 ## [5.35.0] - 2026-06-02
 
 BDC non-accrual extraction no longer depends on a filer phrasing its footnotes exactly the way our whitelist expected, and a parsing gap is now surfaced as a warning rather than read as a confirmed zero.
