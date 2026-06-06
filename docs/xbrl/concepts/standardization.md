@@ -33,7 +33,7 @@ standardized = df.groupby('standard_concept')[['2024-09-30']].sum()
 | Metric | Value |
 |--------|-------|
 | **Total Standard Concepts** | 95 |
-| **XBRL Tags Mapped** | 2,067 |
+| **XBRL Tags Mapped** | 2,900+ |
 | **Coverage** | ~95% of common financial statement tags |
 | **Source** | mpreiss9's production taxonomy (390+ companies) |
 
@@ -41,7 +41,7 @@ standardized = df.groupby('standard_concept')[['2024-09-30']].sum()
 
 ```
 XBRL Tag (e.g., AccountsPayableCurrent)
-    ↓ gaap_mappings.json (2,067 mappings)
+    ↓ gaap_mappings.json (2,900+ mappings)
 Standard Concept (e.g., TradePayables)
     ↓ display_names.json (95 mappings)
 Display Name (e.g., "Accounts Payable")
@@ -296,15 +296,15 @@ The taxonomy distinguishes between:
 Some XBRL tags can map to multiple concepts depending on context. These are flagged
 as "ambiguous" and require context-aware resolution (Phase 4 of implementation).
 
-**Total Ambiguous Tags**: 215 (9.2% of mapped tags)
+**Total Ambiguous Tags**: ~206 (about 7% of mapped tags)
 
 ### Common Ambiguity Types
 
-1. **Current/Non-Current Ambiguity** (202 tags)
+1. **Current/Non-Current Ambiguity** (the large majority)
    - Example: `AccountsPayableCurrentAndNoncurrent` → `TradePayables` OR `OtherOperatingNonCurrentLiabilities`
    - Resolution: Based on balance sheet section placement
 
-2. **Asset/Liability Ambiguity** (12 tags)
+2. **Asset/Liability Ambiguity** (a handful of tags)
    - Example: `DeferredTaxAssetsLiabilitiesNet` → `DeferredTaxNoncurrentAssets` OR `DeferredTaxNonCurrentLiabilities`
    - Resolution: Based on sign (positive = asset, negative = liability)
 
@@ -316,7 +316,7 @@ as "ambiguous" and require context-aware resolution (Phase 4 of implementation).
 
 ## Excluded Tags (DropThisItem)
 
-276 XBRL tags are explicitly excluded from standardization because they:
+Around 270 XBRL tags are explicitly excluded from standardization because they:
 - Confuse financial analysis (EPS details, pro-forma metrics)
 - Are redundant with other tags
 - Don't map cleanly to standard concepts
@@ -331,9 +331,8 @@ as "ambiguous" and require context-aware resolution (Phase 4 of implementation).
 
 ## Deprecated Tags
 
-410 XBRL tags are marked as deprecated by the SEC with the year of deprecation.
-The mapping still works for historical filings, but these tags should not appear
-in recent filings.
+Some tags carry concepts the SEC has deprecated. The mapping still works for
+historical filings, but these tags should not appear in recent filings.
 
 **Example:**
 - `Revenues` (deprecated 2018) → Still maps to `Revenue`
@@ -415,9 +414,11 @@ label = cache.get_standard_label(
 raw_data = xbrl.get_statement("IncomeStatement")
 standardized = cache.standardize_statement_data(raw_data, "IncomeStatement")
 
-# Check cache statistics
+# Check cache statistics. The cache populates as individual label lookups occur
+# via get_standard_label(); the keys are 'label_cache_size', 'statement_cache_size',
+# and 'cached_statements'.
 print(cache.cache_stats)
-# {'label_cache_size': 42, 'statement_cache_size': 1, 'cached_statements': ['IncomeStatement']}
+# e.g. {'label_cache_size': 0, 'statement_cache_size': 0, 'cached_statements': []}
 
 # Clear cache when needed
 cache.clear_cache()  # Clear all
@@ -447,7 +448,7 @@ result = lookup("AccountsPayableCurrentAndNoncurrent")
 result.is_ambiguous          # True
 result.standard_concepts     # ['TradePayables', 'OtherOperatingNonCurrentLiabilities']
 result.display_names         # ['Accounts Payable', 'Other Non-Current Liabilities']
-result.comment               # 'Curr/NonCurr ambiguity'
+result.comment               # None (not every ambiguous tag carries a comment)
 ```
 
 ### Checking Coverage
@@ -457,7 +458,7 @@ from edgar.xbrl.standardization.reverse_index import get_reverse_index
 
 index = get_reverse_index()
 print(index.stats)
-# {'total_mappings': 2067, 'ambiguous_count': 215, 'deprecated_count': 410, 'excluded_count': 276}
+# {'total_mappings': 2923, 'ambiguous_count': 206, 'deprecated_count': 0, 'excluded_count': 272}
 ```
 
 ---
@@ -540,9 +541,9 @@ label = mapper.map_concept(
 
 | File | Purpose |
 |------|---------|
-| `gaap_mappings.json` | 2,067 XBRL tag → standard concept mappings |
+| `gaap_mappings.json` | 2,900+ XBRL tag → standard concept mappings |
 | `display_names.json` | 95 standard concept → display name mappings |
-| `exclusions.py` | 276 excluded (DropThisItem) tags |
+| `exclusions.py` | ~270 excluded (DropThisItem) tags |
 | `reverse_index.py` | O(1) lookup implementation |
 | `core.py` | StandardConcept enum, MappingStore, ConceptMapper, standardize_statement |
 | `cache.py` | StandardizationCache for per-XBRL instance caching |
@@ -571,7 +572,7 @@ label = mapper.map_concept(
 ---
 
 !!! tip "Need help scaling XBRL standardization?"
-    EdgarTools maps 2,067 XBRL tags to 95 standard concepts. But production pipelines hit custom extensions, deprecated tags, and taxonomy version changes that go beyond standard mappings.
+    EdgarTools maps 2,900+ XBRL tags to 95 standard concepts. But production pipelines hit custom extensions, deprecated tags, and taxonomy version changes that go beyond standard mappings.
 
     - **[XBRL consulting for AI & data teams →](https://www.edgar.tools/consulting/xbrl?utm_source=edgartools-docs&utm_medium=see-live&utm_content=xbrl-standardization)**
     - **[See all SEC data consulting services →](https://www.edgar.tools/consulting?utm_source=edgartools-docs&utm_medium=see-live&utm_content=xbrl-standardization)**

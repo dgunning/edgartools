@@ -83,20 +83,21 @@ If you're computing `parent = sum(child * weight for child in children)`, this m
 
 ### Filtering by SEC report tier
 
-The `menucat` column carries the SEC's FilingSummary classification when available:
+The `menucat` column carries the SEC's FilingSummary `MenuCategory` classification when
+available. The values are the full category names, not single-letter codes:
 
-| Code | Meaning |
+| Value | Meaning |
 |---|---|
-| `S` | Statement (face financial statements) |
-| `D` | Details (disclosure schedules) |
-| `N` | Notes |
-| `T` | Tables |
-| `P` | Policies |
-| `C` | Cover |
+| `Statements` | Face financial statements |
+| `Details` | Disclosure detail schedules |
+| `Notes` | Notes to the financial statements |
+| `Tables` | Note tables |
+| `Policies` | Accounting policies |
+| `Cover` | Cover page |
 
 ```python
 # Just the face financial statements, not all the detail schedules
-face_statements = calc[calc.menucat == 'S']
+face_statements = calc[calc.menucat == 'Statements']
 ```
 
 `menucat` is `None` for older filings without a FilingSummary.
