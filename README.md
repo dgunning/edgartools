@@ -10,9 +10,12 @@
   <a href="https://pypi.org/project/edgartools"><img src="https://img.shields.io/pypi/v/edgartools.svg" alt="PyPI - Version"></a>
   <a href="https://github.com/dgunning/edgartools/actions"><img src="https://img.shields.io/github/actions/workflow/status/dgunning/edgartools/python-hatch-workflow.yml" alt="GitHub Workflow Status"></a>
   <a href="https://www.codefactor.io/repository/github/dgunning/edgartools"><img src="https://www.codefactor.io/repository/github/dgunning/edgartools/badge" alt="CodeFactor"></a>
-  <a href="https://github.com/pypa/hatch"><img src="https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg" alt="Hatch project"></a>
   <a href="https://github.com/dgunning/edgartools/blob/main/LICENSE"><img src="https://img.shields.io/github/license/dgunning/edgartools" alt="GitHub"></a>
-  <a href="https://pypi.org/project/edgartools"><img src="https://img.shields.io/pypi/dm/edgartools" alt="PyPI - Downloads"></a>
+  <a href="https://edgartools.readthedocs.io/"><img alt="Documentation" src="https://img.shields.io/badge/docs-edgartools-blue"></a>
+  <img alt="Pepy Total Downloads" src="https://img.shields.io/pepy/dt/edgartools">
+  <a href="https://pepy.tech/project/edgartools"><img alt="Pepy Monthly Downloads" src="https://static.pepy.tech/badge/edgartools/month"></a>
+  <a href="https://github.com/dgunning/edgartools/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/dgunning/edgartools?style=social"></a>
+
 </p>
 
 **EdgarTools** is a Python library for accessing SEC EDGAR filings as structured data. Parse financial statements, insider trades, fund holdings, proxy statements, and 20+ other filing types with a consistent Python API — in a few lines of code. Free and open source.
