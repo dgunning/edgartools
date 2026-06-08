@@ -1437,6 +1437,12 @@ class EnhancedStatementBuilder:
         'ShortTermBorrowings': 'ShortTermDebt',
         # Depreciation concepts
         'DepreciationDepletionAndAmortization': 'DepreciationAndAmortization',
+        # Some filers tag their primary cash-flow D&A line as
+        # OtherDepreciationAndAmortization instead of the common
+        # DepreciationDepletionAndAmortization (e.g. MRVL, AMD, WDAY — GH #839).
+        # Fold it into the canonical D&A concept so it populates the standard
+        # "Depreciation and amortization" line rather than a stray orphan row.
+        'OtherDepreciationAndAmortization': 'DepreciationAndAmortization',
         # Capital expenditure concepts
         'PaymentsToAcquirePropertyPlantAndEquipment': 'CapitalExpenditures',
         'CapitalExpendituresIncurredButNotYetPaid': 'CapitalExpenditures',
@@ -2430,6 +2436,14 @@ class EnhancedStatementBuilder:
         if not orphan_concepts:
             return None
 
+        # Normalized concepts represented by canonical tree nodes. Used to detect
+        # orphan facts that were folded into a canonical row (e.g. a filer that
+        # tags its primary D&A line as OtherDepreciationAndAmortization, which
+        # normalizes into the canonical "Depreciation and amortization" line - GH #839).
+        normalized_tree_targets = {
+            self._normalize_concept(n) for n in virtual_tree_nodes
+        }
+
         # Create orphan section
         orphan_section = MultiPeriodItem(
             concept='AdditionalItems',
@@ -2464,6 +2478,22 @@ class EnhancedStatementBuilder:
                 # Skip orphan if its label already exists in the main tree (concept rename duplicate)
                 if existing_labels and (label or concept) in existing_labels:
                     continue
+                # Skip orphan if it was folded into a canonical tree row that shares
+                # its normalized concept AND that row resolved to *this same fact*
+                # (i.e. the canonical line was empty and this orphan/alias populated it).
+                # This also catches the normalization alias key itself (e.g. the
+                # 'DepreciationAndAmortization' slot created for an OtherDepreciationAndAmortization
+                # fact). Filers reporting both the canonical concept and this one keep
+                # their separate orphan line, since the canonical row used a different fact. (GH #839)
+                normalized = self._normalize_concept(concept)
+                if normalized in normalized_tree_targets:
+                    folded = any(
+                        period_maps[p].get(concept) is not None
+                        and period_maps[p].get(normalized) is period_maps[p].get(concept)
+                        for p in periods
+                    )
+                    if folded:
+                        continue
                 orphan_item = MultiPeriodItem(
                     concept=concept,
                     label=label or concept,
