@@ -456,6 +456,10 @@ class HtmlDocument:
 
     @classmethod
     def get_root(cls, html: str) -> Tag:
+        # Attachment.download() returns str | bytes; decode bytes so the
+        # string-based <TEXT> checks below don't raise TypeError (GH #844)
+        if isinstance(html, (bytes, bytearray)):
+            html = html.decode("utf-8", errors="replace")
         # First check if the html is inside a <DOCUMENT><TEXT> block
         if "<TEXT>" in html[:500]:
             html = get_text_between_tags(html, 'TEXT')

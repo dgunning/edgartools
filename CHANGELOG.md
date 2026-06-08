@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`SixK.text()` no longer crashes on bytes exhibit content** — 6-K exhibits whose `Attachment.download()` returns `bytes` raised `TypeError: a bytes-like object is required, not 'str'` in the legacy HTML parser's `<TEXT>` check; the parser now decodes bytes first, so bytes and str inputs parse identically. ([#844](https://github.com/dgunning/edgartools/issues/844))
+
 ## [5.35.1] - 2026-06-04
 
 10-K section detection and agent TOC parsing receive two targeted fixes that close gaps introduced in 5.34.0.
