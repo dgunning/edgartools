@@ -12,7 +12,7 @@ Dict[str, Optional[float]] on MultiPeriodItem objects, not pandas DataFrames.
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import pandas as pd
 from rich import box
@@ -1932,8 +1932,11 @@ class EnhancedStatementBuilder:
 
         # Create fact maps for each period
         period_maps = {}
+        alias_keys: Set[str] = set()
         for period in periods:
-            period_maps[period] = self._create_fact_map(period_facts.get(period, []))
+            fact_map, period_alias_keys = self._create_fact_map(period_facts.get(period, []))
+            period_maps[period] = fact_map
+            alias_keys |= period_alias_keys
 
         # For Income Statement, promote essential concepts to top level for visibility
         if virtual_tree_key == 'IncomeStatement':
@@ -1973,12 +1976,36 @@ class EnhancedStatementBuilder:
                     _collect_labels(it.children)
         _collect_labels(items)
 
+        # Collect the raw concept of every fact actually rendered in the canonical
+        # tree. An orphan whose fact was folded into a canonical row (e.g. a filer
+        # whose only D&A line is OtherDepreciationAndAmortization, surfaced on the
+        # canonical "Depreciation and amortization" row) is then suppressed, while
+        # a filer reporting that concept *in addition* to the canonical one keeps
+        # it as a distinct line — because the canonical row rendered a different
+        # fact. (GH #839)
+        rendered_concepts: Set[str] = set()
+        def _collect_rendered(item_list):
+            for it in item_list:
+                if not it.is_abstract and it.concept:
+                    for p in periods:
+                        fact = period_maps[p].get(it.concept)
+                        if fact is None:
+                            fact = period_maps[p].get(self._normalize_concept(it.concept))
+                        if fact is not None:
+                            raw = fact.concept.split(':', 1)[-1] if ':' in fact.concept else fact.concept
+                            rendered_concepts.add(raw)
+                if it.children:
+                    _collect_rendered(it.children)
+        _collect_rendered(items)
+
         # Add orphan facts that have values but aren't in the virtual tree
         orphan_section = self._add_orphan_facts(
             period_maps,
             virtual_tree.get('nodes', {}),
             periods,
             virtual_tree_key,
+            alias_keys=alias_keys,
+            rendered_concepts=rendered_concepts,
             existing_labels=existing_labels
         )
         if orphan_section:
@@ -2420,29 +2447,29 @@ class EnhancedStatementBuilder:
                          virtual_tree_nodes: Dict[str, Any],
                          periods: List[str],
                          statement_type: str,
-                         existing_labels: Optional[set] = None) -> Optional[MultiPeriodItem]:
+                         existing_labels: Optional[set] = None,
+                         alias_keys: Optional[Set[str]] = None,
+                         rendered_concepts: Optional[Set[str]] = None) -> Optional[MultiPeriodItem]:
         """Add valuable facts not in virtual tree as 'Additional Items' section."""
+
+        alias_keys = alias_keys or set()
+        rendered_concepts = rendered_concepts or set()
 
         # Find all concepts that have values but aren't in the virtual tree
         orphan_concepts = set()
         for period_map in period_maps.values():
             for concept in period_map.keys():
-                # Skip if already in virtual tree
-                if concept not in virtual_tree_nodes:
-                    # Check if this is an essential or important concept
-                    if self._is_important_orphan(concept, statement_type):
-                        orphan_concepts.add(concept)
+                # Skip if already in virtual tree, or if it's a synthetic
+                # normalization-alias key (the real fact is iterated under its raw
+                # concept name; the alias would only duplicate it - GH #839).
+                if concept in virtual_tree_nodes or concept in alias_keys:
+                    continue
+                # Check if this is an essential or important concept
+                if self._is_important_orphan(concept, statement_type):
+                    orphan_concepts.add(concept)
 
         if not orphan_concepts:
             return None
-
-        # Normalized concepts represented by canonical tree nodes. Used to detect
-        # orphan facts that were folded into a canonical row (e.g. a filer that
-        # tags its primary D&A line as OtherDepreciationAndAmortization, which
-        # normalizes into the canonical "Depreciation and amortization" line - GH #839).
-        normalized_tree_targets = {
-            self._normalize_concept(n) for n in virtual_tree_nodes
-        }
 
         # Create orphan section
         orphan_section = MultiPeriodItem(
@@ -2478,22 +2505,14 @@ class EnhancedStatementBuilder:
                 # Skip orphan if its label already exists in the main tree (concept rename duplicate)
                 if existing_labels and (label or concept) in existing_labels:
                     continue
-                # Skip orphan if it was folded into a canonical tree row that shares
-                # its normalized concept AND that row resolved to *this same fact*
-                # (i.e. the canonical line was empty and this orphan/alias populated it).
-                # This also catches the normalization alias key itself (e.g. the
-                # 'DepreciationAndAmortization' slot created for an OtherDepreciationAndAmortization
-                # fact). Filers reporting both the canonical concept and this one keep
-                # their separate orphan line, since the canonical row used a different fact. (GH #839)
-                normalized = self._normalize_concept(concept)
-                if normalized in normalized_tree_targets:
-                    folded = any(
-                        period_maps[p].get(concept) is not None
-                        and period_maps[p].get(normalized) is period_maps[p].get(concept)
-                        for p in periods
-                    )
-                    if folded:
-                        continue
+                # Skip orphan if its fact was already rendered in a canonical row
+                # via concept normalization (e.g. OtherDepreciationAndAmortization
+                # folded into the canonical "Depreciation and amortization" line).
+                # A filer reporting this concept *in addition* to the canonical one
+                # is unaffected: the canonical row rendered a different fact, so this
+                # concept is absent from rendered_concepts and stays a distinct line. (GH #839)
+                if concept in rendered_concepts:
+                    continue
                 orphan_item = MultiPeriodItem(
                     concept=concept,
                     label=label or concept,
@@ -2955,28 +2974,38 @@ class EnhancedStatementBuilder:
 
         return items
 
-    def _create_fact_map(self, facts: List[FinancialFact]) -> Dict[str, FinancialFact]:
-        """Create concept -> fact mapping with normalization."""
+    def _create_fact_map(self, facts: List[FinancialFact]) -> Tuple[Dict[str, FinancialFact], Set[str]]:
+        """Create concept -> fact mapping with normalization.
+
+        Each fact is stored under its raw concept name and, when normalization
+        applies (e.g. OtherDepreciationAndAmortization -> DepreciationAndAmortization),
+        under its normalized name as well, so the canonical-item builder can fall
+        back to the normalized key when a node's own concept is absent.
+
+        Returns ``(fact_map, alias_keys)`` where ``alias_keys`` are the keys that
+        exist *only* as normalization targets — i.e. no fact reported them under
+        their raw concept name. The orphan collector excludes these synthetic
+        keys so a folded concept isn't also rendered as a stray duplicate row
+        (GH #839).
+        """
         fact_map = {}
+        raw_concepts = set()
         for fact in facts:
             # Get clean concept name without namespace
             concept = fact.concept.split(':', 1)[-1] if ':' in fact.concept else fact.concept
+            raw_concepts.add(concept)
 
-            # Store under both original and normalized names
-            # This allows matching both variants
+            # Last fact in the list wins for the raw concept (unchanged behaviour).
             fact_map[concept] = fact
 
+            # Also expose the fact under its normalized name for canonical lookup.
             normalized = self._normalize_concept(concept)
             if normalized != concept:
-                # Also store under normalized name if different
-                # Prefer normalized if not already present
-                if normalized not in fact_map:
-                    fact_map[normalized] = fact
+                fact_map[normalized] = fact
 
-            # Use most recent fact for duplicates
-            if concept not in fact_map or fact.filing_date > fact_map[concept].filing_date:
-                fact_map[concept] = fact
-        return fact_map
+        # Keys present only as normalization targets, never reported directly.
+        alias_keys = set(fact_map) - raw_concepts
+        return fact_map, alias_keys
 
     def _calculate_coverage(self, facts: List[FinancialFact], virtual_tree_key: str) -> float:
         """Calculate canonical coverage."""

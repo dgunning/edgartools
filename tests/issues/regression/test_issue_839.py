@@ -171,6 +171,37 @@ class TestCashFlowFoldBuilder:
         ]
         assert len(da_value_rows) == 1
 
+    def test_fold_is_robust_to_duplicate_facts_in_period(self):
+        """Two OtherD&A facts in one period (comparative filings) must not double up.
+
+        Regression guard for the fact-map alias: if the normalized alias key
+        pinned a different (older) fact than the raw concept key, the canonical
+        row and a leftover orphan row would both render. _create_fact_map keeps
+        the two keys on the same fact, so exactly one canonical row appears.
+        """
+        builder = EnhancedStatementBuilder()
+        facts = []
+        for year in (2024, 2023):
+            facts.extend(_fact(c, l, v, year) for c, l, v in _FILLER)
+            # Same concept, same period, two comparative filings with different
+            # filing dates and (slightly) different values.
+            old = _fact("OtherDepreciationAndAmortization", "Depreciation and amortization", 349.0, year)
+            old.filing_date = date(year + 1, 2, 1)
+            new = _fact("OtherDepreciationAndAmortization", "Depreciation and amortization", 350.0, year)
+            new.filing_date = date(year + 1, 3, 1)
+            facts.extend([old, new])
+
+        rows = _flatten(builder.build_multi_period_statement(facts, "CashFlowStatement", periods=2, annual=True))
+
+        canonical = [r for r in rows if r.concept == "DepreciationDepletionAndAmortization"]
+        assert len(canonical) == 1
+        # No orphan / alias duplicate rows for the same concept.
+        assert "OtherDepreciationAndAmortization" not in [r.concept for r in rows]
+        assert "DepreciationAndAmortization" not in [r.concept for r in rows]
+        # The canonical value is displayed exactly once.
+        da_rows = [r for r in rows if not r.is_abstract and r.values.get("FY 2024") in (349.0, 350.0)]
+        assert len(da_rows) == 1
+
     def test_both_canonical_and_other_kept_separate(self):
         """Filer reporting both DDA (canonical) and OtherD&A keeps both lines."""
         data = {
