@@ -63,6 +63,33 @@ class TestConceptNormalization:
         assert builder._normalize_concept("us-gaap:OtherDepreciationAndAmortization") == "DepreciationAndAmortization"
 
 
+class TestXbrlStandardizationMapping:
+    """The XBRL standardization layer (gaap_mappings.json) classifies
+    OtherDepreciationAndAmortization as depreciation, not non-operating income.
+
+    Before the fix it mapped to NonoperatingIncomeExpense ("Non-Operating Income
+    (Expense)", confidence 0.5), so the standard_concept column on the XBRL cash
+    flow statement misclassified the primary D&A line.
+    """
+
+    def test_maps_to_depreciation_expense(self):
+        from edgar.xbrl.standardization.reverse_index import (
+            get_display_name,
+            get_standard_concept,
+        )
+
+        assert get_standard_concept("OtherDepreciationAndAmortization") == "DepreciationExpense"
+        assert get_display_name("OtherDepreciationAndAmortization") == "Depreciation Expense"
+
+    def test_matches_sibling_da_concepts(self):
+        """It resolves to the same standard concept as the canonical D&A tags."""
+        from edgar.xbrl.standardization.reverse_index import get_standard_concept
+
+        target = get_standard_concept("DepreciationDepletionAndAmortization")
+        assert target == "DepreciationExpense"
+        assert get_standard_concept("OtherDepreciationAndAmortization") == target
+
+
 def _fact(concept: str, label: str, value: float, year: int) -> FinancialFact:
     """Build a minimal annual (FY) cash-flow FinancialFact for the given year."""
     return FinancialFact(

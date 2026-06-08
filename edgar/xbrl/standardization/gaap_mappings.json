@@ -90627,129 +90627,19 @@
   },
   "OtherDepreciationAndAmortization": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "DepreciationExpense"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Depreciation Expense",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
+    "section": "Operating Expenses",
     "is_total": true,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 180,
     "occurrence_rate": 0.02,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.991
-      },
-      "Chips": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "OtherDerivativesNotDesignatedAsHedgingInstrumentsLiabilitiesAtFairValue": {
     "standard_tags": [
