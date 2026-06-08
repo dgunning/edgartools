@@ -1374,7 +1374,7 @@ class Company(Entity):
 
             AVAILABLE ACTIONS:
               - Use .get_filings() to access SEC filings
-              - Use .financials to get financial statements
+              - Use .get_financials() to get financial statements
               - Use .facts to access company facts API
               - Use .docs for detailed API documentation
         """
@@ -1420,7 +1420,7 @@ class Company(Entity):
             lines.append("")
             lines.append("AVAILABLE ACTIONS:")
             lines.append("  - Use .get_filings() to access SEC filings")
-            lines.append("  - Use .financials to get financial statements")
+            lines.append("  - Use .get_financials() to get financial statements")
             lines.append("  - Use .facts to access company facts API")
             lines.append("  - Use .docs for detailed API documentation")
 

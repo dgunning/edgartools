@@ -2333,7 +2333,8 @@ class Filing:
                 Returns: FormC (crowdfunding offering details)
               - Use .docs for detailed API documentation
               - Use .xbrl() for financial statements (if available)
-              - Use .document() for structured text extraction
+              - Use .text() or .markdown() for full document text
+              - Use .document for the primary document (Attachment)
               - Use .attachments for exhibits (5 documents)
         """
         from edgar import get_obj_info
@@ -2391,7 +2392,8 @@ class Filing:
                                                                                 '6-K'] else "(if available)"
             lines.append(f"  - Use .xbrl() {xbrl_hint}")
 
-            lines.append("  - Use .document() for structured text extraction")
+            lines.append("  - Use .text() or .markdown() for full document text")
+            lines.append("  - Use .document for the primary document (Attachment)")
 
             # Add attachments info if available
             try:
