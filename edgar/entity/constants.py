@@ -145,8 +145,11 @@ FILER_TYPE_DOMESTIC_FORMS = frozenset({
     'S-6', 'S-6/A', 'REGDEX', 'REGDEX/A',
     '24F-2NT', '24F-2NT/A', '487', '497J',
     # Investment company fund forms
+    # Note: the portfolio-holdings form is filed as 'NPORT-P'/'NPORT-EX' (no hyphen
+    # after the N); there is no literal 'N-PORT' form in the SEC index.
     'N-1A', 'N-1A/A', 'N-2', 'N-2/A', 'N-3', 'N-4', 'N-5', 'N-6',
-    'N-8A', 'N-8F', 'N-CSR', 'N-CSRS', 'N-CEN', 'N-PORT',
+    'N-8A', 'N-8F', 'N-CSR', 'N-CSRS', 'N-CEN',
+    'NPORT-P', 'NPORT-P/A', 'NPORT-EX',
     'NSAR-A', 'NSAR-B', '485BPOS', '485APOS',
     '40-APP', '40-APP/A', '40-17G', '40-17G/A',
     # Regulation Crowdfunding (US-only)
