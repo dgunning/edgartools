@@ -36,7 +36,20 @@ class TestIssue844BytesExhibitContent:
         root = HtmlDocument.get_root(SEC_WRAPPED.encode("utf-8"))
         assert root is not None
 
-    def test_non_utf8_bytes_do_not_crash(self):
-        """Latin-1/cp1252 bytes degrade gracefully rather than raising."""
-        latin1 = "<html><body><p>café résumé</p></body></html>".encode("latin-1")
-        assert Document.parse(latin1) is not None
+    @pytest.mark.parametrize("encoding", ["cp1252", "latin-1"])
+    def test_non_utf8_bytes_preserve_characters(self, encoding):
+        """cp1252/latin-1 exhibits must decode to the right characters, not U+FFFD.
+
+        utf-8 + errors="replace" silently mojibaked these legacy filings; the
+        cp1252 -> latin-1 fallback keeps the original text.
+        """
+        html_bytes = "<html><body><p>café résumé</p></body></html>".encode(encoding)
+        parsed = HtmlDocument.get_root(html_bytes).get_text()
+        assert "café" in parsed and "résumé" in parsed
+        assert "�" not in parsed  # no replacement characters
+        assert Document.parse(html_bytes) is not None
+
+    def test_undecodable_bytes_do_not_crash(self):
+        """A byte invalid in utf-8 and cp1252 still degrades via latin-1, never raises."""
+        # 0x81 is undefined in cp1252 and an invalid utf-8 start byte
+        assert Document.parse(b"<html><body><p>\x81</p></body></html>") is not None
