@@ -23,19 +23,14 @@ from edgar.ownership.models import (
 )
 from edgar.ownership.tables import (
     DerivativeHoldings,
-    DerivativeTable,
     DerivativeTransactions,
     NonDerivativeHoldings,
-    NonDerivativeTable,
     NonDerivativeTransactions,
 )
+from edgar.ownership.table_containers import DerivativeTable, NonDerivativeTable
 from edgar.ownership.owners import ReportingOwners
-from edgar.ownership.summary import (
-    InitialOwnershipSummary,
-    SecurityHolding,
-    TransactionActivity,
-    TransactionSummary,
-)
+from edgar.ownership.summary import InitialOwnershipSummary, TransactionSummary
+from edgar.ownership.summary_records import SecurityHolding, TransactionActivity
 from edgar.ownership.html_render import ownership_to_html
 from edgar.ownership.text_render import ownership_to_context
 from edgar.richtools import repr_rich

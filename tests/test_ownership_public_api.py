@@ -92,3 +92,18 @@ def test_class_identity_is_consistent_across_import_paths():
 
     assert ownership.Form4 is canonical_form4 is ownershipforms.Form4
     assert ownership.Issuer is canonical_issuer is ownershipforms.Issuer
+
+
+def test_split_modules_share_one_class_object():
+    # The table containers and summary records were split into their own
+    # modules; the legacy shim (and the summary re-export) must expose the same
+    # object, not a copy.
+    from edgar.ownership.summary import SecurityHolding as summary_holding
+    from edgar.ownership.summary import TransactionActivity as summary_activity
+    from edgar.ownership.summary_records import SecurityHolding, TransactionActivity
+    from edgar.ownership.table_containers import DerivativeTable, NonDerivativeTable
+
+    assert SecurityHolding is summary_holding is ownershipforms.SecurityHolding
+    assert TransactionActivity is summary_activity is ownershipforms.TransactionActivity
+    assert NonDerivativeTable is ownershipforms.NonDerivativeTable
+    assert DerivativeTable is ownershipforms.DerivativeTable

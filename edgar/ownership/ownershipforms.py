@@ -49,20 +49,18 @@ from edgar.ownership.owners import Owner, ReportingOwners
 from edgar.ownership.summary import (
     InitialOwnershipSummary,
     OwnershipSummary,
-    SecurityHolding,
-    TransactionActivity,
     TransactionSummary,
 )
+from edgar.ownership.summary_records import SecurityHolding, TransactionActivity
+from edgar.ownership.table_containers import DerivativeTable, NonDerivativeTable
 from edgar.ownership.tables import (
     DataHolder,
     DerivativeHolding,
     DerivativeHoldings,
-    DerivativeTable,
     DerivativeTransaction,
     DerivativeTransactions,
     NonDerivativeHolding,
     NonDerivativeHoldings,
-    NonDerivativeTable,
     NonDerivativeTransaction,
     NonDerivativeTransactions,
 )
