@@ -2118,7 +2118,7 @@ class Ownership:
             if self.no_securities:
                 lines.append("Holdings: No securities reported")
             elif summary and hasattr(summary, 'total_shares'):
-                lines.append(f"Holdings: {summary.total_shares:,} shares")
+                lines.append(f"Holdings: {format_numeric(summary.total_shares)} shares")
         else:
             lines.append(f"Owner: {self.insider_name} ({self.position})")
             if summary and hasattr(summary, 'primary_activity'):
@@ -2148,7 +2148,7 @@ class Ownership:
                     lines_std.append("")
                     lines_std.append("HOLDINGS:")
                     for h in holdings[:8]:
-                        h_line = f"  {h.security_title}: {h.shares:,} shares"
+                        h_line = f"  {h.security_title}: {format_numeric(h.shares)} shares"
                         if h.is_derivative:
                             h_line += " (derivative)"
                         lines_std.append(h_line)
@@ -2178,7 +2178,7 @@ class Ownership:
                 if summary.remaining_shares is not None:
                     lines_std.append("")
                     lines_std.append("HOLDINGS AFTER:")
-                    lines_std.append(f"  {summary.remaining_shares:,} shares")
+                    lines_std.append(f"  {format_numeric(summary.remaining_shares)} shares")
 
         # Available actions
         lines_std.append("")
