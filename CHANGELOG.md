@@ -7,9 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.36.0] - 2026-06-09
+
+A batch of robustness fixes across insider-ownership context, 6-K exhibit decoding, fund/N-PORT filing access, Schedule 13D/G, and XBRL depreciation standardization, plus an internal restructure of the ownership module. No public API changes.
+
+### Added
+
+- **`form='N-PORT'` resolves to `NPORT-P`** — `get_filings(form='N-PORT')` and related queries now match the actual SEC form type (`NPORT-P`) via a form-name alias, so the intuitive name returns results instead of an empty set. ([#843](https://github.com/dgunning/edgartools/issues/843))
+
 ### Fixed
 
+- **`Ownership.to_context()` no longer crashes on string share values** — Form 3/4/5 filings whose share amounts carried footnote references or other non-numeric text raised a `TypeError` when building the AI context string; the value is now coerced safely so `to_context()` always returns a string. ([#846](https://github.com/dgunning/edgartools/issues/846))
 - **`SixK.text()` no longer crashes on bytes exhibit content** — 6-K exhibits whose `Attachment.download()` returns `bytes` raised `TypeError: a bytes-like object is required, not 'str'` in the legacy HTML parser's `<TEXT>` check; the parser now decodes bytes first, so bytes and str inputs parse identically. Non-UTF-8 exhibits (cp1252/latin-1, common in older filings) decode correctly via a cp1252→latin-1 fallback instead of emitting replacement characters. ([#844](https://github.com/dgunning/edgartools/issues/844))
+- **`SixK.text()` skips binary exhibits** — `.xlsx` and `.zip` attachments are now classified as binary so `SixK.text()` no longer attempts to decode them as HTML/text. ([#844](https://github.com/dgunning/edgartools/issues/844))
+- **`Fund(ticker).get_filings(series_only=True)` now isolates the series** — the flag previously returned filings beyond the requested series; series filtering is now applied correctly. ([#843](https://github.com/dgunning/edgartools/issues/843))
+- **Corrected a dead `N-PORT` entry in `FILER_TYPE_DOMESTIC_FORMS`** — the stale entry meant N-PORT filer-type filtering matched nothing. ([#843](https://github.com/dgunning/edgartools/issues/843))
+- **Schedule 13D/G `obj()` returns a partial object instead of silent `None`** — a parsing gap previously caused `filing.obj()` to return `None` for some 13D/G filings; it now returns a partial object so callers get the data that did parse rather than nothing, and the `to_context()` navigation hints for these filings were corrected. ([#840](https://github.com/dgunning/edgartools/issues/840), [#841](https://github.com/dgunning/edgartools/issues/841))
+- **`OtherDepreciationAndAmortization` no longer breaks standardized cash flow** — filers reporting D&A under the `OtherDepreciationAndAmortization` concept had the primary D&A line dropped from the standardized cash-flow statement and the concept misclassified as non-operating income in XBRL standardization. The line is now retained and classified correctly, with the orphan-fold dedup hardened against duplicate facts. ([#839](https://github.com/dgunning/edgartools/issues/839))
+- **Pinned `httpxthrottlecache <0.5.0`** to avoid a breaking httpx2 fork in the 0.5.x line.
+
+### Changed
+
+- **Internal: `edgar/ownership/ownershipforms.py` split into focused submodules** — the 2,279-line module was decomposed into `models`, `core`, `tables`, `table_containers`, `owners`, `summary_records`, `summary`, `forms`, and `text_render` (each under 600 lines). `ownershipforms.py` remains a backward-compatibility shim re-exporting every previously public name, and the `edgar.ownership` package surface is unchanged — verified by a new public-API guard test. Pure structural refactor with no behavior change.
 
 ## [5.35.1] - 2026-06-04
 
