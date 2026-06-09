@@ -455,11 +455,20 @@ class HtmlDocument:
         return ixbrl_document
 
     @classmethod
-    def get_root(cls, html: str) -> Tag:
-        # Attachment.download() returns str | bytes; decode bytes so the
-        # string-based <TEXT> checks below don't raise TypeError (GH #844)
+    def get_root(cls, html: Union[str, bytes]) -> Tag:
+        # Attachment.download() returns str | bytes. Decode bytes before the
+        # string <TEXT> checks (GH #844); try cp1252 before latin-1 so the SEC's
+        # common non-UTF-8 exhibits decode correctly instead of being mojibaked
+        # by utf-8 + errors="replace".
         if isinstance(html, (bytes, bytearray)):
-            html = html.decode("utf-8", errors="replace")
+            for enc in ("utf-8", "cp1252"):
+                try:
+                    html = html.decode(enc)
+                    break
+                except UnicodeDecodeError:
+                    continue
+            else:
+                html = html.decode("latin-1")  # 1:1 mapping, never raises
         # First check if the html is inside a <DOCUMENT><TEXT> block
         if "<TEXT>" in html[:500]:
             html = get_text_between_tags(html, 'TEXT')
