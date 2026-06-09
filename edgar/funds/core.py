@@ -449,7 +449,9 @@ class Fund:
         Returns:
             Filings object with filtered filings
         """
-        # Series-aware path via EFTS
+        # Series-aware path via EFTS full-text search on the series ID. This
+        # isolates a single series' filings from a registrant that files one
+        # report per series (e.g. an ETF ticker whose CIK is the umbrella trust).
         if series_only and self._target_series_id and not self._target_series_id.startswith("ETF_"):
             try:
                 from edgar.search.efts import search_filings as efts_search
@@ -457,10 +459,18 @@ class Fund:
                 results = efts_search(
                     query=f'"{self._target_series_id}"',
                     forms=forms_filter,
-                    limit=100,
                 )
-                if results and hasattr(results, 'filings') and results.filings is not None:
-                    return results.filings
+                if results is not None and not results.empty:
+                    # Page through the full result set (EFTS returns <=100/page).
+                    if results.total > len(results):
+                        results = results.fetch_more(results.total - len(results))
+                    filings = results.to_filings()
+                    # Apply residual metadata filters (date, etc.); form already
+                    # applied via the EFTS query above.
+                    residual = {k: v for k, v in kwargs.items() if k != 'form'}
+                    if residual:
+                        filings = filings.filter(**residual)
+                    return filings
             except Exception as e:
                 log.debug("EFTS series search failed for %s: %s", self._target_series_id, e)
 

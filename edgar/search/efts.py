@@ -247,6 +247,49 @@ class EFTSSearch:
     def empty(self) -> bool:
         return len(self.results) == 0
 
+    def to_filings(self) -> 'Filings':
+        """Convert the loaded results into a :class:`Filings` index.
+
+        Builds the standard global Filings schema (form, company, cik,
+        filing_date, accession_number) from the currently loaded results — call
+        :meth:`fetch_more` first if you need more than the current page. Useful
+        for turning a full-text search into a normal filings collection that
+        supports ``.latest()``, ``.head()``, ``.filter()``, etc.
+        """
+        from datetime import date as _date
+
+        import pyarrow as pa
+
+        from edgar._filings import Filings, _empty_filing_index
+
+        if not self.results:
+            return Filings(_empty_filing_index())
+
+        forms, companies, ciks, dates, accessions = [], [], [], [], []
+        for r in self.results:
+            forms.append(r.form or "")
+            companies.append(r.company or "")
+            try:
+                ciks.append(int(r.cik) if r.cik else 0)
+            except (TypeError, ValueError):
+                ciks.append(0)
+            try:
+                dates.append(_date.fromisoformat(r.filed) if r.filed else None)
+            except (TypeError, ValueError):
+                dates.append(None)
+            accessions.append(r.accession_number)
+
+        table = pa.table(
+            {
+                "form": pa.array(forms, pa.string()),
+                "company": pa.array(companies, pa.string()),
+                "cik": pa.array(ciks, pa.int32()),
+                "filing_date": pa.array(dates, pa.date32()),
+                "accession_number": pa.array(accessions, pa.string()),
+            }
+        )
+        return Filings(table)
+
     def next(self) -> Optional['EFTSSearch']:
         """Fetch next page of results. Returns None if exhausted."""
         if not self._params:
