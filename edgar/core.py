@@ -252,7 +252,7 @@ def decode_content(content: bytes):
 
 text_extensions = (".txt", ".htm", ".html", ".xsd", ".xml", "XML", ".json", ".idx", ".paper")
 binary_extensions = (".pdf", ".jpg", ".jpeg", "png", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg", ".webp", ".avif",
-                     ".apng")
+                     ".apng", ".xlsx", ".xls", ".zip", ".docx", ".pptx")
 
 
 def get_bool(value: Optional[str] = None) -> Optional[bool]:
@@ -396,7 +396,7 @@ def decode_content(content: bytes):
 
 text_extensions = (".txt", ".htm", ".html", ".xsd", ".xml", "XML", ".json", ".idx", ".paper")
 binary_extensions = (".pdf", ".jpg", ".jpeg", "png", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg", ".webp", ".avif",
-                     ".apng")
+                     ".apng", ".xlsx", ".xls", ".zip", ".docx", ".pptx")
 
 
 class DataPager:
