@@ -56,7 +56,10 @@ dependencies = [
   "nest-asyncio>=1.5.1",
   "jinja2>=3.1.0",
   "pyrate-limiter>=3.0.0",
-  "httpxthrottlecache>=0.3.0",
+  # Cap below 0.5.0: that release migrated from httpx to the httpx2 fork, which
+  # breaks edgartools (we import plain httpx throughout httprequests.py and our
+  # tests mock httpx). 0.3.5 is the latest version still on plain httpx.
+  "httpxthrottlecache>=0.3.0,<0.5.0",
   "truststore>=0.9.0",
 ]
 dynamic = ["version"]

@@ -8,7 +8,6 @@ from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 import pyarrow as pa
-from httpx import HTTPStatusError
 
 from edgar.core import get_edgar_data_directory, listify, log
 from edgar.httprequests import download_file, download_json
@@ -568,12 +567,17 @@ def get_icon_from_ticker(ticker: str) -> Optional[bytes]:
             f"https://raw.githubusercontent.com/nvstly/icons/main/ticker_icons/{ticker_for_url}.png", as_text=False)
         # download_file with as_text=False returns bytes
         return downloaded if isinstance(downloaded, bytes) else None
-    except HTTPStatusError as e:
-        # If the status code is 404, the icon is not available
-        if e.response.status_code == 404:
+    except Exception as e:
+        # If the status code is 404, the icon is not available.
+        # Duck-type on the response rather than the exception class: depending on
+        # the installed httpx build the raised type may not be our imported
+        # HTTPStatusError (e.g. CI environments surface it under a different module
+        # identity such as httpx2), so matching on isinstance is fragile. Any
+        # exception that isn't a 404 is re-raised unchanged.
+        response = getattr(e, "response", None)
+        if response is not None and getattr(response, "status_code", None) == 404:
             return None
-        else:
-            raise
+        raise
 
 def popular_us_stocks():
     df = (read_csv_from_package('popular_us_stocks.csv', dtype={'Cik': int})
