@@ -1,14 +1,85 @@
 import re
 from decimal import Decimal
-from typing import Any, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
+from bs4 import Tag
 from lxml import etree  # type: ignore[import-untyped]
+
+from edgar.ownership.models import TransactionCode
 
 __all__ = ['is_numeric', 'compute_average_price', 'compute_total_value',
            'format_currency', 'format_amount', 'safe_numeric', 'format_numeric',
-           'detect_10b5_1_plan']
+           'detect_10b5_1_plan',
+           'describe_ownership', 'translate', 'translate_buy_sell',
+           'translate_transaction_types', 'translate_ownership',
+           'transaction_footnote_id', 'get_footnotes',
+           'BUY_SELL', 'DIRECT_OR_INDIRECT_OWNERSHIP', 'FORM_DESCRIPTIONS']
+
+
+BUY_SELL = {'A': 'Buy', 'D': 'Sell'}
+
+DIRECT_OR_INDIRECT_OWNERSHIP = {'D': 'Direct', 'I': 'Indirect'}
+
+FORM_DESCRIPTIONS = {'3': 'Initial beneficial ownership',
+                     '4': 'Changes in beneficial ownership',
+                     '5': 'Annual statement of beneficial ownership',
+                     }
+
+
+def describe_ownership(direct_indirect: str, nature_of_ownership: str) -> str:
+    """
+    Describe the ownership
+    :param direct_indirect:
+    :param nature_of_ownership:
+    :return:
+    """
+    if direct_indirect == 'D':
+        return "Direct"
+    if direct_indirect == 'I':
+        if nature_of_ownership:
+            return f"Indirect ({nature_of_ownership})"
+        return "Indirect"
+    return ""
+
+
+def translate(value: str, translations: Dict[str, str]) -> str:
+    return translations.get(value, value)
+
+
+def translate_buy_sell(buy_sell: str) -> str:
+    return translate(buy_sell, BUY_SELL)
+
+
+def translate_transaction_types(code: str) -> str:
+    return translate(code, TransactionCode.TRANSACTION_TYPES)
+
+
+def translate_ownership(value: str) -> str:
+    return translate(value, DIRECT_OR_INDIRECT_OWNERSHIP)
+
+
+def transaction_footnote_id(tag: Tag) -> Tuple[str, Optional[str]]:
+    footnote_id = tag.attrs.get("id") if tag else None
+    # Ensure we get a string, not AttributeValueList
+    if isinstance(footnote_id, list):
+        footnote_id = footnote_id[0] if footnote_id else None
+    return 'footnote', str(footnote_id) if footnote_id else None
+
+
+def get_footnotes(tag: Tag) -> str:
+    footnotes = []
+    for el in tag.find_all("footnoteId"):
+        if isinstance(el, Tag):
+            footnote_id = el.attrs.get('id')
+            if footnote_id:
+                # Ensure string type (handle AttributeValueList)
+                if isinstance(footnote_id, list):
+                    footnote_id = footnote_id[0] if footnote_id else None
+                if footnote_id:
+                    footnotes.append(str(footnote_id))
+    return '\n'.join(footnotes)
 
 
 def is_numeric(series: pd.Series) -> bool:
