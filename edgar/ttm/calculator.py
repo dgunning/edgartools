@@ -691,10 +691,17 @@ class TTMCalculator:
                 continue
 
             # Fallback: derive Q4 from FY - (Q1 + Q2 + Q3) when YTD_9M is absent
-            q1_q3_candidates = []
+            # (concept reported as discrete quarters).
+            #
+            # Select the input quarters by their actual calendar period, NOT by the
+            # fiscal_period label. The SEC tags comparative facts in a re-filing with
+            # the FILING's fiscal_period, so the same calendar quarter can appear
+            # labeled Q1, Q2 AND Q3 across successive 10-Qs. Keying on the label then
+            # selects that one quarter for every slot (Q1=Q2=Q3) and yields a wrong,
+            # often negative, Q4 (e.g. GAIN: 57.2M - 3*28.8M = -29.2M). See GH #848;
+            # same root cause as the fiscal_period unreliability behind #793/#796.
+            q_candidates = []
             for q in quarters:
-                if q.fiscal_period not in ("Q1", "Q2", "Q3"):
-                    continue
                 if q.numeric_value is None or q.period_start is None or q.period_end is None:
                     continue
                 if fy.period_start and fy.period_end:
@@ -702,34 +709,36 @@ class TTMCalculator:
                         continue
                     if not (fy.period_start <= q.period_end <= fy.period_end):
                         continue
-                q1_q3_candidates.append(q)
+                q_candidates.append(q)
 
-            if not q1_q3_candidates:
-                log.debug(f"No Q1-Q3 quarters found for FY {fy.fiscal_year} - cannot derive Q4")
+            if not q_candidates:
+                log.debug(f"No discrete quarters found for FY {fy.fiscal_year} - cannot derive Q4")
                 continue
 
-            # Prefer the latest filing per quarter
-            quarter_by_period = {}
-            for q in q1_q3_candidates:
-                existing = quarter_by_period.get(q.fiscal_period)
-                if not existing or (q.filing_date and existing.filing_date and q.filing_date > existing.filing_date):
-                    quarter_by_period[q.fiscal_period] = q
+            # Collapse to one fact per distinct calendar period (latest periodic
+            # filing wins), sorted ascending by period_end.
+            distinct = self._deduplicate_by_period_end(q_candidates)
 
-            ordered_quarters = [quarter_by_period.get(p) for p in ("Q1", "Q2", "Q3")]
-            if any(q is None for q in ordered_quarters):
-                log.debug(f"Incomplete Q1-Q3 set for FY {fy.fiscal_year} - cannot derive Q4")
+            # If a discrete quarter already ends on the fiscal year-end, Q4 is
+            # reported directly - no derivation needed.
+            if any(q.period_end == fy.period_end for q in distinct):
+                log.debug(f"Discrete Q4 already present for FY {fy.fiscal_year} - skipping derivation")
                 continue
 
-            q1, q2, q3 = ordered_quarters
-            if any(q.numeric_value is None for q in (q1, q2, q3)):
-                log.debug(f"Missing numeric values for Q1-Q3 FY {fy.fiscal_year} - cannot derive Q4")
+            # Expect exactly the three quarters (Q1-Q3) that precede Q4. Anything
+            # else (gaps, overlaps, stub periods) is ambiguous - skip rather than
+            # emit a wrong value.
+            if len(distinct) != 3:
+                log.debug(f"Expected 3 discrete quarters for FY {fy.fiscal_year}, "
+                          f"found {len(distinct)} - cannot derive Q4")
                 continue
 
-            q4_value = fy.numeric_value - (q1.numeric_value + q2.numeric_value + q3.numeric_value)
+            q1, q2, q3 = distinct  # ascending by period_end
+            q1_q3_sum = q1.numeric_value + q2.numeric_value + q3.numeric_value
+            q4_value = fy.numeric_value - q1_q3_sum
 
             # Skip if negative and concept should be positive (revenue-like)
             if q4_value < 0 and self._is_positive_concept(fy.concept):
-                q1_q3_sum = q1.numeric_value + q2.numeric_value + q3.numeric_value
                 log.warning(f"Data quality issue: Q1+Q2+Q3 ({q1_q3_sum/1e9:.2f}B) > "
                             f"FY ({fy.numeric_value/1e9:.2f}B) for {fy.concept}, skipping Q4 derivation")
                 continue
@@ -748,7 +757,7 @@ class TTMCalculator:
             derived.append(q4_fact)
             log.debug(
                 f"Derived Q4 from FY: ${q4_value/1e9:.2f}B "
-                f"(FY ${fy.numeric_value/1e9:.2f}B - Q1-3 ${((q1.numeric_value + q2.numeric_value + q3.numeric_value)/1e9):.2f}B)"
+                f"(FY ${fy.numeric_value/1e9:.2f}B - Q1-3 ${q1_q3_sum/1e9:.2f}B)"
             )
         return derived
 

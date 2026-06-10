@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **TTM Q4 derivation no longer produces wrong/negative values for discrete-quarter reporters** — when a concept is reported as discrete quarters with no cumulative 9-month YTD fact (common for BDCs and investment companies), `TTMCalculator` derives Q4 as `FY - (Q1+Q2+Q3)`. It previously selected the three input quarters by their `fiscal_period` label, but the SEC tags comparative facts in re-filings with the *filing's* fiscal period, so the same calendar quarter could appear labeled Q1, Q2 and Q3 across successive 10-Qs — producing a wrong, often negative Q4 (e.g. GAIN `InvestmentCompanyDividendDistribution`: `57.2M - 3×28.8M = -29.2M`). Quarters are now selected by distinct calendar period (dedup by `period_end`, latest periodic filing wins), and derivation is skipped when a discrete Q4 is already reported. This affects `quarterize()`, TTM calculations, and quarterly statement views. ([#848](https://github.com/dgunning/edgartools/issues/848))
+
 ## [5.36.0] - 2026-06-09
 
 A batch of robustness fixes across insider-ownership context, 6-K exhibit decoding, fund/N-PORT filing access, Schedule 13D/G, and XBRL depreciation standardization, plus an internal restructure of the ownership module. No public API changes.
