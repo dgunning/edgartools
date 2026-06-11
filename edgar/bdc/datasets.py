@@ -61,8 +61,8 @@ __all__ = [
     'list_bdc_datasets',
 ]
 
-# Base URL for SEC BDC Data Sets
-BDC_DATASET_BASE_URL = "https://www.sec.gov/files/structureddata/data/business-development-company-bdc-data-sets"
+# Base URL for SEC BDC Data Sets (moved from /files/structureddata/data/ in 2026)
+BDC_DATASET_BASE_URL = "https://www.sec.gov/files/datastandardsinnovation/data/business-development-company-bdc-data-sets"
 
 # Column name mappings for cleaner output
 _COLUMN_RENAMES = {
@@ -833,8 +833,8 @@ def list_bdc_datasets(max_years_back: int = 3) -> pd.DataFrame:
         >>> df = list_bdc_datasets()
         >>> print(df)
            year  quarter  period                                              url
-        0  2024        4  2024Q4  https://www.sec.gov/files/structureddata/data/...
-        1  2024        3  2024Q3  https://www.sec.gov/files/structureddata/data/...
+        0  2024        4  2024Q4  https://www.sec.gov/files/datastandardsinnovation/data/...
+        1  2024        3  2024Q3  https://www.sec.gov/files/datastandardsinnovation/data/...
     """
     quarters = get_available_quarters(max_years_back)
 
