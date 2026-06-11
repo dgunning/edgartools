@@ -24,6 +24,7 @@ Example usage:
     usd_revenue = converter.to_usd(dkk_revenue, 2024, rate_type='average')
 """
 
+import re
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date, datetime
@@ -47,7 +48,26 @@ def _extract_year(value) -> Optional[int]:
         return value.year
     return None
 
-__all__ = ['CurrencyConverter', 'ExchangeRate']
+__all__ = ['CurrencyConverter', 'ExchangeRate', 'normalize_currency_unit']
+
+
+def normalize_currency_unit(raw: Optional[str]) -> Optional[str]:
+    """Extract an ISO 4217 code from common XBRL currency unit identifiers."""
+    if not raw:
+        return raw
+
+    if re.fullmatch(r"[A-Z]{3}", raw):
+        return raw
+
+    match = re.search(r"iso4217:([A-Z]{3})", raw, flags=re.IGNORECASE)
+    if match:
+        return match.group(1).upper()
+
+    match = re.search(r"UNIT_STANDARD_([A-Z]{3})(?:_|$)", raw)
+    if match:
+        return match.group(1)
+
+    return raw
 
 
 @dataclass

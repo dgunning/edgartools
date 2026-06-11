@@ -24,6 +24,7 @@ from rich.text import Text
 
 from edgar.richtools import repr_rich
 from edgar.xbrl.core import STANDARD_LABEL, parse_date
+from edgar.xbrl.currency import normalize_currency_unit
 from edgar.xbrl.models import select_display_label
 
 
@@ -1014,6 +1015,7 @@ class FactsView:
                 'context_ref': fact.context_ref,
                 'value': fact.value,
                 'unit_ref': fact.unit_ref,
+                'currency': normalize_currency_unit(fact.unit_ref),
                 'decimals': fact.decimals,
                 'numeric_value': fact.numeric_value
             }
