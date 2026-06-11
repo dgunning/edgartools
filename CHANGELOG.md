@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`currency` column on the XBRL facts DataFrame** — `xbrl().facts.to_dataframe()` now includes a `currency` column with each fact's ISO 4217 code (e.g. `USD`, `HKD`) resolved from its unit measure. Non-USD filers tag monetary facts with opaque unit ids such as `UNIT_STANDARD_HKD_MNUSOXGRF0O9R60JINVDUQ`, which were exposed verbatim in `unit_ref` and made currency-based filtering and display unreliable; the raw `unit_ref` is preserved, while `currency` gives a usable code. Per-share monetary units report their numerator currency, and non-monetary units (shares, pure, custom) resolve to `None` rather than a misleading value. ([#850](https://github.com/dgunning/edgartools/issues/850))
+
 ### Fixed
 
 - **TTM Q4 derivation no longer produces wrong/negative values for discrete-quarter reporters** — when a concept is reported as discrete quarters with no cumulative 9-month YTD fact (common for BDCs and investment companies), `TTMCalculator` derives Q4 as `FY - (Q1+Q2+Q3)`. It previously selected the three input quarters by their `fiscal_period` label, but the SEC tags comparative facts in re-filings with the *filing's* fiscal period, so the same calendar quarter could appear labeled Q1, Q2 and Q3 across successive 10-Qs — producing a wrong, often negative Q4 (e.g. GAIN `InvestmentCompanyDividendDistribution`: `57.2M - 3×28.8M = -29.2M`). Quarters are now selected by distinct calendar period (dedup by `period_end`, latest periodic filing wins), and derivation is skipped when a discrete Q4 is already reported. This affects `quarterize()`, TTM calculations, and quarterly statement views. ([#848](https://github.com/dgunning/edgartools/issues/848))
