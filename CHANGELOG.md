@@ -9,7 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`FormC.filer_information.ccc` no longer duplicates the CIK** — the Form C parser read the `filerCik` element into both `cik` and `ccc`; `ccc` now reads the actual `filerCcc` element (always redacted to `XXXXXXXX` in disseminated filings) and is `Optional`, returning `None` when absent.
+- **`FormC.filer_information.live_or_test` is no longer always `False`** — the parser looked for a `testOrLive` element under `filer`, but the schema places `liveTestFlag` under `filerInfo`; LIVE filings now correctly report `True` (older `testOrLive` documents remain supported).
 - **TTM Q4 derivation no longer produces wrong/negative values for discrete-quarter reporters** — when a concept is reported as discrete quarters with no cumulative 9-month YTD fact (common for BDCs and investment companies), `TTMCalculator` derives Q4 as `FY - (Q1+Q2+Q3)`. It previously selected the three input quarters by their `fiscal_period` label, but the SEC tags comparative facts in re-filings with the *filing's* fiscal period, so the same calendar quarter could appear labeled Q1, Q2 and Q3 across successive 10-Qs — producing a wrong, often negative Q4 (e.g. GAIN `InvestmentCompanyDividendDistribution`: `57.2M - 3×28.8M = -29.2M`). Quarters are now selected by distinct calendar period (dedup by `period_end`, latest periodic filing wins), and derivation is skipped when a discrete Q4 is already reported. This affects `quarterize()`, TTM calculations, and quarterly statement views. ([#848](https://github.com/dgunning/edgartools/issues/848))
+
+### Changed
+
+- **Form C parsing migrated from BeautifulSoup to lxml** — `FormC.from_xml` now uses the same lxml parsing pattern as the fund reports, with verified field-level parity across all Form C variants (C, C-U, C-AR, C-TR). Optional fields on the Form C models now declare explicit `None` defaults.
 
 ## [5.36.0] - 2026-06-09
 

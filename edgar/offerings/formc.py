@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from datetime import date, datetime
-from functools import cached_property, lru_cache
+from functools import cached_property
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 if TYPE_CHECKING:
@@ -10,21 +10,22 @@ if TYPE_CHECKING:
     from edgar.entity.entity_filings import EntityFilings
     from edgar.offerings.campaign import Offering
 
-from bs4 import BeautifulSoup
+from lxml import etree
 from pydantic import BaseModel, ConfigDict
 from rich import box
 from rich.columns import Columns
-from rich.console import Group, Text
+from rich.console import Group
 from rich.panel import Panel
 from rich.table import Column, Table
+from rich.text import Text
 
 from edgar._party import Address
 from edgar.core import get_bool
-from edgar.entity import Company
 from edgar.display.formatting import yes_no
+from edgar.entity import Company
+from edgar.funds.reports import _strip_namespaces, _text
 from edgar.reference import states
 from edgar.richtools import Docs, repr_rich
-from edgar.xmltools import child_text
 
 __all__ = ['FormC', 'Signer', 'FundingPortal', 'IssuerCompany']
 
@@ -33,7 +34,7 @@ class FilerInformation(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     cik: str
-    ccc: str
+    ccc: Optional[str] = None  # Filer CCC; redacted to XXXXXXXX in disseminated filings
     confirming_copy_flag: bool
     return_copy_flag: bool
     override_internet_flag: bool
@@ -41,7 +42,6 @@ class FilerInformation(BaseModel):
     period: Optional[date] = None
 
     @property
-    @lru_cache(maxsize=1)
     def company(self):
         return Company(self.cik)
 
@@ -51,7 +51,7 @@ class FundingPortal(BaseModel):
 
     name: str
     cik: str
-    crd: Optional[str]
+    crd: Optional[str] = None
     file_number: str
 
 
@@ -60,7 +60,7 @@ class IssuerInformation(BaseModel):
     address: Address
     website: str
     co_issuer: bool
-    funding_portal: Optional[FundingPortal]
+    funding_portal: Optional[FundingPortal] = None
     legal_status: str
     jurisdiction: str
     date_of_incorporation: date
@@ -89,18 +89,18 @@ class OfferingInformation(BaseModel):
     </offeringInformation>
     """
     compensation_amount: str
-    financial_interest: Optional[str]
-    security_offered_type: Optional[str]
-    security_offered_other_desc: Optional[str]
-    no_of_security_offered: Optional[str]
-    price: Optional[str]
-    price_determination_method: Optional[str]
-    offering_amount: Optional[float]
-    over_subscription_accepted: Optional[str]
-    over_subscription_allocation_type: Optional[str]
-    desc_over_subscription: Optional[str]
-    maximum_offering_amount: Optional[float]
-    deadline_date: Optional[date]
+    financial_interest: Optional[str] = None
+    security_offered_type: Optional[str] = None
+    security_offered_other_desc: Optional[str] = None
+    no_of_security_offered: Optional[str] = None
+    price: Optional[str] = None
+    price_determination_method: Optional[str] = None
+    offering_amount: Optional[float] = None
+    over_subscription_accepted: Optional[str] = None
+    over_subscription_allocation_type: Optional[str] = None
+    desc_over_subscription: Optional[str] = None
+    maximum_offering_amount: Optional[float] = None
+    deadline_date: Optional[date] = None
 
     @property
     def security_description(self) -> str:
@@ -936,29 +936,35 @@ class FormC:
 
     @classmethod
     def from_xml(cls, offering_xml: str, form: str):
-        soup = BeautifulSoup(offering_xml, "xml")
-        root = soup.find('edgarSubmission')
+        xml_bytes = offering_xml.encode() if isinstance(offering_xml, str) else offering_xml
+        try:
+            root = etree.fromstring(xml_bytes)
+        except etree.XMLSyntaxError:
+            parser = etree.XMLParser(recover=True, huge_tree=True)
+            root = etree.fromstring(xml_bytes, parser=parser)
+        _strip_namespaces(root)
 
         # Header Data
         header_data = root.find('headerData')
         filer_info_el = header_data.find('filerInfo')
-
-        filer_el = filer_info_el.find('filer')
+        credentials_el = filer_info_el.find('filer/filerCredentials')
 
         # Flags
-        flags_tag = header_data.find('flags')
-        confirming_copy_flag = child_text(flags_tag, 'confirmingCopyFlag') == 'true'
-        return_copy_flag = child_text(flags_tag, 'returnCopyFlag') == 'true'
-        override_internet_flag = child_text(flags_tag, 'overrideInternetFlag') == 'true'
+        flags_tag = filer_info_el.find('flags')
+        confirming_copy_flag = _text(flags_tag, 'confirmingCopyFlag') == 'true'
+        return_copy_flag = _text(flags_tag, 'returnCopyFlag') == 'true'
+        override_internet_flag = _text(flags_tag, 'overrideInternetFlag') == 'true'
 
-        period = child_text(header_data, 'period')
+        period = _text(header_data, './/period')
+        # Current schema puts <liveTestFlag> under filerInfo; older versions used <testOrLive>
+        live_test_flag = _text(filer_info_el, 'liveTestFlag') or _text(filer_info_el, './/testOrLive')
         filer_information = FilerInformation(
-            cik=filer_el.find('filerCik').text,
-            ccc=filer_el.find('filerCik').text,
+            cik=_text(credentials_el, 'filerCik'),
+            ccc=_text(credentials_el, 'filerCcc'),
             confirming_copy_flag=confirming_copy_flag,
             return_copy_flag=return_copy_flag,
             override_internet_flag=override_internet_flag,
-            live_or_test=child_text(filer_el, 'testOrLive') == 'LIVE',
+            live_or_test=live_test_flag == 'LIVE',
             period=FormC.parse_date(period) if period else None
         )
 
@@ -970,31 +976,32 @@ class FormC:
         issuer_info_tag = issuer_information_tag.find('issuerInfo')
         issuer_address_tag = issuer_info_tag.find('issuerAddress')
         address = Address(
-            street1=child_text(issuer_address_tag, 'street1'),
-            street2=child_text(issuer_address_tag, 'street2'),
-            city=child_text(issuer_address_tag, 'city'),
-            state_or_country=child_text(issuer_address_tag, 'stateOrCountry'),
-            zipcode=child_text(issuer_address_tag, 'zipCode')
+            street1=_text(issuer_address_tag, 'street1'),
+            street2=_text(issuer_address_tag, 'street2'),
+            city=_text(issuer_address_tag, 'city'),
+            state_or_country=_text(issuer_address_tag, 'stateOrCountry'),
+            zipcode=_text(issuer_address_tag, 'zipCode')
         )
 
-        legal_status = child_text(issuer_info_tag, 'legalStatusForm')
-        jurisdiction = child_text(issuer_info_tag, 'jurisdictionOrganization')
-        date_of_incorporation = child_text(issuer_info_tag, 'dateIncorporation')
+        # legalStatusForm etc. sit inside a <legalStatus> wrapper; search descendants
+        legal_status = _text(issuer_info_tag, './/legalStatusForm')
+        jurisdiction = _text(issuer_info_tag, './/jurisdictionOrganization')
+        date_of_incorporation = _text(issuer_info_tag, './/dateIncorporation')
 
         # Funding Portal data
-        funding_portal_cik = child_text(issuer_information_tag, 'commissionCik')
+        funding_portal_cik = _text(issuer_information_tag, 'commissionCik')
         funding_portal = FundingPortal(
-            name=child_text(issuer_information_tag, 'companyName'),
+            name=_text(issuer_information_tag, 'companyName'),
             cik=funding_portal_cik,
-            file_number=child_text(issuer_information_tag, 'commissionFileNumber'),
-            crd=child_text(issuer_information_tag, 'crdNumber')
+            file_number=_text(issuer_information_tag, 'commissionFileNumber'),
+            crd=_text(issuer_information_tag, 'crdNumber')
         ) if funding_portal_cik else None
 
         issuer_information = IssuerInformation(
-            name=child_text(issuer_info_tag, 'nameOfIssuer'),
+            name=_text(issuer_info_tag, 'nameOfIssuer'),
             address=address,
-            website=child_text(issuer_info_tag, 'issuerWebsite'),
-            co_issuer=get_bool(child_text(issuer_information_tag, 'isCoIssuer')),
+            website=_text(issuer_info_tag, 'issuerWebsite'),
+            co_issuer=get_bool(_text(issuer_information_tag, 'isCoIssuer')),
             funding_portal=funding_portal,
             legal_status=legal_status,
             jurisdiction=jurisdiction,
@@ -1003,22 +1010,23 @@ class FormC:
 
         # Offering Information
         offering_info_tag = form_data_tag.find('offeringInformation')
-        if offering_info_tag is not None and offering_info_tag.contents and offering_info_tag.get_text(strip=True):
+        # Skip when missing, self-closing (no children), or containing only empty elements
+        if offering_info_tag is not None and len(offering_info_tag) and ''.join(offering_info_tag.itertext()).strip():
 
             offering_information = OfferingInformation(
-                compensation_amount=child_text(offering_info_tag, 'compensationAmount'),
-                financial_interest=child_text(offering_info_tag, 'financialInterest'),
-                security_offered_type=child_text(offering_info_tag, 'securityOfferedType'),
-                security_offered_other_desc=child_text(offering_info_tag, 'securityOfferedOtherDesc'),
-                no_of_security_offered=child_text(offering_info_tag, 'noOfSecurityOffered'),
-                price=child_text(offering_info_tag, 'price'),
-                price_determination_method=child_text(offering_info_tag, 'priceDeterminationMethod'),
-                offering_amount=maybe_float(child_text(offering_info_tag, 'offeringAmount')),
-                over_subscription_accepted=child_text(offering_info_tag, 'overSubscriptionAccepted'),
-                over_subscription_allocation_type=child_text(offering_info_tag, 'overSubscriptionAllocationType'),
-                desc_over_subscription=child_text(offering_info_tag, 'descOverSubscription'),
-                maximum_offering_amount=maybe_float(child_text(offering_info_tag, 'maximumOfferingAmount')),
-                deadline_date=maybe_date(child_text(offering_info_tag, 'deadlineDate'))
+                compensation_amount=_text(offering_info_tag, 'compensationAmount'),
+                financial_interest=_text(offering_info_tag, 'financialInterest'),
+                security_offered_type=_text(offering_info_tag, 'securityOfferedType'),
+                security_offered_other_desc=_text(offering_info_tag, 'securityOfferedOtherDesc'),
+                no_of_security_offered=_text(offering_info_tag, 'noOfSecurityOffered'),
+                price=_text(offering_info_tag, 'price'),
+                price_determination_method=_text(offering_info_tag, 'priceDeterminationMethod'),
+                offering_amount=maybe_float(_text(offering_info_tag, 'offeringAmount')),
+                over_subscription_accepted=_text(offering_info_tag, 'overSubscriptionAccepted'),
+                over_subscription_allocation_type=_text(offering_info_tag, 'overSubscriptionAllocationType'),
+                desc_over_subscription=_text(offering_info_tag, 'descOverSubscription'),
+                maximum_offering_amount=maybe_float(_text(offering_info_tag, 'maximumOfferingAmount')),
+                deadline_date=maybe_date(_text(offering_info_tag, 'deadlineDate'))
             )
         else:
             offering_information = None
@@ -1026,68 +1034,68 @@ class FormC:
         # Annual Report Disclosure
         annual_report_disclosure_tag = form_data_tag.find('annualReportDisclosureRequirements')
         # If the tag is not None and not Empty e.g. <annualReportDisclosureRequirements/>
-        if annual_report_disclosure_tag and annual_report_disclosure_tag.contents:
+        if annual_report_disclosure_tag is not None and len(annual_report_disclosure_tag):
             annual_report_disclosure = AnnualReportDisclosure(
-                current_employees=int(float(child_text(annual_report_disclosure_tag, 'currentEmployees') or "0.00")),
-                total_asset_most_recent_fiscal_year=maybe_float(child_text(annual_report_disclosure_tag,
+                current_employees=int(float(_text(annual_report_disclosure_tag, 'currentEmployees') or "0.00")),
+                total_asset_most_recent_fiscal_year=maybe_float(_text(annual_report_disclosure_tag,
                                                                            'totalAssetMostRecentFiscalYear')),
                 total_asset_prior_fiscal_year=maybe_float(
-                    child_text(annual_report_disclosure_tag, 'totalAssetPriorFiscalYear')),
+                    _text(annual_report_disclosure_tag, 'totalAssetPriorFiscalYear')),
                 cash_equi_most_recent_fiscal_year=maybe_float(
-                    child_text(annual_report_disclosure_tag, 'cashEquiMostRecentFiscalYear')),
+                    _text(annual_report_disclosure_tag, 'cashEquiMostRecentFiscalYear')),
                 cash_equi_prior_fiscal_year=maybe_float(
-                    child_text(annual_report_disclosure_tag, 'cashEquiPriorFiscalYear')),
-                act_received_most_recent_fiscal_year=maybe_float(child_text(annual_report_disclosure_tag,
+                    _text(annual_report_disclosure_tag, 'cashEquiPriorFiscalYear')),
+                act_received_most_recent_fiscal_year=maybe_float(_text(annual_report_disclosure_tag,
                                                                             'actReceivedMostRecentFiscalYear')),
                 act_received_prior_fiscal_year=maybe_float(
-                    child_text(annual_report_disclosure_tag, 'actReceivedPriorFiscalYear')),
-                short_term_debt_most_recent_fiscal_year=maybe_float(child_text(annual_report_disclosure_tag,
+                    _text(annual_report_disclosure_tag, 'actReceivedPriorFiscalYear')),
+                short_term_debt_most_recent_fiscal_year=maybe_float(_text(annual_report_disclosure_tag,
                                                                                'shortTermDebtMostRecentFiscalYear')),
                 short_term_debt_prior_fiscal_year=maybe_float(
-                    child_text(annual_report_disclosure_tag, 'shortTermDebtPriorFiscalYear')),
-                long_term_debt_most_recent_fiscal_year=maybe_float(child_text(annual_report_disclosure_tag,
+                    _text(annual_report_disclosure_tag, 'shortTermDebtPriorFiscalYear')),
+                long_term_debt_most_recent_fiscal_year=maybe_float(_text(annual_report_disclosure_tag,
                                                                               'longTermDebtMostRecentFiscalYear')),
                 long_term_debt_prior_fiscal_year=maybe_float(
-                    child_text(annual_report_disclosure_tag, 'longTermDebtPriorFiscalYear')),
+                    _text(annual_report_disclosure_tag, 'longTermDebtPriorFiscalYear')),
                 revenue_most_recent_fiscal_year=maybe_float(
-                    child_text(annual_report_disclosure_tag, 'revenueMostRecentFiscalYear')),
+                    _text(annual_report_disclosure_tag, 'revenueMostRecentFiscalYear')),
                 revenue_prior_fiscal_year=maybe_float(
-                    child_text(annual_report_disclosure_tag, 'revenuePriorFiscalYear')),
-                cost_goods_sold_most_recent_fiscal_year=maybe_float(child_text(annual_report_disclosure_tag,
+                    _text(annual_report_disclosure_tag, 'revenuePriorFiscalYear')),
+                cost_goods_sold_most_recent_fiscal_year=maybe_float(_text(annual_report_disclosure_tag,
                                                                                'costGoodsSoldMostRecentFiscalYear')),
                 cost_goods_sold_prior_fiscal_year=maybe_float(
-                    child_text(annual_report_disclosure_tag, 'costGoodsSoldPriorFiscalYear')),
+                    _text(annual_report_disclosure_tag, 'costGoodsSoldPriorFiscalYear')),
                 tax_paid_most_recent_fiscal_year=maybe_float(
-                    child_text(annual_report_disclosure_tag, 'taxPaidMostRecentFiscalYear')),
+                    _text(annual_report_disclosure_tag, 'taxPaidMostRecentFiscalYear')),
                 tax_paid_prior_fiscal_year=maybe_float(
-                    child_text(annual_report_disclosure_tag, 'taxPaidPriorFiscalYear')),
-                net_income_most_recent_fiscal_year=maybe_float(child_text(annual_report_disclosure_tag,
+                    _text(annual_report_disclosure_tag, 'taxPaidPriorFiscalYear')),
+                net_income_most_recent_fiscal_year=maybe_float(_text(annual_report_disclosure_tag,
                                                                           'netIncomeMostRecentFiscalYear')),
                 net_income_prior_fiscal_year=maybe_float(
-                    child_text(annual_report_disclosure_tag, 'netIncomePriorFiscalYear')),
+                    _text(annual_report_disclosure_tag, 'netIncomePriorFiscalYear')),
                 offering_jurisdictions=[el.text for el in
-                                        annual_report_disclosure_tag.find_all('issueJurisdictionSecuritiesOffering')]
+                                        annual_report_disclosure_tag.findall('.//issueJurisdictionSecuritiesOffering')]
             )
         else:
             annual_report_disclosure = None
 
-        # Signature Block
-        signature_block_tag = root.find("signatureInfo")
+        # Signature Block (lives under formData; location kept flexible across schema versions)
+        signature_block_tag = root.find(".//signatureInfo")
 
         issuer_signature_tag = signature_block_tag.find("issuerSignature")
 
         signature_info = SignatureInfo(
             issuer_signature=IssuerSignature(
-                issuer=child_text(issuer_signature_tag, "issuer"),
-                signature=child_text(issuer_signature_tag, "issuerSignature"),
-                title=child_text(issuer_signature_tag, "issuerTitle")
+                issuer=_text(issuer_signature_tag, "issuer"),
+                signature=_text(issuer_signature_tag, "issuerSignature"),
+                title=_text(issuer_signature_tag, "issuerTitle")
             ),
             signatures=[
                 PersonSignature(
-                    signature=child_text(person_signature_tag, "personSignature"),
-                    title=child_text(person_signature_tag, "personTitle"),
-                    date=FormC.parse_date(child_text(person_signature_tag, "signatureDate"))
-                ) for person_signature_tag in signature_block_tag.find_all('signaturePerson')
+                    signature=_text(person_signature_tag, "personSignature"),
+                    title=_text(person_signature_tag, "personTitle"),
+                    date=FormC.parse_date(_text(person_signature_tag, "signatureDate"))
+                ) for person_signature_tag in signature_block_tag.findall('.//signaturePerson')
             ]
         )
 
