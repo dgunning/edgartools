@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`currency` column on the XBRL facts DataFrame** — `xbrl().facts.to_dataframe()` now includes a `currency` column with each fact's ISO 4217 code (e.g. `USD`, `HKD`) resolved from its unit measure. Non-USD filers tag monetary facts with opaque unit ids such as `UNIT_STANDARD_HKD_MNUSOXGRF0O9R60JINVDUQ`, which were exposed verbatim in `unit_ref` and made currency-based filtering and display unreliable; the raw `unit_ref` is preserved, while `currency` gives a usable code. Per-share monetary units report their numerator currency, and non-monetary units (shares, pure, custom) resolve to `None` rather than a misleading value. ([#850](https://github.com/dgunning/edgartools/issues/850))
+
 ### Fixed
 
 - **BDC data sets download again after SEC URL move** — the SEC relocated the DERA BDC data-set files from `/files/structureddata/data/` to `/files/datastandardsinnovation/data/`, which made `fetch_bdc_dataset()` and related functions fail with 404; the base URL now points to the new location.

@@ -43,6 +43,36 @@ def _deduplicate_facts(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def _iso4217_code(measure: Optional[str]) -> Optional[str]:
+    """Return the ISO 4217 code of an ``iso4217:`` unit measure, else ``None``."""
+    if measure and measure.startswith('iso4217:'):
+        return measure[len('iso4217:'):]
+    return None
+
+
+def _unit_currency(unit_info: Optional[Dict[str, Any]]) -> Optional[str]:
+    """Resolve a parsed XBRL unit to its ISO 4217 currency code, or ``None``.
+
+    Currency facts use a simple ``iso4217:`` measure (e.g. ``iso4217:HKD`` ->
+    ``HKD``). Per-share monetary facts use a ``divide`` unit whose numerator is
+    the currency (e.g. ``iso4217:USD`` per ``xbrli:shares``), so the numerator
+    currency is returned. Non-monetary units (shares, pure, ...) return ``None``.
+    The opaque ``unit_ref`` id itself (e.g. ``UNIT_STANDARD_HKD_...``) is never
+    parsed -- only the resolved measure is used (see issue #850).
+    """
+    if not unit_info:
+        return None
+    unit_type = unit_info.get('type')
+    if unit_type == 'simple':
+        return _iso4217_code(unit_info.get('measure'))
+    if unit_type == 'divide':
+        for measure in unit_info.get('numerator', []):
+            code = _iso4217_code(measure)
+            if code:
+                return code
+    return None
+
+
 class FactQuery:
     """
     A query builder for XBRL facts that enables filtering by various attributes.
@@ -1005,6 +1035,10 @@ class FactsView:
         # Build enriched facts from raw facts, contexts, and elements
         enriched_facts = []
 
+        # Resolve each fact's opaque unit_ref to its ISO 4217 currency once
+        # (e.g. "UNIT_STANDARD_HKD_..." -> "HKD"); see issue #850.
+        units = self.xbrl.units
+
         for fact_key, fact in self.xbrl._facts.items():
             # Create a dict with only necessary fields instead of full model_dump
             fact_dict = {
@@ -1014,6 +1048,7 @@ class FactsView:
                 'context_ref': fact.context_ref,
                 'value': fact.value,
                 'unit_ref': fact.unit_ref,
+                'currency': _unit_currency(units.get(fact.unit_ref)) if fact.unit_ref else None,
                 'decimals': fact.decimals,
                 'numeric_value': fact.numeric_value
             }
