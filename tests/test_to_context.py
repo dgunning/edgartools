@@ -46,6 +46,19 @@ class TestFormatCurrencyShort:
     def test_boundary_billion(self):
         assert format_currency_short(1_000_000_000) == "$1.0B"
 
+    def test_high_millions_not_promoted(self):
+        # Comfortably under 1B: stays in millions.
+        assert format_currency_short(999_000_000) == "$999.0M"
+
+    def test_just_under_billion_promotes_to_b(self):
+        # Values that round up to "1,000.0M" must roll over to "1.0B"
+        # instead of rendering the nonsensical "$1,000.0M".
+        assert format_currency_short(999_950_000) == "$1.0B"
+        assert format_currency_short(999_999_999) == "$1.0B"
+
+    def test_just_under_billion_promotes_negative(self):
+        assert format_currency_short(-999_950_000) == "-$1.0B"
+
 
 class TestTenKToContext:
     """Tests for TenK.to_context() using a known filing."""

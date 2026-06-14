@@ -101,7 +101,13 @@ def format_currency_short(value: Union[int, float, Decimal, None], currency: str
     if abs_val >= 1_000_000_000:
         return f"{sign}{currency}{abs_val / 1_000_000_000:,.1f}B"
     elif abs_val >= 1_000_000:
-        return f"{sign}{currency}{abs_val / 1_000_000:,.1f}M"
+        scaled = abs_val / 1_000_000
+        # A value just under 1B (>= ~999.95M) rounds to "1,000.0M" at one
+        # decimal place; promote it to "1.0B" rather than render the
+        # nonsensical "1,000.0M".
+        if round(scaled, 1) >= 1000:
+            return f"{sign}{currency}{abs_val / 1_000_000_000:,.1f}B"
+        return f"{sign}{currency}{scaled:,.1f}M"
     elif abs_val >= 1_000:
         return f"{sign}{currency}{abs_val:,.0f}"
     else:
