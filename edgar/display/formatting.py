@@ -114,7 +114,7 @@ def format_currency_short(value: Union[int, float, Decimal, None], currency: str
         return f"{sign}{currency}{abs_val:,.2f}"
 
 
-def datefmt(value: Union[datetime.datetime, str], fmt: str = "%Y-%m-%d") -> str:
+def datefmt(value: Union[datetime.datetime, datetime.date, str, None], fmt: str = "%Y-%m-%d") -> str:
     """Format a date as a string"""
     if isinstance(value, str):
         # if value matches %Y%m%d, then parse it
@@ -126,8 +126,15 @@ def datefmt(value: Union[datetime.datetime, str], fmt: str = "%Y-%m-%d") -> str:
         elif re.match(r"^\d{4}-\d{2}-\d{2}$", value):
             value = datetime.datetime.strptime(value, "%Y-%m-%d")
         return value.strftime(fmt)
-    else:
+    # Non-string input. datefmt is display-only and is called with filing-derived
+    # values that are not guaranteed to be set — e.g. a former name's null ``to``
+    # date or a missing ``date_of_change`` — so degrade gracefully instead of
+    # crashing on ``None.strftime`` (and likewise for any unexpected type).
+    if value is None:
+        return ""
+    if hasattr(value, "strftime"):
         return value.strftime(fmt)
+    return str(value)
 
 
 def display_size(size: Optional[Union[int, str]]) -> str:
