@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2022-present Dwight Gunning <dgunning@gmail.com>
 #
 # SPDX-License-Identifier: MIT
+import logging
 import re
 from functools import lru_cache, partial
 from typing import List, Optional, Union
@@ -102,6 +103,13 @@ from edgar.correspondence import CORRESPONDENCE_FORMS, Correspondence, Correspon
 from edgar.search.efts import EFTSResult, EFTSSearch, search_filings
 from edgar.thirteenf import THIRTEENF_FORMS, ThirteenF
 from edgar.xbrl import XBRL
+
+# Attach a NullHandler to the package-root logger so that edgartools never emits
+# log output unless the application configures logging itself, per the Python
+# logging HOWTO guidance for libraries (#856).  Without it, library warnings have
+# no handler in their ancestry and fall back to logging.lastResort (stderr),
+# which is especially harmful in MCP / stdio environments.
+logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 # Fix for Issue #457: Clear locale-corrupted cache files on first import
 # This is a one-time operation that only runs if the marker file doesn't exist
