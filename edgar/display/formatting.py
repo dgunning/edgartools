@@ -125,6 +125,12 @@ def datefmt(value: Union[datetime.datetime, datetime.date, str, None], fmt: str 
             value = datetime.datetime.strptime(value, "%Y%m%d%H%M%S")
         elif re.match(r"^\d{4}-\d{2}-\d{2}$", value):
             value = datetime.datetime.strptime(value, "%Y-%m-%d")
+        else:
+            # Unrecognized date string: return it unchanged rather than
+            # crashing on ``str.strftime``. datefmt is display-only and is
+            # called with filing-derived strings that are not guaranteed to
+            # match one of the patterns above (e.g. ``""`` or ``"2022/03/04"``).
+            return value
         return value.strftime(fmt)
     # Non-string input. datefmt is display-only and is called with filing-derived
     # values that are not guaranteed to be set — e.g. a former name's null ``to``
