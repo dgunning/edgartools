@@ -1,9 +1,10 @@
 """Tests for to_context() implementations on DataObject classes."""
+import datetime
 from decimal import Decimal
 
 import pytest
 
-from edgar.display.formatting import format_currency_short
+from edgar.display.formatting import datefmt, format_currency_short
 
 
 class TestFormatCurrencyShort:
@@ -58,6 +59,31 @@ class TestFormatCurrencyShort:
 
     def test_just_under_billion_promotes_negative(self):
         assert format_currency_short(-999_950_000) == "-$1.0B"
+
+
+class TestDatefmt:
+    """Unit tests for the shared date formatting helper."""
+
+    def test_compact_yyyymmdd(self):
+        assert datefmt("20220304", "%B %d, %Y") == "March 04, 2022"
+
+    def test_iso_date(self):
+        assert datefmt("2022-03-04", "%B %d, %Y") == "March 04, 2022"
+
+    def test_compact_datetime(self):
+        assert datefmt("20220304120000", "%Y-%m-%d") == "2022-03-04"
+
+    def test_datetime_object(self):
+        assert datefmt(datetime.datetime(2022, 3, 4), "%B %d, %Y") == "March 04, 2022"
+
+    @pytest.mark.parametrize(
+        "value",
+        ["2022/03/04", "2022-3-4", "March 4, 2022", "N/A", ""],
+    )
+    def test_unrecognized_string_passes_through(self, value):
+        # Strings that match none of the known patterns must be returned
+        # unchanged instead of raising ``AttributeError`` on ``str.strftime``.
+        assert datefmt(value, "%B %d, %Y") == value
 
 
 class TestTenKToContext:
