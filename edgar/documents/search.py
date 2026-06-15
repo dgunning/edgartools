@@ -181,12 +181,15 @@ class DocumentSearch:
                 flags = 0 if case_sensitive else re.IGNORECASE
 
                 for match in re.finditer(pattern, text, flags):
+                    context, start_offset, end_offset = self._get_context_with_offsets(
+                        text, match.start(), match.end()
+                    )
                     results.append(SearchResult(
                         node=node,
                         text=match.group(),
-                        start_offset=match.start(),
-                        end_offset=match.end(),
-                        context=self._get_context(text, match.start(), match.end())
+                        start_offset=start_offset,
+                        end_offset=end_offset,
+                        context=context
                     ))
             else:
                 # Simple substring search
@@ -196,12 +199,15 @@ class DocumentSearch:
                     if pos == -1:
                         break
 
+                    context, start_offset, end_offset = self._get_context_with_offsets(
+                        text, pos, pos + len(query)
+                    )
                     results.append(SearchResult(
                         node=node,
                         text=text[pos:pos + len(query)],
-                        start_offset=pos,
-                        end_offset=pos + len(query),
-                        context=self._get_context(text, pos, pos + len(query))
+                        start_offset=start_offset,
+                        end_offset=end_offset,
+                        context=context
                     ))
 
                     start = pos + 1
@@ -233,12 +239,15 @@ class DocumentSearch:
 
             # Find all matches
             for match in regex.finditer(text):
+                context, start_offset, end_offset = self._get_context_with_offsets(
+                    text, match.start(), match.end()
+                )
                 results.append(SearchResult(
                     node=node,
                     text=match.group(),
-                    start_offset=match.start(),
-                    end_offset=match.end(),
-                    context=self._get_context(text, match.start(), match.end())
+                    start_offset=start_offset,
+                    end_offset=end_offset,
+                    context=context
                 ))
 
         return results
@@ -398,6 +407,12 @@ class DocumentSearch:
 
     def _get_context(self, text: str, start: int, end: int, context_size: int = 50) -> str:
         """Get context around match."""
+        context, _, _ = self._get_context_with_offsets(text, start, end, context_size)
+        return context
+
+    def _get_context_with_offsets(self, text: str, start: int, end: int,
+                                  context_size: int = 50) -> tuple[str, int, int]:
+        """Get context around match with match offsets adjusted to that context."""
         # Calculate context boundaries
         context_start = max(0, start - context_size)
         context_end = min(len(text), end + context_size)
@@ -419,7 +434,7 @@ class DocumentSearch:
             start = start - context_start
             end = end - context_start
 
-        return context
+        return context, start, end
 
     def _calculate_heading_score(self, heading: HeadingNode) -> float:
         """Calculate relevance score for heading."""
