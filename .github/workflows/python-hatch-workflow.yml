@@ -1,22 +1,50 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+# This workflow installs Python dependencies and runs tests across versions.
+#
+# Cost design (to stay within GitHub Actions included minutes):
+#   - Pull requests:  fast tests only, single Python version  (cheap, quick gate)
+#   - Push to main:   fast (full matrix) + network + slow      (real integration gate)
+#   - Nightly (cron): full suite                               (freshness vs SEC API)
+#   - concurrency:    cancel superseded runs on the same ref
+#   - paths-ignore:   skip docs/markdown-only changes
+#   - pip cache:      avoid reinstalling deps from scratch in every job
 
 name: Build and Test Edgartools
 
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'mkdocs.yml'
+      - 'LICENSE'
+      - '.gitignore'
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'mkdocs.yml'
+      - 'LICENSE'
+      - '.gitignore'
+  schedule:
+    # Nightly full suite at 07:00 UTC
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+# Cancel an in-progress run when a newer commit lands on the same branch/PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test-fast:
-    # Fast tests run on all Python versions to verify compatibility
+    # PRs: single version for a quick gate. Push/schedule: full matrix.
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.13"]
+        python-version: ${{ github.event_name == 'pull_request' && fromJSON('["3.13"]') || fromJSON('["3.10", "3.13"]') }}
 
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -24,6 +52,7 @@ jobs:
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: ${{ matrix.python-version }}
+        cache: 'pip'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -37,7 +66,7 @@ jobs:
 
     - name: Upload coverage data
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-      if: matrix.python-version == '3.13'
+      if: matrix.python-version == '3.13' && github.event_name != 'pull_request'
       with:
         name: coverage-fast
         path: |
@@ -47,8 +76,9 @@ jobs:
         retention-days: 1
 
   test-network:
-    # Network and slow tests only on Python 3.12 — SEC API behavior
-    # doesn't vary by Python version, so one version suffices
+    # Network tests skip PRs — SEC API behavior doesn't change per-commit.
+    # Runs on push to main, nightly schedule, and manual dispatch.
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
@@ -57,6 +87,7 @@ jobs:
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: "3.12"
+        cache: 'pip'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -79,7 +110,8 @@ jobs:
         retention-days: 1
 
   test-slow:
-    # Slow tests only on Python 3.12
+    # Slow tests skip PRs (often network-heavy). Push/schedule/dispatch only.
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
@@ -88,6 +120,7 @@ jobs:
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: "3.12"
+        cache: 'pip'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -111,6 +144,8 @@ jobs:
 
   coverage:
     name: Combine Coverage
+    # Only meaningful when the full suite ran (not on PRs).
+    if: github.event_name != 'pull_request'
     needs: [test-fast, test-network, test-slow]
     runs-on: ubuntu-latest
     steps:
@@ -119,6 +154,7 @@ jobs:
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: "3.11"
+        cache: 'pip'
     - name: Install coverage
       run: pip install coverage[toml]
 
