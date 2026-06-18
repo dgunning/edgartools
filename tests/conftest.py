@@ -136,6 +136,55 @@ def pytest_configure(config):
         )
 
 
+@pytest.fixture(scope="session", autouse=True)
+def cache_sec_submissions_for_session():
+    """Memoize SEC *submissions* downloads for the whole test session.
+
+    Tests disable the HTTP cache (see pytest_configure) and submissions have no
+    in-process cache — the lru_cache was removed in #471 so production freshness
+    is governed by a 30s HTTP TTL. In the suite that means every ``Company(...)``
+    re-downloads the submissions JSON live from SEC, and the same entities recur
+    constantly (``Company("AAPL")`` alone appears 243x). SEC data doesn't change
+    mid-run, so we memoize the actual download per CIK for the session.
+
+    Only the real SEC download is wrapped, so local-storage code paths and the
+    cache-behaviour tests (which mock or exercise different functions) are
+    unaffected. Both the defining-module binding and the ``edgar.entity``
+    re-export are patched so the ``_filings.py`` caller is covered too.
+
+    Set EDGAR_TEST_CACHE_STATS=1 to print hit/miss stats at session end.
+    """
+    import os
+    import edgar.entity.submissions as _subs
+    import edgar.entity as _ent
+
+    cache = {}
+    stats = {"calls": 0, "downloads": 0}
+    orig = _subs.download_entity_submissions_from_sec
+    reexported = getattr(_ent, "download_entity_submissions_from_sec", None) is orig
+
+    def cached_download(cik):
+        stats["calls"] += 1
+        if cik not in cache:
+            stats["downloads"] += 1
+            cache[cik] = orig(cik)
+        return cache[cik]
+
+    _subs.download_entity_submissions_from_sec = cached_download
+    if reexported:
+        _ent.download_entity_submissions_from_sec = cached_download
+    try:
+        yield stats
+    finally:
+        _subs.download_entity_submissions_from_sec = orig
+        if reexported:
+            _ent.download_entity_submissions_from_sec = orig
+        if os.environ.get("EDGAR_TEST_CACHE_STATS"):
+            saved = stats["calls"] - stats["downloads"]
+            print(f"\n[submissions cache] {stats['calls']} calls, "
+                  f"{stats['downloads']} live downloads, {saved} saved")
+
+
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_call(item):
     """Skip network tests gracefully when SEC returns transient empty responses."""
