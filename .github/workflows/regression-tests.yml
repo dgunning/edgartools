@@ -25,11 +25,15 @@ concurrency:
 jobs:
   regression:
     runs-on: ubuntu-latest
+    env:
+      EDGAR_LOCAL_DATA_DIR: ${{ github.workspace }}/.edgar-data
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12"]  # Fewer Python versions for regression tests
-        
+        # Single version: regression tests verify data correctness against real
+        # filings, not Python compatibility (the fast job covers 3.10 + 3.13).
+        python-version: ["3.12"]
+
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Set up Python ${{ matrix.python-version }}
@@ -37,6 +41,17 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
+
+    # Persist the SEC HTTP cache — regression tests fetch real filings, and
+    # /Archives/edgar/data is cached forever (see CACHE_RULES), so a warm cache
+    # serves them from disk instead of re-downloading.
+    - name: Restore SEC HTTP cache
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        path: ${{ github.workspace }}/.edgar-data/_tcache
+        key: edgar-tcache-regression-${{ github.run_id }}
+        restore-keys: |
+          edgar-tcache-regression-
 
     - name: Install dependencies
       run: |
@@ -46,11 +61,11 @@ jobs:
 
     - name: Run regression tests
       run: |
-        pytest --cov --cov-report=xml -m regression
-        
+        pytest --cov --cov-report=xml -m regression --enable-cache
+
     - name: Upload coverage reports
       uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
-      if: matrix.python-version == '3.11'
+      if: matrix.python-version == '3.12'
       with:
         files: coverage.xml
         fail_ci_if_error: false
