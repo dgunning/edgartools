@@ -264,6 +264,13 @@ def reverse_name(name: str) -> str:
     surname_parts = parts[:surname_end]
     given_parts = parts[surname_end:]
 
+    # ── 3a. Pull a suffix that sits between surname and given name ───
+    # ("Roberts III Chris" → surname "Roberts", suffix "III", given "Chris").
+    # SEC's LAST SUFFIX FIRST ordering leaves the suffix as the first given
+    # token. Keep at least one given token.
+    while len(given_parts) > 1 and given_parts[0].upper().rstrip('.,') in _SUFFIXES_NORM:
+        suffixes.append(given_parts.pop(0))
+
     # ── 3b. Reorder displaced initials ──────────────────────────────
     # SEC sometimes stores "LAST INITIAL FIRST" (e.g. "Bennett C Frank",
     # "Borninkhof K. Michelle").  Detect when the first given-name token

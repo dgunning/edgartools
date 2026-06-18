@@ -75,6 +75,19 @@ class TestSuffixes:
     def test_professional_suffixes(self, input_name, expected):
         assert reverse_name(input_name) == expected
 
+    @pytest.mark.fast
+    @pytest.mark.parametrize("input_name, expected", [
+        # SEC LAST SUFFIX FIRST ordering — suffix between surname and given.
+        # Real case: PPG insider "Roberts III Chris" (CIK 1775438).
+        ("ROBERTS III CHRIS", "Chris Roberts III"),
+        ("Roberts III Chris", "Chris Roberts III"),
+        ("SMITH JR ROBERT", "Robert Smith JR"),
+        ("ROBERTS III CHRIS C", "Chris C Roberts III"),
+        ("VAN HOUTEN III JOHN", "John Van Houten III"),
+    ])
+    def test_mid_suffix_ordering(self, input_name, expected):
+        assert reverse_name(input_name) == expected
+
 
 class TestTitlePrefixes:
 
