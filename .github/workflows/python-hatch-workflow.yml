@@ -80,6 +80,11 @@ jobs:
     # Runs on push to main, nightly schedule, and manual dispatch.
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    env:
+      # Relocate the EDGAR data/cache dir into the workspace so it can be cached.
+      # This only moves where the HTTP cache (_tcache) lives; it does NOT enable
+      # local storage (that needs EDGAR_USE_LOCAL_DATA, which tests disable).
+      EDGAR_LOCAL_DATA_DIR: ${{ github.workspace }}/.edgar-data
 
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -88,6 +93,20 @@ jobs:
       with:
         python-version: "3.12"
         cache: 'pip'
+
+    # Persist the SEC HTTP cache across runs. Filing documents and XBRL under
+    # /Archives/edgar/data are cached forever (see CACHE_RULES), so a warm cache
+    # serves the bulk of the suite from disk instead of re-downloading from SEC.
+    # run_id-suffixed key always writes a fresh entry; restore-keys warm-starts
+    # from the most recent prior cache (monotonic, GH evicts LRU at the 10GB cap).
+    - name: Restore SEC HTTP cache
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        path: ${{ github.workspace }}/.edgar-data/_tcache
+        key: edgar-tcache-network-${{ github.run_id }}
+        restore-keys: |
+          edgar-tcache-network-
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -96,8 +115,9 @@ jobs:
 
     - name: Run network tests
       run: |
-        # Sequential - respects SEC rate limits (10 req/sec)
-        pytest --cov --cov-report=xml -m 'network and not slow and not regression'
+        # Sequential - respects SEC rate limits. --enable-cache persists HTTP
+        # responses to _tcache (immutable /Archives data cached forever).
+        pytest --cov --cov-report=xml -m 'network and not slow and not regression' --enable-cache
 
     - name: Upload coverage data
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -113,6 +133,8 @@ jobs:
     # Slow tests skip PRs (often network-heavy). Push/schedule/dispatch only.
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    env:
+      EDGAR_LOCAL_DATA_DIR: ${{ github.workspace }}/.edgar-data
 
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -121,6 +143,16 @@ jobs:
       with:
         python-version: "3.12"
         cache: 'pip'
+
+    # Persist the SEC HTTP cache (see test-network for rationale).
+    - name: Restore SEC HTTP cache
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        path: ${{ github.workspace }}/.edgar-data/_tcache
+        key: edgar-tcache-slow-${{ github.run_id }}
+        restore-keys: |
+          edgar-tcache-slow-
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -129,8 +161,8 @@ jobs:
 
     - name: Run slow tests
       run: |
-        # Sequential - often network-heavy
-        pytest --cov --cov-report=xml -m 'slow and not regression'
+        # Sequential - often network-heavy. --enable-cache persists HTTP responses.
+        pytest --cov --cov-report=xml -m 'slow and not regression' --enable-cache
 
     - name: Upload coverage data
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

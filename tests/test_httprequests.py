@@ -162,7 +162,9 @@ async def test_get_daily_index_url_async():
         tasks = [get_with_retry_async(client=client, url=url) for url in urls]
         results = await asyncio.gather(*tasks)
         for r in results:
-            assert r.status_code == 200
+            # 304 (Not Modified) is a successful conditional response when the
+            # HTTP cache is warm — accept it so the test is cache-agnostic.
+            assert r.status_code in (200, 304)
 
 
 def test_download_index_file():
