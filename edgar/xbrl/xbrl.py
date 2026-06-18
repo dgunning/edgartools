@@ -594,7 +594,7 @@ class XBRL:
             XBRL object with parsed data
         """
         if filing.form.endswith("/A"):
-            log.warning(dedent(f"""
+            log.debug(dedent(f"""
             {filing}
             is an amended filing and may not contain full XBRL data e.g. some statements might be missing.
             Consider using the original filing instead if available with `get_filings(form="10-K", amendments=False)`
@@ -605,7 +605,7 @@ class XBRL:
         xbrl_attachments = XBRLAttachments(filing.attachments)
 
         if xbrl_attachments.empty:
-            log.warning(f"No XBRL attachments found in filing {filing}")
+            log.debug(f"No XBRL attachments found in filing {filing}")
             return None
 
         if xbrl_attachments.get('schema'):
