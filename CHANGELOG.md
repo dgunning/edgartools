@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.37.0] - 2026-06-19
+
+A batch of fixes across insider-ownership footnote handling and 10b5-1 plan detection, document search snippet highlighting, BDC/Form C/N-PORT data access, TTM quarterly derivation, and date/currency formatting, plus an ISO 4217 currency column on XBRL facts and the Form C parser's migration to lxml.
+
 ### Added
 
 - **`currency` column on the XBRL facts DataFrame** — `xbrl().facts.to_dataframe()` now includes a `currency` column with each fact's ISO 4217 code (e.g. `USD`, `HKD`) resolved from its unit measure. Non-USD filers tag monetary facts with opaque unit ids such as `UNIT_STANDARD_HKD_MNUSOXGRF0O9R60JINVDUQ`, which were exposed verbatim in `unit_ref` and made currency-based filtering and display unreliable; the raw `unit_ref` is preserved, while `currency` gives a usable code. Per-share monetary units report their numerator currency, and non-monetary units (shares, pure, custom) resolve to `None` rather than a misleading value. ([#850](https://github.com/dgunning/edgartools/issues/850))
