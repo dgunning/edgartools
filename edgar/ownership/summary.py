@@ -18,7 +18,7 @@ from rich.console import Group, Text
 from rich.panel import Panel
 from rich.table import Table
 
-from edgar.ownership.core import format_numeric, safe_numeric
+from edgar.ownership.core import detect_10b5_1_plan, format_numeric, safe_numeric
 from edgar.ownership.summary_records import SecurityHolding, TransactionActivity
 
 __all__ = [
@@ -234,6 +234,8 @@ class TransactionSummary(OwnershipSummary):
     transactions: List[TransactionActivity] = field(default_factory=list)
     remaining_shares: Optional[int] = None
     has_derivative_transactions: bool = False
+    aff10b5_one: Optional[bool] = None
+    all_footnotes_text: str = ""
 
     @property
     def transaction_types(self) -> List[str]:
@@ -256,25 +258,29 @@ class TransactionSummary(OwnershipSummary):
         Check if any transaction in this summary was executed under a Rule 10b5-1 trading plan.
 
         Returns:
-            True if any transaction has 10b5-1 plan detected
-            False if transactions have footnotes but no 10b5-1 plan mentioned
-            None if no transactions or no footnotes available
+            The official aff10b5One value when present
+            True if a 10b5-1 plan is detected in transaction or filing footnotes
+            False if footnotes exist but reference no 10b5-1 plan
+            None if neither the checkbox nor any footnote evidence is available
         """
-        if not self.transactions:
-            return None
+        # 1. The document-level <aff10b5One> checkbox is authoritative when present.
+        if self.aff10b5_one is not None:
+            return self.aff10b5_one
 
-        # Check each transaction
+        # 2. Fall back to footnote evidence. Per-transaction footnote attribution
+        #    is frequently empty even when a 10b5-1 footnote exists, so also scan
+        #    the full footnote set of the filing.
         results = [t.is_10b5_1_plan for t in self.transactions]
+        full_scan = detect_10b5_1_plan(self.all_footnotes_text)
 
-        # If any transaction is under a 10b5-1 plan, return True
-        if any(r is True for r in results):
+        if any(r is True for r in results) or full_scan is True:
             return True
 
-        # If we have footnotes but no plan detected, return False
-        if any(r is False for r in results):
+        # Footnotes exist but reference no 10b5-1 plan.
+        if any(r is False for r in results) or full_scan is False:
             return False
 
-        # No footnotes available
+        # No checkbox and no footnote evidence.
         return None
 
     @property

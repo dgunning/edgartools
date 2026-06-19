@@ -195,6 +195,11 @@ class Footnotes:
             default_value: Optional[str] = None):
         return self._footnotes.get(footnote_id, default_value)
 
+    @property
+    def text(self) -> str:
+        """All footnote text combined into a single string."""
+        return " ".join(self._footnotes.values())
+
     def summary(self) -> pd.DataFrame:
         return pd.DataFrame([(k, v) for k, v in self._footnotes.items()],
                             columns=["id", "footnote"]).set_index("id")
