@@ -306,6 +306,7 @@ class Ownership:
                 remaining_shares=remaining,
                 has_derivative_transactions=has_derivative,
                 aff10b5_one=self.aff10b5_one,
+                all_footnotes_text=self.footnotes.text if self.footnotes else "",
                 remarks=self.remarks if self.remarks else ""
             )
 
