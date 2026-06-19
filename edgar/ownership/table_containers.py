@@ -155,6 +155,10 @@ class NonDerivativeTable:
                     ('AcquiredDisposed', child_text(transaction_amt_tag, 'transactionAcquiredDisposedCode')),
                     ('DirectIndirect', child_text(ownership_nature_tag, 'directOrIndirectOwnership')),
                     ('NatureOfOwnership', child_text(ownership_nature_tag, 'natureOfOwnership')),
+                    # Collect footnoteId references from the whole transaction, not just
+                    # <transactionCoding>: footnotes attach to securityTitle, transaction
+                    # date, shares, price, etc. (edgartools-t043).
+                    ('footnotes', get_footnotes(transaction_tag)),
                 ]
             )
             transaction_coding_tag = transaction_tag.find("transactionCoding")
@@ -164,7 +168,6 @@ class NonDerivativeTable:
                         ('form', child_text(transaction_coding_tag, 'transactionFormType')),
                         ('Code', child_text(transaction_coding_tag, 'transactionCode')),
                         ('EquitySwap', get_bool(child_text(transaction_coding_tag, 'equitySwapInvolved'))),
-                        ('footnotes', get_footnotes(transaction_coding_tag))
                     ]
                 )
                 transaction.update(transaction_coding)
@@ -276,6 +279,9 @@ class DerivativeTable:
                     ('AcquiredDisposed', child_text(transaction_amt_tag, 'transactionAcquiredDisposedCode')),
                     ('Date', child_value(transaction_tag, 'transactionDate')),
                     ('Remaining', child_text(post_transaction_tag, 'sharesOwnedFollowingTransaction')),
+                    # Collect footnoteId references from the whole transaction, not just
+                    # <transactionCoding> (edgartools-t043).
+                    ('footnotes', get_footnotes(transaction_tag)),
                 ]
             )
 
@@ -287,7 +293,6 @@ class DerivativeTable:
                         ('form', child_text(transaction_coding_tag, 'transactionFormType')),
                         ('Code', child_text(transaction_coding_tag, 'transactionCode')),
                         ('EquitySwap', get_bool(child_text(transaction_coding_tag, 'equitySwapInvolved'))),
-                        ('footnotes', get_footnotes(transaction_coding_tag))
                     ]
                 )
                 transaction.update(transaction_coding)

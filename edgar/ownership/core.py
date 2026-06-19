@@ -75,7 +75,11 @@ def transaction_footnote_id(tag: Tag) -> Tuple[str, Optional[str]]:
 
 
 def get_footnotes(tag: Tag) -> str:
-    footnotes = []
+    # A single transaction can reference the same footnote id from several
+    # sub-elements (e.g. securityTitle and shares), so dedupe while preserving
+    # first-seen order to avoid resolving the same footnote text twice.
+    footnotes: list[str] = []
+    seen = set()
     for el in tag.find_all("footnoteId"):
         if isinstance(el, Tag):
             footnote_id = el.attrs.get('id')
@@ -84,7 +88,10 @@ def get_footnotes(tag: Tag) -> str:
                 if isinstance(footnote_id, list):
                     footnote_id = footnote_id[0] if footnote_id else None
                 if footnote_id:
-                    footnotes.append(str(footnote_id))
+                    footnote_id = str(footnote_id)
+                    if footnote_id not in seen:
+                        seen.add(footnote_id)
+                        footnotes.append(footnote_id)
     return '\n'.join(footnotes)
 
 

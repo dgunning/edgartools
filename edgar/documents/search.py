@@ -287,14 +287,23 @@ class DocumentSearch:
                 if isinstance(node, TableNode):
                     # Search in table content
                     table_text = node.text()
-                    if table_text and search_text.lower() in table_text.lower():
-                        results.append(SearchResult(
-                            node=node,
-                            text=f"Table: {node.caption or 'Untitled'}",
-                            start_offset=0,
-                            end_offset=len(table_text),
-                            context=table_text[:200] + "..." if len(table_text) > 200 else table_text
-                        ))
+                    if table_text:
+                        match_pos = table_text.lower().find(search_text.lower())
+                        if match_pos != -1:
+                            # Build a context window around the actual match with
+                            # offsets relative to that window, so snippet highlights
+                            # the match rather than the whole truncated table text
+                            # (edgartools-fi4h).
+                            context, adj_start, adj_end = self._get_context_with_offsets(
+                                table_text, match_pos, match_pos + len(search_text)
+                            )
+                            results.append(SearchResult(
+                                node=node,
+                                text=f"Table: {node.caption or 'Untitled'}",
+                                start_offset=adj_start,
+                                end_offset=adj_end,
+                                context=context
+                            ))
 
         elif search_type == 'section':
             # Search sections

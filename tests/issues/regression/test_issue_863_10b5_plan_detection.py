@@ -134,14 +134,19 @@ def test_aff10b5_one_checkbox_flows_through_xml_parsing_end_to_end():
 
 @pytest.mark.network
 @pytest.mark.vcr
-def test_problem2_full_footnote_fallback_on_real_pre_checkbox_filing():
+def test_problem2_real_pre_checkbox_filing_resolves_via_per_transaction_footnotes():
     """End-to-end on the reported Problem 2 filing: AAPL insider Form 4 (2022).
 
     Pinned by accession (not ``.latest()``) and VCR-backed for determinism. This
-    is a pre-2023-04 Form 4 that carries NO ``<aff10b5One>`` checkbox, and whose
-    per-transaction footnote attribution is empty, yet whose filing-level
-    footnotes describe a Rule 10b5-1 plan. Before the fix, ``has_10b5_1_plan``
-    returned ``None``; the full-footnote-set fallback now returns ``True``.
+    is a pre-2023-04 Form 4 that carries NO ``<aff10b5One>`` checkbox; its 10b5-1
+    footnote is attached to ``<securityTitle>`` (not ``<transactionCoding>``).
+
+    Originally (#863 Problem 2) per-transaction footnote attribution came through
+    empty, so ``has_10b5_1_plan`` returned ``None`` and only the full-footnote
+    fallback could recover it. After edgartools-t043 fixed the attribution, each
+    transaction carries its real footnote IDs and per-transaction detection works
+    directly. (The full-footnote fallback remains a safety net, covered by the
+    synthetic tests above.)
 
     Reported in https://github.com/dgunning/edgartools/issues/863 (Problem 2).
     """
@@ -151,10 +156,10 @@ def test_problem2_full_footnote_fallback_on_real_pre_checkbox_filing():
                     filing_date='2022-05-06', accession_no='0000320193-22-000061')
     summary = filing.obj().get_ownership_summary()
 
-    # No structured checkbox on this pre-2023 filing — the fallback is what fires.
+    # No structured checkbox on this pre-2023 filing.
     assert summary.aff10b5_one is None
-    # Per-transaction footnote attribution is empty in the summary path...
-    assert all(not t.footnotes_text for t in summary.transactions)
-    # ...but the filing-level footnotes mention the plan, so the scan finds it.
-    assert '10b5-1' in summary.all_footnotes_text
+    # Per-transaction footnote attribution is now populated (edgartools-t043)...
+    assert all(t.footnote_ids for t in summary.transactions)
+    # ...and at least one transaction's own footnotes describe the 10b5-1 plan.
+    assert any(t.is_10b5_1_plan is True for t in summary.transactions)
     assert summary.has_10b5_1_plan is True
