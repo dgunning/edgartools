@@ -8,30 +8,30 @@ in ``text_render``/``html_render``.
 """
 import itertools
 from functools import cached_property
-from typing import List, Union
+from typing import List, Optional, Union
 
 import numpy as np
 import pandas as pd
 from bs4 import BeautifulSoup, Tag
 
 from edgar.ownership.core import safe_numeric
+from edgar.ownership.html_render import ownership_to_html
 from edgar.ownership.models import (
     Footnotes,
     Issuer,
     OwnerSignature,
     OwnerSignatures,
 )
+from edgar.ownership.owners import ReportingOwners
+from edgar.ownership.summary import InitialOwnershipSummary, TransactionSummary
+from edgar.ownership.summary_records import SecurityHolding, TransactionActivity
+from edgar.ownership.table_containers import DerivativeTable, NonDerivativeTable
 from edgar.ownership.tables import (
     DerivativeHoldings,
     DerivativeTransactions,
     NonDerivativeHoldings,
     NonDerivativeTransactions,
 )
-from edgar.ownership.table_containers import DerivativeTable, NonDerivativeTable
-from edgar.ownership.owners import ReportingOwners
-from edgar.ownership.summary import InitialOwnershipSummary, TransactionSummary
-from edgar.ownership.summary_records import SecurityHolding, TransactionActivity
-from edgar.ownership.html_render import ownership_to_html
 from edgar.ownership.text_render import ownership_to_context
 from edgar.richtools import repr_rich
 from edgar.xmltools import child_text
@@ -42,6 +42,18 @@ __all__ = [
     'Form4',
     'Form5',
 ]
+
+
+def _parse_aff10b5_one(value: Optional[str]) -> Optional[bool]:
+    if value is None:
+        return None
+
+    normalized = value.strip().lower()
+    if normalized in {'1', 'true'}:
+        return True
+    if normalized in {'0', 'false'}:
+        return False
+    return None
 
 
 class Ownership:
@@ -59,7 +71,8 @@ class Ownership:
                  signatures: OwnerSignatures,
                  reporting_period: str,
                  remarks: str,
-                 no_securities: bool = False
+                 no_securities: bool = False,
+                 aff10b5_one: Optional[bool] = None,
                  ):
         self.form: str = form
         self.footnotes: Footnotes = footnotes
@@ -71,6 +84,7 @@ class Ownership:
         self.reporting_period: str = reporting_period
         self.remarks: str = remarks
         self.no_securities = no_securities
+        self.aff10b5_one = aff10b5_one
 
     @property
     def insider_name(self):
@@ -291,6 +305,7 @@ class Ownership:
                 transactions=activities,
                 remaining_shares=remaining,
                 has_derivative_transactions=has_derivative,
+                aff10b5_one=self.aff10b5_one,
                 remarks=self.remarks if self.remarks else ""
             )
 
@@ -348,6 +363,7 @@ class Ownership:
         remarks = child_text(root, "remarks") or ""
 
         no_securities = child_text(root, "noSecuritiesOwned") == "1"
+        aff10b5_one = _parse_aff10b5_one(child_text(root, "aff10b5One"))
 
         # Footnotes
         footnotes = Footnotes.extract(root)
@@ -391,7 +407,8 @@ class Ownership:
             'derivative_table': derivative_table,
             'reporting_period': report_period,
             'remarks': remarks,
-            'no_securities': no_securities
+            'no_securities': no_securities,
+            'aff10b5_one': aff10b5_one
         }
         return ownership_document
 

@@ -27,6 +27,12 @@ FORM_DESCRIPTIONS = {'3': 'Initial beneficial ownership',
                      '5': 'Annual statement of beneficial ownership',
                      }
 
+_RULE_10B5_1_PATTERN = re.compile(
+    r'10b[-\s\u2010-\u2015\u2212]?5'
+    r'(?:[-\s\u2010-\u2015\u2212]?1(?!\d)|[-\s\u2010-\u2015\u2212]+plan)',
+    re.IGNORECASE,
+)
+
 
 def describe_ownership(direct_indirect: str, nature_of_ownership: str) -> str:
     """
@@ -290,16 +296,4 @@ def detect_10b5_1_plan(footnotes_text: Optional[str]) -> Optional[bool]:
     if not footnotes_text or not footnotes_text.strip():
         return None
 
-    text = footnotes_text.lower()
-
-    # Common patterns for 10b5-1 references in SEC filings
-    patterns = [
-        "10b5-1",
-        "10b-5-1",
-        "rule 10b5",
-        "rule 10b-5",
-        "10b5 plan",
-        "10b-5 plan",
-    ]
-
-    return any(pattern in text for pattern in patterns)
+    return _RULE_10B5_1_PATTERN.search(footnotes_text) is not None

@@ -234,6 +234,7 @@ class TransactionSummary(OwnershipSummary):
     transactions: List[TransactionActivity] = field(default_factory=list)
     remaining_shares: Optional[int] = None
     has_derivative_transactions: bool = False
+    aff10b5_one: Optional[bool] = None
 
     @property
     def transaction_types(self) -> List[str]:
@@ -256,10 +257,14 @@ class TransactionSummary(OwnershipSummary):
         Check if any transaction in this summary was executed under a Rule 10b5-1 trading plan.
 
         Returns:
+            The official aff10b5One value when present
             True if any transaction has 10b5-1 plan detected
             False if transactions have footnotes but no 10b5-1 plan mentioned
             None if no transactions or no footnotes available
         """
+        if self.aff10b5_one is not None:
+            return self.aff10b5_one
+
         if not self.transactions:
             return None
 
