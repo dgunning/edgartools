@@ -37,7 +37,9 @@ def test_offerings_eval_meets_thresholds():
         assert c, f"no results for facet {facet}"
         n = c["n"]
         coverage = c["ok"] / n
-        bad_rate = (c["bad"] + c["error"]) / n
+        # 'suspect' = a Tier B oracle flagged the value as internally inconsistent;
+        # count it as bad so the guardrail trips on likely-wrong values too.
+        bad_rate = (c["bad"] + c["error"] + c["suspect"]) / n
         if coverage < limits["coverage_floor"]:
             failures.append(f"{facet}: coverage {coverage:.0%} < floor {limits['coverage_floor']:.0%}")
         if bad_rate > limits["bad_rate_ceiling"]:

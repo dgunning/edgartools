@@ -27,33 +27,38 @@ re-measure rerun; coverage up, bad_rate stays 0, no anchor regresses
 
 ## Buckets
 
-`ok` clean usable value · `null` no value (see cluster reason) · `deferred`
+`ok` clean usable value · `suspect` a Tier B oracle judged it internally
+inconsistent (likely wrong) · `null` no value (see cluster reason) · `deferred`
 legitimately indeterminate (pay-as-you-go ASR capacity) · `bad` garbage or
 out-of-range — **never ship** · `error` extractor raised.
 
-`coverage = ok / applicable`  ·  `bad_rate = (bad + error) / applicable`
+`coverage = ok / applicable`  ·  `bad_rate = (bad + error + suspect) / applicable`
+· `verified = oracle-passed / oracle-judged`
 
 Anchor entries carry an `expected` value; a mismatch is forced to `bad`, so the
 harness checks accuracy (not just coverage) on the hand-verified cases.
 
 ## Tiers
 
-- **Tier A (here): coverage & validity.** No labels; runs on the whole corpus.
-- **Tier B (next): self-check oracles.** No labels either — exploit the filing's
-  internal redundancy: `net_fee_due ≈ total_offering_amount × fee_rate`,
-  `Σ per-security aggregate ≈ total`, `current_effective + 3y == shelf_expires`,
-  every takedown ∈ `[effective, expires]`. These slot into each facet's
-  classifier and turn coverage into measured *accuracy*.
+- **Tier A: coverage & validity.** No labels; runs on the whole corpus.
+- **Tier B (started): self-check oracles.** No labels either — exploit the
+  filing's internal redundancy. Implemented: `fee_capacity` cross-check —
+  `Σ fee_amount / fee_rate` must reconcile with `total_offering_amount` (the
+  offering cell validated via the independent fee÷rate path; carry-forward /
+  offset filings are skipped). Next: `Σ per-security aggregate ≈ total`,
+  `current_effective + 3y == shelf_expires`, every takedown ∈
+  `[effective, expires]`. A covered value that fails its oracle is demoted to
+  `suspect`, turning coverage into measured *accuracy*.
 - **Tier C (later): LLM-judge** on a stratified sample via the existing
   `edgar/ai/evaluation` infra, for facets without a clean oracle.
 
 ## Baseline (2026-06-20, post fu3x/2w5y/2h4c/zxnj)
 
-| facet | coverage | bad_rate | top triage target |
-|-------|----------|----------|-------------------|
-| fee_capacity | 67% | 0% | null: pre-2022 inline tables / no exhibit |
-| lead_bookrunner | 21% | 0% | null: 424B2 structured-note cover agent not extracted |
-| shelf_status | 100% | 0% | — |
+| facet | coverage | bad_rate | verified | top triage target |
+|-------|----------|----------|----------|-------------------|
+| fee_capacity | 67% | 0% | 9/9 | null: pre-2022 inline tables / no exhibit |
+| lead_bookrunner | 21% | 0% | — | null: 424B2 structured-note cover agent not extracted |
+| shelf_status | 100% | 0% | — | — |
 
 The headline next target is **lead_bookrunner coverage** — the 2h4c guard removed
 all garbage but the 424B2 structured-note covers return an honest `None`;
