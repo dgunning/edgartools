@@ -97,6 +97,89 @@
     "note": "BofA TOC blob (2h4c)"
   },
   {
+    "accession": "0001104659-20-040593",
+    "form": "S-3",
+    "issuer": "consumer",
+    "vintage": "pre-2022",
+    "facet": "fee_capacity",
+    "expected": 30000000.0,
+    "frontier": true,
+    "note": "Kingold Jewelry inline fee table (gap)"
+  },
+  {
+    "accession": "0001654954-21-007440",
+    "form": "S-3/A",
+    "issuer": "medical_device",
+    "vintage": "pre-2022",
+    "facet": "fee_capacity",
+    "expected": 50000000.0,
+    "frontier": true,
+    "note": "Dynatronics inline fee table (gap)"
+  },
+  {
+    "accession": "0001193125-21-204768",
+    "form": "S-3",
+    "issuer": "biotech_foreign",
+    "vintage": "pre-2022",
+    "facet": "fee_capacity",
+    "expected": 250000000.0,
+    "frontier": true,
+    "note": "DBV Technologies inline fee table (gap)"
+  },
+  {
+    "accession": "0001104659-21-067046",
+    "form": "S-3",
+    "issuer": "energy",
+    "vintage": "pre-2022",
+    "facet": "fee_capacity",
+    "expected": 200000000.0,
+    "frontier": true,
+    "note": "Uranium Energy inline fee table (gap)"
+  },
+  {
+    "accession": "0001047469-18-007293",
+    "form": "S-3",
+    "issuer": "clean_energy",
+    "vintage": "pre-2022",
+    "facet": "fee_capacity",
+    "expected": 38606063.86,
+    "frontier": true,
+    "note": "Plug Power inline fee table (gap)"
+  },
+  {
+    "accession": "0001193125-20-310765",
+    "form": "S-3ASR",
+    "issuer": "financial",
+    "vintage": "pre-2022",
+    "facet": "fee_capacity",
+    "expected": null,
+    "deferred": true,
+    "frontier": true,
+    "note": "Charles Schwab indeterminate 457(r) inline (gap)"
+  },
+  {
+    "accession": "0001104659-20-121185",
+    "form": "S-3ASR",
+    "issuer": "tech",
+    "vintage": "pre-2022",
+    "facet": "fee_capacity",
+    "expected": null,
+    "deferred": true,
+    "frontier": true,
+    "note": "Micron indeterminate 457(r) inline (gap)"
+  },
+  {
+    "accession": "0001104659-21-086851",
+    "form": "S-3ASR",
+    "issuer": "reit",
+    "vintage": "pre-2022",
+    "facet": "fee_capacity",
+    "expected": null,
+    "deferred": true,
+    "frontier": true,
+    "note": "Realty Income indeterminate 457(r) inline (gap)"
+  },
+  {
     "accession": "0001193125-25-068723",
     "form": "S-3",
     "issuer": "mixed",

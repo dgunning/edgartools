@@ -19,13 +19,27 @@ re-measure rerun; coverage up, bad_rate stays 0, no anchor regresses
 
 | File | Role |
 |------|------|
-| `corpus.json` | Frozen, stratified list of real filings (anchors + live breadth) |
+| `corpus.json` | Frozen, stratified list of real filings (anchors + frontier + live breadth) |
 | `build_corpus.py` | Rebuild/refresh the corpus (`--no-live` for anchors only) |
 | `run_eval.py` | Tier A runner: bucket each facet, print dashboard + failure catalog |
 | `thresholds.json` | Locked coverage floors / bad_rate ceilings (the ratchet) |
 | `test_eval_ratchet.py` | Network-marked guardrail asserting thresholds hold |
+| `test_frontier.py` | Fast unit tests pinning the frontier/ratchet partition |
 | `tier_c_judge.py` | Tier C LLM-judge: prompt builder + verdict parser + evidence gatherer |
 | `test_tier_c_judge.py` | Fast unit tests for the Tier C pure functions |
+
+## Corpus strata
+
+- **anchors** — hand-verified known-good (and known-deferred) values; regression
+  guards. An `expected` mismatch is forced to `bad`.
+- **frontier** — documented coverage gaps with hand-verified ground truth, carried
+  with `"frontier": true`. They are run and reported but **excluded from the
+  ratcheted denominator** (`summarize` skips them by default), so adding a gap case
+  never lowers a floor. A frontier entry that is `null` today is the *gap*; once an
+  extractor reaches it, its `expected` value (or `deferred`) starts being checked
+  and a wrong value turns `bad`. Watch the gap close in the dashboard's
+  "Frontier (known gaps — NOT ratcheted)" section.
+- **live** — breadth-only sample (no expectations), surfaces unknown failure modes.
 
 ## Buckets
 
@@ -77,11 +91,28 @@ harness checks accuracy (not just coverage) on the hand-verified cases.
 
 | facet | coverage | bad_rate | verified | remaining triage target |
 |-------|----------|----------|----------|-------------------------|
-| fee_capacity | 78% | 0% | 9/9 | null: pre-2022 inline "Calculation of Registration Fee" tables (needs corpus anchors) |
+| fee_capacity | 78% | 0% | 9/9 | frontier: pre-2022 inline "Calculation of Registration Fee" tables |
 | lead_bookrunner | 93% | 0% | — | one prose-only structured note (not worth a fragile pattern) |
 | shelf_status | 100% | 0% | 2/2 | — |
 
-Both coverage attacks that lifted these numbers were measured here: the 424B2
-cover-agent extraction (lead_bookrunner 21%→93%) and the amendment fee-source
-fallback (fee_capacity 67%→78%). The lifecycle Tier B oracle now verifies
-shelf_status date/takedown consistency.
+Coverage/bad_rate are over the *ratcheted* scope only (frontier excluded). Both
+attacks that lifted these numbers were measured here: the 424B2 cover-agent
+extraction (lead_bookrunner 21%→93%) and the amendment fee-source fallback
+(fee_capacity 67%→78%). The lifecycle Tier B oracle now verifies shelf_status
+date/takedown consistency.
+
+## Frontier: pre-2022 inline fee tables (the next lever)
+
+Before the EX-FILING FEES (Exhibit 107) regime, the registration-fee table lived
+inline in the S-3/S-1 body, with no exhibit to parse. `extract_registration_fee_table`
+only reads the EX-107 attachment, so **every pre-2022 filing returns `None`** — a
+hard wall the frozen 2025 corpus could not see. The corpus now carries 8
+hand-verified pre-2022 entries spanning consumer, medical-device, biotech, energy,
+clean-energy, financial, tech, and REIT issuers (5 concrete fixed-dollar shelves +
+3 indeterminate 457(r) WKSI shelves). Current frontier state: **0/8 reachable**.
+
+`_find_fee_table` already *locates* the inline body table on all of them; the gap
+is parsing the older cover-table layout (totals like `Total $30,000,000`). Closing
+it is the next bead: extend `_parse_fee_table_html` (or add an inline path) to read
+the pre-checkbox table, then the 5 concrete entries return `expected` and the 3
+WKSI shelves return `deferred`, and the frontier section walks toward 8/8.

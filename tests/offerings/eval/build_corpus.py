@@ -54,6 +54,46 @@ ANCHORS = [
      "facet": "lead_bookrunner", "note": "BofA TOC blob (2h4c)"},
 ]
 
+# Frontier: documented coverage gaps with hand-verified ground truth, kept OUT of
+# the ratcheted denominator (see run_eval.summarize). These are the pre-2022
+# "Calculation of Registration Fee" filings: before the EX-FILING FEES (Exhibit
+# 107) regime the fee table lived inline in the S-3/S-1 body, with no exhibit to
+# parse — so extract_registration_fee_table returns None for every one of them
+# today. Each total below was read from the inline cover table and cross-checked
+# against the stated fee (offering amount x SEC rate = fee). When an inline-table
+# extractor lands, the concrete entries must return `expected` and the
+# indeterminate 457(r) shelves must return `deferred`. Diverse by sector so the
+# extractor isn't tuned to one issuer's table layout.
+FRONTIER = [
+    # concrete fixed-dollar shelves — value must be recovered exactly
+    {"accession": "0001104659-20-040593", "form": "S-3", "issuer": "consumer", "vintage": "pre-2022",
+     "facet": "fee_capacity", "expected": 30000000.0, "frontier": True,
+     "note": "Kingold Jewelry inline fee table (gap)"},
+    {"accession": "0001654954-21-007440", "form": "S-3/A", "issuer": "medical_device", "vintage": "pre-2022",
+     "facet": "fee_capacity", "expected": 50000000.0, "frontier": True,
+     "note": "Dynatronics inline fee table (gap)"},
+    {"accession": "0001193125-21-204768", "form": "S-3", "issuer": "biotech_foreign", "vintage": "pre-2022",
+     "facet": "fee_capacity", "expected": 250000000.0, "frontier": True,
+     "note": "DBV Technologies inline fee table (gap)"},
+    {"accession": "0001104659-21-067046", "form": "S-3", "issuer": "energy", "vintage": "pre-2022",
+     "facet": "fee_capacity", "expected": 200000000.0, "frontier": True,
+     "note": "Uranium Energy inline fee table (gap)"},
+    {"accession": "0001047469-18-007293", "form": "S-3", "issuer": "clean_energy", "vintage": "pre-2022",
+     "facet": "fee_capacity", "expected": 38606063.86, "frontier": True,
+     "note": "Plug Power inline fee table (gap)"},
+    # indeterminate WKSI shelves (Rule 457(r), pay-as-you-go) — inline equivalent
+    # of the deferred ASR; correct answer is `deferred`, currently null
+    {"accession": "0001193125-20-310765", "form": "S-3ASR", "issuer": "financial", "vintage": "pre-2022",
+     "facet": "fee_capacity", "expected": None, "deferred": True, "frontier": True,
+     "note": "Charles Schwab indeterminate 457(r) inline (gap)"},
+    {"accession": "0001104659-20-121185", "form": "S-3ASR", "issuer": "tech", "vintage": "pre-2022",
+     "facet": "fee_capacity", "expected": None, "deferred": True, "frontier": True,
+     "note": "Micron indeterminate 457(r) inline (gap)"},
+    {"accession": "0001104659-21-086851", "form": "S-3ASR", "issuer": "reit", "vintage": "pre-2022",
+     "facet": "fee_capacity", "expected": None, "deferred": True, "frontier": True,
+     "note": "Realty Income indeterminate 457(r) inline (gap)"},
+]
+
 # Live breadth: N most-recent per form, tagged by stratum. No expectations.
 LIVE_FORMS = [
     ("S-3", "mixed", "fee_capacity", 6),
@@ -86,19 +126,20 @@ def main() -> None:
     ap.add_argument("--quarter", type=int, default=1)
     args = ap.parse_args()
 
-    corpus = list(ANCHORS)
-    anchor_accessions = {a["accession"] for a in ANCHORS}
+    corpus = list(ANCHORS) + list(FRONTIER)
+    known = {a["accession"] for a in corpus}
     if not args.no_live:
         corpus += [r for r in _live(args.year, args.quarter)
-                   if r["accession"] not in anchor_accessions]
+                   if r["accession"] not in known]
 
     CORPUS_PATH.write_text(json.dumps(corpus, indent=2) + "\n")
     by_facet: dict[str, int] = {}
     for r in corpus:
         by_facet[r["facet"]] = by_facet.get(r["facet"], 0) + 1
+    n_live = len(corpus) - len(ANCHORS) - len(FRONTIER)
     print(f"Wrote {len(corpus)} entries to {CORPUS_PATH}")
     print("  by facet:", by_facet)
-    print(f"  anchors: {len(ANCHORS)} | live: {len(corpus) - len(ANCHORS)}")
+    print(f"  anchors: {len(ANCHORS)} | frontier: {len(FRONTIER)} | live: {n_live}")
 
 
 if __name__ == "__main__":

@@ -201,12 +201,19 @@ def run(entries, only_facet=None):
             bucket, value, reason = "error", None, f"{type(ex).__name__}: {ex}"
 
         # Anchor ground-truth check (overrides bucket -> bad on mismatch).
+        # Frontier entries are known coverage gaps: a None value is the documented
+        # gap, not a regression, so it stays in its bucket (null/deferred). A
+        # *present* value that disagrees with ground truth is still flagged — that
+        # is the regression we want to catch once an extractor closes the gap.
         if "expected" in e and bucket in ("ok", "deferred", "null"):
             exp = e["expected"]
             if exp is None:
                 if value is not None:
                     bucket, reason = "bad", f"expected None, got {value}"
-            elif value is None or abs(value - exp) > max(1.0, abs(exp) * 0.01):
+            elif value is None:
+                if not e.get("frontier"):
+                    bucket, reason = "bad", f"expected {exp}, got None"
+            elif abs(value - exp) > max(1.0, abs(exp) * 0.01):
                 bucket, reason = "bad", f"expected {exp}, got {value}"
 
         # Tier B oracle: an internal-consistency cross-check on a covered value.
@@ -224,9 +231,18 @@ def run(entries, only_facet=None):
     return results
 
 
-def summarize(results):
+def summarize(results, include_frontier=False):
+    """Bucket counts per facet.
+
+    Frontier entries (documented coverage gaps not yet reachable by any
+    extractor) are excluded by default so the ratchet measures regressions on the
+    *supported* scope only — newly-added gap cases must not drag the floor down.
+    Pass include_frontier=True to summarize the frontier set on its own.
+    """
     by_facet = defaultdict(lambda: defaultdict(int))
     for r in results:
+        if bool(r.get("frontier")) != include_frontier:
+            continue
         by_facet[r["facet"]][r["bucket"]] += 1
         by_facet[r["facet"]]["n"] += 1
     return by_facet
@@ -250,7 +266,8 @@ def print_dashboard(results):
         print(f"{facet:18}{n:>4}{c['ok']:>5}{c['suspect']:>6}{c['null']:>6}{c['deferred']:>7}"
               f"{c['bad']:>5}{c['error']:>5}{cov:>10.0%}{badr:>10.0%}{vrate:>10}")
 
-    bad = [r for r in results if r["bucket"] in ("bad", "error", "suspect")]
+    bad = [r for r in results if r["bucket"] in ("bad", "error", "suspect")
+           and not r.get("frontier")]
     if bad:
         print("\n--- Failure catalog (bad / error / suspect) ---")
         for r in bad:
@@ -259,12 +276,30 @@ def print_dashboard(results):
 
     nulls = defaultdict(int)
     for r in results:
-        if r["bucket"] == "null":
+        if r["bucket"] == "null" and not r.get("frontier"):
             nulls[(r["facet"], r["reason"])] += 1
     if nulls:
         print("\n--- Null clusters (triage targets) ---")
         for (facet, reason), cnt in sorted(nulls.items(), key=lambda x: -x[1]):
             print(f"  {cnt:>3}  [{facet}] {reason}")
+
+    # Frontier: documented coverage gaps. Not ratcheted; tracked so we can watch
+    # the gap close. coverage here = how much of the known gap is now reachable.
+    frontier = [r for r in results if r.get("frontier")]
+    if frontier:
+        fb = summarize(frontier, include_frontier=True)
+        print("\n--- Frontier (known gaps — NOT ratcheted) ---")
+        for facet, c in sorted(fb.items()):
+            n = c["n"]
+            reached = c["ok"] + c["deferred"]
+            print(f"  [{facet}] {reached}/{n} reachable "
+                  f"(ok={c['ok']} deferred={c['deferred']} null={c['null']} bad={c['bad']})")
+        gaps = defaultdict(int)
+        for r in frontier:
+            if r["bucket"] in ("null", "bad"):
+                gaps[(r["facet"], r["reason"])] += 1
+        for (facet, reason), cnt in sorted(gaps.items(), key=lambda x: -x[1]):
+            print(f"    {cnt:>3}  [{facet}] {reason}")
 
 
 def main():
