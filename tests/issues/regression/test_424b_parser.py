@@ -473,13 +473,18 @@ class TestShelfLifecycle:
 
     @pytest.mark.vcr
     def test_alzamend_shelf_expires(self):
-        """Shelf expires 3 years after filing."""
+        """Shelf expires 3 years after effectiveness (Rule 415(a)(5)).
+
+        Single-generation shelf: S-3 filed 2023-08-02, EFFECT 2023-08-10.
+        Expiry anchors on effectiveness (2023-08-10 + 3y), not the filing date
+        (edgartools-fu3x).
+        """
         from datetime import date
         filing = find("0001214659-26-002941")
         p = Prospectus424B.from_filing(filing)
         lc = p.lifecycle
         assert lc is not None
-        assert lc.shelf_expires == date(2026, 8, 2)
+        assert lc.shelf_expires == date(2026, 8, 10)
 
     @pytest.mark.vcr
     def test_alzamend_cadence(self):

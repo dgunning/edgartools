@@ -391,6 +391,18 @@ def _parse_filing_date(d) -> Optional[date]:
     return None
 
 
+def _plus_three_years(d: date) -> date:
+    """The Rule 415(a)(5) expiry date: three years after ``d``."""
+    try:
+        return d.replace(year=d.year + 3)
+    except ValueError:
+        # Feb 29 -> Feb 28
+        return d.replace(year=d.year + 3, day=d.day - 1)
+
+
+_ASR_BASE_FORMS = {'S-3ASR', 'F-3ASR'}
+
+
 class ShelfLifecycle:
     """Lifecycle position and insights for a 424B filing within its shelf registration.
 
@@ -427,46 +439,79 @@ class ShelfLifecycle:
 
     @cached_property
     def shelf_registration(self) -> Optional['Filing']:
-        """The S-3/F-3/S-1 filing that initiated this shelf."""
-        for f in self._related:
-            base_form = f.form.replace('/A', '')
-            if base_form in _SHELF_BASE_FORMS:
-                return f
-        return None
+        """The S-3/F-3/S-1 filing that *initiated* this shelf.
+
+        The earliest shelf-base-form filing in the family (selected explicitly by
+        filing date, not by ``_related`` ordering). Establishes the shelf's vintage;
+        for the date the expiry clock currently runs from, see
+        :attr:`current_effective_date`.
+        """
+        candidates = [f for f in self._related
+                      if f.form.replace('/A', '') in _SHELF_BASE_FORMS]
+        return min(candidates, key=lambda f: f.filing_date) if candidates else None
 
     @cached_property
-    def _effective_filing(self) -> Optional['Filing']:
-        """The EFFECT filing that declared the shelf effective."""
-        for f in self._related:
-            if f.form == 'EFFECT':
-                return f
-        return None
+    def _initial_effective_filing(self) -> Optional['Filing']:
+        """The EFFECT filing that *first* declared the shelf effective (earliest)."""
+        effects = [f for f in self._related if f.form == 'EFFECT']
+        return min(effects, key=lambda f: f.filing_date) if effects else None
+
+    @cached_property
+    def _current_effective_filing(self) -> Optional['Filing']:
+        """The filing establishing *current* effectiveness (latest).
+
+        The most recent EFFECT notice. A genuine Rule 415(a)(6) re-registration
+        carries a fresh EFFECT, so this advances past cosmetic amendments. Falls
+        back to the latest S-3ASR/F-3ASR filing, since automatic shelves are
+        effective on filing and never receive an EFFECT notice.
+        """
+        effects = [f for f in self._related if f.form == 'EFFECT']
+        if effects:
+            return max(effects, key=lambda f: f.filing_date)
+        asr = [f for f in self._related
+               if f.form.replace('/A', '') in _ASR_BASE_FORMS]
+        return max(asr, key=lambda f: f.filing_date) if asr else None
 
     @cached_property
     def shelf_filed_date(self) -> Optional[str]:
-        """Date the shelf registration was filed (string)."""
+        """Date the shelf registration was *originally* filed (string)."""
         reg = self.shelf_registration
         return str(reg.filing_date) if reg else None
 
     @cached_property
     def effective_date(self) -> Optional[str]:
-        """Date the shelf was declared effective (string)."""
-        eff = self._effective_filing
+        """Date the shelf *first* became effective (string).
+
+        The original effectiveness; immutable for a given registration statement
+        and used to measure the initial SEC review period. For the operative
+        effectiveness today (which advances on re-registration), see
+        :attr:`current_effective_date`.
+        """
+        eff = self._initial_effective_filing
+        return str(eff.filing_date) if eff else None
+
+    @cached_property
+    def current_effective_date(self) -> Optional[str]:
+        """Date of the shelf's *current* effectiveness (string).
+
+        The latest EFFECT (or, for automatic shelves, the latest ASR filing).
+        This is the date the Rule 415(a)(5) three-year clock currently runs from,
+        so a re-registration moves it forward while cosmetic amendments do not.
+        Equals :attr:`effective_date` for a shelf that has never been re-registered.
+        """
+        eff = self._current_effective_filing
         return str(eff.filing_date) if eff else None
 
     @cached_property
     def shelf_expires(self) -> Optional[date]:
-        """Expiration date of the shelf (filed date + 3 years)."""
-        if not self.shelf_filed_date:
-            return None
-        filed = _parse_filing_date(self.shelf_filed_date)
-        if not filed:
-            return None
-        try:
-            return filed.replace(year=filed.year + 3)
-        except ValueError:
-            # Feb 29 -> Feb 28
-            return filed.replace(year=filed.year + 3, day=filed.day - 1)
+        """Expiration date of the shelf (current effective date + 3 years).
+
+        Anchored on *current* effectiveness per Rule 415(a)(5): a genuine
+        415(a)(6) re-registration resets the clock, while a cosmetic POS AM or
+        S-3/A does not. Returns None for a shelf that is not yet effective.
+        """
+        eff = _parse_filing_date(self.current_effective_date)
+        return _plus_three_years(eff) if eff else None
 
     @cached_property
     def days_to_expiry(self) -> Optional[int]:
@@ -583,10 +628,14 @@ class ShelfLifecycle:
         if reg:
             summary.add_row("Shelf Registration", f"{reg.form} filed {reg.filing_date}")
 
-        eff = self._effective_filing
+        eff = self._initial_effective_filing
         if eff:
             review = f" ({self.review_period_days} days review)" if self.review_period_days is not None else ""
             summary.add_row("Effective Date", f"{eff.filing_date}{review}")
+
+        cur = self._current_effective_filing
+        if cur and (eff is None or cur.filing_date != eff.filing_date):
+            summary.add_row("Current Effective", f"{cur.filing_date} (re-registered)")
 
         exp = self.shelf_expires
         if exp:
