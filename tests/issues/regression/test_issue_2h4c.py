@@ -181,3 +181,16 @@ class TestAgencyDealAgentExtraction:
     def test_placement_agent_defined_inline(self):
         """'engaged H.C. Wainwright & Co., LLC (the "placement agent")'."""
         assert self._lead("0001641172-25-001566") == "H.C. Wainwright & Co., LLC"
+
+    @pytest.mark.vcr
+    def test_cover_grid_wrapped_name_not_truncated(self):
+        """edgartools-zzr4: a cover-grid firm name that wraps across lines.
+
+        Calidi's cover renders the placement agent as 'Placement\\nAgent\\n\\n'
+        'Ladenburg\\nThalmann' — the firm name wrapped onto two lines. The
+        cover-role pattern grabbed only the first line, truncating the lead to a
+        bare 'Ladenburg'. It must now stitch the wrapped continuation line.
+        Found by the Tier C LLM-judge audit (a clean, plausible, but incomplete
+        name that Tier A/B coverage/validity checks cannot catch).
+        """
+        assert self._lead("0001641172-25-001350") == "Ladenburg Thalmann"

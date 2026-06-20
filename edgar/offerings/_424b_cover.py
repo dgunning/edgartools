@@ -153,15 +153,20 @@ def extract_cover_page_fields(filing: 'Filing', document=None) -> dict:
 # Text-based underwriter / agent extraction
 # ---------------------------------------------------------------------------
 
-# Cover page role label patterns: "Sole Placement Agent\nTungsten Advisors"
+# Cover page role label patterns: "Sole Placement Agent\nTungsten Advisors".
+# The name capture grabs the grid cell — the label's value plus up to two wrapped
+# continuation lines, bounded by the blank line that separates the cell from the
+# next content. A firm name in a cover grid often wraps ("Ladenburg\nThalmann");
+# whether to stitch those lines is decided in extract_underwriting_from_text.
+_CELL = r'([^\n]+(?:\n[^\n]+){0,2})'
 _COVER_ROLE_PATTERNS = [
-    (r'Sole\s+Book[-\s]Running\s+Manager\s*\n+([^\n]+)', 'sole_book_runner'),
-    (r'Joint\s+Book[-\s]Running\s+Managers?\s*\n+([^\n]+)', 'joint_book_runners'),
-    (r'Sole\s+Placement\s+Agent\s*\n+([^\n]+)', 'sole_placement_agent'),
-    (r'Placement\s+Agent\s*\n+([^\n]+)', 'placement_agent'),
-    (r'Sole\s+(?:Lead\s+)?Manager\s*\n+([^\n]+)', 'sole_manager'),
-    (r'(?:Sole\s+)?Underwriter\s*\n+([^\n]+)', 'underwriter'),
-    (r'Sales\s+Agent\s*\n+([^\n]+)', 'sales_agent'),
+    (r'Sole\s+Book[-\s]Running\s+Manager\s*\n+' + _CELL, 'sole_book_runner'),
+    (r'Joint\s+Book[-\s]Running\s+Managers?\s*\n+' + _CELL, 'joint_book_runners'),
+    (r'Sole\s+Placement\s+Agent\s*\n+' + _CELL, 'sole_placement_agent'),
+    (r'Placement\s+Agent\s*\n+' + _CELL, 'placement_agent'),
+    (r'Sole\s+(?:Lead\s+)?Manager\s*\n+' + _CELL, 'sole_manager'),
+    (r'(?:Sole\s+)?Underwriter\s*\n+' + _CELL, 'underwriter'),
+    (r'Sales\s+Agent\s*\n+' + _CELL, 'sales_agent'),
 ]
 
 # ATM sales agreement text patterns
@@ -270,12 +275,19 @@ def extract_underwriting_from_text(filing: 'Filing', document=None) -> list:
     for pattern, role in _COVER_ROLE_PATTERNS:
         m = re.search(pattern, cover, re.IGNORECASE)
         if m:
-            name = m.group(1).strip()
+            block = m.group(1).strip()
+            first_line = block.split('\n', 1)[0].strip()
+            # Stitch wrapped continuation lines only when the first line is a
+            # single bare word ("Ladenburg" -> "Ladenburg Thalmann"). A multi-word
+            # first line is already a complete name — and could be the first firm
+            # in a multi-line list — so keep just that line.
+            raw = block if (first_line and ' ' not in first_line) else first_line
+            name = _clean_agent_name(raw)
             if 2 < len(name) < 100 and not name.lower().startswith('table') \
                     and not name.startswith('The date'):
                 results.append({
                     'role': role,
-                    'names': [_clean_agent_name(name)],
+                    'names': [name],
                     'source': 'cover_page',
                 })
 
