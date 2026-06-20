@@ -1638,7 +1638,10 @@ class Prospectus424B:
     def underwriting(self) -> Optional[UnderwritingInfo]:
         """Underwriting syndicate or placement agent info.
         Uses table extraction first, falls back to cover page text."""
-        from edgar.offerings._424b_tables import extract_underwriting_from_tables
+        from edgar.offerings._424b_tables import (
+            extract_underwriting_from_tables,
+            is_plausible_underwriter_name,
+        )
         from edgar.offerings._424b_cover import extract_underwriting_from_text
 
         doc = self._document
@@ -1651,16 +1654,20 @@ class Prospectus424B:
         entries: list[UnderwriterEntry] = []
         fee_type = 'underwriting_discount'
 
-        # Prefer allocation tables (have full legal names)
+        # Prefer allocation tables (have full legal names). Guard every name:
+        # 424B2 structured-note/debt covers leak legalese paragraphs and lone
+        # bullets into the name slot (edgartools-2h4c).
         alloc = [r for r in table_results if r['type'] == 'allocation' and r['names']]
         if alloc:
             for name, amt in zip(alloc[0]['names'], alloc[0].get('allocations', [])):
-                entries.append(UnderwriterEntry(name=name, shares_allocated=amt))
+                if is_plausible_underwriter_name(name):
+                    entries.append(UnderwriterEntry(name=name, shares_allocated=amt))
         else:
             # Use cover grid or role listing names
             for tr in table_results:
                 for name in tr['names']:
-                    if not any(e.name == name for e in entries):
+                    if is_plausible_underwriter_name(name) \
+                            and not any(e.name == name for e in entries):
                         entries.append(UnderwriterEntry(name=name))
 
         # Fall back to text-based extraction if no tables found
@@ -1668,7 +1675,8 @@ class Prospectus424B:
             text_results = extract_underwriting_from_text(self._filing, document=doc)
             for tx in text_results:
                 for name in tx['names']:
-                    if not any(e.name == name for e in entries):
+                    if is_plausible_underwriter_name(name) \
+                            and not any(e.name == name for e in entries):
                         entries.append(UnderwriterEntry(name=name))
                 if tx['role'] in ('sole_placement_agent', 'placement_agent'):
                     fee_type = 'placement_agent_fees'

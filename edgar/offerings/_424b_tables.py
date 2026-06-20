@@ -1004,6 +1004,66 @@ def _clean_underwriter_name(name: str) -> str:
     return _WS_RE.sub(' ',name).strip()
 
 
+# Lowercase words allowed mid-name: connectors and corporate-form tokens.
+_UW_NAME_LOWER_OK = {
+    'and', 'of', 'the', 'de', 'für',
+    'llc', 'lp', 'plc', 'sa', 'ag', 'na', 'nv', 'co', 'inc', 'ltd',
+}
+
+# Section headers that are never underwriter names (all-caps, so they survive the
+# term-fragment check).
+_UW_NAME_DENYLIST = {
+    'table of contents', 'pricing supplement', 'prospectus supplement',
+    'risk factors', 'summary information', 'where you can find more information',
+    # Sentence fragments that leak as a single capitalized word.
+    'our', 'we', 'the', 'this', 'these', 'those', 'it', 'its', 'such', 'any', 'all',
+}
+
+
+def _looks_like_term_fragment(name: str) -> bool:
+    """True if ``name`` reads like a sentence/term fragment, not a firm name.
+
+    Underwriter names are proper nouns — every word is capitalized (or a known
+    connector/corporate-form token). A mid-name word that starts lowercase
+    ('Upside participation rate', 'Notes due 2030', 'Linked to ...') is the
+    signature of a structured-note term leaking from a cover table.
+    """
+    words = name.split()
+    for i, word in enumerate(words):
+        if i == 0:
+            continue
+        token = word.strip('.,&()').lower()
+        if token and word.strip('.,&()')[0].islower() and token not in _UW_NAME_LOWER_OK:
+            return True
+    return False
+
+
+def is_plausible_underwriter_name(name: str) -> bool:
+    """Whether ``name`` looks like an underwriter/agent name rather than parser junk.
+
+    424B2 structured-note and debt covers frequently leak whole legalese
+    paragraphs, note titles, table-of-contents blobs, or pricing-term fragments
+    into the name slot, plus lone bullets/punctuation. Reject a value that is
+    multi-line, implausibly long (> 80 chars — a real firm name is short), has no
+    alphabetic character, or reads like a lowercase term fragment.
+    """
+    if not name:
+        return False
+    if '\n' in name:
+        return False
+    stripped = name.strip()
+    if len(stripped) < 2 or len(stripped) > 80:
+        return False
+    if not any(c.isalpha() for c in stripped):
+        return False
+    if stripped[-1] in ':;':
+        # A firm name never ends in a colon/semicolon — this is a term label.
+        return False
+    if stripped.lower() in _UW_NAME_DENYLIST:
+        return False
+    return not _looks_like_term_fragment(stripped)
+
+
 def extract_underwriting_from_tables(document) -> list:
     """
     Find underwriter/agent info from tables in a parsed Document.
