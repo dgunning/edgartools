@@ -4,7 +4,9 @@ Registration fee table extraction from EX-FILING FEES exhibits (Exhibit 107).
 Parses the HTML fee table attached to registration statements (S-3, F-3, S-1, etc.)
 to extract total offering capacity, per-security breakdowns, and fee calculations.
 
-Works with both plain HTML and inline XBRL exhibits (2022-2025+).
+Works with both plain HTML and inline XBRL exhibits (2022-2025+). For pre-EX-107
+registration statements (~pre-2022) that carried the fee table inline in the
+document body instead of an exhibit, falls back to _extract_inline_fee_table.
 Uses HTML table parsing as the universal approach.
 
 See: docs-internal/research/sec-filings/forms/s-3/registration-fee-table-analysis.md
@@ -378,6 +380,121 @@ def _parse_security_row(texts: List[str]) -> Optional[dict]:
     return security
 
 
+# Pre-EX-107 inline fee tables
+# ---------------------------------------------------------------------------
+# A "clean" dollar amount cell: only "$", digits, commas and an optional
+# decimal (after _join_dollar_cells merges a lone "$" with its number). This
+# deliberately rejects prose cells like "par value $0.001 per share" so an
+# embedded par value can never be mistaken for an offering amount.
+_DOLLAR_RE = re.compile(r'^\$\s*[\d,]+(?:\.\d+)?$')
+_DEFERRAL_MARKERS = ('457(r)', 'pay-as-you-go', 'pay as you go')
+
+
+def _data_to_fee_table(data: dict):
+    """Build a RegistrationFeeTable from a parsed-data dict (shared by both the
+    EX-107 exhibit path and the pre-2022 inline path)."""
+    from edgar.offerings.prospectus import RegistrationFeeTable, FeeTableSecurity
+
+    def _securities(rows):
+        return [FeeTableSecurity(
+            security_type=r.get('security_type'),
+            security_title=r.get('security_title'),
+            fee_rule=r.get('fee_rule'),
+            amount_registered=r.get('amount_registered'),
+            price_per_unit=r.get('price_per_unit'),
+            max_aggregate_amount=r.get('max_aggregate_amount'),
+            fee_rate=r.get('fee_rate'),
+            fee_amount=r.get('fee_amount'),
+        ) for r in rows]
+
+    return RegistrationFeeTable(
+        total_offering_amount=data.get('total_offering_amount'),
+        net_fee_due=data.get('net_fee_due'),
+        total_fees_previously_paid=data.get('total_fees_previously_paid'),
+        securities=_securities(data.get('securities', [])),
+        carry_forwards=_securities(data.get('carry_forwards', [])),
+        has_carry_forward=data.get('has_carry_forward', False),
+        fee_deferred=data.get('fee_deferred', False),
+        exhibit_url=data.get('exhibit_url'),
+    )
+
+
+def _parse_inline_fee_table(html: str, form: Optional[str] = None) -> dict:
+    """Parse a pre-EX-107 inline "Calculation of Registration Fee" table.
+
+    Before the Filing Fee Exhibit (Exhibit 107) regime (~2022), registration
+    statements carried the fee table inline in the document body, in column
+    layouts that predate the structured exhibit. The registered capacity is the
+    "Proposed maximum aggregate offering price" — reliably the largest clean
+    dollar amount in the table: the fee is that figure x ~0.0001, the per-unit
+    price is smaller, and share counts are unpriced (no "$"). A table with no
+    dollar amount at all is an indeterminate pay-as-you-go (Rule 457(r)) shelf,
+    the inline equivalent of a deferred ASR.
+
+    Returns a dict with the same keys as _parse_fee_table_html. Limitation: a
+    multi-class table with no "Total" row reports the largest single row, not
+    the sum — such tables almost always carry an explicit Total.
+    """
+    import warnings
+    from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
+
+    result = {
+        'total_offering_amount': None,
+        'net_fee_due': None,
+        'total_fees_previously_paid': None,
+        'securities': [],
+        'carry_forwards': [],
+        'has_carry_forward': False,
+        'fee_deferred': False,
+        'exhibit_url': None,
+    }
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+        soup = BeautifulSoup(html, 'lxml')
+    table = _find_fee_table(soup)
+    if table is None:
+        return result
+
+    dollar_values = []
+    for row in table.find_all('tr'):
+        raw = [re.sub(r'\s+', ' ', c.get_text(' ', strip=True)) for c in row.find_all(['td', 'th'])]
+        cells = _join_dollar_cells([t for t in raw if t.strip()])
+        for c in cells:
+            if _DOLLAR_RE.match(c.strip()):
+                v = _parse_dollar_amount(c)
+                if v and v > 0:
+                    dollar_values.append(v)
+
+    if dollar_values:
+        agg = max(dollar_values)
+        if 0 < agg < 1e12:  # > $1T registered capacity is implausible
+            result['total_offering_amount'] = agg
+    else:
+        # No concrete amount anywhere — an indeterminate Rule 457(r) shelf.
+        base = (form or '').replace('/A', '')
+        doc_text = re.sub(r'\s+', ' ', soup.get_text(' ')).lower()
+        if base.endswith('ASR') or any(m in doc_text for m in _DEFERRAL_MARKERS):
+            result['fee_deferred'] = True
+
+    return result
+
+
+def _extract_inline_fee_table(filing: 'Filing'):
+    """Fee table from a pre-EX-107 registration statement's inline body table."""
+    try:
+        html = filing.html()
+    except Exception:
+        log.debug("Failed to load primary document for %s", filing.accession_no)
+        return None
+    if not html:
+        return None
+    data = _parse_inline_fee_table(html, form=filing.form)
+    if data['total_offering_amount'] is None and not data['fee_deferred']:
+        return None
+    return _data_to_fee_table(data)
+
+
 def extract_registration_fee_table(filing: 'Filing'):
     """Extract the registration fee table from a filing's EX-FILING FEES exhibit.
 
@@ -392,19 +509,23 @@ def extract_registration_fee_table(filing: 'Filing'):
         fee_table = extract_registration_fee_table(filing)
         print(fee_table.total_offering_amount)  # e.g., 79157878.46
     """
-    from edgar.offerings.prospectus import RegistrationFeeTable, FeeTableSecurity
-
     fee_att = _get_filing_fees_attachment(filing)
     if not fee_att:
         # A registration amendment may omit its fee exhibit; recover it from the
         # original registration in the same file-number family.
         source = _resolve_fee_source(filing)
-        if source is None:
-            return None
-        fee_att = _get_filing_fees_attachment(source)
-        if not fee_att:
-            return None
-        filing = source
+        if source is not None:
+            src_att = _get_filing_fees_attachment(source)
+            if src_att is not None:
+                fee_att, filing = src_att, source
+    if not fee_att:
+        # No EX-FILING FEES exhibit anywhere in the family. Pre-EX-107 (~pre-2022)
+        # registration statements carry the fee table inline in the body instead;
+        # fall back to that. Non-registration forms (424B takedowns, reports) have
+        # no such table and keep returning None.
+        if _is_registration_form(filing.form):
+            return _extract_inline_fee_table(filing)
+        return None
 
     try:
         content = fee_att.download()
@@ -416,40 +537,4 @@ def extract_registration_fee_table(filing: 'Filing'):
 
     exhibit_url = getattr(fee_att, 'url', None)
     data = _parse_fee_table_html(content, exhibit_url=exhibit_url)
-
-    securities = []
-    for row in data.get('securities', []):
-        securities.append(FeeTableSecurity(
-            security_type=row.get('security_type'),
-            security_title=row.get('security_title'),
-            fee_rule=row.get('fee_rule'),
-            amount_registered=row.get('amount_registered'),
-            price_per_unit=row.get('price_per_unit'),
-            max_aggregate_amount=row.get('max_aggregate_amount'),
-            fee_rate=row.get('fee_rate'),
-            fee_amount=row.get('fee_amount'),
-        ))
-
-    carry_forwards = []
-    for row in data.get('carry_forwards', []):
-        carry_forwards.append(FeeTableSecurity(
-            security_type=row.get('security_type'),
-            security_title=row.get('security_title'),
-            fee_rule=row.get('fee_rule'),
-            amount_registered=row.get('amount_registered'),
-            price_per_unit=row.get('price_per_unit'),
-            max_aggregate_amount=row.get('max_aggregate_amount'),
-            fee_rate=row.get('fee_rate'),
-            fee_amount=row.get('fee_amount'),
-        ))
-
-    return RegistrationFeeTable(
-        total_offering_amount=data.get('total_offering_amount'),
-        net_fee_due=data.get('net_fee_due'),
-        total_fees_previously_paid=data.get('total_fees_previously_paid'),
-        securities=securities,
-        carry_forwards=carry_forwards,
-        has_carry_forward=data.get('has_carry_forward', False),
-        fee_deferred=data.get('fee_deferred', False),
-        exhibit_url=data.get('exhibit_url'),
-    )
+    return _data_to_fee_table(data)

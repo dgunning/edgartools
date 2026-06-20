@@ -209,6 +209,121 @@ class TestAmendmentFeeSourceFallback:
         assert fee_table is None
 
 
+class TestInlineFeeTablePreEX107:
+    """edgartools-9q82: pre-2022 inline "Calculation of Registration Fee" tables.
+
+    Before the EX-FILING FEES (Exhibit 107) regime (~2022) the fee table lived
+    inline in the S-3/S-1 body, with no exhibit to parse. _extract_inline_fee_table
+    reads it from the primary document: the registered capacity is the largest
+    clean dollar amount in the table (the fee is that x ~0.0001; the per-unit price
+    is smaller; share counts are unpriced), and a table with no dollar amount is an
+    indeterminate Rule 457(r) shelf.
+    """
+
+    # --- fast unit tests on the pure parser (no network) ---
+
+    def test_multi_row_with_total_picks_aggregate_not_fee(self):
+        """Aggregate is the largest $; the smaller fee and an embedded par value
+        in a prose cell must both be ignored."""
+        from edgar.offerings._fee_table import _parse_inline_fee_table
+        html = (
+            "<table>"
+            "<tr><td>Title of each class of securities to be registered</td>"
+            "<td>Amount to be registered</td>"
+            "<td>Proposed maximum aggregate offering price</td>"
+            "<td>Amount of registration fee</td></tr>"
+            "<tr><td>Common stock, par value $0.001 per share</td><td></td><td></td><td></td></tr>"
+            "<tr><td>Total</td><td>$</td><td>30,000,000</td><td>$</td><td>3,894</td></tr>"
+            "</table>"
+        )
+        data = _parse_inline_fee_table(html, form="S-3")
+        assert data["total_offering_amount"] == 30000000.0
+        assert data["fee_deferred"] is False
+
+    def test_single_row_no_total_uses_row_aggregate(self):
+        """A single-class resale has no Total row; the aggregate is the row's
+        largest $ and the unpriced share count is ignored."""
+        from edgar.offerings._fee_table import _parse_inline_fee_table
+        html = (
+            "<table>"
+            "<tr><td>Title of Each Class of Securities To Be Registered</td>"
+            "<td>Amount to be Registered</td><td>Proposed Maximum Offering Price Per Share</td>"
+            "<td>Proposed Maximum Aggregate Offering Price</td><td>Amount of Registration Fee</td></tr>"
+            "<tr><td>Common Stock, $0.01 par value per share</td><td>21,212,123</td>"
+            "<td>$1.82</td><td>$38,606,063.86</td><td>$4,679.06</td></tr>"
+            "</table>"
+        )
+        data = _parse_inline_fee_table(html, form="S-3")
+        assert data["total_offering_amount"] == 38606063.86
+
+    def test_indeterminate_asr_is_deferred(self):
+        """An ASR table with only footnote placeholders (no $) is pay-as-you-go."""
+        from edgar.offerings._fee_table import _parse_inline_fee_table
+        html = (
+            "<table>"
+            "<tr><td>Title of each class of securities to be registered</td>"
+            "<td>Amount to be registered / aggregate price / fee</td></tr>"
+            "<tr><td>Debt Securities</td><td>(1)(2)(3)</td></tr>"
+            "<tr><td>Common Stock, par value $0.01 per share</td><td></td></tr>"
+            "</table>"
+        )
+        data = _parse_inline_fee_table(html, form="S-3ASR")
+        assert data["total_offering_amount"] is None
+        assert data["fee_deferred"] is True
+
+    def test_457r_marker_marks_deferred_even_without_asr_form(self):
+        from edgar.offerings._fee_table import _parse_inline_fee_table
+        html = (
+            "<table>"
+            "<tr><td>Title of each class of securities to be registered</td>"
+            "<td>Aggregate offering price</td></tr>"
+            "<tr><td>Debt Securities</td><td>(1)</td></tr>"
+            "</table>"
+            "<p>Fees calculated pursuant to Rule 457(r) under the Securities Act.</p>"
+        )
+        data = _parse_inline_fee_table(html, form="S-3")
+        assert data["total_offering_amount"] is None
+        assert data["fee_deferred"] is True
+
+    def test_no_fee_table_returns_empty(self):
+        from edgar.offerings._fee_table import _parse_inline_fee_table
+        data = _parse_inline_fee_table("<html><body><p>No table here.</p></body></html>", form="S-3")
+        assert data["total_offering_amount"] is None
+        assert data["fee_deferred"] is False
+
+    # --- ground-truth assertions on real filings (network; cassettes too large
+    # for these 400KB+ primary docs, so run with the network suite) ---
+
+    @pytest.mark.network
+    def test_kingold_multi_row_total(self):
+        """Kingold Jewelry S-3 (2020): inline table, $30M shelf, fee $3,894."""
+        ft = extract_registration_fee_table(find("0001104659-20-040593"))
+        assert ft is not None
+        assert ft.total_offering_amount == pytest.approx(30000000.0, rel=0.01)
+
+    @pytest.mark.network
+    def test_plug_single_row_resale(self):
+        """Plug Power S-3 (2018): single-class resale, $38,606,063.86."""
+        ft = extract_registration_fee_table(find("0001047469-18-007293"))
+        assert ft is not None
+        assert ft.total_offering_amount == pytest.approx(38606063.86, rel=0.01)
+
+    @pytest.mark.network
+    def test_dynatronics_amendment_body(self):
+        """Dynatronics S-3/A (2021): inline table in the amendment body, $50M."""
+        ft = extract_registration_fee_table(find("0001654954-21-007440"))
+        assert ft is not None
+        assert ft.total_offering_amount == pytest.approx(50000000.0, rel=0.01)
+
+    @pytest.mark.network
+    def test_schwab_indeterminate_asr_deferred(self):
+        """Charles Schwab S-3ASR (2020): indeterminate 457(r) shelf -> deferred."""
+        ft = extract_registration_fee_table(find("0001193125-20-310765"))
+        assert ft is not None
+        assert ft.total_offering_amount is None
+        assert ft.fee_deferred is True
+
+
 class TestRegistrationFeeTableModel:
     """Test the RegistrationFeeTable data model."""
 

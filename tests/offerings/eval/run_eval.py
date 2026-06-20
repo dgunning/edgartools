@@ -17,7 +17,9 @@ Buckets per facet:
     bad      garbage or out-of-range  <-- the thing we never want to ship
     error    extractor raised
 
-Metrics:  coverage = ok / applicable     bad_rate = bad / applicable
+Metrics:  coverage = (ok + deferred) / n     bad_rate = (bad + error + suspect) / n
+(a justified `deferred` is a correct resolution — an indeterminate pay-as-you-go
+shelf has no determinate amount — so it counts toward coverage, not against it.)
 
 Tier B (self-check oracles: fee cross-check, lifecycle consistency) plugs into
 each facet via the `ORACLES` hook: an `ok` value is cross-checked against the
@@ -257,7 +259,7 @@ def print_dashboard(results):
     print("-" * len(hdr))
     for facet, c in sorted(by_facet.items()):
         n = c["n"]
-        cov = c["ok"] / n if n else 0
+        cov = (c["ok"] + c["deferred"]) / n if n else 0
         badr = (c["bad"] + c["error"] + c["suspect"]) / n if n else 0
         # verified = oracle-confirmed / oracle-judged (pass + fail), for this facet
         judged = [r for r in results if r["facet"] == facet and r.get("verified") is not None]

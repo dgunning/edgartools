@@ -36,7 +36,9 @@ def test_offerings_eval_meets_thresholds():
         c = by_facet.get(facet)
         assert c, f"no results for facet {facet}"
         n = c["n"]
-        coverage = c["ok"] / n
+        # A justified 'deferred' (indeterminate pay-as-you-go shelf) is a correct
+        # resolution, so it counts toward coverage alongside 'ok'.
+        coverage = (c["ok"] + c["deferred"]) / n
         # 'suspect' = a Tier B oracle flagged the value as internally inconsistent;
         # count it as bad so the guardrail trips on likely-wrong values too.
         bad_rate = (c["bad"] + c["error"] + c["suspect"]) / n

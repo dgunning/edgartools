@@ -38,7 +38,10 @@ re-measure rerun; coverage up, bad_rate stays 0, no anchor regresses
   never lowers a floor. A frontier entry that is `null` today is the *gap*; once an
   extractor reaches it, its `expected` value (or `deferred`) starts being checked
   and a wrong value turns `bad`. Watch the gap close in the dashboard's
-  "Frontier (known gaps — NOT ratcheted)" section.
+  "Frontier (known gaps — NOT ratcheted)" section, then **graduate** the entries
+  (drop the flag) so they ratchet. Currently empty — the pre-2022 inline-fee gap
+  was opened here, closed by edgartools-9q82, and graduated to anchors. The
+  mechanism stays for the next gap (see `test_frontier.py`).
 - **live** — breadth-only sample (no expectations), surfaces unknown failure modes.
 
 ## Buckets
@@ -48,7 +51,10 @@ inconsistent (likely wrong) · `null` no value (see cluster reason) · `deferred
 legitimately indeterminate (pay-as-you-go ASR capacity) · `bad` garbage or
 out-of-range — **never ship** · `error` extractor raised.
 
-`coverage = ok / applicable`  ·  `bad_rate = (bad + error + suspect) / applicable`
+`coverage = (ok + deferred) / n`  ·  `bad_rate = (bad + error + suspect) / n`
+
+A justified `deferred` is a correct resolution (an indeterminate pay-as-you-go
+shelf has no determinate amount), so it counts toward coverage, not against it.
 · `verified = oracle-passed / oracle-judged`
 
 Anchor entries carry an `expected` value; a mismatch is forced to `bad`, so the
@@ -87,32 +93,31 @@ harness checks accuracy (not just coverage) on the hand-verified cases.
     three-year date arithmetic (blessed a wrong status with high confidence). Date
     consistency belongs to the deterministic Tier B lifecycle oracle, not an LLM.
 
-## Baseline (2026-06-20, post fu3x/2w5y/2h4c/zxnj + cover-agent + fee-source fallback)
+## Baseline (2026-06-20, post 9q82 pre-2022 inline-fee parser)
 
 | facet | coverage | bad_rate | verified | remaining triage target |
 |-------|----------|----------|----------|-------------------------|
-| fee_capacity | 78% | 0% | 9/9 | frontier: pre-2022 inline "Calculation of Registration Fee" tables |
+| fee_capacity | 100% | 0% | 9/9 | — (26 entries: 19 ok + 7 deferred, 0 null) |
 | lead_bookrunner | 93% | 0% | — | one prose-only structured note (not worth a fragile pattern) |
 | shelf_status | 100% | 0% | 2/2 | — |
 
-Coverage/bad_rate are over the *ratcheted* scope only (frontier excluded). Both
-attacks that lifted these numbers were measured here: the 424B2 cover-agent
-extraction (lead_bookrunner 21%→93%) and the amendment fee-source fallback
-(fee_capacity 67%→78%). The lifecycle Tier B oracle now verifies shelf_status
-date/takedown consistency.
+Successive attacks measured here lifted these numbers: the 424B2 cover-agent
+extraction (lead_bookrunner 21%→93%), the amendment fee-source fallback
+(fee_capacity 67%→78%), and the pre-2022 inline "Calculation of Registration Fee"
+parser (fee_capacity →100% over a corpus that now includes 8 pre-2022 anchors).
+The lifecycle Tier B oracle verifies shelf_status date/takedown consistency.
 
-## Frontier: pre-2022 inline fee tables (the next lever)
+## Closed gap: pre-2022 inline fee tables (edgartools-9q82)
 
-Before the EX-FILING FEES (Exhibit 107) regime, the registration-fee table lived
-inline in the S-3/S-1 body, with no exhibit to parse. `extract_registration_fee_table`
-only reads the EX-107 attachment, so **every pre-2022 filing returns `None`** — a
-hard wall the frozen 2025 corpus could not see. The corpus now carries 8
-hand-verified pre-2022 entries spanning consumer, medical-device, biotech, energy,
-clean-energy, financial, tech, and REIT issuers (5 concrete fixed-dollar shelves +
-3 indeterminate 457(r) WKSI shelves). Current frontier state: **0/8 reachable**.
-
-`_find_fee_table` already *locates* the inline body table on all of them; the gap
-is parsing the older cover-table layout (totals like `Total $30,000,000`). Closing
-it is the next bead: extend `_parse_fee_table_html` (or add an inline path) to read
-the pre-checkbox table, then the 5 concrete entries return `expected` and the 3
-WKSI shelves return `deferred`, and the frontier section walks toward 8/8.
+Before the EX-FILING FEES (Exhibit 107) regime the registration-fee table lived
+inline in the S-3/S-1 body, with no exhibit to parse — so every pre-2022 filing
+returned `None`, a hard wall the frozen 2025 corpus could not see. This was opened
+as an 8-entry `frontier` set (consumer, medical-device, biotech, energy,
+clean-energy, financial, tech, REIT; 5 concrete fixed-dollar shelves + 3
+indeterminate 457(r) WKSI shelves), then closed: `_fee_table._extract_inline_fee_table`
+reads the inline table from the primary document, taking the registered capacity
+as the largest clean dollar amount (the fee is that × ~0.0001; the per-unit price
+is smaller; share counts are unpriced) and treating a table with no dollar amount
+as a deferred 457(r) shelf. All 8 graduated to ratcheted anchors (5 return
+`expected`, 3 return `deferred`); regression tests live in
+`tests/issues/regression/test_fee_table.py::TestInlineFeeTablePreEX107`.

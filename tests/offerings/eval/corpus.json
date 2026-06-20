@@ -103,8 +103,7 @@
     "vintage": "pre-2022",
     "facet": "fee_capacity",
     "expected": 30000000.0,
-    "frontier": true,
-    "note": "Kingold Jewelry inline fee table (gap)"
+    "note": "Kingold Jewelry inline fee table"
   },
   {
     "accession": "0001654954-21-007440",
@@ -113,8 +112,7 @@
     "vintage": "pre-2022",
     "facet": "fee_capacity",
     "expected": 50000000.0,
-    "frontier": true,
-    "note": "Dynatronics inline fee table (gap)"
+    "note": "Dynatronics inline fee table (amendment body)"
   },
   {
     "accession": "0001193125-21-204768",
@@ -123,8 +121,7 @@
     "vintage": "pre-2022",
     "facet": "fee_capacity",
     "expected": 250000000.0,
-    "frontier": true,
-    "note": "DBV Technologies inline fee table (gap)"
+    "note": "DBV Technologies inline fee table"
   },
   {
     "accession": "0001104659-21-067046",
@@ -133,8 +130,7 @@
     "vintage": "pre-2022",
     "facet": "fee_capacity",
     "expected": 200000000.0,
-    "frontier": true,
-    "note": "Uranium Energy inline fee table (gap)"
+    "note": "Uranium Energy inline fee table"
   },
   {
     "accession": "0001047469-18-007293",
@@ -143,8 +139,7 @@
     "vintage": "pre-2022",
     "facet": "fee_capacity",
     "expected": 38606063.86,
-    "frontier": true,
-    "note": "Plug Power inline fee table (gap)"
+    "note": "Plug Power inline fee table (single-row resale)"
   },
   {
     "accession": "0001193125-20-310765",
@@ -154,8 +149,7 @@
     "facet": "fee_capacity",
     "expected": null,
     "deferred": true,
-    "frontier": true,
-    "note": "Charles Schwab indeterminate 457(r) inline (gap)"
+    "note": "Charles Schwab indeterminate 457(r) inline"
   },
   {
     "accession": "0001104659-20-121185",
@@ -165,8 +159,7 @@
     "facet": "fee_capacity",
     "expected": null,
     "deferred": true,
-    "frontier": true,
-    "note": "Micron indeterminate 457(r) inline (gap)"
+    "note": "Micron indeterminate 457(r) inline"
   },
   {
     "accession": "0001104659-21-086851",
@@ -176,8 +169,7 @@
     "facet": "fee_capacity",
     "expected": null,
     "deferred": true,
-    "frontier": true,
-    "note": "Realty Income indeterminate 457(r) inline (gap)"
+    "note": "Realty Income indeterminate 457(r) inline"
   },
   {
     "accession": "0001193125-25-068723",
