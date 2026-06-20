@@ -182,6 +182,35 @@ def _clean_agent_name(name: str) -> str:
     return re.sub(r'\s+', ' ', name).strip()
 
 
+# Structured-note / debt covers label the distributor inline in a summary box —
+# "Selling Agent:   BofAS" — rather than on its own line, and usually as a defined
+# abbreviation ('BofA Securities, Inc. ("BofAS")'). The 2+ space gap is the
+# table-cell layout: prose "selling agent ..." is lowercase (we stay
+# case-sensitive) and the note-title banner is newline-separated, so both are
+# excluded. The lead agent is the token before " and " (e.g. "BofAS and UBS").
+_SELLING_AGENT_RE = re.compile(
+    r'Selling\s+Agents?:?[ \t]{2,}'
+    r"([A-Z][A-Za-z0-9&.' ]{1,48}?)"
+    r'(?=\s{2,}|[.,;]|\sand\s|\sCUSIP|\sISIN|\n|$)')
+
+# Defined-abbreviation pattern: '<Full Name> ("ABBR")'.
+_ABBREV_DEF_RE = re.compile(
+    r"([A-Z][A-Za-z0-9 ,.&'-]{3,45}?)\s*\(\s*[\"“]([A-Za-z&.']{2,10})[\"”]\s*\)")
+
+
+def _resolve_abbreviation(name: str, text: str) -> str:
+    """Expand a defined abbreviation to its full name.
+
+    Structured-note covers reference the agent by a short tag ("BofAS") defined
+    once as ``BofA Securities, Inc. ("BofAS")``. Resolve the tag to that full
+    name; return ``name`` unchanged when it is not a defined abbreviation.
+    """
+    for m in _ABBREV_DEF_RE.finditer(text):
+        if m.group(2).strip() == name:
+            return m.group(1).strip()
+    return name
+
+
 def extract_underwriting_from_text(filing: 'Filing', document=None) -> list:
     """
     Extract underwriter/agent names from document text (non-table signals).
@@ -230,5 +259,18 @@ def extract_underwriting_from_text(filing: 'Filing', document=None) -> list:
                     'source': 'cover_text',
                 })
                 break
+
+    # Signal: structured-note / debt cover "Selling Agent:" field. Searches the
+    # full text (the summary box can sit past the 8000-char cover window) for the
+    # specific labeled layout; the first match is the cover field.
+    m = _SELLING_AGENT_RE.search(text)
+    if m:
+        agent = _resolve_abbreviation(_clean_agent_name(m.group(1)), text)
+        if 1 < len(agent) < 80:
+            results.append({
+                'role': 'selling_agent',
+                'names': [agent],
+                'source': 'cover_selling_agent',
+            })
 
     return results

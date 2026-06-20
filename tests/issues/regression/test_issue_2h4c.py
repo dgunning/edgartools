@@ -19,6 +19,7 @@ Garbage examples verified against real 424B2/424B5 filings (2025 Q1).
 """
 import pytest
 
+from edgar import find
 from edgar.offerings._424b_tables import is_plausible_underwriter_name as ok
 
 
@@ -93,3 +94,59 @@ def test_all_garbage_yields_no_underwriters():
     entries = [UnderwriterEntry(name=n) for n in names if ok(n)]
     uw = UnderwritingInfo(underwriters=entries)
     assert uw.lead_manager is None
+
+
+# ============================================================
+# Deeper half of 2h4c: positively extract the cover agent.
+#
+# Beyond filtering garbage, recover the real distributor from the structured-note
+# cover's "Selling Agent:" summary field, where it appears inline as a defined
+# abbreviation ("Selling Agent:  BofAS", defined once as
+# 'BofA Securities, Inc. ("BofAS")'). Before this the field was unparsed and the
+# lead came back None, which is honest but uninformative; lifting it took the
+# eval's lead_bookrunner coverage from 21% to 71%.
+# ============================================================
+
+def test_resolve_abbreviation_expands_defined_tag():
+    """A defined abbreviation expands to its full name; an undefined one is kept."""
+    from edgar.offerings._424b_cover import _resolve_abbreviation
+    text = 'Calculation Agent: BofA Securities, Inc. (“BofAS”), an affiliate.'
+    assert _resolve_abbreviation("BofAS", text) == "BofA Securities, Inc."
+    # Already a full name (not a defined tag) — unchanged.
+    assert _resolve_abbreviation("Barclays Capital Inc.", text) == "Barclays Capital Inc."
+
+
+class TestCoverAgentExtraction:
+    """Ground-truth lead_manager from real 424B2 structured-note covers."""
+
+    def _lead(self, accession):
+        from edgar.offerings.prospectus import Prospectus424B
+        uw = Prospectus424B.from_filing(find(accession)).underwriting
+        return uw.lead_manager if uw else None
+
+    @pytest.mark.vcr
+    def test_bofa_selling_agent_colon_field(self):
+        """'Selling Agent:  BofAS' resolves to the full firm name."""
+        assert self._lead("0001918704-25-005439") == "BofA Securities, Inc."
+
+    @pytest.mark.vcr
+    def test_bofa_selling_agents_plural_lead_is_first(self):
+        """'Selling Agents  BofAS and UBS' — the lead is the first agent."""
+        assert self._lead("0001213900-25-026186") == "BofA Securities, Inc."
+
+    @pytest.mark.vcr
+    def test_bofa_selling_agent_summary_box(self):
+        """The summary-box field is recovered even when it sits past the cover window."""
+        assert self._lead("0001918704-25-005486") == "BofA Securities, Inc."
+
+    @pytest.mark.vcr
+    def test_equity_underwriter_unaffected(self):
+        """A standard equity 424B5 still surfaces its table-extracted lead."""
+        assert self._lead("0001193125-25-068732") == "Barclays Capital Inc."
+
+    @pytest.mark.vcr
+    def test_prose_only_agent_stays_none(self):
+        """Silence check: an agent mentioned only in lowercase prose is not guessed."""
+        # 005479 references "selling agent in the case of BofAS" only in prose —
+        # no labeled cover field — so we must not fabricate a lead.
+        assert self._lead("0001918704-25-005479") is None
