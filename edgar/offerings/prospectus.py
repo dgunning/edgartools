@@ -401,6 +401,7 @@ def _plus_three_years(d: date) -> date:
 
 
 _ASR_BASE_FORMS = {'S-3ASR', 'F-3ASR'}
+_WITHDRAWAL_FORMS = {'RW', 'AW', 'RW WD'}
 
 
 class ShelfLifecycle:
@@ -584,6 +585,134 @@ class ShelfLifecycle:
         return None
 
     # ------------------------------------------------------------------
+    # Derived lifecycle signals
+    # ------------------------------------------------------------------
+
+    @cached_property
+    def _generations(self) -> List[date]:
+        """Effective dates of each shelf generation, ascending.
+
+        One entry per effectiveness event: each EFFECT notice, plus each
+        automatic (ASR) shelf filing — automatic shelves are effective on
+        filing and never receive an EFFECT notice. A re-registration adds a
+        generation; this underpins re-registration and continuity detection.
+        """
+        dates = {_parse_filing_date(f.filing_date)
+                 for f in self._related if f.form == 'EFFECT'}
+        dates |= {_parse_filing_date(f.filing_date) for f in self._related
+                  if f.form.replace('/A', '') in _ASR_BASE_FORMS}
+        return sorted(d for d in dates if d is not None)
+
+    @cached_property
+    def is_automatic_shelf(self) -> bool:
+        """Whether this is an automatic (WKSI) shelf — S-3ASR/F-3ASR.
+
+        Automatic shelves are effective on filing with no SEC review. An
+        issuer-class signal: only well-known seasoned issuers may use them.
+        """
+        return any(f.form.replace('/A', '') in _ASR_BASE_FORMS for f in self._related)
+
+    @cached_property
+    def is_effective(self) -> bool:
+        """Whether the shelf has been declared effective.
+
+        True if an effectiveness event exists (EFFECT or automatic shelf) OR any
+        takedown exists — a takedown proves effectiveness even when the EFFECT
+        notice has scrolled out of the recent filing window.
+        """
+        return bool(self._generations) or self.total_takedowns > 0
+
+    @cached_property
+    def is_withdrawn(self) -> bool:
+        """Whether the shelf registration has been withdrawn (RW/AW)."""
+        return any(f.form in _WITHDRAWAL_FORMS for f in self._related)
+
+    @cached_property
+    def is_re_registered(self) -> bool:
+        """Whether the shelf has been re-registered (more than one generation).
+
+        When true, the visible vintage (:attr:`shelf_filed_date`) is not the
+        operative document; the operative effectiveness is
+        :attr:`current_effective_date`.
+        """
+        return len(self._generations) > 1
+
+    @cached_property
+    def continuity(self) -> Optional[str]:
+        """Whether shelf coverage has been continuous across re-registrations.
+
+        ``'continuous'`` when each generation became effective on or before the
+        prior generation's expiry (Rule 415(a)(6) renewal — securities and fees
+        carry forward, no gap). ``'lapsed'`` when any generation became effective
+        only after the prior one expired (a revival after a gap with no shelf
+        access). None when there is no effectiveness event. A single generation
+        is trivially continuous.
+        """
+        gens = self._generations
+        if not gens:
+            return None
+        for prev, nxt in zip(gens, gens[1:]):
+            if nxt > _plus_three_years(prev):
+                return 'lapsed'
+        return 'continuous'
+
+    @cached_property
+    def has_registration_gap(self) -> bool:
+        """Data-quality flag: a generation became effective after the prior expired.
+
+        Within a single file number this should not happen under Rule 415 — it
+        usually means a revival (a fresh registration reusing the file number)
+        and is worth investigating the filing linkage rather than treating the
+        shelf as continuously registered.
+        """
+        return self.continuity == 'lapsed'
+
+    @cached_property
+    def status(self) -> str:
+        """Lifecycle status: withdrawn | expired | effective | registered.
+
+        Precedence: a withdrawal is terminal; then an effective shelf past its
+        expiry is expired; then effective; otherwise registered (filed but not
+        yet effective).
+        """
+        if self.is_withdrawn:
+            return 'withdrawn'
+        if self.is_effective:
+            exp = self.shelf_expires
+            if exp and date.today() > exp:
+                return 'expired'
+            return 'effective'
+        return 'registered'
+
+    @cached_property
+    def program_mode(self) -> str:
+        """Takedown cadence: 'high_frequency' (> 50 takedowns) else 'standard'."""
+        return 'high_frequency' if self.total_takedowns > 50 else 'standard'
+
+    @cached_property
+    def days_since_last_takedown(self) -> Optional[int]:
+        """Days from the most recent takedown to today. None if no takedowns."""
+        if not self.takedowns:
+            return None
+        last = _parse_filing_date(self.takedowns[-1].filing_date)
+        return (date.today() - last).days if last else None
+
+    @cached_property
+    def program_age_days(self) -> Optional[int]:
+        """Age of the shelf program in days.
+
+        Measured from the *original* effectiveness only when coverage has been
+        continuous; for a lapsed/revived shelf it measures from the *current*
+        effectiveness, since the original program no longer applies. None when
+        not yet effective.
+        """
+        gens = self._generations
+        if not gens:
+            return None
+        anchor = gens[0] if self.continuity == 'continuous' else gens[-1]
+        return (date.today() - anchor).days
+
+    # ------------------------------------------------------------------
     # Shelf capacity
     # ------------------------------------------------------------------
 
@@ -623,6 +752,13 @@ class ShelfLifecycle:
         summary = Table(box=box.SIMPLE, show_header=False, padding=(0, 1))
         summary.add_column("field", style="bold deep_sky_blue1", min_width=24)
         summary.add_column("value")
+
+        status_label = self.status.capitalize()
+        if self.continuity == 'lapsed':
+            status_label += " (re-registered after a gap)"
+        elif self.is_re_registered:
+            status_label += " (re-registered)"
+        summary.add_row("Status", status_label)
 
         reg = self.shelf_registration
         if reg:
