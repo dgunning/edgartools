@@ -24,6 +24,8 @@ re-measure rerun; coverage up, bad_rate stays 0, no anchor regresses
 | `run_eval.py` | Tier A runner: bucket each facet, print dashboard + failure catalog |
 | `thresholds.json` | Locked coverage floors / bad_rate ceilings (the ratchet) |
 | `test_eval_ratchet.py` | Network-marked guardrail asserting thresholds hold |
+| `tier_c_judge.py` | Tier C LLM-judge: prompt builder + verdict parser + evidence gatherer |
+| `test_tier_c_judge.py` | Fast unit tests for the Tier C pure functions |
 
 ## Buckets
 
@@ -49,17 +51,37 @@ harness checks accuracy (not just coverage) on the hand-verified cases.
   `current_effective + 3y == shelf_expires`, every takedown ∈
   `[effective, expires]`. A covered value that fails its oracle is demoted to
   `suspect`, turning coverage into measured *accuracy*.
-- **Tier C (later): LLM-judge** on a stratified sample via the existing
-  `edgar/ai/evaluation` infra, for facets without a clean oracle.
+- **Tier C: LLM-judge semantic audit** (`tier_c_judge.py`). For facets where a
+  value can be clean and internally consistent yet still semantically wrong (is
+  this *the lead* agent? is this *the* registered amount?). Mirrors
+  `edgar/ai/evaluation/judge.py`: the module only builds prompts and parses
+  verdicts; a Claude Code subagent does the judging (no API key, no per-run cost,
+  nothing non-deterministic in the gate). It is an **audit, not a gate** — a
+  confirmed disagreement becomes a new Tier B oracle or a hand-verified
+  `corpus.json` anchor, which is what guards CI.
+  - Run it: `get_judge_tasks(corpus, facet=...)` builds `{prompt, ...}` per
+    covered value; spawn one subagent per `task["prompt"]`; feed each reply to
+    `parse_offering_judge_verdict(...)`; `summarize_verdicts(...)` prints the
+    disagreement catalog.
+  - Best for the **semantic** facets (`lead_bookrunner`, `fee_capacity`). A live
+    run confirmed both (Laidlaw placement agent; Vincerx $100M recovered from the
+    amendment's parent registration) and, when fed thin evidence, produced a
+    *false* disagreement on a BofA structured note — fixed by surfacing the
+    labeled `Selling Agent:` field and the `("BofAS")` abbreviation definition in
+    the evidence.
+  - **Not** for `shelf_status`: the same run showed the judge botching the
+    three-year date arithmetic (blessed a wrong status with high confidence). Date
+    consistency belongs to the deterministic Tier B lifecycle oracle, not an LLM.
 
-## Baseline (2026-06-20, post fu3x/2w5y/2h4c/zxnj)
+## Baseline (2026-06-20, post fu3x/2w5y/2h4c/zxnj + cover-agent + fee-source fallback)
 
-| facet | coverage | bad_rate | verified | top triage target |
-|-------|----------|----------|----------|-------------------|
-| fee_capacity | 67% | 0% | 9/9 | null: pre-2022 inline tables / no exhibit |
-| lead_bookrunner | 21% | 0% | — | null: 424B2 structured-note cover agent not extracted |
-| shelf_status | 100% | 0% | — | — |
+| facet | coverage | bad_rate | verified | remaining triage target |
+|-------|----------|----------|----------|-------------------------|
+| fee_capacity | 78% | 0% | 9/9 | null: pre-2022 inline "Calculation of Registration Fee" tables (needs corpus anchors) |
+| lead_bookrunner | 93% | 0% | — | one prose-only structured note (not worth a fragile pattern) |
+| shelf_status | 100% | 0% | 2/2 | — |
 
-The headline next target is **lead_bookrunner coverage** — the 2h4c guard removed
-all garbage but the 424B2 structured-note covers return an honest `None`;
-extracting the real agent ("BofA Securities, Inc.") is the deeper follow-up.
+Both coverage attacks that lifted these numbers were measured here: the 424B2
+cover-agent extraction (lead_bookrunner 21%→93%) and the amendment fee-source
+fallback (fee_capacity 67%→78%). The lifecycle Tier B oracle now verifies
+shelf_status date/takedown consistency.
