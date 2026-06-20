@@ -20,7 +20,9 @@ Buckets per facet:
 Metrics:  coverage = ok / applicable     bad_rate = bad / applicable
 
 Tier B (self-check oracles: fee cross-check, lifecycle consistency) plugs into
-each facet's `classify` via the `oracle` hook — not yet implemented here.
+each facet via the `ORACLES` hook: an `ok` value is cross-checked against the
+filing's own internal redundancy (fee / rate = aggregate; takedown dates within
+the shelf's effective window). A failed oracle demotes `ok` -> `suspect`.
 """
 from __future__ import annotations
 
@@ -92,8 +94,48 @@ def _oracle_fee_crosscheck(ft, tol=0.03):
     return ok, f"implied={implied:,.0f} vs extracted={total:,.0f}"
 
 
+def _oracle_lifecycle_consistency(lc):
+    """Cross-check shelf dates against the takedowns' own filing dates.
+
+    Two internal-redundancy checks, independent of how ``status`` is classified:
+
+    1. Arithmetic identity — ``shelf_expires`` must equal current effectiveness
+       + 3 years (Rule 415(a)(5)). A regression guard on the date anchoring that
+       the fu3x fix established.
+    2. Takedown containment — a 424B takedown cannot legally occur after the
+       shelf expires. Takedown dates come from the 424B filings; the expiry is
+       derived from the EFFECT/ASR side, so a takedown past ``shelf_expires``
+       exposes a mis-dated or mis-linked shelf (the exact fu3x failure mode: an
+       expiry anchored too early leaves recent takedowns stranded past it).
+
+    Deliberately does *not* flag takedowns *before* the earliest effectiveness:
+    an old EFFECT scrolling out of the loaded related-filing window would falsely
+    trip that, whereas recent filings (the upper bound) are never truncated.
+
+    Returns None when there is no current-effective/expiry anchor (e.g.
+    effectiveness proven only by a takedown, with the EFFECT date out of window)
+    or no takedowns to cross-check against — the oracle then verified only a
+    tautology, which is not independent confirmation.
+    """
+    from edgar.offerings.prospectus import _parse_filing_date, _plus_three_years
+    exp = lc.shelf_expires
+    eff = _parse_filing_date(lc.current_effective_date) if lc.current_effective_date else None
+    if exp is None or eff is None:
+        return None, "no current-effective/expiry anchor"
+    if _plus_three_years(eff) != exp:
+        return False, f"shelf_expires {exp} != current effective {eff} + 3y"
+    td_dates = [d for d in (_parse_filing_date(f.filing_date) for f in lc.takedowns) if d]
+    if not td_dates:
+        return None, "arithmetic identity holds; no takedowns to cross-check"
+    late = [d for d in td_dates if d > exp]
+    if late:
+        return False, f"{len(late)} takedown(s) after expiry {exp} (latest {max(late)})"
+    return True, f"{len(td_dates)} takedowns <= expiry {exp}"
+
+
 ORACLES = {
     "fee_capacity": _oracle_fee_crosscheck,
+    "shelf_status": _oracle_lifecycle_consistency,
 }
 
 
@@ -129,7 +171,8 @@ def _facet_shelf_status(filing):
         eff = _parse_filing_date(lc.current_effective_date)
         if eff and lc.shelf_expires < eff:
             return "bad", val, "shelf_expires before current effective date", None
-    return "ok", val, "", None
+    # Hand the lifecycle to the Tier B oracle for the takedown cross-check.
+    return "ok", val, "", lc
 
 
 FACETS = {
