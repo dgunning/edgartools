@@ -172,6 +172,38 @@ _ATM_TEXT_PATTERNS = [
     r'through\s+([A-Z][^\n\(\)]{3,60}?(?:LLC|Inc\.|Corp\.|L\.P\.|&\s+Co\.))\s*[,\(]',
 ]
 
+# Best-efforts / agency deals (registered directs, ATMs) name the agent inline in
+# prose rather than in an allocation table: "We have engaged <Firm>, which we
+# refer to as the placement agent", "engaged <Firm> (the 'placement agent')", or
+# "Sales Agreement ... with <Firm> relating to ...". A firm name mid-sentence may
+# carry a country parenthetical ("(UK)"), commas, and abbreviation periods, so the
+# capture is bounded by the role/clause marker that follows it rather than by a
+# fixed suffix list. is_plausible_underwriter_name guards the result downstream.
+_AGENT_NAME = r"([A-Z][A-Za-z0-9.,&'()\- ]{3,60}?)"
+
+_AGENCY_TEXT_PATTERNS = [
+    # "engaged <Firm>, which we refer to as the placement agent" /
+    # "engaged <Firm> (the 'placement agent')" / "engaged <Firm> as our sales agent"
+    (re.compile(
+        r'\bengaged\s+' + _AGENT_NAME +
+        r'(?=\s*,?\s*(?:which\s+we\s+refer'
+        r'|\(\s*(?:the\s+)?["“]?\s*(?:placement|sales|selling)'
+        r'|(?:as|to\s+act\s+as)\s+(?:our|the)))', re.IGNORECASE),
+     'placement_agent'),
+    # "Sales Agreement ... with <Firm> relating to ..." / "... as sales agent"
+    (re.compile(
+        r'(?:Sales|Equity\s+Distribution|At[\s\-]the[\s\-]Market(?:\s+Issuance)?)'
+        r'\s+Agreement[^.]{0,90}?\bwith\s+' + _AGENT_NAME +
+        r'(?=\s+relating\b|\s+as\s+(?:our\s+)?sales)', re.IGNORECASE),
+     'sales_agent'),
+]
+
+
+def _light_clean_agent_name(name: str) -> str:
+    """Whitespace-normalize and trim trailing separators, keeping internal
+    parentheticals ('(UK)') and abbreviation periods ('Ltd.')."""
+    return re.sub(r'\s+', ' ', name).strip().strip(',').strip()
+
 
 def _clean_agent_name(name: str) -> str:
     """Clean extracted agent name."""
@@ -272,5 +304,20 @@ def extract_underwriting_from_text(filing: 'Filing', document=None) -> list:
                 'names': [agent],
                 'source': 'cover_selling_agent',
             })
+
+    # Signal: best-efforts / agency deal — agent named inline in cover prose.
+    # Tried after the labeled signals so a structured-note "Selling Agent" field
+    # stays the lead; the first matching agency phrase wins.
+    for pattern, role in _AGENCY_TEXT_PATTERNS:
+        m = pattern.search(cover)
+        if m:
+            name = _light_clean_agent_name(m.group(1))
+            if 3 < len(name) < 80:
+                results.append({
+                    'role': role,
+                    'names': [name],
+                    'source': 'cover_text',
+                })
+                break
 
     return results

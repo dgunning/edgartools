@@ -150,3 +150,34 @@ class TestCoverAgentExtraction:
         # 005479 references "selling agent in the case of BofAS" only in prose —
         # no labeled cover field — so we must not fabricate a lead.
         assert self._lead("0001918704-25-005479") is None
+
+
+class TestAgencyDealAgentExtraction:
+    """Lead agent from best-efforts / ATM equity covers named inline in prose.
+
+    Registered directs and ATMs don't carry an underwriter allocation table; the
+    agent appears in cover prose ("We have engaged <Firm> ... as the placement
+    agent", "Sales Agreement ... with <Firm> relating to ..."). Recovering these
+    took the eval's lead_bookrunner coverage from 71% to 93%.
+    """
+
+    def _lead(self, accession):
+        from edgar.offerings.prospectus import Prospectus424B
+        uw = Prospectus424B.from_filing(find(accession)).underwriting
+        return uw.lead_manager if uw else None
+
+    @pytest.mark.vcr
+    def test_registered_direct_placement_agent(self):
+        """'engaged Laidlaw & Company (UK) Ltd. ... the placement agent' — the
+        country parenthetical is preserved in the recovered name."""
+        assert self._lead("0001108205-25-000026") == "Laidlaw & Company (UK) Ltd."
+
+    @pytest.mark.vcr
+    def test_atm_sales_agent(self):
+        """'Sales Agreement ... with Robert W. Baird & Co. Incorporated relating to'."""
+        assert self._lead("0001628280-25-015699") == "Robert W. Baird & Co. Incorporated"
+
+    @pytest.mark.vcr
+    def test_placement_agent_defined_inline(self):
+        """'engaged H.C. Wainwright & Co., LLC (the "placement agent")'."""
+        assert self._lead("0001641172-25-001566") == "H.C. Wainwright & Co., LLC"
