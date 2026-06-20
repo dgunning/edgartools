@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **`EightK.items` no longer under-reports items** the new section parser silently missed. When the parser detects only some items (e.g. only Item 9.01 on a filing that also carries an Item 1.05 cybersecurity body), `.items` now unions the parser result with the chunked primary-document parser so the present item is listed. The `eightk['1.05']` / `eightk['Item 1.05']` accessor is also fixed to fall through to the text-based extractor instead of returning the chunked parser's `None` for a key-format mismatch. (edgartools-83gh)
+- **`get_thirteenf_portfolio()` now returns populated holdings** instead of always an empty DataFrame. It contained a dead column-rename block and then sorted by a `value_usd` column that never existed, so the trailing `KeyError` was swallowed and an empty frame returned for every real filing. It now uses the single canonical PascalCase infotable schema (`Issuer`, `Cusip`, `Value`, …) shared by all parse paths, and adds a `pct_value` column. (edgartools-i5wx)
 
 ## [5.37.0] - 2026-06-19
 
