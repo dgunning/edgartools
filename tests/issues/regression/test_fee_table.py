@@ -178,6 +178,37 @@ class TestFeeTableExtraction:
         assert fee_table.fee_deferred is True
 
 
+class TestAmendmentFeeSourceFallback:
+    """Capacity recovery for registration amendments that omit the fee exhibit.
+
+    S-3/A, F-3/A and POS AM amendments routinely drop Exhibit 107 when no further
+    fee is due — the fee was paid with the original registration. The registered
+    capacity still lives in that original's exhibit, so the extractor walks the
+    file-number family to recover it instead of returning None.
+    """
+
+    @pytest.mark.vcr
+    def test_vincerx_s3a_recovers_from_original(self):
+        """Vincerx S-3/A (no fee exhibit) recovers $100M from the original S-3."""
+        fee_table = extract_registration_fee_table(find("0001193125-25-068723"))
+        assert fee_table is not None
+        assert fee_table.total_offering_amount == pytest.approx(100000000.0, rel=0.01)
+
+    @pytest.mark.vcr
+    def test_tr_finance_f3a_recovers_from_original(self):
+        """TR Finance F-3/A (no fee exhibit) recovers $3B from the original F-3."""
+        fee_table = extract_registration_fee_table(find("0001193125-25-068799"))
+        assert fee_table is not None
+        assert fee_table.total_offering_amount == pytest.approx(3000000000.0, rel=0.01)
+
+    @pytest.mark.vcr
+    def test_424b_takedown_stays_none(self):
+        """Silence check: a 424B takedown is not a registration form, so the
+        family is not walked and the result stays an honest None."""
+        fee_table = extract_registration_fee_table(find("0001918704-25-005439"))
+        assert fee_table is None
+
+
 class TestRegistrationFeeTableModel:
     """Test the RegistrationFeeTable data model."""
 

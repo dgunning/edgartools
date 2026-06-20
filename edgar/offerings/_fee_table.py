@@ -33,6 +33,48 @@ def _get_filing_fees_attachment(filing: 'Filing'):
     return None
 
 
+# Base registration forms that register capacity (and so carry — or whose
+# file-number family carries — a fee exhibit). ASR variants and POS AM are
+# handled separately in _is_registration_form.
+_FEE_BEARING_BASE_FORMS = {'S-1', 'S-3', 'F-1', 'F-3', 'S-4', 'F-4', 'S-11'}
+
+
+def _is_registration_form(form: Optional[str]) -> bool:
+    """Whether ``form`` registers securities (vs. a takedown/notice/report)."""
+    base = (form or '').replace('/A', '')
+    return base in _FEE_BEARING_BASE_FORMS or base.endswith('ASR') or base == 'POS AM'
+
+
+def _resolve_fee_source(filing: 'Filing'):
+    """Find the fee-bearing registration for an amendment that omits its exhibit.
+
+    Registration amendments (S-3/A, F-3/A, POS AM) routinely drop the fee
+    exhibit because no additional fee is due — the fee was paid with the original
+    registration, and the registered capacity still lives in that filing's
+    Exhibit 107. Walk the file-number family and return the most recent
+    fee-bearing registration filing dated at or before this one (falling back to
+    the earliest if all are later). Returns None when ``filing`` is not itself a
+    registration form or no such source exists, so non-registration filings
+    (424B takedowns, 10-Ks) keep their current None result.
+    """
+    if not _is_registration_form(filing.form):
+        return None
+    try:
+        related = filing.related_filings()
+    except Exception:
+        log.debug("related_filings() failed for %s", filing.accession_no)
+        return None
+    own_date = str(filing.filing_date)
+    candidates = [rf for rf in related
+                  if rf.accession_no != filing.accession_no
+                  and _is_registration_form(rf.form)
+                  and _get_filing_fees_attachment(rf) is not None]
+    if not candidates:
+        return None
+    at_or_before = [rf for rf in candidates if str(rf.filing_date) <= own_date]
+    return max(at_or_before or candidates, key=lambda rf: str(rf.filing_date))
+
+
 def _parse_dollar_amount(text: str) -> Optional[float]:
     """Parse a dollar string like '$12,119.07' or '300,000,000' to float."""
     if not text:
@@ -354,7 +396,15 @@ def extract_registration_fee_table(filing: 'Filing'):
 
     fee_att = _get_filing_fees_attachment(filing)
     if not fee_att:
-        return None
+        # A registration amendment may omit its fee exhibit; recover it from the
+        # original registration in the same file-number family.
+        source = _resolve_fee_source(filing)
+        if source is None:
+            return None
+        fee_att = _get_filing_fees_attachment(source)
+        if not fee_att:
+            return None
+        filing = source
 
     try:
         content = fee_att.download()
