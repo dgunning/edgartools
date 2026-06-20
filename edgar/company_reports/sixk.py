@@ -1,8 +1,10 @@
 """Form 6-K Report of Foreign Private Issuer."""
 import re
-from datetime import datetime
+from datetime import date
 from functools import cached_property
 from typing import List, Optional
+
+from edgar.company_reports.current_report import _parse_period_of_report
 
 from rich import box
 from rich.console import Group, Text
@@ -127,13 +129,13 @@ class SixK:
         return self._filing.company
 
     @property
-    def date_of_report(self):
-        """Return the period of report for this filing."""
-        period_of_report_str = self._filing.header.period_of_report
-        if period_of_report_str:
-            period_of_report = datetime.strptime(period_of_report_str, "%Y-%m-%d")
-            return period_of_report.strftime("%B %d, %Y")
-        return ""
+    def date_of_report(self) -> Optional[date]:
+        """The period of report (event date) for this filing as a ``datetime.date``.
+
+        Always returns a ``date`` (or ``None`` when absent) so callers don't have
+        to defensively parse mixed string/date types. (edgartools-83gh)
+        """
+        return _parse_period_of_report(self._filing.header.period_of_report)
 
     @property
     def commission_file_number(self) -> Optional[str]:
@@ -270,12 +272,14 @@ class SixK:
         # Exhibit content
         renderables.append(self._content_renderables())
 
+        dor = self.date_of_report
+        dor_display = dor.strftime("%B %d, %Y") if dor else ""
         panel_title = Text.assemble(
             (f"{self.company}", "bold deep_sky_blue1"),
             (" ", ""),
             (f"{self.form}", "bold green"),
             (" ", ""),
-            (f"{self.date_of_report}", "bold yellow")
+            (dor_display, "bold yellow")
         )
 
         return Panel(
@@ -285,7 +289,9 @@ class SixK:
         )
 
     def __str__(self):
-        return f"{self.company} {self.form} {self.date_of_report}"
+        dor = self.date_of_report
+        dor_display = dor.strftime("%B %d, %Y") if dor else ""
+        return f"{self.company} {self.form} {dor_display}".rstrip()
 
     def __repr__(self):
         return repr_rich(self.__rich__())

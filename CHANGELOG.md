@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **HTTP/1.1 is now the default transport** for the internal HTTP client (previously HTTP/2). HTTP/2 multiplexes every request over a single TCP connection, so a mid-stream reset from cloud egress fails all in-flight requests at once — surfacing as intermittent `h2.exceptions.InvalidBodyLengthError` / `httpx.RemoteProtocolError: ConnectionTerminated` that crash long fan-out jobs. SEC's ~9 req/s rate limit means HTTP/2's multiplexing offers no real upside here.
+- **`EightK.date_of_report` / `SixK.date_of_report` now always return a `datetime.date`** (or `None` when the filing header has no period of report), instead of a formatted string like `'December 20, 2024'`. Consumers no longer need to parse mixed date/string types. (edgartools-83gh)
+
+### Added
+- **Public HTTP/2 toggle** so consumers no longer need to reach into `HTTP_MGR.httpx_params`. Set `EDGAR_HTTP2=true` (env var) or call `configure_http(http2=True)` at runtime to opt back into HTTP/2; `get_http_config()` now reports the current `http2` setting.
+
+### Fixed
+- **`EightK.items` no longer under-reports items** the new section parser silently missed. When the parser detects only some items (e.g. only Item 9.01 on a filing that also carries an Item 1.05 cybersecurity body), `.items` now unions the parser result with the chunked primary-document parser so the present item is listed. The `eightk['1.05']` / `eightk['Item 1.05']` accessor is also fixed to fall through to the text-based extractor instead of returning the chunked parser's `None` for a key-format mismatch. (edgartools-83gh)
+
 ## [5.37.0] - 2026-06-19
 
 A batch of fixes across insider-ownership footnote handling and 10b5-1 plan detection, document search snippet highlighting, BDC/Form C/N-PORT data access, TTM quarterly derivation, and date/currency formatting, plus an ISO 4217 currency column on XBRL facts and the Form C parser's migration to lxml.
