@@ -1,0 +1,9 @@
+{
+  "_comment": "Ratchet floors/ceilings for the offerings eval. Coverage may only go up; bad_rate may only go down. Update deliberately when an improvement lands (record the new baseline in the commit).",
+  "_baseline_recorded": "2026-06-20 (post fu3x/2w5y/2h4c/zxnj)",
+  "facets": {
+    "fee_capacity":    {"coverage_floor": 0.60, "bad_rate_ceiling": 0.02},
+    "lead_bookrunner": {"coverage_floor": 0.15, "bad_rate_ceiling": 0.02},
+    "shelf_status":    {"coverage_floor": 0.90, "bad_rate_ceiling": 0.02}
+  }
+}
