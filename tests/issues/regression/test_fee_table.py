@@ -37,6 +37,30 @@ class TestParsingHelpers:
         assert _join_dollar_cells(['$300,000']) == ['$300,000']  # already joined
         assert _join_dollar_cells([]) == []
 
+    def test_find_fee_table_split_tag_header(self):
+        """edgartools-zxnj: header words split across inline tags / nbsp must match.
+
+        get_text() with no separator collapses '<font>Security</font>
+        <font>Type</font>' to 'SecurityType'; _find_fee_table must use a
+        separator and normalize whitespace so the data table is still found.
+        """
+        import warnings
+        from bs4 import BeautifulSoup
+        from edgar.offerings._fee_table import _find_fee_table
+        html = (
+            "<html><body>"
+            "<table><tr>"
+            "<td><font>Security</font><font>Type</font></td>"
+            "<td>Maximum Aggregate Offering Price</td>"
+            "</tr>"
+            "<tr><td>Equity</td><td>$79,170,150.00</td></tr></table>"
+            "</body></html>"
+        )
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            soup = BeautifulSoup(html, "lxml")
+        assert _find_fee_table(soup) is not None
+
 
 # ============================================================
 # Integration tests against real S-3 filings
@@ -113,6 +137,45 @@ class TestFeeTableExtraction:
         filing = find("0000320193-24-000123")  # Apple 10-K
         fee_table = extract_registration_fee_table(filing)
         assert fee_table is None
+
+    # --- edgartools-zxnj: capacity missing/garbage for most S-3/F-3 shelves ---
+
+    @pytest.mark.vcr
+    def test_zxnj_whitehawk_split_tag_header(self):
+        """Whitehawk S-3 — header words split across inline tags.
+
+        'Security Type' rendered as <font>Security</font><font>Type</font>;
+        _find_fee_table used get_text() with no separator, collapsing it to
+        'securitytype' so the data table was never found (returned None).
+        """
+        fee_table = extract_registration_fee_table(find("0001193125-25-068942"))
+        assert fee_table is not None
+        assert fee_table.total_offering_amount == pytest.approx(79170150.0, rel=0.01)
+
+    @pytest.mark.vcr
+    def test_zxnj_vigil_avoids_footnote_table(self):
+        """Vigil S-3 — must parse the data table, not a footnote table.
+
+        With the split-tag header unmatched, the legacy 'registration fee'
+        fallback matched a footnote paragraph table ('...calculating the
+        registration fee...'), yielding None. Now the data table is found.
+        """
+        fee_table = extract_registration_fee_table(find("0001193125-25-067858"))
+        assert fee_table is not None
+        assert fee_table.total_offering_amount == pytest.approx(9704293.70, rel=0.01)
+
+    @pytest.mark.vcr
+    def test_zxnj_welltower_indeterminate_asr_is_none_not_zero(self):
+        """Welltower S-3ASR — indeterminate amount, deferred fees.
+
+        Every amount cell is a placeholder under Rule 456(b)/457(r). Capacity is
+        genuinely indeterminate, so total_offering_amount must be None (not a
+        parsed 0.0) and fee_deferred must be True.
+        """
+        fee_table = extract_registration_fee_table(find("0001193125-25-066253"))
+        assert fee_table is not None
+        assert fee_table.total_offering_amount is None
+        assert fee_table.fee_deferred is True
 
 
 class TestRegistrationFeeTableModel:

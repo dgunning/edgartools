@@ -86,16 +86,26 @@ def _is_placeholder(text: str) -> bool:
     return False
 
 
+def _table_text(table) -> str:
+    """Lowercased, whitespace-normalized text of a table for header matching.
+
+    Uses an explicit separator so header words split across inline tags
+    (``<font>Security</font><font>Type</font>``) and non-breaking spaces don't
+    collapse into ``securitytype`` and defeat substring matching.
+    """
+    return re.sub(r'\s+', ' ', table.get_text(separator=' ').replace('\xa0', ' ')).strip().lower()
+
+
 def _find_fee_table(soup) -> Optional:
     """Find the main fee data table in the exhibit HTML."""
     for table in soup.find_all('table'):
-        header_text = table.get_text().lower()
+        header_text = _table_text(table)
         if ('security type' in header_text or 'security class' in header_text
                 or 'class of securities' in header_text):
             return table
     # Fallback: find table with 'registration fee' in header (legacy format)
     for table in soup.find_all('table'):
-        header_text = table.get_text().lower()
+        header_text = _table_text(table)
         if 'registration fee' in header_text and ('amount' in header_text or 'aggregate' in header_text):
             return table
     return None
@@ -215,13 +225,21 @@ def _parse_fee_table_html(html: str, exhibit_url: Optional[str] = None) -> dict:
             # Summary row had only fee amount, not offering amount (2022 format)
             result['total_offering_amount'] = aggregate_from_securities
 
-    # Detect deferred fees (S-3ASR with Rule 457(r))
-    all_rules = [s.get('fee_rule', '') for s in result['securities']]
-    if all_rules and all('457(r)' in (r or '') for r in all_rules):
+    # Detect deferred fees (S-3ASR with Rule 457(r)). Consider only rows that
+    # actually carry a fee rule — issuer sub-header rows ("Fees to Be Paid |
+    # Welltower Inc.") have none and would otherwise defeat the all() check.
+    rules_with_content = [r for s in result['securities']
+                          if (r := s.get('fee_rule'))]
+    if rules_with_content and all('457(r)' in r for r in rules_with_content):
         result['fee_deferred'] = True
 
     if result['net_fee_due'] is not None and result['net_fee_due'] == 0.0 and not result['total_offering_amount']:
         result['fee_deferred'] = True
+
+    # An automatic shelf with deferred (pay-as-you-go) fees registers an
+    # indeterminate amount; a parsed 0.0 is a placeholder, not real capacity.
+    if result['fee_deferred'] and result['total_offering_amount'] == 0.0:
+        result['total_offering_amount'] = None
 
     return result
 
