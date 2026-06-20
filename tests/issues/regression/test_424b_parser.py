@@ -9,6 +9,7 @@ values verified by hand against the SEC EDGAR filing.
 """
 import pytest
 from edgar import find
+from edgar._filings import Filing
 from edgar.offerings.prospectus import (
     Prospectus424B,
     ShelfLifecycle,
@@ -122,7 +123,11 @@ class TestOfferingTypeClassification:
 
     @pytest.mark.vcr
     def test_nextera_atm(self):
-        filing = find("0001193125-25-338333")
+        # Construct the Filing directly rather than find() — find() downloads the
+        # whole quarterly full-index to resolve one accession, which bloats the
+        # cassette ~30x (edgartools-9q82 cassette cleanup).
+        filing = Filing(form='424B5', company='NEXTERA ENERGY INC', cik=753308,
+                        filing_date='2025-12-31', accession_no='0001193125-25-338333')
         p = Prospectus424B.from_filing(filing)
         assert p.offering_type == OfferingType.ATM
 
