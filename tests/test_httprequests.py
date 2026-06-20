@@ -8,6 +8,7 @@ import pytest
 from edgar.httpclient import (
     async_http_client,
     get_edgar_http_timeout,
+    get_edgar_use_http2,
     get_edgar_use_system_certs,
     get_edgar_verify_ssl,
     get_http_mgr,
@@ -667,6 +668,69 @@ def test_configure_http_exported_from_edgar():
     # Verify get_http_config returns a dict
     config = get_http_config()
     assert isinstance(config, dict)
+
+
+# =============================================================================
+# HTTP/2 toggle tests (edgartools-x2tv)
+#
+# HTTP/2 multiplexes every request over a single TCP connection, so a
+# mid-stream reset from cloud egress fails all in-flight requests at once
+# (h2 InvalidBodyLengthError / RemoteProtocolError: ConnectionTerminated).
+# EdgarTools defaults to HTTP/1.1 to isolate failures; HTTP/2 is opt-in.
+# =============================================================================
+
+@pytest.mark.fast
+def test_get_edgar_use_http2_defaults_to_false(monkeypatch):
+    """EDGAR_HTTP2 defaults to False (HTTP/1.1) when not set."""
+    monkeypatch.delenv("EDGAR_HTTP2", raising=False)
+    assert get_edgar_use_http2() is False
+
+
+@pytest.mark.fast
+@pytest.mark.parametrize("value", ["true", "True", "TRUE", "1", "yes"])
+def test_get_edgar_use_http2_env_var_enables(monkeypatch, value):
+    """EDGAR_HTTP2 truthy values opt back into HTTP/2."""
+    monkeypatch.setenv("EDGAR_HTTP2", value)
+    assert get_edgar_use_http2() is True
+
+
+@pytest.mark.fast
+def test_http_mgr_defaults_to_http1(monkeypatch):
+    """A freshly constructed HTTP_MGR negotiates HTTP/1.1 by default."""
+    monkeypatch.delenv("EDGAR_HTTP2", raising=False)
+    http_mgr = get_http_mgr()
+    assert http_mgr.httpx_params.get("http2") is False
+
+
+@pytest.mark.fast
+def test_http_mgr_http2_env_override(monkeypatch):
+    """EDGAR_HTTP2=true flips the constructed HTTP_MGR to HTTP/2."""
+    monkeypatch.setenv("EDGAR_HTTP2", "true")
+    http_mgr = get_http_mgr()
+    assert http_mgr.httpx_params.get("http2") is True
+
+
+@pytest.mark.fast
+def test_configure_http_toggles_http2():
+    """configure_http(http2=...) flips the setting at runtime and is reported
+    by get_http_config; passing None leaves it unchanged."""
+    from edgar.httpclient import configure_http, get_http_config, HTTP_MGR
+
+    original = HTTP_MGR.httpx_params.get("http2", False)
+    try:
+        configure_http(http2=True)
+        assert HTTP_MGR.httpx_params["http2"] is True
+        assert get_http_config()["http2"] is True
+
+        # None must not change the existing value
+        configure_http(http2=None)
+        assert HTTP_MGR.httpx_params["http2"] is True
+
+        configure_http(http2=False)
+        assert HTTP_MGR.httpx_params["http2"] is False
+        assert get_http_config()["http2"] is False
+    finally:
+        HTTP_MGR.httpx_params["http2"] = original
 
 
 # =============================================================================

@@ -123,6 +123,25 @@ def get_edgar_use_system_certs() -> bool:
     return strtobool(os.environ.get("EDGAR_USE_SYSTEM_CERTS", "false"))
 
 
+def get_edgar_use_http2() -> bool:
+    """
+    Returns True if the internal httpx client should negotiate HTTP/2.
+
+    Defaults to False (HTTP/1.1). EdgarTools talks to SEC EDGAR with a small
+    number of large, rate-limited (~9 req/s) requests, so HTTP/2's stream
+    multiplexing buys little, while its single-connection model turns a
+    transient reset into a correlated failure across every in-flight request.
+    From cloud egress this surfaces as intermittent
+    ``h2.exceptions.InvalidBodyLengthError`` (truncated body) and
+    ``httpx.RemoteProtocolError: ConnectionTerminated`` mid-download, crashing
+    long fan-out jobs. HTTP/1.1 isolates each request to its own connection so
+    the retry layer can recover. Set EDGAR_HTTP2=true to opt back into HTTP/2.
+
+    See: https://github.com/dgunning/edgartools/issues (edgartools-x2tv)
+    """
+    return strtobool(os.environ.get("EDGAR_HTTP2", "false"))
+
+
 def get_truststore_context():
     """
     Get a truststore SSLContext that uses the OS native certificate store.
@@ -207,6 +226,13 @@ def get_http_mgr(cache_enabled: bool = True, request_per_sec_limit: int = 9) -> 
     else:
         http_mgr.httpx_params["verify"] = get_edgar_verify_ssl()
 
+    # Default to HTTP/1.1 (http2=False). HTTP/2 multiplexes every request over a
+    # single TCP connection, so a mid-stream reset from cloud egress fails all
+    # in-flight requests at once (InvalidBodyLengthError / ConnectionTerminated).
+    # SEC's ~9 req/s rate limit means HTTP/2's multiplexing offers no real upside
+    # here. Override with EDGAR_HTTP2=true or configure_http(http2=True).
+    http_mgr.httpx_params["http2"] = get_edgar_use_http2()
+
     # Increase keepalive from default 5s to 30s for better connection reuse
     # This reduces TCP+TLS handshake overhead (~100ms) for interactive use
     http_mgr.httpx_params["limits"] = httpx.Limits(keepalive_expiry=30)
@@ -246,6 +272,7 @@ def configure_http(
     use_system_certs: Optional[bool] = None,
     proxy: Optional[str] = None,
     timeout: Optional[float] = None,
+    http2: Optional[bool] = None,
 ) -> None:
     """
     Configure HTTP client settings at runtime.
@@ -265,6 +292,11 @@ def configure_http(
         timeout: Request timeout in seconds (default: 30.0). Passing None
                  leaves the current timeout unchanged — to disable the
                  timeout entirely, call disable_http_timeout() instead.
+        http2: Enable/disable HTTP/2 negotiation. Defaults to HTTP/1.1
+               (http2=False) because HTTP/2 multiplexes all requests over one
+               connection, so a mid-stream reset from cloud egress fails every
+               in-flight request at once (InvalidBodyLengthError /
+               ConnectionTerminated). Set to True to opt back into HTTP/2.
 
     Examples:
         # Use OS certificate store (recommended for corporate networks)
@@ -279,6 +311,9 @@ def configure_http(
 
         # Configure proxy
         configure_http(proxy="http://proxy.company.com:8080")
+
+        # Opt back into HTTP/2 (default is HTTP/1.1)
+        configure_http(http2=True)
 
     Note:
         Changes take effect immediately for new requests.
@@ -310,6 +345,10 @@ def configure_http(
     if proxy is not None:
         # Configure proxy for httpx
         HTTP_MGR.httpx_params["proxy"] = proxy
+        settings_changed = True
+
+    if http2 is not None:
+        HTTP_MGR.httpx_params["http2"] = http2
         settings_changed = True
 
     if timeout is not None:
@@ -371,6 +410,7 @@ def get_http_config() -> dict:
         "use_system_certs": using_system_certs,
         "proxy": params.get("proxy"),
         "timeout": params.get("timeout"),
+        "http2": params.get("http2", False),
     }
 
 
