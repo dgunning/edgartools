@@ -15,6 +15,8 @@ The careful one is continuity: 're-registered' is two different business facts.
 
 Ground truth verified by hand against SEC EDGAR on 2026-06-18/20.
 """
+from datetime import date
+
 import pytest
 
 from edgar import Company
@@ -91,3 +93,104 @@ def test_status_precedence_and_signals_consistency():
     assert lc.has_registration_gap == (lc.continuity == "lapsed")
     # An effective, non-withdrawn shelf is 'effective' or 'expired', never 'registered'.
     assert lc.status in ("effective", "expired")
+
+
+# ---------------------------------------------------------------------------
+# Fast, network-free edge cases (synthetic filings) for the code-review fixes.
+# ShelfLifecycle only reads .form, .filing_date, .accession_no off each filing.
+# ---------------------------------------------------------------------------
+
+class _FakeFiling:
+    def __init__(self, form, filing_date, accession_no="acc"):
+        self.form = form
+        self.filing_date = date.fromisoformat(filing_date)
+        self.accession_no = accession_no
+
+
+def _lc(related):
+    return ShelfLifecycle(related[-1], related)
+
+
+def test_rw_wd_rescinds_withdrawal_not_withdrawn():
+    """'RW WD' rescinds an earlier 'RW' — the registration is NOT withdrawn."""
+    lc = _lc([
+        _FakeFiling("S-3", "2020-01-01"),
+        _FakeFiling("EFFECT", "2020-01-10"),
+        _FakeFiling("RW", "2021-01-01"),
+        _FakeFiling("RW WD", "2021-02-01"),
+    ])
+    assert lc.is_withdrawn is False
+
+
+def test_rw_without_rescission_is_withdrawn():
+    """A lone 'RW' withdraws the registration."""
+    lc = _lc([
+        _FakeFiling("S-3", "2020-01-01"),
+        _FakeFiling("EFFECT", "2020-01-10"),
+        _FakeFiling("RW", "2021-03-01"),
+    ])
+    assert lc.is_withdrawn is True
+    assert lc.status == "withdrawn"
+
+
+def test_aw_does_not_withdraw_registration():
+    """'AW' withdraws an amendment only, not the registration."""
+    lc = _lc([
+        _FakeFiling("S-3", "2020-01-01"),
+        _FakeFiling("EFFECT", "2020-01-10"),
+        _FakeFiling("AW", "2021-03-01"),
+    ])
+    assert lc.is_withdrawn is False
+
+
+def test_later_rw_after_rescission_is_withdrawn():
+    """A fresh 'RW' after a prior 'RW WD' re-withdraws the registration."""
+    lc = _lc([
+        _FakeFiling("S-3", "2020-01-01"),
+        _FakeFiling("EFFECT", "2020-01-10"),
+        _FakeFiling("RW", "2021-01-01"),
+        _FakeFiling("RW WD", "2021-02-01"),
+        _FakeFiling("RW", "2021-05-01"),
+    ])
+    assert lc.is_withdrawn is True
+
+
+def test_mixed_effect_then_asr_uses_latest_effectiveness():
+    """An S-3 (EFFECT 2017) re-registered as S-3ASR (2023, no EFFECT).
+
+    current effectiveness must be the 2023 ASR, and shelf_expires/current must
+    agree with the latest generation (the #2 EFFECT-first short-circuit bug).
+    """
+    lc = _lc([
+        _FakeFiling("S-3", "2017-08-21"),
+        _FakeFiling("EFFECT", "2017-08-30"),
+        _FakeFiling("S-3ASR", "2023-06-01"),
+    ])
+    assert lc.current_effective_date == "2023-06-01"
+    assert lc.shelf_expires == date(2026, 6, 1)
+    assert str(lc._generations[-1]) == lc.current_effective_date  # internal consistency
+    assert lc.is_automatic_shelf is True
+
+
+def test_takedown_only_old_shelf_is_expired():
+    """Effectiveness proven only by takedowns whose latest is > 3y old -> expired.
+
+    EFFECT is outside the loaded window so shelf_expires is None, but a shelf
+    cannot take down after expiry, so the latest takedown + 3y bounds it.
+    """
+    lc = _lc([
+        _FakeFiling("424B5", "2018-05-01"),
+        _FakeFiling("424B5", "2018-09-01"),
+    ])
+    assert lc.is_effective is True
+    assert lc.shelf_expires is None
+    assert lc.status == "expired"
+
+
+def test_takedown_only_recent_shelf_is_effective():
+    """A recent takedown (within 3y) without a visible EFFECT stays 'effective'."""
+    lc = _lc([
+        _FakeFiling("424B5", "2024-05-01"),
+        _FakeFiling("424B5", "2025-09-01"),
+    ])
+    assert lc.status == "effective"

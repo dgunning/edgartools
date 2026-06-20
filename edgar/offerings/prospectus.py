@@ -401,7 +401,9 @@ def _plus_three_years(d: date) -> date:
 
 
 _ASR_BASE_FORMS = {'S-3ASR', 'F-3ASR'}
-_WITHDRAWAL_FORMS = {'RW', 'AW', 'RW WD'}
+# 'RW' withdraws the registration; 'RW WD' rescinds an earlier 'RW' (the
+# registration is then NOT withdrawn). 'AW' withdraws only an amendment, not the
+# registration, so it is deliberately excluded.
 
 
 class ShelfLifecycle:
@@ -461,17 +463,17 @@ class ShelfLifecycle:
     def _current_effective_filing(self) -> Optional['Filing']:
         """The filing establishing *current* effectiveness (latest).
 
-        The most recent EFFECT notice. A genuine Rule 415(a)(6) re-registration
-        carries a fresh EFFECT, so this advances past cosmetic amendments. Falls
-        back to the latest S-3ASR/F-3ASR filing, since automatic shelves are
-        effective on filing and never receive an EFFECT notice.
+        The most recent effectiveness event — an EFFECT notice or an automatic
+        (S-3ASR/F-3ASR) shelf filing, whichever is later. Automatic shelves are
+        effective on filing and never receive an EFFECT notice, so both kinds are
+        considered together; a genuine Rule 415(a)(6) re-registration of either
+        kind advances this past cosmetic amendments. Stays consistent with
+        :attr:`_generations`.
         """
-        effects = [f for f in self._related if f.form == 'EFFECT']
-        if effects:
-            return max(effects, key=lambda f: f.filing_date)
-        asr = [f for f in self._related
-               if f.form.replace('/A', '') in _ASR_BASE_FORMS]
-        return max(asr, key=lambda f: f.filing_date) if asr else None
+        candidates = [f for f in self._related
+                      if f.form == 'EFFECT'
+                      or f.form.replace('/A', '') in _ASR_BASE_FORMS]
+        return max(candidates, key=lambda f: f.filing_date) if candidates else None
 
     @cached_property
     def shelf_filed_date(self) -> Optional[str]:
@@ -624,8 +626,24 @@ class ShelfLifecycle:
 
     @cached_property
     def is_withdrawn(self) -> bool:
-        """Whether the shelf registration has been withdrawn (RW/AW)."""
-        return any(f.form in _WITHDRAWAL_FORMS for f in self._related)
+        """Whether the shelf registration has been withdrawn and not rescinded.
+
+        A shelf is withdrawn if it has an 'RW' (Registration Withdrawal) request
+        that has not been undone by a later 'RW WD' (withdrawal of that request).
+        'AW' (withdrawal of an amendment) does not withdraw the registration.
+        """
+        rw_dates = [_parse_filing_date(f.filing_date)
+                    for f in self._related if f.form == 'RW']
+        rw_dates = [d for d in rw_dates if d is not None]
+        if not rw_dates:
+            return False
+        rescind_dates = [_parse_filing_date(f.filing_date)
+                         for f in self._related if f.form == 'RW WD']
+        rescind_dates = [d for d in rescind_dates if d is not None]
+        if not rescind_dates:
+            return True
+        # Withdrawn only if the latest request is more recent than the latest rescission.
+        return max(rw_dates) > max(rescind_dates)
 
     @cached_property
     def is_re_registered(self) -> bool:
@@ -681,6 +699,14 @@ class ShelfLifecycle:
             exp = self.shelf_expires
             if exp and date.today() > exp:
                 return 'expired'
+            if exp is None and self.takedowns:
+                # Effectiveness proven by a takedown but the EFFECT/ASR date is
+                # outside the loaded window, so shelf_expires is unknown. A shelf
+                # cannot take down after it expires, so the latest takedown + 3y
+                # is a guaranteed upper bound on expiry: past it means expired.
+                last_td = _parse_filing_date(self.takedowns[-1].filing_date)
+                if last_td and date.today() > _plus_three_years(last_td):
+                    return 'expired'
             return 'effective'
         return 'registered'
 
