@@ -574,6 +574,11 @@ class ShelfLifecycle:
             base_form = f.form.replace('/A', '')
             if base_form in _TAKEDOWN_FORMS:
                 result.append(f)
+        # Enforce chronological order here rather than trusting _related's
+        # ordering — avg_days_between_takedowns, days_since_last_takedown, and
+        # the takedown-based expiry bound all depend on ascending filing_date.
+        result.sort(key=lambda f: (_parse_filing_date(f.filing_date) or date.min,
+                                    f.accession_no))
         return result
 
     @cached_property
