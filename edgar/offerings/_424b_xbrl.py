@@ -104,7 +104,8 @@ def extract_filing_fees_xbrl(filing: 'Filing') -> dict:
         if not name:
             continue
 
-        ctx = elem.get('contextref') or elem.get('contextRef', '') or ''
+        # The HTML parser lowercases attribute names, so contextRef -> contextref.
+        ctx = elem.get('contextref') or ''
 
         if elem.get('xsi:nil') == 'true':
             continue

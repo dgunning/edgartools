@@ -342,6 +342,33 @@ class FilingFeesData(BaseModel):
     is_final_prospectus: bool = True
 
 
+def _build_filing_fees_data(data: Optional[dict]) -> FilingFeesData:
+    """Convert a raw extract_filing_fees_xbrl dict into a FilingFeesData."""
+    if not data or not data.get('has_exhibit'):
+        return FilingFeesData()
+    rows = [
+        FilingFeesRow(
+            security_type=row.get('security_type'),
+            security_title=row.get('security_title'),
+            max_aggregate_offering_price=row.get('max_aggregate_offering_price'),
+            fee_rate=row.get('fee_rate'),
+            fee_amount=row.get('fee_amount'),
+            fee_rule=row.get('fee_rule'),
+        )
+        for row in data.get('offering_rows', [])
+    ]
+    return FilingFeesData(
+        has_exhibit=True,
+        exhibit_url=data.get('exhibit_url'),
+        form_type=data.get('form_type'),
+        registration_file_number=data.get('registration_file_number'),
+        total_offering_amount=data.get('total_offering_amount'),
+        total_fee_amount=data.get('total_fee_amount'),
+        offering_rows=rows,
+        is_final_prospectus=data.get('is_final_prospectus', True),
+    )
+
+
 # ---------------------------------------------------------------------------
 # Registration Fee Table (S-3 / F-3 / S-1 shelf capacity)
 # ---------------------------------------------------------------------------
@@ -1436,12 +1463,15 @@ class Prospectus424B:
 
     def __init__(self, filing: 'Filing', cover_page: CoverPageData,
                  offering_type: OfferingType, confidence: str,
-                 document=None):
+                 document=None, filing_fees: Optional['FilingFeesData'] = None):
         self._filing = filing
         self._cover_page = cover_page
         self._offering_type = offering_type
         self._confidence = confidence
         self._document = document
+        # Optionally seeded by from_filing when the fee exhibit was already
+        # fetched during classification — avoids a second download.
+        self._eager_filing_fees = filing_fees
 
     # ------------------------------------------------------------------
     # Construction
@@ -1470,7 +1500,22 @@ class Prospectus424B:
         cover_fields = extract_cover_page_fields(filing, document=document)
         cover_page = CoverPageData(**cover_fields)
 
-        classification = classify_offering_type(filing, document=document)
+        # First pass: text only (filing_fees=None suppresses the fee-exhibit
+        # fetch). Only if the text is inconclusive do we fetch the exhibit once
+        # and reuse it for both the classifier's structural fallback and the
+        # filing_fees cache below — avoiding a redundant download.
+        classification = classify_offering_type(filing, document=document, filing_fees=None)
+        eager_filing_fees = None
+        if classification.get('type') == 'unknown':
+            from edgar.offerings._424b_xbrl import extract_filing_fees_xbrl
+            try:
+                fees_dict = extract_filing_fees_xbrl(filing)
+            except Exception:
+                fees_dict = {'has_exhibit': False}
+            classification = classify_offering_type(
+                filing, document=document, filing_fees=fees_dict)
+            eager_filing_fees = _build_filing_fees_data(fees_dict)
+
         offering_type = OfferingType(classification.get('type', 'unknown'))
         confidence = classification.get('confidence', 'low')
 
@@ -1480,6 +1525,7 @@ class Prospectus424B:
             offering_type=offering_type,
             confidence=confidence,
             document=document,
+            filing_fees=eager_filing_fees,
         )
 
     # ------------------------------------------------------------------
@@ -1734,33 +1780,11 @@ class Prospectus424B:
     def filing_fees(self) -> FilingFeesData:
         """Filing fees from EX-FILING FEES XBRL exhibit.
         Available for ~43% of 424B2, ~23% of 424B5. Returns empty if no exhibit."""
+        # Reuse the exhibit already fetched during classification, if any.
+        if self._eager_filing_fees is not None:
+            return self._eager_filing_fees
         from edgar.offerings._424b_xbrl import extract_filing_fees_xbrl
-
-        data = extract_filing_fees_xbrl(self._filing)
-        if not data.get('has_exhibit'):
-            return FilingFeesData()
-
-        rows = []
-        for row in data.get('offering_rows', []):
-            rows.append(FilingFeesRow(
-                security_type=row.get('security_type'),
-                security_title=row.get('security_title'),
-                max_aggregate_offering_price=row.get('max_aggregate_offering_price'),
-                fee_rate=row.get('fee_rate'),
-                fee_amount=row.get('fee_amount'),
-                fee_rule=row.get('fee_rule'),
-            ))
-
-        return FilingFeesData(
-            has_exhibit=True,
-            exhibit_url=data.get('exhibit_url'),
-            form_type=data.get('form_type'),
-            registration_file_number=data.get('registration_file_number'),
-            total_offering_amount=data.get('total_offering_amount'),
-            total_fee_amount=data.get('total_fee_amount'),
-            offering_rows=rows,
-            is_final_prospectus=data.get('is_final_prospectus', True),
-        )
+        return _build_filing_fees_data(extract_filing_fees_xbrl(self._filing))
 
     # ------------------------------------------------------------------
     # Lifecycle navigation

@@ -153,3 +153,81 @@ def test_classifier_unknown_when_no_text_and_no_exhibit():
     result = classify_offering_type(filing, document=neutral)
     assert result["type"] == "unknown"
     assert result["confidence"] == "low"
+
+
+# ---------------------------------------------------------------------------
+# #1 — the IPO promotion requires an assertive 'this is an IPO' phrase
+# ---------------------------------------------------------------------------
+
+_IPO_COVER = _FakeDoc(
+    "This is an initial public offering of common stock. "
+    "The underwriters have a 30-day option to purchase additional shares."
+)
+# A follow-on that merely references its past IPO — same 'initial public
+# offering' substring, but NOT 'this is an initial public offering'.
+_FOLLOWON_COVER = _FakeDoc(
+    "Since our initial public offering in 2021 we have grown. "
+    "The underwriters have a 30-day option to purchase additional shares."
+)
+
+
+def test_ipo_promotion_on_ipo_form_with_assertive_phrase():
+    result = classify_offering_type(_FakeFiling("424B4"), document=_IPO_COVER)
+    assert result["type"] == "ipo"
+
+
+def test_no_ipo_promotion_for_followon_reference():
+    # 424B4, but the cover only references a past IPO -> stays firm_commitment.
+    result = classify_offering_type(_FakeFiling("424B4"), document=_FOLLOWON_COVER)
+    assert result["type"] == "firm_commitment"
+
+
+def test_no_ipo_promotion_on_shelf_takedown_form():
+    # Assertive IPO text but on a 424B5 takedown form -> stays firm_commitment.
+    result = classify_offering_type(_FakeFiling("424B5"), document=_IPO_COVER)
+    assert result["type"] == "firm_commitment"
+
+
+# ---------------------------------------------------------------------------
+# #4 — the fee exhibit is fetched at most once
+# ---------------------------------------------------------------------------
+
+class _CountingAttachment(_FakeAttachment):
+    def __init__(self, content):
+        super().__init__(content)
+        self.downloads = 0
+
+    def download(self):
+        self.downloads += 1
+        return self._content
+
+
+def test_injected_filing_fees_avoids_download():
+    """Passing pre-parsed fee data must not trigger an exhibit download."""
+    att = _CountingAttachment(FIXTURE.read_bytes())
+    filing = _FakeFiling("424B5", attachments=[att])
+    neutral = _FakeDoc("Generic cover paragraph with no classifier keywords.")
+    injected = {"has_exhibit": True, "offering_rows": [{"security_type": "Equity"}]}
+    result = classify_offering_type(filing, document=neutral, filing_fees=injected)
+    assert result["type"] == "firm_commitment"
+    assert att.downloads == 0
+
+
+def test_filing_fees_none_suppresses_fallback_fetch():
+    """filing_fees=None suppresses the fallback entirely (no fetch, unknown)."""
+    att = _CountingAttachment(FIXTURE.read_bytes())
+    filing = _FakeFiling("424B5", attachments=[att])
+    neutral = _FakeDoc("Generic cover paragraph with no classifier keywords.")
+    result = classify_offering_type(filing, document=neutral, filing_fees=None)
+    assert result["type"] == "unknown"
+    assert att.downloads == 0
+
+
+def test_default_fetches_exhibit_once():
+    """Default (no filing_fees arg) fetches the exhibit exactly once."""
+    att = _CountingAttachment(FIXTURE.read_bytes())
+    filing = _FakeFiling("424B5", attachments=[att])
+    neutral = _FakeDoc("Generic cover paragraph with no classifier keywords.")
+    result = classify_offering_type(filing, document=neutral)
+    assert result["type"] == "firm_commitment"  # fixture is Equity
+    assert att.downloads == 1

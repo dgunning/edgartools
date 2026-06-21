@@ -30,6 +30,11 @@ __all__ = ['classify_offering_type']
 # S-3 shelf) is the disambiguator that promotes firm_commitment -> ipo.
 _IPO_FORMS = {'424B1', '424B4'}
 
+# Sentinel for classify_offering_type(filing_fees=...): distinguishes "caller did
+# not supply fee data, fetch it lazily if needed" (default) from "caller supplied
+# None / a dict — use exactly that, do not fetch".
+_FETCH_FEES = object()
+
 
 def _classify_from_security_type(security_types) -> tuple | None:
     """Map EX-FILING FEES ffd:OfferingSctyTp values to an offering type.
@@ -45,6 +50,9 @@ def _classify_from_security_type(security_types) -> tuple | None:
     if any('debt' in t or 'note' in t for t in types) \
             or 'asset-backed' in joined or 'mortgage' in joined:
         return ('debt_offering', 'medium', ['xbrl_security_type:debt'])
+    # Rights are a clean structural signal for a rights offering.
+    if any('right' in t for t in types):
+        return ('rights_offering', 'low', ['xbrl_security_type:rights'])
     # Equity is a weak prior — the deal could be a resale/ATM whose text signals
     # simply did not fire — so it stays low confidence for consumers to weigh.
     if any('equity' in t for t in types):
@@ -52,13 +60,17 @@ def _classify_from_security_type(security_types) -> tuple | None:
     return None
 
 
-def classify_offering_type(filing: 'Filing', document=None) -> dict:
+def classify_offering_type(filing: 'Filing', document=None, filing_fees=_FETCH_FEES) -> dict:
     """
     Classify a 424B filing into an offering type.
 
     Args:
         filing: An EdgarTools Filing object with a 424B* form type.
         document: Pre-parsed Document object. If provided, avoids re-parsing.
+        filing_fees: Pre-parsed EX-FILING FEES dict (from extract_filing_fees_xbrl).
+            Omit to let the structural fallback fetch it lazily when the text
+            cascade is inconclusive. Pass an already-parsed dict (or None to
+            suppress the fallback) to avoid a redundant exhibit download.
 
     Returns:
         dict with keys:
@@ -224,6 +236,11 @@ def classify_offering_type(filing: 'Filing', document=None) -> dict:
     # IPO / SPAC patterns: prose-style price + underwriter references
     if 'initial public offering' in cover:
         fc.append('ipo_text')
+    # Assertive IPO phrasing — a filing describing ITS OWN offering as an IPO,
+    # vs a follow-on merely referencing a past IPO ("since our initial public
+    # offering in 2021"). Used to gate the firm_commitment -> ipo promotion.
+    if 'this is an initial public offering' in cover:
+        fc.append('ipo_assertive')
     if re.search(r'the underwriters have a \d+[- ]day', cover):
         fc.append('underwriter_option_text')
     if re.search(r'(?:has a price of|price of) \$[\d.,]+\s+(?:per |and )', cover):
@@ -280,16 +297,17 @@ def classify_offering_type(filing: 'Filing', document=None) -> dict:
     if 'named_underwriter_cover' in signals['firm_commitment'] and \
        'underwriting_discount' in signals['firm_commitment']:
         return _result('firm_commitment', 'high', signals['firm_commitment'])
-    # IPO / SPAC prose-style patterns (no tabular pricing). An 'initial public
-    # offering' signal on a first-time-registration form (424B1/424B4) is a true
-    # IPO; the same text on a shelf takedown form stays firm_commitment.
-    is_ipo_form = form in _IPO_FORMS
+    # IPO / SPAC prose-style patterns (no tabular pricing). Promote to 'ipo' only
+    # when the filing asserts its OWN offering is an IPO (ipo_assertive) AND sits
+    # on a first-time-registration form (424B1/424B4). A shelf takedown, or a
+    # follow-on that merely references a past IPO, stays firm_commitment.
+    is_ipo = (form in _IPO_FORMS) and 'ipo_assertive' in signals['firm_commitment']
     if 'ipo_text' in signals['firm_commitment'] and \
        'underwriter_option_text' in signals['firm_commitment']:
-        return _result('ipo' if is_ipo_form else 'firm_commitment', 'high', signals['firm_commitment'])
+        return _result('ipo' if is_ipo else 'firm_commitment', 'high', signals['firm_commitment'])
     if 'ipo_text' in signals['firm_commitment'] and \
        'overallotment_underwriter' in signals['firm_commitment']:
-        return _result('ipo' if is_ipo_form else 'firm_commitment', 'high', signals['firm_commitment'])
+        return _result('ipo' if is_ipo else 'firm_commitment', 'high', signals['firm_commitment'])
     if 'prose_price' in signals['firm_commitment'] and \
        'overallotment_underwriter' in signals['firm_commitment']:
         return _result('firm_commitment', 'high', signals['firm_commitment'])
@@ -305,16 +323,20 @@ def classify_offering_type(filing: 'Filing', document=None) -> dict:
         return _result('firm_commitment', 'medium', signals['firm_commitment'])
     # IPO text alone is medium confidence
     if 'ipo_text' in signals['firm_commitment'] and len(signals['firm_commitment']) >= 2:
-        return _result('ipo' if is_ipo_form else 'firm_commitment', 'medium', signals['firm_commitment'])
+        return _result('ipo' if is_ipo else 'firm_commitment', 'medium', signals['firm_commitment'])
 
     # --- Structural fallback: EX-FILING FEES XBRL security type ---
     # The cover text was inconclusive. Before giving up, consult the parsed
     # ffd:OfferingSctyTp from the fee exhibit (when present) — it cleanly
     # separates debt from equity for the ~43%/23% of 424B2/424B5 that carry it.
+    # Use caller-supplied fee data when given (avoids a redundant download);
+    # otherwise fetch lazily here.
     try:
-        from edgar.offerings._424b_xbrl import extract_filing_fees_xbrl
-        fees = extract_filing_fees_xbrl(filing)
-        if fees.get('has_exhibit'):
+        fees = filing_fees
+        if fees is _FETCH_FEES:
+            from edgar.offerings._424b_xbrl import extract_filing_fees_xbrl
+            fees = extract_filing_fees_xbrl(filing)
+        if fees and fees.get('has_exhibit'):
             sec_types = [r.get('security_type') for r in fees.get('offering_rows', [])]
             mapped = _classify_from_security_type(sec_types)
             if mapped:
