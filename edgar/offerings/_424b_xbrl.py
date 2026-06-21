@@ -16,10 +16,17 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, Optional
 
+from lxml import etree
+
 if TYPE_CHECKING:
     from edgar._filings import Filing
 
 __all__ = ['extract_filing_fees_xbrl']
+
+# iXBRL fact tags, matched case-insensitively on the local name so both the
+# ix:nonNumeric / ix:nonFraction source casing and the libxml2-lowercased
+# parse survive.
+_IX_FACT_TAGS = ('nonnumeric', 'nonfraction')
 
 
 def _get_filing_fees_attachment(filing: 'Filing'):
@@ -29,6 +36,13 @@ def _get_filing_fees_attachment(filing: 'Filing'):
         if doc_type == 'EX-FILING FEES':
             return att
     return None
+
+
+def _local_name(tag) -> str:
+    """Lowercased local name, stripping any namespace or ix: prefix."""
+    if not isinstance(tag, str):  # comments / PIs have non-str tags
+        return ''
+    return tag.rsplit('}', 1)[-1].rsplit(':', 1)[-1].lower()
 
 
 def _get_row_num(ctx: str) -> Optional[int]:
@@ -61,10 +75,17 @@ def extract_filing_fees_xbrl(filing: 'Filing') -> dict:
         return {'has_exhibit': False}
 
     try:
-        from bs4 import BeautifulSoup
         content = fee_att.download()
-        soup = BeautifulSoup(content, 'lxml')
+        if isinstance(content, str):
+            # lxml rejects unicode strings carrying an XML encoding
+            # declaration, which iXBRL exhibits routinely include.
+            content = content.encode('utf-8', 'replace')
+        parser = etree.HTMLParser(recover=True, huge_tree=True)
+        root = etree.fromstring(content, parser)
     except Exception:
+        return {'has_exhibit': False}
+
+    if root is None:
         return {'has_exhibit': False}
 
     metadata: dict[str, str] = {}
@@ -75,16 +96,23 @@ def extract_filing_fees_xbrl(filing: 'Filing') -> dict:
     ROW_CONTEXT_PATTERNS = ['TypedMemberffdOfferingAxis', 'offrl_', 'offt_']
     SUMMARY_PREFIXES = ('ffd:Ttl', 'ffd:Net', 'ffd:Nrrtv')
 
-    for elem in soup.find_all(lambda tag: tag.name in ('ix:nonnumeric', 'ix:nonfraction')):
+    for elem in root.iter():
+        if _local_name(elem.tag) not in _IX_FACT_TAGS:
+            continue
+
         name = elem.get('name', '')
         if not name:
             continue
 
-        ctx = elem.get('contextref') or elem.get('contextRef', '')
-        value = elem.get_text(strip=True)
+        ctx = elem.get('contextref') or elem.get('contextRef', '') or ''
 
         if elem.get('xsi:nil') == 'true':
             continue
+
+        # itertext() preserves whitespace between nested inline elements;
+        # the prior get_text(strip=True) mashed multi-span titles together
+        # (e.g. "Series APerpetual Stride" -> "Series A Perpetual Stride").
+        value = ''.join(elem.itertext()).strip()
 
         key = (name, ctx)
         if key in seen_keys:
