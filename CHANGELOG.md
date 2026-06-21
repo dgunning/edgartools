@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.39.0] - 2026-06-21
+
+424B offering extraction now consumes the machine-readable EX-FILING FEES inline-XBRL exhibit it already parsed but previously ignored — wiring it into deal sizing and offering-type classification, adding an IPO offering type, and exposing classifier provenance — plus an lxml rewrite of the exhibit parser and two fixes for offline / local-storage use of historic pre-HTML SGML filings.
+
+### Added
+
+- **`Deal.gross_proceeds` reads the authoritative EX-FILING FEES total** (`ffd:TtlOfferingAmt`) when the cover-page and pricing-table text paths are missing or implausible, sizing the 424B2/424B5 debt/note and ATM shapes those paths miss. (edgartools-s9uo)
+- **Offering-type classification consults the EX-FILING FEES security type** (`ffd:OfferingSctyTp`) before falling through to `unknown`: debt → `debt_offering`, equity → `firm_commitment` (low confidence), rights → `rights_offering`. The exhibit is only fetched on the otherwise-`unknown` path. (edgartools-2l2i)
+- **New `OfferingType.IPO`** — a 424B1/424B4 whose cover asserts "this is an initial public offering" now classifies as `ipo` instead of being folded into `firm_commitment`; shelf takedowns and follow-ons referencing a past IPO stay `firm_commitment`. (edgartools-ejk5)
+- **Offering-type provenance on `Prospectus424B` and `Deal`** — public `offering_type_confidence`, `offering_type_signals` (incl. `xbrl_security_type:*` markers), and `offering_type_sub_type`, also serialized by `Deal.to_dict()`, so consumers can tier values by how the type was determined. (edgartools-drzj)
+
+### Changed
+
+- **EX-FILING FEES inline-XBRL extraction migrated from BeautifulSoup to lxml** — ~15× faster per exhibit (output verified identical across 119 real exhibits), and the exhibit is now fetched at most once per filing rather than potentially twice on the unknown path.
+
+### Fixed
+
+- **Deal size no longer reports the `$1,000` per-note denomination artifact** — a plausibility floor (calibrated: artifacts cluster at exactly $1,000, real deals are ≥ $100k) suppresses these, superseded by the XBRL total where an exhibit exists. (edgartools-s9uo)
+- **Multi-`<span>` security titles keep their whitespace** — the lxml extractor no longer mashes titles spanning inline elements into runs like `"Series APerpetual Stride"`.
+- **`ShelfLifecycle.takedowns` is returned in chronological order** as its contract promised; previously a newest-first `_related` made `avg_days_between_takedowns` negative and `days_since_last_takedown` read the oldest takedown as the most recent. (edgartools-y22m)
+- **`filing.text()` works offline for historic pre-HTML text-only filings** — a tightly-scoped path returns the primary `<TEXT>` body straight from locally-parsed SGML for that shape (a `<FILENAME>`-less, non-HTML/XML primary with no `TEXT-EXTRACT` sibling) instead of re-downloading; every other filing is unchanged. Also adds `FilingSGML.text()` for offline plain-text extraction of the primary document. (edgartools-0rvh)
+- **Local storage no longer misses boundary filings whose feed date differs from the filed-as-of date** — `resolve_local_filing_path()` now scans adjacent day-folders on read (accession numbers are globally unique), wired into `Filing.sgml()`, `full_text_submission()`, and the batch checkers; the local-miss log is downgraded to `DEBUG`. (edgartools-a3ej)
+
 ## [5.38.0] - 2026-06-20
 
 A batch of offerings/prospectus extraction improvements — derived shelf-lifecycle signals, registration fee-table capacity recovery (including pre-2022 inline "Calculation of Registration Fee" tables), and more reliable lead-underwriter/placement-agent extraction on 424B prospectuses — plus an HTTP/1.1 transport default with a public HTTP/2 opt-in, 8-K item/date fixes, and a 13F portfolio fix.
