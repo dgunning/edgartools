@@ -1024,10 +1024,16 @@ def _parse_sec_int(val: Optional[str]) -> Optional[int]:
 # ---------------------------------------------------------------------------
 
 # Floor below which a derived "deal size" is almost certainly an artifact, not a
-# real aggregate. A 424B prospectus offering below six figures effectively does
-# not exist; values at/below this floor are the per-note DENOMINATION (commonly
-# $1,000) bleeding through the cover-page regex. Used to suppress those artifacts
-# and to prefer the authoritative EX-FILING FEES XBRL total when present.
+# real aggregate: the per-note DENOMINATION (commonly $1,000) bleeding through
+# the cover-page regex. Used to suppress those artifacts and to prefer the
+# authoritative EX-FILING FEES XBRL total when present.
+#
+# Calibrated on a random sample (scripts/offerings_bench/calibrate_floor.py):
+# the sub-$100k tail of cover-derived sizes is bimodal — ~5% of 424B2 sit at
+# exactly $1,000 (artifacts), legitimate deals are all >= $100k, and the
+# (1k, 100k] band is empty. $100k sits at the top of that empty gap, so it nulls
+# every observed artifact with zero observed collateral damage. (The XBRL total
+# recovers the artifact subset that carries a fee exhibit; the rest are nulled.)
 _MIN_PLAUSIBLE_DEAL_SIZE = 100_000.0
 
 class Deal:
