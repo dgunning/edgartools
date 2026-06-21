@@ -366,10 +366,6 @@ class Attachment:
     @property
     def empty(self):
         """Some older filings have no document url. So effectively this attachment is empty"""
-        # Historic pre-HTML SGML documents often have no <FILENAME>, but their content
-        # is still available via the parsed sgml_document. Treat those as non-empty.
-        if self.sgml_document is not None:
-            return not (self.sgml_document.content or "").strip()
         return self.document is None or self.document.strip() == ''
 
     def download(self, path: Optional[Union[str, Path]] = None) -> Optional[Union[str, bytes]]:

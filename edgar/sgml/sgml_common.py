@@ -293,10 +293,7 @@ class FilingSGML:
     def html(self):
         html_document = self.attachments.primary_html_document
         if html_document and not html_document.is_binary() and not html_document.empty:
-            # Read directly from the attachment's parsed sgml_document rather than via
-            # get_content(filename): historic filings with no <FILENAME> all key to '' and
-            # would collide, returning the wrong document.
-            html_text = html_document.content
+            html_text = self.get_content(html_document.document)
             if isinstance(html_text, bytes):
                 html_text = html_text.decode('utf-8')
             return html_text

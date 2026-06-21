@@ -1653,24 +1653,7 @@ class Filing:
 
     @lru_cache(maxsize=4)
     def text(self) -> str:
-        """Convert the main filing document to text.
-
-        HTML filings are rendered to text. Historic pre-HTML / plain-text filings are
-        returned verbatim (preserving their fixed-width layout rather than reflowing them
-        through the HTML parser), read from the locally-parsed SGML without a network call.
-        """
-        # Plain-text primary document: return it verbatim from the parsed SGML. This is
-        # faithful (no HTML reflow) and works offline for historic text-only filings.
-        sgml = self.sgml()
-        if sgml is not None:
-            primary = sgml.attachments.primary_documents
-            if primary and not primary[0].empty:
-                content = primary[0].content
-                if isinstance(content, bytes):
-                    content = content.decode('utf-8', 'replace')
-                if content and content.strip() and not is_probably_html(content):
-                    return content.replace("<PAGE>", "")
-
+        """Convert the html of the main filing document to text"""
         html_content = self.html()
         if html_content and is_probably_html(html_content):
             parser = HTMLParser(ParserConfig(form=self.form))
