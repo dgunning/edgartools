@@ -1654,6 +1654,16 @@ class Filing:
     @lru_cache(maxsize=4)
     def text(self) -> str:
         """Convert the html of the main filing document to text"""
+        # Offline shortcut for historic pre-HTML filings: when the primary document has no
+        # <FILENAME> (so html()/_download_filing_text would otherwise re-fetch it over the
+        # network) and it is plain text, return that document's text straight from the
+        # locally-parsed SGML. This yields the same <TEXT> body the network path returns.
+        # Tightly scoped — <FILENAME>-less, non-binary, non-XML, non-HTML, no TEXT-EXTRACT
+        # sibling — so every other shape (HTML, XML, PDF UPLOAD, TEXT-EXTRACT) is unaffected.
+        local_text = self._local_primary_text()
+        if local_text is not None:
+            return local_text
+
         html_content = self.html()
         if html_content and is_probably_html(html_content):
             parser = HTMLParser(ParserConfig(form=self.form))
@@ -1671,6 +1681,40 @@ class Filing:
                 return text_extract_attachment.content
             else:
                 return self._download_filing_text()
+
+    def _local_primary_text(self) -> Optional[str]:
+        """Return the primary document's plain text from the locally-parsed SGML, or None.
+
+        Only returns a value for the historic pre-HTML case — a <FILENAME>-less primary
+        document that is plain text (not binary/XML/HTML) and has no TEXT-EXTRACT sibling.
+        For every other filing this returns None so text() falls through to its normal path,
+        preserving existing behavior (HTML rendering, XML→"", PDF UPLOAD via TEXT-EXTRACT).
+        """
+        try:
+            sgml = self.sgml()
+        except Exception:
+            return None
+        if sgml is None:
+            return None
+        if len(self.attachments.query("document_type == 'TEXT-EXTRACT'")) > 0:
+            return None
+        primary = sgml.attachments.primary_documents
+        if not primary:
+            return None
+        doc = primary[0]
+        # Require a <FILENAME>-less primary (the historic pre-HTML shape). Filings with a
+        # named primary keep their existing text() path, including homepage HTML rendering.
+        if not doc.empty or doc.is_binary() or doc.is_xml():
+            return None
+        content = doc.content
+        if isinstance(content, bytes):
+            content = content.decode('utf-8', 'replace')
+        if not content or not content.strip():
+            return None
+        stripped = content.lstrip()
+        if is_probably_html(content) or stripped.startswith('<?xml'):
+            return None
+        return content
 
     def _download_filing_text(self):
         """

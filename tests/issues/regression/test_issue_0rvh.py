@@ -52,3 +52,29 @@ def test_primary_document_content_accessible_offline(sgml):
     content = sgml.attachments.get_by_sequence(1).content
     assert "FORM 24F-2" in content
     assert len(content) > 5000
+
+
+def test_filing_text_offline_for_filenameless_primary(monkeypatch, tmp_path):
+    """filing.text() returns the primary <TEXT> body offline for a <FILENAME>-less filing.
+
+    Scoped to the historic pre-HTML shape; the bundle is staged in local storage and the
+    network is blocked, so any fallback fetch would fail loudly.
+    """
+    from edgar import Filing, use_local_storage
+
+    day_dir = tmp_path / "filings" / "19951228"
+    day_dir.mkdir(parents=True)
+    (day_dir / "0000950129-95-001652.nc").write_bytes(open(FIXTURE, "rb").read())
+
+    monkeypatch.setenv("EDGAR_LOCAL_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("HTTPS_PROXY", "http://127.0.0.1:9")
+    monkeypatch.setenv("HTTP_PROXY", "http://127.0.0.1:9")
+    use_local_storage(str(tmp_path), use_local=True, allow_network_fallback=False)
+    try:
+        filing = Filing(cik=810271, accession_no="0000950129-95-001652", form="24F-2NT",
+                        company="COMMON SENSE TRUST", filing_date="1995-12-28")
+        text = filing.text()
+        assert "FORM 24F-2" in text
+        assert len(text) > 5000
+    finally:
+        use_local_storage(False)
