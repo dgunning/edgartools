@@ -67,7 +67,7 @@ from edgar.reference.tickers import Exchange, find_ticker, find_ticker_safe
 from edgar.richtools import Docs, print_rich, repr_rich, rich_to_text
 from edgar.search import BM25Search, RegexSearch
 from edgar.sgml import FilingHeader, FilingSGML, Reports, Statements
-from edgar.storage import is_using_local_storage, local_filing_path
+from edgar.storage import is_using_local_storage, local_filing_path, resolve_local_filing_path
 from edgar.xbrl import XBRL, XBRLFilingWithNoXbrlData
 
 """ Contain functionality for working with SEC filing indexes and filings
@@ -1653,7 +1653,24 @@ class Filing:
 
     @lru_cache(maxsize=4)
     def text(self) -> str:
-        """Convert the html of the main filing document to text"""
+        """Convert the main filing document to text.
+
+        HTML filings are rendered to text. Historic pre-HTML / plain-text filings are
+        returned verbatim (preserving their fixed-width layout rather than reflowing them
+        through the HTML parser), read from the locally-parsed SGML without a network call.
+        """
+        # Plain-text primary document: return it verbatim from the parsed SGML. This is
+        # faithful (no HTML reflow) and works offline for historic text-only filings.
+        sgml = self.sgml()
+        if sgml is not None:
+            primary = sgml.attachments.primary_documents
+            if primary and not primary[0].empty:
+                content = primary[0].content
+                if isinstance(content, bytes):
+                    content = content.decode('utf-8', 'replace')
+                if content and content.strip() and not is_probably_html(content):
+                    return content.replace("<PAGE>", "")
+
         html_content = self.html()
         if html_content and is_probably_html(html_content):
             parser = HTMLParser(ParserConfig(form=self.form))
@@ -1688,8 +1705,8 @@ class Filing:
     def full_text_submission(self) -> str:
         """Return the complete text submission file"""
         if is_using_local_storage():
-            local_path = self._local_path()
-            if local_path.exists():
+            local_path = resolve_local_filing_path(str(self.filing_date), self.accession_no)
+            if local_path is not None:
                 from edgar.sgml.sgml_common import read_content_as_string
                 return read_content_as_string(local_path)
         downloaded = download_file(self.text_url, as_text=True)
@@ -1881,8 +1898,8 @@ class Filing:
         if self._sgml:
             return self._sgml
         if is_using_local_storage():
-            local_path = local_filing_path(str(self.filing_date), self.accession_no)
-            if local_path.exists():
+            local_path = resolve_local_filing_path(str(self.filing_date), self.accession_no)
+            if local_path is not None:
                 self._sgml = FilingSGML.from_source(local_path)
 
         if self._sgml is None:
@@ -1892,9 +1909,13 @@ class Filing:
 
         if self._sgml is None:
             if is_using_local_storage():
-                log.warning(
+                # Network fallback is a supported mode (allow_network_fallback=True), so a
+                # genuine local miss is routine, not anomalous — keep this at debug to avoid
+                # per-filing noise in bulk loops. When fallback is disabled the code below
+                # raises, surfacing the problem directly.
+                log.debug(
                     f"Filing bundle {self.accession_no} not found in local storage "
-                    f"(was the {self.filing_date} feed file downloaded?). "
+                    f"(searched the {self.filing_date} feed folder and adjacent days). "
                     f"Falling back to full network fetch. To avoid this, run "
                     f"download_filings(filing_date='{self.filing_date}')."
                 )

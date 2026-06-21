@@ -1,7 +1,7 @@
 import asyncio
 import os
 import re
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Union
 
@@ -44,6 +44,7 @@ __all__ = ['download_edgar_data',
            'set_local_storage_path',
            'download_filings',
            'local_filing_path',
+           'resolve_local_filing_path',
            'check_filings_exist_locally',
            '_filter_extracted_files',
            'compress_filing',
@@ -888,3 +889,65 @@ def local_filing_path(filing_date: Union[str, date],
         if compressed_path.exists():
             return compressed_path
         return base_path
+
+
+# Default number of adjacent days to scan when a filing is not found under its
+# FILED AS OF DATE folder (see resolve_local_filing_path). 4 days spans a weekend
+# plus a day, covering after-hours boundary filings and short dissemination lags.
+_ADJACENT_FOLDER_SEARCH_DAYS = 4
+
+
+def _adjacent_day_offsets(window_days: int):
+    """Yield day offsets ordered by proximity: +1, -1, +2, -2, ... (0 is checked first elsewhere)."""
+    for distance in range(1, window_days + 1):
+        yield distance
+        yield -distance
+
+
+def resolve_local_filing_path(filing_date: Union[str, date],
+                              accession_number: str,
+                              correction: bool = False,
+                              search_window_days: int = _ADJACENT_FOLDER_SEARCH_DAYS) -> Optional[Path]:
+    """
+    Resolve an *existing* local filing bundle, returning its path or None.
+
+    Filings are stored under ``filings/<YYYYMMDD>/``. ``download_filings()`` buckets
+    feed files by the SEC dissemination (acceptance) date, which for most filings equals
+    the FILED AS OF DATE used on the read side — but not always. After-hours submissions
+    (filed-as-of the next business day) and historic dissemination lag can land a bundle
+    in an adjacent day's folder. Because accession numbers are globally unique, any folder
+    holding ``<accession>.nc`` is unambiguously the right file, so when the FILED AS OF DATE
+    folder misses we scan a small window of adjacent days before giving up.
+
+    Returns None when the bundle is not present locally (callers then fall back to the
+    network, exactly as before). Cloud storage uses the exact path only.
+    """
+    exact = local_filing_path(filing_date, accession_number, correction=correction)
+    if exact.exists():
+        return exact
+
+    # Cloud storage: keep exact-only behaviour (no cheap directory scan available).
+    from edgar.filesystem import is_cloud_storage_enabled
+    if is_cloud_storage_enabled():
+        return None
+
+    # Normalise the filing date to a date object so we can walk adjacent days.
+    if isinstance(filing_date, date):
+        base_date = filing_date
+    else:
+        try:
+            base_date = datetime.strptime(str(filing_date).replace('-', ''), '%Y%m%d').date()
+        except ValueError:
+            return None
+
+    ext = 'corr' if correction else 'nc'
+    filings_root = get_edgar_data_directory() / 'filings'
+    for offset in _adjacent_day_offsets(search_window_days):
+        day = (base_date + timedelta(days=offset)).strftime('%Y%m%d')
+        base_path = filings_root / day / f"{accession_number}.{ext}"
+        compressed_path = Path(f"{base_path}.gz")
+        if compressed_path.exists():
+            return compressed_path
+        if base_path.exists():
+            return base_path
+    return None

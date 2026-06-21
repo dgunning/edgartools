@@ -134,14 +134,21 @@ def test_loop_through_attachments():
         assert isinstance(attachment, Attachment)
 
 
-def test_attachment_is_empty():
+def test_attachment_with_missing_filename_is_not_empty():
+    """Historic SGML documents often have no <FILENAME>, but they still carry content.
+
+    Regression for edgartools-0rvh: ``empty`` must reflect whether content is
+    present, not merely whether a filename exists. The primary document of this
+    2000 Apple 10-Q has no <FILENAME> yet contains the full filing body.
+    """
     filing = Filing(form='10-Q', filing_date='2000-05-11', company='APPLE COMPUTER INC', cik=320193,
                     accession_no='0000912057-00-023442')
     attachments = filing.attachments
     print(attachments)
     attachment: Attachment = attachments[1]
-    assert attachment.document == ''
-    assert attachment.empty
+    assert attachment.document == ''      # no <FILENAME> in the SGML
+    assert not attachment.empty           # ...but it is NOT empty — content is present
+    assert len(attachment.content) > 1000
 
 
 
@@ -254,13 +261,20 @@ def test_download_filing_attachment():
     assert isinstance(b, bytes)
 
 
-def test_filings_with_no_content_in_attachments():
+def test_filenameless_attachment_content_is_accessible():
+    """Pre-HTML SGML attachments without a <FILENAME> still expose their content.
+
+    Regression for edgartools-0rvh: before the fix this content-bearing primary
+    document reported ``empty`` (so grep/text extraction silently skipped it).
+    """
     filing = Filing(form='8-K', filing_date='1998-12-31', company='AAMES CAPITAL CORP', cik=913951, accession_no='0001011438-98-000429')
     attachments = filing.attachments
     print()
     print(attachments)
     attachment = attachments[1]
-    assert attachment.empty
+    assert attachment.document == ''      # no <FILENAME>
+    assert not attachment.empty           # content is present, so not empty
+    assert len(attachment.content) > 100
     print(attachment.url)
 
 

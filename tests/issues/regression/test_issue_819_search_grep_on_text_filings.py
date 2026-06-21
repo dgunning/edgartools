@@ -19,9 +19,13 @@ def _pcg_oldest_10k():
 
 
 @pytest.mark.network
-def test_text_filing_html_is_none_but_text_is_populated():
+def test_text_filing_text_is_populated():
+    # Historic pre-HTML SGML documents have no <FILENAME>; html() returns the
+    # primary document content wrapped in an HTML shell (the existing Filing.html()
+    # behavior for non-HTML primaries), and text() yields the full filing body.
+    # See edgartools-0rvh: before that fix html() was None and text() needed network.
     filing = _pcg_oldest_10k()
-    assert filing.html() is None
+    assert filing.html() is not None
     text = filing.text()
     assert text is not None
     assert len(text) > 100_000
