@@ -5,6 +5,13 @@ Uses a priority cascade over cover-page text signals to classify
 the offering type. All primary signals appear in the first 3,000
 characters (cover page); secondary signals in the first 8,000.
 
+Two structural signals supplement the text cascade:
+  - An 'initial public offering' signal on a first-time-registration form
+    (424B1/424B4) is promoted from firm_commitment to 'ipo' (edgartools-ejk5).
+  - When the text is inconclusive, the parsed EX-FILING FEES security type
+    (ffd:OfferingSctyTp) resolves debt vs equity before falling through to
+    'unknown' (edgartools-2l2i).
+
 Validation results: 12/12 = 100% accuracy.
 """
 
@@ -17,6 +24,32 @@ if TYPE_CHECKING:
     from edgar._filings import Filing
 
 __all__ = ['classify_offering_type']
+
+# 424B forms used for the final prospectus of a first-time registration. An
+# 'initial public offering' signal on one of these (vs a 424B5 takedown off an
+# S-3 shelf) is the disambiguator that promotes firm_commitment -> ipo.
+_IPO_FORMS = {'424B1', '424B4'}
+
+
+def _classify_from_security_type(security_types) -> tuple | None:
+    """Map EX-FILING FEES ffd:OfferingSctyTp values to an offering type.
+
+    A structural prior used only when the cover-text cascade reaches 'unknown'.
+    Returns (type, confidence, signals) or None when no security type is present.
+    """
+    types = [t.lower() for t in security_types if t]
+    if not types:
+        return None
+    joined = ' '.join(types)
+    # Debt instruments are an unambiguous structural signal.
+    if any('debt' in t or 'note' in t for t in types) \
+            or 'asset-backed' in joined or 'mortgage' in joined:
+        return ('debt_offering', 'medium', ['xbrl_security_type:debt'])
+    # Equity is a weak prior — the deal could be a resale/ATM whose text signals
+    # simply did not fire — so it stays low confidence for consumers to weigh.
+    if any('equity' in t for t in types):
+        return ('firm_commitment', 'low', ['xbrl_security_type:equity'])
+    return None
 
 
 def classify_offering_type(filing: 'Filing', document=None) -> dict:
@@ -247,13 +280,16 @@ def classify_offering_type(filing: 'Filing', document=None) -> dict:
     if 'named_underwriter_cover' in signals['firm_commitment'] and \
        'underwriting_discount' in signals['firm_commitment']:
         return _result('firm_commitment', 'high', signals['firm_commitment'])
-    # IPO / SPAC prose-style patterns (no tabular pricing)
+    # IPO / SPAC prose-style patterns (no tabular pricing). An 'initial public
+    # offering' signal on a first-time-registration form (424B1/424B4) is a true
+    # IPO; the same text on a shelf takedown form stays firm_commitment.
+    is_ipo_form = form in _IPO_FORMS
     if 'ipo_text' in signals['firm_commitment'] and \
        'underwriter_option_text' in signals['firm_commitment']:
-        return _result('firm_commitment', 'high', signals['firm_commitment'])
+        return _result('ipo' if is_ipo_form else 'firm_commitment', 'high', signals['firm_commitment'])
     if 'ipo_text' in signals['firm_commitment'] and \
        'overallotment_underwriter' in signals['firm_commitment']:
-        return _result('firm_commitment', 'high', signals['firm_commitment'])
+        return _result('ipo' if is_ipo_form else 'firm_commitment', 'high', signals['firm_commitment'])
     if 'prose_price' in signals['firm_commitment'] and \
        'overallotment_underwriter' in signals['firm_commitment']:
         return _result('firm_commitment', 'high', signals['firm_commitment'])
@@ -269,7 +305,22 @@ def classify_offering_type(filing: 'Filing', document=None) -> dict:
         return _result('firm_commitment', 'medium', signals['firm_commitment'])
     # IPO text alone is medium confidence
     if 'ipo_text' in signals['firm_commitment'] and len(signals['firm_commitment']) >= 2:
-        return _result('firm_commitment', 'medium', signals['firm_commitment'])
+        return _result('ipo' if is_ipo_form else 'firm_commitment', 'medium', signals['firm_commitment'])
+
+    # --- Structural fallback: EX-FILING FEES XBRL security type ---
+    # The cover text was inconclusive. Before giving up, consult the parsed
+    # ffd:OfferingSctyTp from the fee exhibit (when present) — it cleanly
+    # separates debt from equity for the ~43%/23% of 424B2/424B5 that carry it.
+    try:
+        from edgar.offerings._424b_xbrl import extract_filing_fees_xbrl
+        fees = extract_filing_fees_xbrl(filing)
+        if fees.get('has_exhibit'):
+            sec_types = [r.get('security_type') for r in fees.get('offering_rows', [])]
+            mapped = _classify_from_security_type(sec_types)
+            if mapped:
+                return _result(*mapped)
+    except Exception:
+        pass
 
     return _result('unknown', 'low', [])
 

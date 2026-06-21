@@ -41,6 +41,7 @@ PROSPECTUS_FORMS = ['424B1', '424B2', '424B3', '424B4', '424B5', '424B7', '424B8
 class OfferingType(str, Enum):
     """Classification of 424B offering types."""
     FIRM_COMMITMENT = "firm_commitment"
+    IPO = "ipo"
     ATM = "atm"
     BEST_EFFORTS = "best_efforts"
     PIPE_RESALE = "pipe_resale"
@@ -55,6 +56,7 @@ class OfferingType(str, Enum):
     def display_name(self) -> str:
         return {
             "firm_commitment": "Firm Commitment",
+            "ipo": "IPO",
             "atm": "At-the-Market",
             "best_efforts": "Best Efforts / PIPE",
             "pipe_resale": "Resale (PIPE)",
@@ -70,6 +72,7 @@ class OfferingType(str, Enum):
     def is_equity(self) -> bool:
         return self in (
             OfferingType.FIRM_COMMITMENT,
+            OfferingType.IPO,
             OfferingType.ATM,
             OfferingType.BEST_EFFORTS,
             OfferingType.PIPE_RESALE,
@@ -80,6 +83,7 @@ class OfferingType(str, Enum):
     def has_fixed_price(self) -> bool:
         return self in (
             OfferingType.FIRM_COMMITMENT,
+            OfferingType.IPO,
             OfferingType.BEST_EFFORTS,
             OfferingType.RIGHTS_OFFERING,
         )
@@ -992,6 +996,13 @@ def _parse_sec_int(val: Optional[str]) -> Optional[int]:
 # Deal — normalized deal summary
 # ---------------------------------------------------------------------------
 
+# Floor below which a derived "deal size" is almost certainly an artifact, not a
+# real aggregate. A 424B prospectus offering below six figures effectively does
+# not exist; values at/below this floor are the per-note DENOMINATION (commonly
+# $1,000) bleeding through the cover-page regex. Used to suppress those artifacts
+# and to prefer the authoritative EX-FILING FEES XBRL total when present.
+_MIN_PLAUSIBLE_DEAL_SIZE = 100_000.0
+
 class Deal:
     """Normalized, computed deal summary synthesized from a 424B prospectus.
 
@@ -1064,31 +1075,57 @@ class Deal:
             return round(raw_gross / self.price)
         return None
 
+    @staticmethod
+    def _plausible(val: Optional[float]) -> bool:
+        """True if ``val`` is a plausible aggregate deal size (not an artifact)."""
+        return val is not None and val >= _MIN_PLAUSIBLE_DEAL_SIZE
+
+    @cached_property
+    def _filing_fees_total(self) -> Optional[float]:
+        """Authoritative total offering amount from the EX-FILING FEES XBRL.
+
+        ffd:TtlOfferingAmt is machine-readable and regex-free. It covers exactly
+        the 424B2/424B5 debt/note shapes the cover-page and pricing-table text
+        paths miss (ATM has no fixed amount; pre-2022 and 424B1/424B4 carry no
+        iXBRL exhibit, so this stays None there)."""
+        ff = self._prospectus.filing_fees
+        if ff and ff.total_offering_amount:
+            return _parse_sec_number(ff.total_offering_amount)
+        return None
+
     @cached_property
     def _raw_gross_proceeds(self) -> Optional[float]:
         """Gross proceeds without using shares (avoids circular dependency)."""
-        # 1. Cover page total amount
+        # 1. Cover page total amount (when plausible — suppresses the per-note
+        #    denomination artifact, e.g. a $1,000 face value read as deal size).
         val = self._prospectus.cover_page.offering_amount_float
-        if val is not None and val > 0:
+        if self._plausible(val):
             return val
-        # 2. Pricing table total column - offering price field (aggregate amount)
+        # 2. Authoritative EX-FILING FEES XBRL total offering amount. Consulted
+        #    when the cover regex is missing/implausible; supersedes artifacts.
+        val = self._filing_fees_total
+        if self._plausible(val):
+            return val
+        # 3. Pricing table total column - offering price field (aggregate amount)
         tot = self._pricing_total
         if tot and tot.offering_price:
             val = _parse_sec_number(tot.offering_price)
-            if val is not None and val > 0:
+            if self._plausible(val):
                 return val
         return None
 
     @cached_property
     def gross_proceeds(self) -> Optional[float]:
         """Total offering amount (gross, before fees)."""
-        # 1-2: Cover page and pricing table total
+        # 1-3: Cover page, authoritative XBRL, and pricing table total
         val = self._raw_gross_proceeds
         if val is not None:
             return val
-        # 3. Compute: shares × price
+        # 4. Compute: shares × price
         if self.shares and self.price:
-            return self.shares * self.price
+            computed = self.shares * self.price
+            if self._plausible(computed):
+                return computed
         return None
 
     @cached_property
