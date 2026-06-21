@@ -14,6 +14,8 @@ import pytest
 from edgar.offerings.prospectus import (
     Deal,
     OfferingType,
+    Prospectus424B,
+    CoverPageData,
     _MIN_PLAUSIBLE_DEAL_SIZE,
 )
 from edgar.offerings._424b_classifier import (
@@ -41,9 +43,10 @@ def test_ipo_offering_type_exists():
 # ---------------------------------------------------------------------------
 
 class _FakeCover:
-    def __init__(self, amount=None, price=None):
+    def __init__(self, amount=None, price=None, security_description=None):
         self.offering_amount_float = amount
         self.offering_price_float = price
+        self.security_description = security_description
 
 
 class _FakeFees:
@@ -231,3 +234,70 @@ def test_default_fetches_exhibit_once():
     result = classify_offering_type(filing, document=neutral)
     assert result["type"] == "firm_commitment"  # fixture is Equity
     assert att.downloads == 1
+
+
+# ---------------------------------------------------------------------------
+# drzj — classifier confidence + signals are reachable on the public API
+# ---------------------------------------------------------------------------
+
+class _ProvenanceFakeProspectus:
+    """Stand-in exposing everything Deal.to_dict reads, defaulting to None."""
+
+    def __init__(self, confidence="low", signals=None,
+                 offering_type=OfferingType.FIRM_COMMITMENT, is_atm=False):
+        self.cover_page = _FakeCover()
+        self.filing_fees = _FakeFees(None)
+        self.pricing = None
+        self.offering_terms = None
+        self.underwriting = None
+        self.dilution = None
+        self.offering_type = offering_type
+        self.offering_type_confidence = confidence
+        self.offering_type_signals = list(signals or [])
+        self.is_atm = is_atm
+
+
+def test_prospectus_exposes_classifier_provenance():
+    p = Prospectus424B(
+        filing=_FakeFiling("424B5"),
+        cover_page=CoverPageData(company_name="Test Co"),
+        offering_type=OfferingType.FIRM_COMMITMENT,
+        confidence="low",
+        signals=["xbrl_security_type:equity"],
+        sub_type=None,
+    )
+    assert p.offering_type_confidence == "low"
+    assert p.offering_type_signals == ["xbrl_security_type:equity"]
+    assert p.offering_type_sub_type is None
+    # The accessor returns a copy — caller mutation can't corrupt the object.
+    p.offering_type_signals.append("x")
+    assert p.offering_type_signals == ["xbrl_security_type:equity"]
+
+
+def test_prospectus_provenance_defaults_empty():
+    p = Prospectus424B(
+        filing=_FakeFiling("424B5"),
+        cover_page=CoverPageData(company_name="X"),
+        offering_type=OfferingType.UNKNOWN,
+        confidence="low",
+    )
+    assert p.offering_type_signals == []
+    assert p.offering_type_sub_type is None
+
+
+def test_deal_delegates_provenance_and_serializes_it():
+    d = Deal(_ProvenanceFakeProspectus(
+        confidence="low", signals=["xbrl_security_type:equity"]))
+    assert d.offering_type_confidence == "low"
+    assert d.offering_type_signals == ["xbrl_security_type:equity"]
+    out = d.to_dict()
+    # The §4 tiering directive is now serializable: a consumer can see the
+    # equity-prior provenance and exclude this row from issuer-proceeds sums.
+    assert out["offering_type_confidence"] == "low"
+    assert out["offering_type_signals"] == ["xbrl_security_type:equity"]
+
+
+def test_deal_to_dict_omits_empty_signals():
+    out = Deal(_ProvenanceFakeProspectus(confidence="high", signals=[])).to_dict()
+    assert "offering_type_signals" not in out
+    assert out["offering_type_confidence"] == "high"

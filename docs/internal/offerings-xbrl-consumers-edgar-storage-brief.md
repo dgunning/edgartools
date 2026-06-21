@@ -72,8 +72,20 @@ tiered:
     low-confidence firm_commitment rows**, or you will double-count resales.
   - `rights_offering` with signal `xbrl_security_type:rights`.
 
-The classifier result carries `confidence` and `signals` — persist both. Signals
-prefixed `xbrl_security_type:` mark the structural fallback fired.
+**Where to read the provenance (public API, no private access needed):**
+
+| Accessor | Type | Notes |
+|---|---|---|
+| `prospectus.offering_type_confidence` / `deal.offering_type_confidence` | `str` | `'high' \| 'medium' \| 'low'` |
+| `prospectus.offering_type_signals` / `deal.offering_type_signals` | `list[str]` | incl. `xbrl_security_type:*` markers |
+| `prospectus.offering_type_sub_type` | `str \| None` | e.g. `'equity_resale'` |
+
+`deal.to_dict()` emits `offering_type_confidence` and `offering_type_signals`
+(the latter omitted when empty) — wire these straight into the schema 1.2
+provenance columns. Signals prefixed `xbrl_security_type:` mark that the
+structural fallback fired. The §4 exclusion rule is then a one-liner:
+`if confidence == 'low' and 'xbrl_security_type:equity' in signals: don't sum as
+issuer proceeds`.
 
 ---
 

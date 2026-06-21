@@ -1186,6 +1186,20 @@ class Deal:
         return self._prospectus.offering_type
 
     @cached_property
+    def offering_type_confidence(self) -> str:
+        """Classifier confidence: 'high' | 'medium' | 'low'."""
+        return self._prospectus.offering_type_confidence
+
+    @cached_property
+    def offering_type_signals(self) -> List[str]:
+        """Classifier provenance signals (incl. 'xbrl_security_type:*' markers).
+
+        Persist alongside offering_type to tier values — e.g. exclude
+        low-confidence firm_commitment rows sourced from 'xbrl_security_type:equity'
+        before summing gross_proceeds (they can be unlabelled resales)."""
+        return self._prospectus.offering_type_signals
+
+    @cached_property
     def is_atm(self) -> bool:
         """Whether this is an at-the-market offering."""
         return self._prospectus.is_atm
@@ -1294,7 +1308,8 @@ class Deal:
         """All non-None computed values as a flat dict."""
         fields = [
             'price', 'shares', 'gross_proceeds', 'net_proceeds',
-            'security_type', 'offering_type', 'is_atm',
+            'security_type', 'offering_type',
+            'offering_type_confidence', 'offering_type_signals', 'is_atm',
             'fee_per_share', 'total_fees', 'discount_rate', 'fee_type',
             'lead_bookrunner', 'underwriter_count',
             'dilution_per_share', 'dilution_pct',
@@ -1303,11 +1318,13 @@ class Deal:
         result = {}
         for name in fields:
             val = getattr(self, name)
-            if val is not None:
-                # Convert enums to string
-                if isinstance(val, OfferingType):
-                    val = val.value
-                result[name] = val
+            # Keep empty provenance lists out of the dict, like other None fields.
+            if val is None or val == []:
+                continue
+            # Convert enums to string
+            if isinstance(val, OfferingType):
+                val = val.value
+            result[name] = val
         return result
 
     def to_context(self, detail: str = 'standard') -> str:
@@ -1469,11 +1486,17 @@ class Prospectus424B:
 
     def __init__(self, filing: 'Filing', cover_page: CoverPageData,
                  offering_type: OfferingType, confidence: str,
-                 document=None, filing_fees: Optional['FilingFeesData'] = None):
+                 document=None, filing_fees: Optional['FilingFeesData'] = None,
+                 signals: Optional[List[str]] = None, sub_type: Optional[str] = None):
         self._filing = filing
         self._cover_page = cover_page
         self._offering_type = offering_type
         self._confidence = confidence
+        # Classifier provenance — lets consumers tier values by how the type was
+        # determined (e.g. exclude low-confidence firm_commitment rows carrying
+        # the 'xbrl_security_type:equity' signal, which can be unlabelled resales).
+        self._signals = signals or []
+        self._sub_type = sub_type
         self._document = document
         # Optionally seeded by from_filing when the fee exhibit was already
         # fetched during classification — avoids a second download.
@@ -1532,6 +1555,8 @@ class Prospectus424B:
             confidence=confidence,
             document=document,
             filing_fees=eager_filing_fees,
+            signals=classification.get('signals') or [],
+            sub_type=classification.get('sub_type'),
         )
 
     # ------------------------------------------------------------------
@@ -1549,6 +1574,26 @@ class Prospectus424B:
     @property
     def offering_type(self) -> OfferingType:
         return self._offering_type
+
+    @property
+    def offering_type_confidence(self) -> str:
+        """Classifier confidence in offering_type: 'high' | 'medium' | 'low'."""
+        return self._confidence
+
+    @property
+    def offering_type_signals(self) -> List[str]:
+        """Signals behind the offering_type classification.
+
+        Includes structural-fallback markers such as 'xbrl_security_type:equity'
+        / ':debt' / ':rights'. Use with offering_type_confidence to tier values
+        (e.g. exclude low-confidence firm_commitment rows sourced from the equity
+        prior before summing gross_proceeds — they can be unlabelled resales)."""
+        return list(self._signals)
+
+    @property
+    def offering_type_sub_type(self) -> Optional[str]:
+        """Classifier sub-type (e.g. 'equity_resale' for a PIPE resale), if any."""
+        return self._sub_type
 
     @property
     def form(self) -> str:
