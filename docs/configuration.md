@@ -141,11 +141,11 @@ export EDGAR_VERIFY_SSL="true"
 - Development environments with self-signed certificates
 - Network environments with SSL inspection
 
-#### EDGAR_HTTP2
+#### EDGAR_USE_HTTP2
 Controls whether the internal HTTP client negotiates HTTP/2.
 
 ```bash
-export EDGAR_HTTP2="false"
+export EDGAR_USE_HTTP2="false"
 ```
 
 **Values:**
@@ -512,7 +512,7 @@ export REQUESTS_CA_BUNDLE="/path/to/company-ca-bundle.crt"
 | Variable | Default | Purpose | Enterprise Use Case |
 |----------|---------|---------|---------------------|
 | `EDGAR_RATE_LIMIT_PER_SEC` | `9` | Request rate limit | Custom mirrors, authorized high-volume apps |
-| `EDGAR_HTTP2` | `false` | HTTP/2 vs HTTP/1.1 | Stable interactive use (enable); cloud fan-out jobs (keep default) |
+| `EDGAR_USE_HTTP2` | `false` | HTTP/2 vs HTTP/1.1 | Stable interactive use (enable); cloud fan-out jobs (keep default) |
 | `EDGAR_BASE_URL` | `https://www.sec.gov` | SEC website base URL | Corporate mirrors, regional mirrors |
 | `EDGAR_DATA_URL` | `https://data.sec.gov` | Data archives URL | CDN acceleration, private repositories |
 | `EDGAR_XBRL_URL` | `https://www.sec.gov` | XBRL services URL | Specialized XBRL servers |

@@ -135,11 +135,11 @@ def get_edgar_use_http2() -> bool:
     ``h2.exceptions.InvalidBodyLengthError`` (truncated body) and
     ``httpx.RemoteProtocolError: ConnectionTerminated`` mid-download, crashing
     long fan-out jobs. HTTP/1.1 isolates each request to its own connection so
-    the retry layer can recover. Set EDGAR_HTTP2=true to opt back into HTTP/2.
+    the retry layer can recover. Set EDGAR_USE_HTTP2=true to opt back into HTTP/2.
 
     See: https://github.com/dgunning/edgartools/issues (edgartools-x2tv)
     """
-    return strtobool(os.environ.get("EDGAR_HTTP2", "false"))
+    return strtobool(os.environ.get("EDGAR_USE_HTTP2", "false"))
 
 
 def get_truststore_context():
@@ -230,7 +230,7 @@ def get_http_mgr(cache_enabled: bool = True, request_per_sec_limit: int = 9) -> 
     # single TCP connection, so a mid-stream reset from cloud egress fails all
     # in-flight requests at once (InvalidBodyLengthError / ConnectionTerminated).
     # SEC's ~9 req/s rate limit means HTTP/2's multiplexing offers no real upside
-    # here. Override with EDGAR_HTTP2=true or configure_http(http2=True).
+    # here. Override with EDGAR_USE_HTTP2=true or configure_http(http2=True).
     http_mgr.httpx_params["http2"] = get_edgar_use_http2()
 
     # Increase keepalive from default 5s to 30s for better connection reuse

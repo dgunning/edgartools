@@ -681,31 +681,31 @@ def test_configure_http_exported_from_edgar():
 
 @pytest.mark.fast
 def test_get_edgar_use_http2_defaults_to_false(monkeypatch):
-    """EDGAR_HTTP2 defaults to False (HTTP/1.1) when not set."""
-    monkeypatch.delenv("EDGAR_HTTP2", raising=False)
+    """EDGAR_USE_HTTP2 defaults to False (HTTP/1.1) when not set."""
+    monkeypatch.delenv("EDGAR_USE_HTTP2", raising=False)
     assert get_edgar_use_http2() is False
 
 
 @pytest.mark.fast
 @pytest.mark.parametrize("value", ["true", "True", "TRUE", "1", "yes"])
 def test_get_edgar_use_http2_env_var_enables(monkeypatch, value):
-    """EDGAR_HTTP2 truthy values opt back into HTTP/2."""
-    monkeypatch.setenv("EDGAR_HTTP2", value)
+    """EDGAR_USE_HTTP2 truthy values opt back into HTTP/2."""
+    monkeypatch.setenv("EDGAR_USE_HTTP2", value)
     assert get_edgar_use_http2() is True
 
 
 @pytest.mark.fast
 def test_http_mgr_defaults_to_http1(monkeypatch):
     """A freshly constructed HTTP_MGR negotiates HTTP/1.1 by default."""
-    monkeypatch.delenv("EDGAR_HTTP2", raising=False)
+    monkeypatch.delenv("EDGAR_USE_HTTP2", raising=False)
     http_mgr = get_http_mgr()
     assert http_mgr.httpx_params.get("http2") is False
 
 
 @pytest.mark.fast
 def test_http_mgr_http2_env_override(monkeypatch):
-    """EDGAR_HTTP2=true flips the constructed HTTP_MGR to HTTP/2."""
-    monkeypatch.setenv("EDGAR_HTTP2", "true")
+    """EDGAR_USE_HTTP2=true flips the constructed HTTP_MGR to HTTP/2."""
+    monkeypatch.setenv("EDGAR_USE_HTTP2", "true")
     http_mgr = get_http_mgr()
     assert http_mgr.httpx_params.get("http2") is True
 
