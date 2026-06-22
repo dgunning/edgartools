@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.39.1] - 2026-06-22
+
+### Fixed
+
+- **SGML header parser no longer drops fields after an empty-value top-level key** — an empty-value key like `CONFIRMING COPY:` was misread as a section header, dropping every following field (incl. `FILED AS OF DATE`) so `FilingSGML.filing_date` returned `None`. (edgartools-sg9k)
+- **`ShelfLifecycle.total_offering_capacity` recovered from misparsed EX-107 fee tables** — the parser picked the registration fee, or a column-misaligned cell, as `total_offering_amount` for a class of Exhibit 107 layouts, surfacing genuine shelves as null capacity. (edgartools-xn7e)
+- **Fee rate parsed correctly for per-$1,000,000 and leading-decimal cells** — `$153.10 per $1,000,000` and `$.0000927` no longer leave `FeeTableSecurity.fee_rate` orders of magnitude too large; dilution tables no longer double-prefix `$` on values that already embed the sign.
+
 ## [5.39.0] - 2026-06-21
 
 424B offering extraction now consumes the machine-readable EX-FILING FEES inline-XBRL exhibit it already parsed but previously ignored — wiring it into deal sizing and offering-type classification, adding an IPO offering type, and exposing classifier provenance — plus an lxml rewrite of the exhibit parser and two fixes for offline / local-storage use of historic pre-HTML SGML filings.
