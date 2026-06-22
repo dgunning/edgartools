@@ -12,7 +12,7 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING
 
-from edgar.offerings._424b_tables.helpers import (
+from edgar.offerings.prospectus._424b_tables.helpers import (
     _get_table_cells,
     _get_full_text,
     _get_row_texts,

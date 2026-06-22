@@ -11,7 +11,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Optional
 
-from edgar.offerings._fee_table.parsing import (
+from edgar.offerings.prospectus._fee_table.parsing import (
     _parse_fee_table_html,
     _parse_inline_fee_table,
 )

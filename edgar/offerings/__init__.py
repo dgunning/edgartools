@@ -1,52 +1,46 @@
+"""SEC offerings: prospectuses, registration statements, and exempt/crowdfunding offerings.
+
+Organized into domain subpackages:
+- ``crowdfunding`` — Regulation Crowdfunding (Form C) and the campaign lifecycle view
+- ``exempt``       — Regulation D exempt offerings (Form D)
+- ``prospectus``   — 424B prospectuses, S-1/S-3/DRS registration statements, fee tables
+
+The former flat module paths (``edgar.offerings.formc``, ``edgar.offerings._fee_table``,
+``edgar.offerings.registration_s1``, …) remain importable via thin back-compat shims.
+"""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict
-
-if TYPE_CHECKING:
-    from edgar.entity.filings import EntityFilings
-
-from edgar.offerings.campaign import Campaign, Offering  # Campaign for backwards compatibility
-from edgar.offerings.formc import FormC, FundingPortal, IssuerCompany, Signer
-from edgar.offerings.formd import FormD
+from edgar.offerings.crowdfunding import (
+    Campaign,
+    Offering,
+    FormC,
+    FundingPortal,
+    IssuerCompany,
+    Signer,
+    group_offerings_by_file_number,
+)
+from edgar.offerings.exempt import FormD
 from edgar.offerings.prospectus import Prospectus424B, OfferingType
-from edgar.offerings.registration_s1 import RegistrationS1, S1OfferingType, S1CoverPage
-from edgar.offerings.drs import DraftRegistrationStatement
-from edgar.offerings.registration_s3 import RegistrationS3, S3OfferingType, S3CoverPage
+from edgar.offerings.prospectus.registration_s1 import RegistrationS1, S1OfferingType, S1CoverPage
+from edgar.offerings.prospectus.drs import DraftRegistrationStatement
+from edgar.offerings.prospectus.registration_s3 import RegistrationS3, S3OfferingType, S3CoverPage
 
-
-def group_offerings_by_file_number(filings) -> Dict[str, EntityFilings]:
-    """
-    Group Form C filings by issuer file number.
-
-    This utility efficiently groups crowdfunding filings using PyArrow operations,
-    which is particularly useful for companies with many offerings. Each group
-    represents one complete offering lifecycle (initial C, amendments, updates, etc.).
-
-    Args:
-        filings: EntityFilings containing Form C variant filings
-
-    Returns:
-        Dictionary mapping file numbers (020-XXXXX) to EntityFilings for that offering
-
-    Example:
-        >>> company = Company('1881570')  # ViiT Health
-        >>> all_filings = company.get_filings(form=['C', 'C/A', 'C-U', 'C-AR'])
-        >>> grouped = group_offerings_by_file_number(all_filings)
-        >>> for file_num, offering_filings in grouped.items():
-        ...     print(f"{file_num}: {len(offering_filings)} filings")
-        020-28927: 1 filings
-        020-32444: 3 filings
-        020-36002: 4 filings
-
-    Note:
-        Uses PyArrow for efficient grouping. For small filing sets, a simple loop
-        may be clearer, but this approach scales better for companies with many filings.
-    """
-    # Use PyArrow to get unique file numbers efficiently
-    unique_file_numbers = filings.data['fileNumber'].unique()
-
-    # Create grouped dictionary using filter
-    return {
-        str(fn): filings.filter(file_number=str(fn))
-        for fn in unique_file_numbers.to_pylist()
-    }
+__all__ = [
+    "Campaign",
+    "Offering",
+    "FormC",
+    "FundingPortal",
+    "IssuerCompany",
+    "Signer",
+    "FormD",
+    "Prospectus424B",
+    "OfferingType",
+    "RegistrationS1",
+    "S1OfferingType",
+    "S1CoverPage",
+    "DraftRegistrationStatement",
+    "RegistrationS3",
+    "S3OfferingType",
+    "S3CoverPage",
+    "group_offerings_by_file_number",
+]

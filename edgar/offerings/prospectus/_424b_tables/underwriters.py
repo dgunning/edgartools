@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import re
 
-from edgar.offerings._424b_tables.helpers import (
+from edgar.offerings.prospectus._424b_tables.helpers import (
     _WS_RE,
     _get_table_cells,
     _get_row_texts,

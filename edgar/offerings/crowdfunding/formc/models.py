@@ -14,7 +14,7 @@ from edgar.entity import Company
 from edgar.reference import states
 from edgar.richtools import repr_rich
 
-from edgar.offerings.formc.helpers import split_list
+from edgar.offerings.crowdfunding.formc.helpers import split_list
 
 
 class FilerInformation(BaseModel):

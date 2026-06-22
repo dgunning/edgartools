@@ -8,7 +8,7 @@ structured data from identified tables. Split into focused submodules:
 - ``extractors``   ``extract_*`` routines that build prospectus models
 - ``underwriters`` underwriter/agent-name recognition and extraction
 
-This package preserves the original ``edgar.offerings._424b_tables`` import
+This package preserves the original ``edgar.offerings.prospectus._424b_tables`` import
 surface — every name importable from the former single module is re-exported.
 
 See table-classification research for validation results and edge cases.
@@ -16,7 +16,7 @@ See table-classification research for validation results and edge cases.
 
 from __future__ import annotations
 
-from edgar.offerings._424b_tables.helpers import (
+from edgar.offerings.prospectus._424b_tables.helpers import (
     _WS_RE,
     _get_table_cells,
     _get_all_cells_including_headers,
@@ -27,7 +27,7 @@ from edgar.offerings._424b_tables.helpers import (
     _prefix_dollar,
     _extract_row_label_and_values,
 )
-from edgar.offerings._424b_tables.classifiers import (
+from edgar.offerings.prospectus._424b_tables.classifiers import (
     _PAGE_NUMBER_RE,
     _is_layout_table,
     _is_toc_table,
@@ -42,7 +42,7 @@ from edgar.offerings._424b_tables.classifiers import (
     classify_table,
     classify_tables_in_document,
 )
-from edgar.offerings._424b_tables.extractors import (
+from edgar.offerings.prospectus._424b_tables.extractors import (
     extract_pricing_data,
     extract_offering_terms,
     extract_dilution_data,
@@ -52,7 +52,7 @@ from edgar.offerings._424b_tables.extractors import (
     extract_selling_stockholders_data,
     extract_structured_note_terms,
 )
-from edgar.offerings._424b_tables.underwriters import (
+from edgar.offerings.prospectus._424b_tables.underwriters import (
     _ALLOC_SKIP_LABELS,
     _BANK_PATTERNS,
     _count_bank_hits,

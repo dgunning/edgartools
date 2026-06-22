@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, List, Optional
 
 if TYPE_CHECKING:
     from edgar._filings import Filing
-    from edgar.offerings.campaign import Offering
+    from edgar.offerings.crowdfunding.campaign import Offering
 
 from lxml import etree
 
@@ -16,7 +16,7 @@ from edgar.entity import Company
 from edgar.funds.reports import _strip_namespaces, _text
 from edgar.richtools import Docs
 
-from edgar.offerings.formc.models import (
+from edgar.offerings.crowdfunding.formc.models import (
     FilerInformation,
     FundingPortal,
     IssuerInformation,
@@ -26,12 +26,12 @@ from edgar.offerings.formc.models import (
     IssuerSignature,
     SignatureInfo,
 )
-from edgar.offerings.formc.helpers import (
+from edgar.offerings.crowdfunding.formc.helpers import (
     maybe_float,
     maybe_date,
     group_offerings_by_file_number,
 )
-from edgar.offerings.formc._render import FormCRenderMixin
+from edgar.offerings.crowdfunding.formc._render import FormCRenderMixin
 
 
 class IssuerCompany:
@@ -290,7 +290,7 @@ class FormC(FormCRenderMixin):
             >>> offering = formc.get_offering()
             >>> print(offering.timeline())
         """
-        from edgar.offerings.campaign import Offering
+        from edgar.offerings.crowdfunding.campaign import Offering
         return Offering(self._filing)
 
     @property

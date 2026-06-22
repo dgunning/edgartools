@@ -9,7 +9,7 @@ registration statements (~pre-2022) that carried the fee table inline in the
 document body instead of an exhibit, falls back to _extract_inline_fee_table.
 
 Split into focused submodules (this package preserves the original
-``edgar.offerings._fee_table`` import surface — every name importable from the
+``edgar.offerings.prospectus._fee_table`` import surface — every name importable from the
 former single module is re-exported here):
 
 - ``parsing``  pure HTML/text/number parsing of fee tables into dicts
@@ -20,7 +20,7 @@ See: docs-internal/research/sec-filings/forms/s-3/registration-fee-table-analysi
 
 from __future__ import annotations
 
-from edgar.offerings._fee_table.parsing import (
+from edgar.offerings.prospectus._fee_table.parsing import (
     _NUMERIC_TOKEN_RE,
     _parse_dollar_amount,
     _FEE_RATE_BASIS_RE,
@@ -41,7 +41,7 @@ from edgar.offerings._fee_table.parsing import (
     _DEFERRAL_MARKERS,
     _parse_inline_fee_table,
 )
-from edgar.offerings._fee_table.extract import (
+from edgar.offerings.prospectus._fee_table.extract import (
     _get_filing_fees_attachment,
     _FEE_BEARING_BASE_FORMS,
     _is_registration_form,

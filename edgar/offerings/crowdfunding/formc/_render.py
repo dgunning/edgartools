@@ -1,4 +1,4 @@
-"""Presentation layer for :class:`~edgar.offerings.formc.core.FormC`.
+"""Presentation layer for :class:`~edgar.offerings.crowdfunding.formc.core.FormC`.
 
 Extracted from the FormC class to keep ``core.py`` focused on parsing/logic.
 ``FormC`` inherits these methods via ``FormCRenderMixin`` — behaviour is

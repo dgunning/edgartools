@@ -25,7 +25,7 @@ def maybe_date(value):
         return None
     # Deferred import: FormC lives in .core, which imports this module — a
     # module-level import would create a cycle.
-    from edgar.offerings.formc.core import FormC
+    from edgar.offerings.crowdfunding.formc.core import FormC
     try:
         return FormC.parse_date(value)
     except ValueError:

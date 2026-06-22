@@ -389,7 +389,7 @@ class ShelfLifecycle:
         if not reg:
             return None
         try:
-            from edgar.offerings._fee_table import extract_registration_fee_table
+            from edgar.offerings.prospectus._fee_table import extract_registration_fee_table
             return extract_registration_fee_table(reg)
         except Exception as e:
             log.debug("Failed to extract shelf capacity for %s: %s",

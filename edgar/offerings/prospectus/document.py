@@ -91,8 +91,8 @@ class Prospectus424B(ProspectusRenderMixin):
         Returns:
             Prospectus424B instance.
         """
-        from edgar.offerings._424b_cover import extract_cover_page_fields
-        from edgar.offerings._424b_classifier import classify_offering_type
+        from edgar.offerings.prospectus._424b_cover import extract_cover_page_fields
+        from edgar.offerings.prospectus._424b_classifier import classify_offering_type
 
         # Parse once, reuse everywhere
         try:
@@ -110,7 +110,7 @@ class Prospectus424B(ProspectusRenderMixin):
         classification = classify_offering_type(filing, document=document, filing_fees=None)
         eager_filing_fees = None
         if classification.get('type') == 'unknown':
-            from edgar.offerings._424b_xbrl import extract_filing_fees_xbrl
+            from edgar.offerings.prospectus._424b_xbrl import extract_filing_fees_xbrl
             try:
                 fees_dict = extract_filing_fees_xbrl(filing)
             except Exception:
@@ -257,7 +257,7 @@ class Prospectus424B(ProspectusRenderMixin):
     @cached_property
     def _classified_tables(self) -> dict:
         """Dict mapping table type -> list of matching TableNode objects."""
-        from edgar.offerings._424b_tables import classify_tables_in_document
+        from edgar.offerings.prospectus._424b_tables import classify_tables_in_document
         doc = self._document
         if not doc:
             return {}
@@ -267,7 +267,7 @@ class Prospectus424B(ProspectusRenderMixin):
     def pricing(self) -> Optional['PricingData']:
         """Pricing table data (offering price, fee, proceeds).
         Returns None for ATM offerings and resale filings."""
-        from edgar.offerings._424b_tables import extract_pricing_data
+        from edgar.offerings.prospectus._424b_tables import extract_pricing_data
         tables = self._classified_tables.get('pricing_table', [])
         if not tables:
             return None
@@ -276,7 +276,7 @@ class Prospectus424B(ProspectusRenderMixin):
     @cached_property
     def offering_terms(self) -> Optional['OfferingTerms']:
         """Key-value offering terms from 'The Offering' section."""
-        from edgar.offerings._424b_tables import extract_offering_terms
+        from edgar.offerings.prospectus._424b_tables import extract_offering_terms
         tables = self._classified_tables.get('offering_summary', [])
         if not tables:
             return None
@@ -287,7 +287,7 @@ class Prospectus424B(ProspectusRenderMixin):
         """Selling stockholders table data.
         Merges all selling stockholder tables found in the filing.
         Returns None if no selling stockholders table is found."""
-        from edgar.offerings._424b_tables import extract_selling_stockholders_data
+        from edgar.offerings.prospectus._424b_tables import extract_selling_stockholders_data
         tables = self._classified_tables.get('selling_stockholders', [])
         if not tables:
             return None
@@ -306,7 +306,7 @@ class Prospectus424B(ProspectusRenderMixin):
     def structured_note_terms(self) -> Optional['StructuredNoteTerms']:
         """Structured note key terms (CUSIP, maturity, underlying, etc.).
         Returns None if no key terms table is found."""
-        from edgar.offerings._424b_tables import extract_structured_note_terms
+        from edgar.offerings.prospectus._424b_tables import extract_structured_note_terms
         tables = self._classified_tables.get('key_terms', [])
         if not tables:
             return None
@@ -327,7 +327,7 @@ class Prospectus424B(ProspectusRenderMixin):
     @cached_property
     def dilution(self) -> Optional['DilutionData']:
         """Per-share dilution impact table."""
-        from edgar.offerings._424b_tables import extract_dilution_data
+        from edgar.offerings.prospectus._424b_tables import extract_dilution_data
         tables = self._classified_tables.get('dilution', [])
         if not tables:
             return None
@@ -336,7 +336,7 @@ class Prospectus424B(ProspectusRenderMixin):
     @cached_property
     def capitalization(self) -> Optional['CapitalizationData']:
         """Actual vs. as-adjusted capitalization table."""
-        from edgar.offerings._424b_tables import extract_capitalization_data
+        from edgar.offerings.prospectus._424b_tables import extract_capitalization_data
         tables = self._classified_tables.get('capitalization', [])
         if not tables:
             return None
@@ -346,11 +346,11 @@ class Prospectus424B(ProspectusRenderMixin):
     def underwriting(self) -> Optional['UnderwritingInfo']:
         """Underwriting syndicate or placement agent info.
         Uses table extraction first, falls back to cover page text."""
-        from edgar.offerings._424b_tables import (
+        from edgar.offerings.prospectus._424b_tables import (
             extract_underwriting_from_tables,
             is_plausible_underwriter_name,
         )
-        from edgar.offerings._424b_cover import extract_underwriting_from_text
+        from edgar.offerings.prospectus._424b_cover import extract_underwriting_from_text
 
         doc = self._document
         if not doc:
@@ -408,7 +408,7 @@ class Prospectus424B(ProspectusRenderMixin):
         # Reuse the exhibit already fetched during classification, if any.
         if self._eager_filing_fees is not None:
             return self._eager_filing_fees
-        from edgar.offerings._424b_xbrl import extract_filing_fees_xbrl
+        from edgar.offerings.prospectus._424b_xbrl import extract_filing_fees_xbrl
         return _build_filing_fees_data(extract_filing_fees_xbrl(self._filing))
 
     # ------------------------------------------------------------------
