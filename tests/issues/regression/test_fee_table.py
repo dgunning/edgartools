@@ -13,6 +13,7 @@ from edgar.offerings._fee_table import (
     _parse_fee_table_html,
     _join_dollar_cells,
     _parse_dollar_amount,
+    _parse_fee_rate,
 )
 from edgar.offerings.prospectus import RegistrationFeeTable, FeeTableSecurity
 
@@ -29,6 +30,30 @@ class TestParsingHelpers:
         assert _parse_dollar_amount('$0.00') == 0.0
         assert _parse_dollar_amount('') is None
         assert _parse_dollar_amount(None) is None
+
+    def test_parse_dollar_amount_leading_decimal_fee_rate(self):
+        """A fee-rate cell with no integer part ('$.0000927') must keep its
+        leading decimal. The numeric-token regex used to require a leading digit,
+        so the '.' was skipped and '0000927' parsed to 927.0 — making the Tier B
+        fee/rate cross-check (Anterix 0001193125-22-186192) flag a correct value
+        as inconsistent (implied=2 vs extracted=$21.7M)."""
+        assert _parse_dollar_amount('$.0000927') == pytest.approx(0.0000927)
+        assert _parse_dollar_amount('.00014760') == pytest.approx(0.00014760)
+
+    def test_parse_fee_rate_per_million_basis(self):
+        """The SEC EX-107 template writes the fee rate on a per-$1,000,000 basis
+        ('$153.10 per $1,000,000'). _parse_dollar_amount reads only the leading
+        token (153.10) and drops the basis, leaving the rate 1,000,000x too large
+        — which trips the fee/rate cross-check. _parse_fee_rate normalises both
+        the per-million form and the raw per-dollar decimal to a fraction."""
+        assert _parse_fee_rate('$153.10 per $1,000,000') == pytest.approx(0.0001531)
+        assert _parse_fee_rate('$153.10 per $1,000,000.00') == pytest.approx(0.0001531)
+        # Raw per-dollar decimals (with or without a leading integer) pass through.
+        assert _parse_fee_rate('0.00015310') == pytest.approx(0.0001531)
+        assert _parse_fee_rate('$.0000927') == pytest.approx(0.0000927)
+        # Placeholders / empty cells stay None.
+        assert _parse_fee_rate('—') is None
+        assert _parse_fee_rate('') is None
 
     def test_join_dollar_cells(self):
         assert _join_dollar_cells(['$', '300,000,000']) == ['$300,000,000']
@@ -130,6 +155,29 @@ class TestFeeTableExtraction:
         # Ground truth: Total Offering ≈ $21,730,000
         assert fee_table.total_offering_amount == pytest.approx(21730000.0, rel=0.01)
         assert fee_table.net_fee_due == pytest.approx(2014.37, rel=0.01)
+        # The fee rate is written '$.0000927' (no integer part); it must parse to
+        # 0.0000927, not 927.0, so fee / rate reconciles with the offering amount.
+        sec = fee_table.securities[0]
+        assert sec.fee_rate == pytest.approx(0.0000927)
+        assert sec.fee_amount / sec.fee_rate == pytest.approx(21730000.0, rel=0.01)
+
+    @pytest.mark.network
+    def test_per_million_fee_rate_basis(self):
+        """S-1 (2025) whose fee-rate cells read '$153.10 per $1,000,000'.
+
+        The headline total_offering_amount was always correct, but the per-
+        security fee_rate parsed to 153.1 instead of 0.0001531 (the basis was
+        dropped), making fee / rate reconcile to ~190 instead of the $189.75M
+        offering amount. Ground truth from the filing's own fee exhibit."""
+        ft = extract_registration_fee_table(find("0001213900-25-059789"))
+        assert ft is not None
+        assert ft.total_offering_amount == pytest.approx(189750000.0, rel=0.01)
+        priced = [s for s in ft.securities if s.fee_rate and s.fee_amount]
+        assert priced, "expected at least one priced security row"
+        for s in priced:
+            assert s.fee_rate == pytest.approx(0.0001531)
+            # fee / rate must reconcile with the row's aggregate (self-check).
+            assert s.fee_amount / s.fee_rate == pytest.approx(s.max_aggregate_amount, rel=0.01)
 
     @pytest.mark.vcr
     def test_filing_without_fee_exhibit(self):

@@ -631,8 +631,11 @@ def extract_dilution_data(table: 'TableNode'):
         if not val:
             continue
 
-        # Format with $ if positive or negative
-        formatted = f"${val}" if not val.startswith('(') else val
+        # Format with $ (negatives in parens are left as-is). _prefix_dollar is a
+        # no-op when the cell already carries its own '$' — a value cell rendered
+        # as '$5.10' (rather than a separate '$' spacer cell) must not become
+        # '$$5.10'.
+        formatted = val if val.startswith('(') else _prefix_dollar(val)
 
         if 'offering price' in label_lower:
             fields['public_offering_price'] = formatted

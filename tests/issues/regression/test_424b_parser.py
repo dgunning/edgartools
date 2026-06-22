@@ -781,3 +781,50 @@ class TestDeal:
         text = str(p.deal)
         assert "Deal" in text
         assert "Traws Pharma" in text or "company=" in text
+
+
+class TestDilutionDollarPrefix:
+    """extract_dilution_data must not double-prefix '$'.
+
+    A dilution table renders the per-share figures either with a separate '$'
+    spacer cell ('$' | '5.10') or with the sign embedded in the value cell
+    ('$5.10'). The value cell is numeric in both shapes, so the embedded form
+    used to become '$$5.10' — the same value source the pricing path already
+    guards with _prefix_dollar.
+    """
+
+    @staticmethod
+    def _table(rows):
+        from types import SimpleNamespace
+        from edgar.documents.table_nodes import Cell, Row
+        return SimpleNamespace(rows=[
+            Row(cells=[Cell(content=c) for c in cells]) for cells in rows
+        ])
+
+    def test_embedded_dollar_not_doubled(self):
+        from edgar.offerings._424b_tables import extract_dilution_data
+        table = self._table([
+            ['Public offering price per share', '$5.10'],
+            ['Dilution per share to new investors', '$3.50'],
+        ])
+        dd = extract_dilution_data(table)
+        assert dd.public_offering_price == '$5.10'
+        assert dd.dilution_per_share == '$3.50'
+
+    def test_spacer_dollar_cell_still_prefixed(self):
+        from edgar.offerings._424b_tables import extract_dilution_data
+        table = self._table([
+            ['Public offering price per share', '$', '5.10'],
+            ['Dilution per share to new investors', '$', '3.50'],
+        ])
+        dd = extract_dilution_data(table)
+        assert dd.public_offering_price == '$5.10'
+        assert dd.dilution_per_share == '$3.50'
+
+    def test_negative_value_left_in_parens(self):
+        from edgar.offerings._424b_tables import extract_dilution_data
+        table = self._table([
+            ['Net tangible book value before the offering', '(0.34)'],
+        ])
+        dd = extract_dilution_data(table)
+        assert dd.ntbv_before_offering == '(0.34)'

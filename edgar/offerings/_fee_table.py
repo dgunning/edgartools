@@ -81,7 +81,10 @@ def _resolve_fee_source(filing: 'Filing'):
 # optional decimal). Matching only the first token stops trailing footnote
 # markers from being concatenated into the number — '$1 (1)(2)(3)(4)' must parse
 # to 1.0, not 11234, and '$761.12 (3)' to 761.12, not 761123.
-_NUMERIC_TOKEN_RE = re.compile(r'\d[\d,]*(?:\.\d+)?')
+# The leading-decimal alternative ('.0000927') matters for the fee-rate cell,
+# which filers write with no integer part ('$.0000927'); without it the leading
+# '.' is skipped and '0000927' parses to 927.0 instead of 0.0000927.
+_NUMERIC_TOKEN_RE = re.compile(r'\d[\d,]*(?:\.\d+)?|\.\d+')
 
 
 def _parse_dollar_amount(text: str) -> Optional[float]:
@@ -100,6 +103,32 @@ def _parse_dollar_amount(text: str) -> Optional[float]:
         return float(cleaned) if cleaned else None
     except ValueError:
         return None
+
+
+# Filers write the fee rate two ways: a raw per-dollar decimal ('0.00015310' /
+# '$.0000927'), or an amount on a per-million basis ('$153.10 per $1,000,000').
+# The second form is the SEC EX-107 template's own wording; _parse_dollar_amount
+# reads only the leading token (153.10) and drops the basis, so the rate comes
+# out 1,000,000x too large. Normalise it back to a per-dollar decimal.
+_FEE_RATE_BASIS_RE = re.compile(r'per\s*\$?\s*([\d,]+)', re.IGNORECASE)
+
+
+def _parse_fee_rate(text: str) -> Optional[float]:
+    """Parse a fee-rate cell to a per-dollar decimal.
+
+    '0.00015310'             -> 0.00015310   (raw per-dollar decimal)
+    '$.0000927'              -> 0.0000927    (leading-decimal, no integer part)
+    '$153.10 per $1,000,000' -> 0.00015310   (amount per $1,000,000 basis)
+    """
+    amount = _parse_dollar_amount(text)
+    if amount is None:
+        return None
+    m = _FEE_RATE_BASIS_RE.search(text)
+    if m:
+        basis = float(m.group(1).replace(',', ''))
+        if basis > 0:
+            return amount / basis
+    return amount
 
 
 # The SEC registration fee rate is a uniquely tiny decimal (~0.0001 per dollar;
@@ -124,8 +153,12 @@ def _refine_fee_columns(security: dict, texts: List[str]) -> None:
     trust those over the positional guess. No-op when no such triple exists
     (carry-forward / deferred rows have no fee rate), so clean rows are unchanged.
     """
+    # Neighbours (aggregate, fee) are plain dollar amounts; the rate candidate is
+    # parsed with _parse_fee_rate so a 'per $1,000,000' cell (153.10 -> 0.0001531)
+    # lands in the rate band and can still anchor a column-shift recovery.
     parsed = [_parse_dollar_amount(t) for t in texts]
-    for i, rate in enumerate(parsed):
+    rates = [_parse_fee_rate(t) for t in texts]
+    for i, rate in enumerate(rates):
         if rate is None or not (_FEE_RATE_MIN < rate < _FEE_RATE_MAX):
             continue
         agg = next((parsed[j] for j in range(i - 1, -1, -1)
@@ -392,7 +425,7 @@ def _parse_security_row_no_category(texts: List[str]) -> Optional[dict]:
     if len(data) >= 6 and not _is_placeholder(data[5]):
         security['max_aggregate_amount'] = _parse_dollar_amount(data[5])
     if len(data) >= 7 and not _is_placeholder(data[6]):
-        security['fee_rate'] = _parse_dollar_amount(data[6])
+        security['fee_rate'] = _parse_fee_rate(data[6])
     if len(data) >= 8 and not _is_placeholder(data[7]):
         security['fee_amount'] = _parse_dollar_amount(data[7])
 
@@ -444,7 +477,7 @@ def _parse_security_row(texts: List[str]) -> Optional[dict]:
     if len(data) >= 6 and not _is_placeholder(data[5]):
         security['max_aggregate_amount'] = _parse_dollar_amount(data[5])
     if len(data) >= 7 and not _is_placeholder(data[6]):
-        security['fee_rate'] = _parse_dollar_amount(data[6])
+        security['fee_rate'] = _parse_fee_rate(data[6])
     if len(data) >= 8 and not _is_placeholder(data[7]):
         security['fee_amount'] = _parse_dollar_amount(data[7])
 
