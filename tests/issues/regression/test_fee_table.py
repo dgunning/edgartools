@@ -209,6 +209,91 @@ class TestAmendmentFeeSourceFallback:
         assert fee_table is None
 
 
+class TestXn7eMisparsedTotalOfferingAmount:
+    """edgartools-xn7e: EX-107 parser selected the fee (or a column-misaligned
+    value) as total_offering_amount, surfacing genuine shelves as null capacity.
+
+    Three distinct failure modes, one symptom — verified against SEC ground truth
+    (live, 2026-06-21):
+      1. The "Total Offering Amounts" summary cell is a typo ('$761,12' = the fee
+         $761.12 with a comma-decimal -> 76112), while the real $6.9M sits in the
+         per-security Maximum Aggregate. The re-derivation guard only fired when
+         total == net_fee_due, so it never recovered the aggregate.
+      2. A '(3)' footnote on the aggregate column split into two cells, shifting
+         columns right: the real $150,000,000 landed in fee_amount and 3.0 in
+         max_aggregate.
+      3. A carry-forward-only F-3 whose summary cell '$1 (1)(2)(3)(4)' had its
+         footnote markers fused into the digits -> 11234.
+    """
+
+    def test_parse_dollar_amount_ignores_trailing_footnotes(self):
+        """Only the first numeric token is read, so appended footnote markers
+        can't be concatenated into the value."""
+        assert _parse_dollar_amount('$1 (1)(2)(3)(4)') == 1.0
+        assert _parse_dollar_amount('$761.12 (3)') == 761.12
+        assert _parse_dollar_amount('$150,000,000 (3)') == 150000000.0
+        # Existing behaviour is preserved.
+        assert _parse_dollar_amount('$12,119.07') == 12119.07
+        assert _parse_dollar_amount('300,000,000') == 300000000.0
+
+    def test_refine_recovers_aggregate_from_shifted_columns(self):
+        """fee = aggregate x rate is self-validating, so a column shift that put
+        the offering amount in the fee column is corrected (333-275559 shape)."""
+        from edgar.offerings._fee_table import _refine_fee_columns
+        # ['Unallocated...', '—', '457', '(o)', '—', '(3', ')', '$150,000,000',
+        #  '0.00014760', '$22,140.00'] — '(3)' split shifted the columns.
+        texts = ['Unallocated (Universal) Shelf (1)', '—', '457', '(o)', '—',
+                 '(3', ')', '$150,000,000', '0.00014760', '$22,140.00']
+        security = {'max_aggregate_amount': 3.0, 'fee_amount': 150000000.0,
+                    'fee_rate': None}
+        _refine_fee_columns(security, texts)
+        assert security['max_aggregate_amount'] == 150000000.0
+        assert security['fee_amount'] == 22140.0
+        assert security['fee_rate'] == pytest.approx(0.00014760)
+
+    def test_refine_is_noop_without_fee_rate(self):
+        """A deferred / placeholder row with no fee rate is left untouched even
+        when a par value in the title falls in the rate band."""
+        from edgar.offerings._fee_table import _refine_fee_columns
+        texts = ['Equity', 'Common Stock, $0.0001 par value per share',
+                 '—', '—', '—', '—', '—', '—']
+        security = {'max_aggregate_amount': None, 'fee_amount': None,
+                    'fee_rate': None}
+        _refine_fee_columns(security, texts)
+        assert security['max_aggregate_amount'] is None
+        assert security['fee_amount'] is None
+        assert security['fee_rate'] is None
+
+    @pytest.mark.vcr
+    def test_typo_summary_prefers_per_security_aggregate(self):
+        """333-273015 (S-1 @2023-06-29): summary cell '$761,12' is a typo for the
+        fee; the registered $6,906,664.94 is recovered from securities[0]."""
+        ft = extract_registration_fee_table(find("0001104659-23-076317"))
+        assert ft is not None
+        assert ft.securities[0].max_aggregate_amount == pytest.approx(6906664.94)
+        assert ft.total_offering_amount == pytest.approx(6906664.94, rel=0.01)
+        assert ft.net_fee_due == pytest.approx(761.12, rel=0.01)
+
+    @pytest.mark.vcr
+    def test_column_misalignment_recovers_offering_amount(self):
+        """333-275559 (S-3 @2023-11-15): a split '(3)' footnote shifted $150M into
+        the fee column; the fee-rate anchor recovers it."""
+        ft = extract_registration_fee_table(find("0001493152-23-041369"))
+        assert ft is not None
+        assert ft.total_offering_amount == pytest.approx(150000000.0, rel=0.01)
+        assert ft.net_fee_due == pytest.approx(22140.0, rel=0.01)
+
+    @pytest.mark.vcr
+    def test_carry_forward_only_is_none_not_token(self):
+        """333-272539 (F-3 @2023-06-08): a carry-forward-only registration with a
+        nominal '$1' summary registers an indeterminate amount -> None, not the
+        footnote-fused 11234 the old parser produced."""
+        ft = extract_registration_fee_table(find("0001104659-23-069410"))
+        assert ft is not None
+        assert ft.total_offering_amount is None
+        assert ft.has_carry_forward is True
+
+
 class TestInlineFeeTablePreEX107:
     """edgartools-9q82: pre-2022 inline "Calculation of Registration Fee" tables.
 
