@@ -278,6 +278,13 @@ def classify_offering_type(filing: 'Filing', document=None, filing_fees=_FETCH_F
        'resale_by_selling_cover' in signals['pipe_resale'] or \
        'direct_listing_resale_cover' in signals['pipe_resale'] or \
        'sepa_resale_cover' in signals['pipe_resale']:
+        # A 424B1/424B4 that asserts ITS OWN offering is an IPO ('this is an
+        # initial public offering') is a mixed primary+secondary IPO, not a
+        # resale. Selling stockholders and a 'will not receive proceeds (from the
+        # secondary shares)' clause co-occur on such covers, but the explicit IPO
+        # assertion outranks them (gh-869).
+        if (form in _IPO_FORMS) and 'ipo_assertive' in signals['firm_commitment']:
+            return _result('ipo', 'high', signals['firm_commitment'])
         return _result('pipe_resale', 'high', signals['pipe_resale'], sub_type='equity_resale')
 
     # 6. Debt offering

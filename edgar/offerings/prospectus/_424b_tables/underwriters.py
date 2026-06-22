@@ -242,6 +242,13 @@ def extract_underwriting_from_tables(document) -> list:
                         continue
                     if trust_structure or _count_bank_hits(cell_lower) >= 1:
                         clean = _clean_underwriter_name(row[0])
+                        # The trust_structure branch accepts any row label (to catch
+                        # SPAC-specialist firms missing from _BANK_PATTERNS), which
+                        # lets a lock-up "Shares Eligible for Future Sale" table leak
+                        # its header cell ('Earliest Date Available for Sale in the
+                        # Public Market') as a name. Reject non-firm text (gh-868).
+                        if not is_plausible_underwriter_name(clean):
+                            continue
                         names.append(clean)
                         # Allocation amount is the last cell if numeric-looking
                         if len(row) >= 2 and re.fullmatch(r'[\d,.$\[\] ]+', row[-1].strip()):

@@ -318,15 +318,24 @@ class RegistrationS1:
         if self._document is None:
             return None
         try:
-            from edgar.offerings.prospectus._424b_tables import extract_underwriting_from_tables
+            from edgar.offerings.prospectus._424b_tables import (
+                extract_underwriting_from_tables,
+                is_plausible_underwriter_name,
+            )
             from edgar.offerings.prospectus import UnderwritingInfo, UnderwriterEntry
             raw = extract_underwriting_from_tables(self._document)
             if not raw:
                 return None
-            # Build UnderwritingInfo from the raw extraction
+            # Build UnderwritingInfo from the raw extraction. Guard every name and
+            # dedup: an S-1 cover/lock-up grid can leak non-firm table text and the
+            # same syndicate firm can appear across several tables (gh-868).
             all_names = []
+            seen = set()
             for entry in raw:
                 for name in entry.get('names', []):
+                    if name in seen or not is_plausible_underwriter_name(name):
+                        continue
+                    seen.add(name)
                     all_names.append(UnderwriterEntry(name=name))
             if all_names:
                 return UnderwritingInfo(underwriters=all_names)
