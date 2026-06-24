@@ -29,24 +29,20 @@ from __future__ import annotations
 
 from typing import Dict, Optional
 
-# Per (form, item) expected content-size bands, in characters. Enforced items
-# only — see module docstring. Generated from the h44r corpus; do not hand-edit
-# without regenerating the corpus.
+from edgar.documents.form_schema import get_form_schema
+
+# The size bands themselves now live on each FormSchema (edgartools-llmp.2 / D2 —
+# FormSchema is the single home of form knowledge). This module keeps the
+# guardrail's evaluation logic and its public API (band_for/evaluate_size/
+# ANOMALOUS_CONFIDENCE), consulting the schema for the per-form data.
+
+# Back-compat read-only projection of the schema bands, in the legacy
+# {form: {item: {"low", "high"}}} shape. The schema is the single source of
+# truth; this view is derived from it (used by the corpus drift-guard test).
 SIZE_BANDS: Dict[str, Dict[str, Dict[str, int]]] = {
-    "10-K": {
-        "1":  {"low": 8_034,  "high": 321_384},    # Business
-        "1A": {"low": 15_978, "high": 639_136},    # Risk Factors
-        "1C": {"low": 1_542,  "high": 61_680},     # Cybersecurity
-        "7":  {"low": 11_440, "high": 457_616},    # MD&A
-        "8":  {"low": 26_136, "high": 1_045_472},  # Financial Statements (large-cap; see caveat)
-        "9A": {"low": 791,    "high": 31_640},     # Controls and Procedures
-        "16": {"low": 410,    "high": 16_400},     # Form 10-K Summary / other
-    },
-    "10-Q": {
-        "1": {"low": 18_009, "high": 720_376},     # Financial Statements
-        "2": {"low": 10_134, "high": 405_368},     # MD&A
-        "6": {"low": 518,    "high": 20_720},      # Exhibits
-    },
+    form: {k: {"low": low, "high": high}
+           for k, low, high in get_form_schema(form).size_bands}
+    for form in ("10-K", "10-Q")
 }
 
 # Confidence assigned to a section whose size is anomalous. Below the healthy
@@ -56,10 +52,16 @@ ANOMALOUS_CONFIDENCE = 0.5
 
 
 def band_for(form: Optional[str], item_key: Optional[str]) -> Optional[Dict[str, int]]:
-    """Return the size band for a (form, item), or None if not enforced."""
+    """Return the size band for a (form, item), or None if not enforced.
+
+    A falsy ``form`` is never enforced (preserves the pre-schema behaviour where
+    an unknown/None form missed the table); known forms resolve via the schema,
+    whose bands are empty for forms without curated enforcement (8-K, 20-F).
+    """
     if not form or not item_key:
         return None
-    return SIZE_BANDS.get(form, {}).get(item_key.upper())
+    band = get_form_schema(form).band_for(item_key)
+    return {"low": band[0], "high": band[1]} if band else None
 
 
 def evaluate_size(form: Optional[str], item_key: Optional[str], length: int) -> Optional[str]:

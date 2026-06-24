@@ -76,6 +76,28 @@ class FormSchema:
     # locating the single Part I→Part II transition (see :meth:`infer_parts`).
     # Empty for forms with unique items (10-K, which uses ``item_part_ranges``).
     repeating_parts: Tuple[str, ...] = ()
+    # Per-item expected content-size bands in characters, as (item_key, low, high)
+    # with ``item_key`` the bare, upper-cased item ("1", "1A", "7"). Enforced
+    # items only — a section whose extracted length falls outside its band is
+    # flagged with a warning and reduced confidence rather than silently returned
+    # (Verification Constitution #2; edgartools-9hwf). Curated from the h44r
+    # fixture corpus; empty for forms with no enforced bands.
+    size_bands: Tuple[Tuple[str, int, int], ...] = ()
+
+    def band_for(self, item_key: Optional[str]) -> Optional[Tuple[int, int]]:
+        """Return the ``(low, high)`` size band for a bare item key, or None.
+
+        None means the item is not size-enforced on this form (so callers must
+        not flag it), matching the pre-schema ``SIZE_BANDS.get(form, {}).get(...)``
+        miss behaviour.
+        """
+        if not item_key:
+            return None
+        key = item_key.upper()
+        for k, low, high in self.size_bands:
+            if k == key:
+                return (low, high)
+        return None
 
     def match_text(self, text_lower: str, use_exclusions: bool = True) -> Optional[str]:
         """Return the normalized item name for the first matching rule, else None."""
@@ -142,11 +164,33 @@ _TEN_Q_RULES: Tuple[TextItemRule, ...] = (
 # Part I: 1–4, Part II: 5–9, Part III: 10–14, Part IV: 15–16.
 _TEN_K_ITEM_PART_RANGES = ((1, 4, "I"), (5, 9, "II"), (10, 14, "III"), (15, 16, "IV"))
 
+# Per-item content-size bands (chars), enforced items only. Generated from the
+# h44r corpus (tests/fixtures/parser_corpus/size_bands.json); regenerate the
+# corpus and copy the enforced bands here when fixtures rotate. Bands are
+# intentionally generous (median/5 .. median*8) so they flag only gross
+# anomalies. Item 8's band assumes inlined financial statements — a filer that
+# incorporates them by reference is legitimately small (handled by the rescue).
+_TEN_K_SIZE_BANDS = (
+    ("1",  8_034,  321_384),    # Business
+    ("1A", 15_978, 639_136),    # Risk Factors
+    ("1C", 1_542,  61_680),     # Cybersecurity
+    ("7",  11_440, 457_616),    # MD&A
+    ("8",  26_136, 1_045_472),  # Financial Statements (large-cap; see caveat)
+    ("9A", 791,    31_640),     # Controls and Procedures
+    ("16", 410,    16_400),     # Form 10-K Summary / other
+)
+_TEN_Q_SIZE_BANDS = (
+    ("1", 18_009, 720_376),     # Financial Statements
+    ("2", 10_134, 405_368),     # MD&A
+    ("6", 518,    20_720),      # Exhibits
+)
+
 TEN_K_SCHEMA = FormSchema(max_bare_item=15, text_rules=_TEN_K_RULES,
                           skip_unmatched_text=False,
-                          item_part_ranges=_TEN_K_ITEM_PART_RANGES)
+                          item_part_ranges=_TEN_K_ITEM_PART_RANGES,
+                          size_bands=_TEN_K_SIZE_BANDS)
 TEN_Q_SCHEMA = FormSchema(max_bare_item=6, text_rules=_TEN_Q_RULES, skip_unmatched_text=True,
-                          repeating_parts=("I", "II"))
+                          repeating_parts=("I", "II"), size_bands=_TEN_Q_SIZE_BANDS)
 # Forms without a 10-K-style item vocabulary (20-F, 40-F, S-1, ...): no text
 # fallback (raw text is returned), default bare-item cap.
 DEFAULT_SCHEMA = FormSchema(max_bare_item=15, text_rules=(), skip_unmatched_text=False)
