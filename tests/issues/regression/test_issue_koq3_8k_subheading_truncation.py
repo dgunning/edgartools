@@ -91,6 +91,7 @@ class TestSubheadingDoesNotTruncateItem:
 class TestNvidia8KGroundTruth:
     """Ground-truth assertion against the real filing from GH #871."""
 
+    @pytest.mark.vcr
     def test_nvidia_item_502_full_body(self):
         import edgar
 
