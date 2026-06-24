@@ -14,7 +14,6 @@ import logging
 from typing import Dict, Optional
 
 from edgar.documents.document import Document, Section
-from edgar.documents.extractors.toc_section_extractor import SECSectionExtractor
 from edgar.documents.nodes import SectionNode
 
 logger = logging.getLogger(__name__)
@@ -50,7 +49,10 @@ class TOCSectionDetector:
         self.document = document
         self.agent = agent
         self.form = form
-        self.extractor = SECSectionExtractor(document, agent=agent, form=form)
+        # Share the document's single cached extractor so the HTML is parsed and
+        # the TOC analyzed once per document — the get_sec_section* API and this
+        # detector no longer build separate instances (edgartools-llmp.1 / D4).
+        self.extractor = document._get_section_extractor(agent=agent, form=form)
 
     def detect(self) -> Optional[Dict[str, Section]]:
         """
@@ -145,52 +147,3 @@ class TOCSectionDetector:
         except Exception as e:
             logger.warning(f"TOC detection failed: {e}", exc_info=True)
             return None
-
-
-def get_section_text(document: Document, section_name: str) -> Optional[str]:
-    """
-    Get section text using TOC-based extraction.
-
-    Args:
-        document: Document to extract from
-        section_name: Section name (e.g., 'Item 1', 'Item 1A')
-
-    Returns:
-        Section text if available, None otherwise
-    """
-    html_content = getattr(document.metadata, 'original_html', None)
-    if not html_content:
-        return None
-
-    try:
-        extractor = SECSectionExtractor(
-            document, form=getattr(document.metadata, 'form', None)
-        )
-        return extractor.get_section_text(section_name)
-    except Exception as e:
-        logger.warning(f"Failed to get section text for {section_name}: {e}")
-        return None
-
-
-def get_available_sections(document: Document) -> list[str]:
-    """
-    Get list of available sections from TOC.
-
-    Args:
-        document: Document to analyze
-
-    Returns:
-        List of section names found in TOC
-    """
-    html_content = getattr(document.metadata, 'original_html', None)
-    if not html_content:
-        return []
-
-    try:
-        extractor = SECSectionExtractor(
-            document, form=getattr(document.metadata, 'form', None)
-        )
-        return extractor.get_available_sections()
-    except Exception as e:
-        logger.warning(f"Failed to get available sections: {e}")
-        return []

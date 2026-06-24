@@ -14,7 +14,8 @@ Bug:
 
 Fix:
     edgar/documents/extractors/toc_section_extractor.py
-    SECSectionExtractor._reattribute_incorporated_financials(): gated on a short
+    SECSectionExtractor._rescue_collapsed_incorporated_financials() (dispatched
+    from _rescue_boundaries()): gated on a short
     incorporation-by-reference Item 7, discover the deferred block's own
     (sub-)TOC anchors, re-point Item 7/7A/8 at them (gap-fill Item 7's end to the
     financial-statements anchor when MD&A has no title link of its own), and

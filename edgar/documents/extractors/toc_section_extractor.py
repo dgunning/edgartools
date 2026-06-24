@@ -145,20 +145,29 @@ class SECSectionExtractor:
 
         self.section_map = {name: data['canonical_name'] for name, data in sec_sections.items()}
 
-        # Recover MD&A / financial statements for filers that incorporate them by
-        # reference into an untitled trailing block (edgartools-rv86 / GH #873).
-        self._reattribute_incorporated_financials()
+        # Re-resolve section boundaries whose span is anomalous for their rescue
+        # key (edgartools-llmp.1 / D3).
+        self._rescue_boundaries()
 
-    # --- Incorporation-by-reference re-attribution (edgartools-rv86 / GH #873) ---
+    # --- Boundary rescue (edgartools-llmp.1 / D3) -------------------------------
     #
-    # Some large 10-K filers (e.g. ExxonMobil, JPMorgan) do not place MD&A /
-    # financial statements under the Item 7 / Item 8 headings. Item 7 carries a
-    # one-line pointer ("Reference is made to ... the Financial Section",
-    # "appears on pages 46-160") and the real narrative lives later in an
-    # untitled "Financial Section" block. That block has no Item heading, so the
-    # trailing item bucket (Item 15/16) absorbs it and Item 7/8 return only the
-    # pointer. We detect the pointer and re-point Item 7/7A/8 at the deferred
-    # body's own anchors.
+    # A "rescue key" is an item that filers commonly defer or merge, so its
+    # TOC anchor can land on the wrong place and leave the section's span
+    # anomalous. Two anomaly directions are recognised:
+    #
+    #   * collapsed — the anchor landed on a short incorporation-by-reference
+    #     pointer; the real body lives later in an untitled block (the
+    #     ExxonMobil / JPMorgan "Financial Section" case, edgartools-rv86 /
+    #     GH #873). Handled by _rescue_collapsed_incorporated_financials below.
+    #   * oversized — the item swallowed a missing neighbour's content (the
+    #     #871 content-bleed class). SEAM ONLY: not yet active here. The bleed
+    #     it targets lives on the *pattern* extractor for non-Item forms, which
+    #     this TOC engine does not yet serve; the Phase 3 routing flip
+    #     (edgartools-llmp.3) is what makes an oversized rescue here meaningful.
+    #
+    # Phase 1 establishes this structure; the rescue-key set, size bands, and
+    # deferred-title vocabulary below move into FormSchema in Phase 2
+    # (edgartools-llmp.2), so a new form becomes a schema entry, not new code.
 
     # Item 7 text that incorporates the MD&A by reference rather than carrying it.
     _INCORP_RE = re.compile(
@@ -301,7 +310,22 @@ class SECSectionExtractor:
             break
         return '\n'.join(lines[i:]).lstrip('\n') if i else text
 
-    def _reattribute_incorporated_financials(self) -> None:
+    def _rescue_boundaries(self) -> None:
+        """Dispatch the size-band boundary rescues for this document.
+
+        Form-agnostic entry point: each rescue self-gates on the form and
+        section shape it applies to, so broadening coverage (Phase 3) is adding
+        a call here, not threading new ``if form ==`` branches through callers.
+        """
+        if self._tree is None:
+            return
+        self._rescue_collapsed_incorporated_financials()
+        # Oversized rescue (#871-bleed class) is a Phase 3 seam — see the module
+        # comment above. Intentionally not called: it would be a no-op on the
+        # Item/TOC path today and the bleed it targets is on the pattern path.
+        # self._rescue_oversized_boundaries()
+
+    def _rescue_collapsed_incorporated_financials(self) -> None:
         if self._base_form() != '10-K' or self._tree is None:
             return
         b7 = self.section_boundaries.get('part_ii_item_7')
