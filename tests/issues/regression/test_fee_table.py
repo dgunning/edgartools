@@ -7,7 +7,7 @@ verified by hand from SEC EDGAR.
 See: docs-internal/research/sec-filings/forms/s-3/registration-fee-table-analysis.md
 """
 import pytest
-from edgar import find
+from edgar import find, get_by_accession_number
 from edgar.offerings._fee_table import (
     extract_registration_fee_table,
     _parse_fee_table_html,
@@ -253,7 +253,9 @@ class TestAmendmentFeeSourceFallback:
     def test_424b_takedown_stays_none(self):
         """Silence check: a 424B takedown is not a registration form, so the
         family is not walked and the result stays an honest None."""
-        fee_table = extract_registration_fee_table(find("0001918704-25-005439"))
+        # get_by_accession_number (year from the accession) is date-stable; find()
+        # walks date-derived quarterly indexes whose cassette drifts over time.
+        fee_table = extract_registration_fee_table(get_by_accession_number("0001918704-25-005439"))
         assert fee_table is None
 
 
@@ -490,7 +492,9 @@ class TestProspectusSections:
     @pytest.mark.vcr
     def test_sections_returns_sections_object(self):
         """Verify that prospectus.sections returns a Sections dict."""
-        filing = find("0001493152-25-029712")  # A 424B5
+        # get_by_accession_number (year from the accession) is date-stable; find()
+        # walks date-derived quarterly indexes whose cassette drifts over time.
+        filing = get_by_accession_number("0001493152-25-029712")  # A 424B5
         prospectus = filing.obj()
         sections = prospectus.sections
         # Should return a dict-like Sections object (may be empty if no patterns match)
