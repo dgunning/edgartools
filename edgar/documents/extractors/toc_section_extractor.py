@@ -202,6 +202,32 @@ class SECSectionExtractor:
                     positions[name] = idx
         return positions, total
 
+    def _lookup_anchor_indices(self, ids, need_total: bool = False):
+        """Document-order index of each requested id / <a name>.
+
+        Resolves only the requested anchors and, unless ``need_total`` is set,
+        stops walking as soon as all are found — so the cheap pre-gate does not
+        pay a full-document iteration for the overwhelmingly common normal-filer
+        case. Returns ``(found, total)``; ``total`` is the full element count when
+        the walk ran to completion, else ``None``.
+        """
+        found: Dict[str, int] = {}
+        if self._tree is None:
+            return found, None
+        targets = {i for i in ids if i}
+        idx = -1
+        for idx, el in enumerate(self._tree.iter()):
+            eid = el.get('id')
+            if eid in targets and eid not in found:
+                found[eid] = idx
+            if el.tag == 'a':
+                name = el.get('name')
+                if name in targets and name not in found:
+                    found[name] = idx
+            if not need_total and len(found) == len(targets):
+                return found, None
+        return found, idx + 1
+
     def _classify_deferred_link(self, text: str) -> Optional[str]:
         """Classify a (sub-)TOC link's text to a deferrable item key, or None."""
         cleaned = re.sub(r'\s+', ' ', text).strip()
@@ -264,18 +290,20 @@ class SECSectionExtractor:
         if b7 is None:
             return
 
-        positions, total = self._anchor_doc_positions()
-        a7 = positions.get(b7.anchor_id)
+        # Cheap pre-gate: a real Item 7 spans most of the body; a pointer stub
+        # spans almost nothing before the next item anchor. Resolve only Item 7's
+        # own two anchors (stopping the tree walk as soon as both are found) so the
+        # overwhelmingly common normal-filer case skips here without paying a full
+        # document iteration; the complete position map is built only once both
+        # gates pass below.
+        need_total = not b7.end_element_id
+        gate_pos, walked_total = self._lookup_anchor_indices(
+            [b7.anchor_id, b7.end_element_id], need_total=need_total)
+        a7 = gate_pos.get(b7.anchor_id)
         if a7 is None:
             return
-        end7 = positions.get(b7.end_element_id) if b7.end_element_id else total
-        if end7 is None:
-            end7 = total
-
-        # Cheap pre-gate: a real Item 7 spans most of the body; a pointer stub
-        # spans almost nothing before the next item anchor. Skips normal filers
-        # without extracting any text.
-        if (end7 - a7) >= self._MIN_DEFERRED_SPAN:
+        end7 = walked_total if need_total else gate_pos.get(b7.end_element_id, walked_total)
+        if end7 is None or (end7 - a7) >= self._MIN_DEFERRED_SPAN:
             return
 
         # Precise gate: confirm the short Item 7 is an incorporation-by-reference
@@ -286,10 +314,19 @@ class SECSectionExtractor:
         try:
             item7_text = self._extract_section_content(html, b7, include_subsections=True, clean=True) or ''
         except Exception:
-            logger.debug("Item 7 pointer gate extraction failed", exc_info=True)
+            # The incorporation-by-reference recovery is being aborted; surface it
+            # (not debug) so a filer that should have been recovered but failed the
+            # stub-extraction gate is diagnosable rather than silently reverting.
+            logger.warning("Item 7 pointer gate extraction failed; "
+                           "skipping incorporated-financials recovery", exc_info=True)
             return
         if len(item7_text.strip()) > self._STUB_MAX_CHARS or not self._INCORP_RE.search(item7_text):
             return
+
+        # Both gates passed (a genuine incorporation-by-reference filer): now build
+        # the full anchor position map for the re-attribution work below.
+        positions, total = self._anchor_doc_positions()
+        a7 = positions.get(b7.anchor_id, a7)
 
         # Discover deferred-section anchors document-wide (the real body lives in a
         # block whose own (sub-)TOC links are not in the main item-TOC).
@@ -394,8 +431,15 @@ class SECSectionExtractor:
         Returns:
             List of section names
         """
-        return sorted(self.section_boundaries.keys(),
-                     key=lambda x: self.section_boundaries[x].anchor_id)
+        # Sort by the section's logical order (same key the construction path uses
+        # at _analyze_sections), not by anchor_id string. Re-attributed boundaries
+        # (edgartools-rv86) get fresh anchor_ids that need not string-sort into
+        # document order, which would otherwise list e.g. Item 8 before Item 7.
+        return sorted(
+            self.section_boundaries.keys(),
+            key=lambda x: (self.toc_analyzer._get_section_type_and_order(x)[1],
+                           self.section_boundaries[x].anchor_id),
+        )
 
     def get_section_text(self, section_name: str,
                         include_subsections: bool = True,
