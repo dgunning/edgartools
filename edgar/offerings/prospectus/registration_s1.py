@@ -27,6 +27,7 @@ from rich.console import Group, Text
 from rich.panel import Panel
 from rich.table import Table
 
+from edgar.offerings.prospectus._sections import ProspectusSectionsMixin
 from edgar.richtools import repr_rich
 
 log = logging.getLogger(__name__)
@@ -102,7 +103,7 @@ class S1CoverPage(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-class RegistrationS1:
+class RegistrationS1(ProspectusSectionsMixin):
     """
     Data object for S-1 registration statement filings.
 
@@ -492,6 +493,7 @@ class RegistrationS1:
             lines.append("  - .dilution -> DilutionData")
             lines.append("  - .capitalization -> CapitalizationData")
             lines.append("  - .underwriting -> UnderwritingInfo")
+            lines.append("  - .sections -> Sections (risk_factors, mda, business, ...; .section(name).text())")
             lines.append("  - .takedowns -> Filings (424B filings under this registration)")
             lines.append("  - .related_filings -> Filings (all filings, same file number)")
 

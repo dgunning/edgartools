@@ -7,6 +7,7 @@ from functools import cached_property
 from typing import List, Optional, TYPE_CHECKING
 
 from edgar.offerings.prospectus._render import ProspectusRenderMixin
+from edgar.offerings.prospectus._sections import ProspectusSectionsMixin
 from edgar.offerings.prospectus.deal import Deal, _extract_amendment_number
 from edgar.offerings.prospectus.lifecycle import ShelfLifecycle
 from edgar.offerings.prospectus.models import (
@@ -32,7 +33,7 @@ if TYPE_CHECKING:
     )
 
 
-class Prospectus424B(ProspectusRenderMixin):
+class Prospectus424B(ProspectusSectionsMixin, ProspectusRenderMixin):
     """
     Parser for 424B* prospectus filings.
 
@@ -226,29 +227,8 @@ class Prospectus424B(ProspectusRenderMixin):
         return self._cover_page.offering_price
 
     # ------------------------------------------------------------------
-    # Section-level text access
+    # Section-level text access — see ProspectusSectionsMixin (.sections / .section())
     # ------------------------------------------------------------------
-
-    @cached_property
-    def sections(self):
-        """Document sections for targeted text extraction.
-
-        Returns a Sections dict mapping section names to Section objects.
-        Each section provides .text() and .tables() for downstream extraction.
-
-        Example:
-            prospectus = filing.obj()
-            for name, section in prospectus.sections.items():
-                print(f"{name}: {len(section.text())} chars")
-
-            uop = prospectus.sections.get('use_of_proceeds')
-            if uop:
-                print(uop.text())
-        """
-        from edgar.documents.document import Sections
-        if self._document:
-            return self._document.sections
-        return Sections({})
 
     # ------------------------------------------------------------------
     # Lazy table-extracted data (Phase 2+)
