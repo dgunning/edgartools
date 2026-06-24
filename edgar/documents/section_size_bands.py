@@ -16,8 +16,10 @@ reduced confidence, so callers can detect the problem (Verification Constitution
 
 The bands are curated from the canonical fixture corpus
 (``tests/fixtures/parser_corpus/size_bands.json``, issue edgartools-h44r): only
-the ``enforce``-flagged items appear here. Regenerate the corpus and copy the
-enforced bands here when fixtures rotate — keep the two in sync.
+the ``enforce``-flagged items are kept. They now live on each ``FormSchema``
+(``FormSchema.size_bands`` in ``form_schema.py`` — the single home of form
+knowledge, edgartools-llmp.2); this module's logic reads them from there.
+Regenerate the corpus and update the bands on the schemas when fixtures rotate.
 
 Caveat — these bands are tuned to large-cap filers. Item 8 in particular is
 enforceable only because every corpus filer inlines its financial statements; a
