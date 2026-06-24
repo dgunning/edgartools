@@ -4,7 +4,7 @@ Section extraction from documents.
 
 import logging
 import re
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 from edgar.documents.document import Document, Section
 from edgar.documents.nodes import HeadingNode, Node, SectionNode
@@ -1131,6 +1131,21 @@ class SectionExtractor:
             if toc_start > 0 and toc_end > toc_start:
                 logger.debug(f"TOC region detected: {toc_start} - {toc_end} ({toc_end - toc_start} chars)")
 
+        # Precompute the header indices that start a *recognized* section for this
+        # form. A section ends at the next such boundary header. For Item-based
+        # forms these are the "Item N" headers; for title-based forms (e.g. 424B:
+        # "Use of Proceeds", "Dilution", "Underwriting") they are the prospectus
+        # titles. Passing this set into _find_section_end lets title-based sections
+        # close on their own headings, which the generic _looks_like_section_header
+        # allowlist alone would miss — so the GH #871 sub-heading fix does not bleed
+        # one section into the next on prospectuses.
+        boundary_indices = set()
+        for _section_patterns in patterns.values():
+            for _pattern, _ in _section_patterns:
+                for _i, (_node, _text, _position) in enumerate(headers):
+                    if re.match(_pattern, _text.strip(), re.IGNORECASE):
+                        boundary_indices.add(_i)
+
         # Try to match each pattern
         for section_name, section_patterns in patterns.items():
             # Collect all candidate headers for this section
@@ -1152,7 +1167,7 @@ class SectionExtractor:
                     # Try to match pattern
                     if re.match(pattern, text.strip(), re.IGNORECASE):
                         # Find end position (next section or end of document)
-                        end_position = self._find_section_end(i, headers, document)
+                        end_position = self._find_section_end(i, headers, document, boundary_indices)
 
                         # For 10-Q, prefix with Part I or Part II in title
                         final_title = title
@@ -1239,7 +1254,8 @@ class SectionExtractor:
     def _find_section_end(self,
                          section_index: int,
                          headers: List[Tuple[Node, str, int]],
-                         document: Document) -> int:
+                         document: Document,
+                         boundary_indices: Optional[Set[int]] = None) -> int:
         """Find where section ends."""
         # Next section starts where next header at same or higher level begins
         if section_index + 1 < len(headers):
@@ -1251,13 +1267,21 @@ class SectionExtractor:
                 next_text = headers[i][1]
                 next_level = next_node.level if isinstance(next_node, HeadingNode) else 1
 
-                # Only an actual section header (Item/PART/SIGNATURE/EXHIBIT/...) may
-                # close a section. Internal sub-headings are HeadingNodes too — e.g. a
-                # bold "Adoption of Fiscal Year 2027 Variable Compensation Plan" inside
-                # an 8-K Item 5.02 — and must NOT terminate the item early and orphan
-                # the body paragraphs that follow it (GH #871). Skip any header that
-                # does not look like a real section boundary.
-                if not self._looks_like_section_header(next_text):
+                # Only an actual section boundary may close a section. Internal
+                # sub-headings are HeadingNodes too — e.g. a bold "Adoption of Fiscal
+                # Year 2027 Variable Compensation Plan" inside an 8-K Item 5.02 — and
+                # must NOT terminate the item early and orphan the body paragraphs
+                # that follow it (GH #871). A header counts as a boundary if it starts
+                # one of this form's recognized sections (boundary_indices — covers
+                # title-based forms like 424B whose section names aren't in the generic
+                # allowlist) or matches the generic structural-header allowlist
+                # (Item/PART/SIGNATURE/EXHIBIT/... — covers terminators such as
+                # SIGNATURES that aren't themselves extracted sections).
+                is_boundary = (
+                    (boundary_indices is not None and i in boundary_indices)
+                    or self._looks_like_section_header(next_text)
+                )
+                if not is_boundary:
                     continue
 
                 # If next header is at same or higher level, that's our end
