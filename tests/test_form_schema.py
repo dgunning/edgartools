@@ -10,8 +10,10 @@ import pytest
 
 from edgar.documents.form_schema import (
     DEFAULT_SCHEMA,
+    S1_SCHEMA,
     TEN_K_SCHEMA,
     TEN_Q_SCHEMA,
+    TWENTY_F_SCHEMA,
     FormSchema,
     TextItemRule,
     get_form_schema,
@@ -26,9 +28,10 @@ from edgar.documents.form_schema import (
     (None, TEN_K_SCHEMA),          # legacy default: unspecified form == 10-K
     ("10-Q", TEN_Q_SCHEMA),
     ("10-Q/A", TEN_Q_SCHEMA),
-    ("20-F", DEFAULT_SCHEMA),
-    ("S-1", DEFAULT_SCHEMA),
-    ("DEF 14A", DEFAULT_SCHEMA),
+    ("20-F", TWENTY_F_SCHEMA),     # title vocabulary homed on its own schema (llmp.2)
+    ("S-1", S1_SCHEMA),            # title-based registration statement (ybth / gh-866)
+    ("S-1/A", S1_SCHEMA),          # amendments share the S-1 schema
+    ("DEF 14A", DEFAULT_SCHEMA),   # still routes to the pattern extractor
 ])
 def test_get_form_schema(form, expected):
     assert get_form_schema(form) is expected

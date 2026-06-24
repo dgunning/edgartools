@@ -33,18 +33,28 @@ def _load_golden():
 
 
 def test_section_patterns_match_golden():
-    """The extractor's pattern table is byte-identical to the pre-migration dump."""
+    """The migrated forms' pattern tables stay byte-identical to the pre-migration dump.
+
+    Scoped to the golden's own keys so a *new* title-based form (S-1,
+    edgartools-ybth) can be added without weakening the migration-drift guard on
+    the original five forms.
+    """
     golden = _load_golden()
     current = {
         form: {sec: [list(t) for t in pats] for sec, pats in secs.items()}
         for form, secs in SectionExtractor.SECTION_PATTERNS.items()
+        if form in golden
     }
     assert current == golden, "SECTION_PATTERNS drifted from the golden snapshot"
 
 
 def test_form_keyset_unchanged():
-    """The set of forms with pattern vocab must not grow or shrink silently."""
-    assert set(SectionExtractor.SECTION_PATTERNS) == {"10-K", "10-Q", "20-F", "8-K", "424B"}
+    """The set of forms with pattern vocab must not grow or shrink silently.
+
+    S-1 joined the original five when the Phase 3 flip extended to registration
+    statements (edgartools-ybth / gh-866); any further change must be deliberate.
+    """
+    assert set(SectionExtractor.SECTION_PATTERNS) == {"10-K", "10-Q", "20-F", "8-K", "424B", "S-1"}
 
 
 def test_patterns_live_on_the_schema():

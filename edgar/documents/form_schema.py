@@ -694,6 +694,79 @@ _FOUR24B_SECTION_PATTERNS = {
     ),
 }
 
+# S-1 registration statements are prospectuses, so they share 424B's title
+# vocabulary plus the registration-specific narrative a 424B usually omits
+# (Forward-Looking Statements / Dividend Policy / MD&A / Business / Management /
+# Executive Compensation / Related-Party Transactions / Principal Stockholders /
+# Shares Eligible for Future Sale). Shared entries reference the 424B tuples so
+# the two stay in lockstep; declaration order follows the canonical S-1 sequence
+# (summary → risk → ... → experts), which FormSchema.section_order() uses to sort
+# title sections that carry no item number.
+_S1_SECTION_PATTERNS = {
+    'about_this_prospectus': _FOUR24B_SECTION_PATTERNS['about_this_prospectus'],
+    'summary': _FOUR24B_SECTION_PATTERNS['summary'],
+    'risk_factors': _FOUR24B_SECTION_PATTERNS['risk_factors'],
+    'forward_looking_statements': (
+        ('^(?:SPECIAL\\s+NOTE\\s+(?:REGARDING|ABOUT)\\s+)?(?:CAUTIONARY\\s+(?:NOTE|STATEMENT)\\s+(?:REGARDING\\s+)?)?FORWARD[- ]LOOKING\\s+STATEMENTS', 'Forward-Looking Statements'),
+        ('^(?:Special\\s+Note\\s+(?:Regarding|About)\\s+)?(?:Cautionary\\s+(?:Note|Statement)\\s+(?:Regarding\\s+)?)?Forward[- ]Looking\\s+Statements', 'Forward-Looking Statements'),
+    ),
+    'use_of_proceeds': _FOUR24B_SECTION_PATTERNS['use_of_proceeds'],
+    'dividend_policy': (
+        ('^DIVIDEND\\s+POLICY', 'Dividend Policy'),
+        ('^Dividend\\s+Policy', 'Dividend Policy'),
+        ('^DIVIDENDS\\s*$', 'Dividends'),
+        ('^Dividends\\s*$', 'Dividends'),
+    ),
+    'capitalization': _FOUR24B_SECTION_PATTERNS['capitalization'],
+    'dilution': _FOUR24B_SECTION_PATTERNS['dilution'],
+    'mda': (
+        ("^(?:MANAGEMENT.?S\\s+)?DISCUSSION\\s+AND\\s+ANALYSIS", 'MD&A'),
+        ("^(?:Management.?s\\s+)?Discussion\\s+and\\s+Analysis", 'MD&A'),
+    ),
+    'business': (
+        ('^BUSINESS\\s*$', 'Business'),
+        ('^Business\\s*$', 'Business'),
+        ('^OUR\\s+BUSINESS', 'Our Business'),
+        ('^Our\\s+Business', 'Our Business'),
+    ),
+    'management': (
+        ('^MANAGEMENT\\s*$', 'Management'),
+        ('^Management\\s*$', 'Management'),
+        ('^DIRECTORS.*EXECUTIVE\\s+OFFICERS', 'Directors and Executive Officers'),
+        ('^Directors.*Executive\\s+Officers', 'Directors and Executive Officers'),
+    ),
+    'executive_compensation': (
+        ('^EXECUTIVE\\s+COMPENSATION', 'Executive Compensation'),
+        ('^Executive\\s+Compensation', 'Executive Compensation'),
+    ),
+    'related_party_transactions': (
+        ('^CERTAIN\\s+RELATIONSHIPS\\s+AND\\s+RELATED\\s*(?:PARTY|PERSON)?\\s*TRANSACTIONS', 'Certain Relationships and Related Party Transactions'),
+        ('^Certain\\s+Relationships\\s+and\\s+Related\\s*(?:Party|Person)?\\s*Transactions', 'Certain Relationships and Related Party Transactions'),
+        ('^RELATED\\s*(?:PARTY|PERSON)\\s+TRANSACTIONS', 'Related Party Transactions'),
+        ('^Related\\s*(?:Party|Person)\\s+Transactions', 'Related Party Transactions'),
+    ),
+    'principal_stockholders': (
+        ('^PRINCIPAL\\s+(?:AND\\s+SELLING\\s+)?(?:STOCK|SECURITY)\\s*HOLDERS', 'Principal Stockholders'),
+        ('^Principal\\s+(?:and\\s+Selling\\s+)?(?:Stock|Security)\\s*[Hh]olders', 'Principal Stockholders'),
+        ('^(?:SECURITY\\s+)?OWNERSHIP\\s+OF\\s+CERTAIN\\s+BENEFICIAL', 'Security Ownership'),
+        ('^(?:Security\\s+)?Ownership\\s+of\\s+Certain\\s+Beneficial', 'Security Ownership'),
+    ),
+    'selling_stockholders': _FOUR24B_SECTION_PATTERNS['selling_stockholders'],
+    'description_of_securities': _FOUR24B_SECTION_PATTERNS['description_of_securities'],
+    'description_of_warrants': _FOUR24B_SECTION_PATTERNS['description_of_warrants'],
+    'shares_eligible_for_future_sale': (
+        ('^SHARES\\s+(?:OR\\s+SECURITIES\\s+)?ELIGIBLE\\s+FOR\\s+FUTURE\\s+SALE', 'Shares Eligible for Future Sale'),
+        ('^Shares\\s+(?:or\\s+Securities\\s+)?Eligible\\s+for\\s+Future\\s+Sale', 'Shares Eligible for Future Sale'),
+    ),
+    'tax_considerations': _FOUR24B_SECTION_PATTERNS['tax_considerations'],
+    'underwriting': _FOUR24B_SECTION_PATTERNS['underwriting'],
+    'plan_of_distribution': _FOUR24B_SECTION_PATTERNS['plan_of_distribution'],
+    'legal_matters': _FOUR24B_SECTION_PATTERNS['legal_matters'],
+    'experts': _FOUR24B_SECTION_PATTERNS['experts'],
+    'where_you_can_find_more_information': _FOUR24B_SECTION_PATTERNS['where_you_can_find_more_information'],
+    'incorporation_by_reference': _FOUR24B_SECTION_PATTERNS['incorporation_by_reference'],
+}
+
 TEN_K_SCHEMA = FormSchema(max_bare_item=15, text_rules=_TEN_K_RULES,
                           skip_unmatched_text=False,
                           item_part_ranges=_TEN_K_ITEM_PART_RANGES,
@@ -712,8 +785,13 @@ EIGHT_K_SCHEMA = FormSchema(section_patterns=_EIGHT_K_SECTION_PATTERNS)
 # title-vocabulary parser (edgartools-llmp.3). 20-F/8-K keep title_based=False —
 # their TOC is Item-number-based like a 10-K's.
 FOUR24B_SCHEMA = FormSchema(section_patterns=_FOUR24B_SECTION_PATTERNS, title_based=True)
-# Forms without any registered vocabulary (40-F, S-1, ...): no text fallback (raw
-# text is returned), default bare-item cap, no patterns.
+# S-1 registration statements are title-based prospectuses too (edgartools-ybth /
+# gh-866): title_based routes anchored S-1s through the TOC engine exactly like a
+# 424B, dissolving the same content-bleed by construction. Item forms keep
+# title_based=False and are untouched.
+S1_SCHEMA = FormSchema(section_patterns=_S1_SECTION_PATTERNS, title_based=True)
+# Forms without any registered vocabulary (40-F, DEF 14A, ...): no text fallback
+# (raw text is returned), default bare-item cap, no patterns.
 DEFAULT_SCHEMA = FormSchema(max_bare_item=15, text_rules=(), skip_unmatched_text=False)
 
 _SCHEMAS: Dict[str, FormSchema] = {
@@ -724,6 +802,8 @@ _SCHEMAS: Dict[str, FormSchema] = {
     "20-F": TWENTY_F_SCHEMA,
     "8-K": EIGHT_K_SCHEMA,
     "424B": FOUR24B_SCHEMA,
+    "S-1": S1_SCHEMA,
+    "S-1/A": S1_SCHEMA,
 }
 
 
