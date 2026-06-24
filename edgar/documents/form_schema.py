@@ -767,6 +767,99 @@ _S1_SECTION_PATTERNS = {
     'incorporation_by_reference': _FOUR24B_SECTION_PATTERNS['incorporation_by_reference'],
 }
 
+# DEF 14A proxy statements are title-based too (edgartools-x341 / gh-867), but
+# their vocabulary is Schedule 14A / Reg S-K governance + compensation rather than
+# prospectus offering sections. Declaration order follows the canonical proxy
+# sequence (notice → summary → proposals → governance → compensation → audit →
+# ownership → general). First key whose regex matches wins (FormSchema.match_
+# section_pattern), so more-specific keys precede the broader ones they could be
+# confused with (director_compensation before executive_compensation; CD&A and
+# equity-plan keyed on their own distinctive phrases). Multiple numbered proposals
+# all collapse to voting_proposals (the issue's single-key contract): first wins,
+# the rest still contribute TOC boundaries so nothing bleeds.
+_DEF14A_SECTION_PATTERNS = {
+    'notice_of_meeting': (
+        ('^NOTICE\\s+OF\\s+(?:THE\\s+)?(?:\\d{4}\\s+)?(?:ANNUAL|SPECIAL)\\s+MEETING', 'Notice of Annual Meeting'),
+        ('^Notice\\s+of\\s+(?:the\\s+)?(?:\\d{4}\\s+)?(?:Annual|Special)\\s+Meeting', 'Notice of Annual Meeting'),
+    ),
+    'proxy_summary': (
+        ('^PROXY\\s+(?:STATEMENT\\s+)?SUMMARY', 'Proxy Summary'),
+        ('^Proxy\\s+(?:Statement\\s+)?Summary', 'Proxy Summary'),
+    ),
+    'voting_proposals': (
+        ('^(?:PROPOSAL|ITEM)\\s+(?:NO\\.?\\s*)?\\d+', 'Voting Proposal'),
+        ('^(?:Proposal|Item)\\s+(?:No\\.?\\s*)?\\d+', 'Voting Proposal'),
+        ('^MANAGEMENT\\s+PROPOSALS?', 'Management Proposals'),
+        ('^Management\\s+Proposals?', 'Management Proposals'),
+        ('^ELECTION\\s+OF\\s+DIRECTORS', 'Election of Directors'),
+        ('^Election\\s+of\\s+Directors', 'Election of Directors'),
+    ),
+    'corporate_governance': (
+        ('^CORPORATE\\s+GOVERNANCE', 'Corporate Governance'),
+        ('^Corporate\\s+Governance', 'Corporate Governance'),
+        ('^BOARD\\s+OF\\s+DIRECTORS\\s*$', 'Board of Directors'),
+        ('^Board\\s+of\\s+Directors\\s*$', 'Board of Directors'),
+    ),
+    'director_compensation': (
+        ('^DIRECTOR\\s+COMPENSATION', 'Director Compensation'),
+        ('^Director\\s+Compensation', 'Director Compensation'),
+        ('^COMPENSATION\\s+OF\\s+DIRECTORS', 'Director Compensation'),
+        ('^Compensation\\s+of\\s+Directors', 'Director Compensation'),
+    ),
+    'compensation_discussion_and_analysis': (
+        ('^COMPENSATION\\s+DISCUSSION\\s+AND\\s+ANALYSIS', 'Compensation Discussion and Analysis'),
+        ('^Compensation\\s+Discussion\\s+and\\s+Analysis', 'Compensation Discussion and Analysis'),
+    ),
+    'pay_versus_performance': (
+        ('^PAY\\s+(?:VERSUS|VS\\.?|FOR)\\s+PERFORMANCE', 'Pay Versus Performance'),
+        ('^Pay\\s+(?:Versus|Vs\\.?|for)\\s+Performance', 'Pay Versus Performance'),
+    ),
+    'executive_compensation': (
+        ('^EXECUTIVE\\s+COMPENSATION', 'Executive Compensation'),
+        ('^Executive\\s+Compensation', 'Executive Compensation'),
+        ('^COMPENSATION\\s+OF\\s+(?:NAMED\\s+)?EXECUTIVE', 'Executive Compensation'),
+        ('^Compensation\\s+of\\s+(?:Named\\s+)?Executive', 'Executive Compensation'),
+    ),
+    'equity_compensation_plan_information': (
+        ('^EQUITY\\s+COMPENSATION\\s+PLAN\\s+INFORMATION', 'Equity Compensation Plan Information'),
+        ('^Equity\\s+Compensation\\s+Plan\\s+Information', 'Equity Compensation Plan Information'),
+    ),
+    'audit_matters': (
+        ('^AUDIT\\b.*\\b(?:COMMITTEE|REPORT|MATTERS|FEES)\\b', 'Audit Matters'),
+        ('^Audit\\b.*\\b(?:Committee|Report|Matters|Fees)\\b', 'Audit Matters'),
+        ('^REPORT\\s+OF\\s+THE\\s+AUDIT', 'Audit Committee Report'),
+        ('^Report\\s+of\\s+the\\s+Audit', 'Audit Committee Report'),
+    ),
+    'security_ownership': (
+        ('^SECURITY\\s+OWNERSHIP', 'Security Ownership'),
+        ('^Security\\s+Ownership', 'Security Ownership'),
+        ('^(?:STOCK\\s+)?OWNERSHIP\\s+OF\\s+(?:CERTAIN\\s+)?(?:BENEFICIAL|DIRECTORS)', 'Security Ownership'),
+        ('^(?:Stock\\s+)?Ownership\\s+of\\s+(?:Certain\\s+)?(?:Beneficial|Directors)', 'Security Ownership'),
+        ('^BENEFICIAL\\s+OWNERSHIP', 'Security Ownership'),
+        ('^Beneficial\\s+Ownership', 'Security Ownership'),
+    ),
+    'related_party_transactions': (
+        ('^CERTAIN\\s+RELATIONSHIPS', 'Certain Relationships and Related Party Transactions'),
+        ('^Certain\\s+Relationships', 'Certain Relationships and Related Party Transactions'),
+        ('^RELATED\\s+PART(?:Y|IES)', 'Related Party Transactions'),
+        ('^Related\\s+Part(?:y|ies)', 'Related Party Transactions'),
+    ),
+    'stockholder_proposals': (
+        ('^(?:STOCKHOLDER|SHAREHOLDER)\\s+PROPOSALS?', 'Stockholder Proposals'),
+        ('^(?:Stockholder|Shareholder)\\s+Proposals?', 'Stockholder Proposals'),
+    ),
+    'general_information': (
+        ('^GENERAL\\s+INFORMATION', 'General Information'),
+        ('^General\\s+Information', 'General Information'),
+        ('^(?:QUESTIONS\\s+AND\\s+ANSWERS|ABOUT\\s+THE\\s+(?:ANNUAL\\s+)?MEETING)', 'General Information'),
+        ('^(?:Questions\\s+and\\s+Answers|About\\s+the\\s+(?:Annual\\s+)?Meeting)', 'General Information'),
+    ),
+    'other_matters': (
+        ('^OTHER\\s+MATTERS', 'Other Matters'),
+        ('^Other\\s+Matters', 'Other Matters'),
+    ),
+}
+
 TEN_K_SCHEMA = FormSchema(max_bare_item=15, text_rules=_TEN_K_RULES,
                           skip_unmatched_text=False,
                           item_part_ranges=_TEN_K_ITEM_PART_RANGES,
@@ -790,7 +883,19 @@ FOUR24B_SCHEMA = FormSchema(section_patterns=_FOUR24B_SECTION_PATTERNS, title_ba
 # 424B, dissolving the same content-bleed by construction. Item forms keep
 # title_based=False and are untouched.
 S1_SCHEMA = FormSchema(section_patterns=_S1_SECTION_PATTERNS, title_based=True)
-# Forms without any registered vocabulary (40-F, DEF 14A, ...): no text fallback
+# DEF 14A / PRE 14A proxy statements (edgartools-x341 / gh-867). The Schedule 14A
+# / Reg S-K governance + compensation vocabulary is staged here, but the flip is
+# deliberately HELD: title_based stays False so proxies do NOT yet route through
+# the title TOC engine. Flagship proxies (AAPL/JPM/KO/WMT) nest a *summary
+# mini-TOC* whose entries match this vocabulary and precede the real detailed-TOC
+# entries in document order, so first-occurrence anchor selection slices the
+# wrong (tiny/summary) bodies. Reliable proxy extraction needs per-key
+# authoritative-anchor selection (prefer the body section over summary
+# cross-references / pick the main TOC) — tracked as the x341 sub-task. Flip
+# title_based=True (and add 'DEF 14A' to the pattern-extractor projection) once
+# that engine work lands.
+DEF14A_SCHEMA = FormSchema(section_patterns=_DEF14A_SECTION_PATTERNS, title_based=False)
+# Forms without any registered vocabulary (40-F, ...): no text fallback
 # (raw text is returned), default bare-item cap, no patterns.
 DEFAULT_SCHEMA = FormSchema(max_bare_item=15, text_rules=(), skip_unmatched_text=False)
 
@@ -804,6 +909,8 @@ _SCHEMAS: Dict[str, FormSchema] = {
     "424B": FOUR24B_SCHEMA,
     "S-1": S1_SCHEMA,
     "S-1/A": S1_SCHEMA,
+    "DEF 14A": DEF14A_SCHEMA,
+    "PRE 14A": DEF14A_SCHEMA,
 }
 
 
