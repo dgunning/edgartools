@@ -1248,7 +1248,17 @@ class SectionExtractor:
 
             for i in range(section_index + 1, len(headers)):
                 next_node = headers[i][0]
+                next_text = headers[i][1]
                 next_level = next_node.level if isinstance(next_node, HeadingNode) else 1
+
+                # Only an actual section header (Item/PART/SIGNATURE/EXHIBIT/...) may
+                # close a section. Internal sub-headings are HeadingNodes too — e.g. a
+                # bold "Adoption of Fiscal Year 2027 Variable Compensation Plan" inside
+                # an 8-K Item 5.02 — and must NOT terminate the item early and orphan
+                # the body paragraphs that follow it (GH #871). Skip any header that
+                # does not look like a real section boundary.
+                if not self._looks_like_section_header(next_text):
+                    continue
 
                 # If next header is at same or higher level, that's our end
                 if next_level <= current_level:
