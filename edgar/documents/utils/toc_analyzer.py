@@ -83,6 +83,14 @@ class TOCAnalyzer:
             Dict mapping normalized section names to anchor IDs
         """
         result: Dict[str, str] = {}
+
+        # Title-based forms (424B prospectuses) key their TOC by section title, not
+        # "Item N" labels. A dedicated parser handles them; the entire Item-based
+        # flow below is never entered for these forms, so 10-K/10-Q/8-K/20-F stay
+        # byte-identical (edgartools-llmp.3).
+        if self.schema.title_based:
+            return self._analyze_title_toc(html_content, tree=tree)
+
         if agent == 'Workiva':
             result = self._analyze_workiva_toc(html_content, tree=tree)
         elif agent == 'Donnelley':
@@ -222,6 +230,52 @@ class TOCAnalyzer:
             logger.debug("Generic TOC parser failed", exc_info=True)
 
         return section_mapping
+
+    # Trailing page-number / dot-leader run on a TOC link's text ("Use of
+    # Proceeds .... 12"), stripped before matching the schema title vocabulary
+    # (whose regexes are heading-anchored with \s*$).
+    _TOC_PAGE_TAIL = re.compile(r'[\s.…]*\d{0,4}\s*$')
+
+    def _analyze_title_toc(self, html_content: str, tree=None) -> Dict[str, str]:
+        """TOC parser for title-based forms (424B prospectuses, llmp.3).
+
+        Keys sections by matching each internal TOC link's text against the
+        schema's title vocabulary (``section_patterns``) rather than parsing an
+        "Item N" number. Returns ``{section_key: anchor_id}`` — the same contract
+        the Item-based parsers return — so the boundary/slicing pipeline in
+        ``SECSectionExtractor`` works unchanged. First occurrence of a key wins
+        (the TOC lists each section once, in document order).
+
+        Only reached when ``self.schema.title_based`` — never for Item forms.
+        """
+        mapping: Dict[str, str] = {}
+        try:
+            tree = self._ensure_tree(html_content, tree)
+        except Exception:
+            logger.debug("Title TOC parser: tree parse failed", exc_info=True)
+            return mapping
+
+        try:
+            for link in tree.xpath('//a[@href]'):
+                href = (link.get('href') or '').strip()
+                if not href.startswith('#'):
+                    continue
+                raw = (link.text_content() or '').strip()
+                if not raw:
+                    continue
+                # Drop a trailing dot-leader/page-number so "Use of Proceeds 12"
+                # still matches the heading-anchored title regexes.
+                text = self._TOC_PAGE_TAIL.sub('', raw).strip() or raw
+                key = self.schema.match_section_pattern(text)
+                if not key or key in mapping:
+                    continue
+                anchor_id = href[1:]
+                if find_anchor_targets(tree, anchor_id):
+                    mapping[key] = anchor_id
+        except Exception:
+            logger.debug("Title TOC parser failed", exc_info=True)
+
+        return mapping
 
     # Matches a body section heading: "Item 1A. Risk Factors", "Item 8. Financial
     # Statements …". The required title after the number (``\S``) is what separates
@@ -1209,6 +1263,13 @@ class TOCAnalyzer:
 
     def _get_section_type_and_order(self, text: str) -> Tuple[str, int]:
         """Get section type and order for sorting."""
+        # Title-based forms (424B): the section name is a vocabulary key
+        # ('use_of_proceeds', ...), ordered by its canonical declaration index.
+        # Gated on title_based so Item forms reach the item-number logic below
+        # unchanged.
+        if self.schema.title_based:
+            return 'section', self.schema.section_order(text)
+
         text_lower = text.lower()
 
         # Part-aware section names (e.g., part_i_item_1, part_ii_item_1a)

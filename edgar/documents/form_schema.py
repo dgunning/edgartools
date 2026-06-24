@@ -90,6 +90,40 @@ class FormSchema:
     # single home of the vocabulary the pattern extractor consumes today and the
     # TOC engine will consume after the Phase 3 routing flip (edgartools-llmp.3).
     section_patterns: Dict[str, Tuple[Tuple[str, str], ...]] = field(default_factory=dict)
+    # True for forms whose TOC entries are section *titles* (424B prospectuses,
+    # later S-1/DEF 14A) rather than "Item N" labels. Gates the TOC engine's
+    # title-vocabulary parser (edgartools-llmp.3): when set, the analyzer matches
+    # TOC link text against ``section_patterns`` to key sections; when unset (all
+    # Item forms), that parser is never entered and the item-number path is used
+    # exactly as before — so the flip cannot affect 10-K/10-Q/8-K/20-F.
+    title_based: bool = False
+
+    def match_section_pattern(self, text: str) -> Optional[str]:
+        """Return the section key whose title vocabulary matches ``text``, else None.
+
+        First key (in declaration order) with a matching regex wins, mirroring the
+        pattern extractor's per-section iteration. Only meaningful for title-based
+        forms; returns None when the form declares no ``section_patterns``.
+        """
+        cleaned = text.strip()
+        for key, patterns in self.section_patterns.items():
+            for regex, _title in patterns:
+                if re.match(regex, cleaned, re.IGNORECASE):
+                    return key
+        return None
+
+    def section_order(self, key: str) -> int:
+        """Canonical sort order for a title-based section key (declaration index).
+
+        Declaration order in ``section_patterns`` follows the canonical prospectus
+        sequence (About → Summary → Risk Factors → Use of Proceeds → …), so it is
+        a stable order for sections that carry no item number. Unknown keys sort
+        last.
+        """
+        for i, k in enumerate(self.section_patterns):
+            if k == key:
+                return i
+        return 99999
 
     def band_for(self, item_key: Optional[str]) -> Optional[Tuple[int, int]]:
         """Return the ``(low, high)`` size band for a bare item key, or None.
@@ -674,7 +708,10 @@ TEN_Q_SCHEMA = FormSchema(max_bare_item=6, text_rules=_TEN_Q_RULES, skip_unmatch
 # named schemas only to home their pattern vocabulary.
 TWENTY_F_SCHEMA = FormSchema(section_patterns=_TWENTY_F_SECTION_PATTERNS)
 EIGHT_K_SCHEMA = FormSchema(section_patterns=_EIGHT_K_SECTION_PATTERNS)
-FOUR24B_SCHEMA = FormSchema(section_patterns=_FOUR24B_SECTION_PATTERNS)
+# 424B prospectuses are title-based: title_based gates the TOC engine's
+# title-vocabulary parser (edgartools-llmp.3). 20-F/8-K keep title_based=False —
+# their TOC is Item-number-based like a 10-K's.
+FOUR24B_SCHEMA = FormSchema(section_patterns=_FOUR24B_SECTION_PATTERNS, title_based=True)
 # Forms without any registered vocabulary (40-F, S-1, ...): no text fallback (raw
 # text is returned), default bare-item cap, no patterns.
 DEFAULT_SCHEMA = FormSchema(max_bare_item=15, text_rules=(), skip_unmatched_text=False)
@@ -698,4 +735,8 @@ def get_form_schema(form: Optional[str]) -> FormSchema:
     """
     if form is None:
         return TEN_K_SCHEMA
+    # All 424B variants (424B1..424B8, /A amendments) share the one prospectus
+    # schema — the pattern extractor already collapses them to the '424B' key.
+    if form.startswith("424B"):
+        return FOUR24B_SCHEMA
     return _SCHEMAS.get(form, DEFAULT_SCHEMA)
