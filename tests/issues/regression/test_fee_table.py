@@ -504,7 +504,7 @@ class TestProspectusSections:
     @pytest.mark.vcr
     def test_section_text_extraction(self):
         """Verify individual sections have extractable text."""
-        filing = find("0001493152-25-029712")
+        filing = get_by_accession_number("0001493152-25-029712")
         prospectus = filing.obj()
         sections = prospectus.sections
         # If any sections were detected, verify they have text
