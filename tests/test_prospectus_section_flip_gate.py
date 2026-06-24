@@ -1,37 +1,30 @@
-"""Pre-flip regression gate for routing prospectus section text through the TOC
-engine (edgartools-llmp.3, Phase 3).
+"""Regression gate for routing prospectus section text through the TOC engine
+(edgartools-llmp.3, Phase 3).
 
-Today 424B/S-1 sections come from the weak pattern extractor (document.py router).
-Phase 3 flips the router so anchored forms get TOC-first detection with pattern
-as a universal fallback — which is what dissolves the GH #871 prospectus
+The document.py router now sends anchored 424B prospectuses through the TOC-first
+hybrid detector (with heading+pattern as a universal fallback) instead of straight
+to the weak pattern extractor — which dissolves the GH #871 prospectus
 content-bleed by construction.
 
-This module captures the invariants that must hold on prospectus output BOTH
-before the flip (pattern extractor) and after it (TOC engine + fallback). The
-design requires this gate to exist and be green on current output *before* the
-router changes; the flip is correct only if every invariant here still holds.
+This module guards the invariants on prospectus output:
+  * anchored 424B (TOC-rich): the correct section set with anchor-bounded text and
+    no cross-section bleed — these failed on the old pattern path and the flip
+    fixed them; the gate keeps them fixed.
+  * flat 424B (no machine-readable TOC): sections still detected via the
+    heading/pattern fallback the flip preserves.
 
-The invariants are deliberately property-based, not byte-snapshots: the flip is
-*meant* to change how sections are produced (and to improve bleed cases), so the
-gate asserts structural correctness (right sections, no cross-section bleed,
-stable keys) rather than identical text.
+The invariants are deliberately property-based, not byte-snapshots: the flip
+changes how sections are produced, so the gate asserts structural correctness
+(right sections, no cross-section bleed, stable keys) rather than identical text.
 """
-import pytest
-
 from edgar.documents import parse_html
 from edgar.documents.config import ParserConfig
 
-# The anchored-prospectus cases are the IMPROVEMENT target of the llmp.3 flip:
-# on current `main` the pattern extractor loses Use of Proceeds and bleeds
-# Dilution into Underwriting on a TOC-anchored 424B (reproduced below). These are
-# marked strict-xfail so they document the acceptance criteria and fail loudly
-# (XPASS) the moment the router flip makes them pass — at which point the marker
-# is removed. The flat-prospectus cases are the no-regression baseline: they pass
-# today via the heading/pattern path and must stay green through the flip.
-_until_flip = pytest.mark.xfail(
-    reason="fixed by the edgartools-llmp.3 router flip (TOC-first for prospectuses)",
-    strict=True,
-)
+# Before the edgartools-llmp.3 flip the pattern extractor lost Use of Proceeds and
+# bled Dilution into Underwriting on a TOC-anchored 424B. The flip routes anchored
+# prospectuses through the TOC engine, so these now pass: the anchored cases are a
+# live regression guard against that bleed returning, and the flat cases guard the
+# heading/pattern fallback that flat prospectuses still use.
 
 
 # A 424B with a real anchored Table of Contents (the bleed-prone, TOC-rich shape
@@ -71,7 +64,6 @@ def _sections(html):
     return parse_html(html, ParserConfig(form="424B5")).sections
 
 
-@_until_flip
 def test_anchored_prospectus_sections_detected():
     keys = set(_sections(_ANCHORED_424B).keys())
     missing = _EXPECTED_ANCHORED - keys
@@ -84,7 +76,6 @@ def test_flat_prospectus_sections_detected():
     assert not missing, f"flat 424B lost sections: {missing} (have {keys})"
 
 
-@_until_flip
 def test_no_cross_section_bleed_anchored():
     """The #871 invariant: a section's text must not contain another's body."""
     secs = _sections(_ANCHORED_424B)

@@ -50,6 +50,11 @@ class TOCAnalyzer:
         # unmatched-text policy. Replaces the scattered `if self.form in (...)`
         # branches that baked 10-K shape into form-agnostic code (edgartools-fhno).
         self.schema = get_form_schema(form)
+        # Document-order rank of each title-based section key, populated by
+        # _analyze_title_toc and consulted by _get_section_type_and_order so a
+        # prospectus's sections are bounded in physical order (not declaration
+        # order) — empty for Item forms (edgartools-llmp.3).
+        self._title_section_order: Dict[str, int] = {}
         # SEC section patterns for normalization
         self.section_patterns = [
             (r'(?:item|part)\s+\d+[a-z]?', 'item'),
@@ -249,6 +254,7 @@ class TOCAnalyzer:
         Only reached when ``self.schema.title_based`` — never for Item forms.
         """
         mapping: Dict[str, str] = {}
+        self._title_section_order = {}
         try:
             tree = self._ensure_tree(html_content, tree)
         except Exception:
@@ -256,6 +262,22 @@ class TOCAnalyzer:
             return mapping
 
         try:
+            # Document-order index of every id / <a name>, so sections can be
+            # ordered (and therefore bounded) by where their bodies physically
+            # sit — a prospectus's TOC declaration order is not always its body
+            # order, and ordering by anything else over-captures (a section runs
+            # to a later-declared but earlier-positioned anchor).
+            positions: Dict[str, int] = {}
+            for idx, el in enumerate(tree.iter()):
+                eid = el.get('id')
+                if eid and eid not in positions:
+                    positions[eid] = idx
+                if el.tag == 'a':
+                    nm = el.get('name')
+                    if nm and nm not in positions:
+                        positions[nm] = idx
+
+            matched: Dict[str, str] = {}  # key -> anchor_id (first TOC link wins)
             for link in tree.xpath('//a[@href]'):
                 href = (link.get('href') or '').strip()
                 if not href.startswith('#'):
@@ -267,11 +289,17 @@ class TOCAnalyzer:
                 # still matches the heading-anchored title regexes.
                 text = self._TOC_PAGE_TAIL.sub('', raw).strip() or raw
                 key = self.schema.match_section_pattern(text)
-                if not key or key in mapping:
+                if not key or key in matched:
                     continue
                 anchor_id = href[1:]
-                if find_anchor_targets(tree, anchor_id):
-                    mapping[key] = anchor_id
+                if anchor_id in positions and find_anchor_targets(tree, anchor_id):
+                    matched[key] = anchor_id
+
+            # Order by the body position of each section's anchor target.
+            ordered = sorted(matched.items(), key=lambda kv: positions[kv[1]])
+            for rank, (key, anchor_id) in enumerate(ordered):
+                mapping[key] = anchor_id
+                self._title_section_order[key] = rank
         except Exception:
             logger.debug("Title TOC parser failed", exc_info=True)
 
@@ -1264,11 +1292,16 @@ class TOCAnalyzer:
     def _get_section_type_and_order(self, text: str) -> Tuple[str, int]:
         """Get section type and order for sorting."""
         # Title-based forms (424B): the section name is a vocabulary key
-        # ('use_of_proceeds', ...), ordered by its canonical declaration index.
-        # Gated on title_based so Item forms reach the item-number logic below
-        # unchanged.
+        # ('use_of_proceeds', ...), ordered by the body position recorded during
+        # _analyze_title_toc so boundaries follow physical document order. Falls
+        # back to the schema's canonical declaration order if a key wasn't ranked
+        # (e.g. ordering by a direct caller rather than the TOC parser). Gated on
+        # title_based so Item forms reach the item-number logic below unchanged.
         if self.schema.title_based:
-            return 'section', self.schema.section_order(text)
+            rank = self._title_section_order.get(text)
+            if rank is None:
+                return 'section', self.schema.section_order(text)
+            return 'section', rank
 
         text_lower = text.lower()
 

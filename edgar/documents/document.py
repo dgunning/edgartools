@@ -721,7 +721,19 @@ class Document:
             # Normalize form type by removing /A suffix for amendments
             base_form = form.replace('/A', '') if form else None
 
-            if base_form and base_form in ['10-K', '10-Q', '8-K', '20-F']:
+            # Route through the anchor-first hybrid detector for Item-based forms
+            # AND for anchored title-based forms (424B prospectuses, flagged by the
+            # schema). The hybrid is TOC-first with heading+pattern as a universal
+            # fallback, so a prospectus with a real TOC gets clean anchor-bounded
+            # sections (dissolving the GH #871 pattern-extractor content-bleed),
+            # while a flat prospectus falls through to the same pattern output as
+            # before. Item-form routing is unchanged (edgartools-llmp.3).
+            from edgar.documents.form_schema import get_form_schema
+            use_hybrid = bool(base_form) and (
+                base_form in ['10-K', '10-Q', '8-K', '20-F']
+                or get_form_schema(base_form).title_based
+            )
+            if use_hybrid:
                 from edgar.documents.extractors.hybrid_section_detector import HybridSectionDetector
                 # Pass thresholds from config if available
                 thresholds = self._config.detection_thresholds if self._config else None

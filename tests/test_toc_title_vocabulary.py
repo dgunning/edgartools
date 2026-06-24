@@ -65,3 +65,29 @@ def test_toc_link_with_trailing_page_number_still_matches():
     )
     ext = _extractor(html)
     assert "use_of_proceeds" in ext.get_available_sections()
+
+
+# Body order here is Dilution THEN Use of Proceeds — the reverse of their order in
+# the 424B section-patterns vocabulary. Sections must be bounded by physical
+# document position, not declaration order; otherwise Dilution's end anchor points
+# at an earlier body position and it over-captures (the bug real ABNB 424B4
+# surfaced: a section ballooning to ~540KB).
+_OUT_OF_ORDER_424B = """
+<html><body>
+<div><b>TABLE OF CONTENTS</b><table>
+<tr><td><a href="#dil">Dilution</a></td></tr>
+<tr><td><a href="#uop">Use of Proceeds</a></td></tr>
+</table></div>
+<div id="dil"><b>Dilution</b><p>MARKER_DIL diluted.</p></div>
+<div id="uop"><b>Use of Proceeds</b><p>MARKER_UOP net proceeds.</p></div>
+</body></html>
+"""
+
+
+def test_sections_bounded_by_document_order_not_declaration_order():
+    ext = _extractor(_OUT_OF_ORDER_424B)
+    dil = ext.get_section_text("dilution") or ""
+    # Dilution comes first in the body; it must stop at Use of Proceeds, not run
+    # backwards/over it.
+    assert "MARKER_DIL" in dil
+    assert "MARKER_UOP" not in dil, "Dilution over-captured Use of Proceeds (declaration-order bug)"
