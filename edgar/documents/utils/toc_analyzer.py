@@ -272,7 +272,12 @@ class TOCAnalyzer:
             # sit — a prospectus's TOC declaration order is not always its body
             # order, and ordering by anything else over-captures (a section runs
             # to a later-declared but earlier-positioned anchor).
+            # Single document-order pass: record each id / <a name> target
+            # position, and collect every internal anchor link with its own
+            # source position (the index of the <a> element) so the authoritative
+            # TOC can be located by where the links physically sit.
             positions: Dict[str, int] = {}
+            internal_links: List[Tuple[int, str, Optional[str]]] = []  # (src_idx, anchor_id, key)
             for idx, el in enumerate(tree.iter()):
                 eid = el.get('id')
                 if eid and eid not in positions:
@@ -281,43 +286,49 @@ class TOCAnalyzer:
                     nm = el.get('name')
                     if nm and nm not in positions:
                         positions[nm] = idx
+                    href = (el.get('href') or '').strip()
+                    if href.startswith('#'):
+                        raw = (el.text_content() or '').strip()
+                        # Drop a trailing dot-leader/page-number so "Use of
+                        # Proceeds 12" still matches the heading-anchored regexes.
+                        text = self._TOC_PAGE_TAIL.sub('', raw).strip() or raw if raw else ''
+                        key = self.schema.match_section_pattern(text) if text else None
+                        internal_links.append((idx, href[1:], key))
+
+            # Locate the authoritative TOC: the body cross-references / back-links
+            # a section emits ("return to contents") also match the title
+            # vocabulary and point *adjacent* to a section start, so including them
+            # as boundaries cuts every section to a sliver (the Apple/JPM proxy
+            # failure: two TOC-like link sets whose targets differ by one node).
+            # The real TOC is the densest contiguous run of vocabulary-matching
+            # links; scattered body back-links form sparse runs with few distinct
+            # keys. Pick the richest run and restrict BOTH key matching and
+            # boundary collection to its source-position span — a single-TOC
+            # filing (prospectus/S-1) has one run, so its behaviour is unchanged.
+            matched_src = [(src, anc, key) for src, anc, key in internal_links if key]
+            toc_lo, toc_hi = self._authoritative_toc_span(matched_src)
+            if toc_lo is None:
+                return mapping
 
             matched: Dict[str, str] = {}      # key -> anchor_id (first TOC link wins)
-            matched_links: List = []          # the matched <a> elements (for the TOC container)
-            for link in tree.xpath('//a[@href]'):
-                href = (link.get('href') or '').strip()
-                if not href.startswith('#'):
+            for src, anchor_id, key in internal_links:
+                if key is None or not (toc_lo <= src <= toc_hi) or key in matched:
                     continue
-                raw = (link.text_content() or '').strip()
-                if not raw:
-                    continue
-                # Drop a trailing dot-leader/page-number so "Use of Proceeds 12"
-                # still matches the heading-anchored title regexes.
-                text = self._TOC_PAGE_TAIL.sub('', raw).strip() or raw
-                key = self.schema.match_section_pattern(text)
-                if not key or key in matched:
-                    continue
-                anchor_id = href[1:]
                 if anchor_id in positions and find_anchor_targets(tree, anchor_id):
                     matched[key] = anchor_id
-                    matched_links.append(link)
 
             if not matched:
                 return mapping
 
-            # Full set of TOC-entry body positions — every section the TOC lists,
-            # not only the ones our vocabulary names — used to bound each detected
-            # section at the *next listed section*, so undetected sections in
-            # between are not absorbed. Restrict to links inside the TOC container
-            # (the common ancestor of the matched links) to exclude body
-            # cross-references, which would otherwise cut sections short.
-            container = self._lowest_common_ancestor(matched_links)
+            # Boundaries = every TOC entry's body position (whether or not our
+            # vocabulary names it), so a detected section stops at the next listed
+            # section and never absorbs an undetected one in between. Restricted to
+            # links physically inside the TOC span, which excludes the body
+            # back-links that previously sliced sections to nothing.
             boundary_positions = set()
-            link_source = container if container is not None else tree
-            for link in link_source.xpath('.//a[@href]'):
-                href = (link.get('href') or '').strip()
-                if href.startswith('#'):
-                    pos = positions.get(href[1:])
+            for src, anchor_id, _key in internal_links:
+                if toc_lo <= src <= toc_hi:
+                    pos = positions.get(anchor_id)
                     if pos is not None:
                         boundary_positions.add(pos)
             sorted_boundaries = sorted(boundary_positions)
@@ -353,29 +364,45 @@ class TOCAnalyzer:
                 return anchor
         return None
 
-    @staticmethod
-    def _lowest_common_ancestor(elements: List):
-        """Deepest element that is an ancestor (or self) of every element given.
+    # A gap (in document-order element indices) between consecutive internal
+    # anchor links larger than this ends the current run. A real TOC is a dense
+    # block of links; body back-references are separated by paragraphs of content,
+    # so this cleanly splits the authoritative TOC from scattered body links.
+    _TOC_RUN_GAP = 120
 
-        Used to find the TOC container from the matched TOC links, so boundary
-        collection stays inside the TOC and ignores body cross-reference links.
-        Returns None if there is no common ancestor (or no elements).
+    @classmethod
+    def _authoritative_toc_span(
+        cls, internal_links: List[Tuple[int, str, Optional[str]]]
+    ) -> Tuple[Optional[int], Optional[int]]:
+        """Source-index span ``(lo, hi)`` of the authoritative TOC, or ``(None, None)``.
+
+        ``internal_links`` is every internal anchor link in document order as
+        ``(src_idx, anchor_id, matched_key_or_None)``. The links are clustered
+        into contiguous runs (a gap over :attr:`_TOC_RUN_GAP` starts a new run);
+        the run carrying the most distinct vocabulary keys (ties broken by link
+        count) is the real TOC. Body back-references — which also match the
+        vocabulary but point adjacent to a section start — fall into sparse,
+        key-poor runs and are excluded, so they no longer pollute the boundary
+        set. A single-TOC filing yields one run, leaving its behaviour unchanged.
         """
-        if not elements:
-            return None
-        # Ancestors-or-self of the first element, ordered deepest -> shallowest.
-        chain = [elements[0]] + list(elements[0].iterancestors())
-        common = set(chain)
-        for el in elements[1:]:
-            common &= {el, *el.iterancestors()}
-            if not common:
-                return None
-        # Deepest common element = the one earliest in `chain` (chain is ordered
-        # from the element up to the root).
-        for el in chain:
-            if el in common:
-                return el
-        return None
+        if not any(key for _src, _anc, key in internal_links):
+            return (None, None)
+
+        runs: List[List[Tuple[int, str, Optional[str]]]] = []
+        current: List[Tuple[int, str, Optional[str]]] = []
+        for entry in internal_links:
+            if current and entry[0] - current[-1][0] > cls._TOC_RUN_GAP:
+                runs.append(current)
+                current = []
+            current.append(entry)
+        if current:
+            runs.append(current)
+
+        def score(run: List[Tuple[int, str, Optional[str]]]) -> Tuple[int, int]:
+            return (len({key for _s, _a, key in run if key}), len(run))
+
+        best = max(runs, key=score)
+        return (best[0][0], best[-1][0])
 
     def title_section_end(self, key: str) -> Optional[str]:
         """End anchor for a title-based section key (next TOC entry), or None.
