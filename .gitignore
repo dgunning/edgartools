@@ -25,3 +25,6 @@ ratelimiter.sqlite*
 .pyscn/
 # Training output (generated, not tracked)
 training/output/
+# Oversized issue-868 S-1 underwriter cassettes (>100MB, kept local only)
+tests/cassettes/TestIssue868S1Underwriters.test_s1_lead_manager_is_real_underwriter.yaml
+tests/cassettes/TestIssue868S1Underwriters.test_s1a_lead_manager_is_real_underwriter.yaml
