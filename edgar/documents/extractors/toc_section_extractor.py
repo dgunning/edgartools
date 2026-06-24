@@ -264,23 +264,41 @@ class SECSectionExtractor:
                 best_pos, best_anchor = tpos, target
         return best_pos, best_anchor
 
-    # Leading navigation breadcrumb lines ("Table of Contents", a page number)
-    # that some filers render just before a re-attributed body heading.
-    _NAV_LINE_RE = re.compile(r'^(?:table of contents|financial table of contents|\d{1,4})$', re.IGNORECASE)
+    # Leading navigation breadcrumb that some filers render just before a
+    # re-attributed body heading, plus the page number that often trails it.
+    _NAV_TEXT_RE = re.compile(r'^(?:table of contents|financial table of contents)$', re.IGNORECASE)
+    _NAV_NUM_RE = re.compile(r'^\d{1,4}$')
 
     def _strip_leading_nav(self, text: Optional[str]) -> Optional[str]:
         """Drop leading blank / navigation-breadcrumb lines from a section's text.
 
         A re-attributed anchor can land on a page-header breadcrumb ("Table of
-        Contents" / "Financial Table of Contents") that sits immediately before the
-        real heading; strip it so the section starts at substantive content.
+        Contents" / "Financial Table of Contents", sometimes followed by the page
+        number) that sits immediately before the real heading; strip it so the
+        section starts at substantive content. A bare number is only treated as a
+        breadcrumb when it follows the textual breadcrumb — a standalone leading
+        number with no breadcrumb is kept, since it may be real content (a year,
+        a figure) rather than a page number.
         """
         if not text:
             return text
         lines = text.split('\n')
         i = 0
-        while i < len(lines) and (not lines[i].strip() or self._NAV_LINE_RE.match(lines[i].strip())):
-            i += 1
+        prev_was_breadcrumb = False
+        while i < len(lines):
+            stripped = lines[i].strip()
+            if not stripped:
+                i += 1
+                continue  # blank lines don't reset breadcrumb adjacency
+            if self._NAV_TEXT_RE.match(stripped):
+                prev_was_breadcrumb = True
+                i += 1
+                continue
+            if prev_was_breadcrumb and self._NAV_NUM_RE.match(stripped):
+                prev_was_breadcrumb = False
+                i += 1
+                continue
+            break
         return '\n'.join(lines[i:]).lstrip('\n') if i else text
 
     def _reattribute_incorporated_financials(self) -> None:
@@ -346,6 +364,14 @@ class SECSectionExtractor:
             if pos is not None:
                 candidates.setdefault(key, []).append((pos, anchor))
         if not candidates:
+            # The stub gates confirmed an incorporation-by-reference Item 7, but no
+            # deferred block was recognised — most likely this filer titles its
+            # 'Financial Section' sub-TOC with wording _DEFERRED_HEAD_MAP doesn't
+            # cover. Surface it so the unenumerated filer is diagnosable instead of
+            # silently returning the pointer stub.
+            logger.warning("Incorporated-financials recovery: Item 7 is an "
+                           "incorporation-by-reference pointer but no deferred "
+                           "section was classified (unrecognised sub-TOC wording?)")
             return
 
         cand_positions = sorted({p for lst in candidates.values() for (p, _) in lst})
@@ -392,19 +418,28 @@ class SECSectionExtractor:
         # supplement's own sub-TOC lists MD&A *subsections* (Executive Overview,
         # risk-management, ...), not a single "MD&A" entry. If Item 7 was not itself
         # remapped but a later financial block was, give it the region preceding the
-        # financial statements. Start it at the supplement's first sub-section
-        # (skipping any exhibit index that physically sits between the item pointers
-        # and the supplement), falling back to the Item 7 pointer when no supplement
-        # TOC is found.
+        # financial statements, starting at the supplement's first sub-section
+        # (which skips any exhibit index physically sitting between the item
+        # pointers and the supplement).
         if 'part_ii_item_7' not in deferred:
             sup_pos, sup_anchor = self._find_supplement_start(positions, a7, first_pos)
-            start_anchor = sup_anchor if (sup_anchor and sup_pos > a7) else b7.anchor_id
-            self.section_boundaries['part_ii_item_7'] = SectionBoundary(
-                name='part_ii_item_7', anchor_id=start_anchor, end_element_id=first_anchor,
-                confidence=min(b7.confidence, 0.9), detection_method='toc-reattributed',
-            )
-            if sup_anchor and a7 < sup_pos < clamp_pos:
-                clamp_pos, clamp_anchor = sup_pos, sup_anchor
+            if sup_anchor and sup_pos > a7:
+                self.section_boundaries['part_ii_item_7'] = SectionBoundary(
+                    name='part_ii_item_7', anchor_id=sup_anchor, end_element_id=first_anchor,
+                    confidence=min(b7.confidence, 0.9), detection_method='toc-reattributed',
+                )
+                if a7 < sup_pos < clamp_pos:
+                    clamp_pos, clamp_anchor = sup_pos, sup_anchor
+            else:
+                # No supplement sub-TOC found: we can't locate where MD&A begins, and
+                # spanning from the Item 7 pointer to the financial statements would
+                # drag in the trailing items and the exhibit index. Leave Item 7 as
+                # its original incorporation-by-reference pointer rather than emit
+                # contaminated MD&A text.
+                logger.warning("Incorporated-financials recovery: financial "
+                               "statements re-attributed but the MD&A supplement "
+                               "start was not found; Item 7 left as its "
+                               "incorporation-by-reference pointer")
 
         # Clamp the trailing bucket(s) that absorbed the deferred block: any item
         # whose anchor precedes the deferred block but whose span runs into it.

@@ -134,8 +134,9 @@ class TestRealWorldIncorporatedMDA:
 
         # The trailing bucket that absorbed the block must have snapped back.
         item16 = ek.sections.get("part_iv_item_16")
-        if item16 is not None:
-            assert len(item16.text()) < 100000, "XOM Item 16 still absorbing the Financial Section"
+        assert item16 is not None, \
+            "XOM Item 16 missing — cannot verify the trailing-bucket clamp (GH #873)"
+        assert len(item16.text()) < 100000, "XOM Item 16 still absorbing the Financial Section"
 
     def test_jpmorgan_mda_gap_fill(self):
         import edgar
@@ -160,8 +161,9 @@ class TestRealWorldIncorporatedMDA:
         # Item 15 (Exhibits) must snap back to just the exhibit index, not absorb
         # the whole MD&A + financial supplement.
         item15 = ek.sections.get("part_iv_item_15")
-        if item15 is not None:
-            assert len(item15.text()) < 100000, "JPM Item 15 still absorbing the supplement"
+        assert item15 is not None, \
+            "JPM Item 15 missing — cannot verify the trailing-bucket clamp (GH #873)"
+        assert len(item15.text()) < 100000, "JPM Item 15 still absorbing the supplement"
 
     def test_apple_control_unchanged(self):
         import edgar
