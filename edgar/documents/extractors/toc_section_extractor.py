@@ -135,6 +135,16 @@ class SECSectionExtractor:
                 next_section = sorted_sections[i + 1][1]
                 end_anchor = next_section['anchor_id']
 
+            # Title-based forms (424B): tighten the end to the next *TOC entry*
+            # (vocabulary or not) so a detected section does not absorb
+            # intervening prospectus sections we have no vocabulary for — e.g.
+            # "Use of Proceeds" must stop at the next listed section, not run on
+            # through Management and the financial statements (edgartools-llmp.3).
+            if self.toc_analyzer.schema.title_based:
+                tight = self.toc_analyzer.title_section_end(section_name)
+                if tight is not None:
+                    end_anchor = tight
+
             self.section_boundaries[section_name] = SectionBoundary(
                 name=section_name,
                 anchor_id=start_anchor,

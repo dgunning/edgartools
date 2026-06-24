@@ -55,6 +55,10 @@ class TOCAnalyzer:
         # prospectus's sections are bounded in physical order (not declaration
         # order) — empty for Item forms (edgartools-llmp.3).
         self._title_section_order: Dict[str, int] = {}
+        # End anchor for each title-based section key: the next TOC entry (any,
+        # not just vocabulary matches) so detected sections don't absorb the
+        # gap to the next *recognised* section. None = run to document end.
+        self._title_next_anchor: Dict[str, Optional[str]] = {}
         # SEC section patterns for normalization
         self.section_patterns = [
             (r'(?:item|part)\s+\d+[a-z]?', 'item'),
@@ -255,6 +259,7 @@ class TOCAnalyzer:
         """
         mapping: Dict[str, str] = {}
         self._title_section_order = {}
+        self._title_next_anchor = {}
         try:
             tree = self._ensure_tree(html_content, tree)
         except Exception:
@@ -277,7 +282,8 @@ class TOCAnalyzer:
                     if nm and nm not in positions:
                         positions[nm] = idx
 
-            matched: Dict[str, str] = {}  # key -> anchor_id (first TOC link wins)
+            matched: Dict[str, str] = {}      # key -> anchor_id (first TOC link wins)
+            matched_links: List = []          # the matched <a> elements (for the TOC container)
             for link in tree.xpath('//a[@href]'):
                 href = (link.get('href') or '').strip()
                 if not href.startswith('#'):
@@ -294,16 +300,90 @@ class TOCAnalyzer:
                 anchor_id = href[1:]
                 if anchor_id in positions and find_anchor_targets(tree, anchor_id):
                     matched[key] = anchor_id
+                    matched_links.append(link)
 
-            # Order by the body position of each section's anchor target.
+            if not matched:
+                return mapping
+
+            # Full set of TOC-entry body positions — every section the TOC lists,
+            # not only the ones our vocabulary names — used to bound each detected
+            # section at the *next listed section*, so undetected sections in
+            # between are not absorbed. Restrict to links inside the TOC container
+            # (the common ancestor of the matched links) to exclude body
+            # cross-references, which would otherwise cut sections short.
+            container = self._lowest_common_ancestor(matched_links)
+            boundary_positions = set()
+            link_source = container if container is not None else tree
+            for link in link_source.xpath('.//a[@href]'):
+                href = (link.get('href') or '').strip()
+                if href.startswith('#'):
+                    pos = positions.get(href[1:])
+                    if pos is not None:
+                        boundary_positions.add(pos)
+            sorted_boundaries = sorted(boundary_positions)
+
+            # Order detected sections by body position; bound each at the next TOC
+            # entry after it (vocabulary or not).
+            pos_to_anchor = {positions[a]: a for a in matched.values()}
             ordered = sorted(matched.items(), key=lambda kv: positions[kv[1]])
             for rank, (key, anchor_id) in enumerate(ordered):
                 mapping[key] = anchor_id
                 self._title_section_order[key] = rank
+                start = positions[anchor_id]
+                nxt = next((p for p in sorted_boundaries if p > start), None)
+                # The next boundary may coincide with the next detected section's
+                # own anchor; resolve to that anchor id when known, else find the
+                # id occupying that position.
+                self._title_next_anchor[key] = (
+                    pos_to_anchor.get(nxt) or self._id_at_position(positions, nxt)
+                    if nxt is not None else None
+                )
         except Exception:
             logger.debug("Title TOC parser failed", exc_info=True)
 
         return mapping
+
+    @staticmethod
+    def _id_at_position(positions: Dict[str, int], pos: Optional[int]) -> Optional[str]:
+        """The id/name whose first document index is ``pos`` (inverse of positions)."""
+        if pos is None:
+            return None
+        for anchor, p in positions.items():
+            if p == pos:
+                return anchor
+        return None
+
+    @staticmethod
+    def _lowest_common_ancestor(elements: List):
+        """Deepest element that is an ancestor (or self) of every element given.
+
+        Used to find the TOC container from the matched TOC links, so boundary
+        collection stays inside the TOC and ignores body cross-reference links.
+        Returns None if there is no common ancestor (or no elements).
+        """
+        if not elements:
+            return None
+        # Ancestors-or-self of the first element, ordered deepest -> shallowest.
+        chain = [elements[0]] + list(elements[0].iterancestors())
+        common = set(chain)
+        for el in elements[1:]:
+            common &= {el, *el.iterancestors()}
+            if not common:
+                return None
+        # Deepest common element = the one earliest in `chain` (chain is ordered
+        # from the element up to the root).
+        for el in chain:
+            if el in common:
+                return el
+        return None
+
+    def title_section_end(self, key: str) -> Optional[str]:
+        """End anchor for a title-based section key (next TOC entry), or None.
+
+        None means the section runs to the end of the document (it is the last
+        TOC entry). Populated by :meth:`_analyze_title_toc`.
+        """
+        return self._title_next_anchor.get(key)
 
     # Matches a body section heading: "Item 1A. Risk Factors", "Item 8. Financial
     # Statements …". The required title after the number (``\S``) is what separates
