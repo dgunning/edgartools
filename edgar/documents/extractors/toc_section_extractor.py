@@ -180,8 +180,13 @@ class SECSectionExtractor:
     # (edgartools-llmp.2), so a new form becomes a schema entry, not new code.
 
     # Item 7 text that incorporates the MD&A by reference rather than carrying it.
+    # The last alternative covers the Chevron-style pointer ("The index to MD&A …
+    # is presented in the Financial Table of Contents"), which defers the body to
+    # a later 'Financial Section' / 'Financial Table of Contents' supplement
+    # rather than to an exhibit — same recovery, different wording (edgartools-gegs).
     _INCORP_RE = re.compile(
-        r'reference is made to|incorporated\s+(?:herein\s+)?by\s+reference|appears\s+on\s+pages',
+        r'reference is made to|incorporated\s+(?:herein\s+)?by\s+reference|appears\s+on\s+pages'
+        r'|presented\s+in\s+the\s+financial\s+(?:table\s+of\s+contents|section)',
         re.IGNORECASE,
     )
     # A genuine Item 7 MD&A is many KB; a pointer stub is a sentence or two.

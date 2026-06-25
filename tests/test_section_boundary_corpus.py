@@ -59,8 +59,11 @@ GROUND_TRUTH = {
 # incorporation-by-reference (e.g. nvda/orcl Item 8 incorporated -> small). This
 # is the *baseline*: the guard asserts the live set is a SUBSET of it, so new
 # breakage fails while a fix that drops a filing from the set still passes.
+# cvx 10-K was here until edgartools-gegs fixed its incorporation-by-reference
+# recovery (Item 7/8 now recovered, Item 14 clamped); removed so a cvx regression
+# re-trips this guard.
 ANOMALY_BASELINE = {
-    ("915358", "10-K"), ("bac", "10-K"), ("cvx", "10-K"),
+    ("915358", "10-K"), ("bac", "10-K"),
     ("gbdc", "10-K"), ("gbdc", "10-Q"), ("gs", "10-K"), ("gs", "10-Q"),
     ("ibm", "10-K"), ("jpm", "10-K"), ("jpm", "10-Q"), ("ms", "10-K"),
     ("nflx", "10-K"), ("nvda", "10-K"), ("orcl", "10-K"), ("xom", "10-Q"),
