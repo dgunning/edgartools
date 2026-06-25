@@ -245,6 +245,80 @@ class TOCAnalyzer:
     # (whose regexes are heading-anchored with \s*$).
     _TOC_PAGE_TAIL = re.compile(r'[\s.…]*\d{0,4}\s*$')
 
+    # A TOC entry whose visible text is only a page number ("8", "12") is a
+    # dot-leader artifact, not a section title. It shares its sibling title's
+    # target so it still marks a boundary position, but it must not define that
+    # boundary's indentation depth (edgartools-gb99).
+    _TOC_PAGE_NUMBER = re.compile(r'^\d{1,4}$')
+
+    # Indents are compared with this tolerance (pt/px) so render noise never
+    # fabricates a depth level; entries within tolerance are siblings.
+    _TOC_INDENT_TOL = 1.5
+    # A CSS length value ("7.2pt", "-7.2pt", "12px"); only the numeric part is
+    # kept (units are assumed consistent within one TOC).
+    _CSS_LEN = re.compile(r'^-?\d+(?:\.\d+)?')
+    # Inline-style declarations, split on ';'.
+    _CSS_DECL = re.compile(r'([a-z-]+)\s*:\s*([^;]+)')
+
+    @classmethod
+    def _css_len(cls, value: str) -> float:
+        m = cls._CSS_LEN.match(value.strip())
+        return float(m.group(0)) if m else 0.0
+
+    @classmethod
+    def _shorthand_left(cls, value: str) -> float:
+        """Left component of a ``margin``/``padding`` shorthand (top right bottom
+        left). 1 value → all sides; 2 → left is the 2nd; 3 → 2nd; 4 → 4th."""
+        parts = value.split()
+        if not parts:
+            return 0.0
+        if len(parts) == 1:
+            return cls._css_len(parts[0])
+        if len(parts) >= 4:
+            return cls._css_len(parts[3])
+        return cls._css_len(parts[1])  # 2 or 3 values: left == right == parts[1]
+
+    @classmethod
+    def _element_left(cls, style: str) -> float:
+        """Left offset an element's inline style contributes: explicit
+        ``margin-left``/``padding-left`` (falling back to the box shorthand) plus
+        ``text-indent``. A hanging indent (``padding-left:7.2pt;text-indent:-7.2pt``)
+        nets to zero, exactly as it renders."""
+        decls = {k: v.strip() for k, v in cls._CSS_DECL.findall(style.lower())}
+        left = 0.0
+        for box in ('margin', 'padding'):
+            if f'{box}-left' in decls:
+                left += cls._css_len(decls[f'{box}-left'])
+            elif box in decls:
+                left += cls._shorthand_left(decls[box])
+        if 'padding-left' not in decls and 'padding-inline-start' in decls:
+            left += cls._css_len(decls['padding-inline-start'])
+        if 'text-indent' in decls:
+            left += cls._css_len(decls['text-indent'])
+        return left
+
+    @classmethod
+    def _toc_indent(cls, el) -> float:
+        """Cumulative left indentation (pt/px) of a TOC entry, summed over up to
+        eight ancestors.
+
+        A nested sub-entry sits deeper than its parent section, so bounding a
+        section at the next *shallower-or-equal* entry skips its own children
+        (edgartools-gb99). A flat single-level TOC (prospectus / S-1 / 424B)
+        yields one uniform value, so the sibling rule collapses to "bound at the
+        next entry" — the prior behaviour, unchanged.
+        """
+        total = 0.0
+        cur = el
+        for _ in range(8):
+            if cur is None:
+                break
+            style = cur.get('style')
+            if style:
+                total += cls._element_left(style)
+            cur = cur.getparent()
+        return total
+
     def _analyze_title_toc(self, html_content: str, tree=None) -> Dict[str, str]:
         """TOC parser for title-based forms (424B prospectuses, llmp.3).
 
@@ -277,7 +351,8 @@ class TOCAnalyzer:
             # source position (the index of the <a> element) so the authoritative
             # TOC can be located by where the links physically sit.
             positions: Dict[str, int] = {}
-            internal_links: List[Tuple[int, str, Optional[str]]] = []  # (src_idx, anchor_id, key)
+            # (src_idx, anchor_id, matched_key_or_None, element, is_page_number)
+            internal_links: List[Tuple[int, str, Optional[str], object, bool]] = []
             for idx, el in enumerate(tree.iter()):
                 eid = el.get('id')
                 if eid and eid not in positions:
@@ -293,7 +368,8 @@ class TOCAnalyzer:
                         # Proceeds 12" still matches the heading-anchored regexes.
                         text = self._TOC_PAGE_TAIL.sub('', raw).strip() or raw if raw else ''
                         key = self.schema.match_section_pattern(text) if text else None
-                        internal_links.append((idx, href[1:], key))
+                        is_pg = (not text) or bool(self._TOC_PAGE_NUMBER.match(text))
+                        internal_links.append((idx, href[1:], key, el, is_pg))
 
             # Locate the authoritative TOC: the body cross-references / back-links
             # a section emits ("return to contents") also match the title
@@ -305,43 +381,77 @@ class TOCAnalyzer:
             # keys. Pick the richest run and restrict BOTH key matching and
             # boundary collection to its source-position span — a single-TOC
             # filing (prospectus/S-1) has one run, so its behaviour is unchanged.
-            matched_src = [(src, anc, key) for src, anc, key in internal_links if key]
+            matched_src = [(src, anc, key) for src, anc, key, _el, _pg in internal_links if key]
             toc_lo, toc_hi = self._authoritative_toc_span(matched_src)
             if toc_lo is None:
                 return mapping
 
-            matched: Dict[str, str] = {}      # key -> anchor_id (first TOC link wins)
-            for src, anchor_id, key in internal_links:
-                if key is None or not (toc_lo <= src <= toc_hi) or key in matched:
+            # Anchor selection: a key can appear several times in one proxy TOC —
+            # a shallow top-level entry plus deeper sub-entry / summary mentions
+            # (Apple lists "Executive Compensation" inside the Proxy Summary
+            # before the real section). Prefer the SHALLOWEST-indented match so a
+            # section keys to its real body, not a summary cross-reference; ties
+            # keep document order (first wins). On a flat TOC every match shares
+            # one indent, so this is exactly first-occurrence-wins (edgartools-gb99).
+            matched: Dict[str, str] = {}          # key -> chosen anchor_id
+            matched_level: Dict[str, float] = {}  # key -> that anchor's indent depth
+            for src, anchor_id, key, el, _pg in internal_links:
+                if key is None or not (toc_lo <= src <= toc_hi):
                     continue
-                if anchor_id in positions and find_anchor_targets(tree, anchor_id):
+                if anchor_id not in positions or not find_anchor_targets(tree, anchor_id):
+                    continue
+                level = self._toc_indent(el)
+                if key not in matched or level < matched_level[key] - self._TOC_INDENT_TOL:
                     matched[key] = anchor_id
+                    matched_level[key] = level
 
             if not matched:
                 return mapping
 
-            # Boundaries = every TOC entry's body position (whether or not our
-            # vocabulary names it), so a detected section stops at the next listed
-            # section and never absorbs an undetected one in between. Restricted to
-            # links physically inside the TOC span, which excludes the body
-            # back-links that previously sliced sections to nothing.
-            boundary_positions = set()
-            for src, anchor_id, _key in internal_links:
-                if toc_lo <= src <= toc_hi:
-                    pos = positions.get(anchor_id)
-                    if pos is not None:
-                        boundary_positions.add(pos)
-            sorted_boundaries = sorted(boundary_positions)
+            # Boundary levels: every TOC entry's body position is a potential
+            # section end, tagged with its indentation depth. A bare page-number
+            # link ("8") shares its title's target, so it still marks a boundary
+            # position but must not set the depth — prefer a real title link's
+            # level at each position. Restricted to links inside the TOC span,
+            # which excludes the body back-links that previously sliced sections
+            # to nothing.
+            boundary_level: Dict[int, float] = {}
+            boundary_titled: Dict[int, bool] = {}
+            for src, anchor_id, _key, el, is_pg in internal_links:
+                if not (toc_lo <= src <= toc_hi):
+                    continue
+                pos = positions.get(anchor_id)
+                if pos is None:
+                    continue
+                if pos in boundary_level and (boundary_titled[pos] or is_pg):
+                    continue
+                boundary_level[pos] = self._toc_indent(el)
+                boundary_titled[pos] = not is_pg
+            sorted_boundaries = sorted(boundary_level)
 
             # Order detected sections by body position; bound each at the next TOC
-            # entry after it (vocabulary or not).
+            # entry that is NOT one of its own descendants — the next boundary at
+            # the same-or-shallower indentation (a sibling), or the next entry that
+            # itself starts a detected section. Deeper sub-entries in between are
+            # children and are absorbed, so a section is no longer sliced to a
+            # sliver by its own audit/compensation sub-headings (the KO
+            # audit_matters=13-char failure, edgartools-gb99). On a flat
+            # single-level TOC every entry is a sibling, so this stays "bound at
+            # the next entry" — prospectus/S-1 behaviour is unchanged.
             pos_to_anchor = {positions[a]: a for a in matched.values()}
+            chosen_starts = set(pos_to_anchor)
             ordered = sorted(matched.items(), key=lambda kv: positions[kv[1]])
             for rank, (key, anchor_id) in enumerate(ordered):
                 mapping[key] = anchor_id
                 self._title_section_order[key] = rank
                 start = positions[anchor_id]
-                nxt = next((p for p in sorted_boundaries if p > start), None)
+                level = matched_level[key]
+                nxt = next(
+                    (p for p in sorted_boundaries
+                     if p > start and (p in chosen_starts
+                                       or boundary_level[p] <= level + self._TOC_INDENT_TOL)),
+                    None,
+                )
                 # The next boundary may coincide with the next detected section's
                 # own anchor; resolve to that anchor id when known, else find the
                 # id occupying that position.
