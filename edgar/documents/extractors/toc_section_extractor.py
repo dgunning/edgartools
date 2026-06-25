@@ -21,6 +21,29 @@ from edgar.documents.utils.toc_analyzer import TOCAnalyzer
 
 logger = logging.getLogger(__name__)
 
+# Canonical title fragment for each 10-K item, used to (a) locate the real
+# ITEM header when a TOC anchor lands on a PART header and (b) recognise that a
+# short extraction already sits on the correct heading (so a legitimately brief
+# item — "incorporated by reference", "Not applicable" — is not over-rescued).
+_ITEM_TITLE_PATTERNS = {
+    '1': r'BUSINESS',
+    '1A': r'RISK\s*FACTORS?',
+    '1B': r'UNRESOLVED\s*STAFF\s*COMMENTS?',
+    '1C': r'CYBERSECURITY',
+    '2': r'PROPERTIES',
+    '3': r'LEGAL\s*PROCEEDINGS?',
+    '4': r'MINE\s*SAFETY',
+    '5': r'MARKET\s*FOR',
+    '6': r'(SELECTED|RESERVED)',
+    '7': r'MANAGEMENT',
+    '7A': r'QUANTITATIVE',
+    '8': r'FINANCIAL\s*STATEMENTS?',
+    '9': r'CHANGES?\s*IN',
+    '9A': r'CONTROLS?',
+    '9B': r'OTHER\s*INFORMATION',
+    '9C': r'DISCLOSURE',
+}
+
 
 @dataclass
 class SectionBoundary:
@@ -557,10 +580,18 @@ class SECSectionExtractor:
                 item_match = re.match(r'(?:part_[iv]+_)?item[_\s]*(\d+[a-z]?)', normalized_name, re.IGNORECASE)
                 if item_match:
                     item_num = item_match.group(1).upper()
-                    # Try to find actual Item content in HTML
-                    actual_content = self._find_actual_item_content(html_content, item_num, boundary, clean)
-                    if actual_content and len(actual_content) > len(section_text):
-                        section_text = actual_content
+                    # Only hunt for "real" content when the short extraction is NOT
+                    # already sitting on this item's own heading. An item that is
+                    # legitimately brief — Legal Proceedings incorporated by
+                    # reference, Mine Safety "Not applicable" — keeps its short,
+                    # correctly-bounded text; the HTML-regex rescue (designed for
+                    # anchors that land on a PART header) would otherwise run past
+                    # the end anchor and swallow following items.
+                    if not self._text_on_item_heading(section_text, item_num):
+                        # Try to find actual Item content in HTML
+                        actual_content = self._find_actual_item_content(html_content, item_num, boundary, clean)
+                        if actual_content and len(actual_content) > len(section_text):
+                            section_text = actual_content
 
             # If no direct content but include_subsections=True, aggregate subsection text
             if not section_text and include_subsections:
@@ -725,6 +756,23 @@ class SECSectionExtractor:
 
         return text.strip()
 
+    def _text_on_item_heading(self, section_text: str, item_num: str) -> bool:
+        """Return True if ``section_text`` begins on this item's own heading.
+
+        Used to tell a *legitimately short* item (whose anchor is correctly
+        placed — e.g. "ITEM 3. LEGAL PROCEEDINGS / incorporated by reference")
+        apart from a *mis-anchored* item (whose anchor landed on a PART header,
+        so the short text carries no item title). Matches "ITEM <n> <TITLE>"
+        within the leading slice, tolerating the non-breaking spaces and
+        entity noise that separate the number from the title.
+        """
+        title_pattern = _ITEM_TITLE_PATTERNS.get(item_num)
+        if not title_pattern:
+            return False
+        head = section_text[:200]
+        pattern = rf'ITEM[\s &#;0-9xnbsp]*{re.escape(item_num)}[\s &#;.0-9xnbsp]*{title_pattern}'
+        return re.search(pattern, head, re.IGNORECASE) is not None
+
     def _find_actual_item_content(self, html_content: str, item_num: str,
                                     boundary: SectionBoundary, clean: bool) -> Optional[str]:
         """
@@ -754,27 +802,7 @@ class SECSectionExtractor:
         # Examples: "ITEM 1. BUSINESS", "ITEM 1.&#160;&#160;BUSINESS", "ITEM&#160;1. BUSINESS"
         item_pattern = rf'ITEM[\s&#;0-9xnbsp]+{re.escape(item_num)}\.?[\s&#;0-9xnbsp]*'
 
-        # Common titles for different items
-        item_titles = {
-            '1': r'BUSINESS',
-            '1A': r'RISK\s*FACTORS?',
-            '1B': r'UNRESOLVED\s*STAFF\s*COMMENTS?',
-            '1C': r'CYBERSECURITY',
-            '2': r'PROPERTIES',
-            '3': r'LEGAL\s*PROCEEDINGS?',
-            '4': r'MINE\s*SAFETY',
-            '5': r'MARKET\s*FOR',
-            '6': r'(SELECTED|RESERVED)',
-            '7': r'MANAGEMENT',
-            '7A': r'QUANTITATIVE',
-            '8': r'FINANCIAL\s*STATEMENTS?',
-            '9': r'CHANGES?\s*IN',
-            '9A': r'CONTROLS?',
-            '9B': r'OTHER\s*INFORMATION',
-            '9C': r'DISCLOSURE',
-        }
-
-        title_pattern = item_titles.get(item_num, r'\w+')
+        title_pattern = _ITEM_TITLE_PATTERNS.get(item_num, r'\w+')
         full_pattern = rf'{item_pattern}{title_pattern}'
 
         # Search for the pattern in HTML
