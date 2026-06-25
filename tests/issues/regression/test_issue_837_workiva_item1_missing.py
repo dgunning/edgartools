@@ -160,3 +160,12 @@ def test_allstate_2026_10k_item_1_present():
     assert workiva.get('part_iv_signatures') == generic['part_iv_signatures']
     assert set(generic) - set(workiva) == set()
     assert "Item 9C" in obj.items
+
+    # edgartools-nqzc: the named Signatures section now surfaces in
+    # document.sections with its real content (was dropped — a backward
+    # end-anchor from an order-400 misclassification emptied its text).
+    signatures = secs.get("part_iv_signatures")
+    assert signatures is not None
+    sig_text = signatures.text()
+    assert len(sig_text) > 10_000
+    assert "Pursuant to the requirements" in sig_text

@@ -1465,6 +1465,21 @@ class TOCAnalyzer:
             order = item_num * 1000 + (ord(item_letter.upper()) - ord('A') + 1 if item_letter else 0)
             return 'item', order
 
+        # Allowlisted named sections (Signatures) carry no item number and sit at
+        # the very end of the filing, after every item. Order them after the last
+        # item — within their Part for a part-prefixed key ("part_iv_signatures"),
+        # or globally last for a bare key — so the trailing "part_iv_" doesn't fall
+        # through to the Part rule below and sort them as a bare "Part IV" header
+        # (order 400). That misorder placed Signatures first and handed it the next
+        # section's anchor as its end boundary — a backward end-anchor that emptied
+        # its text and dropped it from document.sections (edgartools-nqzc).
+        named_match = re.match(r'(?:part_([ivx]+)_)?([a-z_]+)$', text_lower)
+        if named_match and self._is_known_named_section(named_match.group(2)):
+            part_roman = named_match.group(1)
+            if part_roman:
+                return 'section', self._roman_to_int(part_roman) * 100000 + 99000
+            return 'section', 9_900_000
+
         # Parts (Part I, Part II, etc.)
         part_match = re.search(r'part[\s_]*([ivx]+)', text_lower)
         if part_match:
