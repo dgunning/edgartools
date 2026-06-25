@@ -134,6 +134,14 @@ class HybridSectionDetector:
         # Filter by confidence
         sections = self._filter_by_confidence(sections)
 
+        # Header-only artifact drop (title-based forms only) — a proxy/424B/S-1
+        # TOC entry whose section collapses to just its own heading phrase (the
+        # body absorbed by an adjacent section) is a mislabeled sliver, not
+        # content. Drop it before the size guardrail so it is never emitted as a
+        # labeled section (edgartools-x341). Runs before the guardrail so the
+        # bands evaluate only surviving sections.
+        sections = self._drop_header_only_sections(sections)
+
         # Size guardrail — runs LAST so a confidence reduction here cannot cause
         # the confidence filter to silently drop a flagged section. Flags
         # anomalously-sized sections (wrong-content failures) rather than
@@ -141,6 +149,54 @@ class HybridSectionDetector:
         sections = self._apply_size_guardrail(sections)
 
         return sections
+
+    # Length below which a TOC section is a candidate header-only artifact. The
+    # largest empty-header sliver observed across a 32-filer proxy corpus is 48
+    # chars ('Table of Contents     Executive Compensation'); the shortest *real*
+    # short section is 120 ('Item 1: Election of Directors. The Board ...
+    # recommends FOR ...'). 64 sits safely between them.
+    _HEADER_ONLY_MAX_LEN = 64
+
+    def _drop_header_only_sections(self, sections: Dict[str, Section]) -> Dict[str, Section]:
+        """Drop title-based TOC sections that collapsed to a bare heading.
+
+        On hierarchical / divider proxy TOCs a vocabulary term sometimes matches
+        a divider tab or summary cross-reference whose section boundary lands at
+        the very next entry, so the section's entire body is just its heading
+        phrase ('Executive Compensation', 'BOARD OF DIRECTORS') — the real
+        content lives in an adjacent absorbing section. Such a sliver is a
+        mislabeled artifact; the labeled-or-full contract says never emit it.
+
+        Scoped to title-based forms (DEF 14A / PRE 14A / 424B / S-1): the
+        Item-based forms (10-K/10-Q/8-K) keep their existing output untouched.
+        A section is header-only when its extracted text is short
+        (< ``_HEADER_ONLY_MAX_LEN``) AND carries no sentence punctuation — a
+        real short section (a proposal recommendation, a one-line disclosure)
+        has a sentence; a heading-table section is long. Only ``toc`` sections
+        are considered (heading/pattern sections measure length differently).
+        """
+        import re
+        from edgar.documents.form_schema import get_form_schema
+
+        if not get_form_schema(self.form).title_based:
+            return sections
+
+        survivors: Dict[str, Section] = {}
+        for name, section in sections.items():
+            if section.detection_method == 'toc':
+                # Cheap length proxy first (TOC sections store text length in
+                # end_offset); only materialize text() for plausible slivers.
+                proxy = section.end_offset - section.start_offset
+                if 0 < proxy < 2 * self._HEADER_ONLY_MAX_LEN:
+                    body = (section.text() or "").strip()
+                    if len(body) < self._HEADER_ONLY_MAX_LEN and not re.search(r'[.!?]', body):
+                        logger.info(
+                            f"Dropping header-only section '{name}' "
+                            f"(body={body!r}) — content absorbed by a sibling"
+                        )
+                        continue
+            survivors[name] = section
+        return survivors
 
     def _apply_size_guardrail(self, sections: Dict[str, Section]) -> Dict[str, Section]:
         """Flag sections whose extracted content size is anomalous for their item.
