@@ -210,11 +210,16 @@ class TestDFINTOC:
         assert result['part_i_item_1'] == 'item_1_business'
         assert result['part_i_item_1a'] == 'item_1a_risk_factors'
 
-    def test_excludes_non_item_links(self):
-        """Signatures and other non-item links should be excluded."""
+    def test_includes_signatures_named_section(self):
+        """Signatures is an allowlisted named section the agent path now keeps.
+
+        Previously the agent parsers dropped it (it carries no Item/Part number),
+        so the agent path lost a section the generic parser found (edgartools-rbsx).
+        The DFIN snippet has no Part headers, so the key is the bare 'signatures'.
+        """
         result = self.analyzer._analyze_dfin_toc(DFIN_TOC_HTML)
-        assert 'signatures' not in result.values()
-        assert not any('signature' in k.lower() for k in result)
+        assert 'signatures' in result
+        assert result['signatures'] == 'signatures'
 
     def test_dfin_links_fallback(self):
         """When no TOC table exists, falls back to scanning all links."""

@@ -60,6 +60,62 @@ class TestParseItemKeywordFallback:
         assert analyzer._parse_item_from_text("Business") is None
 
 
+# --- edgartools-rbsx: agent path no longer drops Item 9C / Signatures ---------
+
+# Minimal Workiva-style TOC: five normal split-cell item rows (enough item links
+# for the link-based TOC finder), plus the two rows the agent path used to drop —
+# a 9C row whose "Item 9C." label is PLAIN TEXT (only the title and page are
+# links, so the href-grouped text lacks the number) and a bare "Part IV" header
+# followed by a numberless "Signatures" row.
+WORKIVA_9C_SIG_HTML = """
+<html><body>
+<div>TABLE OF CONTENTS</div>
+<table>
+<tr><td><a href="#a13">Item 1.</a></td><td><a href="#a13">Business</a></td><td><a href="#a13">1</a></td></tr>
+<tr><td><a href="#a52">Item 1A.</a></td><td><a href="#a52">Risk Factors</a></td><td><a href="#a52">5</a></td></tr>
+<tr><td><a href="#a70">Item 1B.</a></td><td><a href="#a70">Unresolved Staff Comments</a></td><td><a href="#a70">15</a></td></tr>
+<tr><td><a href="#a94">Item 7.</a></td><td><a href="#a94">MD&amp;A</a></td><td><a href="#a94">20</a></td></tr>
+<tr><td><a href="#a175">Item 8.</a></td><td><a href="#a175">Financial Statements</a></td><td><a href="#a175">30</a></td></tr>
+<tr><td>Item 9C.</td><td><a href="#a235">Disclosure Regarding Foreign Jurisdictions that Prevent Inspections</a></td><td><a href="#a235">170</a></td></tr>
+<tr><td colspan="3">Part IV</td></tr>
+<tr><td><a href="#a265">Signatures</a></td><td><a href="#a265">177</a></td></tr>
+</table>
+<div id="a13">Item 1. Business</div>
+<div id="a52">Item 1A. Risk Factors</div>
+<div id="a70">Item 1B. Unresolved Staff Comments</div>
+<div id="a94">Item 7. MD&A</div>
+<div id="a175">Item 8. Financial Statements</div>
+<div id="a235">Item 9C. Disclosure Regarding Foreign Jurisdictions that Prevent Inspections</div>
+<div id="a265">Signatures</div>
+</body></html>
+"""
+
+
+class TestRbsxNamedSectionAndRowFallback:
+    """Agent path keeps Item 9C (plain-text label) and Signatures (named section)."""
+
+    def test_signatures_named_section_resolves(self):
+        analyzer = TOCAnalyzer(form="10-K")
+        assert analyzer._parse_item_from_text("Signatures") == "signatures"
+
+    def test_item_label_only_row_does_not_invent_a_section(self):
+        """A bare title with no number and no allowlist entry still stays None."""
+        analyzer = TOCAnalyzer(form="10-K")
+        assert analyzer._parse_item_from_text(
+            "Disclosure Regarding Foreign Jurisdictions that Prevent Inspections"
+        ) is None
+
+    def test_workiva_recovers_9c_from_plain_text_label(self):
+        """Item 9C's number lives in a non-link cell; recovered from row text."""
+        result = TOCAnalyzer(form="10-K")._analyze_workiva_toc(WORKIVA_9C_SIG_HTML)
+        assert result.get("part_ii_item_9c") == "a235"
+
+    def test_workiva_recovers_signatures_under_part_iv(self):
+        """A text-only 'Part IV' header gives the numberless Signatures its part."""
+        result = TOCAnalyzer(form="10-K")._analyze_workiva_toc(WORKIVA_9C_SIG_HTML)
+        assert result.get("part_iv_signatures") == "a265"
+
+
 @pytest.mark.network
 @pytest.mark.vcr
 def test_allstate_2026_10k_item_1_present():
@@ -88,3 +144,19 @@ def test_allstate_2026_10k_item_1_present():
     # fallback.
     assert obj.business is not None
     assert len(obj.business) == 59_282
+
+    # edgartools-rbsx: the Workiva agent TOC parser is now a strict superset of
+    # the generic parser. It previously dropped Item 9C (whose "Item 9C." label
+    # is plain text, not a link) and Signatures (a numberless named section).
+    # Assert mapping parity — identical anchors, nothing the generic path finds
+    # is lost — and that Item 9C reaches obj.items. Reuses this test's cassette.
+    from edgar.documents.utils.toc_analyzer import TOCAnalyzer
+
+    html = filing.html()
+    analyzer = TOCAnalyzer(form="10-K")
+    generic = analyzer.analyze_toc_structure(html)
+    workiva = analyzer.analyze_toc_structure(html, agent='Workiva')
+    assert workiva.get('part_ii_item_9c') == generic['part_ii_item_9c']
+    assert workiva.get('part_iv_signatures') == generic['part_iv_signatures']
+    assert set(generic) - set(workiva) == set()
+    assert "Item 9C" in obj.items

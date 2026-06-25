@@ -593,6 +593,15 @@ class TOCAnalyzer:
         if matched:
             return matched
 
+        # Allowlisted named sections (Signatures) carry no Item/Part number but
+        # are real, retrievable sections that the generic parser recognizes via
+        # _is_known_named_section. Without this the agent parsers silently drop
+        # them, so the agent path loses part_iv_signatures the generic path finds
+        # (edgartools-rbsx). Normalize to the lowercase allowlist token so
+        # _make_section_key yields the same key as the generic parser.
+        if self._is_known_named_section(text):
+            return text.strip().lower()
+
         return None
 
     def _item_from_anchor(self, anchor_id: str) -> Optional[str]:
@@ -792,8 +801,17 @@ class TOCAnalyzer:
             rows = toc_table.xpath('.//tr')
 
             for row in rows:
+                row_text = (row.text_content() or '').strip()
                 links = row.xpath('.//a[@href]')
                 if not links:
+                    # A text-only row may be a bare "PART IV" header carrying no
+                    # link. Track it so a numberless named section that follows
+                    # (Signatures) inherits the right Part context (edgartools-rbsx);
+                    # numbered 10-K items infer their Part from the item number, so
+                    # this only changes sections that have no number to infer from.
+                    part = self._parse_item_from_text(row_text)
+                    if part and part.startswith('Part'):
+                        current_part = part
                     continue
 
                 # Group links by href
@@ -825,6 +843,18 @@ class TOCAnalyzer:
 
                     # Try to parse an item/part name from the combined text
                     parsed = self._parse_item_from_text(combined)
+
+                    # Workiva sometimes renders the "Item N." label as plain
+                    # (non-link) cell text while only the title and page number
+                    # are links, so the href-grouped text carries the title alone
+                    # ("Disclosure Regarding Foreign Jurisdictions …") with no
+                    # item marker. When the row holds a single anchor, recover the
+                    # number from the full row text, which still reads "Item 9C.
+                    # <title>" (edgartools-rbsx). Guarded to single-anchor rows so
+                    # a multi-item row can't mis-attribute one row's number.
+                    if not parsed and len(href_order) == 1:
+                        parsed = self._parse_item_from_text(row_text)
+
                     if not parsed:
                         continue
 
