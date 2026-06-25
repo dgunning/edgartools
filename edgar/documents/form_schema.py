@@ -218,7 +218,11 @@ _TEN_K_SIZE_BANDS = (
     ("7",  11_440, 457_616),    # MD&A
     ("8",  26_136, 1_045_472),  # Financial Statements (large-cap; see caveat)
     ("9A", 791,    31_640),     # Controls and Procedures
-    ("16", 410,    16_400),     # Form 10-K Summary / other
+    ("16", 0,      16_400),     # Form 10-K Summary — optional, usually "None.";
+                                # no undersize floor (a tiny body is correct, not
+                                # truncated), high guard kept for over-capture.
+                                # Floor was an artifact of Item 16 absorbing the
+                                # signatures block before edgartools-nqzc split it.
 )
 _TEN_Q_SIZE_BANDS = (
     ("1", 18_009, 720_376),     # Financial Statements

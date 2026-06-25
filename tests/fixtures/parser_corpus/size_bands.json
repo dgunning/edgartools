@@ -124,9 +124,10 @@
         "min": 1281,
         "p50": 2050,
         "max": 23099,
-        "low_flag": 410,
+        "low_flag": 0,
         "high_flag": 16400,
-        "enforce": true
+        "enforce": true,
+        "note": "low_flag dropped to 0 (edgartools-nqzc): Item 16 is optional/usually None; min/p50 reflect pre-split over-capture of the signatures block."
       },
       "1A": {
         "n": 24,
