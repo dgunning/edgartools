@@ -100,7 +100,7 @@ def _load_class(mod_name: str, class_name: str):
     return getattr(module, class_name, None)
 
 
-def _classify(klass, name: str) -> str:
+def _classify_one(klass, name: str) -> str:
     """Resolve ``name`` on ``klass`` -> 'property' | 'method' | 'attr' | 'missing'.
 
     'attr' covers instance attributes (dataclass fields, ``__init__`` parameters,
@@ -131,6 +131,38 @@ def _classify(klass, name: str) -> str:
     for base in inspect.getmro(klass):
         if name in getattr(base, "__annotations__", {}):
             return "attr"
+    return "missing"
+
+
+def _all_subclasses(klass) -> list:
+    """Every transitive subclass of ``klass`` currently loaded."""
+    seen: list = []
+    stack = list(klass.__subclasses__())
+    while stack:
+        sub = stack.pop()
+        if sub in seen:
+            continue
+        seen.append(sub)
+        stack.extend(sub.__subclasses__())
+    return seen
+
+
+def _classify(klass, name: str) -> str:
+    """Resolve ``name``, treating a mixin's hints as the concrete host's API.
+
+    ``to_context()`` may live on a render *mixin* while the attributes it
+    documents are supplied by the concrete subclass that inherits it
+    (e.g. ``FormCRenderMixin`` -> ``FormC``). Classify against the defining
+    class first, then fall back to its subclasses before declaring a reference
+    dead, so the legitimate mixin pattern isn't a false positive.
+    """
+    kind = _classify_one(klass, name)
+    if kind != "missing":
+        return kind
+    for sub in _all_subclasses(klass):
+        sub_kind = _classify_one(sub, name)
+        if sub_kind != "missing":
+            return sub_kind
     return "missing"
 
 
