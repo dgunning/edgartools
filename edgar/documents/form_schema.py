@@ -849,8 +849,12 @@ _DEF14A_SECTION_PATTERNS = {
         ('^Related\\s+Part(?:y|ies)', 'Related Party Transactions'),
     ),
     'stockholder_proposals': (
-        ('^(?:STOCKHOLDER|SHAREHOLDER)\\s+PROPOSALS?', 'Stockholder Proposals'),
-        ('^(?:Stockholder|Shareholder)\\s+Proposals?', 'Stockholder Proposals'),
+        # Allow an optional "Proposal Nos. 5-8" group prefix: filers fuse the
+        # proposal-number tab and the section title into one TOC entry
+        # ("PROPOSAL NOs. 5- Shareholder Proposals"), which the plural "NOs."
+        # keeps out of the voting_proposals "Proposal N" pattern (edgartools-zas6).
+        ('^(?:PROPOSALS?\\s+NOS?\\.?[\\s\\d.,&–—-]*)?(?:STOCKHOLDER|SHAREHOLDER)\\s+PROPOSALS?', 'Stockholder Proposals'),
+        ('^(?:Proposals?\\s+Nos?\\.?[\\s\\d.,&–—-]*)?(?:Stockholder|Shareholder)\\s+Proposals?', 'Stockholder Proposals'),
     ),
     'general_information': (
         ('^GENERAL\\s+INFORMATION', 'General Information'),

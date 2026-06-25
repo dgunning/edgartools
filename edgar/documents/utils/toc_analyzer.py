@@ -319,6 +319,56 @@ class TOCAnalyzer:
             cur = cur.getparent()
         return total
 
+    _TOC_FONT_WEIGHT = re.compile(r'font-weight\s*:\s*(bold|bolder|\d{3})')
+    _TOC_BACKGROUND = re.compile(r'background(?:-color)?\s*:\s*([^;]+)')
+
+    @classmethod
+    def _is_divider(cls, el) -> bool:
+        """Whether a TOC entry is rendered as a section-divider *tab* — bold text
+        on a filled background.
+
+        Such an entry heads the proxy outline regardless of indentation:
+        JPMorgan's otherwise-flat TOC marks its parts ("Corporate governance",
+        "Executive compensation", "Audit matters") this way while nested
+        subsections stay weight-400 with no fill, the only depth signal it carries
+        (edgartools-zas6). Both bold AND a non-white background are required so
+        striped rows and page chrome don't qualify (verified zero false positives
+        on KO/AAPL/WMT)."""
+        bold = bg = False
+        cur = el
+        for _ in range(5):
+            if cur is None:
+                break
+            style = (cur.get('style') or '').lower()
+            if style:
+                if not bold:
+                    m = cls._TOC_FONT_WEIGHT.search(style)
+                    if m and (m.group(1) in ('bold', 'bolder') or
+                              (m.group(1).isdigit() and int(m.group(1)) >= 700)):
+                        bold = True
+                if not bg:
+                    b = cls._TOC_BACKGROUND.search(style)
+                    if b:
+                        val = b.group(1).strip()
+                        if (val not in ('transparent', 'none', 'white')
+                                and not val.startswith('#fff')):
+                            bg = True
+            cur = cur.getparent()
+        return bold and bg
+
+    # A divider tab outranks any indentation, so its depth is pushed below every
+    # normal entry's; only another divider (or the document end) can bound it.
+    _DIVIDER_BONUS = 1000.0
+
+    @classmethod
+    def _toc_depth(cls, el) -> float:
+        """A TOC entry's outline depth: its indentation, lifted above all normal
+        entries when it is a section-divider tab (lower number = higher in the
+        outline). A section is bounded at the next entry of equal-or-lower depth,
+        so a divider bounds only at the next divider and its nested subsections
+        are absorbed (edgartools-gb99 + zas6)."""
+        return cls._toc_indent(el) - (cls._DIVIDER_BONUS if cls._is_divider(el) else 0.0)
+
     def _analyze_title_toc(self, html_content: str, tree=None) -> Dict[str, str]:
         """TOC parser for title-based forms (424B prospectuses, llmp.3).
 
@@ -351,8 +401,9 @@ class TOCAnalyzer:
             # source position (the index of the <a> element) so the authoritative
             # TOC can be located by where the links physically sit.
             positions: Dict[str, int] = {}
-            # (src_idx, anchor_id, matched_key_or_None, element, is_page_number)
-            internal_links: List[Tuple[int, str, Optional[str], object, bool]] = []
+            # Raw internal anchor links in document order, before fragment
+            # coalescing: (src_idx, anchor_id, element, title_text, is_page_number).
+            raw_links: List[Tuple[int, str, object, str, bool]] = []
             for idx, el in enumerate(tree.iter()):
                 eid = el.get('id')
                 if eid and eid not in positions:
@@ -364,12 +415,57 @@ class TOCAnalyzer:
                     href = (el.get('href') or '').strip()
                     if href.startswith('#'):
                         raw = (el.text_content() or '').strip()
-                        # Drop a trailing dot-leader/page-number so "Use of
-                        # Proceeds 12" still matches the heading-anchored regexes.
-                        text = self._TOC_PAGE_TAIL.sub('', raw).strip() or raw if raw else ''
-                        key = self.schema.match_section_pattern(text) if text else None
-                        is_pg = (not text) or bool(self._TOC_PAGE_NUMBER.match(text))
-                        internal_links.append((idx, href[1:], key, el, is_pg))
+                        # Keep the raw text; page-number handling happens after
+                        # coalescing so a proposal number ("PROPOSAL NO. 1") isn't
+                        # mistaken for a trailing page reference per-fragment.
+                        is_pg = (not raw) or bool(self._TOC_PAGE_NUMBER.match(raw))
+                        raw_links.append((idx, href[1:], el, raw, is_pg))
+
+            # Coalesce fragmented entries: a single logical TOC entry is often
+            # split across several <a> elements that all target the same anchor —
+            # JPMorgan renders "PROPOSAL 1:" / "Election of directors" / the page
+            # number as three separate links and even splits a word ("E" +
+            # "ngagement"). Group consecutive links sharing an anchor id, join
+            # their title fragments, and match the vocabulary once on the whole
+            # title, so a fragment never keys a section on its own and the entry
+            # carries one position and one depth (edgartools-zas6).
+            # entry = (first_src, anchor_id, key, depth, is_page_only)
+            entries: List[Tuple[int, str, Optional[str], float, bool]] = []
+            i, n = 0, len(raw_links)
+            while i < n:
+                j = i
+                anchor_id = raw_links[i][1]
+                while j < n and raw_links[j][1] == anchor_id:
+                    j += 1
+                group = raw_links[i:j]
+                i = j
+                # Drop page-number / empty fragments at the LEADING and TRAILING
+                # edges of the entry (running-header digits like JPMorgan's
+                # "202"/"6" and the dot-leader page reference), then join the core
+                # fragments. A numeric fragment that survives in the MIDDLE is a
+                # proposal number ("PROPOSAL NO." "1" "Election of directors"), not
+                # a page reference, and must stay or the "Proposal N" vocabulary no
+                # longer matches (the WMT voting_proposals failure, edgartools-zas6).
+                texts = [t for _s, _a, _e, t, _pg in group]
+                pgs = [pg for _s, _a, _e, _t, pg in group]
+                lo_k, hi_k = 0, len(texts)
+                while lo_k < hi_k and pgs[lo_k]:
+                    lo_k += 1
+                while hi_k > lo_k and pgs[hi_k - 1]:
+                    hi_k -= 1
+                title = ' '.join(t for t in texts[lo_k:hi_k] if t).strip()
+                # A single-fragment entry can still carry an inline trailing page
+                # number ("Use of Proceeds 12"); strip it for matching.
+                title = self._TOC_PAGE_TAIL.sub('', title).strip() or title
+                key = self.schema.match_section_pattern(title) if title else None
+                # Depth from the non-page fragments only: a page-number link is
+                # rendered flush (indent 0) and would otherwise drag every entry's
+                # depth to zero, erasing the indentation hierarchy.
+                title_els = [e for _s, _a, e, _t, pg in group if not pg] \
+                    or [e for _s, _a, e, _t, _pg in group]
+                depth = min(self._toc_depth(e) for e in title_els)
+                is_pg_only = all(pg for _s, _a, _e, _t, pg in group)
+                entries.append((group[0][0], anchor_id, key, depth, is_pg_only))
 
             # Locate the authoritative TOC: the body cross-references / back-links
             # a section emits ("return to contents") also match the title
@@ -377,11 +473,11 @@ class TOCAnalyzer:
             # as boundaries cuts every section to a sliver (the Apple/JPM proxy
             # failure: two TOC-like link sets whose targets differ by one node).
             # The real TOC is the densest contiguous run of vocabulary-matching
-            # links; scattered body back-links form sparse runs with few distinct
+            # entries; scattered body back-links form sparse runs with few distinct
             # keys. Pick the richest run and restrict BOTH key matching and
             # boundary collection to its source-position span — a single-TOC
             # filing (prospectus/S-1) has one run, so its behaviour is unchanged.
-            matched_src = [(src, anc, key) for src, anc, key, _el, _pg in internal_links if key]
+            matched_src = [(src, anc, key) for src, anc, key, _d, _pg in entries if key]
             toc_lo, toc_hi = self._authoritative_toc_span(matched_src)
             if toc_lo is None:
                 return mapping
@@ -389,72 +485,68 @@ class TOCAnalyzer:
             # Anchor selection: a key can appear several times in one proxy TOC —
             # a shallow top-level entry plus deeper sub-entry / summary mentions
             # (Apple lists "Executive Compensation" inside the Proxy Summary
-            # before the real section). Prefer the SHALLOWEST-indented match so a
+            # before the real section). Prefer the SHALLOWEST-depth match so a
             # section keys to its real body, not a summary cross-reference; ties
             # keep document order (first wins). On a flat TOC every match shares
-            # one indent, so this is exactly first-occurrence-wins (edgartools-gb99).
+            # one depth, so this is exactly first-occurrence-wins (edgartools-gb99).
             matched: Dict[str, str] = {}          # key -> chosen anchor_id
-            matched_level: Dict[str, float] = {}  # key -> that anchor's indent depth
-            for src, anchor_id, key, el, _pg in internal_links:
+            matched_depth: Dict[str, float] = {}  # key -> that anchor's outline depth
+            for src, anchor_id, key, depth, _pg in entries:
                 if key is None or not (toc_lo <= src <= toc_hi):
                     continue
                 if anchor_id not in positions or not find_anchor_targets(tree, anchor_id):
                     continue
-                level = self._toc_indent(el)
-                if key not in matched or level < matched_level[key] - self._TOC_INDENT_TOL:
+                if key not in matched or depth < matched_depth[key] - self._TOC_INDENT_TOL:
                     matched[key] = anchor_id
-                    matched_level[key] = level
+                    matched_depth[key] = depth
 
             if not matched:
                 return mapping
 
-            # Boundary levels: every TOC entry's body position is a potential
-            # section end, tagged with its indentation depth. A bare page-number
-            # link ("8") shares its title's target, so it still marks a boundary
-            # position but must not set the depth — prefer a real title link's
-            # level at each position. Restricted to links inside the TOC span,
-            # which excludes the body back-links that previously sliced sections
-            # to nothing.
-            boundary_level: Dict[int, float] = {}
-            boundary_titled: Dict[int, bool] = {}
-            for src, anchor_id, _key, el, is_pg in internal_links:
+            # Boundary depths: every TOC entry's body position is a potential
+            # section end, tagged with its outline depth. Coalescing has already
+            # folded each entry's page number into its title, so a page-only entry
+            # (rare) only fills a position no titled entry claimed. Restricted to
+            # entries inside the TOC span, which excludes the body back-links that
+            # previously sliced sections to nothing.
+            boundary_depth: Dict[int, float] = {}
+            boundary_pg: Dict[int, bool] = {}
+            pos_to_anchor: Dict[int, str] = {}
+            for src, anchor_id, _key, depth, is_pg_only in entries:
                 if not (toc_lo <= src <= toc_hi):
                     continue
                 pos = positions.get(anchor_id)
                 if pos is None:
                     continue
-                if pos in boundary_level and (boundary_titled[pos] or is_pg):
+                pos_to_anchor.setdefault(pos, anchor_id)
+                if pos in boundary_depth and (not boundary_pg[pos] or is_pg_only):
                     continue
-                boundary_level[pos] = self._toc_indent(el)
-                boundary_titled[pos] = not is_pg
-            sorted_boundaries = sorted(boundary_level)
+                boundary_depth[pos] = depth
+                boundary_pg[pos] = is_pg_only
+            sorted_boundaries = sorted(boundary_depth)
 
             # Order detected sections by body position; bound each at the next TOC
-            # entry that is NOT one of its own descendants — the next boundary at
-            # the same-or-shallower indentation (a sibling), or the next entry that
-            # itself starts a detected section. Deeper sub-entries in between are
-            # children and are absorbed, so a section is no longer sliced to a
-            # sliver by its own audit/compensation sub-headings (the KO
-            # audit_matters=13-char failure, edgartools-gb99). On a flat
-            # single-level TOC every entry is a sibling, so this stays "bound at
-            # the next entry" — prospectus/S-1 behaviour is unchanged.
-            pos_to_anchor = {positions[a]: a for a in matched.values()}
-            chosen_starts = set(pos_to_anchor)
+            # entry that is NOT one of its own descendants — the next entry at the
+            # same-or-lower outline depth (a sibling-or-shallower). Deeper entries
+            # in between are children and are absorbed, so a section is no longer
+            # sliced to a sliver by its own audit/compensation sub-headings (the KO
+            # audit_matters=13-char failure, gb99) nor cut by a nested proposal
+            # under a divider tab (the JPM corporate_governance=39-char failure,
+            # zas6). On a flat single-level TOC every entry is a sibling, so this
+            # stays "bound at the next entry" — prospectus/S-1 behaviour unchanged.
             ordered = sorted(matched.items(), key=lambda kv: positions[kv[1]])
             for rank, (key, anchor_id) in enumerate(ordered):
                 mapping[key] = anchor_id
                 self._title_section_order[key] = rank
                 start = positions[anchor_id]
-                level = matched_level[key]
+                depth = matched_depth[key]
                 nxt = next(
                     (p for p in sorted_boundaries
-                     if p > start and (p in chosen_starts
-                                       or boundary_level[p] <= level + self._TOC_INDENT_TOL)),
+                     if p > start and boundary_depth[p] <= depth + self._TOC_INDENT_TOL),
                     None,
                 )
-                # The next boundary may coincide with the next detected section's
-                # own anchor; resolve to that anchor id when known, else find the
-                # id occupying that position.
+                # Resolve the boundary position back to the entry anchor sitting
+                # there, else find the id occupying that position.
                 self._title_next_anchor[key] = (
                     pos_to_anchor.get(nxt) or self._id_at_position(positions, nxt)
                     if nxt is not None else None
