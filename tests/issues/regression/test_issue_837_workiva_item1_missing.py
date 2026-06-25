@@ -169,3 +169,10 @@ def test_allstate_2026_10k_item_1_present():
     sig_text = signatures.text()
     assert len(sig_text) > 10_000
     assert "Pursuant to the requirements" in sig_text
+
+    # edgartools-nqzc Layer 1/2: the named-section API surface.
+    assert signatures.kind == "named"
+    assert secs.named("signatures") is signatures        # typed accessor
+    assert obj.signatures is not None                    # report convenience prop
+    assert "Pursuant to the requirements" in obj.signatures
+    assert "Signatures" not in obj.items                 # not an SEC Item

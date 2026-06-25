@@ -102,6 +102,16 @@ class Section:
     _html_source: Optional[str] = field(default=None, repr=False)  # HTML source for TOC table extraction
     _section_extractor: Optional[Any] = field(default=None, repr=False)  # Section extractor for TOC sections
 
+    @property
+    def kind(self) -> str:
+        """Classify the section: ``'item'`` for a numbered SEC item, else ``'named'``.
+
+        Named sections (e.g. Signatures) carry no Item number. This lets callers
+        iterating ``document.sections`` tell a real Item from a named section
+        without string-matching the key.
+        """
+        return "item" if self.item else "named"
+
     def text(self, **kwargs) -> str:
         """Extract text from section."""
         # If we have a text extractor callback (TOC-based sections), use it
@@ -562,6 +572,28 @@ class Sections(Dict[str, Section]):
                     # Part matches
                     return section
 
+        return None
+
+    def named(self, name: str) -> Optional[Section]:
+        """Get a non-item *named* section (e.g. "Signatures") by name.
+
+        The companion to :meth:`get_item` for sections that carry no SEC Item
+        number. Matches the name token case-insensitively, ignoring any
+        ``part_<roman>_`` prefix, so ``named("signatures")`` resolves
+        ``part_iv_signatures`` (or a bare ``signatures`` key). Returns ``None``
+        if no named section matches.
+
+        Examples:
+            >>> sections.named("signatures")          # the Signatures Section
+            >>> sections.named("Signatures").text()   # the signature block text
+        """
+        target = name.strip().lower().replace(" ", "_")
+        for key, section in self.items():
+            if section.kind != "named":
+                continue
+            token = re.sub(r'^part_[ivxlcdm]+_', '', key.lower())
+            if token == target:
+                return section
         return None
 
     def get_part(self, part: str) -> Dict[str, Section]:

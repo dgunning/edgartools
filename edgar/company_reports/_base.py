@@ -187,6 +187,22 @@ class CompanyReport:
                     items.append(f"Item {item_num}")
         return items
 
+    @property
+    def signatures(self) -> Optional[str]:
+        """The Signatures section text, if present.
+
+        Signatures is a *named* (non-Item) section, so it does not appear in
+        :attr:`items`; this is its convenience accessor, parallel to the Item
+        properties (``.business``, ``.risk_factors``, ...). Returns ``None`` when
+        the filing exposes no detectable Signatures section.
+
+        Examples:
+            >>> tenk.signatures[:60]
+            'Pursuant to the requirements of Section 13 or 15(d) ...'
+        """
+        section = self.document.sections.named("signatures")
+        return section.text() if section else None
+
     def __getitem__(self, item_or_part: str):
         """
         Get item or part text from the filing.
