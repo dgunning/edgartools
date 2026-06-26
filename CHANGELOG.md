@@ -9,8 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Semantic section extraction for proxy statements** — `ProxyStatement.sections` (a dict of named `ProxySection`s) and `ProxyStatement.section(name)` expose Schedule 14A / Reg S-K sections (`proxy_summary`, `corporate_governance`, `compensation_discussion_and_analysis`, `pay_versus_performance`, `audit_matters`, `security_ownership`, …) as section-scoped text. DEF 14A / PRE 14A now route through the title-based section engine; sections are labelled when heading/TOC anchors resolve and fall back to a single `full` section otherwise (no content loss). (edgartools-x341, GH #867)
+- **Semantic section extraction for registration statements and prospectuses** — `RegistrationS1.sections` / `Prospectus424B.sections` and `.section(name)` expose Reg S-K sections (`prospectus_summary`, `risk_factors`, `use_of_proceeds`, `mda`, `business`, `management`, `underwriting`, …) over the shared title-based engine, same labelled-or-`full` contract. (edgartools-ybth, GH #866)
+- **Named-section API surface on `Document`** — section objects now carry a `kind`, are reachable via `named()`, and named sections such as `.signatures` surface in `document.sections`. (edgartools-nqzc)
 - **Form D related-person relationships exposed on `Person`** — `Person.relationships` (e.g. `["Executive Officer", "Director", "Promoter"]` from `<relatedPersonRelationshipList>`) and `Person.relationship_clarification`. The relationship is the analytically meaningful part of the related-persons section; previously only names and addresses were surfaced. Also shown in `FormD` rich rendering and `to_context()`. (edgartools-0dpz, GH #874)
 - **13F amendment type exposed on `ThirteenF`** — `is_amendment`, `amendment_type` (`"RESTATEMENT"` | `"NEW HOLDINGS"` | `None`), `amendment_number`, and full `amendment_info` (confidential-treatment fields). The distinction is load-bearing for correctness: a `NEW HOLDINGS` 13F-HR/A discloses only previously-confidential positions and must be *unioned* with the original, whereas a `RESTATEMENT` *replaces* it — superseding the original by a `NEW HOLDINGS` amendment silently drops the real portfolio. (edgartools-preg, GH #872)
+
+### Changed
+
+- **Offerings package reorganized** into `crowdfunding` / `exempt` / `prospectus` sub-packages (e.g. Form C, Form D, and the 424B/S-1 prospectus surfaces each split into their own modules). Existing `from edgar.offerings.* import ...` paths keep resolving via back-compat shims. (edgartools-n094)
+
+### Fixed
+
+- **`ProxyStatement.voting_proposals` no longer emits text fragments as proposals on merger proxies** — on some DEFM14A filings the extractor lifted numbered items out of an "Incorporation by Reference" / exhibit-list section (e.g. Veeco showed proposals numbered 2 and 3 whose text was 8-K item references). Proposal extraction is now anchored to the proxy's actual matters-to-be-voted-on structure. (edgartools-7pga, GH #875)
+- **8-K item sections no longer truncated at an internal bold sub-heading** — `_find_section_end` only closed a section at a header that is a real section boundary (Item/PART/SIGNATURE/EXHIBIT/…); internal bold sub-headings (e.g. "Adoption of Fiscal Year 2027 Variable Compensation Plan") previously cut Item 5.02 short, dropping the item body. (edgartools-koq3, GH #871)
+- **10-K MD&A (Item 7) recovered when incorporated by reference into an untitled "Financial Section"** — deferred-heading re-attribution plus supplement-start detection recover the MD&A and financial statements for Workiva-style layouts (XOM, JPM, Chevron), without sweeping the exhibit index into Item 7. (edgartools-rv86 / edgartools-gegs, GH #873)
+- **`RegistrationS1.underwriting.lead_manager` no longer returns garbage table text** — a "Shares Eligible for Future Sale" lock-up table was misclassified as an allocation table, leaking the row label "Earliest Date Available for Sale in the Public Market" as the lead underwriter; names are now validated at the source and in the S-1 consumer (ABNB resolves to "Morgan Stanley & Co. LLC"). (GH #868)
+- **Mixed primary+secondary IPO 424B4 no longer misclassified as `PIPE_RESALE`** — the classifier now overrides to `IPO` inside the PIPE-resale branch when a 424B1/424B4 asserts its own offering is an IPO. (GH #869)
+- **Agent (Workiva) TOC parser now recovers Item 9C and Signatures** — keys the generic parser found but the agent path missed on some 10-Ks. (edgartools-rbsx, GH #837 follow-up)
 
 ## [5.39.1] - 2026-06-22
 
