@@ -354,7 +354,25 @@ class FormD:
                 state_or_country_description=child_text(related_person_address_el, "stateOrCountryDescription"),
                 zipcode=child_text(related_person_address_el, "zipCode")
             )
-            related_persons.append(Person(first_name=first_name, last_name=last_name, address=address))
+            # Related-person relationship(s): Executive Officer / Director / Promoter,
+            # plus an optional free-text clarification (GH #874).
+            relationships = []
+            relationship_list_el = related_person_el.find("relatedPersonRelationshipList")
+            if isinstance(relationship_list_el, Tag):
+                relationships = [
+                    rel.get_text(strip=True)
+                    for rel in relationship_list_el.find_all("relationship")
+                    if rel.get_text(strip=True)
+                ]
+            clarification = child_text(related_person_el, "relationshipClarification") or None
+
+            related_persons.append(Person(
+                first_name=first_name,
+                last_name=last_name,
+                address=address,
+                relationships=relationships,
+                relationship_clarification=clarification,
+            ))
 
         # Get the offering data
         offering_data = OfferingData.from_xml(root.find("offeringData"))
@@ -473,7 +491,8 @@ class FormD:
             for p in self.related_persons[:5]:
                 name = f"{p.first_name} {p.last_name}".strip()
                 if name:
-                    lines.append(f"  {name}")
+                    rels = ", ".join(getattr(p, "relationships", []) or [])
+                    lines.append(f"  {name}" + (f" — {rels}" if rels else ""))
 
         # Sales compensation
         if od.sales_compensation_recipients:
@@ -513,9 +532,11 @@ class FormD:
         # related person table
         related_persons_table = Table(box=box.SIMPLE)
         related_persons_table.add_column("related person", style=highlight_col_style)
+        related_persons_table.add_column("relationship")
 
         for index, person in enumerate(self.related_persons):
-            related_persons_table.add_row(f"{person.first_name} {person.last_name}")
+            relationships = ", ".join(getattr(person, "relationships", []) or [])
+            related_persons_table.add_row(f"{person.first_name} {person.last_name}", relationships)
 
         # Sales compensation recipients
         sales_recipients_table = Table(box=box.SIMPLE)

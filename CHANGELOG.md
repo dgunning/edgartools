@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Form D related-person relationships exposed on `Person`** — `Person.relationships` (e.g. `["Executive Officer", "Director", "Promoter"]` from `<relatedPersonRelationshipList>`) and `Person.relationship_clarification`. The relationship is the analytically meaningful part of the related-persons section; previously only names and addresses were surfaced. Also shown in `FormD` rich rendering and `to_context()`. (edgartools-0dpz, GH #874)
 - **13F amendment type exposed on `ThirteenF`** — `is_amendment`, `amendment_type` (`"RESTATEMENT"` | `"NEW HOLDINGS"` | `None`), `amendment_number`, and full `amendment_info` (confidential-treatment fields). The distinction is load-bearing for correctness: a `NEW HOLDINGS` 13F-HR/A discloses only previously-confidential positions and must be *unioned* with the original, whereas a `RESTATEMENT` *replaces* it — superseding the original by a `NEW HOLDINGS` amendment silently drops the real portfolio. (edgartools-preg, GH #872)
 
 ## [5.39.1] - 2026-06-22

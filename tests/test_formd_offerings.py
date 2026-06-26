@@ -37,6 +37,7 @@ def test_parse_offering_xml():
     assert related_person.last_name == "Belldegrun"
     assert related_person.address.state_or_country == "CA"
     assert related_person.address.street2 == "Suite 1370"
+    assert related_person.relationships == ["Executive Officer"]  # GH #874
 
     # Offering data
     assert offering.offering_data.revenue_range == "Decline to Disclose"

@@ -189,10 +189,17 @@ class Person:
     def __init__(self,
                  first_name: str,
                  last_name: str,
-                 address: Optional[Address] = None):
+                 address: Optional[Address] = None,
+                 relationships: Optional[List[str]] = None,
+                 relationship_clarification: Optional[str] = None):
         self.first_name = first_name
         self.last_name = last_name
         self.address: Address = address
+        # Form D related-person relationships, e.g. ["Executive Officer", "Director",
+        # "Promoter"] from <relatedPersonRelationshipList>. Empty for contexts that
+        # don't carry a relationship.
+        self.relationships: List[str] = relationships or []
+        self.relationship_clarification: Optional[str] = relationship_clarification
 
     def __str__(self):
         return f"{self.first_name} {self.first_name}"
