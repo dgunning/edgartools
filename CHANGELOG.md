@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **13F amendment type exposed on `ThirteenF`** — `is_amendment`, `amendment_type` (`"RESTATEMENT"` | `"NEW HOLDINGS"` | `None`), `amendment_number`, and full `amendment_info` (confidential-treatment fields). The distinction is load-bearing for correctness: a `NEW HOLDINGS` 13F-HR/A discloses only previously-confidential positions and must be *unioned* with the original, whereas a `RESTATEMENT` *replaces* it — superseding the original by a `NEW HOLDINGS` amendment silently drops the real portfolio. (edgartools-preg, GH #872)
+
 ## [5.39.1] - 2026-06-22
 
 ### Fixed

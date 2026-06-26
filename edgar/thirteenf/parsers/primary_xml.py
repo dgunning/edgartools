@@ -7,7 +7,15 @@ from decimal import Decimal
 from bs4 import Tag
 
 from edgar._party import Address
-from edgar.thirteenf.models import CoverPage, FilingManager, OtherManager, PrimaryDocument13F, Signature, SummaryPage
+from edgar.thirteenf.models import (
+    AmendmentInfo,
+    CoverPage,
+    FilingManager,
+    OtherManager,
+    PrimaryDocument13F,
+    Signature,
+    SummaryPage,
+)
 from edgar.xmltools import child_text, find_element
 
 __all__ = ['parse_primary_document_xml']
@@ -43,6 +51,27 @@ def parse_primary_document_xml(primary_document_xml: str):
 
     report_calendar_or_quarter = child_text(form_data, "reportCalendarOrQuarter")
     report_type = child_text(cover_page_el, "reportType")
+
+    # Amendment metadata (GH #872). RESTATEMENT replaces the original; NEW HOLDINGS
+    # only adds previously-confidential positions and must be unioned with the original.
+    is_amendment = (child_text(cover_page_el, "isAmendment") or "").strip().lower() == "true"
+    amendment_no_text = child_text(cover_page_el, "amendmentNo")
+    try:
+        amendment_number = int(amendment_no_text) if amendment_no_text else None
+    except ValueError:
+        amendment_number = None
+
+    amendment_info = None
+    amendment_info_el = cover_page_el.find("amendmentInfo")
+    if isinstance(amendment_info_el, Tag):
+        conf_text = child_text(amendment_info_el, "confDeniedExpired")
+        amendment_info = AmendmentInfo(
+            amendment_type=child_text(amendment_info_el, "amendmentType"),
+            conf_denied_expired=(conf_text.strip().lower() == "true") if conf_text else None,
+            date_denied_expired=child_text(amendment_info_el, "dateDeniedExpired"),
+            date_reported=child_text(amendment_info_el, "dateReported"),
+            reason_for_non_confidentiality=child_text(amendment_info_el, "reasonForNonConfidentiality"),
+        )
 
     # Filing Manager
     filing_manager_el = cover_page_el.find("filingManager")
@@ -123,7 +152,10 @@ def parse_primary_document_xml(primary_document_xml: str):
             filing_manager=filing_manager,
             report_calendar_or_quarter=report_calendar_or_quarter,
             report_type=report_type,
-            other_managers=[]  # Deprecated: other_managers now parsed from summaryPage
+            other_managers=[],  # Deprecated: other_managers now parsed from summaryPage
+            is_amendment=is_amendment,
+            amendment_number=amendment_number,
+            amendment_info=amendment_info,
         ),
         signature=signature,
         summary_page=SummaryPage(

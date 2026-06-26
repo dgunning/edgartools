@@ -13,6 +13,7 @@ __all__ = [
     'FilingManager',
     'OtherManager',
     'CoverPage',
+    'AmendmentInfo',
     'SummaryPage',
     'Signature',
     'PrimaryDocument13F',
@@ -171,11 +172,34 @@ class OtherManager:
 
 
 @dataclass(frozen=True)
+class AmendmentInfo:
+    """Amendment metadata from a 13F cover page (<amendmentInfo>).
+
+    ``amendment_type`` is the load-bearing field (GH #872):
+
+    - ``"RESTATEMENT"`` — a full re-filing of the entire holdings report; it
+      *replaces* the original filing.
+    - ``"NEW HOLDINGS"`` — adds only positions previously omitted under
+      confidential treatment and now being disclosed; it must be *combined with*
+      (unioned with) the original and does **not** replace it. Usually paired
+      with ``conf_denied_expired=True``.
+    """
+    amendment_type: Optional[str] = None
+    conf_denied_expired: Optional[bool] = None
+    date_denied_expired: Optional[str] = None
+    date_reported: Optional[str] = None
+    reason_for_non_confidentiality: Optional[str] = None
+
+
+@dataclass(frozen=True)
 class CoverPage:
     report_calendar_or_quarter: str
     report_type: str
     filing_manager: FilingManager
     other_managers: List[OtherManager]
+    is_amendment: bool = False
+    amendment_number: Optional[int] = None
+    amendment_info: Optional[AmendmentInfo] = None
 
 
 @dataclass(frozen=True)
@@ -390,6 +414,55 @@ class ThirteenF:
     @property
     def form(self):
         return self.filing.form
+
+    @property
+    def is_amendment(self) -> bool:
+        """True if this filing is a 13F amendment (e.g. ``13F-HR/A``).
+
+        Reads ``<isAmendment>`` from the cover page when the primary XML is
+        available (2013+); for older TXT-only filings it falls back to the form
+        suffix.
+        """
+        if self.primary_form_information is not None:
+            return self.primary_form_information.cover_page.is_amendment
+        return self.form.endswith("/A")
+
+    @property
+    def amendment_type(self) -> Optional[str]:
+        """The amendment type for a 13F amendment, or ``None``.
+
+        Returns ``"RESTATEMENT"`` or ``"NEW HOLDINGS"`` (GH #872). The
+        distinction is load-bearing for correctness:
+
+        - ``RESTATEMENT`` re-files the entire report and *replaces* the original.
+        - ``NEW HOLDINGS`` adds only previously-confidential positions and must
+          be combined (unioned) with the original — it does **not** replace it.
+          Superseding the original with a ``NEW HOLDINGS`` amendment silently
+          drops the real portfolio.
+
+        Returns ``None`` when this is not an amendment, or when the amendment
+        type is absent (e.g. older TXT-only filings).
+        """
+        info = self.primary_form_information
+        if info is None or info.cover_page.amendment_info is None:
+            return None
+        return info.cover_page.amendment_info.amendment_type
+
+    @property
+    def amendment_number(self) -> Optional[int]:
+        """The amendment sequence number (``<amendmentNo>``), or ``None``."""
+        info = self.primary_form_information
+        if info is None:
+            return None
+        return info.cover_page.amendment_number
+
+    @property
+    def amendment_info(self) -> Optional['AmendmentInfo']:
+        """Full amendment metadata (type, confidential-treatment fields), or ``None``."""
+        info = self.primary_form_information
+        if info is None:
+            return None
+        return info.cover_page.amendment_info
 
     @cached_property
     def infotable_xml(self):
@@ -1311,6 +1384,19 @@ class ThirteenF:
         lines.append(f"CIK: {str(self.filing.cik).zfill(10)}")
         lines.append(f"Filed: {self.filing_date}")
         lines.append(f"Form: {self.form}")
+
+        # Amendment signal (GH #872) — load-bearing for correctness.
+        if self.is_amendment:
+            atype = self.amendment_type
+            if atype == "NEW HOLDINGS":
+                lines.append(
+                    "Amendment: NEW HOLDINGS — adds only previously-confidential positions; "
+                    "UNION with the original filing (does not replace it)."
+                )
+            elif atype == "RESTATEMENT":
+                lines.append("Amendment: RESTATEMENT — full re-file; replaces the original filing.")
+            else:
+                lines.append(f"Amendment: {atype or 'type unknown'}")
 
         # Summary section
         lines.append("")
