@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.40.0] - 2026-06-26
+
+Semantic section extraction reaches proxy statements, registration statements, and prospectuses — `ProxyStatement`, `RegistrationS1`, and `Prospectus424B` now expose Reg S-K sections as section-scoped text over the shared title-based engine. Also adds 13F amendment-type and Form D relationship surfaces, reorganizes the offerings package (with back-compat shims), and fixes a batch of section-boundary and offerings-classification bugs.
+
 ### Added
 
 - **Semantic section extraction for proxy statements** — `ProxyStatement.sections` (a dict of named `ProxySection`s) and `ProxyStatement.section(name)` expose Schedule 14A / Reg S-K sections (`proxy_summary`, `corporate_governance`, `compensation_discussion_and_analysis`, `pay_versus_performance`, `audit_matters`, `security_ownership`, …) as section-scoped text. DEF 14A / PRE 14A now route through the title-based section engine; sections are labelled when heading/TOC anchors resolve and fall back to a single `full` section otherwise (no content loss). (edgartools-x341, GH #867)
