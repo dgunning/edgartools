@@ -463,6 +463,60 @@ class ProxyStatement:
         except Exception:
             return None
 
+    # Semantic Section Text (edgartools-x341 / gh-867)
+    @cached_property
+    def document(self):
+        """Parsed filing :class:`~edgar.documents.Document`.
+
+        Proxies route through the title section engine (DEF 14A / PRE 14A are
+        ``title_based``), so :attr:`sections` exposes the Schedule 14A / Reg S-K
+        semantic sections. Returns ``None`` if the filing has no HTML or parsing
+        fails (the XBRL/HTML-table accessors above remain available).
+        """
+        html = self._filing_html
+        if not html:
+            return None
+        try:
+            from edgar.documents.config import ParserConfig
+            from edgar.documents.parser import HTMLParser
+            return HTMLParser(ParserConfig(form=self._filing.form)).parse(html)
+        except Exception as e:
+            log.debug(f"Proxy document parse failed: {e}")
+            return None
+
+    @property
+    def sections(self):
+        """Semantic proxy sections keyed by Schedule 14A / Reg S-K name.
+
+        Returns a ``Sections`` mapping of section key -> ``Section`` (each with
+        ``.text()`` / ``.markdown()``), e.g. ``proxy_summary``,
+        ``corporate_governance``, ``compensation_discussion_and_analysis``,
+        ``pay_versus_performance``, ``audit_matters``, ``security_ownership``,
+        ``voting_proposals``. Labeled sections are emitted when the proxy's TOC
+        anchors resolve; a flat proxy with no machine-readable TOC may yield an
+        empty mapping (tracked as edgartools-bpab).
+
+        Examples:
+            >>> proxy = filing.obj()
+            >>> list(proxy.sections)
+            ['proxy_summary', 'corporate_governance', ...]
+            >>> proxy.sections['compensation_discussion_and_analysis'].text()[:40]
+            'Compensation Discussion and Analysis ...'
+        """
+        doc = self.document
+        return doc.sections if doc is not None else {}
+
+    def section(self, key: str):
+        """A single proxy section by key, or ``None`` if absent.
+
+        Convenience for ``proxy.sections.get(key)``.
+
+        Examples:
+            >>> cda = proxy.section('compensation_discussion_and_analysis')
+            >>> cda.text() if cda else None
+        """
+        return self.sections.get(key) if self.sections else None
+
     @cached_property
     def voting_proposals(self) -> List['VotingProposal']:
         """
@@ -782,6 +836,8 @@ class ProxyStatement:
                 return "\n".join(lines)
             lines.append("")
             lines.append("AVAILABLE ACTIONS:")
+            lines.append("  .sections                Semantic proxy sections (text, no XBRL needed)")
+            lines.append("  .voting_proposals        Voting proposals with board recommendations")
             lines.append("  .has_xbrl                Whether XBRL data is present")
             return "\n".join(lines)
 
@@ -841,6 +897,7 @@ class ProxyStatement:
         # Available actions
         lines.append("")
         lines.append("AVAILABLE ACTIONS:")
+        lines.append("  .sections                Semantic proxy sections (.text()/.markdown())")
         lines.append("  .executive_compensation  Multi-year comp DataFrame")
         lines.append("  .pay_vs_performance      Pay vs performance DataFrame")
         lines.append("  .peo_total_comp          CEO total compensation")
