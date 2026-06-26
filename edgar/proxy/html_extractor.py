@@ -127,8 +127,12 @@ def _clean_description(desc: str) -> str:
 # ── Main extraction function ─────────────────────────────────────────
 
 # "Proposal 1", "Proposal No. 1", "PROPOSAL 1:", "Item 1", etc.
+# The ``(?!\.\d)`` guard stops a decimal sub-item number from being read as a
+# proposal: on merger proxies (DEFM14A) the Incorporation-by-Reference section
+# cites 8-K items like "Item 2.02 or Item 7.01" \u2014 without the guard "Item 2.02"
+# parses as proposal 2 with description "02 or Item 7.01 ..." (edgartools-7pga).
 _PROPOSAL_PATTERN = re.compile(
-    r'(?:proposal\s+(?:no\.?\s*)?|item\s+)(\d+)\s*[:\-\u2014\u2013.\s]+([^\n]{10,200})',
+    r'(?:proposal\s+(?:no\.?\s*)?|item\s+)(\d+)(?!\.\d)\s*[:\-\u2014\u2013.\s]+([^\n]{10,200})',
     re.I
 )
 
@@ -171,6 +175,13 @@ def extract_voting_proposals(text: str) -> List[VotingProposal]:
 
         # Skip very short descriptions (likely TOC fragments)
         if len(description) < 15:
+            continue
+
+        # Skip descriptions that begin with a digit — a real proposal title
+        # starts with a word ("Share Issuance Proposal"), never a bare number.
+        # This catches decimal-item fragments ("02 or Item 7.01 ...") that slip
+        # past the pattern guard (edgartools-7pga).
+        if description[0].isdigit():
             continue
 
         # Skip descriptions that start with lowercase or connective words
@@ -232,6 +243,15 @@ def extract_voting_proposals(text: str) -> List[VotingProposal]:
         ))
 
     proposals.sort(key=lambda p: p.number)
+
+    # Validate numbering: real proxy proposals are numbered from 1. If the
+    # lowest captured number is not 1, the anchor for proposal 1 was missed and
+    # what remains is almost certainly fragments lifted from elsewhere (e.g. an
+    # Incorporation-by-Reference list) — prefer an empty list over garbage
+    # (edgartools-7pga). A genuine single proposal is always numbered 1.
+    if proposals and proposals[0].number != 1:
+        return []
+
     return proposals
 
 
