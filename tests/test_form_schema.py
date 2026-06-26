@@ -32,24 +32,24 @@ from edgar.documents.form_schema import (
     ("20-F", TWENTY_F_SCHEMA),     # title vocabulary homed on its own schema (llmp.2)
     ("S-1", S1_SCHEMA),            # title-based registration statement (ybth / gh-866)
     ("S-1/A", S1_SCHEMA),          # amendments share the S-1 schema
-    ("DEF 14A", DEF14A_SCHEMA),    # vocabulary staged; flip HELD (see x341)
+    ("DEF 14A", DEF14A_SCHEMA),    # title-based proxy; flip landed (see x341)
     ("PRE 14A", DEF14A_SCHEMA),    # preliminary proxy shares the schema
 ])
 def test_get_form_schema(form, expected):
     assert get_form_schema(form) is expected
 
 
-def test_def14a_flip_is_held():
-    """DEF 14A vocabulary is staged but the title-engine flip is intentionally
-    held pending authoritative-TOC selection (edgartools-x341): title_based must
-    stay False so proxies don't route through the title engine and emit the
-    summary-mini-TOC slicing artifacts documented on the schema."""
+def test_def14a_flip_landed():
+    """DEF 14A proxies route through the title engine (edgartools-x341): the flip
+    landed once the proxy failure modes were solved (authoritative-TOC 4m4x,
+    hierarchy gb99, fragmentation zas6, header-only slivers) and verified across a
+    32-filer corpus. title_based must stay True and both proxy forms must carry
+    their pattern-extractor projection (the universal flat-proxy fallback)."""
     assert DEF14A_SCHEMA.section_patterns, "DEF 14A vocabulary should be staged"
-    assert DEF14A_SCHEMA.title_based is False, "DEF 14A flip must remain held"
-    # And it must not have leaked into the pattern-extractor projection, which
-    # would re-introduce the weak pattern path the flip is meant to replace.
+    assert DEF14A_SCHEMA.title_based is True, "DEF 14A flip should be landed"
     from edgar.documents.extractors.pattern_section_extractor import SectionExtractor
-    assert "DEF 14A" not in SectionExtractor.SECTION_PATTERNS
+    assert "DEF 14A" in SectionExtractor.SECTION_PATTERNS
+    assert "PRE 14A" in SectionExtractor.SECTION_PATTERNS
 
 
 def test_bare_item_caps():

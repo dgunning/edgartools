@@ -32,7 +32,7 @@ class SectionExtractor:
     # (tests/test_section_patterns_schema_parity.py) guards against any drift.
     SECTION_PATTERNS = {
         form: get_form_schema(form).section_patterns
-        for form in ('10-K', '10-Q', '20-F', '8-K', '424B', 'S-1')
+        for form in ('10-K', '10-Q', '20-F', '8-K', '424B', 'S-1', 'DEF 14A', 'PRE 14A')
     }
 
     def __init__(self, form: Optional[str] = None):

@@ -891,18 +891,15 @@ FOUR24B_SCHEMA = FormSchema(section_patterns=_FOUR24B_SECTION_PATTERNS, title_ba
 # 424B, dissolving the same content-bleed by construction. Item forms keep
 # title_based=False and are untouched.
 S1_SCHEMA = FormSchema(section_patterns=_S1_SECTION_PATTERNS, title_based=True)
-# DEF 14A / PRE 14A proxy statements (edgartools-x341 / gh-867). The Schedule 14A
-# / Reg S-K governance + compensation vocabulary is staged here, but the flip is
-# deliberately HELD: title_based stays False so proxies do NOT yet route through
-# the title TOC engine. Flagship proxies (AAPL/JPM/KO/WMT) nest a *summary
-# mini-TOC* whose entries match this vocabulary and precede the real detailed-TOC
-# entries in document order, so first-occurrence anchor selection slices the
-# wrong (tiny/summary) bodies. Reliable proxy extraction needs per-key
-# authoritative-anchor selection (prefer the body section over summary
-# cross-references / pick the main TOC) — tracked as the x341 sub-task. Flip
-# title_based=True (and add 'DEF 14A' to the pattern-extractor projection) once
-# that engine work lands.
-DEF14A_SCHEMA = FormSchema(section_patterns=_DEF14A_SECTION_PATTERNS, title_based=False)
+# DEF 14A / PRE 14A proxy statements (edgartools-x341 / gh-867). title_based=True
+# routes proxies through the TOC title engine. The flip was HELD until the proxy
+# failure modes were solved — body back-references (authoritative-TOC selection,
+# 4m4x), hierarchical sub-entries (indent depth, gb99), fragmented/divider TOCs
+# (coalescing + divider depth, zas6), and header-only slivers (drop guardrail,
+# this issue) — then verified across a 32-filer diverse corpus (30/32 emit clean
+# labeled sections, no mislabeled slivers; residuals NEE/BRK-B are honest
+# fallbacks tracked as jmso/bpab). Now flipped.
+DEF14A_SCHEMA = FormSchema(section_patterns=_DEF14A_SECTION_PATTERNS, title_based=True)
 # Forms without any registered vocabulary (40-F, ...): no text fallback
 # (raw text is returned), default bare-item cap, no patterns.
 DEFAULT_SCHEMA = FormSchema(max_bare_item=15, text_rules=(), skip_unmatched_text=False)

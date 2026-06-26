@@ -52,9 +52,13 @@ def test_form_keyset_unchanged():
     """The set of forms with pattern vocab must not grow or shrink silently.
 
     S-1 joined the original five when the Phase 3 flip extended to registration
-    statements (edgartools-ybth / gh-866); any further change must be deliberate.
+    statements (edgartools-ybth / gh-866); DEF 14A / PRE 14A joined when the proxy
+    title engine flipped (edgartools-x341 / gh-867). Any further change must be
+    deliberate.
     """
-    assert set(SectionExtractor.SECTION_PATTERNS) == {"10-K", "10-Q", "20-F", "8-K", "424B", "S-1"}
+    assert set(SectionExtractor.SECTION_PATTERNS) == {
+        "10-K", "10-Q", "20-F", "8-K", "424B", "S-1", "DEF 14A", "PRE 14A"
+    }
 
 
 def test_patterns_live_on_the_schema():
