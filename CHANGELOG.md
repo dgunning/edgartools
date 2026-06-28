@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **S-1 / 424B `.sections` no longer misattribute content across boundaries** — three fixes to the title-based section engine that surfaced on Airbnb's IPO prospectuses (S-1 `0001193125-20-294801`, 424B4 `0001193125-20-315318`): (1) the boundary selector now requires a section's end anchor to be declared at-or-after it in the TOC, so an out-of-order sub-block anchor (Airbnb's "Glossary of Terms", listed before MD&A but anchored inside it) no longer truncates MD&A to ~100 chars; (2) 424B now shares S-1's full prospectus vocabulary — a final IPO prospectus repeats the entire S-1 body, so without the narrative sections (MD&A, Business, Management, …) the authoritative-TOC span split and `dilution` swallowed ~900KB; (3) a trailing-financials rescue clamps the last narrative section ("Experts" / "Dilution") at the untitled financial-statements (F-pages) block it previously absorbed. (edgartools-ti82, GH #878)
+
 ## [5.40.0] - 2026-06-26
 
 Semantic section extraction reaches proxy statements, registration statements, and prospectuses — `ProxyStatement`, `RegistrationS1`, and `Prospectus424B` now expose Reg S-K sections as section-scoped text over the shared title-based engine. Also adds 13F amendment-type and Form D relationship surfaces, reorganizes the offerings package (with back-compat shims), and fixes a batch of section-boundary and offerings-classification bugs.

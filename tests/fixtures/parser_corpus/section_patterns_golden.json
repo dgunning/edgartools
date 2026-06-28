@@ -992,6 +992,16 @@
         "Risk Factors"
       ]
     ],
+    "forward_looking_statements": [
+      [
+        "^(?:SPECIAL\\s+NOTE\\s+(?:REGARDING|ABOUT)\\s+)?(?:CAUTIONARY\\s+(?:NOTE|STATEMENT)\\s+(?:REGARDING\\s+)?)?FORWARD[- ]LOOKING\\s+STATEMENTS",
+        "Forward-Looking Statements"
+      ],
+      [
+        "^(?:Special\\s+Note\\s+(?:Regarding|About)\\s+)?(?:Cautionary\\s+(?:Note|Statement)\\s+(?:Regarding\\s+)?)?Forward[- ]Looking\\s+Statements",
+        "Forward-Looking Statements"
+      ]
+    ],
     "use_of_proceeds": [
       [
         "^USE\\s+OF\\s+PROCEEDS\\s*$",
@@ -1000,6 +1010,34 @@
       [
         "^Use\\s+of\\s+Proceeds\\s*$",
         "Use of Proceeds"
+      ]
+    ],
+    "dividend_policy": [
+      [
+        "^DIVIDEND\\s+POLICY",
+        "Dividend Policy"
+      ],
+      [
+        "^Dividend\\s+Policy",
+        "Dividend Policy"
+      ],
+      [
+        "^DIVIDENDS\\s*$",
+        "Dividends"
+      ],
+      [
+        "^Dividends\\s*$",
+        "Dividends"
+      ]
+    ],
+    "capitalization": [
+      [
+        "^CAPITALIZATION\\s*$",
+        "Capitalization"
+      ],
+      [
+        "^Capitalization\\s*$",
+        "Capitalization"
       ]
     ],
     "dilution": [
@@ -1012,14 +1050,106 @@
         "Dilution"
       ]
     ],
-    "capitalization": [
+    "mda": [
       [
-        "^CAPITALIZATION\\s*$",
-        "Capitalization"
+        "^(?:MANAGEMENT.?S\\s+)?DISCUSSION\\s+AND\\s+ANALYSIS",
+        "MD&A"
       ],
       [
-        "^Capitalization\\s*$",
-        "Capitalization"
+        "^(?:Management.?s\\s+)?Discussion\\s+and\\s+Analysis",
+        "MD&A"
+      ]
+    ],
+    "business": [
+      [
+        "^BUSINESS\\s*$",
+        "Business"
+      ],
+      [
+        "^Business\\s*$",
+        "Business"
+      ],
+      [
+        "^OUR\\s+BUSINESS",
+        "Our Business"
+      ],
+      [
+        "^Our\\s+Business",
+        "Our Business"
+      ]
+    ],
+    "management": [
+      [
+        "^MANAGEMENT\\s*$",
+        "Management"
+      ],
+      [
+        "^Management\\s*$",
+        "Management"
+      ],
+      [
+        "^DIRECTORS.*EXECUTIVE\\s+OFFICERS",
+        "Directors and Executive Officers"
+      ],
+      [
+        "^Directors.*Executive\\s+Officers",
+        "Directors and Executive Officers"
+      ]
+    ],
+    "executive_compensation": [
+      [
+        "^EXECUTIVE\\s+COMPENSATION",
+        "Executive Compensation"
+      ],
+      [
+        "^Executive\\s+Compensation",
+        "Executive Compensation"
+      ]
+    ],
+    "related_party_transactions": [
+      [
+        "^CERTAIN\\s+RELATIONSHIPS\\s+AND\\s+RELATED\\s*(?:PARTY|PERSON)?\\s*TRANSACTIONS",
+        "Certain Relationships and Related Party Transactions"
+      ],
+      [
+        "^Certain\\s+Relationships\\s+and\\s+Related\\s*(?:Party|Person)?\\s*Transactions",
+        "Certain Relationships and Related Party Transactions"
+      ],
+      [
+        "^RELATED\\s*(?:PARTY|PERSON)\\s+TRANSACTIONS",
+        "Related Party Transactions"
+      ],
+      [
+        "^Related\\s*(?:Party|Person)\\s+Transactions",
+        "Related Party Transactions"
+      ]
+    ],
+    "principal_stockholders": [
+      [
+        "^PRINCIPAL\\s+(?:AND\\s+SELLING\\s+)?(?:STOCK|SECURITY)\\s*HOLDERS",
+        "Principal Stockholders"
+      ],
+      [
+        "^Principal\\s+(?:and\\s+Selling\\s+)?(?:Stock|Security)\\s*[Hh]olders",
+        "Principal Stockholders"
+      ],
+      [
+        "^(?:SECURITY\\s+)?OWNERSHIP\\s+OF\\s+CERTAIN\\s+BENEFICIAL",
+        "Security Ownership"
+      ],
+      [
+        "^(?:Security\\s+)?Ownership\\s+of\\s+Certain\\s+Beneficial",
+        "Security Ownership"
+      ]
+    ],
+    "selling_stockholders": [
+      [
+        "^SELLING\\s+(?:STOCK|SECURITY)\\s*HOLDERS",
+        "Selling Stockholders"
+      ],
+      [
+        "^Selling\\s+(?:Stock|Security)\\s*[Hh]olders",
+        "Selling Stockholders"
       ]
     ],
     "description_of_securities": [
@@ -1068,14 +1198,28 @@
         "Description of Warrants"
       ]
     ],
-    "selling_stockholders": [
+    "shares_eligible_for_future_sale": [
       [
-        "^SELLING\\s+(?:STOCK|SECURITY)\\s*HOLDERS",
-        "Selling Stockholders"
+        "^SHARES\\s+(?:OR\\s+SECURITIES\\s+)?ELIGIBLE\\s+FOR\\s+FUTURE\\s+SALE",
+        "Shares Eligible for Future Sale"
       ],
       [
-        "^Selling\\s+(?:Stock|Security)\\s*[Hh]olders",
-        "Selling Stockholders"
+        "^Shares\\s+(?:or\\s+Securities\\s+)?Eligible\\s+for\\s+Future\\s+Sale",
+        "Shares Eligible for Future Sale"
+      ]
+    ],
+    "tax_considerations": [
+      [
+        "^(?:U\\.?S\\.?\\s+)?(?:FEDERAL\\s+)?(?:INCOME\\s+)?TAX\\s+CONSIDERATIONS",
+        "Tax Considerations"
+      ],
+      [
+        "^(?:U\\.?S\\.?\\s+)?(?:Federal\\s+)?(?:Income\\s+)?Tax\\s+Considerations",
+        "Tax Considerations"
+      ],
+      [
+        "^(?:CERTAIN|MATERIAL)\\s+.*TAX\\s+(?:CONSIDERATIONS|CONSEQUENCES)",
+        "Tax Considerations"
       ]
     ],
     "underwriting": [
@@ -1118,27 +1262,13 @@
         "Experts"
       ]
     ],
-    "tax_considerations": [
-      [
-        "^(?:U\\.?S\\.?\\s+)?(?:FEDERAL\\s+)?(?:INCOME\\s+)?TAX\\s+CONSIDERATIONS",
-        "Tax Considerations"
-      ],
-      [
-        "^(?:U\\.?S\\.?\\s+)?(?:Federal\\s+)?(?:Income\\s+)?Tax\\s+Considerations",
-        "Tax Considerations"
-      ],
-      [
-        "^(?:CERTAIN|MATERIAL)\\s+.*TAX\\s+(?:CONSIDERATIONS|CONSEQUENCES)",
-        "Tax Considerations"
-      ]
-    ],
     "where_you_can_find_more_information": [
       [
-        "^WHERE\\s+YOU\\s+CAN\\s+FIND\\s+MORE\\s+INFORMATION",
+        "^WHERE\\s+YOU\\s+CAN\\s+FIND\\s+(?:MORE|ADDITIONAL)\\s+INFORMATION",
         "Where You Can Find More Information"
       ],
       [
-        "^Where\\s+You\\s+Can\\s+Find\\s+More\\s+Information",
+        "^Where\\s+You\\s+Can\\s+Find\\s+(?:More|Additional)\\s+Information",
         "Where You Can Find More Information"
       ]
     ],

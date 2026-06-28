@@ -8,7 +8,11 @@ design mandates *before* the move:
 
   * ``section_patterns_golden.json`` is a verbatim dump of the pre-migration
     dict. The projection the extractor exposes must remain byte-identical to it,
-    so any transcription drift in the move fails loudly.
+    so any transcription drift in the move fails loudly. The 424B entry was
+    deliberately re-snapshotted when 424B adopted the full prospectus vocabulary
+    it now shares with S-1 (gh-878 / edgartools-ti82): a final IPO prospectus
+    repeats the entire S-1 body, so 424B must recognise the same narrative
+    sections. The drift guard on the other four forms is untouched.
   * The data must actually live on the schema now (``FormSchema.section_patterns``),
     not only on the extractor — that is what lets the Phase 3 routing flip
     (edgartools-llmp.3) feed prospectus section text through the TOC engine using

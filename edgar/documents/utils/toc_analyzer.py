@@ -491,6 +491,7 @@ class TOCAnalyzer:
             # one depth, so this is exactly first-occurrence-wins (edgartools-gb99).
             matched: Dict[str, str] = {}          # key -> chosen anchor_id
             matched_depth: Dict[str, float] = {}  # key -> that anchor's outline depth
+            matched_src: Dict[str, int] = {}      # key -> that entry's TOC source index
             for src, anchor_id, key, depth, _pg in entries:
                 if key is None or not (toc_lo <= src <= toc_hi):
                     continue
@@ -499,6 +500,7 @@ class TOCAnalyzer:
                 if key not in matched or depth < matched_depth[key] - self._TOC_INDENT_TOL:
                     matched[key] = anchor_id
                     matched_depth[key] = depth
+                    matched_src[key] = src
 
             if not matched:
                 return mapping
@@ -511,6 +513,7 @@ class TOCAnalyzer:
             # previously sliced sections to nothing.
             boundary_depth: Dict[int, float] = {}
             boundary_pg: Dict[int, bool] = {}
+            boundary_src: Dict[int, int] = {}  # body pos -> owning entry's TOC source index
             pos_to_anchor: Dict[int, str] = {}
             for src, anchor_id, _key, depth, is_pg_only in entries:
                 if not (toc_lo <= src <= toc_hi):
@@ -523,6 +526,7 @@ class TOCAnalyzer:
                     continue
                 boundary_depth[pos] = depth
                 boundary_pg[pos] = is_pg_only
+                boundary_src[pos] = src
             sorted_boundaries = sorted(boundary_depth)
 
             # Order detected sections by body position; bound each at the next TOC
@@ -540,9 +544,21 @@ class TOCAnalyzer:
                 self._title_section_order[key] = rank
                 start = positions[anchor_id]
                 depth = matched_depth[key]
+                sect_src = matched_src[key]
+                # The end boundary must be a TOC entry positioned after this section
+                # AND declared at-or-after it in the TOC. The declaration-order guard
+                # rejects an out-of-order anchor: a TOC entry listed *before* this
+                # section whose body anchor nonetheless sits *inside* it — e.g. a
+                # "Glossary of Terms" sub-block opening Airbnb's MD&A, declared above
+                # MD&A in the TOC but anchored a few nodes into its body. On a flat
+                # TOC its depth equals MD&A's, so the depth guard alone lets it
+                # truncate MD&A to a sliver; requiring boundary_src > sect_src drops
+                # it (edgartools-ti82 / gh-878). Normal sections, whose body order
+                # matches TOC order, satisfy this for free.
                 nxt = next(
                     (p for p in sorted_boundaries
-                     if p > start and boundary_depth[p] <= depth + self._TOC_INDENT_TOL),
+                     if p > start and boundary_depth[p] <= depth + self._TOC_INDENT_TOL
+                     and boundary_src.get(p, sect_src + 1) > sect_src),
                     None,
                 )
                 # Resolve the boundary position back to the entry anchor sitting

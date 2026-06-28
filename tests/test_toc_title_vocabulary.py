@@ -93,19 +93,21 @@ def test_sections_bounded_by_document_order_not_declaration_order():
     assert "MARKER_UOP" not in dil, "Dilution over-captured Use of Proceeds (declaration-order bug)"
 
 
-# TOC lists a section we have no vocabulary for ("Management") between two we do.
-# Use of Proceeds must stop at Management's anchor, not absorb it (the gap the
-# real ABNB 424B4 exposed: Dilution swallowing ~526KB of Management + the
-# financial statements).
+# TOC lists a section we have no vocabulary for ("Glossary of Terms") between two
+# we do. Use of Proceeds must stop at the glossary's anchor, not absorb it (the
+# gap the real ABNB 424B4 exposed: a section swallowing the untracked body + the
+# financial statements). ("Management" used to be the untracked example here, but
+# 424B now shares S-1's full prospectus vocabulary and surfaces it as a section —
+# gh-878; a glossary is genuinely outside the vocabulary.)
 _GAP_424B = """
 <html><body>
 <div><b>TABLE OF CONTENTS</b><table>
 <tr><td><a href="#uop">Use of Proceeds</a></td></tr>
-<tr><td><a href="#mgmt">Management</a></td></tr>
+<tr><td><a href="#glos">Glossary of Terms</a></td></tr>
 <tr><td><a href="#uw">Underwriting</a></td></tr>
 </table></div>
 <div id="uop"><b>Use of Proceeds</b><p>MARKER_UOP net proceeds.</p></div>
-<div id="mgmt"><b>Management</b><p>MARKER_MGMT directors and officers.</p></div>
+<div id="glos"><b>Glossary of Terms</b><p>MARKER_GLOS defined terms.</p></div>
 <div id="uw"><b>Underwriting</b><p>MARKER_UW purchase.</p></div>
 </body></html>
 """
@@ -113,10 +115,11 @@ _GAP_424B = """
 
 def test_detected_section_does_not_absorb_untracked_gap_section():
     ext = _extractor(_GAP_424B)
-    # Management isn't in the 424B vocabulary, so it isn't surfaced as a section...
-    assert "management" not in [s.lower() for s in ext.get_available_sections()]
+    # "Glossary of Terms" isn't in the prospectus vocabulary, so it isn't surfaced
+    # as a section...
+    assert "glossary_of_terms" not in [s.lower() for s in ext.get_available_sections()]
     # ...but Use of Proceeds must still stop at it, not swallow its body.
     uop = ext.get_section_text("use_of_proceeds") or ""
     assert "MARKER_UOP" in uop
-    assert "MARKER_MGMT" not in uop, "Use of Proceeds absorbed the untracked Management section"
+    assert "MARKER_GLOS" not in uop, "Use of Proceeds absorbed the untracked Glossary section"
     assert "MARKER_UW" not in uop

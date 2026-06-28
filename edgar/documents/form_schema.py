@@ -689,8 +689,8 @@ _FOUR24B_SECTION_PATTERNS = {
         ('^(?:CERTAIN|MATERIAL)\\s+.*TAX\\s+(?:CONSIDERATIONS|CONSEQUENCES)', 'Tax Considerations'),
     ),
     'where_you_can_find_more_information': (
-        ('^WHERE\\s+YOU\\s+CAN\\s+FIND\\s+MORE\\s+INFORMATION', 'Where You Can Find More Information'),
-        ('^Where\\s+You\\s+Can\\s+Find\\s+More\\s+Information', 'Where You Can Find More Information'),
+        ('^WHERE\\s+YOU\\s+CAN\\s+FIND\\s+(?:MORE|ADDITIONAL)\\s+INFORMATION', 'Where You Can Find More Information'),
+        ('^Where\\s+You\\s+Can\\s+Find\\s+(?:More|Additional)\\s+Information', 'Where You Can Find More Information'),
     ),
     'incorporation_by_reference': (
         ('^INCORPORATION\\s+(?:OF\\s+CERTAIN\\s+(?:INFORMATION|DOCUMENTS)\\s+)?BY\\s+REFERENCE', 'Incorporation by Reference'),
@@ -698,14 +698,28 @@ _FOUR24B_SECTION_PATTERNS = {
     ),
 }
 
-# S-1 registration statements are prospectuses, so they share 424B's title
-# vocabulary plus the registration-specific narrative a 424B usually omits
-# (Forward-Looking Statements / Dividend Policy / MD&A / Business / Management /
-# Executive Compensation / Related-Party Transactions / Principal Stockholders /
-# Shares Eligible for Future Sale). Shared entries reference the 424B tuples so
-# the two stay in lockstep; declaration order follows the canonical S-1 sequence
-# (summary → risk → ... → experts), which FormSchema.section_order() uses to sort
-# title sections that carry no item number.
+# The full prospectus title vocabulary, shared by BOTH the S-1 and 424B schemas.
+# A registration statement (S-1) and a final prospectus (424B4) are the same
+# offering document, so they carry the same sections — Forward-Looking Statements /
+# Dividend Policy / MD&A / Business / Management / Executive Compensation /
+# Related-Party Transactions / Principal Stockholders / Shares Eligible for Future
+# Sale, on top of the core offering sections (Use of Proceeds, Dilution,
+# Underwriting, Experts, ...). The core entries reference the `_FOUR24B_SECTION_PATTERNS`
+# tuples so the shared sections stay in lockstep; the debt-prospectus entries
+# (Description of Debt Securities) likewise come from there. Declaration order
+# follows the canonical prospectus sequence (summary → risk → ... → experts),
+# which FormSchema.section_order() uses to sort title sections that carry no item
+# number.
+#
+# 424B originally carried only the core offering sections, on the theory that a
+# 424B "usually omits" the narrative ones. That holds for short shelf/debt
+# takedowns (424B2/B5) but NOT for full IPO prospectuses (424B1/B4), which repeat
+# the entire S-1 body. With the sparse vocabulary those narrative sections went
+# unmatched, the authoritative-TOC-span clustering split on the resulting gap, and
+# the last matched section (e.g. Dilution) absorbed everything after it —
+# hundreds of KB of MD&A + Business + financial statements (gh-878 / edgartools-ti82).
+# Sharing the full vocabulary surfaces those sections (bounding their neighbours)
+# and is a no-op for takedowns that genuinely lack them.
 _S1_SECTION_PATTERNS = {
     'about_this_prospectus': _FOUR24B_SECTION_PATTERNS['about_this_prospectus'],
     'summary': _FOUR24B_SECTION_PATTERNS['summary'],
@@ -757,6 +771,7 @@ _S1_SECTION_PATTERNS = {
     ),
     'selling_stockholders': _FOUR24B_SECTION_PATTERNS['selling_stockholders'],
     'description_of_securities': _FOUR24B_SECTION_PATTERNS['description_of_securities'],
+    'description_of_debt_securities': _FOUR24B_SECTION_PATTERNS['description_of_debt_securities'],
     'description_of_warrants': _FOUR24B_SECTION_PATTERNS['description_of_warrants'],
     'shares_eligible_for_future_sale': (
         ('^SHARES\\s+(?:OR\\s+SECURITIES\\s+)?ELIGIBLE\\s+FOR\\s+FUTURE\\s+SALE', 'Shares Eligible for Future Sale'),
@@ -884,8 +899,11 @@ TWENTY_F_SCHEMA = FormSchema(section_patterns=_TWENTY_F_SECTION_PATTERNS)
 EIGHT_K_SCHEMA = FormSchema(section_patterns=_EIGHT_K_SECTION_PATTERNS)
 # 424B prospectuses are title-based: title_based gates the TOC engine's
 # title-vocabulary parser (edgartools-llmp.3). 20-F/8-K keep title_based=False —
-# their TOC is Item-number-based like a 10-K's.
-FOUR24B_SCHEMA = FormSchema(section_patterns=_FOUR24B_SECTION_PATTERNS, title_based=True)
+# their TOC is Item-number-based like a 10-K's. 424B shares the full prospectus
+# vocabulary with S-1 (`_S1_SECTION_PATTERNS`): a final IPO prospectus (424B4)
+# repeats the entire S-1 body, so it must recognise the same narrative sections —
+# without them the trailing matched section swallowed hundreds of KB (gh-878).
+FOUR24B_SCHEMA = FormSchema(section_patterns=_S1_SECTION_PATTERNS, title_based=True)
 # S-1 registration statements are title-based prospectuses too (edgartools-ybth /
 # gh-866): title_based routes anchored S-1s through the TOC engine exactly like a
 # 424B, dissolving the same content-bleed by construction. Item forms keep

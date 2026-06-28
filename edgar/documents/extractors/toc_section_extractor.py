@@ -58,6 +58,11 @@ class SectionBoundary:
     text_end: Optional[int] = None
     confidence: float = 1.0  # Detection confidence (0.0-1.0)
     detection_method: str = 'unknown'  # How section was detected
+    # Optional hard end: stop extraction when this exact lxml element is reached,
+    # used to bound a section at a block that carries no anchor of its own (the
+    # prospectus financial-statements F-pages — gh-878). Takes effect alongside
+    # end_element_id; whichever boundary is hit first in document order wins.
+    end_element: Optional[object] = None
 
 
 class SECSectionExtractor:
@@ -358,6 +363,7 @@ class SECSectionExtractor:
         if self._tree is None:
             return
         self._rescue_collapsed_incorporated_financials()
+        self._rescue_trailing_financials()
         # Oversized rescue (#871-bleed class) is a Phase 3 seam — see the module
         # comment above. Intentionally not called: it would be a no-op on the
         # Item/TOC path today and the bleed it targets is on the pattern path.
@@ -520,6 +526,80 @@ class SECSectionExtractor:
 
         logger.info("Re-attributed incorporated-by-reference financials: claimed %s",
                     sorted(deferred) + (['part_ii_item_7 (gap-fill)'] if 'part_ii_item_7' not in deferred else []))
+
+    # Heading that opens a prospectus's audited financial-statements block (the
+    # F-pages). It follows the last narrative section ("Experts" / "Legal Matters")
+    # with no TOC anchor of its own, so the last matched section runs to EOF and
+    # swallows it. Filers either index the F-pages ("Index to ... Financial
+    # Statements") or, unindexed, lead with the auditor's report (edgartools-ti82 /
+    # gh-878).
+    _FS_BLOCK_HEADING_RE = re.compile(
+        r'^\s*index\s+to\s+(?:the\s+)?(?:unaudited\s+)?(?:condensed\s+)?'
+        r'(?:consolidated\s+|combined\s+)?financial\s+statements\s*$'
+        r'|^\s*report\s+of\s+independent\s+registered\s+public\s+accounting\s+firm',
+        re.IGNORECASE,
+    )
+
+    def _rescue_trailing_financials(self) -> None:
+        """Bound the last prospectus narrative section at the financial-statements block.
+
+        A prospectus's audited financial statements (F-pages) follow the last
+        narrative section with no TOC anchor, so on title-based forms the trailing
+        matched section runs to end-of-document and absorbs them — hundreds of KB
+        of statements wrongly attributed to "Experts" / "Dilution" (gh-878). Find
+        the F-pages heading in the body and clamp whichever section spans it. Item
+        forms (title_based False) are unaffected: a 10-K's Item 8 *is* the
+        financial statements, so there is nothing to clamp here. Scoped to
+        prospectuses (S-1 / 424B): a DEF 14A proxy is title-based too but has no
+        F-pages, and could carry an auditor-report reference that must not clamp
+        its trailing section.
+        """
+        if self._tree is None:
+            return
+        base = self._base_form()
+        if not (base.startswith('S-1') or base.startswith('424B')):
+            return
+        positions, total = self._anchor_doc_positions()
+        if not self.section_boundaries:
+            return
+        # The F-pages sit after every narrative section, so scan only past the last
+        # section's anchor — this skips the document-top TOC, where the same heading
+        # appears as a link and would otherwise match first.
+        last_start = max(
+            (positions.get(b.anchor_id, -1) for b in self.section_boundaries.values()),
+            default=-1,
+        )
+        if last_start < 0:
+            return
+        # The heading may be an element's own text or the tail text following an
+        # empty <a name> anchor (a common SEC rendering: <p><a name=..></a>Index to
+        # …</p>). Matching both — cheaply, without recursing into text_content —
+        # catches either. Stopping extraction at this element excludes its text and
+        # its tail (both are emitted on/after this element), so the heading and the
+        # F-pages that follow are dropped from the narrative section.
+        rx = self._FS_BLOCK_HEADING_RE
+        fs_pos, fs_el = None, None
+        for idx, el in enumerate(self._tree.iter()):
+            if idx <= last_start:
+                continue
+            own = (el.text or '').strip()
+            tail = (el.tail or '').strip()
+            if (own and rx.match(own)) or (tail and rx.match(tail)):
+                fs_pos, fs_el = idx, el
+                break
+        if fs_el is None:
+            return
+        # Clamp every section whose span runs into the F-pages (normally just the
+        # trailing one): stop it at the heading element, which carries no anchor.
+        for b in self.section_boundaries.values():
+            a_pos = positions.get(b.anchor_id)
+            if a_pos is None or a_pos >= fs_pos:
+                continue
+            end_pos = positions.get(b.end_element_id) if b.end_element_id else total
+            if end_pos is not None and end_pos <= fs_pos:
+                continue
+            b.end_element = fs_el
+        logger.info("Bounded trailing narrative section(s) at the financial-statements block")
 
     def get_available_sections(self) -> List[str]:
         """
@@ -688,6 +768,12 @@ class SECSectionExtractor:
 
                 # Check if we've reached the end boundary
                 if boundary.end_element_id and is_anchor_match(el, boundary.end_element_id):
+                    in_range = False
+                    break
+
+                # Check for an anchorless hard end (e.g. the financial-statements
+                # block that follows the last narrative prospectus section).
+                if in_range and boundary.end_element is not None and el is boundary.end_element:
                     in_range = False
                     break
 
