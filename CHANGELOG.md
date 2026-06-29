@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.40.1] - 2026-06-29
+
 ### Fixed
 
 - **8-K last item no longer absorbs the SIGNATURES block** — the SIGNATURES section following the last reported item (e.g. Item 5.02 on Meta's `0001628280-25-058337`) leaked into that item's text because `_EIGHT_K_SECTION_PATTERNS` had no `'signatures'` entry, leaving the pattern extractor with no terminal boundary. Additionally, the bold-child header strategy (Strategy 3b) was gated to 10-K only, missing Workiva-style SIGNATURES headings rendered with `font-weight:700` on a child `<span>` (not the paragraph itself), and a new strategy (5b) covers plain-text `font-weight:400` SIGNATURES headings used by some filers (e.g. JPMorgan). The SIGNATURES block is now accessible as `ek.document.sections.named("signatures")` and is excluded from `ek.items`. (edgartools-papt, GH #879)
