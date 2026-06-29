@@ -143,6 +143,42 @@
         "^Internal\\s+Control",
         "Internal Controls"
       ]
+    ],
+    "part_iii_item_10": [
+      [
+        "^(Item|ITEM)\\s+10\\.?\\s*Directors",
+        "Item 10 - Directors, Executive Officers and Corporate Governance"
+      ]
+    ],
+    "part_iii_item_11": [
+      [
+        "^(Item|ITEM)\\s+11\\.?\\s*Executive\\s+Compensation",
+        "Item 11 - Executive Compensation"
+      ]
+    ],
+    "part_iii_item_12": [
+      [
+        "^(Item|ITEM)\\s+12\\.?\\s*Security\\s+Ownership",
+        "Item 12 - Security Ownership of Certain Beneficial Owners"
+      ]
+    ],
+    "part_iii_item_13": [
+      [
+        "^(Item|ITEM)\\s+13\\.?\\s*Certain\\s+Relationships",
+        "Item 13 - Certain Relationships and Related Transactions"
+      ]
+    ],
+    "part_iii_item_14": [
+      [
+        "^(Item|ITEM)\\s+14\\.?\\s*Principal\\s+Accountant",
+        "Item 14 - Principal Accountant Fees and Services"
+      ]
+    ],
+    "part_iv_item_16": [
+      [
+        "^(Item|ITEM)\\s+16\\.?\\s*Form\\s+10-K\\s+Summary",
+        "Item 16 - Form 10-K Summary"
+      ]
     ]
   },
   "10-Q": {

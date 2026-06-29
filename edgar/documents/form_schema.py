@@ -287,6 +287,34 @@ _TEN_K_SECTION_PATTERNS = {
         ('^Controls.*Procedures', 'Controls and Procedures'),
         ('^Internal\\s+Control', 'Internal Controls'),
     ),
+    # Part III — Items 10-14.  Many filers incorporate these by reference from
+    # their proxy statement; the Part III block is a compact "see proxy" stub
+    # where each item header is a bold paragraph (not a semantic heading node).
+    # Adding these patterns registers each header as a boundary so that, e.g.,
+    # Item 10's span terminates at the Item 11 header rather than absorbing it
+    # (GH #880 / edgartools-01x4).  Keys use the part_iii_item_N convention so
+    # that Section.parse_section_name() resolves part="III" and item="N"
+    # automatically, matching what _ITEM_TO_PART_10K and __getitem__ expect.
+    'part_iii_item_10': (
+        ('^(Item|ITEM)\\s+10\\.?\\s*Directors', 'Item 10 - Directors, Executive Officers and Corporate Governance'),
+    ),
+    'part_iii_item_11': (
+        ('^(Item|ITEM)\\s+11\\.?\\s*Executive\\s+Compensation', 'Item 11 - Executive Compensation'),
+    ),
+    'part_iii_item_12': (
+        ('^(Item|ITEM)\\s+12\\.?\\s*Security\\s+Ownership', 'Item 12 - Security Ownership of Certain Beneficial Owners'),
+    ),
+    'part_iii_item_13': (
+        ('^(Item|ITEM)\\s+13\\.?\\s*Certain\\s+Relationships', 'Item 13 - Certain Relationships and Related Transactions'),
+    ),
+    'part_iii_item_14': (
+        ('^(Item|ITEM)\\s+14\\.?\\s*Principal\\s+Accountant', 'Item 14 - Principal Accountant Fees and Services'),
+    ),
+    # Part IV — Item 16 (Form 10-K Summary, optional).  Item 15 (Exhibits) is
+    # already represented in the TOC-extraction path as 'part_iv_item_15'.
+    'part_iv_item_16': (
+        ('^(Item|ITEM)\\s+16\\.?\\s*Form\\s+10-K\\s+Summary', 'Item 16 - Form 10-K Summary'),
+    ),
 }
 
 _TEN_Q_SECTION_PATTERNS = {

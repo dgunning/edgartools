@@ -82,7 +82,18 @@ class HybridSectionDetector:
         sections = self.toc_detector.detect()
         if sections:
             logger.info(f"TOC detection successful: {len(sections)} sections found")
-            return self._validate_pipeline(sections, enable_cross_validation=True)
+            validated = self._validate_pipeline(sections, enable_cross_validation=True)
+            # Augment TOC result with pattern-detected sections for items not in the
+            # TOC (most commonly Part III "incorporated by reference" stubs — Items
+            # 10-14 appear only as sparse paragraphs, not as TOC entries).
+            # GH #880 / edgartools-01x4.
+            augmented = self._augment_with_pattern_sections(validated)
+            if augmented is not validated:
+                logger.info(
+                    f"Augmented TOC sections with {len(augmented) - len(validated)} "
+                    f"pattern-detected item(s)"
+                )
+            return augmented
 
         # Strategy 2: Heading-based (fallback)
         logger.debug("TOC detection failed, trying heading detection...")
@@ -100,6 +111,79 @@ class HybridSectionDetector:
 
         logger.warning("All detection strategies failed, no sections found")
         return {}
+
+    def _augment_with_pattern_sections(
+        self, toc_sections: Dict[str, Section]
+    ) -> Dict[str, Section]:
+        """Augment TOC-detected sections with pattern-detected items not in the TOC.
+
+        Some 10-K filers omit Part III (Items 10-14) from the TOC because those
+        items are incorporated by reference from the proxy statement.  The TOC
+        extractor therefore misses them; they are still present as sparse bold
+        paragraphs in the filing body.  This method runs the pattern extractor and
+        merges in any item-numbered sections whose canonical part-based key is
+        absent from the TOC result.  Only Item-based forms benefit (10-K, 10-Q,
+        8-K); the method is a no-op for unsupported forms and does NOT replace or
+        override any TOC section already present.
+
+        Args:
+            toc_sections: Validated sections from TOC detection.
+
+        Returns:
+            A new dict that includes all toc_sections plus any pattern-only additions,
+            or the original dict unchanged if nothing was added.
+        """
+        from edgar.documents.form_schema import get_form_schema
+
+        # Only augment for Item-based forms; skip title-based (DEF 14A, 424B, S-1).
+        if get_form_schema(self.form).title_based:
+            return toc_sections
+
+        # Performance gate: only run the pattern pass when there are item-based
+        # sections that the TOC may have missed.  For 10-K, this means Part III
+        # items (10-14) that are commonly omitted from the TOC when incorporated
+        # by reference.  If all expected Part-III keys are already present in the
+        # TOC result, the augmentation is a no-op and we skip the full extraction.
+        if self.form == '10-K':
+            _PART_III_KEYS = {
+                'part_iii_item_10', 'part_iii_item_11', 'part_iii_item_12',
+                'part_iii_item_13', 'part_iii_item_14',
+            }
+            if _PART_III_KEYS.issubset(toc_sections.keys()):
+                return toc_sections  # All Part III items already found; no augmentation needed
+        else:
+            # For other item-based forms (10-Q, 8-K), there is no standard set of
+            # "commonly missed" items — skip augmentation entirely to avoid cost.
+            return toc_sections
+
+        # Run pattern extractor against the same document.
+        pattern_sections = self._try_pattern_detection()
+        if not pattern_sections:
+            return toc_sections
+
+        # Merge in pattern sections whose keys are not already present in the TOC
+        # result.  Existing TOC sections are never overwritten — they carry higher
+        # confidence and real extracted text, whereas a duplicate pattern section
+        # would add noise.
+        extras = {
+            key: sec
+            for key, sec in pattern_sections.items()
+            if key not in toc_sections
+        }
+        if not extras:
+            return toc_sections
+
+        # Validate extras through the same pipeline (boundary checks, dedup,
+        # confidence filter, size guardrail) before merging.  Pass
+        # enable_cross_validation=False — the pattern extractor has already
+        # made its best effort and we don't want a second expensive pass.
+        extras = self._validate_pipeline(extras, enable_cross_validation=False)
+        if not extras:
+            return toc_sections
+
+        merged = dict(toc_sections)
+        merged.update(extras)
+        return merged
 
     def _validate_pipeline(
         self,
