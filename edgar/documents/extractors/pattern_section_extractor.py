@@ -540,22 +540,29 @@ class SectionExtractor:
                         position = _node_position(node)
                         headers.append((node, text, position))
 
-        # Strategy 3b: ParagraphNodes with bold *children* that read as Item headers.
+        # Strategy 3b: ParagraphNodes with bold *children* that read as section headers.
         #
-        # Some 10-K filings (particularly Part III "incorporated by reference" stubs)
-        # render each item heading as a ParagraphNode whose *child* TextNodes carry
-        # bold weight (fw=700) but whose own style is unstyled (fw=None).  Strategy 3
-        # misses these because _is_bold() checks the paragraph node itself, not its
-        # children.  Strategy 1 only captures them when a HeadingNode child is present,
-        # which happens for Item 10 (an <h3> sub-heading) but NOT for Items 11-14
-        # (plain TextNode children).  This sub-strategy fills the gap.
+        # Some filings render section headings as a ParagraphNode whose *child*
+        # TextNodes carry bold weight (fw=700) but whose own style is unstyled
+        # (fw=None).  Strategy 3 misses these because _is_bold() checks the paragraph
+        # node itself, not its children.  Strategy 1 only captures them when a
+        # HeadingNode child is present.  This sub-strategy fills the gap.
         #
-        # Condition: only run on 10-K filings (the sole form with proxy-incorporated
-        # Part III bold-child paragraph headers); other forms (10-Q/8-K/S-1/424B)
-        # must not pick up stray bold paragraphs as section boundaries.
+        # For 10-K: catches Part III "incorporated by reference" stubs where Items
+        # 11-14 have bold-child paragraph headers (GH #880 / edgartools-01x4).
+        #
+        # For 8-K: catches the SIGNATURES block, which Workiva renders as a
+        # ParagraphNode with an unstyled wrapper and a bold-child TextNode
+        # (font-weight:700 on the <span>).  Without this, the last 8-K item
+        # over-extends into the signature block (edgartools-papt, GH #879).
+        # The `_looks_like_section_header` guard already restricts candidates to
+        # structural headers (Item, SIGNATURES, PART, EXHIBIT, ...) so false
+        # positives from stray bold text cannot occur.
+        #
+        # Other forms (10-Q, S-1, 424B) are excluded: their stray bold paragraphs
+        # would produce unwanted boundaries.
         # Deduplicates against positions already captured.
-        # (GH #880 / edgartools-01x4)
-        if self.form == '10-K':
+        if self.form in ('10-K', '8-K'):
             existing_positions = {pos for _, _, pos in headers}
             from edgar.documents.nodes import ParagraphNode, TextNode as _TextNode
 
@@ -629,6 +636,43 @@ class SectionExtractor:
                         position = _node_position(node)
                         # Use the full paragraph text for matching
                         headers.append((node, text.strip(), position))
+
+        # Strategy 5b: SIGNATURES terminal header for 8-K (and 8-K/A).
+        #
+        # 8-Ks end with a SIGNATURES block that bounds the last item.  The preceding
+        # strategies only pick up the block when the heading is bold (Strategy 3 /
+        # Strategy 3b). Many filers (e.g. JPMorgan, Workiva-processed filings) render
+        # "SIGNATURES" or "SIGNATURE" as plain text with underline styling instead of
+        # bold, so those strategies miss it.  This step scans every ParagraphNode for
+        # a short text that matches the structural pattern (only "SIGNATURES?" passes
+        # `_looks_like_section_header`) and inserts it as a header when not already
+        # present.  Runs after all other strategies so it deduplicates automatically.
+        # Scoped to 8-K because no other registered form needs this (10-K, 10-Q,
+        # 20-F all use the TOC/anchor path; S-1/424B are title-based).
+        # (edgartools-papt, GH #879)
+        if self.form in ('8-K', '8-K/A'):
+            has_sig_header = any(
+                re.match(r'^\s*SIGNATURES?\s*$', text, re.IGNORECASE)
+                for _, text, _ in headers
+            )
+            if not has_sig_header:
+                from edgar.documents.nodes import ParagraphNode
+                existing_positions = {pos for _, _, pos in headers}
+                for node in document.root.find(lambda n: isinstance(n, ParagraphNode)):
+                    text = node.text()
+                    if not text:
+                        continue
+                    stripped = text.strip()
+                    # Only match a bare "SIGNATURES" or "SIGNATURE" line — not
+                    # longer paragraphs that merely contain the word.
+                    if not re.match(r'^\s*SIGNATURES?\s*$', stripped, re.IGNORECASE):
+                        continue
+                    position = _node_position(node)
+                    if position in existing_positions:
+                        continue
+                    headers.append((node, stripped, position))
+                    existing_positions.add(position)
+                    break  # one SIGNATURES header is enough
 
         # Sort by position
         headers.sort(key=lambda x: x[2])

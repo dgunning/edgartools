@@ -646,6 +646,14 @@ _EIGHT_K_SECTION_PATTERNS = {
         ('^(Item|ITEM)\\s+9\\.\\s*01', 'Item 9.01 - Financial Statements and Exhibits'),
         ('^Financial.*Exhibits', 'Financial Statements and Exhibits'),
     ),
+    # SIGNATURES is the terminal section of every 8-K (and 8-K/A). Registering it
+    # here as a named section gives `_find_section_end` a hard boundary so the last
+    # item never over-extends into the signatures block, and makes the block
+    # retrievable as `document.sections.named("signatures")`.
+    # Pattern mirrors the 20-F entry (edgartools-papt, GH #879).
+    'signatures': (
+        ('^SIGNATURES?\\s*$', 'Signatures'),
+    ),
 }
 
 _FOUR24B_SECTION_PATTERNS = {

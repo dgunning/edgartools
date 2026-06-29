@@ -691,7 +691,9 @@ class CurrentReport(CompanyReport):
         # Strategy 1: new parser section detection (95% rate for modern filings)
         if self.sections:
             item_pattern = re.compile(r'(Item\s+\d+\.\s*\d+)', re.IGNORECASE)
-            parser_items = extract_items_from_sections(self.sections, item_pattern)
+            # Exclude named sections (e.g. Signatures) — they are not 8-K items.
+            item_sections = {k: v for k, v in self.sections.items() if v.kind == 'item'}
+            parser_items = extract_items_from_sections(item_sections, item_pattern)
             # Validate: modern 8-K items should have decimal points (e.g., "Item 8.01").
             # If none contain a dot, the parser likely misidentified them
             # (e.g., Amazon-style "ITEM 8.01." parsed as "Item 8") — discard.
