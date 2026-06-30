@@ -472,6 +472,8 @@ def _run_http(host: str, port: int, version: str):
     import uvicorn
     from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
     from starlette.applications import Starlette
+    from starlette.requests import Request
+    from starlette.responses import JSONResponse
     from starlette.routing import Route
 
     # Set version on the Server so StreamableHTTPSessionManager picks it up
@@ -498,8 +500,14 @@ def _run_http(host: str, port: int, version: str):
             )
             yield
 
+    async def health(request: Request):
+        return JSONResponse({"status": "ok", "version": version})
+
     starlette_app = Starlette(
-        routes=[Route("/mcp", endpoint=_MCPEndpoint())],
+        routes=[
+            Route("/mcp", endpoint=_MCPEndpoint()),
+            Route("/health", endpoint=health),
+        ],
         lifespan=lifespan,
     )
 
