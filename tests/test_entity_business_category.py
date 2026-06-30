@@ -12,6 +12,8 @@ from edgar import Company
 from edgar.entity.categorization import (
     BusinessCategory,
     classify_business_category,
+    classify_reit_subtype,
+    REIT_SUBTYPE_MATERIALITY_RATIO,
     SIC_CODES_REIT,
     SIC_CODES_BANK,
     SIC_CODES_INSURANCE,
@@ -733,6 +735,49 @@ class TestIssue774NetworkIntegration:
 # REIT Subtype (edgartools-534c)
 # =============================================================================
 
+class TestClassifyREITSubtype:
+    """Unit tests for the pure classify_reit_subtype() materiality logic (no network)."""
+
+    def test_no_interest_is_equity(self):
+        """A REIT with only rental income is equity."""
+        assert classify_reit_subtype(property_income=1_000_000, interest_income=0) == 'equity'
+
+    def test_no_property_is_mortgage(self):
+        """A REIT with only interest income is mortgage."""
+        assert classify_reit_subtype(property_income=0, interest_income=500_000) == 'mortgage'
+
+    def test_both_zero_defaults_equity(self):
+        """No signal at all falls back to equity (the default REIT structure)."""
+        assert classify_reit_subtype(property_income=0, interest_income=0) == 'equity'
+
+    def test_trivial_interest_stays_equity(self):
+        """WPC-class case: a negligible interest line does not flip an equity REIT.
+
+        W. P. Carey reports $1.48B rental income and a stale $0.2M interest item.
+        $0.2M is 0.013% of rental — far below the materiality threshold.
+        """
+        assert classify_reit_subtype(property_income=1_479_000_000, interest_income=200_000) == 'equity'
+
+    def test_material_interest_is_mortgage(self):
+        """STWD-class case: interest comparable to property income → mortgage.
+
+        Starwood reports ~$182M rental and material interest income; lending
+        dominates, so it classifies as a mortgage REIT.
+        """
+        assert classify_reit_subtype(property_income=182_000_000, interest_income=260_000_000) == 'mortgage'
+
+    def test_materiality_boundary(self):
+        """Interest exactly at the materiality ratio is mortgage; just below is equity."""
+        prop = 1_000_000.0
+        at = prop * REIT_SUBTYPE_MATERIALITY_RATIO
+        assert classify_reit_subtype(property_income=prop, interest_income=at) == 'mortgage'
+        assert classify_reit_subtype(property_income=prop, interest_income=at * 0.99) == 'equity'
+
+    def test_negative_net_interest_uses_magnitude(self):
+        """Highly levered agency REITs report negative net interest; magnitude still signals mortgage."""
+        assert classify_reit_subtype(property_income=800_000, interest_income=-6_500_000) == 'mortgage'
+
+
 class TestREITSubtype:
     """Tests for Company.reit_subtype property."""
 
@@ -761,11 +806,14 @@ class TestREITSubtype:
         ("EQR", "equity"),     # Equity Residential (apartments)
         ("O", "equity"),       # Realty Income (net lease)
         ("SPG", "equity"),     # Simon Property Group (malls)
+        ("WPC", "equity"),     # W. P. Carey (net lease) — GH #854 regression:
+                               # a stale $0.2M interest line must NOT flip it to mortgage
         # Mortgage REITs
         ("AGNC", "mortgage"),  # AGNC Investment (agency MBS)
         ("NLY", "mortgage"),   # Annaly Capital (agency MBS)
         ("STWD", "mortgage"),  # Starwood Property Trust (commercial loans)
         ("MFA", "mortgage"),   # MFA Financial (residential MBS)
+        ("BXMT", "mortgage"),  # Blackstone Mortgage Trust (commercial loans)
     ])
     def test_reit_subtype(self, ticker, expected):
         """Verify REIT subtype classification against live SEC data."""

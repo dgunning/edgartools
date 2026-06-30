@@ -826,9 +826,14 @@ class Company(Entity):
         """
         Classify a REIT as equity or mortgage.
 
-        Mortgage REITs invest in mortgage-backed securities and loans,
-        reporting InterestIncomeExpenseNet as their dominant revenue.
-        Equity REITs own and operate real property.
+        Equity REITs own and operate real property, earning rental income.
+        Mortgage REITs invest in mortgage-backed securities and loans, earning
+        net interest income.
+
+        Classification compares the *magnitude* of property/rental income
+        against net interest income — not the mere presence of an interest
+        line — so a flagship net-lease equity REIT with a negligible interest
+        item (e.g. W. P. Carey) is not mislabeled 'mortgage'.
 
         Returns None immediately for non-REIT companies (no network call).
 
@@ -850,11 +855,27 @@ class Company(Entity):
             return None
 
         import warnings
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore')
-            if facts.get_fact('us-gaap:InterestIncomeExpenseNet') is not None:
-                return 'mortgage'
-        return 'equity'
+
+        from edgar.entity.categorization import (
+            REIT_INTEREST_CONCEPTS,
+            REIT_PROPERTY_CONCEPTS,
+            classify_reit_subtype,
+        )
+
+        def _income_magnitude(concepts) -> float:
+            """Largest absolute annual value across the given concepts (0 if none)."""
+            best = 0.0
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore')
+                for concept in concepts:
+                    fact = facts.get_annual_fact(concept) or facts.get_fact(concept)
+                    if fact is not None and fact.numeric_value is not None:
+                        best = max(best, abs(fact.numeric_value))
+            return best
+
+        property_income = _income_magnitude(REIT_PROPERTY_CONCEPTS)
+        interest_income = _income_magnitude(REIT_INTEREST_CONCEPTS)
+        return classify_reit_subtype(property_income, interest_income)
 
     def is_fund(self) -> bool:
         """

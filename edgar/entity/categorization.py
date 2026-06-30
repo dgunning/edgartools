@@ -22,7 +22,11 @@ from typing import Optional, Set, Union
 __all__ = [
     'BusinessCategory',
     'classify_business_category',
+    'classify_reit_subtype',
     'sic_overrides_bdc',
+    'REIT_PROPERTY_CONCEPTS',
+    'REIT_INTEREST_CONCEPTS',
+    'REIT_SUBTYPE_MATERIALITY_RATIO',
     'SIC_CODES_REIT',
     'SIC_CODES_SPAC',
     'SIC_CODES_BANK',
@@ -455,3 +459,68 @@ def _is_investment_manager(
         return True
 
     return False
+
+
+# =============================================================================
+# REIT Subtype Classification
+# =============================================================================
+
+# Property/rental income concepts — the dominant revenue of equity REITs,
+# which own and operate real property.
+REIT_PROPERTY_CONCEPTS: tuple[str, ...] = (
+    'us-gaap:OperatingLeaseLeaseIncome',
+    'us-gaap:RealEstateRevenueNet',
+)
+
+# Net interest income — the signal of mortgage REITs, which invest in
+# mortgage-backed securities and loans.
+REIT_INTEREST_CONCEPTS: tuple[str, ...] = (
+    'us-gaap:InterestIncomeExpenseNet',
+)
+
+# A REIT is "mortgage" when its interest income is at least this fraction of
+# its property income. This materiality test — rather than mere presence of an
+# interest line — is what prevents a flagship net-lease equity REIT (e.g.
+# W. P. Carey, which carries a negligible, often years-stale interest item)
+# from being mislabeled 'mortgage'.
+#
+# A three-way equity/mortgage/hybrid split was considered but rejected: the
+# diversified "hybrid" REITs (Starwood, Rithm) report their dominant interest
+# income under generic or company-specific concepts with no reliable recent
+# net-interest tag, so a hybrid bucket could not be measured without
+# regressing those names to 'equity'. See GH #854.
+REIT_SUBTYPE_MATERIALITY_RATIO: float = 0.10
+
+
+def classify_reit_subtype(property_income: float, interest_income: float) -> str:
+    """
+    Classify a REIT as 'equity' or 'mortgage' from income magnitudes.
+
+    Equity REITs earn primarily rental/property income; mortgage REITs earn
+    primarily net interest income. A REIT is classified 'mortgage' only when it
+    has no property income, or its interest income is material relative to its
+    property income (see REIT_SUBTYPE_MATERIALITY_RATIO). Comparing magnitudes —
+    rather than the mere presence of an interest line — avoids flipping a
+    net-lease equity REIT with a trivial interest item to 'mortgage'.
+
+    Args:
+        property_income: Rental/property income magnitude (>= 0)
+        interest_income: Net interest income magnitude (abs value; negative net
+            interest from highly levered agency REITs still signals mortgage)
+
+    Returns:
+        'equity' or 'mortgage'
+    """
+    p = abs(property_income or 0.0)
+    i = abs(interest_income or 0.0)
+
+    # No interest signal → equity (the default REIT structure)
+    if i == 0:
+        return 'equity'
+    # Interest present but no property income → mortgage
+    if p == 0:
+        return 'mortgage'
+    # Both present: mortgage only if interest is material relative to property
+    if i >= REIT_SUBTYPE_MATERIALITY_RATIO * p:
+        return 'mortgage'
+    return 'equity'
