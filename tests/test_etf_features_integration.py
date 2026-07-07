@@ -71,25 +71,52 @@ class TestETFFeaturesIntegration:
             assert series == mock_series
             mock_get_fund_series.assert_called_once_with("S000001234")
 
-    def test_fund_get_filings_with_series_only_parameter(self):
-        """Test Fund.get_filings() with series_only parameter uses EFTS search"""
+    def test_fund_get_filings_series_only_resolves_via_browse_edgar(self):
+        """series_only=True resolves the series via SEC browse-edgar and returns
+        only that series' filings, filtered by the requested kwargs (GH #888)."""
+        with patch('edgar.funds.core.find_fund') as mock_find_fund:
+            mock_find_fund.return_value = MagicMock()
+
+            fund = Fund("GRID")
+            fund._target_series_id = "S000001234"
+
+            filtered = MagicMock(name="filtered_filings")
+            series_filings = MagicMock(name="series_filings")
+            series_filings.filter.return_value = filtered
+            mock_series = MagicMock(filings=series_filings)
+
+            with patch('edgar.funds.data.direct_get_fund_with_filings',
+                       return_value=mock_series) as mock_direct:
+                filings = fund.get_filings(series_only=True, form="NPORT-P")
+
+            # Resolved by series ID via browse-edgar, not the umbrella trust.
+            mock_direct.assert_called_once_with("S000001234")
+            # Requested filters are applied (amendments default to True to match
+            # the non-series path).
+            series_filings.filter.assert_called_once_with(form="NPORT-P", amendments=True)
+            assert filings is filtered
+
+    def test_fund_get_filings_series_only_returns_empty_when_unresolved(self):
+        """When the series can't be resolved, series_only=True returns an empty
+        Filings — it must NOT fall through to the unfiltered trust, which would
+        be a sibling series' data (GH #888)."""
+        from edgar._filings import Filings
+
         with patch('edgar.funds.core.find_fund') as mock_find_fund:
             mock_entity = MagicMock()
-            mock_filings = MagicMock()
-            mock_entity.get_filings.return_value = mock_filings
             mock_find_fund.return_value = mock_entity
 
             fund = Fund("GRID")
             fund._target_series_id = "S000001234"
 
-            # When EFTS fails, series_only is consumed by Fund.get_filings()
-            # and NOT forwarded to entity.get_filings() — only **kwargs are passed
-            with patch('edgar.search.efts.search_filings', side_effect=Exception("EFTS unavailable")):
+            with patch('edgar.funds.data.direct_get_fund_with_filings',
+                       side_effect=Exception("browse-edgar unavailable")):
                 filings = fund.get_filings(series_only=True, form="NPORT-P")
 
-            assert filings == mock_filings
-            # series_only is intentionally consumed by Fund — only form= is forwarded
-            mock_entity.get_filings.assert_called_once_with(form="NPORT-P")
+            assert isinstance(filings, Filings)
+            assert len(filings) == 0
+            # The series path must never delegate to the entity (the trust).
+            mock_entity.get_filings.assert_not_called()
 
 
 class TestFundReportTickerResolution:
