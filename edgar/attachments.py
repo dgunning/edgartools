@@ -1,3 +1,4 @@
+import ast
 import http.server
 import os
 import re
@@ -485,6 +486,129 @@ class Attachment:
         return repr_rich(self.__rich__())
 
 
+# String methods callable on a query field, e.g. document.endswith('.htm')
+_ALLOWED_QUERY_STR_METHODS = frozenset({
+    'startswith', 'endswith', 'lower', 'upper', 'strip', 'lstrip', 'rstrip',
+})
+# re functions callable in a query, e.g. re.match('ea.*.htm', document)
+_ALLOWED_QUERY_RE_FUNCS = frozenset({'match', 'search', 'fullmatch'})
+
+
+class _AttachmentQuery:
+    """Safe evaluator for ``Attachments.query()`` filter strings.
+
+    Replaces a former ``eval()``-based implementation (GH #884) that executed
+    the query with the full builtin namespace reachable, allowing arbitrary
+    code execution. This walks the query's AST and permits only: attribute
+    access on the three query fields, literals, boolean/comparison operators,
+    a whitelist of string methods, and ``re.match``/``re.search``. Any other
+    name, call, or construct raises ``ValueError`` — there is no path to
+    ``__import__``, ``open``, or any builtin.
+    """
+
+    ALLOWED_FIELDS = frozenset({'document', 'description', 'document_type'})
+
+    def __init__(self, query_str: str):
+        self.query_str = query_str
+        try:
+            self.tree = ast.parse(query_str, mode='eval')
+        except SyntaxError as e:
+            raise ValueError(f"Invalid attachment query {query_str!r}: {e}") from e
+        # Validate the whole tree up front so a bad query fails fast, before
+        # we start iterating attachments.
+        self._eval(self.tree.body, _VALIDATION_PROBE)
+
+    def matches(self, attachment) -> bool:
+        return bool(self._eval(self.tree.body, attachment))
+
+    def _reject(self, node, detail: Optional[str] = None) -> ValueError:
+        what = detail or type(node).__name__
+        return ValueError(
+            f"Disallowed expression in attachment query ({what}): {self.query_str!r}"
+        )
+
+    def _eval(self, node, attachment):
+        if isinstance(node, ast.BoolOp):
+            values = [self._eval(v, attachment) for v in node.values]
+            if isinstance(node.op, ast.And):
+                return all(values)
+            if isinstance(node.op, ast.Or):
+                return any(values)
+            raise self._reject(node)
+        if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
+            return not self._eval(node.operand, attachment)
+        if isinstance(node, ast.Compare):
+            left = self._eval(node.left, attachment)
+            result = True
+            for op, comparator in zip(node.ops, node.comparators):
+                right = self._eval(comparator, attachment)
+                result = result and self._compare(op, left, right)
+                left = right
+            return result
+        if isinstance(node, ast.Call):
+            return self._eval_call(node, attachment)
+        if isinstance(node, ast.Name):
+            if node.id in self.ALLOWED_FIELDS:
+                return getattr(attachment, node.id)
+            raise self._reject(node, f"unknown name {node.id!r}")
+        if isinstance(node, ast.Constant):
+            return node.value
+        if isinstance(node, (ast.List, ast.Tuple, ast.Set)):
+            return [self._eval(elt, attachment) for elt in node.elts]
+        raise self._reject(node)
+
+    def _compare(self, op, left, right) -> bool:
+        if isinstance(op, ast.Eq):
+            return left == right
+        if isinstance(op, ast.NotEq):
+            return left != right
+        if isinstance(op, ast.In):
+            return left in right
+        if isinstance(op, ast.NotIn):
+            return left not in right
+        if isinstance(op, ast.Lt):
+            return left < right
+        if isinstance(op, ast.LtE):
+            return left <= right
+        if isinstance(op, ast.Gt):
+            return left > right
+        if isinstance(op, ast.GtE):
+            return left >= right
+        raise self._reject(op)
+
+    def _eval_call(self, node, attachment):
+        if node.keywords:
+            raise self._reject(node, "keyword arguments not allowed")
+        func = node.func
+        if not isinstance(func, ast.Attribute):
+            raise self._reject(node, "only method calls are allowed")
+        # re.match(pattern, target) / re.search(...) / re.fullmatch(...)
+        if isinstance(func.value, ast.Name) and func.value.id == 're':
+            if func.attr not in _ALLOWED_QUERY_RE_FUNCS:
+                raise self._reject(node, f"re.{func.attr} not allowed")
+            args = [self._eval(a, attachment) for a in node.args]
+            return getattr(re, func.attr)(*args)
+        # <field>.endswith('...') and other whitelisted string methods
+        target = self._eval(func.value, attachment)
+        if isinstance(target, str) and func.attr in _ALLOWED_QUERY_STR_METHODS:
+            args = [self._eval(a, attachment) for a in node.args]
+            return getattr(target, func.attr)(*args)
+        raise self._reject(node, f"method {func.attr!r} not allowed")
+
+
+class _ValidationProbe:
+    """A stand-in attachment whose query fields are empty strings, used to
+    validate a query's AST once at construction time (so disallowed syntax is
+    rejected before any attachment is scanned)."""
+
+    document = ''
+    description = ''
+    document_type = ''
+
+
+_VALIDATION_PROBE = _ValidationProbe()
+
+
 class Attachments:
     """
     A class to represent the attachments of an SEC filing
@@ -595,33 +719,25 @@ class Attachments:
     def query(self, query_str: str, include_data_files: bool = True):
         """
         Query attachments based on a simple query string.
-        Supports conditions on 'document', 'description', and 'document_type'.
+
+        Supports conditions on 'document', 'description', and 'document_type',
+        combined with ``and``/``or``/``not``, ``==``/``in``/``not in``, the
+        string methods ``startswith``/``endswith``/``lower``/``upper``/``strip``,
+        and ``re.match``/``re.search``.
+
         Example query: "document.endswith('.htm') and 'RELEASE' in description and document_type in ['EX-99.1', 'EX-99', 'EX-99.01']"
+
+        The query is parsed and evaluated against a restricted AST — it cannot
+        call arbitrary functions or reach Python builtins (GH #884). An invalid
+        or disallowed query raises ``ValueError``.
         """
-        allowed_attrs = {'document', 'description', 'document_type'}
-
-        # Precompile regex for finding attributes and match patterns
-        attr_regex = re.compile(rf"\b({'|'.join(allowed_attrs)})\b")
-        match_regex = re.compile(r"re\.match\('(.*)', (\w+)\)")
-
-        def safe_eval(attachment, query):
-            # Replace attribute references with attachment attributes
-            query = attr_regex.sub(lambda m: f"attachment.{m.group(0)}", query)
-
-            # Handle regex match explicitly
-            match = match_regex.search(query)
-            if match:
-                pattern, attr = match.groups()
-                query = query.replace(f"re.match('{pattern}', {attr})",
-                                      f"re.match(r'{pattern}', attachment.{attr})")
-
-            return eval(query, {"re": re, "attachment": attachment})
+        evaluator = _AttachmentQuery(query_str)
 
         # Evaluate the query for documents and data files
-        new_documents = [attachment for attachment in self.documents if safe_eval(attachment, query_str)]
+        new_documents = [attachment for attachment in self.documents if evaluator.matches(attachment)]
         if include_data_files:
             new_data_files = [attachment for attachment in self.data_files if
-                              safe_eval(attachment, query_str)] if self.data_files else None
+                              evaluator.matches(attachment)] if self.data_files else None
         else:
             new_data_files = []
 

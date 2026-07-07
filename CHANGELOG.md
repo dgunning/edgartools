@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- **`Attachments.query()` no longer evaluates filter strings with `eval()` (arbitrary code execution)** — the query was passed to `eval()` with a globals dict that omitted `__builtins__`, so Python injected the full builtin namespace and any query string could run arbitrary code (e.g. `attachments.query("__import__('os').system(...)")`). The query is now parsed and evaluated against a restricted AST that permits only the three filter fields (`document`, `description`, `document_type`), literals, `and`/`or`/`not`, `==`/`in`/`not in`, a whitelist of string methods (`startswith`/`endswith`/`lower`/`upper`/`strip`), and `re.match`/`re.search` — there is no reachable path to `__import__`, `open`, or any builtin. Legitimate queries are unchanged; a disallowed or malformed query now raises `ValueError`. (GH #884)
+
 ### Fixed
 
 - **`Company.reit_subtype` no longer mislabels net-lease equity REITs as mortgage** — the property classified a REIT as `mortgage` whenever an `InterestIncomeExpenseNet` fact was present at all, so W. P. Carey (`WPC`) flipped to `mortgage` on the strength of a stale $0.2M interest line from FY2012 despite reporting $1.48B of current rental income. Classification now compares the *magnitude* of property/rental income against net interest income (mortgage only when there is no property income, or interest is at least 10% of property income), which corrects WPC and the net-lease cohort while preserving the pure-play equity (`PLD`, `O`, `EQR`) and mortgage (`AGNC`, `NLY`, `STWD`, `BXMT`) classifications. A three-way equity/mortgage/hybrid split was evaluated and rejected: diversified REITs (Starwood, Rithm) report their dominant interest income under generic or company-specific concepts with no reliable recent net-interest tag, so a `hybrid` bucket could not be measured without regressing those names to `equity`. (GH #854)
