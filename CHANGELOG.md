@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **10-Q `get_item_with_part('Part I', 'Item 4')` no longer leaks the "PART II — OTHER INFORMATION" heading** — Part I's last item (Controls and Procedures) absorbed the trailing title of the next Part because `Section._clean_boundary_artifacts` only stripped a trailing `PART` line when an `Item N` token followed it, and Part II's heading carries a descriptive title with no item number. A new boundary rule now recognizes the titled next-Part heading as a terminal boundary, tolerant of any separator between the roman numeral and "OTHER INFORMATION" (a real space, an em-dash, no whitespace at all, or a mojibake sequence), plus a bare trailing `PART II` line. Body prose that merely names a part in passing is unaffected. (edgartools-m58p, GH #883)
+
 ## [5.41.0] - 2026-07-07
 
 ### Security

@@ -244,6 +244,33 @@ class Section:
             flags=re.IGNORECASE
         )
 
+        # 2c. Remove a trailing "PART II ... OTHER INFORMATION" heading that
+        # bled into Part I's last item (Item 4, Controls and Procedures) in a
+        # 10-Q. Rules 2a/2b only fire when an ``Item N`` token follows the PART
+        # line, so this titled heading with no item number leaks through
+        # (GH #883). Constraints keep the strip precise:
+        #   - Literal ``PART II`` (not ``[IVXLC]+``): "PART II — OTHER
+        #     INFORMATION" is 10-Q/10-K-specific, so this never touches a
+        #     legitimate ``PART C — OTHER INFORMATION`` heading in S-1 / N-1A /
+        #     N-2 filings (the cleaner runs for every form).
+        #   - ``\W*?`` between the numeral and the title admits only non-word
+        #     separators (a real space, an em-dash, none at all, a mojibake
+        #     byte, or a line break for a two-line render — ``\W`` includes
+        #     ``\n``) but cannot cross body words, so prose such as "Part II
+        #     contains other information" is left intact.
+        #   - ``\b.*$`` absorbs trailing punctuation/qualifiers on the heading
+        #     line ("OTHER INFORMATION.", "(UNAUDITED)", a page ref, markdown
+        #     ``**``). ``.`` never crosses ``\n`` (no DOTALL).
+        # A letter-only mojibake separator (e.g. a mis-decoded em-dash that
+        # yields a Unicode letter) is deliberately not matched — the heading
+        # survives rather than risk deleting real content.
+        text = re.sub(
+            r'\n\s*(?:#{1,6}\s+|\*\*\s*)?PART\s+II\W*?OTHER\s+INFORMATION\b.*$',
+            '',
+            text,
+            flags=re.IGNORECASE,
+        )
+
         # 3. Remove trailing Item headers if they appear at the very end
         # (without preceding PART header). Matches:
         #   - "Item 15", "ITEM 15."  (plain text)
