@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.41.0] - 2026-07-07
+
 ### Security
 
 - **`Attachments.query()` no longer evaluates filter strings with `eval()` (arbitrary code execution)** — the query was passed to `eval()` with a globals dict that omitted `__builtins__`, so Python injected the full builtin namespace and any query string could run arbitrary code (e.g. `attachments.query("__import__('os').system(...)")`). The query is now parsed and evaluated against a restricted AST that permits only the three filter fields (`document`, `description`, `document_type`), literals, `and`/`or`/`not`, `==`/`in`/`not in`, a whitelist of string methods (`startswith`/`endswith`/`lower`/`upper`/`strip`), and `re.match`/`re.search` — there is no reachable path to `__import__`, `open`, or any builtin. Legitimate queries are unchanged; a disallowed or malformed query now raises `ValueError`. (GH #884)
