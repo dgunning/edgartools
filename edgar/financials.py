@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
@@ -8,6 +9,109 @@ from edgar.xbrl import XBRL, XBRLS, Statement
 from edgar.xbrl.presentation import ViewType
 from edgar.xbrl.statements import StitchedStatement
 from edgar.xbrl.xbrl import XBRLFilingWithNoXbrlData
+
+# Columns produced by RenderedStatement.to_dataframe() that are metadata, not
+# period values.
+_NON_PERIOD_COLUMNS = frozenset(
+    {'concept', 'label', 'level', 'abstract', 'dimension', 'is_breakdown', 'unit', 'point_in_time'}
+)
+
+
+def _parse_iso_date(value):
+    try:
+        return datetime.strptime(str(value), '%Y-%m-%d').date()
+    except (ValueError, TypeError):
+        return None
+
+
+def _duration_bucket(days: int) -> str:
+    """Bucket a duration (in days) into a reporting-period class so that a
+    period_offset walk stays within one series (quarter-to-quarter, or
+    year-to-year) instead of interleaving 3-month and YTD columns."""
+    if days <= 130:
+        return 'q'   # ~3 months
+    if days <= 220:
+        return 'h'   # ~6 months (YTD at Q2)
+    if days <= 310:
+        return 't'   # ~9 months (YTD at Q3)
+    return 'y'       # annual
+
+
+def _order_period_columns(rendered, df_period_columns: List[str]) -> List[str]:
+    """Order a rendered statement's period columns most-relevant-first.
+
+    Fixes GH #885: ``RenderedStatement.to_dataframe()`` column order is not
+    sorted by recency, so selecting ``period_columns[period_offset]``
+    positionally could return a prior-year or wrong-duration value (e.g.
+    ``get_revenue()`` returning the comparative FY2024 Q2 figure on a FY2025 Q2
+    10-Q). We rebuild the order from each period's metadata: the current
+    reporting period first (the shortest duration at the latest end date — the
+    reporting quarter for a 10-Q, the year for a 10-K), then the rest of that
+    same-duration series backwards in time, then other durations, then instant
+    periods — all by end date descending. Columns whose period metadata can't be
+    resolved keep their original relative order at the end, so the result is
+    never worse than the previous positional behavior.
+    """
+    periods = getattr(rendered, 'periods', None) or []
+    valid = set(df_period_columns)
+
+    entries = []
+    for period in periods:
+        # Reconstruct the column name to_dataframe() assigns to this period.
+        if period.end_date:
+            name = f"{period.end_date} ({period.quarter})" if period.quarter else period.end_date
+        else:
+            name = period.label
+        if name not in valid:
+            continue
+        end = _parse_iso_date(period.end_date)
+        start = _parse_iso_date(period.start_date)
+        days = (end - start).days if (end and start) else None
+        entries.append({
+            'name': name,
+            'end': end,
+            'is_duration': bool(period.is_duration or start is not None),
+            'days': days,
+            'bucket': _duration_bucket(days) if days is not None else None,
+        })
+
+    # If period metadata is missing/unusable, preserve the original order.
+    if not entries or all(e['end'] is None for e in entries):
+        return list(df_period_columns)
+
+    durations = [e for e in entries if e['is_duration'] and e['end'] is not None]
+    instants = [e for e in entries if not e['is_duration'] and e['end'] is not None]
+
+    ordered = []
+    if durations:
+        current_end = max(e['end'] for e in durations)
+        at_current_end = [e for e in durations if e['end'] == current_end]
+        # The current reporting metric is the shortest duration at the latest
+        # end date (3-month for a 10-Q quarter; the only/annual duration for a
+        # 10-K; the YTD-only duration when a filer reports no 3-month column).
+        current = min(at_current_end, key=lambda e: e['days'] if e['days'] is not None else 10 ** 9)
+        target_bucket = current['bucket']
+        same_bucket = sorted([e for e in durations if e['bucket'] == target_bucket],
+                             key=lambda e: e['end'], reverse=True)
+        other_durations = sorted([e for e in durations if e['bucket'] != target_bucket],
+                                 key=lambda e: e['end'], reverse=True)
+        ordered.extend(same_bucket)
+        ordered.extend(other_durations)
+    ordered.extend(sorted(instants, key=lambda e: e['end'], reverse=True))
+
+    # Emit ordered names, de-duplicated, then append any df columns we couldn't
+    # map (unknown period metadata) so nothing is silently dropped.
+    seen = set()
+    result = []
+    for entry in ordered:
+        if entry['name'] not in seen:
+            seen.add(entry['name'])
+            result.append(entry['name'])
+    for name in df_period_columns:
+        if name not in seen:
+            seen.add(name)
+            result.append(name)
+    return result
 
 
 class Financials:
@@ -189,9 +293,10 @@ class Financials:
             if 'abstract' in df.columns:
                 df = df[~df['abstract']].copy()
 
-            # Get period columns
-            period_columns = [col for col in df.columns
-                            if col not in ['concept', 'label', 'level', 'abstract', 'dimension', 'is_breakdown']]
+            # Get period columns, ordered most-recent-first by period metadata
+            # (positional df order is not recency-sorted — GH #885).
+            period_columns = [col for col in df.columns if col not in _NON_PERIOD_COLUMNS]
+            period_columns = _order_period_columns(rendered, period_columns)
 
             if len(period_columns) <= period_offset:
                 return None
@@ -297,8 +402,11 @@ class Financials:
             for pattern in concept_patterns:
                 matches = df[df['label'].str.contains(pattern, case=False, na=False)]
                 if not matches.empty:
-                    # Get available period columns (excluding metadata columns)
-                    period_columns = [col for col in df.columns if col not in ['concept', 'label', 'level', 'abstract', 'dimension', 'is_breakdown']]
+                    # Get available period columns, ordered most-recent-first by
+                    # period metadata (positional df order is not recency-sorted
+                    # — GH #885).
+                    period_columns = [col for col in df.columns if col not in _NON_PERIOD_COLUMNS]
+                    period_columns = _order_period_columns(rendered, period_columns)
 
                     if len(period_columns) > period_offset:
                         period_col = period_columns[period_offset]
@@ -650,8 +758,11 @@ class Financials:
             for pattern in concept_patterns:
                 matches = df[df['concept'].str.contains(pattern, case=False, na=False)]
                 if not matches.empty:
-                    # Get available period columns (excluding metadata columns)
-                    period_columns = [col for col in df.columns if col not in ['concept', 'label', 'level', 'abstract', 'dimension', 'is_breakdown']]
+                    # Get available period columns, ordered most-recent-first by
+                    # period metadata (positional df order is not recency-sorted
+                    # — GH #885).
+                    period_columns = [col for col in df.columns if col not in _NON_PERIOD_COLUMNS]
+                    period_columns = _order_period_columns(rendered, period_columns)
 
                     if len(period_columns) > period_offset:
                         period_col = period_columns[period_offset]
