@@ -80,6 +80,12 @@ class DocumentPostprocessor:
         if node.type == NodeType.TABLE:
             return False
 
+        # Never remove image nodes — they carry no text/children but represent
+        # real content (e.g. a 10-K stock-performance graph). Pruning them here
+        # is what silently dropped images from markdown/text output (GH #886).
+        if node.type == NodeType.IMAGE:
+            return False
+
         # Never remove nodes with metadata
         if node.metadata:
             return False

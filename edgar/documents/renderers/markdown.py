@@ -3,9 +3,10 @@ Markdown renderer for parsed documents.
 """
 
 from typing import Dict, List, Optional, Set
+from urllib.parse import urljoin
 
 from edgar.documents.document import Document
-from edgar.documents.nodes import HeadingNode, ListItemNode, ListNode, Node, ParagraphNode, TextNode
+from edgar.documents.nodes import HeadingNode, ImageNode, ListItemNode, ListNode, Node, ParagraphNode, TextNode
 from edgar.documents.table_nodes import TableNode
 
 
@@ -48,6 +49,8 @@ class MarkdownRenderer:
         self._rendered_ids: Set[str] = set()
         self._list_depth = 0
         self._in_table = False
+        # Base URL for resolving relative image src (set per-document in render())
+        self._base_url: Optional[str] = None
 
     def render(self, document: Document) -> str:
         """
@@ -60,6 +63,9 @@ class MarkdownRenderer:
             Markdown formatted text
         """
         self._reset_state()
+
+        # Resolve relative image src against the source document URL when known.
+        self._base_url = document.metadata.url if document.metadata else None
 
         parts = []
 
@@ -128,6 +134,8 @@ class MarkdownRenderer:
             return self._render_list(node)
         elif isinstance(node, ListItemNode):
             return self._render_list_item(node)
+        elif isinstance(node, ImageNode):
+            return self._render_image(node)
         else:
             # Default: render children
             return self._render_children(node)
@@ -198,6 +206,30 @@ class MarkdownRenderer:
                 text = f"<u>{text}</u>"
 
         return text
+
+    def _render_image(self, node: ImageNode) -> str:
+        """Render an image node as a Markdown image link (GH #886).
+
+        The relative ``src`` from the filing HTML is resolved against the source
+        document URL when it is known (``document.metadata.url``), so the output
+        is a self-contained absolute link to the image in the SEC archive.
+        Without a base URL (e.g. when parsing raw HTML), the raw ``src`` is kept.
+        """
+        src = (node.src or '').strip()
+        alt = (node.alt or '').strip()
+
+        if not src:
+            # No source to link to; surface the alt text if there is any.
+            return f"![{alt}]()" if alt else ""
+
+        url = src
+        is_absolute = '://' in src or src.startswith('data:')
+        if self._base_url and not is_absolute:
+            url = urljoin(self._base_url, src)
+
+        # Fall back to the file name for the link text when alt is empty.
+        label = alt or src.rsplit('/', 1)[-1]
+        return f"![{label}]({url})"
 
     def _render_table(self, node: TableNode) -> str:
         """Render table node."""
