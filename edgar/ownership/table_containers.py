@@ -32,6 +32,27 @@ __all__ = [
     'DerivativeTable',
 ]
 
+# Columns sourced from a transaction's <transactionCoding> block. They are only
+# populated for transactions that carry that element, so a table where no
+# transaction has coding produces a DataFrame missing these columns entirely.
+_TRANSACTION_CODING_COLUMNS = ('form', 'Code', 'EquitySwap')
+
+
+def _ensure_coding_columns(transaction_df: pd.DataFrame) -> pd.DataFrame:
+    """Guarantee the <transactionCoding>-derived columns exist.
+
+    Some real Form 4/5 filings have transactions with no <transactionCoding>
+    element. When *no* transaction in a table has coding, the assembled
+    DataFrame lacks the 'Code' column and the downstream
+    ``df.Code.apply(...)`` raised ``AttributeError``, aborting the parse of the
+    whole filing (GH #887). Defaulting the missing columns to ``None`` lets
+    those rows degrade gracefully (``TransactionType`` becomes ``None``) instead.
+    """
+    for column in _TRANSACTION_CODING_COLUMNS:
+        if column not in transaction_df.columns:
+            transaction_df[column] = None
+    return transaction_df
+
 
 class NonDerivativeTable:
     """
@@ -173,7 +194,7 @@ class NonDerivativeTable:
                 transaction.update(transaction_coding)
 
             transactions.append(transaction)
-        transaction_df = (pd.DataFrame(transactions)
+        transaction_df = (_ensure_coding_columns(pd.DataFrame(transactions))
         .assign(
             TransactionType=lambda df: df.Code.apply(lambda x: TransactionCode.TRANSACTION_TYPES.get(x, x)))
         )
@@ -299,7 +320,7 @@ class DerivativeTable:
             transactions.append(transaction)
 
         # Now create the transaction dataframe
-        transaction_df = (pd.DataFrame(transactions)
+        transaction_df = (_ensure_coding_columns(pd.DataFrame(transactions))
         .assign(
             TransactionType=lambda df: df.Code.apply(lambda x: TransactionCode.TRANSACTION_TYPES.get(x, x)))
         )
