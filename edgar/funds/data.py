@@ -346,12 +346,16 @@ class _FundSeries(_FundClassOrSeries):
 
 
 # Direct implementation of get_fund_with_filings
-def direct_get_fund_with_filings(contract_or_series_id: str):
+def direct_get_fund_with_filings(contract_or_series_id: str, filing_type: Optional[str] = None):
     """
     Get fund class or series information including filings from the SEC website.
 
     Args:
         contract_or_series_id: Series ID (S...) or Class ID (C...)
+        filing_type: Optional EDGAR form type to filter by server-side (browse-edgar
+            ``&type=``, a prefix match — e.g. "NPORT-P" also matches "NPORT-P/A").
+            Restricting the query keeps large funds from paging through their entire
+            filing history, which SEC rate-limits/503s on deep pages (GH #888).
 
     Returns:
         FundClass or FundSeries object, or None if not found
@@ -365,6 +369,8 @@ def direct_get_fund_with_filings(contract_or_series_id: str):
         return None
 
     base_url = fund_class_or_series_search_url.format(contract_or_series_id)
+    if filing_type:
+        base_url += f"&type={filing_type}"
     # Start at 0 and download 100
     search_url = base_url + "&start=0&count=100"
 
