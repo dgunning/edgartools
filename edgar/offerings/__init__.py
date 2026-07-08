@@ -24,6 +24,7 @@ from edgar.offerings.prospectus import Prospectus424B, OfferingType
 from edgar.offerings.prospectus.registration_s1 import RegistrationS1, S1OfferingType, S1CoverPage
 from edgar.offerings.prospectus.drs import DraftRegistrationStatement
 from edgar.offerings.prospectus.registration_s3 import RegistrationS3, S3OfferingType, S3CoverPage
+from edgar.offerings.prospectus.registration_s4 import RegistrationS4, S4OfferingType, S4CoverPage
 
 __all__ = [
     "Campaign",
@@ -42,5 +43,8 @@ __all__ = [
     "RegistrationS3",
     "S3OfferingType",
     "S3CoverPage",
+    "RegistrationS4",
+    "S4OfferingType",
+    "S4CoverPage",
     "group_offerings_by_file_number",
 ]

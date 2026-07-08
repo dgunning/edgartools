@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`filing.obj()` now returns a `RegistrationS4` object for S-4 / F-4 business-combination registrations** — previously these fell through to XBRL or `None`, leaving no uniform API for registration metadata on merger/acquisition/de-SPAC filings. `RegistrationS4` exposes the same field surface as the other registration objects (`cover_page`, `fee_table`, `total_offering`, `net_fee`, `securities`, `registration_number`, `state_of_incorporation`, `ein`, `is_amendment`), plus `is_foreign` (F-4) and an `offering_type` classifier (business combination vs. exchange offer). Covers S-4, S-4/A, F-4, F-4/A; the fee table and cover-page extraction reuse the existing registration infrastructure. The business-combination narrative (acquirer/target, consideration, exchange ratio) is a separate follow-on (edgartools-ssl6). (edgartools-6yis, GH #876)
+
 ## [5.41.0] - 2026-07-07
 
 ### Security
