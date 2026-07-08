@@ -446,6 +446,10 @@ class Fund:
             self._class = None
             self._series = None
             self._company = self._entity
+        else:
+            self._class = None
+            self._series = None
+            self._company = None
 
     def _is_fund_ticker(self, identifier: str) -> bool:
         """Check if an identifier appears to be a fund ticker"""
