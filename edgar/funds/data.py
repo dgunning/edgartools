@@ -618,9 +618,9 @@ def _build_hierarchy_from_mf_tickers(cik: str, identifier_type: str, identifier:
             current_series.fund_classes.append(current_class)
 
             if identifier_type == 'Class':
-                if identifier.startswith('C') and current_class.class_id == identifier:
+                if re.match(r'^C\d+$', identifier) and current_class.class_id == identifier:
                     target_class = current_class
-                elif not identifier.startswith('C') and current_class.ticker and current_class.ticker.upper() == identifier.upper():
+                elif not re.match(r'^C\d+$', identifier) and current_class.ticker and current_class.ticker.upper() == identifier.upper():
                     target_class = current_class
 
         if identifier_type == 'Series' and current_series.series_id == identifier:
@@ -710,9 +710,9 @@ def get_fund_object(identifier: str) -> Optional[Union[FundCompany, FundSeries, 
             current_series.fund_classes.append(current_class)
 
             if identifier_type == 'Class':
-                if identifier.startswith('C') and current_class.class_id == identifier:
+                if re.match(r'^C\d+$', identifier) and current_class.class_id == identifier:
                     target_class = current_class
-                elif not identifier.startswith('C') and current_class.ticker and current_class.ticker.upper() == identifier.upper():
+                elif not re.match(r'^C\d+$', identifier) and current_class.ticker and current_class.ticker.upper() == identifier.upper():
                     target_class = current_class
 
         if identifier_type == 'Series' and current_series.series_id == identifier:
