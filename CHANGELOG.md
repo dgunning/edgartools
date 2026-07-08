@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`filing.obj()` now returns a `RegistrationS4` object for S-4 / F-4 business-combination registrations** — previously these fell through to XBRL or `None`, leaving no uniform API for registration metadata on merger/acquisition/de-SPAC filings. `RegistrationS4` exposes the same field surface as the other registration objects (`cover_page`, `fee_table`, `total_offering`, `net_fee`, `securities`, `registration_number`, `state_of_incorporation`, `ein`, `is_amendment`), plus `is_foreign` (F-4) and an `offering_type` classifier (business combination vs. exchange offer). Covers S-4, S-4/A, F-4, F-4/A; the fee table and cover-page extraction reuse the existing registration infrastructure. The business-combination narrative (acquirer/target, consideration, exchange ratio) is a separate follow-on (edgartools-ssl6). (edgartools-6yis, GH #876)
+
 ### Fixed
 
-- **10-Q `get_item_with_part('Part I', 'Item 4')` no longer leaks the "PART II — OTHER INFORMATION" heading** — Part I's last item (Controls and Procedures) absorbed the trailing title of the next Part because `Section._clean_boundary_artifacts` only stripped a trailing `PART` line when an `Item N` token followed it, and Part II's heading carries a descriptive title with no item number. A new boundary rule now recognizes the titled next-Part heading as a terminal boundary, tolerant of any separator between the roman numeral and "OTHER INFORMATION" (a real space, an em-dash, no whitespace at all, or a mojibake sequence), plus a bare trailing `PART II` line. Body prose that merely names a part in passing is unaffected. (edgartools-m58p, GH #883)
+- **10-Q `get_item_with_part('Part I', 'Item 4')` no longer leaks the "PART II — OTHER INFORMATION" heading** — Part I's last item (Controls and Procedures) absorbed the trailing title of the next Part because `Section._clean_boundary_artifacts` only stripped a trailing `PART` line when an `Item N` token followed it, and Part II's heading carries a descriptive title with no item number. A new boundary rule recognizes the titled `PART II … OTHER INFORMATION` heading as a terminal boundary — keyed to the literal Part II title, so the legitimate `PART C — OTHER INFORMATION` heading of S-1/N-1A/N-2 filings is left intact, and tolerant of any non-word separator between the numeral and the title (a real space, an em-dash, no whitespace at all, or a line break for a two-line render) plus trailing punctuation/qualifiers. Body prose that merely names a part in passing is unaffected. (edgartools-m58p, GH #883)
 
 ## [5.41.0] - 2026-07-07
 
