@@ -1676,6 +1676,39 @@ class EntityFacts:
         as_of_date = self._parse_ttm_date(as_of)
         return calc.calculate_ttm(as_of=as_of_date)
 
+    def _best_ttm_across_concepts(
+        self,
+        concepts: List[str],
+        as_of: Optional[Union[date, str]],
+        not_found_message: str,
+    ) -> 'TTMMetric':
+        """Compute TTM for each candidate concept and return the freshest result.
+
+        Companies migrate GAAP tags over time (e.g. NVDA/GOOG moved revenue from
+        ``RevenueFromContractWithCustomerExcludingAssessedTax`` to ``Revenues``).
+        The abandoned tag still holds years-old facts, so returning the *first*
+        candidate that resolves silently yields a stale TTM — off by more than an
+        order of magnitude, with no error (GH #893). Instead we evaluate every
+        candidate and pick the one whose window ends most recently (by
+        ``as_of_date``), tie-broken by the caller's priority order.
+        """
+        best = None  # ((as_of_date, -priority_index), TTMMetric)
+        for priority_index, concept in enumerate(concepts):
+            try:
+                metric = self.get_ttm(concept, as_of)
+            except (KeyError, ValueError):
+                # KeyError: concept absent. ValueError: present but <4 quarters.
+                # Either way it cannot yield a TTM — skip and keep searching so a
+                # stale-but-resolvable earlier candidate never masks a fresh one.
+                continue
+            key = (metric.as_of_date, -priority_index)
+            if best is None or key > best[0]:
+                best = (key, metric)
+
+        if best is None:
+            raise KeyError(not_found_message)
+        return best[1]
+
     def get_ttm_revenue(self, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
         """Get Trailing Twelve Months revenue using common revenue concepts."""
         revenue_concepts = [
@@ -1684,22 +1717,16 @@ class EntityFacts:
             'SalesRevenueNet',
             'Revenue',
         ]
-        for concept in revenue_concepts:
-            try:
-                return self.get_ttm(concept, as_of)
-            except KeyError:
-                continue
-        raise KeyError("Could not find revenue concept in company facts")
+        return self._best_ttm_across_concepts(
+            revenue_concepts, as_of, "Could not find revenue concept in company facts"
+        )
 
     def get_ttm_net_income(self, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
         """Get Trailing Twelve Months net income using common net income concepts."""
         income_concepts = ['NetIncomeLoss', 'NetIncome', 'ProfitLoss']
-        for concept in income_concepts:
-            try:
-                return self.get_ttm(concept, as_of)
-            except KeyError:
-                continue
-        raise KeyError("Could not find net income concept in company facts")
+        return self._best_ttm_across_concepts(
+            income_concepts, as_of, "Could not find net income concept in company facts"
+        )
 
     @cached_property
     def _ttm_ready_facts(self) -> 'EntityFacts':

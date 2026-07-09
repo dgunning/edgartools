@@ -46,6 +46,14 @@ ANNUAL_MAX_DAYS = 420
 MAX_TTM_PERIODS = 100  # Maximum periods for TTM trend calculation
 MIN_QUARTERS_FOR_TTM = 4  # Minimum quarters needed for a single TTM value
 
+# Staleness detection (GH #893): how far the newest quarter in a TTM window may
+# lag the reference date (the caller's as_of, or today when unspecified) before
+# the result is flagged stale. A freshly-reported TTM is at most ~1 quarter plus
+# filing lag behind "now" (~135 days), so 185 days (~2 quarters) avoids false
+# positives on current data while catching the year-plus staleness produced by an
+# abandoned XBRL tag or a company that stopped filing.
+STALE_THRESHOLD_DAYS = 185
+
 # Split detection
 MAX_SPLIT_LAG_DAYS = 280  # Maximum days between period_end and filing_date for valid split
 MAX_SPLIT_DURATION_DAYS = 31  # Maximum duration for a valid split fact (instant or short)
@@ -75,6 +83,9 @@ class TTMMetric:
         period_facts: List of FinancialFact objects used in calculation
         has_gaps: True if quarters are not consecutive
         has_calculated_q4: True if Q4 was calculated from FY - (Q1+Q2+Q3)
+        is_stale: True if the newest quarter lags the reference date (as_of, or
+            today) by more than one reporting cycle — the window does not track
+            "now" and the value may be years out of date (GH #893)
         warning: Optional warning message about data quality
 
     """
@@ -88,6 +99,7 @@ class TTMMetric:
     period_facts: List[FinancialFact]
     has_gaps: bool
     has_calculated_q4: bool = False
+    is_stale: bool = False
     warning: Optional[str] = None
 
     def __repr__(self):
@@ -174,20 +186,33 @@ class TTMCalculator:
             for q in ttm_quarters
         )
 
-        # 7. Generate warning if data quality issues exist
-        warning = self._generate_warning(quarterly, ttm_quarters, has_calculated_q4)
+        # 7. Detect staleness: does the newest quarter track the reference date,
+        #    or does it lag by more than a reporting cycle? When as_of is given,
+        #    the caller asked for that point in time, so measure against it;
+        #    otherwise measure against today. (GH #893)
+        window_end = ttm_quarters[-1].period_end
+        reference_date = as_of if as_of is not None else date.today()
+        stale_days = (reference_date - window_end).days
+        is_stale = stale_days > STALE_THRESHOLD_DAYS
 
-        # 8. Build and return result
+        # 8. Generate warning if data quality issues exist
+        warning = self._generate_warning(
+            quarterly, ttm_quarters, has_calculated_q4,
+            is_stale=is_stale, window_end=window_end, reference_date=reference_date
+        )
+
+        # 9. Build and return result
         return TTMMetric(
             concept=ttm_quarters[0].concept,
             label=ttm_quarters[0].label,
             value=ttm_value,
             unit=ttm_quarters[0].unit,
-            as_of_date=ttm_quarters[-1].period_end,  # Most recent quarter
+            as_of_date=window_end,  # Most recent quarter
             periods=[(q.fiscal_year, q.fiscal_period) for q in ttm_quarters],
             period_facts=ttm_quarters,
             has_gaps=has_gaps,
             has_calculated_q4=has_calculated_q4,
+            is_stale=is_stale,
             warning=warning
         )
 
@@ -1205,7 +1230,10 @@ class TTMCalculator:
         self,
         all_quarterly: List[FinancialFact],
         ttm_quarters: List[FinancialFact],
-        has_calculated_q4: bool = False
+        has_calculated_q4: bool = False,
+        is_stale: bool = False,
+        window_end: Optional[date] = None,
+        reference_date: Optional[date] = None
     ) -> Optional[str]:
         """Generate warning message if data quality issues exist.
 
@@ -1213,12 +1241,26 @@ class TTMCalculator:
             all_quarterly: All available quarterly facts
             ttm_quarters: 4 quarters used in TTM calculation
             has_calculated_q4: True if any quarters were derived from YTD/annual data
+            is_stale: True if the TTM window lags the reference date (GH #893)
+            window_end: period_end of the newest quarter (for the stale message)
+            reference_date: date staleness was measured against (as_of, or today)
 
         Returns:
             Warning message string, or None if no issues
 
         """
         warnings = []
+
+        # Staleness is the most consequential problem — surface it first so a
+        # caller scanning warning text sees it before data-derivation notes.
+        if is_stale and window_end is not None and reference_date is not None:
+            warnings.append(
+                f"TTM window ends {window_end.isoformat()}, which lags the "
+                f"reference date {reference_date.isoformat()} by "
+                f"{(reference_date - window_end).days} days. The result may be "
+                "stale — the company may have stopped reporting this concept or "
+                "migrated to a different XBRL tag."
+            )
 
         # Info message if quarters were derived (not a warning, just informational)
         if has_calculated_q4:
