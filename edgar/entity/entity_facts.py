@@ -1136,42 +1136,89 @@ class EntityFacts:
             warnings.warn(hint, stacklevel=2)
             return None
 
-        # Try each synonym in priority order.
         # If unit is not specified, do not force USD: share/count concepts
         # (for example weighted-average shares) should resolve with their
         # native units.
         target_unit = unit
         synonyms_tried = []
 
+        # Recency key for cross-synonym selection: newest filing wins, then the
+        # latest period covered. Mirrors get_fact()'s intra-tag ordering
+        # (max by (filing_date, period_end)). date.min guards facts missing a
+        # date so a comparison never raises.
+        def _recency_key(f: "FinancialFact"):
+            return (f.filing_date or date.min, f.period_end or date.min)
+
+        def _build_result(value, tag, unit_used, fact):
+            if not return_metadata:
+                return value
+            return {
+                'value': value,
+                'tag_used': tag,
+                # Resolved period of the fact actually returned — echoes the
+                # requested period, or the fact's own period when the caller
+                # passed period=None, so a stale pick is visible (GH #892).
+                'period': period if period is not None
+                          else f"{fact.fiscal_year}-{fact.fiscal_period}",
+                'period_end': fact.period_end,
+                'filing_date': fact.filing_date,
+                'unit': unit_used,
+                'concept_name': concept_name,
+                'synonyms_tried': synonyms_tried.copy(),
+            }
+
         # Suppress warnings from get_fact() during synonym resolution
         self._suppress_warnings = True
         try:
-            for concept in group.synonyms:
+            # Best candidate seen so far, when period is not specified:
+            # (recency_key, priority_index, value, tag, unit, fact).
+            best = None
+            for priority_index, concept in enumerate(group.synonyms):
                 synonyms_tried.append(concept)
                 # Try with all known taxonomy prefixes
                 for concept_variant in [concept, f'us-gaap:{concept}', f'ifrs-full:{concept}']:
                     fact = self.get_fact(concept_variant, period)
-                    if fact and fact.numeric_value is not None:
-                        unit_result = UnitNormalizer.get_normalized_value(
-                            fact=fact,
-                            target_unit=target_unit,
-                            apply_scale=True,
-                            strict_unit_match=unit is not None  # Strict when user explicitly specifies unit
+                    if not (fact and fact.numeric_value is not None):
+                        continue
+                    unit_result = UnitNormalizer.get_normalized_value(
+                        fact=fact,
+                        target_unit=target_unit,
+                        apply_scale=True,
+                        strict_unit_match=unit is not None  # Strict when user explicitly specifies unit
+                    )
+                    if not unit_result.success:
+                        continue
+
+                    if period is not None:
+                        # Explicit period: the priority ordering is authoritative
+                        # (the caller pinned the period, so there is no staleness
+                        # ambiguity) — first match wins, preserving prior behavior.
+                        return _build_result(
+                            unit_result.value, concept_variant,
+                            unit_result.normalized_unit, fact
                         )
 
-                        if unit_result.success:
-                            if return_metadata:
-                                return {
-                                    'value': unit_result.value,
-                                    'tag_used': concept_variant,
-                                    'period': period,
-                                    'unit': unit_result.normalized_unit,
-                                    'concept_name': concept_name,
-                                    'synonyms_tried': synonyms_tried.copy()
-                                }
-                            return unit_result.value
+                    # No period requested: do NOT stop at the first synonym that
+                    # happens to hold a fact. A company that switched GAAP tags
+                    # (e.g. NVDA/AMZN moving capex from
+                    # PaymentsToAcquirePropertyPlantAndEquipment to
+                    # PaymentsToAcquireProductiveAssets) still has stale facts
+                    # under the higher-priority tag; first-match-wins would return
+                    # those years-old values (GH #892). Instead pick the most
+                    # recent fact across all synonyms, tie-broken by priority.
+                    candidate = (_recency_key(fact), -priority_index,
+                                 unit_result.value, concept_variant,
+                                 unit_result.normalized_unit, fact)
+                    if best is None or candidate[:2] > best[:2]:
+                        best = candidate
+                    # One winning variant per synonym is enough.
+                    break
         finally:
             self._suppress_warnings = False
+
+        if best is not None:
+            _, _, value, tag, unit_used, fact = best
+            return _build_result(value, tag, unit_used, fact)
 
         return None
 
