@@ -90,7 +90,7 @@ class SectionExtractor:
         sections = self._match_sections(headers, patterns, document, part_context)
 
         # Create section objects
-        return self._create_sections(sections, document)
+        return self._create_sections(sections, document, form)
 
     # NOTE: _detect_form() removed - form type should be known from context
     # Filing metadata should be set by the caller (Filing class, TenK/TenQ, etc.)
@@ -917,9 +917,13 @@ class SectionExtractor:
 
     def _create_sections(self,
                         matched_sections: Dict[str, Tuple[Node, str, int, int]],
-                        document: Document) -> Dict[str, Section]:
+                        document: Document,
+                        form: Optional[str] = None) -> Dict[str, Section]:
         """Create Section objects from matches."""
         from edgar.documents.nodes import TextNode
+        from edgar.documents.form_schema import get_form_schema
+
+        schema = get_form_schema(form)
 
         sections = {}
 
@@ -963,8 +967,18 @@ class SectionExtractor:
                 detection_method = 'pattern'
                 confidence = 0.7
 
-            # Parse section name to extract part and item identifiers
+            # Parse section name to extract part and item identifiers. Semantic
+            # 10-K keys ('mda', 'business', ...) carry no item number in the key
+            # string, so parse_section_name yields item=None; recover item/part
+            # from the form schema's title vocabulary so these sections carry the
+            # same .item/.part as part_iii_item_N-style keys (GH #891).
             part, item = Section.parse_section_name(section_name)
+            if item is None:
+                schema_part, schema_item = schema.resolve_section_key(section_name)
+                if schema_item is not None:
+                    item = schema_item
+                    if part is None:
+                        part = schema_part
 
             # Create Section object
             section = Section(

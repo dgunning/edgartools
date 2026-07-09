@@ -427,6 +427,19 @@ class HybridSectionDetector:
                 # Add child to section
                 section_node.add_child(child)
 
+            # Resolve part/item so heading-detected sections carry the same
+            # metadata as pattern/TOC ones — a consumer keying on section.item
+            # or section.part would otherwise silently drop these (GH #891).
+            # Heading section names are item-only ('item_7'), so
+            # parse_section_name resolves the item but leaves part=None; fill the
+            # part from the form's item->part ranges, mirroring _create_sections.
+            part, item = Section.parse_section_name(section_name)
+            if item is not None and part is None:
+                from edgar.documents.form_schema import get_form_schema
+                part_label = get_form_schema(self.form).part_for_item(f"Item {item}")
+                if part_label:
+                    part = part_label.replace('Part ', '')
+
             # Create Section object
             section = Section(
                 name=section_name,
@@ -435,7 +448,9 @@ class HybridSectionDetector:
                 start_offset=0,  # Would need actual text position
                 end_offset=0,  # Would need actual text position
                 confidence=header_info.confidence,
-                detection_method='heading'
+                detection_method='heading',
+                part=part,
+                item=item
             )
 
             return section

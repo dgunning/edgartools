@@ -165,6 +165,42 @@ class FormSchema:
                 return f"Part {roman}"
         return None
 
+    def item_for_section_key(self, key: str) -> Optional[str]:
+        """Return the bare item key ("7", "1A") for a section-pattern key, else None.
+
+        Derived from the section's canonical first-pattern title (e.g.
+        'Item 7 - MD&A' -> '7'). Semantic keys like 'mda'/'business' carry no item
+        in the key string, so ``Section.parse_section_name`` can't resolve them;
+        this recovers the item from the schema's own title vocabulary. Returns None
+        for non-item keys ('part_i', 'signatures') whose title has no leading
+        "Item N".
+        """
+        patterns = self.section_patterns.get(key)
+        if not patterns:
+            return None
+        title = patterns[0][1]
+        # Capture dotted items ("5.02") whole, not truncated at the dot, so a
+        # form whose semantic key has a sub-numbered title resolves correctly.
+        m = re.match(r'Item\s+(\d+(?:\.\d+)?[A-Z]?)', title, re.IGNORECASE)
+        return m.group(1).upper() if m else None
+
+    def resolve_section_key(self, key: str) -> Tuple[Optional[str], Optional[str]]:
+        """Resolve a section-pattern key to ``(part, item)`` in the bare form that
+        ``Section.parse_section_name`` returns — e.g. ('II', '7'), not ('Part II', …).
+
+        Fills the gap for semantic 10-K keys ('mda', 'business') whose key string
+        carries no item number: the item comes from the schema's title vocabulary
+        (:meth:`item_for_section_key`) and the part from the item->part ranges
+        (:meth:`part_for_item`). Returns ``(None, None)`` when the key names no item
+        (GH #891).
+        """
+        item = self.item_for_section_key(key)
+        if not item:
+            return (None, None)
+        part_label = self.part_for_item(f"Item {item}")
+        part = part_label.replace('Part ', '') if part_label else None
+        return (part, item)
+
     @property
     def seed_part(self) -> Optional[str]:
         """The Part a document-order TOC walk starts in, before any Part header.
