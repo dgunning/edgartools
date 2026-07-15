@@ -41,6 +41,7 @@ from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
 from mcp.server.stdio import stdio_server
 from mcp.types import GetPromptResult, Prompt, TextContent
+from pydantic import AnyUrl
 
 # Set up logging
 logging.basicConfig(
@@ -211,14 +212,15 @@ async def list_resources() -> list[Resource]:
 
 
 @app.read_resource()
-async def read_resource(uri: str) -> str:
+async def read_resource(uri: AnyUrl) -> str:
     """Read a resource."""
-    if uri == "edgartools://docs/quickstart":
+    uri_string = str(uri)
+    if uri_string == "edgartools://docs/quickstart":
         return _get_quickstart_doc()
-    elif uri == "edgartools://docs/tools":
+    elif uri_string == "edgartools://docs/tools":
         return _get_tools_doc()
     else:
-        raise ValueError(f"Unknown resource: {uri}")
+        raise ValueError(f"Unknown resource: {uri_string}")
 
 
 @app.list_prompts()
