@@ -19,23 +19,24 @@ from __future__ import annotations
 
 import logging
 from functools import cached_property
-from typing import List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional
 
 from rich import box
 from rich.console import Group, Text
 from rich.panel import Panel
 from rich.table import Table
 
-from edgar.richtools import repr_rich
 # Re-imported here so `from edgar.offerings.prospectus.registration_s3 import S3CoverPage,
 # S3OfferingType, _is_checked, _extract_s3_cover_page` keeps resolving.
 from edgar.offerings.prospectus._s3_cover import (
-    S3OfferingType,
     S3CoverPage,
-    _is_checked,
-    _extract_s3_cover_page,
+    S3OfferingType,
     _classify_s3_offering,
+    _extract_s3_cover_page,
+    _is_checked,  # noqa: F401  re-exported for backwards compatibility
 )
+from edgar.offerings.prospectus._sections import ProspectusSectionsMixin
+from edgar.richtools import repr_rich
 
 log = logging.getLogger(__name__)
 
@@ -49,7 +50,7 @@ __all__ = ['RegistrationS3', 'S3OfferingType', 'S3CoverPage']
 # Main class
 # ---------------------------------------------------------------------------
 
-class RegistrationS3:
+class RegistrationS3(ProspectusSectionsMixin):
     """
     Data object for S-3 registration statement filings.
 
@@ -66,6 +67,7 @@ class RegistrationS3:
         s3.offering_type       -> S3OfferingType enum
         s3.fee_table           -> RegistrationFeeTable | None
         s3.total_offering      -> float | None (total registered amount)
+        s3.sections            -> Sections (Reg S-K narrative sections)
         s3.takedowns           -> Filings (424B filings under this shelf)
     """
 
@@ -197,6 +199,23 @@ class RegistrationS3:
         return []
 
     # ------------------------------------------------------------------
+    # Section-scoped text access (see ProspectusSectionsMixin: .sections / .section)
+    # ------------------------------------------------------------------
+
+    @cached_property
+    def _document(self):
+        """Parsed document backing ``.sections``.
+
+        ``filing.parse()`` seeds the parser with the S-3 form, which routes the
+        filing through the title-based section engine (see ``S3_SCHEMA`` in
+        ``edgar.documents.form_schema``).
+        """
+        try:
+            return self._filing.parse()
+        except Exception:
+            return None
+
+    # ------------------------------------------------------------------
     # Lifecycle navigation
     # ------------------------------------------------------------------
 
@@ -320,6 +339,7 @@ class RegistrationS3:
             lines.append("  - .cover_page -> S3CoverPage (filer info, checkboxes)")
             lines.append("  - .fee_table -> RegistrationFeeTable (offering capacity)")
             lines.append("  - .total_offering -> float (total registered amount)")
+            lines.append("  - .sections -> Sections (risk_factors, use_of_proceeds, plan_of_distribution, ...; .section(name).text())")
             lines.append("  - .takedowns -> Filings (424B filings under this shelf)")
             lines.append("  - .related_filings -> Filings (all filings, same file number)")
 

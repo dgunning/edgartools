@@ -981,6 +981,12 @@ FOUR24B_SCHEMA = FormSchema(section_patterns=_S1_SECTION_PATTERNS, title_based=T
 # 424B, dissolving the same content-bleed by construction. Item forms keep
 # title_based=False and are untouched.
 S1_SCHEMA = FormSchema(section_patterns=_S1_SECTION_PATTERNS, title_based=True)
+# S-3 shelf registration statements are title-based prospectuses too (gh-877).
+# They incorporate financials by reference and run shorter than S-1s, but the
+# narrative titles (Risk Factors, Use of Proceeds, Plan of Distribution, ...) are
+# the same Reg S-K vocabulary, so S-3 reuses the shared prospectus patterns and
+# routes through the TOC engine exactly like S-1 / 424B.
+S3_SCHEMA = FormSchema(section_patterns=_S1_SECTION_PATTERNS, title_based=True)
 # DEF 14A / PRE 14A proxy statements (edgartools-x341 / gh-867). title_based=True
 # routes proxies through the TOC title engine. The flip was HELD until the proxy
 # failure modes were solved — body back-references (authoritative-TOC selection,
@@ -1004,6 +1010,9 @@ _SCHEMAS: Dict[str, FormSchema] = {
     "424B": FOUR24B_SCHEMA,
     "S-1": S1_SCHEMA,
     "S-1/A": S1_SCHEMA,
+    "S-3": S3_SCHEMA,
+    "S-3/A": S3_SCHEMA,
+    "S-3ASR": S3_SCHEMA,
     "DEF 14A": DEF14A_SCHEMA,
     "PRE 14A": DEF14A_SCHEMA,
 }
