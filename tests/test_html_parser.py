@@ -125,7 +125,9 @@ class TestBasicParsing:
         import pickle
 
         doc = parse_html("<html><body><h1>Title</h1><p>Hello World</p></body></html>")
-        metadata = pickle.loads(pickle.dumps(doc.metadata))
+        # The payload is created locally in the same expression; no untrusted
+        # data reaches this compatibility round-trip.
+        metadata = pickle.loads(pickle.dumps(doc.metadata))  # nosec B301
 
         assert metadata.statistics == {
             "node_count": sum(1 for _ in doc.root.walk()),
@@ -134,7 +136,7 @@ class TestBasicParsing:
             "heading_count": 1,
         }
 
-        restored_document = pickle.loads(
+        restored_document = pickle.loads(  # nosec B301 - trusted local payload
             pickle.dumps(
                 parse_html("<html><body><p>Serializable</p></body></html>")
             )
