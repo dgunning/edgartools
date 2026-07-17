@@ -2,8 +2,8 @@
 Document postprocessor for final processing after parsing.
 """
 
+from functools import partial
 from typing import Dict, List, Set
-from weakref import ref
 
 from edgar.documents.config import ParserConfig
 from edgar.documents.document import Document
@@ -245,17 +245,18 @@ class DocumentPostprocessor:
 
     def _add_statistics(self, document: Document):
         """Configure lazy document statistics on metadata."""
-        document_ref = ref(document)
+        document.metadata._set_statistics_loader(
+            partial(
+                self._calculate_statistics,
+                document,
+                include_section_count=self.config.eager_section_extraction,
+            )
+        )
 
-        def calculate_statistics() -> Dict[str, int]:
-            deferred_document = document_ref()
-            if deferred_document is None:
-                return {}
-            return self._calculate_statistics(deferred_document)
-
-        document.metadata._set_statistics_loader(calculate_statistics)
-
-    def _calculate_statistics(self, document: Document) -> Dict[str, int]:
+    @staticmethod
+    def _calculate_statistics(
+        document: Document, include_section_count: bool
+    ) -> Dict[str, int]:
         """Calculate document statistics on first access."""
         statistics = {
             "node_count": sum(1 for _ in document.root.walk()),
@@ -265,7 +266,7 @@ class DocumentPostprocessor:
         }
 
         # Only add section count if sections were extracted
-        if self.config.eager_section_extraction:
+        if include_section_count:
             statistics["section_count"] = len(document.sections)
 
         return statistics

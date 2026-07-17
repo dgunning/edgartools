@@ -83,20 +83,85 @@ class TestBasicParsing:
         assert doc.metadata.statistics is statistics
         assert text_calls == 1
 
-    def test_statistics_loader_does_not_retain_document(self):
-        """Deferred statistics should not extend the parsed document lifetime."""
+    def test_statistics_are_available_from_detached_metadata(self):
+        """Metadata should retain exact statistics until their first access."""
         import gc
         from weakref import ref
 
         doc = parse_html("<html><body><p>Hello World</p></body></html>")
         metadata = doc.metadata
         document_ref = ref(doc)
+        expected_node_count = sum(1 for _ in doc.root.walk())
+
+        del doc
+        gc.collect()
+
+        assert document_ref() is not None
+        assert metadata.statistics == {
+            "node_count": expected_node_count,
+            "text_length": len("Hello World"),
+            "table_count": 0,
+            "heading_count": 0,
+        }
+
+        gc.collect()
+        assert document_ref() is None
+
+    def test_unaccessed_statistics_do_not_leak_discarded_document(self):
+        """A discarded document cycle should remain garbage-collectable."""
+        import gc
+        from weakref import ref
+
+        doc = parse_html("<html><body><p>Discarded</p></body></html>")
+        document_ref = ref(doc)
 
         del doc
         gc.collect()
 
         assert document_ref() is None
-        assert metadata.statistics == {}
+
+    def test_document_and_metadata_are_pickleable_before_statistics_access(self):
+        """Deferred statistics should preserve document serialization behavior."""
+        import pickle
+
+        doc = parse_html("<html><body><h1>Title</h1><p>Hello World</p></body></html>")
+        metadata = pickle.loads(pickle.dumps(doc.metadata))
+
+        assert metadata.statistics == {
+            "node_count": sum(1 for _ in doc.root.walk()),
+            "text_length": len("Title\n\nHello World"),
+            "table_count": 0,
+            "heading_count": 1,
+        }
+
+        restored_document = pickle.loads(
+            pickle.dumps(
+                parse_html("<html><body><p>Serializable</p></body></html>")
+            )
+        )
+        assert restored_document.metadata.statistics["text_length"] == len("Serializable")
+
+    def test_statistics_loader_is_retried_after_failure(self):
+        """A failed deferred calculation should remain available for retry."""
+        from edgar.documents.document import DocumentMetadata
+
+        metadata = DocumentMetadata()
+        attempts = 0
+
+        def calculate_statistics():
+            nonlocal attempts
+            attempts += 1
+            if attempts == 1:
+                raise RuntimeError("temporary failure")
+            return {"node_count": 1}
+
+        metadata._set_statistics_loader(calculate_statistics)
+
+        with pytest.raises(RuntimeError, match="temporary failure"):
+            _ = metadata.statistics
+
+        assert metadata.statistics == {"node_count": 1}
+        assert attempts == 2
 
 
 class TestNodeTypes:
@@ -254,7 +319,7 @@ class TestPreprocessing:
 
         assert result == "alpha<br/><br/>beta"
 
-    def test_missing_sentence_spacing_is_preserved(self):
+    def test_missing_sentence_spacing_is_normalized_without_changing_abbreviations(self):
         preprocessor = HTMLPreprocessor(ParserConfig())
 
         result = preprocessor._fix_common_issues("Alpha.One Beta?Two U.S.Code")
