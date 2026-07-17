@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **PP&E silently missing from the EntityFacts balance sheet** — `Company('GE').get_facts().balance_sheet()` omitted Property, Plant & Equipment entirely for FY2021 onward. GE stopped reporting `us-gaap:PropertyPlantAndEquipmentNet` after FY2020 and now presents the net line only under a company-specific extension tag that the SEC companyfacts API does not expose, so the standardized statement built the row empty and dropped it. The builder now reconstructs standard 'Net' balance-sheet lines from component concepts the filer still reports (PP&E as `PropertyPlantAndEquipmentGross − AccumulatedDepreciation…`), matched to each displayed period by `period_end` — GE's components survive only as prior-year-end comparatives in later 10-Qs, tagged Q1–Q3 of the following fiscal year, never FY. A period already reporting the concept directly is untouched, and every component must be present or the period is skipped (no gross-as-net). The operating-lease ROU asset GE folds into its extension line renders on its own standardized row. The XBRL path (`get_financials().balance_sheet()`) was unaffected. (GH #894)
+
 ## [5.42.0] - 2026-07-09
 
 ### Added

@@ -10,7 +10,7 @@ Dict[str, Optional[float]] on MultiPeriodItem objects, not pandas DataFrames.
 # ruff: noqa: PD011
 
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import date
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -1454,6 +1454,28 @@ class EnhancedStatementBuilder:
         'PaymentsForRepurchaseOfEquity': 'PaymentsForRepurchaseOfCommonStock'
     }
 
+    # Balance-sheet 'Net' concepts that can be reconstructed from component
+    # concepts when a filer stops reporting the standard net tag directly. Some
+    # filers drop a us-gaap net concept and present the line only under a
+    # company-specific extension tag, which the SEC companyfacts API (this path's
+    # data source) does not expose — so the standardized statement silently loses
+    # the row. Deriving from components the filer still reports restores a
+    # standard, cross-company-comparable value. Every listed component (add and
+    # subtract) must be present for a period or the derivation is skipped, so we
+    # never show e.g. gross PP&E mislabelled as net. (GH #894)
+    #
+    # GE dropped us-gaap:PropertyPlantAndEquipmentNet after FY2020; Gross minus
+    # AccumulatedDepreciation reconstructs its PP&E net. GE additionally folds
+    # operating-lease ROU assets into its extension line, but that ROU asset is
+    # its own standardized concept (OperatingLeaseRightOfUseAsset) and renders on
+    # its own row, so the derived PP&E net stays a pure, comparable figure.
+    DERIVED_BALANCE_CONCEPTS = {
+        'PropertyPlantAndEquipmentNet': {
+            'add': ('PropertyPlantAndEquipmentGross',),
+            'subtract': ('AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment',),
+        },
+    }
+
     def __init__(self, sic_code: Optional[str] = None, ticker: Optional[str] = None):
         """
         Initialize the statement builder.
@@ -1489,6 +1511,100 @@ class EnhancedStatementBuilder:
 
         # Apply normalization mappings
         return self.CONCEPT_NORMALIZATIONS.get(concept, concept)
+
+    def _inject_derived_balance_facts(self,
+                                      facts: List[FinancialFact],
+                                      period_facts_by_label: Dict[str, List[FinancialFact]],
+                                      selected_period_info: List[Any],
+                                      selected_periods: List[str],
+                                      statement_type: str) -> None:
+        """Synthesize standard 'Net' balance-sheet facts from component concepts.
+
+        Some filers stop reporting a us-gaap 'Net' concept and present the line
+        only under a company-specific extension tag, which the SEC companyfacts
+        API (this path's data source) does not expose — so the standardized
+        statement silently loses the row (GH #894). For each derived concept in
+        ``DERIVED_BALANCE_CONCEPTS`` this reconstructs the value from component
+        concepts the filer still reports, matching them to each displayed period
+        by ``period_end`` (the balance date) rather than by fiscal tags, because
+        the components often survive only as prior-year-end comparatives in later
+        10-Qs (e.g. GE's PP&E Gross/AccumulatedDepreciation are tagged Q1–Q3 of
+        the following fiscal year, never FY). Synthetic facts are appended in
+        place to ``period_facts_by_label`` and carry the canonical concept name,
+        so they render through the normal tree node. A period already carrying a
+        real fact for the concept is left untouched, and every component must be
+        present for the period or that period is skipped.
+        """
+        if statement_type not in ('BalanceSheet', 'balance_sheet'):
+            return
+        if not self.DERIVED_BALANCE_CONCEPTS:
+            return
+
+        def _strip(concept: str) -> str:
+            return concept.split(':', 1)[-1] if ':' in concept else concept
+
+        # Index each component concept's value by period_end, preferring the most
+        # recently filed fact (consistent with the rest of this path's recency
+        # preference, and picks up restated component balances).
+        component_names: Set[str] = set()
+        for rule in self.DERIVED_BALANCE_CONCEPTS.values():
+            component_names.update(rule.get('add', ()))
+            component_names.update(rule.get('subtract', ()))
+
+        by_end: Dict[str, Dict[date, FinancialFact]] = {name: {} for name in component_names}
+        for fact in facts:
+            name = _strip(fact.concept)
+            if name not in component_names or fact.period_end is None or fact.numeric_value is None:
+                continue
+            prior = by_end[name].get(fact.period_end)
+            if prior is None or (fact.filing_date or date.min) >= (prior.filing_date or date.min):
+                by_end[name][fact.period_end] = fact
+
+        # Map each displayed period label to its period_end (pk[2]).
+        label_to_end: Dict[str, date] = {}
+        for i, (pk, _info) in enumerate(selected_period_info):
+            if i < len(selected_periods) and pk[2] is not None:
+                label_to_end[selected_periods[i]] = pk[2]
+
+        for derived_concept, rule in self.DERIVED_BALANCE_CONCEPTS.items():
+            for label, period_end in label_to_end.items():
+                bucket = period_facts_by_label.get(label)
+                if bucket is None:
+                    continue
+                # Leave periods that already report the concept directly untouched.
+                if any(_strip(f.concept) == derived_concept for f in bucket):
+                    continue
+
+                total = 0.0
+                base_fact: Optional[FinancialFact] = None
+                complete = True
+                for sign, comps in (('add', rule.get('add', ())), ('subtract', rule.get('subtract', ()))):
+                    for comp in comps:
+                        comp_fact = by_end.get(comp, {}).get(period_end)
+                        if comp_fact is None or comp_fact.numeric_value is None:
+                            complete = False
+                            break
+                        total += comp_fact.numeric_value if sign == 'add' else -comp_fact.numeric_value
+                        if base_fact is None:
+                            base_fact = comp_fact
+                    if not complete:
+                        break
+                if not complete or base_fact is None:
+                    continue
+
+                node_label = self.virtual_trees.get('BalanceSheet', {}).get(
+                    'nodes', {}).get(derived_concept, {}).get('label', derived_concept)
+                synthetic = replace(
+                    base_fact,
+                    concept=derived_concept,
+                    taxonomy='us-gaap',
+                    label=node_label,
+                    value=total,
+                    numeric_value=total,
+                    statement_type='BalanceSheet',
+                    is_estimated=True,
+                )
+                bucket.append(synthetic)
 
     def _is_essential_concept(self, concept: str, statement_type: str) -> bool:
         """Check if concept is essential for this statement type."""
@@ -1839,6 +1955,13 @@ class EnhancedStatementBuilder:
                 period_facts_by_label[label] = filtered_facts
             else:
                 period_facts_by_label[label] = facts_for_period
+
+        # Reconstruct standard 'Net' balance-sheet lines a filer no longer reports
+        # under a us-gaap concept (e.g. GE's PP&E) from component facts, matched to
+        # each displayed period by period_end. (GH #894)
+        self._inject_derived_balance_facts(
+            facts, period_facts_by_label, selected_period_info, selected_periods, statement_type
+        )
 
         # Build hierarchical structure using canonical template
         # Handle statement type naming inconsistencies
