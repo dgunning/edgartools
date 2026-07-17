@@ -12,6 +12,7 @@ from edgar.documents.types import TableType
 from edgar.documents.exceptions import HTMLParsingError, DocumentTooLargeError
 from edgar.documents.nodes import HeadingNode, ParagraphNode, TextNode
 from edgar.documents.table_nodes import TableNode
+from edgar.documents.processors.preprocessor import HTMLPreprocessor
 
 
 class TestBasicParsing:
@@ -51,6 +52,51 @@ class TestBasicParsing:
         
         assert "Unclosed paragraph" in doc.text()
         assert "Nested" in doc.text()
+
+    def test_document_statistics_are_lazy_and_cached(self, monkeypatch):
+        """Statistics should preserve their API without rendering text during parsing."""
+        from dataclasses import asdict
+
+        text_calls = 0
+        original_text = Document.text
+
+        def counting_text(document, *args, **kwargs):
+            nonlocal text_calls
+            text_calls += 1
+            return original_text(document, *args, **kwargs)
+
+        monkeypatch.setattr(Document, "text", counting_text)
+
+        doc = parse_html("<html><body><h1>Title</h1><p>Hello World</p></body></html>")
+        assert text_calls == 0
+        assert "_statistics" not in asdict(doc.metadata)
+
+        statistics = doc.metadata.statistics
+        assert text_calls == 1
+        assert statistics == {
+            "node_count": sum(1 for _ in doc.root.walk()),
+            "text_length": len("Title\n\nHello World"),
+            "table_count": 0,
+            "heading_count": 1,
+        }
+
+        assert doc.metadata.statistics is statistics
+        assert text_calls == 1
+
+    def test_statistics_loader_does_not_retain_document(self):
+        """Deferred statistics should not extend the parsed document lifetime."""
+        import gc
+        from weakref import ref
+
+        doc = parse_html("<html><body><p>Hello World</p></body></html>")
+        metadata = doc.metadata
+        document_ref = ref(doc)
+
+        del doc
+        gc.collect()
+
+        assert document_ref() is None
+        assert metadata.statistics == {}
 
 
 class TestNodeTypes:
@@ -187,6 +233,33 @@ class TestTableParsing:
         
         # Should handle nested tables appropriately
         assert len(doc.tables) >= 1
+
+
+class TestPreprocessing:
+    """Test HTML cleanup before document construction."""
+
+    def test_excessive_newlines_are_collapsed(self):
+        preprocessor = HTMLPreprocessor(ParserConfig())
+
+        result = preprocessor._normalize_whitespace("alpha\n\nbeta\n\n\n\ngamma")
+
+        assert result == "alpha\n\nbeta\n\ngamma"
+
+    def test_three_or_more_line_breaks_are_collapsed(self):
+        preprocessor = HTMLPreprocessor(ParserConfig())
+
+        result = preprocessor._fix_common_issues(
+            "alpha<BR > \n<br/> <br> <Br /> \n beta"
+        )
+
+        assert result == "alpha<br/><br/>beta"
+
+    def test_missing_sentence_spacing_is_preserved(self):
+        preprocessor = HTMLPreprocessor(ParserConfig())
+
+        result = preprocessor._fix_common_issues("Alpha.One Beta?Two U.S.Code")
+
+        assert result == "Alpha. One Beta? Two U.S.Code"
 
 
 class TestTextExtraction:

@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, cast
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -46,6 +46,27 @@ class DocumentMetadata:
     xbrl_data: Optional[List[XBRLFact]] = None
     preserve_whitespace: bool = False
     original_html: Optional[str] = None  # Store original HTML for anchor analysis
+
+    @property
+    def statistics(self) -> Dict[str, int]:
+        """Return document statistics, computing them on first access."""
+        statistics = self.__dict__.get("_statistics")
+        if statistics is None:
+            loader = self.__dict__.pop("_statistics_loader", None)
+            statistics = loader() if loader is not None else {}
+            self.__dict__["_statistics"] = statistics
+        return statistics
+
+    @statistics.setter
+    def statistics(self, value: Dict[str, int]) -> None:
+        """Set precomputed document statistics."""
+        self.__dict__["_statistics"] = value
+        self.__dict__.pop("_statistics_loader", None)
+
+    def _set_statistics_loader(self, loader: Callable[[], Dict[str, int]]) -> None:
+        """Configure deferred statistics calculation for the owning document."""
+        self.__dict__.pop("_statistics", None)
+        self.__dict__["_statistics_loader"] = loader
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert metadata to dictionary."""
