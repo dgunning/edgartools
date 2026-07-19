@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **`RegistrationS4` data object for S-4 / F-4 registrations** — `filing.obj()` now returns a typed object for merger/acquisition/de-SPAC registrations, exposing the standard registration field surface (`cover_page`, `fee_table`, `total_offering`, `net_fee`, `securities`, …) plus `is_foreign` (F-4) and an `offering_type` classifier. Covers S-4, S-4/A, F-4, F-4/A. (GH #876)
+- **`GET /health` liveness endpoint on the MCP HTTP server** — when the MCP server runs in HTTP transport mode it now exposes an unauthenticated `GET /health` returning `{"status": "ok", "version": <server version>}`, giving container orchestrators (Docker `HEALTHCHECK`, Kubernetes liveness/readiness probes) a cheap liveness signal without the full MCP handshake that the `/mcp` endpoint requires. (GH #882)
 
 ### Fixed
 
