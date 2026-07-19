@@ -7,9 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.43.0] - 2026-07-19
+
+### Added
+
+- **`RegistrationS3.sections` / `.section()` for S-3 shelf registrations** — `filing.obj()` for an S-3 now exposes section-scoped Reg S-K access (`risk_factors`, `use_of_proceeds`, `plan_of_distribution`, `selling_stockholders`, …), the same surface `RegistrationS1` and `Prospectus424B` already provide. Previously S-3 fell through to the non-title-based default schema and could not be section-scoped, blocking RAG/NLP workflows over shelf registrations. A new `S3_SCHEMA` covering `S-3`, `S-3/A`, and `S-3ASR` reuses the shared S-1 prospectus vocabulary; a short filing with no resolvable titles falls back to a single `full` section (no content lost), and item-based forms (8-K, 10-K, …) are untouched. (GH #877)
+
 ### Fixed
 
 - **PP&E silently missing from the EntityFacts balance sheet** — `Company('GE').get_facts().balance_sheet()` omitted Property, Plant & Equipment entirely for FY2021 onward. GE stopped reporting `us-gaap:PropertyPlantAndEquipmentNet` after FY2020 and now presents the net line only under a company-specific extension tag that the SEC companyfacts API does not expose, so the standardized statement built the row empty and dropped it. The builder now reconstructs standard 'Net' balance-sheet lines from component concepts the filer still reports (PP&E as `PropertyPlantAndEquipmentGross − AccumulatedDepreciation…`), matched to each displayed period by `period_end` — GE's components survive only as prior-year-end comparatives in later 10-Qs, tagged Q1–Q3 of the following fiscal year, never FY. A period already reporting the concept directly is untouched, and every component must be present or the period is skipped (no gross-as-net). The operating-lease ROU asset GE folds into its extension line renders on its own standardized row. The XBRL path (`get_financials().balance_sheet()`) was unaffected. (GH #894)
+- **Text following an inline-XBRL fact is no longer dropped from `filing.text()`** — the `edgar.documents` parser silently lost the text after an `ix:nonfraction`'s closing tag, usually the unit word and the rest of the sentence, so "$95.2 billion, of which substantially all will be paid" rendered as a bare "$ 95.2". `_get_element_text` collected each child's text but never its lxml `.tail`; it now captures that trailing text (including after skipped `ix:exclude` children, whose content is still dropped). On NVIDIA's FY2026 10-K, scale words ('billion'/'million') and trailing clauses are recovered across dozens of facts; filings without the inline-container pattern render byte-for-byte unchanged. (GH #898)
+- **MCP resource reads no longer fail with `Unknown resource`** — the MCP SDK passes registered resource handlers a Pydantic `AnyUrl`, which did not compare equal to the string literals the handler matched against, so every listed resource URI failed to read even though it listed correctly. Incoming URIs are now normalized to strings before matching. (GH #897)
+
+### Performance
+
+- **HTML document parsing is 18–23% faster** — `parse_html()` no longer eagerly renders the full document text on every parse. Document statistics (`text_length`, `table_count`, …) are computed lazily on first access to `metadata.statistics` rather than during post-processing, and two hot preprocessing regexes (repeated-`<br>` collapsing and sentence-spacing repair) were rewritten to avoid backtracking. Measured 583 ms vs 726 ms (Apple 10-K) through 1,534 ms vs 1,871 ms (Oracle 10-K); rendered output is unchanged, verified by SHA-256 digest of the full rendered text. (GH #900)
 
 ## [5.42.0] - 2026-07-09
 
