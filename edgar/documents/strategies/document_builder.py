@@ -558,36 +558,46 @@ class DocumentBuilder:
 
     def _get_element_text(self, element: HtmlElement) -> str:
         """Get text content from element."""
+        inline = element.tag.lower() in self.INLINE_ELEMENTS
         text_parts = []
 
         # Get element's direct text
         if element.text:
             # For inline elements, preserve leading/trailing whitespace
-            if element.tag.lower() in self.INLINE_ELEMENTS:
+            if inline:
                 text_parts.append(element.text)
             else:
                 text_parts.append(element.text.strip())
 
         # For simple elements, get all text content
-        if element.tag.lower() in self.INLINE_ELEMENTS or \
-           element.tag.lower() in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+        if inline or element.tag.lower() in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
             # Get all text including from child elements
             for child in element:
                 if child.tag.lower() not in self.SKIP_ELEMENTS:
                     child_text = child.text_content()
                     if child_text:
                         # For inline elements, preserve whitespace in child content too
-                        if element.tag.lower() in self.INLINE_ELEMENTS:
+                        if inline:
                             text_parts.append(child_text)
                         else:
                             text_parts.append(child_text.strip())
+                # Text following a child's closing tag lives on child.tail (lxml),
+                # not on the parent. Without capturing it, the unit word and the
+                # rest of the sentence after an inline fact (e.g. ix:nonfraction)
+                # are silently dropped. Read it even for skipped children, since
+                # their trailing text is still part of the document. (gh-898)
+                if child.tail:
+                    if inline:
+                        text_parts.append(child.tail)
+                    elif child.tail.strip():
+                        text_parts.append(child.tail.strip())
 
-        # For inline elements with preserved whitespace, concatenate directly
-        # For others, join with spaces
-        if element.tag.lower() in self.INLINE_ELEMENTS and len(text_parts) == 1:
-            return text_parts[0] if text_parts else ''
-        else:
-            return ' '.join(text_parts)
+        # A single preserved inline part is returned as-is; otherwise space-join
+        # so word boundaries survive (the preprocessor strips whitespace adjacent
+        # to tags, and this re-separates the parts).
+        if inline and len(text_parts) == 1:
+            return text_parts[0]
+        return ' '.join(text_parts)
 
     def _is_text_only_container(self, element: HtmlElement) -> bool:
         """Check if element contains only text and inline elements."""
