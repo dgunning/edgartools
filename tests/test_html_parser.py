@@ -12,6 +12,7 @@ from edgar.documents.types import TableType
 from edgar.documents.exceptions import HTMLParsingError, DocumentTooLargeError
 from edgar.documents.nodes import HeadingNode, ParagraphNode, TextNode
 from edgar.documents.table_nodes import TableNode
+from edgar.documents.processors.preprocessor import HTMLPreprocessor
 
 
 class TestBasicParsing:
@@ -51,6 +52,118 @@ class TestBasicParsing:
         
         assert "Unclosed paragraph" in doc.text()
         assert "Nested" in doc.text()
+
+    def test_document_statistics_are_lazy_and_cached(self, monkeypatch):
+        """Statistics should preserve their API without rendering text during parsing."""
+        from dataclasses import asdict
+
+        text_calls = 0
+        original_text = Document.text
+
+        def counting_text(document, *args, **kwargs):
+            nonlocal text_calls
+            text_calls += 1
+            return original_text(document, *args, **kwargs)
+
+        monkeypatch.setattr(Document, "text", counting_text)
+
+        doc = parse_html("<html><body><h1>Title</h1><p>Hello World</p></body></html>")
+        assert text_calls == 0
+        assert "_statistics" not in asdict(doc.metadata)
+
+        statistics = doc.metadata.statistics
+        assert text_calls == 1
+        assert statistics == {
+            "node_count": sum(1 for _ in doc.root.walk()),
+            "text_length": len("Title\n\nHello World"),
+            "table_count": 0,
+            "heading_count": 1,
+        }
+
+        assert doc.metadata.statistics is statistics
+        assert text_calls == 1
+
+    def test_statistics_are_available_from_detached_metadata(self):
+        """Metadata should retain exact statistics until their first access."""
+        import gc
+        from weakref import ref
+
+        doc = parse_html("<html><body><p>Hello World</p></body></html>")
+        metadata = doc.metadata
+        document_ref = ref(doc)
+        expected_node_count = sum(1 for _ in doc.root.walk())
+
+        del doc
+        gc.collect()
+
+        assert document_ref() is not None
+        assert metadata.statistics == {
+            "node_count": expected_node_count,
+            "text_length": len("Hello World"),
+            "table_count": 0,
+            "heading_count": 0,
+        }
+
+        gc.collect()
+        assert document_ref() is None
+
+    def test_unaccessed_statistics_do_not_leak_discarded_document(self):
+        """A discarded document cycle should remain garbage-collectable."""
+        import gc
+        from weakref import ref
+
+        doc = parse_html("<html><body><p>Discarded</p></body></html>")
+        document_ref = ref(doc)
+
+        del doc
+        gc.collect()
+
+        assert document_ref() is None
+
+    def test_document_and_metadata_are_pickleable_before_statistics_access(self):
+        """Deferred statistics should preserve document serialization behavior."""
+        import pickle
+
+        doc = parse_html("<html><body><h1>Title</h1><p>Hello World</p></body></html>")
+        # The payload is created locally in the same expression; no untrusted
+        # data reaches this compatibility round-trip.
+        metadata = pickle.loads(pickle.dumps(doc.metadata))  # nosec B301
+
+        assert metadata.statistics == {
+            "node_count": sum(1 for _ in doc.root.walk()),
+            "text_length": len("Title\n\nHello World"),
+            "table_count": 0,
+            "heading_count": 1,
+        }
+
+        restored_document = pickle.loads(  # nosec B301 - trusted local payload
+            pickle.dumps(
+                parse_html("<html><body><p>Serializable</p></body></html>")
+            )
+        )
+        assert restored_document.metadata.statistics["text_length"] == len("Serializable")
+
+    def test_statistics_loader_is_retried_after_failure(self):
+        """A failed deferred calculation should remain available for retry."""
+        from edgar.documents.document import DocumentMetadata
+
+        metadata = DocumentMetadata()
+        attempts = 0
+
+        def calculate_statistics():
+            nonlocal attempts
+            attempts += 1
+            if attempts == 1:
+                raise RuntimeError("temporary failure")
+            return {"node_count": 1}
+
+        metadata._set_statistics_loader(calculate_statistics)
+
+        with pytest.raises(RuntimeError, match="temporary failure"):
+            _ = metadata.statistics
+
+        assert metadata.statistics == {"node_count": 1}
+        assert attempts == 2
 
 
 class TestNodeTypes:
@@ -187,6 +300,33 @@ class TestTableParsing:
         
         # Should handle nested tables appropriately
         assert len(doc.tables) >= 1
+
+
+class TestPreprocessing:
+    """Test HTML cleanup before document construction."""
+
+    def test_excessive_newlines_are_collapsed(self):
+        preprocessor = HTMLPreprocessor(ParserConfig())
+
+        result = preprocessor._normalize_whitespace("alpha\n\nbeta\n\n\n\ngamma")
+
+        assert result == "alpha\n\nbeta\n\ngamma"
+
+    def test_three_or_more_line_breaks_are_collapsed(self):
+        preprocessor = HTMLPreprocessor(ParserConfig())
+
+        result = preprocessor._fix_common_issues(
+            "alpha<BR > \n<br/> <br> <Br /> \n beta"
+        )
+
+        assert result == "alpha<br/><br/>beta"
+
+    def test_missing_sentence_spacing_is_normalized_without_changing_abbreviations(self):
+        preprocessor = HTMLPreprocessor(ParserConfig())
+
+        result = preprocessor._fix_common_issues("Alpha.One Beta?Two U.S.Code")
+
+        assert result == "Alpha. One Beta? Two U.S.Code"
 
 
 class TestTextExtraction:

@@ -2,7 +2,8 @@
 Document postprocessor for final processing after parsing.
 """
 
-from typing import List, Set
+from functools import partial
+from typing import Dict, List, Set
 
 from edgar.documents.config import ParserConfig
 from edgar.documents.document import Document
@@ -243,19 +244,32 @@ class DocumentPostprocessor:
                 node.set_metadata('section', section_name)
 
     def _add_statistics(self, document: Document):
-        """Add document statistics to metadata."""
-        stats = {
-            'node_count': sum(1 for _ in document.root.walk()),
-            'text_length': len(document.text()),
-            'table_count': len(document.tables),
-            'heading_count': len(document.headings),
+        """Configure lazy document statistics on metadata."""
+        document.metadata._set_statistics_loader(
+            partial(
+                self._calculate_statistics,
+                document,
+                include_section_count=self.config.eager_section_extraction,
+            )
+        )
+
+    @staticmethod
+    def _calculate_statistics(
+        document: Document, include_section_count: bool
+    ) -> Dict[str, int]:
+        """Calculate document statistics on first access."""
+        statistics = {
+            "node_count": sum(1 for _ in document.root.walk()),
+            "text_length": len(document.text()),
+            "table_count": len(document.tables),
+            "heading_count": len(document.headings),
         }
 
         # Only add section count if sections were extracted
-        if self.config.eager_section_extraction:
-            stats['section_count'] = len(document.sections)
+        if include_section_count:
+            statistics["section_count"] = len(document.sections)
 
-        document.metadata.statistics = stats
+        return statistics
 
     def _validate_structure(self, document: Document):
         """Validate document structure and fix issues."""

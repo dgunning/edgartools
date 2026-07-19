@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, cast
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -46,6 +46,34 @@ class DocumentMetadata:
     xbrl_data: Optional[List[XBRLFact]] = None
     preserve_whitespace: bool = False
     original_html: Optional[str] = None  # Store original HTML for anchor analysis
+
+    @property
+    def statistics(self) -> Dict[str, int]:
+        """Return document statistics, computing them on first access."""
+        statistics = self.__dict__.get("_statistics")
+        if statistics is None:
+            loader = self.__dict__.get("_statistics_loader")
+            statistics = loader() if loader is not None else {}
+            self.__dict__["_statistics"] = statistics
+            self.__dict__.pop("_statistics_loader", None)
+        return statistics
+
+    @statistics.setter
+    def statistics(self, value: Dict[str, int]) -> None:
+        """Set precomputed document statistics."""
+        self.__dict__["_statistics"] = value
+        self.__dict__.pop("_statistics_loader", None)
+
+    def _set_statistics_loader(self, loader: Callable[[], Dict[str, int]]) -> None:
+        """Configure deferred statistics calculation for the owning document."""
+        self.__dict__.pop("_statistics", None)
+        self.__dict__["_statistics_loader"] = loader
+
+    def __getstate__(self) -> Dict[str, Any]:
+        """Materialize deferred statistics before serializing metadata."""
+        if "_statistics_loader" in self.__dict__:
+            _ = self.statistics
+        return self.__dict__.copy()
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert metadata to dictionary."""
@@ -754,6 +782,12 @@ class Document:
     _text_cache: Optional[str] = field(default=None, init=False, repr=False)
     _config: Optional[Any] = field(default=None, init=False, repr=False)  # ParserConfig reference
     _section_extractor: Optional[Any] = field(default=None, init=False, repr=False)  # cached SECSectionExtractor
+
+    def __getstate__(self) -> Dict[str, Any]:
+        """Materialize lazy metadata before serializing a stable document state."""
+        if "_statistics_loader" in self.metadata.__dict__:
+            _ = self.metadata.statistics
+        return self.__dict__.copy()
 
     @property
     def sections(self) -> Sections:

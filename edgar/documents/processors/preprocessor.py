@@ -80,9 +80,12 @@ class HTMLPreprocessor:
             ),
 
             # Common issues
-            'multiple_br': re.compile(r'(<br\s*/?>[\s\n]*){3,}', re.IGNORECASE),
+            "multiple_br": re.compile(
+                r"<br\s*/?>\s*<br\s*/?>\s*<br\s*/?>(?:\s*<br\s*/?>)*\s*",
+                re.IGNORECASE,
+            ),
             'space_before_punct': re.compile(r'\s+([.,;!?])'),
-            'missing_space_after_punct': re.compile(r'(?<=\w{2})([.!?])([A-Z])'),
+            "missing_space_after_punct": re.compile(r"(\w{2})([.!?])(?=[A-Z])"),
         }
 
     def process(self, html: str) -> str:
@@ -205,7 +208,8 @@ class HTMLPreprocessor:
         html = self._compiled_patterns['multiple_spaces'].sub(' ', html)
 
         # Replace multiple newlines with double newline
-        html = self._compiled_patterns['multiple_newlines'].sub('\n\n', html)
+        if "\n\n\n" in html:
+            html = self._compiled_patterns["multiple_newlines"].sub("\n\n", html)
 
         # Normalize whitespace around tags:
         # 1. Collapse whitespace between adjacent tags to single space (preserves word boundaries)
@@ -220,7 +224,8 @@ class HTMLPreprocessor:
         html = self._compiled_patterns['block_close_tags'].sub(r'\1\n', html)
 
         # Clean up excessive newlines (apply again after adding newlines)
-        html = self._compiled_patterns['multiple_newlines'].sub('\n\n', html)
+        if "\n\n\n" in html:
+            html = self._compiled_patterns["multiple_newlines"].sub("\n\n", html)
 
         return html.strip()
 
@@ -237,7 +242,7 @@ class HTMLPreprocessor:
         # Use pre-compiled patterns for better performance
         html = self._compiled_patterns['multiple_br'].sub('<br/><br/>', html)
         html = self._compiled_patterns['space_before_punct'].sub(r'\1', html)
-        html = self._compiled_patterns['missing_space_after_punct'].sub(r'\1 \2', html)
+        html = self._compiled_patterns["missing_space_after_punct"].sub(r"\1\2 ", html)
 
         # Remove zero-width spaces (simple string replace is faster than regex)
         html = html.replace('\u200b', '')
