@@ -143,7 +143,18 @@ class TOCAnalyzer:
         if missing:
             if body is None:
                 body = self._analyze_body_item_headers(html_content, tree=tree)
-            recovered = {k: v for k, v in (body or {}).items() if k not in result}
+            # A recovered item must bring its *own* anchor: one that collides
+            # with an anchor the TOC already claimed would create two sections
+            # on one span. Note the merge mixes TOC-link anchors with body-scan
+            # anchors, and downstream `toc_section_extractor._analyze_sections`
+            # orders boundaries by *logical* item order, not document position —
+            # a merged anchor that doesn't sit between its logical neighbours'
+            # positions would invert a boundary. Distinct per-item anchors (now
+            # guaranteed by the distinctness guard in the body scan) keep this
+            # safe in practice, but the assumption is real.
+            toc_anchors = set(result.values())
+            recovered = {k: v for k, v in (body or {}).items()
+                         if k not in result and v not in toc_anchors}
             if recovered:
                 logger.info("TOC parse missing core item(s) %s; merged %d "
                             "body-header item(s): %s",
@@ -741,7 +752,29 @@ class TOCAnalyzer:
             if key:
                 mapping.setdefault(key, last_anchor_id)
 
+        # The whole contract rests on each header having its own preceding
+        # anchor. Filers that don't emit per-item anchor divs (Nathan's Famous)
+        # leave runs of consecutive items inheriting one stale id, and every
+        # item in a run then collapses onto the same span downstream. When the
+        # anchors aren't (mostly) distinct the premise failed for this
+        # document — return nothing so both consumers (wholesale replacement
+        # and union-merge) fall back exactly as if the scan found no headers
+        # (GH #891 regression on the #904 fix).
+        if mapping:
+            distinct = len(set(mapping.values()))
+            if distinct < self._MIN_DISTINCT_ANCHOR_SHARE * len(mapping):
+                logger.info(
+                    "Body-header scan found %d item(s) but only %d distinct "
+                    "anchor(s); rejecting the map as stale-anchor collapse",
+                    len(mapping), distinct)
+                return {}
         return mapping
+
+    # Minimum share of body-scan items that must resolve to their own anchor
+    # id for the map to be trusted. Filings this scan is built for (GS, Citi,
+    # Coeur) anchor every header individually (share 1.0); a stale-anchor
+    # collapse is dramatic (Nathan's Famous: 23 items on 4 anchors, 0.17).
+    _MIN_DISTINCT_ANCHOR_SHARE = 0.8
 
     @staticmethod
     def _style_is_bold(style: Optional[str]) -> bool:
