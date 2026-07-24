@@ -69,6 +69,14 @@ class FormSchema:
     # repeat across parts (10-Q: Part I Item 1 ≠ Part II Item 1) — there a part
     # must be detected, never inferred from the number.
     item_part_ranges: Tuple[Tuple[int, int, str], ...] = ()
+    # Item *numbers* within ``item_part_ranges`` that a filer may legitimately
+    # omit entirely (10-K Item 16, "Form 10-K Summary", is optional under Form
+    # 10-K's General Instructions — JPM and XOM omit it). Completeness checks
+    # (the successor-guardrail pre-gate) must not treat their absence as a gap,
+    # or every such filer pays a text-extraction scan on each large section.
+    # Lettered sub-items (9B/9C) need no entry: their *number* is covered by
+    # the mandatory 9/9A. Empty for forms without curated ranges.
+    optional_item_numbers: Tuple[int, ...] = ()
     # Valid item numbers per Part for forms whose items repeat across parts, as
     # (part_roman, lo, hi) inclusive ranges. A 10-Q Part I carries Items 1-4
     # only and Part II Items 1-6, so a detected key outside its Part's range
@@ -984,6 +992,7 @@ _DEF14A_SECTION_PATTERNS = {
 TEN_K_SCHEMA = FormSchema(max_bare_item=15, text_rules=_TEN_K_RULES,
                           skip_unmatched_text=False,
                           item_part_ranges=_TEN_K_ITEM_PART_RANGES,
+                          optional_item_numbers=(16,),
                           size_bands=_TEN_K_SIZE_BANDS,
                           section_patterns=_TEN_K_SECTION_PATTERNS)
 TEN_Q_SCHEMA = FormSchema(max_bare_item=6, text_rules=_TEN_Q_RULES, skip_unmatched_text=True,

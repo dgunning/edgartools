@@ -410,6 +410,7 @@ class HybridSectionDetector:
                 present_numbers.add(int(m.group(1)))
 
         max_item_number = max((hi for _lo, hi, _roman in schema.item_part_ranges), default=16)
+        optional_numbers = set(schema.optional_item_numbers)
 
         for section in sections.values():
             if section.detection_method != 'toc':
@@ -423,7 +424,11 @@ class HybridSectionDetector:
             own_num, own_letter = int(m.group(1)), m.group(2)
             # Cheap pre-gate: scan only when a later item *number* is actually
             # missing from the map — a complete ladder has nowhere to overflow.
-            if all(n in present_numbers for n in range(own_num + 1, max_item_number + 1)):
+            # Optional items (10-K Item 16) don't count as gaps: a filing that
+            # legitimately omits one would otherwise force a text extraction on
+            # every large section (JPM, items 1-15: +16% section-detection time).
+            if all(n in present_numbers or n in optional_numbers
+                   for n in range(own_num + 1, max_item_number + 1)):
                 continue
 
             text = section.text() or ""
