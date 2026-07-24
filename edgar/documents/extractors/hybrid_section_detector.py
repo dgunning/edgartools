@@ -8,6 +8,7 @@ This module implements a multi-strategy approach to section detection:
 """
 
 import logging
+import re
 from typing import Dict, List, Optional
 
 from edgar.documents.config import DetectionThresholds
@@ -232,6 +233,12 @@ class HybridSectionDetector:
         # returning them at full confidence (edgartools-9hwf).
         sections = self._apply_size_guardrail(sections)
 
+        # Schema-validity and successor-header guardrails — same flag-and-return
+        # placement as the size guardrail (after the confidence filter, so a
+        # reduction here cannot silently drop the flagged section).
+        sections = self._apply_part_validity(sections)
+        sections = self._apply_successor_guardrail(sections)
+
         return sections
 
     # Length below which a TOC section is a candidate header-only artifact. The
@@ -259,7 +266,6 @@ class HybridSectionDetector:
         has a sentence; a heading-table section is long. Only ``toc`` sections
         are considered (heading/pattern sections measure length differently).
         """
-        import re
         from edgar.documents.form_schema import get_form_schema
 
         if not get_form_schema(self.form).title_based:
@@ -315,6 +321,137 @@ class HybridSectionDetector:
                 section.warnings.append(warning)
                 section.confidence = min(section.confidence, ANOMALOUS_CONFIDENCE)
                 logger.info(f"Section {section.name}: {warning}")
+
+        return sections
+
+    def _apply_part_validity(self, sections: Dict[str, Section]) -> Dict[str, Section]:
+        """Flag sections whose (part, item) cannot exist on this form (GH #905).
+
+        A 10-Q Part I has Items 1-4 only, yet running-header mis-anchoring can
+        scatter content into phantom keys like ``part_i_item_6`` (Freddie Mac
+        Q1 2026 10-Q put the entire MD&A there, while the real Part I items
+        returned scraps). Length heuristics can't catch this — the phantoms
+        look like valid short-or-long items — but the form schema knows the key
+        is impossible. Flag-and-return: the section keeps its content so
+        nothing is silently lost, with a warning and reduced confidence so
+        callers can tell the whole Part's boundaries are suspect. Only forms
+        with curated per-part ranges (10-Q) are checked.
+        """
+        from edgar.documents.form_schema import get_form_schema
+        from edgar.documents.section_size_bands import ANOMALOUS_CONFIDENCE
+
+        schema = get_form_schema(self.form)
+        if not schema.part_item_ranges:
+            return sections
+
+        for section in sections.values():
+            if schema.item_valid_in_part(section.part, section.item) is False:
+                warning = (
+                    f"Part {section.part} of a {self.form} has no Item {section.item} — "
+                    f"the item boundaries were mis-anchored and this content likely "
+                    f"belongs to another section."
+                )
+                section.warnings.append(warning)
+                section.confidence = min(section.confidence, ANOMALOUS_CONFIDENCE)
+                logger.info(f"Section {section.name}: {warning}")
+
+        return sections
+
+    # Only TOC item sections at least this long are scanned for embedded
+    # successor headers: re-extracting text has a real cost, and a shorter
+    # over-capture (two adjacent stubs) is low-impact. An absorbed item's
+    # header deep inside a large section is exactly the failure worth paying
+    # one extra extraction to catch.
+    _SUCCESSOR_SCAN_MIN_CHARS = 15_000
+
+    # Line-anchored item header: start of line, optional (nbsp) indent, then
+    # "Item N." / "ITEM 7A:" with mandatory punctuation so mid-sentence
+    # references ("see Item 7A below") and prose starting with "Item 7A is…"
+    # don't match.
+    _SUCCESSOR_HEADER_RE = re.compile(
+        r'^[ \t\xa0]*Item\s+(\d{1,2})([A-D]?)\s*[.:]', re.IGNORECASE | re.MULTILINE
+    )
+
+    def _apply_successor_guardrail(self, sections: Dict[str, Section]) -> Dict[str, Section]:
+        """Flag item sections whose text embeds the header of a LATER item that
+        detection missed (GH #904).
+
+        Size bands can't see every overshoot: Coeur Mining's overflowed Item 7
+        (257K chars) sat inside Item 7's generous band, and Item 1B (317K chars
+        of everything through Part IV) has no band at all. But both contained
+        line-anchored headers of items absent from the section map — the
+        smoking gun for an end boundary that ran past them. Flag-and-return,
+        like the size guardrail.
+
+        Scoped to forms with unique items across parts (10-K: schema has
+        ``item_part_ranges``) — on repeating-item forms the bare header number
+        can't be ordered against the section without knowing its Part. Only
+        TOC-detected sections are scanned (same calibration argument as the
+        size guardrail), and only when the map is actually missing a later item
+        number, so fully-anchored filings (AAPL) pay no extraction cost.
+        """
+        from edgar.documents.form_schema import get_form_schema
+        from edgar.documents.section_size_bands import ANOMALOUS_CONFIDENCE
+
+        schema = get_form_schema(self.form)
+        if not schema.item_part_ranges:
+            return sections
+
+        def order(num: int, letter: str) -> int:
+            return num * 1000 + (ord(letter.upper()) - ord('A') + 1 if letter else 0)
+
+        item_re = re.compile(r'^(\d{1,2})([A-D]?)$', re.IGNORECASE)
+        present: set = set()
+        present_numbers: set = set()
+        for section in sections.values():
+            m = item_re.match(section.item or '')
+            if m:
+                present.add(section.item.upper())
+                present_numbers.add(int(m.group(1)))
+
+        max_item_number = max((hi for _lo, hi, _roman in schema.item_part_ranges), default=16)
+
+        for section in sections.values():
+            if section.detection_method != 'toc':
+                continue
+            length = section.end_offset - section.start_offset
+            if length < self._SUCCESSOR_SCAN_MIN_CHARS:
+                continue
+            m = item_re.match(section.item or '')
+            if not m:
+                continue
+            own_num, own_letter = int(m.group(1)), m.group(2)
+            # Cheap pre-gate: scan only when a later item *number* is actually
+            # missing from the map — a complete ladder has nowhere to overflow.
+            if all(n in present_numbers for n in range(own_num + 1, max_item_number + 1)):
+                continue
+
+            text = section.text() or ""
+            matches = list(self._SUCCESSOR_HEADER_RE.finditer(text))
+            for hit in matches:
+                token = f"{int(hit.group(1))}{hit.group(2).upper()}"
+                if token in present:
+                    continue
+                if order(int(hit.group(1)), hit.group(2)) <= order(own_num, own_letter):
+                    continue
+                if int(hit.group(1)) > max_item_number:
+                    continue
+                # An embedded TOC/index block lists many item headers in a tight
+                # run; a genuinely absorbed item's header is surrounded by body
+                # text. Skip hits with 2+ other headers within 300 chars.
+                neighbors = sum(1 for other in matches
+                                if other is not hit and abs(other.start() - hit.start()) <= 300)
+                if neighbors >= 2:
+                    continue
+                warning = (
+                    f"Item {section.item} content contains the header of Item {token}, "
+                    f"which was not detected as its own section — the end boundary "
+                    f"likely overshoots into later items (extraction over-captured)."
+                )
+                section.warnings.append(warning)
+                section.confidence = min(section.confidence, ANOMALOUS_CONFIDENCE)
+                logger.info(f"Section {section.name}: {warning}")
+                break
 
         return sections
 

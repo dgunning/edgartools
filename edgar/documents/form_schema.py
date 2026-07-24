@@ -69,6 +69,14 @@ class FormSchema:
     # repeat across parts (10-Q: Part I Item 1 ≠ Part II Item 1) — there a part
     # must be detected, never inferred from the number.
     item_part_ranges: Tuple[Tuple[int, int, str], ...] = ()
+    # Valid item numbers per Part for forms whose items repeat across parts, as
+    # (part_roman, lo, hi) inclusive ranges. A 10-Q Part I carries Items 1-4
+    # only and Part II Items 1-6, so a detected key outside its Part's range
+    # (FMCC's phantom ``part_i_item_6``, GH #905) names a section that cannot
+    # exist on the form — a strong signal the Part's item boundaries were
+    # mis-anchored. Empty for unique-item forms (10-K validity is already
+    # implied by ``item_part_ranges``) and for forms without curated ranges.
+    part_item_ranges: Tuple[Tuple[str, int, int], ...] = ()
     # Canonical, document-ordered Part sequence for forms whose items *repeat*
     # across parts so the number alone can't name the part (10-Q: ("I", "II") —
     # Part I Item 1 is Financial Statements, Part II Item 1 is Legal Proceedings).
@@ -163,6 +171,24 @@ class FormSchema:
         for lo, hi, roman in self.item_part_ranges:
             if lo <= num <= hi:
                 return f"Part {roman}"
+        return None
+
+    def item_valid_in_part(self, part_roman: Optional[str], item: Optional[str]) -> Optional[bool]:
+        """Whether ``item`` ("2", "1A") can exist in Part ``part_roman`` ("I").
+
+        Returns ``None`` — never flag — when the form declares no per-part
+        ranges, when either argument is missing, or when the Part itself is not
+        in the ranges (an unknown Part is a different failure, not this one).
+        """
+        if not self.part_item_ranges or not part_roman or not item:
+            return None
+        m = re.match(r'(\d+)', item)
+        if not m:
+            return None
+        num = int(m.group(1))
+        for roman, lo, hi in self.part_item_ranges:
+            if roman.upper() == part_roman.upper():
+                return lo <= num <= hi
         return None
 
     def item_for_section_key(self, key: str) -> Optional[str]:
@@ -961,7 +987,9 @@ TEN_K_SCHEMA = FormSchema(max_bare_item=15, text_rules=_TEN_K_RULES,
                           size_bands=_TEN_K_SIZE_BANDS,
                           section_patterns=_TEN_K_SECTION_PATTERNS)
 TEN_Q_SCHEMA = FormSchema(max_bare_item=6, text_rules=_TEN_Q_RULES, skip_unmatched_text=True,
-                          repeating_parts=("I", "II"), size_bands=_TEN_Q_SIZE_BANDS,
+                          repeating_parts=("I", "II"),
+                          part_item_ranges=(("I", 1, 4), ("II", 1, 6)),
+                          size_bands=_TEN_Q_SIZE_BANDS,
                           section_patterns=_TEN_Q_SECTION_PATTERNS)
 # 20-F / 8-K / 424B carry no 10-K-style item-number TOC vocabulary, so every
 # field except section_patterns matches DEFAULT_SCHEMA — the TOC analyzer behaves
