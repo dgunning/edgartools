@@ -532,6 +532,7 @@ class TTMCalculator:
             'income', 'loss', 'expense', 'cost', 'liability',
             'deficit', 'impairment', 'depreciation', 'amortization',
             'interest', 'tax', 'earnings', 'profit',  # Can be loss
+            'providedbyusedin',  # Cash-flow totals commonly represent net outflows
         ]
 
         # Check for negative-OK keywords first (more specific)
