@@ -520,18 +520,33 @@ class TTMCalculator:
         # Normalize concept name (remove namespace prefix)
         name = concept.split(':')[-1].lower() if ':' in concept else concept.lower()
 
-        # Concepts that should always be positive
+        # Concepts that should always be positive.
+        #
+        # 'cash' is deliberately NOT listed (GH #907). It matched every cash
+        # flow concept by substring — NetCashProvidedByUsedInInvestingActivities
+        # contains "cash" — so investing and financing flows, which are
+        # routinely negative, were classified must-be-positive and every
+        # derived quarter was silently dropped by the guards below. The cash
+        # *balances* it appeared to protect (CashAndCashEquivalentsAtCarrying-
+        # Value and friends) are instant facts, which _is_additive_concept
+        # already rejects before this check is ever reached, so the keyword
+        # only ever did harm.
         positive_keywords = [
-            'revenue', 'sales', 'asset', 'cash', 'inventory',
+            'revenue', 'sales', 'asset', 'inventory',
             'receivable', 'property', 'equipment', 'goodwill',
-            'grossprofit',  # Gross profit should be positive
         ]
 
-        # Concepts that can legitimately be negative
+        # Concepts that can legitimately be negative. Checked first, so a
+        # keyword here wins over any substring match in positive_keywords.
         negative_ok_keywords = [
             'income', 'loss', 'expense', 'cost', 'liability',
             'deficit', 'impairment', 'depreciation', 'amortization',
             'interest', 'tax', 'earnings', 'profit',  # Can be loss
+            # Period-over-period movements are signed by definition: a decrease
+            # in receivables or deferred revenue is a legitimate negative. These
+            # otherwise match 'receivable'/'revenue'/'asset'/'goodwill' below and
+            # lose their negative quarters the same way cash flows did (#907).
+            'increasedecrease',
         ]
 
         # Check for negative-OK keywords first (more specific)
