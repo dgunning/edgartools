@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **10-K items no longer overflow to end-of-document when the TOC anchors only a subset of items** — Coeur Mining's FY2025 10-K returned `TenK['Item 7']` as 257K chars running from the Item 7 header to the director signatures (Items 7A/8/9A/10/11 embedded inside), and Item 1B as 317K chars for a one-line "None." stub. Three gaps combined: the body-header scan's bold check missed headers whose font weight lives on child spans (only the *title* span bold — "Item 7A." at weight 400); body-header recovery ran only below the 10-K item floor and replaced the map wholesale, so a TOC that anchored exactly 8 canonical items was never repaired; and adjacent items sharing one anchor div (Coeur's 1B/1C) produced an empty span the slicer treated as unbounded. The bold check now accepts split-span headers, body-header recovery union-merges the items the TOC missed (TOC wins conflicts), and end boundaries skip same-anchor sections. A new successor-header guardrail also flags any remaining TOC item section embedding a line-anchored header of a later, undetected item — the over-capture class size bands can't see (Item 7's band is generous; Item 1B has no band). Standard filers (AAPL, Citigroup) parse byte-identically. (GH #904)
+- **10-Q sections that cannot exist on the form are flagged instead of returned silently at full confidence** — Freddie Mac's Q1 2026 10-Q scattered its MD&A into a phantom `part_i_item_6` (165K chars) while the real Part I items returned mislabeled scraps; a 10-Q Part I has Items 1–4 only, but nothing enforced that, so the phantom keys carried 0.95 confidence and no warnings. The 10-Q `FormSchema` now declares per-part item ranges (Part I: 1–4, Part II: 1–6) and the validation pipeline flags any section whose (part, item) is schema-invalid — warning appended, confidence reduced — so callers can tell the Part's item boundaries were mis-anchored. Content is kept (flag-and-return): the underlying running-header mis-anchoring is tracked separately. (GH #905)
+
 ## [5.43.0] - 2026-07-19
 
 ### Added
