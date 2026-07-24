@@ -99,6 +99,59 @@ def test_body_scan_finds_split_span_headers():
     assert mapping.get("part_ii_item_7a") == "anchor_115"
 
 
+# --- Review fix: stale-anchor collapse must reject the body map --------------
+# (dgunning review of #906: Nathan's Famous emits no anchor div before each
+# item header, so runs of consecutive items inherit one stale id. Accepting
+# such a map destroyed NATH's pattern-detected section map — issue #891 test.)
+
+def _bold_item_header(num, title):
+    return f'<div style="font-weight:700">Item {num}. {title}</div>'
+
+
+STALE_ANCHOR_BODY = f"""
+<html><body>
+<div id="only_anchor"></div>
+{_bold_item_header(10, "Directors, Executive Officers and Corporate Governance")}
+<p>Directors prose.</p>
+{_bold_item_header(11, "Executive Compensation")}
+<p>Compensation prose.</p>
+{_bold_item_header(12, "Security Ownership of Certain Beneficial Owners")}
+<p>Ownership prose.</p>
+{_bold_item_header(13, "Certain Relationships and Related Transactions")}
+<p>Relationships prose.</p>
+{_bold_item_header(14, "Principal Accountant Fees and Services")}
+</body></html>
+"""
+
+
+@pytest.mark.fast
+def test_body_scan_rejects_stale_anchor_collapse():
+    """Five items inheriting one stale anchor id (NATH shape) must yield an
+    empty map, so consumers fall back as if the scan found nothing."""
+    mapping = TOCAnalyzer(form="10-K")._analyze_body_item_headers(STALE_ANCHOR_BODY)
+    assert mapping == {}
+
+
+@pytest.mark.fast
+def test_body_scan_keeps_map_at_distinctness_boundary():
+    """Four self-anchored items plus one stale-anchor dup (share exactly 0.8)
+    stay accepted — the guard targets collapse, not an isolated shared anchor
+    (Coeur's Items 1B/1C legitimately share one)."""
+    html = f"""
+    <html><body>
+    <div id="a10"></div>{_bold_item_header(10, "Directors and Executive Officers")}
+    <div id="a11"></div>{_bold_item_header(11, "Executive Compensation")}
+    <div id="a12"></div>{_bold_item_header(12, "Security Ownership of Certain Owners")}
+    <div id="a13"></div>{_bold_item_header(13, "Certain Relationships and Transactions")}
+    <p>No fresh anchor before the next header.</p>
+    {_bold_item_header(14, "Principal Accountant Fees and Services")}
+    </body></html>
+    """
+    mapping = TOCAnalyzer(form="10-K")._analyze_body_item_headers(html)
+    assert len(mapping) == 5
+    assert mapping["part_iii_item_10"] == "a10"
+
+
 # --- Fix 2: union-merge of body headers into a gappy TOC map -----------------
 
 # Coeur's TOC parse: exactly 8 canonical items, ending at Item 7 — clears the
@@ -157,6 +210,24 @@ def test_union_merge_fills_missing_items_and_toc_wins_conflicts():
     assert merged["part_ii_item_7"] == "t7"
     # Everything the TOC anchored is still present.
     assert set(COEUR_LIKE_TOC) <= set(merged)
+
+
+@pytest.mark.fast
+def test_union_merge_skips_recovered_item_colliding_with_toc_anchor():
+    """A body-scan item that resolved to an anchor the TOC already claimed
+    must not be merged — it would put two sections on one span."""
+    body_html = """
+    <html><body>
+    <div id="t7"></div>
+    <div><span style="font-weight:400">Item 7A.</span>
+         <span style="font-weight:700">Quantitative and Qualitative Disclosures</span></div>
+    </body></html>
+    """
+    analyzer = TOCAnalyzer(form="10-K")
+    analyzer._analyze_generic_toc = lambda html_content, tree=None: dict(COEUR_LIKE_TOC)
+    merged = analyzer.analyze_toc_structure(body_html)
+    assert "part_ii_item_7a" not in merged
+    assert merged == COEUR_LIKE_TOC
 
 
 # --- Fix 3: sections sharing one anchor don't run to end-of-document ---------
@@ -296,6 +367,55 @@ def test_successor_guardrail_ignores_midline_cross_references():
     }
     result = _make_10k_detector()._apply_successor_guardrail(sections)
     assert result["part_ii_item_8"].warnings == []
+
+
+# --- Review fix: pre-gate must not leak on optional Item 16 -------------------
+# (dgunning review of #906: Item 16, "Form 10-K Summary", is optional and
+# commonly omitted — JPM items 1-15 paid 5 extractions, +16% detection time.)
+
+def _counting_section(name, part, item, length, calls):
+    def _extract(_name=None, **kwargs):
+        calls.append(name)
+        return "x" * length
+    return Section(
+        name=name, title=name, node=SectionNode(section_name=name),
+        start_offset=0, end_offset=length, confidence=0.95,
+        detection_method="toc", part=part, item=item,
+        _text_extractor=_extract,
+    )
+
+
+def _ladder_10k_sections(calls, through=15):
+    def part_for(n):
+        return "I" if n <= 4 else "II" if n <= 9 else "III" if n <= 14 else "IV"
+    sections = {}
+    for n in range(1, through + 1):
+        part = part_for(n)
+        key = f"part_{part.lower()}_item_{n}"
+        sections[key] = _counting_section(key, part, str(n), 20_000, calls)
+    return sections
+
+
+@pytest.mark.fast
+def test_successor_pre_gate_zero_extractions_when_only_item_16_absent():
+    """Items 1-15 present, optional 16 absent: no section text is extracted."""
+    calls = []
+    result = _make_10k_detector()._apply_successor_guardrail(
+        _ladder_10k_sections(calls)
+    )
+    assert calls == []
+    assert all(not s.warnings for s in result.values())
+
+
+@pytest.mark.fast
+def test_successor_pre_gate_still_scans_when_mandatory_item_missing():
+    """Dropping mandatory Item 15 must open the gate — the leak fix cannot
+    blind the guardrail to real gaps."""
+    calls = []
+    _make_10k_detector()._apply_successor_guardrail(
+        _ladder_10k_sections(calls, through=14)
+    )
+    assert calls, "a missing mandatory item must open the scan gate"
 
 
 # --- End-to-end: Coeur Mining 10-K under VCR ----------------------------------
