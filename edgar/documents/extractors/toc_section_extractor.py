@@ -157,11 +157,19 @@ class SECSectionExtractor:
         for i, (section_name, section_data) in enumerate(sorted_sections):
             start_anchor = section_data['anchor_id']
 
-            # End boundary is the start of the next section (if any)
+            # End boundary is the start of the next section whose anchor
+            # differs from this section's own. Some filers give adjacent items
+            # a single shared anchor (Coeur Mining's one-line Item 1B stub and
+            # Item 1C both target the same div, GH #904); taking the immediate
+            # next section there would make the end anchor equal the start
+            # anchor, an empty span the slicer treats as unbounded — the
+            # section ran to end-of-document.
             end_anchor = None
-            if i + 1 < len(sorted_sections):
-                next_section = sorted_sections[i + 1][1]
-                end_anchor = next_section['anchor_id']
+            for j in range(i + 1, len(sorted_sections)):
+                next_anchor = sorted_sections[j][1]['anchor_id']
+                if next_anchor != start_anchor:
+                    end_anchor = next_anchor
+                    break
 
             # Title-based forms (424B): tighten the end to the next *TOC entry*
             # (vocabulary or not) so a detected section does not absorb
