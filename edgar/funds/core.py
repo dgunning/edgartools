@@ -422,6 +422,7 @@ class Fund:
         """
         self._original_identifier = str(identifier)
         self._target_series_id = None  # New: specific series if determinable
+        self._series_resolution = None  # How _target_series_id was determined
 
         # Handle ticker resolution to series
         if isinstance(identifier, str) and self._is_fund_ticker(identifier):
@@ -429,6 +430,7 @@ class Fund:
             target_series_id = TickerSeriesResolver.get_primary_series(identifier)
             if target_series_id:
                 self._target_series_id = target_series_id
+                self._series_resolution = 'ticker'
 
         # Use existing find_fund to get the appropriate entity
         self._entity = find_fund(identifier)
@@ -450,6 +452,19 @@ class Fund:
             self._class = None
             self._series = None
             self._company = None
+
+        # A series ID or class ID names one series just as unambiguously as a
+        # ticker does, but only the ticker path above populated the target
+        # series. Backfill it from the resolved hierarchy so series-scoped
+        # behaviour — get_filings(series_only=True) above all — works for
+        # Fund("S000...") and Fund("C000...") too. Without this the series_only
+        # branch was skipped entirely and the caller got the umbrella trust's
+        # filings, i.e. a sibling series' data (GH #909, follow-on to #888).
+        if not self._target_series_id and self._series is not None:
+            series_id = getattr(self._series, 'series_id', None)
+            if series_id:
+                self._target_series_id = series_id
+                self._series_resolution = 'hierarchy'
 
     def _is_fund_ticker(self, identifier: str) -> bool:
         """Check if an identifier appears to be a fund ticker"""
@@ -657,12 +672,15 @@ class Fund:
                     'message': f"'{self._original_identifier}' resolved as ETF company ticker"
                 }
             else:
+                resolved_as = ("fund series/class identifier"
+                               if self._series_resolution == 'hierarchy'
+                               else "mutual fund ticker")
                 return {
                     'status': 'success',
                     'method': 'mutual_fund_lookup',
                     'series_id': self._target_series_id,
                     'original_identifier': self._original_identifier,
-                    'message': f"'{self._original_identifier}' resolved as mutual fund ticker"
+                    'message': f"'{self._original_identifier}' resolved as {resolved_as}"
                 }
 
         # Check if it's a company ticker (ETF) that we didn't resolve
