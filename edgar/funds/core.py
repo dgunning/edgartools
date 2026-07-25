@@ -622,7 +622,10 @@ class Fund:
 
     def get_series(self) -> Optional[FundSeries]:
         """
-        Get the specific series for the original ticker if determinable.
+        Get the specific series this Fund's identifier resolves to, if determinable.
+
+        Works for a ticker, a series ID or a class ID; a Fund built from a
+        multi-series trust's CIK names no single series.
 
         Returns:
             FundSeries if we can determine a specific series, None otherwise
@@ -649,6 +652,14 @@ class Fund:
                 except Exception as e:
                     log.debug(f"Failed to create ETF series for {self._target_series_id}: {e}")
             else:
+                # The hierarchy resolved at construction already holds the target
+                # series — re-resolving it by ID would cost up to two HTTP calls
+                # (get_fund_object's lru_cache is only 16 entries) to rebuild an
+                # equivalent object. Only look it up when the two disagree, which
+                # keeps the existing preference for the ticker-resolved series
+                # over the class's parent when a ticker maps elsewhere.
+                if self._series is not None and getattr(self._series, 'series_id', None) == self._target_series_id:
+                    return self._series
                 # Regular mutual fund series - try to get by ID
                 try:
                     return get_fund_series(self._target_series_id)

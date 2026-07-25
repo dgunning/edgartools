@@ -61,6 +61,23 @@ def test_series_only_filters_regardless_of_identifier_form(identifier):
 
 @pytest.mark.network
 @pytest.mark.regression
+@pytest.mark.parametrize("identifier", [VCLT_TICKER, VCLT_SERIES, VCLT_CLASS])
+def test_get_series_reuses_resolved_hierarchy(identifier):
+    """Populating _target_series_id must not send get_series() off to re-resolve
+    the series by ID — the hierarchy built at construction already holds it, and
+    get_fund_object's lru_cache is only 16 entries deep, so a miss would cost two
+    HTTP calls to rebuild an equivalent object."""
+    fund = Fund(identifier)
+    series = fund.get_series()
+
+    assert series is not None
+    assert series.series_id == VCLT_SERIES
+    # The already-resolved object itself, not a rebuilt copy.
+    assert series is fund._series
+
+
+@pytest.mark.network
+@pytest.mark.regression
 def test_identifier_forms_agree_on_filing_set():
     """The three identifier forms are three names for one series, so they must
     return the same filings."""
