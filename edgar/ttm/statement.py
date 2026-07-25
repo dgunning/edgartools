@@ -12,6 +12,16 @@ import pandas as pd
 from edgar.entity.models import FinancialFact
 from edgar.ttm.calculator import DurationBucket, TTMCalculator
 
+# Matches the per-share detection used by the entity statement renderer
+# (enhanced_statement.py), so both surfaces agree on what is a per-share amount.
+_PER_SHARE_INDICATORS = ('pershare', 'per share', 'earnings per', 'eps')
+
+
+def _is_per_share_item(item: dict) -> bool:
+    """True when a statement line item holds a per-share amount."""
+    haystack = f"{item.get('concept', '')} {item.get('label', '')}".lower()
+    return any(indicator in haystack for indicator in _PER_SHARE_INDICATORS)
+
 
 @dataclass
 class TTMStatement:
@@ -159,7 +169,12 @@ class TTMStatement:
                     continue
 
                 abs_value = abs(value)
-                if abs_value >= 1e9:
+                if _is_per_share_item(item):
+                    # Per-share amounts are dollars-and-cents, not magnitudes:
+                    # the whole-dollar format below rendered EPS of 20.16 as
+                    # "$20" while to_dataframe() kept the precision (GH #910).
+                    value_str = f"{value:,.2f}"
+                elif abs_value >= 1e9:
                     value_str = f"${value / 1e9:,.1f}B"
                 elif abs_value >= 1e6:
                     value_str = f"${value / 1e6:,.1f}M"
@@ -298,6 +313,22 @@ class TTMStatementBuilder:
             if len(ni_quarters) < 4:
                 return None
 
+            # Derive each window's label fiscal year from its period_end rather
+            # than the as_of fact's tagged fiscal_year. The SEC tags a quarter
+            # re-filed as a comparative with the FILING's fiscal year, so GOOGL's
+            # Q2 2025 (period_end 2025-06-30) carries fy=2026 and would be
+            # labelled "Q2 2026" — colliding with the real Q2 2026 window and
+            # overwriting it in the caller's period dict. calculate_ttm_trend()
+            # already does this for every other concept (GH #793); the EPS path
+            # did not, which is why only EPS rows were wrong (GH #910).
+            from edgar.entity.enhanced_statement import (
+                calculate_fiscal_year_for_label,
+                detect_fiscal_year_end,
+            )
+            # Detect FYE from the same fact list the windows are built from;
+            # detect_fiscal_year_end takes a list of facts, not an EntityFacts.
+            fiscal_year_end_month = detect_fiscal_year_end(net_income_facts)
+
             shares_calc = TTMCalculator(shares_facts)
             share_quarters = shares_calc._filter_by_duration(DurationBucket.QUARTER)
             if not share_quarters:
@@ -351,10 +382,13 @@ class TTMStatementBuilder:
                     continue
 
                 as_of_fact = window[-1]
+                label_fy = calculate_fiscal_year_for_label(
+                    as_of_fact.period_end, fiscal_year_end_month
+                )
                 rows.append({
-                    "as_of_quarter": f"{as_of_fact.fiscal_period} {as_of_fact.fiscal_year}",
+                    "as_of_quarter": f"{as_of_fact.fiscal_period} {label_fy}",
                     "ttm_value": ttm_income / avg_shares,
-                    "fiscal_year": as_of_fact.fiscal_year,
+                    "fiscal_year": label_fy,
                     "fiscal_period": as_of_fact.fiscal_period,
                     "as_of_date": as_of_fact.period_end,
                 })
@@ -445,9 +479,22 @@ class TTMStatementBuilder:
                 if trend is None:
                     continue
 
-                period_values = {
-                    row["display_quarter"]: row["ttm_value"] for _, row in trend.iterrows()
-                }
+                # trend is ordered most-recent-first. Keep the first window seen
+                # for a label: if two windows ever collide on one label again,
+                # the current period's value wins rather than being silently
+                # overwritten by an older one, which is how GH #910 turned a
+                # labelling bug into a plausible-looking wrong number.
+                period_values = {}
+                for _, row in trend.iterrows():
+                    period_label = row["display_quarter"]
+                    if period_label in period_values:
+                        from edgar.core import log
+                        log.debug(
+                            "%s: duplicate TTM period label %s (window ending %s ignored)",
+                            concept, period_label, row["as_of_date"],
+                        )
+                        continue
+                    period_values[period_label] = row["ttm_value"]
 
                 if base_period_labels:
                     values = {p: period_values.get(p) for p in base_period_labels}
