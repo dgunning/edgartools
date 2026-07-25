@@ -4,6 +4,8 @@
 
 # EdgarTools — Python Library for SEC EDGAR Filings
 
+[![MCP Toplist](https://mcptoplist.com/badge/tools.edgar%2Fsec-intelligence.svg)](https://mcptoplist.com/server/tools.edgar%2Fsec-intelligence)
+
 <br clear="left">
 
 <p>
