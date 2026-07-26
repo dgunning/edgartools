@@ -135,6 +135,38 @@ Ensure:
 - Coverage doesn't decrease
 - New features have tests
 
+#### Test cassettes (VCR)
+
+Network-dependent tests replay recorded SEC responses from `tests/cassettes/`.
+A cassette is the test's ground truth — when a test asserts a section is 91,682
+characters, the authority for that number is the recorded response body, not
+SEC. Hold cassettes to the same standard as the assertions they support:
+
+- **Record from live SEC, and don't edit afterwards.** Delete the cassette and
+  re-run the test to record it (`record_mode` is `once`, so an existing file is
+  never overwritten). Never hand-edit a recorded response — not to shrink a
+  large cassette, not to de-flake a test, not to make an assertion pass. An
+  edited cassette looks like it verifies against a real filing while verifying
+  against something SEC never sent.
+- **Record against `main`, not against your fix.** Recording while your change
+  is applied captures the patched behaviour, so the test can no longer fail if
+  the fix regresses.
+- **Keep cassettes small by scoping the test, not trimming the file.** Narrow
+  what the test fetches — a smaller filing, a single request — and re-record.
+- **CI will not generate cassettes for you.** They are committed artifacts
+  reviewed as part of the PR. Note in the PR description which filings you
+  recorded and when, so a reviewer can spot-check a value against SEC.
+
+Cassettes are loaded as plain data — recorded requests, headers and response
+bodies only. Verify with:
+
+```bash
+hatch run check-cassettes
+```
+
+Run it locally before testing a branch you did not write; CI runs it ahead of
+the test jobs.
+
 ### 5. Commit
 
 Use clear, conventional commit messages:

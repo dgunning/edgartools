@@ -69,6 +69,39 @@ This project uses [Hatch](https://hatch.pypa.io/) for environment and project ma
     *   Explain the changes you made and why.
 8.  **Review:** A maintainer will review your PR. Be prepared to discuss your changes and make further adjustments based on feedback.
 
+## Test Cassettes (VCR)
+
+Network-dependent tests replay recorded SEC responses from `tests/cassettes/`
+rather than hitting the network on every run. A cassette is the test's ground
+truth: when a test asserts that a section is 91,682 characters, the authority
+for that number is the recorded response body, not SEC. Cassettes are therefore
+held to the same standard as the assertions they support.
+
+**Record from live SEC, and don't edit afterwards.** Delete the cassette and
+re-run the test to record it (`record_mode` is `once`, so an existing file is
+never overwritten). Never hand-edit a recorded response — not to shrink a large
+cassette, not to remove a field that makes a test flaky, and not to adjust a
+value so an assertion passes. An edited cassette produces a test that looks like
+it verifies against a real filing while verifying against something SEC never
+sent.
+
+**Record against `main`, not against your fix.** If you record while your change
+is applied, the cassette captures your patched behaviour and the test can no
+longer fail if the fix regresses. Record first, then develop against the
+recording.
+
+**Keep cassettes small by scoping the test, not by trimming the file.** If a
+cassette is unreasonably large, narrow what the test fetches — a smaller filing,
+a single request — and re-record.
+
+**CI will not generate cassettes for you.** They are committed artifacts, and
+they are reviewed as part of the PR. Say in the PR description which filings you
+recorded and when, so a reviewer can spot-check a value against SEC directly.
+
+Cassettes are loaded as plain data — recorded requests, headers and response
+bodies only. `hatch run check-cassettes` verifies this and runs in CI ahead of
+the test jobs; run it locally if you are about to run a branch you did not write.
+
 ## Documentation Structure
 
 EdgarTools uses a three-tier documentation system:
