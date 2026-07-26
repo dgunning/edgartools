@@ -38,8 +38,27 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Must pass before any job that runs pytest. vcrpy loads cassettes with
+  # PyYAML's unsafe loader, so a cassette carrying a python/ tag executes code
+  # in the runner the moment a test touches it — gating after the suite has
+  # started would be no gate at all. Cheap (~10s) and needs only PyYAML.
+  cassette-gate:
+    name: Cassette safety gate
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Set up Python 3.13
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      with:
+        python-version: '3.13'
+    - name: Install PyYAML
+      run: python -m pip install --upgrade pip PyYAML
+    - name: Scan cassettes for unsafe YAML tags
+      run: python scripts/check_cassettes.py
+
   test-fast:
     # PRs: single version for a quick gate. Push/schedule: full matrix.
+    needs: cassette-gate
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -79,6 +98,7 @@ jobs:
     # Network tests skip PRs — SEC API behavior doesn't change per-commit.
     # Runs on push to main, nightly schedule, and manual dispatch.
     if: github.event_name != 'pull_request'
+    needs: cassette-gate
     runs-on: ubuntu-latest
     env:
       # Relocate the EDGAR data/cache dir into the workspace so it can be cached.
@@ -132,6 +152,7 @@ jobs:
   test-slow:
     # Slow tests skip PRs (often network-heavy). Push/schedule/dispatch only.
     if: github.event_name != 'pull_request'
+    needs: cassette-gate
     runs-on: ubuntu-latest
     env:
       EDGAR_LOCAL_DATA_DIR: ${{ github.workspace }}/.edgar-data

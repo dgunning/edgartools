@@ -23,7 +23,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # See python-hatch-workflow.yml: cassettes are loaded with PyYAML's unsafe
+  # loader, so this has to pass before anything runs pytest.
+  cassette-gate:
+    name: Cassette safety gate
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Set up Python 3.13
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      with:
+        python-version: '3.13'
+    - name: Install PyYAML
+      run: python -m pip install --upgrade pip PyYAML
+    - name: Scan cassettes for unsafe YAML tags
+      run: python scripts/check_cassettes.py
+
   regression:
+    needs: cassette-gate
     runs-on: ubuntu-latest
     env:
       EDGAR_LOCAL_DATA_DIR: ${{ github.workspace }}/.edgar-data
