@@ -243,11 +243,28 @@ def _extract_operating_expenses(rows: List[List[str]]) -> List[Dict]:
                 data['acquired_fund_fees'] = _parse_percentage(value)
             elif 'total annual' in label and 'after' not in label:
                 data['total_annual_expenses'] = _parse_percentage(value)
-            elif 'fee waiver' in label or 'reimbursement' in label:
-                data['fee_waiver'] = _parse_percentage(value)
+            # Net expenses must be tested before the waiver, because the
+            # standard SEC wording for the net row — "Total Annual Fund
+            # Operating Expenses After Fee Waiver and Reimbursement" —
+            # contains "fee waiver" too. Matching the waiver first captured
+            # the net ratio as the waiver and left net_expenses unreachable.
+            # Anchored on the start of the label: filers sometimes spill the
+            # footnote prose into the waiver's own label cell, and that prose
+            # routinely contains both "total ... expenses" and "after", which
+            # an unanchored match would misread as the net row.
             elif ('net expense' in label or
-                  ('total' in label and 'after' in label)):
+                  label.startswith('net') or
+                  (label.startswith('total') and 'after' in label)):
                 data['net_expenses'] = _parse_percentage(value)
+            elif 'fee waiver' in label or 'reimbursement' in label:
+                # Filers render the waiver either parenthesized ("(0.19)%") or
+                # bare ("0.03%"). Normalize to a signed reduction so that
+                # total_annual_expenses + fee_waiver == net_expenses holds
+                # regardless of how the filer wrote it.
+                waiver = _parse_percentage(value)
+                if waiver is not None and waiver > 0:
+                    waiver = -waiver
+                data['fee_waiver'] = waiver
 
         results.append(data)
 

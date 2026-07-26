@@ -53,7 +53,9 @@ class ShareClassFees(BaseModel):
     other_expenses: Optional[Decimal] = None
     acquired_fund_fees: Optional[Decimal] = None
     total_annual_expenses: Optional[Decimal] = None
+    # Signed reduction, so total_annual_expenses + fee_waiver == net_expenses.
     fee_waiver: Optional[Decimal] = None
+    # Total annual expenses after the waiver ("net expense ratio").
     net_expenses: Optional[Decimal] = None
 
     # Expense example ($10K hypothetical)
