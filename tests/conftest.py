@@ -9,6 +9,15 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Must run before any cassette is loaded. vcrpy deserializes cassettes with
+# PyYAML's unsafe loader, which constructs arbitrary Python objects from
+# python/ tags — so a cassette on a branch you're reviewing executes as soon as
+# a test touches it. Raises rather than warning if it can't secure the loader
+# (beads edgartools-j1ui).
+from tests._vcr_safety import install_safe_yaml_deserializer  # noqa: E402
+
+install_safe_yaml_deserializer()
+
 # VCR configuration for recording/replaying HTTP interactions
 CASSETTES_DIR = Path(__file__).parent / "cassettes"
 
