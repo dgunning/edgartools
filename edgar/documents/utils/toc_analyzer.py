@@ -125,10 +125,41 @@ class TOCAnalyzer:
         # "Item N. Title" heading preceded by an anchor. When the linked-TOC
         # result is below the floor of items a healthy 10-K must have, scan the
         # body headers and prefer them if they recover more canonical items.
+        body: Optional[Dict[str, str]] = None
         if self._canonical_item_count(result) < self._expected_item_floor():
             body = self._analyze_body_item_headers(html_content, tree=tree)
             if self._canonical_item_count(body) > self._canonical_item_count(result):
                 return body
+
+        # Union-merge recovery (GH #904): a TOC parse can anchor a real but
+        # *incomplete* subset of items — enough to clear the floor above, yet
+        # missing items whose absence silently corrupts boundaries (the last
+        # anchored item extends to end-of-document; Coeur Mining's Item 7
+        # returned the MD&A plus the entire back half of the filing). When core
+        # items every 10-K carries are missing, scan the body headers and fill
+        # in only the items the TOC missed — the TOC keeps every item it did
+        # anchor (it stays the higher-trust source on conflicts).
+        missing = self._missing_core_items(result)
+        if missing:
+            if body is None:
+                body = self._analyze_body_item_headers(html_content, tree=tree)
+            # A recovered item must bring its *own* anchor: one that collides
+            # with an anchor the TOC already claimed would create two sections
+            # on one span. Note the merge mixes TOC-link anchors with body-scan
+            # anchors, and downstream `toc_section_extractor._analyze_sections`
+            # orders boundaries by *logical* item order, not document position —
+            # a merged anchor that doesn't sit between its logical neighbours'
+            # positions would invert a boundary. Distinct per-item anchors (now
+            # guaranteed by the distinctness guard in the body scan) keep this
+            # safe in practice, but the assumption is real.
+            toc_anchors = set(result.values())
+            recovered = {k: v for k, v in (body or {}).items()
+                         if k not in result and v not in toc_anchors}
+            if recovered:
+                logger.info("TOC parse missing core item(s) %s; merged %d "
+                            "body-header item(s): %s",
+                            sorted(missing), len(recovered), sorted(recovered))
+                result.update(recovered)
         return result
 
     @staticmethod
@@ -139,6 +170,29 @@ class TOCAnalyzer:
         # Officers) — not just a–c.
         pat = re.compile(r'^(part_[ivxlcdm]+_)?item_\d+[a-z]?$', re.IGNORECASE)
         return sum(1 for k in (mapping or {}) if pat.match(k))
+
+    # Items effectively every 10-K carries in its body. A TOC parse missing any
+    # of these anchored a subset of the filing's real headers, so the map is
+    # gappy and body-header recovery should fill the gaps (GH #904). Deliberately
+    # excludes items filers legitimately omit or defer (3, 9B/9C, Part III/IV).
+    _CORE_TEN_K_ITEMS = ('1', '1A', '7', '7A', '8', '9A')
+
+    def _missing_core_items(self, mapping: Optional[Dict[str, str]]) -> set:
+        """Core 10-K items absent from a TOC mapping's item keys.
+
+        Empty set for non-10-K forms (the body-header signature is
+        10-K-shaped, same scope as :meth:`_expected_item_floor`) and for empty
+        mappings (nothing to repair — the floor gate already handled wholesale
+        replacement).
+        """
+        if (self.form or '10-K').replace('/A', '') != '10-K' or not mapping:
+            return set()
+        present = set()
+        for key in mapping:
+            m = re.match(r'^(?:part_[ivxlcdm]+_)?item_(\d+[a-z]?)$', key, re.IGNORECASE)
+            if m:
+                present.add(m.group(1).upper())
+        return {item for item in self._CORE_TEN_K_ITEMS if item not in present}
 
     def _expected_item_floor(self) -> int:
         """Minimum canonical item count below which a 10-K TOC parse is suspect.
@@ -698,24 +752,87 @@ class TOCAnalyzer:
             if key:
                 mapping.setdefault(key, last_anchor_id)
 
+        # The whole contract rests on each header having its own preceding
+        # anchor. Filers that don't emit per-item anchor divs (Nathan's Famous)
+        # leave runs of consecutive items inheriting one stale id, and every
+        # item in a run then collapses onto the same span downstream. When the
+        # anchors aren't (mostly) distinct the premise failed for this
+        # document — return nothing so both consumers (wholesale replacement
+        # and union-merge) fall back exactly as if the scan found no headers
+        # (GH #891 regression on the #904 fix).
+        if mapping:
+            distinct = len(set(mapping.values()))
+            if distinct < self._MIN_DISTINCT_ANCHOR_SHARE * len(mapping):
+                logger.info(
+                    "Body-header scan found %d item(s) but only %d distinct "
+                    "anchor(s); rejecting the map as stale-anchor collapse",
+                    len(mapping), distinct)
+                return {}
         return mapping
 
+    # Minimum share of body-scan items that must resolve to their own anchor
+    # id for the map to be trusted. Filings this scan is built for (GS, Citi,
+    # Coeur) anchor every header individually (share 1.0); a stale-anchor
+    # collapse is dramatic (Nathan's Famous: 23 items on 4 anchors, 0.17).
+    _MIN_DISTINCT_ANCHOR_SHARE = 0.8
+
     @staticmethod
-    def _is_bold_header(el, tag: str) -> bool:
+    def _style_is_bold(style: Optional[str]) -> bool:
+        """True when an inline style string declares bold weight (>= 600)."""
+        m = re.search(r'font-weight:\s*(bold|\d+)', (style or '').lower())
+        if not m:
+            return False
+        val = m.group(1)
+        return val == 'bold' or (val.isdigit() and int(val) >= 600)
+
+    # A heading counts as bold when its bold child spans carry at least this
+    # share of its text. The split-span headers this targets put the whole
+    # *title* in a bold span and only the short "Item 7A." fragment in a
+    # regular-weight one (share ~0.85); a prose line with one emphasised word
+    # sits far below one half.
+    _BOLD_CHILD_MIN_SHARE = 0.5
+
+    @classmethod
+    def _bold_text_len(cls, el) -> int:
+        """Total text length carried by bold descendants of ``el``.
+
+        A bold element contributes its whole subtree text (no double counting
+        of bold-within-bold); non-bold containers recurse.
+        """
+        total = 0
+        for child in el:
+            if not isinstance(child.tag, str):
+                continue
+            if child.tag in ('b', 'strong') or cls._style_is_bold(child.get('style')):
+                total += len((child.text_content() or '').strip())
+            else:
+                total += cls._bold_text_len(child)
+        return total
+
+    @classmethod
+    def _is_bold_header(cls, el, tag: str) -> bool:
         """Heuristic: is this element styled as a heading?
 
         True for semantic heading tags and for elements whose own inline style
         is bold (``font-weight:700`` / ``bold``). Body prose is not bold, so this
         plus the strict heading-text patterns keeps inline references out.
+
+        Also true when the element's *bold child spans* carry the majority of
+        its text: some filers (Coeur Mining) build each body item header as an
+        unstyled div whose weight lives entirely on child spans — and split so
+        that only the title span is bold ("Item 7A." at weight 400, the title
+        at 700). The element's own style check sees weight nowhere and the scan
+        matches zero headers on such filings (GH #904). Callers pre-filter to
+        short texts (<= 200 chars), so the child walk is cheap.
         """
         if tag in ('h1', 'h2', 'h3', 'h4', 'h5', 'h6'):
             return True
-        style = (el.get('style') or '').lower()
-        m = re.search(r'font-weight:\s*(bold|\d+)', style)
-        if not m:
+        if cls._style_is_bold(el.get('style')):
+            return True
+        text_len = len((el.text_content() or '').strip())
+        if not text_len:
             return False
-        val = m.group(1)
-        return val == 'bold' or (val.isdigit() and int(val) >= 600)
+        return cls._bold_text_len(el) / text_len >= cls._BOLD_CHILD_MIN_SHARE
 
     # ---- Agent-specific TOC parsers ----
 
