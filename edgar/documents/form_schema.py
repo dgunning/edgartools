@@ -70,12 +70,15 @@ class FormSchema:
     # must be detected, never inferred from the number.
     item_part_ranges: Tuple[Tuple[int, int, str], ...] = ()
     # Item *numbers* within ``item_part_ranges`` that a filer may legitimately
-    # omit entirely (10-K Item 16, "Form 10-K Summary", is optional under Form
-    # 10-K's General Instructions — JPM and XOM omit it). Completeness checks
-    # (the successor-guardrail pre-gate) must not treat their absence as a gap,
-    # or every such filer pays a text-extraction scan on each large section.
-    # Lettered sub-items (9B/9C) need no entry: their *number* is covered by
-    # the mandatory 9/9A. Empty for forms without curated ranges.
+    # omit entirely. On Form 10-K that is Item 16 ("Form 10-K Summary", optional
+    # under the General Instructions) and Item 6, which has been "[Reserved]"
+    # since the 2020 amendments retired Selected Financial Data — filers may
+    # carry it as a bare "[Reserved]" heading or leave it out, and many leave it
+    # out (XOM). Completeness checks (the successor-guardrail pre-gate) must not
+    # treat their absence as a gap, or every such filer pays a text-extraction
+    # scan on each large section. Lettered sub-items (9B/9C) need no entry:
+    # their *number* is covered by the mandatory 9/9A. Empty for forms without
+    # curated ranges.
     optional_item_numbers: Tuple[int, ...] = ()
     # Valid item numbers per Part for forms whose items repeat across parts, as
     # (part_roman, lo, hi) inclusive ranges. A 10-Q Part I carries Items 1-4
@@ -992,7 +995,7 @@ _DEF14A_SECTION_PATTERNS = {
 TEN_K_SCHEMA = FormSchema(max_bare_item=15, text_rules=_TEN_K_RULES,
                           skip_unmatched_text=False,
                           item_part_ranges=_TEN_K_ITEM_PART_RANGES,
-                          optional_item_numbers=(16,),
+                          optional_item_numbers=(6, 16),
                           size_bands=_TEN_K_SIZE_BANDS,
                           section_patterns=_TEN_K_SECTION_PATTERNS)
 TEN_Q_SCHEMA = FormSchema(max_bare_item=6, text_rules=_TEN_Q_RULES, skip_unmatched_text=True,

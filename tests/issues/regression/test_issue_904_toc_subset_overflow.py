@@ -385,11 +385,13 @@ def _counting_section(name, part, item, length, calls):
     )
 
 
-def _ladder_10k_sections(calls, through=15):
+def _ladder_10k_sections(calls, through=15, omit=()):
     def part_for(n):
         return "I" if n <= 4 else "II" if n <= 9 else "III" if n <= 14 else "IV"
     sections = {}
     for n in range(1, through + 1):
+        if n in omit:
+            continue
         part = part_for(n)
         key = f"part_{part.lower()}_item_{n}"
         sections[key] = _counting_section(key, part, str(n), 20_000, calls)
@@ -408,6 +410,20 @@ def test_successor_pre_gate_zero_extractions_when_only_item_16_absent():
 
 
 @pytest.mark.fast
+def test_successor_pre_gate_zero_extractions_when_reserved_item_6_absent():
+    """Item 6 has been '[Reserved]' since Selected Financial Data was retired,
+    so filers omit it as routinely as they omit optional Item 16 (XOM lists 16
+    but not 6). Its absence must not open the gate either — that leak survived
+    the original Item 16 fix because only 16 was declared optional."""
+    calls = []
+    result = _make_10k_detector()._apply_successor_guardrail(
+        _ladder_10k_sections(calls, omit=(6,))
+    )
+    assert calls == [], f"Item 6 absence forced {len(calls)} extraction(s)"
+    assert all(not s.warnings for s in result.values())
+
+
+@pytest.mark.fast
 def test_successor_pre_gate_still_scans_when_mandatory_item_missing():
     """Dropping mandatory Item 15 must open the gate — the leak fix cannot
     blind the guardrail to real gaps."""
@@ -416,6 +432,17 @@ def test_successor_pre_gate_still_scans_when_mandatory_item_missing():
         _ladder_10k_sections(calls, through=14)
     )
     assert calls, "a missing mandatory item must open the scan gate"
+
+
+@pytest.mark.fast
+def test_successor_pre_gate_still_scans_when_mandatory_item_missing_mid_ladder():
+    """Widening the optional set must not blind the guardrail to a gap next to
+    it: Item 5 missing is a real signal even though 6 is now exempt."""
+    calls = []
+    _make_10k_detector()._apply_successor_guardrail(
+        _ladder_10k_sections(calls, omit=(5,))
+    )
+    assert calls, "a missing mandatory item adjacent to an optional one must still scan"
 
 
 # --- End-to-end: Coeur Mining 10-K under VCR ----------------------------------
