@@ -130,6 +130,35 @@ def test_running_session_still_loads_real_cassettes():
 
 
 @pytest.mark.fast
+def test_installer_no_ops_when_vcrpy_is_not_installed(monkeypatch):
+    """Without vcrpy nothing can load a cassette, so there is no unsafe load to
+    prevent and the installer must stay quiet. Conflating this with a moved
+    yamlserializer turns a missing test dependency into a security error that
+    hides the real cause — it broke the regression job, which never installed
+    vcrpy at all."""
+    from tests._vcr_safety import install_safe_yaml_deserializer
+
+    # None in sys.modules makes `import vcr` raise ImportError, which is what a
+    # machine without vcrpy installed does.
+    monkeypatch.setitem(sys.modules, "vcr", None)
+
+    assert install_safe_yaml_deserializer() is False
+
+
+@pytest.mark.fast
+def test_installer_raises_when_vcrpy_is_present_but_serializer_moved(monkeypatch):
+    """The other half of the distinction above: vcrpy installed but its
+    internals relocated is dangerous, because cassettes remain loadable through
+    a deserializer this module no longer patches. That must still fail loudly."""
+    from tests._vcr_safety import install_safe_yaml_deserializer
+
+    monkeypatch.setitem(sys.modules, "vcr.serializers.yamlserializer", None)
+
+    with pytest.raises(RuntimeError, match="not importable"):
+        install_safe_yaml_deserializer()
+
+
+@pytest.mark.fast
 def test_installer_raises_rather_than_silently_failing(monkeypatch):
     """If vcrpy's internals move, the installer must fail loudly. A security
     control that quietly no-ops after a dependency bump is worse than none."""

@@ -39,7 +39,7 @@ def _safe_deserialize(cassette_string: str):
     return yaml.load(cassette_string, Loader=_SafeLoader)
 
 
-def install_safe_yaml_deserializer() -> None:
+def install_safe_yaml_deserializer() -> bool:
     """Replace vcrpy's YAML deserializer with a SafeLoader-backed one.
 
     Patches the serializer module attribute rather than registering a new
@@ -47,19 +47,35 @@ def install_safe_yaml_deserializer() -> None:
     covers every cassette load, including ``vcr.use_cassette`` calls that never
     go through the ``vcr_config`` fixture.
 
+    Returns:
+        True if the deserializer was patched. False if vcrpy is not installed,
+        which is not a weakened control: without vcrpy nothing in this session
+        can load a cassette, so there is no unsafe load to prevent.
+
     Raises:
-        RuntimeError: if vcrpy's internals moved, or if the patch did not
-            actually block the canary. A security control that silently
-            no-ops after a dependency bump is worse than none, so this fails
-            loudly at import instead.
+        RuntimeError: if vcrpy is installed but its internals moved, or if the
+            patch did not actually block the canary. A security control that
+            silently no-ops after a dependency bump is worse than none, so
+            those cases fail loudly at import instead.
     """
     try:
+        import vcr  # noqa: F401
+    except ImportError:
+        # vcrpy absent — no cassette machinery exists to secure. This is the
+        # only case where doing nothing is correct, and it must stay distinct
+        # from the "vcrpy is here but moved" case below: collapsing the two
+        # turns a missing test dependency into an alarming security error that
+        # hides the real cause (a CI job that forgot to install vcrpy).
+        return False
+
+    try:
         import vcr.serializers.yamlserializer as yamlserializer
-    except ImportError as exc:  # pragma: no cover - vcrpy is a test dependency
+    except ImportError as exc:
         raise RuntimeError(
-            "Cannot secure VCR cassette loading: vcr.serializers.yamlserializer "
-            "is not importable. If vcrpy moved it, update tests/_vcr_safety.py "
-            "before running the suite on an untrusted branch."
+            "Cannot secure VCR cassette loading: vcrpy is installed but "
+            "vcr.serializers.yamlserializer is not importable. If vcrpy moved "
+            "it, update tests/_vcr_safety.py before running the suite on an "
+            "untrusted branch."
         ) from exc
 
     if not hasattr(yamlserializer, "deserialize"):  # pragma: no cover
@@ -75,7 +91,7 @@ def install_safe_yaml_deserializer() -> None:
     try:
         yamlserializer.deserialize(_CANARY)
     except yaml.YAMLError:
-        return  # blocked, as intended
+        return True  # blocked, as intended
     raise RuntimeError(
         "VCR cassette loading is still unsafe after patching: the canary "
         "'!!python/object/apply' payload was constructed. Refusing to run "
