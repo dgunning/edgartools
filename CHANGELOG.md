@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.43.1] - 2026-07-27
+
 ### Fixed
 
 - **497K fee-waiver / net-expense mix-up** — for fee tables using the standard "After Fee Waiver and Reimbursement" wording, `ShareClassFees.fee_waiver` held the net expense ratio and `net_expenses` was `None` (ProShares UltraPro QQQ: `waiver=0.84` where the true waiver is 0.13). Net expenses are now matched first and the waiver normalized to a signed reduction, so `total_annual_expenses + fee_waiver == net_expenses`. (GH #912)
