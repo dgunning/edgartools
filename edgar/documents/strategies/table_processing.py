@@ -2,6 +2,7 @@
 Advanced table processing strategy.
 """
 
+import logging
 import re
 from functools import lru_cache
 from typing import List, Optional
@@ -12,6 +13,8 @@ from edgar.documents.config import ParserConfig
 from edgar.documents.strategies.style_parser import StyleParser
 from edgar.documents.table_nodes import Cell, Row, TableNode
 from edgar.documents.types import TableType
+
+logger = logging.getLogger(__name__)
 
 
 def _text_content(elem) -> str:
@@ -35,6 +38,19 @@ class TableProcessor:
     """
     Advanced table processing with type detection and structure analysis.
     """
+
+    # Upper bounds on cell spans. Filing HTML is frequently corrupt -- filing
+    # 0001193125-06-185884 contains colspan="376967340" -- and an unbounded span
+    # is multiplied into an allocation in TableMatrix. The widest tables the SEC
+    # publishes are a few hundred columns, and a rowspan can only usefully reach
+    # the last row of the table, so these leave several orders of magnitude of
+    # headroom over anything legitimate.
+    MAX_COLSPAN = 1000
+    MAX_ROWSPAN = 10000
+
+    # Tags whose subtrees belong to a nested table rather than to the table,
+    # row or cell currently being processed.
+    _NESTED_TAGS = frozenset({'table', 'td', 'th'})
 
     # HTML entities that need replacement
     ENTITY_REPLACEMENTS = {
@@ -107,7 +123,7 @@ class TableProcessor:
             table.set_metadata('classes', table_class)
 
         # Extract caption
-        caption_elem = element.find('.//caption')
+        caption_elem = self._own_section(element, 'caption')
         if caption_elem is not None:
             table.caption = self._extract_text(caption_elem)
 
@@ -129,18 +145,74 @@ class TableProcessor:
 
         return table
 
+    @classmethod
+    def _own_rows(cls, container: HtmlElement) -> List[HtmlElement]:
+        """
+        Rows belonging to `container` itself.
+
+        A descendant scan (``.//tr``) also returns the rows of tables nested
+        inside this table's cells, which makes every ancestor reprocess them and
+        duplicates their cells into the outer table. Descend through wrappers
+        (thead/tbody/tfoot, and whatever malformed markup lxml leaves in place)
+        but stop at nested tables and at cell boundaries.
+        """
+        rows = []
+        for child in container:
+            tag = child.tag
+            if not isinstance(tag, str):
+                continue  # comments and processing instructions
+            tag = tag.lower()
+            if tag == 'tr':
+                rows.append(child)
+            elif tag not in cls._NESTED_TAGS:
+                rows.extend(cls._own_rows(child))
+        return rows
+
+    @classmethod
+    def _own_cells(cls, container: HtmlElement) -> List[HtmlElement]:
+        """Cells belonging to the row `container`, excluding nested tables' cells."""
+        cells = []
+        for child in container:
+            tag = child.tag
+            if not isinstance(tag, str):
+                continue
+            tag = tag.lower()
+            if tag in ('td', 'th'):
+                cells.append(child)
+            elif tag not in ('table', 'tr'):
+                cells.extend(cls._own_cells(child))
+        return cells
+
+    @classmethod
+    def _own_section(cls, container: HtmlElement, name: str) -> Optional[HtmlElement]:
+        """First `name` element belonging to `container`, ignoring nested tables."""
+        for child in container:
+            tag = child.tag
+            if not isinstance(tag, str):
+                continue
+            tag = tag.lower()
+            if tag == name:
+                return child
+            if tag not in cls._NESTED_TAGS and tag != 'tr':
+                found = cls._own_section(child, name)
+                if found is not None:
+                    return found
+        return None
+
     def _process_table_structure(self, element: HtmlElement, table: TableNode):
         """Process table structure (thead, tbody, tfoot)."""
         # Process thead
-        thead = element.find('.//thead')
+        thead = self._own_section(element, 'thead')
+        thead_row_ids = set()
         if thead is not None:
-            for tr in thead.findall('.//tr'):
+            for tr in self._own_rows(thead):
+                thead_row_ids.add(id(tr))
                 cells = self._process_row(tr, is_header=True)
                 if cells:
                     table.headers.append(cells)
 
         # Process tbody (or direct rows)
-        tbody = element.find('.//tbody')
+        tbody = self._own_section(element, 'tbody')
         rows_container = tbody if tbody is not None else element
 
         # Track if we've seen headers and data rows
@@ -148,9 +220,9 @@ class TableProcessor:
         consecutive_header_rows = 0
         data_rows_started = False
 
-        for tr in rows_container.findall('.//tr'):
+        for tr in self._own_rows(rows_container):
             # Skip if already processed in thead
-            if thead is not None and tr.getparent() == thead:
+            if id(tr) in thead_row_ids:
                 continue
 
             # Check if this might be a header row
@@ -224,9 +296,9 @@ class TableProcessor:
                     consecutive_header_rows = 0
 
         # Process tfoot
-        tfoot = element.find('.//tfoot')
+        tfoot = self._own_section(element, 'tfoot')
         if tfoot is not None:
-            for tr in tfoot.findall('.//tr'):
+            for tr in self._own_rows(tfoot):
                 cells = self._process_row(tr, is_header=False)
                 if cells:
                     row = Row(cells=cells, is_header=False)
@@ -236,8 +308,10 @@ class TableProcessor:
         """Process table row into cells."""
         cells = []
 
-        # Process both td and th elements
-        for cell_elem in tr.findall('.//td') + tr.findall('.//th'):
+        # Process both td and th elements, td first (preserves the ordering the
+        # previous ``findall('.//td') + findall('.//th')`` produced)
+        own_cells = self._own_cells(tr)
+        for cell_elem in [c for c in own_cells if c.tag != 'th'] + [c for c in own_cells if c.tag == 'th']:
             cell = self._process_cell(cell_elem, is_header or cell_elem.tag == 'th')
             if cell:
                 cells.append(cell)
@@ -252,6 +326,16 @@ class TableProcessor:
         rowspan_str = elem.get('rowspan', '1').strip()
         colspan = int(colspan_str) if colspan_str and colspan_str.isdigit() else 1
         rowspan = int(rowspan_str) if rowspan_str and rowspan_str.isdigit() else 1
+
+        # Clamp corrupt spans. Debug level only: this fires on garbage attributes
+        # that appear in real filings, and must stay quiet during bulk processing.
+        if colspan > self.MAX_COLSPAN:
+            logger.debug("Clamping colspan %d to %d", colspan, self.MAX_COLSPAN)
+            colspan = self.MAX_COLSPAN
+        if rowspan > self.MAX_ROWSPAN:
+            logger.debug("Clamping rowspan %d to %d", rowspan, self.MAX_ROWSPAN)
+            rowspan = self.MAX_ROWSPAN
+
         align = elem.get('align')
 
         # Extract style
@@ -388,11 +472,13 @@ class TableProcessor:
 
     def _is_header_row(self, tr: HtmlElement) -> bool:
         """Detect if row is likely a header row in SEC filings."""
+        own_cells = self._own_cells(tr)
+
         # Check if contains th elements (most reliable indicator)
-        if tr.find('.//th') is not None:
+        if any(cell.tag == 'th' for cell in own_cells):
             return True
 
-        cells = tr.findall('.//td')
+        cells = [cell for cell in own_cells if cell.tag != 'th']
         if not cells:
             return False
 

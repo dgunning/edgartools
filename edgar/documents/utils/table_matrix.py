@@ -2,10 +2,13 @@
 Table matrix builder for handling complex colspan/rowspan structures.
 """
 
+import logging
 from dataclasses import dataclass
 from typing import List, Optional
 
 from edgar.documents.table_nodes import Cell, Row
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -24,6 +27,12 @@ class TableMatrix:
     This class converts a table with colspan/rowspan into a regular 2D grid
     where each merged cell occupies multiple positions in the matrix.
     """
+
+    # Hard ceiling on grid width. The grid is materialised as row_count *
+    # col_count MatrixCell objects, so a corrupt colspan (or a long row of
+    # them) turns straight into an unbounded allocation. Cells arriving via
+    # TableProcessor are already clamped; this backstops the other callers.
+    MAX_COLUMNS = 2000
 
     def __init__(self):
         """Initialize empty matrix"""
@@ -87,9 +96,12 @@ class TableMatrix:
                     col_pos += 1
 
                 # This cell will occupy from col_pos to col_pos + colspan
-                col_end = col_pos + cell.colspan
+                col_end = min(col_pos + cell.colspan, self.MAX_COLUMNS)
                 max_cols = max(max_cols, col_end)
                 col_pos = col_end
+
+        if max_cols >= self.MAX_COLUMNS:
+            logger.debug("Table width capped at %d columns", self.MAX_COLUMNS)
 
         self.col_count = max_cols
 
@@ -143,10 +155,15 @@ class TableMatrix:
                                             'jul', 'aug', 'sep', 'oct', 'nov', 'dec']) and
                                     row_idx > 1)  # Not a header row (allow for multi-row headers)
 
+                # Spans can only ever reach the edge of the grid, so bound the
+                # loops rather than iterating a corrupt span and discarding it
+                span_rows = max(0, min(cell.rowspan, self.row_count - row_idx))
+                span_cols = max(0, min(cell.colspan, self.col_count - col_pos))
+
                 if is_special_numeric:
                     # Place empty cell at first position, content at second position
                     # This is specifically for Table 15 alignment
-                    for r in range(cell.rowspan):
+                    for r in range(span_rows):
                         # First column of span: empty
                         if row_idx + r < self.row_count and col_pos < self.col_count:
                             self.matrix[row_idx + r][col_pos] = MatrixCell()
@@ -162,7 +179,7 @@ class TableMatrix:
                             self.matrix[row_idx + r][col_pos + 1] = matrix_cell
 
                         # Remaining columns of span: mark as spanned (though colspan=2 has no remaining)
-                        for c in range(2, cell.colspan):
+                        for c in range(2, span_cols):
                             if row_idx + r < self.row_count and col_pos + c < self.col_count:
                                 matrix_cell = MatrixCell(
                                     original_cell=cell,
@@ -173,8 +190,8 @@ class TableMatrix:
                                 self.matrix[row_idx + r][col_pos + c] = matrix_cell
                 else:
                     # Normal placement for other cells
-                    for r in range(cell.rowspan):
-                        for c in range(cell.colspan):
+                    for r in range(span_rows):
+                        for c in range(span_cols):
                             if row_idx + r < self.row_count and col_pos + c < self.col_count:
                                 matrix_cell = MatrixCell(
                                     original_cell=cell,
@@ -188,6 +205,7 @@ class TableMatrix:
 
     def _expand_columns(self, new_col_count: int):
         """Expand matrix to accommodate more columns"""
+        new_col_count = min(new_col_count, self.MAX_COLUMNS)
         if new_col_count <= self.col_count:
             return
 

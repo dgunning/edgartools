@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Corrupt `colspan` no longer exhausts memory during table parsing** — filing 0001193125-06-185884 contains `colspan="376967340"` in its raw SEC HTML; the table processor accepted the value unbounded and `TableMatrix` allocated that many cells per row, consuming hundreds of GB before being killed (reported at ~700 GB from a 7M-filing crawl). Spans are now clamped at parse time (colspan ≤ 1000, rowspan ≤ 10000) with a 2000-column defensive cap in `TableMatrix`, whose placement loops are also bounded by the grid instead of iterating the full corrupt span. The filing now parses in ~4s at 0.3 GB peak RSS. (beads edgartools-c7kh)
+- **Nested tables no longer reprocessed by every ancestor table** — the table processor collected rows and cells with descendant searches (`.//tr`, `.//td`), so a row nested N tables deep was processed once per ancestor: on 0000880195-09-000191 (N-PX, 8,207 tables nested up to 26 deep) rows were processed 11.3× over, turning `FilingSGML.text()` into a 3+ hour call, and inner-table cells were silently duplicated into outer tables' structures. Traversal is now scoped to each table's own rows and cells (stopping at nested-table and cell boundaries, still descending through `thead`/`tbody`/`tfoot` and malformed wrappers), and header-row detection no longer misfires on a nested table's `<th>`. The filing now parses in ~7s total. (beads edgartools-t6z2)
+
 ## [5.43.1] - 2026-07-27
 
 ### Fixed
