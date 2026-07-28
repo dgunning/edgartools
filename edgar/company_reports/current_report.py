@@ -48,6 +48,15 @@ def _normalize_item_number(item_str: str) -> str:
     return cleaned
 
 
+# An item header is anchored either at the start of a line, or immediately after a
+# horizontal rule of 5 or more rule characters on the same line. 2005-era filings that
+# are plain text wrapped in minimal HTML glue the two together with no line break
+# ("------------Item 4.02 Non-Reliance on..."), which a line-start-only anchor misses.
+# The anchor stays deliberately narrow: anything looser would promote mid-sentence
+# references ("as described in Item 8.01") into items. (edgartools-l6cl)
+_ITEM_ANCHOR = r'(?:^[ \t]*|[-=_─–—]{5,}[ \t]*)'
+
+
 def _extract_items_from_text(text: str) -> List[str]:
     """
     Extract 8-K item numbers from filing text using pattern matching.
@@ -77,22 +86,23 @@ def _extract_items_from_text(text: str) -> List[str]:
         - GitHub Issue: #462
         - Beads Issue: edgartools-k1k
     """
-    # Extract items that appear at the start of lines (with optional leading whitespace).
-    # This ensures consistency with _extract_item_content_from_text which
-    # requires items to be at line starts for content extraction.
+    # Extract items that appear at the start of lines (with optional leading whitespace)
+    # or immediately after a horizontal rule. This ensures consistency with
+    # _extract_item_content_from_text, which uses the same anchor for content extraction.
     #
-    # Pattern matches "Item X" or "Item X.XX" at start of line
+    # Pattern matches "Item X" or "Item X.XX" at an item-header anchor
     # This will match:
     # - "Item 1" (standalone)
     # - "  Item 1" (indented — common in HTML-to-text conversion)
     # - "Item 1-Item 4" (only Item 1, since it's at line start)
     # - "Item 2.02" (modern format)
+    # - "--------Item 4.02" (glued onto a horizontal rule)
     #
     # This will NOT match:
-    # - "Item 1-Item 4" (Item 4, not at line start)
+    # - "Item 1-Item 4" (Item 4, only one dash — not a rule, not at line start)
     # - Mid-sentence references to items
     pattern = re.compile(
-        r'^\s*Item\s+(\d+\.?\s*\d*)',
+        _ITEM_ANCHOR + r'Item\s+(\d+\.?\s*\d*)',
         re.IGNORECASE | re.MULTILINE
     )
     matches = pattern.findall(text)
@@ -198,9 +208,10 @@ def _extract_item_content_from_text(filing_text: str, item_name: str) -> Optiona
 
     # Step 2: Find item header in text
     # Pattern matches: "Item 9", "Item 9.", "Item 9:", "Item 9.02", etc.
-    # Must be at start of line (^) to avoid false positives
+    # Must sit at an item-header anchor (line start, or after a horizontal rule)
+    # to avoid matching mid-sentence references
     item_pattern = re.compile(
-        rf'^\s*(Item\s+{re.escape(item_num)}[\s\.:\-]*)',
+        rf'{_ITEM_ANCHOR}(Item\s+{re.escape(item_num)}[\s\.:\-]*)',
         re.IGNORECASE | re.MULTILINE
     )
 
@@ -208,18 +219,17 @@ def _extract_item_content_from_text(filing_text: str, item_name: str) -> Optiona
     if not match:
         return None
 
-    start_pos = match.start()
+    # Content starts at the header itself, not at the rule or indentation the
+    # anchor consumed.
+    start_pos = match.start(1)
 
     # Step 3: Find end position
     # Look for next "Item X" pattern
     next_item_pattern = re.compile(
-        r'^\s*Item\s+\d+\.?\s*\d*[\s\.:\-]',
+        _ITEM_ANCHOR + r'Item\s+\d+\.?\s*\d*[\s\.:\-]',
         re.IGNORECASE | re.MULTILINE
     )
-    next_match = next_item_pattern.search(
-        filing_text,
-        start_pos + len(match.group(0))
-    )
+    next_match = next_item_pattern.search(filing_text, match.end(1))
 
     if next_match:
         end_pos = next_match.start()
@@ -669,12 +679,12 @@ class CurrentReport(CompanyReport):
         """
         List of detected item names (consistent with sections property).
 
-        Uses multi-tier fallback strategy:
+        Unions three detection strategies, all reading the primary document:
         1. New parser's section detection (95% accuracy for modern filings)
         2. Chunked document parser (legacy parser)
-        3. Text-based pattern extraction (100% accuracy, all eras including SGML)
+        3. Text-based pattern extraction (all eras including SGML)
 
-        The text-based fallback handles legacy SGML filings (1999-2001) where
+        The text-based strategy handles legacy SGML filings (1999-2001) where
         SEC metadata is incomplete (GitHub issue #462).
 
         Returns:
@@ -707,20 +717,23 @@ class CurrentReport(CompanyReport):
             if chunked_items:
                 item_set.update(_canonical_item(item) for item in chunked_items)
 
-        if item_set:
-            return sorted(item_set, key=_item_sort_key)
-
-        # Strategy 3: Text-based fallback for legacy SGML filings (no HTML)
-        # This handles filings where SEC metadata is incomplete (particularly 1999-2001)
-        # Use cached text extraction to improve performance
+        # Strategy 3: text-based pattern extraction. It is the only source for legacy
+        # SGML filings (1999-2001, no usable HTML), and is unioned in — rather than
+        # used only when the HTML strategies come up empty — because those strategies
+        # can return a partial set on 2005-era filings that are plain text in minimal
+        # HTML (e.g. Cimarex 0001047469-05-006981, where the chunked parser sees only
+        # Item 8.01 of the two items present). filing.text() renders the primary
+        # document alone, so this shares the precision domain of strategies 1 and 2
+        # and adds no exhibit-text false positives. (edgartools-l6cl)
         filing_text = self._get_filing_text()
         if filing_text:
-            extracted_items = _extract_items_from_text(filing_text)
-            if extracted_items:
-                # Format for display consistency: ['2.02', '9.01'] -> ['Item 2.02', 'Item 9.01']
-                return [_format_item_for_display(item) for item in extracted_items]
+            # Format for display consistency: ['2.02', '9.01'] -> ['Item 2.02', 'Item 9.01']
+            item_set.update(
+                _format_item_for_display(item)
+                for item in _extract_items_from_text(filing_text)
+            )
 
-        return []
+        return sorted(item_set, key=_item_sort_key)
 
     def __getitem__(self, item_name: str):
         """
