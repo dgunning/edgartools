@@ -250,10 +250,13 @@ def available_quarters() -> YearAndQuarters:
     :return:
     """
     current_year, current_quarter = current_year_and_quarter()
-    start_quarters = [(1994, 3), (1994, 4)]
-    in_between_quarters = list(itertools.product(range(1995, current_year), range(1, 5)))
+    # SEC's full-index (e.g. https://www.sec.gov/Archives/edgar/full-index/1993/QTR1/form.gz)
+    # serves quarterly indexes back to 1993 Q1. 1992 and earlier return 404/403 - EDGAR's
+    # electronic filing pilot began in 1993, so there is no earlier index to serve.
+    start_year = 1993
+    prior_quarters = list(itertools.product(range(start_year, current_year), range(1, 5)))
     end_quarters = list(itertools.product([current_year], range(1, current_quarter + 1)))
-    return start_quarters + in_between_quarters + end_quarters
+    return prior_quarters + end_quarters
 
 
 def expand_quarters(year: Union[int, List[int]],
@@ -1325,7 +1328,7 @@ def get_filings(year: Optional[Years] = None,
     if len(year_and_quarters) == 0:
         print_warning(
             f"No SEC filings available for year {year}" + (f" quarter {quarter}" if quarter else ""),
-            f"Valid range: 1994-{datetime.now().year}, quarters 1-4. Example: get_filings(2023, 1)"
+            f"Valid range: 1993-{datetime.now().year}, quarters 1-4. Example: get_filings(2023, 1)"
         )
         return None
     filing_index = get_filings_for_quarters(year_and_quarters, index=index)

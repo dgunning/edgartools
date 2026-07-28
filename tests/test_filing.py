@@ -844,10 +844,13 @@ def test_filing_date_to_year_quarter():
     ]
 
     # Test case 5: Open-ended date range (end date only)
+    # The default start (edgartools-g00j) is 1993-01-01, matching the earliest
+    # quarter SEC's full-index actually serves - see available_quarters() in
+    # edgar/_filings.py.
     assert filing_date_to_year_quarters(":2022-01-01") == [
         (year, quarter)
-        for year in range(1994, 2023)
-        for quarter in (range(2, 5) if year == 1994 else range(1, 2) if year == 2022 else range(1, 5))
+        for year in range(1993, 2023)
+        for quarter in (range(1, 2) if year == 2022 else range(1, 5))
     ]
 
 
