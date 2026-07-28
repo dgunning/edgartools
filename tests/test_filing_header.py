@@ -370,9 +370,20 @@ def test_preprocess_actual_old_header():
     assert header.accession_number == '0001012325-98-000004'
     assert len(header.subject_companies) == 1
 
-    # Don't preprocess before parsing
-    with pytest.raises(KeyError):
-        header: FilingHeader = FilingHeader.parse_from_sgml_text(header_text, preprocess=False)
+    # Don't preprocess before parsing. This used to raise an uncaught KeyError:
+    # the un-preprocessed text has a bare "<REPORTING-OWNER>" tag followed by a
+    # flat, un-nested "COMPANY DATA:" section, and a stale subheader
+    # ("FORMER COMPANY", left over from the SUBJECT COMPANY section above) used
+    # to leak into that new section and blow up on the unguarded
+    # `data[current_header][-1]["FORMER COMPANY"]` lookup (edgartools-nzfp).
+    # The subject company - the only section with full tab-nesting in the raw
+    # text - still parses correctly even without preprocessing.
+    header: FilingHeader = FilingHeader.parse_from_sgml_text(header_text, preprocess=False)
+    assert header.accession_number == '0001012325-98-000004'
+    assert len(header.subject_companies) == 1
+    subject_company = header.subject_companies[0]
+    assert subject_company.company_information.name == 'MORTON INTERNATIONAL INC /IN/'
+    assert subject_company.former_company_names[0].name == 'NEW MORTON INTERNATIONAL INC'
 
 @pytest.mark.network
 def test_get_header_from_old_filing():

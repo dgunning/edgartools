@@ -722,20 +722,15 @@ class FilingHeader:
         return True
 
     @classmethod
-    def parse_from_sgml_text(cls, header_text: str, preprocess=False):
+    def _tokenize_header(cls, header_text: str) -> Dict[str, Any]:
         """
-        Parse the SEC-HEADER text at the top of the submission text
+        Walk the SEC-HEADER text line by line and build the raw nested dict of
+        sections/subsections/key-value pairs. Split out from parse_from_sgml_text
+        so the intermediate structure can be inspected directly in tests.
         """
         data: Dict[str, Any] = {}
         current_header = None
         current_subheader = None
-
-        # Preprocess the text to handle a different format from the 1990's
-        if preprocess:
-            header_text = preprocess_old_headers(header_text)
-
-        # In case there are double newlines, replace them with a single newline
-        header_text = header_text.replace('\n\n', '\n')
 
         # Read the lines in the content. This starts with <ACCEPTANCE-DATETIME>20230606213204
         lines = header_text.split('\n')
@@ -781,6 +776,13 @@ class FilingHeader:
                 # Top level header
                 else:
                     current_header = line.strip().split(':')[0]
+                    # A new top-level section starts fresh - any subheader from the
+                    # previous section (e.g. "MAIL ADDRESS" under a prior "FILER:")
+                    # must not carry over. Some filings from the 1999-2005 era mix
+                    # nested sections with flat KEY: value lines under a later
+                    # top-level header, and a stale subheader here would misroute
+                    # (or drop, see the KeyError handler below) those flat lines.
+                    current_subheader = None
                     if current_header not in data:
                         data[current_header] = []
                     if isinstance(data[current_header], list):
@@ -827,7 +829,10 @@ class FilingHeader:
                         else:
                             data[key] = value
                     elif not current_subheader:
-                        continue
+                        # A top-level header with no subheader of its own (e.g. a
+                        # malformed "COMPANY DATA:" section that isn't nested under
+                        # "FILER:") holds its flat KEY: value lines directly.
+                        data[current_header][-1][key.strip()] = value
                     else:
                         if current_subheader == "FORMER COMPANY":
                             subheader_obj = data[current_header][-1][current_subheader][-1]
@@ -837,7 +842,28 @@ class FilingHeader:
                                 data[current_header][-1][current_subheader][key.strip()] = value
                             except KeyError:
                                 # Some filings from the 2000's have an issue with malformed headers
-                                log.warning("Subheader '%s' not found in header '%s'", current_subheader, current_header)
+                                accession_number = data.get('ACCESSION NUMBER')
+                                identifier = accession_number if accession_number else line.strip()[:80]
+                                log.warning(
+                                    "Subheader '%s' not found in header '%s' (%s)",
+                                    current_subheader, current_header, identifier
+                                )
+
+        return data
+
+    @classmethod
+    def parse_from_sgml_text(cls, header_text: str, preprocess=False):
+        """
+        Parse the SEC-HEADER text at the top of the submission text
+        """
+        # Preprocess the text to handle a different format from the 1990's
+        if preprocess:
+            header_text = preprocess_old_headers(header_text)
+
+        # In case there are double newlines, replace them with a single newline
+        header_text = header_text.replace('\n\n', '\n')
+
+        data: Dict[str, Any] = cls._tokenize_header(header_text)
 
         # The filer
         filers = []
