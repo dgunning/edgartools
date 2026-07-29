@@ -66,7 +66,12 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 ai = [
-    "mcp>=1.12.3",          # Model Context Protocol
+    # Cap below 2.0.0: that release removed the decorator-based Server API
+    # (@app.list_tools() and friends) that edgar/ai/mcp/server.py binds at
+    # import time, so an unpinned resolve breaks `edgartools-mcp` outright and
+    # fails test collection. Lift the cap once server.py is ported to the 2.0
+    # API (add_request_handler / FastMCP).
+    "mcp>=1.12.3,<2.0.0",   # Model Context Protocol
     "tiktoken>=0.10.0",     # Token counting for OpenAI models
     "starlette>=0.36.0",    # ASGI framework for HTTP transport
     "uvicorn>=0.27.0",      # ASGI server for HTTP transport
