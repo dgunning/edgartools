@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **10-Q items rebuilt from cross-references to the 10-K** — ICE's Q3 2024 10-Q returned 101K chars for `obj['PART II, Item 1']`, opening mid-sentence inside the MD&A's cross-reference to "Item 1 'Business — Regulation' … in our 2023 Form 10-K" (same shape on CSCO and CTSH 10-Qs). The TOC anchor was correct, but the correctly-anchored Legal Proceedings stub is under 200 chars, which trips the short-section rescue; the rescue's on-heading check demanded the *10-K* title for the item number (Item 1 → BUSINESS), misjudged the 10-Q text, and then regex-hunted the raw HTML document-wide, matching the cross-reference. A text opening with the item's own "ITEM N" heading now counts as correctly anchored whatever the form, and the rescue's search is bounded to the window between the section's start and end anchors — its premise is an anchor that landed just before the body, so the real heading is never behind the anchor. (GH #918)
+
 ## [5.44.0] - 2026-07-29
 
 ### Fixed
