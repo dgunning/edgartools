@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.44.0] - 2026-07-29
+
 ### Fixed
 
 - **10-K Item 7A silently duplicating Item 7** — Regions Financial's FY2021 10-K (`0001281761-22-000016`) returned Item 7's 194K-char MD&A for `obj['Item 7A']`, at full confidence with no warning: the TOC links only page numbers, and both items start on page 41, so they collided on one anchor. Colliding items are now re-resolved from their own body headings, bounded so a boundary can't invert. (GH #920)
