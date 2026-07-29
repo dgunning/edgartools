@@ -161,7 +161,7 @@ class TOCAnalyzer:
                             sorted(missing), len(recovered), sorted(recovered))
                 result.update(recovered)
 
-        # Anchor-collision repair (rf-item7a): two distinct item keys sharing
+        # Anchor-collision repair (GH #920): two distinct item keys sharing
         # one anchor slice to the identical span downstream — Regions Financial's
         # Item 7 and Item 7A both target the page-41 anchor because this TOC's
         # only links are page numbers and both items begin on page 41, so
@@ -235,7 +235,7 @@ class TOCAnalyzer:
     def _resolve_anchor_collisions(self, result: Dict[str, str], html_content: str,
                                    tree=None, body: Optional[Dict[str, str]] = None
                                    ) -> Dict[str, str]:
-        """Split two item keys that resolved to a single anchor (rf-item7a).
+        """Split two item keys that resolved to a single anchor (GH #920).
 
         When a filer's linked TOC only carries page numbers (no per-item
         anchors) and two items begin on the same page, both item keys map to

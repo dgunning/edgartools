@@ -1,6 +1,6 @@
 """Regression: REGIONS FINANCIAL 10-K Item 7A no longer duplicates Item 7.
 
-rf-item7a (REGIONS FINANCIAL CORP 10-K, accession 0001281761-22-000016). This
+GH #920 (REGIONS FINANCIAL CORP 10-K, accession 0001281761-22-000016). This
 filing's linked TOC carries only page numbers — the "Item N." labels and titles
 are plain (non-link) cells — so the generic TOC parser resolves each item to the
 anchor of the page it starts on. Item 7 (MD&A) and Item 7A (Quantitative and
