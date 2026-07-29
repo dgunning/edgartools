@@ -1123,6 +1123,17 @@ class TOCAnalyzer:
         2. Process each <tr> — group <a> tags by shared href
         3. Combine text from grouped links to reassemble item + title
         4. Extract item number from combined text (anchor IDs are opaque UUIDs)
+
+        Some Workiva filings (Tesla 10-K, GH Item-3-overflow report) give the
+        "Item N." label link a *different* href than the title/page links, and
+        the label hrefs are broken: they point at targets that don't exist, or
+        at unrelated page-break divs. Taking the first group that parses to an
+        item then anchors the item at the wrong place, or drops it entirely
+        when the label target is missing and the title isn't in the keyword
+        vocabulary — so downstream section boundaries overshoot into later
+        items. Each row is therefore resolved as a whole: parse every href
+        group first, and when the row names a single item, pick the anchor
+        whose target exists and whose neighbourhood matches the item heading.
         """
         try:
             tree = self._ensure_tree(html_content, tree)
@@ -1164,6 +1175,9 @@ class TOCAnalyzer:
                         href_order.append(href)
                     href_groups[href].append(text)
 
+                # First pass: parse every href group so anchor selection can
+                # consider the whole row, not just the first group that parses.
+                candidates: List[Tuple[str, Optional[str]]] = []
                 for href in href_order:
                     texts = href_groups[href]
                     anchor_id = href[1:]
@@ -1190,25 +1204,81 @@ class TOCAnalyzer:
                     if not parsed and len(href_order) == 1:
                         parsed = self._parse_item_from_text(row_text)
 
-                    if not parsed:
-                        continue
-
                     # Track part context
-                    if parsed.startswith('Part'):
+                    if parsed and parsed.startswith('Part'):
                         current_part = parsed
                         continue
 
-                    # Verify target exists
-                    if find_anchor_targets(tree, anchor_id):
-                        key = self._make_section_key(parsed, current_part)
+                    candidates.append((anchor_id, parsed))
+
+                if not candidates:
+                    continue
+
+                existing = [(anchor_id, parsed) for anchor_id, parsed in candidates
+                            if find_anchor_targets(tree, anchor_id)]
+                parsed_items = {parsed for _, parsed in candidates if parsed}
+
+                if len(parsed_items) == 1:
+                    # The row names one item; choose its anchor across ALL of
+                    # the row's href groups. When label and title links carry
+                    # different hrefs, the item's identity comes from whichever
+                    # group parsed, but the label href may be broken (target
+                    # missing) or wrong (an unrelated page-break div) — prefer
+                    # a target that exists and sits next to the item's heading.
+                    item = next(iter(parsed_items))
+                    anchor_id = self._choose_row_anchor(tree, item, existing)
+                    if anchor_id:
+                        key = self._make_section_key(item, current_part)
                         if key and key not in mapping:
                             mapping[key] = anchor_id
+                elif not parsed_items and len(existing) == 1:
+                    # No group parsed — a split row whose label href is broken
+                    # and whose title isn't in the keyword vocabulary ("Mine
+                    # Safety Disclosures"). The full row text still reads
+                    # "Item N. <title>", and exactly one group has a real
+                    # target (the title link), so the number can't be
+                    # mis-attributed the way a multi-item row could.
+                    item = self._parse_item_from_text(row_text)
+                    if item and not item.startswith('Part'):
+                        key = self._make_section_key(item, current_part)
+                        if key and key not in mapping:
+                            mapping[key] = existing[0][0]
+                else:
+                    # Multiple distinct items in one row — keep the historical
+                    # per-group behaviour so each item maps to its own anchor.
+                    for anchor_id, parsed in existing:
+                        if parsed:
+                            key = self._make_section_key(parsed, current_part)
+                            if key and key not in mapping:
+                                mapping[key] = anchor_id
 
             return mapping
 
         except Exception:
             logger.debug("Workiva TOC parser failed", exc_info=True)
             return {}
+
+    def _choose_row_anchor(self, tree, item: str,
+                           existing: List[Tuple[str, Optional[str]]]) -> Optional[str]:
+        """Pick one TOC row's anchor among its existing-target href groups.
+
+        `existing` holds (anchor_id, parsed) pairs in row order, already
+        filtered to targets that exist. With one candidate there is nothing to
+        arbitrate. With several (split label/title hrefs), prefer the anchor
+        whose neighbourhood carries the item's own heading — on split-href
+        Workiva rows the label href can point at an unrelated page-break div
+        while the title href points at the real section start. When no
+        candidate passes the heading check (named sections like Signatures
+        never can — the check is Item-number based), keep row order, which is
+        the historical first-group-wins behaviour.
+        """
+        if not existing:
+            return None
+        if len(existing) > 1:
+            for anchor_id, _ in existing:
+                if self._anchor_matches_heading(tree, anchor_id, item):
+                    return anchor_id
+        return existing[0][0]
 
     def _analyze_dfin_toc(self, html_content: str, tree=None) -> Dict[str, str]:
         """
