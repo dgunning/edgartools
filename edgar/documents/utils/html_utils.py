@@ -42,6 +42,65 @@ def remove_xml_declaration(html: str) -> str:
     return html
 
 
+def terminate_unclosed_comments(html: str) -> str:
+    """
+    Close any ``<!--`` that is never followed by ``-->``.
+
+    lxml treats an unterminated comment as running to the end of the input, so a
+    single stray ``<!--`` swallows the whole document and parsing yields an empty
+    tree. Two shapes show up in 1990s/2000s SEC filings:
+
+        <!--DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">   (typo for <!DOCTYPE)
+        <!-- HTML (c)2001 Some Author, email:someone@example.com  (never closed)
+
+    In both the author meant the construct to end at the end of its line, so an
+    unterminated comment is closed at the next newline (or at end of input when
+    there is none). Comments that are already terminated are left untouched, so
+    normal documents are unaffected.
+
+    Args:
+        html: HTML string that may contain an unterminated comment
+
+    Returns:
+        HTML string in which every ``<!--`` has a matching ``-->``
+
+    Examples:
+        >>> terminate_unclosed_comments('<!-- note\\n<p>hi</p>')
+        '<!-- note-->\\n<p>hi</p>'
+
+        >>> terminate_unclosed_comments('<!-- note --><p>hi</p>')  # already closed
+        '<!-- note --><p>hi</p>'
+    """
+    if '<!--' not in html:
+        return html
+
+    out = []
+    pos = 0
+    while True:
+        start = html.find('<!--', pos)
+        if start == -1:
+            out.append(html[pos:])
+            break
+        end = html.find('-->', start + 4)
+        if end != -1:
+            # Properly terminated - copy through the closing marker untouched.
+            out.append(html[pos:end + 3])
+            pos = end + 3
+            continue
+        # Unterminated: close it at the end of its line, then keep scanning -
+        # a document can contain more than one stray comment.
+        newline = html.find('\n', start + 4)
+        if newline == -1:
+            out.append(html[pos:])
+            out.append('-->')
+            break
+        out.append(html[pos:newline])
+        out.append('-->')
+        pos = newline
+
+    return ''.join(out)
+
+
 def create_lxml_parser(
     remove_blank_text: bool = True,
     remove_comments: bool = True,

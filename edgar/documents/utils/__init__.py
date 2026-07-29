@@ -8,7 +8,11 @@ from edgar.documents.utils.currency_merger import CurrencyColumnMerger
 
 # Note: CacheableMixin not exported to avoid circular imports
 # Import directly: from edgar.documents.cache_mixin import CacheableMixin
-from edgar.documents.utils.html_utils import create_lxml_parser, remove_xml_declaration
+from edgar.documents.utils.html_utils import (
+    create_lxml_parser,
+    remove_xml_declaration,
+    terminate_unclosed_comments,
+)
 from edgar.documents.utils.streaming import StreamingParser
 from edgar.documents.utils.table_matrix import ColumnAnalyzer, MatrixCell, TableMatrix
 
@@ -32,6 +36,7 @@ __all__ = [
     'CurrencyColumnMerger',
     # 'CacheableMixin',  # Not exported - import directly to avoid circular imports
     'remove_xml_declaration',
+    'terminate_unclosed_comments',
     'create_lxml_parser',
     # 'process_table_matrix'  # Not exported - import directly to avoid circular imports
 ]

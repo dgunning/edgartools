@@ -18,7 +18,11 @@ from edgar.documents.processors.preprocessor import HTMLPreprocessor
 from edgar.documents.strategies.document_builder import DocumentBuilder
 from edgar.documents.types import XBRLFact
 from edgar.documents.utils import get_cache_manager
-from edgar.documents.utils.html_utils import create_lxml_parser, remove_xml_declaration
+from edgar.documents.utils.html_utils import (
+    create_lxml_parser,
+    remove_xml_declaration,
+    terminate_unclosed_comments,
+)
 
 
 class HTMLParser:
@@ -180,6 +184,9 @@ class HTMLParser:
             # Remove XML declaration if present
             html = remove_xml_declaration(html)
 
+            # A stray "<!--" with no "-->" makes lxml swallow the rest of the document
+            html = terminate_unclosed_comments(html)
+
             parser = create_lxml_parser(
                 remove_blank_text=not self.config.preserve_whitespace,
                 remove_comments=True,
@@ -290,6 +297,7 @@ class HTMLParser:
 
             # Remove XML declaration if present
             html = remove_xml_declaration(html)
+            html = terminate_unclosed_comments(html)
 
             tree = lxml.html.fromstring(html, parser=parser)
 

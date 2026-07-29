@@ -13,6 +13,7 @@ from edgar.httprequests import stream_with_retry
 from edgar.sgml.filing_summary import FilingSummary
 from edgar.sgml.sgml_header import FilingHeader
 from edgar.sgml.sgml_parser import SGMLDocument, SGMLFormatType, SGMLParser, parse_document
+from edgar.sgml.text_extraction import primary_document_text
 from edgar.sgml.tools import is_xml
 
 
@@ -303,8 +304,12 @@ class FilingSGML:
         Return the plain text of the primary filing document, read from the parsed SGML.
 
         Historic pre-HTML filings are returned as fixed-width plain text (page-break
-        markers removed); HTML primary documents are converted to text. Returns None
-        when there is no primary document content.
+        markers removed); HTML primary documents are converted to text; ownership forms
+        (3/4/5) are rendered from their XML rather than returned as raw markup.
+
+        Returns None when there is no text to return: no primary document, an empty one,
+        or a binary one (a PDF-only UPLOAD, say) with no plain-text sibling in the
+        submission.
 
         No network access is required when the SGML was parsed from a local source, which
         makes this the offline-friendly way to extract text from historic text-only filings.
@@ -312,19 +317,30 @@ class FilingSGML:
         primary = self.attachments.primary_documents
         if not primary:
             return None
-        content = primary[0].content
+        document = primary[0]
+        return primary_document_text(
+            self.form,
+            document.content,
+            is_binary=document.is_binary(),
+            text_extract=self._text_extract_content,
+        )
+
+    def _text_extract_content(self) -> Optional[str]:
+        """Content of the SEC-provided TEXT-EXTRACT sibling, if this filing has one.
+
+        UPLOAD filings whose primary document is a scanned PDF often ship a plain-text
+        rendering alongside it.
+        """
+        matches = self.attachments.query("document_type == 'TEXT-EXTRACT'")
+        if len(matches) == 0:
+            return None
+        attachment = matches.get_by_index(0)
+        if attachment is None:
+            return None
+        content = attachment.content
         if isinstance(content, bytes):
             content = content.decode('utf-8', 'replace')
-        if not content or not content.strip():
-            return None
-
-        from edgar.core import is_probably_html
-        if is_probably_html(content):
-            from edgar.documents import HTMLParser, ParserConfig
-            from edgar.richtools import rich_to_text
-            document = HTMLParser(ParserConfig(form=self.form)).parse(content)
-            return "" if document.is_empty else rich_to_text(document, width=500)
-        return content.replace("<PAGE>", "")
+        return content
 
     def xml(self):
         xml_document = self.attachments.primary_xml_document
