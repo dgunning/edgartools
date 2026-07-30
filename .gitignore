@@ -28,3 +28,25 @@ training/output/
 # Oversized issue-868 S-1 underwriter cassettes (>100MB, kept local only)
 tests/cassettes/TestIssue868S1Underwriters.test_s1_lead_manager_is_real_underwriter.yaml
 tests/cassettes/TestIssue868S1Underwriters.test_s1a_lead_manager_is_real_underwriter.yaml
+
+# Local build, test, and session artifacts. Ignore rules never affect
+# already-tracked files (e.g. the tracked .claude/ agents and commands stay
+# tracked).
+.sesskey
+output/
+test_output/
+/training/
+tests/manual/
+edgar/**/.debug/
+ai_docs/
+agent_eval_results/
+.claude/settings.local.json
+.claude/
+.beads/issues.jsonl
+**/TEMP_*.md
+**/WIP_*.md
+**/LOCAL_*.md
+**/my_analysis_*.md
+**/scratch_*.md
+data/
+!edgar/entity/data/
