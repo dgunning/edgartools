@@ -1962,7 +1962,8 @@ class TOCAnalyzer:
                         # rather than allowing any `\d`.
                         max_item_num = self.schema.max_bare_item
                         bare_item_match = re.match(r'^([1-9]\d?)([A-Za-z]?)\.?\s*$', prev_text, re.IGNORECASE)
-                        if bare_item_match and 1 <= int(bare_item_match.group(1)) <= max_item_num:
+                        if (bare_item_match and 1 <= int(bare_item_match.group(1)) <= max_item_num
+                                and not self._cell_in_numbered_index(prev_sibling)):
                             item_num = bare_item_match.group(1)
                             item_letter = bare_item_match.group(2).upper()
                             return f"Item {item_num}{item_letter}"
@@ -1996,6 +1997,44 @@ class TOCAnalyzer:
             logger.debug("Preceding-item-label extraction failed", exc_info=True)
 
         return ''
+
+    # Column headers that name a table's numbering as something other than
+    # items. Exact cell match only — "Table of Contents" is not "Table".
+    _NUMBERED_INDEX_HEADERS = frozenset(
+        ('table', 'tables', 'figure', 'figures', 'chart', 'charts',
+         'exhibit', 'exhibits', 'note', 'notes'))
+
+    def _cell_in_numbered_index(self, cell) -> bool:
+        """Return True when ``cell`` belongs to a numbered table/figure index.
+
+        Freddie Mac's MD&A "List of Tables" (GH #918) has rows shaped exactly
+        like bare-number TOC rows — ``11 | Other Investments Portfolio | 18``
+        — but the numbers are table captions, and reading them as item numbers
+        mapped every Item 1–15 onto MD&A tables at full confidence. The index
+        is recognisable by its header row, which names the numbering:
+        "Table | Description | Page". A genuine TOC either heads its number
+        column "Item" (Morgan Stanley: "Table of Contents | Part | Item |
+        Page") or carries no header at all, so only a header row with an
+        exact "Table"/"Figure"/… cell and no "Item" cell disqualifies the
+        bare numbers. Validating each row's link target instead does not
+        work: many filers' TOC anchors land nowhere near the item heading,
+        so demanding per-row corroboration silently dropped real items
+        (MS 10-K: 19 item sections → 6).
+        """
+        try:
+            table = cell.getparent()
+            while table is not None and table.tag != 'table':
+                table = table.getparent()
+            if table is None:
+                return False
+            for header_row in table.xpath('./tr | ./thead/tr | ./tbody/tr')[:4]:
+                texts = [(c.text_content() or '').strip().rstrip(':').lower()
+                         for c in header_row.xpath('./td | ./th')]
+                if any(t in self._NUMBERED_INDEX_HEADERS for t in texts):
+                    return not any(t == 'item' for t in texts)
+        except Exception:
+            logger.debug("Numbered-index header check failed", exc_info=True)
+        return False
 
     def _extract_part_context(self, text: str) -> Optional[str]:
         """Extract normalized part label from text, e.g., "Part II"."""
