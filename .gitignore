@@ -48,5 +48,9 @@ agent_eval_results/
 **/LOCAL_*.md
 **/my_analysis_*.md
 **/scratch_*.md
-data/
-!edgar/entity/data/
+# Test fixtures at the repo root. Keep the leading slash: hatchling filters the
+# build through .gitignore, so a bare "data/" also matches edgar/reference/data/
+# and edgar/entity/data/ and drops them from the wheel — even though
+# pyproject.toml [tool.hatch.build] includes them explicitly. Those files are
+# needed at import time, so the result is a wheel that cannot `import edgar`.
+/data/
