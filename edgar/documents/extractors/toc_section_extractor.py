@@ -856,14 +856,40 @@ class SECSectionExtractor:
         Used to tell a *legitimately short* item (whose anchor is correctly
         placed — e.g. "ITEM 3. LEGAL PROCEEDINGS / incorporated by reference")
         apart from a *mis-anchored* item (whose anchor landed on a PART header,
-        so the short text carries no item title). Matches "ITEM <n> <TITLE>"
-        within the leading slice, tolerating the non-breaking spaces and
-        entity noise that separate the number from the title.
+        so the short text carries no item title).
+
+        A text that OPENS with "ITEM <n>" is on its own heading whatever the
+        title says: ``_ITEM_TITLE_PATTERNS`` carries the 10-K titles, but the
+        same item number names a different section on other forms (10-Q
+        Part II Item 1 is Legal Proceedings, not Business), and Part III items
+        (10–16) have no entry at all. Requiring the 10-K title here sent
+        correctly-anchored brief 10-Q items into the HTML-regex rescue, which
+        matched a *cross-reference* elsewhere in the filing ("… see Item 1
+        'Business — Regulation' … in our 2023 Form 10-K") and replaced the
+        right 200-char section with 100K chars of mislabeled prose (ICE/CSCO/
+        CTSH 10-Qs). The title match is kept as a fallback for headings that
+        sit deeper in the leading slice.
         """
+        head = section_text[:200]
+        num_match = re.match(r'(\d+)([A-Z]?)$', item_num)
+        if num_match:
+            # Tolerate "1(A)" (ICE writes "ITEM 1(A). RISK FACTORS") and forbid
+            # a digit/letter on either side of the number so item 1 can't
+            # match "ITEM 10", "ITEM 1A", or the tail of "ITEM 11" — the
+            # separator class carries 0-9 for entity noise like &#160;, so
+            # without the lookbehind it would swallow a repeated leading
+            # digit. A leading "PART <N>" line is allowed: an anchor on the
+            # part header immediately before the item's own heading still
+            # yields correctly-bounded content.
+            num, letter = num_match.group(1), num_match.group(2)
+            num_pattern = num + (rf'\(?{letter}\)?' if letter else '')
+            start_pattern = (rf'^\s*(?:PART[\s &#;0-9xnbsp]*[IVX]+[\s.:—–-]*)?'
+                             rf'ITEM[\s &#;0-9xnbsp]*(?<![0-9]){num_pattern}(?![0-9A-Za-z])')
+            if re.search(start_pattern, head, re.IGNORECASE):
+                return True
         title_pattern = _ITEM_TITLE_PATTERNS.get(item_num)
         if not title_pattern:
             return False
-        head = section_text[:200]
         pattern = rf'ITEM[\s &#;0-9xnbsp]*{re.escape(item_num)}[\s &#;.0-9xnbsp]*{title_pattern}'
         return re.search(pattern, head, re.IGNORECASE) is not None
 
@@ -891,6 +917,25 @@ class SECSectionExtractor:
         if html_content.startswith('<?xml'):
             html_content = re.sub(r'<\?xml[^>]*\?>', '', html_content, count=1)
 
+        # The rescue's premise is an anchor that landed just BEFORE the item
+        # body (on a PART header), so the real heading always lies after the
+        # start anchor and before the next section's anchor. Searching the
+        # whole document instead found "Item N …" *cross-references* in other
+        # sections' prose ("… see Item 1 'Business — Regulation' … in our 2023
+        # Form 10-K" in ICE's MD&A) and rebuilt the section from there.
+        window_start = 0
+        for probe in (f'id="{boundary.anchor_id}"', f"id='{boundary.anchor_id}'",
+                      f'name="{boundary.anchor_id}"'):
+            pos = html_content.find(probe)
+            if pos != -1:
+                window_start = pos
+                break
+        window_end = len(html_content)
+        if boundary.end_element_id:
+            pos = html_content.find(f'id="{boundary.end_element_id}"')
+            if pos > window_start:
+                window_end = pos
+
         # Build pattern to find actual ITEM header
         # Match "ITEM 1." or "ITEM 1A." with various spacing/entities
         # Examples: "ITEM 1. BUSINESS", "ITEM 1.&#160;&#160;BUSINESS", "ITEM&#160;1. BUSINESS"
@@ -899,12 +944,12 @@ class SECSectionExtractor:
         title_pattern = _ITEM_TITLE_PATTERNS.get(item_num, r'\w+')
         full_pattern = rf'{item_pattern}{title_pattern}'
 
-        # Search for the pattern in HTML
-        match = re.search(full_pattern, html_content, re.IGNORECASE)
+        # Search for the pattern within the section's anchor window
+        match = re.search(full_pattern, html_content[window_start:window_end], re.IGNORECASE)
         if not match:
             return None
 
-        start_pos = match.start()
+        start_pos = window_start + match.start()
 
         # Find the end of this section (next ITEM header)
         # Start searching after current match
@@ -912,20 +957,12 @@ class SECSectionExtractor:
 
         # Find next ITEM or PART header
         next_item_pattern = r'ITEM[\s&#;0-9xnbsp]*\d+[A-Z]?\.?\s*[A-Z]'
-        next_match = re.search(next_item_pattern, html_content[search_start:], re.IGNORECASE)
+        next_match = re.search(next_item_pattern, html_content[search_start:window_end], re.IGNORECASE)
 
         if next_match:
             end_pos = search_start + next_match.start()
         else:
-            # No next item found - use end boundary anchor if available
-            if boundary.end_element_id:
-                end_anchor_pos = html_content.find(f'id="{boundary.end_element_id}"')
-                if end_anchor_pos > start_pos:
-                    end_pos = end_anchor_pos
-                else:
-                    end_pos = len(html_content)
-            else:
-                end_pos = len(html_content)
+            end_pos = window_end
 
         # Extract HTML content
         section_html = html_content[start_pos:end_pos]
