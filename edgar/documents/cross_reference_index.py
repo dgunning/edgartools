@@ -15,6 +15,27 @@ import re
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
+# The index heading. Cross-reference filers write it in various cases and with or
+# without the hyphen ("FORM 10-K CROSS-REFERENCE INDEX", "Form 10-K Cross Reference Index").
+_INDEX_HEADING_RE = re.compile(r'FORM\s+10-K\s+CROSS[- ]?REFERENCE\s+INDEX', re.IGNORECASE)
+
+# Item numbers may be bare ("1A.") or prefixed ("Item 1A.") — see Citigroup, issue #251.
+_ITEM_1A_RE = re.compile(r'(?:Item\s+)?1A\.?', re.IGNORECASE)
+
+# How far back from the heading the index table may open. The heading is often
+# rendered *inside* the table (GE), so the first row can precede it.
+_TABLE_LOOKBACK = 5_000
+
+
+def _cell_texts(row_html: str) -> List[str]:
+    """Non-empty text of each <td> in a row, tags stripped."""
+    texts = []
+    for cell in re.findall(r'<td[^>]*>(.*?)</td>', row_html, re.DOTALL):
+        text = re.sub(r'<[^>]+>', '', cell).strip()
+        if text and text != '&#160;' and text != '\xa0':
+            texts.append(text)
+    return texts
+
 
 @dataclass
 class PageRange:
@@ -123,6 +144,17 @@ class CrossReferenceIndex:
         self.html = html
         self._entries: Optional[Dict[str, IndexEntry]] = None
 
+    def _heading_position(self) -> Optional[int]:
+        """Position of the index heading, or None if the filing has no such heading.
+
+        The heading may appear more than once (a TOC link as well as the table
+        itself); the last occurrence is the table, so that is the one we anchor to.
+        """
+        last = None
+        for match in _INDEX_HEADING_RE.finditer(self.html):
+            last = match
+        return last.start() if last else None
+
     def has_index(self) -> bool:
         """
         Detect if filing uses Cross Reference Index format.
@@ -130,44 +162,57 @@ class CrossReferenceIndex:
         Returns:
             True if Cross Reference Index is present
         """
-        # Look for the specific heading (case-insensitive, allow hyphen in "Cross-Reference")
-        if not re.search(r'FORM\s+10-K\s+CROSS[- ]?REFERENCE\s+INDEX', self.html, re.IGNORECASE):
+        if self._heading_position() is None:
             return False
 
-        # Look for table with Item/page mapping pattern
-        # Search for a row with "Item 1A" or bare "1A.", "Risk Factors", and page numbers
-        pattern = (
-            r'<td[^>]*>.*?(?:Item\s+)?1A\..*?</td>'
-            r'.*?<td[^>]*>.*?Risk\s+Factors.*?</td>'
-            r'.*?<td[^>]*>.*?\d+(?:(?:&#8211;|-)\d+)?.*?</td>'
-        )
-        return bool(re.search(pattern, self.html, re.DOTALL | re.IGNORECASE))
+        table_html = self._find_index_table()
+        if not table_html:
+            return False
+
+        return self._has_index_row(table_html)
+
+    @staticmethod
+    def _has_index_row(table_html: str) -> bool:
+        """True if the table holds an Item 1A / Risk Factors / page-number row.
+
+        Scans row by row rather than matching one pattern across the table. The
+        previous single regex nested six lazy quantifiers under DOTALL and ran
+        against the whole filing: where the heading matched but the table shape
+        did not, it backtracked catastrophically and never returned on a
+        multi-MB document (issue #928). Row-wise matching is linear, and reuses
+        the row/cell shapes parse() already relies on.
+        """
+        for row_match in re.finditer(r'<tr[^>]*>(.*?)</tr>', table_html, re.DOTALL):
+            cells = _cell_texts(row_match.group(1))
+            if len(cells) < 3:
+                continue
+            if not _ITEM_1A_RE.fullmatch(cells[0]):
+                continue
+            if 'risk factor' not in html_lib.unescape(cells[1]).lower():
+                continue
+            if PageRange.parse(cells[2]):
+                return True
+        return False
 
     def _find_index_table(self) -> Optional[str]:
         """Find the cross-reference index table HTML.
 
-        The heading may appear multiple times (e.g., TOC link + actual table).
-        We search from the last occurrence and handle two layouts:
+        Anchored to the last heading occurrence, handling two layouts:
         1. Heading inside a <table> (GE style) — search backwards for <table
         2. Heading before a <table> (Citigroup style) — search forwards for <table
         """
-        # Find all occurrences and use the last one (actual table, not TOC link)
-        matches = list(re.finditer(
-            r'FORM\s+10-K\s+CROSS[- ]?REFERENCE\s+INDEX', self.html, re.IGNORECASE
-        ))
-        if not matches:
+        heading_pos = self._heading_position()
+        if heading_pos is None:
             return None
 
-        heading_pos = matches[-1].start()
-
         # Check if heading is inside a table (search backwards for <table)
-        preceding = self.html[max(0, heading_pos - 5000):heading_pos]
+        preceding = self.html[max(0, heading_pos - _TABLE_LOOKBACK):heading_pos]
         last_table_open = preceding.rfind('<table')
         last_table_close = preceding.rfind('</table>')
 
         if last_table_open != -1 and last_table_open > last_table_close:
             # Heading is inside an open table — use that table
-            table_start = max(0, heading_pos - 5000) + last_table_open
+            table_start = max(0, heading_pos - _TABLE_LOOKBACK) + last_table_open
         else:
             # Heading is before the table — search forward
             table_start = self.html.find('<table', heading_pos)
@@ -208,14 +253,7 @@ class CrossReferenceIndex:
         page_continuation_pattern = re.compile(r'^[\d,\s&#;.\-\u2013]+$')
 
         for row_match in re.finditer(r'<tr[^>]*>(.*?)</tr>', table_html, re.DOTALL):
-            row_html = row_match.group(1)
-            # Extract non-empty text from each <td>
-            cells = re.findall(r'<td[^>]*>(.*?)</td>', row_html, re.DOTALL)
-            cell_texts = []
-            for cell in cells:
-                text = re.sub(r'<[^>]+>', '', cell).strip()
-                if text and text != '&#160;' and text != '\xa0':
-                    cell_texts.append(text)
+            cell_texts = _cell_texts(row_match.group(1))
 
             if not cell_texts:
                 continue

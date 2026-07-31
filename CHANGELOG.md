@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`filing["Item 7"]` hung indefinitely on some 10-Ks** — `CrossReferenceIndex.has_index()` matched the cross-reference heading, then probed for the index table with a single regex nesting six lazy quantifiers under `DOTALL` against the *entire* filing HTML. Where the heading matched but the table shape did not, it backtracked catastrophically: on ODP Corp's FY2025 10-K (5.6MB) the call did not finish within 45 seconds. A successful match returned instantly, so only the non-matching case was affected. It is reached from `TenK.__getitem__`, so any item lookup on an affected 10-K hung — and because `re` holds the GIL throughout, one such filing froze every other thread in the process, presenting as a whole-process hang rather than one slow filing. Detection is now anchored to the index table `_find_index_table()` already locates and scans it row by row, which is linear. Bounding the search window alone was not enough: on dense markup the old pattern exceeded 10s at 3.6K chars, so any fixed window stayed exploitable. GE and Citigroup still detect and parse unchanged. (GH #928)
+
 ## [5.44.0] - 2026-07-29
 
 ### Fixed
