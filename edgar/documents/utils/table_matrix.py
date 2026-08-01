@@ -52,6 +52,10 @@ class TableMatrix:
         Returns:
             Self for chaining
         """
+        # Discard any previous build; a stale grid would otherwise be consulted
+        # as if it described the rows now being measured.
+        self.matrix = []
+
         # Store header row count for later use
         self.header_row_count = len(header_rows)
 
@@ -85,7 +89,12 @@ class TableMatrix:
         return self
 
     def _calculate_dimensions(self, rows: List[List[Cell]]):
-        """Calculate the actual dimensions considering colspan"""
+        """Calculate the actual dimensions considering colspan.
+
+        Note this runs before the grid is materialised, so `_is_occupied` has
+        nothing to consult and always reports False here. Rowspan occupancy is
+        resolved for real in `_place_cells`, which widens the grid if needed.
+        """
         max_cols = 0
 
         for row_idx, row in enumerate(rows):
@@ -107,7 +116,10 @@ class TableMatrix:
 
     def _is_occupied(self, row: int, col: int) -> bool:
         """Check if a position is occupied by a cell from a previous row (rowspan)"""
-        if row == 0:
+        if row == 0 or not self.matrix:
+            # No grid to consult yet. Without this guard the loop below still
+            # runs `row` times finding nothing, which is O(rows^2) across a
+            # table -- ~2 hours on a 62k-row Fannie Mae ABS-15G.
             return False
 
         # Check if any cell above has rowspan that reaches this position
