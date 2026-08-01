@@ -2,6 +2,7 @@
 Main HTML parser implementation.
 """
 
+import logging
 import time
 from typing import List, Optional, Union
 
@@ -23,6 +24,8 @@ from edgar.documents.utils.html_utils import (
     remove_xml_declaration,
     terminate_unclosed_comments,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class HTMLParser:
@@ -128,14 +131,17 @@ class HTMLParser:
         if doc_size > self.config.streaming_threshold:
             return self._parse_streaming(html)
 
+        # Extract XBRL data BEFORE preprocessing (to preserve ix:hidden content).
+        # Deliberately outside the try below: this step is best-effort and
+        # already swallows its own errors, so it must not be able to surface as
+        # a fatal HTMLParsingError.
+        xbrl_facts = []
+        if self.config.extract_xbrl:
+            xbrl_facts = self._extract_xbrl_pre_process(html)
+
         try:
             # Store original HTML BEFORE preprocessing (needed for TOC analysis)
             original_html = html
-
-            # Extract XBRL data BEFORE preprocessing (to preserve ix:hidden content)
-            xbrl_facts = []
-            if self.config.extract_xbrl:
-                xbrl_facts = self._extract_xbrl_pre_process(html)
 
             # Preprocessing (will remove ix:hidden for rendering)
             html = self.preprocessor.process(html)
@@ -330,10 +336,23 @@ class HTMLParser:
 
             return facts
 
+        except etree.ParserError as e:
+            # No parseable element in the document (lxml's "Document is empty"),
+            # so there is no inline XBRL to find either. Benign, and common
+            # enough in bulk crawls that warning about it is pure noise.
+            logger.debug("No XBRL extracted, document has no parseable root: %s", e)
+            return []
         except Exception as e:
-            # Log error but don't fail parsing
-            import logging
-            logging.warning(f"Failed to extract XBRL data: {e}")
+            # Log error but don't fail parsing. Carry enough context to identify
+            # the offending document in a bulk crawl - this used to log to the
+            # root logger with no detail at all. Build the context defensively:
+            # a diagnostic for a swallowed error must never raise itself.
+            size = len(html) if isinstance(html, str) else -1
+            preview = html[:200] if isinstance(html, str) else repr(html)[:200]
+            logger.warning(
+                "Failed to extract XBRL data (%s: %s). Document size: %s bytes. Preview: %r",
+                type(e).__name__, e, size, preview
+            )
             return []
 
     def parse_file(self, file_path: str) -> Document:
