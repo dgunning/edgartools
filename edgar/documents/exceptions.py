@@ -59,7 +59,6 @@ class DocumentTooLargeError(ParsingError):
             f"Document size ({size:,} bytes) exceeds maximum ({max_size:,} bytes)",
             context={'size': size, 'max_size': max_size},
             suggestions=[
-                "Use streaming parser for large documents",
                 "Increase max_document_size in configuration",
                 "Split document into smaller parts"
             ]

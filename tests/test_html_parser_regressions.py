@@ -105,18 +105,23 @@ class TestTableRenderingRegressions:
 
 
 class TestStreamingParserRegressions:
-    """Regression tests for streaming parser bugs."""
+    """Regression tests from the era of the separate StreamingParser.
+
+    The StreamingParser (a second, size-gated text pipeline for documents over
+    ParserConfig.streaming_threshold) was removed in edgartools-tlj1: it produced
+    divergent and lossy text (dropped div-hosted content entirely, skipped the
+    preprocessor and inline-XBRL extraction) and was ~20x slower than the normal
+    pipeline it was meant to relieve. These tests are kept because they pin
+    behaviour that must now hold trivially: one pipeline, same output at any
+    document size, no duplicated or dropped content.
+    """
 
     def test_jpm_streaming_parent_none_bug(self):
         """
-        Regression: JPM 10-K crashed in streaming parser.
+        Regression: JPM 10-K (52MB) crashed in the old streaming parser.
 
-        Bug: StreamingParser tried to delete elem.getparent()[0] when parent was None
-        Error: 'NoneType' object does not support item deletion
-        Fix: Added None check before deleting parent element
-        Location: edgar/documents/utils/streaming.py:100
-
-        Expected: Large documents parse successfully without crashes
+        Large documents now take the normal pipeline; this pins that a 52MB
+        real filing parses successfully.
         """
         html_path = Path('data/html/JPM.10-K.html')
         if not html_path.exists():
@@ -139,12 +144,9 @@ class TestStreamingParserRegressions:
 
     def test_large_document_streaming_trigger(self):
         """
-        Regression: Ensure streaming mode activates for large docs.
-
-        Bug: Streaming threshold not properly enforced
-        Expected: Documents over threshold use streaming parser
+        Documents over the (now-ignored) streaming_threshold parse without error.
         """
-        # Create a document just over streaming threshold
+        # Create a document just over the old streaming threshold
         threshold = 5 * 1024 * 1024  # 5MB
         large_content = "x" * (threshold + 1000)
         html = f"<html><body><p>{large_content}</p></body></html>"
@@ -154,9 +156,38 @@ class TestStreamingParserRegressions:
             max_document_size=100 * 1024 * 1024
         )
 
-        # Should parse without error using streaming
         doc = parse_html(html, config=config)
         assert doc is not None
+
+    def test_div_text_survives_above_old_streaming_threshold(self):
+        """
+        Regression (edgartools-tlj1): documents over 10MB silently lost ALL text
+        hosted directly in <div> elements.
+
+        The old StreamingParser only materialised p/h1-h6/section/table nodes;
+        text in divs went to an internal buffer that was never flushed into the
+        document. Modern SEC filings are div-based, so any filing crossing the
+        10MB default threshold lost most of its body text — silently, while the
+        same content under 10MB was fine. The streaming path was removed; this
+        builds a genuinely >10MB document (so a reintroduced hardcoded gate
+        would be caught) and asserts div-hosted text survives.
+        """
+        filler = "<p>" + "x" * 1000 + "</p>"
+        n = (10 * 1024 * 1024) // len(filler) + 50
+        html = (
+            "<html><body>"
+            "<div>Sentinel div text that must survive.</div>"
+            + filler * n +
+            "<div>Closing sentinel in a div.</div>"
+            "</body></html>"
+        )
+        assert len(html.encode("utf-8")) > 10 * 1024 * 1024
+
+        config = ParserConfig(max_document_size=100 * 1024 * 1024)
+        text = parse_html(html, config=config).text()
+
+        assert "Sentinel div text that must survive." in text
+        assert "Closing sentinel in a div." in text
 
     def test_streaming_preserves_span_wrapped_paragraph_text(self):
         """

@@ -59,12 +59,6 @@ class HTMLParser:
         if self.config.max_document_size <= 0:
             raise InvalidConfigurationError("max_document_size must be positive")
 
-        if self.config.streaming_threshold and self.config.max_document_size:
-            if self.config.streaming_threshold > self.config.max_document_size:
-                raise InvalidConfigurationError(
-                    "streaming_threshold cannot exceed max_document_size"
-                )
-
     def _init_strategies(self):
         """Initialize parsing strategies based on configuration."""
         self.strategies = {}
@@ -126,10 +120,6 @@ class HTMLParser:
         doc_size = len(html.encode('utf-8'))
         if doc_size > self.config.max_document_size:
             raise DocumentTooLargeError(doc_size, self.config.max_document_size)
-
-        # Check if streaming is needed
-        if doc_size > self.config.streaming_threshold:
-            return self._parse_streaming(html)
 
         # Extract XBRL data BEFORE preprocessing (to preserve ix:hidden content).
         # Deliberately outside the try below: this step is best-effort and
@@ -279,13 +269,6 @@ class HTMLParser:
         document = Document(root=root_node, metadata=metadata)
 
         return document
-
-    def _parse_streaming(self, html: str) -> Document:
-        """Parse large document in streaming mode."""
-        from edgar.documents.utils.streaming import StreamingParser
-
-        streaming_parser = StreamingParser(self.config, self.strategies)
-        return streaming_parser.parse(html)
 
     def _extract_xbrl_pre_process(self, html: str) -> List[XBRLFact]:
         """

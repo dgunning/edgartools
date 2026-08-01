@@ -506,77 +506,30 @@ class TestPerformance:
         with pytest.raises(DocumentTooLargeError):
             parse_html(large_html, config)
     
-    def test_streaming_parser(self):
-        """Test streaming parser for large documents."""
-        # Note: The streaming parser implementation has issues with iterparse
-        # that need to be fixed. For now, we'll test that streaming mode
-        # can be triggered without errors, even if the output is not complete.
+    def test_document_over_old_streaming_threshold_extracts_content(self):
+        """Documents over the former streaming_threshold parse via the one pipeline.
+
+        streaming_threshold used to route anything above it to a separate
+        StreamingParser with divergent, lossy text output (edgartools-tlj1).
+        That parser was removed; the setting is now ignored. This pins that a
+        document above the configured threshold still yields full content.
+        """
         config = ParserConfig(
-            streaming_threshold=1000,  # Use streaming for docs > 1KB
-            max_document_size=20000  # Increased to 20KB
+            streaming_threshold=1000,
+            max_document_size=20000
         )
-        
-        # Create moderately large HTML (should be > streaming_threshold)
+
         html = "<html><body>"
         for i in range(100):
             html += f"<p>Paragraph {i} with some content.</p>"
         html += "</body></html>"
-        
-        # Verify it's large enough to trigger streaming
+
         assert len(html.encode('utf-8')) > config.streaming_threshold
-        
-        # For now, just test that parsing doesn't raise an exception
+
         doc = parse_html(html, config)
-        assert doc is not None
-        
-        # TODO: Fix streaming parser to properly extract content
-        # The streaming parser currently has issues with iterparse
-        # clearing elements before text can be extracted
-
-    def test_streaming_parser_size_check_uses_input_bytes(self):
-        """``StreamingParser.parse`` must size-check against input bytes.
-
-        Regression pin. Before commit 6b702bd9 the streaming loop
-        accumulated ``len(etree.tostring(elem))`` on every iteration,
-        which re-serialized nested subtrees and could falsely reject
-        documents whose actual size was within the configured limit.
-        That commit deferred the accounting around table subtrees but
-        kept the per-event accumulator otherwise — leaving the size
-        check coupled to lxml internals (sibling-pruning order, tail
-        attribution) instead of the input.
-
-        This test calls ``StreamingParser`` directly to bypass the
-        upstream ``HTMLParser._parse`` size guard and pins the
-        invariant: parsing succeeds when actual input size is within
-        ``max_document_size`` and raises ``DocumentTooLargeError``
-        only when it isn't, regardless of how the document is nested.
-        """
-        from edgar.documents.utils.streaming import StreamingParser
-
-        # Deeply-nested inline soup mirrors SEC inline-XBRL filings.
-        inner = "<p><b><i><u><em><strong>x</strong></em></u></i></b></p>"
-        rows = "".join(inner for _ in range(2000))
-        html = f"<html><body>{rows}</body></html>"
-        actual_size = len(html.encode("utf-8"))
-
-        # Cap just above actual size — accounting that reports more
-        # than actual bytes would falsely raise here.
-        config = ParserConfig(
-            streaming_threshold=actual_size // 2,
-            max_document_size=actual_size + 1024,
-        )
-        parser = StreamingParser(config, strategies={})
-        doc = parser.parse(html)
-        assert doc is not None
-
-        # Cap below actual size must still raise.
-        too_small = ParserConfig(
-            streaming_threshold=actual_size // 2,
-            max_document_size=actual_size // 2,
-        )
-        parser_small = StreamingParser(too_small, strategies={})
-        with pytest.raises(DocumentTooLargeError):
-            parser_small.parse(html)
+        text = doc.text()
+        assert "Paragraph 0 with some content." in text
+        assert "Paragraph 99 with some content." in text
 
 
 class TestXBRLExtraction:
