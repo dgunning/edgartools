@@ -368,6 +368,24 @@ class Issuer:
         return repr_rich(self.__rich__())
 
 
+def _company_information_from_submission(company_data: Dict[str, Any]) -> CompanyInformation:
+    """Build CompanyInformation from a SUBMISSION-format COMPANY-DATA block.
+
+    Pre-2004 headers name the SIC field ``ASSIGNED-SIC``; modern ones use
+    ``STANDARD-INDUSTRIAL-CLASSIFICATION``. Accept either so old and new
+    dialects populate the same fields.
+    """
+    return CompanyInformation(
+        name=company_data.get('CONFORMED-NAME'),
+        cik=company_data.get('CIK'),
+        sic=(company_data.get('STANDARD-INDUSTRIAL-CLASSIFICATION')
+             or company_data.get('ASSIGNED-SIC')),
+        irs_number=company_data.get('IRS-NUMBER'),
+        state_of_incorporation=company_data.get('STATE-OF-INCORPORATION'),
+        fiscal_year_end=company_data.get('FISCAL-YEAR-END')
+    )
+
+
 class FilingHeader:
     """
     Contains the parsed representation of the SEC-HEADER text at the top of the full submission text
@@ -470,18 +488,20 @@ class FilingHeader:
             "EFFECTIVE DATE": parsed_data.get("EFFECTIVENESS-DATE"),
         }
 
-        # Handle FILER section
-        for filer_data in parsed_data.get('FILER', []):
+        # Handle FILER section. Schedule 13D/G and pre-2004 headers carry the
+        # filer under FILED-BY instead, and it is not a repeatable tag, so it
+        # arrives as a bare dict rather than a list.
+        filer_records = list(parsed_data.get('FILER', []))
+        filed_by = parsed_data.get('FILED-BY')
+        if isinstance(filed_by, dict):
+            filer_records.append(filed_by)
+        elif filed_by:
+            filer_records.extend(filed_by)
+
+        for filer_data in filer_records:
             # Create Filer object from COMPANY-DATA
             company_data = filer_data.get('COMPANY-DATA', {})
-            company_info = CompanyInformation(
-                name=company_data.get('CONFORMED-NAME'),
-                cik=company_data.get('CIK'),
-                sic=company_data.get('STANDARD INDUSTRIAL CLASSIFICATION'),
-                irs_number=company_data.get('IRS NUMBER'),
-                state_of_incorporation=company_data.get('STATE-OF-INCORPORATION'),
-                fiscal_year_end=company_data.get('FISCAL-YEAR-END')
-            )
+            company_info = _company_information_from_submission(company_data)
 
             # Create Filing Information from FILING-VALUES
             filing_values = filer_data.get('FILING-VALUES', {})
@@ -517,14 +537,7 @@ class FilingHeader:
 
             # Create Company Information object
             company_data = reporting_owner_data.get('COMPANY-DATA', {})
-            company_info = CompanyInformation(
-                name=company_data.get('CONFORMED-NAME'),
-                cik=company_data.get('CIK'),
-                sic=company_data.get('STANDARD-INDUSTRIAL-CLASSIFICATION'),
-                irs_number=company_data.get('IRS-NUMBER'),
-                state_of_incorporation=company_data.get('STATE-OF-INCORPORATION'),
-                fiscal_year_end=company_data.get('FISCAL-YEAR-END')
-            )
+            company_info = _company_information_from_submission(company_data)
 
             # Create Filing Information object
             filing_values = reporting_owner_data.get('FILING-VALUES', {})
@@ -586,14 +599,8 @@ class FilingHeader:
                     date_of_change=former_company.get('DATE-CHANGED')
                 ))
             issuer = Issuer(
-                company_information=CompanyInformation(
-                    name=issuer_record.get('COMPANY-DATA', {}).get('CONFORMED-NAME'),
-                    cik=issuer_record.get('COMPANY-DATA', {}).get('CIK'),
-                    sic=issuer_record.get('COMPANY-DATA', {}).get('STANDARD-INDUSTRIAL-CLASSIFICATION'),
-                    irs_number=issuer_record.get('COMPANY-DATA', {}).get('IRS-NUMBER'),
-                    state_of_incorporation=issuer_record.get('COMPANY-DATA', {}).get('STATE-OF-INCORPORATION'),
-                    fiscal_year_end=issuer_record.get('COMPANY-DATA', {}).get('FISCAL-YEAR-END')
-                ),
+                company_information=_company_information_from_submission(
+                    issuer_record.get('COMPANY-DATA', {})),
                 business_address=business_address,
                 mailing_address=mail_address,
                 former_company_names=former_company_names
@@ -606,14 +613,7 @@ class FilingHeader:
         for subject_company_data in parsed_data.get('SUBJECT-COMPANY', []):
             # Create Company Information object
             company_data = subject_company_data.get('COMPANY-DATA', {})
-            company_info = CompanyInformation(
-                name=company_data.get('CONFORMED-NAME'),
-                cik=company_data.get('CIK'),
-                sic=company_data.get('STANDARD-INDUSTRIAL-CLASSIFICATION'),
-                irs_number=company_data.get('IRS-NUMBER'),
-                state_of_incorporation=company_data.get('STATE-OF-INCORPORATION'),
-                fiscal_year_end=company_data.get('FISCAL-YEAR-END')
-            )
+            company_info = _company_information_from_submission(company_data)
 
             # Create Filing Information object
             filing_values = subject_company_data.get('FILING-VALUES', {})

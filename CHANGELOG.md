@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Header-only pre-2004 submissions failing, then failing silently** — EDGAR sometimes serves the `.hdr.sgml` artifact as a submission's text file: a bare `<SEC-HEADER>` block with no `<SEC-DOCUMENT>` wrapper and no document body (`0000950123-96-000525`, 1.2 KB). Format detection rejected it outright with `Unknown SGML format`. Behind that sat a worse defect: Schedule 13D/G filers arrive under `<FILED-BY>`, not `<FILER>`, and the SUBMISSION header builder only read `FILER` — so once routed, the filing parsed "successfully" with zero filers and a `None` CIK. Pre-2004 headers also name the SIC field `ASSIGNED-SIC` where modern ones use `STANDARD-INDUSTRIAL-CLASSIFICATION`, leaving `sic` silently `None`. All three are fixed. Detection keys on the *dialect*, not just the root tag: a `<SEC-HEADER>` root can introduce either the hyphenated form (`<ACCESSION-NUMBER>`) or the tab-indented one, and routing the latter to the SUBMISSION parser would have yielded an empty header without raising — trading a loud failure for a silent one.
+
 ## [5.44.1] - 2026-07-31
 
 ### Fixed
@@ -29,6 +33,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Filings from 1993 Q1–1994 Q2 unreachable** — `available_quarters()` hardcoded EDGAR's start as 1994 Q3, so `get_by_accession_number()` and `get_filings()` structurally rejected earlier periods even though SEC's full-index serves back to 1993 Q1 (verified; 1992 returns errors). The boundary and the open-ended `filing_date` default now start at 1993 Q1.
 - **Corrupt `colspan` exhausting memory** — filing 0001193125-06-185884 carries `colspan="376967340"`; the matrix allocated that many cells per row, reaching hundreds of GB (~700 GB reported from a 7M-filing crawl) before being killed. Spans are now clamped (colspan ≤ 1000, rowspan ≤ 10000) with a 2000-column cap and grid-bounded placement loops. Parses in ~4s at 0.3 GB.
 - **Nested tables reprocessed by every ancestor** — rows and cells were collected with descendant searches (`.//tr`, `.//td`), so a row nested N deep was processed once per ancestor: on 0000880195-09-000191 (8,207 tables, 26 deep) rows were processed 11.3× over, turning `FilingSGML.text()` into a 3-hour call and duplicating inner cells into outer tables. Traversal is now scoped to each table's own rows. Parses in ~7s.
+
+### Acknowledgements
+
+- The last eight fixes above all came from a single report by **Michael Grüning** (TU Ilmenau), who crawled roughly 7 million SGML filings from 1993–2009 and 2018 and sent back nine clustered defect classes with accession numbers. Whole-archive sweeps surface failure modes that a fixture corpus of modern, well-formed filings structurally cannot, and every one of these had been latent for years. Our thanks for the report and for the follow-up crawl that verified the fixes.
 
 ## [5.43.1] - 2026-07-27
 

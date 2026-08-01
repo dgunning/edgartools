@@ -216,6 +216,38 @@ def _raise_sec_html_error(content: str):
     )
 
 
+_HEADER_ROOT_TAGS = ('<SEC-HEADER>', '<IMS-HEADER>')
+
+
+def _is_tagged_header_dialect(content_stripped: str) -> bool:
+    """Is this header written in the hyphenated tag dialect?
+
+    Pre-2004 ``.hdr.sgml`` artifacts served as the submission text file use
+    tags, e.g. accession 0000950123-96-000525::
+
+        <SEC-HEADER>0000950123-96-000525.hdr.sgml : 19960213
+        <ACCESSION-NUMBER>0000950123-96-000525
+        <TYPE>SC 13G/A
+
+    while the same root tag can also introduce the tab-indented "space"
+    dialect (``ACCESSION NUMBER:\t0000950123-96-000524``). The distinction is
+    load-bearing: SubmissionFormatParser skips every line of the space dialect
+    and yields an empty header *without raising*, so misrouting here produces a
+    silent all-None header rather than an error. Decide on the first header
+    line after the root tag.
+    """
+    # Skip the root tag's own line, which carries the "<file> : <date>" stamp.
+    newline = content_stripped.find('\n')
+    if newline < 0:
+        return False
+    for line in content_stripped[newline + 1:].splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        return stripped.startswith('<') and not stripped.startswith('</')
+    return False
+
+
 class SGMLParser:
     @staticmethod
     def detect_format(content: str) -> SGMLFormatType:
@@ -234,6 +266,14 @@ class SGMLParser:
         elif '<DOCUMENT>' in content[:1000]:
             # For old filings from the 1990's
             return SGMLFormatType.SEC_DOCUMENT
+        elif content_stripped.startswith(_HEADER_ROOT_TAGS):
+            # Pre-2004: EDGAR sometimes serves the .hdr.sgml artifact as the
+            # submission text file. There is no <SEC-DOCUMENT> wrapper and often
+            # no document body at all. Route on the header dialect, since the two
+            # are read by different parsers.
+            return (SGMLFormatType.SUBMISSION
+                    if _is_tagged_header_dialect(content_stripped)
+                    else SGMLFormatType.SEC_DOCUMENT)
 
         # Only check for HTML content if it's not valid SGML structure
         # This prevents false positives when SGML contains HTML within <TEXT> sections
