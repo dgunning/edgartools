@@ -313,6 +313,55 @@ class TestBlankTextNodeWordGluing:
         assert 'RegulationS-T(the rule)' in text
 
 
+class TestCssGapWordBoundary:
+    """Bullets and footnote markers glued to their text: '•MacBook Pro 16-in.'
+
+    A filer who puts a bullet glyph in one span and the item text in the next does not
+    separate them with whitespace — the text span carries a padding-left, and that CSS
+    gap *is* the word boundary. ParagraphNode.text()'s tag allowlist was standing in for
+    it (95% of the 8,109 boundaries it restores across the fixture corpus turn out to
+    have such a gap), but the allowlist keys on `original_tag` metadata, which only
+    TextNodes carry. Header detection promotes a short span like a bare '•' to a
+    HeadingNode, and those lose the boundary — 640 of them across the corpus, including
+    14 bullets in Apple's FY2024 10-K.
+
+    The gap is now read directly off the style, independent of node type. (edgartools-jysx)
+    """
+
+    def test_bullet_glyph_is_separated_from_its_item_text(self):
+        # Apple FY2024 10-K Item 1: shipped as '•MacBook Pro 16-in.; and'. Both spans are
+        # promoted to HeadingNodes here, which is what defeated the allowlist.
+        html = ('<html><body>'
+                '<div style="padding-left:36pt;text-indent:-18pt">'
+                '<span style="font-family:Helvetica;font-size:9pt">&#8226;</span>'
+                '<span style="font-family:Helvetica;font-size:9pt;padding-left:14.85pt">'
+                'MacBook Pro 16-in.; and</span></div></body></html>')
+        text = parse_html(html).text()
+        assert '• MacBook Pro 16-in.' in text
+
+    def test_footnote_marker_is_separated_from_its_note(self):
+        # AbbVie FY2024 10-K Item 15: shipped as '(1)Financial Statements:'.
+        html = ('<html><body><div><span>(1)</span>'
+                '<span style="padding-left:9pt">Financial Statements: See Item 8.</span>'
+                '</div></body></html>')
+        text = parse_html(html).text()
+        assert '(1) Financial Statements' in text
+
+    def test_a_margin_left_gap_counts_too(self):
+        html = ('<html><body><div><span>(a)</span>'
+                '<span style="margin-left:4.3pt">Includes restructuring charges.</span>'
+                '</div></body></html>')
+        text = parse_html(html).text()
+        assert '(a) Includes restructuring' in text
+
+    def test_no_gap_means_no_space_from_this_rule(self):
+        # <font> is outside the allowlist, so with no CSS gap nothing separates these —
+        # which is correct: a browser renders them glued too.
+        html = '<html><body><p><font>Edgar</font><font>Tools</font></p></body></html>'
+        text = parse_html(html).text()
+        assert 'EdgarTools' in text
+
+
 class TestMidWordSplitSpacing:
     """The cost of the allowlist that the four fixes above exist to make redundant.
 

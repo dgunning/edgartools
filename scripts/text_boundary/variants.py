@@ -32,7 +32,7 @@ def _splits_a_word(prev_part, t, prev_child, child):
 
 
 def make_text(drop_tailws=False, drop_punct=False, drop_allowlist=False, pure_join=False,
-              left_gap=False, left_gap_alpha_only=False, no_word_split=False):
+              left_gap=False, left_gap_alpha_only=False, no_word_split=False, union=False):
     def text(self) -> str:
         def _generate_text():
             if pure_join:
@@ -57,6 +57,15 @@ def make_text(drop_tailws=False, drop_punct=False, drop_allowlist=False, pure_jo
                 elif (not drop_punct) and parts and parts[-1].rstrip()[-1:] in '.!?:;':
                     if not self._is_abbreviation_ending(parts[-1]):
                         should_add_space = True
+                # Shipped behaviour plus a CSS-gap branch: the allowlist and the gap test
+                # turn out to cover overlapping-but-different sets, so try both.
+                elif (union and parts and parts[-1] and not parts[-1].endswith(' ')
+                      and (_has_left_gap(child)
+                           or (t[0].isalpha()
+                               and hasattr(child, 'get_metadata')
+                               and child.get_metadata('original_tag') in ['span', 'a', 'em', 'strong', 'i', 'b']
+                               and not _splits_a_word(parts[-1], t, prev_child, child)))):
+                    should_add_space = True
                 elif (left_gap and parts and parts[-1] and not parts[-1].endswith(' ')
                       and (t[0].isalpha() if left_gap_alpha_only else True)
                       and _has_left_gap(child)):
@@ -67,7 +76,7 @@ def make_text(drop_tailws=False, drop_punct=False, drop_allowlist=False, pure_jo
                       and child.get_metadata('original_tag') in ['span', 'a', 'em', 'strong', 'i', 'b']
                       and not _splits_a_word(parts[-1], t, prev_child, child)):
                     should_add_space = True
-                elif ((not drop_allowlist) and not left_gap and not no_word_split and t and t[0].isalpha()
+                elif ((not drop_allowlist) and not left_gap and not no_word_split and not union and t and t[0].isalpha()
                       and parts and parts[-1] and not parts[-1].endswith(' ')
                       and hasattr(child, 'get_metadata')
                       and child.get_metadata('original_tag') in ['span', 'a', 'em', 'strong', 'i', 'b']):
@@ -87,6 +96,5 @@ def make_text(drop_tailws=False, drop_punct=False, drop_allowlist=False, pure_jo
 
 
 VARIANTS = {
-    "A_drop_allowlist": dict(drop_allowlist=True),
-    "H_wordsplit_same_typeface": dict(no_word_split=True),
+    "D_union_allowlist_or_css_gap": dict(union=True),
 }

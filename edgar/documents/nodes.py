@@ -266,6 +266,18 @@ class ParagraphNode(Node, CacheableMixin):
                             if not self._is_abbreviation_ending(parts[-1]):
                                 should_add_space = True
 
+                        # A CSS left gap is the filer drawing a word gap without using
+                        # whitespace: a bullet glyph and its item text, a footnote marker
+                        # and its note. This is what the tag allowlist below has been
+                        # standing in for — 95% of the boundaries it restores across the
+                        # fixture corpus carry a padding-left/margin-left here — but the
+                        # allowlist keys on metadata only TextNodes carry, so it misses
+                        # every child that header detection promoted to a HeadingNode.
+                        # Apple's FY2024 10-K shipped '•MacBook Pro 16-in.' for that reason.
+                        elif (parts and parts[-1] and not parts[-1].endswith(' ')
+                              and _has_left_gap(child)):
+                            should_add_space = True
+
                         # Add space between adjacent inline elements if the current text starts with a letter/digit
                         # This handles cases where whitespace was stripped but spacing is semantically important.
                         # Suppressed where it would weld together two halves of one word (see

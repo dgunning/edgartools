@@ -42,12 +42,18 @@ def sha256(text):
 # Genomics and the BofA 424B2 are byte-identical. Each changed filing was checked with
 # "".join(before.split()) == "".join(after.split()) — true on all three, so nothing but
 # whitespace moved. The Exelon 8-K is the same length before and after: a line re-wrapped.
+#
+# Apple moved once more for the CSS-gap rule (also edgartools-jysx), which separates a
+# bullet or footnote marker from its text where the filer drew that gap with padding
+# rather than whitespace: "•MacBook Pro 14”" -> "• MacBook Pro 14”", "(3)Exhibits
+# required by Item 601" -> "(3) Exhibits required...". Apple is the only one of the five
+# affected, +3 chars, whitespace-only.
 BASELINE = {
     # Modern iXBRL 10-K
     "0000320193-23-000106": (
         dict(form="10-K", filing_date="2023-11-03", company="Apple Inc.",
              cik=320193, accession_no="0000320193-23-000106"),
-        "dbc40be9fbf23322925920773d14f89689807459bbaf545cb5a50d1919b9d966",
+        "bcff18e3de24e2d2355ec064166c95ffbead66df1c6d2a79472c07f32c5da865",
     ),
     # Plain HTML 10-K
     "0001193125-20-052640": (
