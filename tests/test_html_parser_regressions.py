@@ -362,6 +362,75 @@ class TestCssGapWordBoundary:
         assert 'EdgarTools' in text
 
 
+class TestTailWhitespaceInsideAWrapper:
+    """A fifth copy of the delete-vs-collapse bug, created by the two fixes before it.
+
+    DocumentBuilder records a whitespace-only tail as `has_tail_whitespace` metadata on
+    the element that owns it — the innermost one. ParagraphNode.text() read that flag off
+    the sibling it was comparing, so it was missed whenever the whitespace sat inside a
+    wrapper. Chevron's FY2024 10-K puts a run-in heading in an <ix:nonNumeric> with the
+    gap after it in a spacer span *inside* that element, so the flag landed two levels
+    below the sibling and 'GeneralThe Company follows' shipped.
+
+    This only became reachable once the preprocessor started turning a spacer element into
+    whitespace (8b45d8f7) and lxml stopped deleting it (the remove_blank_text fix): before
+    those, there was no whitespace-only tail to lose. The flag is now looked for down the
+    rightmost spine. (edgartools-jysx)
+    """
+
+    def test_spacer_at_the_end_of_a_wrapper_still_separates(self):
+        # Chevron FY2024 10-K note 1, reduced to the shape that matters.
+        html = ('<html><body><div>'
+                '<ix:nonNumeric contextRef="c-1" name="us-gaap:BasisOfAccountingPolicyPolicyTextBlock">'
+                '<span style="font-style:italic;font-weight:700">General</span>'
+                '<span style="font-style:italic;font-weight:700"> </span>'
+                '</ix:nonNumeric>'
+                '<span>The Company follows generally accepted accounting principles.</span>'
+                '</div></body></html>')
+        text = parse_html(html).text()
+        assert 'General The Company follows' in text
+
+    def test_no_spacer_means_no_space(self):
+        # The mirror: with nothing between the wrapper and the next span, nothing is
+        # invented — the flag is only set for whitespace that was in the source.
+        html = ('<html><body><div>'
+                '<ix:nonNumeric contextRef="c-1" name="x"><span>Edgar</span></ix:nonNumeric>'
+                '<font>Tools</font></div></body></html>')
+        text = parse_html(html).text()
+        assert 'EdgarTools' in text
+
+
+class TestFixedWidthMarkerBox:
+    """Dash bullets whose gap is a box width rather than a padding.
+
+    SigmaTron's FY2025 10-K lays out risk-factor bullets as
+    '<span style="display:inline-block;width:0.250in">-</span><span>the political
+    climate…</span>' — the filer reserved a quarter inch for the dash, so the text starts
+    at the far edge of that box. It is the same gap as a padding-left on the text, drawn
+    from the other side, and it is read off the style the same way.
+
+    Do not be tempted to key this on the `white-space:pre-wrap` these spans also carry:
+    that property is near-universal in Word-exported filings and marks nothing. The same
+    property sits on HubSpot's 'Item 1A. RI SK FACTORS', where the space is wrong.
+    (edgartools-jysx)
+    """
+
+    def test_marker_in_a_fixed_width_box_is_separated_from_its_text(self):
+        html = ('<html><body><p style="margin-left:0.50in;text-indent:-0.25in">'
+                '<span style="display:inline-block;width:0.250in;text-indent:0">-</span>'
+                '<span>the political climate and relations with the United States</span>'
+                '</p></body></html>')
+        text = parse_html(html).text()
+        assert '- the political climate' in text
+
+    def test_an_inline_block_without_a_width_is_not_a_marker_box(self):
+        # display:inline-block alone reserves nothing, so it is not a gap.
+        html = ('<html><body><p><font style="display:inline-block">Edgar</font>'
+                '<font>Tools</font></p></body></html>')
+        text = parse_html(html).text()
+        assert 'EdgarTools' in text
+
+
 class TestMidWordSplitSpacing:
     """The cost of the allowlist that the four fixes above exist to make redundant.
 

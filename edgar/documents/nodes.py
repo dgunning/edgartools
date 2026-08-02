@@ -20,11 +20,46 @@ def _has_left_gap(node) -> bool:
     return bool((style.padding_left or 0) > 0 or (style.margin_left or 0) > 0)
 
 
+def _is_marker_box(node) -> bool:
+    """Whether this node is a fixed-width box holding a list marker.
+
+    A filer who writes `<span style="display:inline-block;width:0.25in">-</span>` has
+    reserved a quarter inch for the dash, so the text after it starts at the far edge of
+    that box. Same gap as a padding-left on the text, drawn from the other side — it is
+    how SigmaTron's FY2025 10-K lays out its risk-factor bullets.
+    """
+    style = getattr(node, 'style', None)
+    if style is None:
+        return False
+    return bool(style.display and 'inline-block' in style.display and style.width)
+
+
 def _same_typeface(a, b) -> bool:
     """Whether two nodes are set in the same font family (both must name one)."""
     fa = getattr(getattr(a, 'style', None), 'font_family', None)
     fb = getattr(getattr(b, 'style', None), 'font_family', None)
     return fa is not None and fa == fb
+
+
+def _ends_with_tail_whitespace(node) -> bool:
+    """Whether this node's content ends with whitespace that was in the source.
+
+    DocumentBuilder records a whitespace-only tail as metadata on the element that owns
+    it, which is the innermost one — but the spacing decision here is made between that
+    element's ancestors, so reading the flag off the sibling alone misses it whenever the
+    whitespace sits inside a wrapper. Chevron's FY2024 10-K puts a run-in heading in an
+    <ix:nonNumeric> and the gap after it in a spacer span inside that element, two levels
+    below the sibling being compared, and shipped 'GeneralThe Company follows'.
+
+    Walking the rightmost spine is enough: whitespace anywhere else in the subtree is not
+    at the boundary being decided.
+    """
+    while node is not None:
+        if hasattr(node, 'get_metadata') and node.get_metadata('has_tail_whitespace'):
+            return True
+        children = getattr(node, 'children', None)
+        node = children[-1] if children else None
+    return False
 
 
 def _splits_a_word(prev_part: str, text: str, prev_child, child) -> bool:
@@ -44,7 +79,7 @@ def _splits_a_word(prev_part: str, text: str, prev_child, child) -> bool:
     """
     if not (prev_part and prev_part[-1].islower() and text[:1].islower()):
         return False
-    if _has_left_gap(child):
+    if _has_left_gap(child) or _is_marker_box(prev_child):
         return False
     return _same_typeface(prev_child, child)
 
@@ -250,7 +285,7 @@ class ParagraphNode(Node, CacheableMixin):
                         should_add_space = False
 
                         # Add space if previous child had tail whitespace
-                        if hasattr(prev_child, 'get_metadata') and prev_child.get_metadata('has_tail_whitespace'):
+                        if _ends_with_tail_whitespace(prev_child):
                             should_add_space = True
 
                         # Add space if current text starts with space (preserve intended spacing)
@@ -275,7 +310,7 @@ class ParagraphNode(Node, CacheableMixin):
                         # every child that header detection promoted to a HeadingNode.
                         # Apple's FY2024 10-K shipped '•MacBook Pro 16-in.' for that reason.
                         elif (parts and parts[-1] and not parts[-1].endswith(' ')
-                              and _has_left_gap(child)):
+                              and (_has_left_gap(child) or _is_marker_box(prev_child))):
                             should_add_space = True
 
                         # Add space between adjacent inline elements if the current text starts with a letter/digit
