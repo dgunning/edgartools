@@ -52,8 +52,12 @@ class HTMLPreprocessor:
             # Whitespace normalization
             'multiple_spaces': re.compile(r'[ \t]+'),
             'multiple_newlines': re.compile(r'\n{3,}'),
-            # Whitespace around tags: preserve spaces between adjacent tags (word boundaries)
-            # but strip spaces between text content and tag boundaries
+            # Whitespace around tags is collapsed to a single space, never deleted:
+            # in HTML rendering, whitespace touching a tag boundary is still a word
+            # boundary ('STATES </font><font>SECURITIES' reads 'STATES SECURITIES').
+            # These previously deleted text-adjacent runs outright, which glued
+            # words together across inline elements ('STATESSECURITIES') in a way
+            # nothing downstream could recover (edgartools-tlj1).
             'spaces_between_tags': re.compile(r'(?<=>)\s+(?=<)'),
             'spaces_before_tags': re.compile(r'(?<!>)\s+(?=<)'),
             'spaces_after_tags': re.compile(r'(?<=>)\s+(?!<)'),
@@ -211,12 +215,11 @@ class HTMLPreprocessor:
         if "\n\n\n" in html:
             html = self._compiled_patterns["multiple_newlines"].sub("\n\n", html)
 
-        # Normalize whitespace around tags:
-        # 1. Collapse whitespace between adjacent tags to single space (preserves word boundaries)
-        # 2. Strip whitespace between text content and tags
+        # Collapse whitespace around tags to a single space (see pattern comments:
+        # deleting it destroys word boundaries at inline-element edges)
         html = self._compiled_patterns['spaces_between_tags'].sub(' ', html)
-        html = self._compiled_patterns['spaces_before_tags'].sub('', html)
-        html = self._compiled_patterns['spaces_after_tags'].sub('', html)
+        html = self._compiled_patterns['spaces_before_tags'].sub(' ', html)
+        html = self._compiled_patterns['spaces_after_tags'].sub(' ', html)
 
         # Add newlines around block elements for readability
         # Using combined patterns instead of looping over individual tags

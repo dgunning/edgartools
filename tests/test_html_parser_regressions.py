@@ -104,6 +104,56 @@ class TestTableRenderingRegressions:
             assert len(table_str) > 0
 
 
+class TestInlineBoundaryWordGluing:
+    """Regression tests for edgartools-tlj1's second half: word gluing.
+
+    The preprocessor collapsed whitespace at text<->tag boundaries by DELETING
+    it, so '<font>UNITED STATES </font><font>SECURITIES...' became
+    'UNITED STATESSECURITIES' in extracted text — the word boundary was
+    destroyed in the HTML string before lxml ever parsed it, unrecoverable
+    downstream. Ubiquitous in font-tag-era filings (pre-2009 N-PX, proxies).
+    Whitespace touching a tag boundary is still a word boundary under HTML
+    rendering rules; it is now collapsed to a single space, never deleted.
+    """
+
+    def test_trailing_space_inside_inline_element_is_a_word_boundary(self):
+        html = (
+            '<html><body>'
+            '<p><font>UNITED STATES </font><font>SECURITIES AND EXCHANGE COMMISSION</font></p>'
+            '<p><span>REGISTERED </span><span>MANAGEMENT INVESTMENT COMPANY</span></p>'
+            '</body></html>'
+        )
+        text = parse_html(html).text()
+        assert 'UNITED STATES SECURITIES AND EXCHANGE COMMISSION' in text
+        assert 'STATESSECURITIES' not in text
+        assert 'REGISTERED MANAGEMENT' in text
+
+    def test_leading_space_inside_inline_element_is_a_word_boundary(self):
+        html = (
+            '<html><body>'
+            '<p><font>PROXY</font><font> VOTING RECORD</font></p>'
+            '</body></html>'
+        )
+        text = parse_html(html).text()
+        assert 'PROXY VOTING RECORD' in text
+
+    def test_genuinely_unspaced_inline_split_stays_glued(self):
+        # A word split mid-token across inline elements has no whitespace and
+        # must NOT gain a space: the fix preserves real boundaries, it does not
+        # invent them.
+        html = '<html><body><p><font>Edgar</font><font>Tools</font> parses filings.</p></body></html>'
+        text = parse_html(html).text()
+        assert 'EdgarTools' in text
+
+    def test_nbsp_normalised_to_space(self):
+        # The old streaming pipeline skipped the preprocessor and leaked \xa0
+        # into text. One pipeline now, and nbsp is always normalised.
+        html = '<html><body><p>FORM&nbsp;N-PX</p></body></html>'
+        text = parse_html(html).text()
+        assert 'FORM N-PX' in text
+        assert '\xa0' not in text
+
+
 class TestStreamingParserRegressions:
     """Regression tests from the era of the separate StreamingParser.
 
