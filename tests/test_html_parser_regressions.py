@@ -267,6 +267,52 @@ class TestSpacerElementWordGluing:
         assert '☒ ANNUAL REPORT' in text
 
 
+class TestBlankTextNodeWordGluing:
+    """A fourth copy of the same bug, this one inside lxml: remove_blank_text.
+
+    The preprocessor collapses a whitespace run between two tags down to a single
+    space, deliberately, because that space is a word boundary. lxml was then being
+    handed remove_blank_text=True, and libxml2 discards a text node it judges to be
+    all-ignorable whitespace — so the surviving space was deleted after all, and the
+    ParagraphNode allowlist had to guess the boundary back (see edgartools-jysx).
+    Where the guess did not apply, real filings shipped glued words.
+
+    The whitespace that gets deleted is the one standing alone between two tags. Sibling
+    inline elements at the same level keep theirs, which is why this survived three
+    earlier passes over the bug family: the losing shape is a whitespace-only tail on a
+    child of an inline element, and for JPMorgan and Boeing that child is an
+    <ix:nonFraction> fact — a tag libxml2 has never heard of.
+    """
+
+    def test_whitespace_tail_after_an_inline_xbrl_fact_survives(self):
+        # JPMorgan FY2024 10-K note 32: '...the Firm has threereportable business
+        # segments' before the fix (edgartools-vfwp). The space is the ix fact's tail
+        # and the enclosing <span> ends immediately after it.
+        html = ('<html><body><div>'
+                '<span>As a result of the reorganization, the Firm has '
+                '<ix:nonFraction contextRef="c-1" name="us-gaap:NumberOfReportableSegments"'
+                ' format="ixt-sec:numwordsen">three</ix:nonFraction> </span>'
+                '<span>reportable business segments.</span>'
+                '</div></body></html>')
+        text = parse_html(html).text()
+        assert 'has three reportable business segments' in text
+
+    def test_cover_page_checkbox_keeps_its_gap(self):
+        # Apple FY2024 10-K cover page: 'Yes☒ No ☐' before the fix. The gap between the
+        # label and the glyph is a lone space between two <span>s.
+        html = ('<html><body><div><span>Yes</span>'
+                '<span>&#160;</span><span>&#9746;</span></div></body></html>')
+        text = parse_html(html).text()
+        assert 'Yes ☒' in text
+
+    def test_no_space_is_invented_where_the_source_has_none(self):
+        # The mirror requirement: keeping blank text nodes must not add boundaries that
+        # were never in the markup. 'S-T' is one token split by a wrapper.
+        html = '<html><body><p>Regulation<font>S-T</font>(the rule)</p></body></html>'
+        text = parse_html(html).text()
+        assert 'RegulationS-T(the rule)' in text
+
+
 class TestStreamingParserRegressions:
     """Regression tests from the era of the separate StreamingParser.
 

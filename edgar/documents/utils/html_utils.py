@@ -102,7 +102,7 @@ def terminate_unclosed_comments(html: str) -> str:
 
 
 def create_lxml_parser(
-    remove_blank_text: bool = True,
+    remove_blank_text: bool = False,
     remove_comments: bool = True,
     recover: bool = True,
     encoding: Optional[str] = 'utf-8'
@@ -115,7 +115,9 @@ def create_lxml_parser(
 
     Args:
         remove_blank_text: Remove blank text nodes between tags.
-            Default True for cleaner tree structure.
+            Default False: a whitespace-only text node between two tags is a word
+            boundary, and libxml2 deletes it rather than collapsing it. Turn it on
+            only for trees whose text is never extracted.
         remove_comments: Remove HTML comments from parsed tree.
             Default True since comments are rarely needed.
         recover: Enable error recovery mode to handle malformed HTML.
@@ -127,14 +129,11 @@ def create_lxml_parser(
         Configured lxml.html.HTMLParser instance
 
     Examples:
-        >>> # Standard parser (removes whitespace and comments, recovers from errors)
+        >>> # Standard parser (keeps whitespace, drops comments, recovers from errors)
         >>> parser = create_lxml_parser()
 
         >>> # Parser that preserves all content (for XBRL)
-        >>> parser = create_lxml_parser(
-        ...     remove_blank_text=False,
-        ...     remove_comments=False
-        ... )
+        >>> parser = create_lxml_parser(remove_comments=False)
 
         >>> # Parser without encoding (auto-detect)
         >>> parser = create_lxml_parser(encoding=None)

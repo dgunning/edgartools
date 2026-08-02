@@ -183,8 +183,14 @@ class HTMLParser:
             # A stray "<!--" with no "-->" makes lxml swallow the rest of the document
             html = terminate_unclosed_comments(html)
 
+            # remove_blank_text is never safe here. A whitespace-only text node between
+            # two tags is a word boundary, and the preprocessor has already collapsed the
+            # run down to that single space — libxml2 then dropped it as "ignorable",
+            # gluing the words either side ('Yes☒', 'non-Rule10b5-1', 'threereportable').
+            # Same rule as the preprocessor and DocumentBuilder._collapse_edges: collapse
+            # whitespace, never delete it.
             parser = create_lxml_parser(
-                remove_blank_text=not self.config.preserve_whitespace,
+                remove_blank_text=False,
                 remove_comments=True,
                 recover=True,
                 encoding='utf-8'
