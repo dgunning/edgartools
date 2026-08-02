@@ -313,6 +313,62 @@ class TestBlankTextNodeWordGluing:
         assert 'RegulationS-T(the rule)' in text
 
 
+class TestMidWordSplitSpacing:
+    """The cost of the allowlist that the four fixes above exist to make redundant.
+
+    ParagraphNode.text() force-spaces adjacent inline elements, because nothing at that
+    point can tell a boundary an upstream pass destroyed from a word the filer split
+    mid-token. Filers do split words mid-token, and force-spacing those shipped
+    'identify, asse ss, and monitor' in Apple's FY2024 10-K plus ~225 more across the
+    fixture corpus ('Th e facility', 'jurisd ictions', 'Chevr on').
+
+    The insertion is now suppressed where it would weld two lowercase fragments in the
+    same typeface with no CSS gap between them. Measuring the allowlist's removal
+    outright still costs 8,109 spaces across 57 fixtures, so it stays: this narrows its
+    false positives, it does not replace it. (edgartools-jysx)
+    """
+
+    def test_lowercase_fragments_in_one_typeface_are_rejoined(self):
+        # Apple FY2024 10-K Item 1C: 'asse</span><span style="background-color:#ffffff">ss'.
+        html = ('<html><body><p>'
+                '<span style="font-family:Helvetica">designed to identify, asse</span>'
+                '<span style="font-family:Helvetica;background-color:#ffffff">ss</span>'
+                '<span style="font-family:Helvetica">, and monitor</span>'
+                '</p></body></html>')
+        text = parse_html(html).text()
+        assert 'identify, assess, and monitor' in text
+
+    def test_a_css_left_gap_still_separates_the_words(self):
+        # padding-left is how filers draw a word gap without whitespace; the fragments
+        # are both lowercase, so only the gap distinguishes this from a split word.
+        html = ('<html><body><p>'
+                '<span style="font-family:Helvetica">the</span>'
+                '<span style="font-family:Helvetica;padding-left:4.3pt">facility</span>'
+                '</p></body></html>')
+        text = parse_html(html).text()
+        assert 'the facility' in text
+
+    def test_a_change_of_typeface_still_separates_the_words(self):
+        # SEC cover-page checkboxes set the glyph in Wingdings and the label in a text
+        # face. Both sides can be lowercase ('o' is the unchecked box), so the typeface
+        # is the only signal that this is a label and a glyph, not one word.
+        html = ('<html><body><p>'
+                '<span style="font-family:Arial">Non-accelerated filer</span>'
+                '<span style="font-family:Wingdings">o</span>'
+                '</p></body></html>')
+        text = parse_html(html).text()
+        assert 'Non-accelerated filer o' in text
+
+    def test_a_capitalised_second_fragment_is_still_spaced(self):
+        # A new word, not a split one: the suppression only fires lowercase-to-lowercase.
+        html = ('<html><body><p>'
+                '<span style="font-family:Arial">reported by</span>'
+                '<span style="font-family:Arial">Morgan Stanley</span>'
+                '</p></body></html>')
+        text = parse_html(html).text()
+        assert 'reported by Morgan Stanley' in text
+
+
 class TestStreamingParserRegressions:
     """Regression tests from the era of the separate StreamingParser.
 

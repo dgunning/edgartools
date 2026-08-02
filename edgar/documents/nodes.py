@@ -12,6 +12,43 @@ from edgar.documents.cache_mixin import CacheableMixin
 from edgar.documents.types import NodeType, SemanticType, Style
 
 
+def _has_left_gap(node) -> bool:
+    """Whether the filer drew a word gap with CSS instead of with whitespace."""
+    style = getattr(node, 'style', None)
+    if style is None:
+        return False
+    return bool((style.padding_left or 0) > 0 or (style.margin_left or 0) > 0)
+
+
+def _same_typeface(a, b) -> bool:
+    """Whether two nodes are set in the same font family (both must name one)."""
+    fa = getattr(getattr(a, 'style', None), 'font_family', None)
+    fb = getattr(getattr(b, 'style', None), 'font_family', None)
+    return fa is not None and fa == fb
+
+
+def _splits_a_word(prev_part: str, text: str, prev_child, child) -> bool:
+    """Whether spacing these two children apart would cut one word in half.
+
+    ParagraphNode.text() force-spaces adjacent inline elements, because whichever
+    upstream pass destroyed the boundary whitespace left nothing to tell a real word
+    gap from a mid-word split. Filers do split words mid-token — Apple's FY2024 10-K
+    has 'asse</span><span style="background-color:#ffffff">ss' — and force-spacing
+    those ships 'identify, asse ss, and monitor'.
+
+    Two lowercase fragments meeting with no whitespace between them is the signature
+    of such a split. Two things rule it out: a CSS left gap on the second child (the
+    filer drew the space with padding), and a change of typeface across the boundary,
+    which is how SEC cover-page checkboxes ('Yes x No o', where the glyphs are
+    Wingdings) stay separated from their labels.
+    """
+    if not (prev_part and prev_part[-1].islower() and text[:1].islower()):
+        return False
+    if _has_left_gap(child):
+        return False
+    return _same_typeface(prev_child, child)
+
+
 @dataclass
 class Node(ABC):
     """
@@ -230,10 +267,13 @@ class ParagraphNode(Node, CacheableMixin):
                                 should_add_space = True
 
                         # Add space between adjacent inline elements if the current text starts with a letter/digit
-                        # This handles cases where whitespace was stripped but spacing is semantically important
+                        # This handles cases where whitespace was stripped but spacing is semantically important.
+                        # Suppressed where it would weld together two halves of one word (see
+                        # _splits_a_word) — filers split words mid-token across styled spans.
                         elif (text and text[0].isalpha() and
                               parts and parts[-1] and not parts[-1].endswith(' ') and
-                              hasattr(child, 'get_metadata') and child.get_metadata('original_tag') in ['span', 'a', 'em', 'strong', 'i', 'b']):
+                              hasattr(child, 'get_metadata') and child.get_metadata('original_tag') in ['span', 'a', 'em', 'strong', 'i', 'b'] and
+                              not _splits_a_word(parts[-1], text, prev_child, child)):
                             should_add_space = True
 
                         if should_add_space:

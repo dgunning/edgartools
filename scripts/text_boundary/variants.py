@@ -87,5 +87,6 @@ def make_text(drop_tailws=False, drop_punct=False, drop_allowlist=False, pure_jo
 
 
 VARIANTS = {
+    "A_drop_allowlist": dict(drop_allowlist=True),
     "H_wordsplit_same_typeface": dict(no_word_split=True),
 }

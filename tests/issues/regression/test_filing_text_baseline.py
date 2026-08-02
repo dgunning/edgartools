@@ -34,12 +34,20 @@ def sha256(text):
 # -> "a non-accelerated filer"), and most recently the whitespace-only spacer elements
 # ("☒ANNUAL REPORT" -> "☒ ANNUAL REPORT"). Every changed line on this corpus was verified
 # to differ from its predecessor by inserted spaces only, with no character content changed.
+#
+# Re-captured a fourth time for the lxml remove_blank_text fix (edgartools-vfwp) and the
+# mid-word-split suppression (edgartools-jysx), which move output in opposite directions:
+# Apple's cover page gains "Yes☒" -> "Yes ☒" and its Item 8 loses "foreign jurisd ictions"
+# -> "foreign jurisdictions". 3 of the 5 filings changed (Apple, Merck, Exelon); 10x
+# Genomics and the BofA 424B2 are byte-identical. Each changed filing was checked with
+# "".join(before.split()) == "".join(after.split()) — true on all three, so nothing but
+# whitespace moved. The Exelon 8-K is the same length before and after: a line re-wrapped.
 BASELINE = {
     # Modern iXBRL 10-K
     "0000320193-23-000106": (
         dict(form="10-K", filing_date="2023-11-03", company="Apple Inc.",
              cik=320193, accession_no="0000320193-23-000106"),
-        "4aa7b619216f4cb5ab458ba2d9c08732807c9c99f08e86d070d7db020549b0ef",
+        "dbc40be9fbf23322925920773d14f89689807459bbaf545cb5a50d1919b9d966",
     ),
     # Plain HTML 10-K
     "0001193125-20-052640": (
@@ -51,13 +59,13 @@ BASELINE = {
     "0000065873-05-000060": (
         dict(form="CORRESP", filing_date="2005-11-03", company="MERCK & CO INC",
              cik=65873, accession_no="0000065873-05-000060"),
-        "cb49f8283905f7f31fac5b29c92a998643c81659454dfb1432f3d3403be1be36",
+        "5fb3d0a62a5bc0d8c77fb8791b068011d4f047d3add254a6a8d6d56c6d787ed5",
     ),
     # 2005-era HTML 8-K
     "0000950137-05-004969": (
         dict(form="8-K", filing_date="2005-04-27", company="EXELON CORP",
              cik=1109357, accession_no="0000950137-05-004969"),
-        "e89723fb3903330d6042e10383b6549d11d8eac6c3e162d809fc87b27f648297",
+        "a37f4e540bd777f1e2017e4c7c9a58b8782b6b63123a7c2a2fa8260eba8ffc83",
     ),
     # 424B2 structured note
     "0001481057-23-010389": (

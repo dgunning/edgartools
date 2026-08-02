@@ -55,6 +55,7 @@ class Style:
     font_size: Optional[float] = None
     font_weight: Optional[str] = None
     font_style: Optional[str] = None
+    font_family: Optional[str] = None
     text_align: Optional[str] = None
     text_decoration: Optional[str] = None
     color: Optional[str] = None
