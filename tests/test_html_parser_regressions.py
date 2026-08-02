@@ -214,6 +214,59 @@ class TestTextNodeEdgeWordGluing:
         assert 'RegulationS-T(the rule)' in text
 
 
+class TestSpacerElementWordGluing:
+    """A third copy of the same bug: whitespace-only spacer elements.
+
+    _remove_empty_tags treated a tag holding only whitespace as empty and deleted it
+    outright, taking the whitespace with it. Filers draw a word gap that way — Apple's
+    FY2024 10-K separates 'the App Store and Safari' from 'in the EU' with
+    '<span style="font-size:5.85pt"> </span>' — so the words either side were glued.
+    A tag with whitespace in it now leaves a space behind; a genuinely empty one still
+    leaves nothing.
+
+    The cases below all start the following word with a glyph or a digit, because
+    ParagraphNode.text()'s allowlist heuristic (see edgartools-jysx) hides the bug
+    whenever the next character is a letter — it force-spaces adjacent spans anyway.
+    Those masked cases are real too; they just cannot fail here.
+    """
+
+    def test_spacer_before_a_digit_leaves_a_space(self):
+        # Microsoft FY2025 Q3 cover page: 'Washington98052-6399' before the fix.
+        html = ('<html><body><p><span>REDMOND, Washington</span>'
+                '<span style="font-size:5.85pt"> </span>'
+                '<span>98052-6399</span></p></body></html>')
+        text = parse_html(html).text()
+        assert 'Washington 98052-6399' in text
+
+    def test_spacer_inside_a_sentence_before_a_number(self):
+        # Chevron FY2024 10-K: 'Chevron holds a63 percent-owned' before the fix.
+        html = ('<html><body><p><span>Chevron holds a</span>'
+                '<span style="font-size:5.85pt"> </span>'
+                '<span>63 percent-owned interest.</span></p></body></html>')
+        text = parse_html(html).text()
+        assert 'holds a 63 percent-owned' in text
+
+    def test_genuinely_empty_tag_leaves_nothing(self):
+        # No whitespace anywhere in the source means no word boundary to restore.
+        html = '<html><body><p>Edgar<span></span>Tools</p></body></html>'
+        text = parse_html(html).text()
+        assert 'EdgarTools' in text
+
+    def test_spacer_removal_does_not_double_the_space(self):
+        # The whitespace pass already left a space either side of the spacer; the
+        # replacement must collapse with them, not stack up.
+        html = '<html><body><p>FORM <span> </span> N-PX</p></body></html>'
+        text = parse_html(html).text()
+        assert 'FORM N-PX' in text
+
+    def test_checkbox_glyph_is_separated_from_its_label(self):
+        # Apple FY2024 10-K cover page: '☒ANNUAL REPORT' before the fix.
+        html = ('<html><body><p><span>&#9746;</span><span style="font-size:6pt"> </span>'
+                '<span>ANNUAL REPORT PURSUANT TO SECTION 13</span></p></body></html>')
+        text = parse_html(html).text()
+        assert '☒ ANNUAL REPORT' in text
+
+
 class TestStreamingParserRegressions:
     """Regression tests from the era of the separate StreamingParser.
 

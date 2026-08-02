@@ -31,14 +31,15 @@ def sha256(text):
 # twice as word boundaries were restored: 319469c7 (preprocessor) and the DocumentBuilder
 # text-node edges that followed it. Both moved output the same way — a space an inline
 # element used to swallow comes back ("October18" -> "October 18", "anon-acceleratedfiler"
-# -> "a non-accelerated filer"). Every changed line on this corpus was verified to differ
-# from its predecessor by inserted spaces only, with no character content changed.
+# -> "a non-accelerated filer"), and most recently the whitespace-only spacer elements
+# ("☒ANNUAL REPORT" -> "☒ ANNUAL REPORT"). Every changed line on this corpus was verified
+# to differ from its predecessor by inserted spaces only, with no character content changed.
 BASELINE = {
     # Modern iXBRL 10-K
     "0000320193-23-000106": (
         dict(form="10-K", filing_date="2023-11-03", company="Apple Inc.",
              cik=320193, accession_no="0000320193-23-000106"),
-        "d8e482da9fa3ca9f972e4806ded3f21f90fb28869ceb960b332d7944bb757210",
+        "4aa7b619216f4cb5ab458ba2d9c08732807c9c99f08e86d070d7db020549b0ef",
     ),
     # Plain HTML 10-K
     "0001193125-20-052640": (

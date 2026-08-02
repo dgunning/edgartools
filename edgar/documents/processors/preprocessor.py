@@ -73,9 +73,14 @@ class HTMLPreprocessor:
                 re.IGNORECASE
             ),
 
-            # Empty tags removal - combined pattern for all removable tags
+            # Empty tags removal - combined pattern for all removable tags.
+            # The inner run is captured because a tag holding only whitespace is not
+            # empty: filers use a styled spacer span ('Safari</span><span
+            # style="font-size:5.85pt"> </span><span>in the EU') to set the width of a
+            # word gap, and deleting it outright glued the words either side. Same rule
+            # as everywhere else in this file — collapse to a space, never delete.
             'empty_tags': re.compile(
-                r'<(?:span|div|p|font|b|i|u|strong|em)\b[^>]*>\s*</(?:span|div|p|font|b|i|u|strong|em)>',
+                r'<(?:span|div|p|font|b|i|u|strong|em)\b[^>]*>(\s*)</(?:span|div|p|font|b|i|u|strong|em)>',
                 re.IGNORECASE
             ),
             'empty_self_closing': re.compile(
@@ -233,10 +238,20 @@ class HTMLPreprocessor:
         return html.strip()
 
     def _remove_empty_tags(self, html: str) -> str:
-        """Remove empty tags that don't contribute content."""
+        """Remove empty tags that don't contribute content.
+
+        A tag holding whitespace leaves that whitespace behind: it was a word gap the
+        filer drew with a styled spacer element, and removing it would glue the words
+        either side. A genuinely empty tag leaves nothing.
+        """
         # Use pre-compiled combined patterns instead of looping
-        html = self._compiled_patterns['empty_tags'].sub('', html)
+        html = self._compiled_patterns['empty_tags'].sub(lambda m: ' ' if m.group(1) else '', html)
         html = self._compiled_patterns['empty_self_closing'].sub('', html)
+
+        # The substitution above can put a space next to one the whitespace pass already
+        # left, so re-collapse. Skipped when whitespace is preserved verbatim.
+        if not self.config.preserve_whitespace:
+            html = self._compiled_patterns['multiple_spaces'].sub(' ', html)
 
         return html
 
