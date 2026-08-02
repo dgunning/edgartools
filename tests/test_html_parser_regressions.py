@@ -154,6 +154,66 @@ class TestInlineBoundaryWordGluing:
         assert '\xa0' not in text
 
 
+class TestTextNodeEdgeWordGluing:
+    """The same word gluing, one layer down: DocumentBuilder text nodes.
+
+    Fixing the preprocessor (TestInlineBoundaryWordGluing) left a second copy of
+    the bug in DocumentBuilder._process_element, which built TextNodes with
+    element.text.strip() / element.tail.strip(). lxml puts precisely the
+    word-separating whitespace on those edges, so the boundary was destroyed
+    again before ParagraphNode.text() ever saw it — that method then guessed it
+    back from punctuation plus a hardcoded ['span','a','em','strong','i','b']
+    allowlist, which is why <font> filings stayed glued.
+
+    Edge whitespace is now collapsed, never deleted, matching the preprocessor.
+    The markup below is the real shape from Airbnb's S-1 and Bank of America's
+    424B2, both of which shipped glued text before this fix.
+    """
+
+    def test_space_before_an_inline_child_survives(self):
+        # BofA 424B2 0001481057-23-010389: '$1,246.00 per$1,000 in principal'.
+        # The boundary lives on the parent <p>'s own text, not between children.
+        html = ('<html><body><p>you will receive $1,246.00 per '
+                '<font>$1,000 </font>in principal amount.</p></body></html>')
+        text = parse_html(html).text()
+        assert 'per $1,000 in principal' in text
+        assert 'per$1,000' not in text
+
+    def test_space_after_an_inline_child_survives(self):
+        # The mirror case: the boundary lives on the child's tail.
+        html = ('<html><body><p><font>UNITED STATES</font> SECURITIES AND '
+                'EXCHANGE COMMISSION</p></body></html>')
+        text = parse_html(html).text()
+        assert 'UNITED STATES SECURITIES AND EXCHANGE COMMISSION' in text
+
+    def test_nowrap_font_span_does_not_glue_its_neighbours(self):
+        # Airbnb S-1 (tests/fixtures/html/abnb/s1): a white-space:nowrap <FONT>
+        # wrapping a hyphenated term, with the boundary whitespace on both edges
+        # outside it. Extracted as 'anon-acceleratedfiler' before the fix.
+        html = ('<html><body><p>an accelerated filer, a\n'
+                '<font style="white-space:nowrap">non-accelerated</font> filer, '
+                'a smaller reporting company</p></body></html>')
+        text = parse_html(html).text()
+        assert 'a non-accelerated filer' in text
+        assert 'anon-accelerated' not in text
+        assert 'acceleratedfiler' not in text
+
+    def test_nested_inline_elements_do_not_glue(self):
+        # Airbnb S-1: triple-nested nowrap <FONT>s around 'one-of-a-kind'.
+        html = ('<html><body><p>has become synonymous with '
+                '<font><font><font>one-of-a-kind</font></font></font> travel '
+                'on a global scale.</p></body></html>')
+        text = parse_html(html).text()
+        assert 'with one-of-a-kind travel' in text
+
+    def test_unspaced_edges_still_stay_glued(self):
+        # No whitespace in the source means no word boundary: the fix must not
+        # invent one. 'S-T' is one token split by a nowrap wrapper.
+        html = '<html><body><p>Regulation<font>S-T</font>(the rule)</p></body></html>'
+        text = parse_html(html).text()
+        assert 'RegulationS-T(the rule)' in text
+
+
 class TestStreamingParserRegressions:
     """Regression tests from the era of the separate StreamingParser.
 

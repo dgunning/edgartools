@@ -103,6 +103,21 @@ class DocumentBuilder:
 
         return root
 
+    @staticmethod
+    def _collapse_edges(text: str) -> str:
+        """Collapse a text node's edge whitespace to a single space instead of deleting it.
+
+        lxml puts the whitespace that separates a word from an adjacent inline element on
+        the edge of element.text / element.tail. Stripping it destroys the word boundary
+        ('per <font>$1,000</font>' -> 'per$1,000') and nothing downstream can tell that
+        apart from a genuine mid-word split. Same rule the preprocessor follows: collapse,
+        never delete. Whitespace-only nodes still return '' — those carry no word.
+        """
+        stripped = text.strip()
+        if not stripped:
+            return ''
+        return (' ' if text[:1].isspace() else '') + stripped + (' ' if text[-1:].isspace() else '')
+
     def _process_element(self, element: HtmlElement, parent: Node) -> Optional[Node]:
         """
         Process HTML element into node.
@@ -124,7 +139,7 @@ class DocumentBuilder:
                     parent.add_child(text_node)
                 else:
                     if element.tail.strip():
-                        text_node = TextNode(content=element.tail.strip())
+                        text_node = TextNode(content=self._collapse_edges(element.tail))
                         parent.add_child(text_node)
             return None
 
@@ -172,7 +187,7 @@ class DocumentBuilder:
                                 node.add_child(text_node)
                         else:
                             if element.text.strip():
-                                text_node = TextNode(content=element.text.strip())
+                                text_node = TextNode(content=self._collapse_edges(element.text))
                                 node.add_child(text_node)
 
                     # Process child elements
@@ -186,7 +201,7 @@ class DocumentBuilder:
                             parent.add_child(text_node)
                         else:
                             if element.tail.strip():
-                                text_node = TextNode(content=element.tail.strip())
+                                text_node = TextNode(content=self._collapse_edges(element.tail))
                                 parent.add_child(text_node)
                             elif element.tail.isspace():
                                 # Even if tail is just whitespace, preserve the spacing info
@@ -201,7 +216,7 @@ class DocumentBuilder:
                             parent.add_child(text_node)
                         else:
                             if element.tail.strip():
-                                text_node = TextNode(content=element.tail.strip())
+                                text_node = TextNode(content=self._collapse_edges(element.tail))
                                 parent.add_child(text_node)
                             elif element.tail.isspace():
                                 # Even if tail is just whitespace, preserve the spacing info
@@ -219,7 +234,7 @@ class DocumentBuilder:
                         parent.add_child(text_node)
                     else:
                         if element.tail.strip():
-                            text_node = TextNode(content=element.tail.strip())
+                            text_node = TextNode(content=self._collapse_edges(element.tail))
                             parent.add_child(text_node)
 
             # Exit XBRL context

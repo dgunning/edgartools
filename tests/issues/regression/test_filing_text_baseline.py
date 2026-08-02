@@ -28,10 +28,11 @@ def sha256(text):
 
 # accession -> (Filing kwargs, expected SHA-256 of BOTH .text() and .sgml().text())
 # Hashes captured on the unmodified code before the rck1/j8bs/e0hr fixes, then re-captured
-# after 319469c7 ("stop deleting word boundaries at inline-element edges"), which restores
-# the space an inline element used to swallow: "October18" -> "October 18", "inInternal" ->
-# "in Internal", "Sciencemagazine" -> "Science magazine". Four of the five filings below
-# gained spaces and nothing else; the 2005 8-K was already correct and is unchanged.
+# twice as word boundaries were restored: 319469c7 (preprocessor) and the DocumentBuilder
+# text-node edges that followed it. Both moved output the same way — a space an inline
+# element used to swallow comes back ("October18" -> "October 18", "anon-acceleratedfiler"
+# -> "a non-accelerated filer"). Every changed line on this corpus was verified to differ
+# from its predecessor by inserted spaces only, with no character content changed.
 BASELINE = {
     # Modern iXBRL 10-K
     "0000320193-23-000106": (
@@ -43,7 +44,7 @@ BASELINE = {
     "0001193125-20-052640": (
         dict(form="10-K", filing_date="2020-02-27", company="10x Genomics, Inc.",
              cik=1770787, accession_no="0001193125-20-052640"),
-        "deacb23245b5b0910b42787a128b1944bb7332f955b13a5e25e07cac78246102",
+        "e21a8d626a98d8d3b4a5a709c06dd6f46f6710bca032436403897c2b004cc145",
     ),
     # CORRESP — the shape where the two paths already agreed before the fix
     "0000065873-05-000060": (
@@ -55,13 +56,13 @@ BASELINE = {
     "0000950137-05-004969": (
         dict(form="8-K", filing_date="2005-04-27", company="EXELON CORP",
              cik=1109357, accession_no="0000950137-05-004969"),
-        "3e61134657342bc1674d37ca72b67f1090745b4792c03a7c8c17f3e7b846f00e",
+        "e89723fb3903330d6042e10383b6549d11d8eac6c3e162d809fc87b27f648297",
     ),
     # 424B2 structured note
     "0001481057-23-010389": (
         dict(form="424B2", filing_date="2023-12-13", company="BANK OF AMERICA CORP /DE/",
              cik=70858, accession_no="0001481057-23-010389"),
-        "283d70b4019a9beed3a51ff21e8b3f343384a8358a095521bfc36eda051f0bd3",
+        "fcd15e64fb76fec683067bc1e1c100ce886dc14723d20030dd34d2f6010a6b91",
     ),
 }
 
