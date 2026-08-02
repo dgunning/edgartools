@@ -48,18 +48,32 @@ def sha256(text):
 # rather than whitespace: "•MacBook Pro 14”" -> "• MacBook Pro 14”", "(3)Exhibits
 # required by Item 601" -> "(3) Exhibits required...". Apple is the only one of the five
 # affected, +3 chars, whitespace-only.
+#
+# Re-captured a fifth time for the removal of the ParagraphNode.text() tag allowlist
+# (edgartools-jysx). This is the first re-capture where hashes move because output
+# *loses* a space rather than gains one — the allowlist spaced any two adjacent inline
+# elements regardless of what sat between them, and the spaces it invented after an
+# opening quote are the shape that shows up here. 2 of the 5 filings changed:
+#   Apple        -1 char, 1 line:  '“ The Company’s operations' -> '“The Company’s operations'
+#   10x Genomics -5 chars, 5 lines: '“ Risk Factors - R...' -> '“Risk Factors - R...' (x3,
+#                 the exact string Item 1A cross-references), 'Customer’ s Accounting'
+#                 -> 'Customer’s Accounting', and one more of the same shape.
+# Merck, Exelon and the BofA 424B2 are byte-identical. Both changed filings were checked
+# with "".join(before.split()) == "".join(after.split()) — true on both, so nothing but
+# whitespace moved, and every changed line was read individually: all four distinct
+# repairs, no destroyed boundary.
 BASELINE = {
     # Modern iXBRL 10-K
     "0000320193-23-000106": (
         dict(form="10-K", filing_date="2023-11-03", company="Apple Inc.",
              cik=320193, accession_no="0000320193-23-000106"),
-        "bcff18e3de24e2d2355ec064166c95ffbead66df1c6d2a79472c07f32c5da865",
+        "65e6cb488de90806dd54b4bff0aba0b678a2c0bf6af698a47df09bed19369462",
     ),
     # Plain HTML 10-K
     "0001193125-20-052640": (
         dict(form="10-K", filing_date="2020-02-27", company="10x Genomics, Inc.",
              cik=1770787, accession_no="0001193125-20-052640"),
-        "e21a8d626a98d8d3b4a5a709c06dd6f46f6710bca032436403897c2b004cc145",
+        "1faea8fc5913ca353f6a5124f221631acccb9bcc16cfc55f6e2a26378298a6d8",
     ),
     # CORRESP — the shape where the two paths already agreed before the fix
     "0000065873-05-000060": (

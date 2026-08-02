@@ -432,18 +432,19 @@ class TestFixedWidthMarkerBox:
 
 
 class TestMidWordSplitSpacing:
-    """The cost of the allowlist that the four fixes above exist to make redundant.
+    """Adjacent inline elements are no longer spaced on the strength of their tag name.
 
-    ParagraphNode.text() force-spaces adjacent inline elements, because nothing at that
-    point can tell a boundary an upstream pass destroyed from a word the filer split
-    mid-token. Filers do split words mid-token, and force-spacing those shipped
-    'identify, asse ss, and monitor' in Apple's FY2024 10-K plus ~225 more across the
-    fixture corpus ('Th e facility', 'jurisd ictions', 'Chevr on').
+    ParagraphNode.text() used to force a space between adjacent inline elements whenever
+    the following text began with a letter and the child's original_tag was one of
+    span/a/em/strong/i/b. That allowlist existed because nothing at that point could tell
+    a boundary an upstream pass had destroyed from a word the filer split mid-token — and
+    filers split words mid-token constantly, so it shipped 'identify, asse ss, and
+    monitor' in Apple's FY2024 10-K, 'Th e facility', 'jurisd ictions', 'Chevr on'.
 
-    The insertion is now suppressed where it would weld two lowercase fragments in the
-    same typeface with no CSS gap between them. Measuring the allowlist's removal
-    outright still costs 8,109 spaces across 57 fixtures, so it stays: this narrows its
-    false positives, it does not replace it. (edgartools-jysx)
+    The allowlist is gone as of 2026-08-02 (edgartools-jysx). Spacing is now decided by
+    three signals that read the boundary instead of guessing at it — see
+    TestCssGapWordBoundary, TestFixedWidthMarkerBox and TestMarkerGlyphWordBoundary.
+    These tests guard the negative: no signal, no space.
     """
 
     def test_lowercase_fragments_in_one_typeface_are_rejoined(self):
@@ -466,25 +467,93 @@ class TestMidWordSplitSpacing:
         text = parse_html(html).text()
         assert 'the facility' in text
 
-    def test_a_change_of_typeface_still_separates_the_words(self):
-        # SEC cover-page checkboxes set the glyph in Wingdings and the label in a text
-        # face. Both sides can be lowercase ('o' is the unchecked box), so the typeface
-        # is the only signal that this is a label and a glyph, not one word.
+    def test_a_word_split_before_a_capital_is_also_rejoined(self):
+        """The allowlist spaced this and was wrong to; caps are not a boundary signal.
+
+        It is how 'Item 1A. RI SK FACTORS' and 'ITEM 1B. UNRESOLV ED STAFF COMMENTS'
+        reached users — an all-caps heading split across two spans, spaced on tag name
+        alone. Item headings are exactly what a section matcher keys on, so the damage
+        was not cosmetic. 25 such repairs across the 57-fixture corpus.
+        """
         html = ('<html><body><p>'
-                '<span style="font-family:Arial">Non-accelerated filer</span>'
-                '<span style="font-family:Wingdings">o</span>'
+                '<span>Item 1A. RI</span><span>SK FACTORS</span>'
                 '</p></body></html>')
         text = parse_html(html).text()
-        assert 'Non-accelerated filer o' in text
+        assert 'Item 1A. RISK FACTORS' in text
+        assert 'RI SK' not in text
 
-    def test_a_capitalised_second_fragment_is_still_spaced(self):
-        # A new word, not a split one: the suppression only fires lowercase-to-lowercase.
+    def test_no_space_is_invented_after_an_opening_quote(self):
+        """A filer who closes a span after `("` did not intend a space to follow it.
+
+        92 of the 245 spaces removed from the fixture corpus by deleting the allowlist
+        are this shape — '(the " SEC")', '( i.e.,', 'http:// www.sec.gov'.
+        """
+        html = ('<html><body><p>'
+                '<span>of the Securities and Exchange Commission (the &ldquo;</span>'
+                '<span>SEC</span><span>&rdquo;)</span>'
+                '</p></body></html>')
+        text = parse_html(html).text()
+        assert '“SEC”' in text
+
+    def test_two_adjacent_elements_with_no_signal_are_joined(self):
+        """The deliberate cost of removing the allowlist, pinned so it stays visible.
+
+        Two genuinely distinct words in adjacent inline elements, with no whitespace, no
+        CSS gap and no marker, are now concatenated. Measured across 57 large-cap
+        fixtures and a 129-filing corpus spanning five markup eras and nine form types,
+        this costs 2 real boundaries on the wide corpus ('security See' in an N-CSR
+        footnote, a Latin-to-CJK boundary in a 20-F) against 222 confirmed repairs on the
+        fixtures — which is why the trade was taken. If a signal for this shape is ever
+        found, this test is the one to change.
+        """
         html = ('<html><body><p>'
                 '<span style="font-family:Arial">reported by</span>'
                 '<span style="font-family:Arial">Morgan Stanley</span>'
                 '</p></body></html>')
         text = parse_html(html).text()
-        assert 'reported by Morgan Stanley' in text
+        assert 'reported byMorgan Stanley' in text
+
+
+class TestMarkerGlyphWordBoundary:
+    """A standalone list or checkbox glyph is a word boundary, read from the text.
+
+    Landed with the allowlist's removal (edgartools-jysx). The CSS-gap and marker-box
+    signals cover most bullet boundaries, but not the ones drawn with no style at all —
+    and not SigmaTron's cover page, where `style="…font-family: "Wingdings""` nests
+    double quotes inside a double-quoted attribute so font-family parses as empty for us
+    and for a browser alike. Reading the glyph out of the text survives that.
+    """
+
+    def test_a_bullet_is_separated_from_its_item_text(self):
+        # AAON FY2021 DEF 14A: 43 lines of '• Proposal No. 1...' shipped as '•Proposal'
+        # under the CSS-gap rule alone.
+        html = '<html><body><p><span>&bull;</span><span>Proposal No. 1.</span></p></body></html>'
+        assert '• Proposal No. 1.' in parse_html(html).text()
+
+    def test_a_footnote_asterisk_is_separated_from_its_note(self):
+        html = '<html><body><p><span>*</span><span>Certain projects have multiple wells.</span></p></body></html>'
+        assert '* Certain projects' in parse_html(html).text()
+
+    def test_a_wingdings_checkbox_is_separated_from_its_label(self):
+        # SigmaTron FY2025 10-K: 'o' and 'y-acute' are the unchecked/checked boxes.
+        html = '<html><body><p><span>of the Act.</span><span>o</span><span>Yes</span></p></body></html>'
+        assert 'o Yes' in parse_html(html).text()
+
+    def test_a_letter_marker_does_not_split_a_word(self):
+        """A-Power's FY2009 20-F writes 'our' as 'o'+'ur' across two elements.
+
+        The marker branch is reached before any mid-word-split test, so without this
+        guard the letter markers turn 'our wind turbine business' into 'o ur wind
+        turbine business'. A checkbox label is 'Yes' or 'No', never lowercase.
+        """
+        html = '<html><body><p><span>o</span><span>ur wind turbine business</span></p></body></html>'
+        text = parse_html(html).text()
+        assert 'our wind turbine business' in text
+        assert 'o ur' not in text
+
+    def test_a_glyph_ending_a_word_is_not_a_marker(self):
+        html = '<html><body><p><span>Chevro</span><span>n Corporation</span></p></body></html>'
+        assert 'Chevron Corporation' in parse_html(html).text()
 
 
 class TestStreamingParserRegressions:

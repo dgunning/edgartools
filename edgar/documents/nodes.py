@@ -34,11 +34,40 @@ def _is_marker_box(node) -> bool:
     return bool(style.display and 'inline-block' in style.display and style.width)
 
 
-def _same_typeface(a, b) -> bool:
-    """Whether two nodes are set in the same font family (both must name one)."""
-    fa = getattr(getattr(a, 'style', None), 'font_family', None)
-    fb = getattr(getattr(b, 'style', None), 'font_family', None)
-    return fa is not None and fa == fb
+_SYMBOL_MARKERS = frozenset('•◦▪▸‣·*†‡§☐☑☒')
+# Rendered in Wingdings these are checkboxes; in the character stream they are letters.
+_LETTER_MARKERS = frozenset('oýþ¨')
+_MARKER_GLYPHS = _SYMBOL_MARKERS | _LETTER_MARKERS
+
+
+def _is_bare_marker(part: str, next_text: str = '') -> bool:
+    """Whether the text so far ends in a standalone list or checkbox marker.
+
+    A checkbox and its label, or a footnote asterisk and its note, are two runs the filer
+    does not separate with whitespace — `☐ Yes`, `* Certain projects have multiple wells`.
+    Unlike `_has_left_gap` this reads the text rather than the style, which is what makes
+    it reach the cover-page checkboxes: SigmaTron writes
+    `style="…font-family: "Wingdings""`, nested double quotes inside a double-quoted
+    attribute, so `font-family` parses as empty for us and for a browser alike and no
+    style-based rule can fire there.
+
+    The letter markers need the second guard. This branch is reached before any test for
+    a mid-word split, and filers do split words across elements — A-Power's FY2009 20-F
+    writes `our` as `o`+`ur`, which without the guard extracts as `o ur wind turbine
+    business`. A checkbox label is `Yes` or `No`, never a lowercase continuation.
+    """
+    stripped = part.rstrip()
+    if not stripped:
+        return False
+    glyph = stripped[-1]
+    if glyph not in _MARKER_GLYPHS:
+        return False
+    # A standalone glyph, not the last letter of a word ('o' ends 'Chevro', 'Tokyo').
+    if not (len(stripped) == 1 or not stripped[-2].isalnum()):
+        return False
+    if glyph in _LETTER_MARKERS and next_text[:1].islower():
+        return False
+    return True
 
 
 def _ends_with_tail_whitespace(node) -> bool:
@@ -60,28 +89,6 @@ def _ends_with_tail_whitespace(node) -> bool:
         children = getattr(node, 'children', None)
         node = children[-1] if children else None
     return False
-
-
-def _splits_a_word(prev_part: str, text: str, prev_child, child) -> bool:
-    """Whether spacing these two children apart would cut one word in half.
-
-    ParagraphNode.text() force-spaces adjacent inline elements, because whichever
-    upstream pass destroyed the boundary whitespace left nothing to tell a real word
-    gap from a mid-word split. Filers do split words mid-token — Apple's FY2024 10-K
-    has 'asse</span><span style="background-color:#ffffff">ss' — and force-spacing
-    those ships 'identify, asse ss, and monitor'.
-
-    Two lowercase fragments meeting with no whitespace between them is the signature
-    of such a split. Two things rule it out: a CSS left gap on the second child (the
-    filer drew the space with padding), and a change of typeface across the boundary,
-    which is how SEC cover-page checkboxes ('Yes x No o', where the glyphs are
-    Wingdings) stay separated from their labels.
-    """
-    if not (prev_part and prev_part[-1].islower() and text[:1].islower()):
-        return False
-    if _has_left_gap(child) or _is_marker_box(prev_child):
-        return False
-    return _same_typeface(prev_child, child)
 
 
 @dataclass
@@ -301,26 +308,22 @@ class ParagraphNode(Node, CacheableMixin):
                             if not self._is_abbreviation_ending(parts[-1]):
                                 should_add_space = True
 
-                        # A CSS left gap is the filer drawing a word gap without using
-                        # whitespace: a bullet glyph and its item text, a footnote marker
-                        # and its note. This is what the tag allowlist below has been
-                        # standing in for — 95% of the boundaries it restores across the
-                        # fixture corpus carry a padding-left/margin-left here — but the
-                        # allowlist keys on metadata only TextNodes carry, so it misses
-                        # every child that header detection promoted to a HeadingNode.
-                        # Apple's FY2024 10-K shipped '•MacBook Pro 16-in.' for that reason.
+                        # The filer drew a word gap without using whitespace: a bullet
+                        # glyph and its item text, a footnote marker and its note, a
+                        # cover-page checkbox and its label. Three signals, each reading
+                        # the boundary rather than guessing at it — a CSS gap on the text
+                        # that follows, a fixed-width box around the marker before it, or
+                        # a standalone marker glyph in the text itself.
+                        #
+                        # These replace a `original_tag in ['span','a','em',...]`
+                        # allowlist that stood in for them until 2026-08-02, and that
+                        # spaced any two adjacent inline elements whatever sat between
+                        # them — inventing far more boundaries than it restored, notably
+                        # inside Item headings ('Item 1A. RI SK FACTORS'). See the
+                        # CHANGELOG and edgartools-jysx for the measurement.
                         elif (parts and parts[-1] and not parts[-1].endswith(' ')
-                              and (_has_left_gap(child) or _is_marker_box(prev_child))):
-                            should_add_space = True
-
-                        # Add space between adjacent inline elements if the current text starts with a letter/digit
-                        # This handles cases where whitespace was stripped but spacing is semantically important.
-                        # Suppressed where it would weld together two halves of one word (see
-                        # _splits_a_word) — filers split words mid-token across styled spans.
-                        elif (text and text[0].isalpha() and
-                              parts and parts[-1] and not parts[-1].endswith(' ') and
-                              hasattr(child, 'get_metadata') and child.get_metadata('original_tag') in ['span', 'a', 'em', 'strong', 'i', 'b'] and
-                              not _splits_a_word(parts[-1], text, prev_child, child)):
+                              and (_has_left_gap(child) or _is_marker_box(prev_child)
+                                   or _is_bare_marker(parts[-1], text))):
                             should_add_space = True
 
                         if should_add_space:

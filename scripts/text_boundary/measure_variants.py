@@ -1,8 +1,18 @@
 """Diff each ParagraphNode.text() variant against the current implementation.
 
-Runs over all 57 HTML fixtures and the 5 test_filing_text_baseline filings, and
-classifies every changed line as space-gained / space-lost / content-changed.
+Runs over the fixture corpus and classifies every changed line as space-gained /
+space-lost / content-changed.
+
+Two corpora, selected with --corpus:
+  fixtures  the 57 HTML fixtures under tests/fixtures/html — modern large-cap 10-K/10-Q
+  wide      the widened corpus built by build_wide_corpus.py — five markup eras across
+            nine form types, which is what the allowlist question needs (see that script)
+  both      render both, reported separately
+
+Results are grouped by corpus subdirectory so a loss can be attributed to an era or a
+form rather than just to a file.
 """
+import argparse
 import difflib
 import sys
 import warnings
@@ -16,17 +26,19 @@ from variants import VARIANTS, make_text  # noqa: E402
 from edgar.documents import HTMLParser, ParserConfig  # noqa: E402
 from edgar.documents.nodes import ParagraphNode  # noqa: E402
 
-FIXTURES = Path(__file__).resolve().parents[2] / "tests/fixtures/html"
-BASELINE_TXT = Path(sys.argv[1]) if len(sys.argv) > 1 else None  # dir of current .txt for the 5 filings
+ROOTS = {
+    "fixtures": Path(__file__).resolve().parents[2] / "tests/fixtures/html",
+    "wide": Path(__file__).resolve().parents[2] / "tests/fixtures/text_boundary_corpus",
+}
 
 ORIGINAL = ParagraphNode.text
 
 
-def render_all():
+def render_all(root):
     """Parse every fixture with whatever ParagraphNode.text is currently installed."""
     out = {}
-    for f in sorted(FIXTURES.rglob("*.html")):
-        name = str(f.relative_to(FIXTURES))
+    for f in sorted(root.rglob("*.html")):
+        name = str(f.relative_to(root))
         try:
             doc = HTMLParser(ParserConfig()).parse(f.read_text(errors="replace"))
             out[name] = doc.text()
@@ -64,26 +76,60 @@ def classify(old_text, new_text):
     return gained, lost, other, samples
 
 
-print("rendering fixtures with CURRENT implementation...")
-base = render_all()
+def measure(corpus, root, show_samples):
+    if not root.exists():
+        print(f"!! {corpus} corpus not found at {root} — skipping")
+        return
+    print(f"\n#### corpus={corpus}  root={root}")
+    print("rendering with CURRENT implementation...")
+    base = render_all(root)
+    print(f"  {len(base)} documents")
 
-for vname, kwargs in VARIANTS.items():
-    ParagraphNode.text = make_text(**kwargs)
-    got = render_all()
-    ParagraphNode.text = ORIGINAL
+    for vname, kwargs in VARIANTS.items():
+        ParagraphNode.text = make_text(**kwargs)
+        got = render_all(root)
+        ParagraphNode.text = ORIGINAL
 
-    tg = tl = to = 0
-    changed = []
-    all_samples = []
-    for name in base:
-        g, l, o, s = classify(base[name], got[name])
-        if g or l or o:
-            changed.append((name, g, l, o))
-            tg += g; tl += l; to += o
-            all_samples.extend((name, *x) for x in s)
-    print(f"\n=== {vname}: {len(changed)}/{len(base)} fixtures changed  "
-          f"gained={tg} lost={tl} content/struct={to}")
-    for name, g, l, o in changed[:12]:
-        print(f"     {name}: +{g} -{l} other={o}")
-    for name, kind, a, b in all_samples[:10]:
-        print(f"   [{kind}] {name}\n     - {a[:170]}\n     + {b[:170]}")
+        tg = tl = to = 0
+        changed = []
+        all_samples = []
+        by_group = {}
+        for name in base:
+            g, l, o, s = classify(base[name], got[name])
+            # Group by the first path segment: ticker for the fixture corpus, era for
+            # the wide one. Second segment is the form.
+            parts = Path(name).parts
+            group = parts[0] if len(parts) < 3 else f"{parts[0]}/{parts[1]}"
+            agg = by_group.setdefault(group, [0, 0, 0, 0])
+            agg[3] += 1
+            if g or l or o:
+                changed.append((name, g, l, o))
+                tg += g; tl += l; to += o
+                agg[0] += g; agg[1] += l; agg[2] += o
+                all_samples.extend((name, *x) for x in s)
+        print(f"\n=== [{corpus}] {vname}: {len(changed)}/{len(base)} docs changed  "
+              f"gained={tg} lost={tl} content/struct={to}")
+        for group in sorted(by_group):
+            g, l, o, n = by_group[group]
+            if g or l or o:
+                print(f"     {group:28} n={n:3}  +{g:<6} -{l:<6} other={o}")
+        for name, g, l, o in sorted(changed, key=lambda x: -x[2])[:10]:
+            print(f"     {name}: +{g} -{l} other={o}")
+        if show_samples:
+            for name, kind, a, b in all_samples[:10]:
+                print(f"   [{kind}] {name}\n     - {a[:170]}\n     + {b[:170]}")
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--corpus", choices=["fixtures", "wide", "both"], default="fixtures")
+    ap.add_argument("--samples", action="store_true", help="print changed-line samples")
+    args = ap.parse_args()
+
+    names = ["fixtures", "wide"] if args.corpus == "both" else [args.corpus]
+    for corpus in names:
+        measure(corpus, ROOTS[corpus], args.samples)
+
+
+if __name__ == "__main__":
+    main()

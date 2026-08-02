@@ -54,3 +54,9 @@ agent_eval_results/
 # pyproject.toml [tool.hatch.build] includes them explicitly. Those files are
 # needed at import time, so the result is a wheel that cannot `import edgar`.
 /data/
+
+# Widened text-boundary measurement corpus: filings downloaded by
+# scripts/text_boundary/build_wide_corpus.py. Deliberately NOT committed —
+# tests/fixtures/html already carries 278MB, and this corpus rebuilds exactly from the
+# accession numbers pinned in scripts/text_boundary/wide_corpus_manifest.json.
+/tests/fixtures/text_boundary_corpus/

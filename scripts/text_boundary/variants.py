@@ -49,9 +49,45 @@ def _splits_a_word(prev_part, t, prev_child, child):
     return _same_typeface(prev_child, child)
 
 
+_SYMBOL_MARKERS = set('•◦▪▸‣·*†‡§☐☑☒')
+# Rendered in Wingdings these are checkboxes; in the character stream they are letters.
+_LETTER_MARKERS = set('oýþ¨')
+_MARKER_GLYPHS = _SYMBOL_MARKERS | _LETTER_MARKERS
+
+
+def _is_bare_marker(part: str, nxt: str = '') -> bool:
+    """Whether the text so far ends in a standalone marker glyph.
+
+    A checkbox and its label, or a footnote asterisk and its note, are two runs the filer
+    never separates with whitespace — `☐ Yes`, `* Certain projects`. The allowlist has
+    been spacing them by accident; deleting it without this rule ships `☐Yes`. Unlike the
+    CSS-gap test this reads the text, not the style, so it survives the malformed
+    `font-family: "Wingdings"` that defeats the typeface signal.
+
+    The letter markers need a second guard. This branch runs before the allowlist branch
+    and so never reaches _splits_a_word, and a filer who splits `our` as `o`+`ur` across
+    two elements otherwise gets `o ur` — measured on A-Power's FY2009 20-F, which shipped
+    `our wind turbine business` correctly and broke under the unguarded rule. A checkbox
+    label is `Yes`/`No`, never a lowercase continuation, so requiring the next run not to
+    start lowercase separates the two cleanly.
+    """
+    stripped = part.rstrip()
+    if not stripped:
+        return False
+    glyph = stripped[-1]
+    if glyph not in _MARKER_GLYPHS:
+        return False
+    # A standalone glyph, not the last letter of a word ('o' ends 'Chevro', 'Tokyo').
+    if not (len(stripped) == 1 or not stripped[-2].isalnum()):
+        return False
+    if glyph in _LETTER_MARKERS and nxt[:1].islower():
+        return False
+    return True
+
+
 def make_text(drop_tailws=False, drop_punct=False, drop_allowlist=False, pure_join=False,
               left_gap=False, left_gap_alpha_only=False, no_word_split=False, union=False,
-              shallow_tailws=False):
+              shallow_tailws=False, marker_glyph=False):
     def text(self) -> str:
         def _generate_text():
             if pure_join:
@@ -89,7 +125,8 @@ def make_text(drop_tailws=False, drop_punct=False, drop_allowlist=False, pure_jo
                     should_add_space = True
                 elif (left_gap and parts and parts[-1] and not parts[-1].endswith(' ')
                       and (t[0].isalpha() if left_gap_alpha_only else True)
-                      and (_has_left_gap(child) or _is_marker_box(prev_child))):
+                      and (_has_left_gap(child) or _is_marker_box(prev_child)
+                           or (marker_glyph and _is_bare_marker(parts[-1], t)))):
                     should_add_space = True
                 elif (no_word_split and t and t[0].isalpha()
                       and parts and parts[-1] and not parts[-1].endswith(' ')
@@ -118,10 +155,16 @@ def make_text(drop_tailws=False, drop_punct=False, drop_allowlist=False, pure_jo
 
 VARIANTS = {
     # Shipped behaviour, to confirm the harness reproduces it: expect 0 changed.
+    "G_css_gap_plus_marker": dict(left_gap=True, marker_glyph=True),
+    # The PREVIOUS shipped behaviour — allowlist plus CSS gap. Its diff against the tree
+    # is what deleting the allowlist did; keep it to re-derive that measurement.
     "D_union_allowlist_or_css_gap": dict(union=True),
     # Shipped minus the rightmost-spine tail-whitespace walk: the "lost" count is what
     # that fix restores.
     "E_shallow_tailws": dict(union=True, shallow_tailws=True),
     # What deleting the allowlist would now cost, with the spine fix in place.
     "F_css_gap_only": dict(left_gap=True),
+    # Pure deletion — no allowlist and no CSS-gap replacement. The worst case, and the
+    # upper bound F is measured against.
+    "A_drop_allowlist": dict(drop_allowlist=True),
 }
