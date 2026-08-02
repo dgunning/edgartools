@@ -27,25 +27,29 @@ def sha256(text):
 
 
 # accession -> (Filing kwargs, expected SHA-256 of BOTH .text() and .sgml().text())
-# Hashes captured on the unmodified code before the rck1/j8bs/e0hr fixes.
+# Hashes captured on the unmodified code before the rck1/j8bs/e0hr fixes, then re-captured
+# after 319469c7 ("stop deleting word boundaries at inline-element edges"), which restores
+# the space an inline element used to swallow: "October18" -> "October 18", "inInternal" ->
+# "in Internal", "Sciencemagazine" -> "Science magazine". Four of the five filings below
+# gained spaces and nothing else; the 2005 8-K was already correct and is unchanged.
 BASELINE = {
     # Modern iXBRL 10-K
     "0000320193-23-000106": (
         dict(form="10-K", filing_date="2023-11-03", company="Apple Inc.",
              cik=320193, accession_no="0000320193-23-000106"),
-        "80f608044f7a2eb0cbcb6b3102a905a5757e837671b761b261d4132be7aacd61",
+        "d8e482da9fa3ca9f972e4806ded3f21f90fb28869ceb960b332d7944bb757210",
     ),
     # Plain HTML 10-K
     "0001193125-20-052640": (
         dict(form="10-K", filing_date="2020-02-27", company="10x Genomics, Inc.",
              cik=1770787, accession_no="0001193125-20-052640"),
-        "6a6a53a9bec74819bae9fb181a708a13f010be6da2479fd12c6c90756e98af01",
+        "deacb23245b5b0910b42787a128b1944bb7332f955b13a5e25e07cac78246102",
     ),
     # CORRESP — the shape where the two paths already agreed before the fix
     "0000065873-05-000060": (
         dict(form="CORRESP", filing_date="2005-11-03", company="MERCK & CO INC",
              cik=65873, accession_no="0000065873-05-000060"),
-        "7e80dff07ee6e4eb414c48c11171768643fb1afa2093d5f1c4f829d8d4171898",
+        "cb49f8283905f7f31fac5b29c92a998643c81659454dfb1432f3d3403be1be36",
     ),
     # 2005-era HTML 8-K
     "0000950137-05-004969": (
@@ -57,7 +61,7 @@ BASELINE = {
     "0001481057-23-010389": (
         dict(form="424B2", filing_date="2023-12-13", company="BANK OF AMERICA CORP /DE/",
              cik=70858, accession_no="0001481057-23-010389"),
-        "7592cef4538e85438ceef27cf39a041fb23f36551994d1a0ac10f2b5d150ca18",
+        "283d70b4019a9beed3a51ff21e8b3f343384a8358a095521bfc36eda051f0bd3",
     ),
 }
 
@@ -111,6 +115,10 @@ def test_distinctive_content_survives_in_apple_10k():
     assert "Apple Inc." in text
     assert "CONSOLIDATED STATEMENTS OF OPERATIONS" in text.upper()
     assert "iPhone" in text
+
+    # Words either side of an inline element stay separate (319469c7).
+    assert "Apple Watch® Series 9" in text
+    assert "established in Internal Control - Integrated Framework" in text
 
 
 @pytest.mark.network
