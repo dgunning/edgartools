@@ -556,6 +556,111 @@ class TestMarkerGlyphWordBoundary:
         assert 'Chevron Corporation' in parse_html(html).text()
 
 
+class TestHeadingContentFloor:
+    """A bullet or a bare enumerator is not a heading however it is styled.
+
+    Filers put the glyph in its own span, and header detection scored that span on
+    everything except what it said — ContextualDetector awards +0.3 whenever the next
+    element is three times longer, which a one-character text passes against almost
+    anything, and another +0.3 when the *previous* sibling looks like a heading, so a
+    '•' cleared the 0.6 threshold on borrowed evidence alone.
+
+    Measured across the 57 fixtures before the fix: 17,016 HeadingNodes, of which 2,818
+    had no alphanumeric character at all (2,636 a bare '•') and 1,199 were bare
+    enumerators — 23.6% of every heading built. Meta's FY2024 10-K was 180 of 296.
+    They surfaced through doc.headings, through the markdown renderer as '### •' and its
+    table of contents, and through the heading index DocumentSearch scores.
+
+    HeaderDetectionStrategy.detect() now applies a content floor before any detector
+    runs. Measured after: 12,999 headings, 0 of either kind, section map 0 of 55 changed,
+    doc.text() byte-identical on all 57 fixtures, and no markdown token lost once
+    escaping and emphasis are normalised. (edgartools-1xxo)
+    """
+
+    def _headings(self, html):
+        from edgar.documents.nodes import HeadingNode
+        doc = parse_html(html)
+        return [(h.content or '').strip()
+                for h in doc.root.find(lambda n: isinstance(n, HeadingNode))]
+
+    def test_a_styled_bullet_is_not_promoted_to_a_heading(self):
+        # Apple's FY2024 10-K shipped 12 of these; JNJ's 76.
+        html = ('<html><body><div>'
+                '<p style="font-weight:bold;text-align:center">Products</p>'
+                '<p><span style="font-weight:bold">&bull;</span></p>'
+                '<p>iPhone is the Company&rsquo;s line of smartphones based on its iOS operating '
+                'system, and it represents a substantial share of net sales.</p>'
+                '</div></body></html>')
+        assert '•' not in self._headings(html)
+
+    def test_a_trademark_symbol_is_not_promoted_to_a_heading(self):
+        # 19 bare '®' headings across the fixture corpus, 8 of them in Apple's 10-K,
+        # each one a symbol lifted out of the middle of a product sentence.
+        html = ('<html><body><div>'
+                '<p>The Company offers Apple Watch</p>'
+                '<p><span style="vertical-align:super">&reg;</span></p>'
+                '<p>Series 10, which extends the health and fitness features described above.</p>'
+                '</div></body></html>')
+        assert '®' not in self._headings(html)
+
+    def test_a_bare_enumerator_is_not_promoted_to_a_heading(self):
+        # 1,199 across the corpus: '(1)' x203, '(a)' x134, '(2)' x124. JPMorgan's 10-Q
+        # alone had 147, which is what a footnote-heavy financial table looks like.
+        html = ('<html><body><div>'
+                '<p style="font-weight:bold">Note 3</p>'
+                '<p><span style="font-weight:bold">(1)</span></p>'
+                '<p>Amounts represent the fair value of derivative receivables and payables '
+                'after netting adjustments permitted under master netting agreements.</p>'
+                '</div></body></html>')
+        headings = self._headings(html)
+        assert '(1)' not in headings
+
+    def test_a_real_heading_is_still_promoted(self):
+        """The floor rejects on content only, so nothing that reads as a heading moves.
+
+        Guards against the tempting-but-wrong fix of adding 'span' to
+        skip_header_detection_tags — filers do legitimately mark headings with a styled
+        span, and that would lose the real ones along with the glyphs.
+        """
+        html = ('<html><body><div>'
+                '<p><span style="font-weight:bold;font-size:18px">Item 1A. Risk Factors</span></p>'
+                '<p>The Company&rsquo;s business, reputation, results of operations and financial '
+                'condition can be affected by a number of factors described below.</p>'
+                '</div></body></html>')
+        assert 'Item 1A. Risk Factors' in self._headings(html)
+
+    def test_the_content_floor_admits_what_it_should(self):
+        """The floor itself, tested directly — the detectors are a separate question.
+
+        A heading has to clear the floor *and* convince a detector, and most synthetic
+        markup never convinces one, so asserting through parse_html() here would measure
+        detection rather than the floor. These are the boundaries the regex draws.
+        """
+        from edgar.documents.strategies.header_detection import _can_be_heading
+
+        # Rejected: nothing alphanumeric, or a bare enumerator.
+        for text in ['•', '®', '*', '**', '—', '––', '☐',
+                     '1', '(1)', '(a)', 'iv.', 'b)', '[3]', 'A']:
+            assert not _can_be_heading(text), f'{text!r} should be rejected'
+
+        # Admitted: a year is four digits, so the enumerator rule stops short of it.
+        for text in ['2024', 'Item 1A. Risk Factors', 'PART I', 'Note 3',
+                     '(1) Basis of Presentation', '10-K', 'Overview']:
+            assert _can_be_heading(text), f'{text!r} should be admitted'
+
+    def test_the_bullet_still_reaches_the_text_with_its_boundary_intact(self):
+        """De-promoting the glyph must not undo the boundary work it was masking.
+
+        The bullet becomes an inline TextNode rather than a HeadingNode, which is the
+        path _is_bare_marker covers (TestMarkerGlyphWordBoundary). Before the allowlist
+        removal landed, this fix would have shipped '•iPhone'.
+        """
+        html = ('<html><body><p>'
+                '<span style="font-weight:bold">&bull;</span><span>iPhone</span>'
+                '</p></body></html>')
+        assert '• iPhone' in parse_html(html).text()
+
+
 class TestStreamingParserRegressions:
     """Regression tests from the era of the separate StreamingParser.
 
