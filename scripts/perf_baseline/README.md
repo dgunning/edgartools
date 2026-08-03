@@ -36,7 +36,7 @@ legitimately between corpus files) while the **null token** is asserted exactly
 ## Usage
 
 ```bash
-# once: download and cache the corpus (network; ~86 MB)
+# once: download and cache the corpus (network; ~94 MB)
 python scripts/perf_baseline/build_corpus.py
 
 # measure
@@ -95,11 +95,16 @@ and what 6.0 work will touch:
 
 - `FactsQuery.to_dataframe()` — `edgar/xbrl/facts.py:859`
 - `Filings.to_pandas()` — `edgar/_filings.py:548`
-- `EntityFacts.to_dataframe()` — `edgar/entity/entity_facts.py:246` *(not yet
-  wired: needs a cached company-facts payload in the corpus)*
-- `edgar/entity/query.py:641` and `edgar/xbrl/stitching/query.py:545` *(not yet
-  wired)*
+- `EntityFacts.to_dataframe()` — `edgar/entity/entity_facts.py:246`
+- `edgar/entity/query.py:641`
+- `edgar/xbrl/stitching/query.py:545`
+
+Several are captured under more than one query, because narrowing a query is
+what moved the schema in the first place — a single capture per surface would
+have missed it.
 
 Surfaces that cannot be built from the cached corpus are recorded as
-`unavailable` rather than omitted — an absent key would read as "no change" on
-the next diff.
+`unavailable` rather than omitted, since an absent key reads as "no change" on
+the next diff. That convention only helps where a builder exists to fail: the
+last three surfaces above had none, so they were silently missing from the
+capture until the company-facts payload was added to the corpus.

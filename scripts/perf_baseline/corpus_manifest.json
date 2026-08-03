@@ -172,5 +172,21 @@
     "rows": 340032,
     "year": 2025,
     "quarter": 1
-  }
+  },
+  "entity_facts": [
+    {
+      "key": "tesla",
+      "cik": 1318605,
+      "note": "matches tesla_10k_fy2023",
+      "path": "corpus/_entity_facts/CIK0001318605.json",
+      "bytes": 4030874
+    },
+    {
+      "key": "footlocker",
+      "cik": 850209,
+      "note": "matches the two footlocker entries",
+      "path": "corpus/_entity_facts/CIK0000850209.json",
+      "bytes": 3738100
+    }
+  ]
 }
