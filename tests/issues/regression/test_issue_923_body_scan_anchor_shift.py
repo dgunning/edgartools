@@ -103,6 +103,61 @@ def test_inline_xbrl_id_is_not_mistaken_for_an_anchor():
     assert mapping["part_i_item_1c"] == "real_anchor"
 
 
+# --- GH #923 part 2 — a glued title initial read as an item suffix -----------
+#
+# TOC rows split the label and the title across cells (<td>Item 4</td>
+# <td>Mine Safety Disclosures</td>) and text_content() joins them with no
+# separator, so "Item 4Mine Safety Disclosures" normalized to Item 4M. Foot
+# Locker's FY2013 10-K emitted a full set of codes that do not exist in Reg S-K
+# — 2P, 3L, 4M, 5M, 6S, 7M, 8C, 10D, 11E, 12S, 13C, 14P, 15E — each letter the
+# initial of its own title. Bead edgartools-7g9r.
+
+@pytest.mark.fast
+@pytest.mark.parametrize(
+    "text, expected",
+    [
+        # Glued title: the initial is not a suffix.
+        ("Item 2Properties", "Item 2"),
+        ("Item 4Mine Safety Disclosures", "Item 4"),
+        ("Item 10Directors, Executive Officers and Corporate Governance", "Item 10"),
+        ("Item 15Exhibits and Financial Statement Schedules", "Item 15"),
+        # Real suffixes survive, separated or not.
+        ("Item 1A. Risk Factors", "Item 1A"),
+        ("Item 1B Unresolved Staff Comments", "Item 1B"),
+        ("ITEM 7A. Quantitative and Qualitative Disclosures", "Item 7A"),
+        ("Item 1B", "Item 1B"),
+        # A genuinely glued suffix keeps its letter — the title's initial is
+        # uppercase, so it cannot be confused with a lowercase continuation.
+        ("Item 1ARisk Factors", "Item 1A"),
+    ],
+)
+def test_glued_title_initial_is_not_an_item_suffix(text, expected):
+    assert TOCAnalyzer._item_label_from_text(text) == expected
+
+
+@pytest.mark.fast
+def test_non_item_text_still_returns_none():
+    """The helper must not claim text that does not open with an item label."""
+    assert TOCAnalyzer._item_label_from_text("Risk Factors") is None
+    assert TOCAnalyzer._item_label_from_text("PART II") is None
+
+
+@pytest.mark.network
+def test_foot_locker_2013_emits_only_valid_item_codes():
+    """No item code outside Reg S-K's shape, and no phantom duplicate items."""
+    from edgar import find
+
+    items = find("0001144204-14-019510").obj().items
+
+    invalid = [i for i in items if not re.fullmatch(r"Item \d+[A-C]?", i)]
+    assert invalid == [], f"item codes that do not exist in Reg S-K: {invalid}"
+
+    # The phantoms doubled up on the real items; each number appears once.
+    assert len(items) == len(set(items))
+    for phantom in ("Item 2P", "Item 3L", "Item 4M", "Item 8C", "Item 10D", "Item 15E"):
+        assert phantom not in items
+
+
 @pytest.mark.network
 def test_foot_locker_items_open_on_their_own_headings():
     """The reported filing: every item must open with its own Item heading.

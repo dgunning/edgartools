@@ -1028,6 +1028,39 @@ class TOCAnalyzer:
 
         return None
 
+    @staticmethod
+    def _item_label_from_text(text: str) -> Optional[str]:
+        """Normalize a leading ``Item N`` label, ignoring a title glued onto it.
+
+        A letter straight after the number is an item suffix ("Item 1A") unless
+        it is the first letter of a title with no separator before it. TOC rows
+        routinely split the label and the title across cells::
+
+            <td>Item 4</td><td>Mine Safety Disclosures</td>
+
+        and ``text_content()`` joins them with nothing in between, so
+        "Item 4Mine Safety Disclosures" read as **Item 4M**. Foot Locker's FY2013
+        10-K (``0001144204-14-019510``) produced a full set of codes that do not
+        exist in Reg S-K this way — 2P, 3L, 4M, 5M, 6S, 7M, 8C, 10D, 11E, 12S,
+        13C, 14P, 15E — each letter the initial of its own title, each one a
+        phantom section sitting alongside the real one.
+
+        The discriminator: a real suffix letter is never followed by a lowercase
+        letter, and a glued title's initial always is. This deliberately is not a
+        closed valid-set check — filers do use company-specific suffixes (the
+        body-scan counter already allows for Caterpillar's Item 1D) — and it
+        keeps a genuinely glued suffix working: "Item 1ARisk Factors" -> Item 1A.
+
+        Returns ``None`` when the text does not open with an item label. (GH #923)
+        """
+        match = re.match(r'item\s+(\d+)([A-Za-z])?', text, re.IGNORECASE)
+        if not match:
+            return None
+        num, letter = match.group(1), match.group(2)
+        if letter and text[match.end():][:1].islower():
+            letter = None
+        return f"Item {num}{(letter or '').upper()}"
+
     def _parse_item_from_text(self, text: str) -> Optional[str]:
         """
         Extract a normalized item/part name from TOC entry text.
@@ -1043,9 +1076,9 @@ class TOCAnalyzer:
         # Strip zero-width spaces
         text = text.replace('\u200b', '').replace('\u200c', '').replace('\u200d', '')
 
-        item_match = re.match(r'(?:item|ITEM)\s+(\d+[A-Za-z]?)', text, re.IGNORECASE)
-        if item_match:
-            return f"Item {item_match.group(1).upper()}"
+        item_label = self._item_label_from_text(text)
+        if item_label:
+            return item_label
 
         part_match = re.match(r'(?:part|PART)\s+([IVXivx]+)', text, re.IGNORECASE)
         if part_match:
@@ -1940,10 +1973,11 @@ class TOCAnalyzer:
                 return f"Part {part_num}"
 
         # THIRD PRIORITY: Text-based normalization
-        # Handle common Item patterns in text
-        item_match = re.match(r'item\s+(\d+[a-z]?)', text, re.IGNORECASE)
-        if item_match:
-            return f"Item {item_match.group(1).upper()}"
+        # Handle common Item patterns in text. A title glued straight onto the
+        # item number must not be read as a suffix — see _item_label_from_text.
+        item_label = self._item_label_from_text(text)
+        if item_label:
+            return item_label
 
         # Handle Part patterns
         part_match = re.match(r'part\s+([ivx]+)', text, re.IGNORECASE)
