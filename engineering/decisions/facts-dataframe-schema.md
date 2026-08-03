@@ -61,6 +61,14 @@ the dtype regardless of what was inferred. Both replace behaviour that is
 currently emergent, and the `dropna(axis=1, how='all')` call is deleted rather
 than made conditional — it is the mechanism, not a safeguard.
 
+One constraint the spec has to respect, found while implementing the 5.x half:
+the declared string dtype must be **probed at import** (`pd.Series([""]).dtype`),
+never written as the literal `'str'`. The pandas default changed in 3.0 from
+`object` to `str` while the supported floor is still 2.0, and `astype('str')`
+turns a null into the *string* `"nan"` — silently converting missing data into
+data, on the floor version, in the method whose whole purpose here is to stop
+nulls from changing shape.
+
 ### The declared core (24 columns)
 
 Order is today's order, so this change alters presence and dtype only.
@@ -78,7 +86,7 @@ Order is today's order, so this change alters presence and dtype only.
 | `period_start` | `str` | `entity_identifier` | `str` |
 | `period_end` | `str` | `entity_scheme` | `str` |
 | `period_instant` | `str` | `fiscal_period` | `str` |
-| `is_dimensioned` | `bool` | `fiscal_year` | **`Int64`** |
+| `is_dimensioned` | **`boolean`** | `fiscal_year` | **`Int64`** |
 
 Three dtype choices carry the reasoning:
 
@@ -90,9 +98,13 @@ Three dtype choices carry the reasoning:
   would move its sentinel to `pd.NA` and break every consumer calling
   `np.isnan`, which is a larger break than the one being fixed and buys nothing:
   it is a genuine float either way.
-- **`is_dimensioned` is `bool`, not `boolean`.** `_build_facts` defaults it to
-  `False` at `facts.py:1185`, so it is never null and the nullable variant would
-  add a sentinel that cannot occur.
+- **`is_dimensioned` is nullable `boolean`, not `bool`.** `_build_facts` defaults
+  it to `False` at `facts.py:1185`, so it should never need materializing — but
+  an empty *numpy* bool column materializes as `True`, not null, so declaring
+  `bool` would make the one path that fabricates data the path taken when data
+  is missing. Fabricating "this fact is dimensioned" is the failure class this
+  schema exists to prevent, and `boolean` is the same dtype family, so nothing
+  downstream distinguishes them until a value is actually absent.
 
 ### Configuration-gated blocks
 
