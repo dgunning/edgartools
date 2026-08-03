@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.45.1] - 2026-08-03
+
+Three section-extraction fixes, all reported against 5.44.x with reproductions. Each returned wrong content at full confidence with no warning, so a caller had no signal anything was off.
+
 ### Fixed
 
 - **10-K item map shifted by one slot, so each item returned the previous item's body** — Foot Locker's FY2024 10-K (`0001437749-25-009620`) gave Item 6's five-year financial data for `obj['Item 7']` and the MD&A under `Item 7A`; Items 2 and 9B were missing. The body-header scan takes each item's nearest *preceding* anchor, but Novaworks nests the anchor inside the heading, so every item took the previous one's. It failed silently — every anchor was real. (GH #923)
