@@ -333,7 +333,12 @@ class TOCAnalyzer:
             toc_sections = []
             current_part = self.schema.seed_part  # Track part context; seeds Part I for 10-Q
 
-            for link in anchor_links:
+            # A two-column TOC interleaves its columns in source order, so a
+            # single running part context is whipsawed between them. Read one
+            # column at a time instead — the order a human reads it in.
+            ordered_links = self._order_links_by_toc_column(anchor_links)
+
+            for _column, link in ordered_links:
                 href = link.get('href', '').strip()
                 text = (link.text_content() or '').strip()
 
@@ -1216,6 +1221,149 @@ class TOCAnalyzer:
             prev = max(prev, v)
         return total
 
+    @staticmethod
+    def _toc_cell_column(link) -> Optional[int]:
+        """Which half of its table row a link sits in: 0 (left) or 1 (right).
+
+        ``None`` when the link is not inside a table row, so callers can treat it
+        as belonging to the single default column.
+        """
+        current = link
+        for _ in range(6):
+            parent = current.getparent()
+            if parent is None:
+                return None
+            if parent.tag in ('td', 'th'):
+                row = parent.getparent()
+                if row is None or row.tag != 'tr':
+                    return None
+                cells = [c for c in row if c.tag in ('td', 'th')]
+                try:
+                    index = cells.index(parent)
+                except ValueError:
+                    return None
+                return 0 if index * 2 < len(cells) else 1
+            current = parent
+        return None
+
+    # A TOC link whose whole text is a page number carries no section title, so
+    # it never counts as one of a row's side-by-side entries. Neither does a bare
+    # "Item 1" / "PART II" label: filing agents routinely split a single entry
+    # into [Item 1][Business][5] links, which would otherwise read as two
+    # side-by-side titles and mis-detect every such TOC as two-column.
+    _TOC_PAGE_NUMBER_TEXT = re.compile(r'^\d{1,4}$')
+    # Matches "Item 1" / "Item 1A." and the label standing alone — "1", "1A.",
+    # "7A." — which is how most agents render the label cell. No section title is
+    # ever a bare number with an optional suffix letter, so this cannot swallow
+    # one; J&J's TOC puts "1A." and "Risk factors" in opposite halves of the row,
+    # which would otherwise read as two side-by-side titles.
+    _TOC_BARE_LABEL_TEXT = re.compile(
+        r'^(?:(?:item\s+)?\d+\s*[a-z]?|part\s+[ivx]+)\s*[.:]?$', re.IGNORECASE)
+
+    # How many rows must carry two titled entries before a TOC counts as
+    # two-column. One such row is a formatting accident; a real two-column TOC
+    # has one for every pair of items it lists (Ambac's has nine).
+    _MIN_TWO_COLUMN_ROWS = 3
+
+    def _detect_two_column_toc(self, links: List) -> bool:
+        """True when the TOC lists two items side by side in the same row.
+
+        Deliberately conservative, because the consequences of a false positive
+        land on 10-Q: its items repeat across parts, so a 10-Q part must be
+        *detected* and never inferred, and mis-scoping its part headers moves
+        Part II items under Part I. Counting cells is not enough to tell the
+        layouts apart — a single-column row is commonly ``[label][title][page]``,
+        whose page cell already sits in the right-hand half. What distinguishes a
+        real two-column TOC is two *titled* links in one row; a page number is
+        not a title.
+        """
+        # Hold every row in a list while deduplicating: lxml hands out transient
+        # proxy objects, so an id() recorded for a row that has since been freed
+        # can be handed to an unrelated row and silently skip it.
+        rows: List = []
+        seen_row_ids = set()
+
+        for link in links:
+            href = (link.get('href') or '').strip()
+            if not href.startswith('#'):
+                continue
+            row = None
+            current = link
+            for _ in range(10):
+                parent = current.getparent()
+                if parent is None:
+                    break
+                if parent.tag == 'tr':
+                    row = parent
+                    break
+                current = parent
+            if row is None or id(row) in seen_row_ids:
+                continue
+            rows.append(row)
+            seen_row_ids.add(id(row))
+
+        rows_with_two_titles = 0
+        for row in rows:
+            halves = set()
+            for candidate in row.xpath('.//a[@href]'):
+                if not (candidate.get('href') or '').strip().startswith('#'):
+                    continue
+                text = " ".join((candidate.text_content() or '').split())
+                if (not text
+                        or self._TOC_PAGE_NUMBER_TEXT.match(text)
+                        or self._TOC_BARE_LABEL_TEXT.match(text)):
+                    continue
+                half = self._toc_cell_column(candidate)
+                if half is not None:
+                    halves.add(half)
+            # Two titles *side by side* — in opposite halves of the row. Counting
+            # titles alone is not enough: J&J splits a single heading across
+            # several links in one cell ("P" / "art" / "I"), which reads as
+            # several titles but occupies one column.
+            if len(halves) >= 2:
+                rows_with_two_titles += 1
+                if rows_with_two_titles >= self._MIN_TWO_COLUMN_ROWS:
+                    return True
+
+        return False
+
+    def _order_links_by_toc_column(self, links: List) -> List[Tuple[Optional[int], object]]:
+        """Group a TOC's links by column, left column first, when it has two.
+
+        Ambac's FY2022 10-K lays its table of contents out in two side-by-side
+        columns — Parts I and II down the left, Parts III and IV down the right —
+        and the HTML interleaves them one row at a time::
+
+            Item 3  Legal Proceedings  | Item 10  Directors, Executive Officers
+            Item 4  Mine Safety        | Item 11  Executive Compensation
+            PART II                    | Item 12  Security Ownership
+
+        A linear scan therefore sees the part headers of *both* columns in one
+        running context, so items inherit whichever column last declared a part:
+        Items 7A-9B came out under Part I and Items 13-14 under Part II. Wrong
+        parts scramble the logical order that ``_analyze_sections`` sorts
+        boundaries by, which inverted three spans and ran Item 7 to 538,701 chars
+        — roughly 70% of it Items 8, 9A and 10-15 (GH #924).
+
+        Reading a column at a time restores the filer's intended sequence. This
+        only reorders anything when the layout really is two-column, signalled by
+        part headers appearing in *both* halves; every single-column TOC keeps
+        its exact source order, and so does any TOC that declares its parts in
+        one column only.
+        """
+        if not self._detect_two_column_toc(links):
+            self._toc_two_column = False
+            return [(None, link) for link in links]
+
+        self._toc_two_column = True
+        annotated = [(self._toc_cell_column(link), link) for link in links]
+        logger.debug("Two-column TOC detected; reading columns in order")
+        # Stable sort keeps each column's own source order intact.
+        return sorted(
+            ((column, link) for column, link in annotated),
+            key=lambda pair: (pair[0] is None, pair[0]),
+        )
+
     def _make_section_key(self, item_name: str, current_part: Optional[str]) -> Optional[str]:
         """
         Build a section mapping key, adding part context when available.
@@ -1827,8 +1975,22 @@ class TOCAnalyzer:
         rows that do not contain links. This method finds the nearest preceding
         sibling row with a part marker and returns it as context for the current
         linked item row.
+
+        In a two-column TOC each column carries its own Part headers in its own
+        half of the row, so only headers from the link's own column count. Ambac's
+        FY2022 10-K runs Parts I-II down the left column and III-IV down the
+        right; scanning every cell let the left column's "PART II" govern
+        right-column items, putting Items 7A-9B under Part I and 13-14 under
+        Part II (GH #924). Returning ``None`` here leaves the caller's running
+        context in place, which for the first items of a column is the part the
+        previous column ended in — how the layout actually reads.
         """
         max_rows_to_scan = 200
+        # Only scope by column on a TOC confirmed to be two-column. On a
+        # single-column layout the cell-half test is meaningless and would
+        # discard the very Part headers a 10-Q depends on.
+        link_column = (self._toc_cell_column(link_element)
+                       if getattr(self, '_toc_two_column', False) else None)
 
         try:
             # Find containing row for this link.
@@ -1857,7 +2019,11 @@ class TOCAnalyzer:
                     # artifacts like "PART I3" when a page number is in another cell.
                     cells = prev.xpath('./td|./th')
                     if cells:
-                        for cell in cells:
+                        for index, cell in enumerate(cells):
+                            # Only this link's own column governs it.
+                            if link_column is not None and (
+                                    (0 if index * 2 < len(cells) else 1) != link_column):
+                                continue
                             cell_text = (cell.text_content() or '').strip()
                             part = self._extract_part_context(cell_text)
                             if part:
