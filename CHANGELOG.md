@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **10-K item map shifted by one slot, so each item returned the previous item's body** — Foot Locker's FY2024 10-K (`0001437749-25-009620`) returned Item 6's five-year financial data for `obj['Item 7']` and the MD&A under `obj['Item 7A']`; Items 2 and 9B were missing from `.items` entirely. The body-header scan resolves each item to its nearest *preceding* anchor, which holds for the filers it was built for (Goldman, Citi: an empty `<div id>` before the heading) but not for Novaworks, which nests the anchor inside the heading's first bold span (`<p><b><i><a id="item1a"/>Item</i></b> 1A. Risk Factors</p>`). `tree.iter()` yields the heading before its own descendants, so at match time the running anchor still held the previous item's. An anchor inside the heading's own subtree now wins; only `<a id>` counts, since inline-XBRL wrappers carry generated ids that are not navigable anchors (two items had resolved to those). Every call succeeded and every anchor was real and distinct, so nothing warned and the stale-anchor guard did not fire. Reached only through the body-scan fallback: section maps and section text are byte-identical across all 55 fixtures. Reported by g-carmichael. (GH #923)
+
 ## [5.45.0] - 2026-08-02
 
 Text extraction correctness in `edgar/documents`. Two things before upgrading:

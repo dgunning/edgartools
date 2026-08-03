@@ -842,14 +842,18 @@ class TOCAnalyzer:
             item_m = self._BODY_ITEM_HEADER.match(text)
             if not item_m:
                 continue
-            if not last_anchor_id:
+            # An anchor inside the heading's own subtree belongs to THIS item
+            # and outranks the running one, which at this point still holds the
+            # previous item's anchor (see _own_anchor_id).
+            anchor_id = self._own_anchor_id(el) or last_anchor_id
+            if not anchor_id:
                 continue
             item_name = f"Item {item_m.group(1)}{item_m.group(2).upper()}"
             key = self._make_section_key(item_name, current_part)
             # First occurrence in document order wins (the body heading; a
             # link-less TOC has no competing "Item N. Title" span).
             if key:
-                mapping.setdefault(key, last_anchor_id)
+                mapping.setdefault(key, anchor_id)
 
         # The whole contract rests on each header having its own preceding
         # anchor. Filers that don't emit per-item anchor divs (Nathan's Famous)
@@ -868,6 +872,38 @@ class TOCAnalyzer:
                     len(mapping), distinct)
                 return {}
         return mapping
+
+    @staticmethod
+    def _own_anchor_id(el) -> Optional[str]:
+        """The anchor id carried *inside* a body heading's own subtree, if any.
+
+        The scan's premise is that a heading is **preceded** by its anchor, which
+        holds for the filers it was built for (Goldman, Citi: an empty
+        ``<div id="…">`` immediately before the heading). Novaworks instead nests
+        the anchor in the heading's first bold span::
+
+            <p><b><i><a id="item1a"/>Item</i></b>&#160;<b><i>1A. Risk Factors</i></b></p>
+
+        ``tree.iter()`` yields the heading element before its own descendants, so
+        when the header matches, ``last_anchor_id`` still holds the *previous*
+        item's anchor. Every item then resolves one slot late and the whole map
+        shifts — silently, since each anchor is still distinct and real, which is
+        why the stale-anchor guard below does not catch it (GH #923).
+
+        Only ``<a id=…>`` counts. Inline-XBRL wrappers (``ix:nonNumeric``) carry
+        generated ids that are not navigable anchors, and a heading that tags a
+        fact would otherwise resolve to one of those instead of its own anchor.
+        """
+        for desc in el.iter():
+            tag = desc.tag
+            if not isinstance(tag, str):
+                continue
+            if tag.rsplit('}', 1)[-1].lower() != 'a':
+                continue
+            anchor_id = desc.get('id')
+            if anchor_id:
+                return anchor_id
+        return None
 
     # Minimum share of body-scan items that must resolve to their own anchor
     # id for the map to be trusted. Filings this scan is built for (GS, Citi,
