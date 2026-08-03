@@ -1,5 +1,18 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "Pillow>=10.0",
+#     "playwright>=1.40",
+# ]
+# ///
 """Convert and optimize images for the docs site and the edgartools.io blog.
+
+Runnable standalone with `uv run scripts/images.py ...`, which is how the blog's
+figure scripts reach it: those run in their own pinned environment and have no
+Pillow of their own. Chromium comes from the shared per-user Playwright cache,
+not the ephemeral env, so `playwright install chromium` is a one-time setup.
+
 
 One entry point for the whole chain — SVG, PNG, JPEG or WebP in, an optimized
 WebP (or PNG) out. Supersedes convert_png_to_webp.py and convert_svg_to_png.py,
@@ -182,7 +195,18 @@ async def _rasterize_all(jobs: list[tuple[Path, Path, int, int]]) -> list[str]:
 
     errors: list[str] = []
     async with async_playwright() as p:
-        browser = await p.chromium.launch()
+        try:
+            browser = await p.chromium.launch()
+        except Exception as e:  # noqa: BLE001
+            # Browsers live in a per-user cache keyed by Playwright's build
+            # number, so a newer Playwright (as an ephemeral `uv run` env will
+            # resolve) wants a build the cache may not have. The library's own
+            # error is a wall of async stack frames; say the fix instead.
+            if "Executable doesn't exist" in str(e):
+                return [f"{src}: chromium missing for this Playwright build — run "
+                        f"`uv run --with playwright --no-project python -m playwright "
+                        f"install chromium` once" for src, *_ in jobs]
+            raise
         try:
             for src, dest, width, scale in jobs:
                 text = src.read_text(encoding="utf-8")
