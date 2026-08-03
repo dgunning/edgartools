@@ -32,7 +32,7 @@ D&A node, so ``DepreciationAndAmortization`` is not a normalized target there an
 Cross-company survey (SEC XBRL frames, CY2022-CY2024): ~101 filers report
 ``OtherDepreciationAndAmortization`` with no canonical D&A total — including AMD,
 Workday, Open Text, Elevance, MetLife, Crown Holdings, plus MRVL.
-See docs/internal/analysis/issue-839-otherDA-survey.md.
+See engineering/analysis/issue-839-otherDA-survey.md.
 """
 
 from datetime import date

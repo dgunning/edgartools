@@ -1,6 +1,6 @@
 # Canonical Parser Fixture Corpus
 
-**Issue:** `edgartools-h44r` · **Design:** `docs/internal/parser-design-sprint-2026-05.md` (Tension 7)
+**Issue:** `edgartools-h44r` · **Design:** `engineering/parser-design-sprint-2026-05.md` (Tension 7)
 
 A shared, measured set of real SEC filings used to verify section extraction and
 to detect regressions. It replaces the ad-hoc "each PR ships its own filing"

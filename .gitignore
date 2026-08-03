@@ -38,12 +38,11 @@ tests/cassettes/TestIssue868S1Underwriters.test_s1a_lead_manager_is_real_underwr
 # Ignore rules never affect already-tracked files, so nothing currently tracked
 # changes. To commit something under these paths deliberately, `git add -f`.
 
-# Internal design/planning notes. Two trees exist for historical reasons:
-# docs-internal/ was never tracked; docs/internal/ has some files already public
-# and they stay tracked and editable — this only stops the untracked ones being
-# swept in.
+# Private design/planning notes. The public counterpart is engineering/, which
+# is tracked — anything a contributor should be able to read lives there, not
+# here. docs/ is user documentation only and is built into the docs site, so
+# nothing internal belongs under it.
 docs-internal/
-docs/internal/
 
 # Local knowledge wiki, maintained by an unattended agent that reads private
 # notes. Publishing it risks leaking them.
