@@ -29,6 +29,30 @@ training/output/
 tests/cassettes/TestIssue868S1Underwriters.test_s1_lead_manager_is_real_underwriter.yaml
 tests/cassettes/TestIssue868S1Underwriters.test_s1a_lead_manager_is_real_underwriter.yaml
 
+# Private working material. These rules lived ONLY in .git/info/exclude, which
+# is per-clone and never shared, so a fresh clone tracked all of it with no
+# signal. This is a public repo and the working tree routinely carries 200+
+# untracked files, so a single `git add -A` was the whole distance between these
+# and GitHub. Moved here so the protection travels with the repo.
+#
+# Ignore rules never affect already-tracked files, so nothing currently tracked
+# changes. To commit something under these paths deliberately, `git add -f`.
+
+# Internal design/planning notes. Two trees exist for historical reasons:
+# docs-internal/ was never tracked; docs/internal/ has some files already public
+# and they stay tracked and editable — this only stops the untracked ones being
+# swept in.
+docs-internal/
+docs/internal/
+
+# Local knowledge wiki, maintained by an unattended agent that reads private
+# notes. Publishing it risks leaking them.
+wiki/
+
+# Correspondence drafts kept at the repo root (letters to external reporters and
+# researchers, often unsent).
+/reply-to-*.md
+
 # Local build, test, and session artifacts. Ignore rules never affect
 # already-tracked files (e.g. the tracked .claude/ agents and commands stay
 # tracked).
