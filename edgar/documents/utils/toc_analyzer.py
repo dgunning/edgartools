@@ -7,7 +7,7 @@ enabling section extraction for API filings with generated anchor IDs.
 import logging
 import re
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 from lxml import html as lxml_html
 
@@ -1897,10 +1897,48 @@ class TOCAnalyzer:
             # This handles TOCs where item number is not in the immediately adjacent cell
             # Example: ['Business', 'I', '1', '5'] where '1' is the item number
             if td_element is not None:
+                # In a two-column TOC both columns share one row, so scanning
+                # leftwards runs out of the link's own column and into its
+                # neighbour's — where the last cell before the gap is the other
+                # column's *page number*. Ambac's FY2022 10-K lays out a row as
+                # ['', 'Available Information', '10', '', '', 'Non-GAAP Financial
+                # Measures', '54']: the right column's title took "10" for its
+                # item label and produced a `part_ii_item_10` section sitting
+                # inside MD&A, truncating Item 7 at the Non-GAAP heading
+                # (edgartools-fhk1). Stop at the column boundary.
+                #
+                # Only on a TOC confirmed two-column. A single-column row is
+                # routinely ['Item', '1', 'Business', '5'] — the label cell is in
+                # the *other* half by the same midpoint test, so applying this
+                # unconditionally would discard the label it exists to find. Same
+                # scoping, and the same reason for gating it, as
+                # `_infer_part_from_row_context`.
+                #
+                # `foreign_cells` holds the row's cells that belong to the other
+                # column, split at the midpoint `_toc_cell_column` uses. Only a
+                # right-column link has any — nothing to a left-column link's
+                # left is foreign. `cells` outlives the set on purpose: a freed
+                # lxml proxy hands its id to an unrelated element.
+                foreign_cells: Set[int] = set()
+                if getattr(self, '_toc_two_column', False):
+                    row = td_element.getparent()
+                    if row is not None and row.tag == 'tr':
+                        cells = [c for c in row if c.tag in ('td', 'th')]
+                        try:
+                            own_index = cells.index(td_element)
+                        except ValueError:
+                            own_index = None
+                        if own_index is not None and own_index * 2 >= len(cells):
+                            midpoint = (len(cells) + 1) // 2
+                            foreign_cells = {id(c) for c in cells[:midpoint]}
+
                 # Check all preceding siblings (rightmost to leftmost)
                 prev_sibling = td_element.getprevious()
                 while prev_sibling is not None:
                     if prev_sibling.tag in ['td', 'th']:
+                        if id(prev_sibling) in foreign_cells:
+                            break
+
                         prev_text = (prev_sibling.text_content() or '').strip()
 
                         # Look for "Item X" or just "X" (bare number) pattern
