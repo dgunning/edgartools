@@ -11,7 +11,7 @@ from rich.tree import Tree
 from edgar.company_reports._base import CompanyReport
 from edgar.company_reports._structures import FilingStructure
 from edgar.core import log
-from edgar.documents import HTMLParser, ParserConfig
+from edgar.documents import HTMLParser, ParserConfig, parse_html
 from edgar.files.htmltools import ChunkedDocument
 from edgar.display.formatting import datefmt
 
@@ -652,15 +652,26 @@ class TenK(CompanyReport):
         if self._cross_reference_index is not None:
             item_id = _CROSS_REF_ITEM_MAP.get(item_or_part)
             if item_id:
-                # Extract content using Cross Reference Index parser
-                item_text = self._cross_reference_index.extract_item_content(item_id)
-                if item_text:
-                    # Successfully extracted via Cross Reference Index
-                    item_text = item_text.rstrip()
-                    last_line = item_text.split("\n")[-1]
-                    if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
-                        item_text = item_text.rstrip(last_line)
-                    return item_text
+                # Extract content using Cross Reference Index parser.
+                # extract_item_content() returns HTML by contract (it slices the
+                # source document by page range), while every other branch of
+                # this method returns text. Returning it unconverted handed
+                # callers raw markup — 1.7MB of <div>/<span> for Citigroup's
+                # Item 1, the "HTML leakage" half of GH #821. Convert before the
+                # PART-stripping below, which is written for text and silently
+                # did nothing on markup.
+                item_html = self._cross_reference_index.extract_item_content(item_id)
+                if item_html:
+                    item_text = parse_html(item_html).text()
+                    # An empty conversion falls through to the legacy fallback
+                    # rather than returning the markup — a caller that asked for
+                    # text is better served by the next strategy than by HTML.
+                    if item_text and item_text.strip():
+                        item_text = item_text.rstrip()
+                        last_line = item_text.split("\n")[-1]
+                        if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
+                            item_text = item_text.rstrip(last_line)
+                        return item_text
 
         # Fall back to chunked document for backward compatibility
         # Log fallback usage for Phase 1 deprecation tracking

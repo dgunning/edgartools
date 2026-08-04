@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **10-K items came back as raw HTML on filings that use a Cross Reference Index.** `TenK.__getitem__` prefers the Cross Reference Index when a filing has one, and returned `CrossReferenceIndex.extract_item_content()` straight through. That method returns HTML by contract — it slices the source document by page range — while every other branch of the same lookup returns text. Citigroup's FY2024 10-K (`0000831001-25-000029`) gave 1,685,461 characters beginning `<div style="min-height:36pt;width:100%">` for `obj['Item 1']`, now 218,550 characters of text opening on the Business overview. The item is converted before the trailing-`PART` cleanup that follows it, which was always written for text and silently did nothing to markup.
+
+  It surfaced per item rather than per filing: Citi's section map has only four non-canonical keys, so items coinciding with one of those (`Item 1A`, `Item 7`, `Item 8`) already returned text, while Item 1 had no such section, missed the canonical-Part lookup, and fell through to the Cross Reference Index. Items on any filing that reaches this branch — GE and Henry Schein among them — now return text, so a caller that was parsing the returned markup will need to stop. This is the "Citi HTML leakage" named in GH #821, which was closed on the section-map behaviour while the item API kept emitting HTML.
+
 ### Changed
 
 - **`FactQuery.to_dataframe()` now declares its columns instead of inferring them from the rows a query returned.** The column set follows the query's *configuration* — the `include_*` flags and any names passed to `to_dataframe()` — and no longer varies with which facts happened to match. Three things change for callers: a column no matching row populated comes back null rather than disappearing (`.limit(5)` on Foot Locker's FY2024 10-K returned five fewer columns than the same query unlimited, having dropped `balance`, `currency`, `decimals`, `unit_ref` and `weight` because those five rows were null); narrowing to instant facts no longer removes `period_start`/`period_end`; and an empty result now carries the full column set with zero rows, so `df['decimals']` yields an empty column instead of raising `KeyError`. Requesting a column by name in `to_dataframe('concept', 'period_instant')` likewise returns it null rather than silently omitting it.
