@@ -297,8 +297,19 @@ def test_query_by_dimension_none(aapl_xbrl):
              .by_text("Revenue")
              .by_dimension(None)
              )
-    print(facts.to_dataframe().columns.tolist())
-    assert not any('dim' in col for col in facts.to_dataframe().columns if col != 'is_dimensioned')
+    df = facts.to_dataframe()
+    # No per-axis dim_<axis> column: those exist only for facts that carry that
+    # axis, and this query filtered every dimensioned fact out.
+    assert not any(col.startswith('dim_') for col in df.columns)
+    # The five fixed dimension columns ARE present, and entirely null. The caller
+    # asked for dimension columns via include_dimensions=True, so they get them;
+    # the column set follows the query's configuration, not the rows that matched
+    # (edgartools-rsyt). This assertion previously read "absent", which held only
+    # because dropna(axis=1) deleted any column the result left empty.
+    for col in ['dimension', 'member', 'dimension_label',
+                'dimension_member_label', 'full_dimension_label']:
+        assert col in df.columns
+        assert df[col].isna().all()
 
 
 def test_flexible_dimension_matching(aapl_xbrl):

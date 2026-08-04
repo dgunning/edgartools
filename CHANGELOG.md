@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **`FactQuery.to_dataframe()` now declares its columns instead of inferring them from the rows a query returned.** The column set follows the query's *configuration* — the `include_*` flags and any names passed to `to_dataframe()` — and no longer varies with which facts happened to match. Three things change for callers: a column no matching row populated comes back null rather than disappearing (`.limit(5)` on Foot Locker's FY2024 10-K returned five fewer columns than the same query unlimited, having dropped `balance`, `currency`, `decimals`, `unit_ref` and `weight` because those five rows were null); narrowing to instant facts no longer removes `period_start`/`period_end`; and an empty result now carries the full column set with zero rows, so `df['decimals']` yields an empty column instead of raising `KeyError`. Requesting a column by name in `to_dataframe('concept', 'period_instant')` likewise returns it null rather than silently omitting it.
+
+  Dtypes are unchanged for populated columns. A column containing no data at all now takes its declared dtype, because inference had nothing to work with there and landed arbitrarily — an all-null `decimals` inferred as `object`/`None` rather than string/`pd.NA`. `preferred_sign` and `fiscal_year` still change dtype family between queries; they move to nullable `Int64` in 6.0, which is a sentinel change and so waits for the breaking window.
+
+  With `include_dimensions=True` and a result containing no dimensioned facts, the five fixed dimension columns (`dimension`, `member`, `dimension_label`, `dimension_member_label`, `full_dimension_label`) are now present and null rather than absent. The per-axis `dim_<axis>` columns remain data-driven, since their names depend on which axes the filer used.
+
+  Found while capturing the 6.0 performance baseline's schema snapshot, and it is the failure mode reported in GH #929 occurring *within* a single version: a consumer's filter could break by filtering differently, with no upgrade involved. Full reasoning in `engineering/decisions/facts-dataframe-schema.md`.
+
 ## [5.45.1] - 2026-08-03
 
 Three section-extraction fixes, all reported against 5.44.x with reproductions. Each returned wrong content at full confidence with no warning, so a caller had no signal anything was off.

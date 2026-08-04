@@ -27,6 +27,78 @@ from edgar.xbrl.core import STANDARD_LABEL, parse_date
 from edgar.xbrl.models import select_display_label
 
 
+# The pandas default dtype for strings changed in 3.0 (object -> str), and the
+# supported floor is still 2.0. Probing it keeps a column that had to be
+# materialized identical to the same column when rows populated it, on either
+# major — and avoids astype('str'), which turns nulls into the string "nan".
+_STR_DTYPE = pd.Series([""]).dtype
+
+# Columns FactQuery.to_dataframe() declares, in the order it emits them.
+#
+# The rule (see engineering/decisions/facts-dataframe-schema.md, edgartools-rsyt):
+# the column set is a function of the query's *configuration*, never of the rows
+# that came back. Narrowing a query chooses fewer rows, not a different table
+# shape, so a column no returned row happened to populate is materialized as null
+# rather than silently vanishing.
+#
+# Dtypes here are applied ONLY to columns that had to be materialized. Pinning the
+# dtype of a populated column moves a null sentinel, which is a breaking change
+# held for the 6.0 window (edgartools-rsyt.2) — until then `preferred_sign` and
+# `fiscal_year` keep the float64 they take today whenever a null is present.
+_CORE_COLUMNS: Dict[str, Any] = {
+    'concept': _STR_DTYPE,
+    'label': _STR_DTYPE,
+    'balance': _STR_DTYPE,
+    'preferred_sign': 'float64',
+    'weight': 'float64',
+    'value': _STR_DTYPE,
+    'numeric_value': 'float64',
+    'period_key': _STR_DTYPE,  # emitted for time series analysis (Issue #464)
+    'period_start': _STR_DTYPE,
+    'period_end': _STR_DTYPE,
+    'period_instant': _STR_DTYPE,
+    # Nullable, though _build_facts always populates it: an empty *numpy* bool
+    # column materializes as True, and fabricating "this fact is dimensioned"
+    # is exactly the kind of silent wrong answer this schema exists to prevent.
+    'is_dimensioned': 'boolean',
+    'decimals': _STR_DTYPE,
+    'statement_type': _STR_DTYPE,
+    'statement_name': _STR_DTYPE,
+    'fact_id': _STR_DTYPE,
+    'context_ref': _STR_DTYPE,
+    'unit_ref': _STR_DTYPE,
+    'currency': _STR_DTYPE,
+    'period_type': _STR_DTYPE,
+    'entity_identifier': _STR_DTYPE,
+    'entity_scheme': _STR_DTYPE,
+    'fiscal_period': _STR_DTYPE,
+    'fiscal_year': 'float64',
+}
+
+# Dropped by include_contexts=False.
+_CONTEXT_COLUMNS = frozenset(
+    {'context_ref', 'entity_identifier', 'entity_scheme', 'period_type'})
+
+# Added by include_dimensions=True. The per-axis `dim_<axis>` columns are NOT
+# declared: their names depend on which axes the filer used, so two filings
+# legitimately differ and a diff across them carries no information.
+_DIMENSION_COLUMNS: Dict[str, Any] = {
+    'dimension': _STR_DTYPE,
+    'member': _STR_DTYPE,
+    'dimension_label': _STR_DTYPE,
+    'dimension_member_label': _STR_DTYPE,
+    'full_dimension_label': _STR_DTYPE,
+}
+
+# Never emitted, whatever the configuration.
+_SKIP_COLUMNS = frozenset({'fact_key', 'original_label'})
+
+
+def _null_column(dtype, index: pd.Index) -> pd.Series:
+    """An all-null column of `dtype`, for a declared column no row populated."""
+    return pd.Series(index=index, dtype=dtype)
+
+
 def _deduplicate_facts(df: pd.DataFrame) -> pd.DataFrame:
     """
     Remove true duplicate facts from a DataFrame.
@@ -856,6 +928,18 @@ class FactQuery:
 
         return results
 
+    def _declared_columns(self) -> Dict[str, Any]:
+        """The column -> dtype mapping this query's *configuration* declares.
+
+        A function of the include_* flags only, so two queries configured the
+        same way describe the same table however few rows either returns.
+        """
+        declared = {name: dtype for name, dtype in _CORE_COLUMNS.items()
+                    if self._include_contexts or name not in _CONTEXT_COLUMNS}
+        if self._include_dimensions:
+            declared.update(_DIMENSION_COLUMNS)
+        return declared
+
     def to_dataframe(self, *columns) -> pd.DataFrame:
         """
         Execute the query and return results as a DataFrame.
@@ -863,6 +947,18 @@ class FactQuery:
 
         Returns:
             pandas DataFrame with query results
+
+        The column set is determined by this query's configuration — the
+        ``include_*`` flags and any ``columns`` given here — and never by which
+        rows the query matched. Narrowing a query returns fewer rows, not a
+        different set of columns: a column no matching row populated comes back
+        null rather than disappearing, and an empty result still carries the
+        full set of columns so ``df['decimals']`` works on it.
+
+        The exception is the per-axis ``dim_<axis>`` columns added by
+        ``include_dimensions``, whose names depend on which axes the filer used.
+
+        See engineering/decisions/facts-dataframe-schema.md.
         """
         cache_key = columns
         cache = getattr(self, '_df_cache', {})
@@ -871,7 +967,13 @@ class FactQuery:
         results = self.execute()
 
         if not results:
-            return pd.DataFrame()
+            # Zero rows, but the declared columns and their dtypes. A bare
+            # DataFrame() has no columns at all, so df['decimals'] raised
+            # KeyError on an empty result instead of yielding an empty column.
+            declared = self._declared_columns()
+            names = [c for c in columns if c in declared] if columns else list(declared)
+            return pd.DataFrame({name: _null_column(declared[name], pd.RangeIndex(0))
+                                 for name in names})
 
         df = pd.DataFrame(results)
         df = _deduplicate_facts(df)
@@ -891,25 +993,12 @@ class FactQuery:
                             or col == 'is_dimensioned']]
 
         if not self._include_contexts:
-            context_cols = ['context_ref', 'entity_identifier', 'entity_scheme',
-                            'period_type']
-            df = df.loc[:, [col for col in df.columns if col not in context_cols]]
+            df = df.loc[:, [col for col in df.columns if col not in _CONTEXT_COLUMNS]]
 
         if not self._include_element_info:
             element_cols = ['element_id', 'element_name', 'element_type', 'element_period_type',
                             'element_balance', 'element_label']
             df = df.loc[:, [col for col in df.columns if col not in element_cols]]
-
-        # Drop empty columns
-        df = df.dropna(axis=1, how='all')
-
-        # Filter columns if specified
-        if columns:
-            columns = [col for col in columns if col in df.columns]
-            df = df[list(columns)]
-        # skip these columns
-        # Note: period_key is now included for time series analysis (Issue #464)
-        skip_columns = ['fact_key', 'original_label']
 
         if 'statement_role' in df.columns:
             # Change the statement_role to statement name
@@ -918,17 +1007,33 @@ class FactQuery:
             if 'statement_role' in df.columns:
                 df = df.drop(columns=['statement_role'])
 
-        # order columns
-        first_columns = [col for col in
-                         ['concept', 'label', 'balance', 'preferred_sign', 'weight', 'value', 'numeric_value',
-                          'period_key', 'period_start', 'period_end', 'period_instant',
-                          'is_dimensioned', 'decimals', 'statement_type', 'statement_name']
-                         if col in df.columns]
-        columns = first_columns + [col for col in df.columns
-                                   if col not in first_columns
-                                   and col not in skip_columns]
+        declared = self._declared_columns()
 
-        result = df[columns]
+        # Whatever is present but undeclared is the per-axis dim_<axis> tail.
+        # Sorted, because its order otherwise follows whichever returned row
+        # first introduced each axis.
+        extra = sorted(col for col in df.columns
+                       if col not in declared and col not in _SKIP_COLUMNS)
+        ordered = list(declared) + extra
+        if columns:
+            # A caller projection keeps the caller's order, and may name a
+            # declared column no row populated; unknown names are dropped as before.
+            ordered = [col for col in columns if col in declared or col in df.columns]
+
+        # reindex materializes the declared columns this query's rows left empty,
+        # so the shape stops depending on which rows happened to match.
+        result = df.reindex(columns=ordered)
+
+        # A declared column with no data in it gets its declared dtype. Inference
+        # has nothing to work with there and lands somewhere arbitrary — an
+        # all-None `decimals` infers as object/None rather than string/pd.NA — and
+        # before this change dropna() hid that by deleting the column outright.
+        # Populated columns keep their inferred dtype until edgartools-rsyt.2
+        # pins them, since changing those moves a sentinel callers may rely on.
+        for col in ordered:
+            if col in declared and result[col].isna().all():
+                result[col] = _null_column(declared[col], result.index)
+
         cache[cache_key] = result
         self._df_cache = cache
         return result
@@ -957,8 +1062,11 @@ class FactQuery:
 
         display_columns = [col for col in ['concept','label', 'value', 'period_start', 'period_end']
                            if col in columns]
-        # What is the maximum width of the concept column?
-        max_width = df.concept.apply(len).max() if 'concept' in df.columns else 20
+        # What is the maximum width of the concept column? An empty result carries
+        # the declared columns, so `concept` is present with no rows to measure and
+        # .max() returns NaN — which rich accepts as a width and then fails to
+        # render ("can't multiply sequence by non-int of type 'float'").
+        max_width = df.concept.apply(len).max() if 'concept' in df.columns and not df.empty else 20
         rich_columns = [Column('concept', width=max_width)] + display_columns[1:]
         df = df[display_columns]
         table = Table(*rich_columns, show_header=True, header_style="bold", box=box.SIMPLE)
