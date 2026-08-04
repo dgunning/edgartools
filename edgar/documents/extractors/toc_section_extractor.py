@@ -17,6 +17,7 @@ from lxml import html as lxml_html
 from edgar.documents.document import Document
 from edgar.documents.nodes import Node
 from edgar.documents.utils.anchor_targets import find_anchor_targets, is_anchor_match
+from edgar.documents.utils.tree_traversal import iterwalk_from, precedes
 from edgar.documents.utils.toc_analyzer import TOCAnalyzer
 
 logger = logging.getLogger(__name__)
@@ -750,6 +751,26 @@ class SECSectionExtractor:
         if not start_elements:
             return ""
 
+        # An end boundary that sits BEFORE the start anchor means the boundary
+        # pair is inverted, and this section yields nothing.
+        #
+        # The root walk got this for free: it tested the end anchor before
+        # `in_range` was ever set, so an inverted pair broke out on the first
+        # pass and returned "". Walking from the start anchor never meets that
+        # earlier element, so the section would instead run to the end of the
+        # document — 26,330 chars for a Morgan Stanley Item 1B that is a single
+        # paragraph, ending in the signature block, at confidence 0.95 with no
+        # warning. Silence is the better answer, so the check is now explicit.
+        #
+        # It fires on 4 sections across 3 of the 11 corpus documents. The
+        # inverted boundaries themselves are a separate detection bug
+        # (edgartools-4q74); this preserves the behaviour rather than papering
+        # over it with over-captured text.
+        if boundary.end_element_id:
+            end_elements = find_anchor_targets(tree, boundary.end_element_id)
+            if end_elements and precedes(end_elements[0], start_elements[0]):
+                return ""
+
         # Use document-order traversal (iterwalk) to collect all text between anchors
         # This correctly handles multi-container sections where start and end anchors
         # are in different parent containers
@@ -760,7 +781,16 @@ class SECSectionExtractor:
         block_elements = {'p', 'div', 'table', 'tr', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
                          'blockquote', 'pre', 'section', 'article', 'header', 'footer'}
 
-        for event, el in etree.iterwalk(tree, events=('start', 'end')):
+        # Walk from the start anchor rather than the document root. iterwalk always
+        # begins at the root, so each section used to pay for every element ahead
+        # of its own anchor and discard it — 80% of the traversal on a 9.8MB 10-K,
+        # and worst for the last items in a filing (edgartools-llmp.8). The element
+        # is already resolved above, so starting there costs nothing extra.
+        #
+        # The loop body below is unchanged: iterwalk_from yields the identical
+        # event/element sequence the root walk would have produced from this point
+        # on, ancestor 'end' events included.
+        for event, el in iterwalk_from(start_elements[0]):
             # Skip non-element nodes (comments, etc.)
             if not hasattr(el, 'get'):
                 continue

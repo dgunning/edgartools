@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Performance
+
+- **Section extraction is 4.4x faster on the benchmark corpus** — 20.8s to 4.7s across ten filings, with no change to any extracted section. Two costs dominated the stage, and both were doing the same work repeatedly.
+
+  Anchor resolution ran a full-document XPath per lookup, from eleven call sites. On Morgan Stanley's 9.8MB 10-K that was 92 lookups resolving 30 distinct ids against one tree — 3,854ms, 60% of the whole stage — with 67% of calls re-resolving an id already looked up on the same tree. One indexing pass now serves every lookup, costing ~31ms on that document. The index is cached weakly on the document root so it dies with the tree, and it is built from the document root rather than whichever element was passed, because `//*` is an absolute path: an index built by walking a subtree would have resolved fewer anchors than the XPath it replaces.
+
+  Section content was collected with `iterwalk`, which always begins at the document root, so every section paid for each element preceding its own start anchor and then discarded it — 3,121,117 of 3,892,226 tree events, 80% of the traversal, and worst at the end of a filing, where `part_iii_item_14` walked 190,115 events to use 9. The walk now starts at the anchor, which was already resolved. It is not a subtree walk: sections routinely span containers, and the collector relies on `end` events from ancestors whose `start` fired before the anchor, since those carry the block-level paragraph breaks and tail text.
+
+  Per-filing: Morgan Stanley 6,308ms to 1,136ms, Ambac 3,711 to 519, Regions 3,807 to 793, Tesla 1,549 to 248, Meta 1,189 to 182, Foot Locker 1,185 to 273, ODP 984 to 439. Citigroup moves least (1,048 to 919) because it resolves its items through the cross-reference index, which uses no anchors.
+
+  Guarded by equivalence rather than by expectation: the index returns the identical elements in identical document order as the XPath for all 509 anchor ids across the corpus, the walk reproduces the root walk's exact event sequence from 286 different start elements, and every section's text is byte-identical to before across all eleven documents.
+
 ### Fixed
 
 - **Wells Fargo's 10-K published its exhibit list as the financial statements, and Citigroup's items were unreachable by their canonical keys.** Two filings that every anchor-driven strategy failed on, for two unrelated structural reasons.
