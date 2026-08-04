@@ -901,15 +901,19 @@ class SECSectionExtractor:
     def _clean_section_text(self, text: str) -> str:
         """Clean extracted section text."""
         # Apply the same cleaning as the main document
-        from edgar.documents.utils.anchor_cache import filter_with_cached_patterns
+        from edgar.documents.utils.anchor_cache import filter_navigation_lines
 
         # Remove excessive whitespace
         text = re.sub(r'\n\s*\n\s*\n', '\n\n', text)
 
-        # Filter navigation links
+        # Filter navigation links. The patterns are resolved once per document
+        # and cached there: deriving them costs an md5 of the whole filing, and
+        # this runs once per section (edgartools-llmp.9). The guard stays — a
+        # document with no original HTML filters nothing here, where
+        # Document.text() falls back to the generic SEC pattern set.
         html_content = getattr(self.document.metadata, 'original_html', None)
         if html_content:
-            text = filter_with_cached_patterns(text, html_content)
+            text = filter_navigation_lines(text, self.document._get_navigation_patterns())
 
         return text.strip()
 
