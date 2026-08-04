@@ -12,6 +12,25 @@
 # request forever. Since these checks are meant to become required, every PR has
 # to produce them — the few CI minutes a markdown-only run costs are cheaper than
 # a merge queue that deadlocks on documentation.
+#
+# REQUIRED CHECKS ARE PINNED TO JOB NAMES. `main` requires exactly two contexts:
+#
+#     Cassette safety gate
+#     test-fast (3.13)
+#
+# The second name is generated from the matrix below, which is event-dependent —
+# a pull request builds only 3.13, so the context is literally "test-fast (3.13)".
+# Renaming a job, or changing the pull-request leg of that matrix, retires the
+# context that branch protection is waiting for; it never reports, and every pull
+# request blocks forever with enforce_admins on. If you touch either, update the
+# protection contexts in the same commit:
+#
+#     gh api repos/dgunning/edgartools/branches/main/protection \
+#        --jq .required_status_checks.contexts
+#
+# test-network, test-slow and Combine Coverage are deliberately NOT required:
+# they carry `if: github.event_name != 'pull_request'` and so report as skipped
+# on every pull request. They run on push to main, which is the integration gate.
 
 name: Build and Test Edgartools
 
