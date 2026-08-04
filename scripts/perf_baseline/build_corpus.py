@@ -157,6 +157,50 @@ def fetch_entry(entry: dict, refresh: bool) -> dict | None:
     return record
 
 
+# Companies whose SEC company-facts payload is cached, so the EntityFacts
+# surfaces named in the GH #929 commitment can be snapshotted without network.
+# Both are already in the filing corpus, which keeps the manifest coherent — and
+# they are deliberately unalike: one reports in a single currency with a short
+# history, the other has a decade of restatements behind it.
+ENTITY_FACTS_SPEC = [
+    dict(key="tesla", cik=1318605, note="matches tesla_10k_fy2023"),
+    dict(key="footlocker", cik=850209, note="matches the two footlocker entries"),
+]
+
+
+def fetch_entity_facts(refresh: bool) -> list[dict]:
+    """Cache each company's raw company-facts JSON. Network.
+
+    The raw payload rather than a parsed object: EntityFactsParser is exactly
+    what a 6.0 change might alter, so the baseline has to re-parse it on every
+    run rather than snapshot a pickle of last year's parse.
+    """
+    from edgar.entity.entity_facts import download_company_facts_from_sec
+
+    out = CORPUS / "_entity_facts"
+    records = []
+    for spec in ENTITY_FACTS_SPEC:
+        path = out / f"CIK{spec['cik']:010}.json"
+        if not path.exists() or refresh:
+            out.mkdir(parents=True, exist_ok=True)
+            try:
+                payload = download_company_facts_from_sec(spec["cik"])
+            except Exception as exc:
+                print(f"  ! entity facts {spec['key']}: {type(exc).__name__}: {exc}",
+                      file=sys.stderr)
+                continue
+            if not payload:
+                print(f"  ! entity facts {spec['key']}: empty payload", file=sys.stderr)
+                continue
+            path.write_text(json.dumps(payload))
+        record = dict(spec)
+        record["path"] = str(path.relative_to(HERE))
+        record["bytes"] = path.stat().st_size
+        records.append(record)
+        print(f"{'facts ' + spec['key']:<28} {record['bytes']/1e6:>7.2f} MB  CIK {spec['cik']}")
+    return records
+
+
 INDEX_QUARTER = (2025, 1)  # pinned; a moving quarter would make the snapshot drift
 
 
@@ -228,8 +272,10 @@ def main() -> int:
               f"xbrl:{len(record.get('xbrl_roles', []))}/6  {record['accession']}")
 
     index = fetch_index(args.refresh)
+    entity_facts = fetch_entity_facts(args.refresh)
 
-    MANIFEST.write_text(json.dumps({"entries": manifest, "index": index}, indent=2) + "\n")
+    MANIFEST.write_text(json.dumps(
+        {"entries": manifest, "index": index, "entity_facts": entity_facts}, indent=2) + "\n")
     total = sum(e["html_bytes"] for e in manifest)
     with_xbrl = sum(1 for e in manifest if e.get("xbrl_roles"))
     print(f"\nCorpus: {len(manifest)} filings, {total/1e6:.1f} MB HTML, {with_xbrl} with XBRL")

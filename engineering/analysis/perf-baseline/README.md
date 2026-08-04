@@ -150,6 +150,30 @@ them.
 For the record, since #929 asked: `decimals` currently carries **`pd.NA`**, not
 `None` and not `NaN`.
 
+### The EntityFacts surfaces — the same defect, a different code path
+
+Wiring these in was meant to close a gap in coverage. It found the same bug
+again. Tesla's company facts (CIK 1318605), one `EntityFacts` object, two
+queries through `edgar/entity/query.py:641`:
+
+| column | `.query()` | `.query().by_concept("Revenues")` |
+|---|---|---|
+| *(column count)* | 19 | 19 |
+| `value` | float64 | **int64** |
+| `period_start` | nulls=`None` | no nulls |
+| `statement_type` | nulls=`pd.NA` | no nulls |
+
+The column *count* holds, unlike the XBRL side — but `value`, the column an
+EntityFacts consumer actually reads, changes dtype family when the query narrows
+to a concept whose values all happen to be integral. That moves its null
+sentinel from `NaN` to none-present and changes division semantics for anyone
+not explicitly coercing.
+
+This is the parallel implementation of the same idea as `edgar/xbrl/facts.py`,
+so it inherited the same design: build a DataFrame from a list of dicts and let
+pandas infer. Tracked at P1, to be fixed by applying the same declared-schema
+decision rather than inventing a second contract.
+
 ### `Document.to_dataframe()` — informational, and currently broken
 
 Not gated: its columns are the columns of whatever tables the document happens
@@ -172,20 +196,28 @@ methods in the library:
 |---|---|
 | `FactsQuery.to_dataframe()` — `edgar/xbrl/facts.py:859` | captured |
 | `Filings.to_pandas()` — `edgar/_filings.py:548` | captured |
-| `EntityFacts.to_dataframe()` — `edgar/entity/entity_facts.py:246` | **not yet wired** — needs a cached company-facts payload |
-| `edgar/entity/query.py:641` | **not yet wired** |
-| `edgar/xbrl/stitching/query.py:545` | **not yet wired** |
+| `EntityFacts.to_dataframe()` — `edgar/entity/entity_facts.py:246` | captured, 2 variants |
+| `edgar/entity/query.py:641` | captured, 2 variants |
+| `edgar/xbrl/stitching/query.py:545` | captured |
 
-The three unwired surfaces are a known gap, recorded here rather than left
-silent — an absent key in `schemas.json` would read as "no change" on the next
-diff.
+All five are now wired. The last three needed a cached company-facts payload,
+which comes from a different endpoint than the filing bundles; `build_corpus.py`
+caches the raw JSON for two companies already in the filing corpus and the bench
+re-parses it each run, so a change to `EntityFactsParser` shows up rather than
+being frozen into a stored object.
+
+Worth recording, since this file previously claimed otherwise: those three were
+not being written as `unavailable` — they were **absent from the capture
+entirely**, which is exactly the silence the `unavailable` convention exists to
+prevent. The convention was real (`Document.to_dataframe()` is recorded that
+way) but had never been applied to the surfaces that had no builder at all.
 
 ---
 
 ## Reproducing
 
 ```bash
-python scripts/perf_baseline/build_corpus.py       # network, ~86 MB, once
+python scripts/perf_baseline/build_corpus.py       # network, ~94 MB, once
 python scripts/perf_baseline/bench.py --reps 3 --out /tmp/after
 
 python scripts/perf_baseline/schema_snapshot.py \

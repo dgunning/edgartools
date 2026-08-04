@@ -205,6 +205,57 @@ def capture_schemas(manifest: dict, reps: int) -> dict:
     else:
         schemas["FactsQuery.to_dataframe()"] = {"unavailable": "no XBRL in corpus"}
 
+    # EntityFacts surfaces. Company facts come from a different endpoint than the
+    # filing bundles, so these need their own cached payload; without it they were
+    # not merely unavailable but absent from the capture entirely, which is the
+    # silence this file exists to avoid.
+    entity_specs = manifest.get("entity_facts") or []
+    entity_names = ["EntityFacts.to_dataframe()",
+                    "EntityFacts.to_dataframe() [include_metadata]",
+                    "entity.FactQuery.to_dataframe()",
+                    "entity.FactQuery.to_dataframe() [Revenues]"]
+    if entity_specs:
+        from edgar.entity.parser import EntityFactsParser
+
+        # Pinned to the first spec: the gate compares one company run over run, so
+        # a second company would be a different measurement, not a better one.
+        spec = entity_specs[0]
+        payload = json.loads((HERE / spec["path"]).read_text())
+        entity_facts = EntityFactsParser.parse_company_facts(payload)
+        if entity_facts is None:
+            for name in entity_names:
+                schemas[name] = {"unavailable": f"parse returned None for CIK {spec['cik']}"}
+        else:
+            record("EntityFacts.to_dataframe()", lambda: entity_facts.to_dataframe())
+            record("EntityFacts.to_dataframe() [include_metadata]",
+                   lambda: entity_facts.to_dataframe(include_metadata=True))
+            record("entity.FactQuery.to_dataframe()",
+                   lambda: entity_facts.query().to_dataframe())
+            # A narrowing query, because narrowing is what moved the schema on the
+            # XBRL side of the house (edgartools-rsyt).
+            record("entity.FactQuery.to_dataframe() [Revenues]",
+                   lambda: entity_facts.query().by_concept("Revenues").to_dataframe())
+            schemas["_entity_source"] = {"key": spec["key"], "cik": spec["cik"]}
+    else:
+        for name in entity_names:
+            schemas[name] = {"unavailable": "no cached company facts in corpus"}
+
+    # StitchedFactQuery — two filings from ONE company, so the stitcher has
+    # something coherent to align across periods.
+    stitch_keys = sorted(e["key"] for e in manifest["entries"]
+                         if e.get("xbrl_roles") and e["key"].startswith("footlocker"))
+    if len(stitch_keys) >= 2:
+        from edgar.xbrl.stitching import XBRLS
+
+        def stitched_df():
+            xbrls = XBRLS([_xbrl_from_dir(CORPUS / key / "xbrl") for key in stitch_keys])
+            return xbrls.facts.query().to_dataframe()
+        record("StitchedFactQuery.to_dataframe()", stitched_df)
+        schemas["_stitch_source"] = {"keys": stitch_keys}
+    else:
+        schemas["StitchedFactQuery.to_dataframe()"] = {
+            "unavailable": f"needs 2 same-company XBRL entries, found {len(stitch_keys)}"}
+
     # Document.to_dataframe() — INFORMATIONAL, not gated. Its columns are the
     # columns of whatever tables the document happens to contain, so two
     # different filings produce unrelated schemas and a diff across them means
