@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Comparing a document node with a deep copy of itself raised `RecursionError` instead of returning an answer.** `Node` and its subclasses were plain dataclasses, so Python generated a field-by-field `__eq__` that recursed through `parent` and `children`. Normally the `id` uuid is compared first and decides the result immediately, but `copy.deepcopy` preserves `id`, so the comparison fell through to `parent` and `children` and walked back on itself:
+
+  ```python
+  a = ParagraphNode(); a.add_child(TextNode(content='x'))
+  a == copy.deepcopy(a)     # RecursionError: maximum recursion depth exceeded
+  ```
+
+  Nodes now compare by identity, as plain objects do. Nothing observable changes for existing callers: because `id` is a per-instance uuid compared first, two distinct nodes were already unequal and a node was already equal to itself, so identity was the only answer equality could give that was not a crash. Section text is byte-identical across the eleven-document benchmark corpus.
+
+  Two things get better as a consequence. Every `==`, `in`, `.index()` and `.remove()` on a node stops buying a deep structural walk of the tree where the caller meant identity — the same cost that put 10.5s of Citigroup's 18s sections stage inside `ParagraphNode.__eq__` before two call sites were rewritten to compare `id()` by hand. And nodes are hashable again: `eq=True` sets `__hash__` to `None`, so sets and dicts of nodes previously had to be keyed on `id()`.
+
 ### Performance
 
 - **A filing was md5'd once per section to rebuild a cache key that could not have changed** — the sections stage drops a further 31% on the benchmark corpus, 4.3s to 3.0s, with every section's text byte-identical.
