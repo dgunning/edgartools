@@ -955,8 +955,20 @@ class SectionExtractor:
 
                 # Now add only top-level nodes (nodes whose parent is not in the range)
                 # This prevents adding both a parent and its children as direct section children
+                #
+                # Membership here means identity — "is this same node object also in
+                # the range". It must not go through `in` on the list: Node is a
+                # @dataclass, so `==` compares field-by-field and recurses through
+                # `children`, which is both quadratic (10.5s of Citigroup's 18s
+                # sections stage) and wrong. Two distinct paragraphs with identical
+                # text and styling compare equal, so a node whose parent merely
+                # resembled an in-range node was treated as nested and silently
+                # dropped — boilerplate-heavy filings are exactly where identical
+                # nodes are common. Snapshot the ids first: add_child() reassigns
+                # child.parent as we go.
+                ids_in_range = {id(n) for n in nodes_in_range}
                 for n in nodes_in_range:
-                    if n.parent not in nodes_in_range:
+                    if id(n.parent) not in ids_in_range:
                         section_node.add_child(n)
 
                 # Clear text cache to ensure fresh text generation

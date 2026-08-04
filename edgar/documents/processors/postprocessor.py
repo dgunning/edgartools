@@ -276,8 +276,11 @@ class DocumentPostprocessor:
         issues = []
 
         # Check for orphaned nodes
+        # `is not`, not `!=`: Node is a @dataclass, so `!=` runs a generated
+        # field-by-field comparison on every node in the document to answer a
+        # question about object identity (edgartools-llmp.6.10).
         for node in document.root.walk():
-            if node != document.root and node.parent is None:
+            if node is not document.root and node.parent is None:
                 issues.append(f"Orphaned node: {node.type}")
                 # Fix by adding to root
                 document.root.add_child(node)
