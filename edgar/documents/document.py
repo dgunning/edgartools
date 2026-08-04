@@ -796,8 +796,10 @@ class Document:
 
         Tries detection methods in order of reliability:
         1. TOC-based (0.95 confidence)
-        2. Heading-based (0.7-0.9 confidence)
-        3. Pattern-based (0.6 confidence)
+        2. Cross Reference Index (0.85 confidence) — 10-K filers who map items to
+           printed page ranges instead of labelling them in the body (Citigroup)
+        3. Heading-based (0.7-0.9 confidence)
+        4. Pattern-based (0.6 confidence)
 
         Returns a Sections dictionary wrapper that provides rich terminal display
         via __rich__() method. Each section includes confidence score and detection method.

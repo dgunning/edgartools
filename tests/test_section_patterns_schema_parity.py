@@ -12,7 +12,11 @@ design mandates *before* the move:
     deliberately re-snapshotted when 424B adopted the full prospectus vocabulary
     it now shares with S-1 (gh-878 / edgartools-ti82): a final IPO prospectus
     repeats the entire S-1 body, so 424B must recognise the same narrative
-    sections. The drift guard on the other four forms is untouched.
+    sections. The 10-K entry was re-snapshotted for edgartools-4agg, which added
+    the seven items that had no vocabulary entry at all (4, 5, 6, 9, 9B, 9C, 15)
+    — on a filing whose only usable headers are "Item N" markers those items were
+    unrecoverable and their content was absorbed by the preceding item. That
+    change is purely additive: no pre-existing pattern was edited or removed.
   * The data must actually live on the schema now (``FormSchema.section_patterns``),
     not only on the extractor — that is what lets the Phase 3 routing flip
     (edgartools-llmp.3) feed prospectus section text through the TOC engine using
