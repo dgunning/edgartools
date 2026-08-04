@@ -125,15 +125,46 @@ for n in nodes_in_range:
 and recurses through `children`. Membership against a list therefore runs a deep
 structural comparison for every candidate, O(n²) in the nodes in range.
 
-**This is also a latent correctness bug.** The test means *is this same node object
-also in the range* — identity — but `in` asks whether any in-range node is
-structurally equal. Two distinct paragraphs with identical text and styling compare
-equal, so a node whose parent merely resembles an in-range node is silently treated
-as nested and never added to the section. Under-detected content on a document that
-is already failing detection.
+The test means *is this same node object also in the range* — identity — while `in`
+asks whether any in-range node is structurally **equal**. That reads like a
+correctness bug on top of the cost, and it was written up as one here. It is not:
+`Node.id` is a per-instance uuid and dataclass `__eq__` compares fields in
+declaration order, so `id` is compared first and two distinct nodes are never equal.
+Equality already coincided with identity, which is why fixing it changed no output.
 
-The result: 4 sections, where every comparable 10-K in the corpus yields 20–24.
-Citigroup pays 18 seconds to produce a bad answer.
+**Verified rather than assumed**: section names and per-section character counts are
+byte-identical across all 11 corpus filings before and after the change. The defect
+was cost, not correctness.
+
+Fixed — `{id(n) for n in nodes_in_range}` snapshotted before the loop (`add_child()`
+reassigns `child.parent` as it goes), `id(n.parent)` tested against it:
+
+| entry | before | after |
+|---|---|---|
+| citigroup_10k_fy2024 | 5,215 ms | 816 ms |
+| odp_10k_fy2025 | 1,197 ms | 966 ms |
+
+Every other entry moved within run-to-run noise, since they never reach this path.
+
+Citigroup still returns 4 sections where comparable 10-Ks yield 20–24. **That is
+unchanged and is the real defect** — this fix only stops it costing 18 seconds to
+arrive at the same wrong answer. The detection failure that routes it here is the
+`llmp.6` problem proper.
+
+### The same pattern, one file over
+
+Attributing the `__eq__` calls that remained after the fix found a second site:
+`postprocessor.py:280` ran `if node != document.root` — a generated field-by-field
+comparison, once per node in the document, to answer a question about object
+identity. 2,415 calls on a small synthetic 10-K. Fixed to `is not`.
+
+Both are the same latent hazard: `Node` is a `@dataclass` with `eq=True` by default,
+so any `==`, `!=`, `in`, `.index()` or `.remove()` on nodes silently buys a deep
+comparison. It is worth considering `eq=False` on the node dataclasses so identity
+is the only thing available — the comparison is never what callers want, and it has
+a sharper failure mode than slowness: `Node.__eq__` recurses through `parent` and
+`children`, so comparing two nodes that share an `id` (a `deepcopy`, say) raises
+`RecursionError` rather than returning a wrong answer.
 
 ## What this says for the redesign
 
@@ -142,11 +173,17 @@ repeated once per section**, where the document is fixed for the duration. An
 index-once-reuse-per-section pass addresses all three, and findings 1 and 3 are
 contained enough to fix ahead of the rewrite without betting on its design.
 
-Finding 4 is not a performance finding. The fallback path is quadratic *and*
-wrong, and it runs precisely when detection has already failed — so the documents
-that get the worst answers also cost the most to process. That coincidence is the
-argument for treating detection quality and section-extraction performance as one
-piece of work rather than two.
+Finding 4 is the one that matters, and not for the 6.4× it recovered. The quadratic
+fallback runs precisely when detection has already failed — so the documents that
+get the worst answers also cost the most to produce them. Citigroup is now fast and
+still wrong. That coincidence is the argument for treating detection quality and
+section-extraction performance as one piece of work rather than two.
+
+It is also a caution about reading profiles. The quadratic membership test looked
+like it must be dropping content, and that inference was written down as a finding
+before it was checked. It was wrong — a uuid field in a dataclass meant equality had
+collapsed to identity all along. Both halves of a "slow *and* wrong" claim need
+their own evidence; the profile only ever proved the first.
 
 ## Artifacts
 
