@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Sections detected by heading patterns ran past their own end and into the next item.** Section content was collected by walk position: every node whose position fell in `[start, end)` was gathered, and the top-level ones were attached to the section. A section's `end` is the position of the *next* item's header, but filers normally wrap that header in a container which itself begins before it — so the container was in range, was attached whole, and brought everything it held.
+
+  The boundary was honoured as an index and ignored as a content limit. On Wells Fargo's FY2024 10-K (`0000072971-25-000094`), whose computed boundaries are provably correct, **20 of 23 sections carried a foreign item heading**. Item 8 is a 261-character incorporation-by-reference pointer and came back as 3,329 characters running through Items 9, 9A, 9B and 9C, because a single container spanning positions 489-517 was attached to a section whose range ended at 492. Item 6 — `[RESERVED]` — carried the whole of Item 7's heading.
+
+  A node whose subtree fits inside the range is still attached as it is. One that straddles the boundary is now replaced by a shallow stand-in holding only the children that fall inside, so the nesting the text extractor sees is unchanged. Nothing is dropped: the remainder belongs to the next section, whose range begins where this one ends. Wells Fargo now carries zero foreign headings, Item 8 is 374 characters and Item 6 is 46. Sections detected from a table of contents are unaffected — every section across the eleven-document benchmark corpus is byte-identical.
+
+  Two related defects went with it. The document was re-walked once per section, and the "is my parent also in range?" test read `node.parent` *after* earlier sections had already reassigned it — sections are created in dict order rather than document order, so the result could depend on iteration order. Both now work from one walk and one snapshot taken before any node is attached.
+
+  This is the pattern-path half of the end-boundary overflow cluster. The other half — sections whose *boundaries* are themselves wrong because the TOC pass missed an item anchor (GH #924) — is unchanged.
+
 - **Comparing a document node with a deep copy of itself raised `RecursionError` instead of returning an answer.** `Node` and its subclasses were plain dataclasses, so Python generated a field-by-field `__eq__` that recursed through `parent` and `children`. Normally the `id` uuid is compared first and decides the result immediately, but `copy.deepcopy` preserves `id`, so the comparison fell through to `parent` and `children` and walked back on itself:
 
   ```python
