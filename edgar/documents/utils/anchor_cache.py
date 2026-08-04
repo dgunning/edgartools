@@ -147,35 +147,39 @@ def _analyze_navigation_minimal(html_content: str, min_frequency: int = 5) -> Se
     return patterns
 
 
-def filter_with_cached_patterns(text: str, html_content: Optional[str] = None) -> str:
+# Used when a document carries no original HTML to analyse: the navigation links
+# that appear on nearly every SEC filing.
+FALLBACK_PATTERNS = frozenset({
+    'Table of Contents',
+    'Index to Financial Statements',
+    'Index to Exhibits',
+})
+
+
+def resolve_navigation_patterns(html_content: Optional[str] = None) -> Set[str]:
     """
-    Filter text using cached navigation patterns.
+    Resolve the navigation patterns for a document's HTML.
+
+    Split out from ``filter_with_cached_patterns`` because resolving is
+    per-document while filtering is per-string. Keying the cache requires an md5
+    of the whole filing, so a caller that filters many strings from one document
+    — section extraction filters once per section — should resolve once and pass
+    the result to ``filter_navigation_lines`` rather than re-deriving a key that
+    cannot have changed (edgartools-llmp.9).
+    """
+    if html_content:
+        return get_cached_navigation_patterns(html_content)
+    return FALLBACK_PATTERNS
+
+
+def filter_navigation_lines(text: str, patterns: Set[str]) -> str:
+    """
+    Drop repeated navigation lines from ``text``, given already-resolved patterns.
 
     Preserves first occurrences of patterns (document structure headers)
     while filtering out repeated navigation links.
-
-    Args:
-        text: Text to filter
-        html_content: HTML for pattern analysis (optional)
-
-    Returns:
-        Filtered text
     """
-    if not text:
-        return text
-
-    # Get patterns (cached or analyze)
-    if html_content:
-        patterns = get_cached_navigation_patterns(html_content)
-    else:
-        # Fallback to common SEC patterns
-        patterns = {
-            'Table of Contents',
-            'Index to Financial Statements',
-            'Index to Exhibits'
-        }
-
-    if not patterns:
+    if not text or not patterns:
         return text
 
     # Smart filtering: preserve first few occurrences, filter out repetitions
@@ -203,3 +207,17 @@ def filter_with_cached_patterns(text: str, html_content: Optional[str] = None) -
             filtered_lines.append(line)
 
     return '\n'.join(filtered_lines)
+
+
+def filter_with_cached_patterns(text: str, html_content: Optional[str] = None) -> str:
+    """
+    Filter text using cached navigation patterns.
+
+    Resolves the patterns and filters in one call. Callers filtering repeatedly
+    against the same document should instead resolve once with
+    ``resolve_navigation_patterns`` and call ``filter_navigation_lines``, so the
+    filing is not re-hashed per call.
+    """
+    if not text:
+        return text
+    return filter_navigation_lines(text, resolve_navigation_patterns(html_content))

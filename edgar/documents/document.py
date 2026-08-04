@@ -782,6 +782,31 @@ class Document:
     _text_cache: Optional[str] = field(default=None, init=False, repr=False)
     _config: Optional[Any] = field(default=None, init=False, repr=False)  # ParserConfig reference
     _section_extractor: Optional[Any] = field(default=None, init=False, repr=False)  # cached SECSectionExtractor
+    _nav_patterns: Optional[frozenset] = field(default=None, init=False, repr=False)  # cached navigation patterns
+
+    def _get_navigation_patterns(self) -> frozenset:
+        """Navigation link texts to filter out of extracted text, resolved once.
+
+        Resolution is keyed by an md5 of the entire filing, so it costs an
+        encode plus a hash of every byte — 340ms per call on a 9.8MB 10-K. The
+        section extractor filters once per section, which re-derived that key
+        ~25 times per document to prove it had not changed; against a sections
+        stage that is now ~1.1s on the same filing, that was its single largest
+        remaining item (edgartools-llmp.9).
+
+        Cached on the document rather than inside the pattern cache because the
+        HTML is a plain ``str``, which supports neither weak references nor
+        attributes, so there is nowhere on the key itself to hang a memo. The
+        document owns the HTML and dies with it, which is the same lifetime and
+        the same invalidation story as the anchor index.
+        """
+        if self._nav_patterns is None:
+            from edgar.documents.utils.anchor_cache import resolve_navigation_patterns
+            html = getattr(self.metadata, 'original_html', None)
+            # frozenset() is falsy but not None, so a document that genuinely
+            # has no repeated navigation links is cached, not re-resolved.
+            self._nav_patterns = frozenset(resolve_navigation_patterns(html))
+        return self._nav_patterns
 
     def __getstate__(self) -> Dict[str, Any]:
         """Materialize lazy metadata before serializing a stable document state."""
@@ -913,10 +938,9 @@ class Document:
         if clean:
             # Use cached/integrated navigation filtering (optimized approach)
             try:
-                from edgar.documents.utils.anchor_cache import filter_with_cached_patterns
+                from edgar.documents.utils.anchor_cache import filter_navigation_lines
                 # Use minimal cached approach (no memory overhead)
-                original_html = getattr(self.metadata, 'original_html', None)
-                text = filter_with_cached_patterns(text, html_content=original_html)
+                text = filter_navigation_lines(text, self._get_navigation_patterns())
             except Exception:
                 # Fallback to pattern-based filtering
                 from edgar.documents.utils.toc_filter import filter_toc_links

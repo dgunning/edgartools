@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Performance
 
+- **A filing was md5'd once per section to rebuild a cache key that could not have changed** — the sections stage drops a further 31% on the benchmark corpus, 4.3s to 3.0s, with every section's text byte-identical.
+
+  Navigation-link filtering resolves its patterns through a cache keyed by an md5 of the entire filing, so each lookup encodes and hashes every byte. Section extraction filters once per section, and `Document.text()` filters again, so extracting all 22 sections of Morgan Stanley's 9.8MB 10-K hashed the filing **44 times — 430.7MB hashed to answer a question about 9.8MB**, and the answer was the same every time. The patterns are now resolved once per document and cached on it: 44 hashes become 1.
+
+  The memo lives on the `Document` rather than inside the pattern cache because the HTML is a plain `str`, which supports neither weak references nor attributes, so there is nowhere on the key itself to hang one. The document owns the HTML and dies with it, which is the same lifetime and invalidation story as the anchor index. `filter_with_cached_patterns` keeps its behaviour for callers that filter a single string, and now composes the two halves — `resolve_navigation_patterns` and `filter_navigation_lines` — that a repeat caller should use directly.
+
+  Per-filing sections stage: Regions 790ms to 427, Morgan Stanley 749 to 404, Ambac 462 to 192, Foot Locker 279 to 176, Tesla 239 to 130, Meta 132 to 54. Citigroup is unmoved (947 to 987, within run-to-run noise) because it resolves items through the cross-reference index.
+
 - **Section extraction is 4.4x faster on the benchmark corpus** — 20.8s to 4.7s across ten filings, with no change to any extracted section. Two costs dominated the stage, and both were doing the same work repeatedly.
 
   Anchor resolution ran a full-document XPath per lookup, from eleven call sites. On Morgan Stanley's 9.8MB 10-K that was 92 lookups resolving 30 distinct ids against one tree — 3,854ms, 60% of the whole stage — with 67% of calls re-resolving an id already looked up on the same tree. One indexing pass now serves every lookup, costing ~31ms on that document. The index is cached weakly on the document root so it dies with the tree, and it is built from the document root rather than whichever element was passed, because `//*` is an absolute path: an index built by walking a subtree would have resolved fewer anchors than the XPath it replaces.
