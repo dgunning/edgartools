@@ -304,6 +304,75 @@ def pytest_collection_modifyitems(items):
         'test_6k_with_financials', 'test_fix_429', 'test_multiple_companies_429',
     ]
 
+    # Regression tests used to carry no fast/network marker at all: this hook
+    # marked them `regression` and stopped. All three PR-facing CI selectors read
+    # 'fast and not regression', 'network and not slow and not regression' and
+    # 'slow and not regression', so every one of the 1,746 tests under
+    # tests/issues/regression/ was deselected on every pull request and ran only
+    # after merge, on the weekly/main-push Regression Tests workflow. A PR could
+    # break any of them and merge green (bead edgartools-07lk.21). CLAUDE.md
+    # tells every bug fix to put its regression test in that tree, so the better
+    # a contributor followed the docs, the less their test gated anything.
+    #
+    # Classifying them lets the offline half gate pull requests. Which half is
+    # which was MEASURED, not guessed (2026-08-04): the tree was run with
+    # outbound TCP and DNS blocked, and everything that failed was re-run with
+    # the network to separate "needs SEC" from "already broken" — all 159
+    # passed, so none was broken. Re-measure the same way rather than editing
+    # this by eye; the filename heuristic was wrong for five files the last time
+    # a classification was done here.
+    #
+    # "Offline" means offline *alone*: the measurement clears every functools
+    # cache in the edgar package before each test, so no test is credited with a
+    # fetch an earlier one had already cached. That is stricter than CI, where
+    # xdist workers share warm caches, and deliberately so. Four of the files
+    # below (test_424b_parser, test_fee_table, test_issue_2h4c,
+    # test_issue_868_869_offerings) are cassette-backed and mostly offline, but
+    # 59 of their 170 tests also fetch the quarterly form index, which no
+    # cassette records. Under the lax standard which of them fail depends on the
+    # worker count — stable on one machine, different on a 4-core runner,
+    # different again the next time a test is added. No gate can be built on
+    # that. They go to `network` whole rather than by node id, because a node-id
+    # list lets a renamed test back into the gate silently; bead
+    # edgartools-zuuu tracks decoupling the index fetch, which returns all 170
+    # at once.
+    REGRESSION_NETWORK_FILES = {
+        'test_424b_parser.py',
+        'test_fee_table.py',
+        'test_issue_2h4c.py',
+        'test_issue_868_869_offerings.py',
+        'test_entityfacts_no_duplicate_quarterly_periods.py',
+        'test_issue_282_xbrl_api_regression.py',
+        'test_issue_408_cashflow_empty_periods.py',
+        'test_issue_416_segment_member_values.py',
+        'test_issue_420_multi_year_income_statements.py',
+        'test_issue_427_xbrl_data_cap.py',
+        'test_issue_429_statement_period_regression.py',
+        'test_issue_439_order_parsing.py',
+        'test_issue_441_current_filings_pagination.py',
+        'test_issue_443_corrupted_cache.py',
+        'test_issue_446_20f_ifrs_statements.py',
+        'test_issue_451_expense_sign_regression.py',
+        'test_issue_464_period_key.py',
+        'test_issue_513_data_accuracy.py',
+        'test_issue_518_income_statement_fallback.py',
+        'test_issue_633_earnings_data_accuracy.py',
+        'test_issue_637_ifrs_concept_discovery.py',
+        'test_issue_706_missing_statements.py',
+        'test_issue_712_xbrl_weight_sign.py',
+        'test_issue_880.py',
+        'test_issue_ugc2_discovery.py',
+        'test_issue_xvxp_footnoted_shares.py',
+    }
+
+    # Files whose tests split: everything else in them runs offline.
+    REGRESSION_NETWORK_TESTS = {
+        'tests/issues/regression/test_issue_863_10b5_plan_detection.py::test_aff10b5_one_checkbox_flows_through_xml_parsing_end_to_end',
+        'tests/issues/regression/test_issue_i5wx_api_consistency.py::test_form4_tables_and_remarks_always_present_when_xml_omits_them',
+        'tests/issues/regression/test_issue_t043_footnote_attribution.py::test_footnote_ids_are_deduped_within_a_transaction',
+        'tests/issues/regression/test_issue_t043_footnote_attribution.py::test_transaction_footnote_ids_are_populated_from_whole_transaction',
+    }
+
     unclassified = []
 
     for item in items:
@@ -314,8 +383,21 @@ def pytest_collection_modifyitems(items):
         is_regression = "/regression/" in test_path or "\\regression\\" in test_path
         if is_regression:
             item.add_marker(pytest.mark.regression)
+            existing_markers = {m.name for m in item.iter_markers()}
+            if not existing_markers & {'fast', 'network', 'slow'}:
+                # Unlisted means fast, deliberately. A new regression test that
+                # needs SEC and says so gets `network` from its own marker; one
+                # that needs SEC and forgets fails the pull-request gate on its
+                # first run, which is loud and one marker from fixed. Defaulting
+                # the other way would file it back into the post-merge-only tree
+                # silently — the defect this classification exists to close.
+                needs_network = (
+                    Path(test_path).name in REGRESSION_NETWORK_FILES
+                    or item.nodeid in REGRESSION_NETWORK_TESTS
+                )
+                item.add_marker(pytest.mark.network if needs_network
+                                else pytest.mark.fast)
             logger.debug(f"Auto-marked regression test: {item.nodeid}")
-            # Don't auto-mark regression tests with fast/network - they need explicit markers
             continue
 
         # Skip if test already has fast/network/slow marker

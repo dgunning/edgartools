@@ -92,8 +92,16 @@ jobs:
 
     - name: Run fast tests
       run: |
-        # Parallelize fast tests - safe, no SEC API calls
-        pytest -n auto --cov --cov-report=xml -m 'fast and not regression'
+        # Parallelize fast tests - safe, no SEC API calls.
+        #
+        # No `and not regression` here, unlike the network and slow jobs. The
+        # regression tree is 1,746 tests and every one of them used to be
+        # deselected on pull requests, so a PR could break any of them and merge
+        # green (bead edgartools-07lk.21). conftest.py now classifies each as
+        # fast or network by measurement, and the 934 offline ones gate here.
+        # The network half still runs only in the Regression Tests workflow —
+        # PRs must not hammer the SEC endpoint.
+        pytest -n auto --cov --cov-report=xml -m 'fast'
 
     - name: Upload coverage data
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
