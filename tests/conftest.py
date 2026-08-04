@@ -250,6 +250,24 @@ def pytest_collection_modifyitems(items):
         'test_currency', 'test_thirteenf_rendering', 'test_sections_membership',
         'test_standardization', 'test_abstract_detection', 'test_xbrl_validation',
         'test_urls', 'test_toc_filter', 'test_preprocessing',
+        # Classified 2026-08-04 while closing the marker fall-through hole.
+        # Each of these ran in NO CI job because its name matched no pattern
+        # here. Every one was verified to pass with outbound sockets blocked
+        # before being called fast — the heuristic guess was wrong for five of
+        # them, so the offline run is the authority, not the filename.
+        'test_toc_analyzer_form_aware_bare_item', 'test_toc_agents',
+        'test_toc_hierarchy_bounding', 'test_toc_title_vocabulary',
+        'test_toc_name_anchors', 'test_toc_authoritative_span',
+        'test_toc_fragment_coalescing', 'test_toc_analyzer_part_context',
+        'test_form_schema', 'test_v530_coverage', 'test_concept_graph',
+        'test_concept_extractor', 'test_metalinks', 'test_viewer',
+        'test_viewer_validation', 'test_registration_s3', 'test_datefmt_hardening',
+        'test_internal_deprecation_silence', 'test_parser_corpus',
+        'test_prospectus_section_flip_gate', 'test_prospectus_sections_surface',
+        's1_section_flip_gate', 'test_def14a_section_flip_gate',
+        'test_frontier', 'test_tier_c_judge', 'test_424b_xbrl',
+        'test_offering_consumers', 'test_correspondence',
+        'test_fix_438',
     ]
 
     # Files that need network (fetch from SEC)
@@ -274,7 +292,19 @@ def pytest_collection_modifyitems(items):
         'test_ncen', 'test_ncsr',
         # XBRL tests that need network (use Company() or XBRL.from_filing)
         'test_xbrl_periods',
+        # Classified 2026-08-04 (see the note in FAST_PATTERNS). These fail with
+        # outbound sockets blocked, so they are network by measurement.
+        'test_registration_s1', 'test_registration_s4', 'test_prospectus497k',
+        'test_cashflow_unaccumulation', 'test_drs', 'test_to_context',
+        'test_twentyfourf',
+        # Reproduction scripts under tests/issues/reproductions/ whose names
+        # matched nothing. All fetch from SEC (Company(), get_filings()).
+        'test_financial_metrics_fix', 'test_multiperiod_statements',
+        'test_integration_438_fix', 'test_nvda_2020_duplicate_issue',
+        'test_6k_with_financials', 'test_fix_429', 'test_multiple_companies_429',
     ]
+
+    unclassified = []
 
     for item in items:
         test_path = str(item.fspath)
@@ -302,8 +332,32 @@ def pytest_collection_modifyitems(items):
             item.add_marker(pytest.mark.fast)
             logger.debug(f"Auto-marked fast test: {item.nodeid}")
         else:
-            # Warn about tests that don't match any pattern — they won't run in CI
-            logger.warning(f"Test has no marker and matches no auto-marking pattern: {item.nodeid}")
+            unclassified.append(item.nodeid)
+
+    # A file matching no pattern used to emit a logger.warning and carry on.
+    # Nothing selects it after that: CI runs -m 'fast and not regression',
+    # 'network and not slow and not regression' and 'slow and not regression',
+    # so an unmatched file runs in NO job while CI reports green. It is the one
+    # way left for a pull request to pass a gate it never actually met, and it
+    # silently weakened every other gate. 740 tests across 35 files were sitting
+    # in that state when this check was added (2026-08-04), including ~155
+    # covering the TOC analyzer.
+    #
+    # A warning was the wrong severity: nobody reads pytest's captured log on a
+    # green run, which is exactly why it went unnoticed. Fail collection instead.
+    if unclassified:
+        files = sorted({nodeid.split("::")[0] for nodeid in unclassified})
+        raise pytest.UsageError(
+            f"{len(unclassified)} test(s) in {len(files)} file(s) match no "
+            f"auto-marking pattern, so no CI job would run them:\n"
+            + "".join(f"  {name}\n" for name in files)
+            + "Fix by either adding the filename stem to FAST_PATTERNS or "
+              "NETWORK_PATTERNS in tests/conftest.py, or marking the tests "
+              "explicitly with @pytest.mark.fast / @pytest.mark.network.\n"
+              "Decide fast vs network by RUNNING the file with outbound sockets "
+              "blocked, not by reading its name — the filename heuristic was "
+              "wrong for five of the files classified on 2026-08-04."
+        )
 
 
 # Session-scoped company fixtures for performance optimization
