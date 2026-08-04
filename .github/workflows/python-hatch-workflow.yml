@@ -5,28 +5,21 @@
 #   - Push to main:   fast (full matrix) + network + slow      (real integration gate)
 #   - Nightly (cron): full suite                               (freshness vs SEC API)
 #   - concurrency:    cancel superseded runs on the same ref
-#   - paths-ignore:   skip docs/markdown-only changes
 #   - pip cache:      avoid reinstalling deps from scratch in every job
+#
+# There is deliberately NO paths-ignore. A docs-only change would then report no
+# checks at all, and a required status check that never reports blocks the pull
+# request forever. Since these checks are meant to become required, every PR has
+# to produce them — the few CI minutes a markdown-only run costs are cheaper than
+# a merge queue that deadlocks on documentation.
 
 name: Build and Test Edgartools
 
 on:
   push:
     branches: [ "main" ]
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'mkdocs.yml'
-      - 'LICENSE'
-      - '.gitignore'
   pull_request:
     branches: [ "main" ]
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'mkdocs.yml'
-      - 'LICENSE'
-      - '.gitignore'
   schedule:
     # Nightly full suite at 07:00 UTC
     - cron: '0 7 * * *'
