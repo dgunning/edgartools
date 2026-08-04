@@ -309,7 +309,12 @@ def main() -> int:
     ap.add_argument("--skip-xbrl", action="store_true")
     ap.add_argument("--skip-schemas", action="store_true")
     ap.add_argument("--profile", metavar="KEY",
-                    help="write a pyinstrument profile for one entry's parse (hatch env only)")
+                    help="write a pyinstrument profile for one entry (hatch env only)")
+    ap.add_argument("--profile-stage", default="sections",
+                    choices=["parse", "sections", "tables", "text", "markdown", "headings"],
+                    help="which stage to profile (default: sections, the baseline's "
+                         "most expensive stage). Every stage but 'parse' profiles the "
+                         "parse too, since the stage needs a parsed document.")
     args = ap.parse_args()
 
     if not MANIFEST.exists():
@@ -329,7 +334,7 @@ def main() -> int:
     from edgar import __version__ as edgar_version
 
     if args.profile:
-        return write_profile(args.profile, out)
+        return write_profile(args.profile, out, args.profile_stage, manifest)
 
     results = {
         "edgar_version": edgar_version,
@@ -408,8 +413,14 @@ def main() -> int:
     return 0
 
 
-def write_profile(key: str, out: Path) -> int:
-    """pyinstrument profile of one entry's parse. Requires the hatch env."""
+def write_profile(key: str, out: Path, stage: str, manifest: dict) -> int:
+    """pyinstrument profile of one entry's stage. Requires the hatch env.
+
+    The entry's form is taken from the manifest, not defaulted away:
+    ParserConfig.form gates section detection, so profiling with a bare config
+    walks a different code path than the benchmark measures — an empty
+    doc.sections and a flat 25ms where the baseline records 6.6s.
+    """
     try:
         from pyinstrument import Profiler
     except ImportError:
@@ -426,12 +437,26 @@ def write_profile(key: str, out: Path) -> int:
         return 1
     html = path.read_text(encoding="utf-8")
 
+    entry = next((e for e in manifest["entries"] if e["key"] == key), {})
+    form = entry.get("form")
+    stages = {
+        "sections": lambda doc: doc.sections,
+        "tables": lambda doc: doc.tables,
+        "text": lambda doc: doc.text(),
+        "markdown": lambda doc: doc.to_markdown(),
+        "headings": lambda doc: doc.headings,
+    }
+
     profiler = Profiler()
     profiler.start()
-    HTMLParser(ParserConfig()).parse(html)
+    doc = HTMLParser(ParserConfig(form=form)).parse(html)
+    if stage != "parse":
+        result = stages[stage](doc)
     profiler.stop()
 
-    dest = out / f"profile-{key}.html"
+    if stage != "parse":
+        print(f"{stage}: {len(result or [])} produced (form={form})")
+    dest = out / f"profile-{key}-{stage}.html"
     dest.write_text(profiler.output_html())
     print(profiler.output_text(unicode=True, color=True, show_all=False))
     print(f"\nProfile -> {dest}")
