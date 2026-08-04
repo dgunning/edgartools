@@ -33,6 +33,28 @@ sharp_edges:
       if 'Item 1A' in tenk.items:
           risk = tenk['Item 1A']
 
+  - id: item-incorporated-by-reference
+    summary: A short item is often correct — many 10-K items point at another document
+    severity: medium
+    solution: |
+      # Items 10-14 (and sometimes 1A, 7, 8) are frequently "incorporated by
+      # reference" from the proxy statement or the Annual Report exhibit (EX-13).
+      # The 10-K then holds a one-sentence pointer, NOT the disclosure. That short
+      # string is the correct answer for that filing — do not treat it as a
+      # failure and do not go looking for a longer match elsewhere.
+      item8 = tenk['Item 8']
+      if item8 and 'incorporated' in item8 and 'by reference' in item8:
+          # Wells Fargo: financial statements live in the 2024 Annual Report.
+          # Use XBRL for the numbers instead of the item text.
+          financials = tenk.financials
+
+      # Some filers instead map items to printed PAGE RANGES in a
+      # "Form 10-K Cross-Reference Index" (Citigroup). Items whose index row says
+      # "Not Applicable" or carries only an asterisk have no content in the 10-K,
+      # so tenk['Item 15'] is None. Ask what exists rather than assuming Items
+      # 1-16 are all present:
+      print(tenk.items)   # e.g. ['Item 1', 'Item 1A', 'Item 7', 'Item 8', ...]
+
   - id: text-vs-html
     summary: Item.text is plain text, tables lose structure
     severity: low

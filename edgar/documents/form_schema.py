@@ -360,6 +360,35 @@ _TEN_K_SECTION_PATTERNS = {
         ('^Controls.*Procedures', 'Controls and Procedures'),
         ('^Internal\\s+Control', 'Internal Controls'),
     ),
+    # Items with no semantic key of their own.  These were absent from the
+    # vocabulary entirely, so on a filing whose only usable headers are "Item N"
+    # markers they were silently unrecoverable and their content was absorbed by
+    # the preceding item (edgartools-4agg, Wells Fargo).  Each carries ONLY an
+    # item-numbered pattern: their titles ("Properties", "Other Information",
+    # "Exhibits") are common enough as ordinary headings that a bare-title
+    # alternative would match unrelated blocks.  Keys use the part_N_item_N
+    # convention so Section.parse_section_name() resolves part and item.
+    'part_i_item_4': (
+        ('^(Item|ITEM)\\s+4\\.?\\s*Mine\\s+Safety', 'Item 4 - Mine Safety Disclosures'),
+    ),
+    'part_ii_item_5': (
+        ('^(Item|ITEM)\\s+5\\.?\\s*Market\\s+for', 'Item 5 - Market for Registrant\'s Common Equity'),
+    ),
+    'part_ii_item_6': (
+        ('^(Item|ITEM)\\s+6\\.?\\s*\\[?\\s*(Reserved|Selected\\s+Financial)', 'Item 6 - [Reserved]'),
+    ),
+    'part_ii_item_9': (
+        ('^(Item|ITEM)\\s+9\\.?\\s*Changes\\s+in\\s+and\\s+Disagreements', 'Item 9 - Changes in and Disagreements with Accountants'),
+    ),
+    'part_ii_item_9b': (
+        ('^(Item|ITEM)\\s+9B\\.?\\s*Other\\s+Information', 'Item 9B - Other Information'),
+    ),
+    'part_ii_item_9c': (
+        ('^(Item|ITEM)\\s+9C\\.?\\s*Disclosure\\s+Regarding\\s+Foreign', 'Item 9C - Disclosure Regarding Foreign Jurisdictions'),
+    ),
+    'part_iv_item_15': (
+        ('^(Item|ITEM)\\s+15\\.?\\s*Exhibits?', 'Item 15 - Exhibits and Financial Statement Schedules'),
+    ),
     # Part III — Items 10-14.  Many filers incorporate these by reference from
     # their proxy statement; the Part III block is a compact "see proxy" stub
     # where each item header is a bold paragraph (not a semantic heading node).

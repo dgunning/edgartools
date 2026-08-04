@@ -598,11 +598,22 @@ class SectionExtractor:
             table_nodes = document.root.find(lambda n: isinstance(n, TableNode))
 
             for table in table_nodes:
-                # Look through table rows for Items
-                for row in table.rows:
+                # Look through table rows for Items.
+                #
+                # Header rows are scanned as well as body rows. A filer whose
+                # item headings are standalone one-row tables ("ITEM 1A." |
+                # "RISK FACTORS" — Wells Fargo) has that row classified as the
+                # table's *header*, leaving `rows` empty, so scanning only
+                # `rows` found no items at all and the extractor fell through
+                # to keyword matching, which labeled Item 15's exhibit list as
+                # `financial_statements` (edgartools-4agg).
+                header_cell_rows = [list(hr) for hr in (table.headers or [])]
+                body_cell_rows = [list(row.cells) for row in table.rows]
+
+                for cells in header_cell_rows + body_cell_rows:
                     # Check each cell for Item pattern
                     row_text_parts = []
-                    for cell in row.cells:
+                    for cell in cells:
                         cell_text = cell.text().strip()
                         if cell_text:
                             row_text_parts.append(cell_text)
@@ -720,6 +731,17 @@ class SectionExtractor:
 
         return part_context
 
+    # A schema pattern that anchors on an explicit item number, e.g.
+    # '^(Item|ITEM)\\s+8\\.?\\s*Financial\\s+Statements'. Matched against the
+    # pattern source, not the header text, so it reflects what the schema
+    # actually asserted rather than what the document happened to contain.
+    _ITEM_NUMBERED_PATTERN_RE = re.compile(r'^\^?\(?(?:Item|ITEM)', re.IGNORECASE)
+
+    @classmethod
+    def _is_item_numbered_pattern(cls, pattern: str) -> bool:
+        """True if this schema pattern requires an 'Item N' prefix to match."""
+        return bool(cls._ITEM_NUMBERED_PATTERN_RE.match(pattern))
+
     def _match_sections(self,
                        headers: List[Tuple[Node, str, int]],
                        patterns: Dict[str, List[Tuple[str, str]]],
@@ -816,6 +838,7 @@ class SectionExtractor:
                             'title': final_title,
                             'is_main': is_main,
                             'is_toc_entry': is_toc_entry,
+                            'is_item_numbered': self._is_item_numbered_pattern(pattern),
                             'content_size': end_position - position
                         })
 
@@ -853,6 +876,21 @@ class SectionExtractor:
                     # Fall back to TOC entries if no actual section found
                     selection_pool = candidates
                     logger.info(f"Using TOC entries as fallback for {section_name}")
+
+                # A header that names its item ("ITEM 8. FINANCIAL STATEMENTS")
+                # identifies the section outright; a bare title ("FINANCIAL
+                # STATEMENTS") only suggests it, and the same words routinely
+                # head an unrelated block. Ranking by content size alone let the
+                # weaker evidence win whenever it happened to span more text:
+                # Wells Fargo's Item 8 is a 261-char "incorporated by reference"
+                # pointer, so the "1. FINANCIAL STATEMENTS" heading inside Item
+                # 15's exhibit list claimed the `financial_statements` key with
+                # 42K chars of the wrong content (edgartools-4agg). Item-numbered
+                # matches are therefore preferred outright, and size only breaks
+                # ties within a tier.
+                item_numbered = [c for c in selection_pool if c['is_item_numbered']]
+                if item_numbered:
+                    selection_pool = item_numbered
 
                 # Among the selection pool, prefer main headers (uppercase)
                 main_headers = [c for c in selection_pool if c['is_main']]

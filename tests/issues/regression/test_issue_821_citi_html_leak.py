@@ -28,6 +28,15 @@ Fix:
     conversion falls through to the legacy fallback rather than returning the
     markup.
 
+Later (edgartools-4agg):
+    Citi now resolves 11 canonically-keyed sections from its Cross Reference
+    Index, so 'Item 1' is answered by doc.sections['part_i_item_1'] and no
+    longer reaches the cross-reference branch at all. The branch is still live
+    for filings whose index covers items that section detection does not, so
+    the conversion contract is now exercised directly — by emptying the section
+    map to force the fall-through — rather than by relying on Citi having no
+    section for Item 1.
+
 Offline: drives TenK against the tracked 16.7MB Citi fixture through a minimal
 filing stub, so no network is required.
 """
@@ -66,17 +75,38 @@ def citi_tenk():
 
 class TestCitiItemsAreTextNotHtml:
 
-    def test_cross_reference_branch_is_actually_exercised(self, citi_tenk):
+    def test_cross_reference_index_is_still_detected(self, citi_tenk):
         """Guard against a vacuous pass.
 
-        If Citi ever stops being detected as a Cross Reference Index filing, or
-        Item 1 starts resolving from doc.sections, the assertions below would
-        hold for a reason unrelated to this bug.
+        If Citi ever stops being detected as a Cross Reference Index filing,
+        every assertion below would hold for a reason unrelated to this bug.
         """
         assert citi_tenk._cross_reference_index is not None, \
             "Citi is no longer detected as a Cross Reference Index filing"
-        assert 'part_i_item_1' not in (citi_tenk.sections or {}), \
-            "Item 1 now resolves from doc.sections; this test no longer covers the leak"
+
+    def test_cross_reference_branch_returns_text_not_markup(self, citi_tenk):
+        """The #821 fix itself, exercised directly.
+
+        Item 1 no longer reaches this branch (edgartools-4agg gave Citi a real
+        part_i_item_1 section), so the section map is emptied to force the
+        fall-through. Without the parse_html(...).text() conversion this returns
+        ~1.7MB of <div>/<span> markup.
+        """
+        from edgar.documents.document import Sections
+
+        document = citi_tenk.document
+        original = document.sections
+        try:
+            document._sections = Sections()
+            item1 = citi_tenk['Item 1']
+        finally:
+            document._sections = original
+
+        assert item1, "Item 1 returned nothing via the cross-reference branch"
+        # Reduce to a bool before asserting — see the note below.
+        leaked_markup = '<div' in item1 or '<span' in item1
+        assert not leaked_markup, \
+            f"Cross-reference branch returned raw HTML: {item1[:120]!r}"
 
     def test_item_1_returns_text_not_markup(self, citi_tenk):
         item1 = citi_tenk['Item 1']

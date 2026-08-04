@@ -96,8 +96,23 @@ class HybridSectionDetector:
                 )
             return augmented
 
+        # Strategy 1.5: Cross-reference index.
+        #
+        # Ranked directly below the TOC because it is the same kind of evidence:
+        # the filer stating where each item is, rather than us inferring it. It
+        # only ever fires on filings that publish a "Form 10-K Cross-Reference
+        # Index" and have no navigable TOC — Citigroup, whose 16.7MB 10-K used to
+        # fall all the way through to keyword matching and surface four
+        # non-canonical keys (`mda`, `risk_factors`, ...) while a caller asking
+        # for part_ii_item_7 got nothing (edgartools-4agg).
+        logger.debug("TOC detection failed, trying cross-reference index detection...")
+        sections = self._try_index_detection()
+        if sections:
+            logger.info(f"Cross-reference index detection successful: {len(sections)} sections found")
+            return self._validate_pipeline(sections, enable_cross_validation=False)
+
         # Strategy 2: Heading-based (fallback)
-        logger.debug("TOC detection failed, trying heading detection...")
+        logger.debug("Index detection failed, trying heading detection...")
         sections = self._try_heading_detection()
         if sections:
             logger.info(f"Heading detection successful: {len(sections)} sections found")
@@ -501,6 +516,21 @@ class HybridSectionDetector:
 
         except Exception as e:
             logger.warning(f"Heading detection failed: {e}")
+            return None
+
+    def _try_index_detection(self) -> Optional[Dict[str, Section]]:
+        """Try Cross Reference Index detection.
+
+        Returns:
+            Dictionary of sections if the filing publishes a usable index,
+            None otherwise.
+        """
+        try:
+            from edgar.documents.extractors.index_section_detector import IndexSectionDetector
+
+            return IndexSectionDetector(self.document, self.form).detect()
+        except Exception as e:
+            logger.warning(f"Index detection failed: {e}")
             return None
 
     def _try_pattern_detection(self) -> Optional[Dict[str, Section]]:

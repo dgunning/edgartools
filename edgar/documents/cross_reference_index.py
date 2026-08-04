@@ -22,9 +22,27 @@ _INDEX_HEADING_RE = re.compile(r'FORM\s+10-K\s+CROSS[- ]?REFERENCE\s+INDEX', re.
 # Item numbers may be bare ("1A.") or prefixed ("Item 1A.") — see Citigroup, issue #251.
 _ITEM_1A_RE = re.compile(r'(?:Item\s+)?1A\.?', re.IGNORECASE)
 
+# An index row opens with an item number ("7A." / "Item 7A.") or a Part header.
+_ITEM_NUMBER_RE = re.compile(r'^(?:Item\s+)?(\d+[A-Z]?)\.?$', re.IGNORECASE)
+# IV is matched before I+ — the other order lets `I+` claim the leading "I" of
+# "Part IV" and label Part IV content as Part I.
+_PART_RE = re.compile(r'^Part\s+(IV|I+)', re.IGNORECASE)
+
 # How far back from the heading the index table may open. The heading is often
 # rendered *inside* the table (GE), so the first row can precede it.
 _TABLE_LOOKBACK = 5_000
+
+# An index interrupted by a page break resumes in a *new* <table> (Citigroup
+# breaks after Item 9A and opens a second table for 9B onward). A following
+# table is treated as a continuation only when nothing but layout markup
+# separates it from the previous one — this much visible text between them
+# means the index ended and body content has started.
+_CONTINUATION_MAX_GAP_TEXT = 200
+
+# Cap on how many tables one index may span. Two is the observed maximum
+# (one page break); the cap stops a malformed document from walking the whole
+# filing table by table.
+_MAX_INDEX_TABLES = 6
 
 
 def _cell_texts(row_html: str) -> List[str]:
@@ -84,6 +102,12 @@ class PageRange:
 
             # Remove any parenthetical notes
             part = re.sub(r'\([^)]*\)', '', part).strip()
+            # Strip trailing footnote markers. Items that are *also* incorporated
+            # by reference carry one ("319-321*" for Citigroup's Item 10); the
+            # cited pages are still real, and leaving the marker attached made
+            # int("321*") raise and silently discarded the whole range. A
+            # marker-only cell ("**") reduces to empty and is skipped below.
+            part = part.rstrip('*†‡§').strip()
             if not part:
                 continue
 
@@ -165,11 +189,13 @@ class CrossReferenceIndex:
         if self._heading_position() is None:
             return False
 
-        table_html = self._find_index_table()
-        if not table_html:
+        # The Item 1A row is always in the first table (the index runs in item
+        # order), so detection does not need the continuation walk.
+        tables = self._find_index_tables()
+        if not tables:
             return False
 
-        return self._has_index_row(table_html)
+        return self._has_index_row(tables[0])
 
     @staticmethod
     def _has_index_row(table_html: str) -> bool:
@@ -194,16 +220,24 @@ class CrossReferenceIndex:
                 return True
         return False
 
-    def _find_index_table(self) -> Optional[str]:
-        """Find the cross-reference index table HTML.
+    def _find_index_tables(self) -> List[str]:
+        """Find the cross-reference index table(s), in document order.
 
         Anchored to the last heading occurrence, handling two layouts:
         1. Heading inside a <table> (GE style) — search backwards for <table
         2. Heading before a <table> (Citigroup style) — search forwards for <table
+
+        An index that runs past a page break resumes in a *separate* <table>.
+        Citigroup breaks after Item 9A, so reading only the first table stopped
+        the parse at 14 of 22 items and silently lost Items 9B-15 (including all
+        of Part III). Adjacent tables are therefore appended while they still
+        look like the index, which recovers the full item set without guessing:
+        a continuation must follow with only layout markup in between and must
+        itself carry an item-number or Part row.
         """
         heading_pos = self._heading_position()
         if heading_pos is None:
-            return None
+            return []
 
         # Check if heading is inside a table (search backwards for <table)
         preceding = self.html[max(0, heading_pos - _TABLE_LOOKBACK):heading_pos]
@@ -217,12 +251,50 @@ class CrossReferenceIndex:
             # Heading is before the table — search forward
             table_start = self.html.find('<table', heading_pos)
             if table_start == -1:
-                return None
+                return []
 
-        table_end = self.html.find('</table>', table_start)
-        if table_end == -1:
-            return None
-        return self.html[table_start:table_end + 8]
+        tables: List[str] = []
+        cursor = table_start
+        while len(tables) < _MAX_INDEX_TABLES:
+            open_pos = self.html.find('<table', cursor)
+            if open_pos == -1:
+                break
+            close_pos = self.html.find('</table>', open_pos)
+            if close_pos == -1:
+                break
+            end = close_pos + 8
+
+            if tables:
+                # Continuation candidate: reject on intervening body text, or on
+                # a table that carries no index row of its own.
+                gap = re.sub(r'<[^>]+>', '', self.html[cursor:open_pos])
+                gap = gap.replace('&#160;', ' ').replace('&nbsp;', ' ').strip()
+                if len(gap) > _CONTINUATION_MAX_GAP_TEXT:
+                    break
+                if not self._looks_like_index_table(self.html[open_pos:end]):
+                    break
+
+            tables.append(self.html[open_pos:end])
+            cursor = end
+
+        return tables
+
+    @staticmethod
+    def _looks_like_index_table(table_html: str) -> bool:
+        """True if the table opens rows with item numbers or Part headers.
+
+        Deliberately weaker than :meth:`_has_index_row`: a continuation table
+        holds only the tail of the index (Citigroup's second table starts at
+        Item 9B), so it can't be asked for the Item 1A / Risk Factors row that
+        anchors detection.
+        """
+        for row_match in re.finditer(r'<tr[^>]*>(.*?)</tr>', table_html, re.DOTALL):
+            cells = _cell_texts(row_match.group(1))
+            if not cells:
+                continue
+            if _ITEM_NUMBER_RE.match(cells[0]) or _PART_RE.match(cells[0]):
+                return True
+        return False
 
     def parse(self) -> Dict[str, IndexEntry]:
         """
@@ -241,31 +313,38 @@ class CrossReferenceIndex:
 
         self._entries = {}
 
-        table_html = self._find_index_table()
-        if not table_html:
+        tables = self._find_index_tables()
+        if not tables:
             return self._entries
 
-        # Extract rows and parse cell text from each row
+        # Extract rows and parse cell text from each row. Part context and
+        # page-continuation rows carry across a table boundary, because a page
+        # break can split the index mid-item (Citigroup) \u2014 so the row loop runs
+        # over the concatenated tables rather than restarting per table.
         current_part = None
         last_entry = None
-        item_number_pattern = re.compile(r'^(?:Item\s+)?(\d+[A-Z]?)\.?$', re.IGNORECASE)
         # Pattern for continuation rows: just page numbers like "129, 160-164,"
         page_continuation_pattern = re.compile(r'^[\d,\s&#;.\-\u2013]+$')
 
-        for row_match in re.finditer(r'<tr[^>]*>(.*?)</tr>', table_html, re.DOTALL):
+        rows = (
+            row_match
+            for table_html in tables
+            for row_match in re.finditer(r'<tr[^>]*>(.*?)</tr>', table_html, re.DOTALL)
+        )
+        for row_match in rows:
             cell_texts = _cell_texts(row_match.group(1))
 
             if not cell_texts:
                 continue
 
             # Check for Part headers
-            part_match = re.match(r'^Part\s+(I+|IV)', cell_texts[0], re.IGNORECASE)
+            part_match = _PART_RE.match(cell_texts[0])
             if part_match:
                 current_part = f"Part {part_match.group(1).upper()}"
                 continue
 
             # Check for item row: first cell should be an item number
-            item_match = item_number_pattern.match(cell_texts[0])
+            item_match = _ITEM_NUMBER_RE.match(cell_texts[0])
             if item_match:
                 item_num = item_match.group(1).upper()
                 item_title = cell_texts[1] if len(cell_texts) > 1 else ''
