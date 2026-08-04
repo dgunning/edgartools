@@ -135,6 +135,18 @@ class TestEmptyResults:
         assert df['decimals'].isna().all()       # vacuously true, and not a crash
         assert len(df[df['concept'] == 'Revenue']) == 0
 
+    def test_an_empty_query_can_still_be_displayed(self, xbrl):
+        """Rendering must survive the empty frame having columns.
+
+        Declaring the columns gave an empty result a `concept` column with no
+        rows to measure, so the width calculation in __rich__ produced NaN and
+        rich failed to render it. A mistyped concept in a REPL is enough to hit
+        this, which is exactly the interaction the panel invites.
+        """
+        query = xbrl.facts.query().by_concept('ZzzNoSuchConceptExists')
+
+        assert repr(query)  # previously TypeError inside rich's box rendering
+
     def test_empty_result_of_a_projection_keeps_the_projection(self, xbrl):
         df = (xbrl.facts.query()
               .by_concept('ZzzNoSuchConceptExists')

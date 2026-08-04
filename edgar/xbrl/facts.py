@@ -993,9 +993,7 @@ class FactQuery:
                             or col == 'is_dimensioned']]
 
         if not self._include_contexts:
-            context_cols = ['context_ref', 'entity_identifier', 'entity_scheme',
-                            'period_type']
-            df = df.loc[:, [col for col in df.columns if col not in context_cols]]
+            df = df.loc[:, [col for col in df.columns if col not in _CONTEXT_COLUMNS]]
 
         if not self._include_element_info:
             element_cols = ['element_id', 'element_name', 'element_type', 'element_period_type',
@@ -1064,8 +1062,11 @@ class FactQuery:
 
         display_columns = [col for col in ['concept','label', 'value', 'period_start', 'period_end']
                            if col in columns]
-        # What is the maximum width of the concept column?
-        max_width = df.concept.apply(len).max() if 'concept' in df.columns else 20
+        # What is the maximum width of the concept column? An empty result carries
+        # the declared columns, so `concept` is present with no rows to measure and
+        # .max() returns NaN — which rich accepts as a width and then fails to
+        # render ("can't multiply sequence by non-int of type 'float'").
+        max_width = df.concept.apply(len).max() if 'concept' in df.columns and not df.empty else 20
         rich_columns = [Column('concept', width=max_width)] + display_columns[1:]
         df = df[display_columns]
         table = Table(*rich_columns, show_header=True, header_style="bold", box=box.SIMPLE)
