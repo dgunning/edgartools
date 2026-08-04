@@ -17,7 +17,7 @@ from lxml import html as lxml_html
 from edgar.documents.document import Document
 from edgar.documents.nodes import Node
 from edgar.documents.utils.anchor_targets import find_anchor_targets, is_anchor_match
-from edgar.documents.utils.tree_traversal import iterwalk_from, precedes
+from edgar.documents.utils.tree_traversal import document_order_path, iterwalk_from, precedes
 from edgar.documents.utils.toc_analyzer import TOCAnalyzer
 
 logger = logging.getLogger(__name__)
@@ -154,8 +154,35 @@ class SECSectionExtractor:
         # Sort sections by their logical order
         sorted_sections = sorted(sec_sections.items(), key=lambda x: x[1]['order'])
 
+        # ...and, separately, by where they actually sit in the document. A
+        # section ends where the next one physically begins, and the two orders
+        # are not the same thing: item numbering is what the filer *calls* its
+        # sections, document order is where it *put* them (edgartools-4q74).
+        #
+        # Morgan Stanley's FY2024 10-K lays its items out as
+        #     1, 1A, 1C, 7, 7A, 8, 9, 9A, 9B, 9C, 1B, 2, 3, 4, 5, 10 … 15
+        # grouping Items 1B/2/3/4/5 behind the financial statements. Ending each
+        # section at the next *item number* there is wrong in both directions:
+        # Item 1A ran from Risk Factors all the way to Item 1B's anchor near the
+        # back of the filing (673,015 chars — MD&A, the financial statements and
+        # the controls items all filed under Risk Factors), while Item 1B's end
+        # resolved 75,978 elements *before* its own start and the section
+        # silently produced nothing. Taking the nearest following anchor instead
+        # gives Item 1A its 1,057 elements and Item 1B its paragraph.
+        #
+        # This is ordinary layout, not a malformed filing: ODP's Item 8 sits
+        # after the signature page, where the F-pages conventionally live, which
+        # is why `signatures` was absorbing 188,606 chars of financial
+        # statements.
+        #
+        # Document order is derived from the resolved anchor elements rather
+        # than a document walk — O(depth) per section against ~96k elements.
+        for section_data in sec_sections.values():
+            section_data['doc_path'] = document_order_path(section_data['element'])
+        by_document = sorted(sec_sections.values(), key=lambda d: d['doc_path'])
+
         # Calculate section boundaries
-        for i, (section_name, section_data) in enumerate(sorted_sections):
+        for section_name, section_data in sorted_sections:
             start_anchor = section_data['anchor_id']
 
             # End boundary is the start of the next section whose anchor
@@ -164,12 +191,14 @@ class SECSectionExtractor:
             # Item 1C both target the same div, GH #904); taking the immediate
             # next section there would make the end anchor equal the start
             # anchor, an empty span the slicer treats as unbounded — the
-            # section ran to end-of-document.
+            # section ran to end-of-document. Sections sharing an anchor also
+            # share a doc_path, so scanning past every equal anchor keeps that
+            # fix intact under document ordering.
             end_anchor = None
-            for j in range(i + 1, len(sorted_sections)):
-                next_anchor = sorted_sections[j][1]['anchor_id']
-                if next_anchor != start_anchor:
-                    end_anchor = next_anchor
+            for candidate in by_document:
+                if (candidate['doc_path'] > section_data['doc_path']
+                        and candidate['anchor_id'] != start_anchor):
+                    end_anchor = candidate['anchor_id']
                     break
 
             # Title-based forms (424B): tighten the end to the next *TOC entry*
@@ -762,10 +791,14 @@ class SECSectionExtractor:
         # paragraph, ending in the signature block, at confidence 0.95 with no
         # warning. Silence is the better answer, so the check is now explicit.
         #
-        # It fires on 4 sections across 3 of the 11 corpus documents. The
-        # inverted boundaries themselves are a separate detection bug
-        # (edgartools-4q74); this preserves the behaviour rather than papering
-        # over it with over-captured text.
+        # It used to fire on 4 sections across 3 of the 11 corpus documents, all
+        # of which were TOC boundaries ended at the next *item number* rather
+        # than the next section in document order (edgartools-4q74, fixed in
+        # _analyze_sections). Nothing in the corpus reaches it now, and it stays
+        # as a guard rather than an assertion because the rescue paths and the
+        # pattern extractor build boundaries by other routes: if one of those
+        # ever inverts a pair, silence is still the answer we want over text
+        # that runs to the end of the filing at confidence 0.95.
         if boundary.end_element_id:
             end_elements = find_anchor_targets(tree, boundary.end_element_id)
             if end_elements and precedes(end_elements[0], start_elements[0]):
