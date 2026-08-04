@@ -205,18 +205,25 @@ test-fast-parallel = "pytest -n auto -m 'fast' {args}"
 test-core-parallel = "pytest -n 2 -m 'not (slow or network or performance or batch)' --ignore=tests/perf {args}"
 test-parallel-safe = "pytest -n auto -m 'fast' {args}"
 
-# Parallel CI test strategy (skip regression tests for faster feedback)
+# Parallel CI test strategy
 #
 # SELECTIVE PARALLELIZATION STRATEGY:
-# 1. Marker-based: -m 'not regression' excludes tests marked as regression
+# 1. Marker-based: 'not regression' keeps the network/slow regression tests out
+#    of the PR jobs — they run in the Regression Tests workflow, which is the
+#    only place allowed to hammer the SEC endpoint.
 # 2. Path-based: --ignore=tests/issues/regression excludes entire folder
 # 3. Auto-marking: conftest.py automatically marks tests as fast/network based on filename
 # 4. Selective parallel: Only parallelize tests safe from SEC rate limits
 # 5. Combined coverage: CI combines coverage from fast/network/slow groups for 65% threshold
 #
+# test-ci-fast deliberately does NOT exclude regression. conftest.py classifies
+# every regression test as fast or network by measurement, and the offline ones
+# belong in the pull-request gate — before this they ran only after merge
+# (bead edgartools-07lk.21).
+#
 # Note: "core" group removed from CI - auto-marking leaves 0 tests without markers
 
-test-ci-fast = "pytest -n auto --cov --cov-report=xml -m 'fast and not regression' {args}"
+test-ci-fast = "pytest -n auto --cov --cov-report=xml -m 'fast' {args}"
 test-ci-network = "pytest --cov --cov-report=xml -m 'network and not slow and not regression' {args}"
 test-ci-slow = "pytest --cov --cov-report=xml -m 'slow and not regression' {args}"
 test-ci-all = "pytest --cov --cov-report=xml -m 'not regression' --ignore=tests/perf --ignore=tests/issues/regression {args}"

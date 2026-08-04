@@ -9,13 +9,19 @@ on:
   # Run weekly on Sundays
   schedule:
     - cron: '0 8 * * 0'
-  # Also run on main branch pushes for critical changes
+  # Also run on main branch pushes that touch the library.
+  #
+  # This used to name three packages — edgar/xbrl, edgar/entity and the
+  # regression tree itself — which left every other package uncovered. A change
+  # under edgar/documents that added no regression file ran the suite in no job
+  # at all, and that is where the section-extraction defect cluster lives
+  # (bead edgartools-07lk.21). `edgar/**` closes the hole as a class instead of
+  # one package at a time; docs- and script-only merges still skip it.
   push:
     branches: [ "main" ]
     paths:
       - 'tests/issues/regression/**'
-      - 'edgar/xbrl/**'
-      - 'edgar/entity/**'
+      - 'edgar/**'
 
 # Cancel superseded regression runs on the same ref.
 concurrency:
