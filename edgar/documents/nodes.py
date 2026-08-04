@@ -91,7 +91,27 @@ def _ends_with_tail_whitespace(node) -> bool:
     return False
 
 
-@dataclass
+# eq=False on Node and every subclass: nodes compare by identity, as plain
+# objects do.
+#
+# The generated __eq__ compared field by field and recursed through `parent` and
+# `children`, so every `==`, `in`, `.index()` and `.remove()` on a node bought a
+# deep structural walk of the tree where the caller meant identity. It cost real
+# time — `n.parent not in nodes_in_range` was 10.5s of Citigroup's 18s sections
+# stage (edgartools-llmp.6.10) — and on one input it did not return at all:
+#
+#     a = ParagraphNode(); a.add_child(TextNode(content='x'))
+#     a == copy.deepcopy(a)     # RecursionError: parent -> children -> parent
+#
+# deepcopy preserves `id`, so the uuid that normally decides the comparison on
+# its first field stops short-circuiting and the walk turns back on itself.
+#
+# Nothing observable changes. `id` is a uuid compared first, so two distinct
+# nodes were already unequal and a node was already equal to itself; identity
+# was the only answer equality could give that was not a crash. Nodes also
+# become hashable again — eq=True sets __hash__ to None, so sets and dicts of
+# nodes had to be keyed on id() (edgartools-llmp.10).
+@dataclass(eq=False)
 class Node(ABC):
     """
     Base node class for document tree.
@@ -219,7 +239,7 @@ class Node(ABC):
         return key in self.metadata
 
 
-@dataclass
+@dataclass(eq=False)
 class DocumentNode(Node, CacheableMixin):
     """Root document node."""
     type: NodeType = field(default=NodeType.DOCUMENT, init=False)
@@ -251,7 +271,7 @@ class DocumentNode(Node, CacheableMixin):
 </html>"""
 
 
-@dataclass
+@dataclass(eq=False)
 class TextNode(Node):
     """Plain text content node."""
     type: NodeType = field(default=NodeType.TEXT, init=False)
@@ -271,7 +291,7 @@ class TextNode(Node):
         return text
 
 
-@dataclass
+@dataclass(eq=False)
 class ParagraphNode(Node, CacheableMixin):
     """Paragraph node."""
     type: NodeType = field(default=NodeType.PARAGRAPH, init=False)
@@ -381,7 +401,7 @@ class ParagraphNode(Node, CacheableMixin):
         return ''
 
 
-@dataclass
+@dataclass(eq=False)
 class HeadingNode(Node):
     """Heading node with level."""
     type: NodeType = field(default=NodeType.HEADING, init=False)
@@ -418,7 +438,7 @@ class HeadingNode(Node):
         return ''
 
 
-@dataclass
+@dataclass(eq=False)
 class ContainerNode(Node, CacheableMixin):
     """Generic container node (div, section, etc.)."""
     type: NodeType = field(default=NodeType.CONTAINER, init=False)
@@ -461,7 +481,7 @@ class ContainerNode(Node, CacheableMixin):
         return ''
 
 
-@dataclass
+@dataclass(eq=False)
 class SectionNode(ContainerNode):
     """Document section node."""
     type: NodeType = field(default=NodeType.SECTION, init=False)
@@ -473,7 +493,7 @@ class SectionNode(ContainerNode):
             self.set_metadata('section_name', self.section_name)
 
 
-@dataclass
+@dataclass(eq=False)
 class ListNode(Node):
     """List node (ordered or unordered)."""
     type: NodeType = field(default=NodeType.LIST, init=False)
@@ -499,7 +519,7 @@ class ListNode(Node):
         return f'<{tag}>\n{items}\n</{tag}>'
 
 
-@dataclass
+@dataclass(eq=False)
 class ListItemNode(Node):
     """List item node."""
     type: NodeType = field(default=NodeType.LIST_ITEM, init=False)
@@ -519,7 +539,7 @@ class ListItemNode(Node):
         return f'<li>{content}</li>'
 
 
-@dataclass
+@dataclass(eq=False)
 class LinkNode(Node):
     """Hyperlink node."""
     type: NodeType = field(default=NodeType.LINK, init=False)
@@ -546,7 +566,7 @@ class LinkNode(Node):
         return f'<a{href_attr}{title_attr}>{content}</a>'
 
 
-@dataclass
+@dataclass(eq=False)
 class ImageNode(Node):
     """Image node."""
     type: NodeType = field(default=NodeType.IMAGE, init=False)

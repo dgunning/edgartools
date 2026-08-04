@@ -137,7 +137,7 @@ class Row:
         return False
 
 
-@dataclass
+@dataclass(eq=False)
 class TableNode(Node, CacheableMixin):
     """
     Table node with structured data.
