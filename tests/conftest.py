@@ -322,6 +322,15 @@ def pytest_collection_modifyitems(items):
     # this by eye; the filename heuristic was wrong for five files the last time
     # a classification was done here.
     #
+    # The measurement is a committed harness, so it does not have to be rebuilt
+    # again (bead edgartools-nx3h — it had been written from scratch three times):
+    #
+    #     hatch run test-offline-audit tests/issues/regression/
+    #
+    # Failures there are candidates, not verdicts. Re-run each one WITHOUT the
+    # harness before adding it below: failing offline and being broken look
+    # identical from inside the run. See tests/_offline_harness.py.
+    #
     # "Offline" means offline *alone*: the measurement clears every functools
     # cache in the edgar package before each test, so no test is credited with a
     # fetch an earlier one had already cached. That is stricter than CI, where

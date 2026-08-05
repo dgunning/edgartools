@@ -197,6 +197,28 @@ test-slow = "pytest -m 'slow' {args}"
 test-network = "pytest -m 'network' {args}"
 test-core = "pytest -m 'not (slow or network or performance or batch)' --ignore=tests/perf {args}"
 
+# Measure which tests actually need the SEC, rather than guessing from filenames.
+# Blocks outbound sockets and clears edgar's caches between tests, so the answer
+# does not depend on ordering. Takes a path: `hatch run test-offline-audit
+# tests/issues/regression/`. Anything that fails here must be re-run WITHOUT the
+# plugin before being marked `network` — failing offline and being broken are
+# different facts. See tests/_offline_harness.py.
+# Two flags that both cost more than they look.
+#
+# `python -m pytest`, not `pytest`: -p imports the plugin before collection puts
+# the rootdir on sys.path, and the console script never adds cwd, so the bare
+# form cannot find tests._offline_harness at all.
+#
+# `-p no:pytest-retry` because the suite retries twice with a 4s delay, and a
+# blocked socket never succeeds on the second attempt — it just multiplies the
+# cost of exactly the failures the audit is looking for. On one 16-test file
+# that is 24.9s against 0.35s. The plugin registers as `pytest-retry`, not
+# `retry`, and `-p no:retry` is accepted and silently does nothing; `--retries 0`
+# does not disable it either, since the ini value still reads as set. Disabling
+# it orphans its ini keys, so the run warns `Unknown config option:
+# cumulative_timing` — expected here, and not a sign of a broken config.
+test-offline-audit = "python -m pytest -p tests._offline_harness -p no:pytest-retry {args}"
+
 # Parallel test commands (selective parallelization for SEC rate limit safety)
 # - Fast tests: Full parallelization (no network calls)
 # - Network/slow: Sequential (respects SEC rate limits)
