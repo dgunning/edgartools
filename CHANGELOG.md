@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Performance
+
+- **`filing.obj()` on a registration statement downloaded its whole file-number family looking for a fee exhibit that could not be there.** Each sibling was probed through `filing.attachments`, which fetches the entire `.txt` submission. Learn CW's S-1 (`0001140361-21-010426`) transferred 12.2MB for a 2.4MB filing and found nothing — Exhibit 107 postdates it. Siblings filed before that regime are no longer probed, and probing now stops at the first match.
+
 ### Fixed
 
 - **`Document.to_dataframe()` raised on every real annual and quarterly report, from inside pandas and numpy.** It failed on 10 of the 11 filings in the 6.0 performance corpus, with three different messages depending on which pair of frames pandas happened to align first — `cannot join with no overlapping index names`, `Cannot cast array data from dtype('float64') to dtype('int64') according to the rule 'safe'`, and `Index data must be 1-dimensional`. The only entry that worked was an ABS-15G, which is a single flat table: the degenerate case.

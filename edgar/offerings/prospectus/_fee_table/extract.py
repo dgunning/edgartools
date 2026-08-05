@@ -43,6 +43,30 @@ def _is_registration_form(form: Optional[str]) -> bool:
     return base in _FEE_BEARING_BASE_FORMS or base.endswith('ASR') or base == 'POS AM'
 
 
+# EX-FILING FEES (Exhibit 107) was created by the SEC's filing-fee modernization
+# rule — adopted 2021-10-13, effective 2022-01-31 — so no filing made before that
+# rule existed can carry one. This constant is deliberately set earlier than the
+# effective date: a gate that is too early costs one wasted probe, while a gate
+# that is too late would skip a real exhibit, so the error is pushed to the
+# harmless side. It matters because probing a sibling is not cheap — see
+# _probe_has_fee_exhibit.
+_EX107_EARLIEST_FILING_DATE = "2021-10-01"
+
+
+def _probe_has_fee_exhibit(filing: 'Filing') -> bool:
+    """Whether ``filing`` carries a fee exhibit — at the cost of a full download.
+
+    ``filing.attachments`` resolves through ``filing.sgml()``, which fetches the
+    complete ``.txt`` submission, so asking this question about one sibling costs
+    megabytes. Every caller below is written to ask it as few times as possible.
+    """
+    try:
+        return _get_filing_fees_attachment(filing) is not None
+    except Exception:
+        log.debug("Could not read attachments for %s", filing.accession_no)
+        return False
+
+
 def _resolve_fee_source(filing: 'Filing'):
     """Find the fee-bearing registration for an amendment that omits its exhibit.
 
@@ -51,9 +75,17 @@ def _resolve_fee_source(filing: 'Filing'):
     registration, and the registered capacity still lives in that filing's
     Exhibit 107. Walk the file-number family and return the most recent
     fee-bearing registration filing dated at or before this one (falling back to
-    the earliest if all are later). Returns None when ``filing`` is not itself a
+    the latest if all are later). Returns None when ``filing`` is not itself a
     registration form or no such source exists, so non-registration filings
     (424B takedowns, 10-Ks) keep their current None result.
+
+    Both filters exist to keep the walk from downloading the family. Siblings
+    filed before the Exhibit 107 regime are dropped without being probed at all,
+    which removes the walk entirely for pre-2022 registrations — they have no
+    exhibit anywhere in the family by construction, and their fee table is read
+    from the inline body table instead. The survivors are then probed in
+    priority order and the first hit wins, rather than probing every sibling and
+    taking the maximum afterwards.
     """
     if not _is_registration_form(filing.form):
         return None
@@ -63,14 +95,28 @@ def _resolve_fee_source(filing: 'Filing'):
         log.debug("related_filings() failed for %s", filing.accession_no)
         return None
     own_date = str(filing.filing_date)
-    candidates = [rf for rf in related
-                  if rf.accession_no != filing.accession_no
-                  and _is_registration_form(rf.form)
-                  and _get_filing_fees_attachment(rf) is not None]
-    if not candidates:
+    eligible = [rf for rf in related
+                if rf.accession_no != filing.accession_no
+                and _is_registration_form(rf.form)
+                and str(rf.filing_date) >= _EX107_EARLIEST_FILING_DATE]
+    if not eligible:
         return None
-    at_or_before = [rf for rf in candidates if str(rf.filing_date) <= own_date]
-    return max(at_or_before or candidates, key=lambda rf: str(rf.filing_date))
+
+    # Latest at-or-before this filing wins; only if none of those carries an
+    # exhibit does a later one, latest first. Probing in that order and stopping
+    # at the first hit picks the same filing that taking the maximum over every
+    # fee-bearing candidate did, without paying for the ones after it. Sorting is
+    # stable, so same-date siblings keep their family order and ties resolve the
+    # way max() resolved them.
+    def _by_date_desc(filings):
+        return sorted(filings, key=lambda rf: str(rf.filing_date), reverse=True)
+
+    at_or_before = _by_date_desc(rf for rf in eligible if str(rf.filing_date) <= own_date)
+    after = _by_date_desc(rf for rf in eligible if str(rf.filing_date) > own_date)
+    for candidate in (*at_or_before, *after):
+        if _probe_has_fee_exhibit(candidate):
+            return candidate
+    return None
 
 
 def _data_to_fee_table(data: dict):
