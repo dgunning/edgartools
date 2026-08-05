@@ -72,7 +72,7 @@ import time
 import warnings
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set
 
 # Anchored on this file's own directory, the way scoring.py does it, so the
 # paths survive the file being moved again.
