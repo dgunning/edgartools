@@ -70,8 +70,16 @@ def _clean_underwriter_name(name: str) -> str:
 
 
 # Lowercase words allowed mid-name: connectors and corporate-form tokens.
+#
+# 'a' and 'division' are here because a boutique underwriter is very often a
+# division of its broker-dealer rather than a firm in its own right, and it
+# files under the full construction: 'EF Hutton, division of Benchmark
+# Investments, LLC', 'ThinkEquity, a division of Fordham Financial Management,
+# Inc.'. Both are well under the 80-char cap and were rejected on the single
+# token 'division', which dropped them from the roster and left lead_manager
+# None on every filing they led (bead edgartools-ji90).
 _UW_NAME_LOWER_OK = {
-    'and', 'of', 'the', 'de', 'für',
+    'and', 'of', 'the', 'de', 'für', 'a', 'an', 'division',
     'llc', 'lp', 'plc', 'sa', 'ag', 'na', 'nv', 'co', 'inc', 'ltd',
 }
 
