@@ -25,10 +25,6 @@ ratelimiter.sqlite*
 .pyscn/
 # Training output (generated, not tracked)
 training/output/
-# Oversized issue-868 S-1 underwriter cassettes (>100MB, kept local only)
-tests/cassettes/TestIssue868S1Underwriters.test_s1_lead_manager_is_real_underwriter.yaml
-tests/cassettes/TestIssue868S1Underwriters.test_s1a_lead_manager_is_real_underwriter.yaml
-
 # Private working material. These rules lived ONLY in .git/info/exclude, which
 # is per-clone and never shared, so a fresh clone tracked all of it with no
 # signal. This is a public repo and the working tree routinely carries 200+
