@@ -260,11 +260,30 @@ test-reproduction = "pytest tests/issues/reproductions/ -m 'reproduction' {args}
 test-full = "pytest --ignore=tests/perf {args}"
 
 [tool.hatch.envs.test]
+# Keep this list in step with what CI installs (see the pip install lines in
+# .github/workflows/python-hatch-workflow.yml) and with the default env's pins.
+# A plugin missing here does not fail — it changes what the tests mean. Without
+# pytest-vcr and vcrpy, `@pytest.mark.vcr` is an unregistered marker, no cassette
+# is opened, and the request goes to the network or the local HTTP cache while
+# the run still reports passed. That is the "a cassette existing is not replay"
+# failure one level further down: the cassette can be right and the runner still
+# never open it.
 dependencies = [
   "pytest",
   "pytest-cov",
   "pytest-env",
-  "pytest-asyncio"
+  "pytest-xdist",
+  "pytest-asyncio",
+  "pytest-retry",
+  "pytest-mock",
+  "pytest-vcr",
+  # Pin <8.2 for the same reason as the default env: vcrpy 8.2.0's httpx stub
+  # crashes deserializing a cassette with a null reason phrase.
+  "vcrpy<8.2",
+  "filelock",
+  "tqdm",
+  "responses",
+  "freezegun==1.5.1"
 ]
 
 [[tool.hatch.envs.test.matrix]]
