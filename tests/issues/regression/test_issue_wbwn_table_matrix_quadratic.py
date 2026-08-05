@@ -53,6 +53,38 @@ class CountingList(list):
         return super().__len__()
 
 
+class CountingMatrix(TableMatrix):
+    """A TableMatrix whose grid counts every inspection, through a real build.
+
+    ``build_from_rows`` reassigns ``self.matrix``, so instrumenting the list
+    beforehand does not survive. Routing the attribute through a property keeps
+    the instrument attached across the reassignment, which is what lets the
+    scaling test measure the production code path rather than a stand-in.
+    """
+
+    @property
+    def matrix(self):
+        return self._matrix
+
+    @matrix.setter
+    def matrix(self, value):
+        self._matrix = CountingList(value)
+
+
+def count_grid_inspections(row_count: int) -> int:
+    """Times the grid is consulted while building ``row_count`` rows.
+
+    This is the cost the defect ran up: ``_is_occupied`` reads ``len(self.matrix)``
+    once per iteration of its scan, and the scan is what the short-circuit
+    removes. ``_place_cells`` indexes the grid directly and never asks its
+    length, so the number here is attributable to the occupancy pass alone.
+    """
+    rows = build_rows(row_count)
+    CountingList.len_calls = 0
+    CountingMatrix().build_from_rows([], rows)
+    return CountingList.len_calls
+
+
 class TestDimensionPassDoesNotConsultAnUnbuiltGrid:
     """The specific defect: occupancy was queried before the grid existed."""
 
@@ -113,23 +145,42 @@ class TestLargeTablesBuildInLinearTime:
         assert matrix.col_count == COLUMNS
 
     def test_scaling_is_not_quadratic(self):
-        """Quadratic growth quadruples per doubling; linear roughly doubles."""
+        """4x the rows must cost ~4x the grid inspections, not ~16x.
 
-        def build_seconds(row_count: int) -> float:
-            rows = build_rows(row_count)
-            start = time.perf_counter()
-            TableMatrix().build_from_rows([], rows)
-            return time.perf_counter() - start
+        Counted, not timed. This assertion used to compare wall clock against a
+        ~41ms baseline, and under full-suite load it failed at 9.1x
+        (0.041s -> 0.373s) while the code was perfectly linear — the quadratic
+        guard tripping on GC and scheduler noise rather than on the defect, three
+        attempts deep, because a 41ms baseline cannot support a ratio assertion
+        (bead edgartools-kzdr). Counting removes the runner from the measurement:
+        the numbers below are identical on an idle box and a saturated one.
 
-        baseline = build_seconds(1000)
-        quadrupled = build_seconds(4000)
+        The counts tie back to the original profile of accession
+        0000310522-18-000010, which recorded 95,976 ``_is_occupied`` calls at
+        4,000 rows driving 192,527,603 ``len`` calls. Fixed, those 95,976 calls
+        do one length check each instead of scanning every row above them.
+        """
+        baseline = count_grid_inspections(1000)
+        quadrupled = count_grid_inspections(4000)
 
-        # 4x the rows: ~4x if linear, ~16x if quadratic. Measured 6.7x before
-        # the fix at these sizes and 2-3x after, so 8x separates them with room
-        # for timer noise on a small baseline.
-        assert quadrupled < baseline * 8, (
-            f"4x rows cost {quadrupled / baseline:.1f}x the time "
-            f"({baseline:.3f}s -> {quadrupled:.3f}s), which looks quadratic"
+        # 4x the rows: 4x if linear, ~16x if quadratic. Measured exactly 4.00x
+        # fixed, so 5x separates the two without sitting on the boundary.
+        assert quadrupled < baseline * 5, (
+            f"4x rows cost {quadrupled / baseline:.1f}x the grid inspections "
+            f"({baseline:,} -> {quadrupled:,}), which looks quadratic"
+        )
+
+    def test_grid_inspection_cost_per_row_is_flat(self):
+        """The sharper statement: cost per row does not grow with the table.
+
+        A ratio can be satisfied by a curve that is merely sub-quadratic. Per-row
+        cost holding flat across a 16x size range is what linear actually means,
+        and it is the property the short-circuit restores.
+        """
+        per_row = {n: count_grid_inspections(n) / n for n in (250, 1000, 4000)}
+
+        assert max(per_row.values()) - min(per_row.values()) < 1.0, (
+            f"per-row grid inspections drift with table size: {per_row}"
         )
 
 
