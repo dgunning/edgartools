@@ -31,7 +31,8 @@ COLUMNS = 24
 LARGE_ROW_COUNT = 4000
 
 # The fixed build takes ~0.26s; the quadratic one took ~4.2s on the same box.
-# Generous enough for a slow CI runner, tight enough that O(rows^2) cannot pass.
+# Tight enough that O(rows^2) cannot pass, and only meaningful on a machine that
+# is not otherwise busy — see the marker on the test that asserts it.
 BUILD_BUDGET_SECONDS = 2.0
 
 
@@ -91,6 +92,15 @@ class TestDimensionPassDoesNotConsultAnUnbuiltGrid:
 
 
 class TestLargeTablesBuildInLinearTime:
+    # An absolute wall-clock budget measures the runner as much as the code, so
+    # this one runs in the Regression Tests workflow, which runs pytest serially,
+    # and not in the pull-request gate, which runs it under `-n auto`. On a
+    # saturated 4-core runner the linear build measured 2.11-2.88s against a
+    # 2.0s budget while still being linear — a false failure, and the discriminating
+    # signal (0.26s fixed vs 4.2s quadratic) is what contention destroys first.
+    # test_scaling_is_not_quadratic below is the pull-request guard: it compares
+    # two builds on the same machine, so shared load cancels out of the ratio.
+    @pytest.mark.slow
     def test_large_table_build_is_within_budget(self):
         rows = build_rows(LARGE_ROW_COUNT)
 

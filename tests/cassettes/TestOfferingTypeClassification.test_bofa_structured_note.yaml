@@ -5,7 +5,7 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate, br, zstd
+      - gzip, deflate
       Connection:
       - keep-alive
       Host:
@@ -6859,41 +6859,43 @@ interactions:
         \   ,.545,Z=\"M)M7$D3*U3BX4AUA*W8REH-\nM\"S;49<H-23-)])ER1F1^  S\nM\nM\nM\nM\nM\nM\nM\nM
         \                                                          !\n\"_]D!\n\nend\n</TEXT>\n</DOCUMENT>\n</SEC-DOCUMENT>\n"
     headers:
-      accept-ranges:
+      Accept-Ranges:
       - bytes
+      Connection:
+      - keep-alive
+      Content-Type:
+      - text/plain
+      Date:
+      - Wed, 05 Aug 2026 00:49:55 GMT
+      ETag:
+      - '"77e30ba085c3c762b2d7aa5c564d9a42-gzip"'
+      Last-Modified:
+      - Tue, 31 Dec 2024 11:12:30 GMT
+      Strict-Transport-Security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
       content-length:
       - '831246'
-      content-type:
-      - text/plain
-      date:
-      - Mon, 09 Mar 2026 16:26:34 GMT
-      etag:
-      - '"77e30ba085c3c762b2d7aa5c564d9a42-gzip"'
-      last-modified:
-      - Tue, 31 Dec 2024 11:12:30 GMT
-      strict-transport-security:
-      - max-age=31536000 ; includeSubDomains ; preload
-      vary:
-      - Accept-Encoding
       x-amz-id-2:
-      - je+OkGLf8LZMUKtk+/QMEq7K89BsieUKSTL55waVhmLWIrxlXnpcwKTbqxOznR1jtwn0E2BFEkg=
+      - rjHNQlZI3CN3mvF0WjMthuB4B5cBEwXqEP/nms0wJ8gs/ES3rN8OYrcPtNnthBDup2LEzt+7BkQ=
       x-amz-meta-mode:
       - '33188'
       x-amz-replication-status:
       - COMPLETED
       x-amz-request-id:
-      - 44CHPF5BNCSXCAB9
+      - SF8YQCS92DZXES1Q
       x-amz-server-side-encryption:
       - AES256
       x-amz-version-id:
       - nyghWhdr5cgtgnnB6PtqlIp_XX3WvLC9
-      x-content-type-options:
-      - nosniff
-      x-frame-options:
-      - SAMEORIGIN
-      x-xss-protection:
-      - 1; mode=block
     status:
       code: 200
-      message: null
+      message: OK
 version: 1
