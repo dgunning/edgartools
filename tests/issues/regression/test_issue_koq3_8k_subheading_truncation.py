@@ -28,6 +28,7 @@ import pytest
 from edgar.documents import parse_html
 from edgar.documents.config import ParserConfig
 from edgar.documents.nodes import HeadingNode
+from tests._offline_filings import offline_filing
 
 
 class TestSubheadingDoesNotTruncateItem:
@@ -93,12 +94,11 @@ class TestNvidia8KGroundTruth:
 
     @pytest.mark.vcr
     def test_nvidia_item_502_full_body(self):
-        import edgar
 
         # NVIDIA 8-K, 2026-03-06, items 5.02 + 9.01. Item 5.02 has an internal
         # bold sub-heading ("Adoption of Fiscal Year 2027 Variable Compensation
         # Plan"). Before the fix this returned a 214-char stub.
-        filing = edgar.get_by_accession_number("0001045810-26-000024")
+        filing = offline_filing("0001045810-26-000024")
         ek = filing.obj()
 
         text = ek["Item 5.02"]

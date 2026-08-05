@@ -26,6 +26,7 @@ mis-scoped sections from inline body mentions.
 import pytest
 
 from edgar.documents.form_schema import get_form_schema
+from tests._offline_filings import offline_filing
 
 pytestmark = pytest.mark.regression
 
@@ -67,9 +68,8 @@ def test_non_item_keys_do_not_resolve():
 @pytest.mark.vcr
 def test_nathans_famous_split_node_sections_carry_item_metadata():
     """NATH 10-K: MD&A is detected and every semantic section carries .item/.part."""
-    from edgar import get_by_accession_number
 
-    tenk = get_by_accession_number("0001437749-26-019923").obj()
+    tenk = offline_filing("0001437749-26-019923").obj()
 
     # MD&A (Item 7) must be present on the new parser.
     assert "mda" in tenk.sections, "MD&A section was not detected"

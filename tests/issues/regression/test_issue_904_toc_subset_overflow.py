@@ -41,6 +41,7 @@ from edgar.documents.document import Section
 from edgar.documents.extractors.hybrid_section_detector import HybridSectionDetector
 from edgar.documents.nodes import SectionNode
 from edgar.documents.utils.toc_analyzer import TOCAnalyzer
+from tests._offline_filings import offline_filing
 
 pytestmark = pytest.mark.regression
 
@@ -451,9 +452,8 @@ def test_successor_pre_gate_still_scans_when_mandatory_item_missing_mid_ladder()
 @pytest.mark.vcr
 def test_coeur_item7_bounded_and_body_items_recovered():
     """Coeur 10-K: Item 7 stops at Item 7A; 7A/8/9A exist; Item 1B is a stub."""
-    from edgar import get_by_accession_number
 
-    tenk = get_by_accession_number("0000215466-26-000004").obj()
+    tenk = offline_filing("0000215466-26-000004").obj()
     sections = tenk.document.sections
 
     # The body-header items missing from the TOC are recovered.

@@ -27,6 +27,7 @@ import pytest
 from edgar import find
 from edgar.funds._497k_tables import _extract_operating_expenses, _parse_percentage
 from edgar.funds.prospectus497k import Prospectus497K
+from tests._offline_filings import offline_filing
 
 # The 497K named in GH #912: Ocean Park High Income ETF, series S000085658.
 OCEAN_PARK_ACCESSION = "0001580642-24-004234"
@@ -244,7 +245,7 @@ class TestFootnoteMarkersInValueCells:
         parsed as 4 it overwrote the real return. Best/worst came back as
         4 and 1.
         """
-        prospectus = find("0001193125-25-152548").obj()
+        prospectus = offline_filing("0001193125-25-152548").obj()
 
         assert prospectus.best_quarter[0] == Decimal("6.02")
         assert prospectus.worst_quarter[0] == Decimal("-6.88")
@@ -257,7 +258,7 @@ class TestFootnoteMarkersInValueCells:
         Class A: management fee 0.67, total 1.12, reimbursement (0.01), net 1.11.
         Before the fix these parsed as 0.671, 1.12, -0.013 and None.
         """
-        prospectus = find("0001193125-25-148895").obj()
+        prospectus = offline_filing("0001193125-25-148895").obj()
         class_a = prospectus.share_classes[0]
 
         assert class_a.class_name == "A"

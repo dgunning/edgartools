@@ -6,28 +6,14 @@ Ground truth filings:
   N-MFP2: AB Fixed Income Shares, accession 0001145549-23-075236, report date 2023-11-30
 """
 from decimal import Decimal
-from pathlib import Path
 
 import pytest
-try:
-    import vcr
-except ImportError:
-    vcr = None
 
-from edgar import get_by_accession_number
-from edgar.funds.nmfp3 import MoneyMarketFund, NMFP2_FORMS, NMFP3_FORMS, MONEY_MARKET_FORMS
+from edgar.funds.nmfp3 import MONEY_MARKET_FORMS, NMFP2_FORMS, NMFP3_FORMS, MoneyMarketFund
+from tests._offline_filings import offline_filing
 
 # Mark all tests in this module as network tests
 pytestmark = pytest.mark.network
-
-CASSETTES_DIR = Path(__file__).parent / "cassettes"
-my_vcr = vcr.VCR(
-    cassette_library_dir=str(CASSETTES_DIR),
-    record_mode="once",
-    match_on=["method", "scheme", "host", "port", "path", "query"],
-    filter_headers=["User-Agent", "Authorization"],
-    decode_compressed_response=True,
-) if vcr else None
 
 # Cache the filing and parsed object for all tests in this module
 _filing = None
@@ -37,8 +23,7 @@ _mmf = None
 def get_filing():
     global _filing
     if _filing is None:
-        with my_vcr.use_cassette("test_nmfp3_v3_filing.yaml"):
-            _filing = get_by_accession_number("0001410368-26-010417")
+        _filing = offline_filing("0001410368-26-010417")
     return _filing
 
 
@@ -358,8 +343,7 @@ _v2_mmf = None
 def get_v2_filing():
     global _v2_filing
     if _v2_filing is None:
-        with my_vcr.use_cassette("test_nmfp3_v2_filing.yaml"):
-            _v2_filing = get_by_accession_number("0001145549-23-075236")
+        _v2_filing = offline_filing("0001145549-23-075236")
     return _v2_filing
 
 

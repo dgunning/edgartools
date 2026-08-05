@@ -14,7 +14,6 @@ try:
 except ImportError:
     vcr = None
 
-from edgar import get_by_accession_number
 from edgar.ats import (
     ATS_N_ALL_FORMS,
     ATS_N_AMENDMENT_FORMS,
@@ -23,6 +22,7 @@ from edgar.ats import (
     AlternativeTradingSystem,
     AlternativeTradingSystemWithdrawal,
 )
+from tests._offline_filings import offline_filing
 
 pytestmark = pytest.mark.network
 
@@ -44,7 +44,7 @@ my_vcr = vcr.VCR(
 def bofa_initial():
     """BofA Securities Instinct X — the first initial ATS-N ever filed (2019)."""
     with my_vcr.use_cassette("test_atsn_bofa_initial.yaml"):
-        filing = get_by_accession_number("0001675365-19-000012")
+        filing = offline_filing("0001675365-19-000012")
         return filing.obj()
 
 
@@ -52,7 +52,7 @@ def bofa_initial():
 def gs_amendment():
     """Goldman Sachs Sigma X2 — ATS-N/UA with oversized-field PDFs."""
     with my_vcr.use_cassette("test_atsn_gs_ua.yaml"):
-        filing = get_by_accession_number("0000950123-23-009133")
+        filing = offline_filing("0000950123-23-009133")
         return filing.obj()
 
 
@@ -60,7 +60,7 @@ def gs_amendment():
 def jpm_withdrawal():
     """JPM JPB-X withdrawal — ATS-N-W with atsncw namespace, empty formData."""
     with my_vcr.use_cassette("test_atsn_jpm_withdrawal.yaml"):
-        filing = get_by_accession_number("0000019617-24-000664")
+        filing = offline_filing("0000019617-24-000664")
         return filing.obj()
 
 
