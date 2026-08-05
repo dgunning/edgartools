@@ -124,6 +124,36 @@ def pytest_addoption(parser):
     parser.addoption("--enable-cache", action="store_true", help="Enable HTTP cache")
 
 
+def _require_vcr_plugin_if_cassettes_are_used(config, items):
+    """Fail loudly when cassette-backed tests run without the plugin that replays them.
+
+    The ``vcr`` marker is registered in pyproject, so an environment with no
+    pytest-vcr installed does not warn about an unknown marker — it silently
+    ignores the marker, opens no cassette, and lets the request go to the network
+    or the local HTTP cache. The run still reports passed, which makes it worse
+    than a failure: the suite looks like it verified against recorded responses
+    while verifying against whatever the machine happened to have.
+
+    That is what the hatch ``test`` matrix env did until its dependency list was
+    brought in step with CI (bead edgartools-ov2m). This hook is the guard, not
+    the fix — it turns a silent downgrade into a collection error the next time
+    the two lists drift apart.
+    """
+    if not any(item.get_closest_marker("vcr") for item in items):
+        return
+    # pytest-vcr registers under the short name "vcr"; the module name is checked
+    # too so that disabling it explicitly (-p no:vcr) is caught the same way.
+    if any(config.pluginmanager.hasplugin(name) for name in ("vcr", "pytest_vcr")):
+        return
+    raise pytest.UsageError(
+        "Tests marked @pytest.mark.vcr were collected, but pytest-vcr is not "
+        "installed in this environment, so no cassette would be replayed and the "
+        "tests would reach the network while still reporting passed. Install "
+        "pytest-vcr and vcrpy<8.2 (see [tool.hatch.envs.test] in pyproject.toml), "
+        "or deselect the cassette-backed tests."
+    )
+
+
 def pytest_configure(config):
     """
     - Disables caching for testing
@@ -211,7 +241,7 @@ def pytest_runtest_call(item):
             pytest.skip(f"SEC returned transient empty response: {exc_value}")
 
 
-def pytest_collection_modifyitems(items):
+def pytest_collection_modifyitems(config, items):
     """
     Automatically add markers to tests based on file patterns.
 
@@ -222,6 +252,8 @@ def pytest_collection_modifyitems(items):
 
     Only adds markers to tests that don't already have fast/network/slow markers.
     """
+    _require_vcr_plugin_if_cassettes_are_used(config, items)
+
     # Files that are definitely fast (no network calls - parsing, processing, rendering)
     FAST_PATTERNS = [
         'test_html', 'test_documents', 'test_xbrl', 'test_tables', 'test_table',
