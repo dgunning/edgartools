@@ -145,6 +145,37 @@ class TestTableIndexIsScalar:
         assert not any(isinstance(v, tuple) for v in labels)
 
 
+class TestSpacerColumns:
+    """The empty columns a spanning row-label header leaves behind.
+
+    A filing lays its label column across two or three physical columns sharing
+    one header, and only the first holds the label. Once that one becomes the
+    index the rest are empty columns named after the index — noise, and 367 of
+    the 444 affected tables in the benchmark corpus have nothing else in them.
+
+    They are dropped only when empty. A same-headed column holding a percentage
+    or a rate is data, and 77 corpus tables have one.
+    """
+
+    def test_empty_spacer_columns_are_dropped(self):
+        doc = parse(MIXED_DEPTH_HTML)
+        df = doc.tables[2].to_dataframe()
+        assert list(df.index) == ['Total']
+        # '($ in millions)' spanned two columns; the second is empty and goes.
+        assert df.index.name not in list(df.columns)
+        assert list(df.columns) == ['2024']
+
+    def test_a_same_headed_column_with_content_is_kept(self):
+        """Dropping this one would lose a filed value."""
+        html = """<html><body><table>
+          <tr><th>Rate</th><th>Rate</th><th>2024</th></tr>
+          <tr><td>Effective tax rate</td><td>32.8</td><td>5</td></tr>
+        </table></body></html>"""
+        df = parse(html).tables[0].to_dataframe()
+        values = {str(v).strip() for v in df.to_numpy().ravel()}
+        assert '32.8' in values, "a same-headed column holding data must survive"
+
+
 class TestDocumentToDataFrame:
     """The contract that makes concatenation safe in the first place."""
 
