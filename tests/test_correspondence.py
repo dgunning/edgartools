@@ -5,16 +5,16 @@ Tests use VCR cassettes to replay network requests deterministically.
 """
 
 import pytest
-from edgar import Filing, get_by_accession_number, get_obj_info
+
+from edgar import Filing, get_obj_info
 from edgar.correspondence import (
     Correspondence,
-    CorrespondenceThread,
     CorrespondenceType,
+    _classify_correspondence,
     _extract_file_number,
     _extract_referenced_form,
-    _classify_correspondence,
 )
-
+from tests._offline_filings import offline_filing
 
 # ---------------------------------------------------------------------------
 # Unit tests: metadata extraction (no network)
@@ -105,7 +105,7 @@ class TestCorrespondenceFromFiling:
     @pytest.mark.vcr
     def test_apple_corresp_is_company_response(self):
         """Apple CORRESP filing classified as company_response with correct metadata."""
-        filing = get_by_accession_number('0000320193-24-000061')
+        filing = offline_filing("0000320193-24-000061")
         corresp = Correspondence.from_filing(filing)
         assert isinstance(corresp, Correspondence)
         assert corresp.correspondence_type == CorrespondenceType.COMPANY_RESPONSE
@@ -139,7 +139,7 @@ class TestCorrespondenceFromFiling:
     @pytest.mark.vcr
     def test_acceleration_request(self):
         """Nuvectis CORRESP Rule 461 acceleration request."""
-        filing = get_by_accession_number('0001104659-26-017097')
+        filing = offline_filing("0001104659-26-017097")
         corresp = Correspondence.from_filing(filing)
         assert corresp.correspondence_type == CorrespondenceType.ACCELERATION_REQUEST
         assert corresp.sender == "company"
@@ -162,7 +162,7 @@ class TestObjDispatch:
 
     @pytest.mark.vcr
     def test_corresp_returns_correspondence(self):
-        filing = get_by_accession_number('0000320193-24-000061')
+        filing = offline_filing("0000320193-24-000061")
         result = filing.obj()
         assert isinstance(result, Correspondence)
         assert result.correspondence_type == CorrespondenceType.COMPANY_RESPONSE
@@ -191,7 +191,7 @@ class TestCorrespondenceDisplay:
 
     @pytest.mark.vcr
     def test_correspondence_repr_succeeds(self):
-        filing = get_by_accession_number('0000320193-24-000061')
+        filing = offline_filing("0000320193-24-000061")
         corresp = Correspondence.from_filing(filing)
         text = repr(corresp)
         assert "Apple" in text
@@ -199,7 +199,7 @@ class TestCorrespondenceDisplay:
 
     @pytest.mark.vcr
     def test_correspondence_str(self):
-        filing = get_by_accession_number('0000320193-24-000061')
+        filing = offline_filing("0000320193-24-000061")
         corresp = Correspondence.from_filing(filing)
         text = str(corresp)
         assert "CORRESP" in text
@@ -207,7 +207,7 @@ class TestCorrespondenceDisplay:
 
     @pytest.mark.vcr
     def test_correspondence_to_context(self):
-        filing = get_by_accession_number('0000320193-24-000061')
+        filing = offline_filing("0000320193-24-000061")
         corresp = Correspondence.from_filing(filing)
         ctx = corresp.to_context()
         assert "CORRESPONDENCE" in ctx

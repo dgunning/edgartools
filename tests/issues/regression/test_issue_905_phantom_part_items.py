@@ -23,6 +23,7 @@ from edgar.documents.document import Section
 from edgar.documents.extractors.hybrid_section_detector import HybridSectionDetector
 from edgar.documents.form_schema import get_form_schema
 from edgar.documents.nodes import SectionNode
+from tests._offline_filings import offline_filing
 
 pytestmark = pytest.mark.regression
 
@@ -115,9 +116,8 @@ def test_part_validity_skips_partless_sections():
 def test_fmcc_phantom_items_carry_warnings():
     """FMCC 10-Q: the phantom part_i_item_5/6 are flagged and downgraded, so
     the mis-anchored Part I map is no longer silently wrong."""
-    from edgar import get_by_accession_number
 
-    tenq = get_by_accession_number("0001026214-26-000027").obj()
+    tenq = offline_filing("0001026214-26-000027").obj()
     sections = tenq.document.sections
 
     for phantom in ("part_i_item_5", "part_i_item_6"):
