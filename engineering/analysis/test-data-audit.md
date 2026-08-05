@@ -9,6 +9,37 @@ Footprint audited: `tests/cassettes/` 1.6 GB (176 files, 154 tracked) ·
 `tests/fixtures/` 577 MB (424 files) · root `data/` 384 MB (405 on disk, 360
 tracked) · `tests/data/` 64 KB. `.git` is 829 MB.
 
+## Status (2026-08-05)
+
+**(b) is done** — 117 MiB of zero-reference fixtures deleted after the sanity
+check this document asked for. Every candidate was re-verified against the whole
+working tree, not just tracked files, and the aapl fallback in
+`xbrl2_fixtures.py:37` was read to confirm it globs only top-level `*.xsd` and so
+cannot reach the deleted subdirectories. `-m fast` passes at 4,339 with the same
+seven skips as before, none of them fixture-related — worth checking, because a
+missing xbrl fixture makes its test *skip*, not fail.
+
+**Also settled since this audit**, though not by this document's plan: the
+recorded-quarterly-index problem in `tests/cassettes/` was found and fixed
+independently (beads zuuu, 07lk.21), taking cassettes from 1.6 GB to 899 MiB and
+tracked from ~1,054 MB to 530 MiB. That retires a large part of what row (d)
+below was aiming at, and **corrects it**: gzip serialization does *not* reduce
+clone download, because git already zlib-compresses blobs and base64-of-gzip
+re-compresses in the pack. Measured on a 33.8 MB cassette: pack 8.0 MB today
+versus 8.1 MB pre-compressed, while the working tree drops 33.8 MB to 10.7 MB.
+Row (d) is a checkout/IO win, not a transfer win.
+
+Two things this audit did not catch, both worth knowing:
+
+- A cassette existing is not evidence a test replays from it.
+  `test_issue_880`'s cassette held an index and nothing else while its docstring
+  claimed it recorded the whole filing; the document had always been fetched
+  live past vcr.
+- `test_section_detection_comparison.py:161` wants
+  `fixtures/html/msft/10k/msft-10-k-2024-07-30.html`, but the fixture on disk is
+  `...-2025-07-30.html`. The test has been skipping silently since the fixture
+  was re-dated. Dead coverage, not dead data.
+
 ## Headline numbers
 
 | Action | Tracked clone savings | Effort |
