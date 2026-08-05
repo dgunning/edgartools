@@ -980,9 +980,20 @@ class TableNode(Node, CacheableMixin):
 
             df = pd.DataFrame(data, columns=df_columns)
 
-            # Set row index if first column is labels
+            # Set row index if first column is labels.
+            #
+            # Positionally, not by label. `set_index(df.columns[0])` looks the
+            # first column up by name, and a filing's header texts repeat all
+            # the time — when they do the lookup returns every matching column,
+            # so set_index is handed a 2-D frame and raises 'Index data must be
+            # 1-dimensional' (Tesla's FY2023 10-K). On a MultiIndex it is also a
+            # tuple lookup, which warns 'indexing past lexsort depth' once per
+            # table — hundreds of times over a document (bead edgartools-y9it).
             if self.has_row_headers and len(df.columns) > 0:
-                df = df.set_index(df.columns[0])
+                first_key = df.columns[0]
+                labels = df.iloc[:, 0].to_numpy()
+                df = df.iloc[:, 1:].copy()
+                df.index = pd.Index(labels, name=first_key)
 
             return df
         else:
