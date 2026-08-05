@@ -2640,10 +2640,42 @@ def summarize_files(data: pd.DataFrame) -> pd.DataFrame:
             )
 
 
+def _filing_from_efts(accession_number: str):
+    """Resolve an accession through EDGAR full-text search, or None.
+
+    An accession carries no CIK, and every document URL needs one, so opening a
+    filing from an accession alone always costs a lookup. This is the cheap way
+    to pay it: ~2 KB against 4.1 MB gzipped per quarter probed, which expands to
+    41 MB to parse (bead edgartools-vx29).
+
+    None means "ask the quarterly index" — EFTS indexes 2001 onward, so older
+    filings legitimately miss here, and a network failure is deliberately also a
+    miss rather than an error. The index route stays correct for everything;
+    this only makes the common case cheap.
+    """
+    from edgar.search.efts import resolve_accession
+
+    fields = resolve_accession(accession_number)
+    if not fields:
+        return None
+    return Filing(
+        cik=fields["cik"],
+        company=fields["company"],
+        form=fields["form"],
+        filing_date=fields["filing_date"],
+        accession_no=accession_number,
+        related_entities=fields["related_entities"],
+    )
+
+
 @cache_except_none(maxsize=16)
 def get_filing_by_accession(accession_number: str, year: int):
     """Cache-friendly version that takes year as parameter instead of using datetime.now()"""
     assert re.match(r"\d{10}-\d{2}-\d{6}", accession_number)
+
+    filing = _filing_from_efts(accession_number)
+    if filing is not None:
+        return filing
 
     # Only search quarters that exist - for current year, limit to current quarter
     current_year, current_quarter = current_year_and_quarter()
@@ -2660,6 +2692,12 @@ def get_filing_by_accession(accession_number: str, year: int):
 def get_by_accession_number_enriched(accession_number: str):
     """Get filing with all related entities populated using PyArrow"""
     year = int("19" + accession_number[11:13]) if accession_number[11] == '9' else int("20" + accession_number[11:13])
+
+    # EFTS returns every filer on the filing in one ~2 KB response, which is the
+    # same thing the quarter scan below reconstructs from a 41 MB index.
+    filing = _filing_from_efts(accession_number)
+    if filing is not None:
+        return filing
 
     # Only search quarters that exist - for current year, limit to current quarter
     current_year, current_quarter = current_year_and_quarter()
