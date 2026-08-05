@@ -761,6 +761,73 @@ class Sections(Dict[str, Section]):
         return super().__contains__(key)
 
 
+def _flatten_column_name(col) -> str:
+    """Render one column key as a single string.
+
+    A MultiIndex key arrives as a tuple of header-row texts, and the levels
+    repeat constantly — a header spanning two rows gives ``('Revenue',
+    'Revenue')`` and an unlabelled second row gives ``('Revenue', '')``. Blanks
+    are dropped and consecutive repeats collapsed, so both become ``'Revenue'``
+    rather than ``'Revenue Revenue'`` or ``'Revenue '``.
+    """
+    parts = col if isinstance(col, tuple) else (col,)
+    out = []
+    for part in parts:
+        text = '' if part is None else ' '.join(str(part).split())
+        if text and (not out or out[-1] != text):
+            out.append(text)
+    return ' '.join(out)
+
+
+def _flatten_table_frame(df: 'pd.DataFrame') -> 'pd.DataFrame':
+    """Give one table's frame flat, unique, string column names and a clean index.
+
+    Three things make per-table frames unstackable, and all three are handled
+    here rather than at the concat, where pandas can only report them as an
+    alignment failure deep inside its own internals.
+    """
+    import pandas as pd
+
+    df = df.copy()
+
+    # A table with row headers has its label column moved into the index by
+    # TableNode.to_dataframe. Concatenating with ignore_index=True would throw
+    # those labels away silently, so the column comes back as data.
+    #
+    # allow_duplicates because the label's name legitimately collides: a table
+    # captioned 'In millions of dollars' often carries that same text as a
+    # column header too, and Citigroup's and Morgan Stanley's 10-Ks both do.
+    # The rename pass below makes it unique; refusing the insert would lose the
+    # row labels entirely.
+    if not isinstance(df.index, pd.RangeIndex):
+        label = _flatten_column_name(df.index.name) or 'row_label'
+        # A multi-level row index yields tuples, which pandas cannot store as a
+        # single column ('Index data must be 1-dimensional' — Tesla's 10-K).
+        # Flatten them the same way column keys are flattened.
+        if df.index.nlevels > 1:
+            values = [_flatten_column_name(key) for key in df.index]
+        else:
+            values = list(df.index)
+        df.insert(0, label, values, allow_duplicates=True)
+    df = df.reset_index(drop=True)
+
+    # Flat, string, and unique. Duplicate header texts are ordinary in filings
+    # ('' repeated across spacer columns), and duplicate names would make the
+    # concatenated frame ambiguous to index into.
+    seen: Dict[str, int] = {}
+    names = []
+    for position, col in enumerate(df.columns):
+        name = _flatten_column_name(col) or f'column_{position}'
+        if name in seen:
+            seen[name] += 1
+            name = f'{name}.{seen[name]}'
+        else:
+            seen[name] = 0
+        names.append(name)
+    df.columns = pd.Index(names, dtype=object)
+    return df
+
+
 @dataclass
 class Document:
     """
@@ -1160,28 +1227,45 @@ class Document:
 
     def to_dataframe(self) -> 'pd.DataFrame':
         """
-        Convert document tables to pandas DataFrame.
+        Convert document tables to a single DataFrame, one row per table row.
 
-        Returns a DataFrame with all tables concatenated.
+        Every table in the document is flattened to string column names and
+        stacked, with ``_table_index``, ``_table_type`` and ``_table_caption``
+        recording where each row came from. Columns that only some tables have
+        are null elsewhere, as in any concatenation of differently-shaped frames.
+
+        This is a *document*-level export and is deliberately lossier than
+        :meth:`TableNode.to_dataframe`, which keeps a table's real header
+        structure. A 10-K's tables do not share a schema — Meta's FY2024 10-K
+        has 71 tables whose column indexes are 1, 2, 3, 4, 10 and 17 levels deep
+        — and pandas cannot align a flat Index with a MultiIndex, or two
+        MultiIndexes of different depths. Concatenating them unflattened raised
+        from inside pandas/numpy (``cannot join with no overlapping index
+        names``, ``Cannot cast array data ... according to the rule 'safe'``,
+        ``Index data must be 1-dimensional``) on every real filing tried
+        (bead edgartools-y9it). Reach for ``document.tables[i].to_dataframe()``
+        when a single table's header structure matters.
         """
         import pandas as pd
 
         if not self.tables:
             return pd.DataFrame()
 
-        # Convert each table to DataFrame
         dfs = []
         for i, table in enumerate(self.tables):
-            df = table.to_dataframe()
-            # Add table index
+            df = _flatten_table_frame(table.to_dataframe())
             df['_table_index'] = i
             df['_table_type'] = table.table_type.name
-            if table.caption:
-                df['_table_caption'] = table.caption
+            df['_table_caption'] = table.caption if table.caption else None
             dfs.append(df)
 
-        # Concatenate all tables
-        return pd.concat(dfs, ignore_index=True)
+        # Frames with no rows carry no data but do contribute their columns, and
+        # a 0-row frame's dtypes are all object, which would coerce a real
+        # numeric column to object in the result.
+        non_empty = [df for df in dfs if len(df)]
+        if not non_empty:
+            return pd.DataFrame(columns=['_table_index', '_table_type', '_table_caption'])
+        return pd.concat(non_empty, ignore_index=True)
 
     def chunks(self, chunk_size: int = 512, overlap: int = 128) -> Iterator['DocumentChunk']:
         """
