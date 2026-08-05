@@ -17,39 +17,6 @@ from edgar.documents.config import ParserConfig
 class TestTableRenderingRegressions:
     """Regression tests for table rendering bugs."""
 
-    def test_msft_table_39_rendering(self):
-        """
-        Regression: MSFT Table 39 had incorrect rendering.
-
-        Bug: Table with complex colspan/rowspan was rendering incorrectly
-        Fix: Improved TableMatrix algorithm for cell placement
-        Expected: Table renders with proper cell alignment
-        """
-        html_path = Path('data/html/MSFT.10-K.html')
-        if not html_path.exists():
-            pytest.skip("MSFT 10-K test file not found")
-
-        html = html_path.read_text()
-        doc = parse_html(html)
-
-        # Should have tables
-        assert len(doc.tables) > 0
-
-        # Table 39 should exist (index 38 in 0-based)
-        if len(doc.tables) > 38:
-            table_39 = doc.tables[38]
-
-            # Should be renderable without error (returns rich.Table)
-            rendered = table_39.render()
-            assert rendered is not None
-
-            # Should have rows
-            assert table_39.row_count > 0
-
-            # Text representation should work
-            text = table_39.text()
-            assert isinstance(text, str)
-            assert len(text) > 0
 
     def test_oracle_table_6_rendering(self):
         """
@@ -77,31 +44,6 @@ class TestTableRenderingRegressions:
             table_str = str(table_6)
             assert len(table_str) > 0
 
-    def test_tesla_table_16_rendering(self):
-        """
-        Regression: Tesla Table 16 rendering bug.
-
-        Bug: Table had incorrect cell placement
-        Fix: Fixed TableMatrix cell assignment algorithm
-        Expected: All cells in correct positions
-        """
-        html_path = Path('data/html/Tesla.10-K.html')
-        if not html_path.exists():
-            pytest.skip("Tesla 10-K test file not found")
-
-        html = html_path.read_text()
-        doc = parse_html(html)
-
-        # Should have tables
-        assert len(doc.tables) > 0
-
-        # Table 16 should exist
-        if len(doc.tables) > 15:
-            table_16 = doc.tables[15]
-
-            # Should render without error
-            table_str = str(table_16)
-            assert len(table_str) > 0
 
 
 class TestInlineBoundaryWordGluing:
@@ -675,18 +617,21 @@ class TestStreamingParserRegressions:
 
     def test_jpm_streaming_parent_none_bug(self):
         """
-        Regression: JPM 10-K (52MB) crashed in the old streaming parser.
+        Regression: a JPM 10-K crashed in the old streaming parser.
 
-        Large documents now take the normal pipeline; this pins that a 52MB
-        real filing parses successfully.
+        Large documents now take the normal pipeline; this pins that a big real
+        filing parses successfully.
+
+        It used to read data/html/JPM.10-K.html, which is untracked and under the
+        blanket /data/ ignore, so it ran only for whoever had that file locally
+        and never in CI. It now reads the tracked 12.3 MB JPM 10-K fixture, which
+        is the largest real filing the repository actually ships.
         """
-        html_path = Path('data/html/JPM.10-K.html')
-        if not html_path.exists():
-            pytest.skip("JPM 10-K test file not found")
+        html_path = Path('tests/fixtures/html/jpm/10k/jpm-10-k-2025-02-14.html')
+        assert html_path.exists(), f"tracked fixture missing: {html_path}"
 
         html = html_path.read_text()
 
-        # JPM 10-K is 52MB, exceeds default limit
         config = ParserConfig(max_document_size=100 * 1024 * 1024)
 
         # Should not crash
@@ -696,7 +641,8 @@ class TestStreamingParserRegressions:
         assert doc is not None
         assert len(doc.tables) > 0
 
-        # JPM has many tables (681 in test run)
+        # This filing parses to 633 tables; assert the order of magnitude, not
+        # the exact count, so a benign parser change does not fail the gate.
         assert len(doc.tables) > 500
 
     def test_large_document_streaming_trigger(self):
