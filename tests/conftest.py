@@ -331,9 +331,8 @@ def pytest_collection_modifyitems(items):
     # index to resolve an accession through find(), which no cassette records,
     # so whether a test needed the network depended on the xdist worker count.
     # They build their Filings from tests/_offline_filings.py instead (bead
-    # edgartools-zuuu), which put 163 of those 170 into the gate: five carry an
-    # explicit `network` marker from their authors (400 KB+ primary documents),
-    # and two are held out below for a cassette that cannot be committed.
+    # edgartools-zuuu), which put 165 of those 170 into the gate: five carry an
+    # explicit `network` marker from their authors (400 KB+ primary documents).
     REGRESSION_NETWORK_FILES = {
         'test_entityfacts_no_duplicate_quarterly_periods.py',
         'test_issue_282_xbrl_api_regression.py',
@@ -361,14 +360,13 @@ def pytest_collection_modifyitems(items):
 
     # Files whose tests split: everything else in them runs offline.
     #
-    # The two Airbnb S-1 tests are offline-capable and stay here anyway: their
-    # cassettes are 105 MB each, over GitHub's 100 MB per-file hard limit, so
-    # they cannot be committed for CI to replay. (The S-1 primary document is
-    # genuinely that large — the quarterly index is already stripped out of
-    # both.) Everything else in that file gates normally.
+    # The two Airbnb S-1 tests used to be held out here, because their cassettes
+    # were 105 MB each and GitHub's 100 MB per-file limit is a hard one. They
+    # were that size for a reason unrelated to the S-1: each had recorded THREE
+    # full Airbnb submissions where the test replays one. Trimmed to what is
+    # actually played back they are 43.6 MB and 31.8 MB, so they are tracked and
+    # both tests gate normally now.
     REGRESSION_NETWORK_TESTS = {
-        'tests/issues/regression/test_issue_868_869_offerings.py::TestIssue868S1Underwriters::test_s1_lead_manager_is_real_underwriter',
-        'tests/issues/regression/test_issue_868_869_offerings.py::TestIssue868S1Underwriters::test_s1a_lead_manager_is_real_underwriter',
         'tests/issues/regression/test_issue_863_10b5_plan_detection.py::test_aff10b5_one_checkbox_flows_through_xml_parsing_end_to_end',
         'tests/issues/regression/test_issue_i5wx_api_consistency.py::test_form4_tables_and_remarks_always_present_when_xml_omits_them',
         'tests/issues/regression/test_issue_t043_footnote_attribution.py::test_footnote_ids_are_deduped_within_a_transaction',
