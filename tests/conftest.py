@@ -298,6 +298,7 @@ def pytest_collection_modifyitems(config, items):
         'test_prospectus_section_flip_gate', 'test_prospectus_sections_surface',
         's1_section_flip_gate', 'test_def14a_section_flip_gate',
         'test_frontier', 'test_tier_c_judge', 'test_424b_xbrl',
+        'test_unavailable_partition',
         'test_offering_consumers', 'test_correspondence',
         'test_fix_438',
     ]
