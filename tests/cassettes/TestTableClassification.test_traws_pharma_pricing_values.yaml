@@ -5,7 +5,7 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate, br, zstd
+      - gzip, deflate
       Connection:
       - keep-alive
       Host:
@@ -5175,41 +5175,43 @@ interactions:
         ( @\" ( @\" ( @\" ( @\" ( @\" ( @\" ( @\" ( @\" ( @\" ( @\"\nM ( @\" ( @\"
         ( @\" ( @\" ( @\" ( @\" ( @\" ( @\" ( @\" ( @\" ( @\" ( @\"\n' ( @\" __V0$!\n\nend\n</TEXT>\n</DOCUMENT>\n</SEC-DOCUMENT>\n"
     headers:
-      accept-ranges:
+      Accept-Ranges:
       - bytes
+      Connection:
+      - keep-alive
+      Content-Type:
+      - text/plain
+      Date:
+      - Wed, 05 Aug 2026 00:49:56 GMT
+      ETag:
+      - '"2ae598426242ca16358c0bb469fd9750-gzip"'
+      Last-Modified:
+      - Tue, 31 Dec 2024 22:23:22 GMT
+      Strict-Transport-Security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
       content-length:
       - '477899'
-      content-type:
-      - text/plain
-      date:
-      - Mon, 09 Mar 2026 20:39:23 GMT
-      etag:
-      - '"2ae598426242ca16358c0bb469fd9750-gzip"'
-      last-modified:
-      - Tue, 31 Dec 2024 22:23:22 GMT
-      strict-transport-security:
-      - max-age=31536000 ; includeSubDomains ; preload
-      vary:
-      - Accept-Encoding
       x-amz-id-2:
-      - mTBA0YOMTtFTWQ5pnbBxRlp5/2PYerVljojn8LuHBjmNaV7N1uo81UNvZ6QrQaedWPwyJXWVNWs=
+      - 0lbWixQqealhycNDiHGJ3ido/tqSmAiKYY4AYrVqBvERQ0Iri9lnzbRhwRrEQM9O4PKrsThTxu8=
       x-amz-meta-mode:
       - '33188'
       x-amz-replication-status:
       - COMPLETED
       x-amz-request-id:
-      - 0Z37ZEB0Q98BZVFH
+      - 7MSSFDTSS11AGBRP
       x-amz-server-side-encryption:
       - AES256
       x-amz-version-id:
       - JffM2XU3RdjrE7qDmMaV4xeiE6Ic3JU8
-      x-content-type-options:
-      - nosniff
-      x-frame-options:
-      - SAMEORIGIN
-      x-xss-protection:
-      - 1; mode=block
     status:
       code: 200
-      message: null
+      message: OK
 version: 1

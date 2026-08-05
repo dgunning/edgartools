@@ -325,22 +325,16 @@ def pytest_collection_modifyitems(items):
     # "Offline" means offline *alone*: the measurement clears every functools
     # cache in the edgar package before each test, so no test is credited with a
     # fetch an earlier one had already cached. That is stricter than CI, where
-    # xdist workers share warm caches, and deliberately so. Four of the files
-    # below (test_424b_parser, test_fee_table, test_issue_2h4c,
-    # test_issue_868_869_offerings) are cassette-backed and mostly offline, but
-    # 59 of their 170 tests also fetch the quarterly form index, which no
-    # cassette records. Under the lax standard which of them fail depends on the
-    # worker count — stable on one machine, different on a 4-core runner,
-    # different again the next time a test is added. No gate can be built on
-    # that. They go to `network` whole rather than by node id, because a node-id
-    # list lets a renamed test back into the gate silently; bead
-    # edgartools-zuuu tracks decoupling the index fetch, which returns all 170
-    # at once.
+    # xdist workers share warm caches, and deliberately so. It is also what
+    # caught the quarterly-index coupling: four cassette-backed files were
+    # mostly offline, but 64 of their 170 tests also fetched the quarterly form
+    # index to resolve an accession through find(), which no cassette records,
+    # so whether a test needed the network depended on the xdist worker count.
+    # They build their Filings from tests/_offline_filings.py instead (bead
+    # edgartools-zuuu), which put 163 of those 170 into the gate: five carry an
+    # explicit `network` marker from their authors (400 KB+ primary documents),
+    # and two are held out below for a cassette that cannot be committed.
     REGRESSION_NETWORK_FILES = {
-        'test_424b_parser.py',
-        'test_fee_table.py',
-        'test_issue_2h4c.py',
-        'test_issue_868_869_offerings.py',
         'test_entityfacts_no_duplicate_quarterly_periods.py',
         'test_issue_282_xbrl_api_regression.py',
         'test_issue_408_cashflow_empty_periods.py',
@@ -366,7 +360,15 @@ def pytest_collection_modifyitems(items):
     }
 
     # Files whose tests split: everything else in them runs offline.
+    #
+    # The two Airbnb S-1 tests are offline-capable and stay here anyway: their
+    # cassettes are 105 MB each, over GitHub's 100 MB per-file hard limit, so
+    # they cannot be committed for CI to replay. (The S-1 primary document is
+    # genuinely that large — the quarterly index is already stripped out of
+    # both.) Everything else in that file gates normally.
     REGRESSION_NETWORK_TESTS = {
+        'tests/issues/regression/test_issue_868_869_offerings.py::TestIssue868S1Underwriters::test_s1_lead_manager_is_real_underwriter',
+        'tests/issues/regression/test_issue_868_869_offerings.py::TestIssue868S1Underwriters::test_s1a_lead_manager_is_real_underwriter',
         'tests/issues/regression/test_issue_863_10b5_plan_detection.py::test_aff10b5_one_checkbox_flows_through_xml_parsing_end_to_end',
         'tests/issues/regression/test_issue_i5wx_api_consistency.py::test_form4_tables_and_remarks_always_present_when_xml_omits_them',
         'tests/issues/regression/test_issue_t043_footnote_attribution.py::test_footnote_ids_are_deduped_within_a_transaction',
