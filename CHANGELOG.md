@@ -84,6 +84,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **On a filing with more than one filer, `Filing.cik` and `Filing.company` now name the issuer where they used to name whichever filer the quarterly index listed first.** Resolving an accession — `find("0001918704-25-005439")`, `get_by_accession_number(...)` — goes through EDGAR full-text search before falling back to the quarterly index, and the two sources order a filing's filers differently. EFTS puts the issuer first; the index put the guarantor there.
+
+  BofA's structured notes are the case to look at. They are issued by `BofA Finance LLC` (CIK 1682472) and guaranteed by `BANK OF AMERICA CORP /DE/` (CIK 70858), and both are filers on the filing:
+
+  ```python
+  f = find("0001918704-25-005439")
+  f.cik, f.company     # was (70858, 'BANK OF AMERICA CORP /DE/')
+                       # now (1682472, 'BofA Finance LLC')
+  ```
+
+  Nothing is dropped. The filer that used to be `.cik` is still on the filing: `all_ciks` is sorted and returns the same list as before (`[70858, 1682472]`), and `all_entities` still names both filers, in a different order. EDGAR serves the documents under either CIK, so the attachments, text and XBRL a filing gives you are identical whichever filer heads it. A single-filer filing, which is nearly all of them, is unaffected — measured across the 54 ground-truth accessions in `tests/_offline_filings.py`, 50 resolve identically, 4 differ only in this way, and none fail to resolve.
+
+  If you read `.company` off a multi-filer filing — grouping 424B2s by issuer name, say, or keying a cache on `.cik` — you will see the issuer where you saw the parent. Reach for `filing.all_ciks` or `filing.all_entities` when you want every filer rather than the one at the head: the set of filers did not change, only which one is presented as *the* filer.
+
+  Filings from before 2001 are outside the full-text index and still resolve through the quarterly index, unchanged, as does any lookup EFTS cannot answer — an EFTS failure is a miss that falls through to the slow path, not an error. The change comes with a large speedup as its motivation: `find(accession)` went from downloading and parsing a quarterly index (4.1 MB gzipped over the wire, 41 MB decompressed, per quarter probed) to a ~2 KB request, 0.3s.
+
 - **`FactQuery.to_dataframe()` now declares its columns instead of inferring them from the rows a query returned.** The column set follows the query's *configuration* — the `include_*` flags and any names passed to `to_dataframe()` — and no longer varies with which facts happened to match. Three things change for callers: a column no matching row populated comes back null rather than disappearing (`.limit(5)` on Foot Locker's FY2024 10-K returned five fewer columns than the same query unlimited, having dropped `balance`, `currency`, `decimals`, `unit_ref` and `weight` because those five rows were null); narrowing to instant facts no longer removes `period_start`/`period_end`; and an empty result now carries the full column set with zero rows, so `df['decimals']` yields an empty column instead of raising `KeyError`. Requesting a column by name in `to_dataframe('concept', 'period_instant')` likewise returns it null rather than silently omitting it.
 
   Dtypes are unchanged for populated columns. A column containing no data at all now takes its declared dtype, because inference had nothing to work with there and landed arbitrarily — an all-null `decimals` inferred as `object`/`None` rather than string/`pd.NA`. `preferred_sign` and `fiscal_year` still change dtype family between queries; they move to nullable `Int64` in 6.0, which is a sentinel change and so waits for the breaking window.
