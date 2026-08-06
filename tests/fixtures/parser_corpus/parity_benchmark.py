@@ -92,6 +92,14 @@ from edgar.files.htmltools import ChunkedDocument  # noqa: E402
 HTML_CORPUS = FIXTURES / "html"
 ERA_CORPUS = FIXTURES / "text_boundary_corpus"
 
+# The tracked slice of the gate forms. ERA_CORPUS holds every 8-K and 20-F we
+# measure but is gitignored (91 MB), so without this directory CI would guard
+# 10-K and 10-Q and nothing else — leaving the two forms that actually gate the
+# deletion unguarded, which is the opposite of this harness's purpose. Six
+# filings, 2.8 MB: the four with known gaps plus one clean modern filing per
+# form, so both a regression and a repair are visible in CI.
+GATE_CORPUS = FIXTURES / "parity_gate"
+
 # Forms that gate the deletion, in the order they block it. 10-K is included as
 # the control: it was already at parity in January and a regression there would
 # invalidate the rest of the run.
@@ -181,29 +189,37 @@ def build_corpus(forms: List[str]) -> List[dict]:
     three filings per era). Era is carried through to the report because the
     old-HTML bands are where legacy is claimed to win.
 
-    Available, not committed — the distinction matters. Only
-    ``tests/fixtures/html`` is tracked; ``text_boundary_corpus``, which holds
-    every 8-K and 20-F fixture and so both forms that gate the deletion, is
-    gitignored (91 MB) and present on developer machines only. Callers must treat
-    a filing that is not here as *unmeasured*, never as passing: the ratchet's
-    first CI run read twelve missing fixtures as twelve fixed gaps.
+    Available, not committed — the distinction matters. ``html`` and
+    ``parity_gate`` are tracked and present everywhere; ``text_boundary_corpus``
+    is gitignored (91 MB) and present on developer machines only, so a CI run
+    measures a smaller corpus than a local one. Callers must treat a filing that
+    is not here as *unmeasured*, never as passing: the ratchet's first CI run
+    read twelve missing fixtures as twelve fixed gaps.
+
+    A filing present in both ``parity_gate`` and the era tree is measured once,
+    from the tracked copy, so the two never disagree about what was checked.
     """
     entries: List[dict] = []
+    seen: Set[tuple] = set()
     dir_for_form = {"10-K": "10k", "10-Q": "10q"}
+
+    def add(form: str, path: Path, era: str, label: str) -> None:
+        if (form, label) in seen:
+            return
+        seen.add((form, label))
+        entries.append({"form": form, "path": path, "era": era, "label": label})
 
     for form in forms:
         subdir = dir_for_form.get(form)
         if subdir:
             for path in sorted(HTML_CORPUS.glob(f"*/{subdir}/*.html")):
-                entries.append({
-                    "form": form, "path": path, "era": "modern",
-                    "label": f"{path.parent.parent.name}/{subdir}",
-                })
+                add(form, path, "modern", f"{path.parent.parent.name}/{subdir}")
+        # Tracked gate-form slice first, so it wins the de-duplication and CI
+        # and local runs measure the same file for these six.
+        for path in sorted(GATE_CORPUS.glob(f"{form}/*.html")):
+            add(form, path, "gate", path.stem)
         for path in sorted(ERA_CORPUS.glob(f"*/{form}/*.html")):
-            entries.append({
-                "form": form, "path": path, "era": path.parent.parent.name,
-                "label": path.stem,
-            })
+            add(form, path, path.parent.parent.name, path.stem)
     return entries
 
 
