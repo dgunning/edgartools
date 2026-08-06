@@ -9,9 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Performance
 
-- **`Company.get_facts()` spent about 15% of its wall-clock re-deriving dates that were already ISO-8601.** `EntityFactsParser._parse_date` tried `datetime.strptime` before `datetime.fromisoformat`, so the first format in the loop always matched and the ISO fast path already present as the fallback was never reached — `strptime` takes a locale lock per call and measures ~3.6us against ~0.10us. Parsing WMT, HD, MCD, NKE, LOW and TGT makes 364,523 date calls for 139,284 facts; ISO is now tried first, with the explicit formats kept for non-ISO input.
+- **`Company.get_facts()` spent about 15% of its wall-clock re-deriving dates that were already ISO-8601.** `EntityFactsParser._parse_date` tried `datetime.strptime` first, so the ISO fast path already sitting in the function was never reached — `strptime` takes a locale lock per call, ~3.6us against ~0.10us. WMT, HD, MCD, NKE, LOW and TGT make 364,523 date calls for 139,284 facts. ISO is tried first now, with the explicit formats kept for non-ISO input.
 
 - **`filing.obj()` on a registration statement downloaded its whole file-number family looking for a fee exhibit that could not be there.** Each sibling was probed through `filing.attachments`, which fetches the entire `.txt` submission. Learn CW's S-1 (`0001140361-21-010426`) transferred 12.2MB for a 2.4MB filing and found nothing — Exhibit 107 postdates it. Siblings filed before that regime are no longer probed, and probing now stops at the first match.
+
+### Changed
+
+- **`EntityFactsParser._parse_date` no longer swallows every exception type.** It caught bare `Exception` and returned `None`; it now catches `ValueError` and `TypeError`, the two a date parse can legitimately raise. Malformed and non-string input still yields `None`, but an unanticipated failure surfaces instead of being silently absorbed once per fact.
 
 ### Fixed
 
