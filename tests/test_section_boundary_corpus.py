@@ -62,8 +62,22 @@ GROUND_TRUTH = {
 # cvx 10-K was here until edgartools-gegs fixed its incorporation-by-reference
 # recovery (Item 7/8 now recovered, Item 14 clamped); removed so a cvx regression
 # re-trips this guard.
+#
+# ('c', '10-K') joined the set at ab3a1725 (#951) and is NOT a boundary bug —
+# measured before recording it. That commit taught the parser to read
+# Citigroup's FORM 10-K CROSS-REFERENCE INDEX, which maps items to printed page
+# ranges instead of labelling them in the body, so items became extractable for
+# the first time. They are legitimately enormous and legitimately overlapping:
+# Item 8 is pages 142-313 of a 16.7MB filing and opens on "CONSOLIDATED BALANCE
+# SHEET", Item 7 opens on "MANAGEMENT'S DISCUSSION AND ANALYSIS", and Items 7
+# and 7A both cite pages 70-129 because Citi's market-risk disclosure lives
+# inside MD&A. The slices land where they should; the >300k marker is a
+# heuristic tuned for filings that label their items in the body, and a
+# cross-reference index is a different shape. See the bead for the sharper fix
+# (exempt detection_method='index' from the size markers), which would let this
+# entry come back out.
 ANOMALY_BASELINE = {
-    ("915358", "10-K"), ("bac", "10-K"),
+    ("915358", "10-K"), ("bac", "10-K"), ("c", "10-K"),
     ("gbdc", "10-K"), ("gbdc", "10-Q"), ("gs", "10-K"), ("gs", "10-Q"),
     ("ibm", "10-K"), ("jpm", "10-K"), ("jpm", "10-Q"), ("ms", "10-K"),
     ("nflx", "10-K"), ("nvda", "10-K"), ("orcl", "10-K"), ("xom", "10-Q"),
