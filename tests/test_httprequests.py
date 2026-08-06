@@ -228,6 +228,27 @@ def test_ssl_verification_applied_to_http_manager(monkeypatch):
     assert isinstance(http_mgr.httpx_params["verify"], bool), "verify should be a boolean, not a function"
 
 
+def test_verify_reaches_the_transport_params():
+    """`verify` must survive the last hop, from httpx_params into the transport.
+
+    edgartools used to monkeypatch HttpxThrottleCache._get_httpx_transport_params
+    because it extracted only 'http2' and 'proxy', so configure_http(verify_ssl=False)
+    was silently ignored and users behind SSL-inspecting corporate proxies could not
+    reach EDGAR at all. httpxthrottlecache does this itself now and the patch was
+    removed; this pins the behaviour so an upstream regression fails here rather
+    than in the field. test_ssl_verification_applied_to_http_manager covers the
+    earlier hop (env var -> httpx_params) — this one covers params -> transport.
+    """
+    http_mgr = get_http_mgr()
+
+    assert http_mgr._get_httpx_transport_params({"verify": False})["verify"] is False
+    assert http_mgr._get_httpx_transport_params({"verify": True})["verify"] is True
+
+    # Absent means verify, not "silently off" — the safe default matters more than
+    # the passthrough, since getting it wrong disables TLS checking for everyone.
+    assert http_mgr._get_httpx_transport_params({})["verify"] is True
+
+
 def test_default_http_timeout_is_set(monkeypatch):
     """
     HTTP_MGR must have a non-None default timeout so a stalled upstream

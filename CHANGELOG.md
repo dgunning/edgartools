@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **`httpxthrottlecache` is no longer capped below 0.5.0.** The cap existed because 0.5.0 hard-required the `httpx2` fork, which edgartools does not use. 0.6.0 reversed that and declares `httpx` and `httpx2` as optional extras, so the dependency is now `httpxthrottlecache[httpx]>=0.6.0` — five months of upstream releases become reachable while edgartools stays on plain `httpx`. The `[httpx]` extra is required rather than cosmetic: from 0.6.0 the package installs neither transport by default. Whether to adopt `httpx2` is a separate decision and is not made here.
+
+- **Removed the `HttpxThrottleCache._get_httpx_transport_params` monkeypatch.** It was added when the upstream method dropped the `verify` parameter, which left users behind SSL-inspecting corporate proxies unable to turn verification off. Upstream extracts `verify` itself now, making the patch not merely redundant but a liability — shadowing an upstream method silently reverts any later fix to it. A new test pins the behaviour the patch protected, so an upstream regression fails in CI rather than in the field.
+
 - **`EntityFactsParser._parse_date` no longer swallows every exception type.** It caught bare `Exception` and returned `None`; it now catches `ValueError` and `TypeError`, the two a date parse can legitimately raise. Malformed and non-string input still yields `None`, but an unanticipated failure surfaces instead of being silently absorbed once per fact. (GH #981)
 
 ### Fixed
