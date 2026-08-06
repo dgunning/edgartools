@@ -10,16 +10,24 @@ The measurement lives in ``tests/fixtures/parser_corpus/parity_benchmark.py``;
 run it directly for the full report, per-form coverage, and the work list.
 
 WHAT THIS GUARDS. ``BASELINE_GAPS`` is every (form, filing, item) the legacy
-parser finds and the new one misses, as measured on 2026-08-05 over 115 committed
-fixtures. The assertion is a **subset** check, mirroring the anomaly census in
+parser finds and the new one misses, as measured on 2026-08-05. The assertion is
+a **subset** check, mirroring the anomaly census in
 ``test_section_boundary_corpus.py``: the live gap set may shrink freely, and any
 *new* gap fails. So a fix that closes ``wfc/10k`` needs no change here, while a
 change that breaks a currently-clean filing turns this red.
 
-WHY SUBSET AND NOT EQUALITY. Equality would force every parser improvement to
-edit this file, which makes the guard an obstacle rather than a safety net.
-Tighten the baseline deliberately, in the commit that closes a gap, so the
-recorded set keeps ratcheting down toward the empty set that unblocks deletion.
+TWO CORPORA, AND ONLY ONE OF THEM REACHES CI. ``tests/fixtures/html`` is tracked.
+``tests/fixtures/text_boundary_corpus`` — which holds every 8-K and 20-F fixture,
+the two forms that gate the deletion — is **gitignored** (``.gitignore`` line 81,
+91 MB), so it exists on developer machines and nowhere else. A CI run therefore
+measures roughly half the baseline.
+
+The first version of this file did not account for that and asserted against
+whatever it happened to find, so on CI the twelve unmeasured entries looked like
+twelve *fixed* gaps and the ratchet reported success at closing them. Absent is
+not fixed. Entries whose fixture is missing are partitioned out and reported, and
+``test_the_tracked_corpus_is_present`` fails if the tracked half goes missing too
+— otherwise "measured nothing" would once again read as "nothing wrong".
 
 Deliberately NOT asserted: the coverage percentages. They move with the corpus
 and read as precision the sample size does not support. The differential is the
@@ -33,7 +41,8 @@ import pytest
 sys.path.insert(0, str(pathlib.Path(__file__).parent / "fixtures" / "parser_corpus"))
 import parity_benchmark  # noqa: E402
 
-# Offline, but re-parses 115 fixtures through two parsers (~140s). Slow lane.
+# Offline, but re-parses the corpus through two parsers (~140s locally, less on
+# CI where the era fixtures are absent). Slow lane.
 pytestmark = pytest.mark.slow
 
 
@@ -52,6 +61,9 @@ pytestmark = pytest.mark.slow
 #      20-F outlier 0001144204-10-017467 is EDGARizer-generated filer-agent
 #      HTML: 12,880 <font> tags and zero <p>, the class edgartools-mpjh tracks.
 #   3. Singletons, most of them pre-2015 HTML.
+#
+# Entries keyed on an accession number come from the untracked era corpus and
+# are unmeasurable in CI; the ticker-keyed ones are tracked and always run.
 BASELINE_GAPS = {
     ("8-K", "0001104659-03-004925"): ["9"],
     ("8-K", "0001437749-16-028287"): ["2"],
@@ -81,23 +93,34 @@ BASELINE_GAPS = {
                                        "9"],
 }
 
-# Filings where NEITHER parser finds an item — 16 of them, every one pre-2009.
-# Not a parity signal (the delta is zero), but pinned so a *modern* filing
-# joining them is caught: that would be a gap in both parsers at once.
+# The tracked fixtures every environment must be able to measure. If one of
+# these goes missing the corpus is broken, not merely reduced.
+TRACKED_GAP_FIXTURES = {key for key in BASELINE_GAPS if "/" in key[1]}
+
+# Filings where NEITHER parser finds an item — every one pre-2009, all from the
+# era corpus. Not a parity signal (the delta is zero), but pinned so a *modern*
+# filing joining them is caught: that would be a gap in both parsers at once.
 BASELINE_BOTH_BLIND = 16
 
 
 @pytest.fixture(scope="module")
 def measured():
+    """Measure whatever corpus this environment actually has.
+
+    Returns the per-filing results alongside the set of labels present, because
+    every assertion below needs to distinguish "no gap" from "never looked".
+    """
     corpus = parity_benchmark.build_corpus(parity_benchmark.GATE_FORMS)
-    assert corpus, "fixture corpus is missing — nothing was measured"
-    return [parity_benchmark.measure(entry) for entry in corpus]
+    assert corpus, "fixture corpus is missing entirely — nothing was measured"
+    results = [parity_benchmark.measure(entry) for entry in corpus]
+    present = {(entry["form"], entry["label"]) for entry in corpus}
+    return results, present
 
 
-def _live_gaps(measured):
+def _live_gaps(results):
     return {
         (r["form"], r["label"]): set(r["legacy_only"])
-        for r in measured if r["legacy_only"]
+        for r in results if r["legacy_only"]
     }
 
 
@@ -105,8 +128,9 @@ class TestTheLegacyParserFindsNothingNew:
     """The deletion gate: no section may be legacy-only that was not already."""
 
     def test_no_new_parity_gap_appears(self, measured):
+        results, _present = measured
         baseline = {k: set(v) for k, v in BASELINE_GAPS.items()}
-        live = _live_gaps(measured)
+        live = _live_gaps(results)
 
         regressions = {
             key: sorted(items - baseline.get(key, set()))
@@ -125,14 +149,19 @@ class TestTheLegacyParserFindsNothingNew:
         Not a failure of the parser — a failure to bank the win. Left un-banked,
         the baseline keeps permitting a gap that no longer exists, and the guard
         silently loosens.
+
+        Only fixtures this environment could actually measure are considered. A
+        fixture that is absent has not been fixed, and saying so was the bug that
+        made this test pass a false success on its first CI run.
         """
+        results, present = measured
         baseline = {k: set(v) for k, v in BASELINE_GAPS.items()}
-        live = _live_gaps(measured)
+        live = _live_gaps(results)
 
         stale = {
             key: sorted(items - live.get(key, set()))
             for key, items in baseline.items()
-            if items - live.get(key, set())
+            if key in present and items - live.get(key, set())
         }
         assert not stale, (
             f"these recorded gaps are closed — remove them from BASELINE_GAPS "
@@ -140,10 +169,45 @@ class TestTheLegacyParserFindsNothingNew:
         )
 
 
+class TestTheCorpusItselfIsIntact:
+    """Guards against the measurement quietly shrinking to nothing."""
+
+    def test_the_tracked_corpus_is_present(self, measured):
+        """The tracked fixtures must always be measurable.
+
+        The era corpus is gitignored and legitimately absent in CI, but
+        ``tests/fixtures/html`` is committed. If those go missing the run is
+        broken, and every assertion above would otherwise pass by measuring
+        nothing.
+        """
+        _results, present = measured
+        missing = sorted(TRACKED_GAP_FIXTURES - present)
+        assert not missing, (
+            f"tracked fixtures absent from the corpus: {missing}. The parity "
+            "assertions cannot mean anything without them."
+        )
+
+    def test_unmeasured_baseline_entries_are_only_the_untracked_ones(self, measured):
+        """Whatever this environment could not measure must be explainable.
+
+        An entry going unmeasured is fine when its fixture is gitignored and
+        expected to be missing; it is not fine when a tracked fixture silently
+        stops being collected. This pins the difference rather than leaving the
+        reduced sample to pass unremarked.
+        """
+        _results, present = measured
+        unmeasured = {key for key in BASELINE_GAPS if key not in present}
+        unexplained = sorted(unmeasured & TRACKED_GAP_FIXTURES)
+        assert not unexplained, (
+            f"tracked baseline fixtures were not measured: {unexplained}"
+        )
+
+
 class TestBothParsersStillSeeTheSameCorpus:
 
     def test_both_blind_set_does_not_grow(self, measured):
-        blind = [r for r in measured if r["both_blind"]]
+        results, _present = measured
+        blind = [r for r in results if r["both_blind"]]
         assert len(blind) <= BASELINE_BOTH_BLIND, (
             f"{len(blind)} filings now yield no items from EITHER parser, up "
             f"from {BASELINE_BOTH_BLIND}: "
@@ -151,6 +215,7 @@ class TestBothParsersStillSeeTheSameCorpus:
         )
 
     def test_neither_parser_crashes(self, measured):
+        results, _present = measured
         errors = [(r["form"], r["label"], r["new_error"] or r["legacy_error"])
-                  for r in measured if r["new_error"] or r["legacy_error"]]
+                  for r in results if r["new_error"] or r["legacy_error"]]
         assert not errors, f"parser raised on: {errors}"

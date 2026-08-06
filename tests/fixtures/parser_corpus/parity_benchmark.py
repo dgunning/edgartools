@@ -174,12 +174,19 @@ def normalise_legacy(item_name: str, form: str) -> Optional[str]:
 # ---------------------------------------------------------------------------
 
 def build_corpus(forms: List[str]) -> List[dict]:
-    """Every committed fixture for the requested forms, with provenance.
+    """Every *available* fixture for the requested forms, with provenance.
 
     Two sources with different shapes: the modern per-ticker tree (10-K/10-Q
     only, 2024-2025) and the era-stratified tree (all four gate forms, 1996-2026,
     three filings per era). Era is carried through to the report because the
     old-HTML bands are where legacy is claimed to win.
+
+    Available, not committed — the distinction matters. Only
+    ``tests/fixtures/html`` is tracked; ``text_boundary_corpus``, which holds
+    every 8-K and 20-F fixture and so both forms that gate the deletion, is
+    gitignored (91 MB) and present on developer machines only. Callers must treat
+    a filing that is not here as *unmeasured*, never as passing: the ratchet's
+    first CI run read twelve missing fixtures as twelve fixed gaps.
     """
     entries: List[dict] = []
     dir_for_form = {"10-K": "10k", "10-Q": "10q"}
