@@ -95,7 +95,22 @@ BASELINE_GAPS = {
 
 # The tracked fixtures every environment must be able to measure. If one of
 # these goes missing the corpus is broken, not merely reduced.
-TRACKED_GAP_FIXTURES = {key for key in BASELINE_GAPS if "/" in key[1]}
+#
+# Two sources: the ticker-keyed 10-K/10-Q fixtures under tests/fixtures/html,
+# and the four gap-carrying gate-form filings copied into tests/fixtures/
+# parity_gate so 8-K and 20-F are guarded in CI rather than only on a developer
+# machine. Listed explicitly rather than inferred from the label shape — the
+# inference was right until parity_gate existed, and a guard that quietly stops
+# covering things is the failure this file already had once.
+TRACKED_GAP_FIXTURES = (
+    {key for key in BASELINE_GAPS if "/" in key[1]}
+    | {
+        ("8-K", "0001104659-03-004925"),
+        ("8-K", "0001437749-16-028287"),
+        ("20-F", "0000928385-01-500187"),
+        ("20-F", "0001062993-16-008650"),
+    }
+)
 
 # Filings where NEITHER parser finds an item — every one pre-2009, all from the
 # era corpus. Not a parity signal (the delta is zero), but pinned so a *modern*
