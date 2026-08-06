@@ -31,10 +31,10 @@ class EntityFactsParser:
 
     # Semantic tags for concepts (used for search and categorization)
     SEMANTIC_TAGS = {
-        'Revenue': ['revenue', 'sales', 'operating'],
-        'NetIncomeLoss': ['profit', 'earnings', 'bottom_line'],
-        'Assets': ['assets', 'resources', 'balance_sheet'],
-        'CashAndCashEquivalentsAtCarryingValue': ['cash', 'liquidity', 'current_assets']
+        "Revenue": ["revenue", "sales", "operating"],
+        "NetIncomeLoss": ["profit", "earnings", "bottom_line"],
+        "Assets": ["assets", "resources", "balance_sheet"],
+        "CashAndCashEquivalentsAtCarryingValue": ["cash", "liquidity", "current_assets"],
     }
 
     @classmethod
@@ -53,8 +53,8 @@ class EntityFactsParser:
             return None
 
         try:
-            cik = int(json_data.get('cik', 0))
-            entity_name = json_data.get('entityName', 'Unknown')
+            cik = int(json_data.get("cik", 0))
+            entity_name = json_data.get("entityName", "Unknown")
 
             facts = []
 
@@ -75,7 +75,7 @@ class EntityFactsParser:
                 return interned
 
             # Process facts from different taxonomies
-            facts_data = json_data.get('facts', {})
+            facts_data = json_data.get("facts", {})
 
             # Pre-compute per-concept metadata once instead of per-fact
             _determine_statement_type = cls._determine_statement_type
@@ -88,13 +88,13 @@ class EntityFactsParser:
                 interned_taxonomy = _fast_intern(taxonomy)
                 for concept, concept_data in taxonomy_facts.items():
                     # Process units for this concept
-                    units = concept_data.get('units', {})
-                    label = concept_data.get('label', concept)
-                    description = concept_data.get('description', '')
+                    units = concept_data.get("units", {})
+                    label = concept_data.get("label", concept)
+                    description = concept_data.get("description", "")
 
                     # Intern concept-level strings once (shared by all facts for this concept)
                     interned_concept = _fast_intern(concept)
-                    interned_label = _fast_intern(label) if label else ''
+                    interned_label = _fast_intern(label) if label else ""
 
                     # Hoist per-concept work out of the per-fact loop
                     statement_type = _determine_statement_type(interned_concept)
@@ -104,17 +104,19 @@ class EntityFactsParser:
                     # Note: structural_info is shared across all facts for this concept.
                     # It is only read (via .get()) in _parse_single_fact — do not mutate per-fact.
                     structural_info = _get_structural_info(interned_concept)
-                    if structural_info.get('parent'):
-                        structural_info['parent'] = _fast_intern(structural_info['parent'])
-                    if structural_info.get('section'):
-                        structural_info['section'] = _fast_intern(structural_info['section'])
+                    if structural_info.get("parent"):
+                        structural_info["parent"] = _fast_intern(structural_info["parent"])
+                    if structural_info.get("section"):
+                        structural_info["section"] = _fast_intern(structural_info["section"])
 
                     for unit, unit_facts in units.items():
                         interned_unit = _fast_intern(unit)
-                        clean_unit = _fast_intern(_clean_unit(interned_unit)) if interned_unit else ''
-                        business_context = _fast_intern(
-                            _generate_business_context(interned_label, description, interned_unit)
-                        ) if interned_label or description else ''
+                        clean_unit = _fast_intern(_clean_unit(interned_unit)) if interned_unit else ""
+                        business_context = (
+                            _fast_intern(_generate_business_context(interned_label, description, interned_unit))
+                            if interned_label or description
+                            else ""
+                        )
 
                         for fact_data in unit_facts:
                             fact = cls._parse_single_fact(
@@ -143,17 +145,19 @@ class EntityFactsParser:
             return None
 
     @classmethod
-    def _parse_single_fact(cls,
-                          concept: str,
-                          taxonomy: str,
-                          label: str,
-                          unit: str,
-                          fact_data: Dict[str, Any],
-                          _fast_intern=None,
-                          statement_type: Optional[str] = None,
-                          semantic_tags: Optional[List[str]] = None,
-                          structural_info: Optional[Dict[str, Any]] = None,
-                          business_context: str = '') -> Optional[FinancialFact]:
+    def _parse_single_fact(
+        cls,
+        concept: str,
+        taxonomy: str,
+        label: str,
+        unit: str,
+        fact_data: Dict[str, Any],
+        _fast_intern=None,
+        statement_type: Optional[str] = None,
+        semantic_tags: Optional[List[str]] = None,
+        structural_info: Optional[Dict[str, Any]] = None,
+        business_context: str = "",
+    ) -> Optional[FinancialFact]:
         """
         Parse a single fact from SEC data.
 
@@ -174,30 +178,30 @@ class EntityFactsParser:
         """
 
         # Extract core values
-        value = fact_data.get('val')
+        value = fact_data.get("val")
         if value is None:
             return None
 
         # Parse dates
-        period_end = cls._parse_date(fact_data.get('end'))
-        period_start = cls._parse_date(fact_data.get('start'))
-        filing_date = cls._parse_date(fact_data.get('filed'))
+        period_end = cls._parse_date(fact_data.get("end"))
+        period_start = cls._parse_date(fact_data.get("start"))
+        filing_date = cls._parse_date(fact_data.get("filed"))
 
         # Determine period type
         if period_start:
-            period_type = 'duration'
+            period_type = "duration"
         else:
-            period_type = 'instant'
+            period_type = "instant"
 
         # Parse fiscal period info
-        fiscal_year = cls._parse_fiscal_year(fact_data.get('fy'))
-        fiscal_period = fact_data.get('fp', '')
+        fiscal_year = cls._parse_fiscal_year(fact_data.get("fy"))
+        fiscal_period = fact_data.get("fp", "")
 
         # Determine numeric value
         numeric_value = None
         if isinstance(value, (int, float)):
             numeric_value = float(value)
-        elif isinstance(value, str) and value.replace('-', '').replace('.', '').isdigit():
+        elif isinstance(value, str) and value.replace("-", "").replace(".", "").isdigit():
             try:
                 numeric_value = float(value)
             except ValueError:
@@ -214,43 +218,43 @@ class EntityFactsParser:
         # Intern per-fact strings to deduplicate memory
         if _fast_intern is not None:
             full_concept = _fast_intern(f"{taxonomy}:{concept}")
-            fiscal_period = _fast_intern(fiscal_period) if fiscal_period else ''
+            fiscal_period = _fast_intern(fiscal_period) if fiscal_period else ""
             period_type = _fast_intern(period_type)
-            form_type = _fast_intern(fact_data.get('form', ''))
-            accession = _fast_intern(fact_data.get('accn', ''))
+            form_type = _fast_intern(fact_data.get("form", ""))
+            accession = _fast_intern(fact_data.get("accn", ""))
         else:
             full_concept = f"{taxonomy}:{concept}"
-            form_type = fact_data.get('form', '')
-            accession = fact_data.get('accn', '')
+            form_type = fact_data.get("form", "")
+            accession = fact_data.get("accn", "")
 
         return FinancialFact(
-                concept=full_concept,
-                taxonomy=taxonomy,
-                label=label,
-                value=value,
-                numeric_value=numeric_value,
-                unit=unit,
-                period_start=period_start,
-                period_end=period_end,
-                period_type=period_type,
-                fiscal_year=fiscal_year,
-                fiscal_period=fiscal_period,
-                filing_date=filing_date,
-                form_type=form_type,
-                accession=accession,
-                data_quality=data_quality,
-                is_audited=fiscal_period == 'FY',
-                confidence_score=0.9 if data_quality == DataQuality.HIGH else 0.7,
-                semantic_tags=semantic_tags,
-                business_context=business_context,
-                statement_type=statement_type,
-                depth=structural_info.get('depth'),
-                parent_concept=structural_info.get('parent'),
-                section=structural_info.get('section'),
-                is_abstract=structural_info.get('is_abstract', False),
-                is_total=structural_info.get('is_total', False),
-                presentation_order=structural_info.get('avg_depth')
-            )
+            concept=full_concept,
+            taxonomy=taxonomy,
+            label=label,
+            value=value,
+            numeric_value=numeric_value,
+            unit=unit,
+            period_start=period_start,
+            period_end=period_end,
+            period_type=period_type,
+            fiscal_year=fiscal_year,
+            fiscal_period=fiscal_period,
+            filing_date=filing_date,
+            form_type=form_type,
+            accession=accession,
+            data_quality=data_quality,
+            is_audited=fiscal_period == "FY",
+            confidence_score=0.9 if data_quality == DataQuality.HIGH else 0.7,
+            semantic_tags=semantic_tags,
+            business_context=business_context,
+            statement_type=statement_type,
+            depth=structural_info.get("depth"),
+            parent_concept=structural_info.get("parent"),
+            section=structural_info.get("section"),
+            is_abstract=structural_info.get("is_abstract", False),
+            is_total=structural_info.get("is_total", False),
+            presentation_order=structural_info.get("avg_depth"),
+        )
 
     @staticmethod
     def _parse_date(date_str: Optional[str]) -> Optional[date]:
@@ -258,19 +262,23 @@ class EntityFactsParser:
         if not date_str:
             return None
 
+        # ISO-8601 first: SEC facts dates are ISO, so this hits on the first attempt.
+        # `fromisoformat` is a C fast path, while `strptime` goes through `_strptime`
+        # and takes a locale lock on every call (~37x slower per call on CPython 3.13).
+        # On CPython 3.11+ this also covers the bare '%Y%m%d' form.
         try:
-            # Try common date formats
-            for fmt in ['%Y-%m-%d', '%Y%m%d', '%m/%d/%Y']:
-                try:
-                    return datetime.strptime(date_str, fmt).date()
-                except ValueError:
-                    continue
-
-            # If all formats fail, try to parse as ISO format
             return datetime.fromisoformat(date_str).date()
+        except (ValueError, TypeError):
+            pass
 
-        except Exception:
-            return None
+        # Fall back to the explicit formats for anything non-ISO (e.g. '%m/%d/%Y').
+        for fmt in ["%Y-%m-%d", "%Y%m%d", "%m/%d/%Y"]:
+            try:
+                return datetime.strptime(date_str, fmt).date()
+            except (ValueError, TypeError):
+                continue
+
+        return None
 
     @staticmethod
     def _parse_fiscal_year(fy_value: Any) -> int:
@@ -294,11 +302,12 @@ class EntityFactsParser:
         - fallback mappings (common US-GAAP concepts)
         """
         # Remove namespace if present
-        if ':' in concept:
-            concept = concept.split(':')[-1]
+        if ":" in concept:
+            concept = concept.split(":")[-1]
 
         try:
             from edgar.entity.mappings_loader import get_primary_statement
+
             return get_primary_statement(concept)
         except Exception as e:
             log.debug("Error getting primary statement from mapper: %s", e)
@@ -308,8 +317,8 @@ class EntityFactsParser:
     def _get_semantic_tags(cls, concept: str) -> List[str]:
         """Get semantic tags for a concept"""
         # Remove namespace if present
-        if ':' in concept:
-            concept = concept.split(':')[-1]
+        if ":" in concept:
+            concept = concept.split(":")[-1]
 
         return cls.SEMANTIC_TAGS.get(concept, cls._EMPTY_TAGS)
 
@@ -321,19 +330,19 @@ class EntityFactsParser:
         Returns dict with depth, parent, section, is_abstract, is_total
         """
         # Remove namespace if present
-        if ':' in concept:
-            concept = concept.split(':')[-1]
+        if ":" in concept:
+            concept = concept.split(":")[-1]
 
         try:
             learned_mappings = load_learned_mappings()
             if concept in learned_mappings:
                 mapping = learned_mappings[concept]
                 return {
-                    'depth': int(mapping.get('avg_depth', 0)) if mapping.get('avg_depth') else None,
-                    'parent': mapping.get('parent'),
-                    'section': mapping.get('section'),
-                    'is_abstract': mapping.get('is_abstract', False),
-                    'is_total': mapping.get('is_total', False)
+                    "depth": int(mapping.get("avg_depth", 0)) if mapping.get("avg_depth") else None,
+                    "parent": mapping.get("parent"),
+                    "section": mapping.get("section"),
+                    "is_abstract": mapping.get("is_abstract", False),
+                    "is_total": mapping.get("is_total", False),
                 }
         except Exception as e:
             log.debug("Error getting structural info: %s", e)
@@ -344,11 +353,11 @@ class EntityFactsParser:
     def _assess_data_quality(fact_data: Dict[str, Any], fiscal_period: str) -> DataQuality:
         """Assess the quality of a fact"""
         # Annual data is typically higher quality
-        if fiscal_period == 'FY':
+        if fiscal_period == "FY":
             return DataQuality.HIGH
 
         # Quarterly data
-        if fiscal_period in ['Q1', 'Q2', 'Q3', 'Q4']:
+        if fiscal_period in ["Q1", "Q2", "Q3", "Q4"]:
             return DataQuality.HIGH
 
         # Other data
@@ -368,22 +377,22 @@ class EntityFactsParser:
             return description
 
         # Generate context based on label and unit
-        if label and 'Revenue' in label:
+        if label and "Revenue" in label:
             return "Total revenue generated from operations"
-        elif label and 'Income' in label:
+        elif label and "Income" in label:
             return "Net earnings after all expenses and taxes"
-        elif label and 'Assets' in label:
+        elif label and "Assets" in label:
             return "Total resources owned by the company"
 
         # Return label if available, otherwise empty string
         return label if label else ""
 
     _UNIT_MAPPING = {
-        'USD': 'USD',
-        'usd': 'USD',
-        'pure': 'number',
-        'shares': 'shares',
-        'USD/shares': 'USD per share',
+        "USD": "USD",
+        "usd": "USD",
+        "pure": "number",
+        "shares": "shares",
+        "USD/shares": "USD per share",
     }
 
     @classmethod
