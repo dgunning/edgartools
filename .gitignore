@@ -79,3 +79,20 @@ agent_eval_results/
 # tests/fixtures/html already carries 278MB, and this corpus rebuilds exactly from the
 # accession numbers pinned in scripts/text_boundary/wide_corpus_manifest.json.
 /tests/fixtures/text_boundary_corpus/
+
+# CUSIP->ticker rebuild tooling. Deliberately NOT committed: it reaches into the
+# upstream edgar-storage dataset, and where that dataset lives is not repo
+# knowledge. The script itself takes the location from CT_PRIMARY_BUCKET /
+# CT_PRIMARY_KEY at run time and hardcodes nothing, so this is belt-and-braces
+# rather than the only thing standing between the repo and those details.
+#
+# What the script DOES is committed regardless — sanitize_cusip_tickers() lives in
+# edgar/reference/tickers.py with its tests, so the data-quality contract on the
+# shipped mapping survives in the repo even though the build tool does not. If you
+# need to regenerate ct.pq and this file is missing, that function is the part that
+# mattered; the rest is a merge and a write. See GH #978.
+/scripts/build_ct_pq.py
+
+# Backup this script writes before overwriting the shipped mapping. Anchored and
+# suffixed so it cannot match ct.pq itself — see the hatchling note above.
+/edgar/reference/data/*.bak
