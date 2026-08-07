@@ -5,7 +5,8 @@ import pandas as pd
 
 from edgar.reference import cusip_ticker_mapping, get_ticker_from_cusip, describe_form
 from edgar.reference.tickers import get_cik_tickers, find_cik, get_company_ticker_name_exchange, \
-    get_companies_by_exchange, get_mutual_fund_tickers, find_mutual_fund_cik, get_company_tickers
+    get_companies_by_exchange, get_mutual_fund_tickers, find_mutual_fund_cik, get_company_tickers, \
+    sanitize_cusip_tickers
 
 
 def test_cusip_ticker_mapping():
@@ -41,6 +42,30 @@ def test_cusip_ticker_mapping_not_allowing_duplicates():
     data = cusip_ticker_mapping(allow_duplicate_cusips=True)
     tickers = data.loc['000307108']
     assert len(tickers) == 1
+
+
+def test_bundled_cusip_tickers_are_well_formed():
+    """No symbol in the bundled mapping may be junk.
+
+    This is the guard against a bad data refresh, which is why it lives here and
+    not in tests/issues/regression — the regression suite runs on demand, this
+    runs in CI on every push.
+    """
+    df = cusip_ticker_mapping().reset_index()
+    _, stats = sanitize_cusip_tickers(df)
+
+    rejected = stats["dropped_empty"] + stats["dropped_malformed"]
+    assert stats["placeholder_suffix_stripped"] == 0, (
+        f"{stats['placeholder_suffix_stripped']} tickers carry the XXXX placeholder"
+    )
+    assert rejected == 0, f"{rejected} tickers are not shaped like symbols"
+
+
+def test_get_ticker_from_cusip_has_no_placeholder_suffix():
+    """Ground truth from the reporter of GH #978, hand-checked against SEC filings."""
+    assert get_ticker_from_cusip('G3421J106') == 'FERG'   # Ferguson
+    assert get_ticker_from_cusip('13645T100') == 'CP'     # Canadian Pacific
+    assert get_ticker_from_cusip('001228105') == 'MITT'   # AG Mortgage Investment Trust
 
 
 def test_describe_form():
