@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.46.0] - 2026-08-07
+
 ### Changed
 
 - **On a multi-filer filing, `Filing.cik` and `Filing.company` now name the issuer rather than whichever filer the quarterly index listed first.** Accession lookups go through EDGAR full-text search before falling back to the quarterly index, and the two order a filing's filers differently. `find("0001918704-25-005439")` was `(70858, 'BANK OF AMERICA CORP /DE/')` and is now `(1682472, 'BofA Finance LLC')`. `all_ciks` and `all_entities` still return every filer; single-filer filings are unaffected.
