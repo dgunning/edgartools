@@ -134,6 +134,12 @@ TRACKED = set(BASELINE_NUMBER_LOSS) | CLEAN_FILINGS
 # rather than after the reroute ships.
 BASELINE_NEW_IMAGES = 252
 
+# Fixtures available when the gitignored era corpus IS present, i.e. on a
+# developer machine. The image floor above was counted over all of them, so it
+# only applies to a run that measured all of them; CI sees 61 and gets the weaker
+# assertion. Named rather than inlined so the two numbers stay legibly related.
+FULL_CORPUS_SIZE = 115
+
 
 @pytest.fixture(scope="module")
 def measured():
@@ -222,7 +228,8 @@ class TestTheRerouteStillBuysWhatItIsFor:
             "true, GH #886's premise has changed and this file needs revisiting"
         )
         # Floor, not equality: the corpus in CI is smaller than the local one.
-        expected = BASELINE_NEW_IMAGES if len(scored) >= 115 else 1
+        full_run = len(scored) >= FULL_CORPUS_SIZE
+        expected = BASELINE_NEW_IMAGES if full_run else 1
         assert new_images >= expected, (
             f"the new renderer emitted {new_images} images, expected at least "
             f"{expected}. Rerouting Filing.markdown() is supposed to FIX image "
