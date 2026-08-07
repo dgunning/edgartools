@@ -313,8 +313,20 @@ class HybridSectionDetector:
         confidence reduced to ``ANOMALOUS_CONFIDENCE`` — the section is still
         returned (callers can introspect ``.warnings``), it is just no longer
         presented as high-confidence wrong content.
+
+        Undersize sections are then split by cause (GH #927): a filer that
+        incorporates the item by reference is short *and correctly extracted*,
+        so it gets the cross-reference warning rather than the truncation one.
+        Only sections the bands already flagged pay for the text extraction that
+        test needs — a healthy filing does no extra work.
         """
-        from edgar.documents.section_size_bands import ANOMALOUS_CONFIDENCE, evaluate_size
+        from edgar.documents.section_size_bands import (
+            ANOMALOUS_CONFIDENCE,
+            cross_reference_warning,
+            evaluate_size,
+            is_cross_reference,
+            is_undersize,
+        )
 
         for section in sections.values():
             # Only TOC sections set end_offset to the extracted *text length*
@@ -333,6 +345,15 @@ class HybridSectionDetector:
             item_key = section.item
             warning = evaluate_size(self.form, item_key, length)
             if warning:
+                if is_undersize(self.form, item_key, length):
+                    try:
+                        if is_cross_reference(section.text()):
+                            warning = cross_reference_warning(self.form, item_key, length)
+                    except Exception:
+                        # Keep the size warning: the section is still anomalous,
+                        # we just could not tell which cause it is.
+                        logger.debug("Section %s: cross-reference test failed; "
+                                     "keeping the size warning", section.name, exc_info=True)
                 section.warnings.append(warning)
                 section.confidence = min(section.confidence, ANOMALOUS_CONFIDENCE)
                 logger.info(f"Section {section.name}: {warning}")

@@ -14,7 +14,10 @@ import pytest
 from edgar.documents.section_size_bands import (
     SIZE_BANDS,
     band_for,
+    cross_reference_warning,
     evaluate_size,
+    is_cross_reference,
+    is_undersize,
 )
 
 HTML_ROOT = Path(__file__).parent / "fixtures" / "html"
@@ -39,7 +42,10 @@ def test_evaluate_size_too_large_flags_overshoot():
 
 
 def test_evaluate_size_too_small_flags_truncation():
-    warning = evaluate_size("10-K", "8", 268)  # NFLX Item 8 anchor-on-heading
+    # Length alone only says "undersize"; which of the two undersize causes it is
+    # (truncated extraction vs incorporation by reference) needs the text, and is
+    # decided by is_cross_reference on the detector path.
+    warning = evaluate_size("10-K", "8", 268)
     assert warning is not None
     assert "below the expected minimum" in warning
     assert "truncated" in warning
@@ -73,6 +79,134 @@ def test_evaluate_size_silence_paths():
     # None inputs.
     assert evaluate_size(None, "1", 100) is None
     assert evaluate_size("10-K", None, 100) is None
+
+
+# ---------------------------------------------------------------------------
+# Unit: telling the two undersize causes apart (GH #927)
+# ---------------------------------------------------------------------------
+
+# Verbatim Item 8 bodies from the fixture corpus. Every filer whose Item 8 falls
+# below the band is one of these — an incorporation-by-reference pointer, not a
+# truncated extraction.
+CROSS_REFERENCE_ITEM8 = {
+    "nvda": "Item\xa08. Financial Statements and Supplementary Data\n\nThe information "
+            "required by this Item is set forth in our Consolidated Financial Statements "
+            "and Notes thereto included in this Annual Report on Form 10-K.",
+    "nflx": "Item 8.Financial Statements and Supplementary Data\n\nThe consolidated "
+            "financial statements and accompanying notes listed in Part IV, Item\xa015(a)(1) "
+            "of this Annual Report on Form 10-K are included immediately following Part IV.",
+    "ibm": "Item 8. Financial Statements and Supplementary Data:\n\nRefer to pages 46 "
+           "through 121 of IBM's 2024 Annual Report to Stockholders, which are "
+           "incorporated herein by reference.",
+    "orcl": "Item 8.\tFinancial Statements and Supplementary Data\n\nThe response to this "
+            "item is submitted as a separate section of this Annual Report. See Part IV, "
+            "Item 15.",
+    "cik915358": "FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA\n\nThe response to this item "
+                 "is included in Item 15(a) of this Report.",
+}
+
+
+@pytest.mark.parametrize("filer", sorted(CROSS_REFERENCE_ITEM8))
+def test_cross_reference_stubs_are_recognised(filer):
+    assert is_cross_reference(CROSS_REFERENCE_ITEM8[filer]) is True
+
+
+@pytest.mark.parametrize("text", [
+    "Item 8. Financial Statements and Supplementary Data",   # anchor on the heading
+    "PART II\n\nItem 8.",                                    # anchor on the PART header
+    "Item 8. Financial Statements and Supplementary Data\n\n46",
+    "The following discussion should be read together with our consolidated "
+    "financial statements. Revenue increased 114% to $130,497 million.",
+    # XOM's Item 1 shape (see test_xom_complete_item1_keeps_the_size_warning):
+    # a real body that mentions a deferral. Each bound rejects one half —
+    # a body too long to be a pointer, and a deferral sitting past the top.
+    "Information about our business segments is contained in the Financial "
+    "Section of this report. " + "x" * 1_600,
+    "Our operations span exploration, production, refining and chemicals "
+    "across six continents, described further below. " * 5
+    + "Segment results are set forth in Part II, Item 8.",
+    "",
+    None,
+])
+def test_non_cross_reference_text_is_not_flagged(text):
+    """A truncated extraction carries no deferral — it must keep the size warning."""
+    assert is_cross_reference(text) is False
+
+
+def test_is_undersize_only_below_the_floor():
+    band = band_for("10-K", "8")
+    assert is_undersize("10-K", "8", 207) is True
+    assert is_undersize("10-K", "8", band["low"]) is False
+    assert is_undersize("10-K", "8", band["high"] + 1) is False   # oversize is not undersize
+    assert is_undersize("10-K", "1B", 50) is False                # unenforced item
+    assert is_undersize("10-K", "8", 0) is False                  # unknown length
+
+
+def test_cross_reference_warning_names_the_cause():
+    warning = cross_reference_warning("10-K", "8", 207)
+    assert "incorporation by reference" in warning
+    assert "faithful" in warning
+    assert "truncated" not in warning
+
+
+def test_undersize_cross_reference_replaces_the_truncation_warning():
+    """Detector path: an undersize section whose text is a pointer gets the
+    cross-reference warning; an undersize section without one keeps the
+    truncation warning. Both stay flagged and both keep reduced confidence."""
+    from edgar.documents.document import Section
+    from edgar.documents.extractors.hybrid_section_detector import HybridSectionDetector
+    from edgar.documents.nodes import SectionNode
+    from edgar.documents.section_size_bands import ANOMALOUS_CONFIDENCE
+
+    det = HybridSectionDetector.__new__(HybridSectionDetector)  # bypass heavy __init__
+    det.form = "10-K"
+
+    def mk(text):
+        section = Section(
+            name="part_ii_item_8", title="x", node=SectionNode(section_name="x"),
+            start_offset=0, end_offset=len(text),
+            detection_method="toc", item="8",
+        )
+        section.text = lambda **kw: text  # noqa: ARG005 - stub the extraction
+        return section
+
+    sections = det._apply_size_guardrail({
+        "pointer": mk(CROSS_REFERENCE_ITEM8["nvda"]),
+        "truncated": mk("Item 8. Financial Statements and Supplementary Data"),
+    })
+
+    pointer = sections["pointer"]
+    assert len(pointer.warnings) == 1
+    assert "incorporation by reference" in pointer.warnings[0]
+    assert pointer.confidence <= ANOMALOUS_CONFIDENCE
+
+    truncated = sections["truncated"]
+    assert len(truncated.warnings) == 1
+    assert "truncated" in truncated.warnings[0]
+    assert truncated.confidence <= ANOMALOUS_CONFIDENCE
+
+
+def test_oversize_section_never_pays_for_the_text_test():
+    """Silence/cost check: the cross-reference test is undersize-only, so an
+    over-captured section is never re-extracted to run it."""
+    from edgar.documents.document import Section
+    from edgar.documents.extractors.hybrid_section_detector import HybridSectionDetector
+    from edgar.documents.nodes import SectionNode
+
+    det = HybridSectionDetector.__new__(HybridSectionDetector)
+    det.form = "10-K"
+    section = Section(
+        name="part_ii_item_8", title="x", node=SectionNode(section_name="x"),
+        start_offset=0, end_offset=5_000_000,
+        detection_method="toc", item="8",
+    )
+
+    def boom(**kwargs):
+        raise AssertionError("oversize section must not be re-extracted")
+
+    section.text = boom
+    out = det._apply_size_guardrail({"oversize": section})
+    assert "over-captured" in out["oversize"].warnings[0]
 
 
 def test_guardrail_only_applies_to_toc_sections():
@@ -133,15 +267,49 @@ def test_gs_business_correctly_bounded():
 
 
 @pytest.mark.slow
-def test_nflx_undersized_item8_is_flagged():
-    """Ground truth: NFLX 10-K Item 8 extracts to ~268 chars (anchor on the
-    heading). The guardrail flags it as truncated."""
-    sections = _sections("nflx/10k/nflx-10-k-2025-01-27.html", "10-K")
-    item8 = [s for s in sections.values() if s.item == "8"]
-    assert item8
-    flagged = [s for s in item8 if s.warnings]
-    assert flagged, "NFLX truncated Item 8 was not flagged"
-    assert "truncated" in flagged[0].warnings[0]
+@pytest.mark.parametrize("filer,path,form,key,length", [
+    ("nvda", "nvda/10k/nvda-10-k-2025-02-26.html", "10-K", "part_ii_item_8", 207),
+    ("nflx", "nflx/10k/nflx-10-k-2025-01-27.html", "10-K", "part_ii_item_8", 268),
+    ("ibm", "ibm/10k/ibm-10-k-2025-02-25.html", "10-K", "part_ii_item_8", 250),
+    ("orcl", "orcl/10k/orcl-10-k-2025-06-18.html", "10-K", "part_ii_item_8", 158),
+    ("cik915358", "915358/10k/915358-10-k-2025-08-27.html", "10-K", "part_ii_item_8", 112),
+    # The deferral pattern is not Item-8-specific: IBM also incorporates MD&A
+    # by reference, and 10-Q filers routinely answer Legal Proceedings with a
+    # pointer into Part I's notes.
+    ("ibm", "ibm/10k/ibm-10-k-2025-02-25.html", "10-K", "part_ii_item_7", 212),
+    ("ba", "ba/10q/ba-10-q-2025-07-29.html", "10-Q", "part_ii_item_1", 258),
+])
+def test_undersized_pointer_section_is_flagged_as_a_cross_reference(filer, path, form, key, length):
+    """Ground truth (GH #927): these filers answer an item with a pointer and file
+    the content elsewhere. The extraction is correct, so the guardrail must
+    say incorporation-by-reference — not that the anchor missed the body."""
+    sections = _sections(path, form)
+    assert key in sections, f"{filer} {key} not detected"
+    section = sections[key]
+    assert section.warnings, f"{filer} undersized {key} was not flagged"
+    assert len(section.text()) == length, f"{filer} {key} length drifted from ground truth"
+    assert "incorporation by reference" in section.warnings[0]
+    assert "truncated" not in section.warnings[0]
+    assert section.confidence <= 0.5
+
+
+@pytest.mark.slow
+def test_xom_complete_item1_keeps_the_size_warning():
+    """Negative ground truth: XOM's Item 1 is a complete 7,208-char Business
+    section that falls 10% under a band floor tuned to large-caps, and its
+    narrative mentions a deferral 2,423 chars in ("contained in the Financial
+    Section"). An unbounded pointer test recast it as an incorporation by
+    reference — a false factual claim about a real body. It must keep the
+    plain undersize warning."""
+    sections = _sections("xom/10k/xom-10-k-2025-02-19.html", "10-K")
+    assert "part_i_item_1" in sections, "XOM Item 1 not detected"
+    section = sections["part_i_item_1"]
+    text = section.text()
+    assert len(text) == 7_208, "XOM Item 1 length drifted from ground truth"
+    assert is_cross_reference(text) is False
+    assert section.warnings, "XOM Item 1 should still be flagged undersize"
+    assert "below the expected minimum" in section.warnings[0]
+    assert "incorporation by reference" not in section.warnings[0]
 
 
 @pytest.mark.slow
