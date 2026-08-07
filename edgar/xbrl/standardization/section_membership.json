@@ -274,6 +274,7 @@
   },
   "StatementOfEquity": {
     "Equity Changes": [
+      "DividendsEquity",
       "StockCompensationEquityImpact",
       "StockIssuancesEquity",
       "StockRepurchasesEquity"

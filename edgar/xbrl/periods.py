@@ -250,6 +250,12 @@ def get_period_views(xbrl_instance, statement_type: str) -> List[Dict[str, Any]]
     periods = filter_periods_by_type(all_periods, period_type)
     # Filter by document period end date to exclude periods after the reporting period
     periods = filter_periods_by_document_end_date(periods, document_period_end_date, period_type)
+    # For duration-based statements, exclude non-standard durations (stub/dimensional
+    # contexts like a single month that classify_duration() bucketed as 'Period').
+    # These don't represent the entity's reporting periods and have no statement data.
+    if period_type == 'duration':
+        standard_durations = {'Quarterly', 'Semi-Annual', 'Nine Months', 'Annual'}
+        periods = [p for p in periods if p.get('period_type') in standard_durations]
     periods = sort_periods(periods, period_type)
 
     # If this statement type allows annual comparison and this is an annual report,

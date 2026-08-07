@@ -1,5 +1,5 @@
 site_name: EdgarTools - Python Library for SEC Data Analysis
-site_description: Access and analyze SEC filings, financial statements, insider trading, and investment fund data
+site_description: 'Documentation for edgartools, a Python library to read and analyze SEC EDGAR filings: 10-K, 8-K, XBRL financials, Form 3/4/5, 13F, ADV. Clean API, well-typed, MIT-licensed.'
 repo_url: https://github.com/dgunning/edgartools
 repo_name: dgunning/edgartools
 
@@ -20,6 +20,8 @@ markdown_extensions:
 
 theme:
   name: material
+  logo: images/edgartools-mark.svg
+  favicon: images/edgartools-mark.svg
   palette:
     - scheme: default
       toggle:
@@ -78,6 +80,7 @@ nav:
   - Filings:
     - Working with Filings: guides/working-with-filing.md
     - Search & Filter: guides/searching-filings.md
+    - Full-Text Search & Grep: guides/full-text-search.md
     - Filter by Criteria: guides/filtering-filings.md
     - Current Filings: guides/current-filings.md
     - Attachments: guides/filing-attachments.md
@@ -120,11 +123,13 @@ nav:
     - Company Facts: guides/company-facts.md
     - Multi-Period Analysis: guides/multi-year-financial-data-api.md
     - Stock Splits & EPS Normalization: guides/stock-splits-eps-normalization.md
+    - Equity Statement Data Layers: guides/equity-statement-data-layers.md
     - XBRL Deep Dive:
       - Overview: xbrl/index.md
       - Query XBRL Facts: xbrl-querying.md
       - Getting XBRL Data: getting-xbrl.md
       - Multi-Period Analysis: xbrl/guides/multi-period-analysis.md
+      - Calculation Linkbase & Extensions: xbrl/guides/calculation-linkbase.md
       - Dimensions: xbrl/concepts/dimension-handling.md
       - Standardization: xbrl/concepts/standardization.md
       - Footnotes: guides/xbrl-footnotes.md
@@ -173,5 +178,6 @@ nav:
     - SEC Compliance: resources/sec-compliance.md
     - Troubleshooting: resources/troubleshooting.md
     - Performance: resources/performance.md
+    - Upgrading to 6.0: upgrade/6.0.md
     - Contributing: contributing.md
     - About the Creator: about.md

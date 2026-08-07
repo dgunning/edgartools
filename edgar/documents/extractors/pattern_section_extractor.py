@@ -2,13 +2,15 @@
 Section extraction from documents.
 """
 
+import copy
 import logging
 import re
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 from edgar.documents.document import Document, Section
 from edgar.documents.nodes import HeadingNode, Node, SectionNode
 from edgar.documents.utils.toc_analyzer import find_toc_boundaries
+from edgar.documents.form_schema import get_form_schema
 
 logger = logging.getLogger(__name__)
 
@@ -24,487 +26,14 @@ class SectionExtractor:
     - Financial Statements (Item 8)
     """
 
-    # Common section patterns for different filing types
+    # Per-form section/title vocabulary. The data now lives on each FormSchema
+    # (the single home of form knowledge — edgartools-llmp.2 / D2); this is a
+    # derived back-compat projection keyed exactly as before. 424B* variants are
+    # mapped to the '424B' key by extract(). A golden parity test
+    # (tests/test_section_patterns_schema_parity.py) guards against any drift.
     SECTION_PATTERNS = {
-        '10-K': {
-            'business': [
-                (r'^(Item|ITEM)\s+1\.?\s*Business', 'Item 1 - Business'),
-                (r'^Business\s*$', 'Business'),
-                (r'^Business Overview', 'Business Overview'),
-                (r'^Our Business', 'Our Business'),
-                (r'^Company Overview', 'Company Overview')
-            ],
-            'risk_factors': [
-                (r'^(Item|ITEM)\s+1A\.?\s*Risk\s+Factors', 'Item 1A - Risk Factors'),
-                (r'^Risk\s+Factors', 'Risk Factors'),
-                (r'^Factors\s+That\s+May\s+Affect', 'Risk Factors')
-            ],
-            'properties': [
-                (r'^(Item|ITEM)\s+2\.?\s*Properties', 'Item 2 - Properties'),
-                (r'^Properties', 'Properties'),
-                (r'^Real\s+Estate', 'Real Estate')
-            ],
-            'legal_proceedings': [
-                (r'^(Item|ITEM)\s+3\.?\s*Legal\s+Proceedings', 'Item 3 - Legal Proceedings'),
-                (r'^Legal\s+Proceedings', 'Legal Proceedings'),
-                (r'^Litigation', 'Litigation')
-            ],
-            'market_risk': [
-                (r'^(Item|ITEM)\s+7A\.?\s*Quantitative.*Disclosures', 'Item 7A - Market Risk'),
-                (r'^Market\s+Risk', 'Market Risk'),
-                (r'^Quantitative.*Qualitative.*Market\s+Risk', 'Market Risk')
-            ],
-            'mda': [
-                (r'^(Item|ITEM)\s+7\.?\s*Management.*Discussion', 'Item 7 - MD&A'),
-                (r'^Management.*Discussion.*Analysis', 'MD&A'),
-                (r'^MD&A', 'MD&A')
-            ],
-            'financial_statements': [
-                (r'^(Item|ITEM)\s+8\.?\s*Financial\s+Statements', 'Item 8 - Financial Statements'),
-                (r'^Financial\s+Statements', 'Financial Statements'),
-                (r'^Consolidated\s+Financial\s+Statements', 'Consolidated Financial Statements')
-            ],
-            'controls_procedures': [
-                (r'^(Item|ITEM)\s+9A\.?\s*Controls.*Procedures', 'Item 9A - Controls and Procedures'),
-                (r'^Controls.*Procedures', 'Controls and Procedures'),
-                (r'^Internal\s+Control', 'Internal Controls')
-            ]
-        },
-        '10-Q': {
-            # PART I - Financial Information
-            'part_i_item_1': [
-                (r'^(Item|ITEM)\s+1\.?\s*[-–—.]?\s*Financial\s+Statements', 'Item 1 - Financial Statements'),
-                (r'^Financial\s+Statements', 'Financial Statements'),
-                (r'^Condensed.*Financial\s+Statements', 'Condensed Financial Statements')
-            ],
-            'part_i_item_2': [
-                (r'^(Item|ITEM)\s+2\.?\s*[-–—.]?\s*Management.*Discussion', 'Item 2 - MD&A'),
-                (r'^Management.*Discussion.*Analysis', 'MD&A')
-            ],
-            'part_i_item_3': [
-                (r'^(Item|ITEM)\s+3\.?\s*[-–—.]?\s*Quantitative.*Disclosures', 'Item 3 - Market Risk'),
-                (r'^Market\s+Risk', 'Market Risk')
-            ],
-            'part_i_item_4': [
-                (r'^(Item|ITEM)\s+4\.?\s*[-–—.]?\s*Controls.*Procedures', 'Item 4 - Controls and Procedures'),
-                (r'^Controls.*Procedures', 'Controls and Procedures')
-            ],
-            # PART II - Other Information
-            'part_ii_item_1': [
-                (r'^(Item|ITEM)\s+1\.?\s*[-–—.]?\s*Legal\s+Proceedings', 'Item 1 - Legal Proceedings'),
-                (r'^Legal\s+Proceedings', 'Legal Proceedings')
-            ],
-            'part_ii_item_1a': [
-                (r'^(Item|ITEM)\s+1A\.?\s*[-–—.]?\s*Risk\s+Factors', 'Item 1A - Risk Factors'),
-                (r'^Risk\s+Factors', 'Risk Factors')
-            ],
-            'part_ii_item_2': [
-                (r'^(Item|ITEM)\s+2\.?\s*[-–—.]?\s*Unregistered\s+Sales', 'Item 2 - Unregistered Sales'),
-                (r'^Unregistered\s+Sales.*Equity', 'Unregistered Sales')
-            ],
-            'part_ii_item_3': [
-                (r'^(Item|ITEM)\s+3\.?\s*[-–—.]?\s*Defaults', 'Item 3 - Defaults Upon Senior Securities'),
-                (r'^Defaults\s+Upon\s+Senior', 'Defaults Upon Senior Securities')
-            ],
-            'part_ii_item_4': [
-                (r'^(Item|ITEM)\s+4\.?\s*[-–—.]?\s*Mine\s+Safety', 'Item 4 - Mine Safety Disclosures'),
-                (r'^Mine\s+Safety', 'Mine Safety Disclosures')
-            ],
-            'part_ii_item_5': [
-                (r'^(Item|ITEM)\s+5\.?\s*[-–—.]?\s*Other\s+Information', 'Item 5 - Other Information'),
-                (r'^Other\s+Information', 'Other Information')
-            ],
-            'part_ii_item_6': [
-                (r'^(Item|ITEM)\s+6\.?\s*[-–—.]?\s*Exhibits', 'Item 6 - Exhibits'),
-                (r'^Exhibits', 'Exhibits')
-            ]
-        },
-        '20-F': {
-            # PART I
-            'item_1': [
-                (r'^(Item|ITEM)\s+1\.?\s*[-–—.]?\s*Identity.*Directors', 'Item 1 - Identity of Directors, Senior Management and Advisers'),
-                (r'^Identity.*Directors.*Senior\s+Management', 'Identity of Directors')
-            ],
-            'item_2': [
-                (r'^(Item|ITEM)\s+2\.?\s*[-–—.]?\s*Offer\s+Statistics', 'Item 2 - Offer Statistics and Expected Timetable'),
-                (r'^Offer\s+Statistics.*Timetable', 'Offer Statistics')
-            ],
-            'item_3': [
-                (r'^(Item|ITEM)\s+3\.?\s*[-–—.]?\s*Key\s+Information', 'Item 3 - Key Information'),
-                (r'^Key\s+Information', 'Key Information'),
-                (r'^Risk\s+Factors', 'Risk Factors')
-            ],
-            'item_4': [
-                (r'^(Item|ITEM)\s+4\.?\s*[-–—.]?\s*Information\s+on\s+the\s+Company', 'Item 4 - Information on the Company'),
-                (r'^Information\s+on\s+the\s+Company', 'Information on the Company'),
-                (r'^Business\s+Overview', 'Business Overview')
-            ],
-            'item_4a': [
-                (r'^(Item|ITEM)\s+4A\.?\s*[-–—.]?\s*Unresolved\s+Staff', 'Item 4A - Unresolved Staff Comments'),
-                (r'^Unresolved\s+Staff\s+Comments', 'Unresolved Staff Comments')
-            ],
-            # PART II
-            'item_5': [
-                (r'^(Item|ITEM)\s+5\.?\s*[-–—.]?\s*Operating.*Financial\s+Review', 'Item 5 - Operating and Financial Review and Prospects'),
-                (r'^Operating.*Financial\s+Review', 'Operating and Financial Review'),
-                (r'^Management.*Discussion.*Analysis', 'MD&A')
-            ],
-            'item_6': [
-                (r'^(Item|ITEM)\s+6\.?\s*[-–—.]?\s*Directors.*Senior\s+Management.*Employees', 'Item 6 - Directors, Senior Management and Employees'),
-                (r'^Directors.*Senior\s+Management.*Employees', 'Directors and Employees')
-            ],
-            'item_7': [
-                (r'^(Item|ITEM)\s+7\.?\s*[-–—.]?\s*Major\s+Shareholders', 'Item 7 - Major Shareholders and Related Party Transactions'),
-                (r'^Major\s+Shareholders.*Related\s+Party', 'Major Shareholders')
-            ],
-            'item_8': [
-                (r'^(Item|ITEM)\s+8\.?\s*[-–—.]?\s*Financial\s+Information', 'Item 8 - Financial Information'),
-                (r'^Financial\s+Information', 'Financial Information')
-            ],
-            'item_9': [
-                (r'^(Item|ITEM)\s+9\.?\s*[-–—.]?\s*The\s+Offer\s+and\s+Listing', 'Item 9 - The Offer and Listing'),
-                (r'^The\s+Offer\s+and\s+Listing', 'Offer and Listing')
-            ],
-            # PART III
-            'item_10': [
-                (r'^(Item|ITEM)\s+10\.?\s*[-–—.]?\s*Additional\s+Information', 'Item 10 - Additional Information'),
-                (r'^Additional\s+Information', 'Additional Information')
-            ],
-            'item_11': [
-                (r'^(Item|ITEM)\s+11\.?\s*[-–—.]?\s*Quantitative.*Qualitative.*Market\s+Risk', 'Item 11 - Quantitative and Qualitative Disclosures About Market Risk'),
-                (r'^Quantitative.*Qualitative.*Market\s+Risk', 'Market Risk Disclosures')
-            ],
-            'item_12': [
-                (r'^(Item|ITEM)\s+12\.?\s*[-–—.]?\s*Description.*Securities', 'Item 12 - Description of Securities Other Than Equity Securities'),
-                (r'^Description.*Securities.*Equity', 'Securities Description')
-            ],
-            # PART IV
-            'item_13': [
-                (r'^(Item|ITEM)\s+13\.?\s*[-–—.]?\s*Defaults', 'Item 13 - Defaults, Dividend Arrearages and Delinquencies'),
-                (r'^Defaults.*Dividend.*Arrearages', 'Defaults and Arrearages')
-            ],
-            'item_14': [
-                (r'^(Item|ITEM)\s+14\.?\s*[-–—.]?\s*Material\s+Modifications', 'Item 14 - Material Modifications to the Rights of Security Holders'),
-                (r'^Material\s+Modifications.*Rights', 'Material Modifications')
-            ],
-            'item_15': [
-                (r'^(Item|ITEM)\s+15\.?\s*[-–—.]?\s*Controls.*Procedures', 'Item 15 - Controls and Procedures'),
-                (r'^Controls.*Procedures', 'Controls and Procedures')
-            ],
-            'item_16': [
-                (r'^(Item|ITEM)\s+16\.?\s*[-–—.]?\s*\[?Reserved\]?', 'Item 16 - [Reserved]')
-            ],
-            'item_16a': [
-                (r'^(Item|ITEM)\s+16A\.?\s*[-–—.]?\s*Audit\s+Committee', 'Item 16A - Audit Committee Financial Expert'),
-                (r'^Audit\s+Committee\s+Financial\s+Expert', 'Audit Committee Expert')
-            ],
-            'item_16b': [
-                (r'^(Item|ITEM)\s+16B\.?\s*[-–—.]?\s*Code\s+of\s+Ethics', 'Item 16B - Code of Ethics'),
-                (r'^Code\s+of\s+Ethics', 'Code of Ethics')
-            ],
-            'item_16c': [
-                (r'^(Item|ITEM)\s+16C\.?\s*[-–—.]?\s*Principal\s+Accountant', 'Item 16C - Principal Accountant Fees and Services'),
-                (r'^Principal\s+Accountant\s+Fees', 'Accountant Fees')
-            ],
-            'item_16d': [
-                (r'^(Item|ITEM)\s+16D\.?\s*[-–—.]?\s*Exemptions.*Audit\s+Committees', 'Item 16D - Exemptions from the Listing Standards for Audit Committees'),
-                (r'^Exemptions.*Listing\s+Standards', 'Audit Committee Exemptions')
-            ],
-            'item_16e': [
-                (r'^(Item|ITEM)\s+16E\.?\s*[-–—.]?\s*Purchases.*Equity\s+Securities', 'Item 16E - Purchases of Equity Securities by the Issuer'),
-                (r'^Purchases.*Equity\s+Securities.*Issuer', 'Equity Purchases')
-            ],
-            'item_16f': [
-                (r'^(Item|ITEM)\s+16F\.?\s*[-–—.]?\s*Change.*Certifying\s+Accountant', 'Item 16F - Change in Registrant\'s Certifying Accountant'),
-                (r'^Change.*Certifying\s+Accountant', 'Accountant Change')
-            ],
-            'item_16g': [
-                (r'^(Item|ITEM)\s+16G\.?\s*[-–—.]?\s*Corporate\s+Governance', 'Item 16G - Corporate Governance'),
-                (r'^Corporate\s+Governance', 'Corporate Governance')
-            ],
-            'item_16h': [
-                (r'^(Item|ITEM)\s+16H\.?\s*[-–—.]?\s*Mine\s+Safety', 'Item 16H - Mine Safety Disclosure'),
-                (r'^Mine\s+Safety\s+Disclosure', 'Mine Safety')
-            ],
-            'item_16i': [
-                (r'^(Item|ITEM)\s+16I\.?\s*[-–—.]?\s*Disclosure.*Foreign\s+Jurisdictions', 'Item 16I - Disclosure Regarding Foreign Jurisdictions That Prevent Inspections'),
-                (r'^Disclosure.*Foreign\s+Jurisdictions.*Inspections', 'Foreign Jurisdiction Disclosure'),
-                # Fallback: match just "Item 16I" for filings where title is on separate line
-                (r'^(Item|ITEM)\s+16I\.?\s*$', 'Item 16I')
-            ],
-            'item_16j': [
-                (r'^(Item|ITEM)\s+16J\.?\s*[-–—.]?\s*Insider\s+Trading', 'Item 16J - Insider Trading Policies'),
-                (r'^Insider\s+Trading\s+Policies', 'Insider Trading Policies'),
-                # Fallback: match just "Item 16J" for filings where title is on separate line
-                (r'^(Item|ITEM)\s+16J\.?\s*$', 'Item 16J')
-            ],
-            'item_16k': [
-                (r'^(Item|ITEM)\s+16K\.?\s*[-–—.]?\s*Cybersecurity', 'Item 16K - Cybersecurity'),
-                (r'^Cybersecurity', 'Cybersecurity'),
-                # Fallback: match just "Item 16K" for filings where title is on separate line
-                (r'^(Item|ITEM)\s+16K\.?\s*$', 'Item 16K')
-            ],
-            # PART V
-            'item_17': [
-                (r'^(Item|ITEM)\s+17\.?\s*[-–—.]?\s*Financial\s+Statements', 'Item 17 - Financial Statements'),
-            ],
-            'item_18': [
-                (r'^(Item|ITEM)\s+18\.?\s*[-–—.]?\s*Financial\s+Statements', 'Item 18 - Financial Statements'),
-            ],
-            'item_19': [
-                (r'^(Item|ITEM)\s+19\.?\s*[-–—.]?\s*Exhibits', 'Item 19 - Exhibits'),
-                (r'^Exhibits', 'Exhibits')
-            ],
-            # PARTS
-            'part_i': [
-                (r'^PART\s+I\s*$', 'Part I')
-            ],
-            'part_ii': [
-                (r'^PART\s+II\s*$', 'Part II')
-            ],
-            'part_iii': [
-                (r'^PART\s+III\s*$', 'Part III')
-            ],
-            'part_iv': [
-                (r'^PART\s+IV\s*$', 'Part IV')
-            ],
-            'part_v': [
-                (r'^PART\s+V\s*$', 'Part V')
-            ],
-            'signatures': [
-                (r'^SIGNATURES?\s*$', 'Signatures')
-            ]
-        },
-        '8-K': {
-            # Section 1: Registrant's Business and Operations
-            'item_101': [
-                (r'^(Item|ITEM)\s+1\.\s*01', 'Item 1.01 - Entry into Material Agreement'),
-                (r'^Entry.*Material.*Agreement', 'Material Agreement')
-            ],
-            'item_102': [
-                (r'^(Item|ITEM)\s+1\.\s*02', 'Item 1.02 - Termination of Material Agreement'),
-                (r'^Termination.*Material.*Agreement', 'Termination of Agreement')
-            ],
-            'item_103': [
-                (r'^(Item|ITEM)\s+1\.\s*03', 'Item 1.03 - Bankruptcy or Receivership'),
-                (r'^Bankruptcy.*Receivership', 'Bankruptcy')
-            ],
-            'item_104': [
-                (r'^(Item|ITEM)\s+1\.\s*04', 'Item 1.04 - Mine Safety'),
-                (r'^Mine\s+Safety', 'Mine Safety')
-            ],
-            'item_105': [
-                (r'^(Item|ITEM)\s+1\.\s*05', 'Item 1.05 - Material Cybersecurity Incidents'),
-                (r'^Material\s+Cybersecurity', 'Cybersecurity Incidents')
-            ],
-
-            # Section 2: Financial Information
-            'item_201': [
-                (r'^(Item|ITEM)\s+2\.\s*01', 'Item 2.01 - Completion of Acquisition'),
-                (r'^Completion.*Acquisition', 'Acquisition')
-            ],
-            'item_202': [
-                (r'^(Item|ITEM)\s+2\.\s*02', 'Item 2.02 - Results of Operations'),
-                (r'^Results.*Operations', 'Results of Operations')
-            ],
-            'item_203': [
-                (r'^(Item|ITEM)\s+2\.\s*03', 'Item 2.03 - Creation of Direct Financial Obligation'),
-                (r'^Creation.*Financial\s+Obligation', 'Financial Obligation')
-            ],
-            'item_204': [
-                (r'^(Item|ITEM)\s+2\.\s*04', 'Item 2.04 - Triggering Events'),
-                (r'^Triggering\s+Events', 'Triggering Events')
-            ],
-            'item_205': [
-                (r'^(Item|ITEM)\s+2\.\s*05', 'Item 2.05 - Costs with Exit or Disposal'),
-                (r'^Costs.*Exit.*Disposal', 'Exit or Disposal Costs')
-            ],
-            'item_206': [
-                (r'^(Item|ITEM)\s+2\.\s*06', 'Item 2.06 - Material Impairments'),
-                (r'^Material\s+Impairments', 'Material Impairments')
-            ],
-
-            # Section 3: Securities and Trading Markets
-            'item_301': [
-                (r'^(Item|ITEM)\s+3\.\s*01', 'Item 3.01 - Notice of Delisting'),
-                (r'^Notice.*Delisting', 'Delisting Notice')
-            ],
-            'item_302': [
-                (r'^(Item|ITEM)\s+3\.\s*02', 'Item 3.02 - Unregistered Sales of Equity'),
-                (r'^Unregistered\s+Sales', 'Unregistered Sales')
-            ],
-            'item_303': [
-                (r'^(Item|ITEM)\s+3\.\s*03', 'Item 3.03 - Material Modification to Rights'),
-                (r'^Material\s+Modification.*Rights', 'Rights Modification')
-            ],
-
-            # Section 4: Accountants and Financial Statements
-            'item_401': [
-                (r'^(Item|ITEM)\s+4\.\s*01', 'Item 4.01 - Changes in Certifying Accountant'),
-                (r'^Changes.*Accountant', 'Accountant Changes')
-            ],
-            'item_402': [
-                (r'^(Item|ITEM)\s+4\.\s*02', 'Item 4.02 - Non-Reliance on Financial Statements'),
-                (r'^Non-Reliance.*Financial', 'Non-Reliance')
-            ],
-
-            # Section 5: Corporate Governance and Management
-            'item_501': [
-                (r'^(Item|ITEM)\s+5\.\s*01', 'Item 5.01 - Changes in Control'),
-                (r'^Changes.*Control', 'Changes in Control')
-            ],
-            'item_502': [
-                (r'^(Item|ITEM)\s+5\.\s*02', 'Item 5.02 - Departure/Election of Directors'),
-                (r'^Departure.*Directors.*Officers', 'Director/Officer Changes')
-            ],
-            'item_503': [
-                (r'^(Item|ITEM)\s+5\.\s*03', 'Item 5.03 - Amendments to Articles/Bylaws'),
-                (r'^Amendments.*Articles.*Bylaws', 'Charter Amendments')
-            ],
-            'item_504': [
-                (r'^(Item|ITEM)\s+5\.\s*04', 'Item 5.04 - Temporary Suspension of Trading'),
-                (r'^Temporary\s+Suspension', 'Suspension of Trading')
-            ],
-            'item_505': [
-                (r'^(Item|ITEM)\s+5\.\s*05', 'Item 5.05 - Amendment to Code of Ethics'),
-                (r'^Amendment.*Code.*Ethics', 'Code of Ethics')
-            ],
-            'item_506': [
-                (r'^(Item|ITEM)\s+5\.\s*06', 'Item 5.06 - Change in Shell Company Status'),
-                (r'^Change.*Shell\s+Company', 'Shell Company Status')
-            ],
-            'item_507': [
-                (r'^(Item|ITEM)\s+5\.\s*07', 'Item 5.07 - Submission of Matters to Vote'),
-                (r'^Submission.*Vote', 'Shareholder Vote')
-            ],
-            'item_508': [
-                (r'^(Item|ITEM)\s+5\.\s*08', 'Item 5.08 - Shareholder Nominations'),
-                (r'^Shareholder\s+Nominations', 'Shareholder Nominations')
-            ],
-
-            # Section 6: Asset-Backed Securities
-            'item_601': [
-                (r'^(Item|ITEM)\s+6\.\s*01', 'Item 6.01 - ABS Informational Material'),
-                (r'^ABS\s+Informational', 'ABS Information')
-            ],
-            'item_602': [
-                (r'^(Item|ITEM)\s+6\.\s*02', 'Item 6.02 - Change of Servicer/Trustee'),
-                (r'^Change.*Servicer.*Trustee', 'Servicer Change')
-            ],
-            'item_603': [
-                (r'^(Item|ITEM)\s+6\.\s*03', 'Item 6.03 - Change in Credit Enhancement'),
-                (r'^Change.*Credit\s+Enhancement', 'Credit Enhancement')
-            ],
-            'item_604': [
-                (r'^(Item|ITEM)\s+6\.\s*04', 'Item 6.04 - Failure to Make Distribution'),
-                (r'^Failure.*Distribution', 'Distribution Failure')
-            ],
-            'item_605': [
-                (r'^(Item|ITEM)\s+6\.\s*05', 'Item 6.05 - Securities Act Updating'),
-                (r'^Securities\s+Act\s+Updating', 'Securities Act Update')
-            ],
-            'item_606': [
-                (r'^(Item|ITEM)\s+6\.\s*06', 'Item 6.06 - Static Pool'),
-                (r'^Static\s+Pool', 'Static Pool')
-            ],
-
-            # Section 7: Regulation FD
-            'item_701': [
-                (r'^(Item|ITEM)\s+7\.\s*01', 'Item 7.01 - Regulation FD Disclosure'),
-                (r'^Regulation\s+FD', 'Regulation FD')
-            ],
-
-            # Section 8: Other Events
-            'item_801': [
-                (r'^(Item|ITEM)\s+8\.\s*01', 'Item 8.01 - Other Events'),
-                (r'^Other\s+Events', 'Other Events')
-            ],
-
-            # Section 9: Financial Statements and Exhibits
-            'item_901': [
-                (r'^(Item|ITEM)\s+9\.\s*01', 'Item 9.01 - Financial Statements and Exhibits'),
-                (r'^Financial.*Exhibits', 'Financial Statements and Exhibits')
-            ]
-        },
-
-        # 424B prospectus supplements / takedowns
-        '424B': {
-            'about_this_prospectus': [
-                (r'^ABOUT\s+THIS\s+PROSPECTUS', 'About This Prospectus'),
-                (r'^About\s+This\s+Prospectus', 'About This Prospectus'),
-            ],
-            'summary': [
-                (r'^(?:THE\s+)?OFFERING\s*$', 'The Offering'),
-                (r'^SUMMARY\s*$', 'Summary'),
-                (r'^Summary\s*$', 'Summary'),
-                (r'^PROSPECTUS\s+SUMMARY', 'Prospectus Summary'),
-            ],
-            'risk_factors': [
-                (r'^RISK\s+FACTORS\s*$', 'Risk Factors'),
-                (r'^Risk\s+Factors\s*$', 'Risk Factors'),
-            ],
-            'use_of_proceeds': [
-                (r'^USE\s+OF\s+PROCEEDS\s*$', 'Use of Proceeds'),
-                (r'^Use\s+of\s+Proceeds\s*$', 'Use of Proceeds'),
-            ],
-            'dilution': [
-                (r'^DILUTION\s*$', 'Dilution'),
-                (r'^Dilution\s*$', 'Dilution'),
-            ],
-            'capitalization': [
-                (r'^CAPITALIZATION\s*$', 'Capitalization'),
-                (r'^Capitalization\s*$', 'Capitalization'),
-            ],
-            'description_of_securities': [
-                (r'^DESCRIPTION\s+OF\s+(?:CAPITAL\s+)?STOCK', 'Description of Capital Stock'),
-                (r'^Description\s+of\s+(?:Capital\s+)?Stock', 'Description of Capital Stock'),
-                (r'^DESCRIPTION\s+OF\s+(?:THE\s+)?SECURITIES', 'Description of Securities'),
-                (r'^Description\s+of\s+(?:the\s+)?Securities', 'Description of Securities'),
-                (r'^DESCRIPTION\s+OF\s+(?:THE\s+)?NOTES', 'Description of Notes'),
-                (r'^Description\s+of\s+(?:the\s+)?Notes', 'Description of Notes'),
-            ],
-            'description_of_debt_securities': [
-                (r'^DESCRIPTION\s+OF\s+DEBT\s+SECURITIES', 'Description of Debt Securities'),
-                (r'^Description\s+of\s+Debt\s+Securities', 'Description of Debt Securities'),
-            ],
-            'description_of_warrants': [
-                (r'^DESCRIPTION\s+OF\s+WARRANTS', 'Description of Warrants'),
-                (r'^Description\s+of\s+Warrants', 'Description of Warrants'),
-            ],
-            'selling_stockholders': [
-                (r'^SELLING\s+(?:STOCK|SECURITY)\s*HOLDERS', 'Selling Stockholders'),
-                (r'^Selling\s+(?:Stock|Security)\s*[Hh]olders', 'Selling Stockholders'),
-            ],
-            'underwriting': [
-                (r'^UNDERWRITING\s*$', 'Underwriting'),
-                (r'^Underwriting\s*$', 'Underwriting'),
-            ],
-            'plan_of_distribution': [
-                (r'^PLAN\s+OF\s+DISTRIBUTION', 'Plan of Distribution'),
-                (r'^Plan\s+of\s+Distribution', 'Plan of Distribution'),
-            ],
-            'legal_matters': [
-                (r'^LEGAL\s+MATTERS\s*$', 'Legal Matters'),
-                (r'^Legal\s+Matters\s*$', 'Legal Matters'),
-            ],
-            'experts': [
-                (r'^EXPERTS\s*$', 'Experts'),
-                (r'^Experts\s*$', 'Experts'),
-            ],
-            'tax_considerations': [
-                (r'^(?:U\.?S\.?\s+)?(?:FEDERAL\s+)?(?:INCOME\s+)?TAX\s+CONSIDERATIONS', 'Tax Considerations'),
-                (r'^(?:U\.?S\.?\s+)?(?:Federal\s+)?(?:Income\s+)?Tax\s+Considerations', 'Tax Considerations'),
-                (r'^(?:CERTAIN|MATERIAL)\s+.*TAX\s+(?:CONSIDERATIONS|CONSEQUENCES)', 'Tax Considerations'),
-            ],
-            'where_you_can_find_more_information': [
-                (r'^WHERE\s+YOU\s+CAN\s+FIND\s+MORE\s+INFORMATION', 'Where You Can Find More Information'),
-                (r'^Where\s+You\s+Can\s+Find\s+More\s+Information', 'Where You Can Find More Information'),
-            ],
-            'incorporation_by_reference': [
-                (r'^INCORPORATION\s+(?:OF\s+CERTAIN\s+(?:INFORMATION|DOCUMENTS)\s+)?BY\s+REFERENCE', 'Incorporation by Reference'),
-                (r'^Incorporation\s+(?:of\s+Certain\s+(?:Information|Documents)\s+)?by\s+Reference', 'Incorporation by Reference'),
-            ],
-        },
+        form: get_form_schema(form).section_patterns
+        for form in ('10-K', '10-Q', '20-F', '8-K', '424B', 'S-1', 'DEF 14A', 'PRE 14A')
     }
 
     def __init__(self, form: Optional[str] = None):
@@ -562,7 +91,7 @@ class SectionExtractor:
         sections = self._match_sections(headers, patterns, document, part_context)
 
         # Create section objects
-        return self._create_sections(sections, document)
+        return self._create_sections(sections, document, form)
 
     # NOTE: _detect_form() removed - form type should be known from context
     # Filing metadata should be set by the caller (Filing class, TenK/TenQ, etc.)
@@ -954,6 +483,17 @@ class SectionExtractor:
         """
         headers = []
 
+        # Build a node→position map once so per-node lookups are O(1) instead of
+        # O(N) full-tree walks — avoids O(M·N) cost when many candidate nodes exist.
+        _pos_map: dict = {}
+        _pos = 0
+        for _n in document.root.walk():
+            _pos_map[id(_n)] = _pos
+            _pos += 1
+
+        def _node_position(node: Node) -> int:
+            return _pos_map.get(id(node), 0)
+
         # Strategy 1: Find all heading nodes (most reliable)
         heading_nodes = document.root.find(lambda n: isinstance(n, HeadingNode))
 
@@ -961,7 +501,7 @@ class SectionExtractor:
             text = node.text()
             if text:
                 # Get position in document
-                position = self._get_node_position(node, document)
+                position = _node_position(node)
                 headers.append((node, text, position))
 
         # Strategy 2: Also check for section nodes with embedded headings
@@ -972,7 +512,7 @@ class SectionExtractor:
             if first_heading:
                 text = first_heading.text()
                 if text:
-                    position = self._get_node_position(node, document)
+                    position = _node_position(node)
                     headers.append((node, text, position))
 
         # Strategy 3: Fallback to bold ParagraphNode objects
@@ -998,8 +538,57 @@ class SectionExtractor:
                 if self._is_bold(node):
                     text = node.text()
                     if text and self._looks_like_section_header(text):
-                        position = self._get_node_position(node, document)
+                        position = _node_position(node)
                         headers.append((node, text, position))
+
+        # Strategy 3b: ParagraphNodes with bold *children* that read as section headers.
+        #
+        # Some filings render section headings as a ParagraphNode whose *child*
+        # TextNodes carry bold weight (fw=700) but whose own style is unstyled
+        # (fw=None).  Strategy 3 misses these because _is_bold() checks the paragraph
+        # node itself, not its children.  Strategy 1 only captures them when a
+        # HeadingNode child is present.  This sub-strategy fills the gap.
+        #
+        # For 10-K: catches Part III "incorporated by reference" stubs where Items
+        # 11-14 have bold-child paragraph headers (GH #880 / edgartools-01x4).
+        #
+        # For 8-K: catches the SIGNATURES block, which Workiva renders as a
+        # ParagraphNode with an unstyled wrapper and a bold-child TextNode
+        # (font-weight:700 on the <span>).  Without this, the last 8-K item
+        # over-extends into the signature block (edgartools-papt, GH #879).
+        # The `_looks_like_section_header` guard already restricts candidates to
+        # structural headers (Item, SIGNATURES, PART, EXHIBIT, ...) so false
+        # positives from stray bold text cannot occur.
+        #
+        # Other forms (10-Q, S-1, 424B) are excluded: their stray bold paragraphs
+        # would produce unwanted boundaries.
+        # Deduplicates against positions already captured.
+        if self.form in ('10-K', '8-K'):
+            existing_positions = {pos for _, _, pos in headers}
+            from edgar.documents.nodes import ParagraphNode, TextNode as _TextNode
+
+            def _has_bold_descendant(n) -> bool:
+                for child in (getattr(n, 'children', None) or []):
+                    if isinstance(child, _TextNode) and self._is_bold(child):
+                        return True
+                    if _has_bold_descendant(child):
+                        return True
+                return False
+
+            for node in document.root.find(lambda n: isinstance(n, ParagraphNode)):
+                text = node.text()
+                if not text:
+                    continue
+                if not self._looks_like_section_header(text):
+                    continue
+                position = _node_position(node)
+                if position in existing_positions:
+                    continue  # already captured (e.g. via HeadingNode child in Strategy 1)
+                # Recurse into nested descendants — a filer may wrap the bold
+                # "ITEM 11." text in a nested inline element, not a direct child.
+                if _has_bold_descendant(node):
+                    headers.append((node, text.strip(), position))
+                    existing_positions.add(position)
 
         # Strategy 4: Fallback to table cells with Item patterns
         # Many 8-K filings use tables for layout with Items in table cells
@@ -1010,11 +599,22 @@ class SectionExtractor:
             table_nodes = document.root.find(lambda n: isinstance(n, TableNode))
 
             for table in table_nodes:
-                # Look through table rows for Items
-                for row in table.rows:
+                # Look through table rows for Items.
+                #
+                # Header rows are scanned as well as body rows. A filer whose
+                # item headings are standalone one-row tables ("ITEM 1A." |
+                # "RISK FACTORS" — Wells Fargo) has that row classified as the
+                # table's *header*, leaving `rows` empty, so scanning only
+                # `rows` found no items at all and the extractor fell through
+                # to keyword matching, which labeled Item 15's exhibit list as
+                # `financial_statements` (edgartools-4agg).
+                header_cell_rows = [list(hr) for hr in (table.headers or [])]
+                body_cell_rows = [list(row.cells) for row in table.rows]
+
+                for cells in header_cell_rows + body_cell_rows:
                     # Check each cell for Item pattern
                     row_text_parts = []
-                    for cell in row.cells:
+                    for cell in cells:
                         cell_text = cell.text().strip()
                         if cell_text:
                             row_text_parts.append(cell_text)
@@ -1024,7 +624,7 @@ class SectionExtractor:
 
                     # Check if this row contains an Item pattern
                     if re.match(r'^\s*Item\s+\d', row_text, re.IGNORECASE):
-                        position = self._get_node_position(table, document)
+                        position = _node_position(table)
                         headers.append((table, row_text, position))
                         # Only take the first Item from each table to avoid duplicates
                         break
@@ -1045,9 +645,46 @@ class SectionExtractor:
                     text_start = text[:100].strip()
                     # Match Item X.XX at the start
                     if re.match(r'^\s*Item\s+\d', text_start, re.IGNORECASE):
-                        position = self._get_node_position(node, document)
+                        position = _node_position(node)
                         # Use the full paragraph text for matching
                         headers.append((node, text.strip(), position))
+
+        # Strategy 5b: SIGNATURES terminal header for 8-K (and 8-K/A).
+        #
+        # 8-Ks end with a SIGNATURES block that bounds the last item.  The preceding
+        # strategies only pick up the block when the heading is bold (Strategy 3 /
+        # Strategy 3b). Many filers (e.g. JPMorgan, Workiva-processed filings) render
+        # "SIGNATURES" or "SIGNATURE" as plain text with underline styling instead of
+        # bold, so those strategies miss it.  This step scans every ParagraphNode for
+        # a short text that matches the structural pattern (only "SIGNATURES?" passes
+        # `_looks_like_section_header`) and inserts it as a header when not already
+        # present.  Runs after all other strategies so it deduplicates automatically.
+        # Scoped to 8-K because no other registered form needs this (10-K, 10-Q,
+        # 20-F all use the TOC/anchor path; S-1/424B are title-based).
+        # (edgartools-papt, GH #879)
+        if self.form in ('8-K', '8-K/A'):
+            has_sig_header = any(
+                re.match(r'^\s*SIGNATURES?\s*$', text, re.IGNORECASE)
+                for _, text, _ in headers
+            )
+            if not has_sig_header:
+                from edgar.documents.nodes import ParagraphNode
+                existing_positions = {pos for _, _, pos in headers}
+                for node in document.root.find(lambda n: isinstance(n, ParagraphNode)):
+                    text = node.text()
+                    if not text:
+                        continue
+                    stripped = text.strip()
+                    # Only match a bare "SIGNATURES" or "SIGNATURE" line — not
+                    # longer paragraphs that merely contain the word.
+                    if not re.match(r'^\s*SIGNATURES?\s*$', stripped, re.IGNORECASE):
+                        continue
+                    position = _node_position(node)
+                    if position in existing_positions:
+                        continue
+                    headers.append((node, stripped, position))
+                    existing_positions.add(position)
+                    break  # one SIGNATURES header is enough
 
         # Sort by position
         headers.sort(key=lambda x: x[2])
@@ -1095,6 +732,17 @@ class SectionExtractor:
 
         return part_context
 
+    # A schema pattern that anchors on an explicit item number, e.g.
+    # '^(Item|ITEM)\\s+8\\.?\\s*Financial\\s+Statements'. Matched against the
+    # pattern source, not the header text, so it reflects what the schema
+    # actually asserted rather than what the document happened to contain.
+    _ITEM_NUMBERED_PATTERN_RE = re.compile(r'^\^?\(?(?:Item|ITEM)', re.IGNORECASE)
+
+    @classmethod
+    def _is_item_numbered_pattern(cls, pattern: str) -> bool:
+        """True if this schema pattern requires an 'Item N' prefix to match."""
+        return bool(cls._ITEM_NUMBERED_PATTERN_RE.match(pattern))
+
     def _match_sections(self,
                        headers: List[Tuple[Node, str, int]],
                        patterns: Dict[str, List[Tuple[str, str]]],
@@ -1121,6 +769,21 @@ class SectionExtractor:
             if toc_start > 0 and toc_end > toc_start:
                 logger.debug(f"TOC region detected: {toc_start} - {toc_end} ({toc_end - toc_start} chars)")
 
+        # Precompute the header indices that start a *recognized* section for this
+        # form. A section ends at the next such boundary header. For Item-based
+        # forms these are the "Item N" headers; for title-based forms (e.g. 424B:
+        # "Use of Proceeds", "Dilution", "Underwriting") they are the prospectus
+        # titles. Passing this set into _find_section_end lets title-based sections
+        # close on their own headings, which the generic _looks_like_section_header
+        # allowlist alone would miss — so the GH #871 sub-heading fix does not bleed
+        # one section into the next on prospectuses.
+        boundary_indices = set()
+        for _section_patterns in patterns.values():
+            for _pattern, _ in _section_patterns:
+                for _i, (_node, _text, _position) in enumerate(headers):
+                    if re.match(_pattern, _text.strip(), re.IGNORECASE):
+                        boundary_indices.add(_i)
+
         # Try to match each pattern
         for section_name, section_patterns in patterns.items():
             # Collect all candidate headers for this section
@@ -1133,7 +796,16 @@ class SectionExtractor:
 
                     # For 10-Q part-qualified patterns, validate against part context
                     if part_context and section_name.startswith('part_'):
-                        expected_part = "Part I" if section_name.startswith('part_i_') else "Part II"
+                        _PART_PREFIX_MAP = {
+                            'part_i_': 'Part I',
+                            'part_ii_': 'Part II',
+                            'part_iii_': 'Part III',
+                            'part_iv_': 'Part IV',
+                        }
+                        expected_part = next(
+                            (v for k, v in _PART_PREFIX_MAP.items() if section_name.startswith(k)),
+                            'Part II',
+                        )
                         actual_part = part_context.get(i)
                         # Skip if part context doesn't match expected part
                         if actual_part and actual_part != expected_part:
@@ -1142,7 +814,7 @@ class SectionExtractor:
                     # Try to match pattern
                     if re.match(pattern, text.strip(), re.IGNORECASE):
                         # Find end position (next section or end of document)
-                        end_position = self._find_section_end(i, headers, document)
+                        end_position = self._find_section_end(i, headers, document, boundary_indices)
 
                         # For 10-Q, prefix with Part I or Part II in title
                         final_title = title
@@ -1167,6 +839,7 @@ class SectionExtractor:
                             'title': final_title,
                             'is_main': is_main,
                             'is_toc_entry': is_toc_entry,
+                            'is_item_numbered': self._is_item_numbered_pattern(pattern),
                             'content_size': end_position - position
                         })
 
@@ -1205,6 +878,21 @@ class SectionExtractor:
                     selection_pool = candidates
                     logger.info(f"Using TOC entries as fallback for {section_name}")
 
+                # A header that names its item ("ITEM 8. FINANCIAL STATEMENTS")
+                # identifies the section outright; a bare title ("FINANCIAL
+                # STATEMENTS") only suggests it, and the same words routinely
+                # head an unrelated block. Ranking by content size alone let the
+                # weaker evidence win whenever it happened to span more text:
+                # Wells Fargo's Item 8 is a 261-char "incorporated by reference"
+                # pointer, so the "1. FINANCIAL STATEMENTS" heading inside Item
+                # 15's exhibit list claimed the `financial_statements` key with
+                # 42K chars of the wrong content (edgartools-4agg). Item-numbered
+                # matches are therefore preferred outright, and size only breaks
+                # ties within a tier.
+                item_numbered = [c for c in selection_pool if c['is_item_numbered']]
+                if item_numbered:
+                    selection_pool = item_numbered
+
                 # Among the selection pool, prefer main headers (uppercase)
                 main_headers = [c for c in selection_pool if c['is_main']]
                 if main_headers:
@@ -1229,7 +917,8 @@ class SectionExtractor:
     def _find_section_end(self,
                          section_index: int,
                          headers: List[Tuple[Node, str, int]],
-                         document: Document) -> int:
+                         document: Document,
+                         boundary_indices: Optional[Set[int]] = None) -> int:
         """Find where section ends."""
         # Next section starts where next header at same or higher level begins
         if section_index + 1 < len(headers):
@@ -1238,7 +927,25 @@ class SectionExtractor:
 
             for i in range(section_index + 1, len(headers)):
                 next_node = headers[i][0]
+                next_text = headers[i][1]
                 next_level = next_node.level if isinstance(next_node, HeadingNode) else 1
+
+                # Only an actual section boundary may close a section. Internal
+                # sub-headings are HeadingNodes too — e.g. a bold "Adoption of Fiscal
+                # Year 2027 Variable Compensation Plan" inside an 8-K Item 5.02 — and
+                # must NOT terminate the item early and orphan the body paragraphs
+                # that follow it (GH #871). A header counts as a boundary if it starts
+                # one of this form's recognized sections (boundary_indices — covers
+                # title-based forms like 424B whose section names aren't in the generic
+                # allowlist) or matches the generic structural-header allowlist
+                # (Item/PART/SIGNATURE/EXHIBIT/... — covers terminators such as
+                # SIGNATURES that aren't themselves extracted sections).
+                is_boundary = (
+                    (boundary_indices is not None and i in boundary_indices)
+                    or self._looks_like_section_header(next_text)
+                )
+                if not is_boundary:
+                    continue
 
                 # If next header is at same or higher level, that's our end
                 if next_level <= current_level:
@@ -1249,11 +956,80 @@ class SectionExtractor:
 
     def _create_sections(self,
                         matched_sections: Dict[str, Tuple[Node, str, int, int]],
-                        document: Document) -> Dict[str, Section]:
+                        document: Document,
+                        form: Optional[str] = None) -> Dict[str, Section]:
         """Create Section objects from matches."""
         from edgar.documents.nodes import TextNode
+        from edgar.documents.form_schema import get_form_schema
+
+        schema = get_form_schema(form)
 
         sections = {}
+
+        # Walk the document once, and record each node's position, its original
+        # parent, and how far its subtree reaches.
+        #
+        # The walk was previously redone per section, which is also why the
+        # parent test below has to work from a snapshot: add_child() reassigns
+        # child.parent, so by the time a later section asked "is my parent in my
+        # range?" the answer could already have been rewritten by an earlier one.
+        # Sections are created in dict order, not document order, so that made
+        # the result depend on iteration order. The snapshot is taken before any
+        # node is attached, so every section sees the document as parsed.
+        walk = list(document.root.walk())
+        positions = {id(n): i for i, n in enumerate(walk)}
+        original_parent = {id(n): id(n.parent) if n.parent is not None else None
+                           for n in walk}
+        # reach[node] is one past the last index its subtree occupies.
+        reach = {}
+        for n in reversed(walk):
+            end = positions[id(n)] + 1
+            for child in getattr(n, 'children', None) or []:
+                child_end = reach.get(id(child))
+                if child_end is not None and child_end > end:
+                    end = child_end
+            reach[id(n)] = end
+
+        def attach_bounded(target: Node, source: Node, limit: int) -> None:
+            """Attach ``source`` to ``target``, dropping any subtree past ``limit``.
+
+            A section's boundary is the position of the *next* item's header, but
+            that header is usually nested inside a container which itself starts
+            before the boundary. Attaching that container whole handed the
+            section everything the container held — Wells Fargo's Item 8 is a
+            261-character incorporation-by-reference pointer and came back as
+            3,329 characters running through Items 9, 9A, 9B and 9C, because one
+            container spanning positions 489-517 was attached to a section whose
+            range ended at 492 (edgartools-llmp.6.1).
+
+            A node whose subtree fits inside the range is attached as it is. One
+            that straddles the boundary is replaced by a shallow stand-in holding
+            only the children that fall inside, so the nesting the text extractor
+            sees is unchanged while the out-of-range content is not carried. The
+            remainder is not lost: it belongs to the next section, whose own
+            range starts at this limit.
+            """
+            if reach[id(source)] <= limit:
+                target.add_child(source)
+                return
+
+            stand_in = copy.copy(source)
+            stand_in.children = []
+            stand_in.parent = None
+            stand_in.metadata = dict(source.metadata) if source.metadata else {}
+            # copy.copy carries the source's memoised text, which described the
+            # untrimmed subtree.
+            if hasattr(stand_in, 'clear_text_cache'):
+                stand_in._text_cache = None
+
+            for child in getattr(source, 'children', None) or []:
+                child_pos = positions.get(id(child))
+                if child_pos is None or child_pos >= limit:
+                    break
+                attach_bounded(stand_in, child, limit)
+
+            if stand_in.children:
+                target.add_child(stand_in)
 
         for section_name, (node, title, start_pos, end_pos) in matched_sections.items():
             # Check if this is an HTML-extracted section (marked by start_pos == -1)
@@ -1273,19 +1049,26 @@ class SectionExtractor:
 
                 # Find all nodes in position range - only add top-level nodes
                 # (nodes whose parent is outside the range)
-                # First collect all nodes in range
-                nodes_in_range = []
-                position = 0
-                for n in document.root.walk():
-                    if start_pos <= position < end_pos:
-                        nodes_in_range.append(n)
-                    position += 1
+                nodes_in_range = walk[start_pos:end_pos]
 
                 # Now add only top-level nodes (nodes whose parent is not in the range)
                 # This prevents adding both a parent and its children as direct section children
+                #
+                # Membership here means identity — "is this same node object also in
+                # the range". It must not go through `in` on the list: Node used to
+                # be a plain @dataclass, so `==` compared field-by-field and recursed
+                # through `children`, which was both quadratic (10.5s of Citigroup's
+                # 18s sections stage) and wrong. Two distinct paragraphs with
+                # identical text and styling compared equal, so a node whose parent
+                # merely resembled an in-range node was treated as nested and
+                # silently dropped — boilerplate-heavy filings are exactly where
+                # identical nodes are common. Nodes compare by identity now
+                # (edgartools-llmp.10), but the id() test stays: it is what this
+                # means, and it reads as deliberate rather than incidental.
+                ids_in_range = {id(n) for n in nodes_in_range}
                 for n in nodes_in_range:
-                    if n.parent not in nodes_in_range:
-                        section_node.add_child(n)
+                    if original_parent[id(n)] not in ids_in_range:
+                        attach_bounded(section_node, n, end_pos)
 
                 # Clear text cache to ensure fresh text generation
                 # (nodes may have stale cached text from earlier processing)
@@ -1295,8 +1078,18 @@ class SectionExtractor:
                 detection_method = 'pattern'
                 confidence = 0.7
 
-            # Parse section name to extract part and item identifiers
+            # Parse section name to extract part and item identifiers. Semantic
+            # 10-K keys ('mda', 'business', ...) carry no item number in the key
+            # string, so parse_section_name yields item=None; recover item/part
+            # from the form schema's title vocabulary so these sections carry the
+            # same .item/.part as part_iii_item_N-style keys (GH #891).
             part, item = Section.parse_section_name(section_name)
+            if item is None:
+                schema_part, schema_item = schema.resolve_section_key(section_name)
+                if schema_item is not None:
+                    item = schema_item
+                    if part is None:
+                        part = schema_part
 
             # Create Section object
             section = Section(

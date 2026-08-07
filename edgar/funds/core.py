@@ -27,6 +27,63 @@ log = logging.getLogger(__name__)
 
 __all__ = ['Fund', 'FundCompany', 'FundClass', 'FundSeries', 'get_fund_company', 'get_fund_class', 'get_fund_series', 'find_fund', 'find_funds']
 
+# Keys the browse-edgar Filings.filter interface accepts directly.
+_FILINGS_FILTER_KEYS = frozenset(
+    {'form', 'amendments', 'filing_date', 'date', 'cik', 'exchange', 'ticker', 'accession_number'}
+)
+
+
+def _year_quarter_to_filing_date(year, quarter) -> Optional[str]:
+    """Translate entity-style ``year``/``quarter`` into a ``Filings.filter``
+    ``filing_date`` range (``"YYYY-MM-DD:YYYY-MM-DD"``), or None if it can't be
+    expressed simply (e.g. a list of years)."""
+    if not isinstance(year, int):
+        return None
+    if quarter is None:
+        return f"{year}-01-01:{year}-12-31"
+    if isinstance(quarter, int) and 1 <= quarter <= 4:
+        bounds = {1: ("01-01", "03-31"), 2: ("04-01", "06-30"),
+                  3: ("07-01", "09-30"), 4: ("10-01", "12-31")}
+        start, end = bounds[quarter]
+        return f"{year}-{start}:{year}-{end}"
+    return None
+
+
+def _series_filter_kwargs(kwargs: dict) -> dict:
+    """Map entity-style ``get_filings`` kwargs onto the ``Filings.filter``
+    interface used by the series (browse-edgar) path.
+
+    ``Filings.filter`` is keyword-only and accepts a narrower set than
+    ``Entity.get_filings`` — forwarding raw kwargs raised ``TypeError`` for
+    entity-only args such as ``year``/``quarter``/``is_xbrl`` (GH #888 review).
+    We forward the supported keys, translate ``year``/``quarter`` into a
+    ``filing_date`` range, default ``amendments`` to ``True`` to match the
+    entity path (``Filings.filter`` otherwise drops amendments when a form is
+    given), and log — rather than crash on — any filter we can't honor here.
+    """
+    filter_kwargs = {k: v for k, v in kwargs.items() if k in _FILINGS_FILTER_KEYS}
+
+    # Match the entity path, which includes amendments by default.
+    if 'form' in filter_kwargs and 'amendments' not in filter_kwargs:
+        filter_kwargs['amendments'] = True
+
+    # Translate year/quarter unless an explicit date filter was already given.
+    if kwargs.get('year') is not None and not {'filing_date', 'date'} & filter_kwargs.keys():
+        date_range = _year_quarter_to_filing_date(kwargs.get('year'), kwargs.get('quarter'))
+        if date_range:
+            filter_kwargs['filing_date'] = date_range
+
+    # Anything left that we did not honor (is_xbrl, file_number, sort_by,
+    # untranslatable year/quarter, …) is logged so it isn't silently misleading.
+    honored = set(_FILINGS_FILTER_KEYS)
+    if 'filing_date' in filter_kwargs:
+        honored |= {'year', 'quarter'}
+    unsupported = sorted(set(kwargs) - honored)
+    if unsupported:
+        log.debug("series_only path does not apply these filters: %s", unsupported)
+
+    return filter_kwargs
+
 
 class FundCompany(Entity):
     """
@@ -365,6 +422,7 @@ class Fund:
         """
         self._original_identifier = str(identifier)
         self._target_series_id = None  # New: specific series if determinable
+        self._series_resolution = None  # How _target_series_id was determined
 
         # Handle ticker resolution to series
         if isinstance(identifier, str) and self._is_fund_ticker(identifier):
@@ -372,6 +430,7 @@ class Fund:
             target_series_id = TickerSeriesResolver.get_primary_series(identifier)
             if target_series_id:
                 self._target_series_id = target_series_id
+                self._series_resolution = 'ticker'
 
         # Use existing find_fund to get the appropriate entity
         self._entity = find_fund(identifier)
@@ -389,6 +448,23 @@ class Fund:
             self._class = None
             self._series = None
             self._company = self._entity
+        else:
+            self._class = None
+            self._series = None
+            self._company = None
+
+        # A series ID or class ID names one series just as unambiguously as a
+        # ticker does, but only the ticker path above populated the target
+        # series. Backfill it from the resolved hierarchy so series-scoped
+        # behaviour — get_filings(series_only=True) above all — works for
+        # Fund("S000...") and Fund("C000...") too. Without this the series_only
+        # branch was skipped entirely and the caller got the umbrella trust's
+        # filings, i.e. a sibling series' data (GH #909, follow-on to #888).
+        if not self._target_series_id and self._series is not None:
+            series_id = getattr(self._series, 'series_id', None)
+            if series_id:
+                self._target_series_id = series_id
+                self._series_resolution = 'hierarchy'
 
     def _is_fund_ticker(self, identifier: str) -> bool:
         """Check if an identifier appears to be a fund ticker"""
@@ -441,28 +517,34 @@ class Fund:
         This delegates to the appropriate entity's get_filings method.
 
         Args:
-            series_only: If True and we have target series context, use EFTS
-                         full-text search to find filings mentioning this series ID.
-                         Note: EFTS returns at most 100 results per request.
-            **kwargs: Filtering parameters passed to get_filings
+            series_only: If True and we have target series context, return only
+                         this fund series' filings (resolved via SEC browse-edgar
+                         using the series ID), rather than the whole umbrella
+                         trust's. Returns an empty Filings if the series has no
+                         matching filings.
+            **kwargs: Filtering parameters (form, year, quarter, filing_date,
+                      date, amendments, …) applied to the results.
 
         Returns:
             Filings object with filtered filings
         """
-        # Series-aware path via EFTS
+        # Series-aware path. This isolates a single series' filings from a
+        # registrant that files one report per series (e.g. an ETF ticker whose
+        # CIK is the umbrella trust). We query SEC browse-edgar with the series
+        # ID as the CIK parameter, which returns exactly that series' filings.
+        #
+        # (A previous implementation used EFTS full-text search on the series
+        # ID; that returns nothing — SEC full-text search does not index NPORT
+        # series IDs — so it silently fell through to the unfiltered trust and
+        # returned the WRONG series' data. GH #888.)
         if series_only and self._target_series_id and not self._target_series_id.startswith("ETF_"):
-            try:
-                from edgar.search.efts import search_filings as efts_search
-                forms_filter = [kwargs['form']] if kwargs.get('form') else None
-                results = efts_search(
-                    query=f'"{self._target_series_id}"',
-                    forms=forms_filter,
-                    limit=100,
-                )
-                if results and hasattr(results, 'filings') and results.filings is not None:
-                    return results.filings
-            except Exception as e:
-                log.debug("EFTS series search failed for %s: %s", self._target_series_id, e)
+            series_filings = self._get_series_filings(self._target_series_id, **kwargs)
+            # When series filtering is requested we must NOT silently return the
+            # unfiltered trust: an empty result is correct if the series has no
+            # matching filings, and returning trust-wide filings here would give
+            # the caller a sibling series' data (GH #888).
+            from edgar._filings import Filings
+            return series_filings if series_filings is not None else Filings([])
 
         # Default path: delegate to entity
         filings = None
@@ -479,9 +561,71 @@ class Fund:
 
         return filings
 
+    def _get_series_filings(self, series_id: str, **kwargs) -> Optional['Filings']:
+        """Return only ``series_id``'s filings via SEC browse-edgar, or None.
+
+        Uses the browse-edgar endpoint with the series ID as the CIK parameter,
+        which SEC resolves to exactly that fund series' filing list (unlike EFTS
+        full-text search, which does not index series IDs). When a form filter is
+        given it is pushed to browse-edgar (``&type=``) per requested form so the
+        query returns only those filings — a large fund otherwise pages through
+        its entire history, which SEC 503s on deep pages and would drop the whole
+        result to empty (GH #888). Returns None when the series cannot be
+        resolved so the caller can surface an empty result rather than the
+        unfiltered trust; ``kwargs`` are mapped onto ``Filings.filter``.
+        """
+        form = kwargs.get('form')
+        if isinstance(form, str):
+            form_types = [form]
+        elif isinstance(form, (list, tuple)) and form:
+            form_types = [str(f) for f in form]
+        else:
+            form_types = [None]  # no form filter — one unrestricted lookup
+
+        try:
+            from edgar.funds.data import direct_get_fund_with_filings
+            resolved = False
+            filing_tables = []
+            for filing_type in form_types:
+                series = direct_get_fund_with_filings(series_id, filing_type=filing_type)
+                if series is None:
+                    continue
+                resolved = True
+                series_filings = getattr(series, 'filings', None)
+                if series_filings is not None and len(series_filings) > 0:
+                    filing_tables.append(series_filings.data)
+        except Exception as e:  # network / parse failure — do not fall back to the trust
+            log.debug("Series filing lookup failed for %s: %s", series_id, e)
+            return None
+
+        if not resolved:
+            # Could not resolve the series at all — signal the caller to return
+            # empty, never the unfiltered trust.
+            return None
+
+        from edgar._filings import Filings
+        if filing_tables:
+            import pyarrow as pa
+
+            from edgar.datatools import drop_duplicates_pyarrow
+            combined = pa.concat_tables(filing_tables, mode="default")
+            combined = drop_duplicates_pyarrow(combined, column_name='accession_number')
+            filings = Filings(filing_index=combined)
+        else:
+            # Series resolved but has no filings of the requested form(s).
+            return Filings([])
+
+        filter_kwargs = _series_filter_kwargs(kwargs)
+        if filter_kwargs and len(filings) > 0:
+            filings = filings.filter(**filter_kwargs)
+        return filings
+
     def get_series(self) -> Optional[FundSeries]:
         """
-        Get the specific series for the original ticker if determinable.
+        Get the specific series this Fund's identifier resolves to, if determinable.
+
+        Works for a ticker, a series ID or a class ID; a Fund built from a
+        multi-series trust's CIK names no single series.
 
         Returns:
             FundSeries if we can determine a specific series, None otherwise
@@ -508,6 +652,14 @@ class Fund:
                 except Exception as e:
                     log.debug(f"Failed to create ETF series for {self._target_series_id}: {e}")
             else:
+                # The hierarchy resolved at construction already holds the target
+                # series — re-resolving it by ID would cost up to two HTTP calls
+                # (get_fund_object's lru_cache is only 16 entries) to rebuild an
+                # equivalent object. Only look it up when the two disagree, which
+                # keeps the existing preference for the ticker-resolved series
+                # over the class's parent when a ticker maps elsewhere.
+                if self._series is not None and getattr(self._series, 'series_id', None) == self._target_series_id:
+                    return self._series
                 # Regular mutual fund series - try to get by ID
                 try:
                     return get_fund_series(self._target_series_id)
@@ -531,12 +683,15 @@ class Fund:
                     'message': f"'{self._original_identifier}' resolved as ETF company ticker"
                 }
             else:
+                resolved_as = ("fund series/class identifier"
+                               if self._series_resolution == 'hierarchy'
+                               else "mutual fund ticker")
                 return {
                     'status': 'success',
                     'method': 'mutual_fund_lookup',
                     'series_id': self._target_series_id,
                     'original_identifier': self._original_identifier,
-                    'message': f"'{self._original_identifier}' resolved as mutual fund ticker"
+                    'message': f"'{self._original_identifier}' resolved as {resolved_as}"
                 }
 
         # Check if it's a company ticker (ETF) that we didn't resolve

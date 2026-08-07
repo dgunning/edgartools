@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?><edgarSubmission xmlns="http://www.sec.gov/edgar/schedule13g" xmlns:com="http://www.sec.gov/edgar/common">
+  <schemaVersion>X0202</schemaVersion>
+<headerData>
+    <submissionType>SCHEDULE 13G/A</submissionType>
+    <previousAccessionNumber>0000902664-25-002420</previousAccessionNumber>
+    <filerInfo>
+      <filer>
+        <filerCredentials>
+          <!-- Field: Pseudo-Tag; ID: Name; Data: Pentwater Capital Management LP -->
+          <cik>0001425851</cik>
+          <ccc>XXXXXXXX</ccc>
+        </filerCredentials>
+      </filer>
+      <liveTestFlag>LIVE</liveTestFlag>
+
+
+
+    </filerInfo>
+  </headerData>
+  <formData>
+    <coverPageHeader>
+      <amendmentNo>3</amendmentNo>
+      <securitiesClassTitle>Common stock, par value $0.01 per share</securitiesClassTitle>
+      <eventDateRequiresFilingThisStatement>03/31/2026</eventDateRequiresFilingThisStatement>
+      <issuerInfo>
+        <issuerCik>0000723612</issuerCik>
+        <issuerName>AVIS BUDGET GROUP, INC.</issuerName>
+        <issuerCusips>
+          <issuerCusipNumber>053774105</issuerCusipNumber>
+        </issuerCusips>
+        <issuerPrincipalExecutiveOfficeAddress>
+          <com:street1>379 INTERPACE PARKWAY</com:street1>
+          <com:city>PARSIPPANY</com:city>
+          <com:stateOrCountry>NJ</com:stateOrCountry>
+          <com:zipCode>07054</com:zipCode>
+        </issuerPrincipalExecutiveOfficeAddress>
+      </issuerInfo>
+      <designateRulesPursuantThisScheduleFiled>
+        <designateRulePursuantThisScheduleFiled>Rule 13d-1(b)</designateRulePursuantThisScheduleFiled>
+      </designateRulesPursuantThisScheduleFiled>
+    </coverPageHeader>
+    <coverPageHeaderReportingPersonDetails>
+
+
+      <reportingPersonName>Pentwater Capital Management LP</reportingPersonName>
+      <citizenshipOrOrganization>DE</citizenshipOrOrganization>
+      <reportingPersonBeneficiallyOwnedNumberOfShares>
+        <soleVotingPower>0.00</soleVotingPower>
+        <sharedVotingPower>7824100.00</sharedVotingPower>
+        <soleDispositivePower>0.00</soleDispositivePower>
+        <sharedDispositivePower>7824100.00</sharedDispositivePower>
+      </reportingPersonBeneficiallyOwnedNumberOfShares>
+      <reportingPersonBeneficiallyOwnedAggregateNumberOfShares>7824100.00</reportingPersonBeneficiallyOwnedAggregateNumberOfShares>
+      <aggregateAmountExcludesCertainSharesFlag>N</aggregateAmountExcludesCertainSharesFlag>
+      <classPercent>22.2</classPercent>
+      <typeOfReportingPerson>IA</typeOfReportingPerson>
+      <typeOfReportingPerson>PN</typeOfReportingPerson>
+      <comments>Includes 775,800 shares of Common Stock (as defined in Item 2(a)) issuable upon exercise of call options.</comments>
+    </coverPageHeaderReportingPersonDetails>
+    <coverPageHeaderReportingPersonDetails>
+
+
+      <reportingPersonName>Matthew Halbower</reportingPersonName>
+      <citizenshipOrOrganization>X1</citizenshipOrOrganization>
+      <reportingPersonBeneficiallyOwnedNumberOfShares>
+        <soleVotingPower>0.00</soleVotingPower>
+        <sharedVotingPower>7824100.00</sharedVotingPower>
+        <soleDispositivePower>0.00</soleDispositivePower>
+        <sharedDispositivePower>7824100.00</sharedDispositivePower>
+      </reportingPersonBeneficiallyOwnedNumberOfShares>
+      <reportingPersonBeneficiallyOwnedAggregateNumberOfShares>7824100.00</reportingPersonBeneficiallyOwnedAggregateNumberOfShares>
+      <aggregateAmountExcludesCertainSharesFlag>N</aggregateAmountExcludesCertainSharesFlag>
+      <classPercent>22.2</classPercent>
+      <typeOfReportingPerson>HC</typeOfReportingPerson>
+      <typeOfReportingPerson>IN</typeOfReportingPerson>
+      <comments>Includes 775,800 shares of Common Stock issuable upon exercise of call options.</comments>
+    </coverPageHeaderReportingPersonDetails>
+    <items>
+      <item1>
+        <issuerName>AVIS BUDGET GROUP, INC.</issuerName>
+        <issuerPrincipalExecutiveOfficeAddress>379 Interpace Parkway, Parsippany, NJ 07054</issuerPrincipalExecutiveOfficeAddress>
+      </item1>
+      <item2>
+        <filingPersonName>This statement is filed by:
+
+(i) Pentwater Capital Management LP (the "Investment Manager"), a Delaware limited partnership, and the investment adviser to certain funds (the "Pentwater Funds"), with respect to the shares of common stock, par value $0.01 per share ("Common Stock") of Avis Budget Group, Inc., a Delaware corporation (the "Company"), and the shares of Common Stock issuable upon exercise of call options directly held by the Pentwater Funds; and
+
+(ii) Mr. Matthew Halbower ("Mr. Halbower"), the sole shareholder of MCH PWCM Holdings Inc., the general partner of the Investment Manager, with respect to the shares of Common Stock and the shares of Common Stock issuable upon exercise of call options directly held by the Pentwater Funds.
+
+The foregoing persons are hereinafter sometimes collectively referred to as the "Reporting Persons."
+
+The filing of this statement should not be construed as an admission that any of the foregoing persons or any Reporting Person is, for the purposes of Section 13 of the Securities and Exchange Act of 1934, the beneficial owner of the securities reported herein.</filingPersonName>
+        <principalBusinessOfficeOrResidenceAddress>The address of the business office of each of the Reporting Persons is 1001 10th Avenue South, Suite 216, Naples, FL 34102.</principalBusinessOfficeOrResidenceAddress>
+        <citizenship>The Investment Manager is a Delaware limited partnership.  Mr. Halbower is a citizen of the United States.</citizenship>
+      </item2>
+      <item3>
+        <notApplicableFlag>N</notApplicableFlag>
+        <typeOfPersonFiling>IA</typeOfPersonFiling>
+        <typeOfPersonFiling>HC</typeOfPersonFiling>
+      </item3>
+      <item4>
+        <amountBeneficiallyOwned>The information required by Item 4(a) is set forth in Row 9 of the cover page for each of the Reporting Persons and is incorporated herein by reference.
+
+The percentage set forth in this Schedule 13G is calculated based upon an aggregate of 35,324,685 shares of Common Stock outstanding as of March 25, 2026, as reported in the Company's Definitive Proxy Statement on Schedule 14A filed with the Securities and Exchange Commission on April 2, 2026.</amountBeneficiallyOwned>
+        <classPercent>22.2%</classPercent>
+        <numberOfSharesPersonHas>
+          <solePowerOrDirectToVote>The information required by Item 4(c)(i) is set forth in Row 5 of the cover page for each of the Reporting Persons and is incorporated herein by reference.</solePowerOrDirectToVote>
+          <sharedPowerOrDirectToVote>The information required by Item 4(c)(ii) is set forth in Row 6 of the cover page for each of the Reporting Persons and is incorporated herein by reference.</sharedPowerOrDirectToVote>
+          <solePowerOrDirectToDispose>The information required by Item 4(c)(iii) is set forth in Row 7 of the cover page for each of the Reporting Persons and is incorporated herein by reference.</solePowerOrDirectToDispose>
+          <sharedPowerOrDirectToDispose>The information required by Item 4(c)(iv) is set forth in Row 8 of the cover page for each of the Reporting Persons and is incorporated herein by reference.</sharedPowerOrDirectToDispose>
+        </numberOfSharesPersonHas>
+      </item4>
+      <item5>
+        <notApplicableFlag>Y</notApplicableFlag>
+      </item5>
+      <item6>
+        <notApplicableFlag>N</notApplicableFlag>
+        <ownershipMoreThan5PercentOnBehalfOfAnotherPerson>See Item 2(a). The Pentwater Funds have the right to receive or the power to direct the receipt of dividends from, or the proceeds from the sale of, the shares of Common Stock reported herein. Pentwater Merger Arbitrage Master Fund LTD, a Pentwater Fund, has the right to receive or the power to direct the receipt of dividends from, or the proceeds from the sale of, more than 5 percent of the outstanding Common Stock.</ownershipMoreThan5PercentOnBehalfOfAnotherPerson>
+      </item6>
+      <item7>
+        <notApplicableFlag>Y</notApplicableFlag>
+      </item7>
+      <item8>
+        <notApplicableFlag>Y</notApplicableFlag>
+      </item8>
+      <item9>
+        <notApplicableFlag>Y</notApplicableFlag>
+      </item9>
+      <item10>
+        <notApplicableFlag>N</notApplicableFlag>
+        <certifications>By signing below I certify that, to the best of my knowledge and belief, the securities referred to above were acquired and are held in the ordinary course of business and were not acquired and are not held for the purpose of or with the effect of changing or influencing the control of the issuer of the securities and were not acquired and are not held in connection with or as a participant in any transaction having that purpose or effect, other than activities solely in connection with a nomination under ?? 240.14a-11.</certifications>
+      </item10>
+    </items>
+    <signatureInformation>
+      <reportingPersonName>Pentwater Capital Management LP</reportingPersonName>
+      <signatureDetails>
+        <signature>/s/ Matthew Halbower</signature>
+        <title>By: MCH PWCM Holdings Inc., General Partner, By: Matthew Halbower, Chief Executive Officer</title>
+        <date>04/07/2026</date>
+      </signatureDetails>
+    </signatureInformation>
+    <signatureInformation>
+      <reportingPersonName>Matthew Halbower</reportingPersonName>
+      <signatureDetails>
+        <signature>/s/ Matthew Halbower</signature>
+        <title>Matthew Halbower, Individually</title>
+        <date>04/07/2026</date>
+      </signatureDetails>
+    </signatureInformation>
+  </formData>
+</edgarSubmission>

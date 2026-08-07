@@ -2,7 +2,8 @@
 Document postprocessor for final processing after parsing.
 """
 
-from typing import List, Set
+from functools import partial
+from typing import Dict, List, Set
 
 from edgar.documents.config import ParserConfig
 from edgar.documents.document import Document
@@ -78,6 +79,12 @@ class DocumentPostprocessor:
         """Check if node is empty and can be removed."""
         # Never remove table nodes
         if node.type == NodeType.TABLE:
+            return False
+
+        # Never remove image nodes — they carry no text/children but represent
+        # real content (e.g. a 10-K stock-performance graph). Pruning them here
+        # is what silently dropped images from markdown/text output (GH #886).
+        if node.type == NodeType.IMAGE:
             return False
 
         # Never remove nodes with metadata
@@ -237,27 +244,43 @@ class DocumentPostprocessor:
                 node.set_metadata('section', section_name)
 
     def _add_statistics(self, document: Document):
-        """Add document statistics to metadata."""
-        stats = {
-            'node_count': sum(1 for _ in document.root.walk()),
-            'text_length': len(document.text()),
-            'table_count': len(document.tables),
-            'heading_count': len(document.headings),
+        """Configure lazy document statistics on metadata."""
+        document.metadata._set_statistics_loader(
+            partial(
+                self._calculate_statistics,
+                document,
+                include_section_count=self.config.eager_section_extraction,
+            )
+        )
+
+    @staticmethod
+    def _calculate_statistics(
+        document: Document, include_section_count: bool
+    ) -> Dict[str, int]:
+        """Calculate document statistics on first access."""
+        statistics = {
+            "node_count": sum(1 for _ in document.root.walk()),
+            "text_length": len(document.text()),
+            "table_count": len(document.tables),
+            "heading_count": len(document.headings),
         }
 
         # Only add section count if sections were extracted
-        if self.config.eager_section_extraction:
-            stats['section_count'] = len(document.sections)
+        if include_section_count:
+            statistics["section_count"] = len(document.sections)
 
-        document.metadata.statistics = stats
+        return statistics
 
     def _validate_structure(self, document: Document):
         """Validate document structure and fix issues."""
         issues = []
 
         # Check for orphaned nodes
+        # `is not`, not `!=`: Node is a @dataclass, so `!=` runs a generated
+        # field-by-field comparison on every node in the document to answer a
+        # question about object identity (edgartools-llmp.6.10).
         for node in document.root.walk():
-            if node != document.root and node.parent is None:
+            if node is not document.root and node.parent is None:
                 issues.append(f"Orphaned node: {node.type}")
                 # Fix by adding to root
                 document.root.add_child(node)

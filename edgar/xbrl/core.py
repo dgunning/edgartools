@@ -14,6 +14,28 @@ PERIOD_START_LABEL = "http://www.xbrl.org/2003/role/periodStartLabel"
 PERIOD_END_LABEL = "http://www.xbrl.org/2003/role/periodEndLabel"
 TOTAL_LABEL = "http://www.xbrl.org/2003/role/totalLabel"
 
+# Standard XBRL taxonomy prefixes. Anything else in an element_id is a filer extension.
+# Used by calculation_linkbase() and Statement.extension_arcs() to distinguish
+# filer-authored concepts from standard taxonomy concepts.
+STANDARD_TAXONOMIES = frozenset({
+    'us-gaap', 'dei', 'srt', 'ifrs', 'ifrs-full',
+    'country', 'currency', 'exch', 'ecd',
+    'naics', 'sic', 'stpr', 'invest',
+})
+
+
+def split_element_id(element_id: str) -> Tuple[str, str]:
+    """Split an element ID like 'us-gaap_Revenues' or 'tsla_RestructuringAndOtherExpenses'
+    into (taxonomy_prefix, local_name) on the FIRST underscore.
+
+    Handles 'us-gaap' correctly (contains a hyphen, not an underscore separator).
+    Returns ('', element_id) if there is no underscore.
+    """
+    if not element_id or '_' not in element_id:
+        return '', element_id or ''
+    prefix, _, local = element_id.partition('_')
+    return prefix, local
+
 # XML namespaces
 NAMESPACES = {
     "xlink": "http://www.w3.org/1999/xlink",

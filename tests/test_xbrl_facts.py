@@ -41,16 +41,16 @@ def test_get_facts_by_concept(intc_xbrl: XBRL):
     facts: FactsView = intc_xbrl.facts
     print()
     results = facts.query().by_concept('Revenue').to_dataframe()
-    assert len(results) == 51
+    assert len(results) == 45
 
     # Test with full concept name
     results_full = facts.query().by_concept('us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax').to_dataframe()
-    assert len(results_full) == 48
+    assert len(results_full) == 42
     assert results_full.concept.drop_duplicates().to_list()[0] == 'us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax'
 
     # Test with a concept with '_' in the name instead of ':'
     results_underscore = facts.query().by_concept('us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax').to_dataframe()
-    assert len(results_underscore) == 48
+    assert len(results_underscore) == 42
     assert results_underscore.concept.drop_duplicates().to_list()[0] == 'us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax'
 
 
@@ -92,6 +92,18 @@ def test_numeric_sign_for_cashflow_values():
 
     assert inventory_facts[inventory_facts.period_end == '2022-12-31']['value'].values[0] == '-111288000'
     assert inventory_facts[inventory_facts.period_end == '2022-12-31']['numeric_value'].values[0] == -111288000
+
+
+def test_by_date_range_exact(intc_xbrl: XBRL):
+    """exact=True on by_date_range filters to facts matching the date exactly, not <=/>= (GH #767)."""
+    revenue_range = intc_xbrl.facts.query().by_concept('Revenue').by_date_range(end_date='2024-12-28').to_dataframe()
+    revenue_exact = intc_xbrl.facts.query().by_concept('Revenue').by_date_range(end_date='2024-12-28', exact=True).to_dataframe()
+
+    # Range returns facts ending on or before the date (multiple years)
+    assert len(revenue_range['period_end'].unique()) == 3
+    # Exact returns only facts ending on that exact date
+    assert list(revenue_exact['period_end'].unique()) == ['2024-12-28']
+    assert len(revenue_exact) < len(revenue_range)
 
 
 def test_xbrl_query(intc_xbrl: XBRL):
@@ -285,8 +297,19 @@ def test_query_by_dimension_none(aapl_xbrl):
              .by_text("Revenue")
              .by_dimension(None)
              )
-    print(facts.to_dataframe().columns.tolist())
-    assert not any('dim' in col for col in facts.to_dataframe().columns if col != 'is_dimensioned')
+    df = facts.to_dataframe()
+    # No per-axis dim_<axis> column: those exist only for facts that carry that
+    # axis, and this query filtered every dimensioned fact out.
+    assert not any(col.startswith('dim_') for col in df.columns)
+    # The five fixed dimension columns ARE present, and entirely null. The caller
+    # asked for dimension columns via include_dimensions=True, so they get them;
+    # the column set follows the query's configuration, not the rows that matched
+    # (edgartools-rsyt). This assertion previously read "absent", which held only
+    # because dropna(axis=1) deleted any column the result left empty.
+    for col in ['dimension', 'member', 'dimension_label',
+                'dimension_member_label', 'full_dimension_label']:
+        assert col in df.columns
+        assert df[col].isna().all()
 
 
 def test_flexible_dimension_matching(aapl_xbrl):

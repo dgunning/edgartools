@@ -1,0 +1,192 @@
+{
+  "entries": [
+    {
+      "key": "fanniemae_abs15g_2018",
+      "accession": "0000310522-18-000010",
+      "form": "ABS-15G",
+      "note": "large-table dimension pass: 1h12m -> 24.1s in 5.45.0",
+      "html_bytes": 25166026,
+      "xbrl_roles": []
+    },
+    {
+      "key": "footlocker_10k_fy2024",
+      "accession": "0001437749-25-009620",
+      "form": "10-K",
+      "note": "nested TOC anchors; off-by-one item map (GH #923)",
+      "html_bytes": 3046982,
+      "xbrl_roles": [
+        "calculation",
+        "definition",
+        "instance",
+        "label",
+        "presentation",
+        "schema"
+      ]
+    },
+    {
+      "key": "footlocker_10k_fy2013",
+      "accession": "0001144204-14-019510",
+      "form": "10-K",
+      "note": "split TOC cells; phantom item codes (GH #923)",
+      "html_bytes": 2336648,
+      "xbrl_roles": [
+        "calculation",
+        "definition",
+        "instance",
+        "label",
+        "presentation",
+        "schema"
+      ]
+    },
+    {
+      "key": "ambac_10k_fy2022",
+      "accession": "0000874501-23-000040",
+      "form": "10-K",
+      "note": "two-column TOC; Part context scrambling (GH #924)",
+      "html_bytes": 7708203,
+      "xbrl_roles": [
+        "calculation",
+        "definition",
+        "instance",
+        "label",
+        "presentation",
+        "schema"
+      ]
+    },
+    {
+      "key": "regions_10k_fy2021",
+      "accession": "0001281761-22-000016",
+      "form": "10-K",
+      "note": "page-number-only TOC; Item 7/7A anchor collision (GH #920)",
+      "html_bytes": 9533248,
+      "xbrl_roles": [
+        "calculation",
+        "definition",
+        "instance",
+        "label",
+        "presentation",
+        "schema"
+      ]
+    },
+    {
+      "key": "citigroup_10k_fy2024",
+      "ticker": "C",
+      "form": "10-K",
+      "year": 2025,
+      "note": ">10MB; 830K vs 1.81M chars under the removed lossy pipeline",
+      "accession": "0000831001-25-000067",
+      "html_bytes": 16686353,
+      "xbrl_roles": [
+        "calculation",
+        "definition",
+        "instance",
+        "label",
+        "presentation",
+        "schema"
+      ]
+    },
+    {
+      "key": "morganstanley_10k_fy2024",
+      "ticker": "MS",
+      "form": "10-K",
+      "year": 2025,
+      "note": "~490 word-gluing sites before 5.45.0",
+      "accession": "0000895421-25-000304",
+      "html_bytes": 9788390,
+      "xbrl_roles": [
+        "calculation",
+        "definition",
+        "instance",
+        "label",
+        "presentation",
+        "schema"
+      ]
+    },
+    {
+      "key": "odp_10k_fy2025",
+      "cik": 800240,
+      "form": "10-K",
+      "year": 2025,
+      "note": "5.6MB; catastrophic backtracking in has_index() (GH #928)",
+      "accession": "0000950170-25-027569",
+      "html_bytes": 5603863,
+      "xbrl_roles": [
+        "instance",
+        "schema"
+      ]
+    },
+    {
+      "key": "tesla_10k_fy2023",
+      "ticker": "TSLA",
+      "form": "10-K",
+      "year": 2024,
+      "note": "Workiva TOC row structure (GH #915)",
+      "accession": "0001628280-24-002390",
+      "html_bytes": 2672746,
+      "xbrl_roles": [
+        "calculation",
+        "definition",
+        "instance",
+        "label",
+        "presentation",
+        "schema"
+      ]
+    },
+    {
+      "key": "meta_10k_fy2024",
+      "ticker": "META",
+      "form": "10-K",
+      "year": 2025,
+      "note": "heading detection: 180 of 296 headings were glyphs pre-5.45.0",
+      "accession": "0001326801-25-000017",
+      "html_bytes": 2369769,
+      "xbrl_roles": [
+        "calculation",
+        "definition",
+        "instance",
+        "label",
+        "presentation",
+        "schema"
+      ]
+    },
+    {
+      "key": "jackhenry_10q_fy2025",
+      "ticker": "JKHY",
+      "form": "10-Q",
+      "year": 2025,
+      "note": "small-to-mid 10-Q; guards against tuning only for giants",
+      "accession": "0000779152-25-000092",
+      "html_bytes": 793532,
+      "xbrl_roles": [
+        "calculation",
+        "definition",
+        "instance",
+        "label",
+        "presentation",
+        "schema"
+      ]
+    }
+  ],
+  "index": {
+    "path": "corpus/_index/2025Q1.parquet",
+    "rows": 340032,
+    "year": 2025,
+    "quarter": 1
+  },
+  "entity_facts": [
+    {
+      "key": "tesla",
+      "cik": 1318605,
+      "note": "matches tesla_10k_fy2023",
+      "path": "corpus/_entity_facts/CIK0001318605.json",
+      "bytes": 4030874
+    },
+    {
+      "key": "footlocker",
+      "cik": 850209,
+      "note": "matches the two footlocker entries",
+      "path": "corpus/_entity_facts/CIK0000850209.json",
+      "bytes": 3738100
+    }
+  ]
+}

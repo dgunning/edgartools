@@ -1,0 +1,253 @@
+# Viewer Verification Corpus
+# ===========================
+#
+# Curated filings exercising the variation surface of SEC R*.htm viewer
+# output. The corpus serves two purposes:
+#
+#   1. Regression — every previously-reported viewer bug pins a filing
+#      with ground-truth assertions that would have caught the original
+#      report.
+#   2. Coverage — entries are tagged with dimension labels (header_shape,
+#      footnote_style, scaling, filer_type, fiscal_year_end) so we can
+#      see which corners of the surface are exercised and where we have
+#      gaps.
+#
+# See README.md for the expansion process. New viewer bug fixes must add
+# a corpus entry before merging — that's how the corpus stays current.
+
+schema_version: 1
+
+# Dimension vocabulary — keep this list closed so we can audit coverage.
+dimensions:
+  header_shape:
+    - single_period_12m            # one 12-month column (rare; common in 10-K/A)
+    - comparative_12m              # 2-3 stacked 12-month columns
+    - multi_period_3m_plus_12m     # quarterly schedule + annual in same table
+    - quarterly_3m_plus_9m         # typical 10-Q comparative
+    - comparative_instant          # balance sheet shape (2+ instant columns)
+    - segment_dimensional          # dimensional axis headers
+  footnote_style:
+    - none
+    - simple                       # [1], [2] numeric
+    - lettered                     # [a], [b]
+    - asterisk                     # *, **
+  scaling:
+    - usd_raw                      # in dollars
+    - usd_thousands
+    - usd_millions
+    - usd_billions                 # very rare
+    - non_usd                      # foreign reporting currency
+    - mixed                        # different scaling per statement
+  filer_type:
+    - large_us                     # 10-K large accelerated
+    - smaller_us                   # 10-K smaller reporting
+    - foreign_20f                  # 20-F foreign private issuer
+    - foreign_40f                  # 40-F Canadian
+    - ifrs                         # IFRS reporter (typically 20-F)
+    - investment_company           # N-1A, N-CSR
+  fiscal_year_end:
+    - dec                          # calendar
+    - sep                          # AAPL
+    - jun
+    - nov                          # ADI
+    - other
+
+entries:
+
+  # -------------------------------------------------------------------
+  # GH #797 — FilingSummary salvage via MetaLinks
+  # -------------------------------------------------------------------
+  - id: gh-797-abbv-2021
+    company: AbbVie Inc.
+    ticker: ABBV
+    cik: 1551152
+    accession: "0001551152-22-000007"
+    form: 10-K
+    filing_date: "2022-02-04"
+    dimensions:
+      header_shape: comparative_12m
+      footnote_style: simple
+      scaling: usd_millions
+      filer_type: large_us
+      fiscal_year_end: dec
+    bug_references: [gh-797]
+    notes: >
+      AbbVie's 2021 10-K classifies "Consolidated Statements of Earnings"
+      under "Uncategorized" in FilingSummary.xml. The viewer salvages it
+      via the MetaLinks groupType='statement' fallback. Without the fix,
+      financial_statements is missing the income statement entirely.
+    assertions:
+      statement_count_min: 7
+      statement_short_name_present:
+        - "Consolidated Statements of Earnings"
+        - "Consolidated Balance Sheets"
+        - "Consolidated Statements of Cash Flows"
+
+  # -------------------------------------------------------------------
+  # GH #799 — concept_rows level enrichment from presentation linkbase
+  # -------------------------------------------------------------------
+  - id: gh-799-abt-2025
+    company: Abbott Laboratories
+    ticker: ABT
+    cik: 1800
+    accession: "0001628280-26-010185"
+    form: 10-K
+    filing_date: "2025-02-21"
+    dimensions:
+      header_shape: comparative_instant   # balance sheet is canary
+      footnote_style: simple
+      scaling: usd_millions
+      filer_type: large_us
+      fiscal_year_end: dec
+    bug_references: [gh-799]
+    notes: >
+      ABT 2025 10-K balance sheet has a non-trivial concept hierarchy.
+      Pre-fix, every concept_rows[*].level was 0 (flat). Fix populates
+      level from the XBRL presentation linkbase.
+    assertions:
+      levels_min_distinct:
+        statement_short_name_contains: "BALANCE"
+        min_distinct: 2
+        min_level: 0
+
+  - id: gh-799-aapl-2025
+    company: Apple Inc.
+    ticker: AAPL
+    cik: 320193
+    accession: "0000320193-25-000079"
+    form: 10-K
+    filing_date: "2025-10-31"
+    dimensions:
+      header_shape: comparative_instant
+      footnote_style: simple
+      scaling: usd_millions
+      filer_type: large_us
+      fiscal_year_end: sep
+    bug_references: [gh-799]
+    notes: >
+      AAPL secondary canary for level enrichment — non-calendar fiscal
+      year (September) exercises a different fiscal-year code path.
+    assertions:
+      levels_min_distinct:
+        statement_short_name_contains: "BALANCE"
+        min_distinct: 2
+        min_level: 0
+
+  # -------------------------------------------------------------------
+  # GH #807 — currency_scaling consistency
+  # -------------------------------------------------------------------
+  - id: gh-807-aapl-control
+    company: Apple Inc.
+    ticker: AAPL
+    cik: 320193
+    accession: "0000320193-25-000079"
+    form: 10-K
+    filing_date: "2025-10-31"
+    dimensions:
+      header_shape: comparative_12m
+      footnote_style: simple
+      scaling: usd_millions
+      filer_type: large_us
+      fiscal_year_end: sep
+    bug_references: [gh-807]
+    notes: >
+      Control filing where R*.htm text "$ in Millions" matches XBRL
+      decimals. Pre-fix and post-fix should both report 1_000_000.
+    assertions:
+      currency_scaling:
+        statement_short_name_contains: "OPERATIONS"
+        expected: 1000000
+
+  - id: gh-807-abnb
+    company: Airbnb Inc.
+    ticker: ABNB
+    cik: 1559720
+    form: 10-K
+    dimensions:
+      header_shape: comparative_12m
+      footnote_style: simple
+      scaling: mixed                # the bug surface
+      filer_type: large_us
+      fiscal_year_end: dec
+    bug_references: [gh-807]
+    notes: >
+      ABNB's scaling was reported inconsistent across statements in the
+      original report. Fix uses XBRL decimals as ground truth. No fixed
+      accession — runs against latest 10-K so test stays current.
+    use_latest_filing: true
+    assertions:
+      currency_scaling_consistent_across_statements: true
+
+  # -------------------------------------------------------------------
+  # GH #810 — ConceptRow.numeric_value primary-period resolution
+  # -------------------------------------------------------------------
+  - id: gh-810-abt-2019
+    company: Abbott Laboratories
+    ticker: ABT
+    cik: 1800
+    accession: "0001104659-20-023904"
+    form: 10-K
+    filing_date: "2020-02-21"
+    dimensions:
+      header_shape: comparative_12m
+      footnote_style: simple
+      scaling: usd_millions
+      filer_type: large_us
+      fiscal_year_end: dec
+    bug_references: [gh-810]
+    notes: >
+      ABT had no 2019 discontinued-ops fact. Pre-fix numeric_value
+      silently fell back to the 2018 value (34.0). Post-fix returns
+      None and numeric_values dict still exposes 2018/2017.
+    assertions:
+      concept_row_check:
+        statement_index: 0                          # Income statement
+        concept: us-gaap_IncomeLossFromDiscontinuedOperationsNetOfTax
+        numeric_value: null                         # primary period missing
+        period_value:
+          "12 Months Ended Dec. 31, 2018": 34.0
+          "12 Months Ended Dec. 31, 2017": 124.0
+      # Continuing-ops control row in the same statement
+      concept_row_check_2:
+        statement_index: 0
+        concept: us-gaap_IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest
+        numeric_value: 3687.0
+
+  # -------------------------------------------------------------------
+  # GH #812 — multi-row R*.htm header parsing (CURRENTLY OPEN)
+  # -------------------------------------------------------------------
+  - id: gh-812-adi-2019
+    company: Analog Devices Inc.
+    ticker: ADI
+    cik: 6281
+    accession: "0000006281-19-000144"
+    form: 10-K
+    filing_date: "2019-11-26"
+    dimensions:
+      header_shape: multi_period_3m_plus_12m
+      footnote_style: simple
+      scaling: usd_thousands
+      filer_type: large_us
+      fiscal_year_end: nov
+    bug_references: [gh-812]
+    notes: >
+      R2.htm Consolidated Statements of Income carries 8 quarterly
+      columns plus 3 annual columns under a stacked header (group:
+      '3 Months Ended' colspan=16 | '12 Months Ended' colspan=5).
+      Pre-fix, all 13 parsed period_headers are prefixed
+      '3 Months Ended' because group_headers accumulates flat and the
+      first group swallows every column position. Post-fix, three of
+      them must read '12 Months Ended'.
+    assertions:
+      period_headers_contain:
+        statement_index: 0
+        substrings: ["12 Months Ended"]
+      # FY2019 annual revenue should be ~$6.0B (in thousands)
+      # https://www.sec.gov/Archives/edgar/data/6281/000000628119000144/
+      concept_row_check:
+        statement_index: 0
+        concept: us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax
+        period_contains: "12 Months Ended Nov. 02, 2019"
+        expected_value_min: 5_900_000      # $5.9B floor
+        expected_value_max: 6_100_000      # $6.1B ceiling
+        tolerance_pct: 1.0

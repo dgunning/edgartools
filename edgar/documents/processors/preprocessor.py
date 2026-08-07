@@ -52,8 +52,12 @@ class HTMLPreprocessor:
             # Whitespace normalization
             'multiple_spaces': re.compile(r'[ \t]+'),
             'multiple_newlines': re.compile(r'\n{3,}'),
-            # Whitespace around tags: preserve spaces between adjacent tags (word boundaries)
-            # but strip spaces between text content and tag boundaries
+            # Whitespace around tags is collapsed to a single space, never deleted:
+            # in HTML rendering, whitespace touching a tag boundary is still a word
+            # boundary ('STATES </font><font>SECURITIES' reads 'STATES SECURITIES').
+            # These previously deleted text-adjacent runs outright, which glued
+            # words together across inline elements ('STATESSECURITIES') in a way
+            # nothing downstream could recover (edgartools-tlj1).
             'spaces_between_tags': re.compile(r'(?<=>)\s+(?=<)'),
             'spaces_before_tags': re.compile(r'(?<!>)\s+(?=<)'),
             'spaces_after_tags': re.compile(r'(?<=>)\s+(?!<)'),
@@ -69,9 +73,14 @@ class HTMLPreprocessor:
                 re.IGNORECASE
             ),
 
-            # Empty tags removal - combined pattern for all removable tags
+            # Empty tags removal - combined pattern for all removable tags.
+            # The inner run is captured because a tag holding only whitespace is not
+            # empty: filers use a styled spacer span ('Safari</span><span
+            # style="font-size:5.85pt"> </span><span>in the EU') to set the width of a
+            # word gap, and deleting it outright glued the words either side. Same rule
+            # as everywhere else in this file — collapse to a space, never delete.
             'empty_tags': re.compile(
-                r'<(?:span|div|p|font|b|i|u|strong|em)\b[^>]*>\s*</(?:span|div|p|font|b|i|u|strong|em)>',
+                r'<(?:span|div|p|font|b|i|u|strong|em)\b[^>]*>(\s*)</(?:span|div|p|font|b|i|u|strong|em)>',
                 re.IGNORECASE
             ),
             'empty_self_closing': re.compile(
@@ -80,9 +89,12 @@ class HTMLPreprocessor:
             ),
 
             # Common issues
-            'multiple_br': re.compile(r'(<br\s*/?>[\s\n]*){3,}', re.IGNORECASE),
+            "multiple_br": re.compile(
+                r"<br\s*/?>\s*<br\s*/?>\s*<br\s*/?>(?:\s*<br\s*/?>)*\s*",
+                re.IGNORECASE,
+            ),
             'space_before_punct': re.compile(r'\s+([.,;!?])'),
-            'missing_space_after_punct': re.compile(r'(?<=\w{2})([.!?])([A-Z])'),
+            "missing_space_after_punct": re.compile(r"(\w{2})([.!?])(?=[A-Z])"),
         }
 
     def process(self, html: str) -> str:
@@ -205,14 +217,14 @@ class HTMLPreprocessor:
         html = self._compiled_patterns['multiple_spaces'].sub(' ', html)
 
         # Replace multiple newlines with double newline
-        html = self._compiled_patterns['multiple_newlines'].sub('\n\n', html)
+        if "\n\n\n" in html:
+            html = self._compiled_patterns["multiple_newlines"].sub("\n\n", html)
 
-        # Normalize whitespace around tags:
-        # 1. Collapse whitespace between adjacent tags to single space (preserves word boundaries)
-        # 2. Strip whitespace between text content and tags
+        # Collapse whitespace around tags to a single space (see pattern comments:
+        # deleting it destroys word boundaries at inline-element edges)
         html = self._compiled_patterns['spaces_between_tags'].sub(' ', html)
-        html = self._compiled_patterns['spaces_before_tags'].sub('', html)
-        html = self._compiled_patterns['spaces_after_tags'].sub('', html)
+        html = self._compiled_patterns['spaces_before_tags'].sub(' ', html)
+        html = self._compiled_patterns['spaces_after_tags'].sub(' ', html)
 
         # Add newlines around block elements for readability
         # Using combined patterns instead of looping over individual tags
@@ -220,15 +232,26 @@ class HTMLPreprocessor:
         html = self._compiled_patterns['block_close_tags'].sub(r'\1\n', html)
 
         # Clean up excessive newlines (apply again after adding newlines)
-        html = self._compiled_patterns['multiple_newlines'].sub('\n\n', html)
+        if "\n\n\n" in html:
+            html = self._compiled_patterns["multiple_newlines"].sub("\n\n", html)
 
         return html.strip()
 
     def _remove_empty_tags(self, html: str) -> str:
-        """Remove empty tags that don't contribute content."""
+        """Remove empty tags that don't contribute content.
+
+        A tag holding whitespace leaves that whitespace behind: it was a word gap the
+        filer drew with a styled spacer element, and removing it would glue the words
+        either side. A genuinely empty tag leaves nothing.
+        """
         # Use pre-compiled combined patterns instead of looping
-        html = self._compiled_patterns['empty_tags'].sub('', html)
+        html = self._compiled_patterns['empty_tags'].sub(lambda m: ' ' if m.group(1) else '', html)
         html = self._compiled_patterns['empty_self_closing'].sub('', html)
+
+        # The substitution above can put a space next to one the whitespace pass already
+        # left, so re-collapse. Skipped when whitespace is preserved verbatim.
+        if not self.config.preserve_whitespace:
+            html = self._compiled_patterns['multiple_spaces'].sub(' ', html)
 
         return html
 
@@ -237,7 +260,7 @@ class HTMLPreprocessor:
         # Use pre-compiled patterns for better performance
         html = self._compiled_patterns['multiple_br'].sub('<br/><br/>', html)
         html = self._compiled_patterns['space_before_punct'].sub(r'\1', html)
-        html = self._compiled_patterns['missing_space_after_punct'].sub(r'\1 \2', html)
+        html = self._compiled_patterns["missing_space_after_punct"].sub(r"\1\2 ", html)
 
         # Remove zero-width spaces (simple string replace is faster than regex)
         html = html.replace('\u200b', '')

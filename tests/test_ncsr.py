@@ -10,19 +10,17 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+
 try:
     import vcr
 except ImportError:
     vcr = None
 
-from edgar import get_by_accession_number
 from edgar.funds.ncsr import (
     NCSR_FORMS,
-    AnnualReturn,
     FundShareholderReport,
-    Holding,
-    ShareClassInfo,
 )
+from tests._offline_filings import offline_filing
 
 # Mark all tests in this module as network tests
 pytestmark = pytest.mark.network
@@ -45,7 +43,7 @@ my_vcr = vcr.VCR(
 def annual_report():
     """ALGER PORTFOLIOS — N-CSR, 7 share classes."""
     with my_vcr.use_cassette("test_ncsr_annual.yaml"):
-        filing = get_by_accession_number("0001133228-26-002293")
+        filing = offline_filing("0001133228-26-002293")
         return filing.obj()
 
 
@@ -53,7 +51,7 @@ def annual_report():
 def semiannual_report():
     """AMERICAN CENTURY QUANTITATIVE EQUITY FUNDS — N-CSRS."""
     with my_vcr.use_cassette("test_ncsr_semiannual.yaml"):
-        filing = get_by_accession_number("0000827060-26-000002")
+        filing = offline_filing("0000827060-26-000002")
         return filing.obj()
 
 

@@ -1,6 +1,0 @@
-Company: NVIDIA CORP
-CIK: 1045810
-Form: 10-K
-Filing Date: 2024-02-21
-Accession No: 0001045810-24-000029
-URL: https://www.sec.gov/Archives/edgar/data/1045810/0001045810-24-000029-index.html

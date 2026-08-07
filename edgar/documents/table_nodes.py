@@ -23,6 +23,39 @@ _CURRENCY_PREFIX_RE = re.compile(r'^[A-Z]{0,3}\$')
 _NUMERIC_PLACEHOLDERS = frozenset(['—', '–', '-', '--', 'N/A', 'n/a', 'NM', 'nm'])
 
 
+def _drop_empty_spacer_columns(df: pd.DataFrame, label_key) -> pd.DataFrame:
+    """Drop the empty columns left behind by a row-label header that spans several.
+
+    A filing's label column is routinely laid out across two or three physical
+    columns, all carrying the same header text, with only the first holding the
+    label. Once the first has become the index the rest are empty columns named
+    after the index — pure noise, and 367 of the 444 affected tables in the
+    benchmark corpus have nothing else in them.
+
+    Only columns that are BOTH named after the label and entirely empty go. The
+    other 77 carry real values (percentages, rates) that a filer put in a
+    same-headed column, and those stay as data — they are the reason this is not
+    simply "drop every duplicate of the first header" (bead edgartools-y9it).
+    """
+    spacers = [
+        position for position, key in enumerate(df.columns)
+        if key == label_key and df.iloc[:, position].map(_is_blank_cell).all()
+    ]
+    if not spacers:
+        return df
+    keep = [position for position in range(len(df.columns)) if position not in spacers]
+    return df.iloc[:, keep]
+
+
+def _is_blank_cell(value) -> bool:
+    """Whether a cell holds nothing a reader would call content."""
+    if value is None:
+        return True
+    if isinstance(value, float) and pd.isna(value):
+        return True
+    return isinstance(value, str) and not value.strip()
+
+
 def _clean_numeric_text(text: str) -> str:
     """Strip currency prefixes and formatting from a numeric cell value."""
     clean = _CURRENCY_PREFIX_RE.sub('', text)
@@ -137,7 +170,7 @@ class Row:
         return False
 
 
-@dataclass
+@dataclass(eq=False)
 class TableNode(Node, CacheableMixin):
     """
     Table node with structured data.
@@ -980,9 +1013,21 @@ class TableNode(Node, CacheableMixin):
 
             df = pd.DataFrame(data, columns=df_columns)
 
-            # Set row index if first column is labels
+            # Set row index if first column is labels.
+            #
+            # Positionally, not by label. `set_index(df.columns[0])` looks the
+            # first column up by name, and a filing's header texts repeat all
+            # the time — when they do the lookup returns every matching column,
+            # so set_index is handed a 2-D frame and raises 'Index data must be
+            # 1-dimensional' (Tesla's FY2023 10-K). On a MultiIndex it is also a
+            # tuple lookup, which warns 'indexing past lexsort depth' once per
+            # table — hundreds of times over a document (bead edgartools-y9it).
             if self.has_row_headers and len(df.columns) > 0:
-                df = df.set_index(df.columns[0])
+                first_key = df.columns[0]
+                labels = df.iloc[:, 0].to_numpy()
+                df = df.iloc[:, 1:].copy()
+                df.index = pd.Index(labels, name=first_key)
+                df = _drop_empty_spacer_columns(df, first_key)
 
             return df
         else:

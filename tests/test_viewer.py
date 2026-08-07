@@ -156,6 +156,205 @@ class TestViewerReport:
         assert panel is not None
 
 
+class TestViewerReportCurrencyScaling:
+    """ViewerReport.currency_scaling lazy resolution from XBRL decimals (GH #807)."""
+
+    def test_falls_back_to_concept_report_when_no_viewer(self):
+        """A ViewerReport built without a back-ref viewer uses the text-match value."""
+        from edgar.sgml.concept_extractor import ConceptReport
+        from edgar.xbrl.viewer import ViewerReport
+
+        cr = ConceptReport(title='', period_headers=[], rows=[],
+                           currency_scaling=1_000)
+        report = _make_mock_report('R2.htm', 'Income', 'Statements', '2')
+        vr = ViewerReport(report, None, cr, viewer=None)
+        assert vr.currency_scaling == 1_000
+
+    def test_returns_1_when_no_concept_report(self):
+        """ViewerReport with no ConceptReport returns the unit scale, not 0/None."""
+        from edgar.xbrl.viewer import ViewerReport
+        report = _make_mock_report('R99.htm', 'Cover', 'Cover', '1')
+        vr = ViewerReport(report, None, None, viewer=None)
+        assert vr.currency_scaling == 1
+
+    def test_text_match_fallback_works_with_aapl_fixture(self, viewer):
+        """With no Filing supplied to FilingViewer, XBRL is unavailable so the
+        text-match fallback is used. AAPL's R*.htm headers match ``$ in Millions``
+        so this should be 1_000_000 even on the fallback path."""
+        stmt = viewer.financial_statements[0]
+        assert stmt.currency_scaling == 1_000_000
+
+    def test_xbrl_decimals_override_text_match(self, viewer):
+        """When XBRL is available, decimals win over the text-match value.
+        Inject a fake XBRL whose facts report decimals=-3 across the statement's
+        concepts and verify the resolved scaling is 1_000 (thousands)."""
+        from edgar.sgml.concept_extractor import ConceptReport, ConceptRow
+
+        cr = ConceptReport(
+            title='Income',
+            period_headers=['2025'],
+            rows=[
+                ConceptRow('us-gaap_Revenues', 'Revenues', {'2025': '100'},
+                           is_abstract=False, is_total=False, is_header=False,
+                           level=0, css_class='re'),
+                ConceptRow('us-gaap_NetIncomeLoss', 'Net income', {'2025': '10'},
+                           is_abstract=False, is_total=True, is_header=False,
+                           level=0, css_class='reu'),
+            ],
+            currency_scaling=1,  # text-match returned wrong default
+        )
+
+        class _FakeQuery:
+            def __init__(self, facts):
+                self._facts = facts
+                self._concept = None
+            def by_concept(self, concept, exact=False):
+                self._concept = concept.replace('_', ':')
+                return self
+            def execute(self):
+                return [f for f in self._facts if f['concept'] == self._concept]
+
+        class _FakeFactsView:
+            def __init__(self, facts):
+                self._facts = facts
+            def query(self):
+                return _FakeQuery(self._facts)
+
+        class _FakeNode:
+            pass
+
+        class _FakeTree:
+            all_nodes = {
+                'us-gaap_Revenues': _FakeNode(),
+                'us-gaap_NetIncomeLoss': _FakeNode(),
+            }
+
+        class _FakeXBRL:
+            facts = _FakeFactsView([
+                {'concept': 'us-gaap:Revenues', 'decimals': -3},
+                {'concept': 'us-gaap:NetIncomeLoss', 'decimals': -3},
+            ])
+            presentation_trees = {'http://example.com/role/Income': _FakeTree()}
+
+        viewer._xbrl = _FakeXBRL()
+        viewer._xbrl_loaded = True
+
+        report = _make_mock_report('R7.htm', 'X', 'Statements', '1',
+                                   role='http://example.com/role/Income')
+        from edgar.xbrl.viewer import ViewerReport
+        vr = ViewerReport(report, None, cr, viewer=viewer)
+        try:
+            assert vr.currency_scaling == 1_000
+            # The fix mirrors back onto ConceptReport so the path reported in
+            # GH #807 also sees the corrected value.
+            assert cr.currency_scaling == 1_000
+        finally:
+            viewer._xbrl = None
+            viewer._xbrl_loaded = False
+
+    def test_xbrl_ignores_share_concepts(self, viewer):
+        """Decimals from share-related concepts (EPS, weighted-average shares)
+        must not contaminate the monetary scaling."""
+        from edgar.sgml.concept_extractor import ConceptReport, ConceptRow
+
+        cr = ConceptReport(
+            title='Income',
+            period_headers=['2025'],
+            rows=[
+                ConceptRow('us-gaap_Revenues', 'Revenues', {'2025': '100'},
+                           is_abstract=False, is_total=False, is_header=False,
+                           level=0, css_class='re'),
+                # Shares are decimals=-3 (thousands) but should be ignored.
+                ConceptRow('us-gaap_WeightedAverageShares',
+                           'Weighted average shares outstanding',
+                           {'2025': '5000'},
+                           is_abstract=False, is_total=False, is_header=False,
+                           level=0, css_class='re'),
+            ],
+            currency_scaling=1,
+        )
+
+        class _FakeQuery:
+            def __init__(self, facts):
+                self._facts = facts
+                self._concept = None
+            def by_concept(self, concept, exact=False):
+                self._concept = concept.replace('_', ':')
+                return self
+            def execute(self):
+                return [f for f in self._facts if f['concept'] == self._concept]
+
+        class _FakeFactsView:
+            def __init__(self, facts):
+                self._facts = facts
+            def query(self):
+                return _FakeQuery(self._facts)
+
+        class _FakeNode:
+            pass
+
+        class _FakeTree:
+            all_nodes = {
+                'us-gaap_Revenues': _FakeNode(),
+                'us-gaap_WeightedAverageShares': _FakeNode(),
+            }
+
+        class _FakeXBRL:
+            facts = _FakeFactsView([
+                {'concept': 'us-gaap:Revenues', 'decimals': -6},
+                {'concept': 'us-gaap:WeightedAverageShares', 'decimals': -3},
+            ])
+            presentation_trees = {'http://example.com/role/Income': _FakeTree()}
+
+        viewer._xbrl = _FakeXBRL()
+        viewer._xbrl_loaded = True
+
+        report = _make_mock_report('R7.htm', 'X', 'Statements', '1',
+                                   role='http://example.com/role/Income')
+        from edgar.xbrl.viewer import ViewerReport
+        vr = ViewerReport(report, None, cr, viewer=viewer)
+        try:
+            # Should pick up only the monetary -6, not the shares -3.
+            assert vr.currency_scaling == 1_000_000
+        finally:
+            viewer._xbrl = None
+            viewer._xbrl_loaded = False
+
+
+class TestMultiplierFromDecimals:
+    """Unit tests for the decimals → multiplier helper (GH #807)."""
+
+    def test_millions_majority(self):
+        from edgar.xbrl.viewer import _multiplier_from_decimals
+        assert _multiplier_from_decimals([-6, -6, -6, 0]) == 1_000_000
+
+    def test_thousands_majority(self):
+        from edgar.xbrl.viewer import _multiplier_from_decimals
+        assert _multiplier_from_decimals([-3, -3, -3]) == 1_000
+
+    def test_billions_bucket(self):
+        from edgar.xbrl.viewer import _multiplier_from_decimals
+        assert _multiplier_from_decimals([-9, -9]) == 1_000_000_000
+
+    def test_empty_returns_one(self):
+        from edgar.xbrl.viewer import _multiplier_from_decimals
+        assert _multiplier_from_decimals([]) == 1
+
+    def test_units_only_returns_one(self):
+        from edgar.xbrl.viewer import _multiplier_from_decimals
+        assert _multiplier_from_decimals([0, 0, 2]) == 1
+
+    def test_prefers_scaled_bucket_over_units_on_tie(self):
+        from edgar.xbrl.viewer import _multiplier_from_decimals
+        # 2 zero-bucket values vs 1 millions; we prefer any scaled bucket.
+        assert _multiplier_from_decimals([0, 0, -6]) == 1_000_000
+
+    def test_buckets_by_floor_not_exact_match(self):
+        from edgar.xbrl.viewer import _multiplier_from_decimals
+        # decimals=-5 still indicates scaling to at least thousands (-3 bucket)
+        assert _multiplier_from_decimals([-5, -5]) == 1_000
+
+
 class TestConceptGraphIntegration:
     """Test that the viewer's concept graph works."""
 

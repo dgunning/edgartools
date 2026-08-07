@@ -286,14 +286,9 @@ def check_filing(filing: 'Filing') -> bool:
         >>> if check_filing(filing):
         ...     print("Available offline!")
     """
-    from edgar.storage._local import local_filing_path
+    from edgar.storage._local import resolve_local_filing_path
 
-    local_path = local_filing_path(
-        filing_date=str(filing.filing_date),
-        accession_number=filing.accession_no
-    )
-
-    return local_path.exists()
+    return resolve_local_filing_path(str(filing.filing_date), filing.accession_no) is not None
 
 
 def check_filings_batch(filings: List['Filing']) -> Dict[str, bool]:
@@ -314,15 +309,12 @@ def check_filings_batch(filings: List['Filing']) -> Dict[str, bool]:
         >>> available = [f for f in filings if availability[f.accession_no]]
         >>> print(f"{len(available)} of {len(filings)} available offline")
     """
-    from edgar.storage._local import local_filing_path
+    from edgar.storage._local import resolve_local_filing_path
 
     availability = {}
     for filing in filings:
-        local_path = local_filing_path(
-            filing_date=str(filing.filing_date),
-            accession_number=filing.accession_no
-        )
-        availability[filing.accession_no] = local_path.exists()
+        local_path = resolve_local_filing_path(str(filing.filing_date), filing.accession_no)
+        availability[filing.accession_no] = local_path is not None
 
     return availability
 

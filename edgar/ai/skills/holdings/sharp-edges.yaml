@@ -39,3 +39,20 @@ sharp_edges:
     solution: |
       # Q3 2024 (Sep 30) holdings available after Nov 14
       filings = get_filings(form="13F-HR", year=2024, quarter=3)
+
+  - id: amendment-new-holdings
+    summary: A 13F-HR/A "NEW HOLDINGS" amendment ADDS positions; it does not replace the original
+    severity: critical
+    solution: |
+      # Check the amendment type before superseding the original by its /A.
+      # NEW HOLDINGS = only previously-confidential positions; union with original.
+      # RESTATEMENT  = full re-file; replaces the original.
+      tf = filing.obj()                 # ThirteenF
+      tf.is_amendment                   # bool
+      tf.amendment_type                 # "RESTATEMENT" | "NEW HOLDINGS" | None
+      tf.amendment_number               # int | None
+      # Berkshire 2025-Q1: original 13F-HR = 110 holdings; /A NEW HOLDINGS = 4.
+      # Correct current holdings is the UNION (114), not the 4-holding amendment.
+      if tf.amendment_type == "NEW HOLDINGS":
+          holdings = pd.concat([original.holdings, tf.holdings])  # combine, don't replace
+    detection_pattern: '13F-HR/A.*\.obj\(\)'

@@ -13,6 +13,7 @@ from edgar.httprequests import stream_with_retry
 from edgar.sgml.filing_summary import FilingSummary
 from edgar.sgml.sgml_header import FilingHeader
 from edgar.sgml.sgml_parser import SGMLDocument, SGMLFormatType, SGMLParser, parse_document
+from edgar.sgml.text_extraction import primary_document_text
 from edgar.sgml.tools import is_xml
 
 
@@ -297,6 +298,49 @@ class FilingSGML:
             if isinstance(html_text, bytes):
                 html_text = html_text.decode('utf-8')
             return html_text
+
+    def text(self) -> Optional[str]:
+        """
+        Return the plain text of the primary filing document, read from the parsed SGML.
+
+        Historic pre-HTML filings are returned as fixed-width plain text (page-break
+        markers removed); HTML primary documents are converted to text; ownership forms
+        (3/4/5) are rendered from their XML rather than returned as raw markup.
+
+        Returns None when there is no text to return: no primary document, an empty one,
+        or a binary one (a PDF-only UPLOAD, say) with no plain-text sibling in the
+        submission.
+
+        No network access is required when the SGML was parsed from a local source, which
+        makes this the offline-friendly way to extract text from historic text-only filings.
+        """
+        primary = self.attachments.primary_documents
+        if not primary:
+            return None
+        document = primary[0]
+        return primary_document_text(
+            self.form,
+            document.content,
+            is_binary=document.is_binary(),
+            text_extract=self._text_extract_content,
+        )
+
+    def _text_extract_content(self) -> Optional[str]:
+        """Content of the SEC-provided TEXT-EXTRACT sibling, if this filing has one.
+
+        UPLOAD filings whose primary document is a scanned PDF often ship a plain-text
+        rendering alongside it.
+        """
+        matches = self.attachments.query("document_type == 'TEXT-EXTRACT'")
+        if len(matches) == 0:
+            return None
+        attachment = matches.get_by_index(0)
+        if attachment is None:
+            return None
+        content = attachment.content
+        if isinstance(content, bytes):
+            content = content.decode('utf-8', 'replace')
+        return content
 
     def xml(self):
         xml_document = self.attachments.primary_xml_document

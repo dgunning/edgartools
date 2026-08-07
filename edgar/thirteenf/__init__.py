@@ -7,6 +7,7 @@ Supports both XML format (2013+) and TXT format (2012 and earlier).
 
 from edgar.thirteenf.models import (
     THIRTEENF_FORMS,
+    AmendmentInfo,
     CoverPage,
     FilingManager,
     HoldingsComparison,
@@ -33,6 +34,7 @@ __all__ = [
     'FilingManager',
     'OtherManager',
     'CoverPage',
+    'AmendmentInfo',
     'SummaryPage',
     'Signature',
     'PrimaryDocument13F',

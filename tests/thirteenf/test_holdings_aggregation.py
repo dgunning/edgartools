@@ -55,26 +55,32 @@ def test_holdings_aggregates_multi_manager_filing(state_street_13f_infotable, st
 
 @pytest.mark.network
 def test_holdings_aggregation_math_correct(state_street_13f_infotable, state_street_13f_holdings):
-    """Test that holdings correctly sums values across managers for same CUSIP."""
+    """Test that holdings correctly sums values across managers for same (CUSIP, PutCall)."""
     infotable = state_street_13f_infotable
     holdings = state_street_13f_holdings
 
-    # Find a CUSIP that appears multiple times in infotable
-    cusip_counts = infotable['Cusip'].value_counts()
-    multi_entry_cusips = cusip_counts[cusip_counts > 1].index.tolist()
+    # GH #824: aggregation key is (CUSIP, PutCall), not CUSIP alone — option positions
+    # stay distinct from equity for the same security.
+    group_cols = ['Cusip', 'PutCall'] if 'PutCall' in infotable.columns else ['Cusip']
+    group_counts = infotable.groupby(group_cols).size()
+    multi_entry_groups = group_counts[group_counts > 1].index.tolist()
 
-    # Note: State Street may or may not have multi-entry CUSIPs, so make test flexible
-    if len(multi_entry_cusips) > 0:
-        # Test first multi-entry CUSIP
-        test_cusip = multi_entry_cusips[0]
+    if len(multi_entry_groups) > 0:
+        test_key = multi_entry_groups[0]
 
-        # Get all infotable rows for this CUSIP
-        infotable_rows = infotable[infotable['Cusip'] == test_cusip]
+        if isinstance(test_key, tuple):
+            mask_info = (infotable['Cusip'] == test_key[0]) & (infotable['PutCall'] == test_key[1])
+            mask_hold = (holdings['Cusip'] == test_key[0]) & (holdings['PutCall'] == test_key[1])
+            test_label = f"CUSIP {test_key[0]} (PutCall={test_key[1]!r})"
+        else:
+            mask_info = infotable['Cusip'] == test_key
+            mask_hold = holdings['Cusip'] == test_key
+            test_label = f"CUSIP {test_key}"
 
-        # Get holdings row for this CUSIP
-        holdings_row = holdings[holdings['Cusip'] == test_cusip]
+        infotable_rows = infotable[mask_info]
+        holdings_row = holdings[mask_hold]
 
-        assert len(holdings_row) == 1, f"holdings should have exactly 1 row for CUSIP {test_cusip}"
+        assert len(holdings_row) == 1, f"holdings should have exactly 1 row for {test_label}"
 
         # Verify aggregation sums
         for col in ['SharesPrnAmount', 'Value', 'SoleVoting', 'SharedVoting', 'NonVoting']:
@@ -90,13 +96,13 @@ def test_holdings_aggregation_math_correct(state_street_13f_infotable, state_str
         assert holdings_row['Issuer'].iloc[0] == infotable_rows['Issuer'].iloc[0], \
             "Issuer should be preserved"
 
-        print(f"\n✓ Aggregation math verified for CUSIP {test_cusip}:")
+        print(f"\n✓ Aggregation math verified for {test_label}:")
         print(f"  - infotable entries: {len(infotable_rows)}")
         print(f"  - Managers: {infotable_rows['OtherManager'].tolist()}")
         print(f"  - Individual values: {infotable_rows['Value'].tolist()}")
         print(f"  - Aggregated value: {holdings_row['Value'].iloc[0]}")
     else:
-        print("\n✓ No multi-entry CUSIPs in this filing (all single-manager holdings)")
+        print("\n✓ No multi-entry groups in this filing (all single-manager holdings)")
 
 
 @pytest.mark.network
@@ -128,8 +134,11 @@ def test_holdings_preserves_all_securities(state_street_13f_infotable, state_str
     assert infotable_cusips == holdings_cusips, \
         "holdings should include all unique securities from infotable"
 
-    assert len(holdings_cusips) == len(holdings), \
-        "holdings should have one row per unique CUSIP"
+    # GH #824: holdings has one row per (CUSIP, PutCall) so equity + Put + Call on
+    # the same security produce separate rows. len(holdings) >= unique CUSIP count.
+    group_cols = ['Cusip', 'PutCall'] if 'PutCall' in holdings.columns else ['Cusip']
+    assert len(holdings) == len(holdings.groupby(group_cols)), \
+        "holdings should have one row per unique (CUSIP, PutCall) combination"
 
     print(f"\n✓ All securities preserved:")
     print(f"  - Unique securities: {len(holdings_cusips)}")

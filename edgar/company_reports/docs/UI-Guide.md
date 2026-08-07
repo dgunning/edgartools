@@ -29,7 +29,7 @@ eightk = filing.obj()
 print(eightk.company)           # "Apple Inc."
 print(eightk.form)              # "8-K"
 print(eightk.filing_date)       # "2025-01-23"
-print(eightk.date_of_report)    # "January 22, 2025"
+print(eightk.date_of_report)    # datetime.date(2025, 1, 22)
 
 # Access items
 print(eightk.items)             # ['Item 2.02', 'Item 9.01']
@@ -109,7 +109,7 @@ def _get_header_data(eightk, company: Company, filing) -> dict:
         'is_amendment': '/A' in eightk.form,
         'filing_date': str(filing.filing_date),
         'event_date': eightk.period_of_report,       # YYYY-MM-DD format
-        'date_of_report': eightk.date_of_report,     # "January 22, 2025" format
+        'date_of_report': eightk.date_of_report.isoformat() if eightk.date_of_report else None,  # datetime.date
         'cik': str(company.cik),
         'accession_number': filing.accession_number,
     }
@@ -1120,7 +1120,7 @@ if data.get('earnings', {}).get('available'):
 | `form` | `str` | `"8-K"` or `"8-K/A"` |
 | `filing_date` | `str` | Date filed (YYYY-MM-DD) |
 | `period_of_report` | `str` | Event date (YYYY-MM-DD) |
-| `date_of_report` | `str` | Event date (formatted) |
+| `date_of_report` | `datetime.date` | Event date (None if absent) |
 | `items` | `List[str]` | Item numbers reported |
 | `sections` | `dict` | Section key -> Section object |
 | `has_press_release` | `bool` | Has EX-99 press release |

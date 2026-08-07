@@ -13,16 +13,14 @@ from rich.table import Table
 
 from edgar.core import pandas_version
 from edgar.datatools import compress_dataframe
+from edgar.files._deprecation import warn_legacy_html_usage
 from edgar.files.html_documents import Block, HtmlDocument, LinkBlock, TableBlock, table_to_markdown
 from edgar.richtools import repr_rich
 
-# Deprecation warning for legacy ChunkedDocument
-warnings.warn(
-    "edgar.files.htmltools module (including ChunkedDocument) is deprecated and will be removed in v6.0. "
-    "Please use edgar.documents.HTMLParser instead. "
-    "See migration guide: https://edgartools.readthedocs.io/en/latest/migration/",
-    DeprecationWarning,
-    stacklevel=2
+_HTMLTOOLS_DEPRECATION_MSG = (
+    "edgar.files.htmltools (including ChunkedDocument) is deprecated and "
+    "will be removed in v6.0. Please use edgar.documents.HTMLParser instead. "
+    "See migration guide: https://edgartools.readthedocs.io/en/latest/migration/"
 )
 
 __all__ = [
@@ -345,6 +343,7 @@ class ChunkedDocument:
         :param chunk_fn: A function that converts the chunks to a dataframe
         :param file_path: The path to the filing
         """
+        warn_legacy_html_usage(_HTMLTOOLS_DEPRECATION_MSG)
         self.chunks = chunk(html)
         self._chunked_data = chunk_fn(self.chunks)
         self.chunk_fn = chunk_fn

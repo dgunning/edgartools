@@ -110,7 +110,10 @@ class TestXmlFilingNetwork:
     def test_x17a5_broker_dealer(self):
         """X-17A-5 broker-dealer report — structured XML with dict access."""
         from edgar import get_filings
-        f = get_filings(form='X-17A-5')[0]
+        # amendments=False so we get a primary X-17A-5 rather than an X-17A-5/A;
+        # get_filings includes amendments by default and the latest filing is
+        # frequently an amendment, which would fail the exact-form assertion below.
+        f = get_filings(form='X-17A-5', amendments=False)[0]
         obj = f.obj()
 
         assert isinstance(obj, XmlFiling)

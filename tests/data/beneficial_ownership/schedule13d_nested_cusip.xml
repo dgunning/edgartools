@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?><edgarSubmission xmlns="http://www.sec.gov/edgar/schedule13D" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <schemaVersion>X0202</schemaVersion>
+<headerData>
+    <submissionType>SCHEDULE 13D</submissionType>
+    <filerInfo>
+      <filer>
+        <filerCredentials>
+          <cik>0001906837</cik>
+          <ccc>XXXXXXXX</ccc>
+        </filerCredentials>
+      </filer>
+      <liveTestFlag>LIVE</liveTestFlag>
+
+
+
+    </filerInfo>
+  </headerData>
+  <formData>
+    <coverPageHeader>
+      <securitiesClassTitle>Common Stock, $0.0001 par value</securitiesClassTitle>
+      <dateOfEvent>05/04/2026</dateOfEvent>
+      <previouslyFiledFlag>false</previouslyFiledFlag>
+      <issuerInfo>
+        <issuerCIK>0002042347</issuerCIK>
+        <issuerCusips>
+          <issuerCusipNumber>81221K108</issuerCusipNumber>
+        </issuerCusips>
+        <issuerName>Seaport Therapeutics, Inc.</issuerName>
+        <address>
+          <street1 xmlns="http://www.sec.gov/edgar/common">101 Seaport Blvd.</street1>
+          <street2 xmlns="http://www.sec.gov/edgar/common">Floor 12</street2>
+          <city xmlns="http://www.sec.gov/edgar/common">Boston</city>
+          <stateOrCountry xmlns="http://www.sec.gov/edgar/common">MA</stateOrCountry>
+          <zipCode xmlns="http://www.sec.gov/edgar/common">02210</zipCode>
+        </address>
+      </issuerInfo>
+      <authorizedPersons>
+        <notificationInfo>
+          <personName>Mark McDonnell</personName>
+          <personPhoneNum>(773) 380 6600</personPhoneNum>
+          <personAddress>
+            <street1 xmlns="http://www.sec.gov/edgar/common">ARCH Venture Management, LLC</street1>
+            <street2 xmlns="http://www.sec.gov/edgar/common">8755 W. Higgins Road, Suite 1025</street2>
+            <city xmlns="http://www.sec.gov/edgar/common">Chicago</city>
+            <stateOrCountry xmlns="http://www.sec.gov/edgar/common">IL</stateOrCountry>
+            <zipCode xmlns="http://www.sec.gov/edgar/common">60631</zipCode>
+          </personAddress>
+        </notificationInfo>
+      </authorizedPersons>
+    </coverPageHeader>
+    <reportingPersons>
+      <reportingPersonInfo>
+        <reportingPersonCIK>0001906837</reportingPersonCIK>
+        <reportingPersonNoCIK>N</reportingPersonNoCIK>
+        <reportingPersonName>ARCH Venture Fund XII, L.P.</reportingPersonName>
+        <fundType>WC</fundType>
+        <legalProceedings>N</legalProceedings>
+        <citizenshipOrOrganization>DE</citizenshipOrOrganization>
+        <soleVotingPower>0</soleVotingPower>
+        <sharedVotingPower>6294951</sharedVotingPower>
+        <soleDispositivePower>0</soleDispositivePower>
+        <sharedDispositivePower>6294951</sharedDispositivePower>
+        <aggregateAmountOwned>6294951</aggregateAmountOwned>
+        <isAggregateExcludeShares>N</isAggregateExcludeShares>
+        <percentOfClass>11.9</percentOfClass>
+        <typeOfReportingPerson>PN</typeOfReportingPerson>
+      </reportingPersonInfo>
+      <reportingPersonInfo>
+        <reportingPersonCIK>0001979765</reportingPersonCIK>
+        <reportingPersonNoCIK>N</reportingPersonNoCIK>
+        <reportingPersonName>ARCH Venture Partners XII, L.P.</reportingPersonName>
+        <fundType>WC</fundType>
+        <legalProceedings>N</legalProceedings>
+        <citizenshipOrOrganization>DE</citizenshipOrOrganization>
+        <soleVotingPower>0</soleVotingPower>
+        <sharedVotingPower>6294951</sharedVotingPower>
+        <soleDispositivePower>0</soleDispositivePower>
+        <sharedDispositivePower>6294951</sharedDispositivePower>
+        <aggregateAmountOwned>6294951</aggregateAmountOwned>
+        <isAggregateExcludeShares>N</isAggregateExcludeShares>
+        <percentOfClass>11.9</percentOfClass>
+        <typeOfReportingPerson>PN</typeOfReportingPerson>
+      </reportingPersonInfo>
+      <reportingPersonInfo>
+        <reportingPersonCIK>0001979548</reportingPersonCIK>
+        <reportingPersonNoCIK>N</reportingPersonNoCIK>
+        <reportingPersonName>ARCH Venture Partners XII, LLC</reportingPersonName>
+        <fundType>AF</fundType>
+        <legalProceedings>N</legalProceedings>
+        <citizenshipOrOrganization>DE</citizenshipOrOrganization>
+        <soleVotingPower>0</soleVotingPower>
+        <sharedVotingPower>6294951</sharedVotingPower>
+        <soleDispositivePower>0</soleDispositivePower>
+        <sharedDispositivePower>6294951</sharedDispositivePower>
+        <aggregateAmountOwned>6294951</aggregateAmountOwned>
+        <isAggregateExcludeShares>N</isAggregateExcludeShares>
+        <percentOfClass>11.9</percentOfClass>
+        <typeOfReportingPerson>OO</typeOfReportingPerson>
+      </reportingPersonInfo>
+      <reportingPersonInfo>
+        <reportingPersonCIK>0001219042</reportingPersonCIK>
+        <reportingPersonNoCIK>N</reportingPersonNoCIK>
+        <reportingPersonName>Robert Nelsen</reportingPersonName>
+        <fundType>AF</fundType>
+        <legalProceedings>N</legalProceedings>
+        <citizenshipOrOrganization>X1</citizenshipOrOrganization>
+        <soleVotingPower>0</soleVotingPower>
+        <sharedVotingPower>6294951</sharedVotingPower>
+        <soleDispositivePower>0</soleDispositivePower>
+        <sharedDispositivePower>6294951</sharedDispositivePower>
+        <aggregateAmountOwned>6294951</aggregateAmountOwned>
+        <isAggregateExcludeShares>N</isAggregateExcludeShares>
+        <percentOfClass>11.9</percentOfClass>
+        <typeOfReportingPerson>IN</typeOfReportingPerson>
+      </reportingPersonInfo>
+      <reportingPersonInfo>
+        <reportingPersonCIK>0001219039</reportingPersonCIK>
+        <reportingPersonNoCIK>N</reportingPersonNoCIK>
+        <reportingPersonName>Keith Crandell</reportingPersonName>
+        <fundType>AF</fundType>
+        <legalProceedings>N</legalProceedings>
+        <citizenshipOrOrganization>X1</citizenshipOrOrganization>
+        <soleVotingPower>0</soleVotingPower>
+        <sharedVotingPower>6294951</sharedVotingPower>
+        <soleDispositivePower>0</soleDispositivePower>
+        <sharedDispositivePower>6294951</sharedDispositivePower>
+        <aggregateAmountOwned>6294951</aggregateAmountOwned>
+        <isAggregateExcludeShares>N</isAggregateExcludeShares>
+        <percentOfClass>11.9</percentOfClass>
+        <typeOfReportingPerson>IN</typeOfReportingPerson>
+      </reportingPersonInfo>
+      <reportingPersonInfo>
+        <reportingPersonCIK>0001569248</reportingPersonCIK>
+        <reportingPersonNoCIK>N</reportingPersonNoCIK>
+        <reportingPersonName>Kristina Burow</reportingPersonName>
+        <fundType>AF</fundType>
+        <legalProceedings>N</legalProceedings>
+        <citizenshipOrOrganization>X1</citizenshipOrOrganization>
+        <soleVotingPower>0</soleVotingPower>
+        <sharedVotingPower>6294951</sharedVotingPower>
+        <soleDispositivePower>0</soleDispositivePower>
+        <sharedDispositivePower>6294951</sharedDispositivePower>
+        <aggregateAmountOwned>6294951</aggregateAmountOwned>
+        <isAggregateExcludeShares>N</isAggregateExcludeShares>
+        <percentOfClass>11.9</percentOfClass>
+        <typeOfReportingPerson>IN</typeOfReportingPerson>
+      </reportingPersonInfo>
+      <reportingPersonInfo>
+        <reportingPersonCIK>0001229592</reportingPersonCIK>
+        <reportingPersonNoCIK>N</reportingPersonNoCIK>
+        <reportingPersonName>Steven Gillis</reportingPersonName>
+        <fundType>AF</fundType>
+        <legalProceedings>N</legalProceedings>
+        <citizenshipOrOrganization>X1</citizenshipOrOrganization>
+        <soleVotingPower>0</soleVotingPower>
+        <sharedVotingPower>6294951</sharedVotingPower>
+        <soleDispositivePower>0</soleDispositivePower>
+        <sharedDispositivePower>6294951</sharedDispositivePower>
+        <aggregateAmountOwned>6294951</aggregateAmountOwned>
+        <isAggregateExcludeShares>N</isAggregateExcludeShares>
+        <percentOfClass>11.9</percentOfClass>
+        <typeOfReportingPerson>IN</typeOfReportingPerson>
+      </reportingPersonInfo>
+    </reportingPersons>
+    <items1To7>
+      <item1>
+        <securityTitle>Common Stock, $0.0001 par value</securityTitle>
+        <issuerName>Seaport Therapeutics, Inc.</issuerName>
+        <issuerPrincipalAddress>
+          <street1 xmlns="http://www.sec.gov/edgar/common">101 Seaport Blvd.</street1>
+          <street2 xmlns="http://www.sec.gov/edgar/common">Floor 12</street2>
+          <city xmlns="http://www.sec.gov/edgar/common">Boston</city>
+          <stateOrCountry xmlns="http://www.sec.gov/edgar/common">MA</stateOrCountry>
+          <zipCode xmlns="http://www.sec.gov/edgar/common">02210</zipCode>
+        </issuerPrincipalAddress>
+        <commentText>This statement relates to the Common Stock, $0.0001 par value per share (the "Common Stock"), of Seaport Therapeutics, Inc. (the "Issuer") having its principal executive office at 101 Seaport Blvd., Floor 12, Boston, Massachusetts 02210.</commentText>
+      </item1>
+      <item2>
+        <filingPersonName>This statement is being filed by (1) ARCH Venture Fund XII, L.P. ("AVF XII"), (2) ARCH Venture Partners XII, L.P. ("AVP XII LP") which is the sole general partner of AVF XII, (3) ARCH Venture Partners XII, LLC ("AVP XII LLC") which is  the sole general partner of AVP XII LP,  (4) Keith Crandell ("Crandell"), (5) Robert Nelsen ("Nelsen"), (6) Kristina Burow ("Burow"), and (7) Steven Gillis ("Gillis"). Nelsen, Crandell, Burow, and Gillis are referred to collectively as the "AVP XII Investment Committee Members". Each of the individuals and entities above shall be referred to herein as a "Reporting Person" and collectively as the "Reporting Persons."</filingPersonName>
+        <principalBusinessAddress>The business address of each of the Reporting Persons is 8755 West Higgins Road, Suite 1025, Chicago, IL, 60631.</principalBusinessAddress>
+        <principalJob>The principal business of AVP XII LP is to act as the general partner of AVF XII and the principal business of AVP XII LLC is to act as the general partner of AVP XII LP. AVP XII Investment Committee Members act as investment committee members of AVP XII LLC, and as managing directors or investment committee members of a number of affiliated partnerships with similar businesses.</principalJob>
+        <hasBeenConvicted>During the five years prior to the date hereof, none of the Reporting Persons has been convicted in a criminal proceeding.</hasBeenConvicted>
+        <convictionDescription>During the five years prior to the date hereof, none of the Reporting Persons has been a party to a civil proceeding of a judicial or administrative body of competent jurisdiction ending in a judgment, decree or final order enjoining future violations of, or prohibiting or mandating activities subject to, Federal or State securities laws or finding any violation with respect to such laws.</convictionDescription>
+        <citizenship>AVF XII and AVP XII LP are limited partnerships organized under the laws of the State of Delaware. AVP XII LLC is a limited liability company organized under the laws of the State of Delaware. Each AVP XII Committee Member is a US citizen.</citizenship>
+      </item2>
+      <item3>
+        <fundsSource>On April 8, 2024, AVF XII purchased 2,513,686 shares of Series A-2 Preferred Stock of the Issuer at a purchase price of $11.9347 per share.  The number of shares reflects a 3.1407 to 1 reverse stock split effective immediately prior to the closing of the initial public offering of the Issuer (the "IPO").  Each share of Series A-2 Preferred Stock automatically converted into one share of the Issuer's Common Stock at the closing of the IPO.
+
+On October 18, 2024, AVF XII purchased 2,681,265 shares of Series B Preferred Stock of the Issuer at a purchase price of $14.9183 per share. The number of shares reflects a 3.1407 to 1 reverse stock split effective immediately prior to the closing of the IPO.  Each share of Series B Preferred Stock automatically converted into one share of Common Stock at the closing of the IPO.
+
+On May 1, 2026, AVF XII purchased 1,100,000 shares of Common Stock at a purchase price of $18.00 per share from the underwriters of the IPO.
+
+The source of funds for each of the purchases described in this Item 3 was the working capital of AVF XII.
+
+No part of the purchase price paid by AVF XII was represented by funds or other consideration borrowed or otherwise obtained for the purpose of acquiring, holding, trading or voting the shares of Common Stock described above.  The total amount paid by for securities purchased in the above-listed transactions is as follows:
+
+AVF XII: $89,799,993.80</fundsSource>
+      </item3>
+      <item4>
+        <transactionPurpose>AVF XII and the other Reporting Persons acquired the Common Stock for investment purposes.  Depending on market conditions, the continuing evaluation of the business and prospects of the Issuer and other factors, AVF XII and other Reporting Persons may dispose of or acquire additional shares of Common Stock of the Issuer.  Except as set forth above, none of the Reporting Persons has any present plans which relate to or would result in the matters set forth in subparagraphs (a) - (j) of Item 4 of Schedule 13D.</transactionPurpose>
+      </item4>
+      <item5>
+        <percentageOfClassSecurities>AVF XII is the record owner of 6,294,951 shares of Common Stock ("AVF XII Record Shares"). AVP XII LP, as the sole general partner of AVF XII LP, may be deemed to beneficially own the AVF XII Record Shares. AVP XII LLC, as the sole general partner of AVP XII LP, may be deemed to beneficially own the AVF XII Record Shares.
+
+By virtue of their relationship as affiliated entities who have overlapping general partners and investment committee members, each of the AVP XII Investment Committee Members and direct and indirect general partners of AVF XII may be deemed to share the power to direct the AVF XII Record Shares.
+
+Each Reporting Person disclaims beneficial ownership of the Record Shares except for the shares, if any, held of record by such Reporting Person.
+
+The percentage of outstanding Common Stock of the Issuer which may be deemed to be beneficially owned by each Reporting Person is set forth on Line 13 of such Reporting Person's cover sheet.  Such percentage was calculated based on the 53,027,817 shares outstanding following the IPO, as reported by the Issuer in its Prospectus filed pursuant to Rule 424(b)(4) with the Securities and Exchange Commission on May 1, 2026.</percentageOfClassSecurities>
+        <numberOfShares>Regarding the number of shares as to which such person has:
+
+(i) sole power to vote or to direct the vote:  See line 7 of cover sheets.
+
+(ii) shared power to vote or to direct the vote:  See line 8 of cover sheets.
+
+(iii) sole power to dispose or to direct the disposition:  See line 9 of cover sheets.
+
+(iv) shared power to dispose or to direct the disposition:  See line 10 of cover sheets.</numberOfShares>
+        <transactionDesc>Except as set forth above, none of the Reporting Persons has effected any transaction in the Common Stock during the last 60 days.</transactionDesc>
+        <listOfShareholders>No other person is known to have the right to receive or the power to direct the receipt of dividends from, or any proceeds from the sale of, shares beneficially owned by any of the Reporting Persons. </listOfShareholders>
+        <date5PercentOwnership>Not applicable.</date5PercentOwnership>
+      </item5>
+      <item6>
+        <contractDescription>AVF XII is party to that certain Amended and Restated Investors' Rights Agreement, dated October 18, 2024 (the "Investor Rights Agreement").  Pursuant to the Investor Rights Agreement, the Issuer has granted to AVF XII demand, piggyback and shelf registration rights with respect to shares of  Common Stock held by AVF XII.  Such registration rights will terminate upon the earlier of (i) the occurrence of a deemed liquidation event, as defined in the Issuer's amended and restated certificate of incorporation, as currently in effect, (ii) such date after the completion of the IPO when AVF XII (A) together with its affiliates (as determined under Rule 144 of the Securities Act) holds less than 1% of the Issuer's outstanding capital stock and (B) may immediately sell all registrable securities held by it pursuant to Rule 144 of the Securities Act without any volume limitations, or another similar exemption, during any three month period without registration, and (iii) the third anniversary of the IPO.
+
+Effective as of the closing of the IPO, the covenants relating to delivery of financial statements and inspection rights set forth in Section 3 and the rights of first offer were terminated.
+
+The foregoing description of the Investor Rights Agreement does not purport to be complete and is qualified in its entirety by reference to the full text of such agreement, which is filed as Exhibit 2 to this Schedule 13D and is incorporated herein by reference.
+
+AVF XII has entered into a lock-up agreement with the underwriters of the IPO (the "Lock-Up Agreement") pursuant to which AVF XII has agreed, subject to certain exceptions, not to offer, pledge, announce the intention to sell, sell, contract to sell, sell any option or contract to purchase, purchase any option or contract to sell, grant any option, right or warrant to purchase or otherwise dispose of, directly or indirectly, or enter into any swap or other agreement that transfers, in whole or in part, any of the economic consequences of ownership of the Common Stock for a period of 180 days after April 30, 2026, except with the prior written consent of Goldman Sachs &amp; Co. LLC and J.P. Morgan Securities LLC and the Issuer, subject to certain exceptions.
+
+The foregoing description of the Lock-Up Agreement does not purport to be complete and is qualified in its entirety by reference to the full text of such agreement, the form of which is filed as Exhibit 3 to this Schedule 13D and is incorporated herein by reference.</contractDescription>
+      </item6>
+      <item7>
+        <filedExhibits>Exhibit 1- Agreement of Joint Filing
+
+Exhibit 2- Amended and Restated Investors' Rights Agreement, dated October 18, 2024, as amended, by and among the Issuer and certain of its stockholders (incorporated by reference to Exhibit 4.2 to the Issuer's Registration Statement on Form S-1/A, filed with the Securities and Exchange Commission on April 27, 2026).
+
+Exhibit 3- Form of Lock-Up Agreement (incorporated by reference to Annex II to the Form of Underwriting Agreement filed as Exhibit 1.1 to the Issuer's Registration Statement on Form S-1/A, filed with the Securities and Exchange Commission on April 27, 2026).</filedExhibits>
+      </item7>
+    </items1To7>
+    <signatureInfo>
+      <signaturePerson>
+        <signatureReportingPerson>ARCH Venture Fund XII, L.P.</signatureReportingPerson>
+        <signatureDetails>
+          <signature>ARCH Venture Partners XII, L.P.</signature>
+          <title>its General Partner</title>
+          <date>05/06/2026</date>
+        </signatureDetails>
+        <signatureDetails>
+          <signature>ARCH Venture Partners XII, LLC</signature>
+          <title>its General Partner</title>
+          <date>05/06/2026</date>
+        </signatureDetails>
+        <signatureDetails>
+          <signature>/s/ Mark McDonnell*</signature>
+          <title>Mark McDonnell, as Attorney-in-Fact for Keith Crandell, Managing Director</title>
+          <date>05/06/2026</date>
+        </signatureDetails>
+      </signaturePerson>
+      <signaturePerson>
+        <signatureReportingPerson>ARCH Venture Partners XII, L.P.</signatureReportingPerson>
+        <signatureDetails>
+          <signature>ARCH Venture Partners XII, LLC</signature>
+          <title>its General Partner</title>
+          <date>05/06/2026</date>
+        </signatureDetails>
+        <signatureDetails>
+          <signature>/s/ Mark McDonnell*</signature>
+          <title>Mark McDonnell, as Attorney-in-Fact for Keith Crandell, Managing Director</title>
+          <date>05/06/2026</date>
+        </signatureDetails>
+      </signaturePerson>
+      <signaturePerson>
+        <signatureReportingPerson>ARCH Venture Partners XII, LLC</signatureReportingPerson>
+        <signatureDetails>
+          <signature>/s/ Mark McDonnell*</signature>
+          <title>Mark McDonnell, as Attorney-in-Fact for Keith Crandell, Managing Director</title>
+          <date>05/06/2026</date>
+        </signatureDetails>
+      </signaturePerson>
+      <signaturePerson>
+        <signatureReportingPerson>Robert Nelsen</signatureReportingPerson>
+        <signatureDetails>
+          <signature>/s/ Mark McDonnell*</signature>
+          <title>Mark McDonnell, as Attorney-in-Fact for Robert Nelsen</title>
+          <date>05/06/2026</date>
+        </signatureDetails>
+      </signaturePerson>
+      <signaturePerson>
+        <signatureReportingPerson>Keith Crandell</signatureReportingPerson>
+        <signatureDetails>
+          <signature>/s/ Mark McDonnell*</signature>
+          <title>Mark McDonnell, as Attorney-in-Fact for Keith Crandell</title>
+          <date>05/06/2026</date>
+        </signatureDetails>
+      </signaturePerson>
+      <signaturePerson>
+        <signatureReportingPerson>Kristina Burow</signatureReportingPerson>
+        <signatureDetails>
+          <signature>/s/ Mark McDonnell*</signature>
+          <title>Mark McDonnell, as Attorney-in-Fact for Kristina Burow</title>
+          <date>05/06/2026</date>
+        </signatureDetails>
+      </signaturePerson>
+      <signaturePerson>
+        <signatureReportingPerson>Steven Gillis</signatureReportingPerson>
+        <signatureDetails>
+          <signature>/s/ Mark McDonnell*</signature>
+          <title>Mark McDonnell, as Attorney-in-Fact for Steven Gillis</title>
+          <date>05/06/2026</date>
+        </signatureDetails>
+      </signaturePerson>
+      <commentText>*This Schedule 13D was executed by Mark McDonnell pursuant to a Power of Attorney filed as Exhibit 24.2 to the Form 3 relating to the beneficial ownership of shares of Neumora Therapeutics, Inc. by the Reporting Persons filed with the Securities Exchange Commission on September 14, 2023 and incorporated herein in its entirety by reference.
+</commentText>
+    </signatureInfo>
+  </formData>
+
+</edgarSubmission>

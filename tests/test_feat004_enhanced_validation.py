@@ -291,21 +291,27 @@ def test_real_world_scenarios():
     """Test realistic usage scenarios."""
     print("🔍 Testing real-world scenarios...")
     
-    # Scenario 1: Common typos users make
+    # Scenario 1: Common typos users make.
+    #
+    # Each value is a list of acceptable substrings — the validator only needs
+    # to suggest ONE of them. For "def14a" the SEC has four equidistant DEF
+    # 14A-family forms (DEF 14A, DEFA14A, DEFN14A, DEFR14A), and difflib
+    # ranks them as a tie. Any of them is a reasonable suggestion, so the
+    # test asserts on the family identifier rather than a single member.
     common_typos = {
         # Form type typos
-        "10k": "10-K",
-        "10-k": "10-K", 
-        "10q": "10-Q",
-        "8k": "8-K",
-        "def14a": "DEF 14A",
+        "10k": ["10-K"],
+        "10-k": ["10-K"],
+        "10q": ["10-Q"],
+        "8k": ["8-K"],
+        "def14a": ["DEF 14A", "DEFA14A", "DEFN14A", "DEFR14A"],
         # Period type typos
-        "anual": "annual",
-        "quartly": "quarterly",
-        "montly": "monthly"
+        "anual": ["annual"],
+        "quartly": ["quarterly"],
+        "montly": ["monthly"],
     }
-    
-    for typo, expected in common_typos.items():
+
+    for typo, accepted in common_typos.items():
         try:
             if "10" in typo or "8" in typo or "def" in typo.lower():
                 validate_form_type(typo)
@@ -313,9 +319,12 @@ def test_real_world_scenarios():
                 validate_period_type(typo)
             # If it doesn't raise, the case-insensitive matching worked
         except ValidationError as e:
-            # Should suggest the correct value
-            assert expected in str(e), f"Expected '{expected}' suggested for '{typo}'"
-        print(f"   ✅ '{typo}' -> suggests '{expected}'")
+            # Should suggest at least one of the accepted forms
+            msg = str(e)
+            assert any(option in msg for option in accepted), (
+                f"None of {accepted} suggested for '{typo}'. Got: {msg}"
+            )
+        print(f"   ✅ '{typo}' -> one of {accepted}")
     
     # Scenario 2: Completely invalid inputs
     invalid_inputs = ["xyz123", "random", ""]

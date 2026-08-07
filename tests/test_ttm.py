@@ -118,7 +118,7 @@ class TestTTMCalculator:
                 period_start=date(2023, 1, 1),
                 period_end=date(2023, 6, 30),
                 fiscal_year=2023,
-                fiscal_period="YTD_6M",
+                fiscal_period="Q2",  # SEC tags YTD-6M with the ending quarter
             ),
             make_fact(
                 concept="us-gaap:Revenues",
@@ -127,7 +127,7 @@ class TestTTMCalculator:
                 period_start=date(2023, 1, 1),
                 period_end=date(2023, 9, 30),
                 fiscal_year=2023,
-                fiscal_period="YTD_9M",
+                fiscal_period="Q3",  # SEC tags YTD-9M with the ending quarter
             ),
             make_fact(
                 concept="us-gaap:Revenues",

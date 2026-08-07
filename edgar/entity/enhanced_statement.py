@@ -10,9 +10,9 @@ Dict[str, Optional[float]] on MultiPeriodItem objects, not pandas DataFrames.
 # ruff: noqa: PD011
 
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import date
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import pandas as pd
 from rich import box
@@ -1159,56 +1159,75 @@ class MultiPeriodItem:
             return "-"
 
 
-def validate_fiscal_year_period_end(fiscal_year: int, period_end: date) -> bool:
+def validate_fiscal_year_period_end(fiscal_year: int,
+                                    period_end: date,
+                                    fiscal_year_end_month: int = 12) -> bool:
     """
-    Validate that fiscal_year is reasonable given period_end.
+    Validate that fiscal_year is reasonable given period_end and the company's FYE.
 
     This handles SEC Facts API data quality issues where comparative periods
-    are mislabeled with incorrect fiscal_year values (Issue #452).
+    are mislabeled with incorrect fiscal_year values (Issue #452), and where
+    forward-looking schedule disclosures (e.g., expected amortization) are
+    tagged with future end dates inconsistent with their fiscal_year (Issue #781).
+
+    For non-calendar fiscal year-end companies, the SEC's ``fiscal_year`` is
+    forward-looking — Q1/Q2/Q3 of fiscal year N end in calendar year N-1 (Issue #779).
+    The validator must therefore know the company's FYE month to compute the
+    expected fiscal year correctly. Without this, non-calendar FYE companies
+    (e.g., ADSK, WMT, NVDA, MSFT) had their early-quarter facts incorrectly
+    rejected as "comparative period" data.
 
     Args:
         fiscal_year: The fiscal year from the fact
         period_end: The period end date
+        fiscal_year_end_month: Company's fiscal year end month (1-12, default 12)
 
     Returns:
         True if the fiscal_year/period_end combination is valid, False otherwise
 
     Examples:
-        >>> # Early January period (52/53-week calendar)
-        >>> validate_fiscal_year_period_end(2022, date(2023, 1, 1))
+        >>> # Calendar-year-end company (default FYE=12)
+        >>> validate_fiscal_year_period_end(2023, date(2023, 6, 30))
         True
-        >>> validate_fiscal_year_period_end(2023, date(2023, 1, 1))
+        >>> validate_fiscal_year_period_end(2025, date(2023, 6, 30))
+        False
+
+        >>> # 52/53-week calendar — early January period
+        >>> validate_fiscal_year_period_end(2022, date(2023, 1, 1))
         True
         >>> validate_fiscal_year_period_end(2024, date(2023, 1, 1))
         False
 
-        >>> # Late December period
+        >>> # Late December period — year-end shift tolerance
         >>> validate_fiscal_year_period_end(2023, date(2023, 12, 31))
         True
         >>> validate_fiscal_year_period_end(2024, date(2023, 12, 31))
         True
 
-        >>> # Normal period
-        >>> validate_fiscal_year_period_end(2023, date(2023, 6, 30))
+        >>> # Autodesk (Jan 31 FYE): Q1 FY2026 ends Apr 30, 2025
+        >>> validate_fiscal_year_period_end(2026, date(2025, 4, 30), 1)
         True
-        >>> validate_fiscal_year_period_end(2025, date(2023, 6, 30))
+        >>> # MSFT (Jun 30 FYE): Q1 FY2025 ends Sep 30, 2024
+        >>> validate_fiscal_year_period_end(2025, date(2024, 9, 30), 6)
+        True
+        >>> # AAPL (Sep 30 FYE): Q1 FY2025 ends Dec 28, 2024
+        >>> validate_fiscal_year_period_end(2025, date(2024, 12, 28), 9)
+        True
+
+        >>> # Schedule fact for Dec FYE company — fy=2021 paired with end=2027 (Issue #781)
+        >>> validate_fiscal_year_period_end(2021, date(2027, 6, 30), 12)
         False
     """
-    year_diff = fiscal_year - period_end.year
+    expected_fy = calculate_fiscal_year_for_label(period_end, fiscal_year_end_month)
+    year_diff = fiscal_year - expected_fy
 
-    # Early January (Jan 1-7): fiscal_year should be year-1 (52/53-week calendar) or year
-    # Example: Period ending Jan 1, 2023 → FY 2022 (most common) or FY 2023 (edge case)
-    if period_end.month == 1 and period_end.day <= 7:
-        return year_diff in (-1, 0)
-
-    # Late December (Dec 25-31): fiscal_year should be year or year+1
-    # Example: Period ending Dec 31, 2023 → FY 2023 (most common) or FY 2024 (year-end shifts)
-    elif period_end.month == 12 and period_end.day >= 25:
+    # 52/53-week calendar edge cases: periods ending in early January or late December
+    # may belong to either fy=expected or fy=expected+1 (year-end shifts, fiscal week 53)
+    if (period_end.month == 1 and period_end.day <= 7) or \
+       (period_end.month == 12 and period_end.day >= 25):
         return year_diff in (0, 1)
 
-    # All other dates: fiscal_year should match period_end.year exactly
-    else:
-        return year_diff == 0
+    return year_diff == 0
 
 
 def validate_quarterly_period_end(fiscal_period: str,
@@ -1300,76 +1319,58 @@ def detect_fiscal_year_end(facts: List[FinancialFact]) -> int:
 
 def calculate_fiscal_year_for_label(period_end: date, fiscal_year_end_month: int) -> int:
     """
-    Calculate the year for period labels based on period_end date and fiscal year end.
+    Calculate the fiscal year label for a period based on the dominant convention:
+    fiscal years are named by the calendar year in which they end.
 
-    This function addresses Issue #460 where quarterly labels showed incorrect years
-    because the SEC Facts API provides forward-looking fiscal_year values.
-
-    Issue #02gu: The original implementation incorrectly added 1 year when
-    period_end.month > fiscal_year_end_month, which broke for companies with
-    early fiscal year ends (Jan-Mar) like NVIDIA where almost all months are
-    "after" the FYE month.
-
-    The nuanced fix:
-    - For companies with early FYE (Jan-Mar): Use calendar year labeling
-      This fixes NVIDIA (Jan FYE) where Q3 Oct 2025 should be "Q3 2025" not "Q3 2026"
-    - For companies with later FYE (Apr-Dec): Use fiscal year convention
-      This preserves Apple (Sept FYE) where Q1 Dec 2023 should be "Q1 2024"
+    This matches how companies, the SEC, Bloomberg, S&P Capital IQ, and other
+    financial data providers label fiscal years. For example, Autodesk's fiscal
+    year ending Jan 31, 2026 is "FY2026", and Q1 (Feb-Apr 2025) is "Q1 2026".
 
     Args:
         period_end: The period end date
         fiscal_year_end_month: Company's fiscal year end month (1-12)
 
     Returns:
-        The year to use for labeling this period
+        The fiscal year number (the calendar year in which the fiscal year ends)
 
     Examples:
-        >>> # NVIDIA (fiscal year ends in January - early FYE)
-        >>> # Q3 ending October 26, 2025 - calendar year
+        >>> # NVIDIA (fiscal year ends in January)
+        >>> # Q3 ending October 26, 2025 → FY2026 (ends Jan 2026)
         >>> calculate_fiscal_year_for_label(date(2025, 10, 26), 1)
-        2025  # Q3 2025
+        2026
 
-        >>> # NVIDIA Q4 ending January 26, 2026 - FYE month, so prior year
+        >>> # NVIDIA Q4 ending January 26, 2026 → FY2026
         >>> calculate_fiscal_year_for_label(date(2026, 1, 26), 1)
-        2025  # Q4 2025 (FY2025 ends Jan 2026)
+        2026
 
-        >>> # Apple (fiscal year ends in September - later FYE, use fiscal year)
-        >>> # Q1 ending December 30, 2023
+        >>> # Apple (fiscal year ends in September)
+        >>> # Q1 ending December 30, 2023 → FY2024 (ends Sept 2024)
         >>> calculate_fiscal_year_for_label(date(2023, 12, 30), 9)
-        2024  # Q1 2024 - fiscal year convention preserved
+        2024
 
-        >>> # Apple Q3 ending June 28, 2024
+        >>> # Apple Q3 ending June 28, 2024 → FY2024
         >>> calculate_fiscal_year_for_label(date(2024, 6, 28), 9)
-        2024  # Q3 2024 - before FYE, same calendar year
+        2024
 
         >>> # Early January period (52/53-week calendar edge case)
+        >>> # Period ending Jan 1, 2023 for a Dec FYE company → FY2022
         >>> calculate_fiscal_year_for_label(date(2023, 1, 1), 12)
-        2022  # FY 2022 (52/53-week calendar convention)
+        2022
     """
     # Early January (Jan 1-7): Use prior year (52/53-week calendar convention)
-    # This handles companies with 52/53-week calendars where fiscal year end
-    # dates can fall in the first week of January
+    # Companies with 52/53-week calendars can have fiscal year end dates
+    # fall in the first week of January (e.g., Jan 1 belongs to prior FY)
     if period_end.month == 1 and period_end.day <= 7:
         return period_end.year - 1
 
-    # For companies with early fiscal year ends (Jan-Mar), use calendar year
-    # for most quarters. This avoids the confusing "Q3 2026 for Oct 2025" issue
-    # with companies like NVIDIA where almost all months (Feb-Dec) would
-    # otherwise get +1 year added.
-    # Exception: Q4 periods that end in the FYE month belong to the prior fiscal
-    # year (e.g., NVDA Q4 ending Jan 2026 = FY2025, not FY2026).
-    if fiscal_year_end_month <= 3:
-        if period_end.month == fiscal_year_end_month and period_end.day > 7:
-            return period_end.year - 1
-        return period_end.year
-
-    # For companies with later fiscal year ends (Apr-Dec), use fiscal year convention
-    # Quarters after FYE month are in the next fiscal year
-    # Example: Apple (Sept FYE) Q1 ends in Dec, so Dec 2023 → Q1 2024
+    # Fiscal year convention: if the period ends after the FYE month,
+    # it belongs to the next fiscal year (which ends in FYE month of the following year)
+    # Example: Apple (Sept FYE) Q1 ends in Dec 2023 → FY2024 (ends Sept 2024)
+    # Example: NVIDIA (Jan FYE) Q1 ends in Apr 2025 → FY2026 (ends Jan 2026)
     if period_end.month > fiscal_year_end_month:
         return period_end.year + 1
 
-    # Period is at or before FYE month - use calendar year
+    # Period ends at or before FYE month — belongs to fiscal year ending this calendar year
     return period_end.year
 
 
@@ -1436,6 +1437,12 @@ class EnhancedStatementBuilder:
         'ShortTermBorrowings': 'ShortTermDebt',
         # Depreciation concepts
         'DepreciationDepletionAndAmortization': 'DepreciationAndAmortization',
+        # Some filers tag their primary cash-flow D&A line as
+        # OtherDepreciationAndAmortization instead of the common
+        # DepreciationDepletionAndAmortization (e.g. MRVL, AMD, WDAY — GH #839).
+        # Fold it into the canonical D&A concept so it populates the standard
+        # "Depreciation and amortization" line rather than a stray orphan row.
+        'OtherDepreciationAndAmortization': 'DepreciationAndAmortization',
         # Capital expenditure concepts
         'PaymentsToAcquirePropertyPlantAndEquipment': 'CapitalExpenditures',
         'CapitalExpendituresIncurredButNotYetPaid': 'CapitalExpenditures',
@@ -1445,6 +1452,28 @@ class EnhancedStatementBuilder:
         'PaymentsOfDividendsCommonStock': 'DividendsPaid',
         # Share repurchase
         'PaymentsForRepurchaseOfEquity': 'PaymentsForRepurchaseOfCommonStock'
+    }
+
+    # Balance-sheet 'Net' concepts that can be reconstructed from component
+    # concepts when a filer stops reporting the standard net tag directly. Some
+    # filers drop a us-gaap net concept and present the line only under a
+    # company-specific extension tag, which the SEC companyfacts API (this path's
+    # data source) does not expose — so the standardized statement silently loses
+    # the row. Deriving from components the filer still reports restores a
+    # standard, cross-company-comparable value. Every listed component (add and
+    # subtract) must be present for a period or the derivation is skipped, so we
+    # never show e.g. gross PP&E mislabelled as net. (GH #894)
+    #
+    # GE dropped us-gaap:PropertyPlantAndEquipmentNet after FY2020; Gross minus
+    # AccumulatedDepreciation reconstructs its PP&E net. GE additionally folds
+    # operating-lease ROU assets into its extension line, but that ROU asset is
+    # its own standardized concept (OperatingLeaseRightOfUseAsset) and renders on
+    # its own row, so the derived PP&E net stays a pure, comparable figure.
+    DERIVED_BALANCE_CONCEPTS = {
+        'PropertyPlantAndEquipmentNet': {
+            'add': ('PropertyPlantAndEquipmentGross',),
+            'subtract': ('AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment',),
+        },
     }
 
     def __init__(self, sic_code: Optional[str] = None, ticker: Optional[str] = None):
@@ -1482,6 +1511,100 @@ class EnhancedStatementBuilder:
 
         # Apply normalization mappings
         return self.CONCEPT_NORMALIZATIONS.get(concept, concept)
+
+    def _inject_derived_balance_facts(self,
+                                      facts: List[FinancialFact],
+                                      period_facts_by_label: Dict[str, List[FinancialFact]],
+                                      selected_period_info: List[Any],
+                                      selected_periods: List[str],
+                                      statement_type: str) -> None:
+        """Synthesize standard 'Net' balance-sheet facts from component concepts.
+
+        Some filers stop reporting a us-gaap 'Net' concept and present the line
+        only under a company-specific extension tag, which the SEC companyfacts
+        API (this path's data source) does not expose — so the standardized
+        statement silently loses the row (GH #894). For each derived concept in
+        ``DERIVED_BALANCE_CONCEPTS`` this reconstructs the value from component
+        concepts the filer still reports, matching them to each displayed period
+        by ``period_end`` (the balance date) rather than by fiscal tags, because
+        the components often survive only as prior-year-end comparatives in later
+        10-Qs (e.g. GE's PP&E Gross/AccumulatedDepreciation are tagged Q1–Q3 of
+        the following fiscal year, never FY). Synthetic facts are appended in
+        place to ``period_facts_by_label`` and carry the canonical concept name,
+        so they render through the normal tree node. A period already carrying a
+        real fact for the concept is left untouched, and every component must be
+        present for the period or that period is skipped.
+        """
+        if statement_type not in ('BalanceSheet', 'balance_sheet'):
+            return
+        if not self.DERIVED_BALANCE_CONCEPTS:
+            return
+
+        def _strip(concept: str) -> str:
+            return concept.split(':', 1)[-1] if ':' in concept else concept
+
+        # Index each component concept's value by period_end, preferring the most
+        # recently filed fact (consistent with the rest of this path's recency
+        # preference, and picks up restated component balances).
+        component_names: Set[str] = set()
+        for rule in self.DERIVED_BALANCE_CONCEPTS.values():
+            component_names.update(rule.get('add', ()))
+            component_names.update(rule.get('subtract', ()))
+
+        by_end: Dict[str, Dict[date, FinancialFact]] = {name: {} for name in component_names}
+        for fact in facts:
+            name = _strip(fact.concept)
+            if name not in component_names or fact.period_end is None or fact.numeric_value is None:
+                continue
+            prior = by_end[name].get(fact.period_end)
+            if prior is None or (fact.filing_date or date.min) >= (prior.filing_date or date.min):
+                by_end[name][fact.period_end] = fact
+
+        # Map each displayed period label to its period_end (pk[2]).
+        label_to_end: Dict[str, date] = {}
+        for i, (pk, _info) in enumerate(selected_period_info):
+            if i < len(selected_periods) and pk[2] is not None:
+                label_to_end[selected_periods[i]] = pk[2]
+
+        for derived_concept, rule in self.DERIVED_BALANCE_CONCEPTS.items():
+            for label, period_end in label_to_end.items():
+                bucket = period_facts_by_label.get(label)
+                if bucket is None:
+                    continue
+                # Leave periods that already report the concept directly untouched.
+                if any(_strip(f.concept) == derived_concept for f in bucket):
+                    continue
+
+                total = 0.0
+                base_fact: Optional[FinancialFact] = None
+                complete = True
+                for sign, comps in (('add', rule.get('add', ())), ('subtract', rule.get('subtract', ()))):
+                    for comp in comps:
+                        comp_fact = by_end.get(comp, {}).get(period_end)
+                        if comp_fact is None or comp_fact.numeric_value is None:
+                            complete = False
+                            break
+                        total += comp_fact.numeric_value if sign == 'add' else -comp_fact.numeric_value
+                        if base_fact is None:
+                            base_fact = comp_fact
+                    if not complete:
+                        break
+                if not complete or base_fact is None:
+                    continue
+
+                node_label = self.virtual_trees.get('BalanceSheet', {}).get(
+                    'nodes', {}).get(derived_concept, {}).get('label', derived_concept)
+                synthetic = replace(
+                    base_fact,
+                    concept=derived_concept,
+                    taxonomy='us-gaap',
+                    label=node_label,
+                    value=total,
+                    numeric_value=total,
+                    statement_type='BalanceSheet',
+                    is_estimated=True,
+                )
+                bucket.append(synthetic)
 
     def _is_essential_concept(self, concept: str, statement_type: str) -> bool:
         """Check if concept is essential for this statement type."""
@@ -1654,6 +1777,20 @@ class EnhancedStatementBuilder:
                 if fiscal_period == 'FY':
                     continue
 
+                # Validate fiscal_year is consistent with period_end (Issues #781, #779)
+                # Catches forward-looking schedule data (e.g., intangible amortization)
+                # tagged with real fp values but future end dates (fy=2021, end=2027).
+                # Must pass FYE month so non-calendar-FYE companies (ADSK, WMT, MSFT)
+                # don't have their forward-fiscal-year quarters incorrectly rejected.
+                fiscal_year = pk[0]
+                if not validate_fiscal_year_period_end(fiscal_year, period_end_date,
+                                                      fiscal_year_end_month):
+                    log.debug(
+                        f"Skipping invalid fiscal_year={fiscal_year} for quarterly period_end={period_end_date} "
+                        f"(likely forward-looking schedule data - Issue #781)"
+                    )
+                    continue
+
                 # Validate period_end matches expected month for fiscal_period
                 if validate_quarterly_period_end(fiscal_period, period_end_date, fiscal_year_end_month):
                     valid_quarterly_periods.append((pk, info))
@@ -1819,6 +1956,13 @@ class EnhancedStatementBuilder:
             else:
                 period_facts_by_label[label] = facts_for_period
 
+        # Reconstruct standard 'Net' balance-sheet lines a filer no longer reports
+        # under a us-gaap concept (e.g. GE's PP&E) from component facts, matched to
+        # each displayed period by period_end. (GH #894)
+        self._inject_derived_balance_facts(
+            facts, period_facts_by_label, selected_period_info, selected_periods, statement_type
+        )
+
         # Build hierarchical structure using canonical template
         # Handle statement type naming inconsistencies
         # Map fact statement types to virtual tree keys
@@ -1911,8 +2055,11 @@ class EnhancedStatementBuilder:
 
         # Create fact maps for each period
         period_maps = {}
+        alias_keys: Set[str] = set()
         for period in periods:
-            period_maps[period] = self._create_fact_map(period_facts.get(period, []))
+            fact_map, period_alias_keys = self._create_fact_map(period_facts.get(period, []))
+            period_maps[period] = fact_map
+            alias_keys |= period_alias_keys
 
         # For Income Statement, promote essential concepts to top level for visibility
         if virtual_tree_key == 'IncomeStatement':
@@ -1933,15 +2080,46 @@ class EnhancedStatementBuilder:
                 if item:
                     items.append(item)
 
-        # Collect all labels already in the tree to avoid duplicating them as orphans
+        # Collect both labels and concepts already present in the tree so the
+        # orphan dedup at line ~2456 catches matches by either. Tracking only
+        # labels missed cases where a promoted item carried the canonical
+        # display label ("Total Revenue") while the orphan candidate fact's
+        # label was the raw concept name ("Revenue") — the orphan check
+        # `(label or concept) in existing_labels` then failed to match.
+        # See test_income_statement_deduplication for the exact scenario.
         existing_labels = set()
         def _collect_labels(item_list):
             for it in item_list:
-                if not it.is_abstract and it.label:
-                    existing_labels.add(it.label)
+                if not it.is_abstract:
+                    if it.label:
+                        existing_labels.add(it.label)
+                    if it.concept:
+                        existing_labels.add(it.concept)
                 if it.children:
                     _collect_labels(it.children)
         _collect_labels(items)
+
+        # Collect the raw concept of every fact actually rendered in the canonical
+        # tree. An orphan whose fact was folded into a canonical row (e.g. a filer
+        # whose only D&A line is OtherDepreciationAndAmortization, surfaced on the
+        # canonical "Depreciation and amortization" row) is then suppressed, while
+        # a filer reporting that concept *in addition* to the canonical one keeps
+        # it as a distinct line — because the canonical row rendered a different
+        # fact. (GH #839)
+        rendered_concepts: Set[str] = set()
+        def _collect_rendered(item_list):
+            for it in item_list:
+                if not it.is_abstract and it.concept:
+                    for p in periods:
+                        fact = period_maps[p].get(it.concept)
+                        if fact is None:
+                            fact = period_maps[p].get(self._normalize_concept(it.concept))
+                        if fact is not None:
+                            raw = fact.concept.split(':', 1)[-1] if ':' in fact.concept else fact.concept
+                            rendered_concepts.add(raw)
+                if it.children:
+                    _collect_rendered(it.children)
+        _collect_rendered(items)
 
         # Add orphan facts that have values but aren't in the virtual tree
         orphan_section = self._add_orphan_facts(
@@ -1949,6 +2127,8 @@ class EnhancedStatementBuilder:
             virtual_tree.get('nodes', {}),
             periods,
             virtual_tree_key,
+            alias_keys=alias_keys,
+            rendered_concepts=rendered_concepts,
             existing_labels=existing_labels
         )
         if orphan_section:
@@ -2083,13 +2263,42 @@ class EnhancedStatementBuilder:
         # This preserves valid top-level concepts like weighted-average shares
         # that may be rooted outside IncomeStatementAbstract in learned trees.
         if items:
-            existing_root_concepts = {item.concept for item in items}
+            def _collect_concepts(item: MultiPeriodItem, seen: set):
+                if item.concept:
+                    seen.add(item.concept)
+                for child in item.children:
+                    _collect_concepts(child, seen)
+
+            # Track all concepts already represented in the promoted tree,
+            # not just top-level roots. This prevents duplicate branches like
+            # RevenuesAbstract -> Revenues from being re-added as extra roots.
+            existing_concepts = set()
+            for existing_item in items:
+                _collect_concepts(existing_item, existing_concepts)
+
+            def _prune_duplicate_subtree(item: MultiPeriodItem) -> Optional[MultiPeriodItem]:
+                pruned_children = []
+                for child in item.children:
+                    pruned_child = _prune_duplicate_subtree(child)
+                    if pruned_child:
+                        pruned_children.append(pruned_child)
+                item.children = pruned_children
+
+                if item.concept in existing_concepts or item.concept in promoted_added:
+                    # Keep abstract containers only when they still expose
+                    # unique descendants after duplicate pruning.
+                    if item.is_abstract and item.children:
+                        return item
+                    return None
+
+                return item
+
             for root_concept in virtual_tree.get('roots', []):
                 if root_concept == abstract_root:
                     continue
                 if root_concept in promoted_added:
                     continue
-                if root_concept in existing_root_concepts:
+                if root_concept in existing_concepts:
                     continue
 
                 root_item = self._build_canonical_item(
@@ -2101,8 +2310,11 @@ class EnhancedStatementBuilder:
                     statement_type=statement_type
                 )
                 if root_item:
+                    root_item = _prune_duplicate_subtree(root_item)
+
+                if root_item:
                     items.append(root_item)
-                    existing_root_concepts.add(root_concept)
+                    _collect_concepts(root_item, existing_concepts)
 
         # If no abstract root, just build normally
         if not items:
@@ -2358,18 +2570,26 @@ class EnhancedStatementBuilder:
                          virtual_tree_nodes: Dict[str, Any],
                          periods: List[str],
                          statement_type: str,
-                         existing_labels: Optional[set] = None) -> Optional[MultiPeriodItem]:
+                         existing_labels: Optional[set] = None,
+                         alias_keys: Optional[Set[str]] = None,
+                         rendered_concepts: Optional[Set[str]] = None) -> Optional[MultiPeriodItem]:
         """Add valuable facts not in virtual tree as 'Additional Items' section."""
+
+        alias_keys = alias_keys or set()
+        rendered_concepts = rendered_concepts or set()
 
         # Find all concepts that have values but aren't in the virtual tree
         orphan_concepts = set()
         for period_map in period_maps.values():
             for concept in period_map.keys():
-                # Skip if already in virtual tree
-                if concept not in virtual_tree_nodes:
-                    # Check if this is an essential or important concept
-                    if self._is_important_orphan(concept, statement_type):
-                        orphan_concepts.add(concept)
+                # Skip if already in virtual tree, or if it's a synthetic
+                # normalization-alias key (the real fact is iterated under its raw
+                # concept name; the alias would only duplicate it - GH #839).
+                if concept in virtual_tree_nodes or concept in alias_keys:
+                    continue
+                # Check if this is an essential or important concept
+                if self._is_important_orphan(concept, statement_type):
+                    orphan_concepts.add(concept)
 
         if not orphan_concepts:
             return None
@@ -2407,6 +2627,14 @@ class EnhancedStatementBuilder:
             if has_values:
                 # Skip orphan if its label already exists in the main tree (concept rename duplicate)
                 if existing_labels and (label or concept) in existing_labels:
+                    continue
+                # Skip orphan if its fact was already rendered in a canonical row
+                # via concept normalization (e.g. OtherDepreciationAndAmortization
+                # folded into the canonical "Depreciation and amortization" line).
+                # A filer reporting this concept *in addition* to the canonical one
+                # is unaffected: the canonical row rendered a different fact, so this
+                # concept is absent from rendered_concepts and stays a distinct line. (GH #839)
+                if concept in rendered_concepts:
                     continue
                 orphan_item = MultiPeriodItem(
                     concept=concept,
@@ -2869,28 +3097,38 @@ class EnhancedStatementBuilder:
 
         return items
 
-    def _create_fact_map(self, facts: List[FinancialFact]) -> Dict[str, FinancialFact]:
-        """Create concept -> fact mapping with normalization."""
+    def _create_fact_map(self, facts: List[FinancialFact]) -> Tuple[Dict[str, FinancialFact], Set[str]]:
+        """Create concept -> fact mapping with normalization.
+
+        Each fact is stored under its raw concept name and, when normalization
+        applies (e.g. OtherDepreciationAndAmortization -> DepreciationAndAmortization),
+        under its normalized name as well, so the canonical-item builder can fall
+        back to the normalized key when a node's own concept is absent.
+
+        Returns ``(fact_map, alias_keys)`` where ``alias_keys`` are the keys that
+        exist *only* as normalization targets — i.e. no fact reported them under
+        their raw concept name. The orphan collector excludes these synthetic
+        keys so a folded concept isn't also rendered as a stray duplicate row
+        (GH #839).
+        """
         fact_map = {}
+        raw_concepts = set()
         for fact in facts:
             # Get clean concept name without namespace
             concept = fact.concept.split(':', 1)[-1] if ':' in fact.concept else fact.concept
+            raw_concepts.add(concept)
 
-            # Store under both original and normalized names
-            # This allows matching both variants
+            # Last fact in the list wins for the raw concept (unchanged behaviour).
             fact_map[concept] = fact
 
+            # Also expose the fact under its normalized name for canonical lookup.
             normalized = self._normalize_concept(concept)
             if normalized != concept:
-                # Also store under normalized name if different
-                # Prefer normalized if not already present
-                if normalized not in fact_map:
-                    fact_map[normalized] = fact
+                fact_map[normalized] = fact
 
-            # Use most recent fact for duplicates
-            if concept not in fact_map or fact.filing_date > fact_map[concept].filing_date:
-                fact_map[concept] = fact
-        return fact_map
+        # Keys present only as normalization targets, never reported directly.
+        alias_keys = set(fact_map) - raw_concepts
+        return fact_map, alias_keys
 
     def _calculate_coverage(self, facts: List[FinancialFact], virtual_tree_key: str) -> float:
         """Calculate canonical coverage."""

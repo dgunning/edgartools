@@ -805,6 +805,10 @@ class InstanceParser(BaseParser):
                 # Classify fiscal period from duration length
                 if 350 <= days <= 380:
                     period['fiscal_period'] = 'FY'
+                elif 260 <= days <= 290:
+                    period['fiscal_period'] = 'YTD9'  # 9-month YTD (Q3 10-Q)
+                elif 170 <= days <= 200:
+                    period['fiscal_period'] = 'YTD6'  # 6-month YTD (Q2 10-Q)
                 elif 85 <= days <= 95:
                     period['fiscal_period'] = _quarter_for_date(end_obj, fy_end_month)
 
@@ -836,9 +840,17 @@ def _quarter_for_date(end_date, fy_end_month: int) -> str:
 
     Quarters are counted from the start of the fiscal year.
     For AAPL (FY end Sep): Q1=Oct-Dec, Q2=Jan-Mar, Q3=Apr-Jun, Q4=Jul-Sep.
+
+    52/53-week filers (JNJ, PFE, AAPL, COST, etc.) pin quarter ends to a
+    weekday (e.g. Sunday nearest Jun 30), so the end_date can drift into the
+    first few days of the following calendar month — e.g. JNJ Q2 2023 ended
+    2023-07-02. A first-of-month classification puts those facts in the wrong
+    quarter (GH #816). Normalize by treating end dates in the first week of a
+    month as belonging to the previous month for quarter classification.
     """
-    # Months after fiscal year end determines the quarter
-    # Month offset: how many months past the FY end month
-    month_offset = (end_date.month - fy_end_month - 1) % 12
+    classification_month = end_date.month
+    if end_date.day <= 7:
+        classification_month = 12 if classification_month == 1 else classification_month - 1
+    month_offset = (classification_month - fy_end_month - 1) % 12
     quarter = (month_offset // 3) + 1
     return f"Q{quarter}"

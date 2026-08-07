@@ -275,6 +275,40 @@ class StatementInfo:
     title: str
 
 
+@dataclass
+class ExtensionArc:
+    """An extension (filer-authored) concept linked into a statement via the
+    calculation linkbase but absent from the statement's presentation tree.
+
+    These concepts would not appear in the rendered statement today; this object
+    surfaces them with their us-gaap (or other standard) parent and signed weight.
+
+    Attributes:
+        concept: Local name (e.g., 'NetChangeInAdvancesToandInvestmentsInSubsidiaries').
+        concept_taxonomy: Filer prefix (e.g., 'jpm', 'tsla', 'met').
+        parent_concept: Local name of the calc parent (e.g., 'NetCashProvidedByUsedInInvestingActivities').
+        parent_taxonomy: Parent's taxonomy prefix (typically 'us-gaap').
+        weight: Signed calculation weight (+1.0 or -1.0 typically).
+        label: Standard label from the label linkbase, or '' if unavailable.
+        role_uri: Full extended-link role URI of the statement.
+        element_id: Original underscore-form ID used for fact lookup ('jpm_FooBar').
+        value: Numeric fact value when include_values=True; None otherwise.
+        period_key: Period key (e.g., 'duration_2023-01-01_2023-12-31') for the value.
+        context_ref: Context reference for the value's fact instance.
+    """
+    concept: str
+    concept_taxonomy: str
+    parent_concept: str
+    parent_taxonomy: str
+    weight: float
+    label: str
+    role_uri: str
+    element_id: str
+    value: Optional[float] = None
+    period_key: Optional[str] = None
+    context_ref: Optional[str] = None
+
+
 statement_to_concepts = {
     "IncomeStatement": StatementInfo(name="IncomeStatement",
                                      concept="us-gaap_IncomeStatementAbstract",
@@ -397,6 +431,109 @@ class Statement:
             True if the statement is segmented, False otherwise
         """
         return self.role_or_type.startswith("Segment")
+
+    def extension_arcs(self, include_values: bool = False) -> List[ExtensionArc]:
+        """Extension (filer-authored) concepts linked into this statement via the
+        calculation linkbase but absent from its presentation tree.
+
+        These concepts do not appear in `render()` output today because rendering
+        is driven by the presentation tree. Example: JPM's
+        ``jpm:NetBorrowingsFromSubsidiaries`` rolls up to
+        ``us-gaap:NetCashProvidedByUsedInFinancingActivities`` via the calc
+        linkbase but has no entry in the cash-flow presentation tree, so it
+        silently drops from the rendered statement.
+
+        Calling this method does not change `render()` output. It is purely
+        additive — an opt-in view for pipelines that want the full footprint.
+
+        Args:
+            include_values: When True, look up instance facts for each
+                extension concept and emit one ExtensionArc per (concept,
+                context). When False (default), return one ExtensionArc per
+                concept with `value`/`period_key`/`context_ref` left as None.
+
+        Returns:
+            List of :class:`ExtensionArc`. Empty list if the statement has no
+            calculation tree for its role, or no extension concepts in that
+            tree are absent from the presentation tree.
+
+        Example:
+            >>> stmt = filing.xbrl().statements.cash_flow_statement()
+            >>> for arc in stmt.extension_arcs(include_values=True):
+            ...     print(f"{arc.concept_taxonomy}:{arc.concept} "
+            ...           f"-> {arc.parent_taxonomy}:{arc.parent_concept} "
+            ...           f"w={arc.weight:+.1f} value={arc.value}")
+        """
+        from edgar.xbrl.core import STANDARD_TAXONOMIES, STANDARD_LABEL, split_element_id
+
+        # Resolve to the statement's role URI using the same path render() uses.
+        # find_statement() raises StatementNotFound for unresolvable inputs;
+        # this method should fail silent and return [] instead.
+        lookup_key = self.canonical_type if self.canonical_type else self.role_or_type
+        try:
+            _, role_uri, _ = self.xbrl.find_statement(lookup_key)
+        except StatementNotFound:
+            return []
+        if not role_uri:
+            return []
+
+        calc_tree = self.xbrl.calculation_trees.get(role_uri)
+        if not calc_tree:
+            return []
+
+        pres_tree = self.xbrl.presentation_trees.get(role_uri)
+        presented = set(pres_tree.all_nodes.keys()) if pres_tree else set()
+
+        arcs: List[ExtensionArc] = []
+        for element_id, node in calc_tree.all_nodes.items():
+            if node.parent is None or element_id in presented:
+                continue
+
+            concept_tax, concept_local = split_element_id(element_id)
+            if concept_tax in STANDARD_TAXONOMIES:
+                continue
+
+            parent_tax, parent_local = split_element_id(node.parent)
+            elem = self.xbrl.element_catalog.get(element_id)
+            label = ''
+            if elem and elem.labels:
+                label = elem.labels.get(STANDARD_LABEL, '') or ''
+
+            base_kwargs = dict(
+                concept=concept_local,
+                concept_taxonomy=concept_tax,
+                parent_concept=parent_local,
+                parent_taxonomy=parent_tax,
+                weight=node.weight,
+                label=label,
+                role_uri=role_uri,
+                element_id=element_id,
+            )
+
+            if not include_values:
+                arcs.append(ExtensionArc(**base_kwargs))
+                continue
+
+            # Values-joined: emit one arc per context with a fact.
+            contexts = self.xbrl.element_context_index.get(element_id, [])
+            if not contexts:
+                # No facts recorded — still emit the structural arc so callers
+                # can see the concept exists in the linkbase.
+                arcs.append(ExtensionArc(**base_kwargs))
+                continue
+
+            for ctx_ref in contexts:
+                fact = self.xbrl.parser.get_fact(element_id, ctx_ref)
+                if fact is None:
+                    continue
+                arcs.append(ExtensionArc(
+                    **base_kwargs,
+                    value=fact.numeric_value,
+                    period_key=self.xbrl.context_period_map.get(ctx_ref),
+                    context_ref=ctx_ref,
+                ))
+
+        return arcs
 
     def render(self, period_filter: Optional[str] = None,
                period_view: Optional[str] = None,
@@ -1038,9 +1175,10 @@ class Statement:
             view: StatementView controlling which dimensional data to include.
                   Used for STANDARD vs DETAILED filtering logic.
         """
-        from edgar.xbrl.core import get_unit_display_name
+        from edgar.xbrl.core import PERIOD_END_LABEL, PERIOD_START_LABEL, get_unit_display_name
         from edgar.xbrl.core import is_point_in_time as get_is_point_in_time
         from edgar.xbrl.periods import determine_periods_to_display
+        from edgar.xbrl.rendering import _is_html, html_to_text
 
         # Get raw statement data with view-based filtering
         raw_data = self.get_raw_data(period_filter=period_filter, view=view)
@@ -1220,6 +1358,33 @@ class Statement:
                 # Use raw value from instance document
                 value = values_dict.get(period_key)
 
+                # edgartools-0609: Roll-forward mapping for periodStart/periodEnd
+                # balances (e.g. cash flow / equity "beginning/ending balances").
+                # These are instant facts shown against duration columns: the
+                # beginning balance is the instant at the day before the period
+                # start, the ending balance is the instant at the period end.
+                # Driven by the per-reference preferred label so it works
+                # regardless of statement type and keeps the DataFrame consistent
+                # with the rich view.
+                # Only non-dimensional rows carry a reliable per-reference label;
+                # dimensional rows share the node's label and use the occurrence-
+                # based equity logic below instead.
+                item_preferred_label = None if item.get('is_dimension') else item.get('preferred_label')
+                is_period_start = item_preferred_label == PERIOD_START_LABEL
+                if value is None and item_preferred_label in (PERIOD_START_LABEL, PERIOD_END_LABEL):
+                    if is_period_start and start_date:
+                        # Beginning balance: instant at the day before period start
+                        try:
+                            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
+                            beginning_date = (start_dt - timedelta(days=1)).strftime('%Y-%m-%d')
+                            value = values_dict.get(f"instant_{beginning_date}")
+                            if value is None:
+                                value = values_dict.get(f"instant_{start_date}")
+                        except (ValueError, AttributeError):
+                            pass
+                    if value is None and item_preferred_label == PERIOD_END_LABEL and end_date:
+                        value = values_dict.get(f"instant_{end_date}")
+
                 # Issue #572/#583: For Statement of Equity, match instant facts when duration key is empty
                 # This mirrors the logic in rendering.py (Issue #450) for consistent DataFrame output
                 # Roll-forward structure: first occurrence = beginning balance, later = ending balance
@@ -1240,8 +1405,9 @@ class Statement:
                         except (ValueError, AttributeError):
                             pass  # Fall through to try end_date
 
-                    # If still no value, try instant at end_date (ending balances and most facts)
-                    if value is None and end_date:
+                    # If still no value, try instant at end_date (ending balances and most facts).
+                    # edgartools-0609: never apply the period-end instant to a beginning row.
+                    if value is None and end_date and not is_period_start:
                         instant_key = f"instant_{end_date}"
                         value = values_dict.get(instant_key)
 
@@ -1249,9 +1415,18 @@ class Statement:
                 # Notes/disclosures default to duration period selection, but balance-sheet-type
                 # notes (PPE, Accrued Liabilities) have instant facts.
                 # Try the instant key at the duration's end date.
-                if value is None and period_key.startswith('duration_') and end_date:
+                # edgartools-0609: skip beginning-balance rows -- the period end instant
+                # is the *ending* balance and would mislabel the beginning row.
+                if (value is None and period_key.startswith('duration_') and end_date
+                        and not is_period_start):
                     instant_key = f"instant_{end_date}"
                     value = values_dict.get(instant_key)
+
+                # Issue #762: Sanitize HTML strings from TextBlock XBRL concepts
+                # Disclosure tables contain facts whose values are full HTML markup.
+                # Strip to plain text so DataFrame cells are usable.
+                if isinstance(value, str) and _is_html(value):
+                    value = html_to_text(value)
 
                 # Issue #582: Don't overwrite a valid value with None
                 # Multiple periods can map to the same column (e.g., transition periods for
@@ -3066,7 +3241,8 @@ class StitchedStatement:
 
     def __init__(self, xbrls, statement_type: str, max_periods: int = 8, standard: bool = True,
                  use_optimal_periods: bool = True, include_dimensions: bool = False,
-                 view: ViewType = None):
+                 view: ViewType = None, discrete_quarters: bool = False,
+                 include_quarterly: bool = False):
         """
         Initialize with XBRLS object and statement parameters.
 
@@ -3079,12 +3255,19 @@ class StitchedStatement:
             include_dimensions: Whether to include dimensional segment data (default: False for stitching)
             view: StatementView controlling dimensional filtering. If provided, overrides include_dimensions.
                   'detailed' → include_dimensions=True, 'standard'/'summary' → include_dimensions=False.
+            discrete_quarters: If True and statement is CashFlowStatement, convert
+                              YTD cumulative periods into discrete quarter values (default: False)
+            include_quarterly: If True, surface discrete-quarter columns alongside YTD/annual
+                              columns from each filing (GH #780). Default False preserves
+                              existing one-column-per-filing behavior. Ignored for BalanceSheet.
         """
         self.xbrls = xbrls
         self.statement_type = statement_type
         self.max_periods = max_periods
         self.standard = standard
         self.use_optimal_periods = use_optimal_periods
+        self.discrete_quarters = discrete_quarters
+        self.include_quarterly = include_quarterly
         # If view is provided, derive include_dimensions from it
         if view is not None:
             normalized = normalize_view(view)
@@ -3121,7 +3304,9 @@ class StitchedStatement:
                 self.max_periods,
                 self.standard,
                 self.use_optimal_periods,
-                self.include_dimensions
+                self.include_dimensions,
+                self.discrete_quarters,
+                self.include_quarterly,
             )
         return self._statement_data
 
@@ -3218,7 +3403,8 @@ class StitchedStatements:
 
     def income_statement(self, max_periods: int = 8, standard: bool = True,
                          use_optimal_periods: bool = True, show_date_range: bool = False,
-                         include_dimensions: bool = False, view: ViewType = None) -> Optional[StitchedStatement]:
+                         include_dimensions: bool = False, view: ViewType = None,
+                         include_quarterly: bool = False) -> Optional[StitchedStatement]:
         """
         Get a stitched income statement across multiple time periods.
 
@@ -3229,19 +3415,24 @@ class StitchedStatements:
             show_date_range: Whether to show full date ranges for duration periods
             include_dimensions: Whether to include dimensional segment data (default: False)
             view: StatementView controlling dimensional filtering. Overrides include_dimensions if provided.
+            include_quarterly: If True, surface discrete-quarter columns alongside YTD/annual
+                              columns from each filing (GH #780). Default False.
 
         Returns:
             StitchedStatement for the income statement
         """
         statement = StitchedStatement(self.xbrls, 'IncomeStatement', max_periods, standard,
-                                     use_optimal_periods, include_dimensions, view=view)
+                                     use_optimal_periods, include_dimensions, view=view,
+                                     include_quarterly=include_quarterly)
         if show_date_range:
             statement.show_date_range = show_date_range
         return statement
 
     def cashflow_statement(self, max_periods: int = 8, standard: bool = True,
                            use_optimal_periods: bool = True, show_date_range: bool = False,
-                           include_dimensions: bool = False, view: ViewType = None) -> Optional[StitchedStatement]:
+                           include_dimensions: bool = False, view: ViewType = None,
+                           discrete_quarters: bool = False,
+                           include_quarterly: bool = False) -> Optional[StitchedStatement]:
         """
         Get a stitched cash flow statement across multiple time periods.
 
@@ -3252,12 +3443,21 @@ class StitchedStatements:
             show_date_range: Whether to show full date ranges for duration periods
             include_dimensions: Whether to include dimensional segment data (default: False)
             view: StatementView controlling dimensional filtering. Overrides include_dimensions if provided.
+            discrete_quarters: If True, convert YTD cumulative periods into discrete
+                              quarter values (e.g. Q2 = 6-month YTD minus Q1). Default: False.
+            include_quarterly: If True, surface discrete-quarter columns alongside YTD/annual
+                              columns from each filing (GH #780). Distinct from
+                              ``discrete_quarters`` — this surfaces existing per-filing quarterly
+                              facts; ``discrete_quarters`` derives them from YTD by subtraction.
+                              Default False.
 
         Returns:
             StitchedStatement for the cash flow statement
         """
         statement = StitchedStatement(self.xbrls, 'CashFlowStatement', max_periods, standard,
-                                     use_optimal_periods, include_dimensions, view=view)
+                                     use_optimal_periods, include_dimensions, view=view,
+                                     discrete_quarters=discrete_quarters,
+                                     include_quarterly=include_quarterly)
         if show_date_range:
             statement.show_date_range = show_date_range
         return statement

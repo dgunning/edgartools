@@ -252,7 +252,7 @@ def decode_content(content: bytes):
 
 text_extensions = (".txt", ".htm", ".html", ".xsd", ".xml", "XML", ".json", ".idx", ".paper")
 binary_extensions = (".pdf", ".jpg", ".jpeg", "png", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg", ".webp", ".avif",
-                     ".apng")
+                     ".apng", ".xlsx", ".xls", ".zip", ".docx", ".pptx")
 
 
 def get_bool(value: Optional[str] = None) -> Optional[bool]:
@@ -335,7 +335,8 @@ def filing_date_to_year_quarters(filing_date: str) -> List[Tuple[int, int]]:
         start_date, end_date = filing_date.split(":")
 
         if not start_date:
-            start_date = "1994-06-01"
+            # SEC's full-index goes back to 1993 Q1 - see available_quarters() in _filings.py
+            start_date = "1993-01-01"
 
         if not end_date:
             end_date = date.today().strftime("%Y-%m-%d")
@@ -396,7 +397,7 @@ def decode_content(content: bytes):
 
 text_extensions = (".txt", ".htm", ".html", ".xsd", ".xml", "XML", ".json", ".idx", ".paper")
 binary_extensions = (".pdf", ".jpg", ".jpeg", "png", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg", ".webp", ".avif",
-                     ".apng")
+                     ".apng", ".xlsx", ".xls", ".zip", ".docx", ".pptx")
 
 
 class DataPager:

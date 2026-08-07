@@ -12,6 +12,36 @@ from edgar.documents.config import ParserConfig
 from edgar.documents.types import HeaderInfo, ParseContext
 
 
+# A bare list or footnote enumerator: '1', '(1)', '(a)', 'iv.', 'b)'. Four or more digits
+# are excluded so a year ('2024') is not caught.
+_BARE_ENUMERATOR = re.compile(r'^[(\[]?\s*(?:\d{1,3}|[ivxlcIVXLC]{1,5}|[a-zA-Z])\s*[)\].]?$')
+
+
+def _can_be_heading(text: str) -> bool:
+    """Whether this text could be a heading at all, before any confidence is scored.
+
+    Filers put a bullet glyph or a footnote marker in its own styled span, and the
+    detectors below score that span on everything except what it says: ContextualDetector
+    awards +0.3 whenever the next element is three times longer, which a one-character
+    text passes against almost anything, and another +0.3 when the *previous* sibling
+    looks like a heading. A '•' clears the 0.6 threshold on borrowed evidence alone.
+
+    Across the 57 fixtures that promoted 2,818 headings with no alphanumeric character at
+    all (2,636 of them a bare '•') and 1,199 bare enumerators, together 23.6% of every
+    HeadingNode built. Meta's FY2024 10-K was 180 of 296. They reach users through
+    doc.headings, through the markdown renderer as '### •' and its table of contents, and
+    through the heading index that DocumentSearch scores.
+
+    This is a content floor rather than a confidence adjustment because no amount of
+    styling makes a bullet a heading, and the detectors have no way to express that.
+    """
+    if not any(c.isalnum() for c in text):
+        return False
+    if _BARE_ENUMERATOR.match(text):
+        return False
+    return True
+
+
 class HeaderDetector(ABC):
     """Abstract base class for header detectors."""
 
@@ -376,6 +406,10 @@ class HeaderDetectionStrategy:
         # Skip if element has no text
         text = element.text_content().strip()
         if not text:
+            return None
+
+        # A bullet or a bare enumerator is not a heading however it is styled.
+        if not _can_be_heading(text):
             return None
 
         # Collect results from all detectors

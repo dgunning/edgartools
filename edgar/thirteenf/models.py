@@ -5,6 +5,7 @@ from functools import cached_property
 from typing import List, Optional, Union
 
 import pyarrow.compute as pc
+from lxml import etree
 
 from edgar._party import Address
 
@@ -12,6 +13,7 @@ __all__ = [
     'FilingManager',
     'OtherManager',
     'CoverPage',
+    'AmendmentInfo',
     'SummaryPage',
     'Signature',
     'PrimaryDocument13F',
@@ -25,9 +27,128 @@ __all__ = [
 
 THIRTEENF_FORMS = ['13F-HR', "13F-HR/A", "13F-NT", "13F-NT/A", "13F-CTR", "13F-CTR/A"]
 
-# The SEC changed 13F XML schema around Q4 2022: <value> went from thousands to dollars.
-# Filings with report_period on or before this date have values in thousands.
+# SEC Release 34-96734 switched Form 13F <value> reporting from *thousands* to *whole
+# dollars* for periods ending on/after 2022-12-31. However, the reporting unit is a
+# property of the individual filing (which schema/software the filer used), NOT of the
+# report period: during and after the transition, filings for the same report period
+# arrive in BOTH units (late/amended filings keep both alive in every period). A single
+# date threshold therefore mis-scales a meaningful, non-shrinking fraction of filings in
+# both directions (see issue edgartools-mun2). The unit is now detected per-filing from
+# the holdings themselves (see `_detect_value_in_thousands`); this date cutoff survives
+# only as a last-resort fallback when a filing has no priceable equity rows.
 _13F_VALUE_IN_THOUSANDS_CUTOFF = datetime(2022, 9, 30)
+
+# An implied equity price (Value / SharesPrnAmount under the "as-reported = dollars"
+# hypothesis) below this is dollar-implausible: real equities almost never trade under $1,
+# so such a holding is evidence the filing actually reports in thousands (the two unit
+# hypotheses sit exactly 1000x apart).
+_13F_IMPLIED_PRICE_THOUSANDS_THRESHOLD = 1.0
+
+# Fraction of priceable equity holdings whose implied price is sub-$1 at/above which the
+# filing is unambiguously in thousands. Empirically (sampled across the 2020-2024
+# transition) this fraction is sharply bimodal: genuine whole-dollar filings sit near 0.0
+# (almost no sub-$1 equities) and thousands filings near 1.0 (every normal stock looks
+# sub-$1 once divided by 1000). A high fraction can ONLY be a thousands filing, so it is
+# decided from price alone. A LOW fraction is NOT decisive the other way: a filing with no
+# sub-$1 holdings is genuinely ambiguous between normal whole-dollar pricing and a
+# thousands filing concentrated in >$1000 shares (BRK.A ~$680k, pre-split AMZN/GOOGL). Per
+# the field evidence in edgartools-mun2, magnitude must NEVER decide the high side (no upper
+# price cap); those filings defer to the schema-version / date prior instead.
+_13F_FRAC_THOUSANDS = 0.5   # >= this share of holdings sub-$1 => unambiguously thousands
+
+# Form 13F primary-document <schemaVersion> at/after which the SEC's whole-dollar value
+# convention shipped. Used only as a prior for ambiguous / unpriceable filings.
+_13F_DOLLARS_SCHEMA_VERSION = 'X0202'
+
+
+def _schema_implies_dollars(schema_version: Optional[str]) -> Optional[bool]:
+    """
+    Prior on the reporting unit from the primary-document ``<schemaVersion>``.
+
+    Returns True if the schema version indicates the whole-dollar era, False if it
+    indicates the older thousands era, or None when there is no usable version (caller
+    then falls back to the report-period date cutoff).
+
+    This is only a *prior*: real filers demonstrably submit the new schema while still
+    reporting in thousands (e.g. Bull Street, Abeille, GSA), so it is consulted only to
+    break ties in the ambiguous band and for filings with no priceable equity rows.
+    """
+    if not schema_version:
+        return None
+    return schema_version.strip().upper() >= _13F_DOLLARS_SCHEMA_VERSION
+
+
+def _resolve_unit_fallback(schema_version: Optional[str],
+                           report_period_dt: Optional[datetime]) -> bool:
+    """Schema-version prior, then the legacy report-period date cutoff. Returns
+    True if the filing should be treated as reporting in thousands."""
+    dollars = _schema_implies_dollars(schema_version)
+    if dollars is not None:
+        return not dollars
+    return report_period_dt is not None and report_period_dt <= _13F_VALUE_IN_THOUSANDS_CUTOFF
+
+
+def _detect_value_in_thousands(df,
+                               schema_version: Optional[str] = None,
+                               report_period_dt: Optional[datetime] = None) -> bool:
+    """
+    Determine whether a 13F information table reports ``<value>`` in thousands (vs. whole
+    dollars) per-filing, from the holdings themselves.
+
+    A single 13F reports *all* holdings in *one* unit. Under the "as-reported = dollars"
+    interpretation the implied price of an equity holding is ``Value / SharesPrnAmount``;
+    if the filing is actually in thousands, every implied price is ~1000x too low. The
+    decision is asymmetric:
+
+    - **High side (decisive):** if a large *fraction* of share holdings imply a sub-$1
+      price, the filing can only be in thousands (a real whole-dollar portfolio almost
+      never holds majority sub-$1 equities). This is decided from price alone, and it is
+      what lets a filing using the new whole-dollar schema yet still reporting in thousands
+      be caught (the real Bull Street / Abeille / GSA case).
+    - **Low side (NOT decisive):** few or no sub-$1 holdings is genuinely ambiguous —
+      it is either normal whole-dollar pricing or a thousands filing concentrated in
+      >$1000 shares (BRK.A ~$680k, pre-split AMZN/GOOGL). Price magnitude must never be
+      used to decide here (no upper cap); such filings defer to the schema-version prior,
+      then the report-period date cutoff. This is reliable because genuine whole-dollar
+      filings essentially always carry the new schema (the old-schema/pre-cutover era was
+      uniformly thousands).
+
+    Only ``Type == 'Shares'`` non-option rows are priced: bonds (``Principal``) trade near
+    par so the ratio hovers around 1.0 — useless for discrimination — and option ``Value``
+    is notional.
+
+    Args:
+        df: Raw, *unscaled* holdings DataFrame as produced by the infotable parsers.
+        schema_version: Primary-document ``<schemaVersion>`` (e.g. 'X0202'); the prior for
+            every non-thousands-confident filing.
+        report_period_dt: Report period end date, used as the final fallback.
+
+    Returns:
+        True if the filing's values are in thousands and must be multiplied by 1000.
+    """
+    import pandas as pd
+
+    try:
+        sh = df[(df['Type'] == 'Shares') & (df['SharesPrnAmount'] > 0)]
+        if 'PutCall' in sh.columns:
+            put_call = sh['PutCall'].fillna('')
+            sh = sh[put_call == '']
+        values = pd.to_numeric(sh['Value'], errors='coerce')
+        shares = pd.to_numeric(sh['SharesPrnAmount'], errors='coerce')
+        implied = (values / shares).replace([float('inf'), float('-inf')], pd.NA).dropna()
+        implied = implied[implied > 0]
+        if len(implied) > 0:
+            frac_sub_dollar = float((implied < _13F_IMPLIED_PRICE_THOUSANDS_THRESHOLD).mean())
+            if frac_sub_dollar >= _13F_FRAC_THOUSANDS:
+                return True  # decisive: majority sub-$1 can only be thousands
+            # Low side is ambiguous (normal dollars vs. thousands-of->$1000-shares). Never
+            # decide from magnitude; defer to the schema-version / date prior.
+            return _resolve_unit_fallback(schema_version, report_period_dt)
+    except (KeyError, TypeError, ValueError):
+        pass
+
+    # No priceable equity rows (e.g. bond-only or PRN-only filings).
+    return _resolve_unit_fallback(schema_version, report_period_dt)
 
 
 def format_date(date: Union[str, datetime]) -> str:
@@ -51,11 +172,34 @@ class OtherManager:
 
 
 @dataclass(frozen=True)
+class AmendmentInfo:
+    """Amendment metadata from a 13F cover page (<amendmentInfo>).
+
+    ``amendment_type`` is the load-bearing field (GH #872):
+
+    - ``"RESTATEMENT"`` — a full re-filing of the entire holdings report; it
+      *replaces* the original filing.
+    - ``"NEW HOLDINGS"`` — adds only positions previously omitted under
+      confidential treatment and now being disclosed; it must be *combined with*
+      (unioned with) the original and does **not** replace it. Usually paired
+      with ``conf_denied_expired=True``.
+    """
+    amendment_type: Optional[str] = None
+    conf_denied_expired: Optional[bool] = None
+    date_denied_expired: Optional[str] = None
+    date_reported: Optional[str] = None
+    reason_for_non_confidentiality: Optional[str] = None
+
+
+@dataclass(frozen=True)
 class CoverPage:
     report_calendar_or_quarter: str
     report_type: str
     filing_manager: FilingManager
     other_managers: List[OtherManager]
+    is_amendment: bool = False
+    amendment_number: Optional[int] = None
+    amendment_info: Optional[AmendmentInfo] = None
 
 
 @dataclass(frozen=True)
@@ -228,6 +372,9 @@ class ThirteenF:
         self.__same_day_filings = None  # Lazy-loaded: same-date + same-form subset
         self._previous_holding_report_cache = None  # Cached result for previous_holding_report()
         self._previous_holding_report_cached = False  # Separate flag since result can be None
+        # Per-filing thousands/dollars unit, detected lazily when the infotable is built.
+        # None = not yet determined. See `_detect_value_in_thousands`.
+        self._value_in_thousands_flag = None
 
         if use_latest_period_of_report:
             # Use the last related filing filed on the same date.
@@ -267,6 +414,55 @@ class ThirteenF:
     @property
     def form(self):
         return self.filing.form
+
+    @property
+    def is_amendment(self) -> bool:
+        """True if this filing is a 13F amendment (e.g. ``13F-HR/A``).
+
+        Reads ``<isAmendment>`` from the cover page when the primary XML is
+        available (2013+); for older TXT-only filings it falls back to the form
+        suffix.
+        """
+        if self.primary_form_information is not None:
+            return self.primary_form_information.cover_page.is_amendment
+        return self.form.endswith("/A")
+
+    @property
+    def amendment_type(self) -> Optional[str]:
+        """The amendment type for a 13F amendment, or ``None``.
+
+        Returns ``"RESTATEMENT"`` or ``"NEW HOLDINGS"`` (GH #872). The
+        distinction is load-bearing for correctness:
+
+        - ``RESTATEMENT`` re-files the entire report and *replaces* the original.
+        - ``NEW HOLDINGS`` adds only previously-confidential positions and must
+          be combined (unioned) with the original — it does **not** replace it.
+          Superseding the original with a ``NEW HOLDINGS`` amendment silently
+          drops the real portfolio.
+
+        Returns ``None`` when this is not an amendment, or when the amendment
+        type is absent (e.g. older TXT-only filings).
+        """
+        info = self.primary_form_information
+        if info is None or info.cover_page.amendment_info is None:
+            return None
+        return info.cover_page.amendment_info.amendment_type
+
+    @property
+    def amendment_number(self) -> Optional[int]:
+        """The amendment sequence number (``<amendmentNo>``), or ``None``."""
+        info = self.primary_form_information
+        if info is None:
+            return None
+        return info.cover_page.amendment_number
+
+    @property
+    def amendment_info(self) -> Optional['AmendmentInfo']:
+        """Full amendment metadata (type, confidential-treatment fields), or ``None``."""
+        info = self.primary_form_information
+        if info is None:
+            return None
+        return info.cover_page.amendment_info
 
     @cached_property
     def infotable_xml(self):
@@ -362,9 +558,17 @@ class ThirteenF:
                 df = parse_infotable_txt(self.infotable_txt)
             else:
                 return None
-            # Normalize pre-Q4 2022 values from thousands to dollars
-            if df is not None and len(df) > 0 and self._value_in_thousands:
-                df['Value'] = df['Value'] * 1000
+            # Detect this filing's reporting unit from the raw holdings (per-filing, not a
+            # report-period date rule) and normalize thousands -> dollars. Detection must
+            # run on the unscaled values, so it happens here rather than reading back the
+            # already-scaled column. The result is cached for `total_value` to reuse.
+            if df is not None and len(df) > 0:
+                in_thousands = _detect_value_in_thousands(
+                    df, self._schema_version, self._report_period_dt
+                )
+                self._value_in_thousands_flag = in_thousands
+                if in_thousands:
+                    df['Value'] = df['Value'] * 1000
             return df
         return None
 
@@ -432,7 +636,11 @@ class ThirteenF:
             # No conversion needed - aggregate directly (saves 15 MB copy + 30ms)
             df = infotable
 
-        # Aggregate by CUSIP
+        # Group by CUSIP + PutCall so option positions stay distinct from equity (GH #824).
+        group_keys = ['Cusip']
+        if 'PutCall' in df.columns:
+            group_keys.append('PutCall')
+
         agg_dict = {}
 
         # Keep first value for ID columns
@@ -445,13 +653,23 @@ class ThirteenF:
             if col in df.columns:
                 agg_dict[col] = 'sum'
 
-        # Handle Type and PutCall - keep if consistent across managers, otherwise use first
-        for col in ['Type', 'PutCall']:
-            if col in df.columns:
-                agg_dict[col] = 'first'  # Use first value (typically consistent per CUSIP)
+        # Type keeps first; PutCall is now a grouping key so it's excluded from agg_dict.
+        if 'Type' in df.columns:
+            agg_dict['Type'] = 'first'
 
-        # Group by CUSIP and aggregate
-        holdings = df.groupby('Cusip', as_index=False).agg(agg_dict)
+        holdings = df.groupby(group_keys, as_index=False).agg(agg_dict)
+
+        # Restore PutCall column position. pandas groupby() with PutCall as a key
+        # places it as the second column (right after Cusip), silently shifting
+        # the column layout. This breaks positional column access, table
+        # rendering order, and notebook code with hardcoded indices. Re-insert
+        # PutCall after Ticker to preserve the pre-aggregation column contract.
+        if 'PutCall' in holdings.columns:
+            cols = [c for c in holdings.columns if c != 'PutCall']
+            insert_after = 'Ticker' if 'Ticker' in cols else (id_cols[-1] if id_cols[-1] in cols else cols[-1])
+            idx = cols.index(insert_after) + 1
+            cols.insert(idx, 'PutCall')
+            holdings = holdings[cols]
 
         # Optimize dtypes for low-cardinality columns (saves ~1-2 MB)
         # Include potential fillna values in categories for rendering compatibility
@@ -461,9 +679,10 @@ class ThirteenF:
                 categories=['Shares', 'Principal', '-']
             )
         if 'PutCall' in holdings.columns:
+            # SEC XML emits title-case ('Put', 'Call'); uppercase categories silently dropped values.
             holdings['PutCall'] = pd.Categorical(
                 holdings['PutCall'],
-                categories=['', 'PUT', 'CALL']
+                categories=['', 'Put', 'Call']
             )
 
         # Sort by value descending
@@ -533,11 +752,44 @@ class ThirteenF:
             return datetime.strptime(por, "%Y-%m-%d") if isinstance(por, str) else por
         return None
 
+    @cached_property
+    def _schema_version(self) -> Optional[str]:
+        """
+        The Form 13F primary-document ``<schemaVersion>`` (e.g. 'X0202'), or None for older
+        filings that omit it. Used as a prior for the reporting-unit detection.
+        """
+        try:
+            primary_xml = self.filing.xml()
+            if not primary_xml:
+                return None
+            root = etree.fromstring(
+                primary_xml.strip().encode('utf-8'),
+                parser=etree.XMLParser(recover=True),
+            )
+            for el in root.iter():
+                tag = el.tag.rsplit('}', 1)[-1] if isinstance(el.tag, str) else ''
+                if tag == 'schemaVersion':
+                    return (el.text or '').strip() or None
+        except (etree.XMLSyntaxError, ValueError, TypeError):
+            return None
+        return None
+
     @property
     def _value_in_thousands(self) -> bool:
-        """True if this filing's values are in thousands (pre-Q4 2022 schema)."""
-        dt = self._report_period_dt
-        return dt is not None and dt <= _13F_VALUE_IN_THOUSANDS_CUTOFF
+        """
+        True if this filing's values are in thousands and must be scaled to dollars.
+
+        Detected per-filing from the holdings themselves (see `_detect_value_in_thousands`),
+        not from the report period. Building the infotable runs and caches the detection;
+        if there is no infotable (e.g. 13F-NT), fall back to the schema-version prior and
+        then the report-period date cutoff.
+        """
+        if self._value_in_thousands_flag is None and self.has_infotable():
+            # Trigger infotable build, which performs and caches detection.
+            _ = self.infotable
+        if self._value_in_thousands_flag is not None:
+            return self._value_in_thousands_flag
+        return _resolve_unit_fallback(self._schema_version, self._report_period_dt)
 
     @property
     def report_period(self):
@@ -1132,6 +1384,19 @@ class ThirteenF:
         lines.append(f"CIK: {str(self.filing.cik).zfill(10)}")
         lines.append(f"Filed: {self.filing_date}")
         lines.append(f"Form: {self.form}")
+
+        # Amendment signal (GH #872) — load-bearing for correctness.
+        if self.is_amendment:
+            atype = self.amendment_type
+            if atype == "NEW HOLDINGS":
+                lines.append(
+                    "Amendment: NEW HOLDINGS — adds only previously-confidential positions; "
+                    "UNION with the original filing (does not replace it)."
+                )
+            elif atype == "RESTATEMENT":
+                lines.append("Amendment: RESTATEMENT — full re-file; replaces the original filing.")
+            else:
+                lines.append(f"Amendment: {atype or 'type unknown'}")
 
         # Summary section
         lines.append("")

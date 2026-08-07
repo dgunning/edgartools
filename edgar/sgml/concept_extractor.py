@@ -22,7 +22,7 @@ Value cell classes:
 """
 import re
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from bs4 import BeautifulSoup, Tag
 
@@ -32,6 +32,11 @@ _DEFREF_RE = re.compile(r"defref_([^'\"]+)")
 _TOTAL_CLASSES = frozenset({'reu', 'rou'})
 _HEADER_CLASSES = frozenset({'rh'})
 _DATA_CLASSES = frozenset({'re', 'ro', 'reu', 'rou', 'rh'})
+
+# Footnote markers like ``[1]`` or ``[a]`` parse as standalone ``<th>``
+# cells in many R*.htm files. They must NOT become period columns
+# (GH #812).
+_FOOTNOTE_MARKER_RE = re.compile(r'^\[[\w\s]+\]$')
 
 _SCALING_MAP = {
     'millions': 1_000_000,
@@ -71,6 +76,7 @@ class ConceptRow:
     is_header: bool
     level: int
     css_class: str
+    primary_period: Optional[str] = None
 
     @property
     def namespace(self) -> str:
@@ -91,10 +97,19 @@ class ConceptRow:
 
     @property
     def numeric_value(self) -> Optional[float]:
-        """First period value as a float, or None."""
-        if not self.values:
+        """Value for the primary (first) reporting period, parsed as a float.
+
+        Returns ``None`` when the primary period has no value in this row —
+        even when later periods do. This guards against silently returning a
+        prior-year value for concepts whose primary-period fact is absent
+        (GH #810). Use ``numeric_values`` for the full period→value map.
+
+        Rows constructed without ``primary_period`` set fall back to ``None``
+        rather than the legacy "first dict entry" behavior.
+        """
+        if self.primary_period is None:
             return None
-        return parse_numeric(next(iter(self.values.values())))
+        return parse_numeric(self.values.get(self.primary_period, ''))
 
     @property
     def numeric_values(self) -> Dict[str, Optional[float]]:
@@ -108,7 +123,16 @@ class ConceptRow:
 
 @dataclass
 class ConceptReport:
-    """A parsed R*.htm report with concept annotations extracted."""
+    """A parsed R*.htm report with concept annotations extracted.
+
+    Note on ``currency_scaling``: this default is populated by a narrow text
+    match on the R*.htm header (``$ in Millions`` only) and is unreliable
+    across the filer population (see GH #807). When this report is reached
+    via ``ViewerReport.currency_scaling``, the value is replaced in place by
+    a scale derived from the XBRL ``decimals`` attribute (filer-mandated,
+    uniform). Prefer ``ViewerReport.currency_scaling`` over reading this
+    field directly.
+    """
     title: str
     period_headers: List[str]
     rows: List[ConceptRow]
@@ -186,6 +210,213 @@ def _extract_value(td: Tag) -> str:
     return text if text else ''
 
 
+def _th_text(th: Tag) -> str:
+    """Extract the visible text from a header <th> cell."""
+    div = th.find('div')
+    if div is not None:
+        return div.get_text(strip=True)
+    return th.get_text(strip=True)
+
+
+def _build_header_grid(
+    header_rows: List[Tag],
+) -> List[List[Optional[Tuple[Tag, int]]]]:
+    """Build a virtual grid for the table header section.
+
+    Returns ``grid[row][col]`` where each cell is ``(th_tag, origin_row)`` if
+    the original cell starts at this position, ``(th_tag, origin_row)`` if
+    this position is covered by an earlier cell's rowspan, or ``None`` if
+    the position is unfilled. Honors both ``colspan`` and ``rowspan`` so the
+    semantic-column derivation can find leaf cells by their true grid
+    position rather than by document order (GH #812).
+    """
+    num_rows = len(header_rows)
+    grid: List[List[Optional[Tuple[Tag, int]]]] = [[] for _ in range(num_rows)]
+    for r, tr in enumerate(header_rows):
+        col = 0
+        for cell in tr.find_all(['th', 'td'], recursive=False):
+            # Skip positions occupied by a rowspan from an earlier row.
+            while col < len(grid[r]) and grid[r][col] is not None:
+                col += 1
+            cs = int(cell.get('colspan') or 1)
+            rs = int(cell.get('rowspan') or 1)
+            for dr in range(rs):
+                target = r + dr
+                if target >= num_rows:
+                    break
+                # Pad row to the position.
+                while len(grid[target]) < col + cs:
+                    grid[target].append(None)
+                for dc in range(cs):
+                    grid[target][col + dc] = (cell, r)
+            col += cs
+    return grid
+
+
+@dataclass
+class _SemanticColumn:
+    """One logical period column. ``start_col`` and ``end_col`` (inclusive)
+    describe the column-position range in the data-column grid; data cells
+    falling in that range belong to this column."""
+    label: str
+    start_col: int
+    end_col: int
+
+
+def _extract_period_headers(
+    report_table: Tag,
+) -> Tuple[List[str], List[_SemanticColumn]]:
+    """Extract period headers from a report table.
+
+    The R*.htm column-header section may be one row (simple comparative)
+    or multiple rows (group header + leaf dates, optionally with separate
+    footnote-marker columns). This walker:
+
+      1. Identifies the consecutive header rows at the top of the table.
+      2. Builds a virtual grid honoring colspan and rowspan.
+      3. Classifies cells as title (``class="tl"`` — skipped), leaf (reaches
+         the bottom of the header section), or group (terminates earlier).
+      4. For each leaf, looks up the group cell that spans its column
+         position and combines the texts into a period label.
+      5. Filters footnote-marker leaves (``[1]``, ``[a]`` — they are not
+         period columns).
+
+    Returns ``(period_headers, semantic_columns)`` where ``semantic_columns``
+    carries the column-position range each header occupies, so the value
+    extractor can map data cells back to the correct period regardless of
+    cell index or colspan on either side.
+    """
+    # Header rows are the consecutive <tr> rows at the top of the table
+    # whose first cell is a <th> (the title or column header). Once we
+    # see a row whose first cell is a <td>, the data section has begun.
+    header_rows: List[Tag] = []
+    for tr in report_table.find_all('tr', recursive=False):
+        first = tr.find(['th', 'td'], recursive=False)
+        if first is None:
+            continue
+        if first.name != 'th':
+            break
+        header_rows.append(tr)
+
+    if not header_rows:
+        return [], []
+
+    grid = _build_header_grid(header_rows)
+    num_rows = len(grid)
+    num_cols = max((len(row) for row in grid), default=0)
+
+    # Data cells in body rows are indexed from the first column AFTER the
+    # title (``class="tl"``). Compute that offset so semantic column
+    # ranges line up with what ``_data_cell_positions`` produces.
+    data_col_offset = 0
+    if grid and grid[0]:
+        first_entry = grid[0][0]
+        if first_entry is not None:
+            first_cell, _ = first_entry
+            classes = first_cell.get('class') or []
+            if 'tl' in classes:
+                data_col_offset = int(first_cell.get('colspan') or 1)
+
+    # A leaf is a cell whose rowspan reaches the bottom of the header
+    # section. Title cells (``class="tl"``) are excluded — they label the
+    # report, not a column.
+    semantic_columns: List[_SemanticColumn] = []
+    col = 0
+    while col < num_cols:
+        # Find the leaf cell at this column: scan rows top-down, take the
+        # cell whose origin_row + rowspan reaches num_rows.
+        leaf_origin = None
+        for r in range(num_rows):
+            entry = grid[r][col] if col < len(grid[r]) else None
+            if entry is None:
+                continue
+            cell, origin_row = entry
+            classes = cell.get('class') or []
+            if 'tl' in classes:
+                continue
+            rs = int(cell.get('rowspan') or 1)
+            if origin_row + rs == num_rows:
+                # Only act on the leaf's origin column to avoid emitting
+                # duplicate columns for a wide leaf.
+                if col == _origin_start_col(grid, cell, origin_row):
+                    leaf_origin = (cell, origin_row)
+                break
+
+        if leaf_origin is None:
+            col += 1
+            continue
+
+        leaf_cell, leaf_row = leaf_origin
+        leaf_text = _th_text(leaf_cell)
+        if not leaf_text or _FOOTNOTE_MARKER_RE.match(leaf_text):
+            col += int(leaf_cell.get('colspan') or 1)
+            continue
+
+        cs = int(leaf_cell.get('colspan') or 1)
+        # Translate grid columns to data-column space (which is what
+        # ``_data_cell_positions`` produces).
+        start_col = col - data_col_offset
+        end_col = start_col + cs - 1
+
+        # Walk earlier rows to find the most-specific group covering this
+        # column position (in GRID space — not data-column space). If
+        # multiple groups apply (nested), the lowest row wins.
+        group_texts: List[str] = []
+        for r in range(leaf_row - 1, -1, -1):
+            entry = grid[r][col] if col < len(grid[r]) else None
+            if entry is None:
+                continue
+            group_cell, _ = entry
+            classes = group_cell.get('class') or []
+            if 'tl' in classes:
+                continue
+            if group_cell is leaf_cell:
+                continue
+            text = _th_text(group_cell)
+            if text and not _FOOTNOTE_MARKER_RE.match(text):
+                group_texts.append(text)
+
+        # Compose label: outermost group first, innermost group, then leaf.
+        parts = list(reversed(group_texts)) + [leaf_text]
+        label = ' '.join(parts)
+        semantic_columns.append(
+            _SemanticColumn(label=label, start_col=start_col, end_col=end_col)
+        )
+        col += cs
+
+    period_headers = [sc.label for sc in semantic_columns]
+    return period_headers, semantic_columns
+
+
+def _origin_start_col(
+    grid: List[List[Optional[Tuple[Tag, int]]]],
+    cell: Tag,
+    origin_row: int,
+) -> int:
+    """Find the leftmost column index where ``cell`` appears in
+    ``grid[origin_row]``. Used to suppress duplicate semantic columns for
+    wide (colspan>1) leaf cells."""
+    row = grid[origin_row]
+    for c, entry in enumerate(row):
+        if entry is not None and entry[0] is cell:
+            return c
+    return -1
+
+
+def _data_cell_positions(value_cells: List[Tag]) -> List[int]:
+    """Return the starting column position (in data-column space) for each
+    data ``<td>`` cell, accumulating ``colspan``. Mirrors the grid the
+    header parser builds so values can be mapped back to semantic columns
+    regardless of how the header laid out colspan and footnote-marker
+    cells (GH #812)."""
+    positions = []
+    col = 0
+    for cell in value_cells:
+        positions.append(col)
+        col += int(cell.get('colspan') or 1)
+    return positions
+
+
 def _detect_level(td: Tag) -> int:
     """Detect indentation level from padding-left style or nesting."""
     style = td.get('style', '')
@@ -197,12 +428,66 @@ def _detect_level(td: Tag) -> int:
     return 0
 
 
-def extract_concepts_from_report(html_content: str) -> ConceptReport:
+_ANNUAL_FORMS = frozenset({'10-K', '10-K/A', '20-F', '20-F/A', '40-F', '40-F/A'})
+_PERIOD_DURATION_RE = re.compile(r'^(\d+)\s+Months\s+Ended\s', re.IGNORECASE)
+_VALUE_CELL_CLASSES = frozenset({'nump', 'num', 'numD'})
+
+
+def _is_styling_only_th(classes: List[str]) -> bool:
+    """True when a body-row ``<td>`` has ``th`` styling and no value class.
+
+    See GH #818: SEC R*.htm body rows include empty ``class="th"`` spacer
+    cells and footnote-marker cells (``[1]``); they must be dropped before
+    column-position assignment. Numeric cells (``nump``/``num``/``numD``)
+    that happen to also carry ``th`` for styling are kept.
+    """
+    if 'th' not in classes:
+        return False
+    return not any(c in _VALUE_CELL_CLASSES for c in classes)
+
+
+def _pick_primary_period(period_headers: List[str], form: Optional[str]) -> Optional[str]:
+    """Choose the primary period header for ``ConceptRow.numeric_value``.
+
+    Default behaviour (and the behaviour for quarterly filings) is to pick
+    the first header — that's how the SEC viewer orders columns.
+
+    For annual filings (10-K, 20-F, 40-F), some companies (e.g. ADI 2019 10-K)
+    include a strip of quarterly columns BEFORE the annual columns. Picking
+    ``period_headers[0]`` then returns the most recent quarter rather than
+    the annual period the filing is reporting on. To avoid that silent
+    misclassification, prefer the longest-duration "X Months Ended …"
+    header. Headers without that prefix (balance sheets, point-in-time) fall
+    back to the first header. See GH #818.
+    """
+    if not period_headers:
+        return None
+    if form not in _ANNUAL_FORMS:
+        return period_headers[0]
+
+    best = period_headers[0]
+    best_duration = 0
+    for h in period_headers:
+        m = _PERIOD_DURATION_RE.match(h)
+        if not m:
+            continue
+        duration = int(m.group(1))
+        if duration > best_duration:
+            best_duration = duration
+            best = h
+    return best
+
+
+def extract_concepts_from_report(html_content: str, form: Optional[str] = None) -> ConceptReport:
     """
     Parse an R*.htm file and extract concept-annotated rows.
 
     Args:
         html_content: Raw HTML content of an R*.htm file
+        form: Optional SEC form type (e.g. "10-K", "10-Q"). Used to pick
+            the primary period header for ``ConceptRow.numeric_value``
+            when annual filings include both quarterly and annual columns
+            (see GH #818).
 
     Returns:
         ConceptReport with title, period headers, and concept-annotated rows
@@ -244,40 +529,13 @@ def extract_concepts_from_report(html_content: str) -> ConceptReport:
                 if f'shares in {word}' in header_lower:
                     shares_scaling = factor
 
-    # Extract period headers from <th class="th"> cells.
-    # Group-spanning headers (colspan > 1) like "3 Months Ended" are captured
-    # and prefixed to leaf headers for structured period identification.
-    group_headers: List[tuple] = []  # (text, colspan)
-    period_headers = []
-    for th in report_table.find_all('th', class_='th'):
-        div = th.find('div')
-        text = div.get_text(strip=True) if div else th.get_text(strip=True)
-        if not text:
-            continue
-        colspan = th.get('colspan')
-        if colspan:
-            try:
-                cs = int(colspan)
-            except ValueError:
-                cs = 1
-        else:
-            cs = 1
-        if cs > 1:
-            group_headers.append((text, cs))
-        else:
-            # Find which group this leaf header belongs to
-            prefix = ''
-            col_pos = len(period_headers)
-            offset = 0
-            for grp_text, grp_span in group_headers:
-                if offset <= col_pos < offset + grp_span:
-                    prefix = grp_text
-                    break
-                offset += grp_span
-            if prefix:
-                period_headers.append(f"{prefix} {text}")
-            else:
-                period_headers.append(text)
+    # Extract period headers via a column-position-aware grid walk so we
+    # correctly handle (a) multi-row headers with colspan groups, (b)
+    # footnote-marker cells that must not become columns, and (c) leaf
+    # cells with colspan>1 that ARE the date (not a group). See GH #812.
+    period_headers, semantic_columns = _extract_period_headers(report_table)
+
+    primary_period = _pick_primary_period(period_headers, form)
 
     # Extract data rows
     rows = []
@@ -311,17 +569,44 @@ def extract_concepts_from_report(html_content: str) -> ConceptReport:
         is_total = row_class in _TOTAL_CLASSES
         is_header = row_class in _HEADER_CLASSES
 
-        # Extract values keyed by period header
+        # Drop ``class="th"`` cells from the body row when they carry
+        # no value class (``nump``/``num``/``numD``). In SEC R*.htm
+        # files such cells are non-data — typically empty spacer cells
+        # or footnote markers like ``[1]`` — and including them in
+        # ``value_cells`` shifts ``_data_cell_positions`` so values are
+        # bound to the wrong semantic columns. See GH #818 (ADSK 2019
+        # 10-K Net Revenue: FY2019 value bound to "Jan. 31, 2018" key).
+        # The narrow filter preserves any hypothetical numeric cell
+        # that happens to also carry ``th`` for styling.
+        value_cells = [
+            td for td in value_cells
+            if not _is_styling_only_th(td.get('class') or [])
+        ]
+
+        # Map data cells to semantic columns by column position rather
+        # than by index — necessary when header rows mix colspan-1 date
+        # cells with colspan-1 footnote markers and colspan-2 date cells
+        # in the same table (ADI 2019 R2.htm, GH #812).
+        positions = _data_cell_positions(value_cells)
         values = {}
-        for i, cell in enumerate(value_cells):
+        for cell, pos in zip(value_cells, positions):
             val = _extract_value(cell)
-            if val and i < len(period_headers):
-                header = period_headers[i]
-                # Handle duplicate period headers (e.g., "Mar. 29, 2025" appears twice)
-                if header in values:
-                    # Append index to disambiguate
-                    header = f"{header} ({i})"
-                values[header] = val
+            if not val:
+                continue
+            # Find the semantic column whose range contains this position.
+            sc = next(
+                (s for s in semantic_columns
+                 if s.start_col <= pos <= s.end_col),
+                None,
+            )
+            if sc is None:
+                continue
+            header = sc.label
+            if header in values:
+                # Disambiguate genuine duplicate dates (e.g. two columns
+                # both labelled "Mar. 29, 2025") so neither value is lost.
+                header = f"{header} ({pos})"
+            values[header] = val
 
         rows.append(ConceptRow(
             concept_id=concept_id,
@@ -332,6 +617,7 @@ def extract_concepts_from_report(html_content: str) -> ConceptReport:
             is_header=is_header,
             level=level,
             css_class=row_class,
+            primary_period=primary_period,
         ))
 
     return ConceptReport(

@@ -1,9 +1,12 @@
 # SPDX-FileCopyrightText: 2022-present Dwight Gunning <dgunning@gmail.com>
 #
 # SPDX-License-Identifier: MIT
+import logging
 import re
 from functools import lru_cache, partial
 from typing import List, Optional, Union
+
+from edgar.__about__ import __version__
 
 from edgar._filings import (
     Attachment,
@@ -51,6 +54,14 @@ from edgar.funds.ncsr import NCSR_FORMS, FundShareholderReport
 from edgar.funds.nmfp3 import MONEY_MARKET_FORMS, NMFP2_FORMS, NMFP3_FORMS, MoneyMarketFund
 from edgar.funds.prospectus497k import PROSPECTUS497K_FORMS, Prospectus497K
 from edgar.funds.reports import NPORT_FORMS, FundReport
+from edgar.ats import (
+    ATS_N_ALL_FORMS,
+    ATS_N_AMENDMENT_FORMS,
+    ATS_N_FORMS,
+    ATS_N_WITHDRAWAL_FORMS,
+    AlternativeTradingSystem,
+    AlternativeTradingSystemWithdrawal,
+)
 from edgar.bdc import BDCEntities, BDCEntity, get_bdc_list, get_active_bdc_ciks, is_bdc_cik
 
 # HTTP configuration functions for runtime SSL/proxy configuration
@@ -68,7 +79,7 @@ from edgar.paths import (
     set_data_directory,
     set_test_directory,
 )
-from edgar.proxy import PROXY_FORMS, ProxyStatement
+from edgar.proxy import PROXY_FORMS, ProxyContests, ProxyStatement, proxy_contests
 from edgar.storage import (
     StorageAnalysis,
     StorageInfo,
@@ -92,6 +103,13 @@ from edgar.correspondence import CORRESPONDENCE_FORMS, Correspondence, Correspon
 from edgar.search.efts import EFTSResult, EFTSSearch, search_filings
 from edgar.thirteenf import THIRTEENF_FORMS, ThirteenF
 from edgar.xbrl import XBRL
+
+# Attach a NullHandler to the package-root logger so that edgartools never emits
+# log output unless the application configures logging itself, per the Python
+# logging HOWTO guidance for libraries (#856).  Without it, library warnings have
+# no handler in their ancestry and fall back to logging.lastResort (stderr),
+# which is especially harmful in MCP / stdio environments.
+logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 # Fix for Issue #457: Clear locale-corrupted cache files on first import
 # This is a one-time operation that only runs if the marker file doesn't exist
@@ -237,6 +255,15 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         'DEF 14A': ('ProxyStatement', 'proxy statement with executive compensation'),
         'DEFA14A': ('ProxyStatement', 'additional proxy soliciting materials'),
         'DEFM14A': ('ProxyStatement', 'merger-related proxy statement'),
+        'DEFC14A': ('ProxyStatement', 'contested proxy statement'),
+        'DEFN14A': ('ProxyStatement', 'non-management definitive proxy'),
+        'DFAN14A': ('ProxyStatement', 'non-management additional proxy materials'),
+        'DEFR14A': ('ProxyStatement', 'revised definitive proxy'),
+        'DFRN14A': ('ProxyStatement', 'revised non-management proxy'),
+        'PRE 14A': ('ProxyStatement', 'preliminary proxy statement'),
+        'PREC14A': ('ProxyStatement', 'preliminary contested proxy'),
+        'PREN14A': ('ProxyStatement', 'preliminary non-management proxy'),
+        'PREM14A': ('ProxyStatement', 'preliminary merger proxy'),
         'S-1': ('RegistrationS1', 'S-1 registration statement'),
         'S-1/A': ('RegistrationS1', 'S-1 registration statement (amendment)'),
         'F-1': ('RegistrationS1', 'F-1 foreign registration statement'),
@@ -251,6 +278,10 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         'F-3/A': ('RegistrationS3', 'F-3 foreign shelf registration (amendment)'),
         'F-3ASR': ('RegistrationS3', 'F-3 automatic shelf registration'),
         'F-3ASR/A': ('RegistrationS3', 'F-3 automatic shelf registration (amendment)'),
+        'S-4': ('RegistrationS4', 'business-combination registration statement'),
+        'S-4/A': ('RegistrationS4', 'business-combination registration statement (amendment)'),
+        'F-4': ('RegistrationS4', 'foreign business-combination registration statement'),
+        'F-4/A': ('RegistrationS4', 'foreign business-combination registration statement (amendment)'),
         '424B1': ('Prospectus424B', 'prospectus (exchange offer / IPO)'),
         '424B2': ('Prospectus424B', 'prospectus (structured note / debt)'),
         '424B3': ('Prospectus424B', 'prospectus (resale / rights offering)'),
@@ -273,6 +304,8 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         'SBSE-A': ('XmlFiling', 'security-based swap entity registration (annual)'),
         'SBSE-W': ('XmlFiling', 'security-based swap entity withdrawal'),
         'ATS-N-C': ('XmlFiling', 'ATS cessation of operations'),
+        'ATS-N': ('AlternativeTradingSystem', 'alternative trading system disclosure'),
+        'ATS-N-W': ('AlternativeTradingSystemWithdrawal', 'alternative trading system withdrawal'),
         '24F-2NT': ('FundFeeNotice', 'annual notice of securities sold'),
         '497K': ('Prospectus497K', 'fund summary prospectus with fees and performance'),
     }
@@ -371,6 +404,10 @@ def obj(sec_filing: Filing) -> Optional[object]:
         from edgar.offerings.registration_s3 import RegistrationS3
         return RegistrationS3.from_filing(sec_filing)
 
+    elif matches_form(sec_filing, ['S-4', 'F-4']):
+        from edgar.offerings.registration_s4 import RegistrationS4
+        return RegistrationS4.from_filing(sec_filing)
+
     elif matches_form(sec_filing, ['424B1', '424B2', '424B3', '424B4', '424B5', '424B7', '424B8']):
         from edgar.offerings.prospectus import Prospectus424B
         return Prospectus424B.from_filing(sec_filing)
@@ -402,6 +439,12 @@ def obj(sec_filing: Filing) -> Optional[object]:
     elif matches_form(sec_filing, "24F-2NT"):
         from edgar.funds.twentyfourf import FundFeeNotice
         return FundFeeNotice.from_filing(sec_filing)
+
+    elif matches_form(sec_filing, ATS_N_WITHDRAWAL_FORMS):
+        return AlternativeTradingSystemWithdrawal.from_filing(sec_filing)
+
+    elif matches_form(sec_filing, ATS_N_FORMS + ATS_N_AMENDMENT_FORMS):
+        return AlternativeTradingSystem.from_filing(sec_filing)
 
     else:
         from edgar.xmlfiling import XML_FILING_FORMS, XmlFiling

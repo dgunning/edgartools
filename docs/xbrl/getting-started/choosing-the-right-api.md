@@ -2,16 +2,26 @@
 
 EdgarTools offers three different ways to access financial data. This guide helps you choose the right one for your needs.
 
+The single most important distinction:
+
+- **Company Facts** (`company.income_statement()` / `company.get_facts()`) draws from the
+  SEC's aggregated company-facts data, so it gives you **many years of history** for one company.
+- **Financials** (`company.get_financials()`) parses a **single filing** — the latest annual
+  report — so it's a **one-period snapshot** with convenient standardized getters.
+
+If you want multi-year trends, reach for Company Facts even when comparing companies — `get_financials()`
+only covers the latest filing's periods.
+
 ## Quick Decision Tree
 
 ```
 What do you want to do?
 
-├─ "Get historical financial trends for one company"
-│  └─> Use Company Facts API (company.income_statement())
+├─ "Multi-year history for one or many companies"
+│  └─> Use Company Facts API (company.income_statement() / company.get_facts())
 │
-├─ "Compare metrics across multiple companies"
-│  └─> Use Financials API (company.get_financials())
+├─ "Quick latest-period metric, standardized for comparison"
+│  └─> Use Financials API (company.get_financials().get_revenue())
 │
 ├─ "Need segment data, dimensions, or detailed breakdowns"
 │  └─> Use XBRL API (filing.xbrl().statements)
@@ -22,20 +32,20 @@ What do you want to do?
 
 ## The Three APIs at a Glance
 
-### 1. Company Facts API - Simplest
+### 1. Company Facts API - Multi-year history, simplest
 ```python
 company = Company("AAPL")
-income = company.income_statement()  # Multi-year data instantly
+income = company.income_statement(periods=5)  # 5 years of annual data instantly
 ```
 
-### 2. Financials API - Best for Comparison
+### 2. Financials API - Latest-period snapshot, standardized getters
 ```python
 company = Company("AAPL")
-financials = company.get_financials()
-revenue = financials.get_revenue()
+financials = company.get_financials()   # latest annual filing only
+revenue = financials.get_revenue()      # single value, comparable across companies
 ```
 
-### 3. XBRL API - Most Complete
+### 3. XBRL API - Single filing, most complete
 ```python
 filing = Company("AAPL").get_filings(form="10-K").latest()
 xbrl = filing.xbrl()
@@ -48,14 +58,14 @@ statements = xbrl.statements
 |---------|--------------|------------|------|
 | **Speed** | Fastest (cached) | Fast | Slower (parses filing) |
 | **Lines of code** | 1-2 | 2-3 | 3-5 |
-| **Multi-period data** | Built-in | Built-in | Manual filtering |
-| **Historical range** | All available periods | Recent filings | Single filing only |
+| **Multi-period data** | Built-in (all years) | Within one filing (≤3 periods) | Manual filtering |
+| **Historical range** | All available periods | Latest annual filing only | Single filing only |
 | **Statements** | Primary 3 only | Primary 3 only | All statements |
 | **Segment/dimension data** | No | No | Yes |
 | **Footnotes** | No | No | Yes |
 | **Custom concepts** | No | Limited | All concepts |
-| **Standardization** | Partial | Yes | Raw (you control) |
-| **Cross-company comparison** | Manual | Built-in | Manual |
+| **Standardization** | Yes (`standard_concept`) | Yes (named getters) | Raw (you control) |
+| **Cross-company comparison** | Multi-year | Latest period only | Manual |
 
 ## Use Case Examples
 
@@ -66,12 +76,16 @@ statements = xbrl.statements
 from edgar import Company
 
 company = Company("AAPL")
-income = company.income_statement()
+income = company.income_statement(periods=5)
 
-# Get all revenue values
-revenues = income.get_all_values("Revenues")
-for value in revenues[:5]:
-    print(f"{value.period}: ${value.value:,.0f}")
+# Convert to a DataFrame: rows are indexed by concept, period columns are 'FY 2025', ...
+df = income.to_dataframe()
+period_cols = [c for c in df.columns if c.startswith("FY")]
+
+# Revenue concept for Apple; use `print(income)` or the `label` column to discover names
+revenue = df.loc["RevenueFromContractWithCustomerExcludingAssessedTax", period_cols]
+for period, value in revenue.items():
+    print(f"{period}: ${value:,.0f}")
 ```
 
 **Why this API?**
@@ -151,12 +165,13 @@ Here's how to get current year revenue using each API:
 ### Method 1: Company Facts
 ```python
 company = Company("AAPL")
-income = company.income_statement()
-revenue = income.get_value("Revenues", period="latest")
+df = company.income_statement(periods=1).to_dataframe()
+period_col = [c for c in df.columns if c.startswith("FY")][0]   # most recent year
+revenue = df.loc["RevenueFromContractWithCustomerExcludingAssessedTax", period_col]
 print(f"Revenue: ${revenue:,.0f}")
 ```
-**Pros**: Simplest, one company object
-**Cons**: Less standardized concept names
+**Pros**: Same object also gives you all prior years
+**Cons**: You address rows by XBRL concept name
 
 ### Method 2: Financials
 ```python
@@ -171,13 +186,16 @@ print(f"Revenue: ${revenue:,.0f}")
 ### Method 3: XBRL
 ```python
 filing = Company("AAPL").get_filings(form="10-K").latest()
-statements = filing.xbrl().statements
-income = statements.income_statement
-revenue = income.get_fact_value("Revenues", period_filter="current")
+df = filing.xbrl().statements.income_statement().to_dataframe()
+
+# Filter to the consolidated (non-dimensional) revenue row
+period_col = [c for c in df.columns if c.endswith("(FY)")][0]   # most recent year
+revenue_rows = df[(df["standard_concept"] == "Revenue") & (~df["is_breakdown"])]
+revenue = revenue_rows.iloc[0][period_col]
 print(f"Revenue: ${revenue:,.0f}")
 ```
-**Pros**: Most control, access to everything
-**Cons**: Most verbose, must filter period
+**Pros**: Most control, access to everything (dimensions, footnotes)
+**Cons**: Most verbose, must filter period and dimensions
 
 ---
 
@@ -222,17 +240,13 @@ statements = xbrl.statements
 
 ### Mistake 1: Using XBRL for simple tasks
 ```python
-# DON'T: Too complex for this task
+# DON'T: Too complex when you just want a single latest value
 filing = Company("AAPL").get_filings(form="10-K").latest()
-xbrl = filing.xbrl()
-statements = xbrl.statements
-income = statements.income_statement
-revenue = income.get_fact_value("Revenues")
+df = filing.xbrl().statements.income_statement().to_dataframe()
+# ...then filter rows, dimensions, and period columns yourself
 
-# DO: Use Company Facts
-company = Company("AAPL")
-income = company.income_statement()
-revenue = income.get_value("Revenues")
+# DO: Use the Financials API for a single standardized value
+revenue = Company("AAPL").get_financials().get_revenue()
 ```
 
 ### Mistake 2: Using Company Facts for cross-company work

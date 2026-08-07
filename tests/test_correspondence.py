@@ -5,16 +5,16 @@ Tests use VCR cassettes to replay network requests deterministically.
 """
 
 import pytest
-from edgar import get_by_accession_number, get_obj_info
+
+from edgar import Filing, get_obj_info
 from edgar.correspondence import (
     Correspondence,
-    CorrespondenceThread,
     CorrespondenceType,
+    _classify_correspondence,
     _extract_file_number,
     _extract_referenced_form,
-    _classify_correspondence,
 )
-
+from tests._offline_filings import offline_filing
 
 # ---------------------------------------------------------------------------
 # Unit tests: metadata extraction (no network)
@@ -105,7 +105,7 @@ class TestCorrespondenceFromFiling:
     @pytest.mark.vcr
     def test_apple_corresp_is_company_response(self):
         """Apple CORRESP filing classified as company_response with correct metadata."""
-        filing = get_by_accession_number('0000320193-24-000061')
+        filing = offline_filing("0000320193-24-000061")
         corresp = Correspondence.from_filing(filing)
         assert isinstance(corresp, Correspondence)
         assert corresp.correspondence_type == CorrespondenceType.COMPANY_RESPONSE
@@ -118,7 +118,8 @@ class TestCorrespondenceFromFiling:
     @pytest.mark.vcr
     def test_apple_upload_is_sec_comment(self):
         """Apple UPLOAD filing classified as sec_comment."""
-        filing = get_by_accession_number('0000000000-24-003505')
+        filing = Filing(form='UPLOAD', filing_date='2024-04-02', company='Apple Inc.',
+                        cik=320193, accession_no='0000000000-24-003505')
         corresp = Correspondence.from_filing(filing)
         assert isinstance(corresp, Correspondence)
         assert corresp.correspondence_type == CorrespondenceType.SEC_COMMENT
@@ -128,7 +129,8 @@ class TestCorrespondenceFromFiling:
     @pytest.mark.vcr
     def test_apple_review_complete(self):
         """Apple UPLOAD with 'completed our review' classified correctly."""
-        filing = get_by_accession_number('0000000000-24-005673')
+        filing = Filing(form='UPLOAD', filing_date='2024-05-16', company='Apple Inc.',
+                        cik=320193, accession_no='0000000000-24-005673')
         corresp = Correspondence.from_filing(filing)
         assert corresp.correspondence_type == CorrespondenceType.REVIEW_COMPLETE
         assert corresp.sender == "sec"
@@ -137,7 +139,7 @@ class TestCorrespondenceFromFiling:
     @pytest.mark.vcr
     def test_acceleration_request(self):
         """Nuvectis CORRESP Rule 461 acceleration request."""
-        filing = get_by_accession_number('0001104659-26-017097')
+        filing = offline_filing("0001104659-26-017097")
         corresp = Correspondence.from_filing(filing)
         assert corresp.correspondence_type == CorrespondenceType.ACCELERATION_REQUEST
         assert corresp.sender == "company"
@@ -146,7 +148,8 @@ class TestCorrespondenceFromFiling:
     @pytest.mark.vcr
     def test_no_review_notice(self):
         """Nuvectis UPLOAD 'will not review' classified as NO_REVIEW."""
-        filing = get_by_accession_number('0000000000-26-001655')
+        filing = Filing(form='UPLOAD', filing_date='2026-02-18', company='Nuvectis Pharma, Inc.',
+                        cik=1875558, accession_no='0000000000-26-001655')
         corresp = Correspondence.from_filing(filing)
         assert corresp.correspondence_type == CorrespondenceType.NO_REVIEW
         assert corresp.sender == "sec"
@@ -159,14 +162,15 @@ class TestObjDispatch:
 
     @pytest.mark.vcr
     def test_corresp_returns_correspondence(self):
-        filing = get_by_accession_number('0000320193-24-000061')
+        filing = offline_filing("0000320193-24-000061")
         result = filing.obj()
         assert isinstance(result, Correspondence)
         assert result.correspondence_type == CorrespondenceType.COMPANY_RESPONSE
 
     @pytest.mark.vcr
     def test_upload_returns_correspondence(self):
-        filing = get_by_accession_number('0000000000-24-005673')
+        filing = Filing(form='UPLOAD', filing_date='2024-05-16', company='Apple Inc.',
+                        cik=320193, accession_no='0000000000-24-005673')
         result = filing.obj()
         assert isinstance(result, Correspondence)
         assert result.correspondence_type == CorrespondenceType.REVIEW_COMPLETE
@@ -187,7 +191,7 @@ class TestCorrespondenceDisplay:
 
     @pytest.mark.vcr
     def test_correspondence_repr_succeeds(self):
-        filing = get_by_accession_number('0000320193-24-000061')
+        filing = offline_filing("0000320193-24-000061")
         corresp = Correspondence.from_filing(filing)
         text = repr(corresp)
         assert "Apple" in text
@@ -195,7 +199,7 @@ class TestCorrespondenceDisplay:
 
     @pytest.mark.vcr
     def test_correspondence_str(self):
-        filing = get_by_accession_number('0000320193-24-000061')
+        filing = offline_filing("0000320193-24-000061")
         corresp = Correspondence.from_filing(filing)
         text = str(corresp)
         assert "CORRESP" in text
@@ -203,7 +207,7 @@ class TestCorrespondenceDisplay:
 
     @pytest.mark.vcr
     def test_correspondence_to_context(self):
-        filing = get_by_accession_number('0000320193-24-000061')
+        filing = offline_filing("0000320193-24-000061")
         corresp = Correspondence.from_filing(filing)
         ctx = corresp.to_context()
         assert "CORRESPONDENCE" in ctx

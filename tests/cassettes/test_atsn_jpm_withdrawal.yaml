@@ -1,0 +1,84 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/782124/000001961724000664/0000019617-24-000664.txt
+  response:
+    body:
+      string: "<SEC-DOCUMENT>0000019617-24-000664.txt : 20241223\n<SEC-HEADER>0000019617-24-000664.hdr.sgml
+        : 20241223\n<ACCEPTANCE-DATETIME>20241223135729\nACCESSION NUMBER:\t\t0000019617-24-000664\nCONFORMED
+        SUBMISSION TYPE:\tATS-N-W\nPUBLIC DOCUMENT COUNT:\t\t1\nWITHDRAWN ACCESSION
+        NUMBER: \t0000019617-24-000662\nFILED AS OF DATE:\t\t20241223\nEFFECTIVENESS
+        DATE:\t\t20241223\n\nFILER:\n\n\tCOMPANY DATA:\t\n\t\tCOMPANY CONFORMED NAME:\t\t\tJ.P.
+        MORGAN SECURITIES LLC\n\t\tCENTRAL INDEX KEY:\t\t\t0000782124\n\t\tORGANIZATION
+        NAME:           \t\n\t\tIRS NUMBER:\t\t\t\t134110995\n\t\tSTATE OF INCORPORATION:\t\t\tDE\n\t\tFISCAL
+        YEAR END:\t\t\t1231\n\n\tFILING VALUES:\n\t\tFORM TYPE:\t\tATS-N-W\n\t\tSEC
+        ACT:\t\t1934 Act\n\t\tSEC FILE NUMBER:\t013-00109\n\t\tFILM NUMBER:\t\t241572320\n\n\tBUSINESS
+        ADDRESS:\t\n\t\tSTREET 1:\t\t383 MADISON AVENUE\n\t\tCITY:\t\t\tNEW YORK\n\t\tSTATE:\t\t\tNY\n\t\tZIP:\t\t\t10179\n\t\tBUSINESS
+        PHONE:\t\t614-217-5492\n\n\tMAIL ADDRESS:\t\n\t\tSTREET 1:\t\t1111 POLARIS
+        PKWY\n\t\tSTREET 2:\t\tFLOOR 3F\n\t\tCITY:\t\t\tCOLUMBUS\n\t\tSTATE:\t\t\tOH\n\t\tZIP:\t\t\t43240\n\n\tFORMER
+        COMPANY:\t\n\t\tFORMER CONFORMED NAME:\tJ.P. MORGAN SECURITIES INC.\n\t\tDATE
+        OF NAME CHANGE:\t20100902\n\n\tFORMER COMPANY:\t\n\t\tFORMER CONFORMED NAME:\tJ.P.
+        MORGAN SECURITIES LLC\n\t\tDATE OF NAME CHANGE:\t20100823\n\n\tFORMER COMPANY:\t\n\t\tFORMER
+        CONFORMED NAME:\tJ.P. MORGAN SECURITIES INC.\n\t\tDATE OF NAME CHANGE:\t20090219\n</SEC-HEADER>\n<DOCUMENT>\n<TYPE>ATS-N-W\n<SEQUENCE>1\n<FILENAME>primary_doc.xml\n<TEXT>\n<XML>\n<?xml
+        version=\"1.0\" encoding=\"UTF-8\"?>\n<edgarSubmission xmlns=\"http://www.sec.gov/edgar/atsncw\"
+        xmlns:com=\"http://www.sec.gov/edgar/common\" xmlns:ats=\"http://www.sec.gov/edgar/atsncommon\">\n
+        \ <headerData>\n    <submissionType>ATS-N-W</submissionType>\n    <accessionNumber>0000019617-24-000662</accessionNumber>\n
+        \   <filerInfo>\n      <liveTestFlag>LIVE</liveTestFlag>\n      <filer>\n
+        \       <filerCredentials>\n          <com:cik>0000782124</com:cik>\n          <com:ccc>XXXXXXXX</com:ccc>\n
+        \       </filerCredentials>\n        <MPID>JPBX</MPID>\n        <NMSStockATSName>JPB-X</NMSStockATSName>\n
+        \     </filer>\n      <contact>\n        <ats:contactName>Mahlet Ayalew</ats:contactName>\n
+        \       <ats:contactPhoneNumber>212-648-2298</ats:contactPhoneNumber>\n        <ats:contactEmailAddress>mahlet.ayalew@jpmchase.com</ats:contactEmailAddress>\n
+        \     </contact>\n      <flags>\n        <ats:overrideInternetFlag>false</ats:overrideInternetFlag>\n
+        \       <ats:confirmingCopyFlag>false</ats:confirmingCopyFlag>\n      </flags>\n
+        \   </filerInfo>\n  </headerData>\n  <formData>\n\n  </formData>\n</edgarSubmission>\n</XML>\n</TEXT>\n</DOCUMENT>\n</SEC-DOCUMENT>\n"
+    headers:
+      Accept-Ranges:
+      - bytes
+      Connection:
+      - keep-alive
+      Content-Type:
+      - text/plain
+      Date:
+      - Thu, 16 Apr 2026 15:04:20 GMT
+      ETag:
+      - '"94f39a86bf6b113d21e47640db7fdbd1-gzip"'
+      Last-Modified:
+      - Mon, 23 Dec 2024 18:57:57 GMT
+      Strict-Transport-Security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '2476'
+      x-amz-id-2:
+      - PbAUTgYpj3dEVvU0gAmyt2qiCEg3eLiD5+Ujf/u/1X93i5MiorYYmP5LLuVMJbpPtsjDdH+MTCE=
+      x-amz-meta-mode:
+      - '33188'
+      x-amz-replication-status:
+      - COMPLETED
+      x-amz-request-id:
+      - JB28DM8PHZ3TQGF0
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - DdK.jokl674COqgSe.G9YSqqUzfD91EQ
+    status:
+      code: 200
+      message: OK
+version: 1

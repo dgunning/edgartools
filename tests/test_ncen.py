@@ -10,12 +10,12 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+
 try:
     import vcr
 except ImportError:
     vcr = None
 
-from edgar import get_by_accession_number
 from edgar.funds.ncen import (
     NCEN_FORMS,
     BrokerDealer,
@@ -26,6 +26,7 @@ from edgar.funds.ncen import (
     ServiceProvider,
     SignatureInfo,
 )
+from tests._offline_filings import offline_filing
 
 # Mark all tests in this module as network tests
 pytestmark = pytest.mark.network
@@ -48,7 +49,7 @@ my_vcr = vcr.VCR(
 def mutual_fund_census():
     """AB CAP FUND, INC. — mutual fund, 3 series, no ETFs."""
     with my_vcr.use_cassette("test_ncen_mutual_fund.yaml"):
-        filing = get_by_accession_number("0001410368-26-010921")
+        filing = offline_filing("0001410368-26-010921")
         return filing.obj()
 
 
@@ -56,7 +57,7 @@ def mutual_fund_census():
 def etf_census():
     """AB Active ETFs, Inc. — ETF company, 22 series."""
     with my_vcr.use_cassette("test_ncen_etf.yaml"):
-        filing = get_by_accession_number("0001410368-26-010918")
+        filing = offline_filing("0001410368-26-010918")
         return filing.obj()
 
 
@@ -491,7 +492,7 @@ class TestObjIntegration:
 
     def test_obj_returns_fund_census(self):
         with my_vcr.use_cassette("test_ncen_mutual_fund.yaml"):
-            filing = get_by_accession_number("0001410368-26-010921")
+            filing = offline_filing("0001410368-26-010921")
             result = filing.obj()
         assert isinstance(result, FundCensus)
 

@@ -1,13 +1,28 @@
 from datetime import datetime
 from pathlib import Path
 
+import pytest
+
 from edgar import *
 from edgar.offerings import FormC, Signer
+
+ALL_FORMC_FIXTURES = [
+    ("data/pickleball.FormC.xml", "C"),
+    ("data/xml/Anesu.FormC.xml", "C"),
+    ("data/xml/alto.FormC.xml", "C"),
+    ("data/HiddenSea.FormCU.xml", "C-U"),
+    ("data/EVSolar.FormC-AR.xml", "C-AR"),
+    ("data/Neurotez.FormCTR.xml", "C-TR"),
+]
 
 
 def test_parse_formc_offering():
     offering_xml = Path("data/pickleball.FormC.xml").read_text()
     formC: FormC = FormC.from_xml(offering_xml, form="C")
+    # Filer information (ccc/live_or_test were previously mis-parsed - edgartools-nqoi)
+    assert formC.filer_information.cik == "0002011047"
+    assert formC.filer_information.ccc == "XXXXXXXX"  # always redacted in disseminated filings
+    assert formC.filer_information.live_or_test is True
     assert formC.issuer_information.funding_portal.cik == "0001348811"
     assert formC.issuer_information.funding_portal.file_number == "008-67202"
     assert formC.issuer_information.funding_portal.name == "ANDES CAPITAL GROUP, LLC"
@@ -137,6 +152,8 @@ def test_parse_form_tr():
     assert formC.offering_information is None
     assert formC.filer_information.period is None
     assert formC.filer_information.cik == "0001725567"
+    assert formC.filer_information.ccc == "XXXXXXXX"
+    assert formC.filer_information.live_or_test is True
 
 
 def test_form_c_termination_report():
@@ -164,3 +181,82 @@ def test_formc_with_empty_offering_tag():
     formC = filing.obj()
     assert formC
     assert formC.offering_information is None
+
+
+@pytest.mark.parametrize("fixture_path,form", ALL_FORMC_FIXTURES)
+def test_formc_parses_all_fixtures(fixture_path, form):
+    """Every fixture parses with correct filer credentials across all Form C variants (edgartools-nqoi)."""
+    formC: FormC = FormC.from_xml(Path(fixture_path).read_text(), form=form)
+    assert formC.form == form
+    assert len(formC.filer_information.cik) == 10
+    assert formC.filer_information.cik.isdigit()
+    # ccc must NOT be the cik (the pre-lxml parser copied filerCik into ccc)
+    assert formC.filer_information.ccc == "XXXXXXXX"
+    assert formC.filer_information.ccc != formC.filer_information.cik
+    # All fixtures are LIVE filings (the pre-lxml parser always returned False)
+    assert formC.filer_information.live_or_test is True
+    assert formC.issuer_information.name
+    assert len(formC.signature_info.signers) >= 1
+
+
+MINIMAL_FORMC_XML = """<?xml version="1.0" encoding="UTF-8"?>
+<edgarSubmission xmlns="http://www.sec.gov/edgar/formc" xmlns:com="http://www.sec.gov/edgar/common">
+  <headerData>
+    <submissionType>C-TR</submissionType>
+    <filerInfo>
+      <filer>
+        <filerCredentials>
+          <filerCik>0001725567</filerCik>
+        </filerCredentials>
+      </filer>
+      <liveTestFlag>TEST</liveTestFlag>
+      <flags/>
+    </filerInfo>
+  </headerData>
+  <formData>
+    <issuerInformation>
+      <issuerInfo>
+        <nameOfIssuer>Minimal Inc.</nameOfIssuer>
+        <legalStatus>
+          <legalStatusForm>Corporation</legalStatusForm>
+          <jurisdictionOrganization>DE</jurisdictionOrganization>
+          <dateIncorporation>10-14-2005</dateIncorporation>
+        </legalStatus>
+        <issuerAddress>
+          <com:street1>1 MAIN ST</com:street1>
+          <com:city>WILMINGTON</com:city>
+          <com:stateOrCountry>DE</com:stateOrCountry>
+          <com:zipCode>19801</com:zipCode>
+        </issuerAddress>
+        <issuerWebsite>https://example.com</issuerWebsite>
+      </issuerInfo>
+      <isCoIssuer>N</isCoIssuer>
+    </issuerInformation>
+    <signatureInfo>
+      <issuerSignature>
+        <issuer>Minimal Inc.</issuer>
+        <issuerSignature>Jane Doe</issuerSignature>
+        <issuerTitle>CEO</issuerTitle>
+      </issuerSignature>
+      <signaturePersons>
+        <signaturePerson>
+          <personSignature>Jane Doe</personSignature>
+          <personTitle>CEO</personTitle>
+          <signatureDate>03-28-2024</signatureDate>
+        </signaturePerson>
+      </signaturePersons>
+    </signatureInfo>
+  </formData>
+</edgarSubmission>"""
+
+
+def test_formc_missing_optional_elements_silence_check():
+    """Missing filerCcc, empty flags, TEST filings parse without raising (edgartools-nqoi)."""
+    formC: FormC = FormC.from_xml(MINIMAL_FORMC_XML, form="C-TR")
+    assert formC.filer_information.ccc is None  # absent element -> None, not an exception
+    assert formC.filer_information.live_or_test is False  # TEST filing
+    assert formC.filer_information.confirming_copy_flag is False
+    assert formC.issuer_information.name == "Minimal Inc."
+    assert formC.issuer_information.address.street2 is None
+    assert formC.offering_information is None
+    assert formC.annual_report_disclosure is None

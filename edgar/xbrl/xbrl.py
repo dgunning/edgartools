@@ -29,7 +29,7 @@ from edgar.attachments import Attachments
 from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
 from edgar.richtools import repr_rich
-from edgar.xbrl.core import STANDARD_LABEL
+from edgar.xbrl.core import STANDARD_LABEL, STANDARD_TAXONOMIES, split_element_id
 from edgar.xbrl.models import PresentationNode
 from edgar.xbrl.parsers import XBRLParser
 from edgar.xbrl.period_selector import select_periods
@@ -298,6 +298,95 @@ class XBRL:
     def reporting_periods(self):
         return self.parser.reporting_periods
 
+    def calculation_linkbase(self, include_abstract: bool = False) -> pd.DataFrame:
+        """Return the filing's calculation linkbase as a DataFrame of arcs.
+
+        Each row is one parent→child calculation relationship with its weight,
+        role, and taxonomy attribution. Useful for building per-filer concept
+        hierarchies (e.g., mapping `jpm:AssetManagementFees → us-gaap:NoninterestIncome`)
+        without parsing `_cal.xml` directly.
+
+        Args:
+            include_abstract: When False (default), abstract concepts are excluded.
+                Set True to include structural/grouping concepts.
+
+        Returns:
+            DataFrame with columns:
+                concept, concept_taxonomy, parent_concept, parent_taxonomy,
+                weight, role_uri, role_short, menucat, is_abstract, label
+
+            Root nodes (those without a parent) are always excluded — they have
+            no arc. Returns an empty DataFrame (with the documented columns) if
+            the filing has no calculation linkbase.
+
+        Notes:
+            - `weight` preserves the XBRL `weight` attribute sign. Real filings
+              use `-1.0` for contra-account rollups (e.g., MET's amortization
+              entries); do not flatten the sign downstream.
+            - `concept_taxonomy` is the prefix before the first `_` in the
+              element ID (`us-gaap`, `dei`, `srt`, or the filer's own prefix
+              like `jpm`, `tsla`).
+            - `menucat` is the SEC FilingSummary report tier when available
+              (`S`=Statement, `D`=Details, `N`=Notes, `T`=Tables, `P`=Policies,
+              `C`=Cover). May be None for older filings without FilingSummary.
+
+        Example:
+            >>> from edgar import Company
+            >>> jpm_10k = Company("JPM").latest("10-K")
+            >>> calc = jpm_10k.xbrl().calculation_linkbase()
+            >>> # Find extension concepts that roll up to a us-gaap parent
+            >>> extensions = calc[
+            ...     (calc.concept_taxonomy == 'jpm') &
+            ...     (calc.parent_taxonomy == 'us-gaap')
+            ... ]
+        """
+        columns = [
+            'concept', 'concept_taxonomy', 'parent_concept', 'parent_taxonomy',
+            'weight', 'role_uri', 'role_short', 'menucat', 'is_abstract', 'label',
+        ]
+        rows = []
+
+        for role_uri, tree in self.calculation_trees.items():
+            # Prefer schema-declared role definition (human-authored) over
+            # the derived form CalculationTree.definition.
+            role_short = (
+                self.parser.role_types.get(role_uri, {}).get('definition')
+                or tree.definition
+            )
+            menucat = self._filing_summary_menu_categories.get(role_uri)
+
+            for element_id, node in tree.all_nodes.items():
+                if node.parent is None:
+                    # Root node — no arc to emit.
+                    continue
+
+                concept_tax, concept_local = split_element_id(element_id)
+                parent_tax, parent_local = split_element_id(node.parent)
+
+                elem = self.element_catalog.get(element_id)
+                is_abstract = bool(elem.abstract) if elem else False
+                if is_abstract and not include_abstract:
+                    continue
+
+                label = ''
+                if elem and elem.labels:
+                    label = elem.labels.get(STANDARD_LABEL, '') or ''
+
+                rows.append({
+                    'concept': concept_local,
+                    'concept_taxonomy': concept_tax,
+                    'parent_concept': parent_local,
+                    'parent_taxonomy': parent_tax,
+                    'weight': node.weight,
+                    'role_uri': role_uri,
+                    'role_short': role_short,
+                    'menucat': menucat,
+                    'is_abstract': is_abstract,
+                    'label': label,
+                })
+
+        return pd.DataFrame(rows, columns=columns)
+
     @property
     def period_of_report(self) -> Optional[str]:
         """Get the document period end date, with discrepancy detection."""
@@ -505,7 +594,7 @@ class XBRL:
             XBRL object with parsed data
         """
         if filing.form.endswith("/A"):
-            log.warning(dedent(f"""
+            log.debug(dedent(f"""
             {filing}
             is an amended filing and may not contain full XBRL data e.g. some statements might be missing.
             Consider using the original filing instead if available with `get_filings(form="10-K", amendments=False)`
@@ -516,7 +605,7 @@ class XBRL:
         xbrl_attachments = XBRLAttachments(filing.attachments)
 
         if xbrl_attachments.empty:
-            log.warning(f"No XBRL attachments found in filing {filing}")
+            log.debug(f"No XBRL attachments found in filing {filing}")
             return None
 
         if xbrl_attachments.get('schema'):
@@ -536,6 +625,36 @@ class XBRL:
 
         if xbrl_attachments.get('instance'):
             xbrl.parser.parse_instance_content(xbrl_attachments.get('instance').content)
+        elif not xbrl_attachments.empty:
+            # Filing bundle is in local storage AND has linkbases, but the XBRL
+            # instance document itself is missing. This is typical for iXBRL filings
+            # filed before SEC's Oct-2020 feed format change, when the inline-XBRL
+            # data was embedded in the .htm file but not extracted to a separate
+            # _htm.xml in the feed bundle. Fall back to fetching just the instance
+            # from the filing homepage if network fallback is allowed.
+            from edgar.storage import is_using_local_storage, is_network_fallback_allowed
+            if is_using_local_storage() and is_network_fallback_allowed():
+                homepage_xbrl = XBRLAttachments(filing.homepage.attachments)
+                if homepage_xbrl.get('instance'):
+                    log.info(
+                        f"XBRL instance missing from local SGML for {filing.accession_no} "
+                        f"(common for iXBRL filings before SEC's Oct-2020 feed format change). "
+                        f"Fetching just the instance from the SEC homepage (network fallback)."
+                    )
+                    xbrl.parser.parse_instance_content(homepage_xbrl.get('instance').content)
+                else:
+                    log.warning(
+                        f"XBRL instance document not found for {filing.accession_no} — "
+                        f"missing from both local SGML and the SEC filing homepage. "
+                        f"Entity info and facts will be empty."
+                    )
+            else:
+                log.warning(
+                    f"XBRL instance missing from local SGML for {filing.accession_no} "
+                    f"and network fallback is disabled. Either re-enable fallback "
+                    f"(use_local_storage(..., allow_network_fallback=True)) or re-download "
+                    f"the filing — entity info and facts will be empty."
+                )
 
         # Capture SGML period_of_report for date discrepancy detection
         try:
@@ -1074,7 +1193,8 @@ class XBRL:
                              path: Optional[List[str]] = None, should_display_dimensions: bool = False,
                              valid_dimensional_members: Optional[Dict[str, Set[str]]] = None,
                              view: Optional['StatementView'] = None,
-                             statement_role: Optional[str] = None) -> None:
+                             statement_role: Optional[str] = None,
+                             preferred_label_override: Optional[str] = None) -> None:
         """
         Recursively generate line items for a statement.
 
@@ -1092,6 +1212,11 @@ class XBRL:
                   DETAILED: Relaxed filtering - show all dimensional facts (fixes GH-574)
                   SUMMARY: No dimensional facts shown
             statement_role: Role URI of the statement being generated (GH-712)
+            preferred_label_override: Preferred label role for *this* reference to
+                the element, taken from the parent's child arc. Distinguishes
+                roll-forward references that share one node but use different label
+                roles (e.g. cash-flow periodStart vs periodEnd balances).
+                (edgartools-0609)
         """
         from edgar.xbrl.presentation import StatementView
         if element_id not in nodes:
@@ -1106,8 +1231,26 @@ class XBRL:
         # Get node information
         node = nodes[element_id]
 
+        # edgartools-0609: Honor this reference's preferred label when it differs
+        # from the shared node's (roll-forward concepts referenced more than once).
+        effective_preferred_label = (
+            preferred_label_override
+            if preferred_label_override is not None
+            else node.preferred_label
+        )
+
         # Get label
-        label = node.display_label
+        if (preferred_label_override is not None
+                and preferred_label_override != node.preferred_label):
+            from edgar.xbrl.models import select_display_label
+            label = select_display_label(
+                labels=node.labels,
+                standard_label=node.standard_label,
+                preferred_label=effective_preferred_label,
+                element_id=element_id
+            )
+        else:
+            label = node.display_label
 
         # Get values and decimals across periods
         values = {}
@@ -1153,11 +1296,11 @@ class XBRL:
         # Calculate preferred_sign from preferred_label (for Issue #463)
         # This determines display transformation: -1 = negate, 1 = as-is, None = not specified
         preferred_sign_value = None
-        if node.preferred_label:
+        if effective_preferred_label:
             # Check if this is a negatedLabel (indicates value should be negated for display)
             # Use pattern matching to support any XBRL namespace version (2003, 2009, future versions)
             # Matches: 'negatedLabel', 'negatedTerseLabel', 'http://www.xbrl.org/YYYY/role/negated*Label', etc.
-            label_lower = node.preferred_label.lower()
+            label_lower = effective_preferred_label.lower()
             is_negated = 'negated' in label_lower and (
                 label_lower.startswith('negated') or  # Short form: 'negatedLabel'
                 '/role/negated' in label_lower        # Full URI: 'http://www.xbrl.org/*/role/negated*'
@@ -1415,7 +1558,7 @@ class XBRL:
                 'parent': node.parent,  # Presentation tree parent (may be abstract) (Issue #514)
                 'calculation_parent': calculation_parent,  # Calculation tree parent (metric) (Issue #514 refinement)
                 'level': node.depth,
-                'preferred_label': node.preferred_label,
+                'preferred_label': effective_preferred_label,
                 'is_abstract': node.is_abstract,  # Issue #450: Use node's actual abstract flag
                 'children': node.children,
                 'has_values': len(values) > 0,  # True if we have total values
@@ -1439,7 +1582,7 @@ class XBRL:
                 'parent': node.parent,  # Presentation tree parent (may be abstract) (Issue #514)
                 'calculation_parent': calculation_parent,  # Calculation tree parent (metric) (Issue #514 refinement)
                 'level': node.depth,
-                'preferred_label': node.preferred_label,
+                'preferred_label': effective_preferred_label,
                 'is_abstract': node.is_abstract,
                 'children': node.children,
                 'has_values': len(values) > 0,  # Flag to indicate if we found values
@@ -1561,10 +1704,16 @@ class XBRL:
             result.extend(dim_items_added)
 
         # Process children
-        for child_id in node.children:
+        # edgartools-0609: pass each child reference's own preferred label so
+        # roll-forward concepts (same element_id referenced twice) render with the
+        # correct periodStart/periodEnd label and value mapping.
+        child_labels = node.child_preferred_labels
+        for idx, child_id in enumerate(node.children):
+            child_override = child_labels[idx] if idx < len(child_labels) else None
             self._generate_line_items(child_id, nodes, result, period_filter, current_path,
                                       should_display_dimensions, valid_dimensional_members, view,
-                                      statement_role=statement_role)
+                                      statement_role=statement_role,
+                                      preferred_label_override=child_override)
 
     def _apply_member_hierarchy(self, dim_items: List[Dict[str, Any]]) -> None:
         """Adjust level of dimensional items based on definition linkbase member hierarchy.

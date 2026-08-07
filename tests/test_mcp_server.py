@@ -8,6 +8,7 @@ and routes tool calls.
 import json
 
 import pytest
+from pydantic import AnyUrl
 
 from edgar.ai.mcp.tools.base import ToolResponse, classify_error, error
 
@@ -122,6 +123,22 @@ class TestServerConfiguration:
         """main function is importable."""
         from edgar.ai.mcp.server import main
         assert callable(main)
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        ("uri", "expected_heading"),
+        [
+            ("edgartools://docs/quickstart", "# EdgarTools MCP Quickstart"),
+            ("edgartools://docs/tools", "# EdgarTools MCP Tools Reference"),
+        ],
+    )
+    async def test_read_resource_accepts_mcp_any_url(self, uri, expected_heading):
+        """Resource handlers receive AnyUrl values from the MCP SDK."""
+        from edgar.ai.mcp.server import read_resource
+
+        content = await read_resource(AnyUrl(uri))
+
+        assert content.startswith(expected_heading)
 
 
 class TestToolResponseErrorCode:

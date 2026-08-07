@@ -2,10 +2,13 @@
 Table matrix builder for handling complex colspan/rowspan structures.
 """
 
+import logging
 from dataclasses import dataclass
 from typing import List, Optional
 
 from edgar.documents.table_nodes import Cell, Row
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -25,6 +28,12 @@ class TableMatrix:
     where each merged cell occupies multiple positions in the matrix.
     """
 
+    # Hard ceiling on grid width. The grid is materialised as row_count *
+    # col_count MatrixCell objects, so a corrupt colspan (or a long row of
+    # them) turns straight into an unbounded allocation. Cells arriving via
+    # TableProcessor are already clamped; this backstops the other callers.
+    MAX_COLUMNS = 2000
+
     def __init__(self):
         """Initialize empty matrix"""
         self.matrix: List[List[MatrixCell]] = []
@@ -43,6 +52,10 @@ class TableMatrix:
         Returns:
             Self for chaining
         """
+        # Discard any previous build; a stale grid would otherwise be consulted
+        # as if it described the rows now being measured.
+        self.matrix = []
+
         # Store header row count for later use
         self.header_row_count = len(header_rows)
 
@@ -76,7 +89,12 @@ class TableMatrix:
         return self
 
     def _calculate_dimensions(self, rows: List[List[Cell]]):
-        """Calculate the actual dimensions considering colspan"""
+        """Calculate the actual dimensions considering colspan.
+
+        Note this runs before the grid is materialised, so `_is_occupied` has
+        nothing to consult and always reports False here. Rowspan occupancy is
+        resolved for real in `_place_cells`, which widens the grid if needed.
+        """
         max_cols = 0
 
         for row_idx, row in enumerate(rows):
@@ -87,15 +105,21 @@ class TableMatrix:
                     col_pos += 1
 
                 # This cell will occupy from col_pos to col_pos + colspan
-                col_end = col_pos + cell.colspan
+                col_end = min(col_pos + cell.colspan, self.MAX_COLUMNS)
                 max_cols = max(max_cols, col_end)
                 col_pos = col_end
+
+        if max_cols >= self.MAX_COLUMNS:
+            logger.debug("Table width capped at %d columns", self.MAX_COLUMNS)
 
         self.col_count = max_cols
 
     def _is_occupied(self, row: int, col: int) -> bool:
         """Check if a position is occupied by a cell from a previous row (rowspan)"""
-        if row == 0:
+        if row == 0 or not self.matrix:
+            # No grid to consult yet. Without this guard the loop below still
+            # runs `row` times finding nothing, which is O(rows^2) across a
+            # table -- ~2 hours on a 62k-row Fannie Mae ABS-15G.
             return False
 
         # Check if any cell above has rowspan that reaches this position
@@ -143,10 +167,15 @@ class TableMatrix:
                                             'jul', 'aug', 'sep', 'oct', 'nov', 'dec']) and
                                     row_idx > 1)  # Not a header row (allow for multi-row headers)
 
+                # Spans can only ever reach the edge of the grid, so bound the
+                # loops rather than iterating a corrupt span and discarding it
+                span_rows = max(0, min(cell.rowspan, self.row_count - row_idx))
+                span_cols = max(0, min(cell.colspan, self.col_count - col_pos))
+
                 if is_special_numeric:
                     # Place empty cell at first position, content at second position
                     # This is specifically for Table 15 alignment
-                    for r in range(cell.rowspan):
+                    for r in range(span_rows):
                         # First column of span: empty
                         if row_idx + r < self.row_count and col_pos < self.col_count:
                             self.matrix[row_idx + r][col_pos] = MatrixCell()
@@ -162,7 +191,7 @@ class TableMatrix:
                             self.matrix[row_idx + r][col_pos + 1] = matrix_cell
 
                         # Remaining columns of span: mark as spanned (though colspan=2 has no remaining)
-                        for c in range(2, cell.colspan):
+                        for c in range(2, span_cols):
                             if row_idx + r < self.row_count and col_pos + c < self.col_count:
                                 matrix_cell = MatrixCell(
                                     original_cell=cell,
@@ -173,8 +202,8 @@ class TableMatrix:
                                 self.matrix[row_idx + r][col_pos + c] = matrix_cell
                 else:
                     # Normal placement for other cells
-                    for r in range(cell.rowspan):
-                        for c in range(cell.colspan):
+                    for r in range(span_rows):
+                        for c in range(span_cols):
                             if row_idx + r < self.row_count and col_pos + c < self.col_count:
                                 matrix_cell = MatrixCell(
                                     original_cell=cell,
@@ -188,6 +217,7 @@ class TableMatrix:
 
     def _expand_columns(self, new_col_count: int):
         """Expand matrix to accommodate more columns"""
+        new_col_count = min(new_col_count, self.MAX_COLUMNS)
         if new_col_count <= self.col_count:
             return
 

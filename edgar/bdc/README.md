@@ -328,7 +328,7 @@ Pre-extracted XBRL data from SEC's Division of Economic and Risk Analysis.
 
 **Download pattern:**
 ```
-https://www.sec.gov/files/structureddata/data/business-development-company-bdc-data-sets/{year}q{quarter}_bdc.zip
+https://www.sec.gov/files/datastandardsinnovation/data/business-development-company-bdc-data-sets/{year}q{quarter}_bdc.zip
 ```
 
 **Files in ZIP:**

@@ -13,6 +13,7 @@ Access via ``filing.viewer()``:
     viewer.search('debt')           # Search all concepts
     viewer.validate()               # Check calculation trees
 """
+from collections import Counter
 from functools import cached_property
 from typing import Dict, List, Optional, TYPE_CHECKING
 
@@ -33,6 +34,49 @@ if TYPE_CHECKING:
 __all__ = ['FilingViewer', 'ViewerReport']
 
 
+# Concepts whose decimals attribute reflects shares / ratios / percentages —
+# excluded when inferring the report's currency scaling.
+# Keep in sync with edgar.xbrl.core.determine_dominant_scale.
+_NON_MONETARY_LABEL_KEYWORDS = (
+    'shares', 'share', 'stock', 'eps', 'earnings per share',
+    'weighted average', 'number of', 'per common share', 'per share',
+    'per basic', 'per diluted', 'outstanding', 'issued',
+    'ratio', 'margin', 'percentage', 'rate', 'per cent',
+)
+
+
+def _is_monetary_label(label: str) -> bool:
+    if not label:
+        return True
+    label_lower = label.lower()
+    return not any(kw in label_lower for kw in _NON_MONETARY_LABEL_KEYWORDS)
+
+
+def _multiplier_from_decimals(decimals_values: List[int]) -> int:
+    """Convert a sample of XBRL ``decimals`` attribute values into a positive multiplier.
+
+    XBRL convention: ``decimals="-6"`` means rounded to the nearest million,
+    so display values are in millions and the raw amount is ``display * 1_000_000``.
+    Buckets each input into {-9, -6, -3, 0} and returns the most common scaled
+    bucket (preferring scale over units). Returns 1 when the input is empty.
+    """
+    if not decimals_values:
+        return 1
+    counts: Counter = Counter()
+    for d in decimals_values:
+        if d <= -9:
+            counts[-9] += 1
+        elif d <= -6:
+            counts[-6] += 1
+        elif d <= -3:
+            counts[-3] += 1
+        else:
+            counts[0] += 1
+    scaled = [b for b in counts if b < 0]
+    best = max(scaled, key=lambda b: counts[b]) if scaled else 0
+    return 10 ** (-best)
+
+
 class ViewerReport:
     """
     A report in the viewer with concept annotations from R*.htm.
@@ -44,10 +88,15 @@ class ViewerReport:
     def __init__(self,
                  filing_report: 'Report',
                  meta_report: Optional[MetaLinksReport],
-                 concept_report: Optional[ConceptReport]):
+                 concept_report: Optional[ConceptReport],
+                 viewer: Optional['FilingViewer'] = None):
         self._report = filing_report
         self._meta = meta_report
         self._concept_report = concept_report
+        self._viewer = viewer  # back-ref for lazy level enrichment (GH #799)
+        self._levels_enriched = False
+        self._scaling_resolved = False
+        self._scaling: int = 1  # default until first resolution
 
     @property
     def short_name(self) -> str:
@@ -84,11 +133,51 @@ class ViewerReport:
         return self._concept_report
 
     @property
+    def currency_scaling(self) -> int:
+        """Currency-scale multiplier for monetary values in this report.
+
+        ``1`` = units, ``1_000`` = thousands, ``1_000_000`` = millions,
+        ``1_000_000_000`` = billions. Multiplying a display value by this
+        factor yields the raw amount in dollars (or the reporting currency).
+
+        Derived from the XBRL ``decimals`` attribute on monetary facts mapped
+        to this statement's role in the presentation linkbase (GH #807). The
+        R*.htm header text-match value on ``concept_report.currency_scaling``
+        is used as a fallback when XBRL is unavailable.
+        """
+        # ConceptReport is falsy when rows is empty (it defines __len__), so we
+        # must distinguish "no concept report" from "empty rows" via ``is None``.
+        if self._concept_report is None:
+            return 1
+        if not self._scaling_resolved:
+            self._scaling_resolved = True
+            if self._viewer is not None:
+                self._scaling = self._viewer._resolve_currency_scaling(
+                    self._concept_report, self._report.role
+                )
+            else:
+                self._scaling = self._concept_report.currency_scaling
+            # Mirror the resolved value back onto ConceptReport so callers
+            # accessing it via concept_report.currency_scaling (the path
+            # reported in GH #807) also see the corrected value.
+            self._concept_report.currency_scaling = self._scaling
+        return self._scaling
+
+    @property
     def concept_rows(self) -> list:
         """Concept-annotated rows from R*.htm."""
-        if self._concept_report:
-            return self._concept_report.rows
-        return []
+        if not self._concept_report:
+            return []
+        # Lazy level enrichment from XBRL presentation linkbase (GH #799).
+        # Deferred to first access so that initial viewer construction stays
+        # cheap and avoids re-entering FilingSummary iteration during XBRL parse.
+        if not self._levels_enriched:
+            self._levels_enriched = True
+            if self._viewer is not None:
+                self._viewer._enrich_levels_from_presentation_tree(
+                    self._concept_report, self._report.role
+                )
+        return self._concept_report.rows
 
     @property
     def concepts(self) -> List[str]:
@@ -151,19 +240,36 @@ class FilingViewer:
     def __init__(self,
                  sgml: 'FilingSGML',
                  filing_summary: 'FilingSummary',
-                 metalinks: MetaLinks):
+                 metalinks: MetaLinks,
+                 filing=None):
         self._sgml = sgml
         self._filing_summary = filing_summary
         self._metalinks = metalinks
+        self._filing = filing  # retained for lazy XBRL parse (level enrichment, GH #799)
         self._viewer_reports_cache: Dict[str, ViewerReport] = {}
         self._concept_reports_cache: Dict[str, ConceptReport] = {}
+        # Lazy XBRL — parsed only when concept_rows level enrichment is needed.
+        self._xbrl_loaded = False
+        self._xbrl = None
 
     # --- Report access by category (like SEC viewer tabs) ---
 
     @cached_property
     def financial_statements(self) -> List[ViewerReport]:
-        """Reports in the Statements category."""
-        return self._get_viewer_reports_by_category('Statements')
+        """Reports recognized as financial statements.
+
+        Returns the union of:
+          - FilingSummary.xml ``MenuCategory='Statements'``
+          - MetaLinks.json ``groupType='statement'``
+
+        The MetaLinks fallback salvages primary statements that filers
+        miscategorized in FilingSummary.xml (e.g., AbbVie's 2021 10-K placed
+        ``Consolidated Statements of Earnings`` under ``Uncategorized``;
+        MetaLinks correctly classifies it as a statement). Reports are
+        returned in FilingSummary position order, deduplicated by
+        ``html_file_name``.
+        """
+        return self._get_statement_viewer_reports()
 
     @cached_property
     def notes(self) -> List[ViewerReport]:
@@ -429,6 +535,32 @@ class FilingViewer:
                 result.append(vr)
         return result
 
+    def _get_statement_viewer_reports(self) -> List[ViewerReport]:
+        """Walk all FilingSummary reports, returning those recognized as
+        financial statements via either FilingSummary MenuCategory or
+        MetaLinks groupType. Preserves filing position order; dedup by
+        html_file_name.
+        """
+        seen: set = set()
+        result: List[ViewerReport] = []
+        for report in self._filing_summary.reports:
+            fname = report.html_file_name
+            if not fname or fname in seen:
+                continue
+            is_stmt = report.menu_category == 'Statements'
+            if not is_stmt:
+                rkey = self._report_key(report)
+                meta = self._metalinks.get_report(rkey) if rkey else None
+                if meta and meta.group_type == 'statement':
+                    is_stmt = True
+            if not is_stmt:
+                continue
+            vr = self._get_or_create_viewer_report(report)
+            if vr:
+                seen.add(fname)
+                result.append(vr)
+        return result
+
     def _get_or_create_viewer_report(self, report: 'Report') -> Optional[ViewerReport]:
         """Get or create a ViewerReport for a FilingSummary Report."""
         fname = report.html_file_name
@@ -441,12 +573,16 @@ class FilingViewer:
         meta_report = self._metalinks.get_report(rkey) if rkey else None
         concept_report = self._get_or_create_concept_report(report)
 
-        vr = ViewerReport(report, meta_report, concept_report)
+        vr = ViewerReport(report, meta_report, concept_report, viewer=self)
         self._viewer_reports_cache[fname] = vr
         return vr
 
     def _get_or_create_concept_report(self, report: 'Report') -> Optional[ConceptReport]:
-        """Lazily parse R*.htm content into a ConceptReport."""
+        """Lazily parse R*.htm content into a ConceptReport.
+
+        Level enrichment (GH #799) is deferred to first concept_rows access
+        on the wrapping ViewerReport — see ViewerReport.concept_rows.
+        """
         fname = report.html_file_name
         if not fname:
             return None
@@ -455,9 +591,121 @@ class FilingViewer:
         content = report.content
         if not content:
             return None
-        cr = extract_concepts_from_report(content)
+        form = getattr(self._filing, 'form', None) if self._filing is not None else None
+        cr = extract_concepts_from_report(content, form=form)
         self._concept_reports_cache[fname] = cr
         return cr
+
+    def _get_xbrl(self):
+        """Lazy-load the XBRL parser for presentation-tree access (GH #799).
+
+        Returns None if no Filing was supplied (e.g., legacy construction)
+        or if XBRL parsing fails. Caches both the success and failure cases
+        so we don't retry on every concept_rows access.
+        """
+        if self._xbrl_loaded:
+            return self._xbrl
+        self._xbrl_loaded = True
+        if self._filing is None:
+            return None
+        try:
+            from edgar.xbrl.xbrl import XBRL
+            self._xbrl = XBRL.from_filing(self._filing)
+        except Exception:
+            self._xbrl = None
+        return self._xbrl
+
+    def _resolve_currency_scaling(self, cr: ConceptReport, role: Optional[str]) -> int:
+        """Resolve a report's currency-scale multiplier from XBRL decimals (GH #807).
+
+        Mirrors the GH #799 pattern for level enrichment: XBRL is the canonical
+        source. The ``decimals`` attribute on each monetary fact is filer-mandated
+        and uniform (``-6`` → millions, ``-3`` → thousands, ``0`` → units), unlike
+        the R*.htm ``<th class='tl'>`` header which only matches Apple-style
+        ``$ in Millions`` formatting and silently misses common variations
+        (``In Millions``, ``USD ($) in Millions``, ``(in millions)``, …).
+
+        Falls back to ``cr.currency_scaling`` (the R*.htm header match value)
+        when no XBRL is available, when the role is missing from the presentation
+        linkbase, or when no monetary facts produce a usable ``decimals`` value.
+        """
+        if cr is None:
+            return 1
+        if not cr.rows:
+            return cr.currency_scaling
+        xbrl = self._get_xbrl()
+        if xbrl is None or not role:
+            return cr.currency_scaling
+        tree = xbrl.presentation_trees.get(role)
+        if tree is None or not tree.all_nodes:
+            return cr.currency_scaling
+
+        decimals_values: List[int] = []
+        seen_concepts = set()
+        # Dedup is per-concept (avoid querying the same concept N times when it
+        # repeats across dimensional rows). Each query still returns one fact
+        # per period context, so a single concept can still contribute multiple
+        # decimals samples — that's intentional, the mode absorbs the variance.
+        for row in cr.rows:
+            if row.is_abstract or row.is_header:
+                continue
+            if not _is_monetary_label(row.label):
+                continue
+            if row.concept_id in seen_concepts:
+                continue
+            seen_concepts.add(row.concept_id)
+            try:
+                facts = xbrl.facts.query().by_concept(row.concept_id, exact=True).execute()
+            except Exception:
+                continue
+            for fact in facts:
+                d = fact.get('decimals') if isinstance(fact, dict) else getattr(fact, 'decimals', None)
+                if d is None:
+                    continue
+                if isinstance(d, str):
+                    if d == 'INF':
+                        continue
+                    try:
+                        decimals_values.append(int(d))
+                    except ValueError:
+                        continue
+                elif isinstance(d, int):
+                    decimals_values.append(d)
+
+        if not decimals_values:
+            return cr.currency_scaling
+        return _multiplier_from_decimals(decimals_values)
+
+    def _enrich_levels_from_presentation_tree(self, cr: ConceptReport, role: Optional[str]) -> None:
+        """Populate ConceptRow.level from the XBRL presentation linkbase (GH #799).
+
+        SEC R*.htm files no longer encode hierarchy in HTML (no plN classes,
+        no padding-left, no row nesting on modern filings). The canonical
+        source is the XBRL presentation linkbase, which the parser already
+        loads as ``xbrl.presentation_trees[role].all_nodes[concept_id].depth``.
+
+        Levels are normalized so the smallest depth observed in the report
+        becomes 0 — e.g., a balance-sheet root abstract at depth 2 maps to
+        level 0, its children at depth 3 to level 1, etc.
+        """
+        if not role or not cr.rows:
+            return
+        xbrl = self._get_xbrl()
+        if xbrl is None:
+            return
+        tree = xbrl.presentation_trees.get(role)
+        if tree is None or not tree.all_nodes:
+            return
+
+        # Collect raw depths only for rows whose concept maps into this tree.
+        matched = [(row, tree.all_nodes[row.concept_id].depth)
+                   for row in cr.rows
+                   if row.concept_id in tree.all_nodes]
+        if not matched:
+            return
+        min_depth = min(depth for _, depth in matched)
+        for row, depth in matched:
+            row.level = depth - min_depth
 
     def _report_key(self, report: 'Report') -> Optional[str]:
         """Extract report key (e.g., 'R2') from html_file_name (e.g., 'R2.htm')."""
@@ -486,7 +734,7 @@ class FilingViewer:
         if not metalinks_content:
             return None
         metalinks = MetaLinks.parse(metalinks_content)
-        return cls(sgml, filing_summary, metalinks)
+        return cls(sgml, filing_summary, metalinks, filing=filing)
 
     @staticmethod
     def viewer_support(filing) -> str:

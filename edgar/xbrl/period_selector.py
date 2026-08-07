@@ -62,9 +62,9 @@ def select_periods(xbrl, statement_type: str, max_periods: int = 4) -> List[Tupl
         if statement_type in instant_statement_types:
             candidate_periods = _select_balance_sheet_periods(filtered_periods, xbrl.entity_info, max_periods)
         elif statement_type in EQUITY_STATEMENT_TYPES:
-            candidate_periods = _select_equity_statement_periods(filtered_periods, xbrl.entity_info, max_periods)
+            candidate_periods = _select_equity_statement_periods(filtered_periods, xbrl.entity_info, max_periods, document_end_date)
         else:  # Income/Cash Flow statements (duration-based)
-            candidate_periods = _select_duration_periods(filtered_periods, xbrl.entity_info, max_periods)
+            candidate_periods = _select_duration_periods(filtered_periods, xbrl.entity_info, max_periods, document_end_date)
 
         # Step 3: Filter out periods with insufficient data
         periods_with_data = _filter_periods_with_sufficient_data(xbrl, candidate_periods, statement_type)
@@ -196,7 +196,7 @@ def _select_balance_sheet_periods(periods: List[Dict], entity_info: Dict[str, An
     return selected_periods
 
 
-def _select_equity_statement_periods(periods: List[Dict], entity_info: Dict[str, Any], max_periods: int) -> List[Tuple[str, str]]:
+def _select_equity_statement_periods(periods: List[Dict], entity_info: Dict[str, Any], max_periods: int, period_of_report: Optional[str] = None) -> List[Tuple[str, str]]:
     """
     Select periods for Statement of Equity.
 
@@ -220,10 +220,10 @@ def _select_equity_statement_periods(periods: List[Dict], entity_info: Dict[str,
     """
     # Use the same logic as income statement - select duration periods
     # The rendering layer will handle merging instant facts into the same columns
-    return _select_duration_periods(periods, entity_info, max_periods)
+    return _select_duration_periods(periods, entity_info, max_periods, period_of_report)
 
 
-def _select_duration_periods(periods: List[Dict], entity_info: Dict[str, Any], max_periods: int) -> List[Tuple[str, str]]:
+def _select_duration_periods(periods: List[Dict], entity_info: Dict[str, Any], max_periods: int, period_of_report: Optional[str] = None) -> List[Tuple[str, str]]:
     """
     Select duration periods for income/cash flow statements with fiscal intelligence.
 
@@ -264,10 +264,11 @@ def _select_duration_periods(periods: List[Dict], entity_info: Dict[str, Any], m
             return [(p['key'], p['label']) for p in scored_periods[:max_periods]]
 
     # For quarterly reports or if no annual periods found, use sophisticated quarterly logic
-    return _select_quarterly_periods(duration_periods, max_periods)
+    return _select_quarterly_periods(duration_periods, max_periods, period_of_report)
 
 
-def _select_quarterly_periods(duration_periods: List[Dict], max_periods: int) -> List[Tuple[str, str]]:
+def _select_quarterly_periods(duration_periods: List[Dict], max_periods: int,
+                              period_of_report: Optional[str] = None) -> List[Tuple[str, str]]:
     """
     Select quarterly periods with intelligent investor-focused logic.
 
@@ -277,12 +278,48 @@ def _select_quarterly_periods(duration_periods: List[Dict], max_periods: int) ->
     3. Year-to-date current year (6-month, 9-month YTD)
     4. Year-to-date prior year (comparative YTD)
 
+    Selection strategy:
+    - Issue #822: If period_of_report is available, prefer durations whose end_date
+      matches it as the primary anchor. This handles irregular quarter lengths
+      (16-week Q1 = 111 days, 14-week extra-week years, IPO stub periods) that fall
+      outside the standard 80-100 day quarterly bucket.
+    - Bucket-based logic (80-100 day quarterly, 150-285 day YTD) is retained as a
+      fallback for filings without a clear period_of_report match or to supplement
+      the anchor periods.
+
     Issue #464 Fix: Cast wider net by checking more quarterly periods and returning
     more candidates (max_periods * 3) to let data quality filtering select the best ones.
-    This mirrors the successful Balance Sheet fix from v4.20.1.
     """
     if not duration_periods:
         return []
+
+    # Anchor-based selection (Issue #822 fix):
+    # If period_of_report is set, prefer durations ending exactly there. Disambiguate
+    # multiple anchors by duration: shortest = current quarter, longest = current YTD.
+    anchor_quarter = None
+    anchor_ytd = None
+    if period_of_report:
+        anchors = [p for p in duration_periods if p.get('end_date') == period_of_report]
+        # Compute days for each anchor; fall back to recomputing if not pre-populated
+        def _anchor_days(p):
+            d = p.get('days')
+            if d is not None:
+                return d
+            try:
+                start = datetime.strptime(p['start_date'], '%Y-%m-%d').date()
+                end = datetime.strptime(p['end_date'], '%Y-%m-%d').date()
+                return (end - start).days
+            except (ValueError, TypeError, KeyError):
+                return None
+
+        valid_anchors = [(p, _anchor_days(p)) for p in anchors]
+        valid_anchors = [(p, d) for p, d in valid_anchors if d is not None and d >= 60]
+        valid_anchors.sort(key=lambda pd: pd[1])  # shortest first
+
+        if valid_anchors:
+            anchor_quarter = valid_anchors[0][0]
+            if len(valid_anchors) > 1:
+                anchor_ytd = valid_anchors[-1][0]
 
     # Categorize periods by duration to identify types
     quarterly_periods = []  # ~90 days (80-100)
@@ -302,6 +339,55 @@ def _select_quarterly_periods(duration_periods: List[Dict], max_periods: int) ->
 
         except (ValueError, TypeError, KeyError):
             continue
+
+    # When anchors are available, override the bucket-based "current" choices with
+    # the anchor periods so irregular quarter lengths still get selected.
+    if anchor_quarter is not None:
+        # Promote anchor_quarter to the front of quarterly_periods (deduped by key)
+        quarterly_periods = [anchor_quarter] + [p for p in quarterly_periods if p['key'] != anchor_quarter['key']]
+    if anchor_ytd is not None:
+        ytd_periods = [anchor_ytd] + [p for p in ytd_periods if p['key'] != anchor_ytd['key']]
+
+    # When the anchor quarter has irregular length (not in 80-100 bucket), seed
+    # prior-year comparatives by matching its actual duration ±10 days rather than
+    # relying on the global 80-100 bucket. Same for anchor_ytd vs 150-285 bucket.
+    def _seed_prior_year_matches(anchor: Optional[Dict], bucket: List[Dict], tolerance: int = 10) -> List[Dict]:
+        if anchor is None:
+            return bucket
+        try:
+            target_days = anchor.get('days')
+            if target_days is None:
+                start = datetime.strptime(anchor['start_date'], '%Y-%m-%d').date()
+                end = datetime.strptime(anchor['end_date'], '%Y-%m-%d').date()
+                target_days = (end - start).days
+            anchor_end = datetime.strptime(anchor['end_date'], '%Y-%m-%d').date()
+        except (ValueError, TypeError, KeyError):
+            return bucket
+
+        # Find candidates outside the bucket whose duration matches the anchor's
+        # within tolerance and whose end_date is ~365 days earlier (300-400 days).
+        existing_keys = {p['key'] for p in bucket}
+        extras = []
+        for p in duration_periods:
+            if p['key'] in existing_keys or p['key'] == anchor['key']:
+                continue
+            try:
+                p_start = datetime.strptime(p['start_date'], '%Y-%m-%d').date()
+                p_end = datetime.strptime(p['end_date'], '%Y-%m-%d').date()
+                p_days = (p_end - p_start).days
+            except (ValueError, TypeError, KeyError):
+                continue
+            if abs(p_days - target_days) > tolerance:
+                continue
+            year_gap = (anchor_end - p_end).days
+            if 300 <= year_gap <= 400:
+                extras.append(p)
+        return bucket + extras
+
+    if anchor_quarter is not None:
+        quarterly_periods = _seed_prior_year_matches(anchor_quarter, quarterly_periods)
+    if anchor_ytd is not None:
+        ytd_periods = _seed_prior_year_matches(anchor_ytd, ytd_periods)
 
     # Sort periods by end date (most recent first)
     quarterly_periods = _sort_periods_by_date(quarterly_periods, 'duration')

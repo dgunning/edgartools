@@ -1,7 +1,7 @@
 import asyncio
 import os
 import re
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Union
 
@@ -35,12 +35,16 @@ def _run_coroutine(coroutine):
 
 
 __all__ = ['download_edgar_data',
+           'download_submissions',
+           'download_submissions_async',
            'get_edgar_data_directory',
            'use_local_storage',
            'is_using_local_storage',
+           'is_network_fallback_allowed',
            'set_local_storage_path',
            'download_filings',
            'local_filing_path',
+           'resolve_local_filing_path',
            'check_filings_exist_locally',
            '_filter_extracted_files',
            'compress_filing',
@@ -61,7 +65,9 @@ class DirectoryBrowsingNotAllowed(Exception):
         super().__init__(f"{message} \nurl: {url}")
         self.url = url
 
-def use_local_storage(path_or_enable: Union[bool, str, Path, None] = True, use_local: Optional[bool] = None):
+def use_local_storage(path_or_enable: Union[bool, str, Path, None] = True,
+                      use_local: Optional[bool] = None,
+                      allow_network_fallback: bool = True):
     """
     Enable or disable local storage, optionally setting the storage path.
 
@@ -74,6 +80,10 @@ def use_local_storage(path_or_enable: Union[bool, str, Path, None] = True, use_l
             - None: Use default behavior
         use_local: Optional boolean to explicitly set enable/disable state.
                   Only used when path_or_enable is a path.
+        allow_network_fallback: If True (default), allow network requests when
+                  local data is incomplete (e.g. missing XBRL instance documents
+                  in pre-Oct 2020 SEC feed files). Network fallback is logged
+                  so you know when it happens. Set to False for strict offline mode.
 
     Raises:
         FileNotFoundError: If path is provided but does not exist.
@@ -93,6 +103,9 @@ def use_local_storage(path_or_enable: Union[bool, str, Path, None] = True, use_l
         >>> # Set path and explicitly control enable/disable
         >>> use_local_storage("/tmp/edgar", True)   # enable
         >>> use_local_storage("/tmp/edgar", False)  # set path but disable
+
+        >>> # Strict offline mode — no network requests at all
+        >>> use_local_storage("/tmp/edgar", allow_network_fallback=False)
     """
     # Determine the actual values based on parameter types
     if isinstance(path_or_enable, bool):
@@ -117,12 +130,24 @@ def use_local_storage(path_or_enable: Union[bool, str, Path, None] = True, use_l
     # Set the local storage flag
     os.environ['EDGAR_USE_LOCAL_DATA'] = "1" if enable else "0"
 
+    # Set the network fallback flag
+    os.environ['EDGAR_ALLOW_NETWORK_FALLBACK'] = "1" if allow_network_fallback else "0"
+
 
 def is_using_local_storage() -> bool:
     """
     Returns True if using local storage
     """
     return strtobool(os.getenv('EDGAR_USE_LOCAL_DATA', "False"))
+
+
+def is_network_fallback_allowed() -> bool:
+    """
+    Returns True if network fallback is allowed when local data is incomplete.
+    Defaults to True — network requests are permitted when local data is missing,
+    but each fallback is logged so the user knows when it happens.
+    """
+    return strtobool(os.getenv('EDGAR_ALLOW_NETWORK_FALLBACK', "True"))
 
 
 def set_local_storage_path(path: Union[str, Path]) -> None:
@@ -864,3 +889,65 @@ def local_filing_path(filing_date: Union[str, date],
         if compressed_path.exists():
             return compressed_path
         return base_path
+
+
+# Default number of adjacent days to scan when a filing is not found under its
+# FILED AS OF DATE folder (see resolve_local_filing_path). 4 days spans a weekend
+# plus a day, covering after-hours boundary filings and short dissemination lags.
+_ADJACENT_FOLDER_SEARCH_DAYS = 4
+
+
+def _adjacent_day_offsets(window_days: int):
+    """Yield day offsets ordered by proximity: +1, -1, +2, -2, ... (0 is checked first elsewhere)."""
+    for distance in range(1, window_days + 1):
+        yield distance
+        yield -distance
+
+
+def resolve_local_filing_path(filing_date: Union[str, date],
+                              accession_number: str,
+                              correction: bool = False,
+                              search_window_days: int = _ADJACENT_FOLDER_SEARCH_DAYS) -> Optional[Path]:
+    """
+    Resolve an *existing* local filing bundle, returning its path or None.
+
+    Filings are stored under ``filings/<YYYYMMDD>/``. ``download_filings()`` buckets
+    feed files by the SEC dissemination (acceptance) date, which for most filings equals
+    the FILED AS OF DATE used on the read side — but not always. After-hours submissions
+    (filed-as-of the next business day) and historic dissemination lag can land a bundle
+    in an adjacent day's folder. Because accession numbers are globally unique, any folder
+    holding ``<accession>.nc`` is unambiguously the right file, so when the FILED AS OF DATE
+    folder misses we scan a small window of adjacent days before giving up.
+
+    Returns None when the bundle is not present locally (callers then fall back to the
+    network, exactly as before). Cloud storage uses the exact path only.
+    """
+    exact = local_filing_path(filing_date, accession_number, correction=correction)
+    if exact.exists():
+        return exact
+
+    # Cloud storage: keep exact-only behaviour (no cheap directory scan available).
+    from edgar.filesystem import is_cloud_storage_enabled
+    if is_cloud_storage_enabled():
+        return None
+
+    # Normalise the filing date to a date object so we can walk adjacent days.
+    if isinstance(filing_date, date):
+        base_date = filing_date
+    else:
+        try:
+            base_date = datetime.strptime(str(filing_date).replace('-', ''), '%Y%m%d').date()
+        except ValueError:
+            return None
+
+    ext = 'corr' if correction else 'nc'
+    filings_root = get_edgar_data_directory() / 'filings'
+    for offset in _adjacent_day_offsets(search_window_days):
+        day = (base_date + timedelta(days=offset)).strftime('%Y%m%d')
+        base_path = filings_root / day / f"{accession_number}.{ext}"
+        compressed_path = Path(f"{base_path}.gz")
+        if compressed_path.exists():
+            return compressed_path
+        if base_path.exists():
+            return base_path
+    return None

@@ -141,6 +141,39 @@ export EDGAR_VERIFY_SSL="true"
 - Development environments with self-signed certificates
 - Network environments with SSL inspection
 
+#### EDGAR_USE_HTTP2
+Controls whether the internal HTTP client negotiates HTTP/2.
+
+```bash
+export EDGAR_USE_HTTP2="false"
+```
+
+**Values:**
+- `"false"` (default) - Use HTTP/1.1
+- `"true"`, `"1"`, `"yes"`, `"on"` - Opt back into HTTP/2
+
+**Why HTTP/1.1 is the default:** HTTP/2 multiplexes every request over a single
+TCP connection, so a mid-stream connection reset fails *all* in-flight requests
+at once — surfacing from cloud egress as intermittent
+`h2.exceptions.InvalidBodyLengthError` (truncated body) or
+`httpx.RemoteProtocolError: ConnectionTerminated` that crash long fan-out jobs.
+Because EdgarTools fetches a small number of large documents under SEC's ~9
+req/s rate limit, HTTP/2's multiplexing offers no real throughput benefit, while
+HTTP/1.1's one-request-per-connection model lets the retry layer recover from a
+dropped connection in isolation.
+
+**Use Cases for Enabling:**
+- Interactive single-user access against `data.sec.gov` (many small JSON
+  requests) on a stable network where HTTP/2 reduces connection overhead
+
+You can also toggle this at runtime without setting an environment variable:
+
+```python
+from edgar import configure_http
+configure_http(http2=True)   # opt back into HTTP/2
+configure_http(http2=False)  # force HTTP/1.1 (default)
+```
+
 ### HTTP Rate Limiting
 Rate limiting is implemented in `httpclient_ratelimiting`. 
 
@@ -479,6 +512,7 @@ export REQUESTS_CA_BUNDLE="/path/to/company-ca-bundle.crt"
 | Variable | Default | Purpose | Enterprise Use Case |
 |----------|---------|---------|---------------------|
 | `EDGAR_RATE_LIMIT_PER_SEC` | `9` | Request rate limit | Custom mirrors, authorized high-volume apps |
+| `EDGAR_USE_HTTP2` | `false` | HTTP/2 vs HTTP/1.1 | Stable interactive use (enable); cloud fan-out jobs (keep default) |
 | `EDGAR_BASE_URL` | `https://www.sec.gov` | SEC website base URL | Corporate mirrors, regional mirrors |
 | `EDGAR_DATA_URL` | `https://data.sec.gov` | Data archives URL | CDN acceleration, private repositories |
 | `EDGAR_XBRL_URL` | `https://www.sec.gov` | XBRL services URL | Specialized XBRL servers |

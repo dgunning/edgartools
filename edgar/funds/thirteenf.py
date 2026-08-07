@@ -52,43 +52,17 @@ def get_thirteenf_portfolio(filing) -> pd.DataFrame:
             log.warning("Could not extract information table from filing %s", filing.accession_no)
             return pd.DataFrame()
 
-        # Convert to DataFrame
+        # Convert to DataFrame. The infotable already uses the canonical PascalCase
+        # schema (Issuer, Class, Cusip, Value, SharesPrnAmount, ..., Ticker) for
+        # every parse path (XML and legacy TXT) — see edgar/thirteenf/parsers/.
+        # There is a single canonical schema; do not re-alias columns. (edgartools-i5wx)
         df = pd.DataFrame(infotable)
 
-        # Clean up and organize data
-        if not df.empty:
-            # Update column names for consistency
-            if 'nameOfIssuer' in df.columns:
-                df = df.rename(columns={
-                    'nameOfIssuer': 'name',
-                    'titleOfClass': 'title',
-                    'cusip': 'cusip',
-                    'value': 'value_usd',
-                    'sshPrnamt': 'shares',
-                    'sshPrnamtType': 'share_type',
-                    'investmentDiscretion': 'investment_discretion',
-                    'votingAuthority': 'voting_authority'
-                })
-
-            # Add ticker mapping if possible
-            try:
-                from edgar.reference import cusip_ticker_mapping
-                cusip_map = cusip_ticker_mapping(allow_duplicate_cusips=False)
-                df['ticker'] = df['cusip'].map(cusip_map.Ticker)
-            except Exception as e:
-                log.warning("Error adding ticker mappings: %s", e)
-                df['ticker'] = None
-
-            # Calculate percent of portfolio
-            if 'value_usd' in df.columns:
-                total_value = df['value_usd'].sum()
-                if total_value > 0:
-                    df['pct_value'] = df['value_usd'] / total_value * 100
-                else:
-                    df['pct_value'] = 0
-
-            # Sort by value
-            df = df.sort_values('value_usd', ascending=False).reset_index(drop=True)
+        if not df.empty and 'Value' in df.columns:
+            # Percent of portfolio, then sort by value (most concentrated first).
+            total_value = df['Value'].sum()
+            df['pct_value'] = (df['Value'] / total_value * 100) if total_value > 0 else 0
+            df = df.sort_values('Value', ascending=False).reset_index(drop=True)
 
         return df
 

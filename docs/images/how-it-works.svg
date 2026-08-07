@@ -1,83 +1,99 @@
-<svg width="700" height="340" viewBox="0 0 700 340" xmlns="http://www.w3.org/2000/svg">
-    <!-- Background -->
-    <rect width="700" height="340" fill="#0d0d1a"/>
+<svg width="800" height="372" viewBox="0 0 800 372" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .lbl  { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .mono { font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace; }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto">
+      <polygon points="0,1 7,4.5 0,8" fill="#FFD700" opacity="0.75"/>
+    </marker>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="3.2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <radialGradient id="hubGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFD700" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#FFD700" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="hubFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#33404f"/>
+      <stop offset="100%" stop-color="#222c38"/>
+    </linearGradient>
+  </defs>
 
-    <!-- "Before" label -->
-    <text x="150" y="30" text-anchor="middle" fill="#ff6b6b" font-size="14" font-weight="600" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">THE PROBLEM</text>
+  <rect width="800" height="372" rx="14" fill="#161b24" stroke="#222c38" stroke-width="1"/>
 
-    <!-- SEC Box with pain points -->
-    <g transform="translate(30, 45)">
-        <rect x="0" y="0" width="240" height="200" rx="12"
-              fill="#2a2020" stroke="#ff6b6b" stroke-width="2" stroke-dasharray="5,3"/>
-        <text x="120" y="35" text-anchor="middle" fill="#fff" font-size="18" font-weight="600" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">SEC EDGAR</text>
-        <line x1="20" y1="60" x2="220" y2="60" stroke="#444" stroke-width="1"/>
+  <!-- eyebrows -->
+  <text x="105" y="150" class="lbl" font-size="11" fill="#FFD700" text-anchor="middle" letter-spacing="1.5">ANY FILING</text>
+  <text x="610" y="34"  class="lbl" font-size="11" fill="#FFD700" text-anchor="middle" letter-spacing="1.5">TYPED OBJECTS</text>
 
-        <!-- Pain points with X icons -->
-        <text x="25" y="87" fill="#ff6b6b" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">&#x2717;</text>
-        <text x="45" y="87" fill="#aaa" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Complex XBRL parsing</text>
+  <!-- Filing card -->
+  <rect x="30" y="160" width="150" height="52" rx="9" fill="#2d3748" stroke="#3d5875" stroke-width="1.5"/>
+  <text x="105" y="184" class="mono" font-size="14" fill="#ffffff" text-anchor="middle">Filing</text>
+  <text x="105" y="202" class="lbl"  font-size="11" fill="#8b97a7" text-anchor="middle">any SEC form</text>
 
-        <text x="25" y="110" fill="#ff6b6b" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">&#x2717;</text>
-        <text x="45" y="110" fill="#aaa" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Messy HTML documents</text>
+  <!-- arrow into hub -->
+  <line x1="184" y1="186" x2="270" y2="186" stroke="#FFD700" stroke-width="2.2" marker-end="url(#ah)"/>
 
-        <text x="25" y="133" fill="#ff6b6b" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">&#x2717;</text>
-        <text x="45" y="133" fill="#aaa" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Rate limiting headaches</text>
+  <!-- hub glow -->
+  <circle cx="316" cy="186" r="58" fill="url(#hubGlow)"/>
+  <!-- hub outer frame -->
+  <polygon points="316,138 359,163 359,209 316,234 273,209 273,163"
+           fill="none" stroke="#FFD700" stroke-width="1.5" opacity="0.35"/>
+  <!-- hub -->
+  <polygon points="316,146 351,166 351,206 316,226 281,206 281,166"
+           fill="url(#hubFill)" stroke="#FFD700" stroke-width="2.5" filter="url(#glow)"/>
+  <text x="316" y="191" class="mono" font-size="15" fill="#FFD700" text-anchor="middle" font-weight="bold">.obj()</text>
 
-        <text x="25" y="156" fill="#ff6b6b" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">&#x2717;</text>
-        <text x="45" y="156" fill="#aaa" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Inconsistent formats</text>
+  <!-- fan-out connectors -->
+  <line x1="353" y1="186" x2="462" y2="66"  stroke="#FFD700" stroke-width="1.5" opacity="0.4" marker-end="url(#ah)"/>
+  <line x1="353" y1="186" x2="462" y2="126" stroke="#FFD700" stroke-width="1.5" opacity="0.4" marker-end="url(#ah)"/>
+  <line x1="353" y1="186" x2="462" y2="186" stroke="#FFD700" stroke-width="1.5" opacity="0.4" marker-end="url(#ah)"/>
+  <line x1="353" y1="186" x2="462" y2="246" stroke="#FFD700" stroke-width="1.5" opacity="0.4" marker-end="url(#ah)"/>
+  <line x1="353" y1="186" x2="462" y2="306" stroke="#FFD700" stroke-width="1.5" opacity="0.4" marker-end="url(#ah)"/>
 
-        <text x="25" y="179" fill="#ff6b6b" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">&#x2717;</text>
-        <text x="45" y="179" fill="#aaa" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">100+ lines to get started</text>
-    </g>
+  <!-- form cards -->
+  <!-- 1 TenK -->
+  <g>
+    <rect x="470" y="44" width="300" height="44" rx="8" fill="#2d3748" stroke="#3d5875" stroke-width="1.2"/>
+    <rect x="470" y="44" width="4" height="44" rx="2" fill="#FFD700"/>
+    <text x="490" y="64" class="mono" font-size="14" fill="#FFD700">TenK</text>
+    <text x="490" y="79" class="lbl"  font-size="10" fill="#6b7685">10-K</text>
+    <text x="754" y="71" class="lbl"  font-size="12" fill="#98c379" text-anchor="end">financials · risk factors</text>
+  </g>
+  <!-- 2 TenQ -->
+  <g>
+    <rect x="470" y="104" width="300" height="44" rx="8" fill="#2d3748" stroke="#3d5875" stroke-width="1.2"/>
+    <rect x="470" y="104" width="4" height="44" rx="2" fill="#FFD700"/>
+    <text x="490" y="124" class="mono" font-size="14" fill="#FFD700">TenQ</text>
+    <text x="490" y="139" class="lbl"  font-size="10" fill="#6b7685">10-Q</text>
+    <text x="754" y="131" class="lbl"  font-size="12" fill="#98c379" text-anchor="end">quarterly financials</text>
+  </g>
+  <!-- 3 Form4 -->
+  <g>
+    <rect x="470" y="164" width="300" height="44" rx="8" fill="#2d3748" stroke="#3d5875" stroke-width="1.2"/>
+    <rect x="470" y="164" width="4" height="44" rx="2" fill="#FFD700"/>
+    <text x="490" y="184" class="mono" font-size="14" fill="#FFD700">Form4</text>
+    <text x="490" y="199" class="lbl"  font-size="10" fill="#6b7685">Form 4</text>
+    <text x="754" y="191" class="lbl"  font-size="12" fill="#98c379" text-anchor="end">insider transactions</text>
+  </g>
+  <!-- 4 ThirteenF -->
+  <g>
+    <rect x="470" y="224" width="300" height="44" rx="8" fill="#2d3748" stroke="#3d5875" stroke-width="1.2"/>
+    <rect x="470" y="224" width="4" height="44" rx="2" fill="#FFD700"/>
+    <text x="490" y="244" class="mono" font-size="14" fill="#FFD700">ThirteenF</text>
+    <text x="490" y="259" class="lbl"  font-size="10" fill="#6b7685">13F</text>
+    <text x="754" y="251" class="lbl"  font-size="12" fill="#98c379" text-anchor="end">portfolio holdings</text>
+  </g>
+  <!-- 5 FundReport -->
+  <g>
+    <rect x="470" y="284" width="300" height="44" rx="8" fill="#2d3748" stroke="#3d5875" stroke-width="1.2"/>
+    <rect x="470" y="284" width="4" height="44" rx="2" fill="#FFD700"/>
+    <text x="490" y="304" class="mono" font-size="14" fill="#FFD700">FundReport</text>
+    <text x="490" y="319" class="lbl"  font-size="10" fill="#6b7685">N-PORT</text>
+    <text x="754" y="311" class="lbl"  font-size="12" fill="#98c379" text-anchor="end">fund portfolio</text>
+  </g>
 
-    <!-- EdgarTools Hero Box (Center) -->
-    <g transform="translate(285, 85)">
-        <!-- Main box -->
-        <rect x="0" y="0" width="130" height="120" rx="12"
-              fill="#3d5875" stroke="#FFD700" stroke-width="3"/>
-
-        <!-- Logo pill -->
-        <rect x="15" y="15" width="100" height="32" rx="6" fill="#FFD700"/>
-        <text x="65" y="37" text-anchor="middle" fill="#3d5875" font-size="14" font-weight="700" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">EdgarTools</text>
-
-        <!-- Tagline -->
-        <text x="65" y="80" text-anchor="middle" fill="#fff" font-size="11" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Simple API</text>
-    </g>
-
-    <!-- Arrow Left to Center -->
-    <line x1="270" y1="145" x2="282" y2="145" stroke="#FFD700" stroke-width="2"/>
-    <polygon points="285,145 275,139 275,151" fill="#FFD700"/>
-
-    <!-- Arrow Center to Right -->
-    <line x1="415" y1="145" x2="427" y2="145" stroke="#FFD700" stroke-width="2"/>
-    <polygon points="430,145 420,139 420,151" fill="#FFD700"/>
-
-    <!-- "After" label -->
-    <text x="550" y="30" text-anchor="middle" fill="#98c379" font-size="14" font-weight="600" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">THE SOLUTION</text>
-
-    <!-- Your Code Box with benefits -->
-    <g transform="translate(430, 45)">
-        <rect x="0" y="0" width="240" height="200" rx="12"
-              fill="#1a2a1a" stroke="#98c379" stroke-width="2"/>
-        <text x="120" y="35" text-anchor="middle" fill="#fff" font-size="18" font-weight="600" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Your Code</text>
-        <line x1="20" y1="60" x2="220" y2="60" stroke="#3a5a3a" stroke-width="1"/>
-
-        <!-- Benefits with check icons -->
-        <text x="25" y="87" fill="#98c379" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">&#x2713;</text>
-        <text x="45" y="87" fill="#98c379" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Clean financials</text>
-
-        <text x="25" y="110" fill="#98c379" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">&#x2713;</text>
-        <text x="45" y="110" fill="#98c379" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Structured text</text>
-
-        <text x="25" y="133" fill="#98c379" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">&#x2713;</text>
-        <text x="45" y="133" fill="#98c379" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Automatic throttling</text>
-
-        <text x="25" y="156" fill="#98c379" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">&#x2713;</text>
-        <text x="45" y="156" fill="#98c379" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Standardized objects</text>
-
-        <text x="25" y="179" fill="#98c379" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">&#x2713;</text>
-        <text x="45" y="179" fill="#98c379" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">3 lines to start</text>
-    </g>
-
-    <!-- Bottom tagline -->
-    <text x="350" y="320" text-anchor="middle" fill="#888" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">Free &amp; Open Source · MIT License · 1000+ Tests</text>
+  <!-- footer -->
+  <text x="400" y="356" class="lbl" font-size="12" fill="#6b7685" text-anchor="middle">One call returns the typed object built for that form — 20+ supported</text>
 </svg>

@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, cast
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -46,6 +46,34 @@ class DocumentMetadata:
     xbrl_data: Optional[List[XBRLFact]] = None
     preserve_whitespace: bool = False
     original_html: Optional[str] = None  # Store original HTML for anchor analysis
+
+    @property
+    def statistics(self) -> Dict[str, int]:
+        """Return document statistics, computing them on first access."""
+        statistics = self.__dict__.get("_statistics")
+        if statistics is None:
+            loader = self.__dict__.get("_statistics_loader")
+            statistics = loader() if loader is not None else {}
+            self.__dict__["_statistics"] = statistics
+            self.__dict__.pop("_statistics_loader", None)
+        return statistics
+
+    @statistics.setter
+    def statistics(self, value: Dict[str, int]) -> None:
+        """Set precomputed document statistics."""
+        self.__dict__["_statistics"] = value
+        self.__dict__.pop("_statistics_loader", None)
+
+    def _set_statistics_loader(self, loader: Callable[[], Dict[str, int]]) -> None:
+        """Configure deferred statistics calculation for the owning document."""
+        self.__dict__.pop("_statistics", None)
+        self.__dict__["_statistics_loader"] = loader
+
+    def __getstate__(self) -> Dict[str, Any]:
+        """Materialize deferred statistics before serializing metadata."""
+        if "_statistics_loader" in self.__dict__:
+            _ = self.statistics
+        return self.__dict__.copy()
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert metadata to dictionary."""
@@ -97,9 +125,20 @@ class Section:
     validated: bool = False  # Cross-validated flag
     part: Optional[str] = None  # Part identifier for 10-Q: "I", "II", or None for 10-K
     item: Optional[str] = None  # Item identifier: "1", "1A", "2", etc.
+    warnings: list = field(default_factory=list)  # Extraction warnings (e.g. anomalous content size)
     _text_extractor: Optional[Any] = field(default=None, repr=False)  # Callback for lazy text extraction
     _html_source: Optional[str] = field(default=None, repr=False)  # HTML source for TOC table extraction
     _section_extractor: Optional[Any] = field(default=None, repr=False)  # Section extractor for TOC sections
+
+    @property
+    def kind(self) -> str:
+        """Classify the section: ``'item'`` for a numbered SEC item, else ``'named'``.
+
+        Named sections (e.g. Signatures) carry no Item number. This lets callers
+        iterating ``document.sections`` tell a real Item from a named section
+        without string-matching the key.
+        """
+        return "item" if self.item else "named"
 
     def text(self, **kwargs) -> str:
         """Extract text from section."""
@@ -114,6 +153,68 @@ class Section:
 
         # Clean up boundary artifacts (page numbers, next section headers)
         return self._clean_boundary_artifacts(text)
+
+    def markdown(self) -> str:
+        """Render this section to Markdown.
+
+        Mirrors :meth:`text` but preserves syntax for tables (pipe
+        format) and lists (bullet / numbered markers) by routing
+        through the same renderer used by :meth:`Document.to_markdown`.
+
+        For heading/pattern-based sections the cached node tree is
+        rendered directly. For TOC-based sections (whose node has no
+        children — content is fetched lazily from the original HTML)
+        the section's HTML subtree is sliced between its anchors via
+        :mod:`edgar.documents.utils.section_slicer` (which preserves
+        ``<table>``/``<tbody>`` structure and de-duplicates nested
+        tables), re-parsed, and rendered. If that slice yields nothing
+        usable, this falls back to :meth:`text` so callers never get a
+        regression versus the plain-text output.
+        """
+        if self.detection_method == 'toc' and self._text_extractor is not None:
+            rendered = self._markdown_from_toc_section()
+            if rendered:
+                return self._clean_boundary_artifacts(rendered)
+            # Slice produced nothing usable — fall back to plain text so
+            # callers get correct content rather than an empty string.
+            return self.text()
+
+        # Heading/pattern-based sections: render the cached node tree.
+        # Apply the same boundary-artifact cleanup as `text()` so page
+        # numbers and bleed-in next-item headers don't leak into the
+        # markdown output.
+        from edgar.documents.renderers.markdown import MarkdownRenderer
+        renderer = MarkdownRenderer()
+        rendered = renderer.render_node(self.node)
+        return self._clean_boundary_artifacts(rendered)
+
+    def _markdown_from_toc_section(self) -> Optional[str]:
+        """Render a TOC-based section to Markdown by slicing its HTML subtree.
+
+        Slices the section HTML between anchors (preserving table/list
+        structure via :mod:`section_slicer`), re-parses it into a node tree,
+        and renders that tree to Markdown. Returns ``None`` on any failure so
+        :meth:`markdown` can fall back to :meth:`text`.
+        """
+        if self._html_source is None or self._section_extractor is None:
+            return None
+        try:
+            from edgar.documents.config import ParserConfig
+            from edgar.documents.parser import HTMLParser
+            from edgar.documents.renderers.markdown import MarkdownRenderer
+
+            section_html = self._extract_section_html(self._section_extractor, self._html_source)
+            if not section_html:
+                return None
+
+            # Re-parse the section subtree into a node tree (section detection
+            # off — we already know this is one section) and render it.
+            parsed = HTMLParser(ParserConfig(detect_sections=False)).parse(section_html)
+            rendered = MarkdownRenderer().render_node(parsed.root)
+            return rendered or None
+        except Exception as e:  # noqa: BLE001 — markdown is best-effort; text() is the safety net
+            logger.debug(f"TOC markdown render failed for section '{self.name}': {e}")
+            return None
 
     def _clean_boundary_artifacts(self, text: str) -> str:
         """
@@ -134,10 +235,10 @@ class Section:
         # Pattern: page number followed by PART header followed by Item number
         # e.g., "\n\n  16\n\n  PART I\n\nItem 1A\n\n" (this is a page break artifact)
         text = re.sub(
-            r'\n\s*\d{1,3}\s*\n\s*PART\s+[IVX]+\s*\n\s*Item\s+\d+[A-Za-z]?(?:,\s*\d+[A-Za-z]?)?\s*\n',
+            r'\n\s*\d{1,3}\s*\n\s*(?:#{1,6}\s+|\*\*\s*)?PART\s+[IVX]+(?:\s*\*\*)?\s*\n\s*(?:#{1,6}\s+|\*\*\s*)?Item\s+\d+[A-Za-z]?(?:\\?\.)?(?:,\s*\d+[A-Za-z]?(?:\\?\.)?)?(?:\s*\*\*)?\s*\n',
             '\n\n',
             text,
-            flags=re.IGNORECASE
+            flags=re.IGNORECASE,
         )
 
         # 1b. Remove interior page headers for 20-F (Table of Contents format)
@@ -152,12 +253,15 @@ class Section:
 
         # 2a. Remove trailing page footer for 10-K/10-Q (PART + Item at end)
         # Pattern: page number + PART + Item header at end (next section bleeding in)
-        # e.g., "\n\n  29\n\n  PART I\n\nItem 1B, 1C" at end
+        # e.g., "\n\n  29\n\n  PART I\n\nItem 1B, 1C" at end. Optional
+        # markdown decorations (``#``, ``**``) and backslash-escaped
+        # periods accommodate ``MarkdownRenderer`` output where each
+        # of PART or Item may have been rendered as a heading or bold.
         text = re.sub(
-            r'\n\s*\d{1,3}\s*\n\s*PART\s+[IVX]+\s*\n\s*Item\s+\d+[A-Za-z]?(?:,\s*\d+[A-Za-z]?)?\s*$',
+            r'\n\s*\d{1,3}\s*\n\s*(?:#{1,6}\s+|\*\*\s*)?PART\s+[IVX]+(?:\s*\*\*)?\s*\n\s*(?:#{1,6}\s+|\*\*\s*)?Item\s+\d+[A-Za-z]?(?:\\?\.)?(?:,\s*\d+[A-Za-z]?(?:\\?\.)?)?(?:\s*\*\*)?\s*$',
             '',
             text,
-            flags=re.IGNORECASE
+            flags=re.IGNORECASE,
         )
 
         # 2b. Remove trailing page footer for 20-F (Table of Contents at end)
@@ -168,10 +272,59 @@ class Section:
             flags=re.IGNORECASE
         )
 
+        # 2c. Remove a trailing "PART II ... OTHER INFORMATION" heading that
+        # bled into Part I's last item (Item 4, Controls and Procedures) in a
+        # 10-Q. Rules 2a/2b only fire when an ``Item N`` token follows the PART
+        # line, so this titled heading with no item number leaks through
+        # (GH #883). Constraints keep the strip precise:
+        #   - Literal ``PART II`` (not ``[IVXLC]+``): "PART II — OTHER
+        #     INFORMATION" is 10-Q/10-K-specific, so this never touches a
+        #     legitimate ``PART C — OTHER INFORMATION`` heading in S-1 / N-1A /
+        #     N-2 filings (the cleaner runs for every form).
+        #   - ``\W*?`` between the numeral and the title admits only non-word
+        #     separators (a real space, an em-dash, none at all, a mojibake
+        #     byte, or a line break for a two-line render — ``\W`` includes
+        #     ``\n``) but cannot cross body words, so prose such as "Part II
+        #     contains other information" is left intact.
+        #   - ``\b.*$`` absorbs trailing punctuation/qualifiers on the heading
+        #     line ("OTHER INFORMATION.", "(UNAUDITED)", a page ref, markdown
+        #     ``**``). ``.`` never crosses ``\n`` (no DOTALL).
+        # A letter-only mojibake separator (e.g. a mis-decoded em-dash that
+        # yields a Unicode letter) is deliberately not matched — the heading
+        # survives rather than risk deleting real content.
+        text = re.sub(
+            r'\n\s*(?:#{1,6}\s+|\*\*\s*)?PART\s+II\W*?OTHER\s+INFORMATION\b.*$',
+            '',
+            text,
+            flags=re.IGNORECASE,
+        )
+
         # 3. Remove trailing Item headers if they appear at the very end
-        # (without preceding PART header)
-        # e.g., "\n\nItem 15" or "\n\nITEM 15."
-        text = re.sub(r'\n\s*Item\s+\d+[A-Za-z]?\.?\s*$', '', text, flags=re.IGNORECASE)
+        # (without preceding PART header). Matches:
+        #   - "Item 15", "ITEM 15."  (plain text)
+        #   - "Item 15\."            (markdown-escaped period)
+        #   - "# Item 15", "## Item 15"  (markdown heading)
+        #   - "**Item 15**", "**Item 15.**"  (markdown bold)
+        # The ``MarkdownRenderer`` can produce any of these depending on
+        # how the next-item bleed-in was structured in the HTML.
+        text = re.sub(
+            r'\n\s*#{1,6}\s*Item\s+\d+[A-Za-z]?(?:\\?\.)?\s*$',
+            '',
+            text,
+            flags=re.IGNORECASE,
+        )
+        text = re.sub(
+            r'\n\s*\*\*\s*Item\s+\d+[A-Za-z]?(?:\\?\.)?\s*\*\*\s*$',
+            '',
+            text,
+            flags=re.IGNORECASE,
+        )
+        text = re.sub(
+            r'\n\s*Item\s+\d+[A-Za-z]?(?:\\?\.)?\s*$',
+            '',
+            text,
+            flags=re.IGNORECASE,
+        )
 
         # 4. Remove trailing page numbers: whitespace followed by 1-3 digits at end
         # e.g., "\n\n  100" or "\n  92"
@@ -238,60 +391,32 @@ class Section:
             return []
 
     def _extract_section_html(self, extractor, html_source: str) -> str:
-        """Extract HTML content for this section from full document HTML."""
+        """Extract HTML content for this section from full document HTML.
+
+        Delegates to the centralized anchor-to-anchor slicing primitive
+        (:mod:`edgar.documents.utils.section_slicer`), which handles the
+        top-level-only serialization that prevents nested-table duplication
+        (issue #826) and repairs orphaned table-row fragments so they survive
+        a round-trip through the parser. Reuses the extractor's cached lxml
+        tree when available.
+        """
         try:
             import lxml.html as lxml_html
-            from lxml import etree
-            import re
-
-            # Handle XML declaration
-            if html_source.startswith('<?xml'):
-                html_source = re.sub(r'<\?xml[^>]*\?>', '', html_source, count=1)
-
-            tree = lxml_html.fromstring(html_source)
+            from edgar.documents.utils.section_slicer import extract_section_html
 
             # Get section boundary info
             if self.name not in extractor.section_boundaries:
                 return ""
-
             boundary = extractor.section_boundaries[self.name]
 
-            # Find start anchor by id or legacy name attribute
-            start_elements = find_anchor_targets(tree, boundary.anchor_id)
-            if not start_elements:
-                return ""
+            # Reuse the extractor's cached tree; fall back to parsing.
+            tree = getattr(extractor, '_tree', None)
+            if tree is None:
+                if html_source.startswith('<?xml'):
+                    html_source = re.sub(r'<\?xml[^>]*\?>', '', html_source, count=1)
+                tree = lxml_html.fromstring(html_source)
 
-            # Collect all elements between start and end anchors
-            collected_elements = []
-            in_range = False
-
-            for event, el in etree.iterwalk(tree, events=('start',)):
-                if not hasattr(el, 'get'):
-                    continue
-
-                # Check if we've reached the start anchor
-                if is_anchor_match(el, boundary.anchor_id):
-                    in_range = True
-                    continue
-
-                # Check if we've reached the end boundary
-                if boundary.end_element_id and is_anchor_match(el, boundary.end_element_id):
-                    break
-
-                # Collect elements in range
-                if in_range:
-                    collected_elements.append(el)
-
-            # Convert collected elements back to HTML string
-            html_parts = []
-            for elem in collected_elements:
-                try:
-                    html_parts.append(lxml_html.tostring(elem, encoding='unicode'))
-                except (LxmlError, TypeError, AttributeError) as e:
-                    logger.debug(f"Failed to serialize element in section '{self.name}': {e}")
-                    continue
-
-            return ''.join(html_parts)
+            return extract_section_html(tree, boundary.anchor_id, boundary.end_element_id)
 
         except (LxmlError, XMLSyntaxError, ValueError) as e:
             logger.debug(f"HTML extraction failed for section '{self.name}': {e}")
@@ -504,6 +629,28 @@ class Sections(Dict[str, Section]):
 
         return None
 
+    def named(self, name: str) -> Optional[Section]:
+        """Get a non-item *named* section (e.g. "Signatures") by name.
+
+        The companion to :meth:`get_item` for sections that carry no SEC Item
+        number. Matches the name token case-insensitively, ignoring any
+        ``part_<roman>_`` prefix, so ``named("signatures")`` resolves
+        ``part_iv_signatures`` (or a bare ``signatures`` key). Returns ``None``
+        if no named section matches.
+
+        Examples:
+            >>> sections.named("signatures")          # the Signatures Section
+            >>> sections.named("Signatures").text()   # the signature block text
+        """
+        target = name.strip().lower().replace(" ", "_")
+        for key, section in self.items():
+            if section.kind != "named":
+                continue
+            token = re.sub(r'^part_[ivxlcdm]+_', '', key.lower())
+            if token == target:
+                return section
+        return None
+
     def get_part(self, part: str) -> Dict[str, Section]:
         """
         Get all sections in a specific part.
@@ -595,6 +742,91 @@ class Sections(Dict[str, Section]):
         # Not found - raise KeyError
         raise KeyError(key)
 
+    def __contains__(self, key) -> bool:
+        """Membership mirrors __getitem__'s flexible resolution.
+
+        A bare ``"Item 1"`` / ``"1A"`` or a ``(part, item)`` tuple counts as
+        present whenever the corresponding section exists, even though the stored
+        key is the canonical ``"part_i_item_1"`` form. This keeps
+        ``"Item 1" in sections`` working after item keys gained canonical part
+        prefixes (edgartools-3usf).
+        """
+        if isinstance(key, str):
+            if super().__contains__(key):
+                return True
+            return self.get_item(key) is not None
+        if isinstance(key, tuple) and len(key) == 2:
+            part, item = key
+            return self.get_item(item, part) is not None
+        return super().__contains__(key)
+
+
+def _flatten_column_name(col) -> str:
+    """Render one column key as a single string.
+
+    A MultiIndex key arrives as a tuple of header-row texts, and the levels
+    repeat constantly — a header spanning two rows gives ``('Revenue',
+    'Revenue')`` and an unlabelled second row gives ``('Revenue', '')``. Blanks
+    are dropped and consecutive repeats collapsed, so both become ``'Revenue'``
+    rather than ``'Revenue Revenue'`` or ``'Revenue '``.
+    """
+    parts = col if isinstance(col, tuple) else (col,)
+    out = []
+    for part in parts:
+        text = '' if part is None else ' '.join(str(part).split())
+        if text and (not out or out[-1] != text):
+            out.append(text)
+    return ' '.join(out)
+
+
+def _flatten_table_frame(df: 'pd.DataFrame') -> 'pd.DataFrame':
+    """Give one table's frame flat, unique, string column names and a clean index.
+
+    Three things make per-table frames unstackable, and all three are handled
+    here rather than at the concat, where pandas can only report them as an
+    alignment failure deep inside its own internals.
+    """
+    import pandas as pd
+
+    df = df.copy()
+
+    # A table with row headers has its label column moved into the index by
+    # TableNode.to_dataframe. Concatenating with ignore_index=True would throw
+    # those labels away silently, so the column comes back as data.
+    #
+    # allow_duplicates because the label's name legitimately collides: a table
+    # captioned 'In millions of dollars' often carries that same text as a
+    # column header too, and Citigroup's and Morgan Stanley's 10-Ks both do.
+    # The rename pass below makes it unique; refusing the insert would lose the
+    # row labels entirely.
+    if not isinstance(df.index, pd.RangeIndex):
+        label = _flatten_column_name(df.index.name) or 'row_label'
+        # A multi-level row index yields tuples, which pandas cannot store as a
+        # single column ('Index data must be 1-dimensional' — Tesla's 10-K).
+        # Flatten them the same way column keys are flattened.
+        if df.index.nlevels > 1:
+            values = [_flatten_column_name(key) for key in df.index]
+        else:
+            values = list(df.index)
+        df.insert(0, label, values, allow_duplicates=True)
+    df = df.reset_index(drop=True)
+
+    # Flat, string, and unique. Duplicate header texts are ordinary in filings
+    # ('' repeated across spacer columns), and duplicate names would make the
+    # concatenated frame ambiguous to index into.
+    seen: Dict[str, int] = {}
+    names = []
+    for position, col in enumerate(df.columns):
+        name = _flatten_column_name(col) or f'column_{position}'
+        if name in seen:
+            seen[name] += 1
+            name = f'{name}.{seen[name]}'
+        else:
+            seen[name] = 0
+        names.append(name)
+    df.columns = pd.Index(names, dtype=object)
+    return df
+
 
 @dataclass
 class Document:
@@ -616,6 +848,38 @@ class Document:
     _xbrl_facts: Optional[List[XBRLFact]] = field(default=None, init=False, repr=False)
     _text_cache: Optional[str] = field(default=None, init=False, repr=False)
     _config: Optional[Any] = field(default=None, init=False, repr=False)  # ParserConfig reference
+    _section_extractor: Optional[Any] = field(default=None, init=False, repr=False)  # cached SECSectionExtractor
+    _nav_patterns: Optional[frozenset] = field(default=None, init=False, repr=False)  # cached navigation patterns
+
+    def _get_navigation_patterns(self) -> frozenset:
+        """Navigation link texts to filter out of extracted text, resolved once.
+
+        Resolution is keyed by an md5 of the entire filing, so it costs an
+        encode plus a hash of every byte — 340ms per call on a 9.8MB 10-K. The
+        section extractor filters once per section, which re-derived that key
+        ~25 times per document to prove it had not changed; against a sections
+        stage that is now ~1.1s on the same filing, that was its single largest
+        remaining item (edgartools-llmp.9).
+
+        Cached on the document rather than inside the pattern cache because the
+        HTML is a plain ``str``, which supports neither weak references nor
+        attributes, so there is nowhere on the key itself to hang a memo. The
+        document owns the HTML and dies with it, which is the same lifetime and
+        the same invalidation story as the anchor index.
+        """
+        if self._nav_patterns is None:
+            from edgar.documents.utils.anchor_cache import resolve_navigation_patterns
+            html = getattr(self.metadata, 'original_html', None)
+            # frozenset() is falsy but not None, so a document that genuinely
+            # has no repeated navigation links is cached, not re-resolved.
+            self._nav_patterns = frozenset(resolve_navigation_patterns(html))
+        return self._nav_patterns
+
+    def __getstate__(self) -> Dict[str, Any]:
+        """Materialize lazy metadata before serializing a stable document state."""
+        if "_statistics_loader" in self.metadata.__dict__:
+            _ = self.metadata.statistics
+        return self.__dict__.copy()
 
     @property
     def sections(self) -> Sections:
@@ -624,8 +888,10 @@ class Document:
 
         Tries detection methods in order of reliability:
         1. TOC-based (0.95 confidence)
-        2. Heading-based (0.7-0.9 confidence)
-        3. Pattern-based (0.6 confidence)
+        2. Cross Reference Index (0.85 confidence) — 10-K filers who map items to
+           printed page ranges instead of labelling them in the body (Citigroup)
+        3. Heading-based (0.7-0.9 confidence)
+        4. Pattern-based (0.6 confidence)
 
         Returns a Sections dictionary wrapper that provides rich terminal display
         via __rich__() method. Each section includes confidence score and detection method.
@@ -642,7 +908,19 @@ class Document:
             # Normalize form type by removing /A suffix for amendments
             base_form = form.replace('/A', '') if form else None
 
-            if base_form and base_form in ['10-K', '10-Q', '8-K', '20-F']:
+            # Route through the anchor-first hybrid detector for Item-based forms
+            # AND for anchored title-based forms (424B prospectuses, flagged by the
+            # schema). The hybrid is TOC-first with heading+pattern as a universal
+            # fallback, so a prospectus with a real TOC gets clean anchor-bounded
+            # sections (dissolving the GH #871 pattern-extractor content-bleed),
+            # while a flat prospectus falls through to the same pattern output as
+            # before. Item-form routing is unchanged (edgartools-llmp.3).
+            from edgar.documents.form_schema import get_form_schema
+            use_hybrid = bool(base_form) and (
+                base_form in ['10-K', '10-Q', '8-K', '20-F']
+                or get_form_schema(base_form).title_based
+            )
+            if use_hybrid:
                 from edgar.documents.extractors.hybrid_section_detector import HybridSectionDetector
                 # Pass thresholds from config if available
                 thresholds = self._config.detection_thresholds if self._config else None
@@ -727,10 +1005,9 @@ class Document:
         if clean:
             # Use cached/integrated navigation filtering (optimized approach)
             try:
-                from edgar.documents.utils.anchor_cache import filter_with_cached_patterns
+                from edgar.documents.utils.anchor_cache import filter_navigation_lines
                 # Use minimal cached approach (no memory overhead)
-                original_html = getattr(self.metadata, 'original_html', None)
-                text = filter_with_cached_patterns(text, html_content=original_html)
+                text = filter_navigation_lines(text, self._get_navigation_patterns())
             except Exception:
                 # Fallback to pattern-based filtering
                 from edgar.documents.utils.toc_filter import filter_toc_links
@@ -794,16 +1071,14 @@ class Document:
             return section
 
         # If not found and looks like an item without part, check if we have multiple parts
-        # In that case, raise a helpful error
+        # In that case, raise a helpful error.
         if section_name.startswith("item_") or section_name.replace("_", "").startswith("item"):
-            # Check if we have part-aware sections (10-Q)
             matching_sections = [name for name in self.sections.keys()
                                if section_name in name and "part_" in name]
             if matching_sections:
-                # Multiple parts available - user needs to specify which one
                 parts = sorted(set(s.split("_")[1] for s in matching_sections if s.startswith("part_")))
                 raise ValueError(
-                    f"Ambiguous section '{section_name}' in 10-Q filing. "
+                    f"Ambiguous section '{section_name}'. "
                     f"Found in parts: {parts}. "
                     f"Please specify part: get_section('{section_name}', part='I') or part='II'"
                 )
@@ -816,6 +1091,46 @@ class Document:
         if section:
             return section.text()
         return None
+
+    def _resolve_form(self) -> Optional[str]:
+        """Resolve the filing form (config first, then metadata), /A-stripped.
+
+        Mirrors the resolution in the ``sections`` property so every section
+        consumer agrees on the form passed to the extractor.
+        """
+        form = None
+        if self._config and hasattr(self._config, 'form'):
+            form = self._config.form
+        elif self.metadata and self.metadata.form:
+            form = self.metadata.form
+        return form.replace('/A', '') if form else None
+
+    def _get_section_extractor(self, agent: Optional[str] = None,
+                               form: Optional[str] = None):
+        """Return the document's single cached ``SECSectionExtractor``.
+
+        Both the TOC detector (via ``document.sections``) and the
+        ``get_sec_section*`` API share one extractor per document, so the HTML
+        is parsed and the TOC analyzed exactly once. The first caller seeds it;
+        later callers reuse it regardless of their arguments. ``agent`` and
+        ``form`` are resolved here when not supplied — agent auto-detection and
+        form resolution match the hybrid detection path, so the shared instance
+        is identical to the one the hybrid path used to build itself.
+        """
+        if self._section_extractor is None:
+            from edgar.documents.extractors.toc_section_extractor import SECSectionExtractor
+            if form is None:
+                form = self._resolve_form()
+            if agent is None:
+                html = getattr(self.metadata, 'original_html', None) if self.metadata else None
+                if html:
+                    try:
+                        from edgar.documents.agents import detect_filing_agent
+                        agent = detect_filing_agent(html)
+                    except Exception:
+                        agent = None
+            self._section_extractor = SECSectionExtractor(self, agent=agent, form=form)
+        return self._section_extractor
 
     def get_sec_section(self, section_name: str, clean: bool = True,
                        include_subsections: bool = True) -> Optional[str]:
@@ -835,12 +1150,7 @@ class Document:
             >>> doc.get_sec_section("Item 1A") # Risk factors
             >>> doc.get_sec_section("Item 7")  # MD&A
         """
-        # Lazy-load section extractor
-        if not hasattr(self, '_section_extractor'):
-            from edgar.documents.extractors.toc_section_extractor import SECSectionExtractor
-            self._section_extractor = SECSectionExtractor(self)
-
-        return self._section_extractor.get_section_text(
+        return self._get_section_extractor().get_section_text(
             section_name, include_subsections, clean
         )
 
@@ -856,11 +1166,7 @@ class Document:
             >>> print(sections)
             ['Part I', 'Item 1', 'Item 1A', 'Item 1B', 'Item 2', ...]
         """
-        if not hasattr(self, '_section_extractor'):
-            from edgar.documents.extractors.toc_section_extractor import SECSectionExtractor
-            self._section_extractor = SECSectionExtractor(self)
-
-        return self._section_extractor.get_available_sections()
+        return self._get_section_extractor().get_available_sections()
 
     def get_sec_section_info(self, section_name: str) -> Optional[Dict]:
         """
@@ -872,11 +1178,7 @@ class Document:
         Returns:
             Dict with section metadata including anchor info
         """
-        if not hasattr(self, '_section_extractor'):
-            from edgar.documents.extractors.toc_section_extractor import SECSectionExtractor
-            self._section_extractor = SECSectionExtractor(self)
-
-        return self._section_extractor.get_section_info(section_name)
+        return self._get_section_extractor().get_section_info(section_name)
 
     def to_markdown(self) -> str:
         """Convert document to Markdown."""
@@ -925,28 +1227,45 @@ class Document:
 
     def to_dataframe(self) -> 'pd.DataFrame':
         """
-        Convert document tables to pandas DataFrame.
+        Convert document tables to a single DataFrame, one row per table row.
 
-        Returns a DataFrame with all tables concatenated.
+        Every table in the document is flattened to string column names and
+        stacked, with ``_table_index``, ``_table_type`` and ``_table_caption``
+        recording where each row came from. Columns that only some tables have
+        are null elsewhere, as in any concatenation of differently-shaped frames.
+
+        This is a *document*-level export and is deliberately lossier than
+        :meth:`TableNode.to_dataframe`, which keeps a table's real header
+        structure. A 10-K's tables do not share a schema — Meta's FY2024 10-K
+        has 71 tables whose column indexes are 1, 2, 3, 4, 10 and 17 levels deep
+        — and pandas cannot align a flat Index with a MultiIndex, or two
+        MultiIndexes of different depths. Concatenating them unflattened raised
+        from inside pandas/numpy (``cannot join with no overlapping index
+        names``, ``Cannot cast array data ... according to the rule 'safe'``,
+        ``Index data must be 1-dimensional``) on every real filing tried
+        (bead edgartools-y9it). Reach for ``document.tables[i].to_dataframe()``
+        when a single table's header structure matters.
         """
         import pandas as pd
 
         if not self.tables:
             return pd.DataFrame()
 
-        # Convert each table to DataFrame
         dfs = []
         for i, table in enumerate(self.tables):
-            df = table.to_dataframe()
-            # Add table index
+            df = _flatten_table_frame(table.to_dataframe())
             df['_table_index'] = i
             df['_table_type'] = table.table_type.name
-            if table.caption:
-                df['_table_caption'] = table.caption
+            df['_table_caption'] = table.caption if table.caption else None
             dfs.append(df)
 
-        # Concatenate all tables
-        return pd.concat(dfs, ignore_index=True)
+        # Frames with no rows carry no data but do contribute their columns, and
+        # a 0-row frame's dtypes are all object, which would coerce a real
+        # numeric column to object in the result.
+        non_empty = [df for df in dfs if len(df)]
+        if not non_empty:
+            return pd.DataFrame(columns=['_table_index', '_table_type', '_table_caption'])
+        return pd.concat(non_empty, ignore_index=True)
 
     def chunks(self, chunk_size: int = 512, overlap: int = 128) -> Iterator['DocumentChunk']:
         """

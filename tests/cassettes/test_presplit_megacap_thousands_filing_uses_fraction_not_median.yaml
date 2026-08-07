@@ -1,0 +1,93 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/1619124/000161912421000002/0001619124-21-000002.txt
+  response:
+    body:
+      string: "<SEC-DOCUMENT>0001619124-21-000002.txt : 20210212\n<SEC-HEADER>0001619124-21-000002.hdr.sgml
+        : 20210212\n<ACCEPTANCE-DATETIME>20210212100642\nACCESSION NUMBER:\t\t0001619124-21-000002\nCONFORMED
+        SUBMISSION TYPE:\t13F-HR\nPUBLIC DOCUMENT COUNT:\t\t2\nCONFORMED PERIOD OF
+        REPORT:\t20201231\nFILED AS OF DATE:\t\t20210212\nDATE AS OF CHANGE:\t\t20210212\nEFFECTIVENESS
+        DATE:\t\t20210212\n\nFILER:\n\n\tCOMPANY DATA:\t\n\t\tCOMPANY CONFORMED NAME:\t\t\tACTIAM
+        N.V.\n\t\tCENTRAL INDEX KEY:\t\t\t0001619124\n\t\tIRS NUMBER:\t\t\t\t000000000\n\t\tSTATE
+        OF INCORPORATION:\t\t\tP7\n\t\tFISCAL YEAR END:\t\t\t1231\n\n\tFILING VALUES:\n\t\tFORM
+        TYPE:\t\t13F-HR\n\t\tSEC ACT:\t\t1934 Act\n\t\tSEC FILE NUMBER:\t028-19140\n\t\tFILM
+        NUMBER:\t\t21623688\n\n\tBUSINESS ADDRESS:\t\n\t\tSTREET 1:\t\tPO BOX 679\n\t\tCITY:\t\t\tUTRECHT\n\t\tSTATE:\t\t\tP7\n\t\tZIP:\t\t\t3500
+        AR\n\t\tBUSINESS PHONE:\t\t31205436159\n\n\tMAIL ADDRESS:\t\n\t\tSTREET 1:\t\tPO
+        BOX 679\n\t\tCITY:\t\t\tUTRECHT\n\t\tSTATE:\t\t\tP7\n\t\tZIP:\t\t\t3500 AR\n</SEC-HEADER>\n<DOCUMENT>\n<TYPE>13F-HR\n<SEQUENCE>1\n<FILENAME>primary_doc.xml\n<TEXT>\n<XML>\n<?xml
+        version=\"1.0\" encoding=\"UTF-8\"?>\n<edgarSubmission xmlns=\"http://www.sec.gov/edgar/thirteenffiler\"
+        xmlns:com=\"http://www.sec.gov/edgar/common\">\n  <headerData>\n    <submissionType>13F-HR</submissionType>\n
+        \   <filerInfo>\n      <liveTestFlag>LIVE</liveTestFlag>\n      <flags>\n
+        \       <confirmingCopyFlag>false</confirmingCopyFlag>\n        <returnCopyFlag>false</returnCopyFlag>\n
+        \       <overrideInternetFlag>false</overrideInternetFlag>\n      </flags>\n
+        \     <filer>\n        <credentials>\n          <cik>0001619124</cik>\n          <ccc>XXXXXXXX</ccc>\n
+        \       </credentials>\n      </filer>\n      <periodOfReport>12-31-2020</periodOfReport>\n
+        \   </filerInfo>\n  </headerData>\n  <formData>\n    <coverPage>\n      <reportCalendarOrQuarter>12-31-2020</reportCalendarOrQuarter>\n
+        \     <filingManager>\n        <name>ACTIAM N.V.</name>\n        <address>\n
+        \         <com:street1>PO BOX 679</com:street1>\n          <com:city>UTRECHT</com:city>\n
+        \         <com:stateOrCountry>P7</com:stateOrCountry>\n          <com:zipCode>3500
+        AR</com:zipCode>\n        </address>\n      </filingManager>\n      <reportType>13F
+        HOLDINGS REPORT</reportType>\n      <form13FFileNumber>028-19140</form13FFileNumber>\n
+        \     <provideInfoForInstruction5>N</provideInfoForInstruction5>\n    </coverPage>\n
+        \   <signatureBlock>\n      <name>Dudley Keiller</name>\n      <title>CFRO</title>\n
+        \     <phone>31205436153</phone>\n      <signature>0001619124</signature>\n
+        \     <city>Amsterdam</city>\n      <stateOrCountry>P7</stateOrCountry>\n
+        \     <signatureDate>02-12-2021</signatureDate>\n    </signatureBlock>\n    <summaryPage>\n
+        \     <otherIncludedManagersCount>0</otherIncludedManagersCount>\n      <tableEntryTotal>5</tableEntryTotal>\n
+        \     <tableValueTotal>732158</tableValueTotal>\n      <isConfidentialOmitted>false</isConfidentialOmitted>\n
+        \   </summaryPage>\n  </formData>\n</edgarSubmission>\n</XML>\n</TEXT>\n</DOCUMENT>\n<DOCUMENT>\n<TYPE>INFORMATION
+        TABLE\n<SEQUENCE>2\n<FILENAME>Q4202013FHOLDINGSACTIAMNV.xml\n<TEXT>\n<XML>\n<?xml
+        version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<ns1:informationTable
+        xmlns:ns1=\"http://www.sec.gov/edgar/document/thirteenf/informationtable\">\n\t<ns1:infoTable>\n\t\t<ns1:nameOfIssuer>APPLE
+        INC</ns1:nameOfIssuer>\n\t\t<ns1:titleOfClass>Common stock</ns1:titleOfClass>\n\t\t<ns1:cusip>037833100</ns1:cusip>\n\t\t<ns1:value>230054</ns1:value>\n\t\t<ns1:shrsOrPrnAmt>\n\t\t\t<ns1:sshPrnamt>1733777</ns1:sshPrnamt>\n\t\t\t<ns1:sshPrnamtType>SH</ns1:sshPrnamtType>\n\t\t</ns1:shrsOrPrnAmt>\n\t\t<ns1:investmentDiscretion>SOLE</ns1:investmentDiscretion>\n\t\t<ns1:votingAuthority>\n\t\t\t<ns1:Sole>1733777</ns1:Sole>\n\t\t\t<ns1:Shared>0</ns1:Shared>\n\t\t\t<ns1:None>0</ns1:None>\n\t\t</ns1:votingAuthority>\n\t</ns1:infoTable>\n\t<ns1:infoTable>\n\t\t<ns1:nameOfIssuer>ALPHABET
+        INC</ns1:nameOfIssuer>\n\t\t<ns1:titleOfClass>Common stock C</ns1:titleOfClass>\n\t\t<ns1:cusip>02079K107</ns1:cusip>\n\t\t<ns1:value>66793</ns1:value>\n\t\t<ns1:shrsOrPrnAmt>\n\t\t\t<ns1:sshPrnamt>38127</ns1:sshPrnamt>\n\t\t\t<ns1:sshPrnamtType>SH</ns1:sshPrnamtType>\n\t\t</ns1:shrsOrPrnAmt>\n\t\t<ns1:investmentDiscretion>SOLE</ns1:investmentDiscretion>\n\t\t<ns1:votingAuthority>\n\t\t\t<ns1:Sole>38127</ns1:Sole>\n\t\t\t<ns1:Shared>0</ns1:Shared>\n\t\t\t<ns1:None>0</ns1:None>\n\t\t</ns1:votingAuthority>\n\t</ns1:infoTable>\n\t<ns1:infoTable>\n\t\t<ns1:nameOfIssuer>ALPHABET
+        INC</ns1:nameOfIssuer>\n\t\t<ns1:titleOfClass>Common stock A</ns1:titleOfClass>\n\t\t<ns1:cusip>02079K305</ns1:cusip>\n\t\t<ns1:value>58769</ns1:value>\n\t\t<ns1:shrsOrPrnAmt>\n\t\t\t<ns1:sshPrnamt>33532</ns1:sshPrnamt>\n\t\t\t<ns1:sshPrnamtType>SH</ns1:sshPrnamtType>\n\t\t</ns1:shrsOrPrnAmt>\n\t\t<ns1:investmentDiscretion>SOLE</ns1:investmentDiscretion>\n\t\t<ns1:votingAuthority>\n\t\t\t<ns1:Sole>33532</ns1:Sole>\n\t\t\t<ns1:Shared>0</ns1:Shared>\n\t\t\t<ns1:None>0</ns1:None>\n\t\t</ns1:votingAuthority>\n\t</ns1:infoTable>\n\t<ns1:infoTable>\n\t\t<ns1:nameOfIssuer>MICROSOFT
+        CORP</ns1:nameOfIssuer>\n\t\t<ns1:titleOfClass>Common stock</ns1:titleOfClass>\n\t\t<ns1:cusip>594918104</ns1:cusip>\n\t\t<ns1:value>224483</ns1:value>\n\t\t<ns1:shrsOrPrnAmt>\n\t\t\t<ns1:sshPrnamt>1009277</ns1:sshPrnamt>\n\t\t\t<ns1:sshPrnamtType>SH</ns1:sshPrnamtType>\n\t\t</ns1:shrsOrPrnAmt>\n\t\t<ns1:investmentDiscretion>SOLE</ns1:investmentDiscretion>\n\t\t<ns1:votingAuthority>\n\t\t\t<ns1:Sole>1009277</ns1:Sole>\n\t\t\t<ns1:Shared>0</ns1:Shared>\n\t\t\t<ns1:None>0</ns1:None>\n\t\t</ns1:votingAuthority>\n\t</ns1:infoTable>\n\t<ns1:infoTable>\n\t\t<ns1:nameOfIssuer>AMAZON.COM
+        INC</ns1:nameOfIssuer>\n\t\t<ns1:titleOfClass>Common stock</ns1:titleOfClass>\n\t\t<ns1:cusip>023135106</ns1:cusip>\n\t\t<ns1:value>152059</ns1:value>\n\t\t<ns1:shrsOrPrnAmt>\n\t\t\t<ns1:sshPrnamt>46688</ns1:sshPrnamt>\n\t\t\t<ns1:sshPrnamtType>SH</ns1:sshPrnamtType>\n\t\t</ns1:shrsOrPrnAmt>\n\t\t<ns1:investmentDiscretion>SOLE</ns1:investmentDiscretion>\n\t\t<ns1:votingAuthority>\n\t\t\t<ns1:Sole>46688</ns1:Sole>\n\t\t\t<ns1:Shared>0</ns1:Shared>\n\t\t\t<ns1:None>0</ns1:None>\n\t\t</ns1:votingAuthority>\n\t</ns1:infoTable>\n</ns1:informationTable>\n</XML>\n</TEXT>\n</DOCUMENT>\n</SEC-DOCUMENT>\n"
+    headers:
+      accept-ranges:
+      - bytes
+      content-length:
+      - '5804'
+      content-type:
+      - text/plain
+      date:
+      - Fri, 29 May 2026 19:45:45 GMT
+      etag:
+      - '"eacb154cd57b4dd2aa1e9ccd8254032b-gzip"'
+      last-modified:
+      - Fri, 12 Feb 2021 15:07:32 GMT
+      strict-transport-security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      vary:
+      - Accept-Encoding
+      x-amz-id-2:
+      - qk3b3BWbvheT/5QtTNOTJGxLSV5ULAeKvESkLSNubu48GvO4z/6ZYaS+BiytR8wvc/Ei87OxkIXKZY1OZsbgpshF1KTlm1ok
+      x-amz-meta-mode:
+      - '33188'
+      x-amz-replication-status:
+      - COMPLETED
+      x-amz-request-id:
+      - WVA54MJRP40QENEK
+      x-amz-version-id:
+      - WGSv1F6Zw5.aDaGKsCBrBBD1yWWqrosV
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: null
+version: 1

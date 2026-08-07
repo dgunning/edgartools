@@ -225,17 +225,17 @@ class StatementTypeSelector:
         return [instant_periods[0]]
 
     def select_income_statement_periods(self, xbrl: XBRL, doc_period_end_date: Optional[date],
-                                      fiscal_period: str) -> List[Dict]:
+                                      fiscal_period: str, include_quarterly: bool = False) -> List[Dict]:
         """Select duration periods for income statements"""
-        return self._select_duration_periods(xbrl, doc_period_end_date, fiscal_period)
+        return self._select_duration_periods(xbrl, doc_period_end_date, fiscal_period, include_quarterly)
 
     def select_cash_flow_periods(self, xbrl: XBRL, doc_period_end_date: Optional[date],
-                               fiscal_period: str) -> List[Dict]:
+                               fiscal_period: str, include_quarterly: bool = False) -> List[Dict]:
         """Select duration periods for cash flow statements"""
-        return self._select_duration_periods(xbrl, doc_period_end_date, fiscal_period)
+        return self._select_duration_periods(xbrl, doc_period_end_date, fiscal_period, include_quarterly)
 
     def _select_duration_periods(self, xbrl: XBRL, doc_period_end_date: Optional[date],
-                               fiscal_period: str) -> List[Dict]:
+                               fiscal_period: str, include_quarterly: bool = False) -> List[Dict]:
         """Common logic for selecting duration periods"""
         # Filter for duration periods only
         duration_periods = [p for p in xbrl.reporting_periods if p['type'] == 'duration']
@@ -271,7 +271,7 @@ class StatementTypeSelector:
                     continue
 
             if matching_periods:
-                return self._select_appropriate_durations(matching_periods, fiscal_period)
+                return self._select_appropriate_durations(matching_periods, fiscal_period, include_quarterly)
             else:
                 # No exact match found - don't use fallback
                 logger.info("No exact duration period match found for %s", doc_period_end_date)
@@ -280,8 +280,14 @@ class StatementTypeSelector:
         # No document_period_end_date - use fallback logic
         return self._select_fallback_periods(enriched_periods, fiscal_period)
 
-    def _select_appropriate_durations(self, periods: List[Dict], fiscal_period: str) -> List[Dict]:
-        """Select appropriate duration periods based on fiscal period"""
+    def _select_appropriate_durations(self, periods: List[Dict], fiscal_period: str,
+                                      include_quarterly: bool = False) -> List[Dict]:
+        """Select appropriate duration periods based on fiscal period.
+
+        When ``include_quarterly`` is True, surfaces both quarterly and longer
+        (YTD/annual) periods side-by-side for the same filing — addressing
+        GH #780 (XBRLS quarterly column parity with single-filing XBRL).
+        """
         selected_periods = []
 
         is_annual = fiscal_period == 'FY'
@@ -291,6 +297,12 @@ class StatementTypeSelector:
             annual_periods = self.classifier.classify_annual_periods(periods)
             if annual_periods:
                 selected_periods.append(annual_periods[0])
+            # Also surface the discrete Q4 period (90-day) when requested.
+            # 10-Ks include this period in the same filing alongside the annual.
+            if include_quarterly:
+                quarterly_periods = self.classifier.classify_quarterly_periods(periods)
+                if quarterly_periods:
+                    selected_periods.append(quarterly_periods[0])
         else:
             # For quarterly reports, select the period with more data (Issue #475)
             # Some companies (e.g., PYPL) tag full detail to YTD periods rather than
@@ -298,11 +310,20 @@ class StatementTypeSelector:
             quarterly_periods = self.classifier.classify_quarterly_periods(periods)
             ytd_periods = self.classifier.classify_ytd_periods(periods, fiscal_period)
 
-            # If we have both, select the one that appears to have more data
-            # (by checking if it's the longest duration, which typically has more facts tagged)
-            if quarterly_periods and ytd_periods:
-                # YTD has longer duration, so if it exists, it likely has more data
-                # This matches regular statement behavior for companies like PYPL
+            if include_quarterly:
+                # Surface both quarterly and YTD when requested (GH #780).
+                # Quarterly first so it leads in column ordering.
+                if quarterly_periods:
+                    selected_periods.append(quarterly_periods[0])
+                if ytd_periods:
+                    selected_periods.append(ytd_periods[0])
+                # Edge case: neither classified (very rare); fall through.
+                if not selected_periods and quarterly_periods:
+                    selected_periods.append(quarterly_periods[0])
+            elif quarterly_periods and ytd_periods:
+                # Default behavior: YTD has longer duration, so if it exists,
+                # it likely has more data. This matches regular statement
+                # behavior for companies like PYPL.
                 selected_periods.append(ytd_periods[0])
             elif quarterly_periods:
                 # Only quarterly available
@@ -436,12 +457,13 @@ class PeriodOptimizer:
         self.deduplicator = PeriodDeduplicator()
 
     def determine_optimal_periods(self, xbrl_list: List[XBRL], statement_type: str,
-                                 max_periods: Optional[int] = None) -> List[Dict[str, Any]]:
+                                 max_periods: Optional[int] = None,
+                                 include_quarterly: bool = False) -> List[Dict[str, Any]]:
         """Main entry point - orchestrates the entire process"""
         max_periods = max_periods or self.config.max_periods_default
 
         # Step 1: Extract periods from all XBRLs
-        all_periods = self._extract_all_periods(xbrl_list, statement_type)
+        all_periods = self._extract_all_periods(xbrl_list, statement_type, include_quarterly)
 
         # Step 2: Enrich with metadata
         enriched_periods = self._enrich_with_metadata(all_periods)
@@ -451,7 +473,8 @@ class PeriodOptimizer:
 
         return final_periods
 
-    def _extract_all_periods(self, xbrl_list: List[XBRL], statement_type: str) -> List[Dict[str, Any]]:
+    def _extract_all_periods(self, xbrl_list: List[XBRL], statement_type: str,
+                             include_quarterly: bool = False) -> List[Dict[str, Any]]:
         """Extract periods from all XBRL objects"""
         all_periods = []
 
@@ -471,7 +494,7 @@ class PeriodOptimizer:
 
             # Select appropriate periods based on statement type
             selected_periods = self._select_periods_for_statement_type(
-                xbrl, statement_type, doc_period_end_date, fiscal_period
+                xbrl, statement_type, doc_period_end_date, fiscal_period, include_quarterly
             )
 
             # Add context information to each period
@@ -504,18 +527,23 @@ class PeriodOptimizer:
 
     def _select_periods_for_statement_type(self, xbrl: XBRL, statement_type: str,
                                          doc_period_end_date: Optional[date],
-                                         fiscal_period: str) -> List[Dict]:
+                                         fiscal_period: str,
+                                         include_quarterly: bool = False) -> List[Dict]:
         """Select periods based on statement type"""
         if statement_type == 'BalanceSheet':
+            # Balance sheet is instant-only; include_quarterly does not apply.
             return self.selector.select_balance_sheet_periods(xbrl, doc_period_end_date)
         elif statement_type in ['IncomeStatement', 'CashFlowStatement']:
             if statement_type == 'IncomeStatement':
-                return self.selector.select_income_statement_periods(xbrl, doc_period_end_date, fiscal_period)
+                return self.selector.select_income_statement_periods(
+                    xbrl, doc_period_end_date, fiscal_period, include_quarterly)
             else:
-                return self.selector.select_cash_flow_periods(xbrl, doc_period_end_date, fiscal_period)
+                return self.selector.select_cash_flow_periods(
+                    xbrl, doc_period_end_date, fiscal_period, include_quarterly)
         else:
             # For other statement types, use income statement logic as default
-            return self.selector.select_income_statement_periods(xbrl, doc_period_end_date, fiscal_period)
+            return self.selector.select_income_statement_periods(
+                xbrl, doc_period_end_date, fiscal_period, include_quarterly)
 
     def _enrich_with_metadata(self, all_periods: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Enrich periods with comprehensive metadata"""
@@ -551,7 +579,8 @@ class PeriodOptimizer:
 
 
 # Main function that maintains the original API
-def determine_optimal_periods(xbrl_list: List[XBRL], statement_type: str, max_periods: int = 8) -> List[Dict[str, Any]]:
+def determine_optimal_periods(xbrl_list: List[XBRL], statement_type: str, max_periods: int = 8,
+                              include_quarterly: bool = False) -> List[Dict[str, Any]]:
     """
     Determine the optimal periods to display for stitched statements from a list of XBRL objects.
 
@@ -563,9 +592,11 @@ def determine_optimal_periods(xbrl_list: List[XBRL], statement_type: str, max_pe
         xbrl_list: List of XBRL objects ordered chronologically
         statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
         max_periods: Maximum number of periods to return (default is 8)
+        include_quarterly: If True, surface discrete-quarter periods alongside YTD/annual
+            periods (GH #780). Default False preserves existing YTD-only/annual-only output.
 
     Returns:
         List of period metadata dictionaries containing information for display
     """
     optimizer = PeriodOptimizer()
-    return optimizer.determine_optimal_periods(xbrl_list, statement_type, max_periods)
+    return optimizer.determine_optimal_periods(xbrl_list, statement_type, max_periods, include_quarterly)

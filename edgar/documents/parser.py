@@ -2,6 +2,7 @@
 Main HTML parser implementation.
 """
 
+import logging
 import time
 from typing import List, Optional, Union
 
@@ -18,7 +19,13 @@ from edgar.documents.processors.preprocessor import HTMLPreprocessor
 from edgar.documents.strategies.document_builder import DocumentBuilder
 from edgar.documents.types import XBRLFact
 from edgar.documents.utils import get_cache_manager
-from edgar.documents.utils.html_utils import create_lxml_parser, remove_xml_declaration
+from edgar.documents.utils.html_utils import (
+    create_lxml_parser,
+    remove_xml_declaration,
+    terminate_unclosed_comments,
+)
+
+logger = logging.getLogger(__name__)
 
 
 class HTMLParser:
@@ -51,12 +58,6 @@ class HTMLParser:
         """Validate configuration."""
         if self.config.max_document_size <= 0:
             raise InvalidConfigurationError("max_document_size must be positive")
-
-        if self.config.streaming_threshold and self.config.max_document_size:
-            if self.config.streaming_threshold > self.config.max_document_size:
-                raise InvalidConfigurationError(
-                    "streaming_threshold cannot exceed max_document_size"
-                )
 
     def _init_strategies(self):
         """Initialize parsing strategies based on configuration."""
@@ -120,18 +121,17 @@ class HTMLParser:
         if doc_size > self.config.max_document_size:
             raise DocumentTooLargeError(doc_size, self.config.max_document_size)
 
-        # Check if streaming is needed
-        if doc_size > self.config.streaming_threshold:
-            return self._parse_streaming(html)
+        # Extract XBRL data BEFORE preprocessing (to preserve ix:hidden content).
+        # Deliberately outside the try below: this step is best-effort and
+        # already swallows its own errors, so it must not be able to surface as
+        # a fatal HTMLParsingError.
+        xbrl_facts = []
+        if self.config.extract_xbrl:
+            xbrl_facts = self._extract_xbrl_pre_process(html)
 
         try:
             # Store original HTML BEFORE preprocessing (needed for TOC analysis)
             original_html = html
-
-            # Extract XBRL data BEFORE preprocessing (to preserve ix:hidden content)
-            xbrl_facts = []
-            if self.config.extract_xbrl:
-                xbrl_facts = self._extract_xbrl_pre_process(html)
 
             # Preprocessing (will remove ix:hidden for rendering)
             html = self.preprocessor.process(html)
@@ -180,8 +180,17 @@ class HTMLParser:
             # Remove XML declaration if present
             html = remove_xml_declaration(html)
 
+            # A stray "<!--" with no "-->" makes lxml swallow the rest of the document
+            html = terminate_unclosed_comments(html)
+
+            # remove_blank_text is never safe here. A whitespace-only text node between
+            # two tags is a word boundary, and the preprocessor has already collapsed the
+            # run down to that single space — libxml2 then dropped it as "ignorable",
+            # gluing the words either side ('Yes☒', 'non-Rule10b5-1', 'threereportable').
+            # Same rule as the preprocessor and DocumentBuilder._collapse_edges: collapse
+            # whitespace, never delete it.
             parser = create_lxml_parser(
-                remove_blank_text=not self.config.preserve_whitespace,
+                remove_blank_text=False,
                 remove_comments=True,
                 recover=True,
                 encoding='utf-8'
@@ -267,13 +276,6 @@ class HTMLParser:
 
         return document
 
-    def _parse_streaming(self, html: str) -> Document:
-        """Parse large document in streaming mode."""
-        from edgar.documents.utils.streaming import StreamingParser
-
-        streaming_parser = StreamingParser(self.config, self.strategies)
-        return streaming_parser.parse(html)
-
     def _extract_xbrl_pre_process(self, html: str) -> List[XBRLFact]:
         """
         Extract XBRL facts before preprocessing.
@@ -290,6 +292,7 @@ class HTMLParser:
 
             # Remove XML declaration if present
             html = remove_xml_declaration(html)
+            html = terminate_unclosed_comments(html)
 
             tree = lxml.html.fromstring(html, parser=parser)
 
@@ -322,10 +325,23 @@ class HTMLParser:
 
             return facts
 
+        except etree.ParserError as e:
+            # No parseable element in the document (lxml's "Document is empty"),
+            # so there is no inline XBRL to find either. Benign, and common
+            # enough in bulk crawls that warning about it is pure noise.
+            logger.debug("No XBRL extracted, document has no parseable root: %s", e)
+            return []
         except Exception as e:
-            # Log error but don't fail parsing
-            import logging
-            logging.warning(f"Failed to extract XBRL data: {e}")
+            # Log error but don't fail parsing. Carry enough context to identify
+            # the offending document in a bulk crawl - this used to log to the
+            # root logger with no detail at all. Build the context defensively:
+            # a diagnostic for a swallowed error must never raise itself.
+            size = len(html) if isinstance(html, str) else -1
+            preview = html[:200] if isinstance(html, str) else repr(html)[:200]
+            logger.warning(
+                "Failed to extract XBRL data (%s: %s). Document size: %s bytes. Preview: %r",
+                type(e).__name__, e, size, preview
+            )
             return []
 
     def parse_file(self, file_path: str) -> Document:

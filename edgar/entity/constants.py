@@ -31,9 +31,16 @@ COMPANY_FORMS = {
     # Proxy materials
     "DEF 14A", "PRE 14A", "DEFA14A", "DEFM14A",
     "DEF 14C",                  # Information statement (no vote required)
+    "DEFC14A",                  # Contested proxy solicitation
+    "DEFN14A",                  # Non-management definitive proxy
+    "DFAN14A",                  # Non-management additional proxy materials
     "DEFR14A",                  # Definitive revised proxy
+    "DFRN14A",                  # Revised non-management proxy
     "PREM14A",                  # Preliminary merger proxy
-    "PREC14A",                  # Preliminary revised consent solicitation
+    "PREC14A",                  # Preliminary contested proxy
+    "PREN14A",                  # Preliminary non-management proxy
+    "PRRN14A",                  # Revised preliminary non-management proxy
+    "PX14A6G",                  # Exempt solicitation
     # Prospectus supplements
     "424B1", "424B2", "424B3", "424B4", "424B5",
     # Annual reports and notices
@@ -138,8 +145,11 @@ FILER_TYPE_DOMESTIC_FORMS = frozenset({
     'S-6', 'S-6/A', 'REGDEX', 'REGDEX/A',
     '24F-2NT', '24F-2NT/A', '487', '497J',
     # Investment company fund forms
+    # Note: the portfolio-holdings form is filed as 'NPORT-P'/'NPORT-EX' (no hyphen
+    # after the N); there is no literal 'N-PORT' form in the SEC index.
     'N-1A', 'N-1A/A', 'N-2', 'N-2/A', 'N-3', 'N-4', 'N-5', 'N-6',
-    'N-8A', 'N-8F', 'N-CSR', 'N-CSRS', 'N-CEN', 'N-PORT',
+    'N-8A', 'N-8F', 'N-CSR', 'N-CSRS', 'N-CEN',
+    'NPORT-P', 'NPORT-P/A', 'NPORT-EX',
     'NSAR-A', 'NSAR-B', '485BPOS', '485APOS',
     '40-APP', '40-APP/A', '40-17G', '40-17G/A',
     # Regulation Crowdfunding (US-only)

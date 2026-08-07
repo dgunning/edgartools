@@ -41,6 +41,7 @@ from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
 from mcp.server.stdio import stdio_server
 from mcp.types import GetPromptResult, Prompt, TextContent
+from pydantic import AnyUrl
 
 # Set up logging
 logging.basicConfig(
@@ -211,14 +212,15 @@ async def list_resources() -> list[Resource]:
 
 
 @app.read_resource()
-async def read_resource(uri: str) -> str:
+async def read_resource(uri: AnyUrl) -> str:
     """Read a resource."""
-    if uri == "edgartools://docs/quickstart":
+    uri_string = str(uri)
+    if uri_string == "edgartools://docs/quickstart":
         return _get_quickstart_doc()
-    elif uri == "edgartools://docs/tools":
+    elif uri_string == "edgartools://docs/tools":
         return _get_tools_doc()
     else:
-        raise ValueError(f"Unknown resource: {uri}")
+        raise ValueError(f"Unknown resource: {uri_string}")
 
 
 @app.list_prompts()
@@ -472,6 +474,8 @@ def _run_http(host: str, port: int, version: str):
     import uvicorn
     from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
     from starlette.applications import Starlette
+    from starlette.requests import Request
+    from starlette.responses import JSONResponse
     from starlette.routing import Route
 
     # Set version on the Server so StreamableHTTPSessionManager picks it up
@@ -498,8 +502,14 @@ def _run_http(host: str, port: int, version: str):
             )
             yield
 
+    async def health(request: Request):
+        return JSONResponse({"status": "ok", "version": version})
+
     starlette_app = Starlette(
-        routes=[Route("/mcp", endpoint=_MCPEndpoint())],
+        routes=[
+            Route("/mcp", endpoint=_MCPEndpoint()),
+            Route("/health", endpoint=health),
+        ],
         lifespan=lifespan,
     )
 

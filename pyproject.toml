@@ -56,14 +56,24 @@ dependencies = [
   "nest-asyncio>=1.5.1",
   "jinja2>=3.1.0",
   "pyrate-limiter>=3.0.0",
-  "httpxthrottlecache>=0.3.0",
+  # The [httpx] extra is required, not decorative: from 0.6.0 httpxthrottlecache
+  # declares httpx and httpx2 as optional extras and installs neither by default.
+  # 0.5.0 briefly hard-required the httpx2 fork — which is why this was capped
+  # below it — and 0.6.0 reversed that, so the cap is no longer needed to stay on
+  # plain httpx. Migrating to httpx2 is tracked separately (edgartools-q2iz).
+  "httpxthrottlecache[httpx]>=0.6.0",
   "truststore>=0.9.0",
 ]
 dynamic = ["version"]
 
 [project.optional-dependencies]
 ai = [
-    "mcp>=1.12.3",          # Model Context Protocol
+    # Cap below 2.0.0: that release removed the decorator-based Server API
+    # (@app.list_tools() and friends) that edgar/ai/mcp/server.py binds at
+    # import time, so an unpinned resolve breaks `edgartools-mcp` outright and
+    # fails test collection. Lift the cap once server.py is ported to the 2.0
+    # API (add_request_handler / FastMCP).
+    "mcp>=1.12.3,<2.0.0",   # Model Context Protocol
     "tiktoken>=0.10.0",     # Token counting for OpenAI models
     "starlette>=0.36.0",    # ASGI framework for HTTP transport
     "uvicorn>=0.27.0",      # ASGI server for HTTP transport
@@ -150,7 +160,11 @@ dependencies = [
   "pytest-asyncio",
   "pytest-retry",
   "pytest-vcr",
-  "vcrpy",
+  # Pin <8.2: vcrpy 8.2.0 reintroduced an httpx stub whose response
+  # deserializer crashes (`'NoneType' object has no attribute 'encode'`)
+  # on cassettes with a null reason phrase (e.g. SEC S3 404 responses).
+  # 8.1.1 intercepts httpx via httpcore_stubs.py and replays correctly.
+  "vcrpy<8.2",
   "filelock",
   "pyinstrument",
   "pyright",
@@ -175,11 +189,37 @@ cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=edgar 
 no-cov = "cov --no-cov {args}"
 lint = "ruff check edgar"
 smoke-filings = "python scripts/batch/batch_filings.py {args}"
+# Run before testing a branch you didn't write: vcrpy loads cassettes with
+# PyYAML's unsafe loader, so a contributed cassette executes code on your
+# machine the moment a test touches it. CI gates on this too.
+check-cassettes = "python scripts/check_cassettes.py {args}"
 # Test categorization commands (sequential execution)
 test-fast = "pytest -m 'fast' {args}"
 test-slow = "pytest -m 'slow' {args}"
 test-network = "pytest -m 'network' {args}"
 test-core = "pytest -m 'not (slow or network or performance or batch)' --ignore=tests/perf {args}"
+
+# Measure which tests actually need the SEC, rather than guessing from filenames.
+# Blocks outbound sockets and clears edgar's caches between tests, so the answer
+# does not depend on ordering. Takes a path: `hatch run test-offline-audit
+# tests/issues/regression/`. Anything that fails here must be re-run WITHOUT the
+# plugin before being marked `network` — failing offline and being broken are
+# different facts. See tests/_offline_harness.py.
+# Two flags that both cost more than they look.
+#
+# `python -m pytest`, not `pytest`: -p imports the plugin before collection puts
+# the rootdir on sys.path, and the console script never adds cwd, so the bare
+# form cannot find tests._offline_harness at all.
+#
+# `-p no:pytest-retry` because the suite retries twice with a 4s delay, and a
+# blocked socket never succeeds on the second attempt — it just multiplies the
+# cost of exactly the failures the audit is looking for. On one 16-test file
+# that is 24.9s against 0.35s. The plugin registers as `pytest-retry`, not
+# `retry`, and `-p no:retry` is accepted and silently does nothing; `--retries 0`
+# does not disable it either, since the ini value still reads as set. Disabling
+# it orphans its ini keys, so the run warns `Unknown config option:
+# cumulative_timing` — expected here, and not a sign of a broken config.
+test-offline-audit = "python -m pytest -p tests._offline_harness -p no:pytest-retry {args}"
 
 # Parallel test commands (selective parallelization for SEC rate limit safety)
 # - Fast tests: Full parallelization (no network calls)
@@ -189,18 +229,25 @@ test-fast-parallel = "pytest -n auto -m 'fast' {args}"
 test-core-parallel = "pytest -n 2 -m 'not (slow or network or performance or batch)' --ignore=tests/perf {args}"
 test-parallel-safe = "pytest -n auto -m 'fast' {args}"
 
-# Parallel CI test strategy (skip regression tests for faster feedback)
+# Parallel CI test strategy
 #
 # SELECTIVE PARALLELIZATION STRATEGY:
-# 1. Marker-based: -m 'not regression' excludes tests marked as regression
+# 1. Marker-based: 'not regression' keeps the network/slow regression tests out
+#    of the PR jobs — they run in the Regression Tests workflow, which is the
+#    only place allowed to hammer the SEC endpoint.
 # 2. Path-based: --ignore=tests/issues/regression excludes entire folder
 # 3. Auto-marking: conftest.py automatically marks tests as fast/network based on filename
 # 4. Selective parallel: Only parallelize tests safe from SEC rate limits
 # 5. Combined coverage: CI combines coverage from fast/network/slow groups for 65% threshold
 #
+# test-ci-fast deliberately does NOT exclude regression. conftest.py classifies
+# every regression test as fast or network by measurement, and the offline ones
+# belong in the pull-request gate — before this they ran only after merge
+# (bead edgartools-07lk.21).
+#
 # Note: "core" group removed from CI - auto-marking leaves 0 tests without markers
 
-test-ci-fast = "pytest -n auto --cov --cov-report=xml -m 'fast and not regression' {args}"
+test-ci-fast = "pytest -n auto --cov --cov-report=xml -m 'fast' {args}"
 test-ci-network = "pytest --cov --cov-report=xml -m 'network and not slow and not regression' {args}"
 test-ci-slow = "pytest --cov --cov-report=xml -m 'slow and not regression' {args}"
 test-ci-all = "pytest --cov --cov-report=xml -m 'not regression' --ignore=tests/perf --ignore=tests/issues/regression {args}"
@@ -215,11 +262,30 @@ test-reproduction = "pytest tests/issues/reproductions/ -m 'reproduction' {args}
 test-full = "pytest --ignore=tests/perf {args}"
 
 [tool.hatch.envs.test]
+# Keep this list in step with what CI installs (see the pip install lines in
+# .github/workflows/python-hatch-workflow.yml) and with the default env's pins.
+# A plugin missing here does not fail — it changes what the tests mean. Without
+# pytest-vcr and vcrpy, `@pytest.mark.vcr` is an unregistered marker, no cassette
+# is opened, and the request goes to the network or the local HTTP cache while
+# the run still reports passed. That is the "a cassette existing is not replay"
+# failure one level further down: the cassette can be right and the runner still
+# never open it.
 dependencies = [
   "pytest",
   "pytest-cov",
   "pytest-env",
-  "pytest-asyncio"
+  "pytest-xdist",
+  "pytest-asyncio",
+  "pytest-retry",
+  "pytest-mock",
+  "pytest-vcr",
+  # Pin <8.2 for the same reason as the default env: vcrpy 8.2.0's httpx stub
+  # crashes deserializing a cassette with a null reason phrase.
+  "vcrpy<8.2",
+  "filelock",
+  "tqdm",
+  "responses",
+  "freezegun==1.5.1"
 ]
 
 [[tool.hatch.envs.test.matrix]]
@@ -235,6 +301,9 @@ omit = [
   "edgar/**/examples.py",
   "edgar/**/examples/*.py",
   "edgar/display/demo.py",
+  "edgar/thirteenf/demo_comparison.py",
+  # __main__-only data download stubs (not library code)
+  "edgar/reference/financials.py",
   # Training scripts (ML training utilities, not runtime code)
   "edgar/entity/training/*",
   # Migration utilities (one-time migration helpers)
@@ -321,6 +390,8 @@ markers = [
     "integration: Integration tests",
     "data_quality: Data quality validation tests",
     "vcr: Tests using VCR cassettes for recorded HTTP responses",
+    "manual: Manual-only tests, excluded from CI (slow evaluations, benchmarks)",
+    "viewer_corpus: SEC R*.htm viewer verification corpus (beads edgartools-doup)",
 ]
 
 [tool.pyright]

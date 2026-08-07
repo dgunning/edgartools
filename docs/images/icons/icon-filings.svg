@@ -1,0 +1,27 @@
+<svg width="80" height="80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Style A: Gold-on-Dark -->
+
+  <!-- Outer hexagon frame -->
+  <polygon points="40,5 70,22.5 70,57.5 40,75 10,57.5 10,22.5"
+           fill="none" stroke="#FFD700" stroke-width="2" opacity="0.4"/>
+
+  <!-- Inner hexagon with dark fill -->
+  <polygon points="40,15 60,27.5 60,52.5 40,65 20,52.5 20,27.5"
+           fill="#2d3748" opacity="0.9"/>
+  <polygon points="40,15 60,27.5 60,52.5 40,65 20,52.5 20,27.5"
+           fill="none" stroke="#FFD700" stroke-width="2"/>
+
+  <!-- Stacked documents symbol - GOLD -->
+  <!-- Back page (peeks behind, top-right) -->
+  <rect x="37" y="29" width="15" height="20" rx="1.5"
+        fill="none" stroke="#FFD700" stroke-width="2"/>
+  <!-- Front page (dark fill occludes the back page) -->
+  <rect x="28" y="33" width="15" height="20" rx="1.5"
+        fill="#2d3748" stroke="#FFD700" stroke-width="2"/>
+  <!-- Text lines on front page -->
+  <g stroke="#FFD700" stroke-width="1.5">
+    <line x1="31" y1="39" x2="40" y2="39"/>
+    <line x1="31" y1="43" x2="40" y2="43"/>
+    <line x1="31" y1="47" x2="37" y2="47"/>
+  </g>
+</svg>

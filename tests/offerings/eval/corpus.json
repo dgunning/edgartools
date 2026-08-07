@@ -1,0 +1,342 @@
+[
+  {
+    "accession": "0001193125-25-067122",
+    "form": "S-3",
+    "issuer": "biotech",
+    "facet": "fee_capacity",
+    "expected": 300000000.0,
+    "note": "Nektar"
+  },
+  {
+    "accession": "0001140361-25-024210",
+    "form": "S-3",
+    "issuer": "bank",
+    "facet": "fee_capacity",
+    "expected": 300000000.0,
+    "note": "Central Pacific universal shelf"
+  },
+  {
+    "accession": "0000950103-25-008153",
+    "form": "S-3",
+    "issuer": "biotech",
+    "facet": "fee_capacity",
+    "expected": 79157878.46,
+    "note": "ADC Therapeutics"
+  },
+  {
+    "accession": "0001213900-25-058997",
+    "form": "S-3",
+    "issuer": "asset_mgr",
+    "facet": "fee_capacity",
+    "expected": 350000000.0,
+    "note": "GCM Grosvenor carry-forward"
+  },
+  {
+    "accession": "0001193125-22-186192",
+    "form": "S-3",
+    "issuer": "telecom",
+    "vintage": "pre-2022",
+    "facet": "fee_capacity",
+    "expected": 21730000.0,
+    "note": "Anterix pre-inline-XBRL"
+  },
+  {
+    "accession": "0001193125-25-068942",
+    "form": "S-3",
+    "issuer": "biotech",
+    "facet": "fee_capacity",
+    "expected": 79170150.0,
+    "note": "Whitehawk split-tag header (zxnj)"
+  },
+  {
+    "accession": "0001193125-25-067858",
+    "form": "S-3",
+    "issuer": "biotech",
+    "facet": "fee_capacity",
+    "expected": 9704293.7,
+    "note": "Vigil footnote-table avoidance (zxnj)"
+  },
+  {
+    "accession": "0001193125-25-067182",
+    "form": "S-3",
+    "issuer": "biotech",
+    "facet": "fee_capacity",
+    "expected": 300000000.0,
+    "note": "Forte (zxnj)"
+  },
+  {
+    "accession": "0001193125-25-066253",
+    "form": "S-3ASR",
+    "issuer": "reit",
+    "facet": "fee_capacity",
+    "expected": null,
+    "deferred": true,
+    "note": "Welltower indeterminate ASR (zxnj)"
+  },
+  {
+    "accession": "0001104659-25-064107",
+    "form": "S-3ASR",
+    "issuer": "industrial",
+    "facet": "fee_capacity",
+    "expected": null,
+    "deferred": true,
+    "note": "AeroVironment deferred 457(r)"
+  },
+  {
+    "accession": "0001918704-25-005479",
+    "form": "424B2",
+    "issuer": "structured_note",
+    "facet": "lead_bookrunner",
+    "note": "BofA note title leak (2h4c)"
+  },
+  {
+    "accession": "0001918704-25-005486",
+    "form": "424B2",
+    "issuer": "structured_note",
+    "facet": "lead_bookrunner",
+    "note": "BofA TOC blob (2h4c)"
+  },
+  {
+    "accession": "0001104659-20-040593",
+    "form": "S-3",
+    "issuer": "consumer",
+    "vintage": "pre-2022",
+    "facet": "fee_capacity",
+    "expected": 30000000.0,
+    "note": "Kingold Jewelry inline fee table"
+  },
+  {
+    "accession": "0001654954-21-007440",
+    "form": "S-3/A",
+    "issuer": "medical_device",
+    "vintage": "pre-2022",
+    "facet": "fee_capacity",
+    "expected": 50000000.0,
+    "note": "Dynatronics inline fee table (amendment body)"
+  },
+  {
+    "accession": "0001193125-21-204768",
+    "form": "S-3",
+    "issuer": "biotech_foreign",
+    "vintage": "pre-2022",
+    "facet": "fee_capacity",
+    "expected": 250000000.0,
+    "note": "DBV Technologies inline fee table"
+  },
+  {
+    "accession": "0001104659-21-067046",
+    "form": "S-3",
+    "issuer": "energy",
+    "vintage": "pre-2022",
+    "facet": "fee_capacity",
+    "expected": 200000000.0,
+    "note": "Uranium Energy inline fee table"
+  },
+  {
+    "accession": "0001047469-18-007293",
+    "form": "S-3",
+    "issuer": "clean_energy",
+    "vintage": "pre-2022",
+    "facet": "fee_capacity",
+    "expected": 38606063.86,
+    "note": "Plug Power inline fee table (single-row resale)"
+  },
+  {
+    "accession": "0001193125-20-310765",
+    "form": "S-3ASR",
+    "issuer": "financial",
+    "vintage": "pre-2022",
+    "facet": "fee_capacity",
+    "expected": null,
+    "deferred": true,
+    "note": "Charles Schwab indeterminate 457(r) inline"
+  },
+  {
+    "accession": "0001104659-20-121185",
+    "form": "S-3ASR",
+    "issuer": "tech",
+    "vintage": "pre-2022",
+    "facet": "fee_capacity",
+    "expected": null,
+    "deferred": true,
+    "note": "Micron indeterminate 457(r) inline"
+  },
+  {
+    "accession": "0001104659-21-086851",
+    "form": "S-3ASR",
+    "issuer": "reit",
+    "vintage": "pre-2022",
+    "facet": "fee_capacity",
+    "expected": null,
+    "deferred": true,
+    "note": "Realty Income indeterminate 457(r) inline"
+  },
+  {
+    "accession": "0001193125-25-068723",
+    "form": "S-3",
+    "issuer": "mixed",
+    "facet": "fee_capacity",
+    "note": "Vincerx Pharma, Inc."
+  },
+  {
+    "accession": "0001753926-25-000509",
+    "form": "S-3",
+    "issuer": "mixed",
+    "facet": "fee_capacity",
+    "note": "LIPELLA PHARMACEUTICALS INC."
+  },
+  {
+    "accession": "0001013762-25-004079",
+    "form": "S-3",
+    "issuer": "mixed",
+    "facet": "fee_capacity",
+    "note": "Longeveron Inc."
+  },
+  {
+    "accession": "0001193125-25-068799",
+    "form": "F-3",
+    "issuer": "foreign",
+    "facet": "fee_capacity",
+    "note": "TR Finance LLC"
+  },
+  {
+    "accession": "0001193125-25-067974",
+    "form": "S-3ASR",
+    "issuer": "wksi",
+    "facet": "fee_capacity",
+    "note": "ADVANCED MICRO DEVICES INC"
+  },
+  {
+    "accession": "0001193125-25-068794",
+    "form": "S-3ASR",
+    "issuer": "wksi",
+    "facet": "fee_capacity",
+    "note": "Clearwater Analytics Holdings,"
+  },
+  {
+    "accession": "0001193125-25-068916",
+    "form": "S-3ASR",
+    "issuer": "wksi",
+    "facet": "fee_capacity",
+    "note": "DENTSPLY SIRONA Inc."
+  },
+  {
+    "accession": "0001193125-25-067979",
+    "form": "S-3ASR",
+    "issuer": "wksi",
+    "facet": "fee_capacity",
+    "note": "PAYCHEX INC"
+  },
+  {
+    "accession": "0001108205-25-000026",
+    "form": "424B5",
+    "issuer": "firm_commitment",
+    "facet": "lead_bookrunner",
+    "note": "CURIS INC"
+  },
+  {
+    "accession": "0001641172-25-001350",
+    "form": "424B5",
+    "issuer": "firm_commitment",
+    "facet": "lead_bookrunner",
+    "note": "Calidi Biotherapeutics, Inc."
+  },
+  {
+    "accession": "0001628280-25-015699",
+    "form": "424B5",
+    "issuer": "firm_commitment",
+    "facet": "lead_bookrunner",
+    "note": "ESS Tech, Inc."
+  },
+  {
+    "accession": "0001641172-25-001566",
+    "form": "424B5",
+    "issuer": "firm_commitment",
+    "facet": "lead_bookrunner",
+    "note": "Ensysce Biosciences, Inc."
+  },
+  {
+    "accession": "0001193125-25-068732",
+    "form": "424B5",
+    "issuer": "firm_commitment",
+    "facet": "lead_bookrunner",
+    "note": "Excelerate Energy, Inc."
+  },
+  {
+    "accession": "0001193125-25-067364",
+    "form": "424B5",
+    "issuer": "firm_commitment",
+    "facet": "lead_bookrunner",
+    "note": "Instil Bio, Inc."
+  },
+  {
+    "accession": "0001213900-25-026186",
+    "form": "424B2",
+    "issuer": "structured_note",
+    "facet": "lead_bookrunner",
+    "note": "BANK OF AMERICA CORP /DE/"
+  },
+  {
+    "accession": "0001918704-25-005439",
+    "form": "424B2",
+    "issuer": "structured_note",
+    "facet": "lead_bookrunner",
+    "note": "BANK OF AMERICA CORP /DE/"
+  },
+  {
+    "accession": "0001918704-25-005449",
+    "form": "424B2",
+    "issuer": "structured_note",
+    "facet": "lead_bookrunner",
+    "note": "BANK OF AMERICA CORP /DE/"
+  },
+  {
+    "accession": "0001918704-25-005450",
+    "form": "424B2",
+    "issuer": "structured_note",
+    "facet": "lead_bookrunner",
+    "note": "BANK OF AMERICA CORP /DE/"
+  },
+  {
+    "accession": "0001918704-25-005456",
+    "form": "424B2",
+    "issuer": "structured_note",
+    "facet": "lead_bookrunner",
+    "note": "BANK OF AMERICA CORP /DE/"
+  },
+  {
+    "accession": "0001918704-25-005457",
+    "form": "424B2",
+    "issuer": "structured_note",
+    "facet": "lead_bookrunner",
+    "note": "BANK OF AMERICA CORP /DE/"
+  },
+  {
+    "accession": "0001193125-25-068840",
+    "form": "424B3",
+    "issuer": "shelf_takedown",
+    "facet": "shelf_status",
+    "note": "Apollo Debt Solutions BDC"
+  },
+  {
+    "accession": "0001839882-25-019026",
+    "form": "424B3",
+    "issuer": "shelf_takedown",
+    "facet": "shelf_status",
+    "note": "BANK OF NOVA SCOTIA"
+  },
+  {
+    "accession": "0001099910-25-000115",
+    "form": "424B3",
+    "issuer": "shelf_takedown",
+    "facet": "shelf_status",
+    "note": "CANADIAN DERIVATIVES CLEARING "
+  },
+  {
+    "accession": "0001076598-25-000009",
+    "form": "424B3",
+    "issuer": "shelf_takedown",
+    "facet": "shelf_status",
+    "note": "Eaton Vance Senior Floating-Ra"
+  }
+]

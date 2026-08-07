@@ -456,13 +456,39 @@ def test_invalid_xml():
 
 @pytest.mark.fast
 def test_missing_xml():
-    """Test handling when filing has no XML"""
+    """No XML (pre-2025 HTML filing) -> partial object from header, never None.
+
+    See GH #840: obj() must not silently return None for a form that has a data
+    object type. When there is no structured XML, from_filing() builds a partial
+    Schedule13D/G from the SGML header with has_structured_data == False.
+    """
+    filer = Mock()
+    filer.company_information = Mock(name='BlackRock, Inc.', cik='0001364742')
+    filer.company_information.name = 'BlackRock, Inc.'
+    filer.company_information.cik = '0001364742'
+    subject = Mock()
+    subject.company_information = Mock()
+    subject.company_information.name = 'Acme Corp'
+    subject.company_information.cik = '0000123456'
+    header = Mock()
+    header.filers = [filer]
+    header.subject_companies = [subject]
+
     filing = Mock()
     filing.form = 'SCHEDULE 13D'
     filing.xml = Mock(return_value=None)
+    filing.header = header
+    filing.cik = 123456
+    filing.company = 'Acme Corp'
 
     result = Schedule13D.from_filing(filing)
-    assert result is None
+    assert result is not None
+    assert result.has_structured_data is False
+    assert result.issuer_info.name == 'Acme Corp'
+    assert result.reporting_persons[0].name == 'BlackRock, Inc.'
+    # Ownership numerics are genuinely unavailable, not zero.
+    assert result.total_shares is None
+    assert result.total_percent is None
 
 
 @pytest.mark.fast

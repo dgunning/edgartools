@@ -94,11 +94,13 @@ async def edgar_proxy(
     try:
         company = resolve_company(identifier)
 
-        # Get DEF 14A filings
+        # Get proxy filings — try DEF 14A first, then contested (DEFC14A) if none found
         filings = company.get_filings(form="DEF 14A")
         if filings is None or len(filings) == 0:
+            filings = company.get_filings(form=["DEFC14A", "DEFN14A"])
+        if filings is None or len(filings) == 0:
             return error(
-                f"No DEF 14A proxy filings found for '{identifier}'",
+                f"No proxy filings found for '{identifier}'",
                 suggestions=[
                     "This company may not file proxy statements (e.g., foreign private issuers use 20-F)",
                     "Try edgar_read with form='DEF 14A' to search more broadly",
@@ -111,7 +113,7 @@ async def edgar_proxy(
         filing_index = max(0, filing_index)
         if filing_index >= len(filings):
             return error(
-                f"Only {len(filings)} DEF 14A filings available, but index {filing_index} requested",
+                f"Only {len(filings)} proxy filings available, but index {filing_index} requested",
                 suggestions=[f"Use filing_index between 0 and {len(filings) - 1}"],
                 error_code="INVALID_ARGUMENTS"
             )
@@ -181,17 +183,82 @@ async def edgar_proxy(
         if pvp:
             result["pay_vs_performance"] = pvp
 
-        # Governance
+        # Governance and award timing
+        governance: dict[str, Any] = {}
         if proxy.insider_trading_policy_adopted is not None:
-            result["governance"] = {
-                "insider_trading_policy": proxy.insider_trading_policy_adopted,
-            }
+            governance["insider_trading_policy"] = proxy.insider_trading_policy_adopted
+        if proxy.award_timing_mnpi_considered is not None:
+            governance["award_timing_mnpi_considered"] = proxy.award_timing_mnpi_considered
+        if proxy.award_dates_predetermined is not None:
+            governance["award_dates_predetermined"] = proxy.award_dates_predetermined
+        if proxy.mnpi_disclosure_timed_for_comp_value is not None:
+            governance["mnpi_timed_for_comp_value"] = proxy.mnpi_disclosure_timed_for_comp_value
+        if governance:
+            result["governance"] = governance
+
+        # Awards close to MNPI
+        awards_df = proxy.awards_close_to_mnpi
+        if awards_df is not None and not awards_df.empty:
+            result["awards_close_to_mnpi"] = _df_to_records(awards_df, limit=20)
+
+        # CEO Pay Ratio
+        try:
+            pay_ratio = proxy.ceo_pay_ratio
+            if pay_ratio and pay_ratio.ratio:
+                result["ceo_pay_ratio"] = {
+                    "ceo_compensation": pay_ratio.ceo_compensation,
+                    "median_employee_compensation": pay_ratio.median_employee_compensation,
+                    "ratio": pay_ratio.ratio,
+                }
+        except Exception:
+            pass
 
         # Performance measures
         if proxy.performance_measures:
             result["performance_measures"] = proxy.performance_measures
 
-        # Compensation history (multi-year DataFrame)
+        # Summary Compensation Table (per-NEO, from HTML)
+        try:
+            sct_df = proxy.summary_compensation_table
+            if sct_df is not None and not sct_df.empty:
+                result["summary_compensation_table"] = _df_to_records(sct_df, limit=30)
+        except Exception:
+            pass
+
+        # Beneficial Ownership (from HTML)
+        try:
+            own_df = proxy.beneficial_ownership
+            if own_df is not None and not own_df.empty:
+                result["beneficial_ownership"] = _df_to_records(own_df, limit=30)
+        except Exception:
+            pass
+
+        # Director Compensation (from HTML)
+        try:
+            dir_df = proxy.director_compensation_table
+            if dir_df is not None and not dir_df.empty:
+                result["director_compensation"] = _df_to_records(dir_df, limit=20)
+        except Exception:
+            pass
+
+        # Audit Fees (from HTML)
+        try:
+            af = proxy.audit_fees
+            if af and af.current_year:
+                result["audit_fees"] = {
+                    "auditor_name": af.auditor_name,
+                    "current_year": af.current_year,
+                    "prior_year": af.prior_year,
+                    "audit": {"current": af.audit_fees_current, "prior": af.audit_fees_prior},
+                    "audit_related": {"current": af.audit_related_current, "prior": af.audit_related_prior},
+                    "tax": {"current": af.tax_fees_current, "prior": af.tax_fees_prior},
+                    "other": {"current": af.other_fees_current, "prior": af.other_fees_prior},
+                    "total": {"current": af.total_current, "prior": af.total_prior},
+                }
+        except Exception:
+            pass
+
+        # Compensation history (multi-year DataFrame, from XBRL)
         comp_df = proxy.executive_compensation
         if comp_df is not None and not comp_df.empty:
             result["compensation_history"] = _df_to_records(comp_df, limit=10)

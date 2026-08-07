@@ -368,6 +368,24 @@ class Issuer:
         return repr_rich(self.__rich__())
 
 
+def _company_information_from_submission(company_data: Dict[str, Any]) -> CompanyInformation:
+    """Build CompanyInformation from a SUBMISSION-format COMPANY-DATA block.
+
+    Pre-2004 headers name the SIC field ``ASSIGNED-SIC``; modern ones use
+    ``STANDARD-INDUSTRIAL-CLASSIFICATION``. Accept either so old and new
+    dialects populate the same fields.
+    """
+    return CompanyInformation(
+        name=company_data.get('CONFORMED-NAME'),
+        cik=company_data.get('CIK'),
+        sic=(company_data.get('STANDARD-INDUSTRIAL-CLASSIFICATION')
+             or company_data.get('ASSIGNED-SIC')),
+        irs_number=company_data.get('IRS-NUMBER'),
+        state_of_incorporation=company_data.get('STATE-OF-INCORPORATION'),
+        fiscal_year_end=company_data.get('FISCAL-YEAR-END')
+    )
+
+
 class FilingHeader:
     """
     Contains the parsed representation of the SEC-HEADER text at the top of the full submission text
@@ -463,23 +481,27 @@ class FilingHeader:
         metadata = {
             "ACCESSION NUMBER": parsed_data.get("ACCESSION-NUMBER"),
             "CONFORMED SUBMISSION TYPE": parsed_data.get("TYPE"),
+            "PUBLIC DOCUMENT COUNT": parsed_data.get("PUBLIC-DOCUMENT-COUNT"),
+            "CONFORMED PERIOD OF REPORT": parsed_data.get("PERIOD"),
             "FILED AS OF DATE": parsed_data.get("FILING-DATE"),
             "DATE AS OF CHANGE": parsed_data.get("DATE-OF-FILING-DATE-CHANGE"),
             "EFFECTIVE DATE": parsed_data.get("EFFECTIVENESS-DATE"),
         }
 
-        # Handle FILER section
-        for filer_data in parsed_data.get('FILER', []):
+        # Handle FILER section. Schedule 13D/G and pre-2004 headers carry the
+        # filer under FILED-BY instead, and it is not a repeatable tag, so it
+        # arrives as a bare dict rather than a list.
+        filer_records = list(parsed_data.get('FILER', []))
+        filed_by = parsed_data.get('FILED-BY')
+        if isinstance(filed_by, dict):
+            filer_records.append(filed_by)
+        elif filed_by:
+            filer_records.extend(filed_by)
+
+        for filer_data in filer_records:
             # Create Filer object from COMPANY-DATA
             company_data = filer_data.get('COMPANY-DATA', {})
-            company_info = CompanyInformation(
-                name=company_data.get('CONFORMED-NAME'),
-                cik=company_data.get('CIK'),
-                sic=company_data.get('STANDARD INDUSTRIAL CLASSIFICATION'),
-                irs_number=company_data.get('IRS NUMBER'),
-                state_of_incorporation=company_data.get('STATE-OF-INCORPORATION'),
-                fiscal_year_end=company_data.get('FISCAL-YEAR-END')
-            )
+            company_info = _company_information_from_submission(company_data)
 
             # Create Filing Information from FILING-VALUES
             filing_values = filer_data.get('FILING-VALUES', {})
@@ -515,14 +537,7 @@ class FilingHeader:
 
             # Create Company Information object
             company_data = reporting_owner_data.get('COMPANY-DATA', {})
-            company_info = CompanyInformation(
-                name=company_data.get('CONFORMED-NAME'),
-                cik=company_data.get('CIK'),
-                sic=company_data.get('STANDARD-INDUSTRIAL-CLASSIFICATION'),
-                irs_number=company_data.get('IRS-NUMBER'),
-                state_of_incorporation=company_data.get('STATE-OF-INCORPORATION'),
-                fiscal_year_end=company_data.get('FISCAL-YEAR-END')
-            )
+            company_info = _company_information_from_submission(company_data)
 
             # Create Filing Information object
             filing_values = reporting_owner_data.get('FILING-VALUES', {})
@@ -584,14 +599,8 @@ class FilingHeader:
                     date_of_change=former_company.get('DATE-CHANGED')
                 ))
             issuer = Issuer(
-                company_information=CompanyInformation(
-                    name=issuer_record.get('COMPANY-DATA', {}).get('CONFORMED-NAME'),
-                    cik=issuer_record.get('COMPANY-DATA', {}).get('CIK'),
-                    sic=issuer_record.get('COMPANY-DATA', {}).get('STANDARD-INDUSTRIAL-CLASSIFICATION'),
-                    irs_number=issuer_record.get('COMPANY-DATA', {}).get('IRS-NUMBER'),
-                    state_of_incorporation=issuer_record.get('COMPANY-DATA', {}).get('STATE-OF-INCORPORATION'),
-                    fiscal_year_end=issuer_record.get('COMPANY-DATA', {}).get('FISCAL-YEAR-END')
-                ),
+                company_information=_company_information_from_submission(
+                    issuer_record.get('COMPANY-DATA', {})),
                 business_address=business_address,
                 mailing_address=mail_address,
                 former_company_names=former_company_names
@@ -604,14 +613,7 @@ class FilingHeader:
         for subject_company_data in parsed_data.get('SUBJECT-COMPANY', []):
             # Create Company Information object
             company_data = subject_company_data.get('COMPANY-DATA', {})
-            company_info = CompanyInformation(
-                name=company_data.get('CONFORMED-NAME'),
-                cik=company_data.get('CIK'),
-                sic=company_data.get('STANDARD-INDUSTRIAL-CLASSIFICATION'),
-                irs_number=company_data.get('IRS-NUMBER'),
-                state_of_incorporation=company_data.get('STATE-OF-INCORPORATION'),
-                fiscal_year_end=company_data.get('FISCAL-YEAR-END')
-            )
+            company_info = _company_information_from_submission(company_data)
 
             # Create Filing Information object
             filing_values = subject_company_data.get('FILING-VALUES', {})
@@ -720,20 +722,15 @@ class FilingHeader:
         return True
 
     @classmethod
-    def parse_from_sgml_text(cls, header_text: str, preprocess=False):
+    def _tokenize_header(cls, header_text: str) -> Dict[str, Any]:
         """
-        Parse the SEC-HEADER text at the top of the submission text
+        Walk the SEC-HEADER text line by line and build the raw nested dict of
+        sections/subsections/key-value pairs. Split out from parse_from_sgml_text
+        so the intermediate structure can be inspected directly in tests.
         """
         data: Dict[str, Any] = {}
         current_header = None
         current_subheader = None
-
-        # Preprocess the text to handle a different format from the 1990's
-        if preprocess:
-            header_text = preprocess_old_headers(header_text)
-
-        # In case there are double newlines, replace them with a single newline
-        header_text = header_text.replace('\n\n', '\n')
 
         # Read the lines in the content. This starts with <ACCEPTANCE-DATETIME>20230606213204
         lines = header_text.split('\n')
@@ -751,7 +748,20 @@ class FilingHeader:
             # The line ends with a ':' meaning nested content follows e.g. "REPORTING-OWNER:"
             line_ends_with_colon = line.rstrip('\t').endswith(':')
 
-            is_header = (nesting_level == 0 and line_ends_with_colon) or nesting_will_increase
+            # A colon-ending line is a section header only when nested content actually
+            # follows it (after any blank lines). Otherwise it is a key with an empty value
+            # — e.g. "CONFIRMING COPY:" — which must be captured as a key/value rather than a
+            # section, or it would swallow every following top-level field (FILED AS OF DATE,
+            # CONFORMED PERIOD OF REPORT, ...). Blank lines commonly separate a real section
+            # header (e.g. "FILER:") from its nested body, so skip them when looking ahead.
+            next_nonblank_nesting = nesting_level
+            for next_line in lines[index + 1:]:
+                if next_line.strip():
+                    next_nonblank_nesting = len(next_line) - len(next_line.lstrip('\t'))
+                    break
+            followed_by_nested = next_nonblank_nesting > nesting_level
+
+            is_header = (line_ends_with_colon and followed_by_nested) or nesting_will_increase
             if is_header:
                 # Nested line means a subheader e.g. "OWNER DATA:"
                 if line.startswith('\t'):
@@ -766,6 +776,13 @@ class FilingHeader:
                 # Top level header
                 else:
                     current_header = line.strip().split(':')[0]
+                    # A new top-level section starts fresh - any subheader from the
+                    # previous section (e.g. "MAIL ADDRESS" under a prior "FILER:")
+                    # must not carry over. Some filings from the 1999-2005 era mix
+                    # nested sections with flat KEY: value lines under a later
+                    # top-level header, and a stale subheader here would misroute
+                    # (or drop, see the KeyError handler below) those flat lines.
+                    current_subheader = None
                     if current_header not in data:
                         data[current_header] = []
                     if isinstance(data[current_header], list):
@@ -812,7 +829,10 @@ class FilingHeader:
                         else:
                             data[key] = value
                     elif not current_subheader:
-                        continue
+                        # A top-level header with no subheader of its own (e.g. a
+                        # malformed "COMPANY DATA:" section that isn't nested under
+                        # "FILER:") holds its flat KEY: value lines directly.
+                        data[current_header][-1][key.strip()] = value
                     else:
                         if current_subheader == "FORMER COMPANY":
                             subheader_obj = data[current_header][-1][current_subheader][-1]
@@ -822,7 +842,28 @@ class FilingHeader:
                                 data[current_header][-1][current_subheader][key.strip()] = value
                             except KeyError:
                                 # Some filings from the 2000's have an issue with malformed headers
-                                log.warning("Subheader '%s' not found in header '%s'", current_subheader, current_header)
+                                accession_number = data.get('ACCESSION NUMBER')
+                                identifier = accession_number if accession_number else line.strip()[:80]
+                                log.warning(
+                                    "Subheader '%s' not found in header '%s' (%s)",
+                                    current_subheader, current_header, identifier
+                                )
+
+        return data
+
+    @classmethod
+    def parse_from_sgml_text(cls, header_text: str, preprocess=False):
+        """
+        Parse the SEC-HEADER text at the top of the submission text
+        """
+        # Preprocess the text to handle a different format from the 1990's
+        if preprocess:
+            header_text = preprocess_old_headers(header_text)
+
+        # In case there are double newlines, replace them with a single newline
+        header_text = header_text.replace('\n\n', '\n')
+
+        data: Dict[str, Any] = cls._tokenize_header(header_text)
 
         # The filer
         filers = []

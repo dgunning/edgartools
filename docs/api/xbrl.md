@@ -148,6 +148,53 @@ rendered = xbrl.render_statement("IncomeStatement",
                                 max_rows=50)
 ```
 
+#### Linkbase Access
+
+#### calculation_linkbase()
+```python
+def calculation_linkbase(self, include_abstract: bool = False) -> pd.DataFrame
+```
+Return the filing's calculation linkbase as a DataFrame of parent → child arcs with signed weights, role URIs, and taxonomy attribution. Useful for building per-filer concept hierarchies, mapping extension concepts to their us-gaap parents, and recovering the SEC report tier classification.
+
+**Parameters:**
+- `include_abstract`: When `False` (default), abstract concepts are excluded. Set `True` to include structural/grouping concepts.
+
+**Returns:** `pd.DataFrame` with columns:
+
+| Column | Type | Description |
+|---|---|---|
+| `concept` | str | Local concept name (e.g., `Revenues`) |
+| `concept_taxonomy` | str | Prefix before the first `_` (`us-gaap`, `dei`, `jpm`, ...) |
+| `parent_concept` | str | Local name of the calc parent |
+| `parent_taxonomy` | str | Parent's taxonomy prefix |
+| `weight` | float | Signed calc weight (`+1.0`, `-1.0`) — **do not flatten the sign** |
+| `role_uri` | str | Full extended-link role URI |
+| `role_short` | str | Human-readable role title from the schema |
+| `menucat` | str \| None | SEC report tier when available (`S`=Statement, `D`=Details, `N`=Notes, `T`=Tables, `P`=Policies, `C`=Cover) |
+| `is_abstract` | bool | True for structural/grouping concepts |
+| `label` | str | Standard label from the label linkbase |
+
+Returns an empty DataFrame with the documented columns when the filing has no calculation linkbase. Root nodes (those without a parent) are always excluded — they carry no arc.
+
+**Example:**
+```python
+from edgar import Company
+
+filing = Company("JPM").latest("10-K")
+calc = filing.xbrl().calculation_linkbase()
+
+# Extension concepts and their us-gaap parents
+extensions = calc[
+    (calc.concept_taxonomy == 'jpm') &
+    (calc.parent_taxonomy == 'us-gaap')
+]
+
+# Children of NoninterestIncome — bank revenue disaggregation
+noninterest = calc[calc.parent_concept == 'NoninterestIncome']
+```
+
+See the [Calculation Linkbase guide](../xbrl/guides/calculation-linkbase.md) for the longer walkthrough.
+
 #### Data Conversion
 
 #### to_pandas()
@@ -376,6 +423,52 @@ print(df_raw[['label', 'level', 'parent_concept', 'parent_abstract_concept']].he
 - [Revenue Segment Hierarchy Guide](../guides/extract-statements.md#understanding-statement-hierarchy)
 
 **Returns:** DataFrame with statement data
+
+#### extension_arcs()
+```python
+def extension_arcs(self, include_values: bool = False) -> List[ExtensionArc]
+```
+Return filer-authored extension concepts that participate in this statement's calculation linkbase but are absent from its presentation tree.
+
+These concepts do not appear in `render()` output today because the rendered statement is driven by the presentation tree. Calling `extension_arcs()` does **not** change `render()` behavior — it's an opt-in additive view.
+
+**Parameters:**
+- `include_values`: When `True`, look up instance facts for each extension concept and emit one `ExtensionArc` per `(concept, context)`. When `False` (default), return one `ExtensionArc` per concept with `value`/`period_key`/`context_ref` left as `None`.
+
+**Returns:** `List[ExtensionArc]`. Empty list when the statement has no calculation tree, when its role cannot be resolved, or when no extension concepts are dropped from the presentation tree.
+
+**ExtensionArc fields:**
+
+| Field | Type | Description |
+|---|---|---|
+| `concept` | str | Local name (e.g., `NetBorrowingsFromSubsidiaries`) |
+| `concept_taxonomy` | str | Filer prefix (e.g., `jpm`) |
+| `parent_concept` | str | Local name of the calc parent |
+| `parent_taxonomy` | str | Parent's taxonomy prefix (typically `us-gaap`) |
+| `weight` | float | Signed calc weight |
+| `label` | str | Standard label or `''` |
+| `role_uri` | str | Full role URI of the statement |
+| `element_id` | str | Original underscore-form ID (e.g., `jpm_FooBar`) |
+| `value` | float \| None | Instance value (only with `include_values=True`) |
+| `period_key` | str \| None | Period key (e.g., `duration_2023-01-01_2023-12-31`) |
+| `context_ref` | str \| None | XBRL context reference |
+
+**Example:**
+```python
+cash_flow = filing.xbrl().statements.cash_flow_statement()
+
+# Structural mode — which extensions are silently dropped from render()?
+for arc in cash_flow.extension_arcs():
+    print(f"{arc.concept_taxonomy}:{arc.concept} "
+          f"-> {arc.parent_taxonomy}:{arc.parent_concept} "
+          f"w={arc.weight:+.1f}")
+
+# With values — emits one arc per period that has a fact
+for arc in cash_flow.extension_arcs(include_values=True):
+    print(f"{arc.concept}  {arc.period_key}  {arc.value:,.0f}")
+```
+
+See the [Calculation Linkbase guide](../xbrl/guides/calculation-linkbase.md) for the longer walkthrough and rationale.
 
 #### get_concept_value()
 ```python

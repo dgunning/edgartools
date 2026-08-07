@@ -1,5 +1,5 @@
 import datetime
-from typing import Optional, Tuple
+from typing import Optional, Sequence, Tuple, Union
 
 __all__ = [
     "extract_dates",
@@ -11,7 +11,9 @@ class InvalidDateException(Exception):
     def __init__(self, message: str):
         super().__init__(message)
 
-def extract_dates(date_str: str) -> Tuple[Optional[datetime.datetime], Optional[datetime.datetime], bool]:
+def extract_dates(
+    date_str: Union[str, Sequence[Optional[str]]]
+) -> Tuple[Optional[datetime.datetime], Optional[datetime.datetime], bool]:
     """
     Split a date or a date range into start_date and end_date
     Examples:
@@ -19,9 +21,18 @@ def extract_dates(date_str: str) -> Tuple[Optional[datetime.datetime], Optional[
         extract_dates("2022-03-04:2022-04-05") -> 2022-03-04, 2022-04-05, True
         extract_dates("2022-03-04:") -> 2022-03-04, <current_date>, True
         extract_dates(":2022-03-04") -> 1994-07-01, 2022-03-04, True
+        extract_dates(("2022-03-04", "2022-04-05")) -> 2022-03-04, 2022-04-05, True
+        extract_dates(("2022-03-04", None)) -> 2022-03-04, <current_date>, True
+        extract_dates((None, "2022-03-04")) -> 1994-07-01, 2022-03-04, True
 
     Args:
-        date_str: Date string in YYYY-MM-DD format, optionally with a range separator ':'
+        date_str: Date string in YYYY-MM-DD format, optionally with a range
+            separator ':'. Accepts a 2-tuple or 2-list of YYYY-MM-DD strings as
+            equivalent to the colon-separated form (with ``None`` in either
+            slot meaning "open" and treated the same as a missing side of
+            "start:" or ":end"). The tuple form matches the public type hint
+            on ``Entity.get_filings(filing_date=...)`` which had silently
+            crashed before edgartools 5.30.2 (GH #794).
 
     Returns:
         Tuple of (start_date, end_date, is_range) where dates are datetime objects
@@ -32,6 +43,22 @@ def extract_dates(date_str: str) -> Tuple[Optional[datetime.datetime], Optional[
     """
     if not date_str:
         raise InvalidDateException("Empty date string provided")
+
+    # Normalize tuple/list form into the colon-separated string form so the
+    # rest of the parser stays a single code path. None in either slot is
+    # treated as the "open" side of a range (same semantics as "start:" / ":end").
+    if isinstance(date_str, (tuple, list)):
+        if len(date_str) != 2:
+            raise InvalidDateException(
+                "Date range tuple must have exactly two elements (start, end); "
+                f"got {len(date_str)}"
+            )
+        start_part, end_part = date_str
+        if start_part is None and end_part is None:
+            raise InvalidDateException(
+                "Date range tuple must have at least one non-None bound"
+            )
+        date_str = f"{start_part or ''}:{end_part or ''}"
 
     try:
         # Split on colon, handling the single date case

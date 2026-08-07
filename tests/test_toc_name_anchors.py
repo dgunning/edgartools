@@ -43,16 +43,27 @@ def test_toc_analyzer_resolves_name_anchors():
     analyzer = TOCAnalyzer()
     mapping = analyzer.analyze_toc_structure(HTML_WITH_NAMED_ANCHORS)
 
-    assert mapping.get("Item 1") == "ITEM_1_BUSINESS"
-    assert mapping.get("Item 1A") == "ITEM_1A_RISK_FACTORS"
-    assert mapping.get("Item 2") == "ITEM_2_PROPERTIES"
+    # Keys are the canonical part-prefixed form; the 10-K schema infers the part
+    # from the item number when the TOC has no explicit Part headers (3usf).
+    assert mapping.get("part_i_item_1") == "ITEM_1_BUSINESS"
+    assert mapping.get("part_i_item_1a") == "ITEM_1A_RISK_FACTORS"
+    assert mapping.get("part_i_item_2") == "ITEM_2_PROPERTIES"
 
 
 def test_parser_uses_toc_with_name_anchors():
-    """Parser should expose item sections from TOC when using name anchors."""
+    """Parser should expose item sections from TOC when using name anchors.
+
+    Stored keys are canonical (part_i_item_1), but membership and indexing accept
+    the bare 'Item 1' form too — Sections.__contains__/__getitem__ resolve it, so
+    the part-prefix change is backward compatible (edgartools-3usf)."""
     parser = HTMLParser(ParserConfig(form="10-K"))
     doc = parser.parse(HTML_WITH_NAMED_ANCHORS)
 
+    # Canonical stored keys
+    assert "part_i_item_1" in doc.sections
+    assert "part_i_item_1a" in doc.sections
+    # Backward-compatible bare-form membership and indexing still resolve
     assert "Item 1" in doc.sections
     assert "Item 1A" in doc.sections
     assert "Item 2" in doc.sections
+    assert doc.sections["Item 1"] is doc.sections["part_i_item_1"]

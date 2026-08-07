@@ -10,10 +10,15 @@ from typing import Any, Dict, List, Optional, Union
 
 from lxml import etree as ET
 
-from edgar.xbrl.core import extract_element_id
+from edgar.xbrl.core import PERIOD_END_LABEL, PERIOD_START_LABEL, extract_element_id
 from edgar.xbrl.models import ElementCatalog, PresentationNode, PresentationTree, XBRLProcessingError
 
 from .base import BaseParser
+
+# Roll-forward label roles legitimately repeat the same concept under one parent
+# (e.g. cash flow's "Cash, beginning/ending balances"). These must NOT be
+# deduplicated even though both arcs collapse to a single element_id node.
+ROLL_FORWARD_LABELS = {PERIOD_START_LABEL, PERIOD_END_LABEL}
 
 
 class PresentationParser(BaseParser):
@@ -234,14 +239,36 @@ class PresentationParser(BaseParser):
             # Sort children by order
             children = sorted(from_map[element_id], key=lambda r: r['order'])
 
+            # Track child concepts already added under this parent. Some filers
+            # emit two presentation arcs from the same parent to the same concept
+            # (GH-825: CLW's balance sheet points AssetsAbstract at
+            # PropertyPlantAndEquipmentNet at both order 2 and order 4). Because
+            # nodes are keyed by element_id they collapse to a single node, so a
+            # duplicate child reference would render the identical line item twice.
+            # Keep the first occurrence (lowest order) and skip the rest.
+            #
+            # Exception: roll-forward arcs (periodStart/periodEndLabel) repeat the
+            # same concept on purpose -- e.g. cash flow's "Cash, beginning/ending
+            # balances" -- and statement rendering relies on both references being
+            # present (first occurrence = beginning, later = ending). Never dedupe
+            # those (GH-755 regression of the GH-825 fix).
+            seen_children = set()
+
             for rel in children:
                 child_id = rel['to_element']
-
-                # Add child to parent's children list
-                node.children.append(child_id)
-
-                # Set preferred label
                 preferred_label = rel['preferred_label']
+                is_roll_forward = preferred_label in ROLL_FORWARD_LABELS
+
+                if not is_roll_forward:
+                    if child_id in seen_children:
+                        continue
+                    seen_children.add(child_id)
+
+                # Add child to parent's children list, tracking this reference's
+                # preferred label role positionally (edgartools-0609: roll-forward
+                # arcs reference the same concept twice with different label roles).
+                node.children.append(child_id)
+                node.child_preferred_labels.append(preferred_label)
 
                 # Recursively build child subtree
                 self._build_presentation_subtree(

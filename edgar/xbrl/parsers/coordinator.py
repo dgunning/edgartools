@@ -64,8 +64,22 @@ class XBRLParser:
         self.axes: Dict[str, Axis] = {}
         self.domains: Dict[str, Domain] = {}
 
-        # Entity information
-        self.entity_info: Dict[str, Any] = {}
+        # Entity information — always pre-populate keys so callers never get KeyError
+        self.entity_info: Dict[str, Any] = {
+            'entity_name': None,
+            'ticker': None,
+            'identifier': None,
+            'document_type': None,
+            'reporting_end_date': None,
+            'document_period_end_date': None,
+            'fiscal_year': None,
+            'fiscal_period': None,
+            'fiscal_year_end_month': None,
+            'fiscal_year_end_day': None,
+            'annual_report': False,
+            'quarterly_report': False,
+            'amendment': False,
+        }
         self.dei_facts: Dict[str, Fact] = {}
 
         # Reporting periods

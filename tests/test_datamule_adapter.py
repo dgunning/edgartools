@@ -525,6 +525,11 @@ class TestRealTarFixture:
         assert exhibit.description == 'EXHIBIT 99.1'
 
     def test_primary_document_contains_html(self):
+        # The primary document is zstd-compressed inside the datamule tar.
+        # Reading its content requires the optional 'data' extra (zstandard);
+        # without it the reader returns the raw compressed bytes (logged), so
+        # skip cleanly rather than assert on undecompressed content.
+        pytest.importorskip("zstandard")
         filing = load_filing_from_tar(REAL_TAR_PATH)
         primary = filing.get_document_by_name('flws20231228_8k.htm')
         assert primary is not None

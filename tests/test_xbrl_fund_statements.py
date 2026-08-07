@@ -17,7 +17,10 @@ from edgar.xbrl.statement_resolver import statement_registry
 from edgar.xbrl.period_selector import ESSENTIAL_CONCEPT_PATTERNS
 
 
-@pytest.fixture
+# Module-scoped: parsing the GBDC XBRL directory takes ~16s. The tests below
+# only read from the result, so parse once per module instead of once per test
+# (was ~176s of redundant parsing across 11 tests).
+@pytest.fixture(scope="module")
 def gbdc_xbrl():
     """Load GBDC (Golub Capital BDC) test fixture - a business development company."""
     data_dir = Path("tests/fixtures/xbrl/gbdc")

@@ -6,7 +6,7 @@ import re
 from typing import List, Optional, Set
 
 from edgar.documents.document import Document
-from edgar.documents.nodes import HeadingNode, Node, ParagraphNode, TextNode
+from edgar.documents.nodes import HeadingNode, ImageNode, Node, ParagraphNode, TextNode
 from edgar.documents.table_nodes import TableNode
 
 
@@ -27,6 +27,7 @@ class TextExtractor:
                  include_tables: bool = True,
                  include_metadata: bool = False,
                  include_links: bool = False,
+                 include_images: bool = False,
                  max_length: Optional[int] = None,
                  preserve_structure: bool = False,
                  table_max_col_width: Optional[int] = None):
@@ -38,6 +39,9 @@ class TextExtractor:
             include_tables: Include table content
             include_metadata: Include metadata annotations
             include_links: Include link URLs
+            include_images: Emit an ``[Image: <alt or filename>]`` placeholder for
+                            each image so graphical content is not silently
+                            dropped (default False — keeps clean text image-free).
             max_length: Maximum text length
             preserve_structure: Preserve document structure with markers
             table_max_col_width: Maximum column width for table rendering (default: 200).
@@ -47,6 +51,7 @@ class TextExtractor:
         self.include_tables = include_tables
         self.include_metadata = include_metadata
         self.include_links = include_links
+        self.include_images = include_images
         self.max_length = max_length
         self.preserve_structure = preserve_structure
         self.table_max_col_width = table_max_col_width
@@ -136,6 +141,16 @@ class TextExtractor:
                     text = self._annotate_with_metadata(text, node.metadata)
                 parts.append(text)
             # Don't process children since we already got the paragraph text
+            return
+
+        elif isinstance(node, ImageNode):
+            # Images carry no text; emit an opt-in placeholder so graphical
+            # content isn't silently dropped (GH #886). Off by default to keep
+            # clean text image-free.
+            if self.include_images:
+                label = (node.alt or '').strip() or (node.src or '').rsplit('/', 1)[-1]
+                if label:
+                    parts.append(f"[Image: {label}]")
             return
 
         else:

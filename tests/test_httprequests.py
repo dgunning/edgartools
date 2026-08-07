@@ -7,6 +7,8 @@ import pytest
 
 from edgar.httpclient import (
     async_http_client,
+    get_edgar_http_timeout,
+    get_edgar_use_http2,
     get_edgar_use_system_certs,
     get_edgar_verify_ssl,
     get_http_mgr,
@@ -161,7 +163,9 @@ async def test_get_daily_index_url_async():
         tasks = [get_with_retry_async(client=client, url=url) for url in urls]
         results = await asyncio.gather(*tasks)
         for r in results:
-            assert r.status_code == 200
+            # 304 (Not Modified) is a successful conditional response when the
+            # HTTP cache is warm — accept it so the test is cache-agnostic.
+            assert r.status_code in (200, 304)
 
 
 def test_download_index_file():
@@ -222,6 +226,114 @@ def test_ssl_verification_applied_to_http_manager(monkeypatch):
     http_mgr = get_http_mgr()
     assert http_mgr.httpx_params["verify"] is True
     assert isinstance(http_mgr.httpx_params["verify"], bool), "verify should be a boolean, not a function"
+
+
+def test_verify_reaches_the_transport_params():
+    """`verify` must survive the last hop, from httpx_params into the transport.
+
+    edgartools used to monkeypatch HttpxThrottleCache._get_httpx_transport_params
+    because it extracted only 'http2' and 'proxy', so configure_http(verify_ssl=False)
+    was silently ignored and users behind SSL-inspecting corporate proxies could not
+    reach EDGAR at all. httpxthrottlecache does this itself now and the patch was
+    removed; this pins the behaviour so an upstream regression fails here rather
+    than in the field. test_ssl_verification_applied_to_http_manager covers the
+    earlier hop (env var -> httpx_params) — this one covers params -> transport.
+    """
+    http_mgr = get_http_mgr()
+
+    assert http_mgr._get_httpx_transport_params({"verify": False})["verify"] is False
+    assert http_mgr._get_httpx_transport_params({"verify": True})["verify"] is True
+
+    # Absent means verify, not "silently off" — the safe default matters more than
+    # the passthrough, since getting it wrong disables TLS checking for everyone.
+    assert http_mgr._get_httpx_transport_params({})["verify"] is True
+
+
+def test_default_http_timeout_is_set(monkeypatch):
+    """
+    HTTP_MGR must have a non-None default timeout so a stalled upstream
+    cannot wedge a worker indefinitely on a blocking socket read.
+
+    Regression for the pattern where edgar_discovery jobs ran 50+
+    minutes past their budget because get_current_filings() blocked
+    in a read with no timeout.
+    """
+    # Default — no env override
+    monkeypatch.delenv("EDGAR_HTTP_TIMEOUT", raising=False)
+    assert get_edgar_http_timeout() == 30.0
+
+    http_mgr = get_http_mgr()
+    timeout = http_mgr.httpx_params.get("timeout")
+    assert timeout is not None, "HTTP_MGR must have a default timeout"
+    assert isinstance(timeout, httpx.Timeout)
+    # Every phase must be bounded — None on any phase is the bug.
+    for phase in ("connect", "read", "write", "pool"):
+        assert getattr(timeout, phase) is not None, (
+            f"timeout.{phase} must not be None"
+        )
+    assert timeout.read == 30.0
+    assert timeout.connect == 10.0
+
+
+def test_default_http_timeout_env_override(monkeypatch):
+    """EDGAR_HTTP_TIMEOUT overrides the default at HTTP_MGR construction."""
+    monkeypatch.setenv("EDGAR_HTTP_TIMEOUT", "5")
+    assert get_edgar_http_timeout() == 5.0
+
+    http_mgr = get_http_mgr()
+    timeout = http_mgr.httpx_params["timeout"]
+    assert timeout.read == 5.0
+
+
+@pytest.mark.parametrize("value", ["", "none", "None", "NONE", "unlimited", "UNLIMITED", "0", "0.0", "-1"])
+def test_default_http_timeout_env_opt_out(monkeypatch, value):
+    """
+    EDGAR_HTTP_TIMEOUT routes empty / "none" / "unlimited" / non-positive
+    values through the unlimited path. The HTTP_MGR is constructed with
+    no "timeout" key in httpx_params, so httpx falls back to its built-in
+    default behaviour (no enforced read timeout from edgar's side).
+    Critically, EDGAR_HTTP_TIMEOUT=0 must NOT produce httpx.Timeout(0.0),
+    which httpx interprets as immediate-timeout on every I/O phase.
+    """
+    monkeypatch.setenv("EDGAR_HTTP_TIMEOUT", value)
+    assert get_edgar_http_timeout() is None
+
+    http_mgr = get_http_mgr()
+    assert "timeout" not in http_mgr.httpx_params, (
+        f"EDGAR_HTTP_TIMEOUT={value!r} must leave timeout unset, "
+        f"got {http_mgr.httpx_params.get('timeout')!r}"
+    )
+
+
+def test_disable_http_timeout_removes_timeout():
+    """
+    disable_http_timeout() is the documented escape hatch for opting out
+    of the default timeout at runtime. configure_http(timeout=None) is
+    intentionally a no-op (it matches the "leave unchanged" semantics of
+    the other configure_http parameters), so a dedicated function exists
+    to actually remove the timeout key.
+    """
+    from edgar.httpclient import configure_http, disable_http_timeout, HTTP_MGR
+
+    original_timeout = HTTP_MGR.httpx_params.get("timeout")
+    try:
+        # Ensure a timeout is set
+        configure_http(timeout=15.0)
+        assert "timeout" in HTTP_MGR.httpx_params
+
+        disable_http_timeout()
+        assert "timeout" not in HTTP_MGR.httpx_params
+
+        # configure_http(timeout=None) must NOT reinstate the default —
+        # None means "leave unchanged" for consistency with the other
+        # parameters; the timeout stays disabled.
+        configure_http(timeout=None)
+        assert "timeout" not in HTTP_MGR.httpx_params
+    finally:
+        if original_timeout is None:
+            HTTP_MGR.httpx_params.pop("timeout", None)
+        else:
+            HTTP_MGR.httpx_params["timeout"] = original_timeout
 
 
 def test_is_ssl_error_detection():
@@ -577,6 +689,69 @@ def test_configure_http_exported_from_edgar():
     # Verify get_http_config returns a dict
     config = get_http_config()
     assert isinstance(config, dict)
+
+
+# =============================================================================
+# HTTP/2 toggle tests (edgartools-x2tv)
+#
+# HTTP/2 multiplexes every request over a single TCP connection, so a
+# mid-stream reset from cloud egress fails all in-flight requests at once
+# (h2 InvalidBodyLengthError / RemoteProtocolError: ConnectionTerminated).
+# EdgarTools defaults to HTTP/1.1 to isolate failures; HTTP/2 is opt-in.
+# =============================================================================
+
+@pytest.mark.fast
+def test_get_edgar_use_http2_defaults_to_false(monkeypatch):
+    """EDGAR_USE_HTTP2 defaults to False (HTTP/1.1) when not set."""
+    monkeypatch.delenv("EDGAR_USE_HTTP2", raising=False)
+    assert get_edgar_use_http2() is False
+
+
+@pytest.mark.fast
+@pytest.mark.parametrize("value", ["true", "True", "TRUE", "1", "yes"])
+def test_get_edgar_use_http2_env_var_enables(monkeypatch, value):
+    """EDGAR_USE_HTTP2 truthy values opt back into HTTP/2."""
+    monkeypatch.setenv("EDGAR_USE_HTTP2", value)
+    assert get_edgar_use_http2() is True
+
+
+@pytest.mark.fast
+def test_http_mgr_defaults_to_http1(monkeypatch):
+    """A freshly constructed HTTP_MGR negotiates HTTP/1.1 by default."""
+    monkeypatch.delenv("EDGAR_USE_HTTP2", raising=False)
+    http_mgr = get_http_mgr()
+    assert http_mgr.httpx_params.get("http2") is False
+
+
+@pytest.mark.fast
+def test_http_mgr_http2_env_override(monkeypatch):
+    """EDGAR_USE_HTTP2=true flips the constructed HTTP_MGR to HTTP/2."""
+    monkeypatch.setenv("EDGAR_USE_HTTP2", "true")
+    http_mgr = get_http_mgr()
+    assert http_mgr.httpx_params.get("http2") is True
+
+
+@pytest.mark.fast
+def test_configure_http_toggles_http2():
+    """configure_http(http2=...) flips the setting at runtime and is reported
+    by get_http_config; passing None leaves it unchanged."""
+    from edgar.httpclient import configure_http, get_http_config, HTTP_MGR
+
+    original = HTTP_MGR.httpx_params.get("http2", False)
+    try:
+        configure_http(http2=True)
+        assert HTTP_MGR.httpx_params["http2"] is True
+        assert get_http_config()["http2"] is True
+
+        # None must not change the existing value
+        configure_http(http2=None)
+        assert HTTP_MGR.httpx_params["http2"] is True
+
+        configure_http(http2=False)
+        assert HTTP_MGR.httpx_params["http2"] is False
+        assert get_http_config()["http2"] is False
+    finally:
+        HTTP_MGR.httpx_params["http2"] = original
 
 
 # =============================================================================

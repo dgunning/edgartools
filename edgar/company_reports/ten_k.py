@@ -11,7 +11,7 @@ from rich.tree import Tree
 from edgar.company_reports._base import CompanyReport
 from edgar.company_reports._structures import FilingStructure
 from edgar.core import log
-from edgar.documents import HTMLParser, ParserConfig
+from edgar.documents import HTMLParser, ParserConfig, parse_html
 from edgar.files.htmltools import ChunkedDocument
 from edgar.display.formatting import datefmt
 
@@ -44,6 +44,33 @@ _CROSS_REF_ITEM_MAP = {
     'Item 15': '15',
     'Item 16': '16',
 }
+
+
+# SEC 10-K item-to-part mapping. Each item number has exactly one valid Part
+# per SEC rules. Used to constrain section lookups so a missing Part I item
+# does not silently fall back to a wrong-Part section produced by a flaky
+# section detector. See GH #821 (GS 10-K Item 1 mis-mapped to part_ii_item_1).
+_ITEM_TO_PART_10K = {
+    '1': 'i', '1a': 'i', '1b': 'i', '1c': 'i', '2': 'i', '3': 'i', '4': 'i',
+    '5': 'ii', '6': 'ii', '7': 'ii', '7a': 'ii',
+    '8': 'ii', '9': 'ii', '9a': 'ii', '9b': 'ii', '9c': 'ii',
+    '10': 'iii', '11': 'iii', '12': 'iii', '13': 'iii', '14': 'iii',
+    '15': 'iv', '16': 'iv',
+}
+
+
+def _item_sort_key(item: str) -> tuple:
+    """Sort key producing canonical SEC 10-K item order.
+
+    Sorts by numeric item value first, then by the full token so letter
+    suffixes order correctly within a number (e.g. ``Item 1`` < ``Item 1A``
+    < ``Item 1B``, and ``Item 7`` < ``Item 7A``). Yields the canonical
+    sequence: 1, 1A, 1B, 1C, 2, 3, 4, 5, 6, 7, 7A, 8, 9, 9A, 9B, 9C,
+    10, 11, 12, 13, 14, 15, 16.
+    """
+    token = item.split()[-1]  # "Item 1A" -> "1A"
+    num = int(''.join(c for c in token if c.isdigit()) or '0')
+    return (num, token)
 
 
 class TenK(CompanyReport):
@@ -226,7 +253,8 @@ class TenK(CompanyReport):
         Falls back to old chunked_document if new parser returns no sections.
 
         Returns:
-            List of item titles (e.g., ['Item 1', 'Item 1A', 'Item 2', ...])
+            List of unique item titles in canonical SEC order
+            (e.g., ['Item 1', 'Item 1A', 'Item 1B', 'Item 2', ...]).
         """
         # Mapping from friendly section names to Item numbers
         section_to_item = {
@@ -255,6 +283,10 @@ class TenK(CompanyReport):
             'summary': 'Item 16'
         }
 
+        def _canonical(raw_items):
+            """Deduplicate and sort into canonical SEC 10-K item order."""
+            return sorted(dict.fromkeys(raw_items), key=_item_sort_key)
+
         # Try new parser first
         if self.sections:
             items = []
@@ -268,11 +300,13 @@ class TenK(CompanyReport):
                 # Handle keys that are already in "Item X" format
                 elif key.startswith('Item '):
                     items.append(key)
-            return items if items else (self.chunked_document.list_items() if self.chunked_document else [])
+            if items:
+                return _canonical(items)
+            return _canonical(self.chunked_document.list_items()) if self.chunked_document else []
 
         # Fallback to old parser for backward compatibility
         if self.chunked_document:
-            return self.chunked_document.list_items()
+            return _canonical(self.chunked_document.list_items())
 
         return []
 
@@ -426,24 +460,13 @@ class TenK(CompanyReport):
         except Exception:
             pass
 
-        # Sections
+        # Sections (items property is already deduplicated and canonically sorted)
         try:
             items = self.items
             if items:
-                # Deduplicate and sort by item number
-                seen = set()
-                unique_items = []
-                for item in items:
-                    if item not in seen:
-                        seen.add(item)
-                        unique_items.append(item)
-                unique_items.sort(key=lambda x: (
-                    int(''.join(c for c in x.split()[-1] if c.isdigit()) or '0'),
-                    x.split()[-1]
-                ))
                 lines.append("")
                 lines.append("SECTIONS:")
-                lines.append(f"  {', '.join(unique_items)}")
+                lines.append(f"  {', '.join(items)}")
         except Exception:
             pass
 
@@ -557,30 +580,16 @@ class TenK(CompanyReport):
                 item_num = item_key[5:].strip().lower()
 
             if item_num:
-                # Try Part I first (most common for Items 1-4)
-                part_i_key = f'part_i_item_{item_num}'
-                if part_i_key in self.sections:
-                    text = self.sections[part_i_key].text()
-                    if text and text.strip():
-                        return text
-                # Try Part II for Items 5-9C
-                part_ii_key = f'part_ii_item_{item_num}'
-                if part_ii_key in self.sections:
-                    text = self.sections[part_ii_key].text()
-                    if text and text.strip():
-                        return text
-                # Try Part III for Items 10-14
-                part_iii_key = f'part_iii_item_{item_num}'
-                if part_iii_key in self.sections:
-                    text = self.sections[part_iii_key].text()
-                    if text and text.strip():
-                        return text
-                # Try Part IV for Items 15-16
-                part_iv_key = f'part_iv_item_{item_num}'
-                if part_iv_key in self.sections:
-                    text = self.sections[part_iv_key].text()
-                    if text and text.strip():
-                        return text
+                # Only check the SEC-canonical Part for this item — prevents
+                # silent fallback to wrong-Part content when the section
+                # detector mis-labels a section (GH #821).
+                canonical_part = _ITEM_TO_PART_10K.get(item_num)
+                if canonical_part:
+                    part_key = f'part_{canonical_part}_item_{item_num}'
+                    if part_key in self.sections:
+                        text = self.sections[part_key].text()
+                        if text and text.strip():
+                            return text
 
                 # PRIORITY 1.5: Try combined-items keys (e.g., "Items 1 and 2. Business and Properties")
                 # Some filings (energy, MLP, REIT) combine items under a single heading.
@@ -621,46 +630,20 @@ class TenK(CompanyReport):
                     if friendly_name in self.sections:
                         return self.sections[friendly_name].text()
 
-            # Legacy fallback: Try part-based naming convention again
-            # (This code path may not be reached now, but kept for safety)
+            # Legacy fallback: SEC-canonical Part lookup only.
+            # Items have exactly one valid Part per SEC rules — see GH #821.
+            legacy_item_num = None
             if normalized.startswith('Item '):
-                # Extract item number: "Item 1" -> "1", "Item 1A" -> "1a"
-                item_num = normalized[5:].strip().lower()
-                # Try Part I first (most common for Items 1-4)
-                part_i_key = f'part_i_item_{item_num}'
-                if part_i_key in self.sections:
-                    text = self.sections[part_i_key].text()
-                    # Only return if non-empty (otherwise fall back to chunked_document)
-                    if text and text.strip():
-                        return text
-                # Try Part II for Items 5-9C
-                part_ii_key = f'part_ii_item_{item_num}'
-                if part_ii_key in self.sections:
-                    text = self.sections[part_ii_key].text()
-                    if text and text.strip():
-                        return text
-                # Try Part III for Items 10-14
-                part_iii_key = f'part_iii_item_{item_num}'
-                if part_iii_key in self.sections:
-                    text = self.sections[part_iii_key].text()
-                    if text and text.strip():
-                        return text
-                # Try Part IV for Items 15-16
-                part_iv_key = f'part_iv_item_{item_num}'
-                if part_iv_key in self.sections:
-                    text = self.sections[part_iv_key].text()
-                    if text and text.strip():
-                        return text
-
-            # Also handle if user provides just a number like "1" or "1A"
+                legacy_item_num = normalized[5:].strip().lower()
             elif re.match(r'^\d+[a-z]?$', normalized, re.IGNORECASE):
-                item_num = normalized.lower()
-                # Try all parts
-                for part in ['i', 'ii', 'iii', 'iv']:
-                    part_key = f'part_{part}_item_{item_num}'
+                legacy_item_num = normalized.lower()
+
+            if legacy_item_num:
+                canonical_part = _ITEM_TO_PART_10K.get(legacy_item_num)
+                if canonical_part:
+                    part_key = f'part_{canonical_part}_item_{legacy_item_num}'
                     if part_key in self.sections:
                         text = self.sections[part_key].text()
-                        # Only return if non-empty
                         if text and text.strip():
                             return text
 
@@ -669,15 +652,26 @@ class TenK(CompanyReport):
         if self._cross_reference_index is not None:
             item_id = _CROSS_REF_ITEM_MAP.get(item_or_part)
             if item_id:
-                # Extract content using Cross Reference Index parser
-                item_text = self._cross_reference_index.extract_item_content(item_id)
-                if item_text:
-                    # Successfully extracted via Cross Reference Index
-                    item_text = item_text.rstrip()
-                    last_line = item_text.split("\n")[-1]
-                    if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
-                        item_text = item_text.rstrip(last_line)
-                    return item_text
+                # Extract content using Cross Reference Index parser.
+                # extract_item_content() returns HTML by contract (it slices the
+                # source document by page range), while every other branch of
+                # this method returns text. Returning it unconverted handed
+                # callers raw markup — 1.7MB of <div>/<span> for Citigroup's
+                # Item 1, the "HTML leakage" half of GH #821. Convert before the
+                # PART-stripping below, which is written for text and silently
+                # did nothing on markup.
+                item_html = self._cross_reference_index.extract_item_content(item_id)
+                if item_html:
+                    item_text = parse_html(item_html).text()
+                    # An empty conversion falls through to the legacy fallback
+                    # rather than returning the markup — a caller that asked for
+                    # text is better served by the next strategy than by HTML.
+                    if item_text and item_text.strip():
+                        item_text = item_text.rstrip()
+                        last_line = item_text.split("\n")[-1]
+                        if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
+                            item_text = item_text.rstrip(last_line)
+                        return item_text
 
         # Fall back to chunked document for backward compatibility
         # Log fallback usage for Phase 1 deprecation tracking

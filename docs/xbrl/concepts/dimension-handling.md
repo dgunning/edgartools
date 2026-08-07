@@ -176,8 +176,10 @@ df = income.to_dataframe(view="standard")
 # COGS may have individual values but NaN for total
 cogs_rows = df[df['concept'] == 'us-gaap_CostOfGoodsAndServicesSold']
 
-# Sum the non-NaN values for the total
-period_col = '2025-01-31'  # or whichever period you need
+# Sum the non-NaN values for the total.
+# Period columns carry a fiscal-period suffix, e.g. '2025-01-31 (FY)',
+# so derive the column rather than hardcoding a bare date.
+period_col = [c for c in df.columns if c.endswith('(FY)')][0]  # most recent fiscal year
 total_cogs = cogs_rows[period_col].sum()
 ```
 
@@ -236,6 +238,10 @@ Some axes behave differently based on statement type:
 ```python
 # Check what's in the full data
 df = statement.to_dataframe(view="detailed")
+
+# Period columns carry a '(FY)' suffix; pick the most recent
+value_column = [c for c in df.columns if c.endswith('(FY)')][0]
+
 concept_rows = df[df['concept'].str.contains('YourConcept')]
 print(concept_rows[['label', 'dimension', 'dimension_label', value_column]])
 ```
@@ -245,6 +251,7 @@ print(concept_rows[['label', 'dimension', 'dimension_label', value_column]])
 **Check the dimensional data:**
 ```python
 df = income.to_dataframe(view="detailed")
+value_column = [c for c in df.columns if c.endswith('(FY)')][0]
 
 # Look for missing values that might be dimensional
 missing = df[df[value_column].isna() & (df['abstract'] == False)]

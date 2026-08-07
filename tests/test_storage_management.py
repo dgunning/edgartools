@@ -165,7 +165,7 @@ def test_analyze_storage_rich_display():
 
 # Phase 4: Storage Optimization
 
-@pytest.mark.fast
+@pytest.mark.slow  # scans real storage dir like the storage_info() tests above
 def test_optimize_storage_dry_run():
     """Test optimize_storage with dry_run=True"""
     from edgar.storage._management import optimize_storage
@@ -180,7 +180,7 @@ def test_optimize_storage_dry_run():
     assert result['bytes_saved'] >= 0
     assert result['errors'] >= 0
 
-@pytest.mark.fast
+@pytest.mark.slow  # scans real storage dir like the storage_info() tests above
 def test_cleanup_storage_dry_run():
     """Test cleanup_storage with dry_run=True"""
     from edgar.storage._management import cleanup_storage
@@ -195,7 +195,7 @@ def test_cleanup_storage_dry_run():
     assert result['bytes_freed'] >= 0
     assert result['errors'] >= 0
 
-@pytest.mark.fast
+@pytest.mark.slow  # scans real storage dir like the storage_info() tests above
 def test_clear_cache_dry_run():
     """Test clear_cache with dry_run=True"""
     from edgar.storage._management import clear_cache
@@ -211,7 +211,7 @@ def test_clear_cache_dry_run():
     assert result['errors'] >= 0
 
 
-@pytest.mark.fast
+@pytest.mark.slow  # scans real storage dir like the storage_info() tests above
 def test_clear_cache_obsolete_only():
     """Test clear_cache with obsolete_only parameter"""
     from edgar.storage._management import clear_cache

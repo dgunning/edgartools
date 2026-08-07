@@ -44,7 +44,12 @@ print(income)
 
 # Or convert to DataFrame for analysis
 df = income.to_dataframe()
-print(df[['Revenue']])
+
+# The DataFrame has a `standard_concept` column for stable, cross-year access.
+# Index by it and select the period (date) columns:
+periods = [c for c in df.columns if c.startswith("20")]  # e.g. ['2025-09-27', '2024-09-28', '2023-09-30']
+df = df.set_index("standard_concept")
+print(df.loc["Revenue", periods])
 ```
 
 This automatically:
@@ -149,41 +154,53 @@ DataFrames are ideal for quantitative analysis:
 # Get income statement as DataFrame
 df = income.to_dataframe()
 
-# DataFrame structure:
-# - Rows: Financial line items (Revenue, Cost of Goods Sold, etc.)
-# - Columns: Time periods (2024, 2023, 2022)
-# - Index: Concept names
+# DataFrame structure (RangeIndex — 0, 1, 2, ...):
+# - `label`            : the company's own line-item wording (e.g. "Net sales")
+# - `concept`          : the raw XBRL concept (e.g. "us-gaap_RevenueFromContract...")
+# - `standard_concept` : the standardized concept for cross-company access (e.g. "Revenue")
+# - one column per period, keyed by fiscal year-end date (e.g. "2025-09-27")
+# - `preferred_sign`   : display-sign hint
 
 print(df.head())
 ```
 
-**Example output:**
+**Example output** (columns trimmed for readability):
 
 ```
-                                    2024-09-28  2023-09-30  2022-09-24
-Revenue                             391035000   383285000   394328000
-Cost of Goods Sold                  210352000   214137000   223546000
-Gross Profit                        180683000   169148000   170782000
-Operating Expenses                   55013000    51345000    51345000
-Operating Income                    125670000   117803000   119437000
+            label                       standard_concept            2025-09-27   2024-09-28   2023-09-30
+0  Net sales                   Revenue                     416161000000 391035000000 383285000000
+1  Cost of sales               CostOfGoodsAndServicesSold  ...
+2  Gross margin                GrossProfit                 ...
+3  Total operating expenses    TotalOperatingExpenses      ...
+4  Operating income            OperatingIncomeLoss         ...
 ```
 
 ### Understanding Column Structure
 
-Period columns use fiscal year-end dates:
+The DataFrame is **integer-indexed**. Line items are identified by the `label` and
+`standard_concept` columns, not by the index. Period columns use fiscal year-end dates:
 
 ```python
-# Examine available periods
-print(df.columns.tolist())
-# ['2024-09-28', '2023-09-30', '2022-09-24']
+# Examine the period (date) columns
+periods = [c for c in df.columns if c.startswith("20")]
+print(periods)
+# ['2025-09-27', '2024-09-28', '2023-09-30']
 
-# Access specific period
-revenue_2024 = df.loc['Revenue', '2024-09-28']
+# Index by standard_concept for stable, cross-year access
+df = df.set_index("standard_concept")
+
+# Access a specific period
+revenue_2025 = df.loc["Revenue", "2025-09-27"]
 
 # Access all periods for a line item
-revenue_trend = df.loc['Revenue']
+revenue_trend = df.loc["Revenue", periods]
 print(revenue_trend)
 ```
+
+> **Tip**: `standard_concept` values are stable across companies and years
+> (`Revenue`, `GrossProfit`, `OperatingIncomeLoss`, `NetIncome`, ...). The `label`
+> column preserves each company's original presentation, so use `label` when you want
+> the filer's exact wording and `standard_concept` when you want portable code.
 
 ### Working with Dimensions
 
@@ -303,9 +320,11 @@ xbrls = XBRLS.from_filings(filings)
 # Get income statement
 income = xbrls.statements.income_statement(max_periods=5)
 df = income.to_dataframe()
+periods = [c for c in df.columns if c.startswith("20")]
+df = df.set_index("standard_concept")
 
-# Extract revenue trend
-revenue = df.loc['Revenue']
+# Extract revenue trend (oldest -> newest for a natural growth series)
+revenue = df.loc["Revenue", periods[::-1]]
 print(revenue)
 
 # Calculate year-over-year growth
@@ -321,17 +340,19 @@ Compare profitability trends:
 ```python
 # Get income statement
 df = income.to_dataframe()
+periods = [c for c in df.columns if c.startswith("20")]
+df = df.set_index("standard_concept")
 
 # Calculate gross margin for each period
-revenue = df.loc['Revenue']
-gross_profit = df.loc['Gross Profit']
+revenue = df.loc["Revenue", periods]
+gross_profit = df.loc["GrossProfit", periods]
 gross_margin = (gross_profit / revenue) * 100
 
 print("Gross Margin Trend:")
 print(gross_margin)
 
 # Operating margin
-operating_income = df.loc['Operating Income']
+operating_income = df.loc["OperatingIncomeLoss", periods]
 operating_margin = (operating_income / revenue) * 100
 
 print("\nOperating Margin Trend:")
@@ -346,18 +367,20 @@ Track how balance sheet composition changes:
 # Get balance sheet
 balance = xbrls.statements.balance_sheet(max_periods=5)
 df = balance.to_dataframe()
+periods = [c for c in df.columns if c.startswith("20")]
+df = df.set_index("standard_concept")
 
 # Asset composition
-total_assets = df.loc['Assets']
-cash = df.loc['Cash and Cash Equivalents']
+total_assets = df.loc["Assets", periods]
+cash = df.loc["CashAndMarketableSecurities", periods]
 cash_ratio = (cash / total_assets) * 100
 
 print("Cash as % of Total Assets:")
 print(cash_ratio)
 
 # Leverage analysis
-total_liabilities = df.loc['Liabilities']
-equity = df.loc['Stockholders Equity']
+total_liabilities = df.loc["Liabilities", periods]
+equity = df.loc["AllEquityBalance", periods]
 debt_to_equity = total_liabilities / equity
 
 print("\nDebt-to-Equity Ratio:")
@@ -372,20 +395,24 @@ Understand cash generation and usage:
 # Get cash flow statement
 cash_flow = xbrls.statements.cash_flow_statement(max_periods=5)
 df = cash_flow.to_dataframe()
+periods = [c for c in df.columns if c.startswith("20")]
+df = df.set_index("standard_concept")
 
 # Operating cash flow trend
-operating_cf = df.loc['Net Cash Provided by Operating Activities']
+operating_cf = df.loc["NetCashFromOperatingActivities", periods]
 print("Operating Cash Flow:")
 print(operating_cf)
 
-# Free cash flow (Operating CF - Capex)
-capex = df.loc['Capital Expenditures']
-free_cash_flow = operating_cf + capex  # capex is negative
+# Free cash flow (Operating CF - Capex). CapitalExpenses is reported as a
+# positive outflow here, so subtract it.
+capex = df.loc["CapitalExpenses", periods]
+free_cash_flow = operating_cf - capex
 print("\nFree Cash Flow:")
 print(free_cash_flow)
 
 # Cash conversion ratio
-net_income = income.to_dataframe().loc['Net Income']
+income_df = income.to_dataframe().set_index("standard_concept")
+net_income = income_df.loc["NetIncome", periods]
 cash_conversion = (operating_cf / net_income) * 100
 print("\nCash Conversion (Operating CF / Net Income):")
 print(cash_conversion)
@@ -404,21 +431,23 @@ xbrls = XBRLS.from_filings(filings)
 
 # Create comparison DataFrame
 income_df = xbrls.statements.income_statement().to_dataframe()
+periods = [c for c in income_df.columns if c.startswith("20")]
+income_df = income_df.set_index("standard_concept")
 
-# Select key metrics
+# Select key metrics by standardized concept
 key_metrics = [
     'Revenue',
-    'Gross Profit',
-    'Operating Income',
-    'Net Income'
+    'GrossProfit',
+    'OperatingIncomeLoss',
+    'NetIncome',
 ]
 
-comparison = income_df.loc[key_metrics]
+comparison = income_df.loc[key_metrics, periods]
 
-# Add year-over-year changes
-for i in range(len(comparison.columns) - 1):
-    current_col = comparison.columns[i]
-    prior_col = comparison.columns[i + 1]
+# Add year-over-year changes (columns are newest -> oldest)
+for i in range(len(periods) - 1):
+    current_col = periods[i]
+    prior_col = periods[i + 1]
     change_col = f"{current_col[:4]} vs {prior_col[:4]}"
 
     comparison[change_col] = (
@@ -579,7 +608,8 @@ df = income.to_dataframe()
 revenue_rows = df[df['standard_concept'] == 'Revenue']
 
 # Aggregate by standard concept for comparison
-standardized = df.groupby('standard_concept')[['2024-09-30', '2023-09-30']].sum()
+periods = [c for c in df.columns if c.startswith("20")]
+standardized = df.groupby('standard_concept')[periods].sum()
 ```
 
 > **Note**: Labels preserve the company's original presentation. The `standard_concept` column
@@ -734,16 +764,17 @@ print(filing.homepage_url)
 
 # Verify key metrics
 df = income.to_dataframe()
-revenue = df.loc['Revenue'].iloc[0]
+periods = [c for c in df.columns if c.startswith("20")]
+df = df.set_index("standard_concept")
+revenue = df.loc["Revenue", periods[0]]  # periods[0] is the most recent
 print(f"Revenue (most recent): ${revenue:,.0f}")
 ```
 
 ## Related Documentation
 
-- **[Dimension Handling](../dimension-handling.md)** - Working with segment data
-- **[Standardization Concepts](../standardization-concepts.md)** - How concept normalization works
-- **[XBRL Basics](../xbrl-basics.md)** - Understanding XBRL structure
-- **[Company API Reference](../../api/company.md)** - Alternative approach using EntityFacts
+- **[Dimension Handling](../concepts/dimension-handling.md)** - Working with segment data
+- **[Standardization Concepts](../concepts/standardization.md)** - How concept normalization works
+- **[Choosing the Right API](../getting-started/choosing-the-right-api.md)** - When to use XBRLS vs the Company/Facts APIs
 
 ## Summary
 
@@ -775,9 +806,11 @@ cash_flow = xbrls.statements.cash_flow_statement(max_periods=5)
 
 # Convert to DataFrame
 df = income.to_dataframe()
+periods = [c for c in df.columns if c.startswith("20")]
+df = df.set_index("standard_concept")
 
-# Analyze
-revenue_trend = df.loc['Revenue']
+# Analyze (oldest -> newest for a natural growth series)
+revenue_trend = df.loc["Revenue", periods[::-1]]
 print(revenue_trend.pct_change() * 100)
 ```
 

@@ -223,10 +223,19 @@ class TestRealWorld8KFilings:
         doc = parse_html(html, config)
 
         sections = doc.sections
-        assert len(sections) == 2, \
-            f"Should detect 2 sections (previously detected 0, got {len(sections)})"
         assert 'item_202' in sections, "Should detect Item 2.02"
         assert 'item_901' in sections, "Should detect Item 9.01"
+
+        # Exactly two *item* sections (previously detected 0 before issue #1ho).
+        item_sections = {n: s for n, s in sections.items() if s.kind == 'item'}
+        assert len(item_sections) == 2, \
+            f"Should detect 2 item sections (got {sorted(item_sections)})"
+
+        # The trailing SIGNATURES block is now surfaced as its own named section
+        # rather than being absorbed into the last item (GH #879 / edgartools-papt),
+        # so the total section count includes it.
+        assert 'signatures' in sections, "SIGNATURES should be a named section (GH #879)"
+        assert sections['signatures'].kind == 'named'
 
         # Verify confidence is preserved
         for name, section in sections.items():

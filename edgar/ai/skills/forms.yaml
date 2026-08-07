@@ -13,6 +13,8 @@ mappings:
     "ipo prospectus|ipo pricing": "424B4"
     "resale prospectus|pipe resale": "424B3"
     "structured note prospectus": "424B2"
+    "merger registration|business combination registration|acquisition stock registration|de-spac registration": "S-4"
+    "foreign merger registration|foreign business combination": "F-4"
     "crowdfunding": "C"
     "private placement": "D"
     "regulation a|mini-ipo": "1-A"
@@ -40,3 +42,4 @@ gotchas:
   - "Form 4 = insider trades; SC 13D = 5%+ ownership disclosure"
   - "DEF 14A = final proxy; PRE 14A = preliminary draft"
   - "424B5 = shelf takedown supplement; 424B4 = IPO final; 424B3 = resale; 424B2 = structured notes"
+  - "S-4/F-4 = securities registered in a merger/business combination; filing.obj() -> RegistrationS4 (fee table, cover page, offering_type)"

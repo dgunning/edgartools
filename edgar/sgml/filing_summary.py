@@ -250,9 +250,9 @@ class Report:
         """
         Get the text content of the report
         """
-        table = self._get_report_table()
-        if table:
-            return rich_to_text(table.render(500))
+        renderable = self._build_renderable(500)
+        if renderable is not None:
+            return rich_to_text(renderable, width=500)
 
     def _get_report_table(self):
         """
@@ -269,10 +269,73 @@ class Report:
         self._cached_report_table = document.tables[0]
         return self._cached_report_table
 
+    @staticmethod
+    def _has_embedded_tables(report_soup) -> bool:
+        """True if any TextBlock cell wraps a full HTML table (see issue #755)."""
+        return any(td.find('table') is not None
+                   for td in report_soup.find_all('td', class_='text'))
+
+    def _build_renderable(self, width: int = 500):
+        """
+        Build a Rich renderable for the report.
+
+        Most R-files render cleanly as a single table. But "(Tables)" reports —
+        and some "Notes" reports — wrap a complete HTML table inside a TextBlock
+        cell. Rendering the outer wrapper flattens that nested table into one
+        narrow column, producing the mangled layout reported in issue #755.
+
+        For those reports we render each embedded table on its own, prefixed by
+        its element label and any narrative lead-in text. All other reports keep
+        the original single-table rendering.
+        """
+        content = self.content
+        if not content:
+            return None
+
+        soup = BeautifulSoup(content, 'html.parser')
+        report = soup.find('table', class_='report')
+        if report is None or not self._has_embedded_tables(report):
+            table = self._get_report_table()
+            return table.render(width) if table else None
+
+        parser = HTMLParser(ParserConfig())
+        renderables = []
+        title = self.long_name or self.short_name
+        if title:
+            renderables.append(Text(title, style="bold"))
+
+        for tr in report.find_all('tr'):
+            text_td = tr.find('td', class_='text')
+            if not (text_td and text_td.find('table')):
+                continue
+
+            label_td = tr.find('td', class_='pl')
+            label = label_td.get_text(' ', strip=True) if label_td else None
+            if label:
+                renderables.append(Text(label, style="bold cyan"))
+
+            # Narrative lead-in: everything in the cell that is not inside a table
+            narrative_soup = BeautifulSoup(str(text_td), 'html.parser')
+            for nested in narrative_soup.find_all('table'):
+                nested.decompose()
+            narrative = narrative_soup.get_text(' ', strip=True)
+            if narrative:
+                renderables.append(Text(narrative))
+
+            # Render the embedded table(s) as proper tables
+            cell_doc = parser.parse('<html><body>' + str(text_td) + '</body></html>')
+            for embedded in cell_doc.tables:
+                renderables.append(embedded.render(width))
+
+        if not renderables:
+            table = self._get_report_table()
+            return table.render(width) if table else None
+        return Group(*renderables)
+
     def view(self):
-        table = self._get_report_table()
-        if table:
-            print_rich(table.render(500))
+        renderable = self._build_renderable(500)
+        if renderable is not None:
+            print_rich(renderable)
 
     def to_dataframe(self):
         """

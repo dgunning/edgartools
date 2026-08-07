@@ -1,6 +1,5 @@
 import re
 import textwrap
-import warnings
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import cached_property
@@ -15,18 +14,17 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar.core import log
+from edgar.files._deprecation import warn_legacy_html_usage
 from edgar.files.html_documents import DocumentData, HtmlDocument
 from edgar.files.styles import StyleInfo, Width, get_heading_level, parse_style
 from edgar.files.tables import ColumnOptimizer, ProcessedTable, TableProcessor
 from edgar.richtools import repr_rich
 
-# Deprecation warning for legacy HTML parser
-warnings.warn(
-    "edgar.files.html module is deprecated and will be removed in v6.0. "
-    "Please use edgar.documents.HTMLParser instead. "
-    "See migration guide: https://edgartools.readthedocs.io/en/latest/migration/",
-    DeprecationWarning,
-    stacklevel=2
+_HTML_DEPRECATION_MSG = (
+    "edgar.files.html (including SECHTMLParser and Document) is deprecated "
+    "and will be removed in v6.0. Please use edgar.documents.HTMLParser "
+    "instead. See migration guide: "
+    "https://edgartools.readthedocs.io/en/latest/migration/"
 )
 
 __all__ = ['SECHTMLParser', 'Document', 'DocumentNode']
@@ -501,6 +499,9 @@ class Document:
     """Document class that works with the new node hierarchy"""
     nodes: List[BaseNode]
 
+    def __post_init__(self):
+        warn_legacy_html_usage(_HTML_DEPRECATION_MSG)
+
     def __len__(self):
         return len(self.nodes)
 
@@ -563,6 +564,7 @@ class StyledText:
 
 class SECHTMLParser:
     def __init__(self, root: Tag, extract_data: bool = True, include_page_breaks: bool = False):
+        warn_legacy_html_usage(_HTML_DEPRECATION_MSG)
         self.data:DocumentData = HtmlDocument.extract_data(root) if extract_data else None
         self.root:Tag = root
         self.base_font_size = 10.0  # Default base font size in pt

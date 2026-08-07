@@ -172,6 +172,34 @@ class TestFilerTypeFallback:
             company.data.state_of_incorporation = original
 
     @pytest.mark.fast
+    def test_filer_type_fallback_nport_means_domestic(self):
+        """A fund filing only NPORT-P/NPORT-EX is classified Domestic via the extended fallback.
+
+        Regression for GH #843: FILER_TYPE_DOMESTIC_FORMS previously listed the
+        non-existent form 'N-PORT' instead of the real 'NPORT-P'/'NPORT-EX', so this
+        intersection never fired for N-PORT-only fund filers.
+        """
+        from edgar import Company
+        company = Company("AAPL")
+        company.__dict__.pop('filer_type', None)
+        original = company.data.state_of_incorporation
+        company.data.state_of_incorporation = ''
+        try:
+            for forms in ({'NPORT-P', 'NPORT-EX'}, {'NPORT-P/A'}):
+                company.__dict__.pop('filer_type', None)
+                with patch.object(company, '_get_form_types', return_value=forms):
+                    assert company.filer_type == 'Domestic', f"forms={forms}"
+        finally:
+            company.data.state_of_incorporation = original
+
+    @pytest.mark.fast
+    def test_legacy_n_port_string_not_in_domestic_forms(self):
+        """The dead 'N-PORT' entry must not creep back in (GH #843)."""
+        from edgar.entity.constants import FILER_TYPE_DOMESTIC_FORMS
+        assert 'N-PORT' not in FILER_TYPE_DOMESTIC_FORMS
+        assert 'NPORT-P' in FILER_TYPE_DOMESTIC_FORMS
+
+    @pytest.mark.fast
     def test_20f_takes_priority_over_10k(self):
         """If both 20-F and 10-K present, 20-F wins (Foreign)."""
         from edgar import Company

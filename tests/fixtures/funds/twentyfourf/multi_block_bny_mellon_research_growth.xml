@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edgarSubmission xmlns="http://www.sec.gov/edgar/twentyfourf2filer" xmlns:feec="http://www.sec.gov/edgar/feecommon">
+  <schemaVersion>X0102</schemaVersion>
+  <headerData>
+    <submissionType>24F-2NT</submissionType>
+    <filerInfo>
+      <liveTestFlag>LIVE</liveTestFlag>
+      <filer>
+        <issuerCredentials>
+          <cik>0000030162</cik>
+          <ccc>XXXXXXXX</ccc>
+        </issuerCredentials>
+      </filer>
+      <flags>
+        <overrideInternetFlag>false</overrideInternetFlag>
+        <confirmingCopyFlag>false</confirmingCopyFlag>
+      </flags>
+      <investmentCompanyType>N-1A</investmentCompanyType>
+    </filerInfo>
+  </headerData>
+  <formData>
+    <annualFilings>
+      <annualFilingInfo>
+        <item1>
+          <nameOfIssuer>BNY MELLON RESEARCH GROWTH FUND, INC.</nameOfIssuer>
+          <addressOfIssuer>
+            <street1>240 Greenwich Street</street1>
+            <city>New York</city>
+            <state>NY</state>
+            <country>X1</country>
+            <zipCode>10286</zipCode>
+          </addressOfIssuer>
+        </item1>
+        <item2>
+          <reportSeriesClass>
+            <rptSeriesClassInfo>
+              <seriesName>BNY Mellon Research Growth Fund, Inc.</seriesName>
+              <seriesId>S000000071</seriesId>
+              <classInfo>
+                <className>Class Z</className>
+                <classId>C000000108</classId>
+              </classInfo>
+            </rptSeriesClassInfo>
+          </reportSeriesClass>
+        </item2>
+        <item3>
+          <investmentCompActFileNo>811-01899</investmentCompActFileNo>
+          <securitiesActFileNumbers>
+            <securitiesActFileNo>
+              <fileNumber>002-33733</fileNumber>
+            </securitiesActFileNo>
+          </securitiesActFileNumbers>
+        </item3>
+        <item4>
+          <lastDayOfFiscalYear>02/28/2026</lastDayOfFiscalYear>
+          <isThisFormBeingFiledLate>false</isThisFormBeingFiledLate>
+        </item4>
+        <item5>
+          <seriesOrClassId>C000000108</seriesOrClassId>
+          <aggregateSalePriceOfSecuritiesSold>92341147.00</aggregateSalePriceOfSecuritiesSold>
+          <aggregatePriceOfSecuritiesRedeemedOrRepurchasedInFiscalYear>67705392.00</aggregatePriceOfSecuritiesRedeemedOrRepurchasedInFiscalYear>
+          <aggregatePriceOfSecuritiesRedeemedOrRepurchasedAnyPrior>719945660.00</aggregatePriceOfSecuritiesRedeemedOrRepurchasedAnyPrior>
+          <totalAvailableRedemptionCredits>787651052.00</totalAvailableRedemptionCredits>
+          <netSales>0.00</netSales>
+          <redemptionCreditsAvailableForUseInFutureYears>(695309905.00)</redemptionCreditsAvailableForUseInFutureYears>
+          <multiplierForDeterminingRegistrationFee>0.0001381</multiplierForDeterminingRegistrationFee>
+          <registrationFeeDue>0.00</registrationFeeDue>
+        </item5>
+        <item6>
+          <interestDue>0.00</interestDue>
+        </item6>
+        <item7>
+          <totalOfRegistrationFeePlusAnyInterestDue>0.00</totalOfRegistrationFeePlusAnyInterestDue>
+        </item7>
+        <signature>
+          <signature>/s/ Amanda Quinn</signature>
+          <nameAndTitle>Amanda Quinn, Vice President and Assistant Secretary</nameAndTitle>
+          <signatureDate>05/11/2026</signatureDate>
+        </signature>
+      </annualFilingInfo>
+      <annualFilingInfo>
+        <item1>
+          <nameOfIssuer>BNY MELLON RESEARCH GROWTH FUND, INC.</nameOfIssuer>
+          <addressOfIssuer>
+            <street1>240 Greenwich Street</street1>
+            <city>New York</city>
+            <state>NY</state>
+            <country>X1</country>
+            <zipCode>10286</zipCode>
+          </addressOfIssuer>
+        </item1>
+        <item2>
+          <reportSeriesClass>
+            <rptSeriesClassInfo>
+              <seriesName>BNY Mellon Research Growth Fund, Inc. </seriesName>
+              <seriesId>S000000071</seriesId>
+              <classInfo>
+                <className>Class A</className>
+                <classId>C000069523</classId>
+              </classInfo>
+            </rptSeriesClassInfo>
+          </reportSeriesClass>
+        </item2>
+        <item3>
+          <investmentCompActFileNo>811-01899</investmentCompActFileNo>
+          <securitiesActFileNumbers>
+            <securitiesActFileNo>
+              <fileNumber>002-33733</fileNumber>
+            </securitiesActFileNo>
+          </securitiesActFileNumbers>
+        </item3>
+        <item4>
+          <lastDayOfFiscalYear>02/28/2026</lastDayOfFiscalYear>
+          <isThisFormBeingFiledLate>false</isThisFormBeingFiledLate>
+        </item4>
+        <item5>
+          <seriesOrClassId>C000069523</seriesOrClassId>
+          <aggregateSalePriceOfSecuritiesSold>117104215.00</aggregateSalePriceOfSecuritiesSold>
+          <aggregatePriceOfSecuritiesRedeemedOrRepurchasedInFiscalYear>90422241.00</aggregatePriceOfSecuritiesRedeemedOrRepurchasedInFiscalYear>
+          <aggregatePriceOfSecuritiesRedeemedOrRepurchasedAnyPrior>187501874.00</aggregatePriceOfSecuritiesRedeemedOrRepurchasedAnyPrior>
+          <totalAvailableRedemptionCredits>277924115.00</totalAvailableRedemptionCredits>
+          <netSales>0.00</netSales>
+          <redemptionCreditsAvailableForUseInFutureYears>(160819900.00)</redemptionCreditsAvailableForUseInFutureYears>
+          <multiplierForDeterminingRegistrationFee>0.0001381</multiplierForDeterminingRegistrationFee>
+          <registrationFeeDue>0.00</registrationFeeDue>
+        </item5>
+        <item6>
+          <interestDue>0.00</interestDue>
+        </item6>
+        <item7>
+          <totalOfRegistrationFeePlusAnyInterestDue>0.00</totalOfRegistrationFeePlusAnyInterestDue>
+        </item7>
+        <signature>
+          <signature>/s/ Amanda Quinn</signature>
+          <nameAndTitle>Amanda Quinn, Vice President and Assistant Secretary</nameAndTitle>
+          <signatureDate>05/11/2026</signatureDate>
+        </signature>
+      </annualFilingInfo>
+      <annualFilingInfo>
+        <item1>
+          <nameOfIssuer>BNY MELLON RESEARCH GROWTH FUND, INC.</nameOfIssuer>
+          <addressOfIssuer>
+            <street1>240 Greenwich Street</street1>
+            <city>New York</city>
+            <state>NY</state>
+            <country>X1</country>
+            <zipCode>10286</zipCode>
+          </addressOfIssuer>
+        </item1>
+        <item2>
+          <reportSeriesClass>
+            <rptSeriesClassInfo>
+              <seriesName>BNY Mellon Research Growth Fund, Inc. </seriesName>
+              <seriesId>S000000071</seriesId>
+              <classInfo>
+                <className>Class C</className>
+                <classId>C000069524</classId>
+              </classInfo>
+            </rptSeriesClassInfo>
+          </reportSeriesClass>
+        </item2>
+        <item3>
+          <investmentCompActFileNo>811-01899</investmentCompActFileNo>
+          <securitiesActFileNumbers>
+            <securitiesActFileNo>
+              <fileNumber>002-33733</fileNumber>
+            </securitiesActFileNo>
+          </securitiesActFileNumbers>
+        </item3>
+        <item4>
+          <lastDayOfFiscalYear>02/28/2026</lastDayOfFiscalYear>
+          <isThisFormBeingFiledLate>false</isThisFormBeingFiledLate>
+        </item4>
+        <item5>
+          <seriesOrClassId>C000069524</seriesOrClassId>
+          <aggregateSalePriceOfSecuritiesSold>870777.00</aggregateSalePriceOfSecuritiesSold>
+          <aggregatePriceOfSecuritiesRedeemedOrRepurchasedInFiscalYear>1146729.00</aggregatePriceOfSecuritiesRedeemedOrRepurchasedInFiscalYear>
+          <aggregatePriceOfSecuritiesRedeemedOrRepurchasedAnyPrior>130970463.00</aggregatePriceOfSecuritiesRedeemedOrRepurchasedAnyPrior>
+          <totalAvailableRedemptionCredits>132117192.00</totalAvailableRedemptionCredits>
+          <netSales>0.00</netSales>
+          <redemptionCreditsAvailableForUseInFutureYears>(131246415.00)</redemptionCreditsAvailableForUseInFutureYears>
+          <multiplierForDeterminingRegistrationFee>0.0001381</multiplierForDeterminingRegistrationFee>
+          <registrationFeeDue>0.00</registrationFeeDue>
+        </item5>
+        <item6>
+          <interestDue>0.00</interestDue>
+        </item6>
+        <item7>
+          <totalOfRegistrationFeePlusAnyInterestDue>0.00</totalOfRegistrationFeePlusAnyInterestDue>
+        </item7>
+        <signature>
+          <signature>/s/ Amanda Quinn</signature>
+          <nameAndTitle>Amanda Quinn, Vice President and Assistant Secretary</nameAndTitle>
+          <signatureDate>05/11/2026</signatureDate>
+        </signature>
+      </annualFilingInfo>
+      <annualFilingInfo>
+        <item1>
+          <nameOfIssuer>BNY MELLON RESEARCH GROWTH FUND, INC.</nameOfIssuer>
+          <addressOfIssuer>
+            <street1>240 Greenwich Street</street1>
+            <city>New York</city>
+            <state>NY</state>
+            <country>X1</country>
+            <zipCode>10286</zipCode>
+          </addressOfIssuer>
+        </item1>
+        <item2>
+          <reportSeriesClass>
+            <rptSeriesClassInfo>
+              <seriesName>BNY Mellon Research Growth Fund, Inc. </seriesName>
+              <seriesId>S000000071</seriesId>
+              <classInfo>
+                <className>Class I</className>
+                <classId>C000069525</classId>
+              </classInfo>
+            </rptSeriesClassInfo>
+          </reportSeriesClass>
+        </item2>
+        <item3>
+          <investmentCompActFileNo>811-01899</investmentCompActFileNo>
+          <securitiesActFileNumbers>
+            <securitiesActFileNo>
+              <fileNumber>002-33733</fileNumber>
+            </securitiesActFileNo>
+          </securitiesActFileNumbers>
+        </item3>
+        <item4>
+          <lastDayOfFiscalYear>02/28/2026</lastDayOfFiscalYear>
+          <isThisFormBeingFiledLate>false</isThisFormBeingFiledLate>
+        </item4>
+        <item5>
+          <seriesOrClassId>C000069525</seriesOrClassId>
+          <aggregateSalePriceOfSecuritiesSold>61461470.00</aggregateSalePriceOfSecuritiesSold>
+          <aggregatePriceOfSecuritiesRedeemedOrRepurchasedInFiscalYear>67229352.00</aggregatePriceOfSecuritiesRedeemedOrRepurchasedInFiscalYear>
+          <aggregatePriceOfSecuritiesRedeemedOrRepurchasedAnyPrior>363236750.00</aggregatePriceOfSecuritiesRedeemedOrRepurchasedAnyPrior>
+          <totalAvailableRedemptionCredits>430466102.00</totalAvailableRedemptionCredits>
+          <netSales>0.00</netSales>
+          <redemptionCreditsAvailableForUseInFutureYears>(369004632.00)</redemptionCreditsAvailableForUseInFutureYears>
+          <multiplierForDeterminingRegistrationFee>0.0001381</multiplierForDeterminingRegistrationFee>
+          <registrationFeeDue>0.00</registrationFeeDue>
+        </item5>
+        <item6>
+          <interestDue>0.00</interestDue>
+        </item6>
+        <item7>
+          <totalOfRegistrationFeePlusAnyInterestDue>0.00</totalOfRegistrationFeePlusAnyInterestDue>
+        </item7>
+        <signature>
+          <signature>/s/ Amanda Quinn</signature>
+          <nameAndTitle>Amanda Quinn, Vice President and Assistant Secretary</nameAndTitle>
+          <signatureDate>05/11/2026</signatureDate>
+        </signature>
+      </annualFilingInfo>
+      <annualFilingInfo>
+        <item1>
+          <nameOfIssuer>BNY MELLON RESEARCH GROWTH FUND, INC.</nameOfIssuer>
+          <addressOfIssuer>
+            <street1>240 Greenwich Street</street1>
+            <city>New York</city>
+            <state>NY</state>
+            <country>X1</country>
+            <zipCode>10286</zipCode>
+          </addressOfIssuer>
+        </item1>
+        <item2>
+          <reportSeriesClass>
+            <rptSeriesClassInfo>
+              <seriesName>BNY Mellon Research Growth Fund, Inc.</seriesName>
+              <seriesId>S000000071</seriesId>
+              <classInfo>
+                <className>Class Y</className>
+                <classId>C000127666</classId>
+              </classInfo>
+            </rptSeriesClassInfo>
+          </reportSeriesClass>
+        </item2>
+        <item3>
+          <investmentCompActFileNo>811-01899</investmentCompActFileNo>
+          <securitiesActFileNumbers>
+            <securitiesActFileNo>
+              <fileNumber>002-33733</fileNumber>
+            </securitiesActFileNo>
+          </securitiesActFileNumbers>
+        </item3>
+        <item4>
+          <lastDayOfFiscalYear>02/28/2026</lastDayOfFiscalYear>
+          <isThisFormBeingFiledLate>false</isThisFormBeingFiledLate>
+        </item4>
+        <item5>
+          <seriesOrClassId>C000127666</seriesOrClassId>
+          <aggregateSalePriceOfSecuritiesSold>11264967.00</aggregateSalePriceOfSecuritiesSold>
+          <aggregatePriceOfSecuritiesRedeemedOrRepurchasedInFiscalYear>36419666.00</aggregatePriceOfSecuritiesRedeemedOrRepurchasedInFiscalYear>
+          <aggregatePriceOfSecuritiesRedeemedOrRepurchasedAnyPrior>237816672.00</aggregatePriceOfSecuritiesRedeemedOrRepurchasedAnyPrior>
+          <totalAvailableRedemptionCredits>274236338.00</totalAvailableRedemptionCredits>
+          <netSales>0.00</netSales>
+          <redemptionCreditsAvailableForUseInFutureYears>(262971371.00)</redemptionCreditsAvailableForUseInFutureYears>
+          <multiplierForDeterminingRegistrationFee>0.0001381</multiplierForDeterminingRegistrationFee>
+          <registrationFeeDue>0.00</registrationFeeDue>
+        </item5>
+        <item6>
+          <interestDue>0.00</interestDue>
+        </item6>
+        <item7>
+          <totalOfRegistrationFeePlusAnyInterestDue>0.00</totalOfRegistrationFeePlusAnyInterestDue>
+        </item7>
+        <signature>
+          <signature>/s/ Amanda Quinn</signature>
+          <nameAndTitle>Amanda Quinn, Vice President and Assistant Secretary</nameAndTitle>
+          <signatureDate>05/11/2026</signatureDate>
+        </signature>
+      </annualFilingInfo>
+    </annualFilings>
+  </formData>
+</edgarSubmission>

@@ -158,7 +158,7 @@ class TestSectionDetectionComparison:
 
     def test_microsoft_10k_comparison(self):
         """Compare Microsoft 10-K section detection."""
-        html_path = Path('tests/fixtures/html/msft/10k/msft-10-k-2024-07-30.html')
+        html_path = Path('tests/fixtures/html/msft/10k/msft-10-k-2025-07-30.html')
 
         if not html_path.exists():
             pytest.skip("Microsoft 10-K fixture not found")
@@ -177,7 +177,7 @@ class TestSectionDetectionComparison:
         """Test section detection across multiple tickers."""
         test_cases = [
             ('tests/fixtures/html/aapl/10k/aapl-10-k-2024-11-01.html', 'AAPL'),
-            ('tests/fixtures/html/msft/10k/msft-10-k-2024-07-30.html', 'MSFT'),
+            ('tests/fixtures/html/msft/10k/msft-10-k-2025-07-30.html', 'MSFT'),
         ]
 
         results = []

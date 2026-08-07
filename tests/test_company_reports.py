@@ -3,10 +3,33 @@ from rich import print
 
 from edgar import Filing
 from edgar.company_reports import TenK, TenQ, TwentyF, EightK
+from edgar.company_reports.ten_k import _item_sort_key
 from edgar.files.htmltools import ChunkedDocument
 import pytest
 
 pd.options.display.max_colwidth = 40
+
+
+# Canonical SEC Form 10-K item sequence (Parts I-IV, suffixes after their base number).
+CANONICAL_10K_ITEMS = [
+    'Item 1', 'Item 1A', 'Item 1B', 'Item 1C', 'Item 2', 'Item 3', 'Item 4',
+    'Item 5', 'Item 6', 'Item 7', 'Item 7A', 'Item 8', 'Item 9', 'Item 9A',
+    'Item 9B', 'Item 9C', 'Item 10', 'Item 11', 'Item 12', 'Item 13', 'Item 14',
+    'Item 15', 'Item 16',
+]
+
+
+@pytest.mark.fast
+def test_item_sort_key_produces_canonical_order():
+    """_item_sort_key orders items by number then suffix (1 < 1A < 1B, 7 < 7A)."""
+    # Shuffled / detection-order input should sort to canonical sequence.
+    scrambled = ['Item 7A', 'Item 1A', 'Item 10', 'Item 1', 'Item 2', 'Item 9C',
+                 'Item 9', 'Item 7', 'Item 1C', 'Item 1B']
+    expected = ['Item 1', 'Item 1A', 'Item 1B', 'Item 1C', 'Item 2', 'Item 7',
+                'Item 7A', 'Item 9', 'Item 9C', 'Item 10']
+    assert sorted(scrambled, key=_item_sort_key) == expected
+    # Full canonical list is already in sorted order.
+    assert sorted(CANONICAL_10K_ITEMS, key=_item_sort_key) == CANONICAL_10K_ITEMS
 
 @pytest.mark.network
 def test_tenk_filing_with_no_gaap(frontier_masters_10k_filing):
@@ -31,6 +54,26 @@ def test_tenk_item_and_parts(frontier_masters_10k_filing):
     print(item3)
     # Show Item 1
     # tenk.view('Item 1')
+
+
+@pytest.mark.network
+def test_tenk_items_canonical_order_and_dedup():
+    """Ground truth: AAPL FY2023 10-K exposes all 23 items in canonical SEC order.
+
+    Regression for the ordering footgun where TenK.items returned sections in
+    detection order (e.g. Item 1, 7A, 8, ... 1A) while only __rich__ sorted them.
+    The items property must now dedup and return canonical order itself.
+    """
+    filing = Filing(form='10-K', filing_date='2023-11-03', company='Apple Inc.',
+                    cik=320193, accession_no='0000320193-23-000106')
+    items = filing.obj().items
+
+    assert items == CANONICAL_10K_ITEMS
+    # No duplicates leaked through.
+    assert len(items) == len(set(items))
+    # Property output matches an independent canonical sort of the same data.
+    assert items == sorted(items, key=_item_sort_key)
+
 
 @pytest.mark.network
 def test_tenq_filing():

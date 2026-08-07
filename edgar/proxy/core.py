@@ -57,7 +57,10 @@ class ProxyStatement:
         Args:
             filing: SEC Filing object for a DEF 14A form
         """
-        assert filing.form in PROXY_FORMS, f"Form {filing.form} is not a valid proxy form"
+        assert filing.form in PROXY_FORMS, (
+            f"Form '{filing.form}' is not a recognized proxy form. "
+            f"Expected one of: DEF 14A, DEFA14A, DEFC14A, DFAN14A, PRE 14A, PREC14A, etc."
+        )
         self._filing = filing
         self._xbrl = None
         self._facts_df = None
@@ -153,6 +156,26 @@ class ProxyStatement:
             return None
         try:
             return Decimal(str(value))
+        except Exception:
+            return None
+
+    @cached_property
+    def season(self) -> Optional['ProxySeason']:
+        """The proxy season for this filing's company.
+
+        Returns the latest ProxySeason for the company. Note: if this
+        ProxyStatement is from an older filing, the returned season may
+        be more recent. Use Company.proxy_season(index=N) to access
+        specific historical seasons.
+
+        Returns None if the filing's company cannot be resolved.
+        """
+        from edgar.proxy.season import ProxySeason
+        try:
+            entity = self._filing.get_entity()
+            if entity is None:
+                return None
+            return ProxySeason.for_company(entity)
         except Exception:
             return None
 
@@ -285,6 +308,356 @@ class ProxyStatement:
         if value is None:
             return None
         return str(value).lower() in ('true', 'yes', '1', 'y')
+
+    # Award Timing Properties (SEC Rule 402(x) — since 2023)
+    @cached_property
+    def award_timing_mnpi_considered(self) -> Optional[bool]:
+        """Whether equity award timing decisions considered material nonpublic information."""
+        value = self._get_concept_value('ecd:AwardTmgMnpiCnsdrdFlag')
+        if value is None:
+            return None
+        return str(value).lower() in ('true', 'yes', '1', 'y')
+
+    @cached_property
+    def award_dates_predetermined(self) -> Optional[bool]:
+        """Whether equity award grant dates were predetermined."""
+        value = self._get_concept_value('ecd:AwardTmgPredtrmndFlag')
+        if value is None:
+            return None
+        return str(value).lower() in ('true', 'yes', '1', 'y')
+
+    @cached_property
+    def mnpi_disclosure_timed_for_comp_value(self) -> Optional[bool]:
+        """Whether MNPI disclosure was timed to affect compensation value."""
+        value = self._get_concept_value('ecd:MnpiDiscTimedForCompValFlag')
+        if value is None:
+            return None
+        return str(value).lower() in ('true', 'yes', '1', 'y')
+
+    @cached_property
+    def awards_close_to_mnpi(self) -> pd.DataFrame:
+        """
+        Awards granted within 4 business days of MNPI disclosure.
+
+        Required since 2023 for companies that granted equity awards close to
+        material nonpublic information disclosures. Each row represents one
+        award grant to a named executive officer.
+
+        Columns:
+            - grant_date: Date the award was granted
+            - executive: Executive member identifier
+            - award_type: Type of award (e.g., stock option)
+            - exercise_price: Exercise price of the award
+            - grant_date_fair_value: Fair value on grant date
+            - underlying_securities: Number of underlying securities
+            - market_price_change_pct: Percentage change in underlying security market price
+        """
+        if self._facts_dataframe is None:
+            return pd.DataFrame(columns=[
+                'grant_date', 'executive', 'award_type', 'exercise_price',
+                'grant_date_fair_value', 'underlying_securities', 'market_price_change_pct'
+            ])
+
+        df = self._facts_dataframe
+        names = df[df['concept'] == 'ecd:AwardsCloseToMnpiDiscIndName']
+
+        if len(names) == 0:
+            return pd.DataFrame(columns=[
+                'grant_date', 'executive', 'award_type', 'exercise_price',
+                'grant_date_fair_value', 'underlying_securities', 'market_price_change_pct'
+            ])
+
+        rows = []
+        for _, name_row in names.iterrows():
+            individual = name_row.get('dim_ecd_IndividualAxis')
+            award_type = name_row.get('dim_us-gaap_AwardTypeAxis')
+
+            # Build filter for matching dimensional rows
+            def _match(concept_df):
+                mask = concept_df['concept'].notna()
+                if individual is not None and 'dim_ecd_IndividualAxis' in concept_df.columns:
+                    mask = mask & (concept_df['dim_ecd_IndividualAxis'] == individual)
+                if award_type is not None and 'dim_us-gaap_AwardTypeAxis' in concept_df.columns:
+                    mask = mask & (concept_df['dim_us-gaap_AwardTypeAxis'] == award_type)
+                return concept_df[mask]
+
+            exercise_price = _match(df[df['concept'] == 'ecd:AwardExrcPrice'])
+            fair_value = _match(df[df['concept'] == 'ecd:AwardGrantDateFairValue'])
+            securities = _match(df[df['concept'] == 'ecd:AwardUndrlygSecuritiesAmt'])
+            pct_change = _match(df[df['concept'] == 'ecd:UndrlygSecurityMktPriceChngPct'])
+
+            # Clean up the executive identifier (e.g., "jnj:DuatoMember" → "DuatoMember")
+            exec_id = str(individual) if individual else None
+            if exec_id and ':' in exec_id:
+                exec_id = exec_id.split(':', 1)[1]
+            if exec_id and exec_id.endswith('Member'):
+                exec_id = exec_id[:-6]
+
+            # Clean up award type
+            award_type_str = str(award_type) if award_type else None
+            if award_type_str and ':' in award_type_str:
+                award_type_str = award_type_str.split(':', 1)[1]
+            if award_type_str and award_type_str.endswith('Member'):
+                award_type_str = award_type_str[:-6]
+
+            rows.append({
+                'grant_date': name_row['value'],
+                'executive': exec_id,
+                'award_type': award_type_str,
+                'exercise_price': self._decimal_or_none(
+                    exercise_price.iloc[0]['numeric_value'] if len(exercise_price) > 0 else None
+                ),
+                'grant_date_fair_value': self._decimal_or_none(
+                    fair_value.iloc[0]['numeric_value'] if len(fair_value) > 0 else None
+                ),
+                'underlying_securities': self._decimal_or_none(
+                    securities.iloc[0]['numeric_value'] if len(securities) > 0 else None
+                ),
+                'market_price_change_pct': self._decimal_or_none(
+                    pct_change.iloc[0]['numeric_value'] if len(pct_change) > 0 else None
+                ),
+            })
+
+        return pd.DataFrame(rows)
+
+    # HTML Extraction Properties
+    @cached_property
+    def _filing_text(self) -> Optional[str]:
+        """Full text of the filing for regex-based extraction.
+
+        Prefers text() over markdown() because markdown table formatting
+        (pipes, alignment characters) pollutes regex pattern matching.
+        """
+        try:
+            return self._filing.text()
+        except Exception:
+            try:
+                return self._filing.markdown()
+            except Exception:
+                return None
+
+    @cached_property
+    def _filing_html(self) -> Optional[str]:
+        """Raw HTML of the filing, cached for shared use by HTML extractors."""
+        try:
+            return self._filing.html()
+        except Exception:
+            return None
+
+    @cached_property
+    def _html_tree(self):
+        """Parsed lxml HTML tree, shared across all DOM-based extractors.
+
+        Parsing a 1MB proxy statement takes ~100-200ms with lxml.
+        Caching avoids redundant parsing when multiple extractors are accessed.
+        """
+        html = self._filing_html
+        if not html:
+            return None
+        try:
+            import lxml.html
+            from edgar.documents.utils.html_utils import remove_xml_declaration
+            html = remove_xml_declaration(html)
+            parser = lxml.html.HTMLParser(remove_blank_text=True, remove_comments=True, recover=True)
+            return lxml.html.fromstring(html, parser=parser)
+        except Exception:
+            return None
+
+    # Semantic Section Text (edgartools-x341 / gh-867)
+    @cached_property
+    def document(self):
+        """Parsed filing :class:`~edgar.documents.Document`.
+
+        Proxies route through the title section engine (DEF 14A / PRE 14A are
+        ``title_based``), so :attr:`sections` exposes the Schedule 14A / Reg S-K
+        semantic sections. Returns ``None`` if the filing has no HTML or parsing
+        fails (the XBRL/HTML-table accessors above remain available).
+        """
+        html = self._filing_html
+        if not html:
+            return None
+        try:
+            from edgar.documents.config import ParserConfig
+            from edgar.documents.parser import HTMLParser
+            return HTMLParser(ParserConfig(form=self._filing.form)).parse(html)
+        except Exception as e:
+            log.debug(f"Proxy document parse failed: {e}")
+            return None
+
+    @property
+    def sections(self):
+        """Semantic proxy sections keyed by Schedule 14A / Reg S-K name.
+
+        Returns a ``Sections`` mapping of section key -> ``Section`` (each with
+        ``.text()`` / ``.markdown()``), e.g. ``proxy_summary``,
+        ``corporate_governance``, ``compensation_discussion_and_analysis``,
+        ``pay_versus_performance``, ``audit_matters``, ``security_ownership``,
+        ``voting_proposals``. Labeled sections are emitted when the proxy's TOC
+        anchors resolve; a flat proxy with no machine-readable TOC may yield an
+        empty mapping (tracked as edgartools-bpab).
+
+        Examples:
+            >>> proxy = filing.obj()
+            >>> list(proxy.sections)
+            ['proxy_summary', 'corporate_governance', ...]
+            >>> proxy.sections['compensation_discussion_and_analysis'].text()[:40]
+            'Compensation Discussion and Analysis ...'
+        """
+        doc = self.document
+        return doc.sections if doc is not None else {}
+
+    def section(self, key: str):
+        """A single proxy section by key, or ``None`` if absent.
+
+        Convenience for ``proxy.sections.get(key)``.
+
+        Examples:
+            >>> cda = proxy.section('compensation_discussion_and_analysis')
+            >>> cda.text() if cda else None
+        """
+        return self.sections.get(key) if self.sections else None
+
+    @cached_property
+    def voting_proposals(self) -> List['VotingProposal']:
+        """
+        Voting proposals with board recommendations, extracted from HTML.
+
+        Each proposal includes the proposal number, description, board
+        recommendation (FOR/AGAINST/ABSTAIN), and classified type
+        (director_election, say_on_pay, auditor_ratification, etc.).
+
+        Returns:
+            List of VotingProposal dataclasses, sorted by proposal number.
+            Returns empty list if text extraction fails.
+        """
+        from edgar.proxy.html_extractor import extract_voting_proposals
+        text = self._filing_text
+        if not text:
+            return []
+        return extract_voting_proposals(text)
+
+    @cached_property
+    def ceo_pay_ratio(self) -> Optional['CEOPayRatio']:
+        """
+        CEO pay ratio disclosure extracted from HTML.
+
+        Returns CEOPayRatio with fields:
+            - ceo_compensation: CEO annual total compensation (int or None)
+            - median_employee_compensation: Median employee annual total comp (int or None)
+            - ratio: The pay ratio as an integer (e.g., 533 means 533:1), or None
+
+        Returns None if no pay ratio section found in the filing.
+        SRCs and EGCs are exempt from this disclosure.
+        """
+        from edgar.proxy.html_extractor import extract_ceo_pay_ratio
+        text = self._filing_text
+        if not text:
+            return None
+        return extract_ceo_pay_ratio(text)
+
+    @cached_property
+    def summary_compensation_table(self) -> pd.DataFrame:
+        """
+        Per-executive Summary Compensation Table extracted from HTML.
+
+        Contains individual NEO compensation broken down by component,
+        typically covering 3 fiscal years. This is the detailed data that
+        the XBRL PvP table only provides in aggregate.
+
+        Columns:
+            name, title, year, salary, bonus, stock_awards, option_awards,
+            non_equity_incentive, pension_change, other_compensation, total
+        """
+        from edgar.proxy.html_extractor import extract_summary_compensation
+        tree = self._html_tree
+        if tree is None:
+            return pd.DataFrame()
+        entries = extract_summary_compensation(tree)
+        if not entries:
+            return pd.DataFrame()
+        return pd.DataFrame([
+            {
+                'name': e.name, 'title': e.title, 'year': e.year,
+                'salary': e.salary, 'bonus': e.bonus,
+                'stock_awards': e.stock_awards, 'option_awards': e.option_awards,
+                'non_equity_incentive': e.non_equity_incentive,
+                'pension_change': e.pension_change,
+                'other_compensation': e.other_compensation, 'total': e.total,
+            }
+            for e in entries
+        ])
+
+    @cached_property
+    def beneficial_ownership(self) -> pd.DataFrame:
+        """
+        Beneficial ownership table extracted from HTML.
+
+        Shows 5%+ institutional holders and insider (director/officer) ownership.
+        SEC Item 403 of Regulation S-K mandates this disclosure.
+
+        Columns:
+            holder_name, holder_type (5pct_holder/director_officer/group),
+            shares, percent_of_class
+        """
+        from edgar.proxy.html_extractor import extract_beneficial_ownership
+        tree = self._html_tree
+        if tree is None:
+            return pd.DataFrame()
+        owners = extract_beneficial_ownership(tree)
+        if not owners:
+            return pd.DataFrame()
+        return pd.DataFrame([
+            {
+                'holder_name': o.name, 'holder_type': o.holder_type,
+                'shares': o.shares, 'percent_of_class': o.percent_of_class,
+            }
+            for o in owners
+        ])
+
+    @cached_property
+    def director_compensation_table(self) -> pd.DataFrame:
+        """
+        Non-employee director compensation extracted from HTML.
+
+        SEC Item 402(k) mandates this disclosure. Covers fees earned,
+        stock awards, option awards, and total for each non-employee director.
+
+        Columns:
+            name, fees_earned, stock_awards, option_awards,
+            non_equity_incentive, pension_change, other_compensation, total
+        """
+        from edgar.proxy.html_extractor import extract_director_compensation
+        tree = self._html_tree
+        if tree is None:
+            return pd.DataFrame()
+        entries = extract_director_compensation(tree)
+        if not entries:
+            return pd.DataFrame()
+        return pd.DataFrame([
+            {
+                'name': e.name, 'fees_earned': e.fees_earned,
+                'stock_awards': e.stock_awards, 'option_awards': e.option_awards,
+                'non_equity_incentive': e.non_equity_incentive,
+                'pension_change': e.pension_change,
+                'other_compensation': e.other_compensation, 'total': e.total,
+            }
+            for e in entries
+        ])
+
+    @cached_property
+    def audit_fees(self) -> Optional['AuditFees']:
+        """
+        Audit fee disclosure extracted from HTML.
+
+        Returns AuditFees with auditor name and fee breakdown (audit,
+        audit-related, tax, other, total) for current and prior year.
+        Returns None if the section/table was not found.
+        """
+        from edgar.proxy.html_extractor import extract_audit_fees
+        tree = self._html_tree
+        if tree is None:
+            return None
+        return extract_audit_fees(tree)
 
     # DataFrame Properties
     @cached_property
@@ -463,6 +836,8 @@ class ProxyStatement:
                 return "\n".join(lines)
             lines.append("")
             lines.append("AVAILABLE ACTIONS:")
+            lines.append("  .sections                Semantic proxy sections (text, no XBRL needed)")
+            lines.append("  .voting_proposals        Voting proposals with board recommendations")
             lines.append("  .has_xbrl                Whether XBRL data is present")
             return "\n".join(lines)
 
@@ -506,19 +881,125 @@ class ProxyStatement:
             if ni is not None:
                 lines.append(f"  Net Income: {format_currency_short(float(ni))}")
 
+        # Award timing
+        mnpi_considered = self.award_timing_mnpi_considered
+        if mnpi_considered is not None:
+            lines.append("")
+            lines.append("AWARD TIMING:")
+            lines.append(f"  MNPI Considered: {'Yes' if mnpi_considered else 'No'}")
+            predetermined = self.award_dates_predetermined
+            if predetermined is not None:
+                lines.append(f"  Dates Predetermined: {'Yes' if predetermined else 'No'}")
+            mnpi_timed = self.mnpi_disclosure_timed_for_comp_value
+            if mnpi_timed is not None:
+                lines.append(f"  MNPI Timed for Comp Value: {'Yes' if mnpi_timed else 'No'}")
+
         # Available actions
         lines.append("")
         lines.append("AVAILABLE ACTIONS:")
+        lines.append("  .sections                Semantic proxy sections (.text()/.markdown())")
         lines.append("  .executive_compensation  Multi-year comp DataFrame")
         lines.append("  .pay_vs_performance      Pay vs performance DataFrame")
         lines.append("  .peo_total_comp          CEO total compensation")
         lines.append("  .named_executives        Named executive officers list")
         lines.append("  .performance_measures    Company performance measures")
+        lines.append("  .awards_close_to_mnpi    Awards granted near MNPI disclosure")
+        lines.append("  .voting_proposals        Voting proposals with board recommendations")
+        lines.append("  .ceo_pay_ratio           CEO pay ratio (CEO comp, median employee, ratio)")
+        lines.append("  .summary_compensation_table  Per-NEO compensation DataFrame (HTML)")
+        lines.append("  .beneficial_ownership    Ownership table (5%+ holders, insiders)")
+        lines.append("  .director_compensation_table  Director compensation DataFrame (HTML)")
+        lines.append("  .audit_fees              Audit fee breakdown (HTML)")
 
         if detail == 'standard':
             return "\n".join(lines)
 
         # === FULL ===
+        # CEO Pay Ratio
+        try:
+            pay_ratio = self.ceo_pay_ratio
+            if pay_ratio and pay_ratio.ratio:
+                lines.append("")
+                lines.append("CEO PAY RATIO:")
+                if pay_ratio.ceo_compensation:
+                    lines.append(f"  CEO Compensation: ${pay_ratio.ceo_compensation:,}")
+                if pay_ratio.median_employee_compensation:
+                    lines.append(f"  Median Employee: ${pay_ratio.median_employee_compensation:,}")
+                lines.append(f"  Ratio: {pay_ratio.ratio}:1")
+        except Exception:
+            pass
+
+        # Summary Compensation Table
+        try:
+            sct = self.summary_compensation_table
+            if not sct.empty:
+                execs = sct['name'].nunique()
+                years = sct['year'].nunique()
+                lines.append("")
+                lines.append(f"SUMMARY COMPENSATION TABLE: {execs} executives, {years} years")
+                latest = sct['year'].max()
+                for _, row in sct[sct['year'] == latest].iterrows():
+                    total_str = f"${row['total']:,.0f}" if row.get('total') else '-'
+                    title_str = f" ({row['title']})" if row.get('title') else ''
+                    lines.append(f"  {row['name']}{title_str}: {total_str}")
+        except Exception:
+            pass
+
+        # Beneficial Ownership
+        try:
+            ownership = self.beneficial_ownership
+            if not ownership.empty:
+                holders = len(ownership)
+                pct5 = len(ownership[ownership['holder_type'] == '5pct_holder'])
+                lines.append("")
+                lines.append(f"BENEFICIAL OWNERSHIP: {holders} holders ({pct5} at 5%+)")
+                for _, row in ownership.head(5).iterrows():
+                    pct = f"{row['percent_of_class']:.1f}%" if row.get('percent_of_class') and row['percent_of_class'] != 0.5 else '<1%' if row.get('percent_of_class') == 0.5 else '-'
+                    shares = f"{row['shares']:,}" if row.get('shares') else '-'
+                    lines.append(f"  {row['holder_name'][:40]}: {shares} shares ({pct})")
+        except Exception:
+            pass
+
+        # Director Compensation
+        try:
+            dir_comp = self.director_compensation_table
+            if not dir_comp.empty:
+                lines.append("")
+                lines.append(f"DIRECTOR COMPENSATION: {len(dir_comp)} directors")
+                for _, row in dir_comp.head(5).iterrows():
+                    total_str = f"${row['total']:,.0f}" if row.get('total') else '-'
+                    lines.append(f"  {row['name'][:35]}: {total_str}")
+        except Exception:
+            pass
+
+        # Audit Fees
+        try:
+            af = self.audit_fees
+            if af and af.current_year:
+                from edgar.display.formatting import format_currency_short
+                lines.append("")
+                lines.append(f"AUDIT FEES ({af.current_year}):")
+                if af.auditor_name:
+                    lines.append(f"  Auditor: {af.auditor_name}")
+                if af.audit_fees_current is not None:
+                    lines.append(f"  Audit: {format_currency_short(af.audit_fees_current)}")
+                if af.total_current is not None:
+                    lines.append(f"  Total: {format_currency_short(af.total_current)}")
+        except Exception:
+            pass
+
+        # Voting proposals
+        try:
+            proposals = self.voting_proposals
+            if proposals:
+                lines.append("")
+                lines.append(f"VOTING PROPOSALS: {len(proposals)}")
+                for p in proposals:
+                    rec = f" (Board: {p.board_recommendation})" if p.board_recommendation else ""
+                    lines.append(f"  {p.number}. {p.description}{rec} [{p.proposal_type}]")
+        except Exception:
+            pass
+
         # Named executives
         try:
             if self.has_individual_executive_data:
@@ -549,6 +1030,21 @@ class ProxyStatement:
             if itp is not None:
                 lines.append("")
                 lines.append(f"Insider Trading Policy: {'Adopted' if itp else 'Not adopted'}")
+        except Exception:
+            pass
+
+        # Awards close to MNPI
+        try:
+            awards_df = self.awards_close_to_mnpi
+            if len(awards_df) > 0:
+                lines.append("")
+                lines.append(f"AWARDS CLOSE TO MNPI: {len(awards_df)} grants")
+                for _, row in awards_df.iterrows():
+                    exec_name = row.get('executive', 'Unknown')
+                    grant_date = row.get('grant_date', '')
+                    fair_value = row.get('grant_date_fair_value')
+                    fv_str = f" (FV: ${float(fair_value):,.0f})" if fair_value else ""
+                    lines.append(f"  {exec_name}: {grant_date}{fv_str}")
         except Exception:
             pass
 
@@ -648,6 +1144,47 @@ class ProxyStatement:
             elements.append(Text())
             elements.append(pvp_table)
 
+        # Award Timing
+        mnpi_considered = self.award_timing_mnpi_considered
+        if mnpi_considered is not None:
+            timing_text = Text()
+            timing_text.append("Award Timing: ", style="bold")
+            parts = []
+            if mnpi_considered:
+                parts.append("MNPI considered")
+            predetermined = self.award_dates_predetermined
+            if predetermined:
+                parts.append("dates predetermined")
+            mnpi_timed = self.mnpi_disclosure_timed_for_comp_value
+            if mnpi_timed:
+                parts.append("MNPI timed for comp value")
+            if parts:
+                timing_text.append(", ".join(parts))
+            else:
+                timing_text.append("No MNPI timing concerns", style="green")
+            elements.append(Text())
+            elements.append(timing_text)
+
+        # CEO Pay Ratio
+        try:
+            pay_ratio = self.ceo_pay_ratio
+            if pay_ratio and pay_ratio.ratio:
+                from edgar.display.formatting import format_currency_short
+                ratio_text = Text()
+                ratio_text.append("Pay Ratio: ", style="bold")
+                ratio_text.append(f"{pay_ratio.ratio}:1")
+                parts = []
+                if pay_ratio.ceo_compensation:
+                    parts.append(f"CEO {format_currency_short(pay_ratio.ceo_compensation)}")
+                if pay_ratio.median_employee_compensation:
+                    parts.append(f"Median {format_currency_short(pay_ratio.median_employee_compensation)}")
+                if parts:
+                    ratio_text.append(f" ({' / '.join(parts)})", style="dim")
+                elements.append(Text())
+                elements.append(ratio_text)
+        except Exception:
+            pass
+
         # Governance indicators
         if self.insider_trading_policy_adopted is not None:
             gov_text = Text()
@@ -658,6 +1195,133 @@ class ProxyStatement:
                 gov_text.append("No Insider Trading Policy", style="red")
             elements.append(Text())
             elements.append(gov_text)
+
+        # Summary Compensation Table
+        try:
+            sct = self.summary_compensation_table
+            if not sct.empty:
+                from edgar.display.formatting import format_currency_short
+                latest = sct['year'].max()
+                latest_rows = sct[sct['year'] == latest]
+                sct_table = Table(
+                    title=f"Summary Compensation ({latest})",
+                    box=box.SIMPLE,
+                    show_header=True,
+                )
+                sct_table.add_column("Name", ratio=2)
+                sct_table.add_column("Title", style="dim", ratio=1)
+                sct_table.add_column("Salary", justify="right")
+                sct_table.add_column("Stock Awards", justify="right")
+                sct_table.add_column("Total", justify="right")
+
+                for _, row in latest_rows.iterrows():
+                    salary = format_currency_short(row['salary']) if row.get('salary') else "-"
+                    stock = format_currency_short(row['stock_awards']) if row.get('stock_awards') else "-"
+                    total = format_currency_short(row['total']) if row.get('total') else "-"
+                    sct_table.add_row(row['name'], row.get('title', ''), salary, stock, total)
+
+                elements.append(Text())
+                elements.append(sct_table)
+        except Exception:
+            pass
+
+        # Beneficial Ownership
+        try:
+            ownership = self.beneficial_ownership
+            if not ownership.empty:
+                own_table = Table(
+                    title="Beneficial Ownership",
+                    box=box.SIMPLE,
+                    show_header=True,
+                )
+                own_table.add_column("Holder", ratio=3)
+                own_table.add_column("Type", style="dim", ratio=1)
+                own_table.add_column("Shares", justify="right")
+                own_table.add_column("%", justify="right", width=6)
+
+                for _, row in ownership.head(10).iterrows():
+                    shares_str = f"{row['shares']:,}" if row.get('shares') else "-"
+                    pct_str = f"{row['percent_of_class']:.1f}%" if row.get('percent_of_class') and row['percent_of_class'] != 0.5 else "<1%" if row.get('percent_of_class') == 0.5 else "-"
+                    own_table.add_row(
+                        row['holder_name'][:40],
+                        row['holder_type'].replace('_', ' '),
+                        shares_str,
+                        pct_str,
+                    )
+                elements.append(Text())
+                elements.append(own_table)
+        except Exception:
+            pass
+
+        # Director Compensation
+        try:
+            dir_comp = self.director_compensation_table
+            if not dir_comp.empty:
+                from edgar.display.formatting import format_currency_short
+                dir_table = Table(
+                    title="Director Compensation",
+                    box=box.SIMPLE,
+                    show_header=True,
+                )
+                dir_table.add_column("Name", ratio=2)
+                dir_table.add_column("Fees", justify="right")
+                dir_table.add_column("Stock Awards", justify="right")
+                dir_table.add_column("Total", justify="right")
+
+                for _, row in dir_comp.iterrows():
+                    fees = format_currency_short(row['fees_earned']) if row.get('fees_earned') else "-"
+                    stock = format_currency_short(row['stock_awards']) if row.get('stock_awards') else "-"
+                    total = format_currency_short(row['total']) if row.get('total') else "-"
+                    dir_table.add_row(row['name'][:30], fees, stock, total)
+
+                elements.append(Text())
+                elements.append(dir_table)
+        except Exception:
+            pass
+
+        # Audit Fees
+        try:
+            af = self.audit_fees
+            if af and af.current_year:
+                from edgar.display.formatting import format_currency_short
+                af_text = Text()
+                af_text.append(f"Audit Fees ({af.current_year}): ", style="bold")
+                if af.auditor_name:
+                    af_text.append(f"{af.auditor_name} — ")
+                if af.total_current is not None:
+                    af_text.append(f"Total {format_currency_short(af.total_current)}")
+                elements.append(Text())
+                elements.append(af_text)
+        except Exception:
+            pass
+
+        # Voting Proposals
+        try:
+            proposals = self.voting_proposals
+            if proposals:
+                prop_table = Table(
+                    title="Voting Proposals",
+                    box=box.SIMPLE,
+                    show_header=True,
+                )
+                prop_table.add_column("#", style="dim", width=3)
+                prop_table.add_column("Proposal", ratio=3)
+                prop_table.add_column("Type", style="dim", ratio=1)
+                prop_table.add_column("Board", justify="center", width=8)
+
+                for p in proposals:
+                    rec_style = "green" if p.board_recommendation == "FOR" else "red" if p.board_recommendation == "AGAINST" else ""
+                    rec_text = p.board_recommendation or "-"
+                    prop_table.add_row(
+                        str(p.number),
+                        p.description,
+                        p.proposal_type.replace('_', ' '),
+                        Text(rec_text, style=rec_style),
+                    )
+                elements.append(Text())
+                elements.append(prop_table)
+        except Exception:
+            pass
 
         # Performance Measures
         if self.performance_measures:

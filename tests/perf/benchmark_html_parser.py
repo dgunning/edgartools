@@ -100,13 +100,14 @@ class ParserBenchmark:
             'runs': runs
         }
 
-    def benchmark_corpus(self, pattern: str = '*.html', max_files: Optional[int] = None) -> List[Dict]:
+    def benchmark_corpus(self, pattern: str = '*.html', max_files: Optional[int] = None, runs: int = 5) -> List[Dict]:
         """
         Benchmark all files in corpus.
 
         Args:
             pattern: Glob pattern for HTML files
             max_files: Maximum number of files to benchmark (None = all)
+            runs: Number of benchmark runs per file
 
         Returns:
             List of benchmark results
@@ -127,7 +128,7 @@ class ParserBenchmark:
 
         for html_file in files:
             try:
-                result = self.benchmark_document(html_file)
+                result = self.benchmark_document(html_file, runs=runs)
                 self.results.append(result)
 
                 print(f"{result['file']:<35} "
@@ -278,7 +279,7 @@ def main():
     args = parser.parse_args()
 
     benchmark = ParserBenchmark(corpus_dir=args.corpus)
-    benchmark.benchmark_corpus(pattern=args.pattern, max_files=args.max_files)
+    benchmark.benchmark_corpus(pattern=args.pattern, max_files=args.max_files, runs=args.runs)
     benchmark.save_results(args.output)
 
     if args.baseline:

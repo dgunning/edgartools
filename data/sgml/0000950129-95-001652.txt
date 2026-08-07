@@ -1,0 +1,277 @@
+-----BEGIN PRIVACY-ENHANCED MESSAGE-----
+Proc-Type: 2001,MIC-CLEAR
+Originator-Name: webmaster@www.sec.gov
+Originator-Key-Asymmetric:
+ MFgwCgYEVQgBAQICAf8DSgAwRwJAW2sNKK9AVtBzYZmr6aGjlWyK3XmZv3dTINen
+ TWSM7vrzLADbmYQaionwg5sDW3P6oaM5D3tdezXMm7z1T+B+twIDAQAB
+MIC-Info: RSA-MD5,RSA,
+ R8NfjA6Otp8FM5Kxir2vXlxBZi//HKWVMfnG71oDaQ1gy/iX5hDAaUs/bGKNwHs0
+ 2l0+64lYThn/RAPEqq5Ffw==
+
+<SEC-DOCUMENT>0000950129-95-001652.txt : 19960102
+<SEC-HEADER>0000950129-95-001652.hdr.sgml : 19960102
+ACCESSION NUMBER:		0000950129-95-001652
+CONFORMED SUBMISSION TYPE:	24F-2NT
+PUBLIC DOCUMENT COUNT:		2
+CONFORMED PERIOD OF REPORT:	19951031
+FILED AS OF DATE:		19951228
+SROS:			NASD
+
+FILER:
+
+	COMPANY DATA:	
+		COMPANY CONFORMED NAME:			COMMON SENSE TRUST
+		CENTRAL INDEX KEY:			0000810271
+		STANDARD INDUSTRIAL CLASSIFICATION:	 []
+		STATE OF INCORPORATION:			MA
+		FISCAL YEAR END:			1031
+
+	FILING VALUES:
+		FORM TYPE:		24F-2NT
+		SEC ACT:		1933 Act
+		SEC FILE NUMBER:	033-11716
+		FILM NUMBER:		95605520
+
+	BUSINESS ADDRESS:	
+		STREET 1:		2800 POST OAK BLVD 46TH FL
+		CITY:			HOUSTON
+		STATE:			TX
+		ZIP:			77056
+		BUSINESS PHONE:		7139930500
+</SEC-HEADER>
+<DOCUMENT>
+<TYPE>24F-2NT
+<SEQUENCE>1
+<DESCRIPTION>VKAC COMMON SENSE TRUST - GROWTH FUND - 24F-2
+<TEXT>
+
+<PAGE>   1
+                   U.S. SECURITIES AND EXCHANGE COMMISSION
+                            WASHINGTON, D.C. 20549
+
+                                  FORM 24F-2
+                       ANNUAL NOTICE OF SECURITIES SOLD
+                            PURSUANT TO RULE 24F-2
+
+           READ INSTRUCTIONS AT END OF FORM BEFORE PREPARING FORM.
+                            PLEASE PRINT OR TYPE.
+
+________________________________________________________________________________
+
+1.  Name and address of issuer:
+    Common Sense Trust - Growth Fund
+    2800 Post Oak Blvd.
+    Houston, TX 77056
+________________________________________________________________________________
+
+2.  Name of each series or class of funds for which this notice is filed:
+    
+
+________________________________________________________________________________
+
+3.  Investment Company Act File Number: 811-5018
+
+
+    Securities Act File Number: 33-11716
+
+________________________________________________________________________________
+
+4.  Last day of fiscal year for which this notice is filed: 10/31/95
+
+________________________________________________________________________________
+
+5.  Check box if this notice is being filed more that 180 days after the close
+of the issuer's fiscal year for purposes of reporting securities sold after 
+the close of the fiscal year but before termination of the issuer's 24f-2 
+declaration:
+                                                               {  }
+________________________________________________________________________________
+
+6.  Date of termination of issuer's declaration under rule 24f-2(a)(1), if
+applicable (see instruction A.6):
+
+
+________________________________________________________________________________
+
+7.  Number and amount of securities of the same class or series which had been
+registered under the Securities Act of 1933 other than pursuant to rule 24f-2 
+in a prior fiscal year, but which remained unsold at the beginning of the 
+fiscal year:
+
+          -0-
+________________________________________________________________________________
+
+8.  Number and amount of securities registered during the fiscal year other
+than pursuant to rule 24f-2:
+
+          -0-
+________________________________________________________________________________
+
+9.  Number and aggregate sale price of securities sold during the fiscal year:
+    
+        19,019,524                               $315,907,470
+________________________________________________________________________________
+
+
+<PAGE>   2
+________________________________________________________________________________
+
+10.  Number and aggregate sale price of securities sold during the fiscal year
+in reliance upon registration pursuant to rule 24f-2:
+     
+         19,019,524                                   $315,907,479
+________________________________________________________________________________
+
+11.  Number and aggregate sale price of securities issued during the fiscal
+year in connection with dividend reinvestment plans, if applicable (see
+instruction B.7):
+     
+         12,278,591                                   $168,462,102
+________________________________________________________________________________
+
+12.  Calculation of registration fee:
+
+    (i)  Aggregate sale price of securities sold during the    
+         fiscal year in reliance on rule 24f-2 (from Item 10): $    315,907,479
+                                                                _______________
+
+    (ii) Aggregate price of shares issued in connection with 
+         dividend reinvestment plans (from item 11, if 
+         applicable):                                          +    168,462,102 
+                                                                _______________
+
+   (iii) Aggregate price of shares redeemed or repurchased
+         during the fiscal year (if applicable):               -    365,263,456
+                                                                _______________
+
+   (iv)  Aggregate price of shares redeemed or repurchased and
+         previously applied as a reduction to filing fees 
+         pursuant to rule 24e-2 (if applicable):               +        -0-
+                                                                _______________
+
+    (v)  Net aggregate price of securities sold and issued
+         during the fiscal year in reliance on rule 24f-2
+         [line (i), plus line (ii), less line (iii), plus line
+         (iv)] (if applicable):                                     119,106,125
+                                                                _______________
+
+   (vi)  Multiplier prescribed by Section 6(b) of the 
+         Securities Act of 1933 or other applicable law or 
+         regulation (see Instruction C.6):                     x     0.00034483
+                                                                _______________
+
+   (vii) Fee due [line (i) or line (v) multiplied by 
+         line (vi)]                                            $      41,071.08
+                                                                _______________
+
+INSTRUCTION:  ISSUERS SHOULD COMPLETE LINES (II), (III), (IV), AND (V) ONLY IF
+THE FORM IS BEING FILED WITHIN 60 DAYS AFTER THE CLOSE OF THE ISSUER'S FISCAL
+YEAR.  SEE INSTRUCTION C.3.
+________________________________________________________________________________
+
+13.  Check box if fees are being remitted to the Commission's lockbox depository
+as described in section 3a of the Commission's Rules of Informal and Other
+Procedures (17 CFR 202.3a).             
+
+                                                                        {X} 
+
+Date of mailing or wire transfer of filing fees to the Commission's lockbox
+depository:
+         
+                            December 20, 1995
+______________________________________________________________________________
+
+                                  SIGNATURES
+
+This report has been signed below by the following persons on behalf of the
+issuer and in the capacities and on the dates indicated.
+
+By (Signature and Title)* /s/ NORI L. GABERT
+                         _____________________________________________________
+                              Nori L. Gabert, Secretary
+                         _____________________________________________________
+
+Date December 28, 1995
+     _________________
+
+* PLEASE PRINT THE NAME AND TITLE OF THE SIGNING OFFICER BELOW THE SIGNATURE.
+
+________________________________________________________________________________
+
+
+
+
+
+
+</TEXT>
+</DOCUMENT>
+<DOCUMENT>
+<TYPE>EX-99.11
+<SEQUENCE>2
+<DESCRIPTION>OPINION OF SULLIVAN & WORCESTER
+<TEXT>
+
+<PAGE>   1
+                                 [LETTERHEAD]
+
+
+
+
+
+                                   December 19, 1995
+
+
+
+Common Sense Trust - Growth Fund
+2800 Post Oak Boulevard
+Houston, Texas  77056
+
+                        Rule 24f-2 Notice
+             Registration Statement File No. 811-5018
+
+Ladies and Gentlemen:
+
+     Common Sense Trust (the "Trust"), a Massachusetts business
+trust with multiple series portfolios, proposes to file with the
+Securities and Exchange Commission on behalf of its Growth Fund
+pursuant to the provisions of Rule 24f-2 under the Investment
+Company Act of 1940, as amended (the "Act"), a notice making
+definite the registration of 31,298,115 of its shares of
+beneficial interest authorized by the Board of Trustees of the
+Trust (the "Shares"), which were sold in reliance upon
+registration pursuant to Rule 24f-2 during the fiscal year ended
+October 31, 1995.
+
+     We have made such investigations and have relied upon
+originals or copies, certified or otherwise identified to our
+satisfaction, of such records, instruments, certificates,
+memoranda and other documents as we have deemed necessary or
+advisable for purposes of this opinion.  In that examination, we
+have assumed the genuineness of all signatures, the authenticity
+of all documents purporting to be originals, and the conformity
+to the originals of all documents purporting to be copies.
+
+     Based upon and subject to the foregoing, we hereby advise
+you that, in our opinion, the Shares, the registration of which
+is being made definite by the notice referred to above, are
+validly and legally issued, fully paid and nonassessable.  For
+purposes of this letter, we express no opinion as to compliance
+with the Securities Act of 1933, as amended, applicable state
+laws regulating the sale of securities, or the Act.
+
+     We consent to your filing this opinion as an exhibit to the
+notice referred to above.
+
+                              Very truly yours,
+
+                              /s/ SULLIVAN & WORCESTER LLP
+
+                              Sullivan & Worcester LLP
+                              A Registered Limited Liability
+                              Partnership
+
+
+</TEXT>
+</DOCUMENT>
+</SEC-DOCUMENT>
+-----END PRIVACY-ENHANCED MESSAGE-----

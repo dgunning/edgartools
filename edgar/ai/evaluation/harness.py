@@ -16,7 +16,7 @@ Example:
 
 import json
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -50,7 +50,7 @@ class TestResult:
     code: str
     evaluation: CombinedEvaluation
     run_timestamp: str = field(
-        default_factory=lambda: datetime.utcnow().isoformat()
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
     )
     metadata: Dict[str, Any] = field(default_factory=dict)
 
@@ -96,7 +96,7 @@ class EvaluationReport:
     results: List[TestResult]
     condition: str = "unknown"
     run_timestamp: str = field(
-        default_factory=lambda: datetime.utcnow().isoformat()
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
     )
     summary_stats: Dict[str, Any] = field(default_factory=dict)
 

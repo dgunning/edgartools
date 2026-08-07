@@ -35,6 +35,39 @@ def fund_reference_data():
     return FundReferenceData(df)
 
 
+@pytest.mark.fast
+def test_company_lookup_with_numeric_cik_column():
+    """Regression: the SEC bulk fund dataset can type the CIK column as numeric,
+    so a CIK arrives as a float (225323.0). Naive str().zfill() then keyed it as
+    "00225323.0", which no clean lookup ("0000225323") matched — silently
+    breaking every company lookup. _normalize_cik coerces through int so both
+    sides agree."""
+    df = pd.DataFrame({
+        'Reporting File Number': ['811-02968'],
+        'CIK Number': [225323.0],  # numeric, not a zero-padded string
+        'Entity Name': ['FIDELITY COURT STREET TRUST'],
+        'Entity Org Type': ['N-1A'],
+        'Series ID': ['S000007462'],
+        'Series Name': ['Fidelity New Jersey Municipal Income Fund'],
+        'Class ID': ['C000020488'],
+        'Class Name': ['Fidelity New Jersey Municipal Income Fund'],
+        'Class Ticker': ['FNJHX'],
+        'Address_1': ['245 SUMMER STREET'],
+        'Address_2': [''],
+        'City': ['BOSTON'],
+        'State': ['MA'],
+        'Zip Code': ['02210'],
+    })
+    ref = FundReferenceData(df)
+    company = ref.get_company("0000225323")
+    assert company is not None
+    assert company.cik == "0000225323"
+    assert company.name == "FIDELITY COURT STREET TRUST"
+    # The numeric CIK also resolves series and the bare-int lookup form.
+    assert len(ref.get_series_for_company("0000225323")) == 1
+    assert ref.get_company("225323") is not None
+
+
 class TestFundReferenceData:
 
     @pytest.mark.fast

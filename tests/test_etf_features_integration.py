@@ -2,7 +2,7 @@
 Integration tests for ETF features (FEAT-417 and FEAT-418).
 """
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, call
 import pandas as pd
 from decimal import Decimal
 
@@ -71,25 +71,54 @@ class TestETFFeaturesIntegration:
             assert series == mock_series
             mock_get_fund_series.assert_called_once_with("S000001234")
 
-    def test_fund_get_filings_with_series_only_parameter(self):
-        """Test Fund.get_filings() with series_only parameter uses EFTS search"""
+    def test_fund_get_filings_series_only_pushes_form_type_to_browse_edgar(self):
+        """series_only=True resolves via browse-edgar per requested form type
+        (server-side &type=), so large funds don't page through their whole
+        history and 503 (GH #888). It must never delegate to the entity/trust."""
+        from edgar._filings import Filings
+
         with patch('edgar.funds.core.find_fund') as mock_find_fund:
             mock_entity = MagicMock()
-            mock_filings = MagicMock()
-            mock_entity.get_filings.return_value = mock_filings
             mock_find_fund.return_value = mock_entity
 
             fund = Fund("GRID")
             fund._target_series_id = "S000001234"
 
-            # When EFTS fails, series_only is consumed by Fund.get_filings()
-            # and NOT forwarded to entity.get_filings() — only **kwargs are passed
-            with patch('edgar.search.efts.search_filings', side_effect=Exception("EFTS unavailable")):
-                filings = fund.get_filings(series_only=True, form="NPORT-P")
+            with patch('edgar.funds.data.direct_get_fund_with_filings',
+                       return_value=None) as mock_direct:
+                filings = fund.get_filings(series_only=True, form=["N-PORT", "NPORT-P"])
 
-            assert filings == mock_filings
-            # series_only is intentionally consumed by Fund — only form= is forwarded
-            mock_entity.get_filings.assert_called_once_with(form="NPORT-P")
+            # One browse-edgar lookup per requested form, each with its type filter.
+            assert mock_direct.call_args_list == [
+                call("S000001234", filing_type="N-PORT"),
+                call("S000001234", filing_type="NPORT-P"),
+            ]
+            # Unresolved series -> empty Filings, never the unfiltered trust.
+            assert isinstance(filings, Filings)
+            assert len(filings) == 0
+            mock_entity.get_filings.assert_not_called()
+
+    def test_fund_get_filings_series_only_empty_when_series_has_no_such_form(self):
+        """A resolved series with no filings of the requested form returns an
+        empty Filings (not a crash, not the trust)."""
+        from edgar._filings import Filings
+
+        with patch('edgar.funds.core.find_fund') as mock_find_fund:
+            mock_find_fund.return_value = MagicMock()
+
+            fund = Fund("GRID")
+            fund._target_series_id = "S000001234"
+
+            empty_filings = MagicMock()
+            empty_filings.__len__ = lambda self: 0
+            mock_series = MagicMock(filings=empty_filings)
+
+            with patch('edgar.funds.data.direct_get_fund_with_filings',
+                       return_value=mock_series):
+                filings = fund.get_filings(series_only=True, form="SC 13D")
+
+            assert isinstance(filings, Filings)
+            assert len(filings) == 0
 
 
 class TestFundReportTickerResolution:

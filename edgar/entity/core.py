@@ -797,11 +797,19 @@ class Company(Entity):
             >>> Company('JPM').business_category
             'Bank'
         """
-        from edgar.entity.categorization import BusinessCategory, classify_business_category
+        from edgar.entity.categorization import BusinessCategory, classify_business_category, sic_overrides_bdc
 
-        # Check authoritative BDC signal first (814- file number)
+        # Check authoritative BDC signal (814- file number), but only if
+        # SIC doesn't definitively indicate another category. Large asset
+        # managers (BX, KKR) and non-financial companies (NEE) can inherit
+        # 814- file numbers from BDC subsidiaries. (GH #774)
         if getattr(self.data, 'is_bdc', False):
-            return BusinessCategory.BDC.value
+            try:
+                sic_int = int(self.sic) if self.sic is not None else None
+            except (ValueError, TypeError):
+                sic_int = None
+            if not sic_overrides_bdc(sic_int):
+                return BusinessCategory.BDC.value
 
         form_types = self._get_form_types()
         entity_type = getattr(self.data, 'entity_type', None)
@@ -812,6 +820,62 @@ class Company(Entity):
             name=self.name or '',
             form_types=form_types
         )
+
+    @cached_property
+    def reit_subtype(self) -> Optional[str]:
+        """
+        Classify a REIT as equity or mortgage.
+
+        Equity REITs own and operate real property, earning rental income.
+        Mortgage REITs invest in mortgage-backed securities and loans, earning
+        net interest income.
+
+        Classification compares the *magnitude* of property/rental income
+        against net interest income — not the mere presence of an interest
+        line — so a flagship net-lease equity REIT with a negligible interest
+        item (e.g. W. P. Carey) is not mislabeled 'mortgage'.
+
+        Returns None immediately for non-REIT companies (no network call).
+
+        Returns:
+            'equity', 'mortgage', or None (non-REIT)
+
+        Example:
+            >>> Company('PLD').reit_subtype
+            'equity'
+            >>> Company('AGNC').reit_subtype
+            'mortgage'
+            >>> Company('AAPL').reit_subtype  # not a REIT
+        """
+        if self.business_category != 'REIT':
+            return None
+
+        facts = self.get_facts()
+        if not facts:
+            return None
+
+        import warnings
+
+        from edgar.entity.categorization import (
+            REIT_INTEREST_CONCEPTS,
+            REIT_PROPERTY_CONCEPTS,
+            classify_reit_subtype,
+        )
+
+        def _income_magnitude(concepts) -> float:
+            """Largest absolute annual value across the given concepts (0 if none)."""
+            best = 0.0
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore')
+                for concept in concepts:
+                    fact = facts.get_annual_fact(concept) or facts.get_fact(concept)
+                    if fact is not None and fact.numeric_value is not None:
+                        best = max(best, abs(fact.numeric_value))
+            return best
+
+        property_income = _income_magnitude(REIT_PROPERTY_CONCEPTS)
+        interest_income = _income_magnitude(REIT_INTEREST_CONCEPTS)
+        return classify_reit_subtype(property_income, interest_income)
 
     def is_fund(self) -> bool:
         """
@@ -875,6 +939,29 @@ class Company(Entity):
         if latest_10q is not None:
             return latest_10q.obj()
         return None
+
+    def proxy_season(self, index: int = 0) -> Optional['ProxySeason']:
+        """
+        Get a proxy season for this company.
+
+        A proxy season groups all proxy-related filings around one annual meeting,
+        including the management definitive proxy (DEF 14A or DEFC14A), supplemental
+        materials, preliminary filings, and any contest filings.
+
+        Args:
+            index: 0 = latest season, 1 = previous season, etc.
+
+        Returns:
+            ProxySeason if proxy filings found, None otherwise
+
+        Example:
+            >>> company = Company("AAPL")
+            >>> season = company.proxy_season()
+            >>> print(season.is_contested)
+            False
+        """
+        from edgar.proxy.season import ProxySeason
+        return ProxySeason.for_company(self, index=index)
 
     def get_icon(self):
         return get_icon_from_ticker(self.tickers[0])
@@ -1308,7 +1395,7 @@ class Company(Entity):
 
             AVAILABLE ACTIONS:
               - Use .get_filings() to access SEC filings
-              - Use .financials to get financial statements
+              - Use .get_financials() to get financial statements
               - Use .facts to access company facts API
               - Use .docs for detailed API documentation
         """
@@ -1354,7 +1441,7 @@ class Company(Entity):
             lines.append("")
             lines.append("AVAILABLE ACTIONS:")
             lines.append("  - Use .get_filings() to access SEC filings")
-            lines.append("  - Use .financials to get financial statements")
+            lines.append("  - Use .get_financials() to get financial statements")
             lines.append("  - Use .facts to access company facts API")
             lines.append("  - Use .docs for detailed API documentation")
 

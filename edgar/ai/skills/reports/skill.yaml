@@ -177,6 +177,32 @@ patterns:
       424B3 = resale; 424B4 = IPO final; 424B5 = shelf takedown / ATM.
       selling_stockholders returns None if no table found; numeric properties return None on parse failure.
 
+  - name: DEF 14A Proxy Sections
+    when: Need governance, compensation, audit, or ownership section text from a proxy statement
+    code: |
+      proxy = company.get_filings(form="DEF 14A")[0].obj()   # ProxyStatement
+
+      # Semantic Schedule 14A / Reg S-K sections (text, no XBRL needed)
+      proxy.sections                       # dict: key -> Section (.text()/.markdown())
+      list(proxy.sections)                 # ['proxy_summary', 'corporate_governance',
+                                           #  'compensation_discussion_and_analysis',
+                                           #  'audit_matters', 'security_ownership', ...]
+
+      cda = proxy.section('compensation_discussion_and_analysis')  # Section | None
+      cda.text()                           # CD&A narrative (tens of thousands of chars)
+      proxy.sections['corporate_governance'].text()
+
+      # Structured compensation/governance data (XBRL + HTML tables)
+      proxy.executive_compensation         # Multi-year comp DataFrame
+      proxy.pay_vs_performance             # Pay vs performance DataFrame
+      proxy.voting_proposals               # Proposals + board recommendations
+      proxy.audit_fees                     # Auditor + fee breakdown
+    note: |
+      Section keys follow the Schedule 14A / Reg S-K vocabulary, not "Item N".
+      proxy.section(key) returns None for an unknown/absent key; a flat proxy with
+      no machine-readable TOC may yield an empty sections mapping. The compensation
+      DataFrames need XBRL (proxy.has_xbrl); .sections and .voting_proposals do not.
+
   - name: 8-K Events
     when: Extract current report events
     code: |

@@ -1,6 +1,6 @@
 """Form 8-K and 6-K current report classes."""
 import re
-from datetime import datetime
+from datetime import date, datetime
 from functools import cached_property, partial
 from typing import List, Optional
 
@@ -48,6 +48,15 @@ def _normalize_item_number(item_str: str) -> str:
     return cleaned
 
 
+# An item header is anchored either at the start of a line, or immediately after a
+# horizontal rule of 5 or more rule characters on the same line. 2005-era filings that
+# are plain text wrapped in minimal HTML glue the two together with no line break
+# ("------------Item 4.02 Non-Reliance on..."), which a line-start-only anchor misses.
+# The anchor stays deliberately narrow: anything looser would promote mid-sentence
+# references ("as described in Item 8.01") into items. (edgartools-l6cl)
+_ITEM_ANCHOR = r'(?:^[ \t]*|[-=_─–—]{5,}[ \t]*)'
+
+
 def _extract_items_from_text(text: str) -> List[str]:
     """
     Extract 8-K item numbers from filing text using pattern matching.
@@ -77,22 +86,23 @@ def _extract_items_from_text(text: str) -> List[str]:
         - GitHub Issue: #462
         - Beads Issue: edgartools-k1k
     """
-    # Extract items that appear at the start of lines (with optional leading whitespace).
-    # This ensures consistency with _extract_item_content_from_text which
-    # requires items to be at line starts for content extraction.
+    # Extract items that appear at the start of lines (with optional leading whitespace)
+    # or immediately after a horizontal rule. This ensures consistency with
+    # _extract_item_content_from_text, which uses the same anchor for content extraction.
     #
-    # Pattern matches "Item X" or "Item X.XX" at start of line
+    # Pattern matches "Item X" or "Item X.XX" at an item-header anchor
     # This will match:
     # - "Item 1" (standalone)
     # - "  Item 1" (indented — common in HTML-to-text conversion)
     # - "Item 1-Item 4" (only Item 1, since it's at line start)
     # - "Item 2.02" (modern format)
+    # - "--------Item 4.02" (glued onto a horizontal rule)
     #
     # This will NOT match:
-    # - "Item 1-Item 4" (Item 4, not at line start)
+    # - "Item 1-Item 4" (Item 4, only one dash — not a rule, not at line start)
     # - Mid-sentence references to items
     pattern = re.compile(
-        r'^\s*Item\s+(\d+\.?\s*\d*)',
+        _ITEM_ANCHOR + r'Item\s+(\d+\.?\s*\d*)',
         re.IGNORECASE | re.MULTILINE
     )
     matches = pattern.findall(text)
@@ -121,6 +131,48 @@ def _format_item_for_display(item_num: str) -> str:
         Display format string
     """
     return f"Item {item_num}"
+
+
+def _canonical_item(item: str) -> str:
+    """
+    Collapse any item spelling to a canonical 'Item X.YY' form.
+
+    Handles case, spacing ("Item 9. 01"), and prefix variations so that the
+    same item detected by different parsers de-duplicates to a single entry.
+    """
+    return _format_item_for_display(_normalize_item_number(item))
+
+
+def _item_sort_key(item: str):
+    """Sort items numerically ('Item 1.05' before 'Item 9.01', 'Item 5' before 'Item 5.02')."""
+    num = _normalize_item_number(item)
+    try:
+        return tuple(int(part) for part in num.split('.') if part != '')
+    except ValueError:
+        return (999,)
+
+
+def _parse_period_of_report(period_of_report) -> Optional[date]:
+    """
+    Normalize a filing header's period_of_report to a ``datetime.date``.
+
+    The header value is usually an ISO 'YYYY-MM-DD' string, but defensive
+    parsing also accepts already-parsed date/datetime objects and a couple of
+    human-readable fallbacks so callers always receive a ``date`` (or ``None``
+    when absent) rather than a mix of types. (edgartools-83gh)
+    """
+    if not period_of_report:
+        return None
+    if isinstance(period_of_report, datetime):
+        return period_of_report.date()
+    if isinstance(period_of_report, date):
+        return period_of_report
+    for fmt in ("%Y-%m-%d", "%B %d, %Y", "%b %d, %Y"):
+        try:
+            return datetime.strptime(str(period_of_report).strip(), fmt).date()
+        except (ValueError, TypeError):
+            continue
+    return None
 
 
 def _extract_item_content_from_text(filing_text: str, item_name: str) -> Optional[str]:
@@ -156,9 +208,10 @@ def _extract_item_content_from_text(filing_text: str, item_name: str) -> Optiona
 
     # Step 2: Find item header in text
     # Pattern matches: "Item 9", "Item 9.", "Item 9:", "Item 9.02", etc.
-    # Must be at start of line (^) to avoid false positives
+    # Must sit at an item-header anchor (line start, or after a horizontal rule)
+    # to avoid matching mid-sentence references
     item_pattern = re.compile(
-        rf'^\s*(Item\s+{re.escape(item_num)}[\s\.:\-]*)',
+        rf'{_ITEM_ANCHOR}(Item\s+{re.escape(item_num)}[\s\.:\-]*)',
         re.IGNORECASE | re.MULTILINE
     )
 
@@ -166,18 +219,17 @@ def _extract_item_content_from_text(filing_text: str, item_name: str) -> Optiona
     if not match:
         return None
 
-    start_pos = match.start()
+    # Content starts at the header itself, not at the rule or indentation the
+    # anchor consumed.
+    start_pos = match.start(1)
 
     # Step 3: Find end position
     # Look for next "Item X" pattern
     next_item_pattern = re.compile(
-        r'^\s*Item\s+\d+\.?\s*\d*[\s\.:\-]',
+        _ITEM_ANCHOR + r'Item\s+\d+\.?\s*\d*[\s\.:\-]',
         re.IGNORECASE | re.MULTILINE
     )
-    next_match = next_item_pattern.search(
-        filing_text,
-        start_pos + len(match.group(0))
-    )
+    next_match = next_item_pattern.search(filing_text, match.end(1))
 
     if next_match:
         end_pos = next_match.start()
@@ -627,45 +679,61 @@ class CurrentReport(CompanyReport):
         """
         List of detected item names (consistent with sections property).
 
-        Uses multi-tier fallback strategy:
+        Unions three detection strategies, all reading the primary document:
         1. New parser's section detection (95% accuracy for modern filings)
         2. Chunked document parser (legacy parser)
-        3. Text-based pattern extraction (100% accuracy, all eras including SGML)
+        3. Text-based pattern extraction (all eras including SGML)
 
-        The text-based fallback handles legacy SGML filings (1999-2001) where
+        The text-based strategy handles legacy SGML filings (1999-2001) where
         SEC metadata is incomplete (GitHub issue #462).
 
         Returns:
             List of item titles for backward compatibility (e.g., ['Item 5.02', 'Item 9.01'])
         """
-        # Strategy 1: Try new parser first (95% detection rate for modern filings)
-        if self.sections:
-            # Extract items using shared helper (eliminates code duplication)
-            item_pattern = re.compile(r'(Item\s+\d+\.\s*\d+)', re.IGNORECASE)
-            items = extract_items_from_sections(self.sections, item_pattern)
-            # Validate: modern 8-K items should have decimal points (e.g., "Item 8.01").
-            # If no items contain a dot, the parser likely misidentified them
-            # (e.g., Amazon-style "ITEM 8.01." parsed as "Item 8").
-            if items and any('.' in item for item in items):
-                return items
+        # The new parser (strategy 1) is high-precision for modern filings but can
+        # silently miss an item whose body is present — e.g. an Item 1.05
+        # cybersecurity disclosure that only shows Item 9.01 in the parsed sections
+        # (edgartools-83gh). The chunked parser operates on the same primary
+        # document (no exhibit text, so no false positives from press releases),
+        # so unioning the two recovers missed items without over-reporting.
+        item_set = set()
 
-        # Strategy 2: Fallback to old chunked_document parser
+        # Strategy 1: new parser section detection (95% rate for modern filings)
+        if self.sections:
+            item_pattern = re.compile(r'(Item\s+\d+\.\s*\d+)', re.IGNORECASE)
+            # Exclude named sections (e.g. Signatures) — they are not 8-K items.
+            item_sections = {k: v for k, v in self.sections.items() if v.kind == 'item'}
+            parser_items = extract_items_from_sections(item_sections, item_pattern)
+            # Validate: modern 8-K items should have decimal points (e.g., "Item 8.01").
+            # If none contain a dot, the parser likely misidentified them
+            # (e.g., Amazon-style "ITEM 8.01." parsed as "Item 8") — discard.
+            if parser_items and any('.' in item for item in parser_items):
+                item_set.update(_canonical_item(item) for item in parser_items)
+
+        # Strategy 2: chunked parser of the primary document — backfills items the
+        # new parser missed; same precision domain (excludes exhibit text).
         if self.chunked_document:
             chunked_items = self.chunked_document.list_items()
             if chunked_items:
-                return chunked_items
+                item_set.update(_canonical_item(item) for item in chunked_items)
 
-        # Strategy 3: Text-based fallback for legacy SGML filings
-        # This handles filings where SEC metadata is incomplete (particularly 1999-2001)
-        # Use cached text extraction to improve performance
+        # Strategy 3: text-based pattern extraction. It is the only source for legacy
+        # SGML filings (1999-2001, no usable HTML), and is unioned in — rather than
+        # used only when the HTML strategies come up empty — because those strategies
+        # can return a partial set on 2005-era filings that are plain text in minimal
+        # HTML (e.g. Cimarex 0001047469-05-006981, where the chunked parser sees only
+        # Item 8.01 of the two items present). filing.text() renders the primary
+        # document alone, so this shares the precision domain of strategies 1 and 2
+        # and adds no exhibit-text false positives. (edgartools-l6cl)
         filing_text = self._get_filing_text()
         if filing_text:
-            extracted_items = _extract_items_from_text(filing_text)
-            if extracted_items:
-                # Format for display consistency: ['2.02', '9.01'] -> ['Item 2.02', 'Item 9.01']
-                return [_format_item_for_display(item) for item in extracted_items]
+            # Format for display consistency: ['2.02', '9.01'] -> ['Item 2.02', 'Item 9.01']
+            item_set.update(
+                _format_item_for_display(item)
+                for item in _extract_items_from_text(filing_text)
+            )
 
-        return []
+        return sorted(item_set, key=_item_sort_key)
 
     def __getitem__(self, item_name: str):
         """
@@ -707,10 +775,15 @@ class CurrentReport(CompanyReport):
                 if normalized_key == normalized_input:
                     return section.text()
 
-        # Strategy 2: Fallback to old chunked_document for backward compatibility
+        # Strategy 2: Fallback to old chunked_document for backward compatibility.
+        # Only return a hit — chunked_document returns None for an unmatched key
+        # (e.g. '1.05' when it indexes by 'Item 1.05'); returning that None here
+        # would short-circuit the text-based fallback below. (edgartools-83gh)
         if self.chunked_document:
             try:
-                return self.chunked_document[item_name]
+                result = self.chunked_document[item_name]
+                if result:
+                    return result
             except (KeyError, TypeError):
                 pass
 
@@ -732,13 +805,14 @@ class CurrentReport(CompanyReport):
             print(item_text)
 
     @property
-    def date_of_report(self):
-        """Return the period of report for this filing"""
-        period_of_report_str = self._filing.header.period_of_report
-        if period_of_report_str:
-            period_of_report = datetime.strptime(period_of_report_str, "%Y-%m-%d")
-            return period_of_report.strftime("%B %d, %Y")
-        return ""
+    def date_of_report(self) -> Optional[date]:
+        """The period of report (event date) for this filing as a ``datetime.date``.
+
+        Always returns a ``date`` (or ``None`` when the header has no period of
+        report) so callers don't have to defensively parse mixed string/date
+        types. (edgartools-83gh)
+        """
+        return _parse_period_of_report(self._filing.header.period_of_report)
 
     def _get_exhibit_content(self, exhibit) -> Optional[str]:
         """
@@ -795,12 +869,14 @@ class CurrentReport(CompanyReport):
         for exhibit in self._filing.exhibits:
             exhibit_table.add_row(exhibit.sequence_number, exhibit.document_type, exhibit.description)
 
+        dor = self.date_of_report
+        dor_display = dor.strftime("%B %d, %Y") if dor else ""
         panel_title = Text.assemble(
             (f"{self.company}", "bold deep_sky_blue1"),
             (" ", ""),
             (f"{self.form}", "bold green"),
             (" ", ""),
-            (f"{self.date_of_report}", "bold yellow")
+            (dor_display, "bold yellow")
         )
 
         # Add the content of the exhibits
@@ -813,7 +889,9 @@ class CurrentReport(CompanyReport):
         )
 
     def __str__(self):
-        return f"{self.company} {self.form} {self.date_of_report}"
+        dor = self.date_of_report
+        dor_display = dor.strftime("%B %d, %Y") if dor else ""
+        return f"{self.company} {self.form} {dor_display}".rstrip()
 
     def to_context(self, detail: str = 'standard') -> str:
         """

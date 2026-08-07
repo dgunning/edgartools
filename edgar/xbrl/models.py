@@ -200,6 +200,14 @@ class PresentationNode(BaseModel):
     element_id: str
     parent: Optional[str] = None
     children: List[str] = Field(default_factory=list)
+    # Preferred label role for each child *reference*, aligned positionally with
+    # `children`. A concept may be referenced more than once under one parent
+    # (e.g. a cash-flow roll-forward points at the same cash concept with
+    # periodStartLabel and periodEndLabel). Because child nodes are keyed by
+    # element_id they share a single PresentationNode whose `preferred_label`
+    # only retains the last arc, so the per-reference role is tracked here.
+    # (edgartools-0609)
+    child_preferred_labels: List[Optional[str]] = Field(default_factory=list)
     order: float = 0.0
     preferred_label: Optional[str] = None
     depth: int = 0

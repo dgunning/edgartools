@@ -378,7 +378,9 @@ def compare_viewer_to_xbrl(viewer: 'FilingViewer', xbrl: 'XBRL',
         if not cr:
             continue
 
-        currency_scaling = cr.currency_scaling
+        # Use ViewerReport.currency_scaling — derived from XBRL decimals when
+        # available (GH #807), with the R*.htm header text-match as fallback.
+        currency_scaling = vr.currency_scaling
         shares_scaling = cr.shares_scaling
         results.scaling_factor = currency_scaling
         seen_concepts_in_report = set()

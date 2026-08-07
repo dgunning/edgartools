@@ -57,7 +57,8 @@ class TestIssue712WeightSign:
         Same bug pattern as AAPL — TSLA also uses "Statements of Operations" naming.
         """
         company = Company("TSLA")
-        filing = company.get_filings(form="10-K").latest()
+        # Skip 10-K/A amendments — they may lack full XBRL.
+        filing = company.get_filings(form="10-K", amendments=False).latest()
         xbrl = filing.xbrl()
 
         income = xbrl.statements.income_statement()

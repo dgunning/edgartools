@@ -95,11 +95,21 @@ fund = Fund("VFINX")
 # All filings for the parent company
 filings = fund.get_filings(form="NPORT-P")
 
-# Series-specific filings via EFTS full-text search
+# Series-specific filings
 filings = fund.get_filings(series_only=True, form="NPORT-P")
 ```
 
-The `series_only=True` parameter uses EFTS to search for filings mentioning this fund's specific series ID, which filters more precisely than company-level filings.
+The `series_only=True` parameter resolves the fund's own series through SEC browse-edgar (using the series ID as the CIK parameter), returning only that series' filings rather than the whole umbrella trust's. This matters for funds whose CIK is a multi-series trust: without it, the newest `NPORT-P` you get back may belong to a sibling series.
+
+It works the same whether the `Fund` was created from a ticker, a series ID, or a class ID -- all three name one series:
+
+```python
+Fund("VCLT").get_filings(form="NPORT-P", series_only=True)         # ticker
+Fund("S000026864").get_filings(form="NPORT-P", series_only=True)   # series ID
+Fund("C000080858").get_filings(form="NPORT-P", series_only=True)   # class ID
+```
+
+If the series has no filings of the requested form, you get an empty `Filings` -- never the trust's filings as a silent fallback.
 
 ---
 
@@ -180,10 +190,10 @@ print(series.name, series.series_id)
 | Method | Returns | Description |
 |--------|---------|-------------|
 | `get_filings(**kwargs)` | `Filings` | Filings for this fund entity |
-| `get_filings(series_only=True, form=...)` | `Filings` | Series-specific filings via EFTS |
+| `get_filings(series_only=True, form=...)` | `Filings` | Only this series' filings, via SEC browse-edgar |
 | `get_latest_report(form='NPORT-P')` | report object or `None` | Latest parsed report |
 | `get_portfolio()` | `DataFrame` or `None` | Latest NPORT-P portfolio holdings |
-| `get_series()` | `FundSeries` or `None` | Specific series for ticker |
+| `get_series()` | `FundSeries` or `None` | The series this identifier resolves to |
 | `list_series()` | `list[FundSeries]` | All series in the company |
 | `list_classes()` | `list[FundClass]` | All share classes in the series |
 | `get_resolution_diagnostics()` | `dict` | How the identifier was resolved |
@@ -196,7 +206,7 @@ print(series.name, series.series_id)
 
 **ETF synthetic series IDs.** ETFs often lack formal SEC series IDs. EdgarTools creates synthetic IDs (e.g., `ETF_12345`) for internal tracking. These work with `Fund()` but won't appear in SEC filings.
 
-**EFTS 100-result limit.** When using `series_only=True`, EFTS returns at most 100 results per request. For funds with hundreds of filings, omit `series_only` to get the full history from the company's filing index.
+**`series_only=True` narrows to one series, and that is usually what you want.** Omitting it returns every filing by the registrant, which for a multi-series trust means other funds' reports mixed in with this one's. Pass a `form=` alongside it: the form is pushed down to the SEC query, which keeps large funds from paging through their entire filing history.
 
 **`find_funds()` returns raw records.** The search function returns `FundSeriesRecord`, `FundCompanyRecord`, or `FundClassRecord` objects -- not `Fund` instances. Use an identifier from the record to create a `Fund`.
 

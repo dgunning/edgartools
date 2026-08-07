@@ -8,6 +8,7 @@ This module implements a multi-strategy approach to section detection:
 """
 
 import logging
+import re
 from typing import Dict, List, Optional
 
 from edgar.documents.config import DetectionThresholds
@@ -48,9 +49,27 @@ class HybridSectionDetector:
         self.form = form
         self.thresholds = thresholds or DetectionThresholds()
 
-        # Initialize detection strategies
-        self.toc_detector = TOCSectionDetector(document)
+        # Detect filing agent from the original HTML for agent-aware TOC parsing
+        agent = self._detect_agent()
+
+        # Initialize detection strategies. `form` flows through to the
+        # TOC analyzer so its bare-item-number heuristic can apply
+        # form-aware bounds (prevents page-number cells from being
+        # mis-interpreted as item identifiers on forms with few items
+        # like 10-Q).
+        self.toc_detector = TOCSectionDetector(document, agent=agent, form=form)
         self.pattern_extractor = SectionExtractor(form)
+
+    def _detect_agent(self) -> Optional[str]:
+        """Detect filing agent from the document's original HTML."""
+        html_content = getattr(self.document.metadata, 'original_html', None)
+        if not html_content:
+            return None
+        try:
+            from edgar.documents.agents import detect_filing_agent
+            return detect_filing_agent(html_content)
+        except Exception:
+            return None
 
     def detect_sections(self) -> Dict[str, Section]:
         """
@@ -64,10 +83,36 @@ class HybridSectionDetector:
         sections = self.toc_detector.detect()
         if sections:
             logger.info(f"TOC detection successful: {len(sections)} sections found")
-            return self._validate_pipeline(sections, enable_cross_validation=True)
+            validated = self._validate_pipeline(sections, enable_cross_validation=True)
+            # Augment TOC result with pattern-detected sections for items not in the
+            # TOC (most commonly Part III "incorporated by reference" stubs — Items
+            # 10-14 appear only as sparse paragraphs, not as TOC entries).
+            # GH #880 / edgartools-01x4.
+            augmented = self._augment_with_pattern_sections(validated)
+            if augmented is not validated:
+                logger.info(
+                    f"Augmented TOC sections with {len(augmented) - len(validated)} "
+                    f"pattern-detected item(s)"
+                )
+            return augmented
+
+        # Strategy 1.5: Cross-reference index.
+        #
+        # Ranked directly below the TOC because it is the same kind of evidence:
+        # the filer stating where each item is, rather than us inferring it. It
+        # only ever fires on filings that publish a "Form 10-K Cross-Reference
+        # Index" and have no navigable TOC — Citigroup, whose 16.7MB 10-K used to
+        # fall all the way through to keyword matching and surface four
+        # non-canonical keys (`mda`, `risk_factors`, ...) while a caller asking
+        # for part_ii_item_7 got nothing (edgartools-4agg).
+        logger.debug("TOC detection failed, trying cross-reference index detection...")
+        sections = self._try_index_detection()
+        if sections:
+            logger.info(f"Cross-reference index detection successful: {len(sections)} sections found")
+            return self._validate_pipeline(sections, enable_cross_validation=False)
 
         # Strategy 2: Heading-based (fallback)
-        logger.debug("TOC detection failed, trying heading detection...")
+        logger.debug("Index detection failed, trying heading detection...")
         sections = self._try_heading_detection()
         if sections:
             logger.info(f"Heading detection successful: {len(sections)} sections found")
@@ -82,6 +127,79 @@ class HybridSectionDetector:
 
         logger.warning("All detection strategies failed, no sections found")
         return {}
+
+    def _augment_with_pattern_sections(
+        self, toc_sections: Dict[str, Section]
+    ) -> Dict[str, Section]:
+        """Augment TOC-detected sections with pattern-detected items not in the TOC.
+
+        Some 10-K filers omit Part III (Items 10-14) from the TOC because those
+        items are incorporated by reference from the proxy statement.  The TOC
+        extractor therefore misses them; they are still present as sparse bold
+        paragraphs in the filing body.  This method runs the pattern extractor and
+        merges in any item-numbered sections whose canonical part-based key is
+        absent from the TOC result.  Only Item-based forms benefit (10-K, 10-Q,
+        8-K); the method is a no-op for unsupported forms and does NOT replace or
+        override any TOC section already present.
+
+        Args:
+            toc_sections: Validated sections from TOC detection.
+
+        Returns:
+            A new dict that includes all toc_sections plus any pattern-only additions,
+            or the original dict unchanged if nothing was added.
+        """
+        from edgar.documents.form_schema import get_form_schema
+
+        # Only augment for Item-based forms; skip title-based (DEF 14A, 424B, S-1).
+        if get_form_schema(self.form).title_based:
+            return toc_sections
+
+        # Performance gate: only run the pattern pass when there are item-based
+        # sections that the TOC may have missed.  For 10-K, this means Part III
+        # items (10-14) that are commonly omitted from the TOC when incorporated
+        # by reference.  If all expected Part-III keys are already present in the
+        # TOC result, the augmentation is a no-op and we skip the full extraction.
+        if self.form == '10-K':
+            _PART_III_KEYS = {
+                'part_iii_item_10', 'part_iii_item_11', 'part_iii_item_12',
+                'part_iii_item_13', 'part_iii_item_14',
+            }
+            if _PART_III_KEYS.issubset(toc_sections.keys()):
+                return toc_sections  # All Part III items already found; no augmentation needed
+        else:
+            # For other item-based forms (10-Q, 8-K), there is no standard set of
+            # "commonly missed" items — skip augmentation entirely to avoid cost.
+            return toc_sections
+
+        # Run pattern extractor against the same document.
+        pattern_sections = self._try_pattern_detection()
+        if not pattern_sections:
+            return toc_sections
+
+        # Merge in pattern sections whose keys are not already present in the TOC
+        # result.  Existing TOC sections are never overwritten — they carry higher
+        # confidence and real extracted text, whereas a duplicate pattern section
+        # would add noise.
+        extras = {
+            key: sec
+            for key, sec in pattern_sections.items()
+            if key not in toc_sections
+        }
+        if not extras:
+            return toc_sections
+
+        # Validate extras through the same pipeline (boundary checks, dedup,
+        # confidence filter, size guardrail) before merging.  Pass
+        # enable_cross_validation=False — the pattern extractor has already
+        # made its best effort and we don't want a second expensive pass.
+        extras = self._validate_pipeline(extras, enable_cross_validation=False)
+        if not extras:
+            return toc_sections
+
+        merged = dict(toc_sections)
+        merged.update(extras)
+        return merged
 
     def _validate_pipeline(
         self,
@@ -115,6 +233,245 @@ class HybridSectionDetector:
 
         # Filter by confidence
         sections = self._filter_by_confidence(sections)
+
+        # Header-only artifact drop (title-based forms only) — a proxy/424B/S-1
+        # TOC entry whose section collapses to just its own heading phrase (the
+        # body absorbed by an adjacent section) is a mislabeled sliver, not
+        # content. Drop it before the size guardrail so it is never emitted as a
+        # labeled section (edgartools-x341). Runs before the guardrail so the
+        # bands evaluate only surviving sections.
+        sections = self._drop_header_only_sections(sections)
+
+        # Size guardrail — runs LAST so a confidence reduction here cannot cause
+        # the confidence filter to silently drop a flagged section. Flags
+        # anomalously-sized sections (wrong-content failures) rather than
+        # returning them at full confidence (edgartools-9hwf).
+        sections = self._apply_size_guardrail(sections)
+
+        # Schema-validity and successor-header guardrails — same flag-and-return
+        # placement as the size guardrail (after the confidence filter, so a
+        # reduction here cannot silently drop the flagged section).
+        sections = self._apply_part_validity(sections)
+        sections = self._apply_successor_guardrail(sections)
+
+        return sections
+
+    # Length below which a TOC section is a candidate header-only artifact. The
+    # largest empty-header sliver observed across a 32-filer proxy corpus is 48
+    # chars ('Table of Contents     Executive Compensation'); the shortest *real*
+    # short section is 120 ('Item 1: Election of Directors. The Board ...
+    # recommends FOR ...'). 64 sits safely between them.
+    _HEADER_ONLY_MAX_LEN = 64
+
+    def _drop_header_only_sections(self, sections: Dict[str, Section]) -> Dict[str, Section]:
+        """Drop title-based TOC sections that collapsed to a bare heading.
+
+        On hierarchical / divider proxy TOCs a vocabulary term sometimes matches
+        a divider tab or summary cross-reference whose section boundary lands at
+        the very next entry, so the section's entire body is just its heading
+        phrase ('Executive Compensation', 'BOARD OF DIRECTORS') — the real
+        content lives in an adjacent absorbing section. Such a sliver is a
+        mislabeled artifact; the labeled-or-full contract says never emit it.
+
+        Scoped to title-based forms (DEF 14A / PRE 14A / 424B / S-1): the
+        Item-based forms (10-K/10-Q/8-K) keep their existing output untouched.
+        A section is header-only when its extracted text is short
+        (< ``_HEADER_ONLY_MAX_LEN``) AND carries no sentence punctuation — a
+        real short section (a proposal recommendation, a one-line disclosure)
+        has a sentence; a heading-table section is long. Only ``toc`` sections
+        are considered (heading/pattern sections measure length differently).
+        """
+        from edgar.documents.form_schema import get_form_schema
+
+        if not get_form_schema(self.form).title_based:
+            return sections
+
+        survivors: Dict[str, Section] = {}
+        for name, section in sections.items():
+            if section.detection_method == 'toc':
+                # Cheap length proxy first (TOC sections store text length in
+                # end_offset); only materialize text() for plausible slivers.
+                proxy = section.end_offset - section.start_offset
+                if 0 < proxy < 2 * self._HEADER_ONLY_MAX_LEN:
+                    body = (section.text() or "").strip()
+                    if len(body) < self._HEADER_ONLY_MAX_LEN and not re.search(r'[.!?]', body):
+                        logger.info(
+                            f"Dropping header-only section '{name}' "
+                            f"(body={body!r}) — content absorbed by a sibling"
+                        )
+                        continue
+            survivors[name] = section
+        return survivors
+
+    def _apply_size_guardrail(self, sections: Dict[str, Section]) -> Dict[str, Section]:
+        """Flag sections whose extracted content size is anomalous for their item.
+
+        Uses the per-(form, item) bands in ``section_size_bands``. For
+        TOC-detected sections the content length is already known (stored in
+        ``end_offset`` by the detector), so this adds no extraction cost. A
+        section outside its band gets a human-readable ``warning`` and its
+        confidence reduced to ``ANOMALOUS_CONFIDENCE`` — the section is still
+        returned (callers can introspect ``.warnings``), it is just no longer
+        presented as high-confidence wrong content.
+        """
+        from edgar.documents.section_size_bands import ANOMALOUS_CONFIDENCE, evaluate_size
+
+        for section in sections.values():
+            # Only TOC sections set end_offset to the extracted *text length*
+            # (start_offset == 0), which is what the bands are calibrated on.
+            # Pattern sections set end_offset to a *document character position*
+            # (a different, markup-inclusive yardstick) and heading sections set
+            # 0; applying text-length bands to either would mis-flag. The
+            # documented failures (GS/Citi-class) are all on the TOC path.
+            if section.detection_method != 'toc':
+                continue
+            # Length proxy: TOC sections set end_offset to the extracted text
+            # length (start_offset == 0). Skip when length is unknown (0).
+            length = section.end_offset - section.start_offset
+            if length <= 0:
+                continue
+            item_key = section.item
+            warning = evaluate_size(self.form, item_key, length)
+            if warning:
+                section.warnings.append(warning)
+                section.confidence = min(section.confidence, ANOMALOUS_CONFIDENCE)
+                logger.info(f"Section {section.name}: {warning}")
+
+        return sections
+
+    def _apply_part_validity(self, sections: Dict[str, Section]) -> Dict[str, Section]:
+        """Flag sections whose (part, item) cannot exist on this form (GH #905).
+
+        A 10-Q Part I has Items 1-4 only, yet running-header mis-anchoring can
+        scatter content into phantom keys like ``part_i_item_6`` (Freddie Mac
+        Q1 2026 10-Q put the entire MD&A there, while the real Part I items
+        returned scraps). Length heuristics can't catch this — the phantoms
+        look like valid short-or-long items — but the form schema knows the key
+        is impossible. Flag-and-return: the section keeps its content so
+        nothing is silently lost, with a warning and reduced confidence so
+        callers can tell the whole Part's boundaries are suspect. Only forms
+        with curated per-part ranges (10-Q) are checked.
+        """
+        from edgar.documents.form_schema import get_form_schema
+        from edgar.documents.section_size_bands import ANOMALOUS_CONFIDENCE
+
+        schema = get_form_schema(self.form)
+        if not schema.part_item_ranges:
+            return sections
+
+        for section in sections.values():
+            if schema.item_valid_in_part(section.part, section.item) is False:
+                warning = (
+                    f"Part {section.part} of a {self.form} has no Item {section.item} — "
+                    f"the item boundaries were mis-anchored and this content likely "
+                    f"belongs to another section."
+                )
+                section.warnings.append(warning)
+                section.confidence = min(section.confidence, ANOMALOUS_CONFIDENCE)
+                logger.info(f"Section {section.name}: {warning}")
+
+        return sections
+
+    # Only TOC item sections at least this long are scanned for embedded
+    # successor headers: re-extracting text has a real cost, and a shorter
+    # over-capture (two adjacent stubs) is low-impact. An absorbed item's
+    # header deep inside a large section is exactly the failure worth paying
+    # one extra extraction to catch.
+    _SUCCESSOR_SCAN_MIN_CHARS = 15_000
+
+    # Line-anchored item header: start of line, optional (nbsp) indent, then
+    # "Item N." / "ITEM 7A:" with mandatory punctuation so mid-sentence
+    # references ("see Item 7A below") and prose starting with "Item 7A is…"
+    # don't match.
+    _SUCCESSOR_HEADER_RE = re.compile(
+        r'^[ \t\xa0]*Item\s+(\d{1,2})([A-D]?)\s*[.:]', re.IGNORECASE | re.MULTILINE
+    )
+
+    def _apply_successor_guardrail(self, sections: Dict[str, Section]) -> Dict[str, Section]:
+        """Flag item sections whose text embeds the header of a LATER item that
+        detection missed (GH #904).
+
+        Size bands can't see every overshoot: Coeur Mining's overflowed Item 7
+        (257K chars) sat inside Item 7's generous band, and Item 1B (317K chars
+        of everything through Part IV) has no band at all. But both contained
+        line-anchored headers of items absent from the section map — the
+        smoking gun for an end boundary that ran past them. Flag-and-return,
+        like the size guardrail.
+
+        Scoped to forms with unique items across parts (10-K: schema has
+        ``item_part_ranges``) — on repeating-item forms the bare header number
+        can't be ordered against the section without knowing its Part. Only
+        TOC-detected sections are scanned (same calibration argument as the
+        size guardrail), and only when the map is actually missing a later item
+        number, so fully-anchored filings (AAPL) pay no extraction cost.
+        """
+        from edgar.documents.form_schema import get_form_schema
+        from edgar.documents.section_size_bands import ANOMALOUS_CONFIDENCE
+
+        schema = get_form_schema(self.form)
+        if not schema.item_part_ranges:
+            return sections
+
+        def order(num: int, letter: str) -> int:
+            return num * 1000 + (ord(letter.upper()) - ord('A') + 1 if letter else 0)
+
+        item_re = re.compile(r'^(\d{1,2})([A-D]?)$', re.IGNORECASE)
+        present: set = set()
+        present_numbers: set = set()
+        for section in sections.values():
+            m = item_re.match(section.item or '')
+            if m:
+                present.add(section.item.upper())
+                present_numbers.add(int(m.group(1)))
+
+        max_item_number = max((hi for _lo, hi, _roman in schema.item_part_ranges), default=16)
+        optional_numbers = set(schema.optional_item_numbers)
+
+        for section in sections.values():
+            if section.detection_method != 'toc':
+                continue
+            length = section.end_offset - section.start_offset
+            if length < self._SUCCESSOR_SCAN_MIN_CHARS:
+                continue
+            m = item_re.match(section.item or '')
+            if not m:
+                continue
+            own_num, own_letter = int(m.group(1)), m.group(2)
+            # Cheap pre-gate: scan only when a later item *number* is actually
+            # missing from the map — a complete ladder has nowhere to overflow.
+            # Optional items (10-K Item 16) don't count as gaps: a filing that
+            # legitimately omits one would otherwise force a text extraction on
+            # every large section (JPM, items 1-15: +16% section-detection time).
+            if all(n in present_numbers or n in optional_numbers
+                   for n in range(own_num + 1, max_item_number + 1)):
+                continue
+
+            text = section.text() or ""
+            matches = list(self._SUCCESSOR_HEADER_RE.finditer(text))
+            for hit in matches:
+                token = f"{int(hit.group(1))}{hit.group(2).upper()}"
+                if token in present:
+                    continue
+                if order(int(hit.group(1)), hit.group(2)) <= order(own_num, own_letter):
+                    continue
+                if int(hit.group(1)) > max_item_number:
+                    continue
+                # An embedded TOC/index block lists many item headers in a tight
+                # run; a genuinely absorbed item's header is surrounded by body
+                # text. Skip hits with 2+ other headers within 300 chars.
+                neighbors = sum(1 for other in matches
+                                if other is not hit and abs(other.start() - hit.start()) <= 300)
+                if neighbors >= 2:
+                    continue
+                warning = (
+                    f"Item {section.item} content contains the header of Item {token}, "
+                    f"which was not detected as its own section — the end boundary "
+                    f"likely overshoots into later items (extraction over-captured)."
+                )
+                section.warnings.append(warning)
+                section.confidence = min(section.confidence, ANOMALOUS_CONFIDENCE)
+                logger.info(f"Section {section.name}: {warning}")
+                break
 
         return sections
 
@@ -159,6 +516,21 @@ class HybridSectionDetector:
 
         except Exception as e:
             logger.warning(f"Heading detection failed: {e}")
+            return None
+
+    def _try_index_detection(self) -> Optional[Dict[str, Section]]:
+        """Try Cross Reference Index detection.
+
+        Returns:
+            Dictionary of sections if the filing publishes a usable index,
+            None otherwise.
+        """
+        try:
+            from edgar.documents.extractors.index_section_detector import IndexSectionDetector
+
+            return IndexSectionDetector(self.document, self.form).detect()
+        except Exception as e:
+            logger.warning(f"Index detection failed: {e}")
             return None
 
     def _try_pattern_detection(self) -> Optional[Dict[str, Section]]:
@@ -227,6 +599,19 @@ class HybridSectionDetector:
                 # Add child to section
                 section_node.add_child(child)
 
+            # Resolve part/item so heading-detected sections carry the same
+            # metadata as pattern/TOC ones — a consumer keying on section.item
+            # or section.part would otherwise silently drop these (GH #891).
+            # Heading section names are item-only ('item_7'), so
+            # parse_section_name resolves the item but leaves part=None; fill the
+            # part from the form's item->part ranges, mirroring _create_sections.
+            part, item = Section.parse_section_name(section_name)
+            if item is not None and part is None:
+                from edgar.documents.form_schema import get_form_schema
+                part_label = get_form_schema(self.form).part_for_item(f"Item {item}")
+                if part_label:
+                    part = part_label.replace('Part ', '')
+
             # Create Section object
             section = Section(
                 name=section_name,
@@ -235,7 +620,9 @@ class HybridSectionDetector:
                 start_offset=0,  # Would need actual text position
                 end_offset=0,  # Would need actual text position
                 confidence=header_info.confidence,
-                detection_method='heading'
+                detection_method='heading',
+                part=part,
+                item=item
             )
 
             return section

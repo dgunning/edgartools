@@ -52,7 +52,10 @@ class XBRLS:
         Each filing should be the same form (e.g., 10-K, 10-Q) and from the same company.
 
         Args:
-            filings: List of Filing objects, should be from the same company
+            filings: A ``Filings`` collection or a plain list of ``Filing`` objects,
+                all from the same company.
+            filter_amendments: If True (default), drop amendments (forms ending in
+                ``/A``) before stitching. Works for both ``Filings`` and plain lists.
 
         Returns:
             XBRLS object with stitched data
@@ -60,7 +63,11 @@ class XBRLS:
         from edgar.xbrl.xbrl import XBRL
 
         if filter_amendments:
-            filtered_filings = filings.filter(amendments=False)
+            if hasattr(filings, 'filter'):
+                filtered_filings = filings.filter(amendments=False)
+            else:
+                # Plain list/iterable: drop amendments by form-suffix check (GH edgartools-6k96).
+                filtered_filings = [f for f in filings if not (f.form or '').endswith('/A')]
         else:
             filtered_filings = filings
 
@@ -143,7 +150,9 @@ class XBRLS:
                      max_periods: int = 8,
                      standard: bool = True,
                      use_optimal_periods: bool = True,
-                     include_dimensions: bool = False) -> Dict[str, Any]:
+                     include_dimensions: bool = False,
+                     discrete_quarters: bool = False,
+                     include_quarterly: bool = False) -> Dict[str, Any]:
         """
         Get a stitched statement of the specified type.
 
@@ -153,12 +162,19 @@ class XBRLS:
             standard: Whether to use standardized concept labels
             use_optimal_periods: Whether to use entity info to determine optimal periods
             include_dimensions: Whether to include dimensional segment data (default: False for stitching)
+            discrete_quarters: If True and statement_type is CashFlowStatement, convert
+                              YTD cumulative periods into discrete quarter values (default: False)
+            include_quarterly: If True, surface discrete-quarter columns alongside YTD/annual
+                              columns. Each 10-Q then contributes both a 90-day Q column and
+                              the YTD column; each 10-K contributes both an annual column and
+                              its embedded Q4 column. Default False preserves existing behavior
+                              (one column per filing). Has no effect for BalanceSheet. (GH #780)
 
         Returns:
             Dictionary with stitched statement data
         """
         # Check cache first
-        cache_key = f"{statement_type}_{max_periods}_{standard}_{use_optimal_periods}_{include_dimensions}"
+        cache_key = f"{statement_type}_{max_periods}_{standard}_{use_optimal_periods}_{include_dimensions}_{discrete_quarters}_{include_quarterly}"
         if cache_key in self._statement_cache:
             return self._statement_cache[cache_key]
 
@@ -170,7 +186,9 @@ class XBRLS:
             max_periods=max_periods,
             standard=standard,
             use_optimal_periods=use_optimal_periods,
-            include_dimensions=include_dimensions
+            include_dimensions=include_dimensions,
+            discrete_quarters=discrete_quarters,
+            include_quarterly=include_quarterly,
         )
 
         # Cache the result

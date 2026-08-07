@@ -17,42 +17,13 @@ except (locale.Error, ValueError):
     # This shouldn't happen on most systems, but better safe than sorry
     pass
 
-from typing import Any
-
+# We used to monkeypatch HttpxThrottleCache._get_httpx_transport_params below this
+# import, because it dropped the 'verify' parameter on the floor and users behind
+# SSL-inspecting corporate proxies could not turn verification off. httpxthrottlecache
+# now extracts 'verify' itself, so the patch was redundant — and worse than redundant,
+# since shadowing an upstream method silently reverts any future fix to it.
+# test_verify_reaches_the_transport_params pins the behaviour the patch protected.
 from httpxthrottlecache import HttpxThrottleCache
-
-
-# =============================================================================
-# WORKAROUND for httpxthrottlecache bug: SSL verify parameter not passed to transport
-#
-# Bug: httpxthrottlecache v0.2.1 (and possibly earlier versions) fails to pass the
-# 'verify' parameter to the HTTP transport, causing SSL verification to remain enabled
-# even when configure_http(verify_ssl=False) is called.
-#
-# Impact: Users behind corporate VPNs/proxies with SSL inspection cannot disable
-# SSL verification, making edgartools unusable in those environments.
-#
-# Upstream issue: https://github.com/paultiq/httpxthrottlecache/issues/XXX (TODO: create)
-#
-# TODO: Remove this monkey patch once httpxthrottlecache releases a fix (check for v0.3.0+)
-# =============================================================================
-def _patched_get_httpx_transport_params(self, params: dict[str, Any]) -> dict[str, Any]:
-    """
-    Patched version that includes the 'verify' parameter for SSL configuration.
-
-    This fixes a bug where httpxthrottlecache._get_httpx_transport_params() only
-    extracts 'http2' and 'proxy' parameters, ignoring 'verify'.
-    """
-    http2 = params.get("http2", False)
-    proxy = self.proxy
-    verify = params.get("verify", True)  # Extract verify parameter (defaults to True for security)
-
-    return {"http2": http2, "proxy": proxy, "verify": verify}
-
-
-# Apply the monkey patch at module import time
-HttpxThrottleCache._get_httpx_transport_params = _patched_get_httpx_transport_params
-# =============================================================================
 
 from edgar.core import get_identity, strtobool
 
@@ -123,6 +94,25 @@ def get_edgar_use_system_certs() -> bool:
     return strtobool(os.environ.get("EDGAR_USE_SYSTEM_CERTS", "false"))
 
 
+def get_edgar_use_http2() -> bool:
+    """
+    Returns True if the internal httpx client should negotiate HTTP/2.
+
+    Defaults to False (HTTP/1.1). EdgarTools talks to SEC EDGAR with a small
+    number of large, rate-limited (~9 req/s) requests, so HTTP/2's stream
+    multiplexing buys little, while its single-connection model turns a
+    transient reset into a correlated failure across every in-flight request.
+    From cloud egress this surfaces as intermittent
+    ``h2.exceptions.InvalidBodyLengthError`` (truncated body) and
+    ``httpx.RemoteProtocolError: ConnectionTerminated`` mid-download, crashing
+    long fan-out jobs. HTTP/1.1 isolates each request to its own connection so
+    the retry layer can recover. Set EDGAR_USE_HTTP2=true to opt back into HTTP/2.
+
+    See: https://github.com/dgunning/edgartools/issues (edgartools-x2tv)
+    """
+    return strtobool(os.environ.get("EDGAR_USE_HTTP2", "false"))
+
+
 def get_truststore_context():
     """
     Get a truststore SSLContext that uses the OS native certificate store.
@@ -131,6 +121,31 @@ def get_truststore_context():
 
     import truststore
     return truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+
+
+def get_edgar_http_timeout() -> Optional[float]:
+    """
+    Default request timeout in seconds for the internal httpx client.
+
+    Without an explicit timeout, a stalled upstream or slow TLS handshake
+    can cause a blocking socket read that never returns — the process is
+    not interruptible until the syscall completes. Override via the
+    EDGAR_HTTP_TIMEOUT environment variable (seconds); pass an explicit
+    timeout to configure_http() to change it at runtime.
+
+    Returns None for "unlimited" (no timeout set on the client), which is
+    signalled by the env var being empty or one of "none"/"unlimited"/"0"
+    (case-insensitive). Non-positive numerics also route through the
+    unlimited path so EDGAR_HTTP_TIMEOUT=0 cannot configure httpx with
+    a 0.0 read timeout (which httpx treats as immediate-timeout).
+    """
+    raw = os.environ.get("EDGAR_HTTP_TIMEOUT", "30.0")
+    if raw.strip() == "" or raw.strip().lower() in ("none", "unlimited"):
+        return None
+    value = float(raw)
+    if value <= 0:
+        return None
+    return value
 
 
 def get_edgar_rate_limit_per_sec():
@@ -182,9 +197,24 @@ def get_http_mgr(cache_enabled: bool = True, request_per_sec_limit: int = 9) -> 
     else:
         http_mgr.httpx_params["verify"] = get_edgar_verify_ssl()
 
+    # Default to HTTP/1.1 (http2=False). HTTP/2 multiplexes every request over a
+    # single TCP connection, so a mid-stream reset from cloud egress fails all
+    # in-flight requests at once (InvalidBodyLengthError / ConnectionTerminated).
+    # SEC's ~9 req/s rate limit means HTTP/2's multiplexing offers no real upside
+    # here. Override with EDGAR_USE_HTTP2=true or configure_http(http2=True).
+    http_mgr.httpx_params["http2"] = get_edgar_use_http2()
+
     # Increase keepalive from default 5s to 30s for better connection reuse
     # This reduces TCP+TLS handshake overhead (~100ms) for interactive use
     http_mgr.httpx_params["limits"] = httpx.Limits(keepalive_expiry=30)
+
+    # Set a non-None default timeout so a stalled upstream cannot wedge
+    # a worker indefinitely. Override via EDGAR_HTTP_TIMEOUT env var or
+    # configure_http(timeout=...). Set EDGAR_HTTP_TIMEOUT=none (or call
+    # disable_http_timeout() at runtime) to opt out entirely.
+    timeout = get_edgar_http_timeout()
+    if timeout is not None:
+        http_mgr.httpx_params["timeout"] = httpx.Timeout(timeout, connect=10.0)
     return http_mgr
 
 
@@ -213,6 +243,7 @@ def configure_http(
     use_system_certs: Optional[bool] = None,
     proxy: Optional[str] = None,
     timeout: Optional[float] = None,
+    http2: Optional[bool] = None,
 ) -> None:
     """
     Configure HTTP client settings at runtime.
@@ -229,7 +260,14 @@ def configure_http(
                          SSL inspection, as it uses certificates managed by your OS.
         proxy: HTTP/HTTPS proxy URL (e.g., "http://proxy.company.com:8080").
                Supports authentication: "http://user:pass@proxy.company.com:8080"
-        timeout: Request timeout in seconds (default: 30.0)
+        timeout: Request timeout in seconds (default: 30.0). Passing None
+                 leaves the current timeout unchanged — to disable the
+                 timeout entirely, call disable_http_timeout() instead.
+        http2: Enable/disable HTTP/2 negotiation. Defaults to HTTP/1.1
+               (http2=False) because HTTP/2 multiplexes all requests over one
+               connection, so a mid-stream reset from cloud egress fails every
+               in-flight request at once (InvalidBodyLengthError /
+               ConnectionTerminated). Set to True to opt back into HTTP/2.
 
     Examples:
         # Use OS certificate store (recommended for corporate networks)
@@ -244,6 +282,9 @@ def configure_http(
 
         # Configure proxy
         configure_http(proxy="http://proxy.company.com:8080")
+
+        # Opt back into HTTP/2 (default is HTTP/1.1)
+        configure_http(http2=True)
 
     Note:
         Changes take effect immediately for new requests.
@@ -277,6 +318,10 @@ def configure_http(
         HTTP_MGR.httpx_params["proxy"] = proxy
         settings_changed = True
 
+    if http2 is not None:
+        HTTP_MGR.httpx_params["http2"] = http2
+        settings_changed = True
+
     if timeout is not None:
         from httpx import Timeout
         HTTP_MGR.httpx_params["timeout"] = Timeout(timeout, connect=10.0)
@@ -285,6 +330,25 @@ def configure_http(
     # Force client recreation if settings changed and client already exists
     # This ensures new settings take effect even if client was already created
     if settings_changed and HTTP_MGR._client is not None:
+        HTTP_MGR._client.close()
+        HTTP_MGR._client = None
+
+
+def disable_http_timeout() -> None:
+    """Remove the default HTTP timeout — requests will wait indefinitely.
+
+    Use only when blocking reads on stalled upstreams is acceptable
+    (for example, long-running batch jobs with external supervision).
+    By default the client has a 30s read/write/pool timeout configured;
+    that timeout exists to prevent a single stalled SEC request from
+    wedging a worker forever, so removing it should be a deliberate choice.
+
+    `configure_http(timeout=None)` is intentionally a no-op (matches the
+    "leave unchanged" semantics of the other parameters), which is why
+    opting out lives behind this dedicated function.
+    """
+    HTTP_MGR.httpx_params.pop("timeout", None)
+    if HTTP_MGR._client is not None:
         HTTP_MGR._client.close()
         HTTP_MGR._client = None
 
@@ -317,6 +381,7 @@ def get_http_config() -> dict:
         "use_system_certs": using_system_certs,
         "proxy": params.get("proxy"),
         "timeout": params.get("timeout"),
+        "http2": params.get("http2", False),
     }
 
 

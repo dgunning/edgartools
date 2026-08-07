@@ -715,22 +715,41 @@ class EntityFacts:
         """
         Get time series data for a concept.
 
+        Returned columns include ``period_start`` and ``duration_days`` so that
+        facts sharing a ``period_end`` but representing different reporting
+        windows (e.g., a 3-month Q2 vs. a 6-month YTD H1) remain distinguishable.
+
         Args:
             concept: Concept name or label
             periods: Number of periods to retrieve
 
         Returns:
-            DataFrame with time series data
+            DataFrame with columns ``[period_start, period_end, duration_days,
+            numeric_value, fiscal_period, fiscal_year]``.
         """
         from edgar.entity.query import FactQuery
         query = FactQuery(self._facts, self._fact_index)
 
-        # Get facts and limit
-        return query \
-            .by_concept(concept) \
+        df = query \
+            .by_concept(concept, exact=":" in concept) \
             .sort_by('filing_date', ascending=False) \
-            .to_dataframe('period_end', 'numeric_value', 'fiscal_period', 'fiscal_year') \
+            .to_dataframe('period_start', 'period_end', 'numeric_value',
+                          'fiscal_period', 'fiscal_year') \
             .head(periods)
+
+        if not df.empty:
+            # Compute duration_days for duration facts; instant facts get None.
+            # Use a comprehension so date/datetime/None mixes are handled safely.
+            df = df.assign(
+                duration_days=[
+                    (e - s).days if (s is not None and e is not None) else None
+                    for s, e in zip(df['period_start'], df['period_end'])
+                ]
+            )
+            df = df[['period_start', 'period_end', 'duration_days',
+                     'numeric_value', 'fiscal_period', 'fiscal_year']]
+
+        return df
 
     # DEI (Document and Entity Information) helpers
     def dei_facts(self, as_of: Optional[date] = None) -> pd.DataFrame:
@@ -1117,42 +1136,89 @@ class EntityFacts:
             warnings.warn(hint, stacklevel=2)
             return None
 
-        # Try each synonym in priority order.
         # If unit is not specified, do not force USD: share/count concepts
         # (for example weighted-average shares) should resolve with their
         # native units.
         target_unit = unit
         synonyms_tried = []
 
+        # Recency key for cross-synonym selection: newest filing wins, then the
+        # latest period covered. Mirrors get_fact()'s intra-tag ordering
+        # (max by (filing_date, period_end)). date.min guards facts missing a
+        # date so a comparison never raises.
+        def _recency_key(f: "FinancialFact"):
+            return (f.filing_date or date.min, f.period_end or date.min)
+
+        def _build_result(value, tag, unit_used, fact):
+            if not return_metadata:
+                return value
+            return {
+                'value': value,
+                'tag_used': tag,
+                # Resolved period of the fact actually returned — echoes the
+                # requested period, or the fact's own period when the caller
+                # passed period=None, so a stale pick is visible (GH #892).
+                'period': period if period is not None
+                          else f"{fact.fiscal_year}-{fact.fiscal_period}",
+                'period_end': fact.period_end,
+                'filing_date': fact.filing_date,
+                'unit': unit_used,
+                'concept_name': concept_name,
+                'synonyms_tried': synonyms_tried.copy(),
+            }
+
         # Suppress warnings from get_fact() during synonym resolution
         self._suppress_warnings = True
         try:
-            for concept in group.synonyms:
+            # Best candidate seen so far, when period is not specified:
+            # (recency_key, priority_index, value, tag, unit, fact).
+            best = None
+            for priority_index, concept in enumerate(group.synonyms):
                 synonyms_tried.append(concept)
                 # Try with all known taxonomy prefixes
                 for concept_variant in [concept, f'us-gaap:{concept}', f'ifrs-full:{concept}']:
                     fact = self.get_fact(concept_variant, period)
-                    if fact and fact.numeric_value is not None:
-                        unit_result = UnitNormalizer.get_normalized_value(
-                            fact=fact,
-                            target_unit=target_unit,
-                            apply_scale=True,
-                            strict_unit_match=unit is not None  # Strict when user explicitly specifies unit
+                    if not (fact and fact.numeric_value is not None):
+                        continue
+                    unit_result = UnitNormalizer.get_normalized_value(
+                        fact=fact,
+                        target_unit=target_unit,
+                        apply_scale=True,
+                        strict_unit_match=unit is not None  # Strict when user explicitly specifies unit
+                    )
+                    if not unit_result.success:
+                        continue
+
+                    if period is not None:
+                        # Explicit period: the priority ordering is authoritative
+                        # (the caller pinned the period, so there is no staleness
+                        # ambiguity) — first match wins, preserving prior behavior.
+                        return _build_result(
+                            unit_result.value, concept_variant,
+                            unit_result.normalized_unit, fact
                         )
 
-                        if unit_result.success:
-                            if return_metadata:
-                                return {
-                                    'value': unit_result.value,
-                                    'tag_used': concept_variant,
-                                    'period': period,
-                                    'unit': unit_result.normalized_unit,
-                                    'concept_name': concept_name,
-                                    'synonyms_tried': synonyms_tried.copy()
-                                }
-                            return unit_result.value
+                    # No period requested: do NOT stop at the first synonym that
+                    # happens to hold a fact. A company that switched GAAP tags
+                    # (e.g. NVDA/AMZN moving capex from
+                    # PaymentsToAcquirePropertyPlantAndEquipment to
+                    # PaymentsToAcquireProductiveAssets) still has stale facts
+                    # under the higher-priority tag; first-match-wins would return
+                    # those years-old values (GH #892). Instead pick the most
+                    # recent fact across all synonyms, tie-broken by priority.
+                    candidate = (_recency_key(fact), -priority_index,
+                                 unit_result.value, concept_variant,
+                                 unit_result.normalized_unit, fact)
+                    if best is None or candidate[:2] > best[:2]:
+                        best = candidate
+                    # One winning variant per synonym is enough.
+                    break
         finally:
             self._suppress_warnings = False
+
+        if best is not None:
+            _, _, value, tag, unit_used, fact = best
+            return _build_result(value, tag, unit_used, fact)
 
         return None
 
@@ -1445,9 +1511,28 @@ class EntityFacts:
     def _prepare_quarterly_facts(self, facts: List[FinancialFact]) -> List[FinancialFact]:
         """Enhance facts with derived quarter-level duration facts for TTM/quarterly views."""
         from edgar.ttm.calculator import TTMCalculator
+        from edgar.entity.enhanced_statement import (
+            detect_fiscal_year_end,
+            validate_fiscal_year_period_end,
+        )
+
+        # Filter out forward-looking schedule data before TTM derivation (Issues #781, #779).
+        # These are footnote disclosures (e.g., expected amortization) tagged with
+        # real fp values but future end dates inconsistent with their fiscal_year.
+        # Must be filtered here, before the TTM calculator derives quarters from them.
+        # Pass the company's FYE month so non-calendar-FYE companies (ADSK, WMT, MSFT)
+        # don't have their forward-fiscal-year quarters incorrectly rejected.
+        fiscal_year_end_month = detect_fiscal_year_end(facts)
+        filtered_facts = []
+        for fact in facts:
+            if fact.period_end and fact.fiscal_year:
+                if not validate_fiscal_year_period_end(fact.fiscal_year, fact.period_end,
+                                                      fiscal_year_end_month):
+                    continue
+            filtered_facts.append(fact)
 
         concept_facts = defaultdict(list)
-        for fact in facts:
+        for fact in filtered_facts:
             concept_facts[fact.concept].append(fact)
 
         derived_facts: List[FinancialFact] = []
@@ -1591,6 +1676,39 @@ class EntityFacts:
         as_of_date = self._parse_ttm_date(as_of)
         return calc.calculate_ttm(as_of=as_of_date)
 
+    def _best_ttm_across_concepts(
+        self,
+        concepts: List[str],
+        as_of: Optional[Union[date, str]],
+        not_found_message: str,
+    ) -> 'TTMMetric':
+        """Compute TTM for each candidate concept and return the freshest result.
+
+        Companies migrate GAAP tags over time (e.g. NVDA/GOOG moved revenue from
+        ``RevenueFromContractWithCustomerExcludingAssessedTax`` to ``Revenues``).
+        The abandoned tag still holds years-old facts, so returning the *first*
+        candidate that resolves silently yields a stale TTM — off by more than an
+        order of magnitude, with no error (GH #893). Instead we evaluate every
+        candidate and pick the one whose window ends most recently (by
+        ``as_of_date``), tie-broken by the caller's priority order.
+        """
+        best = None  # ((as_of_date, -priority_index), TTMMetric)
+        for priority_index, concept in enumerate(concepts):
+            try:
+                metric = self.get_ttm(concept, as_of)
+            except (KeyError, ValueError):
+                # KeyError: concept absent. ValueError: present but <4 quarters.
+                # Either way it cannot yield a TTM — skip and keep searching so a
+                # stale-but-resolvable earlier candidate never masks a fresh one.
+                continue
+            key = (metric.as_of_date, -priority_index)
+            if best is None or key > best[0]:
+                best = (key, metric)
+
+        if best is None:
+            raise KeyError(not_found_message)
+        return best[1]
+
     def get_ttm_revenue(self, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
         """Get Trailing Twelve Months revenue using common revenue concepts."""
         revenue_concepts = [
@@ -1599,22 +1717,16 @@ class EntityFacts:
             'SalesRevenueNet',
             'Revenue',
         ]
-        for concept in revenue_concepts:
-            try:
-                return self.get_ttm(concept, as_of)
-            except KeyError:
-                continue
-        raise KeyError("Could not find revenue concept in company facts")
+        return self._best_ttm_across_concepts(
+            revenue_concepts, as_of, "Could not find revenue concept in company facts"
+        )
 
     def get_ttm_net_income(self, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
         """Get Trailing Twelve Months net income using common net income concepts."""
         income_concepts = ['NetIncomeLoss', 'NetIncome', 'ProfitLoss']
-        for concept in income_concepts:
-            try:
-                return self.get_ttm(concept, as_of)
-            except KeyError:
-                continue
-        raise KeyError("Could not find net income concept in company facts")
+        return self._best_ttm_across_concepts(
+            income_concepts, as_of, "Could not find net income concept in company facts"
+        )
 
     @cached_property
     def _ttm_ready_facts(self) -> 'EntityFacts':

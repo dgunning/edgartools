@@ -9,43 +9,88 @@ on:
   # Run weekly on Sundays
   schedule:
     - cron: '0 8 * * 0'
-  # Also run on main branch pushes for critical changes
+  # Also run on main branch pushes that touch the library.
+  #
+  # This used to name three packages — edgar/xbrl, edgar/entity and the
+  # regression tree itself — which left every other package uncovered. A change
+  # under edgar/documents that added no regression file ran the suite in no job
+  # at all, and that is where the section-extraction defect cluster lives
+  # (bead edgartools-07lk.21). `edgar/**` closes the hole as a class instead of
+  # one package at a time; docs- and script-only merges still skip it.
   push:
     branches: [ "main" ]
     paths:
       - 'tests/issues/regression/**'
-      - 'edgar/xbrl/**'
-      - 'edgar/entity/**'
+      - 'edgar/**'
+
+# Cancel superseded regression runs on the same ref.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  regression:
+  # See python-hatch-workflow.yml: cassettes are loaded with PyYAML's unsafe
+  # loader, so this has to pass before anything runs pytest.
+  cassette-gate:
+    name: Cassette safety gate
     runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Set up Python 3.13
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      with:
+        python-version: '3.13'
+    - name: Install PyYAML
+      run: python -m pip install --upgrade pip PyYAML
+    - name: Scan cassettes for unsafe YAML tags
+      run: python scripts/check_cassettes.py
+
+  regression:
+    needs: cassette-gate
+    runs-on: ubuntu-latest
+    env:
+      EDGAR_LOCAL_DATA_DIR: ${{ github.workspace }}/.edgar-data
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12"]  # Fewer Python versions for regression tests
-        
+        # Single version: regression tests verify data correctness against real
+        # filings, not Python compatibility (the fast job covers 3.10 + 3.13).
+        python-version: ["3.12"]
+
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: ${{ matrix.python-version }}
-        
+        cache: 'pip'
+
+    # Persist the SEC HTTP cache — regression tests fetch real filings, and
+    # /Archives/edgar/data is cached forever (see CACHE_RULES), so a warm cache
+    # serves them from disk instead of re-downloading.
+    - name: Restore SEC HTTP cache
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        path: ${{ github.workspace }}/.edgar-data/_tcache
+        key: edgar-tcache-regression-${{ github.run_id }}
+        restore-keys: |
+          edgar-tcache-regression-
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         python -m pip install -e ".[ai]"
-        python -m pip install pytest pytest-cov pytest-env pytest-xdist pytest-asyncio pytest-retry pytest-mock freezegun==1.5.1 filelock tqdm responses
+        python -m pip install pytest pytest-cov pytest-env pytest-xdist pytest-asyncio pytest-retry pytest-mock pytest-vcr "vcrpy<8.2" freezegun==1.5.1 filelock tqdm responses
 
     - name: Run regression tests
       run: |
-        pytest --cov --cov-report=xml -m regression
-        
+        pytest --cov --cov-report=xml -m regression --enable-cache
+
     - name: Upload coverage reports
-      uses: codecov/codecov-action@v3
-      if: matrix.python-version == '3.11'
+      uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
+      if: matrix.python-version == '3.12'
       with:
-        file: coverage.xml
+        files: coverage.xml
         fail_ci_if_error: false
         flags: regression
+        token: ${{ secrets.CODECOV_TOKEN }}

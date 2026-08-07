@@ -1,0 +1,151 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/1099219/000114036123013281/0001140361-23-013281.txt
+  response:
+    body:
+      string: "<SEC-DOCUMENT>0001140361-23-013281.txt : 20230323\n<SEC-HEADER>0001140361-23-013281.hdr.sgml
+        : 20230323\n<ACCEPTANCE-DATETIME>20230323112745\nACCESSION NUMBER:\t\t0001140361-23-013281\nCONFORMED
+        SUBMISSION TYPE:\t13F-HR\nPUBLIC DOCUMENT COUNT:\t\t2\nCONFORMED PERIOD OF
+        REPORT:\t20211231\nFILED AS OF DATE:\t\t20230323\nDATE AS OF CHANGE:\t\t20230323\nEFFECTIVENESS
+        DATE:\t\t20230323\n\nFILER:\n\n\tCOMPANY DATA:\t\n\t\tCOMPANY CONFORMED NAME:\t\t\tMETLIFE
+        INC\n\t\tCENTRAL INDEX KEY:\t\t\t0001099219\n\t\tSTANDARD INDUSTRIAL CLASSIFICATION:\tLIFE
+        INSURANCE [6311]\n\t\tIRS NUMBER:\t\t\t\t134075851\n\t\tSTATE OF INCORPORATION:\t\t\tDE\n\t\tFISCAL
+        YEAR END:\t\t\t1231\n\n\tFILING VALUES:\n\t\tFORM TYPE:\t\t13F-HR\n\t\tSEC
+        ACT:\t\t1934 Act\n\t\tSEC FILE NUMBER:\t028-18621\n\t\tFILM NUMBER:\t\t23755001\n\n\tBUSINESS
+        ADDRESS:\t\n\t\tSTREET 1:\t\t200 PARK AVENUE\n\t\tCITY:\t\t\tNEW YORK\n\t\tSTATE:\t\t\tNY\n\t\tZIP:\t\t\t10166\n\t\tBUSINESS
+        PHONE:\t\t212-578-5500\n\n\tMAIL ADDRESS:\t\n\t\tSTREET 1:\t\t200 PARK AVENUE\n\t\tCITY:\t\t\tNEW
+        YORK\n\t\tSTATE:\t\t\tNY\n\t\tZIP:\t\t\t10166\n</SEC-HEADER>\n<DOCUMENT>\n<TYPE>13F-HR\n<SEQUENCE>1\n<FILENAME>primary_doc.xml\n<TEXT>\n<XML>\n<?xml
+        version=\"1.0\" encoding=\"UTF-8\"?>\n<edgarSubmission xmlns:com=\"http://www.sec.gov/edgar/common\"
+        xmlns=\"http://www.sec.gov/edgar/thirteenffiler\">\n  <schemaVersion>X0202</schemaVersion>\n
+        \ <headerData>\n    <submissionType>13F-HR</submissionType>\n    <filerInfo>\n
+        \     <liveTestFlag>LIVE</liveTestFlag>\n      <filer>\n        <credentials>\n
+        \         <cik>0001099219</cik>\n          <ccc>XXXXXXXX</ccc>\n        </credentials>\n
+        \     </filer>\n      <periodOfReport>12-31-2021</periodOfReport>\n    </filerInfo>\n
+        \ </headerData>\n  <formData>\n    <coverPage>\n      <reportCalendarOrQuarter>12-31-2021</reportCalendarOrQuarter>\n
+        \     <isAmendment>false</isAmendment>\n      <filingManager>\n        <name>METLIFE
+        INC</name>\n        <address>\n          <com:street1>200 PARK AVENUE</com:street1>\n
+        \         <com:city>NEW YORK</com:city>\n          <com:stateOrCountry>NY</com:stateOrCountry>\n
+        \         <com:zipCode>10166</com:zipCode>\n        </address>\n      </filingManager>\n
+        \     <reportType>13F COMBINATION REPORT</reportType>\n      <form13FFileNumber>028-18621</form13FFileNumber>\n
+        \     <otherManagersInfo>\n        <otherManager>\n          <cik>0000931588</cik>\n
+        \         <form13FFileNumber>028-16107</form13FFileNumber>\n          <name>PROVIDA
+        PENSION FUND ADMINISTRATOR</name>\n        </otherManager>\n        <otherManager>\n
+        \         <cik>0000728618</cik>\n          <form13FFileNumber>028-00491</form13FFileNumber>\n
+        \         <name>METROPOLITAN LIFE INSURANCE CO/NY</name>\n        </otherManager>\n
+        \       <otherManager>\n          <cik>0001529735</cik>\n          <form13FFileNumber>028-18628</form13FFileNumber>\n
+        \         <crdNumber>000142463</crdNumber>\n          <secFileNumber>801-67314</secFileNumber>\n
+        \         <name>MetLife Investment Management, LLC</name>\n        </otherManager>\n
+        \     </otherManagersInfo>\n      <provideInfoForInstruction5>Y</provideInfoForInstruction5>\n
+        \     <additionalInformation>MetLife, Inc. is the parent holding company of
+        certain institutional investment managers.  MetLife, Inc. is filing this 13F
+        Combination Report to reflect Section 13(f) securities for which one of such
+        institutional investment managers exercises investment discretion, however
+        where such manager does not exceed the $100 million filing threshold and thus
+        does not meet the criteria for being an Other Included Manager.  Other institutional
+        investment managers for which MetLife, Inc. is the parent holding company
+        file separate 13F Holdings Reports.\n\nMetLife, Inc. is the parent holding
+        company of certain institutional investment managers. For purposes of the
+        reporting requirements under Section 13(f) of the Securities Exchange Act
+        of 1934 (the Act), and the rules promulgated thereunder, MetLife, Inc. itself
+        does not exercise, and therefore disclaims, investment discretion with respect
+        to any Section 13(f) securities positions over which its investment operating
+        subsidiaries exercise such discretion. To the extent, however, that MetLife
+        Inc.'s ownership interest in such subsidiaries may nevertheless give rise
+        to a Form 13F obligation on behalf of MetLife, Inc., the information required
+        by Form 13F is reported herein on behalf of all such subsidiaries.</additionalInformation>\n
+        \   </coverPage>\n    <signatureBlock>\n      <name>Steven Goulart</name>\n
+        \     <title>EVP &amp; Chief Investment Officer</title>\n      <phone>973-355-4814</phone>\n
+        \     <signature>/s/ Steven Goulart</signature>\n      <city>WHIPPANY</city>\n
+        \     <stateOrCountry>NJ</stateOrCountry>\n      <signatureDate>03-22-2023</signatureDate>\n
+        \   </signatureBlock>\n    <summaryPage>\n      <otherIncludedManagersCount>0</otherIncludedManagersCount>\n
+        \     <tableEntryTotal>6</tableEntryTotal>\n      <tableValueTotal>11019796</tableValueTotal>\n
+        \   </summaryPage>\n  </formData>\n</edgarSubmission>\n</XML>\n</TEXT>\n</DOCUMENT>\n<DOCUMENT>\n<TYPE>INFORMATION
+        TABLE\n<SEQUENCE>2\n<FILENAME>informationtable.xml\n<TEXT>\n<XML>\n<?xml version=\"1.0\"
+        encoding=\"utf-8\"?>\n<informationTable xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"
+        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.sec.gov/edgar/document/thirteenf/informationtable\">\n
+        \   <infoTable>\n        <nameOfIssuer>ISHARES MSCI CHILE ETF</nameOfIssuer>\n
+        \       <titleOfClass>COM</titleOfClass>\n        <cusip>464286640</cusip>\n
+        \       <value>2049983</value>\n        <shrsOrPrnAmt>\n            <sshPrnamt>98000</sshPrnamt>\n
+        \           <sshPrnamtType>SH</sshPrnamtType>\n        </shrsOrPrnAmt>\n        <investmentDiscretion>DFND</investmentDiscretion>\n
+        \       <votingAuthority>\n            <Sole>0</Sole>\n            <Shared>98000</Shared>\n
+        \           <None>0</None>\n        </votingAuthority>\n    </infoTable>\n
+        \   <infoTable>\n        <nameOfIssuer>ISHARES MSCI PACIFIC EX JAPAN ETF</nameOfIssuer>\n
+        \       <titleOfClass>COM</titleOfClass>\n        <cusip>464286665</cusip>\n
+        \       <value>598969</value>\n        <shrsOrPrnAmt>\n            <sshPrnamt>12592</sshPrnamt>\n
+        \           <sshPrnamtType>SH</sshPrnamtType>\n        </shrsOrPrnAmt>\n        <investmentDiscretion>DFND</investmentDiscretion>\n
+        \       <votingAuthority>\n            <Sole>0</Sole>\n            <Shared>12592</Shared>\n
+        \           <None>0</None>\n        </votingAuthority>\n    </infoTable>\n
+        \   <infoTable>\n        <nameOfIssuer>ISHARES LATIN AMERICA ETF</nameOfIssuer>\n
+        \       <titleOfClass>COM</titleOfClass>\n        <cusip>464287390</cusip>\n
+        \       <value>2486808</value>\n        <shrsOrPrnAmt>\n            <sshPrnamt>92502</sshPrnamt>\n
+        \           <sshPrnamtType>SH</sshPrnamtType>\n        </shrsOrPrnAmt>\n        <investmentDiscretion>DFND</investmentDiscretion>\n
+        \       <votingAuthority>\n            <Sole>0</Sole>\n            <Shared>92502</Shared>\n
+        \           <None>0</None>\n        </votingAuthority>\n    </infoTable>\n
+        \   <infoTable>\n        <nameOfIssuer>ISHARES EUROPE ETF TRUST</nameOfIssuer>\n
+        \       <titleOfClass>COM</titleOfClass>\n        <cusip>464287861</cusip>\n
+        \       <value>743478</value>\n        <shrsOrPrnAmt>\n            <sshPrnamt>14555</sshPrnamt>\n
+        \           <sshPrnamtType>SH</sshPrnamtType>\n        </shrsOrPrnAmt>\n        <investmentDiscretion>DFND</investmentDiscretion>\n
+        \       <votingAuthority>\n            <Sole>0</Sole>\n            <Shared>14555</Shared>\n
+        \           <None>0</None>\n        </votingAuthority>\n    </infoTable>\n
+        \   <infoTable>\n        <nameOfIssuer>ISHARES MSCI JAPAN ETF</nameOfIssuer>\n
+        \       <titleOfClass>COM</titleOfClass>\n        <cusip>46434G822</cusip>\n
+        \       <value>895357</value>\n        <shrsOrPrnAmt>\n            <sshPrnamt>12983</sshPrnamt>\n
+        \           <sshPrnamtType>SH</sshPrnamtType>\n        </shrsOrPrnAmt>\n        <investmentDiscretion>DFND</investmentDiscretion>\n
+        \       <votingAuthority>\n            <Sole>0</Sole>\n            <Shared>12983</Shared>\n
+        \           <None>0</None>\n        </votingAuthority>\n    </infoTable>\n
+        \   <infoTable>\n        <nameOfIssuer>SPDR S&amp;P ETF TRUST</nameOfIssuer>\n
+        \       <titleOfClass>COM</titleOfClass>\n        <cusip>78462F103</cusip>\n
+        \       <value>4245201</value>\n        <shrsOrPrnAmt>\n            <sshPrnamt>9866</sshPrnamt>\n
+        \           <sshPrnamtType>SH</sshPrnamtType>\n        </shrsOrPrnAmt>\n        <investmentDiscretion>DFND</investmentDiscretion>\n
+        \       <votingAuthority>\n            <Sole>0</Sole>\n            <Shared>9866</Shared>\n
+        \           <None>0</None>\n        </votingAuthority>\n    </infoTable>\n</informationTable>\n</XML>\n</TEXT>\n</DOCUMENT>\n</SEC-DOCUMENT>\n"
+    headers:
+      accept-ranges:
+      - bytes
+      content-length:
+      - '8408'
+      content-type:
+      - text/plain
+      date:
+      - Fri, 29 May 2026 18:00:33 GMT
+      etag:
+      - '"2984d626f371dce4d5d525b0d13421ce-gzip"'
+      last-modified:
+      - Thu, 23 Mar 2023 15:28:10 GMT
+      strict-transport-security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      vary:
+      - Accept-Encoding
+      x-amz-id-2:
+      - Tkkz7fZbfRtucP/gfrEm0uopENd1BNWJdRaZZoZPO21jXA8S0THRRoeP/p09zNflJ2wKpxx2yjk=
+      x-amz-meta-mode:
+      - '33188'
+      x-amz-replication-status:
+      - COMPLETED
+      x-amz-request-id:
+      - 23HVDDEG3H8FQBAS
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - _zRPO_hzgMG6i.c5E_1MLAchCkdXh4KA
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: null
+version: 1

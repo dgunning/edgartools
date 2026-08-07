@@ -101,15 +101,22 @@ class Concept:
 
     @property
     def value(self) -> Optional[str]:
-        """Latest period value from the primary report."""
+        """Primary-period value from the primary report.
+
+        Resolves against the row's primary period (the leftmost column of the
+        R*.htm report) and returns ``None`` when that period has no value —
+        even when later periods do. This guards against silently returning a
+        prior-year value for concepts whose primary-period fact is absent
+        (GH #810).
+        """
         rows = self._graph._get_rows_for_concept(self.id)
         if not rows:
             return None
-        # Return first non-dimensional value
         for row in rows:
             if not row.is_dimensional and not row.is_abstract and row.values:
-                vals = list(row.values.values())
-                return vals[0] if vals else None
+                if row.primary_period is None:
+                    return None
+                return row.values.get(row.primary_period) or None
         return None
 
     @property

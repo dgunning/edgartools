@@ -32,7 +32,7 @@ import logging
 import os
 import time
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -104,7 +104,7 @@ class AgentTestResult:
     trace: AgentTrace
     score: AgentScore
     timestamp: str = field(
-        default_factory=lambda: datetime.utcnow().isoformat()
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
     )
 
     def to_dict(self) -> Dict[str, Any]:
@@ -928,7 +928,7 @@ class AgentTestRunner:
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
 
-        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         filepath = output_path / f"agent_evaluation_{timestamp}.json"
 
         data: Dict[str, Any] = {

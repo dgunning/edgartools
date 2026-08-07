@@ -17,6 +17,34 @@ if TYPE_CHECKING:
 
 __all__ = ['render_schedule13d', 'render_schedule13g']
 
+_UNAVAILABLE = "[dim italic]unavailable[/dim italic]"
+
+
+def _fmt_shares(value) -> str:
+    """Format a share count, or a dim 'unavailable' marker when None."""
+    return f"{value:,}" if value is not None else _UNAVAILABLE
+
+
+def _fmt_percent(value) -> str:
+    """Format a percentage, or a dim 'unavailable' marker when None."""
+    return f"{value:.2f}%" if value is not None else _UNAVAILABLE
+
+
+def _degraded_notice() -> Panel:
+    """Banner shown when only header identities are available (pre-2025 HTML filing)."""
+    return Panel(
+        Text(
+            "Structured ownership data is unavailable: this filing predates the SEC "
+            "structured-XML mandate (2024-12-18). Only filer and issuer identities "
+            "were recovered from the filing header. Use filing.text() or "
+            "filing.markdown() for the full document.",
+            style="yellow",
+        ),
+        title="[bold yellow]⚠ Header data only[/bold yellow]",
+        border_style="yellow",
+        padding=(0, 1),
+    )
+
 
 def render_schedule13d(schedule: 'Schedule13D') -> Panel:
     """
@@ -38,14 +66,19 @@ def render_schedule13d(schedule: 'Schedule13D') -> Panel:
     header.add_row("Filing Date:", str(schedule.filing_date))
     header.add_row("Event Date:", schedule.date_of_event)
     header.add_row("Issuer:", f"{schedule.issuer_info.name} ({schedule.issuer_info.cik})")
-    header.add_row("Security:", schedule.security_info.title)
-    header.add_row("CUSIP:", schedule.security_info.cusip)
+    if schedule.security_info.title:
+        header.add_row("Security:", schedule.security_info.title)
+    if schedule.security_info.cusip:
+        header.add_row("CUSIP:", schedule.security_info.cusip)
 
     # Aggregate ownership
-    header.add_row("Total Shares:", f"{schedule.total_shares:,}")
-    header.add_row("Total Percent:", f"{schedule.total_percent:.2f}%")
+    header.add_row("Total Shares:", _fmt_shares(schedule.total_shares))
+    header.add_row("Total Percent:", _fmt_percent(schedule.total_percent))
 
     elements = [header, Text()]
+    if not schedule.has_structured_data:
+        elements.append(_degraded_notice())
+        elements.append(Text())
 
     # Reporting Persons table
     persons_table = Table(
@@ -61,14 +94,15 @@ def render_schedule13d(schedule: 'Schedule13D') -> Panel:
     persons_table.add_column("Voting Power", justify="right")
     persons_table.add_column("Dispositive Power", justify="right")
 
+    structured = schedule.has_structured_data
     for person in schedule.reporting_persons:
         persons_table.add_row(
             person.name,
             person.cik or 'N/A',
-            f"{person.aggregate_amount:,}",
-            f"{person.percent_of_class:.2f}%",
-            f"{person.total_voting_power:,}",
-            f"{person.total_dispositive_power:,}"
+            f"{person.aggregate_amount:,}" if structured else _UNAVAILABLE,
+            f"{person.percent_of_class:.2f}%" if structured else _UNAVAILABLE,
+            f"{person.total_voting_power:,}" if structured else _UNAVAILABLE,
+            f"{person.total_dispositive_power:,}" if structured else _UNAVAILABLE
         )
 
     elements.append(persons_table)
@@ -147,18 +181,23 @@ def render_schedule13g(schedule: 'Schedule13G') -> Panel:
     header.add_row("Filing Date:", str(schedule.filing_date))
     header.add_row("Event Date:", schedule.event_date)
     header.add_row("Issuer:", f"{schedule.issuer_info.name} ({schedule.issuer_info.cik})")
-    header.add_row("Security:", schedule.security_info.title)
-    header.add_row("CUSIP:", schedule.security_info.cusip)
+    if schedule.security_info.title:
+        header.add_row("Security:", schedule.security_info.title)
+    if schedule.security_info.cusip:
+        header.add_row("CUSIP:", schedule.security_info.cusip)
 
     if schedule.rule_designation:
         header.add_row("Rule:", schedule.rule_designation)
 
     # Aggregate ownership
-    header.add_row("Total Shares:", f"{schedule.total_shares:,}")
-    header.add_row("Total Percent:", f"{schedule.total_percent:.2f}%")
+    header.add_row("Total Shares:", _fmt_shares(schedule.total_shares))
+    header.add_row("Total Percent:", _fmt_percent(schedule.total_percent))
     header.add_row("Type:", "Passive Institutional Investor")
 
     elements = [header, Text()]
+    if not schedule.has_structured_data:
+        elements.append(_degraded_notice())
+        elements.append(Text())
 
     # Reporting Persons table
     persons_table = Table(
@@ -174,14 +213,15 @@ def render_schedule13g(schedule: 'Schedule13G') -> Panel:
     persons_table.add_column("Voting Power", justify="right")
     persons_table.add_column("Dispositive Power", justify="right")
 
+    structured = schedule.has_structured_data
     for person in schedule.reporting_persons:
         persons_table.add_row(
             person.name,
             person.type_of_reporting_person or 'N/A',
-            f"{person.aggregate_amount:,}",
-            f"{person.percent_of_class:.2f}%",
-            f"{person.total_voting_power:,}",
-            f"{person.total_dispositive_power:,}"
+            f"{person.aggregate_amount:,}" if structured else _UNAVAILABLE,
+            f"{person.percent_of_class:.2f}%" if structured else _UNAVAILABLE,
+            f"{person.total_voting_power:,}" if structured else _UNAVAILABLE,
+            f"{person.total_dispositive_power:,}" if structured else _UNAVAILABLE
         )
 
     elements.append(persons_table)

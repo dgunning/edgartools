@@ -1,0 +1,298 @@
+{
+  "description": "Per (form, item) content-size bands from healthy filings (edgartools-h44r; consumed by edgartools-9hwf).",
+  "bands": {
+    "10-K": {
+      "1": {
+        "n": 23,
+        "min": 13188,
+        "p50": 40173,
+        "max": 201707,
+        "low_flag": 8034,
+        "high_flag": 321384,
+        "enforce": true
+      },
+      "7A": {
+        "n": 24,
+        "min": 243,
+        "p50": 3673,
+        "max": 198443,
+        "low_flag": 734,
+        "high_flag": 29384,
+        "enforce": false
+      },
+      "8": {
+        "n": 24,
+        "min": 59877,
+        "p50": 130684,
+        "max": 284879,
+        "low_flag": 26136,
+        "high_flag": 1045472,
+        "enforce": true
+      },
+      "9": {
+        "n": 24,
+        "min": 98,
+        "p50": 115,
+        "max": 318,
+        "low_flag": 23,
+        "high_flag": 920,
+        "enforce": false
+      },
+      "9A": {
+        "n": 24,
+        "min": 1429,
+        "p50": 3955,
+        "max": 9349,
+        "low_flag": 791,
+        "high_flag": 31640,
+        "enforce": true
+      },
+      "9B": {
+        "n": 24,
+        "min": 52,
+        "p50": 702,
+        "max": 2852,
+        "low_flag": 140,
+        "high_flag": 5616,
+        "enforce": false
+      },
+      "9C": {
+        "n": 23,
+        "min": 93,
+        "p50": 116,
+        "max": 6889,
+        "low_flag": 23,
+        "high_flag": 928,
+        "enforce": false
+      },
+      "10": {
+        "n": 24,
+        "min": 378,
+        "p50": 1465,
+        "max": 35476,
+        "low_flag": 293,
+        "high_flag": 11720,
+        "enforce": false
+      },
+      "11": {
+        "n": 24,
+        "min": 127,
+        "p50": 373,
+        "max": 35476,
+        "low_flag": 74,
+        "high_flag": 2984,
+        "enforce": false
+      },
+      "12": {
+        "n": 24,
+        "min": 224,
+        "p50": 343,
+        "max": 35476,
+        "low_flag": 68,
+        "high_flag": 2744,
+        "enforce": false
+      },
+      "13": {
+        "n": 24,
+        "min": 178,
+        "p50": 292,
+        "max": 4006,
+        "low_flag": 58,
+        "high_flag": 2336,
+        "enforce": false
+      },
+      "14": {
+        "n": 15,
+        "min": 201,
+        "p50": 297,
+        "max": 884,
+        "low_flag": 59,
+        "high_flag": 2376,
+        "enforce": false
+      },
+      "15": {
+        "n": 24,
+        "min": 457,
+        "p50": 11701,
+        "max": 47482,
+        "low_flag": 2340,
+        "high_flag": 93608,
+        "enforce": false
+      },
+      "16": {
+        "n": 22,
+        "min": 1281,
+        "p50": 2050,
+        "max": 23099,
+        "low_flag": 0,
+        "high_flag": 16400,
+        "enforce": true,
+        "note": "low_flag dropped to 0 (edgartools-nqzc): Item 16 is optional/usually None; min/p50 reflect pre-split over-capture of the signatures block."
+      },
+      "1A": {
+        "n": 24,
+        "min": 32791,
+        "p50": 79892,
+        "max": 201707,
+        "low_flag": 15978,
+        "high_flag": 639136,
+        "enforce": true
+      },
+      "1B": {
+        "n": 23,
+        "min": 40,
+        "p50": 50,
+        "max": 5792,
+        "low_flag": 10,
+        "high_flag": 400,
+        "enforce": false
+      },
+      "1C": {
+        "n": 23,
+        "min": 2743,
+        "p50": 7710,
+        "max": 11111,
+        "low_flag": 1542,
+        "high_flag": 61680,
+        "enforce": true
+      },
+      "2": {
+        "n": 24,
+        "min": 296,
+        "p50": 1299,
+        "max": 6040,
+        "low_flag": 259,
+        "high_flag": 10392,
+        "enforce": false
+      },
+      "3": {
+        "n": 24,
+        "min": 143,
+        "p50": 959,
+        "max": 166755,
+        "low_flag": 191,
+        "high_flag": 7672,
+        "enforce": false
+      },
+      "4": {
+        "n": 23,
+        "min": 51,
+        "p50": 97,
+        "max": 32310,
+        "low_flag": 19,
+        "high_flag": 776,
+        "enforce": false
+      },
+      "5": {
+        "n": 24,
+        "min": 479,
+        "p50": 3234,
+        "max": 5281,
+        "low_flag": 646,
+        "high_flag": 25872,
+        "enforce": false
+      },
+      "6": {
+        "n": 24,
+        "min": 15,
+        "p50": 21,
+        "max": 502,
+        "low_flag": 4,
+        "high_flag": 168,
+        "enforce": false
+      },
+      "7": {
+        "n": 24,
+        "min": 15358,
+        "p50": 57202,
+        "max": 163211,
+        "low_flag": 11440,
+        "high_flag": 457616,
+        "enforce": true
+      },
+      "1D": {
+        "n": 1,
+        "min": 2095,
+        "p50": 2095,
+        "max": 2095,
+        "low_flag": 419,
+        "high_flag": 16760,
+        "enforce": false
+      },
+      "4A": {
+        "n": 1,
+        "min": 8628,
+        "p50": 8628,
+        "max": 8628,
+        "low_flag": 1725,
+        "high_flag": 69024,
+        "enforce": false
+      }
+    },
+    "10-Q": {
+      "1": {
+        "n": 11,
+        "min": 24903,
+        "p50": 90047,
+        "max": 115487,
+        "low_flag": 18009,
+        "high_flag": 720376,
+        "enforce": true
+      },
+      "3": {
+        "n": 11,
+        "min": 150,
+        "p50": 394,
+        "max": 6679,
+        "low_flag": 78,
+        "high_flag": 3152,
+        "enforce": false
+      },
+      "4": {
+        "n": 12,
+        "min": 764,
+        "p50": 1951,
+        "max": 73485,
+        "low_flag": 390,
+        "high_flag": 15608,
+        "enforce": false
+      },
+      "1A": {
+        "n": 9,
+        "min": 172,
+        "p50": 1003,
+        "max": 148645,
+        "low_flag": 200,
+        "high_flag": 8024,
+        "enforce": false
+      },
+      "2": {
+        "n": 11,
+        "min": 19723,
+        "p50": 50671,
+        "max": 100614,
+        "low_flag": 10134,
+        "high_flag": 405368,
+        "enforce": true
+      },
+      "5": {
+        "n": 11,
+        "min": 32,
+        "p50": 658,
+        "max": 2628,
+        "low_flag": 131,
+        "high_flag": 5264,
+        "enforce": false
+      },
+      "6": {
+        "n": 11,
+        "min": 1358,
+        "p50": 2590,
+        "max": 14240,
+        "low_flag": 518,
+        "high_flag": 20720,
+        "enforce": true
+      }
+    }
+  }
+}

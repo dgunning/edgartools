@@ -223,6 +223,7 @@
   "StockCompensationEquityImpact": "Stock-Based Compensation (Equity)",
   "StockIssuanceProceeds": "Proceeds from Stock Issuance",
   "StockIssuancesEquity": "Stock Issuances",
+  "DividendsEquity": "Dividends (Equity)",
   "StockRepurchasePayments": "Stock Repurchase Payments",
   "StockRepurchasesEquity": "Stock Repurchases (Equity)",
   "SubscriptionRevenue": "Subscription Revenue",

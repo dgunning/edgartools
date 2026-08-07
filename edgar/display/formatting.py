@@ -101,14 +101,20 @@ def format_currency_short(value: Union[int, float, Decimal, None], currency: str
     if abs_val >= 1_000_000_000:
         return f"{sign}{currency}{abs_val / 1_000_000_000:,.1f}B"
     elif abs_val >= 1_000_000:
-        return f"{sign}{currency}{abs_val / 1_000_000:,.1f}M"
+        scaled = abs_val / 1_000_000
+        # A value just under 1B (>= ~999.95M) rounds to "1,000.0M" at one
+        # decimal place; promote it to "1.0B" rather than render the
+        # nonsensical "1,000.0M".
+        if round(scaled, 1) >= 1000:
+            return f"{sign}{currency}{abs_val / 1_000_000_000:,.1f}B"
+        return f"{sign}{currency}{scaled:,.1f}M"
     elif abs_val >= 1_000:
         return f"{sign}{currency}{abs_val:,.0f}"
     else:
         return f"{sign}{currency}{abs_val:,.2f}"
 
 
-def datefmt(value: Union[datetime.datetime, str], fmt: str = "%Y-%m-%d") -> str:
+def datefmt(value: Union[datetime.datetime, datetime.date, str, None], fmt: str = "%Y-%m-%d") -> str:
     """Format a date as a string"""
     if isinstance(value, str):
         # if value matches %Y%m%d, then parse it
@@ -119,9 +125,22 @@ def datefmt(value: Union[datetime.datetime, str], fmt: str = "%Y-%m-%d") -> str:
             value = datetime.datetime.strptime(value, "%Y%m%d%H%M%S")
         elif re.match(r"^\d{4}-\d{2}-\d{2}$", value):
             value = datetime.datetime.strptime(value, "%Y-%m-%d")
+        else:
+            # Unrecognized date string: return it unchanged rather than
+            # crashing on ``str.strftime``. datefmt is display-only and is
+            # called with filing-derived strings that are not guaranteed to
+            # match one of the patterns above (e.g. ``""`` or ``"2022/03/04"``).
+            return value
         return value.strftime(fmt)
-    else:
+    # Non-string input. datefmt is display-only and is called with filing-derived
+    # values that are not guaranteed to be set — e.g. a former name's null ``to``
+    # date or a missing ``date_of_change`` — so degrade gracefully instead of
+    # crashing on ``None.strftime`` (and likewise for any unexpected type).
+    if value is None:
+        return ""
+    if hasattr(value, "strftime"):
         return value.strftime(fmt)
+    return str(value)
 
 
 def display_size(size: Optional[Union[int, str]]) -> str:
@@ -244,6 +263,13 @@ def reverse_name(name: str) -> str:
 
     surname_parts = parts[:surname_end]
     given_parts = parts[surname_end:]
+
+    # ── 3a. Pull a suffix that sits between surname and given name ───
+    # ("Roberts III Chris" → surname "Roberts", suffix "III", given "Chris").
+    # SEC's LAST SUFFIX FIRST ordering leaves the suffix as the first given
+    # token. Keep at least one given token.
+    while len(given_parts) > 1 and given_parts[0].upper().rstrip('.,') in _SUFFIXES_NORM:
+        suffixes.append(given_parts.pop(0))
 
     # ── 3b. Reorder displaced initials ──────────────────────────────
     # SEC sometimes stores "LAST INITIAL FIRST" (e.g. "Bennett C Frank",

@@ -13,7 +13,7 @@ import pyarrow.compute as pc
 
 from edgar.core import listify, log
 from edgar.dates import InvalidDateException
-from edgar.entity.filings import EntityFilings
+from edgar.entity.filings import EntityFilings, empty_company_filings
 from edgar.filtering import filter_by_date, filter_by_form, filter_by_year_quarter
 from edgar.display.formatting import reverse_name
 
@@ -539,175 +539,185 @@ class EntityData:
         return repr_rich(self.__rich__())
 
     def __rich__(self):
-        """Creates a rich representation of the entity with clear information hierarchy."""
-        # Use lazy imports for rich components
+        """Creates a rich representation of the entity.
+
+        Design follows the EdgarTools display language:
+        - Single outer border (card-based) with box.ROUNDED
+        - No emojis - uses unicode symbols from SYMBOLS
+        - Semantic colors from edgar.display.styles
+        - Compact layout with whitespace section separation
+        """
         box = lazy_import('rich.box')
         Group = lazy_import('rich.console.Group')
-        Columns = lazy_import('rich.columns.Columns')
-        Padding = lazy_import('rich.padding.Padding')
         Panel = lazy_import('rich.panel.Panel')
         Table = lazy_import('rich.table.Table')
         Text = lazy_import('rich.text.Text')
-        find_ticker = lazy_import('edgar.reference.tickers.find_ticker')
-        zip_longest = lazy_import('itertools.zip_longest')
+        get_style = lazy_import('edgar.display.styles.get_style')
+        SYMBOLS = lazy_import('edgar.display.styles.SYMBOLS')
+        cik_text = lazy_import('edgar.display.formatting.cik_text')
         datefmt = lazy_import('edgar.display.formatting.datefmt')
+        find_ticker = lazy_import('edgar.reference.tickers.find_ticker')
 
-        # Primary entity identification section
+        # Build header line: Entity Name + Ticker(s) if company
         if self.is_company:
-            ticker = find_ticker(self.cik)
-            ticker = f"{ticker}" if ticker else ""
-
-            # The title of the panel
-            entity_title = Text.assemble("🏢 ",
-                                         (self.display_name, "bold green"),
-                                         " ",
-                                         (f"[{self.cik}] ", "dim"),
-                                         (ticker, "bold yellow")
-                                         )
-        else:
-            entity_title = Text.assemble("👤", (self.display_name, "bold green"))
-
-        # Primary Information Table
-        main_info = Table(box=box.SIMPLE_HEAVY, show_header=False, padding=(0, 1))
-        main_info.add_column("Row", style="")  # Single column for the entire row
-
-        row_parts = []
-        row_parts.extend([Text("CIK", style="grey60"), Text(str(self.cik), style="bold deep_sky_blue3")])
-        if hasattr(self, 'entity_type') and self.entity_type:
-            if self.is_individual:
-                row_parts.extend([Text("Type", style="grey60"),
-                                  Text("Individual", style="bold yellow")])
+            tickers = self.tickers or []
+            if tickers:
+                if len(tickers) == 1:
+                    ticker_text = Text(tickers[0], style=get_style("ticker"))
+                elif len(tickers) == 2:
+                    ticker_text = Text.assemble(
+                        (tickers[0], get_style("ticker")),
+                        (" / ", get_style("metadata")),
+                        (tickers[1], get_style("ticker"))
+                    )
+                else:
+                    ticker_text = Text.assemble(
+                        (tickers[0], get_style("ticker")),
+                        (" / ", get_style("metadata")),
+                        (tickers[1], get_style("ticker")),
+                        (f" +{len(tickers) - 2}", get_style("metadata"))
+                    )
+                header = Text.assemble(
+                    (self.display_name, get_style("company_name")),
+                    "  ",
+                    ticker_text
+                )
             else:
-                row_parts.extend([Text("Type", style="grey60"),
-                                  Text(self.entity_type.title(), style="bold yellow"),
-                                  Text(self._get_operating_type_emoticon(self.entity_type), style="bold yellow")])
-        main_info.add_row(*row_parts)
+                header = Text(self.display_name, style=get_style("company_name"))
+        else:
+            header = Text(self.display_name, style=get_style("company_name"))
 
-        # Detailed Information Table
-        details = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
-        details.add_column("Category")
-        details.add_column("Industry")
-        details.add_column("Fiscal Year End")
+        # Build subtitle line: CIK + type/exchange/category
+        subtitle_parts = [cik_text(self.cik)]
 
-        details.add_row(
-            getattr(self, 'category', '-') or "-",
-            f"{getattr(self, 'sic', '')}: {getattr(self, 'sic_description', '')}" if hasattr(self,
-                                                                                             'sic') and self.sic else "-",
-            self._format_fiscal_year_date(getattr(self, 'fiscal_year_end', '')) if hasattr(self,
-                                                                                           'fiscal_year_end') and self.fiscal_year_end else "-"
+        if self.is_individual:
+            subtitle_parts.append(Text("Individual", style=get_style("ticker")))
+        elif hasattr(self, 'entity_type') and self.entity_type:
+            subtitle_parts.append(Text(self.entity_type.title(), style=get_style("value")))
+
+        # Add exchange if available (companies)
+        if self.is_company and self.exchanges and self.exchanges[0]:
+            subtitle_parts.append(Text(self.exchanges[0], style=get_style("value")))
+
+        # Add category if available (companies)
+        if self.is_company:
+            category = getattr(self, 'category', None)
+            if category:
+                if 'Emerging growth' in category:
+                    category = 'Emerging Growth'
+                elif 'Large accelerated' in category:
+                    category = 'Large Accelerated Filer'
+                elif 'accelerated' in category.lower():
+                    category = 'Accelerated Filer'
+                elif 'Non-accelerated' in category:
+                    category = 'Non-accelerated Filer'
+                subtitle_parts.append(Text(category, style=get_style("metadata")))
+
+        subtitle = Text(f" {SYMBOLS['bullet']} ").join(subtitle_parts)
+
+        # Build content sections
+        content_lines = []
+
+        if self.is_company:
+            # Key-value details table for companies
+            details_table = Table(box=None, show_header=False, padding=(0, 2), expand=False)
+            details_table.add_column("Label", style=get_style("label"), width=14)
+            details_table.add_column("Value", style=get_style("value_highlight"))
+
+            # Industry
+            if hasattr(self, 'sic') and self.sic:
+                sic_desc = getattr(self, 'sic_description', '') or ''
+                details_table.add_row("Industry", f"{self.sic}: {sic_desc}")
+
+            # Fiscal Year End
+            if hasattr(self, 'fiscal_year_end') and self.fiscal_year_end:
+                fy_end = self._format_fiscal_year_date(self.fiscal_year_end)
+                details_table.add_row("Fiscal Year", fy_end)
+
+            # State of Incorporation
+            if hasattr(self, 'state_of_incorporation') and self.state_of_incorporation:
+                from edgar.reference._codes import get_place_name
+                code = self.state_of_incorporation
+                state_name = get_place_name(code)
+                if not state_name:
+                    state_name = code
+                details_table.add_row("Incorporated", state_name)
+
+            # Phone
+            if hasattr(self, 'phone') and self.phone:
+                details_table.add_row("Phone", self.phone)
+
+            # Website
+            if hasattr(self, 'website') and self.website:
+                details_table.add_row("Website", self.website)
+
+            # Address (single line, business address preferred)
+            address = None
+            if hasattr(self, 'business_address') and not self.business_address.empty:
+                address = self.business_address
+            elif hasattr(self, 'mailing_address') and not self.mailing_address.empty:
+                address = self.mailing_address
+
+            if address:
+                addr_parts = []
+                if address.street1:
+                    addr_parts.append(address.street1)
+                if address.street2:
+                    addr_parts.append(address.street2)
+                city_state = []
+                if address.city:
+                    city_state.append(address.city)
+                if address.state_or_country:
+                    city_state.append(address.state_or_country)
+                if city_state:
+                    addr_parts.append(", ".join(city_state))
+                if address.zipcode and addr_parts:
+                    addr_parts[-1] = addr_parts[-1] + " " + address.zipcode
+
+                if addr_parts:
+                    details_table.add_row("Address", ", ".join(addr_parts[:2]) if len(addr_parts) > 2 else ", ".join(addr_parts))
+
+            content_lines.append(details_table)
+
+            # Former Names (only recent, max 3 — same treatment as Company)
+            if hasattr(self, 'former_names') and self.former_names:
+                from datetime import date, timedelta
+                most_recent = self.former_names[0]
+                two_years_ago = date.today() - timedelta(days=730)
+                most_recent_date_str = most_recent.get('to')
+                most_recent_date = date.fromisoformat(most_recent_date_str) if most_recent_date_str else None
+                if most_recent_date and most_recent_date >= two_years_ago:
+                    content_lines.append(Text(""))
+                    content_lines.append(Text("Former Names", style=get_style("section_header")))
+                    for former_name in self.former_names[:3]:
+                        from_date = datefmt(former_name['from'], '%b %Y')
+                        to_date = datefmt(former_name['to'], '%b %Y')
+                        content_lines.append(Text.assemble(
+                            ("  ", ""),
+                            (former_name['name'], "italic"),
+                            (" (", get_style("metadata")),
+                            (f"{from_date} {SYMBOLS['arrow_right']} {to_date}", get_style("metadata")),
+                            (")", get_style("metadata"))
+                        ))
+                    if len(self.former_names) > 3:
+                        remaining = len(self.former_names) - 3
+                        content_lines.append(Text(f"  {SYMBOLS['ellipsis']} and {remaining} more", style=get_style("metadata")))
+
+        content = Group(
+            header,
+            subtitle,
+            Text(""),
+            *content_lines
         )
 
-        # Combine main_info and details in a single panel
-        if self.is_company:
-            basic_info_renderables = [main_info, details]
-        else:
-            basic_info_renderables = [main_info]
-        basic_info_panel = Panel(
-            Group(*basic_info_renderables),
-            title="📋 Entity",
-            border_style="grey50"
-        )
-
-        # Trading Information
-        if self.tickers and self.exchanges:
-            trading_info = Table(box=box.SIMPLE, show_header=True, padding=(0, 1))
-            trading_info.add_column("Exchange")
-            trading_info.add_column("Symbol", style="bold yellow")
-
-            for exchange, ticker in zip_longest(self.exchanges, self.tickers, fillvalue="-"):
-                trading_info.add_row(exchange, ticker)
-
-            trading_panel = Panel(
-                trading_info,
-                title="📈 Exchanges",
-                border_style="grey50"
-            )
-        else:
-            trading_panel = Panel(
-                Text("No trading information available", style="grey58"),
-                title="📈 Trading Information",
-                border_style="grey50"
-            )
-
-        # Contact Information
-        contact_info = Table(box=box.SIMPLE, show_header=False, padding=(0, 1))
-        contact_info.add_column("Label", style="bold grey70")
-        contact_info.add_column("Value")
-
-        has_contact_info = any([
-            hasattr(self, 'phone') and self.phone,
-            hasattr(self, 'website') and self.website,
-            hasattr(self, 'investor_website') and self.investor_website
-        ])
-
-        if hasattr(self, 'website') and self.website:
-            contact_info.add_row("Website", self.website)
-        if hasattr(self, 'investor_website') and self.investor_website:
-            contact_info.add_row("Investor Relations", self.investor_website)
-        if hasattr(self, 'phone') and self.phone:
-            contact_info.add_row("Phone", self.phone)
-
-        # Three-column layout for addresses and contact info
-        contact_renderables = []
-        if hasattr(self, 'business_address') and not self.business_address.empty:
-            contact_renderables.append(Panel(
-                Text(str(self.business_address)),
-                title="🏢 Business Address",
-                border_style="grey50"
-            ))
-        if hasattr(self, 'mailing_address') and not self.mailing_address.empty:
-            contact_renderables.append(Panel(
-                Text(str(self.mailing_address)),
-                title="📫 Mailing Address",
-                border_style="grey50"
-            ))
-        if has_contact_info:
-            contact_renderables.append(Panel(
-                contact_info,
-                title="📞 Contact Information",
-                border_style="grey50"
-            ))
-
-        # Former Names Table (if any exist)
-        former_names_panel = None
-        if hasattr(self, 'former_names') and self.former_names:
-            former_names_table = Table(box=box.SIMPLE, show_header=False, padding=(0, 1))
-            former_names_table.add_column("Previous Company Names")
-            former_names_table.add_column("")  # Empty column for better spacing
-
-            for former_name in self.former_names:
-                from_date = datefmt(former_name['from'], '%B %Y')
-                to_date = datefmt(former_name['to'], '%B %Y')
-                former_names_table.add_row(Text(former_name['name'], style="italic"), f"{from_date} to {to_date}")
-
-            former_names_panel = Panel(
-                former_names_table,
-                title="📜 Former Names",
-                border_style="grey50"
-            )
-
-        # Combine all sections using Group
-        if self.is_company:
-            content_renderables = [Padding("", (1, 0, 0, 0)), basic_info_panel, trading_panel]
-            if len(contact_renderables):
-                contact_and_addresses = Columns(contact_renderables, equal=True, expand=True)
-                content_renderables.append(contact_and_addresses)
-            if former_names_panel:
-                content_renderables.append(former_names_panel)
-        else:
-            content_renderables = [Padding("", (1, 0, 0, 0)), basic_info_panel]
-            if len(contact_renderables):
-                contact_and_addresses = Columns(contact_renderables, equal=True, expand=True)
-                content_renderables.append(contact_and_addresses)
-
-        content = Group(*content_renderables)
-
-        # Create the main panel
         return Panel(
             content,
-            title=entity_title,
-            subtitle="SEC Entity Data",
-            border_style="grey50"
+            border_style=get_style("border"),
+            box=box.ROUNDED,
+            padding=(0, 1),
+            width=85,
+            subtitle=Text("SEC Entity Data", style=get_style("metadata")),
+            subtitle_align="right"
         )
 
     @property
@@ -844,9 +854,6 @@ def create_default_entity_data(cik: int) -> 'EntityData':
         zipcode="",
         state_or_country_desc=""
     )
-
-    # Import using lazy import cache
-    empty_company_filings = lazy_import('edgar.entity.filings.empty_company_filings')
 
     # Use the CIK as the name since we don't know the real name
     name = f"Entity {cik}"

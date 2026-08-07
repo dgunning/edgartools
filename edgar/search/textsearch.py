@@ -4,8 +4,8 @@ from typing import Callable, List, Tuple, Optional
 import pandas as pd
 from rich import box
 from rich.console import Group
-from rich.markdown import Markdown
 from rich.panel import Panel
+from rich.text import Text
 
 from edgar._markdown import convert_table
 from edgar.richtools import repr_rich
@@ -151,11 +151,14 @@ class SearchResults:
     def __init__(self,
                  query: str,
                  sections: List[DocSection],
-                 tables: bool = True
+                 tables: bool = True,
+                 regex: bool = False
                  ):
         self.query: str = query
         self.sections: List[DocSection] = sections
         self._show_tables = tables
+        self._regex = regex
+        self._highlight_pattern = self._build_highlight_pattern()
 
     def __len__(self):
         return len(self.sections)
@@ -177,19 +180,49 @@ class SearchResults:
             'tables': self._show_tables
         }
 
+    # Style applied to matched query terms in the rendered output.
+    HIGHLIGHT_STYLE = "bold red"
+
+    def _build_highlight_pattern(self) -> Optional["re.Pattern"]:
+        """Compile a regex that matches the query terms, for highlighting.
+
+        For ``regex`` searches the query is itself the pattern. For the default
+        BM25 search we highlight each meaningful query word (stopwords removed)
+        as a case-insensitive substring, so "repurchase" also lights up
+        "repurchases".
+        """
+        if self._regex:
+            try:
+                return re.compile(self.query, re.IGNORECASE)
+            except re.error:
+                return None
+        words = [w for w in re.split(r"\s+", self.query.strip()) if w]
+        words = [w for w in words if w.lower() not in STOPWORDS]
+        if not words:
+            return None
+        pattern = "|".join(re.escape(word) for word in words)
+        return re.compile(pattern, re.IGNORECASE)
+
+    def _highlight(self, text: str) -> "Text":
+        """Wrap text in a rich Text with matched query terms styled."""
+        rich_text = Text(text)
+        if self._highlight_pattern is not None:
+            rich_text.highlight_regex(self._highlight_pattern, style=self.HIGHLIGHT_STYLE)
+        return rich_text
+
     def __rich__(self):
-        _md = ""
         renderables = []
         title = f"Searching for '{self.query}'"
         subtitle = f"{len(self)} result(s)" if not self.empty else "No results"
         sorted_sections = sorted(self.sections, key=lambda s: s.score, reverse=True)
-        for i, doc_section in enumerate(sorted_sections):
+        for doc_section in sorted_sections:
             if doc_section.doc.startswith("|  |") and self._show_tables:
-                table = convert_table(doc_section.doc)
-                section = table
+                section = convert_table(doc_section.doc, cell_highlighter=self._highlight)
             else:
-                section = Markdown(doc_section.doc + "\n\n---")
-            renderables.append(Panel(section, box=box.ROUNDED, title=f"{i}"))
+                section = self._highlight(doc_section.doc)
+            # Title is the section index in the source corpus, not the display rank.
+            # Otherwise BM25 (sorts by score) and regex (no score) disagree on what "0" means.
+            renderables.append(Panel(section, box=box.ROUNDED, title=f"{doc_section.loc}"))
         return Panel(
             Group(*renderables), title=title, subtitle=subtitle, box=box.SIMPLE
         )
@@ -262,5 +295,6 @@ class RegexSearch:
             sections=[DocSection(loc=loc, doc=doc)
                       for loc, doc in enumerate(self.document_objs)
                       if re.search(query, doc, flags=re.IGNORECASE)],
-            tables=tables
+            tables=tables,
+            regex=True
         )

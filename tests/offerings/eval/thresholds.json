@@ -1,0 +1,9 @@
+{
+  "_comment": "Ratchet floors/ceilings for the offerings eval. Coverage may only go up; bad_rate may only go down. Update deliberately when an improvement lands (record the new baseline in the commit). Scope: ratcheted over non-frontier entries only; frontier (known-gap) entries are excluded from the denominator (see run_eval.summarize).",
+  "_baseline_recorded": "2026-06-20 (post fu3x/2w5y/2h4c/zxnj; lead_bookrunner raised 0.15->0.65 after 424B2 cover-agent extraction lifted coverage to 71%; fee_capacity raised 0.60->0.72 after amendment fee-source fallback lifted coverage to 78%; lead_bookrunner raised 0.65->0.88 after inline agency/ATM agent extraction lifted coverage to 93%; coverage redefined to (ok+deferred)/n; fee_capacity raised 0.72->0.90 after the 9q82 pre-2022 inline 'Calculation of Registration Fee' parser took fee_capacity to 100% over a corpus that now includes 8 pre-2022 anchors)",
+  "facets": {
+    "fee_capacity":    {"coverage_floor": 0.90, "bad_rate_ceiling": 0.02},
+    "lead_bookrunner": {"coverage_floor": 0.88, "bad_rate_ceiling": 0.02},
+    "shelf_status":    {"coverage_floor": 0.90, "bad_rate_ceiling": 0.02}
+  }
+}

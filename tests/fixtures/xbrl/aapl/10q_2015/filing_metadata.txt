@@ -1,6 +1,0 @@
-Company: APPLE INC
-CIK: 320193
-Form: 10-Q
-Filing Date: 2015-07-22
-Accession No: 0001193125-15-259935
-URL: https://www.sec.gov/Archives/edgar/data/320193/0001193125-15-259935-index.html

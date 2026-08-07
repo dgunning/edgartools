@@ -25,3 +25,57 @@ ratelimiter.sqlite*
 .pyscn/
 # Training output (generated, not tracked)
 training/output/
+# Private working material. These rules lived ONLY in .git/info/exclude, which
+# is per-clone and never shared, so a fresh clone tracked all of it with no
+# signal. This is a public repo and the working tree routinely carries 200+
+# untracked files, so a single `git add -A` was the whole distance between these
+# and GitHub. Moved here so the protection travels with the repo.
+#
+# Ignore rules never affect already-tracked files, so nothing currently tracked
+# changes. To commit something under these paths deliberately, `git add -f`.
+
+# Private design/planning notes. The public counterpart is engineering/, which
+# is tracked — anything a contributor should be able to read lives there, not
+# here. docs/ is user documentation only and is built into the docs site, so
+# nothing internal belongs under it.
+docs-internal/
+
+# Local knowledge wiki, maintained by an unattended agent that reads private
+# notes. Publishing it risks leaking them.
+wiki/
+
+# Correspondence drafts kept at the repo root (letters to external reporters and
+# researchers, often unsent).
+/reply-to-*.md
+
+# Local build, test, and session artifacts. Ignore rules never affect
+# already-tracked files (e.g. the tracked .claude/ agents and commands stay
+# tracked).
+.sesskey
+output/
+test_output/
+/training/
+tests/manual/
+edgar/**/.debug/
+ai_docs/
+agent_eval_results/
+.claude/settings.local.json
+.claude/
+.beads/issues.jsonl
+**/TEMP_*.md
+**/WIP_*.md
+**/LOCAL_*.md
+**/my_analysis_*.md
+**/scratch_*.md
+# Test fixtures at the repo root. Keep the leading slash: hatchling filters the
+# build through .gitignore, so a bare "data/" also matches edgar/reference/data/
+# and edgar/entity/data/ and drops them from the wheel — even though
+# pyproject.toml [tool.hatch.build] includes them explicitly. Those files are
+# needed at import time, so the result is a wheel that cannot `import edgar`.
+/data/
+
+# Widened text-boundary measurement corpus: filings downloaded by
+# scripts/text_boundary/build_wide_corpus.py. Deliberately NOT committed —
+# tests/fixtures/html already carries 278MB, and this corpus rebuilds exactly from the
+# accession numbers pinned in scripts/text_boundary/wide_corpus_manifest.json.
+/tests/fixtures/text_boundary_corpus/

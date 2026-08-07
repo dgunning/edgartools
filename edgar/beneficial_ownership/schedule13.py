@@ -100,6 +100,68 @@ def extract_amendment_number(form_name: str) -> Optional[int]:
     return None
 
 
+def _partial_from_header(filing: 'Filing') -> tuple:
+    """
+    Build ``(issuer_info, reporting_persons)`` from the SGML header.
+
+    Used for Schedule 13D/G filings that predate the SEC structured-XML mandate
+    (effective 2024-12-18) and therefore have no machine-readable XML. Only the
+    identities are recoverable from the header — the subject company (issuer) and
+    the filer(s)/reporting person(s). Beneficial-ownership numerics
+    (shares, percentage, voting/dispositive power) are NOT in the header and are
+    left as ``0`` / empty; callers must gate on ``has_structured_data``.
+
+    Returns:
+        Tuple of (IssuerInfo, List[ReportingPerson]). Falls back to filing-level
+        company info when the header has no explicit subject company.
+    """
+    issuer_info = IssuerInfo(cik='', name='', cusip='')
+    reporting_persons: List[ReportingPerson] = []
+
+    header = None
+    try:
+        header = filing.header
+    except Exception:
+        header = None
+
+    # Subject company -> issuer
+    if header is not None:
+        subjects = getattr(header, 'subject_companies', None) or []
+        for subject in subjects:
+            ci = getattr(subject, 'company_information', None)
+            if ci and ci.name:
+                issuer_info = IssuerInfo(cik=ci.cik or '', name=ci.name, cusip='')
+                break
+
+    # Fall back to the filing-level subject (the issuer is the entity the 13D/G is
+    # filed against, which the index records as the filing's company).
+    if not issuer_info.name:
+        try:
+            issuer_info = IssuerInfo(cik=str(filing.cik or ''), name=filing.company or '', cusip='')
+        except Exception:
+            pass
+
+    # Filer(s) -> reporting person(s). Identity only; numerics unknown from header.
+    if header is not None:
+        for flr in (getattr(header, 'filers', None) or []):
+            ci = getattr(flr, 'company_information', None)
+            if ci and ci.name:
+                reporting_persons.append(ReportingPerson(
+                    cik=ci.cik or '',
+                    name=ci.name,
+                    citizenship='',
+                    sole_voting_power=0,
+                    shared_voting_power=0,
+                    sole_dispositive_power=0,
+                    shared_dispositive_power=0,
+                    aggregate_amount=0,
+                    percent_of_class=0.0,
+                    type_of_reporting_person='',
+                ))
+
+    return issuer_info, reporting_persons
+
+
 class Schedule13D:
     """
     Schedule 13D - Active Beneficial Ownership Report.
@@ -125,7 +187,8 @@ class Schedule13D:
         signatures: List[Signature],
         date_of_event: str,
         previously_filed: bool = False,
-        amendment_number: Optional[int] = None
+        amendment_number: Optional[int] = None,
+        has_structured_data: bool = True
     ):
         self._filing = filing
         self.issuer_info = issuer_info
@@ -136,6 +199,9 @@ class Schedule13D:
         self.date_of_event = date_of_event
         self.previously_filed = previously_filed
         self.amendment_number = amendment_number
+        # False for pre-2025 HTML-only filings parsed from the SGML header alone,
+        # where beneficial-ownership numerics are unavailable. See _partial_from_header.
+        self.has_structured_data = has_structured_data
 
     @staticmethod
     def parse_xml(xml: str) -> dict:
@@ -188,7 +254,13 @@ class Schedule13D:
                     zipcode=child_text(address_el, 'zipCode')
                 )
 
-            cusip = child_text(issuer_el, 'issuerCUSIP') or ''
+            # Check for the legacy flat tag first
+            cusip = child_text(issuer_el, 'issuerCUSIP')
+            # If missing, check for the new nested SEC schema
+            if not cusip:
+                cusip = child_text(issuer_el, 'issuerCusipNumber')
+            cusip = cusip or ''
+
             result['issuer_info'] = IssuerInfo(
                 cik=child_text(issuer_el, 'issuerCIK') or '',
                 name=child_text(issuer_el, 'issuerName') or '',
@@ -340,7 +412,10 @@ class Schedule13D:
             filing: Filing object with form 'SCHEDULE 13D', 'SCHEDULE 13D/A', 'SC 13D', or 'SC 13D/A'
 
         Returns:
-            Schedule13D instance or None if no XML found
+            Schedule13D instance. Fully populated when the filing has structured XML
+            (SEC mandate, 2024-12-18 onward); a partial instance built from the SGML
+            header (filer + issuer identities only, ``has_structured_data == False``)
+            for older HTML-only filings.
 
         Raises:
             AssertionError: If filing is not a Schedule 13D form
@@ -348,13 +423,36 @@ class Schedule13D:
         assert filing.form in ['SCHEDULE 13D', 'SCHEDULE 13D/A', 'SC 13D', 'SC 13D/A'], \
             f"Expected Schedule 13D form, got {filing.form}"
 
+        amendment_number = extract_amendment_number(filing.form)
         xml = filing.xml()
         if xml:
             parsed = cls.parse_xml(xml)
-            # Extract amendment number from filing form name
-            amendment_number = extract_amendment_number(filing.form)
             return cls(filing=filing, amendment_number=amendment_number, **parsed)
-        return None
+        return cls.from_header(filing)
+
+    @classmethod
+    def from_header(cls, filing: 'Filing') -> 'Schedule13D':
+        """
+        Build a partial Schedule13D from the SGML header (no XML available).
+
+        For Schedule 13D filings that predate the structured-XML mandate, only the
+        filer and issuer identities are machine-readable. The returned instance has
+        ``has_structured_data == False``; beneficial-ownership numerics are unavailable
+        (``total_shares`` / ``total_percent`` return ``None``). Use ``filing.text()``
+        or ``filing.markdown()`` for the full document text.
+        """
+        issuer_info, reporting_persons = _partial_from_header(filing)
+        return cls(
+            filing=filing,
+            issuer_info=issuer_info,
+            security_info=SecurityInfo(title='', cusip=''),
+            reporting_persons=reporting_persons,
+            items=Schedule13DItems(),
+            signatures=[],
+            date_of_event='',
+            amendment_number=extract_amendment_number(filing.form),
+            has_structured_data=False,
+        )
 
     @property
     def is_amendment(self) -> bool:
@@ -367,7 +465,12 @@ class Schedule13D:
         return self._filing.filing_date
 
     @property
-    def total_shares(self) -> int:
+    def event_date(self) -> str:
+        """Alias for ``date_of_event`` for API consistency with ``Schedule13G``."""
+        return self.date_of_event
+
+    @property
+    def total_shares(self) -> Optional[int]:
         """
         Total beneficial ownership across all reporting persons.
 
@@ -376,7 +479,13 @@ class Schedule13D:
         filers file separate forms. The correct aggregate is always max().
 
         Excludes shares flagged with is_aggregate_exclude_shares == True.
+
+        Returns ``None`` when ``has_structured_data`` is False (pre-2025 HTML-only
+        filing) — the share count is genuinely unavailable, not zero.
         """
+        if not self.has_structured_data:
+            return None
+
         if not self.reporting_persons:
             return 0
 
@@ -389,7 +498,7 @@ class Schedule13D:
         return max(p.aggregate_amount for p in included_persons)
 
     @property
-    def total_percent(self) -> float:
+    def total_percent(self) -> Optional[float]:
         """
         Total ownership percentage across all reporting persons.
 
@@ -398,7 +507,13 @@ class Schedule13D:
         filers file separate forms. The correct aggregate is always max().
 
         Excludes shares flagged with is_aggregate_exclude_shares == True.
+
+        Returns ``None`` when ``has_structured_data`` is False (pre-2025 HTML-only
+        filing) — the percentage is genuinely unavailable, not zero.
         """
+        if not self.has_structured_data:
+            return None
+
         if not self.reporting_persons:
             return 0.0
 
@@ -428,8 +543,12 @@ class Schedule13D:
         lines.append(f"Filed: {self.filing_date}")
         if self.date_of_event:
             lines.append(f"Event Date: {self.date_of_event}")
-        lines.append(f"Security: {self.security_info.title}")
-        lines.append(f"Ownership: {self.total_percent:.1f}% ({self.total_shares:,} shares)")
+        if self.security_info.title:
+            lines.append(f"Security: {self.security_info.title}")
+        if self.has_structured_data:
+            lines.append(f"Ownership: {self.total_percent:.1f}% ({self.total_shares:,} shares)")
+        else:
+            lines.append("Ownership: unavailable (pre-2025 HTML filing)")
 
         # Filer(s)
         if self.reporting_persons:
@@ -438,6 +557,13 @@ class Schedule13D:
             if len(self.reporting_persons) > 3:
                 filer_str += f" (+{len(self.reporting_persons) - 3} more)"
             lines.append(f"Filer: {filer_str}")
+
+        # Loud notice when only header identities are available.
+        if not self.has_structured_data:
+            lines.append("")
+            lines.append("NOTE: This filing predates the SEC structured-XML mandate "
+                         "(2024-12-18); only filer/issuer identities are available. "
+                         "Use filing.text() or filing.markdown() for the full document.")
 
         if detail == 'minimal':
             return "\n".join(lines)
@@ -453,7 +579,12 @@ class Schedule13D:
             lines.append("")
             lines.append("REPORTING PERSONS:")
             for p in self.reporting_persons[:5]:
-                p_line = f"  {p.name}: {p.percent_of_class:.1f}% ({p.aggregate_amount:,} shares)"
+                if self.has_structured_data:
+                    p_line = f"  {p.name}: {p.percent_of_class:.1f}% ({p.aggregate_amount:,} shares)"
+                else:
+                    p_line = f"  {p.name}"
+                    if p.cik:
+                        p_line += f" (CIK {p.cik})"
                 if p.type_of_reporting_person:
                     p_line += f" [{p.type_of_reporting_person}]"
                 lines.append(p_line)
@@ -486,7 +617,7 @@ class Schedule13D:
             lines.append(f"Source of Funds: {self.items.item3_source_of_funds[:150]}")
 
         # Voting/dispositive power detail for first person
-        if self.reporting_persons:
+        if self.reporting_persons and self.has_structured_data:
             p = self.reporting_persons[0]
             lines.append("")
             lines.append(f"VOTING/DISPOSITIVE POWER ({p.name}):")
@@ -532,7 +663,8 @@ class Schedule13G:
         signatures: List[Signature],
         event_date: str,
         rule_designation: Optional[str] = None,
-        amendment_number: Optional[int] = None
+        amendment_number: Optional[int] = None,
+        has_structured_data: bool = True
     ):
         self._filing = filing
         self.issuer_info = issuer_info
@@ -543,6 +675,9 @@ class Schedule13G:
         self.event_date = event_date
         self.rule_designation = rule_designation
         self.amendment_number = amendment_number
+        # False for pre-2025 HTML-only filings parsed from the SGML header alone,
+        # where beneficial-ownership numerics are unavailable. See _partial_from_header.
+        self.has_structured_data = has_structured_data
 
     @staticmethod
     def parse_xml(xml: str) -> dict:
@@ -601,7 +736,13 @@ class Schedule13G:
                     zipcode=child_text(address_el, 'zipCode')
                 )
 
-            cusip = child_text(issuer_el, 'issuerCusip') or ''
+            # Check for the legacy flat tag first
+            cusip = child_text(issuer_el, 'issuerCusip')
+            # If missing, check for the new nested SEC schema
+            if not cusip:
+                cusip = child_text(issuer_el, 'issuerCusipNumber')
+            cusip = cusip or ''
+
             result['issuer_info'] = IssuerInfo(
                 cik=child_text(issuer_el, 'issuerCik') or '',
                 name=child_text(issuer_el, 'issuerName') or '',
@@ -773,7 +914,10 @@ class Schedule13G:
             filing: Filing object with form 'SCHEDULE 13G', 'SCHEDULE 13G/A', 'SC 13G', or 'SC 13G/A'
 
         Returns:
-            Schedule13G instance or None if no XML found
+            Schedule13G instance. Fully populated when the filing has structured XML
+            (SEC mandate, 2024-12-18 onward); a partial instance built from the SGML
+            header (filer + issuer identities only, ``has_structured_data == False``)
+            for older HTML-only filings.
 
         Raises:
             AssertionError: If filing is not a Schedule 13G form
@@ -781,13 +925,36 @@ class Schedule13G:
         assert filing.form in ['SCHEDULE 13G', 'SCHEDULE 13G/A', 'SC 13G', 'SC 13G/A'], \
             f"Expected Schedule 13G form, got {filing.form}"
 
+        amendment_number = extract_amendment_number(filing.form)
         xml = filing.xml()
         if xml:
             parsed = cls.parse_xml(xml)
-            # Extract amendment number from filing form name
-            amendment_number = extract_amendment_number(filing.form)
             return cls(filing=filing, amendment_number=amendment_number, **parsed)
-        return None
+        return cls.from_header(filing)
+
+    @classmethod
+    def from_header(cls, filing: 'Filing') -> 'Schedule13G':
+        """
+        Build a partial Schedule13G from the SGML header (no XML available).
+
+        For Schedule 13G filings that predate the structured-XML mandate, only the
+        filer and issuer identities are machine-readable. The returned instance has
+        ``has_structured_data == False``; beneficial-ownership numerics are unavailable
+        (``total_shares`` / ``total_percent`` return ``None``). Use ``filing.text()``
+        or ``filing.markdown()`` for the full document text.
+        """
+        issuer_info, reporting_persons = _partial_from_header(filing)
+        return cls(
+            filing=filing,
+            issuer_info=issuer_info,
+            security_info=SecurityInfo(title='', cusip=''),
+            reporting_persons=reporting_persons,
+            items=Schedule13GItems(),
+            signatures=[],
+            event_date='',
+            amendment_number=extract_amendment_number(filing.form),
+            has_structured_data=False,
+        )
 
     @property
     def is_amendment(self) -> bool:
@@ -800,7 +967,12 @@ class Schedule13G:
         return self._filing.filing_date
 
     @property
-    def total_shares(self) -> int:
+    def date_of_event(self) -> str:
+        """Alias for ``event_date`` for API consistency with ``Schedule13D``."""
+        return self.event_date
+
+    @property
+    def total_shares(self) -> Optional[int]:
         """
         Total beneficial ownership across all reporting persons.
 
@@ -809,7 +981,13 @@ class Schedule13G:
         filers file separate forms. The correct aggregate is always max().
 
         Excludes shares flagged with is_aggregate_exclude_shares == True.
+
+        Returns ``None`` when ``has_structured_data`` is False (pre-2025 HTML-only
+        filing) — the share count is genuinely unavailable, not zero.
         """
+        if not self.has_structured_data:
+            return None
+
         if not self.reporting_persons:
             return 0
 
@@ -822,7 +1000,7 @@ class Schedule13G:
         return max(p.aggregate_amount for p in included_persons)
 
     @property
-    def total_percent(self) -> float:
+    def total_percent(self) -> Optional[float]:
         """
         Total ownership percentage across all reporting persons.
 
@@ -831,7 +1009,13 @@ class Schedule13G:
         filers file separate forms. The correct aggregate is always max().
 
         Excludes shares flagged with is_aggregate_exclude_shares == True.
+
+        Returns ``None`` when ``has_structured_data`` is False (pre-2025 HTML-only
+        filing) — the percentage is genuinely unavailable, not zero.
         """
+        if not self.has_structured_data:
+            return None
+
         if not self.reporting_persons:
             return 0.0
 
@@ -866,8 +1050,12 @@ class Schedule13G:
         lines.append(f"Filed: {self.filing_date}")
         if self.event_date:
             lines.append(f"Event Date: {self.event_date}")
-        lines.append(f"Security: {self.security_info.title}")
-        lines.append(f"Ownership: {self.total_percent:.1f}% ({self.total_shares:,} shares)")
+        if self.security_info.title:
+            lines.append(f"Security: {self.security_info.title}")
+        if self.has_structured_data:
+            lines.append(f"Ownership: {self.total_percent:.1f}% ({self.total_shares:,} shares)")
+        else:
+            lines.append("Ownership: unavailable (pre-2025 HTML filing)")
 
         if self.reporting_persons:
             names = [p.name for p in self.reporting_persons[:3]]
@@ -875,6 +1063,13 @@ class Schedule13G:
             if len(self.reporting_persons) > 3:
                 filer_str += f" (+{len(self.reporting_persons) - 3} more)"
             lines.append(f"Filer: {filer_str}")
+
+        # Loud notice when only header identities are available.
+        if not self.has_structured_data:
+            lines.append("")
+            lines.append("NOTE: This filing predates the SEC structured-XML mandate "
+                         "(2024-12-18); only filer/issuer identities are available. "
+                         "Use filing.text() or filing.markdown() for the full document.")
 
         if detail == 'minimal':
             return "\n".join(lines)
@@ -892,7 +1087,12 @@ class Schedule13G:
             lines.append("")
             lines.append("REPORTING PERSONS:")
             for p in self.reporting_persons[:5]:
-                p_line = f"  {p.name}: {p.percent_of_class:.1f}% ({p.aggregate_amount:,} shares)"
+                if self.has_structured_data:
+                    p_line = f"  {p.name}: {p.percent_of_class:.1f}% ({p.aggregate_amount:,} shares)"
+                else:
+                    p_line = f"  {p.name}"
+                    if p.cik:
+                        p_line += f" (CIK {p.cik})"
                 if p.type_of_reporting_person:
                     p_line += f" [{p.type_of_reporting_person}]"
                 lines.append(p_line)
@@ -913,7 +1113,7 @@ class Schedule13G:
             return "\n".join(lines)
 
         # === FULL ===
-        if self.reporting_persons:
+        if self.reporting_persons and self.has_structured_data:
             p = self.reporting_persons[0]
             lines.append("")
             lines.append(f"VOTING/DISPOSITIVE POWER ({p.name}):")
