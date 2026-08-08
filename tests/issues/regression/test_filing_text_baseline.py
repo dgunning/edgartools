@@ -94,18 +94,46 @@ def sha256(text):
 #     Both paths now produce identical output on all five filings, which is why a
 #     single hash still covers them.
 
+#
+# Re-captured a SEVENTH time, for the table data-row truncation fix
+# (edgartools-j8bs). A data row rendered only the first line of each cell, so
+# any cell whose text wrapped lost everything after line one; header rows never
+# did. Trailing per-line padding to the last column's width was dropped in the
+# same change.
+#
+# Every filing gets SMALLER while carrying MORE text -- padding out, content in:
+#
+#                       chars                non-whitespace
+#   Apple 10-K      269,924 -> 253,809     172,906 -> 173,747   (+841)
+#   10x Genomics    604,621 -> 595,520     453,711 -> 461,351   (+7,640)
+#   Exelon 8-K        2,619 ->   2,629       1,882 ->   2,012   (+130)
+#   BofA 424B2      108,462 ->  81,438      63,577 ->  66,035   (+2,458)
+#   Merck CORRESP     1,362 ->   1,362       1,131 ->   1,131   unchanged
+#
+# Merck is byte-identical and keeps its hash: a CORRESP with no wrapped table
+# cell has nothing to recover and nothing to unpad.
+#
+# The character-level diff reports ~1,825 non-whitespace characters "removed"
+# from 10x Genomics. They are not lost. The chunks it names begin mid-word
+# ("ith staggered three-year terms", "approva") because re-wrapping moves the
+# alignment; every phrase was probed in the new text and all are present. The
+# genuine removals are box-drawing rules (U+2500) whose count tracks line
+# structure -- 9,498 remain.
+#
+# Both paths still agree on all five, so one hash still covers them.
+
 BASELINE = {
     # Modern iXBRL 10-K
     "0000320193-23-000106": (
         dict(form="10-K", filing_date="2023-11-03", company="Apple Inc.",
              cik=320193, accession_no="0000320193-23-000106"),
-        "ff65df35e734f046041f768a17c6f3aa939779eaa75ab2939ad2ed33e7ca2c8f",
+        "a209021d285101eca93a0645914b4a633056af278fbe975813d7a40ac5734fdb",
     ),
     # Plain HTML 10-K
     "0001193125-20-052640": (
         dict(form="10-K", filing_date="2020-02-27", company="10x Genomics, Inc.",
              cik=1770787, accession_no="0001193125-20-052640"),
-        "1185fdd9547ad64d3e4b9becf320b9c6033f643df2930ff45d188a5255fd1e28",
+        "b077ddc8480a28b3ead2ac5039fa0059b1d5d13f66f83208b48ab443d04816f0",
     ),
     # CORRESP — the shape where the two paths already agreed before the fix
     "0000065873-05-000060": (
@@ -117,13 +145,13 @@ BASELINE = {
     "0000950137-05-004969": (
         dict(form="8-K", filing_date="2005-04-27", company="EXELON CORP",
              cik=1109357, accession_no="0000950137-05-004969"),
-        "2105709ed5c1e6379f2f13448caeafb50add837d46dee26ad6877344a9ead511",
+        "a57148944a33bf13bce04b692856c8ad5a61e50132bc648d480b089a5d7ecdda",
     ),
     # 424B2 structured note
     "0001481057-23-010389": (
         dict(form="424B2", filing_date="2023-12-13", company="BANK OF AMERICA CORP /DE/",
              cik=70858, accession_no="0001481057-23-010389"),
-        "b340e30f1a3901a4ec99cc002517df3c42791a91fa99c833c6eae96210e5f74f",
+        "32a49882a47542bf4e0d03af0dd389571a83c2d42452825b7cb138dedcb4b1c2",
     ),
 }
 

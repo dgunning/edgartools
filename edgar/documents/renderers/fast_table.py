@@ -522,12 +522,17 @@ class FastTableRenderer:
                 sep_line = self._create_separator_line(col_widths)
                 lines.append(sep_line)
 
-        # Data rows
+        # Data rows. Multi-line cells are expanded the same way header rows are:
+        # _format_row keeps only a cell's first line, which silently discards the
+        # rest. A headerless single-cell layout table -- how 1990s and 2000s
+        # filers wrap a whole document -- is then reduced to one line of itself.
+        # Autoliv's 2001 DEFR14A rendered 20,523 characters instead of 83,316,
+        # losing its "DEAR STOCKHOLDER" cover letter out of an 18,759-character
+        # cell. (edgartools-j8bs)
         for row in rows:
             # Only add rows with meaningful content
             if any(cell.strip() for cell in row):
-                row_line = self._format_row(row, col_widths, alignments)
-                lines.append(row_line)
+                lines.extend(self._format_multiline_row(row, col_widths, alignments))
 
         return '\n'.join(lines)
 
@@ -568,11 +573,15 @@ class FastTableRenderer:
             padded_cell = ' ' * self.style.padding + aligned_content + ' ' * self.style.padding
             cells.append(padded_cell)
 
-        # Join with borders
+        # Join with borders. Trailing run trimmed: padding the final column out
+        # to its width serves column alignment, and nothing follows it on the
+        # line, so those spaces are noise in text output. It matters more now
+        # that multi-line cells expand to one line each — a tall cell used to
+        # pay that cost once and now pays it per line.
         if border:
-            return border + border.join(cells) + border
+            return (border + border.join(cells) + border).rstrip()
         else:
-            return '  '.join(cells)
+            return '  '.join(cells).rstrip()
 
     def _format_multiline_row(self, row: List[str], col_widths: List[int],
                               alignments: List[Alignment]) -> List[str]:
