@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`Document.to_markdown()` dropped the exhibit index from 10-K filings.** Every exhibit row was classified as a header row — `_is_header_row` reads any date as evidence of a period column, and exhibit descriptions are full of them ("dated as of June 25, 2019") — leaving no data rows for the renderer to emit. On AbbVie's FY2024 10-K the index is back: 62 "incorporated by reference" rows, and the rendered document grows from 436,060 to 452,668 characters.
+
+- **Table cell text gained a space wherever inline markup split a value.** `_extract_text` inserted one between any two adjacent text fragments, so AbbVie's FY2024 10-K, which writes each exhibit number across two `<a>` tags, rendered `10.10` as `10.1 0` — present but unfindable. Separation now derives from block boundaries only, so `<div>Exhibit</div><div>Number</div>` still reads as two words.
+
 ## [5.46.0] - 2026-08-07
 
 ### Changed

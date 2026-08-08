@@ -64,9 +64,18 @@ pytestmark = pytest.mark.slow
 #
 # Entries keyed on an accession number come from the untracked era corpus and
 # are unmeasurable in CI; the ticker-keyed ones are tracked and always run.
+#
+# Banked 2026-08-07: ("8-K", "0001437749-16-028287") Item 2 closed as a side
+# effect of edgartools-2vzk. That filing puts its heading — "Item 2.02 Results of
+# Operations and Financial Condition." — inside a <table> cell (verified), so it
+# was read through the same _extract_text that was fabricating a space between
+# adjacent inline elements. The new parser now resolves item_202.
+#
+# A markdown-rendering fix closing a section-extraction gap is not a coincidence:
+# both harnesses read cell text through that one extractor. Worth remembering
+# when triaging the remaining dt1f gaps — some may be extraction, not detection.
 BASELINE_GAPS = {
     ("8-K", "0001104659-03-004925"): ["9"],
-    ("8-K", "0001437749-16-028287"): ["2"],
     ("10-K", "0000927356-01-000369"): ["7"],
     ("10-K", "0000950153-99-001234"): ["1", "10", "11", "12", "13", "14", "2",
                                        "3", "4", "5", "6", "7", "7A", "8", "9"],
