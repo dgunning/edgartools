@@ -378,6 +378,21 @@ retry_delay = 4
 cumulative_timing = false
 retry_outcome = "rerun"
 
+# An xfail that passes is a failure, not a quiet success.
+#
+# Without this, xfail-pass and xfail-fail are BOTH green, so an xfail-marked
+# test has no outcome that can fail and stops being a test. Three in
+# test_issue_583_equity_labels.py sat that way for months reporting XPASS in
+# every CI run: they were marked "not yet implemented" and the feature had
+# shipped, which the file's own docstring recorded (edgartools-07lk.24
+# finding 2). Strict mode turns the next one of those into a failure the day
+# the behaviour changes, which is the only moment the information is useful.
+#
+# The four remaining xfails are genuinely still failing and stay xfail --
+# strict does not touch those. If you mark a test xfail, it must actually fail;
+# when it starts passing, delete the marker rather than widen this setting.
+xfail_strict = true
+
 # Pytest markers for test categorization
 markers = [
     "fast: Fast tests that run quickly (< 0.1s each)",
