@@ -598,13 +598,18 @@ for exhibit in filing.exhibits:
 ```python
 filing = company.get_filings(form="10-K").latest()
 
-# Export to markdown
-md = filing.markdown(include_page_breaks=True)
+# Export to markdown — tables, links and images all preserved
+md = filing.markdown()
 
 # Save for LLM processing
 with open("filing_for_analysis.md", "w") as f:
     f.write(md)
 ```
+
+!!! warning "`include_page_breaks` is deprecated"
+
+    It routes the document through the legacy renderer, which drops images.
+    Removed in 6.0.
 
 ## Error Handling
 

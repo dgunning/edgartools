@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **`Filing.markdown()` and `Attachment.markdown()` now render through `edgar.documents`.** They were the last public rendering methods still on the legacy `edgar.files` pipeline, which has no image node at all — `MarkdownRenderer.render` handles text blocks, tables, headings and page breaks, and drops everything else. Every `<img>` in every filing vanished silently. NVIDIA's FY2026 10-K now renders both of its images, including the Item 5 stock performance graph whose five-year return comparison exists only as a chart. Relative `src` values are resolved against the filing's SEC archive directory, so the markdown carries working absolute links rather than bare sibling file names. Output also differs where the two renderers disagree on tables; a parity ratchet pins the numeric content of both. (GH #886)
+
+### Deprecated
+
+- **`include_page_breaks` and `start_page_number` on `Filing.markdown()` and `Attachment.markdown()`.** Page-break rendering exists only in the legacy renderer, so passing `include_page_breaks=True` routes the whole document through it and forfeits images and the newer table rendering — the flag selects a renderer, not a feature. It still works and now emits a `DeprecationWarning`; both parameters go in 6.0 alongside `edgar.files`. There is no replacement: the `edgar.documents` builder treats page-break `<hr>`s and page-number containers as print chrome and discards them.
+
 ### Fixed
 
 - **`Document.to_markdown()` dropped the exhibit index from 10-K filings.** Every exhibit row was classified as a header row — `_is_header_row` reads any date as evidence of a period column, and exhibit descriptions are full of them ("dated as of June 25, 2019") — leaving no data rows for the renderer to emit. On AbbVie's FY2024 10-K the index is back: 62 "incorporated by reference" rows, and the rendered document grows from 436,060 to 452,668 characters.

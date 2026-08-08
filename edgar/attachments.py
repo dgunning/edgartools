@@ -6,6 +6,7 @@ import signal
 import socketserver
 import tempfile
 import time
+import warnings
 import webbrowser
 import zipfile
 
@@ -30,6 +31,7 @@ from rich.text import Text
 
 from edgar.config import SEC_BASE_URL
 from edgar.core import binary_extensions, has_html_content, text_extensions
+from edgar.files._deprecation import PAGE_BREAK_DEPRECATION
 from edgar.files.html_documents import get_clean_html
 from edgar.files.markdown import to_markdown
 from edgar.httpclient import async_http_client
@@ -440,9 +442,17 @@ class Attachment:
         """
         Convert the attachment to markdown format if it's HTML content.
 
+        Rendered by ``edgar.documents``, the same pipeline as ``Filing.markdown()``,
+        so images survive (GH #886) with their ``src`` resolved against this
+        attachment's URL.
+
         Args:
-            include_page_breaks: If True, include page break delimiters in the markdown
-            start_page_number: Starting page number for page break markers (default: 0)
+            include_page_breaks: If True, include ``{N}----`` page break
+                delimiters in the markdown. **Deprecated** — routes the document
+                through the legacy ``edgar.files`` renderer and forfeits images.
+                Removed in 6.0.
+            start_page_number: Starting page number for page break markers
+                (default: 0). Only meaningful with ``include_page_breaks=True``.
 
         Returns:
             None if the attachment is not HTML or cannot be converted.
@@ -458,12 +468,25 @@ class Attachment:
         if not has_html_content(content):
             return None
 
-        # Use the same approach as Filing.markdown() but with page break support
-        clean_html = get_clean_html(content)
-        if clean_html:
-            return to_markdown(clean_html, include_page_breaks=include_page_breaks, start_page_number=start_page_number)
+        if include_page_breaks:
+            warnings.warn(PAGE_BREAK_DEPRECATION.format(cls="Attachment"),
+                          DeprecationWarning, stacklevel=2)
+            clean_html = get_clean_html(content)
+            if clean_html:
+                return to_markdown(clean_html, include_page_breaks=True,
+                                   start_page_number=start_page_number)
+            return None
 
-        return None
+        from edgar.documents import HTMLParser, ParserConfig
+        from edgar.documents.exceptions import ParsingError
+        try:
+            document = HTMLParser(ParserConfig()).parse(content)
+        except ParsingError:
+            return None
+        # Base for resolving relative image src. self.url ends in the document
+        # file name, so urljoin() resolves siblings in the same archive folder.
+        document.metadata.url = self.url
+        return document.to_markdown() or None
 
     def __rich__(self):
         icon = get_file_icon(self.document_type, self.sequence_number, self.document)
@@ -845,7 +868,9 @@ class Attachments:
         Convert all HTML attachments to markdown format.
 
         Args:
-            include_page_breaks: If True, include page break delimiters in the markdown
+            include_page_breaks: If True, include page break delimiters in the
+                markdown. **Deprecated** — see :meth:`Attachment.markdown`.
+                Removed in 6.0.
             start_page_number: Starting page number for page break markers (default: 0)
 
         Returns:

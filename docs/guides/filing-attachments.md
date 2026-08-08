@@ -60,9 +60,17 @@ if attachment.is_html():
     print(markdown_content)
 ```
 
-The `markdown()` method returns `None` for non-HTML attachments, so you can safely call it on any attachment.
+The `markdown()` method returns `None` for non-HTML attachments, so you can safely call it on any attachment. Images are rendered as Markdown image links with absolute SEC archive URLs, resolved against the attachment's own URL.
 
 #### Page Break Delimiter Support
+
+!!! warning "Deprecated — removed in 6.0"
+
+    Page-break rendering exists only in the legacy renderer, so
+    `include_page_breaks=True` routes the whole document through it. That
+    renderer drops every image and formats tables differently from the default
+    path, which is why the flag is going away rather than being carried
+    forward. Prefer `attachment.markdown()`.
 
 The `markdown()` method supports optional page break delimiters to help you understand document structure:
 
