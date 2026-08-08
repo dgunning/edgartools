@@ -2,6 +2,7 @@ import itertools
 import json
 import pickle
 import re
+import warnings
 import webbrowser
 from contextlib import nullcontext
 from dataclasses import dataclass
@@ -54,6 +55,8 @@ from edgar.dates import InvalidDateException
 from edgar.display.formatting import accession_number_text, display_size
 from edgar.display.styles import print_info, print_warning
 from edgar.documents import HTMLParser, ParserConfig
+from edgar.documents.exceptions import ParsingError
+from edgar.files._deprecation import PAGE_BREAK_DEPRECATION as _PAGE_BREAK_DEPRECATION
 from edgar.files.html_documents import get_clean_html
 from edgar.files.htmltools import html_sections
 from edgar.files.markdown import to_markdown
@@ -1747,16 +1750,42 @@ class Filing:
         """
         Return the markdown version of this filing html
 
+        Rendered by ``edgar.documents``, so images survive into the markdown
+        (GH #886) and tables render through the same pipeline as ``text()``,
+        ``view()`` and the section extractors. Relative image ``src`` values are
+        resolved against the filing's SEC archive directory, so the markdown is
+        a self-contained document with working image links.
+
         Args:
-            include_page_breaks: If True, include page break delimiters in the markdown
-            start_page_number: Starting page number for page break markers (default: 0)
+            include_page_breaks: If True, include ``{N}----`` page break
+                delimiters in the markdown. **Deprecated.** Page breaks exist
+                only in the legacy ``edgar.files`` renderer, so passing True
+                routes the whole document through it and forfeits images and
+                the newer table rendering. Removed in 6.0.
+            start_page_number: Starting page number for page break markers
+                (default: 0). Only meaningful with ``include_page_breaks=True``.
         """
         html = self.html()
         if html:
-            clean_html = get_clean_html(html)
-            if clean_html:
-                markdown_result = to_markdown(clean_html, include_page_breaks=include_page_breaks,
-                                              start_page_number=start_page_number)
+            if include_page_breaks:
+                warnings.warn(_PAGE_BREAK_DEPRECATION.format(cls="Filing"),
+                              DeprecationWarning, stacklevel=2)
+                clean_html = get_clean_html(html)
+                if clean_html:
+                    markdown_result = to_markdown(clean_html, include_page_breaks=True,
+                                                  start_page_number=start_page_number)
+                    if markdown_result:
+                        return markdown_result
+            else:
+                try:
+                    document = HTMLParser(ParserConfig(form=self.form)).parse(html)
+                    # Base for resolving relative image src. Trailing slash matters:
+                    # urljoin() drops the last path segment without it. base_dir is a
+                    # pure string property, so this costs no request.
+                    document.metadata.url = f"{self.base_dir}/"
+                    markdown_result = document.to_markdown()
+                except ParsingError:
+                    markdown_result = None
                 if markdown_result:
                     return markdown_result
         text_content = self.text()

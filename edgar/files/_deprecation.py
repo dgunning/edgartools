@@ -15,6 +15,21 @@ notice is preserved where it matters.
 import inspect
 import warnings
 
+#: Emitted by ``Filing.markdown()`` and ``Attachment.markdown()`` when a caller
+#: asks for page breaks. ``{cls}`` is the class name of the call site. Page
+#: break rendering lives only in ``edgar.files.markdown``; the ``edgar.documents``
+#: builder treats page-break ``<hr>``s and page-number containers as print
+#: chrome and drops them (``strategies/document_builder.py``). So the flag does
+#: not select a feature, it selects a whole renderer — which is the reason it is
+#: going away rather than being ported.
+PAGE_BREAK_DEPRECATION = (
+    "{cls}.markdown(include_page_breaks=True) renders through the legacy "
+    "edgar.files pipeline, which drops images and formats tables differently "
+    "from the default path. It is deprecated and will be removed in "
+    "edgartools 6.0; call {cls}.markdown() without the flag for the supported "
+    "renderer."
+)
+
 # Modules that are transparent to the caller check: the deprecated
 # modules themselves and (for dataclass-generated __init__ trampolines)
 # the standard library's dataclasses module. The dataclass machinery
