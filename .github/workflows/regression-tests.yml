@@ -94,3 +94,63 @@ jobs:
         fail_ci_if_error: false
         flags: regression
         token: ${{ secrets.CODECOV_TOKEN }}
+
+  # A red `main` has to arrive somewhere a person looks.
+  #
+  # This lane runs post-merge, so nothing blocks on it and its result lands in
+  # the Actions tab and nowhere else. On 2026-08-08 it went red at 13:00 and
+  # three more pull requests merged through it before anyone noticed — the
+  # failures were visible the whole time and no one was looking (edgartools-hwdp).
+  #
+  # One issue, reopened and commented rather than duplicated, so a week of
+  # nightly failures is one thread and not seven. It closes itself when the lane
+  # goes green again, which makes the issue list the answer to "is main ok?".
+  # `needs` covers both jobs on purpose. A failed cassette gate skips the
+  # regression job rather than failing it, so keying only on that job's result
+  # would stay silent for the one failure that stops the suite running at all.
+  # Neither a cancelled run (concurrency supersedes one on every push) nor a
+  # skipped one is treated as red.
+  report:
+    name: Report red main
+    needs: [cassette-gate, regression]
+    if: always() && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      SHA: ${{ github.sha }}
+      LABEL: red-main
+      TITLE: "Regression Tests are failing on main"
+    steps:
+    - name: Ensure the tracking label exists
+      run: |
+        gh label create "$LABEL" --repo "$REPO" --color b60205 \
+          --description "Post-merge regression lane is red" 2>/dev/null || true
+
+    - name: Open or update the tracking issue
+      if: needs.regression.result == 'failure' || needs['cassette-gate'].result == 'failure'
+      run: |
+        number=$(gh issue list --repo "$REPO" --label "$LABEL" --state all \
+                   --limit 1 --json number --jq '.[0].number // empty')
+        body=$(printf '%s\n\n- commit: %s\n- run: %s\n' \
+                 "The post-merge regression lane failed on \`main\`." "$SHA" "$RUN_URL")
+        if [ -z "$number" ]; then
+          gh issue create --repo "$REPO" --label "$LABEL" \
+            --title "$TITLE" --body "$body"
+        else
+          gh issue reopen --repo "$REPO" "$number" 2>/dev/null || true
+          gh issue comment --repo "$REPO" "$number" --body "$body"
+        fi
+
+    - name: Close the tracking issue when main is green again
+      if: needs.regression.result == 'success' && needs['cassette-gate'].result == 'success'
+      run: |
+        number=$(gh issue list --repo "$REPO" --label "$LABEL" --state open \
+                   --limit 1 --json number --jq '.[0].number // empty')
+        if [ -n "$number" ]; then
+          gh issue close --repo "$REPO" "$number" \
+            --comment "Green again at $SHA — $RUN_URL"
+        fi
