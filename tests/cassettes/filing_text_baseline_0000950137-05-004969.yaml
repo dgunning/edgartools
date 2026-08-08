@@ -1,0 +1,165 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/1109357/000095013705004969/0000950137-05-004969.txt
+  response:
+    body:
+      string: "-----BEGIN PRIVACY-ENHANCED MESSAGE-----\nProc-Type: 2001,MIC-CLEAR\nOriginator-Name:
+        webmaster@www.sec.gov\nOriginator-Key-Asymmetric:\n MFgwCgYEVQgBAQICAf8DSgAwRwJAW2sNKK9AVtBzYZmr6aGjlWyK3XmZv3dTINen\n
+        TWSM7vrzLADbmYQaionwg5sDW3P6oaM5D3tdezXMm7z1T+B+twIDAQAB\nMIC-Info: RSA-MD5,RSA,\n
+        KlvXanhFZ3Zb4ZPMCT6Ng/EhulxV3J3DSYOdySBYtbs9hRaTj6oWfMQvYRem0Htf\n gQa1j+DwRgn9raJrby6FjQ==\n\n<SEC-DOCUMENT>0000950137-05-004969.txt
+        : 20050427\n<SEC-HEADER>0000950137-05-004969.hdr.sgml : 20050427\n<ACCEPTANCE-DATETIME>20050427122550\nACCESSION
+        NUMBER:\t\t0000950137-05-004969\nCONFORMED SUBMISSION TYPE:\t8-K\nPUBLIC DOCUMENT
+        COUNT:\t\t1\nCONFORMED PERIOD OF REPORT:\t20050426\nITEM INFORMATION:\t\tDeparture
+        of Directors or Principal Officers; Election of Directors; Appointment of
+        Principal Officers\nFILED AS OF DATE:\t\t20050427\nDATE AS OF CHANGE:\t\t20050427\n\nFILER:\n\n\tCOMPANY
+        DATA:\t\n\t\tCOMPANY CONFORMED NAME:\t\t\tEXELON CORP\n\t\tCENTRAL INDEX KEY:\t\t\t0001109357\n\t\tSTANDARD
+        INDUSTRIAL CLASSIFICATION:\tELECTRIC & OTHER SERVICES COMBINED [4931]\n\t\tIRS
+        NUMBER:\t\t\t\t232990190\n\t\tSTATE OF INCORPORATION:\t\t\tPA\n\t\tFISCAL
+        YEAR END:\t\t\t1231\n\n\tFILING VALUES:\n\t\tFORM TYPE:\t\t8-K\n\t\tSEC ACT:\t\t1934
+        Act\n\t\tSEC FILE NUMBER:\t001-16169\n\t\tFILM NUMBER:\t\t05775417\n\n\tBUSINESS
+        ADDRESS:\t\n\t\tSTREET 1:\t\t10 S DEARBORN ST 37TH FLR\n\t\tSTREET 2:\t\tPO
+        BOX A-3005\n\t\tCITY:\t\t\tCHICAGO\n\t\tSTATE:\t\t\tIL\n\t\tZIP:\t\t\t60690-3005\n\t\tBUSINESS
+        PHONE:\t\t3123947399\n\n\tMAIL ADDRESS:\t\n\t\tSTREET 1:\t\tP O BOX 767\n\t\tCITY:\t\t\tCHICAGO\n\t\tSTATE:\t\t\tIL\n\t\tZIP:\t\t\t60690\n</SEC-HEADER>\n<DOCUMENT>\n<TYPE>8-K\n<SEQUENCE>1\n<FILENAME>c94636e8vk.htm\n<DESCRIPTION>CURRENT
+        REPORT\n<TEXT>\n<HTML>\n<HEAD>\n<TITLE>e8vk</TITLE>\n</HEAD>\n<BODY bgcolor=\"#FFFFFF\">\n<!--
+        PAGEBREAK -->\n<H5 align=\"left\" style=\"page-break-before:always\">&nbsp;</H5><P>\n<DIV
+        style=\"font-family: 'Times New Roman',Times,serif\">\n\n\n\n<DIV style=\"width:
+        100%; border-bottom: 2pt solid black; font-size: 1pt\">&nbsp;</DIV>\n<DIV
+        style=\"width: 100%; border-bottom: 1pt solid black; font-size: 1pt\">&nbsp;</DIV>\n\n\n\n\n\n\n\n\n<P
+        align=\"center\" style=\"font-size: 14pt\"><B>UNITED STATES<BR>\nSECURITIES
+        AND EXCHANGE COMMISSION</B>\n\n<DIV align=\"center\" style=\"font-size: 10pt\">Washington,
+        DC 20549</DIV>\n\n\n<P align=\"center\" style=\"font-size: 18pt\"><B>FORM
+        8-K</B>\n\n\n<P align=\"center\" style=\"font-size: 12pt\"><B>CURRENT REPORT</B><BR>\nPursuant
+        to Section&nbsp;13 or 15(d) of the Securities Exchange Act of 1934\n\n\n<P
+        align=\"center\" style=\"font-size: 10pt\"><B>April&nbsp;26, 2005</B><BR>\nDate
+        of Report (Date of earliest event reported)\n\n\n<DIV align=\"center\">\n<TABLE
+        style=\"font-size: 10pt\" cellspacing=\"0\" border=\"0\" cellpadding=\"0\"
+        width=\"100%\">\n<!-- Begin Table Head -->\n<TR valign=\"bottom\">\n    <TD
+        width=\"10%\">&nbsp;</TD>\n    <TD width=\"10%\">&nbsp;</TD>\n    <TD width=\"40%\">&nbsp;</TD>\n
+        \   <TD width=\"10%\">&nbsp;</TD>\n    <TD width=\"30%\">&nbsp;</TD>\n</TR>\n<!--
+        End Table Head -->\n<!-- Begin Table Body -->\n<TR valign=\"bottom\">\n    <TD
+        valign=\"bottom\"><DIV style=\"margin-left:0px; text-indent:-0px\">Commission<BR>\nFile
+        Number\n</DIV></TD>\n    <TD>&nbsp;</TD>\n    <TD align=\"left\" valign=\"top\">Exact
+        Name of Registrant as\nSpecified in Its Charter; State of\nIncorporation;
+        Address of\nPrincipal Executive Offices; and\nTelephone Number\n</TD>\n    <TD>&nbsp;</TD>\n
+        \   <TD align=\"left\" valign=\"bottom\">IRS Employer<BR>\nIdentification
+        Number</TD>\n</TR>\n<TR style=\"font-size: 1px\">\n    <TD valign=\"top\"
+        style=\"border-top: 1px solid #000000\"><DIV style=\"margin-left:0px; text-indent:-0px\">&nbsp;\n</DIV></TD>\n
+        \   <TD>&nbsp;</TD>\n    <TD align=\"left\" valign=\"top\" style=\"border-top:
+        1px solid #000000\">&nbsp;\n</TD>\n    <TD>&nbsp;</TD>\n    <TD align=\"left\"
+        valign=\"top\" style=\"border-top: 1px solid #000000\">&nbsp;</TD>\n</TR>\n<TR>\n
+        \   <TD>&nbsp;</TD>\n</TR>\n\n<TR valign=\"bottom\">\n    <TD valign=\"top\"><DIV
+        style=\"margin-left:0px; text-indent:-0px\">1-16169\n</DIV></TD>\n    <TD>&nbsp;</TD>\n
+        \   <TD align=\"left\" valign=\"top\">EXELON CORPORATION<BR>\n(a Pennsylvania
+        corporation)<BR>\n10 South Dearborn Street&nbsp;&#151;&nbsp;37th Floor<BR>\nP.O.
+        Box 805379<BR>\nChicago, Illinois 60680-5379<BR>\n(312)&nbsp;394-7398\n</TD>\n
+        \   <TD>&nbsp;</TD>\n    <TD align=\"left\" valign=\"top\">23-2990190</TD>\n</TR>\n<!--
+        End Table Body -->\n</TABLE>\n</DIV>\n\n\n<P align=\"left\" style=\"font-size:
+        10pt\"><HR size=\"2\" noshade width=\"100%\" align=\"center\" color=\"#000000\">\n\n<P
+        align=\"left\" style=\"font-size: 10pt\">Check the appropriate box below if
+        the Form 8-K filing is intended to simultaneously satisfy the\nfiling obligation
+        of the registrant under any of the following provisions:\n\n\n\n<P>\n<TABLE
+        width=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"font-size:
+        10pt\">\n\n<TR valign=\"top\" style=\"font-size: 10pt; color: #000000; background:
+        transparent\">\n    <TD><FONT style=\"font-family: Wingdings\">&#111;</FONT>
+        Written communications pursuant to Rule&nbsp;425 under the Securities Act
+        (17 CFR 230.425)</TD>\n</TR>\n\n<TR>\n    <TD colspan=\"5\">&nbsp;</TD>\n</TR>\n<TR
+        valign=\"top\" style=\"font-size: 10pt; color: #000000; background: transparent\">\n
+        \   <TD><FONT style=\"font-family: Wingdings\">&#111;</FONT> Soliciting material
+        pursuant to Rule&nbsp;14a-12 under the Exchange Act (17 CFR 240.14a-12)</TD>\n</TR>\n\n<TR>\n
+        \   <TD colspan=\"5\">&nbsp;</TD>\n</TR>\n<TR valign=\"top\" style=\"font-size:
+        10pt; color: #000000; background: transparent\">\n    <TD><FONT style=\"font-family:
+        Wingdings\">&#111;</FONT> Pre-commencement communications pursuant to Rule&nbsp;14d-2(b)
+        under the Exchange Act (17 CFR 240.14d-2(b))</TD>\n</TR>\n\n<TR>\n    <TD
+        colspan=\"5\">&nbsp;</TD>\n</TR>\n<TR valign=\"top\" style=\"font-size: 10pt;
+        color: #000000; background: transparent\">\n    <TD><FONT style=\"font-family:
+        Wingdings\">&#111;</FONT> Pre-commencement communications pursuant to Rule&nbsp;13e-4(c)
+        under the Exchange Act (17 CFR 240.13e-4(c))</TD>\n</TR>\n\n</TABLE>\n\n<P>\n\n<DIV
+        style=\"width: 100%; border-bottom: 1pt solid black; font-size: 1pt\">&nbsp;</DIV>\n<DIV
+        style=\"width: 100%; border-bottom: 2pt solid black; font-size: 1pt\">&nbsp;</DIV>\n\n\n<P
+        align=\"center\" style=\"font-size: 10pt\">&nbsp;\n</DIV>\n\n<!-- PAGEBREAK
+        -->\n<P><HR noshade><P>\n<H5 align=\"left\" style=\"page-break-before:always\">&nbsp;</H5><P>\n\n<DIV
+        style=\"font-family: 'Times New Roman',Times,serif\">\n\n\n<P><TABLE width=\"100%\"
+        border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"font-size: 10pt\">\n\n\n\n</TABLE>\n\n\n<P
+        align=\"left\" style=\"font-size: 10pt\"><B>Section&nbsp;5 &#150; Corporate
+        Governance and Management</B><BR>\n<B>Item&nbsp;5.02. Departure of Directors
+        or Principal Officers; Election of Directors; Appointment of\nPrincipal Officers.</B>\n\n\n<P
+        align=\"left\" style=\"font-size: 10pt\">On April&nbsp;26, 2005, the board
+        of directors of Exelon Corporation elected Thomas J. Ridge to serve as\na
+        Class&nbsp;I director, effective May&nbsp;2, 2005. Mr.&nbsp;Ridge, age 59,
+        served as Secretary of the United\nStates Department of Homeland Security
+        from January&nbsp;2003 through January&nbsp;2005, and served from\nOctober&nbsp;2001
+        through December&nbsp;2002 as Special Assistant to the President for Homeland
+        Security, an\nExecutive Office created by President Bush in October&nbsp;2001.
+        Mr.&nbsp;Ridge served as Governor of the\nCommonwealth of Pennsylvania from
+        1994 through October&nbsp;2001. Mr.&nbsp;Ridge is also a director of Home\nDepot
+        Corporation and Savi Technology.\n\n\n\n<P align=\"center\" style=\"font-size:
+        10pt\">*****\n\n\n\n\n<P align=\"center\" style=\"font-size: 10pt\">&nbsp;\n</DIV>\n\n<!--
+        PAGEBREAK -->\n<P><HR noshade><P>\n<H5 align=\"left\" style=\"page-break-before:always\">&nbsp;</H5><P>\n\n<DIV
+        style=\"font-family: 'Times New Roman',Times,serif\">\n\n\n\n\n<P align=\"center\"
+        style=\"font-size: 10pt\">SIGNATURES\n\n\n<P align=\"left\" style=\"font-size:
+        10pt\">Pursuant to the requirements of the Securities Exchange Act of 1934,
+        the registrant has duly\ncaused this report to be signed on its behalf by
+        the undersigned hereunto duly authorized.\n\n\n\n<TABLE width=\"100%\" border=\"0\"
+        cellspacing=\"0\" cellpadding=\"0\" style=\"font-size: 10pt\">\n<TR>\n    <TD
+        width=\"48%\">&nbsp;</TD>\n    <TD width=\"1%\">&nbsp;</TD>\n    <TD width=\"1%\">&nbsp;</TD>\n
+        \   <TD width=\"35%\">&nbsp;</TD>\n    <TD width=\"15%\">&nbsp;</TD>\n</TR>\n<TR>\n
+        \   <TD valign=\"top\" align=\"left\">&nbsp;</TD>\n    <TD colspan=\"3\" align=\"left\">EXELON
+        CORPORATION <BR>\n&nbsp;</TD>\n    <TD>&nbsp;</TD>\n</TR><TR>\n    <TD align=\"left\">&nbsp;</TD>\n
+        \   <TD colspan=\"3\" style=\"border-bottom: 1px solid #000000\" align=\"left\">/s/
+        J. Barry Mitchell\n&nbsp;</TD>\n    <TD>&nbsp;</TD>\n</TR><TR>\n    <TD align=\"left\">&nbsp;</TD>\n
+        \   <TD colspan=\"3\" align=\"left\">J. Barry Mitchell</TD>\n    <TD>&nbsp;</TD>\n</TR><TR>\n
+        \   <TD align=\"left\">&nbsp;</TD>\n    <TD colspan=\"3\" align=\"left\">Senior
+        Vice President, Treasurer and<BR>\nChief Financial Officer&nbsp;</TD>\n    <TD>&nbsp;</TD>\n</TR>\n<TR>\n
+        \   <TD colspan=\"5\">&nbsp;</TD>\n</TR>\n</TABLE>\n\n<P align=\"left\" style=\"font-size:
+        10pt\">April&nbsp;27, 2005\n\n\n\n<P align=\"center\" style=\"font-size: 10pt\">&nbsp;\n</DIV>\n\n\n</BODY>\n</HTML>\n</TEXT>\n</DOCUMENT>\n</SEC-DOCUMENT>\n-----END
+        PRIVACY-ENHANCED MESSAGE-----\n"
+    headers:
+      Accept-Ranges:
+      - bytes
+      Connection:
+      - keep-alive
+      Content-Type:
+      - text/plain
+      Date:
+      - Sat, 08 Aug 2026 22:00:26 GMT
+      ETag:
+      - '"315366d7a7619e8b7f9151e8a5dbef38-gzip"'
+      Last-Modified:
+      - Wed, 04 Oct 2017 09:06:01 GMT
+      Strict-Transport-Security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '8865'
+      x-amz-id-2:
+      - OsQeCXy1qP+4lcb5VxPu5dxfOuYA099m3P9oNoZvamCuxyGrILK6NyX4D9Sd8DbF6tiroSdpUEI=
+      x-amz-meta-mode:
+      - '33188'
+      x-amz-replication-status:
+      - REPLICA
+      x-amz-request-id:
+      - PFD9QV0GF1G7JZAZ
+      x-amz-version-id:
+      - h6Lr5F_Of5.QLCqzpi9504KthpxlnfKP
+    status:
+      code: 200
+      message: OK
+version: 1

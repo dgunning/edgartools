@@ -158,7 +158,53 @@ BASELINE = {
 ASSERTED = list(BASELINE)
 
 
-@pytest.mark.network
+# These replay recorded submissions rather than fetching from SEC.
+#
+# This file is the guard on Filing.text(), and while it was `network`-marked it
+# ran post-merge only: three pull requests merged green on 2026-08-08 and each
+# turned `main` red here minutes later (bead edgartools-hwdp). Nothing in the
+# usual PR loop ran it, because `hatch run test-fast` selects on the `fast`
+# marker. Replaying moves all 17 tests into the pull-request gate, which is the
+# point of the change — a regression-marked test with no fast/network/slow
+# marker is auto-marked `fast` (see tests/conftest.py), so dropping `network`
+# is what puts them there.
+#
+# ONE CASSETTE PER FILING, not one per test. The three parametrized tests fetch
+# the same six submissions, so per-test cassettes would store 19.4 MB of corpus
+# three times over. Naming the cassette after the accession instead of the test
+# stores each submission once — 23.5 MB total — and the tests that share a
+# filing share its recording.
+#
+# It also makes recording work at all. `record_mode` is `once`, so a cassette is
+# sealed as soon as it exists; a single shared cassette records the first test's
+# filing and then refuses the other five. Keyed by accession, each file contains
+# exactly the one submission its tests ask for.
+#
+# To re-record: delete the affected tests/cassettes/filing_text_baseline_*.yaml
+# and run this file with the network available. Record against `main`, per
+# CONTRIBUTING.md — a cassette recorded with a text-pipeline change applied
+# bakes that change in, and the baseline can no longer fail when it regresses.
+APPLE_10K = "0000320193-23-000106"
+HISTORIC_PLAINTEXT = "0000912057-00-023442"
+
+
+def records(accession):
+    """Point an unparametrized test at the cassette for the filing it reads."""
+    def mark(func):
+        func.accession = accession
+        return func
+    return mark
+
+
+@pytest.fixture
+def vcr_cassette_name(request):
+    """Name the cassette after the filing it holds, not the test that plays it."""
+    callspec = getattr(request.node, "callspec", None)
+    accession = callspec.params["accession"] if callspec else request.function.accession
+    return f"filing_text_baseline_{accession}"
+
+
+@pytest.mark.vcr
 @pytest.mark.parametrize("accession", ASSERTED)
 def test_filing_text_output_unchanged(accession):
     """Filing.text() returns exactly what it returned before the text-path unification."""
@@ -174,7 +220,7 @@ def test_filing_text_output_unchanged(accession):
     )
 
 
-@pytest.mark.network
+@pytest.mark.vcr
 @pytest.mark.parametrize("accession", ASSERTED)
 def test_sgml_text_output_unchanged(accession):
     """FilingSGML.text() agrees with Filing.text() and is likewise unchanged."""
@@ -187,7 +233,7 @@ def test_sgml_text_output_unchanged(accession):
     assert sha256(text) == expected
 
 
-@pytest.mark.network
+@pytest.mark.vcr
 @pytest.mark.parametrize("accession", ASSERTED)
 def test_both_paths_agree(accession):
     kwargs, _ = BASELINE[accession]
@@ -196,10 +242,11 @@ def test_both_paths_agree(accession):
     assert filing.text() == filing.sgml().text()
 
 
-@pytest.mark.network
+@pytest.mark.vcr
+@records(APPLE_10K)
 def test_distinctive_content_survives_in_apple_10k():
     """A content check alongside the hash, so a failure says what was lost."""
-    kwargs, _ = BASELINE["0000320193-23-000106"]
+    kwargs, _ = BASELINE[APPLE_10K]
     text = Filing(**kwargs).text()
 
     assert "Apple Inc." in text
@@ -211,7 +258,8 @@ def test_distinctive_content_survives_in_apple_10k():
     assert "established in Internal Control - Integrated Framework" in text
 
 
-@pytest.mark.network
+@pytest.mark.vcr
+@records(HISTORIC_PLAINTEXT)
 def test_historic_plaintext_filing_keeps_fixed_width_layout():
     """Pre-HTML filings are returned as laid out, not reflowed through an HTML parser.
 
@@ -219,7 +267,7 @@ def test_historic_plaintext_filing_keeps_fixed_width_layout():
     columns that historic financial tables depend on.
     """
     filing = Filing(form="10-Q", filing_date="2000-05-11", company="APPLE COMPUTER INC",
-                    cik=320193, accession_no="0000912057-00-023442")
+                    cik=320193, accession_no=HISTORIC_PLAINTEXT)
 
     text = filing.sgml().text()
 
