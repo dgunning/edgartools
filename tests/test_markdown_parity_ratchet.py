@@ -95,7 +95,6 @@ BASELINE_NUMBER_LOSS = {
     ("10-K", "crm/10k"): 27,
     ("10-K", "cvx/10k"): 4,
     ("10-K", "gbdc/10k"): 67,
-    ("10-K", "googl/10k"): 2,
     ("10-K", "gs/10k"): 9,
     ("10-K", "hd/10k"): 32,
     ("10-K", "hubs/10k"): 24,
@@ -113,7 +112,12 @@ BASELINE_NUMBER_LOSS = {
     ("10-K", "pfe/10k"): 3,
     ("10-K", "rf/10k"): 4,
     ("10-K", "tsla/10k"): 22,
-    ("10-K", "unh/10k"): 186,
+    # Was 186 until the two-up maturity-row fix (edgartools-v3ec) restored
+    # the long-term debt schedule. Re-banked rather than left at 186: the
+    # "do not re-bank a decrease" rule above is about renderer noise of a
+    # point or two, and leaving a 104-point drop unbanked would let the
+    # schedule regress all the way back without tripping anything.
+    ("10-K", "unh/10k"): 82,
     ("10-K", "unp/10k"): 12,
     ("10-K", "v/10k"): 13,
     ("10-K", "wfc/10k"): 15,
@@ -126,6 +130,9 @@ BASELINE_NUMBER_LOSS = {
 # this much" are different claims and only one of them is a work item.
 CLEAN_FILINGS = {
     ("8-K", "0001104659-03-004925"),
+    # Reached zero via edgartools-v3ec: its remaining two lost numbers were in a
+    # table whose rows were being classified as headers.
+    ("10-K", "googl/10k"),
     ("8-K", "0001437749-16-028287"),
     ("20-F", "0000928385-01-500187"),
     ("10-Q", "xom/10q"),
