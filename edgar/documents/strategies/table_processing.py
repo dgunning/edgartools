@@ -379,37 +379,69 @@ class TableProcessor:
 
         return text
 
+    # Elements that start a new line of text. Everything else (a, span, b, i,
+    # font, sup, ...) is inline and contributes no separator.
+    _BLOCK_TAGS = frozenset({
+        'address', 'article', 'aside', 'blockquote', 'br', 'caption', 'div',
+        'dd', 'dl', 'dt', 'fieldset', 'figcaption', 'figure', 'footer', 'form',
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hr', 'li', 'main', 'nav',
+        'ol', 'p', 'pre', 'section', 'table', 'td', 'th', 'tr', 'ul',
+    })
+
+    @classmethod
+    def _fragments_with_block_breaks(cls, elem: HtmlElement) -> List[str]:
+        """Text fragments, with a newline marker at every block boundary.
+
+        Downstream normalisation collapses runs of whitespace, so emitting a
+        marker on both entering and leaving a block is safe and keeps the rule
+        simple: separation comes from the document structure, never from
+        guessing at a fragment boundary.
+        """
+        parts: List[str] = []
+
+        def walk(node) -> None:
+            tag = node.tag
+            is_block = isinstance(tag, str) and tag.lower() in cls._BLOCK_TAGS
+            if is_block:
+                parts.append('\n')
+            if node.text:
+                parts.append(node.text)
+            for child in node:
+                walk(child)
+                if child.tail:
+                    parts.append(child.tail)
+            if is_block:
+                parts.append('\n')
+
+        walk(elem)
+        return [p for p in parts if p]
+
     def _extract_text(self, elem: HtmlElement) -> str:
         """Extract and clean text from element."""
-        # Use itertext() to get all text fragments
-        # This preserves spaces better than text_content()
-        text_parts = []
-        for text in elem.itertext():
-            if text:
-                text_parts.append(text)
+        # Fragments, with a marker wherever a BLOCK boundary separates them.
+        #
+        # The rule that matters is which boundaries imply whitespace. A block
+        # boundary does: <div>Exhibit</div><div>Number</div> is two words. An
+        # inline one does not: markup inside a run of text is invisible to the
+        # reader, so <a>10.1</a><a>0</a> is the single token 10.10 -- which is
+        # exactly how ABBV's exhibit index numbers its exhibits, each split
+        # across two <a> tags with no whitespace between them.
+        #
+        # This used to insert a space between ANY two adjacent fragments unless
+        # one already carried whitespace, which fabricated "10.1 0" and made
+        # every such exhibit number unfindable (edgartools-2vzk). Separating on
+        # block boundaries only fixes that without regressing the word-gluing
+        # this function was written to avoid -- the opposite failure, and the one
+        # a bare text_content() would reintroduce.
+        text_parts = self._fragments_with_block_breaks(elem)
 
-        # Join parts, ensuring we don't lose spaces
-        # If a part doesn't end with whitespace and the next doesn't start with whitespace,
-        # we need to add a space between them
         if not text_parts:
             return ''
 
-        result = []
-        for i, part in enumerate(text_parts):
-            if i == 0:
-                result.append(part)
-            else:
-                prev_part = text_parts[i-1]
-                # Check if we need to add a space between parts
-                # Don't add space if previous ends with space or current starts with space
-                if prev_part and part:
-                    if not prev_part[-1].isspace() and not part[0].isspace():
-                        # Check for punctuation that shouldn't have space before it
-                        if part[0] not in ',.;:!?%)]':
-                            result.append(' ')
-                result.append(part)
-
-        text = ''.join(result)
+        # Concatenated verbatim: the separators are already in text_parts, as
+        # newline markers at block boundaries. Nothing is inserted here, so an
+        # inline split cannot invent whitespace that the source did not have.
+        text = ''.join(text_parts)
 
         # Replace entities
         for entity, replacement in self.ENTITY_REPLACEMENTS.items():
@@ -470,6 +502,40 @@ class TableProcessor:
         pattern = '|'.join(f'(?:{p})' for p in patterns)
         return re.compile(pattern, re.IGNORECASE)
 
+    # A column header is a label, not a sentence. Genuine header cells in the
+    # fixture corpus sit well under this: median 24 characters, 75th percentile
+    # 54, and even a wide "Three Months Ended June 30, 2025 and 2024" is ~42.
+    # Prose cells are an order of magnitude longer, so the threshold sits in an
+    # empty band rather than near either population.
+    PROSE_CELL_CHARS = 100
+
+    @staticmethod
+    def _has_prose_cell(cells: List[HtmlElement]) -> bool:
+        """Does any cell hold a sentence rather than a label?
+
+        Used to veto ONE header signal: a bare date appearing anywhere in the
+        row. That signal exists to catch period columns like "Three Months Ended
+        June 30, 2025", but the pattern also matches a date buried in ordinary
+        prose — and SEC exhibit indexes are full of it ("...dated as of June 25,
+        2019, between AbbVie Inc. and ..."). Every row of ABBV's exhibit index
+        matched, so the whole table was classified as header rows, `rows` came
+        back nearly empty, and the markdown renderer combined 30 "header" rows
+        into a single line: the exhibit index vanished from the rendered output
+        (edgartools-2vzk).
+
+        Deliberately scoped to that one branch. A row with real ``<th>`` tags,
+        units notation, or genuine multi-year columns is still a header no matter
+        how long its cells are; length only breaks the tie when the sole evidence
+        was an incidental date.
+
+        Per-cell rather than per-row, because a wide table's header row is long
+        in total while each individual label stays short.
+        """
+        return any(
+            len(_text_content(cell).strip()) > TableProcessor.PROSE_CELL_CHARS
+            for cell in cells
+        )
+
     def _is_header_row(self, tr: HtmlElement) -> bool:
         """Detect if row is likely a header row in SEC filings."""
         own_cells = self._own_cells(tr)
@@ -485,6 +551,11 @@ class TableProcessor:
         # Get row text for analysis
         row_text = _text_content(tr)
         row_text_lower = row_text.lower()
+
+        # Every date- and year-derived signal below is evidence only when the row
+        # reads as labels. In prose those dates are incidental — see
+        # _has_prose_cell — so compute the veto once and apply it to each.
+        has_prose = self._has_prose_cell(cells)
 
         # Check for date ranges with financial data (Oracle Table 6 pattern)
         # Date ranges like "March 1, 2024—March 31, 2024" should be data rows, not headers
@@ -514,7 +585,7 @@ class TableProcessor:
                 # Not a multi-year comparison header
                 pass  # Don't return True
             # Multiple different years suggest multi-year comparison header
-            elif 'total' not in row_text_lower[:20]:  # Check first 20 chars
+            elif 'total' not in row_text_lower[:20] and not has_prose:
                 return True
 
         # Enhanced year detection - check individual cells for year patterns
@@ -533,7 +604,7 @@ class TableProcessor:
 
         # If we have multiple year cells or year + date phrases, likely a header
         if year_cells >= 2 or (year_cells >= 1 and date_phrases >= 1):
-            if 'total' not in row_text_lower[:20]:
+            if 'total' not in row_text_lower[:20] and not has_prose:
                 return True
 
         # Check for comprehensive financial period patterns (from old parser)
@@ -542,7 +613,7 @@ class TableProcessor:
             # Additional validation: ensure it's not a data row with period text
             # Check for absence of strong data indicators
             data_pattern = r'(?:\$\s*\d|\d+(?:,\d{3})+|\d+\s*[+\-*/]\s*\d+|\(\s*\d+(?:,\d{3})*\s*\))'
-            if not re.search(data_pattern, row_text):
+            if not re.search(data_pattern, row_text) and not has_prose:
                 return True
 
         # Check for units notation (in millions, thousands, billions)

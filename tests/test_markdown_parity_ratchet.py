@@ -49,72 +49,76 @@ pytestmark = pytest.mark.slow
 # Distinct numeric values each filing renders in legacy markdown and NOT in new,
 # measured 2026-08-07 on main (4bb2c3e0). Tracked fixtures only.
 #
-# The shape of this list is one finding, not fifty-seven. The dominant cluster is
-# the exhibit index — missing values run 4.1, 10.11, 10.12 ... 99.1, i.e. exhibit
-# numbers, and they come with 'exhibit', 'incorporated', 'reference' and 'herein'
-# in the word shortfall. The parser captures those tables (ABBV: 4 TableNodes,
-# 6.5-9.5 KB each); both renderers then lose them. That is edgartools-2vzk, and
-# closing it should empty most of this dict at once.
+# REBASELINED 2026-08-07 after edgartools-2vzk. Fixing the exhibit index took the
+# corpus-wide total from 1965 to 1191 distinct values (-39%) with zero filings
+# regressing, and six tracked filings now lose nothing at all.
 #
-# unh/10k at 232 is the extreme of the same thing, not a separate problem.
+# It did NOT empty this dict, which the pre-fix note predicted it would. What is
+# left is a different and more mixed population, and the largest part of it looks
+# like it is not our bug: unh/10k's residual is values such as 10000.55 and
+# 10001.15, i.e. LEGACY running two numbers together, the numeric counterpart of
+# the word-gluing that glued() already discounts. Extending that discount to
+# numbers is the next refinement to the harness, and would likely drop this
+# baseline again without any parser change.
+#
+# The real remaining signal is the executive-officers table ('executive',
+# 'officer', 'president' in the word shortfalls, e.g. adbe/10k).
 BASELINE_NUMBER_LOSS = {
     ("8-K", "0000887919-21-000012"): 2,
     ("20-F", "0001062993-16-008650"): 42,
-    ("20-F", "0001062993-21-003193"): 34,
+    ("20-F", "0001062993-21-003193"): 24,
     ("10-Q", "aapl/10q"): 10,
-    ("10-Q", "ba/10q"): 5,
+    ("10-Q", "ba/10q"): 1,
     ("10-Q", "gbdc/10q"): 24,
     ("10-Q", "gs/10q"): 6,
     ("10-Q", "hubs/10q"): 18,
     ("10-Q", "ibm/10q"): 6,
     ("10-Q", "jnj/10q"): 1,
     ("10-Q", "jpm/10q"): 6,
-    ("10-Q", "ko/10q"): 47,
+    ("10-Q", "ko/10q"): 2,
     ("10-Q", "msft/10q"): 68,
     ("10-Q", "nflx/10q"): 6,
-    ("10-Q", "nvda/10q"): 4,
-    ("10-Q", "pg/10q"): 29,
+    ("10-Q", "nvda/10q"): 2,
+    ("10-Q", "pg/10q"): 24,
     ("10-Q", "tsla/10q"): 4,
     ("10-Q", "unp/10q"): 2,
-    ("10-Q", "xom/10q"): 1,
-    ("10-K", "915358/10k"): 55,
+    ("10-K", "915358/10k"): 30,
     ("10-K", "aapl/10k"): 1,
-    ("10-K", "abbv/10k"): 38,
+    ("10-K", "abbv/10k"): 4,
     ("10-K", "adbe/10k"): 16,
-    ("10-K", "amzn/10k"): 66,
-    ("10-K", "axp/10k"): 36,
-    ("10-K", "ba/10k"): 51,
+    ("10-K", "amzn/10k"): 34,
+    ("10-K", "axp/10k"): 18,
+    ("10-K", "ba/10k"): 14,
     ("10-K", "bac/10k"): 5,
-    ("10-K", "c/10k"): 6,
-    ("10-K", "cat/10k"): 62,
-    ("10-K", "crm/10k"): 30,
-    ("10-K", "cvx/10k"): 28,
-    ("10-K", "gbdc/10k"): 72,
+    ("10-K", "c/10k"): 2,
+    ("10-K", "cat/10k"): 17,
+    ("10-K", "crm/10k"): 27,
+    ("10-K", "cvx/10k"): 4,
+    ("10-K", "gbdc/10k"): 67,
     ("10-K", "googl/10k"): 2,
     ("10-K", "gs/10k"): 9,
     ("10-K", "hd/10k"): 32,
     ("10-K", "hubs/10k"): 24,
-    ("10-K", "ibm/10k"): 27,
-    ("10-K", "jnj/10k"): 12,
-    ("10-K", "jpm/10k"): 6,
-    ("10-K", "ko/10k"): 86,
-    ("10-K", "ma/10k"): 20,
+    ("10-K", "jnj/10k"): 7,
+    ("10-K", "jpm/10k"): 1,
+    ("10-K", "ko/10k"): 3,
+    ("10-K", "ma/10k"): 3,
     ("10-K", "meta/10k"): 53,
-    ("10-K", "ms/10k"): 16,
+    ("10-K", "ms/10k"): 6,
     ("10-K", "msft/10k"): 57,
-    ("10-K", "nflx/10k"): 40,
-    ("10-K", "nke/10k"): 26,
-    ("10-K", "nvda/10k"): 18,
+    ("10-K", "nflx/10k"): 21,
+    ("10-K", "nke/10k"): 8,
+    ("10-K", "nvda/10k"): 16,
     ("10-K", "orcl/10k"): 9,
-    ("10-K", "pfe/10k"): 33,
-    ("10-K", "rf/10k"): 44,
-    ("10-K", "tsla/10k"): 30,
-    ("10-K", "unh/10k"): 232,
+    ("10-K", "pfe/10k"): 3,
+    ("10-K", "rf/10k"): 4,
+    ("10-K", "tsla/10k"): 22,
+    ("10-K", "unh/10k"): 186,
     ("10-K", "unp/10k"): 12,
-    ("10-K", "v/10k"): 29,
+    ("10-K", "v/10k"): 13,
     ("10-K", "wfc/10k"): 15,
-    ("10-K", "wmt/10k"): 23,
-    ("10-K", "xom/10k"): 2,
+    ("10-K", "wmt/10k"): 14,
+    ("10-K", "xom/10k"): 1,
 }
 
 # Tracked filings that already lose nothing. Kept as a separate set rather than
@@ -124,6 +128,8 @@ CLEAN_FILINGS = {
     ("8-K", "0001104659-03-004925"),
     ("8-K", "0001437749-16-028287"),
     ("20-F", "0000928385-01-500187"),
+    ("10-Q", "xom/10q"),
+    ("10-K", "ibm/10k"),
     ("10-K", "pg/10k"),
 }
 
