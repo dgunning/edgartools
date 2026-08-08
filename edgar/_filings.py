@@ -67,7 +67,7 @@ from edgar.headers import FilingDirectory, IndexHeaders
 from edgar.httprequests import download_file, download_text, download_text_between_tags
 from edgar.reference import describe_form
 from edgar.reference.tickers import Exchange, find_ticker, find_ticker_safe
-from edgar.richtools import Docs, print_rich, repr_rich, rich_to_text
+from edgar.richtools import Docs, print_rich, repr_rich
 from edgar.search import BM25Search, RegexSearch
 from edgar.sgml import FilingHeader, FilingSGML, Reports, Statements
 from edgar.storage import is_using_local_storage, local_filing_path, resolve_local_filing_path
@@ -1658,8 +1658,16 @@ class Filing:
         return xml_content
 
     @lru_cache(maxsize=4)
-    def text(self) -> str:
-        """Convert the html of the main filing document to text"""
+    def text(self, include_images: bool = False) -> str:
+        """Convert the html of the main filing document to text
+
+        Args:
+            include_images: Emit an ``[Image: <alt or filename>]`` placeholder
+                wherever the filing has an image (GH #886). Charts that carry
+                content — a 10-K's stock performance graph, say — otherwise
+                vanish with nothing to mark the gap. Off by default so the text
+                that feeds sections, search and embeddings stays image-free.
+        """
         # Offline shortcut for historic pre-HTML filings: when the primary document has no
         # <FILENAME> (so html()/_download_filing_text would otherwise re-fetch it over the
         # network) and it is plain text, return that document's text straight from the
@@ -1679,7 +1687,12 @@ class Filing:
             if document.is_empty:
                 return ""
 
-            return rich_to_text(document, width=500)  # Wide enough for tables without truncation
+            # Straight to the extractor. Going via rich_to_text() rendered the
+            # document through Document.__repr__, which hardcodes
+            # table_max_col_width=200 — so the 500 below never reached the table
+            # renderer and long cells were cut at 200 with no ellipsis.
+            return document.text(table_max_col_width=500,  # Wide enough for tables without truncation
+                                 include_images=include_images)
         else:
             text_extract_attachments = self.attachments.query("document_type == 'TEXT-EXTRACT'")
             if len(text_extract_attachments) > 0 and text_extract_attachments.get_by_index(0) is not None:
