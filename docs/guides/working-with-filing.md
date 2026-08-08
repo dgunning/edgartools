@@ -156,6 +156,14 @@ text = filing.text()
 print(text[:500])  # First 500 characters
 ```
 
+Images contribute nothing by default. To mark where they were — useful when a
+chart carries content the surrounding prose does not repeat:
+
+```python
+text = filing.text(include_images=True)
+# ... [Image: nvidialogoa10.jpg] ...
+```
+
 ### Get Markdown
 
 ```python

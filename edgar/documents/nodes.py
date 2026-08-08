@@ -576,8 +576,19 @@ class ImageNode(Node):
     height: Optional[int] = None
 
     def text(self) -> str:
-        """Extract image alt text."""
-        return self.alt or ''
+        """Images contribute no document text.
+
+        ``alt`` is a description *of* an image, not text the filer wrote into
+        the document, and it is frequently just the source file name
+        ("nvidialogoa10.jpg"). Returning it here leaked bare filenames into
+        ``Filing.text()`` through ``ParagraphNode.text()``, which aggregates
+        child ``text()``, with nothing marking them as image captions.
+
+        Callers that want images represented ask for it explicitly and read
+        ``alt``/``src`` themselves: ``TextExtractor(include_images=True)``
+        emits ``[Image: ...]`` and ``MarkdownRenderer`` emits ``![alt](src)``.
+        """
+        return ''
 
     def html(self) -> str:
         """Generate image HTML."""

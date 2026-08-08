@@ -965,7 +965,8 @@ class Document:
              include_tables: bool = True,
              include_metadata: bool = False,
              max_length: Optional[int] = None,
-             table_max_col_width: Optional[int] = None) -> str:
+             table_max_col_width: Optional[int] = None,
+             include_images: bool = False) -> str:
         """
         Extract text from document.
 
@@ -977,13 +978,17 @@ class Document:
             table_max_col_width: Maximum column width for table rendering (default: 200).
                                 Set higher (e.g., 500) to avoid truncating long table labels,
                                 or None for unlimited width. Useful for AI/LLM processing.
+            include_images: Emit an ``[Image: <alt or filename>]`` placeholder for
+                            each image (GH #886). Off by default so clean text stays
+                            image-free for sections, search and embedding.
 
         Returns:
             Extracted text
         """
         # Use cache if available and parameters match
         if (self._text_cache is not None and
-            clean and not include_tables and not include_metadata and max_length is None):
+            clean and not include_tables and not include_metadata
+                and max_length is None and not include_images):
             return self._text_cache
 
         # If whitespace was preserved during parsing and clean is default (True),
@@ -997,7 +1002,8 @@ class Document:
             include_tables=include_tables,
             include_metadata=include_metadata,
             max_length=max_length,
-            table_max_col_width=table_max_col_width
+            table_max_col_width=table_max_col_width,
+            include_images=include_images
         )
         text = extractor.extract(self)
 
@@ -1014,7 +1020,8 @@ class Document:
                 text = filter_toc_links(text)
 
         # Cache if using default parameters
-        if clean and not include_tables and not include_metadata and max_length is None:
+        if (clean and not include_tables and not include_metadata
+                and max_length is None and not include_images):
             self._text_cache = text
 
         return text
