@@ -571,6 +571,26 @@ class TableProcessor:
         if has_date_range and (has_currency or has_decimals or has_large_numbers):
             return False
 
+        # A row carrying actual figures is a data row however many years it names.
+        # Header rows label periods; they do not hold dollar amounts. This vetoes
+        # the year-derived signals below, in the same spirit as the date-range
+        # guard above and _has_prose_cell — the year evidence is only evidence
+        # when nothing stronger contradicts it.
+        #
+        # The case that needed it: UnitedHealth's long-term debt schedule is laid
+        # out two-up, two debt series per row, so every data row names two
+        # DIFFERENT maturity years -- "$750 3.5%, Feb 2024 | 750 | $850 5.8%,
+        # Mar 2036 | 838" reads as a 2024-vs-2036 comparison header. 35 of the
+        # table's 40 rows were classified as headers, `rows` came back with 3,
+        # and the schedule vanished from rendered output: 64 of 66 maturities and
+        # 50 of 66 coupon rates. _has_prose_cell cannot help, because these are
+        # short numeric cells, not sentences. (edgartools-v3ec)
+        #
+        # Currency and thousands-grouping only -- NOT bare decimals, which appear
+        # in legitimate header labels ("Item 7A.", a note reference) where a
+        # dollar amount never does.
+        carries_figures = has_currency or has_large_numbers
+
         # Check for year patterns (very common in financial headers)
         year_pattern = r'\b(19\d{2}|20\d{2})\b'
         years_found = re.findall(year_pattern, row_text)
@@ -585,7 +605,8 @@ class TableProcessor:
                 # Not a multi-year comparison header
                 pass  # Don't return True
             # Multiple different years suggest multi-year comparison header
-            elif 'total' not in row_text_lower[:20] and not has_prose:
+            elif ('total' not in row_text_lower[:20] and not has_prose
+                    and not carries_figures):
                 return True
 
         # Enhanced year detection - check individual cells for year patterns
