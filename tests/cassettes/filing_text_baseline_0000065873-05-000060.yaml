@@ -1,0 +1,117 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/65873/000006587305000060/0000065873-05-000060.txt
+  response:
+    body:
+      string: "-----BEGIN PRIVACY-ENHANCED MESSAGE-----\nProc-Type: 2001,MIC-CLEAR\nOriginator-Name:
+        webmaster@www.sec.gov\nOriginator-Key-Asymmetric:\n MFgwCgYEVQgBAQICAf8DSgAwRwJAW2sNKK9AVtBzYZmr6aGjlWyK3XmZv3dTINen\n
+        TWSM7vrzLADbmYQaionwg5sDW3P6oaM5D3tdezXMm7z1T+B+twIDAQAB\nMIC-Info: RSA-MD5,RSA,\n
+        FeGxK52z1769qHoZE2/JgXN0qCEQ/FlMT5Kra/lJj6le5vxIYdNHl5NEIZ8e24dW\n i+u3l48Rg5GAacPXNduRAQ==\n\n<SEC-DOCUMENT>0000065873-05-000060.txt
+        : 20060501\n<SEC-HEADER>0000065873-05-000060.hdr.sgml : 20060501\n<ACCEPTANCE-DATETIME>20050623102512\n<PRIVATE-TO-PUBLIC>\nACCESSION
+        NUMBER:\t\t0000065873-05-000060\nCONFORMED SUBMISSION TYPE:\tCORRESP\nPUBLIC
+        DOCUMENT COUNT:\t\t1\nFILED AS OF DATE:\t\t20050623\n\nFILER:\n\n\tCOMPANY
+        DATA:\t\n\t\tCOMPANY CONFORMED NAME:\t\t\tALLTEL CORP\n\t\tCENTRAL INDEX KEY:\t\t\t0000065873\n\t\tSTANDARD
+        INDUSTRIAL CLASSIFICATION:\tRADIO TELEPHONE COMMUNICATIONS [4812]\n\t\tIRS
+        NUMBER:\t\t\t\t340868285\n\t\tSTATE OF INCORPORATION:\t\t\tDE\n\t\tFISCAL
+        YEAR END:\t\t\t1231\n\n\tFILING VALUES:\n\t\tFORM TYPE:\t\tCORRESP\n\n\tBUSINESS
+        ADDRESS:\t\n\t\tSTREET 1:\t\tONE ALLIED DR\n\t\tCITY:\t\t\tLITTLE ROCK\n\t\tSTATE:\t\t\tAR\n\t\tZIP:\t\t\t72202\n\t\tBUSINESS
+        PHONE:\t\t5019058967\n\n\tMAIL ADDRESS:\t\n\t\tSTREET 1:\t\tONE ALLIED DR\n\t\tCITY:\t\t\tLITTLE
+        ROCK\n\t\tSTATE:\t\t\tAR\n\t\tZIP:\t\t\t72202\n\n\tFORMER COMPANY:\t\n\t\tFORMER
+        CONFORMED NAME:\tMID CONTINENT TELEPHONE CORP\n\t\tDATE OF NAME CHANGE:\t19831031\n</SEC-HEADER>\n<DOCUMENT>\n<TYPE>CORRESP\n<SEQUENCE>1\n<FILENAME>filename1.htm\n<TEXT>\n<!DOCTYPE
+        HTML PUBLIC'-//W3C//DTD HTML 3.2//EN\">\n\n\n<body>\n\n<font SIZE=\"2\">\n<p
+        ALIGN=\"CENTER\">&nbsp;</p>\n\n<p align=\"center\" style=\"margin-bottom:
+        -20\">ALLTEL CORPORATION</p>\n<p align=\"center\" style=\"margin-bottom: -20\">One
+        Allied Drive, Little Rock,\nArkansas 72202</p>\n<p align=\"center\" style=\"margin-bottom:
+        -20\">&nbsp;</p>\n<p style=\"margin-bottom: -20\">&nbsp;</p>\n<p style=\"margin-bottom:
+        -20\">&nbsp;</p>\n<p style=\"margin-bottom: -20\">&nbsp;</p>\n<p style=\"margin-bottom:
+        -20\" align=\"center\">June 22, 2005</p>\n<p style=\"margin-bottom: -20\">&nbsp;</p>\n<p
+        style=\"margin-bottom: -20\"><u><b>VIA FACSIMILE</b></u></p>\n<p style=\"margin-bottom:
+        -20\">&nbsp;</p>\n<p style=\"margin-bottom: -20\">Securities and Exchange
+        Commission</p>\n<p style=\"margin-bottom: -20\">100 F Street, NE</p>\n<p style=\"margin-bottom:
+        -20\">Washington, D.C. 20549</p>\n<p style=\"margin-bottom: -20\">&nbsp;</p>\n<p
+        style=\"text-indent: 45; margin-bottom: -20\">Re:&nbsp;&nbsp;&nbsp; ALLTEL\nCorporation</p>\n<p
+        style=\"text-indent: 45; margin-bottom: -20\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n\nForm
+        S-4, as amended&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </p>\n<p style=\"text-indent:
+        45; margin-bottom: -20\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\nFile
+        No. 333-123596</p>\n<p style=\"text-indent: 45; margin-bottom: -20\">&nbsp;</p>\n<p
+        style=\"margin-bottom: -20\">Ladies and Gentlemen:</p>\n<p style=\"margin-bottom:
+        -20\">&nbsp;</p>\n<p ALIGN=\"JUSTIFY\" style=\"text-indent: 40\">The undersigned
+        respectively requests\nthat the effective date of the above-referenced Registration
+        Statement be\naccelerated to 1:00 p.m. Central Daylight Time on June 23, 2005,
+        or as soon\nthereafter as practicable.</p>\n<p ALIGN=\"JUSTIFY\"></p>\n<p
+        ALIGN=\"JUSTIFY\" style=\"text-indent: 40\">Alltel Corporation (the &quot;Company&quot;)\nhereby
+        acknowledges that:</p>\n<p ALIGN=\"JUSTIFY\"></p>\n<ul>\n  <li>\n  <p style=\"margin-left:
+        15\">Should the Securities and Exchange Commission (the\n  &quot;Commission&quot;)
+        or the staff, acting pursuant to delegated authority, declare\n  the filing
+        effective, it does not foreclose the Commission from taking any\n  action
+        with respect to the filing;</li>\n</ul>\n<p ALIGN=\"JUSTIFY\"></p>\n<ul>\n
+        \ <li>\n  <p style=\"margin-left: 15\">The action of the Commission or the
+        staff acting\n  pursuant to delegated authority, in declaring the filing effective,
+        does not\n  relieve the Company from its full responsibility for the adequacy
+        and accuracy\n  of the disclosure in the filing; and</li>\n</ul>\n<p ALIGN=\"JUSTIFY\"></p>\n<ul>\n
+        \ <li>\n  <p style=\"margin-left: 15\">The Company may not assert staff comments
+        and the\n  declaration of effectiveness as a defense in any proceeding initiated
+        by the\n  Commission or any person under the federal securities laws of the
+        United\n  States.</li>\n</ul>\n<dir>\n  <dir>\n    <dir>\n      <dir>\n        <dir>\n
+        \         <dir>\n            <dir>\n              <dir>\n                <dir>\n
+        \                 <dir>\n                    <p>Alltel Corporation</p>\n                    <p
+        style=\"margin-top: -1; margin-bottom: -1\">By:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n
+        \                   <u>/s/ Francis X. Frantz</u></p>\n                    <p
+        style=\"margin-top: -1; margin-bottom: -1\">Name:&nbsp;&nbsp; Francis X. Frantz</p>\n
+        \                   <p style=\"margin-top: -1; margin-bottom: -1\">Title:&nbsp;&nbsp;&nbsp;&nbsp;\n
+        \                   Executive Vice President</p>\n                    <p style=\"margin-top:
+        -1; margin-bottom: -1\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n
+        \                   and Secretary</p>\n                  </dir>\n                </dir>\n
+        \             </dir>\n            </dir>\n          </dir>\n        </dir>\n
+        \     </dir>\n    </dir>\n  </dir>\n</dir>\n\n</font>\n\n</body>\n</TEXT>\n</DOCUMENT>\n</SEC-DOCUMENT>\n-----END
+        PRIVACY-ENHANCED MESSAGE-----\n"
+    headers:
+      Accept-Ranges:
+      - bytes
+      Connection:
+      - keep-alive
+      Content-Type:
+      - text/plain
+      Date:
+      - Sat, 08 Aug 2026 22:00:26 GMT
+      ETag:
+      - '"fa559e3bf0ba9b0243dbff8e04f9d720-gzip"'
+      Last-Modified:
+      - Tue, 10 Oct 2017 13:48:54 GMT
+      Strict-Transport-Security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '5166'
+      x-amz-id-2:
+      - BXHv+cwRCg9WnPG+i+wWfkR7QIQLrdmOeOXJEZftR7DJRztVR5efqE0/nmfNHy21KmRbYME8LaE6BjmztxzF++EC2KYGmBWt
+      x-amz-meta-mode:
+      - '33188'
+      x-amz-replication-status:
+      - REPLICA
+      x-amz-request-id:
+      - GNYMNCTC138XD4F8
+      x-amz-version-id:
+      - FnoY9fGG49C8iMj2D3sMxJY_L9pOHrKV
+    status:
+      code: 200
+      message: OK
+version: 1
