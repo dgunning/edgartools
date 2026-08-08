@@ -62,36 +62,68 @@ def sha256(text):
 # with "".join(before.split()) == "".join(after.split()) — true on both, so nothing but
 # whitespace moved, and every changed line was read individually: all four distinct
 # repairs, no destroyed boundary.
+#
+# Re-captured a SIXTH time, and this one banks two separate changes because the
+# fifth capture was never followed up. All five filings move.
+#
+# (a) THE MISSED ONE. ef9c70b0 (#993, the exhibit-index fix) changed _extract_text
+#     to stop fabricating a space between adjacent inline elements, and restored
+#     exhibit-index tables that were being classified as all-header. It moved this
+#     corpus and the hashes were not re-captured -- verified by bisect: 0 failures
+#     at its parent ea538528, 8 at ef9c70b0. The file went red on 2026-08-08 and
+#     stayed red, because it is network-marked and `hatch run test-fast` selects on
+#     the `fast` marker, so nothing in the usual PR loop runs it.
+#       Apple +2,969   10x Genomics +1,232   BofA +1,484   Merck 0   Exelon 0
+#     Content gained, not whitespace: these are exhibit rows coming back.
+#
+# (b) THIS CHANGE. Both text paths stop rendering through rich_to_text(), which
+#     went via Document.__repr__ and its hardcoded table_max_col_width=200, and
+#     call document.text(table_max_col_width=500) directly. Long table cells were
+#     being cut at 200 characters with no ellipsis. Filing.text() was fixed first
+#     (#995) and FilingSGML.text() was missed, which is what broke
+#     test_both_paths_agree; both are now the same call.
+#       Apple +6,394   BofA +9,135   10x Genomics +1,009   Merck -1   Exelon -1
+#     Recovered text is prose that had been cut mid-sentence -- Apple's FY2023
+#     "gross unrecognized tax benefits was $19.5 billion, of which $9.5 billion, if
+#     recognized, would impact Apple..." and BofA's automatic-call terms. Checked
+#     for duplication: none of Apple's six recovered chunks already existed
+#     elsewhere in the old text.
+#     The two -1s are whitespace: "".join(before.split()) == "".join(after.split())
+#     holds on Merck and Exelon, so nothing but a space moved on those.
+#
+#     Both paths now produce identical output on all five filings, which is why a
+#     single hash still covers them.
+
 BASELINE = {
     # Modern iXBRL 10-K
     "0000320193-23-000106": (
         dict(form="10-K", filing_date="2023-11-03", company="Apple Inc.",
              cik=320193, accession_no="0000320193-23-000106"),
-        "65e6cb488de90806dd54b4bff0aba0b678a2c0bf6af698a47df09bed19369462",
+        "ff65df35e734f046041f768a17c6f3aa939779eaa75ab2939ad2ed33e7ca2c8f",
     ),
     # Plain HTML 10-K
     "0001193125-20-052640": (
         dict(form="10-K", filing_date="2020-02-27", company="10x Genomics, Inc.",
              cik=1770787, accession_no="0001193125-20-052640"),
-        "1faea8fc5913ca353f6a5124f221631acccb9bcc16cfc55f6e2a26378298a6d8",
+        "1185fdd9547ad64d3e4b9becf320b9c6033f643df2930ff45d188a5255fd1e28",
     ),
     # CORRESP — the shape where the two paths already agreed before the fix
     "0000065873-05-000060": (
         dict(form="CORRESP", filing_date="2005-11-03", company="MERCK & CO INC",
              cik=65873, accession_no="0000065873-05-000060"),
-        "5fb3d0a62a5bc0d8c77fb8791b068011d4f047d3add254a6a8d6d56c6d787ed5",
+        "733944a9b6e911a63321cd3d37c3a1408ad3ac215e9a93e4ed04f549e5c42b6e",
     ),
     # 2005-era HTML 8-K
     "0000950137-05-004969": (
         dict(form="8-K", filing_date="2005-04-27", company="EXELON CORP",
              cik=1109357, accession_no="0000950137-05-004969"),
-        "a37f4e540bd777f1e2017e4c7c9a58b8782b6b63123a7c2a2fa8260eba8ffc83",
+        "2105709ed5c1e6379f2f13448caeafb50add837d46dee26ad6877344a9ead511",
     ),
     # 424B2 structured note
     "0001481057-23-010389": (
         dict(form="424B2", filing_date="2023-12-13", company="BANK OF AMERICA CORP /DE/",
              cik=70858, accession_no="0001481057-23-010389"),
-        "fcd15e64fb76fec683067bc1e1c100ce886dc14723d20030dd34d2f6010a6b91",
+        "b340e30f1a3901a4ec99cc002517df3c42791a91fa99c833c6eae96210e5f74f",
     ),
 }
 
