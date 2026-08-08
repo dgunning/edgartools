@@ -143,7 +143,6 @@ def html_to_text(html: str, form: Optional[str] = None) -> str:
     """
     from edgar.documents import HTMLParser, ParserConfig
     from edgar.documents.exceptions import HTMLParsingError
-    from edgar.richtools import rich_to_text
 
     try:
         document = HTMLParser(ParserConfig(form=form)).parse(html)
@@ -153,8 +152,17 @@ def html_to_text(html: str, form: Optional[str] = None) -> str:
 
     if document.is_empty:
         return ""
-    # Wide enough that tables are not truncated.
-    return rich_to_text(document, width=500)
+    # Straight to the extractor, matching Filing.text(). Going via rich_to_text()
+    # rendered the document through Document.__repr__, which hardcodes
+    # table_max_col_width=200, so the 500 never reached the table renderer and
+    # long cells were cut at 200 with no ellipsis. The comment that used to sit
+    # here — "Wide enough that tables are not truncated" — described an intent
+    # the code did not carry out.
+    #
+    # Both text paths must make this call the same way: they are asserted equal
+    # by test_filing_text_baseline.test_both_paths_agree, and fixing only
+    # Filing.text() is what broke it.
+    return document.text(table_max_col_width=500)
 
 
 def strip_html_tags(html: str) -> str:
