@@ -287,7 +287,10 @@ class TestJPMMultiItemGroundTruth:
     not bold. Tests that middle items are untouched and the last item is bounded.
     Ground truth:
     - Item 5.02: 4097 chars (middle item, unchanged)
-    - Item 9.01: 794 chars (last item; before fix this contained the sig block)
+    - Item 9.01: 602 chars (last item; before fix this contained the sig block).
+      Was 794 until the table renderer stopped padding each line out to the
+      last column's full width (edgartools-j8bs). Whitespace only — the
+      non-whitespace content is 486 characters before and after.
     Cassette: tests/cassettes/test_issue_879_jpm_8k.yaml
     """
 
@@ -325,11 +328,18 @@ class TestJPMMultiItemGroundTruth:
         )
 
     def test_last_item_901_ground_truth_length(self, doc):
-        """Item 9.01 post-fix exact length is ~794 chars (allow ±15%)."""
+        """Item 9.01 post-fix exact length is ~602 chars (allow ±15%)."""
         sections = doc.sections
         text = sections["item_901"].text().strip()
-        # Ground truth: 794 chars. Allow ±15% (674–913).
-        assert 674 <= len(text) <= 913, (
+        # Ground truth: 602 chars. Allow ±15% (512-692).
+        #
+        # Was 794 until trailing cell padding stopped being emitted
+        # (edgartools-j8bs). Content is unchanged: 486 non-whitespace characters
+        # on both sides of that commit, so what left the string was spaces at
+        # end of line. Asserted on len() rather than content because the point
+        # of this test is that the item is BOUNDED and no longer swallows the
+        # signature block.
+        assert 512 <= len(text) <= 692, (
             f"JPM Item 9.01 length {len(text)} outside expected range [674, 913]"
         )
 

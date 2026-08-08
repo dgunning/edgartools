@@ -352,7 +352,16 @@ class TableNode(Node, CacheableMixin):
                         justify=alignment,
                         vertical="middle",
                         width=col_width,
-                        overflow="ellipsis"
+                        # "fold", matching the header branch above. This used to
+                        # be "ellipsis", which silently cut a cell to its first
+                        # line: a headerless table's cells are no less content
+                        # than a headed one's. 1990s and 2000s filers wrap a
+                        # whole document in a single-cell layout table, so the
+                        # cut discarded the filing. Autoliv's 2001 DEFR14A
+                        # rendered 20,523 characters instead of 83,316, losing
+                        # its "DEAR STOCKHOLDER" cover letter from an 18,759-
+                        # character cell. (edgartools-j8bs)
+                        overflow="fold"
                     )
 
         # Add data rows
