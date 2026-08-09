@@ -121,19 +121,45 @@ def sha256(text):
 # structure -- 9,498 remain.
 #
 # Both paths still agree on all five, so one hash still covers them.
+#
+# Re-captured an EIGHTH time, for the header-row misclassifications in
+# edgartools-y264. Two of the five filings move, and both moves are pure
+# relocation: `sorted(before) == sorted(after)` holds on each, so not one
+# character was gained, lost or altered — rows changed which side of the
+# header/body split they render on.
+#
+#   Apple 10-K      253,809 -> 253,809 chars, 4 lines differ
+#   10x Genomics    595,520 -> 595,520 chars, 2 lines differ
+#   Merck, Exelon, BofA 424B2  byte-identical
+#
+# Apple's two moved lines are term-debt rows carrying interest-rate RANGES:
+#
+#   Fixed-rate 0.000% - 4.650% notes  2024 - 2062  $ 101,322  0.03% - 6.72% ...
+#
+# A range cell was being counted as text by the content-type-ratio branch of
+# _is_header_row, so the rows scored as all-text and rendered inside the header
+# block. They now render in the table body, below the rule, which is why the
+# lines move down rather than change. 10x Genomics moves for the same reason at
+# one remove: its two differing lines are the box-drawing rule shifting by one
+# row as a row leaves its header.
+#
+# This is the first re-capture on this corpus where nothing was repaired in the
+# text itself. The user-visible change is that these rows are now readable as
+# data — which is what the markdown parity ratchet measures, and where the same
+# fix took the tracked corpus from 902 lost numbers to 739.
 
 BASELINE = {
     # Modern iXBRL 10-K
     "0000320193-23-000106": (
         dict(form="10-K", filing_date="2023-11-03", company="Apple Inc.",
              cik=320193, accession_no="0000320193-23-000106"),
-        "a209021d285101eca93a0645914b4a633056af278fbe975813d7a40ac5734fdb",
+        "6147976a87b59b1400d374831c625d023f0202b4d36fda6b931e8407a07a4ccc",
     ),
     # Plain HTML 10-K
     "0001193125-20-052640": (
         dict(form="10-K", filing_date="2020-02-27", company="10x Genomics, Inc.",
              cik=1770787, accession_no="0001193125-20-052640"),
-        "b077ddc8480a28b3ead2ac5039fa0059b1d5d13f66f83208b48ab443d04816f0",
+        "feae74ba4ffd7cb9bc267297bab99ab3f2d0a707cda06ce1bbb6ee19257580df",
     ),
     # CORRESP — the shape where the two paths already agreed before the fix
     "0000065873-05-000060": (

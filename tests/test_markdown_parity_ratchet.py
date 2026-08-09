@@ -63,10 +63,26 @@ pytestmark = pytest.mark.slow
 #
 # The real remaining signal is the executive-officers table ('executive',
 # 'officer', 'president' in the word shortfalls, e.g. adbe/10k).
+#
+# REBASELINED AGAIN 2026-08-09 after edgartools-y264, which took the tracked
+# total from 902 to 739 (-18%) with zero filings regressing. Thirteen entries
+# moved. That the corpus-wide effect is an order of magnitude larger than the
+# filing it was found on is the point worth keeping: y264 started as "why does
+# unh/10k still lose 82?" and the answer was two more branches of
+# _is_header_row missing a figures veto, which were quietly collapsing tables
+# in a dozen other filings too — msft/10q 68 -> 8, msft/10k 57 -> 15,
+# amzn/10k 34 -> 13, meta/10k 53 -> 39.
+#
+# The gluing hypothesis above was also settled, and it holds: of unh/10k's
+# remaining 74, 69 are legacy running a principal into a coupon ($1,000 +
+# 2.875% -> $1,0002.875%) and 5 are page-number footers the new parser is right
+# to drop. Nothing in that filing's residual is content the new renderer loses.
+# So the harness refinement is still worth doing, and is now known to be the
+# ONLY thing left on unh/10k rather than a guess about most of it.
 BASELINE_NUMBER_LOSS = {
     ("8-K", "0000887919-21-000012"): 2,
     ("20-F", "0001062993-16-008650"): 42,
-    ("20-F", "0001062993-21-003193"): 24,
+    ("20-F", "0001062993-21-003193"): 22,
     ("10-Q", "aapl/10q"): 10,
     ("10-Q", "ba/10q"): 1,
     ("10-Q", "gbdc/10q"): 24,
@@ -76,23 +92,22 @@ BASELINE_NUMBER_LOSS = {
     ("10-Q", "jnj/10q"): 1,
     ("10-Q", "jpm/10q"): 6,
     ("10-Q", "ko/10q"): 2,
-    ("10-Q", "msft/10q"): 68,
+    ("10-Q", "msft/10q"): 8,
     ("10-Q", "nflx/10q"): 6,
     ("10-Q", "nvda/10q"): 2,
     ("10-Q", "pg/10q"): 24,
     ("10-Q", "tsla/10q"): 4,
     ("10-Q", "unp/10q"): 2,
-    ("10-K", "915358/10k"): 30,
-    ("10-K", "aapl/10k"): 1,
+    ("10-K", "915358/10k"): 25,
     ("10-K", "abbv/10k"): 4,
     ("10-K", "adbe/10k"): 16,
-    ("10-K", "amzn/10k"): 34,
+    ("10-K", "amzn/10k"): 13,
     ("10-K", "axp/10k"): 18,
     ("10-K", "ba/10k"): 14,
     ("10-K", "bac/10k"): 5,
     ("10-K", "c/10k"): 2,
     ("10-K", "cat/10k"): 17,
-    ("10-K", "crm/10k"): 27,
+    ("10-K", "crm/10k"): 26,
     ("10-K", "cvx/10k"): 4,
     ("10-K", "gbdc/10k"): 67,
     ("10-K", "gs/10k"): 9,
@@ -101,14 +116,14 @@ BASELINE_NUMBER_LOSS = {
     ("10-K", "jnj/10k"): 7,
     ("10-K", "jpm/10k"): 1,
     ("10-K", "ko/10k"): 3,
-    ("10-K", "ma/10k"): 3,
-    ("10-K", "meta/10k"): 53,
+    ("10-K", "ma/10k"): 2,
+    ("10-K", "meta/10k"): 39,
     ("10-K", "ms/10k"): 6,
-    ("10-K", "msft/10k"): 57,
+    ("10-K", "msft/10k"): 15,
     ("10-K", "nflx/10k"): 21,
-    ("10-K", "nke/10k"): 8,
+    ("10-K", "nke/10k"): 7,
     ("10-K", "nvda/10k"): 16,
-    ("10-K", "orcl/10k"): 9,
+    ("10-K", "orcl/10k"): 7,
     ("10-K", "pfe/10k"): 3,
     ("10-K", "rf/10k"): 4,
     ("10-K", "tsla/10k"): 22,
@@ -117,8 +132,14 @@ BASELINE_NUMBER_LOSS = {
     # "do not re-bank a decrease" rule above is about renderer noise of a
     # point or two, and leaving a 104-point drop unbanked would let the
     # schedule regress all the way back without tripping anything.
-    ("10-K", "unh/10k"): 82,
-    ("10-K", "unp/10k"): 12,
+    #
+    # Then 82 until edgartools-y264 restored the buyback table and the
+    # stock-option assumptions. The 74 left are all accounted for and none of
+    # them are ours: 69 legacy gluings and 5 page-number footers. This entry
+    # will not reach zero by fixing the parser — only by teaching the harness
+    # to discount glued numbers the way it already discounts glued words.
+    ("10-K", "unh/10k"): 74,
+    ("10-K", "unp/10k"): 7,
     ("10-K", "v/10k"): 13,
     ("10-K", "wfc/10k"): 15,
     ("10-K", "wmt/10k"): 14,
@@ -133,6 +154,10 @@ CLEAN_FILINGS = {
     # Reached zero via edgartools-v3ec: its remaining two lost numbers were in a
     # table whose rows were being classified as headers.
     ("10-K", "googl/10k"),
+    # Reached zero via edgartools-y264. Its last lost number was 6.65 — the top
+    # of the interest-rate range "0.03% – 6.65%" in the term-debt table, in a
+    # row whose range cells were being counted as text.
+    ("10-K", "aapl/10k"),
     ("8-K", "0001437749-16-028287"),
     ("20-F", "0000928385-01-500187"),
     ("10-Q", "xom/10q"),
