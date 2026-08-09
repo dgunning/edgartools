@@ -111,7 +111,7 @@ def test_part_validity_skips_partless_sections():
 
 # --- End-to-end: Freddie Mac 10-Q under VCR ------------------------------------
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
 def test_fmcc_phantom_items_are_prevented():
     """FMCC 10-Q: the phantom part_i_item_5/6 no longer exist at all.

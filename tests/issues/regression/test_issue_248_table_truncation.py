@@ -16,10 +16,10 @@ from edgar.documents.parser import HTMLParser
 from edgar.documents.renderers.fast_table import TableStyle
 
 
-@pytest.mark.network
 class TestIssue248TableTruncation:
     """Tests for table truncation fix in Issue #248."""
 
+    @pytest.mark.network
     def test_fast_table_renderer_does_not_truncate_long_descriptions(self):
         """
         Original issue: Long financial descriptions were truncated with "...".
@@ -47,6 +47,7 @@ class TestIssue248TableTruncation:
         for indicator in truncation_indicators:
             assert indicator not in text, f"Text still truncated: found '{indicator}'"
 
+    @pytest.mark.fast
     def test_simple_style_max_col_width_is_adequate(self):
         """Verify the simple() style has adequate max_col_width."""
         style = TableStyle.simple()
@@ -57,6 +58,7 @@ class TestIssue248TableTruncation:
             "should be >= 100 to avoid truncating SEC filing text"
         )
 
+    @pytest.mark.network
     def test_financial_table_content_preserved(self):
         """
         Ensure financial tables preserve their full content.

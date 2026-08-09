@@ -77,30 +77,45 @@ class TestComprehensiveIncomeZeroDivision:
             1009829,  # Another affected company
         ]
 
+        # This used to end in a bare `except Exception: pass`, which made the
+        # test pass without doing anything at all -- an offline audit found it
+        # green with outbound sockets blocked, because the very first
+        # Company(cik) call raised a connection error straight into the
+        # swallow. Counting the companies actually exercised, and requiring at
+        # least one, is what makes a green run mean something here.
+        exercised = 0
+
         for cik in test_ciks:
+            from edgar import Company
+            company = Company(str(cik))
+            filing = company.get_filings(form="10-K").latest(1)
+
+            if not filing:
+                continue
+
+            xb = filing.xbrl()
+
             try:
-                from edgar import Company
-                company = Company(str(cik))
-                filing = company.get_filings(form="10-K").latest(1)
+                # Try both methods - neither should raise ZeroDivisionError
+                xb.statements.comprehensive_income()
+                ci_bracket = xb.statements.get('ComprehensiveIncome')
 
-                if filing:
-                    xb = filing.xbrl()
-
-                    # Try both methods - should not crash
-                    ci_primary = xb.statements.comprehensive_income()
-                    ci_bracket = xb.statements.get('ComprehensiveIncome')
-
-                    # If bracket notation finds something, to_dataframe() should work
-                    if ci_bracket:
-                        df = ci_bracket.to_dataframe()
-                        assert df is not None
+                # If bracket notation finds something, to_dataframe() should work
+                if ci_bracket:
+                    assert ci_bracket.to_dataframe() is not None
 
             except ZeroDivisionError as e:
                 pytest.fail(f"ZeroDivisionError for CIK {cik}: {e}. Bug #486 not fixed.")
-            except Exception:
-                # Other exceptions are OK (e.g., network issues, no filings)
-                # We're only testing for ZeroDivisionError
+            except (StatementNotFound, KeyError):
+                # The statement being absent is not this bug; the crash was.
                 pass
+
+            exercised += 1
+
+        assert exercised, (
+            f"none of {test_ciks} yielded a 10-K to check, so this test proved "
+            f"nothing about #486"
+        )
 
 
 if __name__ == "__main__":

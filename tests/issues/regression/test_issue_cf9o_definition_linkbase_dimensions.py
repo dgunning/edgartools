@@ -104,7 +104,7 @@ def test_xbrl_dimension_validation_methods():
     assert xbrl.is_dimension_valid_for_role("srt_ProductOrServiceAxis", role)
 
 
-@pytest.mark.network
+@pytest.mark.fast
 def test_fallback_to_heuristic_when_no_definition_linkbase():
     """
     When definition linkbase is not available, fall back to heuristic filtering.

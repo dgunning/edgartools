@@ -448,7 +448,7 @@ def test_successor_pre_gate_still_scans_when_mandatory_item_missing_mid_ladder()
 
 # --- End-to-end: Coeur Mining 10-K under VCR ----------------------------------
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
 def test_coeur_item7_bounded_and_body_items_recovered():
     """Coeur 10-K: Item 7 stops at Item 7A; 7A/8/9A exist; Item 1B is a stub."""

@@ -103,7 +103,7 @@ def test_issue_631_save_to_directory():
         assert loaded._sgml is not None
 
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.regression
 def test_issue_631_xbrl_attachments_none_content_guard():
     """

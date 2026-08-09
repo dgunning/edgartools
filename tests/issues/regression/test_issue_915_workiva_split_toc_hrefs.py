@@ -111,7 +111,7 @@ class TestWorkivaSplitHrefRows:
         }
 
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
 def test_tesla_2023_10k_item_3_does_not_overflow():
     """End-to-end on the reported filing: Tesla FY2023 10-K (Workiva agent).

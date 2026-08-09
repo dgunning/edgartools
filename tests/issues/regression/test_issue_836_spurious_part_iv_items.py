@@ -96,7 +96,7 @@ class TestTenQUnaffected:
         assert analyzer._make_section_key("Item 1", "Part I") == "part_i_item_1"
 
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
 def test_unh_2026_10k_no_spurious_part_iv_item_1():
     """End-to-end on the reported filing: UNH FY2025 10-K.

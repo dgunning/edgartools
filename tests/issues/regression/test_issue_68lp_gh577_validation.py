@@ -323,10 +323,10 @@ class TestBalanceSheetPPE:
 # CONTROL CASES - Breakdowns Should Still Be Filtered
 # =============================================================================
 
-@pytest.mark.network
 class TestBreakdownsFiltered:
     """Test that breakdown dimensions are still correctly filtered."""
 
+    @pytest.mark.network
     def test_geographic_breakdown_filtered(self):
         """StatementGeographicalAxis should be filtered as breakdown."""
         from edgar import Company
@@ -350,6 +350,7 @@ class TestBreakdownsFiltered:
         assert is_breakdown_dimension(item, xbrl=xbrl, role_uri=role_uri), \
             "Geographic axis should be filtered as breakdown"
 
+    @pytest.mark.fast
     def test_business_segment_breakdown_filtered(self):
         """StatementBusinessSegmentsAxis should be filtered as breakdown."""
         from edgar.xbrl.dimensions import is_breakdown_dimension
@@ -364,6 +365,7 @@ class TestBreakdownsFiltered:
         assert is_breakdown_dimension(item), \
             "Business segment axis should be filtered as breakdown"
 
+    @pytest.mark.fast
     def test_product_service_axis_preserved(self):
         """ProductOrServiceAxis should NOT be filtered (it's a face axis)."""
         from edgar.xbrl.dimensions import is_breakdown_dimension
