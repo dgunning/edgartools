@@ -56,14 +56,26 @@ class TestSubheadingDoesNotTruncateItem:
 
         This is what makes it a candidate section boundary; if the parser ever
         stops doing this the test below would pass trivially, so assert it.
+
+        Searching for a heading containing 'Adoption' and asserting it was
+        found is the weakest form of that: it holds for a heading carrying only
+        part of the line, and it says nothing about the item header, which must
+        NOT be a heading (it is a bold paragraph — that asymmetry is the whole
+        setup). Both are pinned instead.
         """
         doc = self._doc()
-        sub = next(
-            (n for n in doc.root.walk()
-             if isinstance(n, HeadingNode) and 'Adoption' in (n.text() or '')),
-            None,
+        headings = [n for n in doc.root.walk() if isinstance(n, HeadingNode)]
+        texts = [(n.text() or '').strip() for n in headings]
+        assert texts == ['Adoption of Fiscal Year 2027 Variable Compensation Plan'], (
+            "expected exactly one HeadingNode, the internal sub-heading; got "
+            f"{texts}. If the bold Item 5.02 line has become a heading too, "
+            "this fixture no longer reproduces the NVDA structure."
         )
-        assert sub is not None, "Sub-heading should be parsed as a HeadingNode"
+        assert headings[0].level == 1, (
+            f"sub-heading parsed at level {headings[0].level}. It closed the "
+            "item because its level was at or above the item header's; a "
+            "deeper level would make this fixture stop reproducing the bug."
+        )
 
     def test_item_body_not_truncated_at_subheading(self):
         """The Item 5.02 body must survive the internal bold sub-heading."""

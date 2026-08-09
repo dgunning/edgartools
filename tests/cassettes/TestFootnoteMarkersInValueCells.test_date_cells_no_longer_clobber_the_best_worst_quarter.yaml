@@ -1,0 +1,1527 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/772129/000119312525152548/0001193125-25-152548.txt
+  response:
+    body:
+      string: "<SEC-DOCUMENT>0001193125-25-152548.txt : 20250630\n<SEC-HEADER>0001193125-25-152548.hdr.sgml
+        : 20250630\n<ACCEPTANCE-DATETIME>20250630145103\nACCESSION NUMBER:\t\t0001193125-25-152548\nCONFORMED
+        SUBMISSION TYPE:\t497K\nPUBLIC DOCUMENT COUNT:\t\t2\nFILED AS OF DATE:\t\t20250630\nDATE
+        AS OF CHANGE:\t\t20250630\nEFFECTIVENESS DATE:\t\t20250630\n\nFILER:\n\n\tCOMPANY
+        DATA:\t\n\t\tCOMPANY CONFORMED NAME:\t\t\tGMO TRUST\n\t\tCENTRAL INDEX KEY:\t\t\t0000772129\n\t\tORGANIZATION
+        NAME:           \t\n\t\tEIN:\t\t\t\t000000000\n\t\tSTATE OF INCORPORATION:\t\t\tMA\n\t\tFISCAL
+        YEAR END:\t\t\t0831\n\n\tFILING VALUES:\n\t\tFORM TYPE:\t\t497K\n\t\tSEC ACT:\t\t1933
+        Act\n\t\tSEC FILE NUMBER:\t002-98772\n\t\tFILM NUMBER:\t\t251091403\n\n\tBUSINESS
+        ADDRESS:\t\n\t\tSTREET 1:\t\t53 STATE STREET\n\t\tSTREET 2:\t\tFLOOR 33\n\t\tCITY:\t\t\tBOSTON\n\t\tSTATE:\t\t\tMA\n\t\tZIP:\t\t\t02109\n\t\tBUSINESS
+        PHONE:\t\t6173467646\n\n\tMAIL ADDRESS:\t\n\t\tSTREET 1:\t\t53 STATE STREET\n\t\tSTREET
+        2:\t\tFLOOR 33\n\t\tCITY:\t\t\tBOSTON\n\t\tSTATE:\t\t\tMA\n\t\tZIP:\t\t\t02109\n\n\tFORMER
+        COMPANY:\t\n\t\tFORMER CONFORMED NAME:\tGMO CORE TRUST\n\t\tDATE OF NAME CHANGE:\t19900927\n<SERIES-AND-CLASSES-CONTRACTS-DATA>\n<EXISTING-SERIES-AND-CLASSES-CONTRACTS>\n<SERIES>\n<OWNER-CIK>0000772129\n<SERIES-ID>S000004917\n<SERIES-NAME>GMO
+        Multi-Sector Fixed Income Fund\n<CLASS-CONTRACT>\n<CLASS-CONTRACT-ID>C000213366\n<CLASS-CONTRACT-NAME>Class
+        I\n</CLASS-CONTRACT>\n<CLASS-CONTRACT>\n<CLASS-CONTRACT-ID>C000213367\n<CLASS-CONTRACT-NAME>Class
+        R6\n</CLASS-CONTRACT>\n</SERIES>\n</EXISTING-SERIES-AND-CLASSES-CONTRACTS>\n</SERIES-AND-CLASSES-CONTRACTS-DATA>\n</SEC-HEADER>\n<DOCUMENT>\n<TYPE>497K\n<SEQUENCE>1\n<FILENAME>d94622d497k.htm\n<DESCRIPTION>GMO
+        TRUST\n<TEXT>\n<HTML><HEAD>\n<TITLE>GMO TRUST</TITLE>\n</HEAD>\n\n\n<body
+        style=\"margin-top:0.0pt;width:595pt;\" bgcolor=\"white\">\n  <div> <div><a
+        name=\"xx_39754e51-4a39-46e0-abde-2f548a968d0d_1\"></A> <div style=\"page-break-after:always;position:relative;\">
+        <div style=\"clear:both;\">\n</div> <div style=\"float:left;margin-left:18pt;margin-top:18pt;width:420pt;min-height:42pt;\">\n<div
+        style=\"line-height:19.0pt;text-align:left;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:18pt;font-weight:bold;line-height:19pt;\">GMO MULTI-SECTOR
+        FIXED INCOME FUND</font></div> </div>\n<div style=\"float:left;margin-left:19pt;margin-top:18pt;width:120pt;min-height:36pt;\">
+        <div style=\"line-height:14.0pt;text-align:left;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:12pt;font-weight:bold;line-height:14pt;\">Summary\nProspectus</font>
+        <div> </div><font style=\"color:#000000;font-family:Times New Roman;font-size:12pt;font-weight:bold;line-height:14pt;\">June
+        30, 2025</font></div> </div> <div style=\"clear:both;\"> </div>\n<div style=\"float:left;margin-left:18pt;width:559pt;min-height:678pt;\">
+        <div style=\"line-height:0.0pt;text-align:left;\"><font style=\"color:#000000;float:right;font-family:Times
+        New Roman;font-size:1pt;font-weight:bold;\">&#8195;</font></div>\n<div style=\"margin-top:15pt;\">\n<table
+        style=\"empty-cells:show;width:269.97pt;\" cellpadding=\"0\" cellspacing=\"0\">\n<tr
+        style=\"height:12pt;\">\n<td style=\"padding-bottom:4pt;padding-top:4pt;vertical-align:Top;width:147pt;\">
+        <div style=\"line-height:13pt;text-align:left;\"> <div style=\"margin-right:15pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:12pt;margin-left:0.0pt;\">Share Class:</font></div> </div>
+        </td>\n<td style=\"padding-bottom:4pt;padding-top:4pt;vertical-align:Top;width:73.99pt;\">
+        <div style=\"line-height:13pt;text-align:left;\"> <div style=\"margin-left:15pt;margin-right:15pt;text-align:Center;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:12pt;\">Class R6</font></div> </div> </td>\n<td style=\"padding-bottom:4pt;padding-top:4pt;vertical-align:Top;width:48.98pt;\">
+        <div style=\"line-height:13pt;text-align:left;\"> <div style=\"margin-left:15pt;text-align:Center;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:12pt;\">Class I</font></div> </div> </td> </tr>\n<tr style=\"height:13pt;\">\n<td
+        style=\"padding-bottom:4.5pt;padding-top:4pt;vertical-align:Top;width:147pt;\">
+        <div style=\"line-height:13pt;text-align:left;\"> <div style=\"margin-right:15pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:12pt;margin-left:0.0pt;\">Ticker:</font></div> </div>
+        </td>\n<td style=\"padding-bottom:4.5pt;padding-top:4pt;vertical-align:Top;width:73.99pt;\">
+        <div style=\"line-height:13pt;text-align:left;\"> <div style=\"margin-left:15pt;margin-right:15pt;text-align:Center;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:12pt;\">&#8212;</font></div> </div> </td>\n<td style=\"padding-bottom:4.5pt;padding-top:4pt;vertical-align:Top;width:48.98pt;\">
+        <div style=\"line-height:13pt;text-align:left;\"> <div style=\"margin-left:15pt;text-align:Center;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:12pt;\">&#8212;</font></div> </div> </td> </tr> </table>
+        </div> <div style=\"border:1pt solid #000000;\">\n<div style=\"line-height:11.5pt;margin-left:6pt;margin-right:6pt;padding-top:4pt;padding-bottom:4pt;margin-top:7pt;text-align:justify;\">
+        <div style=\"margin-top:7pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:0.00%;\">Before you invest, you may want
+        to review the Fund&#8217;s prospectus, which contains more information about
+        the Fund and its risks. </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:0.00%;\">You can find the Fund&#8217;s
+        prospectus, statement of additional information and other information about
+        the Fund online at\nhttps://www.gmo.com/americas/investment-capabilities/mutual-funds/.</font><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;margin-left:0.00%;\">
+        You can also get this information at no cost by calling </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:0.00%;\">1-617-346-7646, by sending an
+        email request to SHS@gmo.com, or by contacting your financial intermediary.
+        The Fund&#8217;s </font><font\nstyle=\"color:#000000;font-family:Times New
+        Roman;font-size:10pt;margin-left:0.00%;\">prospectus and statement of additional
+        information, each dated June 30, 2025, each as may be revised and/or supplemented
+        from </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;margin-left:0.0pt;\">time
+        to time, are incorporated by reference into this summary prospectus.</font></div>
+        </div> </div>\n<div style=\"line-height:12.0pt;margin-top:21.5pt;text-align:left;\">
+        <div style=\"margin-top:10pt;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;font-weight:bold;\">Investment objective</font></div>
+        </div>\n<div style=\"line-height:11.5pt;margin-left:21pt;margin-top:1.0pt;text-align:left;\">
+        <div style=\"margin-top:1pt;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">Total return in excess of that of its benchmark,
+        the Bloomberg\nU.S. Aggregate Index.</font></div> </div> <div style=\"line-height:12.0pt;margin-top:10.0pt;text-align:left;\">
+        <div style=\"margin-top:10pt;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;font-weight:bold;\">Fees and\nexpenses</font></div>
+        </div> <div style=\"line-height:11.5pt;margin-top:1pt;text-align:justify;\">
+        <div style=\"margin-top:1pt;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:3.76%;\">The table below describes the\nfees
+        and expenses that you may bear for each class of shares if you buy, hold,
+        and sell shares of the </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">Fund. You may pay other fees, such as brokerage
+        commissions and\nother fees to financial intermediaries, which are not reflected
+        in the </font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">table
+        and example below.</font></div> </div>\n<div style=\"line-height:12.0pt;margin-top:10.0pt;text-align:left;\">
+        <div style=\"margin-top:10pt;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;font-weight:bold;\">Annual Fund operating expenses</font>
+        <br><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;font-weight:bold;line-height:12pt;\">
+        </font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">(expenses
+        that you bear each year as a percentage of the value of\nyour investment)</font><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:1pt;font-weight:bold;\">&#8195;</font></div>
+        </div> <div style=\"line-height:0.0pt;margin-top:6.0pt;text-align:left;\">
+        <div style=\"margin-top:6pt;\"> </div> </div>\n<div style=\"margin-top:0.0pt;\">\n<table
+        style=\"empty-cells:show;width:559pt;\" cellpadding=\"0\" cellspacing=\"0\">\n<tr
+        style=\"height:13.75pt;\">\n<td style=\"border-bottom:0.5pt solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;width:450.07pt;\">
+        <div style=\"line-height:0.5pt;text-align:left;\">\n<div style=\"margin-left:6pt;margin-right:6pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;font-weight:bold;\">&nbsp;</font></div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;width:50.32pt;\">
+        <div style=\"line-height:12.0pt;text-align:left;\">\n<div style=\"margin-left:4pt;margin-right:4pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;font-weight:bold;\">Class
+        R6</font></div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;width:58.61pt;\">
+        <div style=\"line-height:12.0pt;text-align:left;\">\n<div style=\"margin-left:4pt;margin-right:10pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;font-weight:bold;\">Class
+        I</font></div> </div> </td> </tr>\n<tr style=\"height:13.25pt;\">\n<td style=\"padding-bottom:2.5pt;padding-top:1.25pt;vertical-align:Bottom;width:450.07pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-left:6pt;margin-right:6pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:0.0pt;\">Management fee</font></div>
+        </div> </td>\n<td style=\"padding-bottom:2.5pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:50.32pt;\">
+        <div style=\"line-height:11pt;margin-left:6pt;margin-right:6pt;text-align:right;width:38.32pt;\">\n<div
+        style=\"display:flex;margin:auto;width:37.74pt;\"> <div style=\"display:flex;white-space:nowrap;width:37.74pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;margin-left:3.33pt;\">0.40%</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:6.5pt;position:relative;top:-2.75pt;\">1</font> <div style=\"clear:right;\">
+        </div> </div> </div> </div> </td>\n<td style=\"padding-bottom:2.5pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:58.61pt;\">
+        <div style=\"line-height:11pt;margin-left:6pt;margin-right:6pt;text-align:right;width:40.61pt;\">\n<div
+        style=\"display:flex;margin:auto;width:42.61pt;\"> <div style=\"display:flex;white-space:nowrap;width:42.61pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;margin-left:3.33pt;\">0.40%</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:6.5pt;position:relative;top:-2.75pt;\">1</font> <div style=\"clear:right;\">
+        </div> </div> </div> </div> </td> </tr>\n<tr style=\"height:12pt;\">\n<td
+        style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;width:450.07pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-left:6pt;margin-right:6pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:0.0pt;\">Other expenses</font></div>
+        </div> </td>\n<td style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;white-space:nowrap;width:50.32pt;\">
+        <div style=\"line-height:11pt;margin-left:6pt;margin-right:6pt;text-align:right;width:38.32pt;\">\n<div
+        style=\"display:flex;margin:auto;width:37.74pt;\"> <div style=\"display:flex;white-space:nowrap;width:37.74pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;margin-left:3.33pt;\">0.32%</font></div>
+        </div> </div> </td>\n<td style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;white-space:nowrap;width:58.61pt;\">
+        <div style=\"line-height:11pt;margin-left:6pt;margin-right:6pt;text-align:right;width:40.61pt;\">\n<div
+        style=\"display:flex;margin:auto;width:42.61pt;\"> <div style=\"display:flex;white-space:nowrap;width:42.61pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;margin-left:3.33pt;\">0.44%</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:6.5pt;position:relative;top:-2.75pt;\">2</font> <div style=\"clear:right;\">
+        </div> </div> </div> </div> </td> </tr>\n<tr style=\"height:12pt;\">\n<td
+        style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;width:450.07pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-left:6pt;margin-right:6pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:0.0pt;\">Acquired fund fees and expenses
+        (underlying fund expenses)</font></div> </div> </td>\n<td style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;white-space:nowrap;width:50.32pt;\">
+        <div style=\"line-height:11pt;margin-left:6pt;margin-right:6pt;text-align:right;width:38.32pt;\">\n<div
+        style=\"display:flex;margin:auto;width:37.74pt;\"> <div style=\"display:flex;white-space:nowrap;width:37.74pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;margin-left:3.33pt;\">0.12%</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:6.5pt;position:relative;top:-2.75pt;\">3</font> <div style=\"clear:right;\">
+        </div> </div> </div> </div> </td>\n<td style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;white-space:nowrap;width:58.61pt;\">
+        <div style=\"line-height:11pt;margin-left:6pt;margin-right:6pt;text-align:right;width:40.61pt;\">\n<div
+        style=\"display:flex;margin:auto;width:42.61pt;\"> <div style=\"display:flex;white-space:nowrap;width:42.61pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;margin-left:3.33pt;\">0.12%</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:6.5pt;position:relative;top:-2.75pt;\">3</font> <div style=\"clear:right;\">
+        </div> </div> </div> </div> </td> </tr>\n<tr style=\"height:12pt;\">\n<td
+        style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;width:450.07pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-left:6pt;margin-right:6pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:0.0pt;\">Total annual fund operating
+        expenses</font></div> </div> </td>\n<td style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;white-space:nowrap;width:50.32pt;\">
+        <div style=\"line-height:11pt;margin-left:6pt;margin-right:6pt;text-align:right;width:38.32pt;\">\n<div
+        style=\"display:flex;margin:auto;width:37.74pt;\"> <div style=\"display:flex;white-space:nowrap;width:37.74pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;margin-left:3.33pt;\">0.84%</font></div>
+        </div> </div> </td>\n<td style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;white-space:nowrap;width:58.61pt;\">
+        <div style=\"line-height:11pt;margin-left:6pt;margin-right:6pt;text-align:right;width:40.61pt;\">\n<div
+        style=\"display:flex;margin:auto;width:42.61pt;\"> <div style=\"display:flex;white-space:nowrap;width:42.61pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;margin-left:3.33pt;\">0.96%</font></div>
+        </div> </div> </td> </tr>\n\n<tr style=\"height:12pt;\">\n<td style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;width:450.07pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-left:6pt;margin-right:6pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:15pt;\">Expense reimbursement/waiver</font></div>
+        </div> </td>\n<td style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;white-space:nowrap;width:50.32pt;\">
+        <div style=\"line-height:11pt;margin-left:6pt;margin-right:6pt;text-align:right;width:38.32pt;\">\n<div
+        style=\"display:flex;margin:auto;width:37.74pt;\"> <div style=\"display:flex;white-space:nowrap;width:37.74pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">(0.37%)</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:6.5pt;position:relative;top:-2.75pt;\">1</font> <div style=\"clear:right;\">
+        </div> </div> </div> </div> </td>\n<td style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;white-space:nowrap;width:58.61pt;\">
+        <div style=\"line-height:11pt;margin-left:6pt;margin-right:6pt;text-align:right;width:40.61pt;\">\n<div
+        style=\"display:flex;margin:auto;width:42.61pt;\"> <div style=\"display:flex;white-space:nowrap;width:42.61pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">(0.37%)</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:6.5pt;position:relative;top:-2.75pt;\">1,</font><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:6.5pt;position:relative;top:-2.75pt;\">2</font>
+        <div style=\"clear:right;\">\n</div> </div> </div> </div> </td> </tr>\n<tr
+        style=\"height:21.5pt;\">\n<td style=\"padding-bottom:1.5pt;padding-top:2.5pt;vertical-align:Bottom;width:450.07pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-left:6pt;margin-right:6pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:0.0pt;\">Total annual fund operating
+        expenses after expense reimbursement/waiver (Fund and underlying fund </font></div>\n<div
+        style=\"margin-left:6pt;margin-right:6pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;margin-left:10pt;\">expenses)</font></div>
+        </div> </td>\n<td style=\"padding-bottom:1.5pt;padding-top:2.5pt;vertical-align:Bottom;white-space:nowrap;width:50.32pt;\">
+        <div style=\"line-height:11pt;margin-left:6pt;margin-right:6pt;text-align:right;width:38.32pt;\">\n<div
+        style=\"display:flex;margin:auto;width:37.74pt;\"> <div style=\"display:flex;white-space:nowrap;width:37.74pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;margin-left:3.33pt;\">0.47%</font></div>
+        </div> </div> </td>\n<td style=\"padding-bottom:1.5pt;padding-top:2.5pt;vertical-align:Bottom;white-space:nowrap;width:58.61pt;\">
+        <div style=\"line-height:11pt;margin-left:6pt;margin-right:6pt;text-align:right;width:40.61pt;\">\n<div
+        style=\"display:flex;margin:auto;width:42.61pt;\"> <div style=\"display:flex;white-space:nowrap;width:42.61pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;margin-left:3.33pt;\">0.59%</font></div>
+        </div> </div> </td> </tr>\n</table> </div> <div style=\"line-height:9.0pt;margin-top:9pt;text-align:justify;\">\n<div
+        style=\"margin-top:9pt;\"><font style=\"color:#000000;font-family:Times New
+        Roman;font-size:5pt;font-style:italic;margin-left:0%;position:relative;top:-2pt;\">1</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;font-style:italic;line-height:9pt;\">&nbsp;</font><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:8pt;font-style:italic;\">Includes
+        both management fee of 0.25% and\nclass-specific shareholder service fee,
+        if any, for each class of shares. For additional information about the shareholder
+        </font><font style=\"color:#000000;font-family:Times New Roman;font-size:8pt;font-style:italic;margin-left:0%;\">service
+        fee\napplicable to each class of shares of the Fund, please see the table
+        included in the section of the Prospectus entitled &#8220;Multiple Classes
+        and Eligibility.&#8221; </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;font-style:italic;margin-left:0%;\">Grantham, Mayo,
+        Van Otterloo &amp; Co. LLC (&#8220;GMO&#8221;) has contractually agreed to
+        reimburse the Fund for the portion of its &#8220;Specified\nOperating Expenses&#8221;
+        (as defined </font><font style=\"color:#000000;font-family:Times New Roman;font-size:8pt;font-style:italic;margin-left:0%;\">below)
+        that exceeds 0.02% of the Fund&#8217;s average daily net assets. &#8220;Specified
+        Operating\nExpenses&#8221; means only the following expenses: audit expenses,
+        fund accounting </font><font style=\"color:#000000;font-family:Times New Roman;font-size:8pt;font-style:italic;margin-left:0%;\">and
+        administration expenses, pricing service expenses,\nexpenses of non-investment
+        related tax services, transfer agency expenses (excluding, in the case of
+        Class I shares, </font><font style=\"color:#000000;font-family:Times New Roman;font-size:8pt;font-style:italic;margin-left:0%;\">any
+        amounts paid for\nsub-transfer agency, recordkeeping and other administrative
+        services provided by financial intermediaries for the benefit of Class I shareholders),
+        </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:8pt;font-style:italic;margin-left:0%;\">expenses
+        of non-investment related legal services provided to the Fund by or at the
+        direction of GMO, federal securities law filing expenses, printing\nexpenses,
+        state and </font><font style=\"color:#000000;font-family:Times New Roman;font-size:8pt;font-style:italic;margin-left:0%;\">federal
+        registration fees and custody expenses. GMO also has contractually agreed
+        to waive or reduce the Fund&#8217;s\nmanagement fees and shareholder service
+        fees to the </font><font style=\"color:#000000;font-family:Times New Roman;font-size:8pt;font-style:italic;margin-left:0%;\">extent
+        necessary to offset the management fees and shareholder service fees paid
+        to\nGMO that are directly or indirectly borne by the Fund or a class of shares
+        of the </font><font style=\"color:#000000;font-family:Times New Roman;font-size:8pt;font-style:italic;margin-left:0%;\">Fund
+        as a result of the Fund&#8217;s direct or indirect\ninvestments in other series
+        of GMO Trust and GMO-managed ETFs (&#8220;GMO Funds&#8221;). Management fees
+        and shareholder </font><font style=\"color:#000000;font-family:Times New Roman;font-size:8pt;font-style:italic;margin-left:0%;\">service
+        fees will\nnot be waived below zero. These reimbursements and waivers will
+        continue through at least June 30, 2026 and may not be terminated prior to
+        this date\n</font><font style=\"color:#000000;font-family:Times New Roman;font-size:8pt;font-style:italic;\">without
+        the action or consent of the Trust&#8217;s Board of Trustees.</font></div>
+        </div>\n<div style=\"line-height:9.0pt;margin-top:4pt;text-align:justify;\">
+        <div style=\"margin-top:4pt;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:5pt;font-style:italic;margin-left:0%;position:relative;top:-2pt;\">2</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;font-style:italic;line-height:9pt;\">&nbsp;</font><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:8pt;font-style:italic;\">Includes
+        estimate of payments for sub-transfer\nagency, recordkeeping and other administrative
+        services for Class I&#8217;s initial fiscal year. GMO has contractually agreed
+        to </font><font style=\"color:#000000;font-family:Times New Roman;font-size:8pt;font-style:italic;margin-left:0%;\">waive
+        its\nfees with respect to and/or reimburse Class I shares to the extent that
+        amounts paid by the Fund out of the net assets attributable to Class I shares
+        for sub-transfer</font><font\nstyle=\"color:#000000;font-family:Times New
+        Roman;font-size:8pt;font-style:italic;margin-left:0%;\"> agency, recordkeeping
+        and other administrative services provided by financial intermediaries for
+        the benefit of Class I shareholders exceed 0.15% of\nthe average </font><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:8pt;font-style:italic;margin-left:0%;\">daily
+        net assets attributable to Class I shares. This reimbursement will continue
+        through at least June 30, 2026 and may not\nbe terminated prior to this date
+        without the </font><font style=\"color:#000000;font-family:Times New Roman;font-size:8pt;font-style:italic;\">action
+        or consent of the Trust&#8217;s Board of Trustees.</font></div> </div>\n<div
+        style=\"line-height:9.0pt;margin-top:4pt;text-align:left;\"> <div style=\"margin-top:4pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:5pt;font-style:italic;position:relative;top:-2pt;\">3</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;font-style:italic;line-height:9pt;\">&nbsp;</font><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:8pt;font-style:italic;\">Consists
+        of approximately 0.11% in underlying\nfund fees and expenses and less than
+        0.01% in interest expense incurred by underlying funds.</font></div> </div>
+        <div style=\"line-height:12.0pt;margin-top:10pt;text-align:left;\"> <div style=\"margin-top:10pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;font-weight:bold;\">Example</font></div> </div> <div
+        style=\"line-height:11.5pt;margin-top:1pt;text-align:justify;\"> <div style=\"margin-top:1pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:3.76%;\">This example is intended to
+        help you compare the cost of investing in the Fund with the cost of investing
+        in other mutual funds. </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">The example assumes that you invest $10,000 in
+        the Fund for the time periods indicated, regardless of whether or not you
+        redeem your </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">shares
+        at the end of such periods. The example also assumes that your investment
+        has a 5% return each year and that the Fund&#8217;s </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">operating expenses remain the same as those shown
+        in the table. The one year amounts shown reflect the expense reimbursement
+        and </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">waiver
+        noted in the expense table. Although your actual costs may be higher or lower,
+        based on these assumptions your costs would be:</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:1pt;\">&#8195;</font></div> </div> <div style=\"line-height:0.0pt;margin-top:6.0pt;text-align:left;\">
+        <div style=\"margin-top:6pt;\"> </div> </div> <div style=\"margin-top:0.0pt;\">\n<table
+        style=\"empty-cells:show;margin-left:127.12pt;width:304.75pt;\" cellpadding=\"0\"
+        cellspacing=\"0\">\n<tr style=\"height:10.5pt;\">\n<td style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;width:151.5pt;\">
+        <div style=\"line-height:0.5pt;text-align:left;\"> <div style=\"margin-left:3pt;margin-right:4.5pt;text-align:Center;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;font-weight:bold;\">&nbsp;</font></div> </div> </td>\n<td
+        style=\"padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;width:35.36pt;\">
+        <div style=\"line-height:10.0pt;text-align:left;\"> <div style=\"border-bottom:0.5pt
+        solid #000000;margin-left:12.73%;margin-right:12.73%;padding-bottom:1pt;\">\n<div
+        style=\"text-align:Center;white-space:nowrap;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;font-weight:bold;line-height:9pt;\">&#8201;</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;font-weight:bold;\">1 Year</font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;font-weight:bold;line-height:9pt;\">&#8201;</font></div>
+        </div> </div> </td>\n<td style=\"padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;width:38.47pt;\">
+        <div style=\"line-height:10.0pt;text-align:left;\"> <div style=\"border-bottom:0.5pt
+        solid #000000;margin-left:11.70%;margin-right:11.70%;padding-bottom:1pt;\">\n<div
+        style=\"text-align:Center;white-space:nowrap;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;font-weight:bold;line-height:9pt;\">&#8201;</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;font-weight:bold;\">3 Years</font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;font-weight:bold;line-height:9pt;\">&#8201;</font></div>
+        </div> </div> </td>\n<td style=\"padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;width:38.47pt;\">
+        <div style=\"line-height:10.0pt;text-align:left;\"> <div style=\"border-bottom:0.5pt
+        solid #000000;margin-left:11.70%;margin-right:11.70%;padding-bottom:1pt;\">\n<div
+        style=\"text-align:Center;white-space:nowrap;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;font-weight:bold;line-height:9pt;\">&#8201;</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;font-weight:bold;\">5 Years</font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;font-weight:bold;line-height:9pt;\">&#8201;</font></div>
+        </div> </div> </td>\n<td style=\"padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;width:40.97pt;\">
+        <div style=\"line-height:10.0pt;text-align:left;\"> <div style=\"border-bottom:0.5pt
+        solid #000000;margin-left:10.98%;margin-right:3.66%;padding-bottom:1pt;\">\n<div
+        style=\"text-align:Center;white-space:nowrap;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;font-weight:bold;line-height:9pt;\">&#8201;</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;font-weight:bold;\">10 Years</font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;font-weight:bold;line-height:9pt;\">&#8201;</font></div>
+        </div> </div> </td> </tr>\n<tr style=\"height:12pt;\">\n<td style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;width:151.5pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-left:3pt;margin-right:4.5pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:0.0pt;\">Class R6</font></div> </div>
+        </td>\n<td style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;white-space:nowrap;width:35.36pt;\">
+        <div style=\"line-height:11pt;margin-left:4.5pt;margin-right:4.5pt;text-align:right;width:26.36pt;\">\n<div
+        style=\"display:flex;margin:auto;width:17.0pt;\"> <div style=\"display:flex;white-space:nowrap;width:17.0pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;width:auto;\">$</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;width:17.0pt;\">48</font></div> </div> </div> </td>\n<td
+        style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;white-space:nowrap;width:38.47pt;\">
+        <div style=\"line-height:11pt;margin-left:4.5pt;margin-right:4.5pt;text-align:right;width:29.47pt;\">\n<div
+        style=\"display:flex;margin:auto;width:22.0pt;\"> <div style=\"display:flex;white-space:nowrap;width:22.0pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;width:auto;\">$</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;width:22.0pt;\">231</font></div> </div> </div> </td>\n<td
+        style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;white-space:nowrap;width:38.47pt;\">
+        <div style=\"line-height:11pt;margin-left:4.5pt;margin-right:4.5pt;text-align:right;width:29.47pt;\">\n<div
+        style=\"display:flex;margin:auto;width:22.0pt;\"> <div style=\"display:flex;white-space:nowrap;width:22.0pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;width:auto;\">$</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;width:22.0pt;\">430</font></div> </div> </div> </td>\n<td
+        style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;white-space:nowrap;width:40.97pt;\">
+        <div style=\"line-height:11pt;margin-left:4.5pt;margin-right:1.5pt;text-align:right;width:33.47pt;\">\n<div
+        style=\"display:flex;margin:auto;width:29.5pt;\"> <div style=\"display:flex;white-space:nowrap;width:29.5pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;width:auto;\">$</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;width:29.5pt;\">1,003</font></div> </div> </div>
+        </td> </tr>\n<tr style=\"height:10.5pt;\">\n<td style=\"padding-bottom:1.5pt;padding-top:2.5pt;vertical-align:Bottom;width:151.5pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-left:3pt;margin-right:4.5pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:0.0pt;\">Class I</font></div> </div>
+        </td>\n<td style=\"padding-bottom:1.5pt;padding-top:2.5pt;vertical-align:Bottom;white-space:nowrap;width:35.36pt;\">
+        <div style=\"line-height:11pt;margin-left:4.5pt;margin-right:4.5pt;text-align:right;width:26.36pt;\">\n<div
+        style=\"display:flex;margin:auto;width:17.0pt;\"> <div style=\"display:flex;white-space:nowrap;width:17.0pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;width:auto;\">$</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;width:17.0pt;\">60</font></div> </div> </div> </td>\n<td
+        style=\"padding-bottom:1.5pt;padding-top:2.5pt;vertical-align:Bottom;white-space:nowrap;width:38.47pt;\">
+        <div style=\"line-height:11pt;margin-left:4.5pt;margin-right:4.5pt;text-align:right;width:29.47pt;\">\n<div
+        style=\"display:flex;margin:auto;width:22.0pt;\"> <div style=\"display:flex;white-space:nowrap;width:22.0pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;width:auto;\">$</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;width:22.0pt;\">269</font></div> </div> </div> </td>\n<td
+        style=\"padding-bottom:1.5pt;padding-top:2.5pt;vertical-align:Bottom;white-space:nowrap;width:38.47pt;\">
+        <div style=\"line-height:11pt;margin-left:4.5pt;margin-right:4.5pt;text-align:right;width:29.47pt;\">\n<div
+        style=\"display:flex;margin:auto;width:22.0pt;\"> <div style=\"display:flex;white-space:nowrap;width:22.0pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;width:auto;\">$</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;width:22.0pt;\">495</font></div> </div> </div> </td>\n<td
+        style=\"padding-bottom:1.5pt;padding-top:2.5pt;vertical-align:Bottom;white-space:nowrap;width:40.97pt;\">
+        <div style=\"line-height:11pt;margin-left:4.5pt;margin-right:1.5pt;text-align:right;width:33.47pt;\">\n<div
+        style=\"display:flex;margin:auto;width:29.5pt;\"> <div style=\"display:flex;white-space:nowrap;width:29.5pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;width:auto;\">$</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;width:29.5pt;\">1,144</font></div> </div> </div>
+        </td> </tr> </table> </div> </div> </div> </div> <div style=\"float:left;margin-bottom:5.0pt;width:100%;\">
+        </div>\n<hr style=\"clear:both;margin-bottom:0.25pt;margin-left:0.25pt;margin-right:0.25pt;margin-top:40.0pt;\">\n</div>
+        <div> <div><a name=\"xx_39754e51-4a39-46e0-abde-2f548a968d0d_2\"></A> <div
+        style=\"page-break-after:always;position:relative;\"> <div style=\"clear:both;\">
+        </div>\n<div style=\"float:left;margin-left:18pt;margin-top:18pt;width:559pt;min-height:18pt;\">
+        <div style=\"line-height:14.0pt;text-align:right;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:12pt;font-weight:bold;line-height:14pt;\">GMO\nMULTI-SECTOR
+        FIXED INCOME FUND</font></div> </div> <div style=\"clear:both;\"> </div> <div
+        style=\"float:left;margin-left:18pt;margin-top:12pt;width:559pt;min-height:690pt;\">
+        <div style=\"line-height:12.0pt;text-align:left;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;font-weight:bold;\">Portfolio turnover</font></div>
+        <div style=\"line-height:11.5pt;margin-top:1pt;text-align:justify;\"> <div
+        style=\"margin-top:1pt;\"><font\nstyle=\"color:#000000;font-family:Times New
+        Roman;font-size:10pt;margin-left:3.76%;\">The Fund pays transaction costs,
+        such as commissions, when it buys and sells securities. A higher portfolio
+        turnover rate may </font><font\nstyle=\"color:#000000;font-family:Times New
+        Roman;font-size:10pt;\">result in higher transaction costs and, for holders
+        of Fund shares subject to U.S. taxes, higher income taxes. These transaction
+        costs, </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">which
+        are not reflected in Annual Fund operating expenses or in the Example, affect
+        the Fund&#8217;s performance.</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\"> During its fiscal year </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">ended February 28, 2025, the Fund&#8217;s portfolio
+        turnover rate (excluding\nshort-term investments) was </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">444</font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">% of the average value of its </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">portfolio securities.</font></div> </div> <div
+        style=\"line-height:12.0pt;margin-top:10.0pt;text-align:left;\"> <div style=\"margin-top:10pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;font-weight:bold;\">Principal investment strategies</font></div>
+        </div> <div style=\"line-height:11.5pt;margin-top:1.0pt;text-align:justify;\">
+        <div style=\"margin-top:1pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:3.76%;\">The Fund&#8217;s investment
+        program has two principal components. One component seeks to achieve a return
+        commensurate with that </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">of the Fund&#8217;s benchmark. The second component
+        seeks to add value relative to the Fund&#8217;s benchmark by making investments
+        that often </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">will
+        not track its benchmark. These investments principally include global interest
+        rate and currency derivatives and indirect (through </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">other GMO Funds) and direct investments in asset-backed,
+        corporate, government and emerging country debt securities. This second </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">component can cause the Fund&#8217;s performance
+        to differ significantly from that of its benchmark.</font></div> </div>\n<div
+        style=\"line-height:11.5pt;margin-top:6.5pt;text-align:justify;\"> <div style=\"margin-top:6.5pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;margin-left:3.76%;\">In
+        deciding what investments to make in global interest\nrate and currency markets
+        and the size of those investments, GMO uses a </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">quantitative approach that considers macroeconomic
+        factors (e.g., inflation) as well as\nprice-based factors (e.g., interest
+        and exchange </font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">rates).
+        GMO evaluates the relative attractiveness of particular markets and instruments
+        using various fixed income risk\npremium </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">measures, which typically include, for example,
+        term structure, foreign exchange, volatility, credit and liquidity. GMO also
+        may consider </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">the
+        relative attractiveness of yield curve and duration positions in these markets.
+        In addition, GMO seeks to identify opportunities </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">arising from unusual market conditions (such as
+        markets with heightened volatility, significant market declines, or widespread
+        asset </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">price
+        dislocations) not otherwise identified by its quantitative models and uses
+        various portfolio construction techniques to manage risk.</font></div> </div>\n<div
+        style=\"line-height:11.5pt;margin-top:6.5pt;text-align:justify;\"> <div style=\"margin-top:6.5pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;margin-left:3.76%;\">In
+        making decisions regarding credit investments, GMO\nseeks to take advantage
+        of its proprietary investment models to allocate </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">the Fund&#8217;s assets opportunistically among
+        credit sectors (e.g., investment grade and high\nyield) and to systematically
+        identify </font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">investments
+        within those credit sectors with the most attractive risk/return profiles.
+        In selecting credit investments, the models\nused by </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">GMO take into account value criteria, quality
+        factors (including ESG (environmental, social, and governance) criteria in
+        some cases), </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">momentum,
+        and liquidity. The factors GMO considers and investment methods GMO uses can
+        change over time.</font></div> </div>\n<div style=\"line-height:11.5pt;margin-top:6.5pt;text-align:justify;\">
+        <div style=\"margin-top:6.5pt;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:3.76%;\">In pursuing its investment program,
+        the Fund may make or\nmaintain investments in: (i) bonds denominated in various
+        currencies, </font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">including
+        non-U.S. and U.S. government bonds, agency bonds, and corporate bonds, asset-backed\nsecurities,
+        and emerging country debt </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">securities; (ii) shares of Opportunistic Income
+        Fund (to provide exposure to asset-backed credit markets); (iii) shares of
+        Emerging\n</font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">Country
+        Debt Fund (&#8220;ECDF&#8221;) (to provide exposure to emerging country debt
+        securities); and (iv) the types of investments typically held </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">by money market funds. The Fund may also engage
+        in short sales and invest in derivatives, including without limitation, to-be-announced</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\"> transactions (&#8220;TBAs&#8221;), futures contracts,
+        currency and interest rate options, currency forwards, repurchase agreements
+        and </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">reverse
+        repurchase agreements, and swap contracts, such as swaps on securities and
+        securities indices, total return swaps, interest rate </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">swaps, and currency swaps, and other types of
+        derivatives.</font></div> </div> <div style=\"line-height:11.5pt;margin-top:6.5pt;text-align:justify;\">
+        <div style=\"margin-top:6.5pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:3.76%;\">The Fund has and expects to
+        continue to have material exposure to U.S. and non-U.S. bonds, U.S. asset-backed
+        securities, and </font><font\nstyle=\"color:#000000;font-family:Times New
+        Roman;font-size:10pt;\">emerging country debt securities that are below investment
+        grade (below investment grade debt investments are commonly referred to as
+        </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">&#8220;high
+        yield&#8221; or &#8220;junk bonds,&#8221; although these terms are not generally
+        used to refer to emerging country debt securities or asset-backed </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">securities).</font></div> </div> <div style=\"line-height:11.5pt;margin-top:6.5pt;text-align:justify;\">
+        <div style=\"margin-top:6.5pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:3.76%;\">GMO normally seeks to maintain
+        an annualized tracking error (standard deviation) relative to the Fund&#8217;s
+        benchmark of 1-3% over </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">a complete market cycle and an estimated interest
+        rate duration within 2 years of the benchmark&#8217;s duration (approximately
+        6 years as of </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">May
+        31, 2025). For an additional discussion of duration, see &#8220;Additional
+        Information About the Funds&#8217; Investment Strategies, Risks and </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">Expenses &#8212; Bond Funds &#8212; Duration.&#8221;</font></div>
+        </div> <div style=\"line-height:11.5pt;margin-top:6.5pt;text-align:justify;\">
+        <div style=\"margin-top:6.5pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:3.76%;\">Under normal circumstances,
+        the Fund invests directly and indirectly (e.g., through other GMO Funds or
+        derivatives) at least 80% </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">of its assets in bonds (see &#8220;Name Policies&#8221;).
+        The term &#8220;bond&#8221; includes (i) obligations of an issuer to make
+        payments on future dates of </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">principal, interest (whether fixed or variable)
+        or both and (ii) synthetic debt instruments created by GMO by investing in
+        derivatives </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">(e.g.,
+        a futures contract, swap contract, currency forward, or option).</font></div>
+        </div> <div style=\"line-height:11.5pt;margin-top:6.5pt;text-align:justify;\">\n<div
+        style=\"margin-top:6.5pt;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:3.76%;\">The Fund may invest in securities
+        of companies of any market capitalization. In addition, the Fund may lend
+        its portfolio\n</font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">securities.
+        The Fund is not limited in its use of derivatives or in the total notional
+        value of its derivative positions. Leverage is not a </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">principal component of the Fund&#8217;s investment
+        strategy. However, because of its derivative positions, the Fund may at times
+        have gross </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">investment
+        exposure in excess of its net assets (i.e., the Fund may be leveraged) and,
+        therefore, may be subject to higher risk of loss </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">during those times than if the Fund were not leveraged.
+        The Fund&#8217;s performance can depend substantially on the performance of
+        assets </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">or
+        indices underlying its derivatives even though it does not own those assets
+        or indices.</font></div> </div> <div style=\"line-height:12.0pt;margin-top:10.0pt;text-align:left;\">\n<div
+        style=\"margin-top:10pt;\"><font style=\"color:#000000;font-family:Times New
+        Roman;font-size:10pt;font-weight:bold;\">Principal risks of investing in the
+        Fund</font></div> </div> <div style=\"line-height:11.5pt;margin-top:1.0pt;text-align:justify;\">\n<div
+        style=\"margin-top:1pt;\"><font style=\"color:#000000;font-family:Times New
+        Roman;font-size:10pt;margin-left:3.76%;\">The value of the Fund&#8217;s shares
+        changes with the value of the Fund&#8217;s investments. </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">Many factors can affect this value, and you may
+        </font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">lose
+        money by investing in the Fund.</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\"> The Fund is a non-diversified investment company
+        under the Investment Company Act of 1940, as </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">amended,\nand therefore a decline in the market
+        price of a particular security held by the Fund may affect the Fund&#8217;s
+        performance more </font></div> </div> </div> <div style=\"clear:both;\"> </div>\n<div
+        style=\"float:left;margin-left:18pt;margin-top:8pt;width:559pt;min-height:12pt;\">\n<div
+        style=\"line-height:12.0pt;margin-top:5pt;text-align:center;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;line-height:12pt;\">2</font></div> </div> </div>
+        </div> <div style=\"float:left;margin-bottom:5.0pt;width:100%;\">\n</div>
+        <hr style=\"clear:both;margin-bottom:0.25pt;margin-left:0.25pt;margin-right:0.25pt;margin-top:40.0pt;\">\n</div>
+        <div> <div><a name=\"xx_39754e51-4a39-46e0-abde-2f548a968d0d_3\"></A> <div
+        style=\"page-break-after:always;position:relative;\"> <div style=\"clear:both;\">
+        </div>\n<div style=\"float:left;margin-left:18pt;margin-top:18pt;width:559pt;min-height:18pt;\">
+        <div style=\"line-height:14.0pt;text-align:right;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:12pt;font-weight:bold;line-height:14pt;\">GMO\nMULTI-SECTOR
+        FIXED INCOME FUND</font></div> </div> <div style=\"clear:both;\"> </div> <div
+        style=\"float:left;margin-left:18pt;margin-top:12pt;width:559pt;min-height:690pt;\">
+        <div style=\"line-height:11.5pt;text-align:justify;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:0%;\">than if the Fund were a diversified
+        investment company. The principal risks of investing in the Fund are summarized
+        below. For a more </font><font\nstyle=\"color:#000000;font-family:Times New
+        Roman;font-size:10pt;margin-left:0%;\">complete discussion of these risks,
+        see &#8220;Additional Information about the Funds&#8217; Investment Strategies,
+        Risks, and Expenses&#8221; and </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">&#8220;Description of Principal Risks.&#8221;</font></div>
+        <div> <div style=\"clear:both;margin-top:6.5pt;position:relative;width:100%;\">\n<div
+        style=\"float:left;line-height:9.5pt;text-align:left;width:3.68pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:8pt;\">&#9679;</font></div>\n<div
+        style=\"float:left;line-height:11.5pt;margin-left:11.32pt;text-align:justify;width:539.00pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;font-style:italic;\">Market
+        Risk &#8211; Fixed Income</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\"> &#8211; The market price of a fixed income investment
+        can decline due to market-related factors, including </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">rising interest or inflation rates and widening
+        credit spreads, or decreased liquidity due, for example, to market uncertainty
+        about the </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">value
+        of a fixed income investment (or class of fixed income investments).</font><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;line-height:11.5pt;\">\n</font></div>
+        </div> <div style=\"clear:both;position:relative;\"> </div> </div> <div> <div
+        style=\"clear:both;margin-top:6.5pt;position:relative;width:100%;\"> <div
+        style=\"float:left;line-height:9.5pt;text-align:left;width:3.68pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;\">&#9679;</font></div> <div style=\"float:left;line-height:11.5pt;margin-left:11.32pt;text-align:justify;width:539.00pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;font-style:italic;\">Credit Risk</font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\"> &#8211; The Fund runs the risk that the issuer
+        or guarantor of a fixed\nincome investment (including a sovereign or quasi-</font><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">sovereign
+        debt issuer) or the obligor of an obligation underlying an asset-backed security
+        will be unable or unwilling\nto satisfy its </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">obligation to pay principal and interest or otherwise
+        to honor its obligations in a timely manner or at all. The market price of
+        a fixed </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">income
+        investment will normally decline as a result of the failure of an issuer,
+        guarantor, or obligor to meet its payment obligations </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">or in anticipation of such a failure. Below investment
+        grade investments (commonly referred to as high yield or &#8220;junk&#8221;
+        bonds) have </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">speculative
+        characteristics and are subject to greater credit risk than other fixed income
+        investments. Negative changes in economic </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">conditions or other circumstances are more likely
+        to impair the ability of issuers of below investment grade investments to
+        make </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">principal
+        and interest payments than issuers of investment grade investments.</font><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\"> In addition,
+        investments\nin emerging country sovereign </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">or quasi-sovereign debt are subject to a heightened
+        risk that the issuer responsible for repayment of the debt may be unable or
+        </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">unwilling
+        to pay interest and repay principal when due, and the Fund may lack recourse
+        against the issuer in the event of a default. </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">Investments in quasi-sovereign debt also are subject
+        to the risk that the issuer will default independently of its sovereign.</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;line-height:11.5pt;\"> </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">Investments in distressed or defaulted or other
+        low quality debt investments\ngenerally are considered speculative and are
+        subject to </font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">substantial
+        risks not normally associated with investments in higher quality securities,
+        including adverse\nbusiness, financial or </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">economic conditions that lead to their issuers&#8217;
+        payment defaults and insolvency proceedings. In particular, distressed or
+        defaulted </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">obligations
+        might be repaid, if at all, only after lengthy workout or bankruptcy proceedings
+        during which the issuer might not make </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">any interest or other payments, and the Fund may
+        incur additional expenses in its effort to be repaid. If GMO&#8217;s assessment
+        of the </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">eventual
+        recovery value of a distressed or defaulted debt investment proves incorrect,
+        the Fund may lose a substantial portion or all </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">of its original investment or may be required
+        to accept cash or instruments worth less than its original investment.</font></div>
+        </div> <div style=\"clear:both;position:relative;\">\n</div> </div> <div>
+        <div style=\"clear:both;margin-top:6.5pt;position:relative;width:100%;\">\n<div
+        style=\"float:left;line-height:9.5pt;text-align:left;width:3.68pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:8pt;\">&#9679;</font></div>\n<div
+        style=\"float:left;line-height:11.5pt;margin-left:11.32pt;text-align:justify;width:539.00pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;font-style:italic;\">Management
+        and Operational Risk</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\"> &#8211; The Fund runs the risk that GMO&#8217;s
+        investment techniques will fail to produce intended results.</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;line-height:11.5pt;\"> </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">GMO uses quantitative models as part of its investment
+        process. GMO&#8217;s models\nmay not accurately predict future market </font><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">movements.
+        In addition, GMO&#8217;s models rely on assumptions and data that are subject
+        to limitations (e.g., inaccuracies,\nstaleness) </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">that could adversely affect their predictive value.</font><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\"> The Fund
+        also runs the risk\nthat GMO&#8217;s assessment of an investment, including
+        a </font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">security&#8217;s
+        fundamental fair (or intrinsic) value, is wrong or that deficiencies in GMO&#8217;s
+        or another\nservice provider&#8217;s internal systems </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">or controls will cause losses for the Fund or
+        impair Fund operations.</font></div> </div>\n<div style=\"clear:both;position:relative;\">
+        </div> </div> <div> <div style=\"clear:both;margin-top:6.5pt;position:relative;width:100%;\">
+        <div style=\"float:left;line-height:9.5pt;text-align:left;width:3.68pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;\">&#9679;</font></div> <div style=\"float:left;line-height:11.5pt;margin-left:11.32pt;text-align:justify;width:539.00pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;font-style:italic;\">Derivatives and Short Sales
+        Risk</font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">
+        &#8211; The use of derivatives involves the risk that\ntheir value may not
+        change as expected relative to </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">changes in the value of the underlying assets,
+        pools of assets, rates, currencies or indices. Derivatives also present\nother
+        risks, </font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">including
+        market risk, illiquidity risk, currency risk, credit risk, leveraging risk,
+        commodities risk and counterparty risk. The market </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">price of an option is affected by many factors,
+        including changes in the market prices or dividend rates of underlying securities
+        (or </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">in
+        the case of indices, the securities in such indices); the time remaining before
+        expiration; changes in interest rates or exchange </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">rates; and changes in the actual or perceived
+        volatility of the relevant index or underlying securities. The Fund typically
+        creates short </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">investment
+        exposure by selling securities short or by taking a derivative position in
+        which the value of the derivative moves in the </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">opposite direction from the price of an underlying
+        asset, pool of assets, rate, currency or index. Specifically, the net asset
+        value of </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">the
+        Fund&#8217;s shares will be adversely affected if the equities or other assets
+        that are the subject of the Fund&#8217;s short exposures </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">appreciate in value. The risk of loss associated
+        with derivatives that provide short investment exposure and short sales of
+        securities </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">is
+        theoretically unlimited. The purchaser of TBA securities generally is subject
+        to higher market risk and interest rate risk, because </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">the delivered securities&nbsp;may be less favorable
+        than anticipated by the purchaser.</font></div> </div> <div style=\"clear:both;position:relative;\">
+        </div> </div> <div>\n<div style=\"clear:both;margin-top:6.5pt;position:relative;width:100%;\">
+        <div style=\"float:left;line-height:9.5pt;text-align:left;width:3.68pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:8pt;\">&#9679;</font></div>\n<div
+        style=\"float:left;line-height:11.5pt;margin-left:11.32pt;text-align:justify;width:539.00pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;font-style:italic;\">Currency
+        Risk</font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">
+        &#8211; Fluctuations in exchange rates can adversely affect the market value
+        of the Fund&#8217;s foreign currency holdings and </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">investments denominated in foreign currencies.</font></div>
+        </div> <div style=\"clear:both;position:relative;\"> </div> </div> <div>\n<div
+        style=\"clear:both;margin-top:6.5pt;position:relative;width:100%;\"> <div
+        style=\"float:left;line-height:9.5pt;text-align:left;width:3.68pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:8pt;\">&#9679;</font></div>\n<div
+        style=\"float:left;line-height:11.5pt;margin-left:11.32pt;text-align:justify;width:539.00pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;font-style:italic;\">Market
+        Risk &#8211; Asset-Backed Securities</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\"> &#8211; The market price of asset-backed securities,
+        like that of other fixed income investments, </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">can\ndecline for a variety of reasons, including
+        increases in interest rates. In addition, the market price can decrease due
+        to a </font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">reduction
+        in or decrease in the reliability\nof their payment streams. Payment streams
+        associated with asset-backed securities held by </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">the Fund depend on many factors (e.g., the cash
+        flow generated by the assets\nbacking the securities, deal structure, and
+        </font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">creditworthiness
+        of any credit-support provider), and a problem in any of these factors can
+        lead to a reduction in the payment\nstream </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">GMO expected the Fund to receive when the Fund
+        purchased the asset-backed security. The liquidity of asset-backed securities
+        </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">(particularly
+        below investment grade asset-backed securities) may change over time. During
+        periods of deteriorating economic </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">conditions, such as recessions, or periods of
+        rising unemployment, delinquencies and losses generally increase, sometimes
+        </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">dramatically,
+        for asset-backed securities whose underlying assets consist of loans, sales
+        contracts, receivables and other obligations.</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;line-height:11.5pt;\"> </font></div> </div> <div
+        style=\"clear:both;position:relative;\"> </div> </div> <div> <div style=\"clear:both;margin-top:6.5pt;position:relative;width:100%;\">\n<div
+        style=\"float:left;line-height:9.5pt;text-align:left;width:3.68pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:8pt;\">&#9679;</font></div>\n<div
+        style=\"float:left;line-height:11.5pt;margin-left:11.32pt;text-align:justify;width:539.00pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;font-style:italic;\">Illiquidity
+        Risk</font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">
+        &#8211; Low trading volume, lack of a market maker, large position size, or
+        legal restrictions increase the risk that the Fund </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">or an underlying fund is limited or prevented
+        from selling particular securities or closing derivative positions at desirable
+        prices at a </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">particular
+        time or at all.</font></div> </div> <div style=\"clear:both;position:relative;\">
+        </div> </div> </div> <div style=\"clear:both;\"> </div>\n<div style=\"float:left;margin-left:18pt;margin-top:8pt;width:559pt;min-height:12pt;\">\n<div
+        style=\"line-height:12.0pt;margin-top:5pt;text-align:center;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;line-height:12pt;\">3</font></div> </div> </div>
+        </div> <div style=\"float:left;margin-bottom:5.0pt;width:100%;\">\n</div>
+        <hr style=\"clear:both;margin-bottom:0.25pt;margin-left:0.25pt;margin-right:0.25pt;margin-top:40.0pt;\">\n</div>
+        <div> <div><a name=\"xx_39754e51-4a39-46e0-abde-2f548a968d0d_4\"></A> <div
+        style=\"page-break-after:always;position:relative;\"> <div style=\"clear:both;\">
+        </div>\n<div style=\"float:left;margin-left:18pt;margin-top:18pt;width:559pt;min-height:18pt;\">
+        <div style=\"line-height:14.0pt;text-align:right;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:12pt;font-weight:bold;line-height:14pt;\">GMO\nMULTI-SECTOR
+        FIXED INCOME FUND</font></div> </div> <div style=\"clear:both;\"> </div> <div
+        style=\"float:left;margin-left:18pt;margin-top:12pt;width:559pt;min-height:690pt;\">
+        <div> <div style=\"clear:both;position:relative;width:100%;\">\n<div style=\"float:left;line-height:9.5pt;text-align:left;width:3.68pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:8pt;\">&#9679;</font></div>\n<div
+        style=\"float:left;line-height:11.5pt;margin-left:11.32pt;text-align:justify;width:539.00pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;font-style:italic;\">Futures
+        Contracts Risk</font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">
+        &#8211; The loss to the Fund resulting from its use of futures contracts is
+        potentially unlimited. Futures markets are </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">highly volatile, and the use of futures contracts
+        increases the volatility of the Fund&#8217;s net asset value. A liquid market
+        may not exist </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">for
+        any particular futures contract at any particular time, and the Fund may be
+        unable when it wishes to terminate its exposure under </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">that contract. When the Fund uses futures contracts
+        for hedging purposes, it runs the risk that changes in the prices of the contracts
+        </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">will
+        not correlate perfectly with changes in the securities, index, or other asset
+        underlying the contracts or movements in the prices </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">of the Fund&#8217;s investments that are subject
+        to the hedge. In addition, the Fund may be unable to recover or may be delayed
+        in </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">recovering
+        margin or other amounts deposited with a futures commission merchant or futures
+        clearinghouse. Foreign futures </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">contracts are often less liquid and more volatile
+        than U.S. futures contracts.</font></div> </div> <div style=\"clear:both;position:relative;\">
+        </div> </div> <div>\n<div style=\"clear:both;margin-top:6.5pt;position:relative;width:100%;\">
+        <div style=\"float:left;line-height:9.5pt;text-align:left;width:3.68pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:8pt;\">&#9679;</font></div>\n<div
+        style=\"float:left;line-height:11.5pt;margin-left:11.32pt;text-align:justify;width:539.00pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;font-style:italic;\">Non-U.S.
+        Investment Risk</font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">
+        &#8211; The market prices of many non-U.S. securities fluctuate more than
+        those of U.S. securities. Many non-</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">U.S. securities markets are less stable, smaller,
+        less liquid, and less regulated than U.S. securities markets, and the cost
+        of trading in </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">those
+        markets often is higher than in U.S. securities markets. In addition, non-U.S.
+        securities issuers often are not subject to as much </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">regulation as U.S. issuers, and the reporting,
+        recordkeeping, accounting, custody, and auditing standards to which those
+        issuers are </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">subject
+        often are not as rigorous as U.S. standards. In addition, the Fund is subject
+        to taxation by countries other than the </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">United States, including potentially on a retroactive
+        basis, on (i) capital gains it realizes or dividends, interest, or other amounts
+        it </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">realizes
+        or accrues in respect of non-U.S. investments; (ii) transactions in those
+        investments; and (iii) repatriation of proceeds </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">generated from the sale or other disposition of
+        those investments.</font><font style=\"color:#000000;font-family:Times New
+        Roman;font-size:10pt;\"> Also, the Fund needs a license to\ninvest directly
+        in securities </font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">traded
+        in many non-U.S. securities markets, and the Fund is subject to the risk that
+        its license is terminated or suspended. In some </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">non-U.S. securities markets, prevailing custody
+        and trade settlement practices (e.g., the requirement to pay for securities
+        prior to </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">receipt)
+        expose the Fund to credit and other risks. Further, adverse changes in investment
+        regulations, capital requirements or </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">exchange controls could adversely affect the value
+        of the Fund&#8217;s investments. The risks above (such as substantial price
+        fluctuations </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">and
+        market instability, illiquidity and lack of regulation) and other risks (e.g.,
+        nationalization, expropriation or other confiscation of </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">assets of non-U.S. issuers, difficulties enforcing
+        legal judgments or contractual rights and geopolitical risks) tend to be higher
+        for </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">investments
+        in the securities of issuers tied economically to emerging countries. The
+        economies of emerging countries often depend </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">predominantly on only a few industries or commodities
+        and often are more volatile than the economies of developed countries.</font></div>
+        </div>\n<div style=\"clear:both;position:relative;\"> </div> </div> <div>
+        <div style=\"clear:both;margin-top:6.5pt;position:relative;width:100%;\">
+        <div style=\"float:left;line-height:9.5pt;text-align:left;width:3.68pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;\">&#9679;</font></div> <div style=\"float:left;line-height:11.5pt;margin-left:11.32pt;text-align:justify;width:539.00pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;font-style:italic;\">Counterparty Risk</font><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\"> &#8211;
+        The Fund runs the risk that the counterparty to a\nderivatives contract or
+        a clearing member used by the Fund to </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">hold a cleared derivatives contract is unable
+        or unwilling to make timely settlement payments, return the\nFund&#8217;s
+        collateral or </font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">otherwise
+        honor its obligations.</font></div> </div> <div style=\"clear:both;position:relative;\">
+        </div> </div> <div>\n<div style=\"clear:both;margin-top:6.5pt;position:relative;width:100%;\">
+        <div style=\"float:left;line-height:9.5pt;text-align:left;width:3.68pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:8pt;\">&#9679;</font></div>\n<div
+        style=\"float:left;line-height:11.5pt;margin-left:11.32pt;text-align:justify;width:539.00pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;font-style:italic;\">Focused
+        Investment Risk</font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">
+        &#8211; Investments in countries, regions, asset classes, sectors, industries,
+        currencies, or issuers that are subject </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">to the same or similar risk factors and investments
+        whose market prices are closely correlated, such as the Fund&#8217;s investments
+        in </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">non-U.S.
+        government bonds and asset-backed securities secured by different types of
+        consumer debt (e.g., credit-card receivables, </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">automobile loans, and home equity loans), are
+        subject to higher overall risk than investments that are more diversified
+        or whose </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">market
+        prices are not as closely correlated.</font></div> </div> <div style=\"clear:both;position:relative;\">
+        </div> </div> <div>\n<div style=\"clear:both;margin-top:6.5pt;position:relative;width:100%;\">
+        <div style=\"float:left;line-height:9.5pt;text-align:left;width:3.68pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:8pt;\">&#9679;</font></div>\n<div
+        style=\"float:left;line-height:11.5pt;margin-left:11.32pt;text-align:justify;width:539.00pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;font-style:italic;\">Leveraging
+        Risk</font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">
+        &#8211; The use of derivatives, short sales and securities lending can create
+        leverage. Leverage increases the Fund&#8217;s losses </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">when the value of its investments (including derivatives)
+        declines. In addition, the Fund&#8217;s portfolio will be leveraged if it
+        exercises </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">its
+        right to delay payment on a redemption and the value of the Fund&#8217;s assets
+        declines between the time a redemption request is </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">treated as being received by the Fund and the
+        time the Fund liquidates assets to fund that redemption.</font></div> </div>
+        <div style=\"clear:both;position:relative;\"> </div> </div>\n<div> <div style=\"clear:both;margin-top:6.5pt;position:relative;width:100%;\">
+        <div style=\"float:left;line-height:9.5pt;text-align:left;width:3.68pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:8pt;\">&#9679;</font></div>\n<div
+        style=\"float:left;line-height:11.5pt;margin-left:11.32pt;text-align:justify;width:539.00pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;font-style:italic;\">Large
+        Transactions Risk</font><font\nstyle=\"color:#000000;font-family:Times New
+        Roman;font-size:10pt;\"> &#8211; To the extent that a large number of shares
+        of the Fund is held by a single shareholder (e.g., an\n</font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">institutional investor or another GMO Fund) or
+        a group of shareholders with a common investment strategy (e.g., GMO asset
+        </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">allocation
+        accounts), the Fund is subject to the risk that a redemption by that shareholder
+        or group will require the Fund to sell </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">investments at disadvantageous prices, disrupt
+        the Fund&#8217;s operations, lead to temporary overexposure to the Fund&#8217;s
+        intended </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">investment
+        program or force the Fund&#8217;s liquidation. The Fund also may be subject
+        to these effects when a number of shareholders </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">collectively redeem a large amount of Fund shares.</font></div>
+        </div> <div style=\"clear:both;position:relative;\"> </div> </div> <div>\n<div
+        style=\"clear:both;margin-top:6.5pt;position:relative;width:100%;\"> <div
+        style=\"float:left;line-height:9.5pt;text-align:left;width:3.68pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:8pt;\">&#9679;</font></div>\n<div
+        style=\"float:left;line-height:11.5pt;margin-left:11.32pt;text-align:justify;width:539.00pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;font-style:italic;\">Market
+        Disruption and Geopolitical Risk</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\"> &#8211; Geopolitical and other events (e.g.,
+        wars, pandemics, sanctions, terrorism, diplomatic\n</font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">tensions, dramatic changes in regulatory and/or
+        foreign policy, cyberattacks, and rapid technological developments such as
+        artificial </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">intelligence)
+        often disrupt securities markets and adversely affect the general economy
+        or particular economies and markets. Those </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">events, as well as other changes in non-U.S. and
+        U.S. economic and political conditions, could exacerbate other risks or otherwise
+        </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">reduce
+        the value of the Fund&#8217;s investments.</font></div> </div> <div style=\"clear:both;position:relative;\">
+        </div> </div> <div>\n<div style=\"clear:both;margin-top:6.5pt;position:relative;width:100%;\">
+        <div style=\"float:left;line-height:9.5pt;text-align:left;width:3.68pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:8pt;\">&#9679;</font></div>\n<div
+        style=\"float:left;line-height:11.5pt;margin-left:11.32pt;text-align:justify;width:539.00pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;font-style:italic;\">Fund
+        of Funds Risk</font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">
+        &#8211; The Fund is indirectly exposed to all of the risks of an investment
+        in the underlying funds in which it invests, </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">including the risk that those underlying funds
+        will not perform as expected.</font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;line-height:11.5pt;\">\n</font></div> </div> <div
+        style=\"clear:both;position:relative;\"> </div> </div> <div> <div style=\"clear:both;margin-top:6.5pt;position:relative;width:100%;\">
+        <div style=\"float:left;line-height:9.5pt;text-align:left;width:3.68pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;\">&#9679;</font></div> <div style=\"float:left;line-height:11.5pt;margin-left:11.32pt;text-align:justify;width:539.00pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;font-style:italic;\">Smaller Company Risk</font><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\"> &#8211;
+        Smaller companies may have limited product lines,\nmarkets, or financial resources,
+        lack the competitive </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">strength of larger companies, have less experienced
+        managers or depend on a few key employees. The securities of\ncompanies with
+        </font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">smaller
+        market capitalizations often are less widely held and trade less frequently
+        and in lesser quantities, and their market prices </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">often fluctuate more, than the securities of companies
+        with larger market capitalizations.</font></div> </div> <div style=\"clear:both;position:relative;\">
+        </div> </div> </div>\n<div style=\"clear:both;\"> </div> <div style=\"float:left;margin-left:18pt;margin-top:8pt;width:559pt;min-height:12pt;\">
+        <div style=\"line-height:12.0pt;margin-top:5pt;text-align:center;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;line-height:12pt;\">4</font></div> </div> </div>
+        </div> <div style=\"float:left;margin-bottom:5.0pt;width:100%;\"> </div>\n<hr
+        style=\"clear:both;margin-bottom:0.25pt;margin-left:0.25pt;margin-right:0.25pt;margin-top:40.0pt;\">\n</div>
+        <div> <div><a name=\"xx_39754e51-4a39-46e0-abde-2f548a968d0d_5\"></A> <div
+        style=\"page-break-after:always;position:relative;\"> <div style=\"clear:both;\">
+        </div>\n<div style=\"float:left;margin-left:18pt;margin-top:18pt;width:559pt;min-height:18pt;\">
+        <div style=\"line-height:14.0pt;text-align:right;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:12pt;font-weight:bold;line-height:14pt;\">GMO\nMULTI-SECTOR
+        FIXED INCOME FUND</font></div> </div> <div style=\"clear:both;\"> </div> <div
+        style=\"float:left;margin-left:18pt;margin-top:12pt;width:559pt;min-height:135pt;\">
+        <div style=\"line-height:12.0pt;text-align:left;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;font-weight:bold;\">Performance</font></div> <div
+        style=\"line-height:11.5pt;margin-top:1pt;text-align:justify;\"> <div style=\"margin-top:1pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:3.76%;\">The bar chart and table below
+        provide some indication of the risks of investing in the Fund by showing changes
+        in the Fund&#8217;s </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">annual total returns from year to year for the
+        periods indicated and by comparing the Fund&#8217;s average annual total returns
+        for different </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">calendar
+        periods with those of the Fund&#8217;s benchmark, a broad-based securities
+        market index.</font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">
+        Share\nclasses not shown would have </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">substantially similar annual returns to those
+        below because all share classes invest in the same portfolio of securities.
+        Annual returns\n</font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">vary
+        among share classes to the extent that they bear different expenses. Share
+        classes that bear higher expenses than the share classes </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">shown below would have lower returns. </font><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">After-tax
+        returns are calculated using the historical highest\nindividual federal marginal
+        income </font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">tax
+        rates and do not reflect the impact of state and local taxes.</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\"> Actual after-tax returns depend on your tax situation
+        and may differ from </font><font style=\"color:#000000;font-family:Times New
+        Roman;font-size:10pt;\">those shown. After-tax\nreturns shown are not relevant
+        if you are tax-exempt or if you hold your Fund shares through tax-advantaged
+        </font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">arrangements
+        (such as a 401(k) plan or individual retirement\naccount). </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">After-tax returns are shown for Class III shares
+        only; after-tax </font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">returns
+        for\nother classes will vary.</font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\"> Updated performance information for the Fund
+        is available at\n</font><font style=\"color:#000000;font-family:Times New
+        Roman;font-size:10pt;\">www.gmo.com</font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">.\n</font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">Past performance </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">(before and after taxes) is not an indication
+        of future\nperformance.</font></div> </div> </div> <div style=\"clear:both;\">
+        </div> <div style=\"float:left;margin-left:18pt;margin-top:12pt;width:267.5pt;min-height:198pt;\">
+        <div style=\"line-height:12.0pt;text-align:center;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;font-weight:bold;\">Annual Total Returns/Class III
+        Shares</font> <br><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">Years
+        Ending December 31</font></div>\n<div style=\"margin-top:4pt;text-align:left;\">\n<img
+        src=\"g123733bar_msfif.jpg\" alt=\" \" style=\"height:119pt;width:259pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;line-height:11pt;\">&#8201;</font><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:1pt;\">&#8195;</font>\n</div>
+        <div style=\"margin-top:0.0pt;\">\n<table style=\"empty-cells:show;margin-left:34.97pt;width:197.57pt;\"
+        cellpadding=\"0\" cellspacing=\"0\">\n<tr style=\"height:9.5pt;\">\n<td style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;width:72.25pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-right:4.5pt;text-align:Center;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">Highest Quarter:</font></div> </div> </td>\n<td
+        style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;width:54pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-left:4.5pt;margin-right:4.5pt;text-align:Center;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">6.02%</font></div> </div> </td>\n<td style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;width:71.32pt;\"
+        colspan=\"2\"> <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-left:4.5pt;text-align:Center;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">4Q 2023</font></div> </div> </td> </tr>\n<tr style=\"height:12pt;\">\n<td
+        style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;width:72.25pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-right:4.5pt;text-align:Center;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">Lowest Quarter:</font></div> </div> </td>\n<td
+        style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;width:54pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-left:4.5pt;margin-right:4.5pt;text-align:Center;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">-6.88%</font></div> </div> </td>\n<td style=\"padding-bottom:2.5pt;padding-top:2.5pt;vertical-align:Bottom;width:71.32pt;\"
+        colspan=\"2\"> <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-left:4.5pt;text-align:Center;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">1Q 2022</font></div> </div> </td> </tr>\n<tr style=\"height:10.5pt;\">\n<td
+        style=\"padding-bottom:1.5pt;padding-top:2.5pt;vertical-align:Bottom;width:72.25pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-right:4.5pt;text-align:Center;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">Year-to-Date:</font></div> </div> </td>\n<td style=\"padding-bottom:1.5pt;padding-top:2.5pt;vertical-align:Bottom;width:54pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-left:4.5pt;margin-right:4.5pt;text-align:Center;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">2.96%</font></div> </div> </td>\n<td style=\"padding-bottom:1.5pt;padding-top:2.5pt;vertical-align:Bottom;width:29.01pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-left:4.5pt;margin-right:1.75pt;text-align:Center;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">As of</font></div> </div> </td>\n<td style=\"padding-bottom:1.5pt;padding-top:2.5pt;vertical-align:Bottom;width:42.31pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-left:1.75pt;text-align:Center;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">3/31/2025</font></div> </div> </td> </tr> </table>
+        </div> <div style=\"line-height:11.0pt;text-align:left;\"> </div> </div>\n<div
+        style=\"float:left;margin-left:24.0pt;margin-top:12pt;width:267.5pt;min-height:198pt;\">
+        <div style=\"line-height:12.0pt;text-align:center;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;font-weight:bold;\">Average Annual\nTotal Returns</font>
+        <br><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">Periods
+        Ending December 31, 2024</font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:1pt;\">&#8195;</font></div>\n<div style=\"line-height:0.0pt;margin-top:6pt;text-align:left;\">
+        <div style=\"margin-top:6pt;\"> </div> </div> <div style=\"margin-top:0.0pt;\">\n<table
+        style=\"border-bottom:0.5pt solid #000000;border-left:0.5pt solid #000000;border-right:0.5pt
+        solid #000000;border-top:0.5pt solid #000000;empty-cells:show;width:267.5pt;\"
+        cellpadding=\"0\" cellspacing=\"0\">\n<tr style=\"height:10.75pt;\">\n<td
+        style=\"border-bottom:0.5pt solid #000000;border-right:0.5pt solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;width:127.1pt;\">
+        <div style=\"line-height:0.5pt;text-align:left;\">\n<div style=\"margin-left:3pt;margin-right:2.75pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;font-weight:bold;margin-left:0.0pt;\">&nbsp;</font></div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #000000;border-right:0.5pt
+        solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;width:29.03pt;\">
+        <div style=\"line-height:9.0pt;text-align:left;\">\n<div style=\"margin-left:0.75pt;margin-right:0.75pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;font-weight:bold;\">1
+        Year</font></div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #000000;border-right:0.5pt
+        solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;width:31.15pt;\">
+        <div style=\"line-height:9.0pt;text-align:left;\">\n<div style=\"margin-left:0.75pt;margin-right:0.75pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;font-weight:bold;\">5
+        Years</font></div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #000000;border-right:0.5pt
+        solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;width:35.1pt;\">
+        <div style=\"line-height:9.0pt;text-align:left;\">\n<div style=\"margin-left:0.75pt;margin-right:0.75pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;font-weight:bold;\">10
+        Years</font></div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;width:45.11pt;\">
+        <div style=\"line-height:9.0pt;text-align:left;\">\n<div style=\"margin-left:0.75pt;margin-right:1pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;font-weight:bold;\">Incept.</font></div>
+        </div> </td> </tr>\n<tr style=\"height:9.5pt;\">\n<td style=\"border-bottom:0.5pt
+        solid #000000;border-right:0.5pt solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;width:127.1pt;\">
+        <div style=\"line-height:9.0pt;text-align:left;\">\n<div style=\"margin-left:3pt;margin-right:2.75pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;font-weight:bold;margin-left:0.0pt;\">Class
+        III</font></div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #000000;border-right:0.5pt
+        solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:29.03pt;\">\n<div
+        style=\"line-height:0.5pt;margin-left:3pt;margin-right:3pt;text-align:right;width:23.03pt;\">
+        <div style=\"display:flex;margin:auto;width:25.03pt;\"> <div style=\"display:flex;white-space:nowrap;width:25.03pt;\">
+        </div> </div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #000000;border-right:0.5pt
+        solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:31.15pt;\">\n<div
+        style=\"line-height:0.5pt;margin-left:3pt;margin-right:3pt;text-align:right;width:25.15pt;\">
+        <div style=\"display:flex;margin:auto;width:25.03pt;\"> <div style=\"display:flex;white-space:nowrap;width:25.03pt;\">
+        </div> </div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #000000;border-right:0.5pt
+        solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:35.1pt;\">\n<div
+        style=\"line-height:0.5pt;margin-left:3pt;margin-right:3pt;text-align:right;width:29.1pt;\">
+        <div style=\"display:flex;margin:auto;width:25.03pt;\"> <div style=\"display:flex;white-space:nowrap;width:25.03pt;\">
+        </div> </div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:45.11pt;\">
+        <div style=\"line-height:9.0pt;margin-left:3pt;margin-right:1.5pt;text-align:right;width:38.61pt;\">\n<div
+        style=\"display:flex;margin:auto;width:40.61pt;\"> <div style=\"display:flex;white-space:nowrap;width:40.61pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;font-weight:bold;\">4/30/1997</font></div>
+        </div> </div> </td>\n</tr>\n<tr style=\"height:9.5pt;\">\n<td style=\"border-bottom:0.5pt
+        solid #000000;border-right:0.5pt solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;width:127.1pt;\">
+        <div style=\"line-height:9.0pt;text-align:left;\">\n<div style=\"margin-left:3pt;margin-right:2.75pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;font-weight:bold;margin-left:0.0pt;\">Return
+        Before Taxes</font></div> </div> </td>\n<td style=\"border-bottom:0.5pt solid
+        #000000;border-right:0.5pt solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:29.03pt;\">\n<div
+        style=\"line-height:9.0pt;margin-left:3pt;margin-right:3pt;text-align:right;width:23.03pt;\">
+        <div style=\"display:flex;margin:auto;width:25.03pt;\"> <div style=\"display:flex;white-space:nowrap;width:25.03pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:7.9pt;margin-left:2.63pt;\">1.30%</font></div> </div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #000000;border-right:0.5pt
+        solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:31.15pt;\">\n<div
+        style=\"line-height:9.0pt;margin-left:3pt;margin-right:3pt;text-align:right;width:25.15pt;\">
+        <div style=\"display:flex;margin:auto;width:25.03pt;\"> <div style=\"display:flex;white-space:nowrap;width:25.03pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:7.9pt;\">-0.84%</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #000000;border-right:0.5pt solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:35.1pt;\">\n<div
+        style=\"line-height:9.0pt;margin-left:3pt;margin-right:3pt;text-align:right;width:29.1pt;\">
+        <div style=\"display:flex;margin:auto;width:25.03pt;\"> <div style=\"display:flex;white-space:nowrap;width:25.03pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:7.9pt;margin-left:2.63pt;\">1.13%</font></div> </div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:45.11pt;\">
+        <div style=\"line-height:9.0pt;margin-left:3pt;margin-right:1.5pt;text-align:right;width:38.61pt;\">\n<div
+        style=\"display:flex;margin:auto;width:40.61pt;\"> <div style=\"display:flex;white-space:nowrap;width:40.61pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;margin-left:18.21pt;\">4.19%</font></div>
+        </div> </div> </td>\n</tr>\n<tr style=\"height:17.5pt;\">\n<td style=\"border-bottom:0.5pt
+        solid #000000;border-right:0.5pt solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;width:127.1pt;\">
+        <div style=\"line-height:9.0pt;text-align:left;\">\n<div style=\"margin-left:3pt;margin-right:2.75pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;font-weight:bold;margin-left:0.0pt;\">Return
+        After Taxes on </font></div>\n<div style=\"margin-left:3pt;margin-right:2.75pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;font-weight:bold;margin-left:7.9pt;\">Distributions</font></div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #000000;border-right:0.5pt
+        solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:29.03pt;\">\n<div
+        style=\"line-height:9.0pt;margin-left:3pt;margin-right:3pt;text-align:right;width:23.03pt;\">
+        <div style=\"display:flex;margin:auto;width:25.03pt;\"> <div style=\"display:flex;white-space:nowrap;width:25.03pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:7.9pt;\">-0.54%</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #000000;border-right:0.5pt solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:31.15pt;\">\n<div
+        style=\"line-height:9.0pt;margin-left:3pt;margin-right:3pt;text-align:right;width:25.15pt;\">
+        <div style=\"display:flex;margin:auto;width:25.03pt;\"> <div style=\"display:flex;white-space:nowrap;width:25.03pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:7.9pt;\">-2.12%</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #000000;border-right:0.5pt solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:35.1pt;\">\n<div
+        style=\"line-height:9.0pt;margin-left:3pt;margin-right:3pt;text-align:right;width:29.1pt;\">
+        <div style=\"display:flex;margin:auto;width:25.03pt;\"> <div style=\"display:flex;white-space:nowrap;width:25.03pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:7.9pt;\">-0.43%</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:45.11pt;\">
+        <div style=\"line-height:9.0pt;margin-left:3pt;margin-right:1.5pt;text-align:right;width:38.61pt;\">\n<div
+        style=\"display:flex;margin:auto;width:40.61pt;\"> <div style=\"display:flex;white-space:nowrap;width:40.61pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;margin-left:18.21pt;\">1.91%</font></div>
+        </div> </div> </td>\n</tr>\n<tr style=\"height:25.5pt;\">\n<td style=\"border-bottom:0.5pt
+        solid #000000;border-right:0.5pt solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;width:127.1pt;\">
+        <div style=\"line-height:9.0pt;text-align:left;\">\n<div style=\"margin-left:3pt;margin-right:2.75pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;font-weight:bold;margin-left:0.0pt;\">Return
+        After Taxes on </font></div>\n<div style=\"margin-left:3pt;margin-right:2.75pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;font-weight:bold;margin-left:7.9pt;\">Distributions
+        and Sale of Fund </font></div>\n<div style=\"margin-left:3pt;margin-right:2.75pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;font-weight:bold;margin-left:7.9pt;\">Shares</font></div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #000000;border-right:0.5pt
+        solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:29.03pt;\">\n<div
+        style=\"line-height:9.0pt;margin-left:3pt;margin-right:3pt;text-align:right;width:23.03pt;\">
+        <div style=\"display:flex;margin:auto;width:25.03pt;\"> <div style=\"display:flex;white-space:nowrap;width:25.03pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:7.9pt;margin-left:2.63pt;\">0.77%</font></div> </div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #000000;border-right:0.5pt
+        solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:31.15pt;\">\n<div
+        style=\"line-height:9.0pt;margin-left:3pt;margin-right:3pt;text-align:right;width:25.15pt;\">
+        <div style=\"display:flex;margin:auto;width:25.03pt;\"> <div style=\"display:flex;white-space:nowrap;width:25.03pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:7.9pt;\">-0.96%</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #000000;border-right:0.5pt solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:35.1pt;\">\n<div
+        style=\"line-height:9.0pt;margin-left:3pt;margin-right:3pt;text-align:right;width:29.1pt;\">
+        <div style=\"display:flex;margin:auto;width:25.03pt;\"> <div style=\"display:flex;white-space:nowrap;width:25.03pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:7.9pt;margin-left:2.63pt;\">0.30%</font></div> </div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:45.11pt;\">
+        <div style=\"line-height:9.0pt;margin-left:3pt;margin-right:1.5pt;text-align:right;width:38.61pt;\">\n<div
+        style=\"display:flex;margin:auto;width:40.61pt;\"> <div style=\"display:flex;white-space:nowrap;width:40.61pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;margin-left:18.21pt;\">2.34%</font></div>
+        </div> </div> </td>\n</tr>\n<tr style=\"height:31.75pt;\">\n<td style=\"border-right:0.5pt
+        solid #000000;padding-bottom:1.5pt;padding-top:1.25pt;vertical-align:Bottom;width:127.1pt;\">
+        <div style=\"line-height:8pt;text-align:left;\">\n<div style=\"margin-left:3pt;margin-right:2.75pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;font-weight:bold;margin-left:0.0pt;\">Bloomberg
+        U.S. Aggregate </font></div>\n<div style=\"margin-left:3pt;margin-right:2.75pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;font-weight:bold;margin-left:7.9pt;\">Index</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:7.9pt;margin-left:0.0pt;\">&nbsp;(Fund benchmark) (reflects
+        </font></div> <div style=\"margin-left:3pt;margin-right:2.75pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:7.9pt;margin-left:7.9pt;\">no deduction for fees, expenses,
+        or </font></div> <div style=\"margin-left:3pt;margin-right:2.75pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:7.9pt;margin-left:7.9pt;\">taxes)</font></div> </div>
+        </td>\n<td style=\"border-right:0.5pt solid #000000;padding-bottom:1.5pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:29.03pt;\">
+        <div style=\"line-height:8pt;margin-left:3pt;margin-right:3pt;text-align:right;width:23.03pt;\">\n<div
+        style=\"display:flex;margin:auto;width:25.03pt;\"> <div style=\"display:flex;white-space:nowrap;width:25.03pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;margin-left:2.63pt;\">1.25%</font></div>
+        </div> </div> </td>\n<td style=\"border-right:0.5pt solid #000000;padding-bottom:1.5pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:31.15pt;\">
+        <div style=\"line-height:8pt;margin-left:3pt;margin-right:3pt;text-align:right;width:25.15pt;\">\n<div
+        style=\"display:flex;margin:auto;width:25.03pt;\"> <div style=\"display:flex;white-space:nowrap;width:25.03pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;\">-0.33%</font></div>
+        </div> </div> </td>\n<td style=\"border-right:0.5pt solid #000000;padding-bottom:1.5pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:35.1pt;\">
+        <div style=\"line-height:8pt;margin-left:3pt;margin-right:3pt;text-align:right;width:29.1pt;\">\n<div
+        style=\"display:flex;margin:auto;width:25.03pt;\"> <div style=\"display:flex;white-space:nowrap;width:25.03pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;margin-left:2.63pt;\">1.35%</font></div>
+        </div> </div> </td>\n<td style=\"padding-bottom:1.5pt;padding-top:1.25pt;vertical-align:Bottom;white-space:nowrap;width:45.11pt;\">
+        <div style=\"line-height:8pt;margin-left:3pt;margin-right:1.5pt;text-align:right;width:38.61pt;\">\n<div
+        style=\"display:flex;margin:auto;width:40.61pt;\"> <div style=\"display:flex;white-space:nowrap;width:40.61pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:7.9pt;margin-left:18.21pt;\">4.14%</font></div>
+        </div> </div> </td>\n</tr> </table> </div> </div> <div style=\"clear:both;\">
+        </div> <div style=\"float:left;margin-left:18pt;margin-top:12pt;width:559pt;min-height:333pt;\">
+        <div style=\"line-height:12.0pt;text-align:left;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;font-weight:bold;\">Management of the Fund</font></div>
+        <div style=\"line-height:11.5pt;margin-left:21pt;margin-top:1pt;text-align:left;\">
+        <div style=\"margin-top:1pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">Investment Adviser: Grantham, Mayo, Van Otterloo
+        &amp; Co. LLC</font> <br><font style=\"color:#000000;font-family:Times New
+        Roman;font-size:10pt;\">Investment Team and Senior Members of\nGMO primarily
+        responsible for portfolio management of the Fund:</font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:1pt;\">&#8195;</font></div> </div> <div style=\"line-height:0.0pt;margin-top:6.0pt;text-align:left;\">\n<div
+        style=\"margin-top:6pt;\"> </div> </div> <div style=\"margin-top:0.0pt;\">\n<table
+        style=\"empty-cells:show;width:559pt;\" cellpadding=\"0\" cellspacing=\"0\">\n<tr
+        style=\"height:11pt;\">\n<td style=\"border-bottom:0.5pt solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;width:88.5pt;\">
+        <div style=\"line-height:10.0pt;text-align:left;\"> <div style=\"margin-right:4.5pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;font-weight:bold;margin-left:0.0pt;\">Investment Team</font></div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;width:237.5pt;\">
+        <div style=\"line-height:10.0pt;text-align:left;\">\n<div style=\"margin-left:4.5pt;margin-right:4.5pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:8pt;font-weight:bold;margin-left:0.0pt;\">Senior
+        Member (Length of Service with Fund)</font></div>\n</div> </td>\n<td style=\"border-bottom:0.5pt
+        solid #000000;padding-bottom:1.25pt;padding-top:1.25pt;vertical-align:Bottom;width:233pt;\">
+        <div style=\"line-height:10.0pt;text-align:left;\"> <div style=\"margin-left:4.5pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:8pt;font-weight:bold;margin-left:0.0pt;\">Title</font></div>
+        </div> </td> </tr>\n<tr style=\"height:24pt;\">\n<td style=\"padding-bottom:3pt;padding-top:1.25pt;vertical-align:Top;width:88.5pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-right:4.5pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:0.0pt;\">Developed Rates </font></div>
+        <div style=\"margin-right:4.5pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:0.0pt;\">and FX</font></div> </div> </td>\n<td
+        style=\"padding-bottom:3pt;padding-top:1.25pt;vertical-align:Top;width:237.5pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-left:4.5pt;margin-right:4.5pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:0.0pt;\">Kevin Breaux (since 2025)</font></div>
+        </div> </td>\n<td style=\"padding-bottom:3pt;padding-top:1.25pt;vertical-align:Top;width:233pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-left:4.5pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:0.0pt;\">Portfolio Manager, Developed
+        Rates and FX Team, </font></div> <div style=\"margin-left:4.5pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:0.0pt;\">GMO.</font></div> </div> </td>
+        </tr>\n<tr style=\"height:22pt;\">\n<td style=\"padding-bottom:1.5pt;padding-top:3pt;vertical-align:Top;width:88.5pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-right:4.5pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:0.0pt;\">Developed Rates </font></div>
+        <div style=\"margin-right:4.5pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:0.0pt;\">and FX</font></div> </div> </td>\n<td
+        style=\"padding-bottom:1.5pt;padding-top:3pt;vertical-align:Top;width:237.5pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-left:4.5pt;margin-right:4.5pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:0.0pt;\">James Donaldson (since 2023)</font></div>
+        </div> </td>\n<td style=\"padding-bottom:1.5pt;padding-top:3pt;vertical-align:Top;width:233pt;\">
+        <div style=\"line-height:11pt;text-align:left;\"> <div style=\"margin-left:4.5pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:0.0pt;\">Portfolio Manager, Developed
+        Rates and FX Team, </font></div> <div style=\"margin-left:4.5pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:0.0pt;\">GMO.</font></div> </div> </td>
+        </tr> </table> </div> <div style=\"line-height:12.0pt;margin-top:10pt;text-align:left;\">
+        <div style=\"margin-top:10pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;font-weight:bold;\">Purchase and sale of Fund shares</font></div>
+        </div> <div style=\"line-height:11.5pt;margin-top:1pt;text-align:justify;\">
+        <div style=\"margin-top:1pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:3.76%;\">Under ordinary circumstances,
+        you may purchase the Fund&#8217;s shares on days when both (i) the New York
+        Stock Exchange </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">(&#8220;NYSE&#8221;)
+        is open for business and (ii) the U.S. bond markets are also open for business.
+        Purchase orders should be submitted directly </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">to GMO Trust (the &#8220;Trust&#8221;) or through
+        a broker or agent authorized to accept purchase and redemption orders on the
+        Funds&#8217; behalf. </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">Investors who have entered into agreements with
+        the Trust may purchase shares of the Fund through the National Securities
+        Clearing </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">Corporation
+        (&#8220;NSCC&#8221;).</font></div> </div> <div style=\"line-height:11.5pt;margin-top:6.5pt;text-align:justify;\">
+        <div style=\"margin-top:6.5pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:3.76%;\">Class R6 shares and Class I
+        shares are available for purchase by (i) eligible retirement plans (e.g.,
+        401(k) plans, 457 plans, </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">employer-sponsored 403(b) plans, profit-sharing
+        and money purchase pension plans, defined benefit plans and non-qualified
+        deferred </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">compensation
+        plans), (ii) section 529 plans, and (iii) other investors whose accounts are
+        maintained by the Fund through third-party </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">platforms or intermediaries. Purchases of Class
+        R6 shares or Class I shares are not subject to any minimum dollar amount.</font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;line-height:11.5pt;\"> </font></div> </div> <div
+        style=\"line-height:11.5pt;margin-top:6.5pt;text-align:justify;\"> <div style=\"margin-top:6.5pt;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:3.76%;\">Fund shares are redeemable.
+        Under ordinary circumstances, you may redeem the Fund&#8217;s shares on days
+        when both (i) the NYSE is </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">open for business and (ii) the U.S. bond markets
+        are also open for business. Redemption orders should be submitted directly
+        to the Trust </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">unless
+        the Fund shares to be redeemed were purchased through a broker or agent, in
+        which case the redemption order should be </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">submitted to that broker or agent. Investors who
+        have entered into agreements with the Trust may redeem shares of the Fund
+        through </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">the
+        NSCC. For instructions on redeeming shares directly, call the Trust at 1-617-346-7646
+        or send an email to SHS@GMO.com.</font></div> </div> </div> <div style=\"clear:both;\">
+        </div>\n<div style=\"float:left;margin-left:18pt;margin-top:8pt;width:559pt;min-height:12pt;\">\n<div
+        style=\"line-height:12.0pt;margin-top:5pt;text-align:center;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;line-height:12pt;\">5</font></div> </div> </div>
+        </div> <div style=\"float:left;margin-bottom:5.0pt;width:100%;\">\n</div>
+        <hr style=\"clear:both;margin-bottom:0.25pt;margin-left:0.25pt;margin-right:0.25pt;margin-top:40.0pt;\">\n</div>
+        <div> <div><a name=\"xx_39754e51-4a39-46e0-abde-2f548a968d0d_6\"></A> <div
+        style=\"page-break-after:always;position:relative;\"> <div style=\"clear:both;\">
+        </div>\n<div style=\"float:left;margin-left:18pt;margin-top:18pt;width:559pt;min-height:18pt;\">
+        <div style=\"line-height:14.0pt;text-align:right;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:12pt;font-weight:bold;line-height:14pt;\">GMO\nMULTI-SECTOR
+        FIXED INCOME FUND</font></div> </div> <div style=\"clear:both;\"> </div> <div
+        style=\"float:left;margin-left:18pt;margin-top:12pt;width:559pt;min-height:690pt;\">
+        <div style=\"line-height:12.0pt;text-align:left;\"><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;font-weight:bold;\">U.S. tax information</font></div>
+        <div style=\"line-height:11.5pt;margin-top:1pt;text-align:justify;\"> <div
+        style=\"margin-top:1pt;\"><font\nstyle=\"color:#000000;font-family:Times New
+        Roman;font-size:10pt;margin-left:3.76%;\">The Fund intends to qualify and
+        be treated each year, as a regulated investment company (a &#8220;RIC&#8221;)
+        under Subchapter M of the </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">Internal Revenue Code of 1986, as amended (the
+        &#8220;Code&#8221;) for U.S. federal income tax purposes and to distribute
+        net investment income </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">and net realized capital gains, if any, to shareholders.
+        These distributions are taxable as ordinary income or capital gain to U.S.
+        </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">shareholders
+        that are not exempt from U.S. income tax or that are not investing through
+        a tax-advantaged account. U.S. shareholders </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">who are investing through a tax-advantaged account
+        may be taxed upon withdrawals from that account.</font></div> </div>\n<div
+        style=\"line-height:12.0pt;margin-top:10.0pt;text-align:left;\"> <div style=\"margin-top:10pt;\"><font
+        style=\"color:#000000;font-family:Times New Roman;font-size:10pt;font-weight:bold;\">Financial
+        intermediary compensation</font></div> </div>\n<div style=\"line-height:11.5pt;margin-top:1.0pt;text-align:justify;\">
+        <div style=\"margin-top:1pt;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;margin-left:3.76%;\">The Fund makes payments out
+        of the net assets attributable\nto Class I shares for sub-transfer agency,
+        recordkeeping and other </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">administrative services provided by financial
+        intermediaries for the benefit of Class I shareholders.\nIn addition, GMO
+        pays brokers, </font><font style=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">agents,
+        or other financial intermediaries for transfer agency and related services.
+        These payments create a conflict of interest by\ncreating </font><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">a financial incentive for the broker, agent or
+        other financial intermediary and salesperson to recommend the purchase of
+        Fund shares </font><font\nstyle=\"color:#000000;font-family:Times New Roman;font-size:10pt;\">over
+        another investment. GMO also makes payments to financial intermediaries for
+        the purchase of Fund shares, which creates a similar </font><font\nstyle=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;\">conflict of interest. Ask your salesperson or
+        consult your financial intermediary&#8217;s website for more information.</font></div>
+        </div> </div> <div style=\"clear:both;\"> </div>\n<div style=\"float:left;margin-left:18pt;margin-top:8pt;width:559pt;min-height:12pt;\">\n<div
+        style=\"line-height:12.0pt;margin-top:5pt;text-align:center;\"><font style=\"color:#000000;font-family:Times
+        New Roman;font-size:10pt;line-height:12pt;\">6</font></div> </div> </div>
+        </div> <div style=\"float:left;margin-bottom:5.0pt;width:100%;\">\n</div>
+        <hr style=\"clear:both;margin-bottom:0.25pt;margin-left:0.25pt;margin-right:0.25pt;margin-top:40.0pt;\">\n</div>
+        </BODY></HTML>\n</TEXT>\n</DOCUMENT>\n<DOCUMENT>\n<TYPE>GRAPHIC\n<SEQUENCE>2\n<FILENAME>g123733bar_msfif.jpg\n<DESCRIPTION>GRAPHIC\n<TEXT>\nbegin
+        644 g123733bar_msfif.jpg\nM_]C_X  02D9)1@ ! 0$ 9 !D  #_X@H@24-#7U!23T9)3$4
+        \ 0$   H0\nM  (0  !M;G1R4D=\"(%A96B                !A8W-P05!03\nM                        ]M4
+        \ 0    #3+\nM                                              ID97-C    _\nM
+        'QC<')T   !>    \"AW='!T   !H    !1B:W!T   !M    !1R6%E:   !\nMR    !1G6%E:
+        \  !W    !1B6%E:   !\\    !1R5%)#   \"!   \" QG5%)#\nM   \"!   \" QB5%)#   \"!
+        \  \" QD97-C         \")!<G1I9F5X(%-O9G1W\nM87)E('-21T(@24-#(%!R;V9I;&4              \")!<G1I9F5X(%-O9G1W\nM87)E('-21T(@24-#(%!R;V9I;&4\nM
+        \           =&5X=     !#;W!Y<FEG:'0@07)T:69E>\"!3;V9T=V%R92 R\nM,#$Q %A96B
+        \       #S40 !     1;,6%E:(                     !8\nM65H@        ;Z(  #CU
+        \  #D%A96B        !BF0  MX4  !C:6%E:(\nM     \"2@   /A   ML]C=7)V        !
+        \     %  H #P 4 !D '@ C \"@\nM+0 R #< .P!  $4 2@!/ %0 60!> &, : !M '( =P!\\
+        ($ A@\"+ )  E0\":\nM )\\ I \"I *X L@\"W +P P0#& ,L T #5 -L X #E .L \\ #V /L!
+        0$' 0T!\nM$P$9 1\\!)0$K 3(!. $^ 44!3 %2 5D!8 %G 6X!=0%\\ 8,!BP&2 9H!H0&I\nM
+        ;$!N0'! <D!T0'9 >$!Z0'R ?H\" P(, A0\"'0(F B\\\". )! DL\"5 )= F<\"\nM<0)Z H0\"C@*8
+        J(\"K *V L$\"RP+5 N \"ZP+U P #\"P,6 R$#+0,X T,#3P-:\nM V8#<@-^ XH#E@.B ZX#N@/'
+        ],#X /L _D$!@03!\" $+00[!$@$501C!'$$\nM?@2,!)H$J 2V!,0$TP3A!/ $_@4-!1P%*P4Z!4D%6
+        5G!7<%A@66!:8%M07%\nM!=4%Y07V!@8&%@8G!C<&2 99!FH&>P:,!IT&KP; !M$&XP;U!P<'&0<K!ST'\nM3P=A!W0'A@>9!ZP'OP?2!^4'^
+        @+\"!\\(,@A&\"%H(;@B\"\")8(J@B^\"-((YPC[\nM\"1 ))0DZ\"4\\)9 EY\"8\\)I FZ\"<\\)Y0G[\"A$*)PH]\"E0*:@J!\"I@*K@K%\"MP*\nM\\PL+\"R(+.0M1\"VD+@
+        N8\"[ +R OA\"_D,$@PJ#$,,7 QU#(X,IPS #-D,\\PT-\nM#28-0 U:#70-C@VI#<,-W@WX#A,.+@Y)#F0.?PZ;#K8.T@[N#PD/)0]!#UX/\nM>@^6#[,/SP_L$
+        D0)A!#$&$0?A\";$+D0UQ#U$1,1,1%/$6T1C!&J$<D1Z!('\nM$B8211)D$H02HQ+#$N,3 Q,C$T,38Q.#$Z03Q1/E%
+        84)Q1)%&H4BQ2M%,X4\nM\\!42%3055A5X%9L5O17@%@,6)A9)%FP6CQ:R%M86^A<=%T$791>)%ZX7TA?W\nM&!L80!AE&(H8KQC5&/H9(!E%&6L9D1FW&=T:!!HJ&E$:=QJ>&L4:[!L4&SL;\nM8QN*&[(;VAP\"'\"H<4AQ['*,<S!SU'1X=1QUP'9D=PQWL'A8>0!YJ'I0>OA[I\nM'Q,?/A]I'Y0?OQ_J(!4@02!L()@@Q\"#P(1PA2\"%U(:$ASB'[(B<B52*\"(J\\B\nMW2,*(S@C9B.4(\\(C\\\"0?)$TD?\"2K)-HE\"24X)6@EER7')?<F)R97)H<FMR;H\nM)Q@G22=Z)ZLGW\"@-*#\\H<2BB*-0I!BDX*6LIG2G0*@(J-2IH*ILJSRL\"*S8K\nM:2N=*]$L!2PY+&XLHBS7+0PM02UV+:LMX2X6+DPN@BZW+NXO)\"]:+Y$OQR_^\nM,#4P;#\"D,-LQ$C%*,8(QNC'R,BHR8S*;,M0S#3-&,W\\SN#/Q-\"LT932>--@U\nM$S5--8<UPC7]-C<V<C:N-NDW)#=@-YPWUS@4.%
+        XC#C(.04Y0CE_.;PY^3HV\nM.G0ZLCKO.RT[:SNJ.^@\\)SQE/*0\\XSTB/6$]H3W@/B ^8#Z@/N
+        _(3]A/Z(_\nMXD C0&1 ID#G02E!:D&L0>Y\",$)R0K5\"]T,Z0WU#P$0#1$=$BD3.11)%546:\nM1=Y&(D9G1JM&\\$<U1WM'P$@%2$M(D4C721U)8TFI2?!*-TI]2L1+#$M32YI+\nMXDPJ3'),NDT\"34I-DTW<3B5.;DZW3P!/24^33]U0)U!Q4+M1!E%049M1YE(Q\nM4GQ2QU,34U]3JE/V5$)4CU3;52A5=57\"5@]67%:I5O=71%>25^!8+UA]6,M9\nM&EEI6;A:!UI66J9:]5M%6Y5;Y5PU7(9<UETG77A=R5X:7FQ>O5\\/7V%?LV
+        %\nM8%=@JF#\\84]AHF'U8DEBG&+P8T-CEV/K9$!DE&3I93UEDF7G9CUFDF;H9SUG\nMDV?I:#]HEFCL:4-IFFGQ:DAJGVKW:T]KIVO_;%=LKVT(;6!MN6X2;FMNQ&\\>\nM;WAOT7
+        K<(9PX'$Z<95Q\\')+<J9S 7-=<[AT%'1P=,QU*'6%=>%V/G:;=OAW\nM5G>S>!%X;GC,>2IYB7GG>D9ZI7L$>V-[PGPA?(%\\X7U!?:%^
+        7YB?L)_(W^$\nM?^6 1X\"H@0J!:X'-@C\"\"DH+T@U>#NH0=A(\"$XX5'A:N&#H9RAM>'.X>?B
+        2(\nM:8C.B3.)F8G^BF2*RHLPBY:+_(QCC,J-,8V8C?^.9H[.CS:/GI &D&Z0UI$_\nMD:B2$9)ZDN.339.VE\"\"4BI3TE5^5R98TEI^7\"I=UE^\"83)BXF229D)G\\FFB:\nMU9M\"FZ^<')R)G/>=9)W2GD\">KI\\=GXN?^J!IH-BA1Z&VHB:BEJ,&HW:CYJ16\nMI,>E.*6IIAJFBZ;]IVZGX*A2J,2I-ZFIJARJCZL\"JW6KZ:Q<K-\"M1*VXKBVN\nMH:\\6KXNP
+        +!UL.JQ8+'6LDNRPK,XLZZT);2<M1.UBK8!MGFV\\+=HM^\"X6;C1\nMN4JYPKH[NK6[+KNGO\"&\\F[T5O8^^\"KZ$OO^_>K_UP'#
+        [,%GP>/\"7\\+;PUC#\nMU,11Q,[%2\\7(QD;&P\\=!Q[_(/<B\\R3K)N<HXRK?+-LNVS#7,M<TUS;7.-LZV\nMSS?/N-
+        YT+K1/-&^TC_2P=-$T\\;42=3+U4[5T=95UMC77-?@V&38Z-ELV?':\nM=MK[VX#<!=R*W1#=EMX<WJ+?*=^OX#;@O>%$X<SB4^+;XV/CZ^1SY/SEA.8-\nMYI;G'^>IZ#+HO.E&Z=#J6^KEZW#K^^R&[1'MG.XH[K3O0._,\\%CPY?%R\\?_R\nMC/,9\\Z?T-/3\"]5#UWO9M]OOWBO@9^*CY./G'^E?ZY_MW_
+        ?\\F/TI_;K^2_[<\nM_VW____; $, \" 8&!P8%\" <'!PD)\" H,% T,\"PL,&1(3#Q0=&A\\>'1H<'\"
+        D\nM+B<@(BPC'!PH-RDL,#$T-#0?)SD].#(\\+C,T,O_; $,!\"0D)# L,& T-&#(A\nM'\"$R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R\nM,C(R,C(R,O_
+        \ !$( *4!: ,!(@ \"$0$#$0'_Q  ?   !!0$! 0$! 0\nM     0(#! 4&!P@)\"@O_Q \"U$
+        \ \" 0,# @0#!04$!    7T! @, !!$%$B$Q\nM008346$'(G$4,H&1H0@C0K'!%5+1\\\"0S8G*\"\"0H6%Q@9&B4F)R@I*C0U-C<X\nM.3I#1$5&1TA)2E-455976%E:8V1E9F=H:6IS='5V=WAY>H.$A8:'B(F*DI.4\nME9:7F)F:HJ.DI::GJ*FJLK.TM;:WN+FZPL/$Q<;'R,G*TM/4U=;7V-G:X>+C\nMY.7FY^CIZO'R\\_3U]O?X^?K_Q
+        \ ? 0 # 0$! 0$! 0$!         0(#! 4&\nM!P@)\"@O_Q \"U$0 \" 0($! ,$!P4$!  !
+        G<  0(#$00%(3$&$D%1!V%Q$R(R\nM@0@40I&AL<$)(S-2\\!5B<M$*%B0TX27Q%Q@9&B8G*\"DJ-38W.#DZ0T1%1D=(\nM24I35%565UA96F-D969G:&EJ<W1U=G=X>7J\"@X2%AH>(B8J2DY25EI>8F9JB\nMHZ2EIJ>HJ:JRL[2UMK>XN;K\"P\\3%QL?(R<K2T]35UM?8V=KBX^3EYN?HZ>KR\nM\\_3U]O?X^?K_V@
+        , P$  A$#$0 _ /?ZY\\^*4_X3%= ^Q3JOV>29KN7Y$RFS\nM(7(^8?.,GH.G/..@K(N]#-UXEM-8%T8S;VLUMY80$GS\"IW9/
+        QMZ8/6@#D++\nMXHR7^C7&I)IEDD2-&JG^T@VS>V 90$S&,=^>>*ZG1O$0U>*>Z, M;*\"&-I))\nMGQMD9-[J>P\"
+        J\"?7(XQ5;1?#-[INHS:C>:I'>W8LULH&%L(56-6+ N 3N;)'\nM(P.. ,U4L_ [6NNV&HM?B401
+        3!HOFED(E\\PYS@+(TVYACDHOIP ;G_\"3^'R\nM2/[<TS(ZC[7'_C2_\\)-H/_0;TW_P+C_QJC86=J?&&M*;:'
+        M[7 V#C_6UM_8\nM;3_GU@_[]B@\"E_PDV@_]!O3?_ N/_&C_ (2;0?\\ H-Z;_P\"!<?\\ C5W[#:?\\\nM^L'_
+        '[%'V&T_P\"?6#_OV* *7_\"3:#_T&]-_\\\"X_\\:/^$FT'_H-Z;_X%Q_XU\nM=^PVG_/K!_W[%'V&T_Y]8/\\
+        OV* *7_\"3:#_ -!O3?\\ P+C_ ,:/^$FT'_H-\nMZ;_X%Q_XU=^PVG_/K!_W[%'V&T_Y]8/^_8H
+        I?\\ \"3:#_P!!O3?_  +C_P :\nM/^$FT'_H-Z;_ .!<?^-7?L-I_P ^L'_?L4?8;3_GU@_[]B@\"E_PDV@_]!O3?\nM_
+        N/_&C_ (2;0?\\ H-Z;_P\"!<?\\ C5W[#:?\\^L'_ '[%'V&T_P\"?6#_OV* *\nM7_\"3:#_T&]-_\\\"X_\\:/^$FT'_H-Z;_X%Q_XU=^PVG_/K!_W[%'V&T_Y]8/\\\nMOV*
+        *7_\"3:#_ -!O3?\\ P+C_ ,:/^$FT'_H-Z;_X%Q_XU=^PVG_/K!_W[%'V\nM&T_Y]8/^_8H I?\\
+        \"3:#_P!!O3?_  +C_P :/^$FT'_H-Z;_ .!<?^-7?L-I\nM_P ^L'_?L4?8;3_GU@_[]B@\"E_PDV@_]!O3?_
+        N/_&C_ (2;0?\\ H-Z;_P\"!\nM<?\\ C5W[#:?\\^L'_ '[%'V&T_P\"?6#_OV* *7_\"3:#_T&]-_\\\"X_\\:/^$FT'\nM_H-Z;_X%Q_XU=^PVG_/K!_W[%'V&T_Y]8/\\
+        OV* *7_\"3:#_ -!O3?\\ P+C_\nM ,:/^$FT'_H-Z;_X%Q_XU=^PVG_/K!_W[%'V&T_Y]8/^_8H
+        I?\\ \"3:#_P!!\nMO3?_  +C_P :/^$FT'_H-Z;_ .!<?^-7?L-I_P ^L'_?L4?8;3_GU@_[]B@\"\nME_PDV@_]!O3?_
+        N/_&C_ (2;0?\\ H-Z;_P\"!<?\\ C5W[#:?\\^L'_ '[%'V&T\nM_P\"?6#_OV* *7_\"3:#_T&]-_\\\"X_\\:/^$FT'_H-Z;_X%Q_XU=^PVG_/K!_W[\nM%'V&T_Y]8/\\
+        OV* *7_\"3:#_ -!O3?\\ P+C_ ,:/^$FT'_H-Z;_X%Q_XU=^P\nMVG_/K!_W[%'V&T_Y]8/^_8H
+        I?\\ \"3:#_P!!O3?_  +C_P :/^$FT'_H-Z;_\nM .!<?^-7?L-I_P ^L'_?L4?8;3_GU@_[]B@\"E_PDV@_]!O3?_
+        N/_&C_ (2;\nM0?\\ H-Z;_P\"!<?\\ C5W[#:?\\^L'_ '[%'V&T_P\"?6#_OV* *7_\"3:#_T&]-_\nM\\\"X_\\:/^$FT'_H-Z;_X%Q_XU=^PVG_/K!_W[%'V&T_Y]8/\\
+        OV* *7_\"3:#_\nM -!O3?\\ P+C_ ,:/^$FT'_H-Z;_X%Q_XU=^PVG_/K!_W[%'V&T_Y]8/^_8H\nMI+XDT)F\"KK6G%F(
+        \ NDR2>@ZT50\\86ELGA:\\9+>)6'EX(0 CYUHH Z.BBN\"U\nM>TN8/B3#<075Q-<3Z3>&&-V&V(CR@H0=N><GDD]>!0!WC,%4LQ
+        \ ZDT;EW;=\nMPW8SC/.*\\7\\+:+:Z];2VEA<K;VJZ98S:B\\L9DC-\\K.9!(I(R<?>Y'09[5O\\\nMAK6)+/5(-.2,O=:A;1);7=QDLD(CE\\@F/@LN(6=_F&&E
+        [Y !UUA_P CCK7_\nM %[6O_M6MRN+LK;Q(?%>KA=6TD2BWMM['3)\"I'[S&!]HX[]SGV[['V7Q5_T&\nM=&_\\%,O_
+        ,DT ;E%8?V7Q5_T&=&_\\%,O_P DT?9?%7_09T;_ ,%,O_R30!N4\nM5A_9?%7_ $&=&_\\ !3+_
+        /)-'V7Q5_T&=&_\\%,O_ ,DT ;E%8?V7Q5_T&=&_\nM\\%,O_P DT?9?%7_09T;_ ,%,O_R30!N45A_9?%7_
+        $&=&_\\ !3+_ /)-'V7Q\nM5_T&=&_\\%,O_ ,DT ;E%8?V7Q5_T&=&_\\%,O_P DT?9?%7_09T;_
+        ,%,O_R3\nM0!N45A_9?%7_ $&=&_\\ !3+_ /)-'V7Q5_T&=&_\\%,O_ ,DT ;E%8?V7Q5_T\nM&=&_\\%,O_P
+        DT?9?%7_09T;_ ,%,O_R30!N5E7VLFRU6\"S:V8QR[!YN3U=BH\nM X(XX)R1P1C-0?9?%7_09T;_
+        ,%,O_R367K\"ZYIZPWEU>:-<2%_*1ET5BZY!\nM/5KD8& >_>@\"W)XOAAOQ;26^P/<^1$[N5W[9?+=N5Q@'T)SD=.<7=/UW[7?-\nM9W%M]EG
+        X5GSDXS@<#D#)/X$;@<UR*:MJ:2/(@TQ7<J78:( 6*G()/VOG! Q\nM6AI3ZSJU[++%=:3%<6X#>9+HS9^?(X(NC_=Q]*
+        .VHK#^R^*O^@SHW_@IE_^\nM2:EEN-3@U#3;9KFS</&[W1^SLORH!N9?WAV\\L@P=W4G/% &O17&WOBR_AN;R\nM*%;0A)=D);I@$Y+$N
+        .G&[8#_#NXS?@\\0W*:C!!>QQ)#<%?+9%.?GSL!R>_K\nMC(((VXPU '1T5B-:^*-QVZQHX7/
+        .E2D_P#I12?9?%7_ $&=&_\\ !3+_ /)-\nM &Y16']E\\5?]!G1O_!3+_P#)-'V7Q5_T&=&_\\%,O_P
+        DT ;E%8?V7Q5_T&=&\nM_P#!3+_\\DT?9?%7_ $&=&_\\ !3+_ /)- &Y16']E\\5?]!G1O_!3+_P#)-'V7\nMQ5_T&=&_\\%,O_P
+        DT ;E%8?V7Q5_T&=&_P#!3+_\\DT?9?%7_ $&=&_\\ !3+_\nM /)- &Y16']E\\5?]!G1O_!3+_P#)-'V7Q5_T&=&_\\%,O_P
+        DT ;E%8?V7Q5_\nMT&=&_P#!3+_\\DT?9?%7_ $&=&_\\ !3+_ /)- &Y16']E\\5?]!G1O_!3+_P#)\nM-'V7Q5_T&=&_\\%,O_P
+        DT )XR_Y%.]_[9_\\ H:T5D>*;?Q$GARZ:ZU32Y8 8\nM]Z1:;)&S#>O1C.P'Y&B@9VE%%(S!5+,0%
+        R2>@H$!52\"\"H(/48ZTGEH&#;%W\nM 8!QR!Z5YW9?%&2_T:XU)-,LDB1HU4_VD&V;VP#* F8QCOSSQ74:/XD358+B\nM\\>%;2QMX(WEEF?;LD*;W4YX
+        12N3ZY'&* '6'_(XZU_U[6O_ +5K<KB[+Q;X\nM;3Q7J\\S>(=)6*2WM@CF]C\"L1YF0#GG&1^=;'_\":>%?\\
+        H9=&_P# ^+_XJ@#<\nMHK#_ .$T\\*_]#+HW_@?%_P#%4?\\ \":>%?^AET;_P/B_^*H W**P_^$T\\*_\\\nM0RZ-_P\"!\\7_Q5'_\":>%?^AET;_P/B_\\
+        BJ -RBL/_A-/\"O\\ T,NC?^!\\7_Q5\nM'_\":>%?^AET;_P #XO\\ XJ@#<HK#_P\"$T\\*_]#+HW_@?%_\\
+        %5E-XPTE?$7G\nMGQ)HCZ<(&1434X@=V4.2I(!/WN<\\ =B>0#L:*\\WE\\2VTNYI_$^EM(+HRHMOK\nM\"!&&Q
+        \ ?G0A =W'/K@]3=T_Q9I5EJ_E2>)],N;)MR^;+J<1V  ?-@OU)XQSW\nM(VCB@#NZ*P_^$T\\*_P#0RZ-_X'Q?_%4?\\)IX5_Z&71O_
+        \ /B_P#BJ -RBL/_\nM (33PK_T,NC?^!\\7_P 51_PFGA7_ *&71O\\ P/B_^*H W*Y_Q=_R#[7_
+        *^1\nM_P\"@/4G_  FGA7_H9=&_\\#XO_BJR=?\\ $6B:K;VUOIVL:?>3\"?<8[>Y21L!&\nMYPI)QR*
+        ,>M_PA_Q^ZA_USA_G)6!6CH.M:5I%[>?VGJ=G9>;'%Y?VF=8]^\"^\nM<;B,XR/S% '<UG:SJ;Z5:QS)
+        LS/($VM)L X)SG!]*J?\\)IX5_Z&71O_  /B\nM_P#BJRM>\\1:'JEM;V^GZSIUW/YV[R[>Z21L!&R<
+        DXH F_X2^Y_Z!D7_ (%'\nM_P\"(J_H^MOJEX\\,EE'\"50R!EEWY/ _NCUKD:OZ-J^FZ1J1?4M1M+))(6\"-<S\nM+&&.5X&XC-
+        '=T5A_P#\":>%?^AET;_P/B_\\ BJ/^$T\\*_P#0RZ-_X'Q?_%4\nM;E%8?_\":>%?^AET;_P
+        #XO\\ XJC_ (33PK_T,NC?^!\\7_P 50!N45A_\\)IX5\nM_P\"AET;_ ,#XO_BJ/^$T\\*_]#+HW_@?%_P#%4
+        ;E%8?_  FGA7_H9=&_\\#XO\nM_BJ/^$T\\*_\\ 0RZ-_P\"!\\7_Q5 &Y6)KUSJ=O/:\"P20Q'<9/+3<68%=J_=;
+        (\nM+\\G XZBD_P\"$T\\*_]#+HW_@?%_\\ %57O?&NABU;^SM=TFYNRRK'$EVCEB6 X\nM56R>\":
+        $O[_4DOIS']O6!6PJ06F_,>Q3N!*_?+Y7!)&.2,#-0F^URR6VGG:6\nMZC90\\L44&&'(&W[@.XGOCGGA,9,'_\"4:IZ6?_?IO_BZDM_%Y@NHO[7NM/M+1\nMR5,LA\\H
+        X)'S,V.U '745A_\\)IX5_P\"AET;_ ,#XO_BJ/^$T\\*_]#+HW_@?%\nM_P#%4 ;E%8?_  FGA7_H9=&_\\#XO_BJ/^$T\\*_\\
+        0RZ-_P\"!\\7_Q5 \">,O\\\nMD4[W_MG_ .AK161XI\\5>';WPY=6UKKVESSR&,)%%>1LS'>O
+        \ .310,[2FNI=\nM&4,5)!&X8R/?GBG44\".9T7PS>Z;J,VHWFJ1WMV+-;*!A;\"%5C5BP+@$[FR1R\nM,#C@#-5;'P3)9Z_I^I_VCO\\
+        LT8\\W,?SR2$2^80<X\"NTVYACJB^G&\\/$.BFU\nMN+I=7L6M[9MD\\BW\"%8VSC#$'@Y[&K<5Y;3S&&*>.201K+M1@?D;.UOH<'![X\nM-
+        &58?\\ (XZU_P!>UK_[5K<K#L/^1QUK_KVM?_:M;E !1110 57-Y&-16RVR\nM>88C*&V_+@$
+        C/<\\BK%9>JWUE87%N]Q',TK(ZH8C@A<J6[CN%_*@\"J_BB);M\nMK;^SKYG5V1BGE-@A\"YX#YZ#TSD@=2*OZ=JUOJ?F>2&4QXW*Y7//I@G(]QP<\\\nM$\\UB6VJ:+:7?VJ*TN_/V&/>S[R%)!V\\N>/E&!VYQU-:&BIIMU--?V<,J2J6A\nM<R-U)P['&2.21S[4
+        ;5<YXIN)X7LUAGEB#\"0MY;E<XVXZ?4UT=<OXN_UUC_N\nMR?\\ LE &)]MO/^?V[_[_ +_XUT/A:XGF^UK--+*%V$>8Y;&<YZ_05R]=)X2^\nM]>?2/_V:@#IJQVN;L>(C$'N?LBQY<&W/EDX&
+        K!<DYR2=V.@ )R1L5B>(M0N\nM;%+<6TGEERVX[03QCU^M #W?55\\[$F=E_&HQ!]Z%MF0.>VYLMST/3M!I]YJD\nM6K_8[X2SQMN59EB
+        4$ $DD <=ATP21\\WWJQO[?U3_G[/_?M/\\*VO#FHW5\\]T\nMMS+YGEA\"IV@8SNST^@H WJY_Q=_R#[7_
+        *^1_P\"@/705S_B[_D'VO_7R/_0'\nMH Y6M_PA_P ?NH?]<X?YR5@5O^$/^/W4/^N</\\Y* .KK!\\6?\\@ZW_P\"O@?\\\nMH#5O5@^+/^0=;_\\
+        7P/_ $!J .3K;\\+?\\A63_K@W_H2UB5M^%O\\ D*R?]<&_\nM]\"6@#KZ*** \"BBB@ HHHH
+        **** \"LKQ)_P @&X_WH_\\ T-:U:RO$G_(!N/\\\nM>C_]#6@#BJTM _Y#EK]6_P#0#6;6EH'_
+        \"'+7ZM_Z : .XJO=WD=F(C(LC\"6\nM58AL7.\"QP\"3V&35BJU^]M%9M+>9\\F-E<D G!# KP.3R!0!4O=<M[\"\\6UFAF+\nMN!Y979B1BRJ%&6SU8#)
+        'O44/B6SEN4@:&XB=FV?O H ;H03GC!R/0E2!DBJ\nM$]_X:N9/,FDNG8'()2X^5AT8<<-P/F'/O3XSX<U4PZ>GFM\\K+&A25.,[F^8@\nM<G'))R:
+        +'C+_D4[W_MG_P\"AK11XR_Y%.]_[9_\\ H:T4#-VJVH12SZ;=0P';\nM-)\"ZH<XPQ! Y^M6:*!'DWAGPV=24\"[L;_2;>RTJR@E?R?*=KN$N6=0RD.
+        #C\nM.\"#NXK6\\,2ZII.M6=@NER+:WL<<CO)$Y>.+RY!&N_.U?+6*)64\\EI21COZ'1\nM0!RAM]3G\\9ZN=/U\"&U
+        MK7>)+;S=W,N/XEQ5;6KKQ-I4]M&FL64GG*[$G3R,\nM;2O_ $T_VOTK8L/^1QUK_KVM?_:M6=2AL+B]LH+RWDDDD+I$Z[@J\\;B\"01U\"\nM]/:@#C?[<\\4_]!2P_P#
+        \ _\\ QRMC1G\\2ZI;2ROK5E&8Y?+P-/)S\\JG/^L]Z@\nM6^\\/MMVZ7=?--Y0S.@X_OG,O\"\\CK@\\CBMK0[[3G:2ULH)8&_UC)*1DG@>IST\nMP?3&#@\\4
+        -^P>(_^@]:?^\"[_ .V50U'PUKFIO$TOB\"V!B# 8T[UQG_EI[\"NK\nMHH X?_A\"-8_Z&*W_
+        /!=_P#;*T--\\/:]ID,L</B\"U(DD\\P[M.[X _P\">G^R*\nMZBB@##^P>(_^@]:?^\"[_ .V50U'PUKNI-$TOB\"V!C#
+        8T[UQG_EI[\"NKHH X\nM?_A\"-8_Z&*W_ /!=_P#;*O:=X;UW3?-\\KQ!;$R8SG3O3/_33WKJJ*
+        ,/[!XC\nM_P\"@]:?^\"[_[95+4?#FNZD(Q+X@MAY><8T[U_P\"VGM74T4 </_PA&L?]#%;_\nM
+        /@N_P#ME7=.\\-:[IK2M%X@MB9 H.=.],_\\ 33W-=710!A_8/$?_ $'K3_P7\nM?_;*IZCX?U[4H8XI?$%J
+        C[QC3N^\"/\\ GI[FNHHH X?_ (0C6/\\ H8K?_P %\nMW_VRKFF^&=<TR2:2+Q!;$RA0V=._NYQ_RT_VC7644
+        8?V#Q'_P!!ZT_\\%W_V\nMRJFH>']>U*!(I=?M0$?>,:=WP1_ST]ZZ>B@#A_\\ A\"-8_P\"ABM__
+        \ 7?_;*M\nMZ?X6UO3IVFB\\06Q8KMYT[MD'_GI[5UM% &']@\\1_]!ZT_P#!=_\\ ;*S]7/B7\nM3+1)EUJR<M($P=/([$_\\]/:NLK\"\\6$+I<3,0
+        )QDGM\\K4 <O_;GBG_H*6'_@\nM ?\\ XY5[2;WQ/J5\\;=]8L4 C+Y&GD]\"!_P ]/>LC[1#_
+        ,]H_P#OH5M^%)$?\nM67V.K8MVZ'/\\24 :_P!@\\1_]!ZT_\\%W_ -LJGJJ^)=.TZ2Z76[-RA4;3IQ'5\nM@/\\
+        GI[UU%9'B;_D 3_[\\7_HQ: .1_MSQ3_T%+#_ , #_P#'*N:3?^)]1U'[\nM*^KV*#R6DW#3R>A48_UG^U6=6MX8_P\"1@_[=9/\\
+        T..@#8^P>(_^@]:?^\"[_\nM .V57O=$U^^M'MI=?M0C$$D:=Z$'_GI[5TE% '#_ /\"$:Q_T,5O_
+        .\"[_P\"V\nM5/9^$M:L[I+A/$-N73.,Z=ZC'_/3WKL:* ,/[!XC_P\"@]:?^\"[_[94%YHOB\"\nM]M7MY-?M0CXSC3O0Y_YZ>U='10!P_P#PA&L?]#%;_P#@N_\\
+        ME36GA#6K.[C\nMN4\\0VY>,D@'3O4$?\\]/>NRHH XOQ39ZY'X<NGN=8MIH08]\\:V.PL-Z]]YQ^5\nM%:_C+_D4[W_MG_Z&M%
+        S=JM>:A9:>JM>74-N'.$\\UPNX^@SU/L*LU6O-.LM1\nM15O+6&<(<IYB E#ZJ>Q]Q0(\\[T[QOXGOM/G=K6V6\\VQ2+:+IMP)HHG?!D*EO\nMWH&,?+W]JZ31?%)O7F?49;:S\\N
+        ?Z,6_>-(BYN& SDJC'9P.J-[5:TCPK#I%\nMQ-=+J-_=W3VXMHIKN19&AB!)\"KA1GDYRV2<#)J&T\\%6%GJMC?Q7%SNM(XU\"%\nM@1(Z+*H=CC.2)Y\"><$G-
+        &=9>+-$3Q7J\\S7N(WM[8*?*?DCS,]O<5H'Q)X6V\nM0HMRL:0N7C6.&1 K$$$C ']X_G5JP_Y''6O^O:U_]JUN4
+        <@=6\\(MNW7<K;N\nM&RTYW+_=/JO^STY/'-2?V[X4_M!;_P\"UG[0K,P;9+U*[<XQC[HQ75T4
+        87_\"\nM9:!_S_\\ _D&3_P\")H_X3+0/^?_\\ \\@R?_$UNT4 87_\"9:!_S_P#_ )!D_P#B\nM:/\\
+        A,M _P\"?_P#\\@R?_ !-;M% &%_PF6@?\\_P#_ .09/_B:/^$RT#_G_P#_\nM \"#)_P#$UNT4
+        87_  F6@?\\ /_\\ ^09/_B:/^$RT#_G_ /\\ R#)_\\36[10!A\nM?\\)EH'_/_P#^09/_ (FC_A,M
+        _Y__P#R#)_\\36[10!A?\\)EH'_/_ /\\ D&3_\nM .)H_P\"$RT#_ )__ /R#)_\\ $UNT4 87_\"9:!_S_
+        /\\ Y!D_^)H_X3+0/^?_\nM /\\ (,G_ ,36[10!A?\\ \"9:!_P __P#Y!D_^)H_X3+0/^?\\
+        _P#(,G_Q-;M%\nM &%_PF6@?\\__ /Y!D_\\ B:/^$RT#_G__ /(,G_Q-;M% &%_PF6@?\\_\\
+        _P\"0\nM9/\\ XFC_ (3+0/\\ G_\\ _(,G_P 36[10!A?\\)EH'_/\\ _P#D&3_XFKE]JBP6\nM<DMHL=S+&H8P^80V\"\"1P%9LD#@8K1J*XMK>[B\\JY@BFCSG9(@8?D:
+        ,ZXUEH\nMP&BMT,;6C72RRS;4(4KD94,> V<X_P#K55\\1SPO;KJ6G\"S\\Y%8L9BP3(!.?E\nM'3./8CG
+        ()VFM+9H_+:WB*;&CVE!C:W5<>AP,CVI+BRM;L8N;>*88 Q(H;C.\nM>_N!0!GW?BC1[&ZDMKF\\V31G#+Y3G'?J!63K?B?1[_2I+:VO-\\TCQA5\\IQGY\nMU/4C%=;61XF_Y
+        $_^_%_Z,6@#C*MZ1J=GI6L+/>S>5&UO(@;:6YW(<< ^AJI\nM6MX8_P\"1@_[=9/\\ T..@#7_X3+0/^?\\
+        _P#(,G_Q-'_\"9:!_S_\\ _D&3_P\")\nMK=HH PO^$RT#_G__ /(,G_Q-'_\"9:!_S_P#_ )!D_P#B:W:*
+        ,+_ (3+0/\\\nMG_\\ _(,G_P 31_PF6@?\\_P#_ .09/_B:W:* ,+_A,M _Y_\\ _P @R?\\
+        Q-'_\nM  F6@?\\ /_\\ ^09/_B:W:* .*\\4^*=&O?#MS;6]YOED,85?*<9.]>Y%%;'C+\nM_D4[W_MG_P\"AK10,W:B:ZMTNDM6GB6XD4ND1<!V48R0.I
+        R.?<4R^^V?8I?L\nM'D?:]O[K[1G9GWQSCZ5Q$^@:A_PF5O?-;_Z?=:3=1W-S\"9#\"LI\\L(H9ONC@D\nM#CN:!'6CQ#HIM;BZ75[%K>V;9/(MPA6-LXPQ!X.>QJW%>6T\\QABGCDD$:R[4\nM8'Y&SM;Z'!P>^#7EOAGPV=24\"[L;_2;>RTJR@E?R?*=KN$N6=0RD.
+        #C.\"#N\nMXK2\\/-J^FZE;Z;#82P07\\\",9WA9I((_+D$8W'Y!Y2Q1*5(.YI2>.A .KL/\\\nMD<=:_P\"O:U_]JUN5Q=EI6JGQ7JZ#Q%=*ZV]L6?[/#EL^9@8V8X_K6Q_8^L?]\nM#/>?^
+        L'_P 10!N45A_V/K'_ $,]Y_X\"P?\\ Q%']CZQ_T,]Y_P\" L'_Q% &Y\nM16'_ &/K'_0SWG_@+!_\\11_8^L?]#/>?^
+        L'_P 10!N45A_V/K'_ $,]Y_X\"\nMP?\\ Q%']CZQ_T,]Y_P\" L'_Q% &Y16'_ &/K'_0SWG_@+!_\\11_8^L?]#/>?\nM^
+        L'_P 10!N45A_V/K'_ $,]Y_X\"P?\\ Q%']CZQ_T,]Y_P\" L'_Q% &Y16'_\nM &/K'_0SWG_@+!_\\11_8^L?]#/>?^
+        L'_P 10!N45A_V/K'_ $,]Y_X\"P?\\\nMQ%']CZQ_T,]Y_P\" L'_Q% &Y16'_ &/K'_0SWG_@+!_\\11_8^L?]#/>?^
+        L'\nM_P 10!N45A_V/K'_ $,]Y_X\"P?\\ Q%']CZQ_T,]Y_P\" L'_Q% &Y16'_ &/K\nM'_0SWG_@+!_\\11_8^L?]#/>?^
+        L'_P 10!N45A_V/K'_ $,]Y_X\"P?\\ Q%']\nMCZQ_T,]Y_P\" L'_Q% &Y16'_ &/K'_0SWG_@+!_\\11_8^L?]#/>?^
+        L'_P 1\nM0!N45A_V/K'_ $,]Y_X\"P?\\ Q%']CZQ_T,]Y_P\" L'_Q% &Y61XF_P\"0!/\\\nM[\\7_
+        *,6HO['UC_H9[S_ ,!8/_B*S];TS4H-*DDGUZYN8U>/=$\\$*AOG7NJ@\nMT 8-:WAC_D8/^W63_P!#CK)JWH]M<W6LJEK?R63BWD)DCC1R1N3C#
+        C_ /50\nM!W]%8?\\ 8^L?]#/>?^ L'_Q%']CZQ_T,]Y_X\"P?_ !% &Y16'_8^L?\\ 0SWG\nM_@+!_P#$4?V/K'_0SWG_
+        (\"P?_$4 ;E%8?\\ 8^L?]#/>?^ L'_Q%']CZQ_T,\nM]Y_X\"P?_ !% &Y16'_8^L?\\ 0SWG_@+!_P#$4?V/K'_0SWG_
+        (\"P?_$4 )XR\nM_P\"13O?^V?\\ Z&M%9'BG3-3A\\.74DVOW-Q&IC+1-;PJ&^=>,A0?RHH&=I14<\nM\\\\-K
+        \\UQ+'%$@RSR,%51[D]*YJ/Q3=3>-+?3([6'^RI;26>.[#B1IRA3E-I(\nM\"_,1SR2.W<$=317F6G>-_$]]I\\[M:VRWFV*1;1=-N!-%$[X,A4M^]
+        QCY>_M\nM72Z)XH:^DF:_:&W:. 8LTR\\SRHN9RB#+,%8[, $Y1NN10!<L/^1QUK_KVM?_\nM
+        &K6Y7%V7B:P7Q7J\\IM]6VO;VP &D71;CS.J^7D=>XYYQTK8_P\"$LT[_ )]M\nM9_\\ !+>?_&J
+        -RBL/_A+-._Y]M9_\\$MY_P#&J/\\ A+-._P\"?;6?_  2WG_QJ\nM@#<HK#_X2S3O^?;6?_!+>?\\
+        QJC_ (2S3O\\ GVUG_P $MY_\\:H W**P_^$LT\nM[_GVUG_P2WG_ ,:H_P\"$LT[_ )]M9_\\
+        !+>?_&J -RBL/_A+-._Y]M9_\\$MY\nM_P#&J/\\ A+-._P\"?;6?_  2WG_QJ@#<HK#_X2S3O^?;6?_!+>?\\
+        QJC_ (2S\nM3O\\ GVUG_P $MY_\\:H W**P_^$LT[_GVUG_P2WG_ ,:H_P\"$LT[_ )]M9_\\\nM!+>?_&J
+        -RBL/_A+-._Y]M9_\\$MY_P#&J/\\ A+-._P\"?;6?_  2WG_QJ@#<H\nMK#_X2S3O^?;6?_!+>?\\
+        QJC_ (2S3O\\ GVUG_P $MY_\\:H W**P_^$LT[_GV\nMUG_P2WG_ ,:H_P\"$LT[_ )]M9_\\
+        !+>?_&J -RBL/_A+-._Y]M9_\\$MY_P#&\nMJ/\\ A+-._P\"?;6?_  2WG_QJ@#<HK#_X2S3O^?;6?_!+>?\\
+        QJC_ (2S3O\\\nMGVUG_P $MY_\\:H W**P_^$LT[_GVUG_P2WG_ ,:H_P\"$LT[_ )]M9_\\
+        !+>?\nM_&J -RBL/_A+-._Y]M9_\\$MY_P#&J/\\ A+-._P\"?;6?_  2WG_QJ@#<K(\\3?\nM\\@\"?_?B_]&+47_\"6:=_S[:S_
+        .\"6\\_\\ C54-9U^SU#2I;:\"WU82,R$;]&O .\nM&!/(A/I0!@5K>&/^1@_[=9/_ $..L7S'_P\">%[_X*K[_
+        .1ZOZ)?QZ?JGVFX\nM@U'R_):/$>D7I.2RGO /[IH [^BL/_A+-._Y]M9_\\$MY_P#&J/\\ A+-._P\"?\nM;6?_
+        \ 2WG_QJ@#<HK#_X2S3O^?;6?_!+>?\\ QJC_ (2S3O\\ GVUG_P $MY_\\\nM:H W**P_^$LT[_GVUG_P2WG_
+        ,:H_P\"$LT[_ )]M9_\\ !+>?_&J -RBL/_A+\nM-._Y]M9_\\$MY_P#&J/\\ A+-._P\"?;6?_
+        \ 2WG_QJ@!/&7_(IWO\\ VS_]#6BL\nMCQ3XCL;OPY=01P:HKN8P#+I5S&H^=>K-& /Q-% SL)X(;J!X;B*.6)QADD4,\nMK#W!ZUG'P]8?VK:7\\:M
+        UK;26T44.$C\".5)X R#\\HQ@CO6K6,WBO1%UO^QVO\nMU%\\&V%2C;0VW=MWXV[L<[<Y]J!$.D>%8=(N)KI=1O[NZ>W%M%-=R+(T,0)(5\nM<*,\\G.6R3@9-0VG@JPL]5L;^*XN=UI'&H0L\")'195#L<9R1/(3S@DYI\\/CKP\nMY<6<]U!?F6.%D5@L$FYBY(3:I7+@X.\"N1P>:U++5[+49C':3>=B&.<LH.W9)\nMDISZD#..N,>HH
+        HV'_(XZU_U[6O_ +5K<K#L/^1QUK_KVM?_ &K6Y0 4444\nM%%%% !1110 4444 %%%% !1110
+        4444 %%%% !1110 4444 %%%% !1110 4\nM444 %9EY%J3SP2VY53')(/+\\W]VZF-MK/P#][;P,XZ\\]M.B@#FI++6)/#ZVL\nM[7/VH3NSR6\\XW.N]BOS;D('W>
+        1QQ[55M]-UQK'S&DO;:Y#J%@:Y\\P 8&6W%\nMSD\\$X/'. ,_-77T4 5-,>YDTV!KN$PS[<,A;<1@X!SD]1@]3UJW110
+        4444\nM%%%% !1110!A>,O^13O?^V?_ *&M%'C+_D4[W_MG_P\"AK10,U;Z&XGLI8K2Z\nM^RW#+A)O+#[#Z[3P:\\^GT?Q-J7B-;?5=-DN-.MU9;>\\22\"-'F9\"IN9(PVXD\nMX50.!SUKTFB@1YOX=\\)7=P-WB'26AALM*M=/CBCN
+        7F>$LWFJR,\"O4 9(/)S\nM5C1])\\1Z?J=M:QQ-:Z?=1\"2Z,/ED1%DD!4,06W1[;9$Q\\I ;.>WH%%
+        ''V7A\nMF^'B#59I-:U=(V6%8Y0T69  Q/\\ !V+'\\ZU/^$>N/^ACUG_ON+_XW6S+GRGP\nMX0[3AR/N^]>1+K=\\\\%P^G^(KR?2);NSLGO)IE,C,TVV::/\\
+        YYH00H[>E 'H\nMG_\"/7'_0QZS_ -]Q?_&Z/^$>N/\\ H8]9_P\"^XO\\ XW7$R:KKQ\\+V\\\\&KM]EM\nMM=-F9B-TMU$+H(GSYQC;D$XR<#GKF[=WNH0?$-;BXU!Y-,DOXK*&WM-1YC<Q\nM
+        _O(=IR\"02?F! (.* -R+1-4;6[J!]>U@6*6T+Q2;HLM(6E#C/E]@L?_ 'U5\nMW_A'KC_H8]9_[[B_^-ULRY\\I\\.$.TX<C[OO7D2ZW?/!</I_B*\\GTB6[L[)[R\nM:93(S--MFFC_
+        .>:$$*.WI0!Z)_PCUQ_T,>L_P#?<7_QNC_A'KC_ *&/6?\\\nMON+_ .-UQ]QJ>N/\\,-9N;+5BKV%Q>1I>N-\\LT,;L$*MD#<<
+        ;N> >_-0:[K^\nMJ0^*6#75W'8V%M92E;>X$9;S)-K,4*GS<G\"[<CC..: .J71-4.MRP-KVL\"R%\nMLCI)NBR9\"S!AGR_0+^=7?^$>N/\\
+        H8]9_P\"^XO\\ XW6Y7DFL:[J-I<>()]%U\nMZYN_L%I<?:GE=2GG%AM6&/MY:YRPX]>] '?_
+        /\"/7'_0QZS_ -]Q?_&Z/^$>\nMN/\\ H8]9_P\"^XO\\ XW7$7NHZU!X9\\7PZ7KLDEOI;AHKZ4^;*R&W5V17R
+        #N/\nM7G )]L;.LVES>^(M M[76M4MY[M?/N$BN\"(U@B4;CMQU9F1<D]SZ4 :/]B:K\nM_;OD?V[K'V'[-O\\
+        ,W19\\S=C&?+]*N_\\(]<?]#'K/_?<7_QNMRO)-8UW4;2X\nM\\03Z+KUS=_8+2X^U/*ZE/.+#:L,?;RUSEAQZ]Z
+        ._P#^$>N/^ACUG_ON+_XW\nM1_PCUQ_T,>L_]]Q?_&ZXB]U'6H/#/B^'2]=DDM]+<-%?2GS960VZNR*^0
+        =Q\nMZ\\X!/MAWB'7=2@\\30M!?W26MG'IYN-DH58_-E(;,9YFW# ZC;UH ZAM$U0:W\nM% NO:P;(VSN\\FZ+(D#*%&?+]\"WY5=_X1ZX_Z&/6?^^XO_C=;E>2:QKNHVEQX\nM@GT77KF[^P6EQ]J>5U*><6&U88^WEKG+#CU[T
+        =__P (]<?]#'K/_?<7_P ;\nMH_X1ZX_Z&/6?^^XO_C=<_H]SJDEIXFT_3M9,Z64\\:VM_<_OV\"M\"CN
+        <C<02<\nM9Z9YR.*YK4];UN/P9HVHKJ=V'&AM=9@N(U<W *$/*'(+I@D<9Y.,9(H [B?1\nM-475[.&+7M8:T>.4SR;HOE8;=@SY??+?E5W_
+        (1ZX_Z&/6?^^XO_ (W6I8S2\nMW&GVTTR;)9(E=UQC:Q )&/K7!:QJ=W%XV:WTO6KB>[@W3W5N[J((HO*.R$)_\nM%(S8;(Y
+        _\"@#J?\\ A'KC_H8]9_[[B_\\ C='_  CUQ_T,>L_]]Q?_ !NO/M*U\nMZ5-,F;4/%%XMD^CV>HW=T'#R13.[!XHS_\"6P
+        \ .1VJO=:SK<>EJ+K7+FU6/2\nM[[4;4BX4R,ZR+Y,4CCAV\"GD>_- '>76B:JFJ6$4&NZPUK)YGVA]T7R87Y?\\\nMEGW-7?\\
+        A'KC_H8]9_[[B_\\ C=:EC-)<:?;33)LEDB5W7T) )%<%K&IW<7C9\nMK?2]:N)[N#=/=6[NH@BB\\H[(0G\\4C-ALCD#\\*
+        .I_P\"$>N/^ACUG_ON+_P\"-\nMT?\\ \"/7'_0QZS_WW%_\\ &Z\\^TK7I4TR9M0\\47BV3Z/9ZC=W0</)%,[L'BC/\\\nM);
+        \  Y':KLM[XCA\\&Z7>_P!KF.)]3C#(6$D_E/<*$C>0'&0I^;@D]/7(!T]W\nMHFJ1W^GQV^O:P]O)(XN&W1'8H1B#_J^/F
+        'XU=_X1ZX_Z&/6?^^XO_C=;E>=\nM:QJ=W%XV:WTO6KB>[@W3W5N[J((HO*.R$)_%(S8;(Y _\"@#J?^$>N/\\
+        H8]9\nM_P\"^XO\\ XW1_PCUQ_P!#'K/_ 'W%_P#&ZXOPOJ]Y-:74<_B.<PS:#;ZA/>RN\nMLALYWW[\\=E&!G;VQ4$.L[?#-SJ5SX@U--,DO0-/MUN%-Y<
+        QX5\"_5-SY?!Z\nM<\\4 ==?Z)JD4MB+37M8=)+D).2T1V1[6.?\\ 5\\<A1^-7?^$>N/\\ H8]9_P\"^\nMXO\\
+        XW4_AD7P\\,Z<-2N8[J]\\A?.FC8,&;'/(X/U[UR_BZ^FC\\46%E8:Y<1:E\nM,T31VRR*D$$(?]Y)+G[^X?*
+        >_3O0!T/_\"/7'_0QZS_WW%_\\;H_X1ZX_Z&/6\nM?^^XO_C=<'IFNZA->))<>()X#?0ZF;W>P9;
+        0RA8V5#]W\"\\<]?>I]/N[O4M\nMNI(/$%VD%Q=$Z7!-?(EQ.HBZ/(1E02#)CJ ,'K0!U&I:)JL/V3['KNL2;[E$\nMFRT1VQG.X_ZOZ5=_X1ZX_P\"ACUG_
+        +[B_P#C=.\\(W[ZIX0TB]DG>XDFM49Y7\nM3:7;&\"2.W.:YSQ=?31^*+\"RL-<N(M2F:)H[99%2\"\"$/^\\DES]_</E
+        /?IWH\nMZ'_A'KC_ *&/6?\\ ON+_ .-T?\\(]<?\\ 0QZS_P!]Q?\\ QNN#TS7=0FO$DN/$\nM$\\!OH=3-[O8,M@(90L;*A^[A>.>OO4+^+;VQ\\+7LMMJ-ZUOJ-PRZ?<3YN)K:\nM%8QN=]H)!8@[0>FX$\\
+        T =?XA\\-7LNB7\"0:QJUU)E\"(7:(A\\.#SA!_.BMGPO\nM?C4_\"NE7GFO*TMK&7=U(9F\"@,3GGJ#]:*
+        -:BBB@ HHHH ;)&DL;1R(KQN\"K\nM*PR&!Z@BLR#PQX?MHIXK?0],BCG79,D=I&HD7KA@!R/8T44
+        6AI>GK9160L;\nM86D15HX!\"NQ\"IR\"%Q@8/(]Z0Z3IIU(:D=/M#?@;1=>2OFXQC&_&<8]Z**
+        +4\nMD:2QM'(BO&X*LK#(8'J\"*S(/#'A^VBGBM]#TR*.==DR1VD:B1>N& '(]C110\nM!;&FV\"Z=_9RV5L+'88_LPB7R]O\\
+        =VXQCVIL^DZ;=7-O<W&GVDT]M_J)9(59\nMHO\\ =)&5_\"BB@\"Y67;^&]\"M+A[BVT7389W#*\\D=JBLP;[P)
+        R<]_6BB@\">'1\nM]+M].?3H--LXK&3(>V2!5C;/7*@8.:G%G;+<K<BWA%PD?E+*$&X)D':#UQD\nMXZ<\"BB@\":LNW\\-Z%:7#W%MHNFPSN&5Y([5%9@WW@2!DY[^M%%
+        $\\.CZ7;Z<^\nMG0:;9Q6,F0]LD\"K&V>N5 P<TD^BZ7<WD%Y/IMG+<VX AF>!6>/'3:2,C\\***\nM
+        +U9=OX;T*TN'N+;1=-AG<,KR1VJ*S!OO D#)SW]:** +5GIMAIUH;2QLK:U\nMMB2?)@B5$YZ\\
+        8J&70='GBM8I=*L9([3_CV1K=\"(?]P8^7H.GI110!H5F_\\\nM\"/:(-1_M'^Q]/^W;]_VG[,GF[O7=C.?>BB@!I\\-Z$;:6W.BZ:8)I!++%]E3:\nM[_WF&,$\\GDTH\\-Z$+:&V&BZ<((7,D47V5-L;G^)1C
+        /N*** -.LW_A'M$&H_\nMVC_8^G_;M^_[3]F3S=WKNQG/O110 T^&]\"-M+;G1=-,$T@EEB^RIM=_[S#&\"\nM>3R:FAT72K>R6RATRRCM%D$JP)
+        H0.#D-M QG(!S[444 7JS?^$>T0:C_:/]\nMCZ?]NW[_ +3]F3S=WKNQG/O110 Z/0='BMKFVCTFQ2\"Z.Z>);9
+        LI]6&,-^-\nM5O\\ A$?#7D^3_P (]I/E;M^S[%'MW8QG&WK110!J6UK;V5M';6L$4$$8PD42\nM!54>@
+        X%4KKP]HE]>B\\O-'T^XNAC$\\ULCOQT^8C/%%% #GT'1Y'NG?2;%GNQ\nMBY8VR$S#KA^/F_&H5\\+>'EM'M%T'2Q;.X=H19Q[&8<
+        E<8)]Z** -2.-(HUC\nMC14C0!551@*!T %9]UX>T2^O1>7FCZ?<70QB>:V1WXZ?,1GBBB@!SZ#H\\CW3\nMOI-BSW8Q<L;9\"9AUP_'S?C3K+1=*TV\"6\"QTRRM89O];'!
+        J*_&/F &#QZT44\n: 6XHHX(DBB18XT4*B(,!0.  .PHHHH __]D!\n\nend\n</TEXT>\n</DOCUMENT>\n</SEC-DOCUMENT>\n"
+    headers:
+      Accept-Ranges:
+      - bytes
+      Connection:
+      - keep-alive
+      Content-Type:
+      - text/plain
+      Date:
+      - Mon, 27 Jul 2026 01:11:37 GMT
+      ETag:
+      - '"bad317c853b2c657ed3ca8a1a649ab42-gzip"'
+      Last-Modified:
+      - Mon, 30 Jun 2025 18:51:31 GMT
+      Strict-Transport-Security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '141038'
+      x-amz-id-2:
+      - +s/WgT6rw0JgiIfI1mnlthweQiX3LXhossLE5SunwqxIpEe90hXFzneXqTGGGyl/72MX7+zV3PsTYmWawQRd128dItif61rJ
+      x-amz-meta-mode:
+      - '33188'
+      x-amz-replication-status:
+      - COMPLETED
+      x-amz-request-id:
+      - 16AZZ0BP3SNHCWBS
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - FuuawcIP4kvOhcRymA3v6RNguVe5jzRo
+    status:
+      code: 200
+      message: OK
+version: 1

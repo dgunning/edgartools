@@ -24,7 +24,19 @@ See: https://github.com/dgunning/edgartools/issues/599
 """
 import warnings
 
+import pandas as pd
 import pytest
+
+# Everything to_dataframe() emits that is not a period column.
+META_COLS = ['concept', 'label', 'level', 'abstract', 'dimension',
+             'dimension_label', 'balance', 'weight', 'preferred_sign',
+             'parent_concept', 'parent_abstract_concept', 'is_breakdown',
+             'dimension_axis', 'dimension_member', 'dimension_member_label',
+             'unit', 'point_in_time', 'standard_concept']
+
+
+def value_columns(df):
+    return [c for c in df.columns if c not in META_COLS]
 
 
 class TestIssue599PandasFutureWarning:
@@ -56,13 +68,7 @@ class TestIssue599PandasFutureWarning:
         assert 'preferred_sign' in df.columns, "Should have preferred_sign column"
 
         # Verify we have value columns (not just metadata)
-        meta_cols = ['concept', 'label', 'level', 'abstract', 'dimension',
-                     'dimension_label', 'balance', 'weight', 'preferred_sign',
-                     'parent_concept', 'parent_abstract_concept', 'is_breakdown',
-                     'dimension_axis', 'dimension_member', 'dimension_member_label',
-                     'unit', 'point_in_time', 'standard_concept']
-        value_cols = [c for c in df.columns if c not in meta_cols]
-        assert len(value_cols) > 0, "Should have at least one value column"
+        assert len(value_columns(df)) > 0, "Should have at least one value column"
 
     @pytest.mark.network
     def test_cashflow_statement_presentation_no_warning(self, msft_10k_xbrl):
@@ -111,40 +117,62 @@ class TestIssue599PandasFutureWarning:
 
     @pytest.mark.network
     def test_presentation_values_correct(self, msft_10k_xbrl):
-        """Test that presentation transformation still works correctly after the fix.
+        """The transformation negates exactly the preferred_sign=-1 rows.
 
-        The fix should maintain correct behavior: expenses/outflows with
-        preferred_sign=-1 should be negated for display.
+        WHAT THIS USED TO BE. Four nested ``if``s ending in ``assert
+        df_with.loc[idx, value_col] is not None``, on the INCOME statement --
+        which for MSFT has no preferred_sign=-1 rows at all (44 rows at +1, two
+        null). Every run took the outermost false branch and asserted nothing.
+        Its own comment conceded the point: "we can't easily verify exact
+        negation without knowing the original".
+
+        The original is one call away. ``to_dataframe(presentation=False)``
+        returns the same rows untransformed, so negation is checkable exactly,
+        for every row and every period, without pinning a single figure -- which
+        matters because the fixture is MSFT's *latest* 10-K and its numbers move
+        every year.
+
+        The cash flow statement is the one to check: it is where the sign flips
+        live (working-capital movements, debt repayments), and it was the second
+        statement named in #599.
         """
-        income = msft_10k_xbrl.statements.income_statement()
+        cashflow = msft_10k_xbrl.statements.cashflow_statement()
+        df_with = cashflow.to_dataframe(presentation=True)
+        df_without = cashflow.to_dataframe(presentation=False)
 
-        # Get dataframes with and without presentation
-        df_with = income.to_dataframe(presentation=True)
-        df_without = income.to_dataframe(presentation=False)
+        assert list(df_with.index) == list(df_without.index), \
+            "presentation changed the row set, so rows cannot be compared pairwise"
+        assert 'preferred_sign' in df_with.columns
+        cols = value_columns(df_with)
+        assert cols, "no period columns to compare"
 
-        # Find rows where preferred_sign is -1 (should be negated in presentation mode)
-        if 'preferred_sign' in df_with.columns:
-            negated_rows = df_with[df_with['preferred_sign'] == -1]
-            if len(negated_rows) > 0:
-                # Get a value column
-                meta_cols = ['concept', 'label', 'level', 'abstract', 'dimension',
-                             'dimension_label', 'balance', 'weight', 'preferred_sign',
-                             'parent_concept', 'parent_abstract_concept', 'is_breakdown',
-                             'dimension_axis', 'dimension_member', 'dimension_member_label',
-                             'unit', 'point_in_time', 'standard_concept']
-                value_cols = [c for c in df_with.columns if c not in meta_cols]
+        negated = 0
+        for col in cols:
+            for idx in df_with.index:
+                raw = pd.to_numeric(df_without.loc[idx, col], errors='coerce')
+                shown = pd.to_numeric(df_with.loc[idx, col], errors='coerce')
+                if pd.isna(raw):
+                    continue
+                sign = df_with.loc[idx, 'preferred_sign']
+                label = df_with.loc[idx, 'label']
+                if sign == -1:
+                    assert shown == -raw, (
+                        f"{label!r} [{col}] has preferred_sign=-1 but displays "
+                        f"{shown} against an underlying {raw}"
+                    )
+                    negated += 1
+                else:
+                    assert shown == raw, (
+                        f"{label!r} [{col}] has preferred_sign={sign} and must "
+                        f"display unchanged, but shows {shown} against {raw}"
+                    )
 
-                if value_cols:
-                    value_col = value_cols[0]
-                    # Get first non-null negated value for comparison
-                    sample_idx = negated_rows[negated_rows[value_col].notna()].index
-                    if len(sample_idx) > 0:
-                        idx = sample_idx[0]
-                        # Check that the value was actually transformed
-                        # (We can't easily verify exact negation without knowing original,
-                        # but we verify the transformation ran without error)
-                        assert df_with.loc[idx, value_col] is not None, \
-                            "Presentation transformation should produce values"
+        assert negated > 0, (
+            "no preferred_sign=-1 values were found in MSFT's cash flow "
+            "statement, so the negation this test exists to check never ran. "
+            "That is how the income-statement version of this test passed "
+            "without asserting anything."
+        )
 
     @pytest.mark.network
     def test_standard_view_no_warning(self, msft_10k_xbrl):

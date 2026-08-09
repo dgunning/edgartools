@@ -85,7 +85,21 @@ class TestParsingHelpers:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             soup = BeautifulSoup(html, "lxml")
-        assert _find_fee_table(soup) is not None
+
+        table = _find_fee_table(soup)
+        assert table is not None, (
+            "_find_fee_table did not match the header; the split-tag text is "
+            "'SecurityType' without a separator"
+        )
+        # Finding *a* table is not the claim -- the fee table is the one
+        # carrying the data row, and returning a wrapper or the wrong table
+        # would satisfy `is not None` while extraction downstream got nothing.
+        cells = [td.get_text(" ", strip=True) for td in table.find_all("td")]
+        # The nbsp in the second header cell is half of what this test exists
+        # for, so it is asserted as-is rather than normalised away.
+        assert cells == ['Security Type', 'Maximum\xa0Aggregate Offering Price',
+                         'Equity', '$79,170,150.00'], \
+            f"matched a table whose cells are {cells}"
 
 
 # ============================================================

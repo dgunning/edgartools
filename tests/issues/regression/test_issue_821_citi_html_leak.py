@@ -80,9 +80,31 @@ class TestCitiItemsAreTextNotHtml:
 
         If Citi ever stops being detected as a Cross Reference Index filing,
         every assertion below would hold for a reason unrelated to this bug.
+
+        Detection alone is not the precondition, though: the branch under test
+        slices the document BY PAGE RANGE, so what has to hold is that the
+        index parses to entries and that Item 1 — the item that leaked markup —
+        carries page ranges to slice. An index that is detected but parses to
+        nothing would satisfy `is not None` and still leave the test below
+        passing for an unrelated reason.
         """
-        assert citi_tenk._cross_reference_index is not None, \
+        index = citi_tenk._cross_reference_index
+        assert index is not None, \
             "Citi is no longer detected as a Cross Reference Index filing"
+
+        # Read off the tracked fixture, which is a fixed 2024 10-K and so does
+        # not move: 22 items, Part I through Part IV.
+        entries = index.parse()
+        assert len(entries) == 22, f"index parsed {len(entries)} items, expected 22"
+
+        item1 = entries['1']
+        assert item1.item_title == 'Business'
+        assert item1.part == 'Part I'
+        assert [str(p) for p in item1.pages] == \
+            ['4-32', '130-135', '137', '169-173', '314-315'], \
+            f"Item 1 page ranges are {[str(p) for p in item1.pages]}; with no " \
+            "ranges the cross-reference branch has nothing to slice and returns " \
+            "nothing at all, markup or otherwise"
 
     def test_cross_reference_branch_returns_text_not_markup(self, citi_tenk):
         """The #821 fix itself, exercised directly.

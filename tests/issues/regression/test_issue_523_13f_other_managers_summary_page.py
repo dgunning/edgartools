@@ -11,6 +11,7 @@ Test cases:
 See: https://github.com/dgunning/edgartools/issues/523
 """
 import pytest
+
 from edgar import Filing
 
 
@@ -67,22 +68,44 @@ def test_other_manager_has_sequence_number():
     assert first_manager.sequence_number >= 1, "sequence_number should be >= 1"
 
 
+# The eight managers declared on the summary page of 0001143718-24-000007,
+# in filing order. Sequence numbers are the filer's own and are NOT contiguous
+# -- 1,2,3,5,6,28,43,88 -- which is the detail a "not None" check cannot see and
+# the one that matters: holdings reference their manager BY sequence number, so
+# reading positions as sequence numbers silently reassigns them.
+EXPECTED_MANAGERS = [
+    (1,  '0001102113', '028-10264', 'BANK OF AMERICA NA'),
+    (2,  '0000728612', '028-00962', 'MERRILL LYNCH, PIERCE, FENNER & SMITH INC.'),
+    (3,  '0001675365', '028-19575', 'BOFA SECURITIES, INC.'),
+    (5,  '0001143718', '028-14408', 'MERRILL LYNCH CANADA, INC.'),
+    (6,  '0001062577', '028-07178', 'MERRILL LYNCH INTERNATIONAL'),
+    (28, '0001185372', '028-10270', 'U.S. TRUST Co OF DELAWARE'),
+    (43, '0001418660', '028-12631', 'MANAGED ACCOUNT ADVISORS LLC'),
+    (88, '0001803522', '028-20099', 'BofA Securities Europe SA'),
+]
+
+
 @pytest.mark.network
 def test_other_manager_data_correctness():
-    """Test that other_manager data is correctly parsed from summaryPage."""
-    # State Street filing
+    """Every field of every manager, against the filing.
+
+    This test is named for data correctness and asserted only non-nullity, over
+    a loop that asserted nothing at all when the list came back empty -- which
+    is exactly the failure #523 was about. Note also that CIK 70858 is Bank of
+    America, not State Street; the accession is what pins the content.
+    """
     filing = Filing(form='13F-HR', filing_date='2024-01-29', company='STATE STREET CORP',
                     cik=70858, accession_no='0001143718-24-000007')
 
     thirteenf = filing.obj()
     other_managers = thirteenf.primary_form_information.summary_page.other_managers
 
-    # Verify each manager has valid data
-    for manager in other_managers:
-        assert manager.cik is not None, "Manager should have cik"
-        assert manager.name is not None, "Manager should have name"
-        # file_number might be None for some managers
-        assert manager.sequence_number is not None, "Manager should have sequence_number"
+    actual = [(m.sequence_number, m.cik, m.file_number, m.name) for m in other_managers]
+    assert actual == EXPECTED_MANAGERS, (
+        "summary-page managers do not match the filing.\n"
+        f"  expected: {EXPECTED_MANAGERS}\n"
+        f"  actual:   {actual}"
+    )
 
 
 @pytest.mark.network

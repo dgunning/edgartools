@@ -15,7 +15,7 @@ Affected ~9.5% of filings (~2,038 filings, 28+ companies).
 
 import pytest
 
-from edgar import Filing, Company
+from edgar import Company
 from edgar.xbrl.exceptions import StatementNotFound
 
 
@@ -87,51 +87,77 @@ class TestComprehensiveIncomeZeroDivision:
 
     @pytest.mark.network
     def test_comprehensive_income_multiple_affected_companies(self):
-        """Test a sample of other affected companies from the issue"""
-        # Test a few companies from the list of 28+ affected CIKs
-        test_ciks = [
-            1001601,  # Another affected company
-            1009829,  # Another affected company
-        ]
+        """Two more of the 28+ affected CIKs, and one of them must render.
 
-        # This used to end in a bare `except Exception: pass`, which made the
-        # test pass without doing anything at all -- an offline audit found it
-        # green with outbound sockets blocked, because the very first
-        # Company(cik) call raised a connection error straight into the
-        # swallow. Counting the companies actually exercised, and requiring at
-        # least one, is what makes a green run mean something here.
-        exercised = 0
+        HISTORY, because this test has been weakened twice by accident. It
+        began as a loop ending in a bare `except Exception: pass`, so it passed
+        with outbound sockets blocked -- the very first Company() call raised a
+        connection error straight into the swallow. Counting companies
+        exercised fixed that but left `assert ci_bracket.to_dataframe() is not
+        None` as the only claim about the data, which an empty dataframe
+        satisfies. #486 was a crash *while rendering*, so a run in which
+        nothing rendered proves nothing, however many companies it visited.
 
-        for cik in test_ciks:
-            from edgar import Company
+        The last 10-K is a moving target, so nothing here is pinned to a
+        figure: the assertions are that the CIKs are the companies the issue
+        named, that their XBRL parses, that neither access path raises, and
+        that at least one company produces a comprehensive income statement
+        with rows in it.
+        """
+        from edgar import Company
+
+        expected = {
+            1001601: "MGT CAPITAL INVESTMENTS, INC.",
+            1009829: "JAKKS PACIFIC INC",
+        }
+        rendered = []
+
+        for cik, name in expected.items():
             company = Company(str(cik))
-            filing = company.get_filings(form="10-K").latest(1)
+            assert company.name == name, (
+                f"CIK {cik} is now {company.name!r}, not {name!r}; this test's "
+                "sample no longer matches the companies issue #486 listed"
+            )
 
-            if not filing:
-                continue
+            filing = company.get_filings(form="10-K").latest(1)
+            assert filing, f"{name} has no 10-K to check"
 
             xb = filing.xbrl()
+            assert not xb.facts.to_dataframe().empty, (
+                f"{name} {filing.accession_no} parsed to zero facts, so no "
+                "statement could be rendered from it"
+            )
 
             try:
-                # Try both methods - neither should raise ZeroDivisionError
-                xb.statements.comprehensive_income()
+                # Both access paths, neither of which may raise ZeroDivisionError.
+                ci = xb.statements.comprehensive_income()
                 ci_bracket = xb.statements.get('ComprehensiveIncome')
-
-                # If bracket notation finds something, to_dataframe() should work
-                if ci_bracket:
-                    assert ci_bracket.to_dataframe() is not None
-
             except ZeroDivisionError as e:
                 pytest.fail(f"ZeroDivisionError for CIK {cik}: {e}. Bug #486 not fixed.")
             except (StatementNotFound, KeyError):
                 # The statement being absent is not this bug; the crash was.
-                pass
+                continue
 
-            exercised += 1
+            if ci is None:
+                # Not every small filer presents comprehensive income
+                # separately, so this is allowed -- but it renders nothing, and
+                # a run where BOTH companies land here fails below.
+                assert ci_bracket is None, (
+                    f"{name}: the accessor found no comprehensive income "
+                    "statement but bracket notation did; the two paths disagree"
+                )
+                continue
 
-        assert exercised, (
-            f"none of {test_ciks} yielded a 10-K to check, so this test proved "
-            f"nothing about #486"
+            df = ci.to_dataframe()
+            assert not df.empty, f"{name}: comprehensive income rendered no rows"
+            assert (df['label'].astype(str).str.strip() != '').all(), \
+                f"{name}: comprehensive income has unlabelled rows"
+            rendered.append(name)
+
+        assert rendered, (
+            f"neither {list(expected.values())} rendered a comprehensive "
+            "income statement, so the summing path that raised "
+            "ZeroDivisionError was never reached"
         )
 
 
