@@ -21,10 +21,19 @@ is an audit that decays. Three things are enforced.
 2. A REPAIRED TEST MUST BE BANKED. Fixing one and leaving it listed quietly
    loosens the guard, exactly as an unbanked parity baseline does.
 
-3. NO TEST RETURNS A VALUE. ``return positive_count > 0`` instead of
-   ``assert`` always passes; pytest warns, and the warning had been scrolling
-   past for years in a suite with thousands of them. GH #334's two tests were
-   found that way. The count is zero and stays zero.
+3. NO TEST RETURNS A VALUE, ANYWHERE UNDER ``tests/``. ``return
+   positive_count > 0`` instead of ``assert`` always passes; pytest warns, and
+   the warning had been scrolling past for years in a suite with thousands of
+   them. GH #334's two tests were found that way, and widening the scan beyond
+   the regression tree found five more (edgartools-8m2n) — four of them in one
+   535-line file that had 57 ``print`` calls and no assertions at all, three of
+   which printed "✗ FAIL" on every run. The count is zero across all 6,900-odd
+   collected tests and stays zero.
+
+   Rules 1 and 2 stay scoped to the regression tree. Returns-a-value is a
+   property of one function with no judgement in it; existence-only needs a
+   ground truth per test, and the 104 outstanding elsewhere are not a work list
+   anyone has agreed to yet.
 
 WHY AST AND NOT A LINT RULE. The question is not "does this line match a
 pattern" but "does this function make any claim that could be false", which
@@ -48,7 +57,8 @@ import pathlib
 
 import pytest
 
-REGRESSION_DIR = pathlib.Path(__file__).parent / "issues" / "regression"
+TESTS_DIR = pathlib.Path(__file__).parent
+REGRESSION_DIR = TESTS_DIR / "issues" / "regression"
 
 # Tests whose only assertions are `x is not None`. The list started at 15 on
 # 2026-08-09 and is now EMPTY: every one of them was given ground truth read
@@ -139,28 +149,74 @@ def is_value_assert(node):
     return isinstance(node.test, (ast.Compare, ast.Call, ast.BoolOp, ast.UnaryOp))
 
 
-def _test_functions():
-    """Every collected test function in the regression tree, with its AST."""
-    for path in sorted(REGRESSION_DIR.rglob("test_*.py")):
+def _is_fixture(fn):
+    """``@pytest.fixture`` — a fixture RETURNS its value; that is its job."""
+    for dec in fn.decorator_list:
+        node = dec.func if isinstance(dec, ast.Call) else dec
+        name = node.attr if isinstance(node, ast.Attribute) else getattr(node, 'id', None)
+        if name == 'fixture':
+            return True
+    return False
+
+
+def _test_functions(root):
+    """Every function pytest would COLLECT under ``root``, with its AST.
+
+    Collection rules matter here, and getting them wrong is how a scan reports
+    work that does not exist. "Every function whose name starts with test"
+    over-counts twice:
+
+    * ``@pytest.fixture def test_company(...)`` returns a value because that is
+      what a fixture does. Two of these were briefly mistaken for defective
+      tests.
+    * A method of a class pytest does not collect is not a test. ``class
+      FastTableRendererTestSuite`` does not match ``Test*``, so its
+      ``test_basic_rendering`` runs only under ``__main__`` — its trailing
+      ``return`` cannot make a suite green because nothing runs it.
+
+    Both classes of false positive appeared in the first sweep outside the
+    regression tree; nine findings came down to five real ones.
+    """
+    for path in sorted(root.rglob("test_*.py")):
         tree = ast.parse(path.read_text())
-        for fn in ast.walk(tree):
-            if isinstance(fn, (ast.FunctionDef, ast.AsyncFunctionDef)) \
-                    and fn.name.startswith("test"):
-                yield path.name, fn
+        for node in tree.body:
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) \
+                    and node.name.startswith("test") and not _is_fixture(node):
+                yield path.name, node
+            elif isinstance(node, ast.ClassDef) and node.name.startswith("Test"):
+                for item in node.body:
+                    if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)) \
+                            and item.name.startswith("test") and not _is_fixture(item):
+                        yield path.name, item
 
 
 @pytest.fixture(scope="module")
 def classified():
+    """Existence-only over the regression tree; returns-a-value over all of it.
+
+    The two rules have different scopes on purpose. Returns-a-value is a
+    property of a single function, has no false positives once collection is
+    modelled correctly, and a test that has it cannot fail — so it is enforced
+    everywhere. Existence-only needs a judgement about each test's subject and
+    a ground truth to replace it with; 104 of those remain outside the
+    regression tree and are not yet a work list anyone has agreed to.
+    """
     existence_only, returns_value = set(), set()
-    seen = 0
-    for filename, fn in _test_functions():
-        seen += 1
+    seen = {'regression': 0, 'all': 0}
+
+    for filename, fn in _test_functions(REGRESSION_DIR):
+        seen['regression'] += 1
         body = list(own_nodes(fn))
         if any(is_existence_assert(n) for n in body) \
                 and not any(is_value_assert(n) or is_raises_context(n) for n in body):
             existence_only.add((filename, fn.name))
-        if any(isinstance(n, ast.Return) and n.value is not None for n in body):
+
+    for filename, fn in _test_functions(TESTS_DIR):
+        seen['all'] += 1
+        if any(isinstance(n, ast.Return) and n.value is not None
+               for n in own_nodes(fn)):
             returns_value.add((filename, fn.name))
+
     return existence_only, returns_value, seen
 
 
@@ -170,9 +226,14 @@ class TestTheSuiteCanStillFail:
     def test_the_tree_was_actually_scanned(self, classified):
         """"Measured nothing" must never read as "nothing wrong"."""
         _existence, _returns, seen = classified
-        assert seen > 500, (
-            f"only {seen} test functions found under {REGRESSION_DIR}; the "
-            "scan is not reaching the tree and every assertion below is vacuous"
+        assert seen['regression'] > 500, (
+            f"only {seen['regression']} test functions found under "
+            f"{REGRESSION_DIR}; the scan is not reaching the tree and every "
+            "assertion below is vacuous"
+        )
+        assert seen['all'] > 4000, (
+            f"only {seen['all']} test functions found under {TESTS_DIR}; the "
+            "returns-a-value rule below is scanning almost nothing"
         )
 
     def test_no_new_existence_only_tests(self, classified):
