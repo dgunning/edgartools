@@ -124,8 +124,18 @@ def sgml():
 class TestHeaderOnlySubmissionParses:
     """A bare <SEC-HEADER> submission must parse instead of raising."""
 
-    def test_from_text_does_not_raise(self, sgml):
-        assert sgml is not None
+    def test_from_text_does_not_raise(self):
+        """The original crash: ValueError("Unknown SGML format").
+
+        Deliberately does not use the module fixture. The fixture is built once
+        at collection, so a test that takes it and asserts `is not None` cannot
+        fail for the reason it is named after -- the raise would surface as an
+        error in every other test in the file, and this one would never run.
+        Calling from_text here is what makes the claim testable, and the
+        accession proves the returned object came from THIS content.
+        """
+        sgml = FilingSGML.from_text(HEADER_ONLY_1996)
+        assert sgml.header.accession_number == "0000950123-96-000525"
 
     def test_detected_as_submission_format(self):
         assert SGMLParser.detect_format(HEADER_ONLY_1996) == SGMLFormatType.SUBMISSION

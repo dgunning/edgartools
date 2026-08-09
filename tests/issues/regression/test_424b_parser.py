@@ -526,10 +526,31 @@ class TestShelfLifecycle:
 
     @pytest.mark.vcr
     def test_backward_compat_related_filings(self):
-        """Prospectus424B.related_filings should delegate to lifecycle."""
+        """Prospectus424B.related_filings should delegate to lifecycle.
+
+        `is not None` did not test the delegation at all -- any non-empty
+        result, from any file number, satisfied it. What is asserted instead is
+        that the property returns exactly what the lifecycle returns, and that
+        the set is Alzamend's shelf: the 2023 S-3, its EFFECT notice, and the
+        five takedowns off it, ending with this filing.
+        """
         filing = offline_filing("0001214659-26-002941")
         p = Prospectus424B.from_filing(filing)
-        assert p.related_filings is not None
+
+        related = p.related_filings
+        assert related is not None
+        accessions = [f.accession_no for f in related]
+        assert accessions == [f.accession_no for f in p.lifecycle.filings], \
+            "related_filings does not return the lifecycle's filings"
+        assert accessions == [
+            "0001214659-23-010661",   # S-3, 2023-08-02
+            "9999999995-23-002345",   # EFFECT, 2023-08-10
+            "0001214659-23-012226",   # 424B5
+            "0001214659-24-008532",   # 424B5
+            "0001214659-24-008760",   # 424B5
+            "0001214659-24-017145",   # 424B5
+            "0001214659-26-002941",   # 424B5 — this filing
+        ], f"shelf resolved to {accessions}"
 
     @pytest.mark.vcr
     def test_lifecycle_rich_display(self):

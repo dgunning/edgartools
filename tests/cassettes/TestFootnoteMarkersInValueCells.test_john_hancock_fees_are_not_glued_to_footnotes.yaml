@@ -1,0 +1,769 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/45291/000119312525148895/0001193125-25-148895.txt
+  response:
+    body:
+      string: "<SEC-DOCUMENT>0001193125-25-148895.txt : 20250626\n<SEC-HEADER>0001193125-25-148895.hdr.sgml
+        : 20250626\n<ACCEPTANCE-DATETIME>20250626160640\nACCESSION NUMBER:\t\t0001193125-25-148895\nCONFORMED
+        SUBMISSION TYPE:\t497K\nPUBLIC DOCUMENT COUNT:\t\t2\nFILED AS OF DATE:\t\t20250626\nDATE
+        AS OF CHANGE:\t\t20250626\nEFFECTIVENESS DATE:\t\t20250626\n\nFILER:\n\n\tCOMPANY
+        DATA:\t\n\t\tCOMPANY CONFORMED NAME:\t\t\tJOHN HANCOCK CAPITAL SERIES\n\t\tCENTRAL
+        INDEX KEY:\t\t\t0000045291\n\t\tORGANIZATION NAME:           \t\n\t\tEIN:\t\t\t\t042443211\n\t\tSTATE
+        OF INCORPORATION:\t\t\tDE\n\t\tFISCAL YEAR END:\t\t\t1031\n\n\tFILING VALUES:\n\t\tFORM
+        TYPE:\t\t497K\n\t\tSEC ACT:\t\t1933 Act\n\t\tSEC FILE NUMBER:\t002-29502\n\t\tFILM
+        NUMBER:\t\t251080415\n\n\tBUSINESS ADDRESS:\t\n\t\tSTREET 1:\t\tC/O JOHN HANCOCK
+        FUNDS\n\t\tSTREET 2:\t\t200 BERKELEY STREET\n\t\tCITY:\t\t\tBOSTON\n\t\tSTATE:\t\t\tMA\n\t\tZIP:\t\t\t02116\n\t\tBUSINESS
+        PHONE:\t\t617-663-3000\n\n\tMAIL ADDRESS:\t\n\t\tSTREET 1:\t\tC/O JOHN HANCOCK
+        FUNDS\n\t\tSTREET 2:\t\t200 BERKELEY STREET\n\t\tCITY:\t\t\tBOSTON\n\t\tSTATE:\t\t\tMA\n\t\tZIP:\t\t\t02116\n\n\tFORMER
+        COMPANY:\t\n\t\tFORMER CONFORMED NAME:\tHANCOCK JOHN CAPITAL SERIES\n\t\tDATE
+        OF NAME CHANGE:\t19940316\n\n\tFORMER COMPANY:\t\n\t\tFORMER CONFORMED NAME:\tHANCOCK
+        JOHN GROWTH TRUST /MA/\n\t\tDATE OF NAME CHANGE:\t19910704\n\n\tFORMER COMPANY:\t\n\t\tFORMER
+        CONFORMED NAME:\tHANCOCK JOHN GROWTH FUND INC\n\t\tDATE OF NAME CHANGE:\t19850423\n<SERIES-AND-CLASSES-CONTRACTS-DATA>\n<EXISTING-SERIES-AND-CLASSES-CONTRACTS>\n<SERIES>\n<OWNER-CIK>0000045291\n<SERIES-ID>S000000617\n<SERIES-NAME>Classic
+        Value Fund\n<CLASS-CONTRACT>\n<CLASS-CONTRACT-ID>C000001745\n<CLASS-CONTRACT-NAME>Class
+        A\n<CLASS-CONTRACT-TICKER-SYMBOL>PZFVX\n</CLASS-CONTRACT>\n<CLASS-CONTRACT>\n<CLASS-CONTRACT-ID>C000001747\n<CLASS-CONTRACT-NAME>Class
+        C\n<CLASS-CONTRACT-TICKER-SYMBOL>JCVCX\n</CLASS-CONTRACT>\n<CLASS-CONTRACT>\n<CLASS-CONTRACT-ID>C000001748\n<CLASS-CONTRACT-NAME>Class
+        I\n<CLASS-CONTRACT-TICKER-SYMBOL>JCVIX\n</CLASS-CONTRACT>\n<CLASS-CONTRACT>\n<CLASS-CONTRACT-ID>C000078721\n<CLASS-CONTRACT-NAME>Class
+        R5\n<CLASS-CONTRACT-TICKER-SYMBOL>JCVVX\n</CLASS-CONTRACT>\n<CLASS-CONTRACT>\n<CLASS-CONTRACT-ID>C000106431\n<CLASS-CONTRACT-NAME>Class
+        R6\n<CLASS-CONTRACT-TICKER-SYMBOL>JCVWX\n</CLASS-CONTRACT>\n<CLASS-CONTRACT>\n<CLASS-CONTRACT-ID>C000113483\n<CLASS-CONTRACT-NAME>Class
+        R2\n<CLASS-CONTRACT-TICKER-SYMBOL>JCVSX\n</CLASS-CONTRACT>\n</SERIES>\n</EXISTING-SERIES-AND-CLASSES-CONTRACTS>\n</SERIES-AND-CLASSES-CONTRACTS-DATA>\n</SEC-HEADER>\n<DOCUMENT>\n<TYPE>497K\n<SEQUENCE>1\n<FILENAME>d98079d497k.htm\n<DESCRIPTION>JOHN
+        HANCOCK CAPITAL SERIES\n<TEXT>\n<HTML><HEAD>\n<TITLE>JOHN HANCOCK CAPITAL
+        SERIES</TITLE>\n</HEAD>\n\n\n<body style=\"margin-top:0.0pt;width:613.35pt;\"
+        bgcolor=\"white\">\n  <div> <div><a name=\"xx_60e7110f-7c4d-40b7-b2c6-a1af91db2eb6_1\"></A>
+        <div style=\"page-break-after:always;position:relative;\">\n<div style=\"clear:both;\">
+        </div> <div style=\"float:left;margin-left:24pt;margin-top:42pt;width:558pt;min-height:648pt;\">
+        <div style=\"text-align:left;\">\n<img src=\"g53455jhim_fcv.jpg\" alt=\" \"
+        style=\"height:28pt;width:184pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:10pt;line-height:11pt;\">&#8201;</font></div> <div style=\"line-height:20.0pt;margin-top:9pt;text-align:left;\">\n<div
+        style=\"margin-top:9pt;\"><font style=\"color:#000000;font-family:Arial Narrow;font-size:18pt;\">Prospectus
+        Supplement</font></div> </div> <div style=\"line-height:11.0pt;margin-top:6pt;text-align:left;\">
+        <div style=\"margin-top:6pt;\"><font\nstyle=\"color:#000000;font-family:Arial
+        Narrow;font-size:9pt;font-weight:bold;\">John Hancock Capital Series</font>
+        <br><font style=\"color:#000000;font-family:Arial Narrow;font-size:9pt;font-weight:bold;\">John
+        Hancock Classic Value Fund (the\nfund)</font></div> </div> <div style=\"line-height:11.0pt;margin-top:6pt;text-align:left;\">
+        <div style=\"margin-top:6pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:9pt;font-weight:bold;\">Supplement dated June 26, 2025 to
+        the\ncurrent Summary Prospectus, as may be supplemented (the Summary Prospectus)</font></div>
+        </div> <div style=\"line-height:12.0pt;margin-top:14pt;text-align:left;\">
+        <div style=\"margin-top:14pt;\"><font\nstyle=\"color:#000000;font-family:Arial
+        Narrow;font-size:9pt;\">At a meeting held on June 24-26, 2025, the fund&#8217;s
+        Board of Trustees approved a management fee reduction. As a result, the information
+        in the &#8220;Annual </font><font\nstyle=\"color:#000000;font-family:Arial
+        Narrow;font-size:9pt;\">fund operating expenses&#8221; table and the &#8220;Expense
+        example&#8221; table is amended and restated as follows to reflect the fund&#8217;s
+        management fee schedule </font><font\nstyle=\"color:#000000;font-family:Arial
+        Narrow;font-size:9pt;\">effective July 1, 2025:</font><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:1pt;line-height:1pt;\">&#8195;</font></div> </div>\n<div
+        style=\"line-height:1.0pt;margin-top:6pt;text-align:left;\"> <div style=\"margin-top:6pt;\">
+        </div> </div> <div style=\"margin-top:0.0pt;\">\n<table style=\"border-bottom:0.5pt
+        solid #D9D9D9;empty-cells:show;width:558pt;\" cellpadding=\"0\" cellspacing=\"0\">\n<tr
+        style=\"height:22pt;\">\n<td style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Bottom;width:306pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\"> <div style=\"margin-right:-0.25pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;font-weight:bold;margin-left:0.0pt;\">Annual fund operating
+        expenses (%) </font><font style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;margin-left:0.0pt;\">(expenses
+        that you pay\neach year as a percentage of </font></div> <div style=\"margin-right:-0.25pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;margin-left:0.0pt;\">the
+        value of your investment)</font></div> </div>\n</td>\n<td style=\"border-bottom:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Bottom;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-left:-2.25pt;margin-right:-2.25pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;font-weight:bold;\">A</font></div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Bottom;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-left:-2.25pt;margin-right:-2.25pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;font-weight:bold;\">C</font></div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Bottom;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-left:-2.25pt;margin-right:-2.25pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;font-weight:bold;\">I</font></div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Bottom;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-left:-2.25pt;margin-right:-2.25pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;font-weight:bold;\">R2</font></div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Bottom;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-left:-2.25pt;margin-right:-2.25pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;font-weight:bold;\">R5</font></div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Bottom;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\"> <div style=\"margin-left:-2.25pt;text-align:Center;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;font-weight:bold;\">R6</font></div> </div> </td> </tr>\n<tr
+        style=\"height:12pt;\">\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;width:306pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-right:-0.25pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;margin-left:0.0pt;\">Management
+        fee</font></div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.67</font> <div style=\"clear:right;\">
+        </div> </div>\n<div style=\"display:flex;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:5pt;position:relative;top:-3.25pt;width:auto;\">1</font></div>
+        </div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.67</font> <div style=\"clear:right;\">
+        </div> </div>\n<div style=\"display:flex;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:5pt;position:relative;top:-3.25pt;width:auto;\">1</font></div>
+        </div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.67</font> <div style=\"clear:right;\">
+        </div> </div>\n<div style=\"display:flex;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:5pt;position:relative;top:-3.25pt;width:auto;\">1</font></div>
+        </div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.67</font> <div style=\"clear:right;\">
+        </div> </div>\n<div style=\"display:flex;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:5pt;position:relative;top:-3.25pt;width:auto;\">1</font></div>
+        </div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.67</font> <div style=\"clear:right;\">
+        </div> </div>\n<div style=\"display:flex;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:5pt;position:relative;top:-3.25pt;width:auto;\">1</font></div>
+        </div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.67</font> <div style=\"clear:right;\">
+        </div> </div>\n<div style=\"display:flex;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:5pt;position:relative;top:-3.25pt;width:auto;\">1</font></div>
+        </div> </div> </td> </tr>\n<tr style=\"height:12pt;\">\n<td style=\"border-bottom:0.5pt
+        solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;width:306pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-right:-0.25pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;margin-left:0.0pt;\">Distribution
+        and service (Rule 12b-1) fees</font></div> </div> </td>\n<td style=\"border-bottom:0.5pt
+        solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.25</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">1.00</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.00</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.25</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.00</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.00</font></div> </div> </div> </td>
+        </tr>\n<tr style=\"height:12pt;\">\n<td style=\"border-bottom:0.5pt solid
+        #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;width:306pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-right:-0.25pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;margin-left:0.0pt;\">Other
+        expenses</font></div> </div> </td>\n<td style=\"border-bottom:0.5pt solid
+        #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"> </div> </div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"> </div> </div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"> </div> </div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"> </div> </div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"> </div> </div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"> </div> </div>
+        </div> </td> </tr>\n<tr style=\"height:12pt;\">\n<td style=\"border-bottom:0.5pt
+        solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;width:306pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-right:-0.25pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;margin-left:8pt;\">Service
+        plan fee</font></div> </div> </td>\n<td style=\"border-bottom:0.5pt solid
+        #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.00</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.00</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.00</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.25</font> <div style=\"clear:right;\">
+        </div> </div>\n<div style=\"display:flex;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:5pt;position:relative;top:-3.25pt;width:auto;\">2</font></div>
+        </div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.05</font> <div style=\"clear:right;\">
+        </div> </div>\n<div style=\"display:flex;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:5pt;position:relative;top:-3.25pt;width:auto;\">2</font></div>
+        </div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.00</font></div> </div> </div> </td>
+        </tr>\n<tr style=\"height:12pt;\">\n<td style=\"border-bottom:0.5pt solid
+        #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;width:306pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-right:-0.25pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;margin-left:8pt;\">Additional
+        other expenses</font></div> </div> </td>\n<td style=\"border-bottom:0.5pt
+        solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.20</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.20</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.20</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.09</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.09</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.09</font></div> </div> </div> </td>
+        </tr>\n<tr style=\"height:12pt;\">\n<td style=\"border-bottom:0.5pt solid
+        #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;width:306pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-right:-0.25pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;margin-left:0.0pt;\">Total
+        other expenses</font></div> </div> </td>\n<td style=\"border-bottom:0.5pt
+        solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.20</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.20</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.20</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.34</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.14</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">0.09</font></div> </div> </div> </td>
+        </tr>\n<tr style=\"height:12pt;\">\n<td style=\"border-bottom:0.5pt solid
+        #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;width:306pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-right:-0.25pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;font-weight:bold;margin-left:0.0pt;\">Total
+        annual fund operating expenses</font></div> </div> </td>\n<td style=\"border-bottom:0.5pt
+        solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;font-weight:bold;width:20.47pt;\">1.12</font></div> </div>
+        </div>\n</td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;font-weight:bold;width:20.47pt;\">1.87</font></div> </div>
+        </div>\n</td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;font-weight:bold;width:20.47pt;\">0.87</font></div> </div>
+        </div>\n</td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;font-weight:bold;width:20.47pt;\">1.26</font></div> </div>
+        </div>\n</td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;font-weight:bold;width:20.47pt;\">0.81</font></div> </div>
+        </div>\n</td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;font-weight:bold;width:20.47pt;\">0.76</font></div> </div>
+        </div>\n</td> </tr>\n<tr style=\"height:12pt;\">\n<td style=\"border-bottom:0.5pt
+        solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;width:306pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-right:-0.25pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;margin-left:0.0pt;\">Contractual
+        expense reimbursement</font></div> </div> </td>\n<td style=\"border-bottom:0.5pt
+        solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">-0.01</font> <div style=\"clear:right;\">
+        </div> </div>\n<div style=\"display:flex;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:5pt;position:relative;top:-3.25pt;width:auto;\">3</font></div>
+        </div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">-0.01</font> <div style=\"clear:right;\">
+        </div> </div>\n<div style=\"display:flex;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:5pt;position:relative;top:-3.25pt;width:auto;\">3</font></div>
+        </div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">-0.01</font> <div style=\"clear:right;\">
+        </div> </div>\n<div style=\"display:flex;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:5pt;position:relative;top:-3.25pt;width:auto;\">3</font></div>
+        </div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">-0.01</font> <div style=\"clear:right;\">
+        </div> </div>\n<div style=\"display:flex;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:5pt;position:relative;top:-3.25pt;width:auto;\">3</font></div>
+        </div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">-0.01</font> <div style=\"clear:right;\">
+        </div> </div>\n<div style=\"display:flex;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:5pt;position:relative;top:-3.25pt;width:auto;\">3</font></div>
+        </div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42pt;\">\n<div style=\"display:flex;margin:auto;width:20.47pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:20.47pt;\">-0.01</font> <div style=\"clear:right;\">
+        </div> </div>\n<div style=\"display:flex;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:5pt;position:relative;top:-3.25pt;width:auto;\">3</font></div>
+        </div> </div> </td> </tr>\n<tr style=\"height:11.5pt;\">\n<td style=\"border-right:0.5pt
+        solid #D9D9D9;padding-bottom:2pt;padding-top:1.625pt;vertical-align:Top;width:306pt;\">
+        <div style=\"line-height:10pt;text-align:left;\"> <div style=\"margin-right:-0.25pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;font-weight:bold;margin-left:0.0pt;\">Total annual fund
+        operating expenses after expense reimbursements</font></div> </div> </td>\n<td
+        style=\"border-right:0.5pt solid #D9D9D9;padding-bottom:2pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:10pt;text-align:right;width:42pt;\"> <div style=\"display:flex;margin:auto;width:20.47pt;\">\n<div
+        style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;font-weight:bold;width:20.47pt;\">1.11</font></div> </div>
+        </div> </td>\n<td style=\"border-right:0.5pt solid #D9D9D9;padding-bottom:2pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:10pt;text-align:right;width:42pt;\"> <div style=\"display:flex;margin:auto;width:20.47pt;\">\n<div
+        style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;font-weight:bold;width:20.47pt;\">1.86</font></div> </div>
+        </div> </td>\n<td style=\"border-right:0.5pt solid #D9D9D9;padding-bottom:2pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:10pt;text-align:right;width:42pt;\"> <div style=\"display:flex;margin:auto;width:20.47pt;\">\n<div
+        style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;font-weight:bold;width:20.47pt;\">0.86</font></div> </div>
+        </div> </td>\n<td style=\"border-right:0.5pt solid #D9D9D9;padding-bottom:2pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:10pt;text-align:right;width:42pt;\"> <div style=\"display:flex;margin:auto;width:20.47pt;\">\n<div
+        style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;font-weight:bold;width:20.47pt;\">1.25</font></div> </div>
+        </div> </td>\n<td style=\"border-right:0.5pt solid #D9D9D9;padding-bottom:2pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:10pt;text-align:right;width:42pt;\"> <div style=\"display:flex;margin:auto;width:20.47pt;\">\n<div
+        style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;font-weight:bold;width:20.47pt;\">0.80</font></div> </div>
+        </div> </td>\n<td style=\"padding-bottom:2pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42pt;\">
+        <div style=\"line-height:10pt;text-align:right;width:42pt;\"> <div style=\"display:flex;margin:auto;width:20.47pt;\">\n<div
+        style=\"display:flex;white-space:nowrap;width:20.47pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;font-weight:bold;width:20.47pt;\">0.75</font></div> </div>
+        </div> </td> </tr> </table> </div> <div>\n<div style=\"clear:both;margin-top:0.0pt;position:relative;width:100%;\">
+        <div style=\"float:left;line-height:9.5pt;text-align:left;width:4.74pt;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;font-weight:bold;\">1</font></div>\n<div
+        style=\"float:left;line-height:9.5pt;margin-left:9.26pt;text-align:left;width:539.00pt;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;\">&#8220;Management
+        fee&#8221; has been restated to reflect the contractual management fee\nschedule
+        effective July 1, 2025.</font></div> </div> <div style=\"clear:both;position:relative;\">
+        </div> </div> <div> <div style=\"clear:both;margin-top:0.0pt;position:relative;width:100%;\">\n<div
+        style=\"float:left;line-height:9.5pt;text-align:left;width:4.74pt;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;font-weight:bold;\">2</font></div>\n<div
+        style=\"float:left;line-height:11.5pt;margin-left:9.26pt;text-align:left;width:539.00pt;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;\">&#8220;Service
+        plan fee&#8221; has been restated to reflect maximum allowable\nfees.</font><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:10pt;line-height:9.5pt;\">
+        </font></div> </div> <div style=\"clear:both;position:relative;\"> </div>
+        </div> <div>\n<div style=\"clear:both;margin-top:0.0pt;position:relative;width:100%;\">
+        <div style=\"float:left;line-height:9.5pt;text-align:left;width:4.74pt;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;font-weight:bold;\">3</font></div>\n<div
+        style=\"float:left;line-height:9.5pt;margin-left:9.26pt;text-align:left;width:539.00pt;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;\">The advisor
+        contractually agrees to waive a portion of its management fee and/or\nreimburse
+        expenses for the fund and certain other John Hancock funds according to </font><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;\">an asset level
+        breakpoint schedule that is based on the aggregate net assets of all the\nfunds
+        participating in the waiver or reimbursement, including the fund (the </font><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;\">participating
+        portfolios). This waiver equals, on an annualized basis, 0.0100% of that portion
+        of\nthe aggregate net assets of all the participating portfolios that </font><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;\">exceeds $75
+        billion but is less than or equal to $125 billion; 0.0125% of that portion
+        of the aggregate net\nassets of all the participating portfolios that exceeds
+        </font><font style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;\">$125
+        billion but is less than or equal to $150 billion; 0.0150% of that portion
+        of the aggregate net assets of all the\nparticipating portfolios that exceeds
+        $150 billion </font><font style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;\">but
+        is less than or equal to $175 billion; 0.0175% of that portion of the aggregate
+        net assets of all the participating\nportfolios that exceeds $175 billion
+        but is less </font><font style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;\">than
+        or equal to $200 billion; 0.0200% of that portion of the aggregate net assets
+        of all the participating portfolios that\nexceeds $200 billion but is less
+        than or equal </font><font style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;\">to
+        $225 billion; and 0.0225% of that portion of the aggregate net assets of all
+        the participating portfolios that exceeds $225\nbillion. The amount of the
+        </font><font style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;\">reimbursement
+        is calculated daily and allocated among all the participating portfolios in
+        proportion to the daily net assets of each participating\nportfolio. During
+        its </font><font style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;\">most
+        recent fiscal year, the fund&#8217;s reimbursement amounted to 0.01% of the
+        fund&#8217;s average daily net assets. This agreement expires on\n</font><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;\">July 31, 2026</font><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;\">, unless renewed
+        </font><font\nstyle=\"color:#000000;font-family:Arial Narrow;font-size:8pt;\">by
+        mutual agreement of the fund and the advisor based upon a determination that
+        this is appropriate under the circumstances at that time.</font></div> </div>\n<div
+        style=\"clear:both;position:relative;\"> </div> </div> <div style=\"line-height:12.0pt;margin-top:12.0pt;text-align:left;\">
+        <div style=\"margin-top:12pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:10pt;font-weight:bold;\">Expense\nexample</font> <hr style=\"background-color:#000000;height:0.5pt;margin-bottom:2pt;margin-left:0%;margin-top:1.0pt;position:relative;text-align:left;top:-1pt;width:558pt;\">
+        </div> </div>\n<div style=\"line-height:12.0pt;margin-top:2pt;text-align:left;\">
+        <div style=\"margin-top:2pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:9pt;\">This example is intended to help you compare the cost
+        of investing in the fund with the\ncost of investing in other mutual funds.
+        Please see below a </font><font style=\"color:#000000;font-family:Arial Narrow;font-size:9pt;\">hypothetical
+        example showing the expenses of a $10,000 investment for the time periods
+        indicated and then, except\nas shown below, assuming you </font><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:9pt;\">sell all of your shares at the end of those periods.
+        The example assumes a 5% average annual return and that fund expenses will
+        not change over\nthe </font><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:9pt;\">periods. Although your actual costs may be higher
+        or lower, based on these assumptions, your costs would be:</font><font\nstyle=\"color:#000000;font-family:Arial
+        Narrow;font-size:1pt;line-height:1pt;\">&#8195;</font></div> </div> <div style=\"line-height:1.0pt;margin-top:6pt;text-align:left;\">
+        <div style=\"margin-top:6pt;\"> </div> </div> <div style=\"margin-top:0.0pt;\">\n<table
+        style=\"border-bottom:0.5pt solid #D9D9D9;empty-cells:show;width:558pt;\"
+        cellpadding=\"0\" cellspacing=\"0\">\n<tr style=\"height:22pt;\">\n<td style=\"border-bottom:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Bottom;width:251.56pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\"> <div style=\"margin-right:-0.25pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;font-weight:bold;line-height:10pt;margin-left:0.0pt;\">&nbsp;</font></div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Bottom;width:257.52pt;\"
+        colspan=\"6\"> <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-left:-2.25pt;margin-right:-2.25pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;font-weight:bold;\">Shares
+        Sold</font><font\nstyle=\"color:#000000;font-family:Arial Narrow;font-size:8pt;font-weight:bold;line-height:10pt;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Bottom;width:48.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-left:-2.25pt;margin-right:4pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;font-weight:bold;\">Shares</font></div>\n<div
+        style=\"margin-left:-2.25pt;margin-right:4pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;font-weight:bold;\">Not
+        Sold</font></div> </div> </td> </tr>\n<tr style=\"height:12pt;\">\n<td style=\"border-bottom:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Bottom;width:251.56pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\"> <div style=\"margin-right:-0.25pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;font-weight:bold;margin-left:0.0pt;\">Expenses ($)</font></div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Bottom;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-left:-2.25pt;margin-right:-2.25pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;font-weight:bold;\">A</font></div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Bottom;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-left:-2.25pt;margin-right:-2.25pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;font-weight:bold;\">C</font></div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Bottom;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-left:-2.25pt;margin-right:-2.25pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;font-weight:bold;\">I</font></div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Bottom;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-left:-2.25pt;margin-right:-2.25pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;font-weight:bold;\">R2</font></div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Bottom;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-left:-2.25pt;margin-right:-2.25pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;font-weight:bold;\">R5</font></div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Bottom;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-left:-2.25pt;margin-right:-2.25pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;font-weight:bold;\">R6</font></div>
+        </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Bottom;width:48.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-left:-2.25pt;margin-right:4pt;text-align:Center;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;font-weight:bold;\">C</font></div>
+        </div> </td> </tr>\n<tr style=\"height:12pt;\">\n<td style=\"border-bottom:0.5pt
+        solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;width:251.56pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-right:-0.25pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;margin-left:0.0pt;\">1
+        year</font></div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:23.1pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:23.1pt;\">608</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:23.1pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:23.1pt;\">289</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:23.1pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:23.1pt;\">88</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:23.1pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:23.1pt;\">127</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:23.1pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:23.1pt;\">82</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:16.21pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:16.21pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:16.21pt;\">77</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:48.92pt;\">
+        <div style=\"line-height:11.0pt;margin-right:3pt;text-align:right;width:42.92pt;\">\n<div
+        style=\"display:flex;margin:auto;width:23.1pt;\"> <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;width:23.1pt;\">189</font></div>
+        </div> </div> </td> </tr>\n<tr style=\"height:12pt;\">\n<td style=\"border-bottom:0.5pt
+        solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;width:251.56pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-right:-0.25pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;margin-left:0.0pt;\">3
+        years</font></div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:23.1pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:23.1pt;\">837</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:23.1pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:23.1pt;\">587</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:23.1pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:23.1pt;\">277</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:23.1pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:23.1pt;\">399</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:23.1pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:23.1pt;\">258</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:16.21pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:16.21pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:16.21pt;\">242</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:48.92pt;\">
+        <div style=\"line-height:11.0pt;margin-right:3pt;text-align:right;width:42.92pt;\">\n<div
+        style=\"display:flex;margin:auto;width:23.1pt;\"> <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;width:23.1pt;\">587</font></div>
+        </div> </div> </td> </tr>\n<tr style=\"height:12pt;\">\n<td style=\"border-bottom:0.5pt
+        solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;width:251.56pt;\">
+        <div style=\"line-height:11.0pt;text-align:left;\">\n<div style=\"margin-right:-0.25pt;text-align:Left;white-space:nowrap;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;margin-left:0.0pt;\">5
+        years</font></div> </div> </td>\n<td style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt
+        solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:23.1pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:23.1pt;\">1,085</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:23.1pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:23.1pt;\">1,010</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:23.1pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:23.1pt;\">481</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:23.1pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:23.1pt;\">691</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:23.1pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:23.1pt;\">449</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;border-right:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:11.0pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:16.21pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:16.21pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:16.21pt;\">421</font></div> </div> </div> </td>\n<td
+        style=\"border-bottom:0.5pt solid #D9D9D9;padding-bottom:1.625pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:48.92pt;\">
+        <div style=\"line-height:11.0pt;margin-right:3pt;text-align:right;width:42.92pt;\">\n<div
+        style=\"display:flex;margin:auto;width:23.1pt;\"> <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;width:23.1pt;\">1,010</font></div>
+        </div> </div> </td> </tr>\n<tr style=\"height:11.5pt;\">\n<td style=\"border-right:0.5pt
+        solid #D9D9D9;padding-bottom:2pt;padding-top:1.625pt;vertical-align:Top;width:251.56pt;\">
+        <div style=\"line-height:10pt;text-align:left;\"> <div style=\"margin-right:-0.25pt;text-align:Left;white-space:nowrap;\"><font\nstyle=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;margin-left:0.0pt;\">10 years</font></div> </div> </td>\n<td
+        style=\"border-right:0.5pt solid #D9D9D9;padding-bottom:2pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:10pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:23.1pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:23.1pt;\">1,794</font></div> </div> </div> </td>\n<td
+        style=\"border-right:0.5pt solid #D9D9D9;padding-bottom:2pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:10pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:23.1pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:23.1pt;\">1,994</font></div> </div> </div> </td>\n<td
+        style=\"border-right:0.5pt solid #D9D9D9;padding-bottom:2pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:10pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:23.1pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:23.1pt;\">1,072</font></div> </div> </div> </td>\n<td
+        style=\"border-right:0.5pt solid #D9D9D9;padding-bottom:2pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:10pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:23.1pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:23.1pt;\">1,522</font></div> </div> </div> </td>\n<td
+        style=\"border-right:0.5pt solid #D9D9D9;padding-bottom:2pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:10pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:23.1pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:23.1pt;\">1,001</font></div> </div> </div> </td>\n<td
+        style=\"border-right:0.5pt solid #D9D9D9;padding-bottom:2pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:42.92pt;\">
+        <div style=\"line-height:10pt;text-align:right;width:42.92pt;\">\n<div style=\"display:flex;margin:auto;width:16.21pt;\">
+        <div style=\"display:flex;white-space:nowrap;width:16.21pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;width:16.21pt;\">941</font></div> </div> </div> </td>\n<td
+        style=\"padding-bottom:2pt;padding-top:1.625pt;vertical-align:Top;white-space:nowrap;width:48.92pt;\">
+        <div style=\"line-height:10pt;margin-right:3pt;text-align:right;width:42.92pt;\">
+        <div style=\"display:flex;margin:auto;width:23.1pt;\">\n<div style=\"display:flex;white-space:nowrap;width:23.1pt;\"><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;width:23.1pt;\">1,994</font></div>
+        </div> </div> </td> </tr> </table> </div>\n<div style=\"line-height:18.0pt;margin-top:6pt;text-align:left;\">
+        <div style=\"margin-top:6pt;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:9pt;font-style:italic;\">You should read this supplement
+        in conjunction with the Summary\nProspectus and retain it for your future
+        reference.</font></div> </div> </div> <div style=\"clear:both;\"> </div> <div
+        style=\"float:left;margin-left:24pt;margin-top:10pt;width:558pt;min-height:30pt;\">\n<div
+        style=\"line-height:10.0pt;text-align:justify;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:8pt;line-height:10pt;margin-left:0%;\">Manulife, Manulife
+        Investments, Stylized M Design, and Manulife Investments &amp; Stylized M\nDesign
+        are trademarks of The Manufacturers Life Insurance Company and John </font><font
+        style=\"color:#000000;font-family:Arial Narrow;font-size:8pt;line-height:10pt;\">Hancock,
+        and the Stylized John Hancock Design are trademarks of John Hancock Life\nInsurance
+        Company (U.S.A.). Each are used by it and by its affiliates under license.</font></div>
+        </div> <div style=\"clear:both;\"> </div> <div style=\"float:left;margin-left:24pt;margin-top:2pt;width:558pt;min-height:18pt;\">\n<div
+        style=\"line-height:18.53pt;margin-top:0.00pt;text-align:left;\"><font style=\"color:#000000;font-family:Arial
+        Narrow;font-size:13.03pt;line-height:14.21pt;\">&#8201;</font></div> </div>
+        </div> </div>\n<div style=\"float:left;margin-bottom:5.0pt;width:100%;\">
+        </div> <hr style=\"clear:both;margin-bottom:0.25pt;margin-left:0.25pt;margin-right:0.25pt;margin-top:40.0pt;\">\n</div>
+        </BODY></HTML>\n</TEXT>\n</DOCUMENT>\n<DOCUMENT>\n<TYPE>GRAPHIC\n<SEQUENCE>2\n<FILENAME>g53455jhim_fcv.jpg\n<DESCRIPTION>GRAPHIC\n<TEXT>\nbegin
+        644 g53455jhim_fcv.jpg\nM_]C_X  02D9)1@ ! 0$ 9 !D  #_X@H@24-#7U!23T9)3$4  0$
+        \  H0\nM  (0  !M;G1R4D=\"(%A96B                !A8W-P05!03\nM                        ]M4
+        \ 0    #3+\nM                                              ID97-C    _\nM
+        'QC<')T   !>    \"AW='!T   !H    !1B:W!T   !M    !1R6%E:   !\nMR    !1G6%E:
+        \  !W    !1B6%E:   !\\    !1R5%)#   \"!   \" QG5%)#\nM   \"!   \" QB5%)#   \"!
+        \  \" QD97-C         \")!<G1I9F5X(%-O9G1W\nM87)E('-21T(@24-#(%!R;V9I;&4              \")!<G1I9F5X(%-O9G1W\nM87)E('-21T(@24-#(%!R;V9I;&4\nM
+        \           =&5X=     !#;W!Y<FEG:'0@07)T:69E>\"!3;V9T=V%R92 R\nM,#$Q %A96B
+        \       #S40 !     1;,6%E:(                     !8\nM65H@        ;Z(  #CU
+        \  #D%A96B        !BF0  MX4  !C:6%E:(\nM     \"2@   /A   ML]C=7)V        !
+        \     %  H #P 4 !D '@ C \"@\nM+0 R #< .P!  $4 2@!/ %0 60!> &, : !M '( =P!\\
+        ($ A@\"+ )  E0\":\nM )\\ I \"I *X L@\"W +P P0#& ,L T #5 -L X #E .L \\ #V /L!
+        0$' 0T!\nM$P$9 1\\!)0$K 3(!. $^ 44!3 %2 5D!8 %G 6X!=0%\\ 8,!BP&2 9H!H0&I\nM
+        ;$!N0'! <D!T0'9 >$!Z0'R ?H\" P(, A0\"'0(F B\\\". )! DL\"5 )= F<\"\nM<0)Z H0\"C@*8
+        J(\"K *V L$\"RP+5 N \"ZP+U P #\"P,6 R$#+0,X T,#3P-:\nM V8#<@-^ XH#E@.B ZX#N@/'
+        ],#X /L _D$!@03!\" $+00[!$@$501C!'$$\nM?@2,!)H$J 2V!,0$TP3A!/ $_@4-!1P%*P4Z!4D%6
+        5G!7<%A@66!:8%M07%\nM!=4%Y07V!@8&%@8G!C<&2 99!FH&>P:,!IT&KP; !M$&XP;U!P<'&0<K!ST'\nM3P=A!W0'A@>9!ZP'OP?2!^4'^
+        @+\"!\\(,@A&\"%H(;@B\"\")8(J@B^\"-((YPC[\nM\"1 ))0DZ\"4\\)9 EY\"8\\)I FZ\"<\\)Y0G[\"A$*)PH]\"E0*:@J!\"I@*K@K%\"MP*\nM\\PL+\"R(+.0M1\"VD+@
+        N8\"[ +R OA\"_D,$@PJ#$,,7 QU#(X,IPS #-D,\\PT-\nM#28-0 U:#70-C@VI#<,-W@WX#A,.+@Y)#F0.?PZ;#K8.T@[N#PD/)0]!#UX/\nM>@^6#[,/SP_L$
+        D0)A!#$&$0?A\";$+D0UQ#U$1,1,1%/$6T1C!&J$<D1Z!('\nM$B8211)D$H02HQ+#$N,3 Q,C$T,38Q.#$Z03Q1/E%
+        84)Q1)%&H4BQ2M%,X4\nM\\!42%3055A5X%9L5O17@%@,6)A9)%FP6CQ:R%M86^A<=%T$791>)%ZX7TA?W\nM&!L80!AE&(H8KQC5&/H9(!E%&6L9D1FW&=T:!!HJ&E$:=QJ>&L4:[!L4&SL;\nM8QN*&[(;VAP\"'\"H<4AQ['*,<S!SU'1X=1QUP'9D=PQWL'A8>0!YJ'I0>OA[I\nM'Q,?/A]I'Y0?OQ_J(!4@02!L()@@Q\"#P(1PA2\"%U(:$ASB'[(B<B52*\"(J\\B\nMW2,*(S@C9B.4(\\(C\\\"0?)$TD?\"2K)-HE\"24X)6@EER7')?<F)R97)H<FMR;H\nM)Q@G22=Z)ZLGW\"@-*#\\H<2BB*-0I!BDX*6LIG2G0*@(J-2IH*ILJSRL\"*S8K\nM:2N=*]$L!2PY+&XLHBS7+0PM02UV+:LMX2X6+DPN@BZW+NXO)\"]:+Y$OQR_^\nM,#4P;#\"D,-LQ$C%*,8(QNC'R,BHR8S*;,M0S#3-&,W\\SN#/Q-\"LT932>--@U\nM$S5--8<UPC7]-C<V<C:N-NDW)#=@-YPWUS@4.%
+        XC#C(.04Y0CE_.;PY^3HV\nM.G0ZLCKO.RT[:SNJ.^@\\)SQE/*0\\XSTB/6$]H3W@/B ^8#Z@/N
+        _(3]A/Z(_\nMXD C0&1 ID#G02E!:D&L0>Y\",$)R0K5\"]T,Z0WU#P$0#1$=$BD3.11)%546:\nM1=Y&(D9G1JM&\\$<U1WM'P$@%2$M(D4C721U)8TFI2?!*-TI]2L1+#$M32YI+\nMXDPJ3'),NDT\"34I-DTW<3B5.;DZW3P!/24^33]U0)U!Q4+M1!E%049M1YE(Q\nM4GQ2QU,34U]3JE/V5$)4CU3;52A5=57\"5@]67%:I5O=71%>25^!8+UA]6,M9\nM&EEI6;A:!UI66J9:]5M%6Y5;Y5PU7(9<UETG77A=R5X:7FQ>O5\\/7V%?LV
+        %\nM8%=@JF#\\84]AHF'U8DEBG&+P8T-CEV/K9$!DE&3I93UEDF7G9CUFDF;H9SUG\nMDV?I:#]HEFCL:4-IFFGQ:DAJGVKW:T]KIVO_;%=LKVT(;6!MN6X2;FMNQ&\\>\nM;WAOT7
+        K<(9PX'$Z<95Q\\')+<J9S 7-=<[AT%'1P=,QU*'6%=>%V/G:;=OAW\nM5G>S>!%X;GC,>2IYB7GG>D9ZI7L$>V-[PGPA?(%\\X7U!?:%^
+        7YB?L)_(W^$\nM?^6 1X\"H@0J!:X'-@C\"\"DH+T@U>#NH0=A(\"$XX5'A:N&#H9RAM>'.X>?B
+        2(\nM:8C.B3.)F8G^BF2*RHLPBY:+_(QCC,J-,8V8C?^.9H[.CS:/GI &D&Z0UI$_\nMD:B2$9)ZDN.339.VE\"\"4BI3TE5^5R98TEI^7\"I=UE^\"83)BXF229D)G\\FFB:\nMU9M\"FZ^<')R)G/>=9)W2GD\">KI\\=GXN?^J!IH-BA1Z&VHB:BEJ,&HW:CYJ16\nMI,>E.*6IIAJFBZ;]IVZGX*A2J,2I-ZFIJARJCZL\"JW6KZ:Q<K-\"M1*VXKBVN\nMH:\\6KXNP
+        +!UL.JQ8+'6LDNRPK,XLZZT);2<M1.UBK8!MGFV\\+=HM^\"X6;C1\nMN4JYPKH[NK6[+KNGO\"&\\F[T5O8^^\"KZ$OO^_>K_UP'#
+        [,%GP>/\"7\\+;PUC#\nMU,11Q,[%2\\7(QD;&P\\=!Q[_(/<B\\R3K)N<HXRK?+-LNVS#7,M<TUS;7.-LZV\nMSS?/N-
+        YT+K1/-&^TC_2P=-$T\\;42=3+U4[5T=95UMC77-?@V&38Z-ELV?':\nM=MK[VX#<!=R*W1#=EMX<WJ+?*=^OX#;@O>%$X<SB4^+;XV/CZ^1SY/SEA.8-\nMYI;G'^>IZ#+HO.E&Z=#J6^KEZW#K^^R&[1'MG.XH[K3O0._,\\%CPY?%R\\?_R\nMC/,9\\Z?T-/3\"]5#UWO9M]OOWBO@9^*CY./G'^E?ZY_MW_
+        ?\\F/TI_;K^2_[<\nM_VW____; $, \" 8&!P8%\" <'!PD)\" H,% T,\"PL,&1(3#Q0=&A\\>'1H<'\"
+        D\nM+B<@(BPC'!PH-RDL,#$T-#0?)SD].#(\\+C,T,O_; $,!\"0D)# L,& T-&#(A\nM'\"$R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R,C(R\nM,C(R,C(R,O_
+        \ !$( \"< _P,!(@ \"$0$#$0'_Q  ?   !!0$! 0$! 0\nM     0(#! 4&!P@)\"@O_Q \"U$
+        \ \" 0,# @0#!04$!    7T! @, !!$%$B$Q\nM008346$'(G$4,H&1H0@C0K'!%5+1\\\"0S8G*\"\"0H6%Q@9&B4F)R@I*C0U-C<X\nM.3I#1$5&1TA)2E-455976%E:8V1E9F=H:6IS='5V=WAY>H.$A8:'B(F*DI.4\nME9:7F)F:HJ.DI::GJ*FJLK.TM;:WN+FZPL/$Q<;'R,G*TM/4U=;7V-G:X>+C\nMY.7FY^CIZO'R\\_3U]O?X^?K_Q
+        \ ? 0 # 0$! 0$! 0$!         0(#! 4&\nM!P@)\"@O_Q \"U$0 \" 0($! ,$!P4$!  !
+        G<  0(#$00%(3$&$D%1!V%Q$R(R\nM@0@40I&AL<$)(S-2\\!5B<M$*%B0TX27Q%Q@9&B8G*\"DJ-38W.#DZ0T1%1D=(\nM24I35%565UA96F-D969G:&EJ<W1U=G=X>7J\"@X2%AH>(B8J2DY25EI>8F9JB\nMHZ2EIJ>HJ:JRL[2UMK>XN;K\"P\\3%QL?(R<K2T]35UM?8V=KBX^3EYN?HZ>KR\nM\\_3U]O?X^?K_V@
+        , P$  A$#$0 _ /0O!WQ\"'C/QAJEI8IMTNS@!B9AAI6+8\nM+GT'H/S] :5\\0AKWQ,F\\.V\"8L;.\"7SI6'S2RJRCCT49/U^E>??L_?\\A_6/\\\nMKU3_
+        -\"H^&'_ \"6S6_\\ M[_]&B@9Z+<?$&*;XG:?X0L$#_-)]MF8=\"L3L$7\\\nM0\"3^%=S7@.D?\\G,2?]?5Q_Z(>O?J!!7->+?'6C^\"S9#5A<8O-_EF&,-C;MSG\nMD?WA72UXW\\<;-=0UCP=9.Q1;BXFB+#J
+        S0C/ZT >PPS1W$$<T+J\\4BAT=3D,\nM\",@BN<T7QYHGB#Q+>Z%I[S275FKO)(4 C(5@IVG//+#M7DEOXUUSPEX;U'P'\nM)#,^NQ3BTL)$'_+-\\\\@_B-O^^/2K_P
+        +M ;PQ\\7=5T>2022V^DJ9&'3>WD.P\nM'L\"Q ^E SW*BO(?$NN^.=+;4[^Y\\2Z#I4=LSFVTT['DN$7[N,@MEATZ?04FM\nM_$?7I/\"_@[5-($$=UJTSQ3PL@*.ZL$P\">5!;/T!ZT\"/7Z*\\GG\\0^./\"_C?P_\nM:>(+^QN[+69?)\\FVA\"K$Q95.#@-P77DDYYK<\\!^)]4UWQ5XQL;^9)+?3+T0V\nMJK&%*KOE&\"1UX1>M
+        '8:MJEKHFDW6IWK,MM;1F20JN3@>@]:Y*X^)EC9:#H&\nMJ7.GW1&LR%8HX0&\\L9QR>,GD<=^?2N0'B?5?$OPX\\=?VG.LOV20PP[8PN%S[\nM=>E(_B74_#OPX\\\"?V=+&GVJ41R[XU?(SVR.#SUH&=CXM\\?7.B>(K/P]H^BOJ\nMNJW,7G>6)?+55Y[X.3\\I/;%=9I-U=WNDVMU?61LKJ6,/);%]YC)[$X%>*ZS9\nM^*G^.:Q6FJ6<>HO!(]I,\\64C@^?:C#;RP7(SBM>;QGXCUO7;S1M+\\0:3I$.E\nM!8+B^NPFZYF'#E588QN5N@Z?4\"@#U^J&N7,MGX?U*Z@?9-#:RR1M@'#!\"0<'\nMCJ*\\\\\\'^*_$_BI9[
+        7=E'J.DW02[DCVM'<QDD C@\\?*WW<9^7D9-=]XF_P\"1\nM4UC_ *\\9O_0#0(U**** \"N7;5;VSM+R_2\\AGLI+EDLHY8\\RR,>
+        J$, P+[@H\nMP.,'.*Z&]DM8[.5KV2*.VV_O&E8*F/<GC%>8VGC2PU/QLEX;6[N+&V22'1X+\nM6(%7VC$MP<D
+        \  ;%]L]S0!Z);SSZ?H[W>MW<(=%,T[JNR.(8R0.^ .Y))Y^@\nMI^'=>F\\0B:\\CLVATT@?9Y),AY.N3CL,8^F<'G(7AO%'C.PUS7K'19;:];0DD\nMA>](A(,\\DF##\"5.\"
+        20Q!Y(7@8Y/3'XB^'X)Y+2!+N00S0VZ^1;DH3)]S:>F\nM,=.Y'(!'- '4WE[;V$'G7#[4W!0
+        I9F8] %&22?0#->>R^*=4EN8M/T*\\#7V\nMK74CVT5W9R$P6^?]<&9@-FT;@-IY;'L-?QG?QL8A'+(L.G.9]1FC
+        /D0LC*<\nM'_GIM8D 9(&3CE0?+Y=>N8K#_A+[2>&#5M6O/L&F6Y< 6UH$=!D9P,,4//=5\nM/0F@#U+3]0DN-5D\\/Z).\\B6.#J>J2GS&,A_@7/!D/<]%
+        QCH!V%>=^$?$7AS\nMP_H>FZ79O<7*3R2 WPCPEQ*HW32Y8ABJ\\Y;&,# )Q6M8_$C0M0U\"\"SA6]5Y[\nMF6V1Y+<JA:,98Y]
+        /R[XH ZZBN7'CW1VA2=4NVMII##:3\"+*W;[MNV(9W-SW\nMP!P3G%1Q?$+2+F[2RMK;4+B__>&6TBM\\R0!&*L7YQC((X)SVH
+        Z#5-4LM%TV\nM;4-0G6\"VA7<[M_(>I/0#O5+PYJ]WKEF][-9?9;=V'V<%\\LZ^I_\\ K<=<$C!/\nMGFK^+].U_P
+        7PRW%O<WOA[3+E8(4@C5EN[QN V\"1N5!V&3WQBO6U8,H92\"#T\nM(H \\(_9^M+C^TM8O#\"XMC\"D0E(^4ONS@'UQ1\\+;2XD^,'B\"[2%S;Q-<H\\H'R\nMJS2\\
+        GU.#^5>V:5I5EHNFP:?I]NL%K\"NU$7^9]2>Y[T:;I5EI,#PV-ND*22M\nM-)CJ[L<LQ/<DT >)Z%:7%Q^TC>3Q0N\\5O<3O,X'\"
+        Q,H)/N2!^->\\53LM*LM\nM.ENYK6W6.6[E,T[C[TC'N3[=A5R@ KRSXL:?>WGB?P3):VD\\Z0WCM*T498(-\nM\\/+$#CH>OI7J=4I]4@M]8L],=9#/=Q2RQL
+        -H$90-GG.?W@QQZT 4+OPEI5[\nMXKLO$<T&;ZTB:-#V.>C$=ROS8_WO88X:VT[5/^%V>+KJVMYHQ-I'EVURR$1F\nM39
+        !ANG4'\\C7J@=6+!6!*G! /2AG5,;F R<#)ZF@#YQT^R6U\\*ZEIEUX#U2^\nM\\4.D_FWMQ\"61
+        0?W@8YY Z8')'!YK1&CZG_PAOPWB_LZ[\\RWU&9ID\\ALQ W&\nM06&.!CGFO?-Z[]FX;\\9VYYQZU6L-3M-2TZ/4+>7-M(\"5=AMR
+        2,\\].E SS[X\nMF6-W=^-? ,MM:SS1P:B6E>.,L(QYD!RQ'0<'KZ&L+2]0U?P%\\0/%:2>&M2U%\nM=7NO/M6M8R5;YG91G!&,2<GMCI7LX=&8JK*67&0#R,]*%=77<K
+        KZ@\\4\"/\"?\nM#FEZL/AOX[CN=+NH;JYEW) 8FRQSR%X^;ZBI-<TG4I/A_P\" ($T^[:6\"X!FC\nM6%BT8S_$,<?C7M<FH6T=U:VYDS)=;O*VC(;:,GGITJ=75BP5@2IP<'H:
+        /-;\nMRQNV_: T^]%K.;1=.*F<1G8#MDXW=,\\BN3O_  ]%X3\\::S+K?@^XUW2M0F,]\nMK<6\\9<Q%F)V<?[V.<'Y01FO>**
+        .&^&]B([:_OO^$3B\\/K/(! F3YDD0'&]3\nMT()/IUZ<9/2^)O\\ D5-8_P\"O&;_T UJ5#>6L5]8W%I-GRIXVB?!P=K#!_G0!\nM-63JVLFRG@L+.#[5J=R\"8H
+        V%11UDD/\\*#UZD\\ $U?OKN.PL+F\\FSY5O$TKX\nMZX4$G^5<]!):>%-$O/$&O3K'=W.)KR0\\D''RPIZA1\\H'<Y/4F@#EOB
+        TUK:6\nM>CI/_:'B?69/(@D9<);1GAVC3D(,'&[ENI+'%=-9?#[1[+['Y33J+>P&GNBL\nM D\\6[>=W&>6))P1G)!R*R/!6B:AJ_B&Y\\<Z_
+        T-S<KY>G6C];:#L3Z,1_,^O\nM'H5 '('X<:,ZVPFGOI6BNY;R1WD7-S)(,'S,*,@#@8Q@4Y/AYI<:VICN[]98\nM)YKDRATW2R2C:6?Y,9
+        X4@#;VKK:* ./N?AY9WT,=E=ZMJ<VDI)YG]GET\".V\nM<_.X4.XSS\\S$YYS5^X\\&:5=:_%J\\OFF6&T:S@A4JL4*D8+*
+        ,AL$C.>GX5T-\nM% '%VOPSTJTDA=-0U-C!9_8X0TD>(TSN! \"#Y@<'T) )!IZ?#30HUMD5[P10\nM6#V'EB4
+        .CDLS' SO))R01GH1CBNQHH XJZ\\):39#3?W^L-=::NVUG@AWND>\nMPIL&(]@&#V ;.#G/-57T?3UDN)[71O$,4=S;+:RQ0I$
+        R)NVD[SNS\\Q)&<-_\nM$#7?T4 >.K#IW@M;.:ST+6(=):)[;4Y;NUS)&C9'GAUSA@3@@<$$<<5Z'X4N\nM-$_L\\VFCZC]J52965V_>*&YR5P\"!^
+        _$YK<EBCGA>&5%DBD4JZ,,A@>\"\".XK\nMC4\\#75E;&PT_5%6P0YM?M$3-/9^JQRJZG:>1@]CU/2@#M:***
+        \"BBB@ KA_'\nM'_(6M_\\ L\":I_P\"@PT44 8#V,&FS27=C;QP_V?H^GZJ4B4*'9'F\\PGU9H]ZY\nMZ\\U4U.\"TM8+&YU^=(H=5L7D0M;\"<_:9G:1U7GY7VLBA^
+        -G4444#-GS-/M_'\nM\\5@/*O=2N'C,\\%];!I53R ID28$C;M!RASDEL8SDY_AJTT;46\\,:<;2UG6UD\nMOX;N)H!M\\]0F<@C#$
+        KSSV]*** *5A8LOAS35TV)8KB[\\+RRSM'A6F*R0$DM\nMD9.UG R>]7;6/1-4@LI-/>*[TZXUFU62-;,00%A&X($9/7&T'(P<#K110!;5\nM='TK4=&EO+6!+5-9OK6']R&\".TC>6H&.!NZ=A[5:\\\"7FG?\\
+        \"1WFGZ9Y%PD4\nM,C7$[6OE7,3^8,1RL#B7.6.X=-O/6BB@#T2BBB@04444 1W$$5U;2V\\Z!XI4\nM*.IZ,I&\"/RK*'A?2VNX;JYCFO)H#F$W<[S\"(^JAB0#_M8S[T44
+        ;-%%% !11\n510 4444 %%%% !1110 4444 ?__9\n\nend\n</TEXT>\n</DOCUMENT>\n</SEC-DOCUMENT>\n"
+    headers:
+      Accept-Ranges:
+      - bytes
+      Connection:
+      - keep-alive
+      Content-Type:
+      - text/plain
+      Date:
+      - Mon, 27 Jul 2026 00:43:48 GMT
+      ETag:
+      - '"2cea39fec79aaee4c6ca076daea17afc-gzip"'
+      Last-Modified:
+      - Thu, 26 Jun 2025 20:06:58 GMT
+      Strict-Transport-Security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      Vary:
+      - Accept-Encoding
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - 1; mode=block
+      content-length:
+      - '74823'
+      x-amz-id-2:
+      - vzA4uXi+RUt2pjNhJ2cJDBn/gkrNvYBzwxPWnjhE1z4ZNiFaoDJ9KBIdK2VMSV9eqkuqbWRuxAKBRjlXepAho3obKId8GctU
+      x-amz-meta-mode:
+      - '33188'
+      x-amz-replication-status:
+      - COMPLETED
+      x-amz-request-id:
+      - T5T9QMFMTJ0NAD33
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - 9gT5mHcpZGsPzv6GuoUbSxMqr8WRs0ZG
+    status:
+      code: 200
+      message: OK
+version: 1

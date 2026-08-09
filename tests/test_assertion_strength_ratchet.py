@@ -5,7 +5,8 @@ None`` assertions across 125 files", and read that way it is a demoralising
 grind with no obvious end. The count is the wrong measurement. A test that pins
 real values and *also* checks non-nullity is fine; what matters is whether a
 test that passed could have failed. Asked that way, 463 assertions across 125
-files becomes the 15 tests listed below.
+files became 15 tests; eight of those have since been given ground truth, and
+what is left is the short list below.
 
 This file is the sibling of ``scripts/check_regression_skips.py`` and the two
 parity ratchets, and exists for the same reason they do: an audit nobody re-runs
@@ -13,7 +14,9 @@ is an audit that decays. Three things are enforced.
 
 1. NO NEW EXISTENCE-ONLY TESTS. A test whose only assertions are ``x is not
    None`` is listed in ``KNOWN_EXISTENCE_ONLY`` or it fails here. The list may
-   only shrink.
+   only shrink. ``EXISTENCE_BY_DESIGN`` is the separate, deliberately tiny
+   escape hatch for tests whose assertions this scan cannot see at all; keeping
+   those on the work list would destroy the only thing the work list is for.
 
 2. A REPAIRED TEST MUST BE BANKED. Fixing one and leaving it listed quietly
    loosens the guard, exactly as an unbanked parity baseline does.
@@ -29,7 +32,10 @@ needs the whole function body — and needs to stop at nested ``def``s, because 
 monkeypatch stub returning a MagicMock is not the test returning a value. Both
 of those cost a false-positive round when this analysis was first written by
 hand: ``except X: pytest.fail(...)`` scored as a swallowed exception, and six
-correct tests scored as returning instead of asserting.
+correct tests scored as returning instead of asserting. A third came out of the
+first repair pass: a claim need not be an ``assert`` statement at all, since
+``with pytest.raises(IndexError, match=...)`` is a stricter one than most —
+see ``is_raises_context``.
 
 WHAT IS DELIBERATELY NOT ENFORCED. Exception swallowing. The honest classifier
 for it -- a handler that neither fails, raises, skips nor asserts -- still flags
@@ -56,9 +62,6 @@ REGRESSION_DIR = pathlib.Path(__file__).parent / "issues" / "regression"
 # TO FIX ONE: give it a value assertion, then delete its line below. The test
 # `test_a_repaired_test_is_banked` fails if you do the first without the second.
 KNOWN_EXISTENCE_ONLY = {
-    ("test_424b_parser.py", "test_backward_compat_related_filings"),
-    ("test_fee_table.py", "test_find_fee_table_split_tag_header"),
-    ("test_issue_441_current_filings_pagination.py", "test_out_of_bounds_indexing_raises_proper_errors"),
     ("test_issue_486_comprehensive_income_zerodiv.py", "test_comprehensive_income_multiple_affected_companies"),
     ("test_issue_512_13f_manager_assignment.py", "test_13f_backward_compatibility"),
     ("test_issue_523_13f_other_managers_summary_page.py", "test_other_manager_data_correctness"),
@@ -66,10 +69,18 @@ KNOWN_EXISTENCE_ONLY = {
     ("test_issue_599_pandas_futurewarning.py", "test_presentation_values_correct"),
     ("test_issue_674_fallback_simulation.py", "test_fallback_xbrl_available"),
     ("test_issue_683_vale_cashflow.py", "test_vale_stitched_cashflow_no_crash"),
-    ("test_issue_821_citi_html_leak.py", "test_cross_reference_index_is_still_detected"),
-    ("test_issue_a3ej.py", "test_accepts_str_and_yyyymmdd_dates"),
-    ("test_issue_etoo_header_only_submissions.py", "test_from_text_does_not_raise"),
-    ("test_issue_koq3_8k_subheading_truncation.py", "test_subheading_is_a_heading_node"),
+}
+
+# Reviewed and correct as they stand — NOT a work list. Keeping these in
+# KNOWN_EXISTENCE_ONLY would have made that list stop meaning "outstanding
+# work", which is the only reason anyone would read it.
+#
+# A test belongs here when its assertions live somewhere this analysis cannot
+# see, not when it is weak. Each entry carries the reason.
+EXISTENCE_BY_DESIGN = {
+    # Its real assertions are in ASSERTION_RUNNERS, dispatched per manifest
+    # entry, and the test already refuses to pass on an entry that declares
+    # none. No static analysis of this function will find them.
     ("test_viewer_corpus.py", "test_viewer_corpus_entry"),
 }
 
@@ -98,6 +109,27 @@ def is_existence_assert(node):
             and isinstance(node.test.ops[0], ast.IsNot)
             and isinstance(node.test.comparators[0], ast.Constant)
             and node.test.comparators[0].value is None)
+
+
+def is_raises_context(node):
+    """``with pytest.raises(SomeError, match=...)`` — a claim, and a strict one.
+
+    It is not an ``ast.Assert``, so the first version of this file scored
+    GH #441's out-of-bounds test as existence-only: its only bare assert is
+    ``assert filing is not None`` and the actual subject of the test —
+    "IndexError, not AssertionError, and with this message" — is expressed
+    entirely by two ``pytest.raises`` blocks.
+    """
+    if not isinstance(node, (ast.With, ast.AsyncWith)):
+        return False
+    for item in node.items:
+        call = item.context_expr
+        if isinstance(call, ast.Call):
+            func = call.func
+            name = func.attr if isinstance(func, ast.Attribute) else getattr(func, 'id', None)
+            if name == 'raises':
+                return True
+    return False
 
 
 def is_value_assert(node):
@@ -130,7 +162,7 @@ def classified():
         seen += 1
         body = list(own_nodes(fn))
         if any(is_existence_assert(n) for n in body) \
-                and not any(is_value_assert(n) for n in body):
+                and not any(is_value_assert(n) or is_raises_context(n) for n in body):
             existence_only.add((filename, fn.name))
         if any(isinstance(n, ast.Return) and n.value is not None for n in body):
             returns_value.add((filename, fn.name))
@@ -150,21 +182,23 @@ class TestTheSuiteCanStillFail:
 
     def test_no_new_existence_only_tests(self, classified):
         existence_only, _returns, _seen = classified
-        new = sorted(existence_only - KNOWN_EXISTENCE_ONLY)
+        new = sorted(existence_only - KNOWN_EXISTENCE_ONLY - EXISTENCE_BY_DESIGN)
         assert not new, (
             "these tests assert only that something is not None, which cannot "
             "tell a correct value from a wrong one. Assert the value — a "
-            "figure read off the filing — or, if this is genuinely a "
-            f"does-not-crash test, say so with a comment and list it here: {new}"
+            "figure read off the filing — or, if the assertions genuinely live "
+            "somewhere this scan cannot see, add it to EXISTENCE_BY_DESIGN "
+            f"with the reason: {new}"
         )
 
     def test_a_repaired_test_is_banked(self, classified):
         """The ratchet's other half: delete the line in the commit that fixes it."""
         existence_only, _returns, _seen = classified
-        repaired = sorted(KNOWN_EXISTENCE_ONLY - existence_only)
+        repaired = sorted((KNOWN_EXISTENCE_ONLY | EXISTENCE_BY_DESIGN) - existence_only)
         assert not repaired, (
             "these tests now assert values and must be removed from "
-            f"KNOWN_EXISTENCE_ONLY in the same commit that fixed them: {repaired}"
+            "KNOWN_EXISTENCE_ONLY / EXISTENCE_BY_DESIGN in the same commit "
+            f"that fixed them: {repaired}"
         )
 
     def test_no_test_returns_instead_of_asserting(self, classified):
