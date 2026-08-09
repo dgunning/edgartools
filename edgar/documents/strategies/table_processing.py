@@ -536,6 +536,40 @@ class TableProcessor:
             for cell in cells
         )
 
+    # Everything a cell may hold alongside its digits and still be nothing but
+    # figures: currency and percent signs, thousands separators, decimal points,
+    # parenthesised negatives, the separators in a range ("25.5% - 30.7%", and
+    # the en/em dashes filings use in place of a hyphen), and whitespace.
+    _FIGURE_ORNAMENTS = str.maketrans('', '', '$%,.()-–— \t\n ')
+
+    @staticmethod
+    def _is_figure_cell(cell_text: str) -> bool:
+        """Does this cell hold figures and nothing else?
+
+        Used by the content-type ratio, the last-resort "mostly text means
+        header" branch. The ratio only works if a cell full of numbers is
+        counted as a number, and the original test -- strip ``$%,()``, then drop
+        ``.`` and ``-``, then ``isdigit()`` -- silently failed on any cell
+        holding a RANGE, because the space either side of the dash survived and
+        ``'255  307'.isdigit()`` is False.
+
+        UnitedHealth's stock-option assumptions table is made almost entirely of
+        ranges::
+
+            Expected volatility | 25.5% - 30.7% | 29.7% - 30.6% | 30.6% - 30.8%
+
+        so the row scored 4 text cells against 0 number cells and was classified
+        as a header. Three of the table's five rows went that way -- risk-free
+        rate, volatility and dividend yield -- while ``Forfeiture rate 5.0%``
+        survived, because a single value did pass ``isdigit()``. The rendered
+        filing kept the two rows nobody asks about and dropped the three that
+        carry the assumptions.
+
+        ``str.isdigit`` is False on the empty string, so a lone ``$`` or an
+        em-dash placeholder still counts as text, exactly as before.
+        """
+        return cell_text.translate(TableProcessor._FIGURE_ORNAMENTS).isdigit()
+
     def _is_header_row(self, tr: HtmlElement) -> bool:
         """Detect if row is likely a header row in SEC filings."""
         own_cells = self._own_cells(tr)
@@ -625,15 +659,34 @@ class TableProcessor:
 
         # If we have multiple year cells or year + date phrases, likely a header
         if year_cells >= 2 or (year_cells >= 1 and date_phrases >= 1):
-            if 'total' not in row_text_lower[:20] and not has_prose:
+            # Same veto as the multi-year branch above, and for the same reason:
+            # this is a year-derived signal, so a row holding dollar amounts
+            # outranks it. edgartools-v3ec fixed the sibling branch and left this
+            # one alone as unobserved; it is not unobservable — a schedule laid
+            # out "2024 | $1,000 | 2025 | $2,000" trips it, and did so on a
+            # synthetic row before this veto was added.
+            if ('total' not in row_text_lower[:20] and not has_prose
+                    and not carries_figures):
                 return True
 
         # Check for comprehensive financial period patterns (from old parser)
         period_pattern = self._get_period_header_pattern()
         if period_pattern.search(row_text_lower):
             # Additional validation: ensure it's not a data row with period text
-            # Check for absence of strong data indicators
-            data_pattern = r'(?:\$\s*\d|\d+(?:,\d{3})+|\d+\s*[+\-*/]\s*\d+|\(\s*\d+(?:,\d{3})*\s*\))'
+            # Check for absence of strong data indicators.
+            #
+            # `\d+\.\d+` is here for the same reason it is in the two sibling
+            # data_patterns below: a plain decimal is a figure. This branch was
+            # the only one of the three that omitted it, and the omission cost
+            # UnitedHealth two thirds of its buyback table. Rows read
+            # "November 30, 2024 | 0.9 | 593.39 | 0.9 | 38.7" -- a single date
+            # matches the period pattern, and with no `$`, no thousands
+            # separator and no parenthesised negative, nothing here contradicted
+            # it. October survived only because its price cell carried a stray
+            # `$`; November and December were classified as headers and the
+            # renderer collapsed them.
+            data_pattern = (r'(?:\$\s*\d|\d+(?:,\d{3})+|\d+\.\d+'
+                            r'|\d+\s*[+\-*/]\s*\d+|\(\s*\d+(?:,\d{3})*\s*\))')
             if not re.search(data_pattern, row_text) and not has_prose:
                 return True
 
@@ -713,9 +766,7 @@ class TableProcessor:
         for cell in cells:
             cell_text = _text_content(cell).strip()
             if cell_text:
-                # Remove common symbols for analysis
-                clean_text = cell_text.replace('$', '').replace('%', '').replace(',', '').replace('(', '').replace(')', '')
-                if clean_text.replace('.', '').replace('-', '').strip().isdigit():
+                if self._is_figure_cell(cell_text):
                     number_cells += 1
                 else:
                     text_cells += 1
