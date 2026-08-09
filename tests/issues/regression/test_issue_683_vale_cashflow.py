@@ -26,7 +26,6 @@ the xfail below.
 import pytest
 
 from edgar.xbrl.exceptions import StatementNotFound
-from edgar.xbrl.stitching.core import StatementStitcher
 
 
 class TestStitchingSkipsMissingStatements:

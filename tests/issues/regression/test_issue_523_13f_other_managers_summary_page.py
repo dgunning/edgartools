@@ -11,6 +11,7 @@ Test cases:
 See: https://github.com/dgunning/edgartools/issues/523
 """
 import pytest
+
 from edgar import Filing
 
 

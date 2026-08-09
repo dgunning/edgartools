@@ -9,8 +9,9 @@ Strategy:
   2. Force fallback by patching FilingSGML.from_filing to raise ValueError
   3. Verify that the fallback path produces equivalent or acceptable results
 """
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 from edgar._filings import Filing
 from edgar.sgml.sgml_common import FilingSGML

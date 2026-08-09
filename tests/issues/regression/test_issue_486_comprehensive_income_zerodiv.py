@@ -15,7 +15,7 @@ Affected ~9.5% of filings (~2,038 filings, 28+ companies).
 
 import pytest
 
-from edgar import Filing, Company
+from edgar import Company
 from edgar.xbrl.exceptions import StatementNotFound
 
 
