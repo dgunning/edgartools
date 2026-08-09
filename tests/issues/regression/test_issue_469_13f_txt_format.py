@@ -14,7 +14,7 @@ Test case: 2012-11-14 Berkshire Hathaway 13F-HR filing (accession: 0001193125-12
 """
 
 import pytest
-from edgar import get_filings, Filing
+from edgar import get_filings, find, Filing
 from edgar.thirteenf import ThirteenF
 
 
@@ -282,41 +282,52 @@ def test_issue_469_columnar_format_real_filing():
     """
     Test columnar format with real 2012 filing that uses Format 2.
 
-    This tests the full workflow with a real filing from 2012 that uses
-    the columnar SGML format (Format 2).
+    PINNED, and deliberately so. This test used to pull every 2012 Q4 13F-HR
+    (3,620 of them) with ``list(filings)[:10]``, walk the first ten inside
+    ``try: ... except Exception: continue``, and then do all of its asserting
+    under ``if columnar_filing:``. Only three of those ten are columnar and one
+    of the three has 2 holdings, below the test's own ``> 10`` threshold -- so
+    the search was one reordering away from finding nothing, and finding
+    nothing meant passing while asserting nothing at all.
+
+    GROUND TRUTH. JANA Partners' Q4 2012 13F, accession 0000902664-12-001664,
+    read from the filing: 34 holdings worth $2,520,762,000, the largest being
+    7,373,173 shares of Agrium (CUSIP 008916108) at $762,828,000.
     """
-    # Get 2012 13F filings
-    filings_2012 = get_filings(form='13F-HR', year=2012, quarter=4)
+    filing = find("0000902664-12-001664")
+    assert filing is not None, "the pinned 2012 columnar 13F could not be fetched"
 
-    # Find a filing that uses columnar format
-    # We'll iterate through a few filings to find one with columnar format
-    columnar_filing = None
-    for filing in list(filings_2012)[:10]:  # Check first 10 filings
-        try:
-            # Get the TXT content
-            thirteenf = filing.obj()
-            if thirteenf.infotable_txt:
-                # Check if it's columnar format by looking for <S> tags in data rows
-                txt_content = thirteenf.infotable_txt
-                if '<S>' in txt_content and 'NAME OF ISSUER' in txt_content:
-                    # This looks like columnar format
-                    infotable = thirteenf.infotable
-                    if infotable is not None and len(infotable) > 10:
-                        columnar_filing = filing
-                        columnar_thirteenf = thirteenf
-                        break
-        except Exception:
-            continue
+    thirteenf = filing.obj()
 
-    # If we found a columnar filing, test it
-    if columnar_filing:
-        assert columnar_thirteenf.infotable is not None, "Should parse columnar format infotable"
-        assert len(columnar_thirteenf.infotable) > 0, "Should have holdings"
-        assert columnar_thirteenf.total_holdings > 0, "Should have total holdings count"
-        assert columnar_thirteenf.total_value > 0, "Should have total value"
+    # Format 2: SGML column tags plus a text header, which is what distinguishes
+    # this shape from the tag-per-field layout the sibling tests cover.
+    txt_content = thirteenf.infotable_txt
+    assert txt_content, "filing has no infotable_txt, so there is no TXT format to parse"
+    assert '<S>' in txt_content and 'NAME OF ISSUER' in txt_content, (
+        "the pinned filing is no longer in columnar format; this test needs one "
+        "that is, or it is not testing Format 2"
+    )
 
-        # Verify data quality
-        infotable = columnar_thirteenf.infotable
-        assert infotable['Cusip'].notna().all(), "All CUSIPs should be non-null"
-        assert infotable['Value'].sum() > 0, "Total value should be positive"
-        assert infotable['Issuer'].notna().all(), "All issuers should be non-null"
+    infotable = thirteenf.infotable
+    assert infotable is not None, "Should parse columnar format infotable"
+    assert len(infotable) == 34, (
+        f"parsed {len(infotable)} holdings from JANA's Q4 2012 13F, expected 34"
+    )
+    assert thirteenf.total_holdings == 34
+    assert thirteenf.total_value == 2_520_762_000
+
+    # Data quality across every row, not just a count.
+    assert infotable['Cusip'].notna().all(), "All CUSIPs should be non-null"
+    assert infotable['Issuer'].notna().all(), "All issuers should be non-null"
+    assert infotable['Value'].sum() == 2_520_762_000, (
+        "holdings do not sum to the reported total, so a row was dropped or "
+        "a value misparsed"
+    )
+
+    # The largest position, by name, CUSIP, value and share count -- the four
+    # fields the columnar parser has to line up across fixed-width columns.
+    agrium = infotable[infotable['Cusip'] == '008916108']
+    assert len(agrium) == 1, "Agrium appears once in this filing"
+    assert agrium.iloc[0]['Value'] == 762_828_000
+    assert agrium.iloc[0]['SharesPrnAmount'] == 7_373_173
+    assert 'AGRIUM' in agrium.iloc[0]['Issuer'].upper()

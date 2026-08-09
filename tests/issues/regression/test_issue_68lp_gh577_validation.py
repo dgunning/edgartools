@@ -409,12 +409,19 @@ class TestSummaryValidation:
                 if cogs is None:
                     cogs = get_face_value_sum(df, "CostOfRevenue")
 
-                results[ticker] = cogs is not None and cogs != 0
-            except Exception as e:
-                results[ticker] = False
+                results[ticker] = (
+                    None if (cogs is not None and cogs != 0)
+                    else f"COGS resolved to {cogs!r}"
+                )
+            except Exception as e:  # noqa: BLE001 — recorded, not swallowed
+                # Keeping the exception matters: this branch turns any failure
+                # into "failed COGS validation", so a connection error used to
+                # be reported as a data-correctness defect in five companies at
+                # once. The cause now travels with the failure.
+                results[ticker] = f"{type(e).__name__}: {e}"
 
-        failed = [t for t, passed in results.items() if not passed]
-        assert len(failed) == 0, f"These companies failed COGS validation: {failed}"
+        failed = {t: why for t, why in results.items() if why is not None}
+        assert not failed, f"These companies failed COGS validation: {failed}"
 
     def test_dimension_filtering_reduces_row_count(self):
         """Verify that dimension filtering still reduces row count (breakdowns filtered)."""

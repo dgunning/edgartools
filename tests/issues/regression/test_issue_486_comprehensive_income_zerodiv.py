@@ -39,15 +39,25 @@ class TestComprehensiveIncomeZeroDivision:
         # This should NOT raise ZeroDivisionError
         try:
             ci = xb.statements.comprehensive_income()
-            if ci is not None:
-                # If found, should be renderable
-                df = ci.to_dataframe()
-                assert df is not None
         except ZeroDivisionError as e:
             pytest.fail(f"ZeroDivisionError raised: {e}. Bug #486 not fixed.")
-        except StatementNotFound:
-            # Statement not found is OK - we're testing that ZeroDivisionError doesn't occur
-            pass
+        except StatementNotFound as e:
+            pytest.fail(
+                f"Apple's 10-K has no comprehensive income statement ({e}). The "
+                "absence used to be tolerated here, which meant the test could "
+                "report green having never rendered anything -- and rendering is "
+                "where #486 crashed."
+            )
+
+        # Apple files a comprehensive income statement in every 10-K; treating
+        # its absence as acceptable is what let this test pass without
+        # exercising the weight_map arithmetic that raised ZeroDivisionError.
+        assert ci is not None, "comprehensive_income() returned None for AAPL"
+        df = ci.to_dataframe()
+        assert not df.empty, (
+            "comprehensive income rendered an empty dataframe, so the summing "
+            "path that raised ZeroDivisionError was never reached"
+        )
 
     @pytest.mark.network
     def test_comprehensive_income_bracket_notation_no_zerodiv(self):
@@ -59,14 +69,21 @@ class TestComprehensiveIncomeZeroDivision:
         # Bracket notation should NOT raise ZeroDivisionError
         try:
             ci_br = xb.statements['ComprehensiveIncome']
-            if ci_br is not None:
-                df = ci_br.to_dataframe()
-                assert df is not None
         except ZeroDivisionError as e:
             pytest.fail(f"ZeroDivisionError raised: {e}. Bug #486 not fixed.")
-        except (StatementNotFound, KeyError):
-            # Statement not found is OK - we're testing that ZeroDivisionError doesn't occur
-            pass
+        except (StatementNotFound, KeyError) as e:
+            pytest.fail(
+                f"bracket notation could not resolve ComprehensiveIncome for "
+                f"MSFT ({type(e).__name__}: {e}). Tolerating that made a green "
+                "run mean nothing -- see the sibling accessor test."
+            )
+
+        assert ci_br is not None, "statements['ComprehensiveIncome'] returned None for MSFT"
+        df = ci_br.to_dataframe()
+        assert not df.empty, (
+            "comprehensive income rendered an empty dataframe, so the summing "
+            "path that raised ZeroDivisionError was never reached"
+        )
 
     @pytest.mark.network
     def test_comprehensive_income_multiple_affected_companies(self):

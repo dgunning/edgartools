@@ -7,6 +7,8 @@ doesn't regress in future changes.
 Issue URL: https://github.com/dgunning/edgartools/issues/403
 """
 
+import inspect
+
 import pytest
 from unittest.mock import MagicMock
 from edgar.xbrl.statements import StitchedStatements
@@ -37,21 +39,25 @@ class TestIssue403Regression:
             'comprehensive_income'
         ]
         
-        # Test that each method accepts standard=True without raising TypeError
+        # Asserted against the SIGNATURE, not by calling and catching TypeError.
+        #
+        # The call-and-catch version ended in `except Exception: pass`, so any
+        # failure that was not a TypeError -- including one raised by the
+        # MagicMock standing in for XBRLS -- left the loop having proven
+        # nothing, and the test reported green. The signature is the claim
+        # anyway: "these methods accept a `standard` parameter" is a statement
+        # about the interface, and nothing a mock does can mask it.
         for method_name in statement_methods:
             method = getattr(self.statements, method_name)
-            
-            # This should not raise TypeError
-            try:
-                method(standard=True)
-                method(standard=False)
-            except TypeError as e:
-                if "unexpected keyword argument 'standard'" in str(e):
-                    pytest.fail(f"Method {method_name} does not accept 'standard' parameter: {e}")
-                # Other TypeErrors might be expected (e.g., from mocked dependencies)
-            except Exception:
-                # Other exceptions are fine - we're only testing parameter acceptance
-                pass
+            params = inspect.signature(method).parameters
+            assert 'standard' in params, (
+                f"{method_name}() no longer accepts a 'standard' parameter; "
+                f"its signature is ({', '.join(params)})"
+            )
+            assert params['standard'].kind is not inspect.Parameter.VAR_KEYWORD, (
+                f"{method_name}() only absorbs 'standard' via **kwargs, which is "
+                "not the same as supporting it"
+            )
                 
     def test_standard_parameter_works(self):
         """
