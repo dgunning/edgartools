@@ -408,7 +408,15 @@ def pytest_collection_modifyitems(config, items):
     # full Airbnb submissions where the test replays one. Trimmed to what is
     # actually played back they are 43.6 MB and 31.8 MB, so they are tracked and
     # both tests gate normally now.
+    # test_issue_455 is listed per test rather than per file for the reason this
+    # set exists. Its two filing-backed tests read MAIN's FY2024 10-K and have no
+    # cassette yet, but its third asserts only that
+    # `us-gaap_NetAssetValuePerShare` is still in `eps_concepts` -- which is the
+    # #455 fix itself, needs no filing, and costs nothing. Marking the file
+    # `network` would push that guard out of the pull-request gate too.
     REGRESSION_NETWORK_TESTS = {
+        'tests/issues/regression/test_issue_455_nav_per_share_scaling.py::test_main_nav_per_share_not_scaled',
+        'tests/issues/regression/test_issue_455_nav_per_share_scaling.py::test_main_nav_per_share_renders_unscaled',
         'tests/issues/regression/test_issue_863_10b5_plan_detection.py::test_aff10b5_one_checkbox_flows_through_xml_parsing_end_to_end',
         'tests/issues/regression/test_issue_i5wx_api_consistency.py::test_form4_tables_and_remarks_always_present_when_xml_omits_them',
         'tests/issues/regression/test_issue_t043_footnote_attribution.py::test_footnote_ids_are_deduped_within_a_transaction',
