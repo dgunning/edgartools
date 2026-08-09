@@ -60,7 +60,6 @@ def test_13f_cover_page_other_managers_2(state_street_13f):
         assert hasattr(first_manager, 'cik'), "Manager should have cik"
         assert hasattr(first_manager, 'name'), "Manager should have name"
         assert hasattr(first_manager, 'file_number'), "Manager should have file_number"
-        print(f"Found {len(other_managers)} other managers on cover page")
 
 
 @pytest.mark.network
@@ -80,14 +79,21 @@ def test_13f_manager_assignment_integration(state_street_13f, state_street_13f_i
     assert isinstance(holdings_df, pd.DataFrame), "holdings should be a DataFrame"
     assert 'OtherManager' in holdings_df.columns, "OtherManager column should exist"
 
-    # Print summary
-    print(f"\nCover page managers: {len(cover_page_managers)}")
-    print(f"Holdings with manager assignments: {len(holdings_with_managers)}")
-    print(f"Total holdings: {len(holdings_df)}")
+    # `has_data` used to be computed here and then PRINTED, never asserted, so
+    # a build that assigned no manager to any holding passed this test with a
+    # tidy "Has manager data: False" in output pytest hides by default.
+    assert len(cover_page_managers) > 0 or len(holdings_with_managers) > 0, (
+        f"neither the cover page ({len(cover_page_managers)} managers) nor the "
+        f"holdings ({len(holdings_with_managers)} of {len(holdings_df)} "
+        "assigned) carries manager data, which is the whole subject of #512"
+    )
 
-    # For multi-manager filings, at least one of these should have data
-    has_data = len(cover_page_managers) > 0 or len(holdings_with_managers) > 0
-    print(f"Has manager data: {has_data}")
+    # This filing assigns a manager to EVERY holding — the ids are the
+    # summary-page sequence numbers, zero-padded, with '43,01' where two
+    # managers share a position.
+    assert len(holdings_with_managers) == len(holdings_df) == 26569
+    assert set(holdings_df['OtherManager'].unique()) == \
+        {'00', '01', '02', '03', '05', '06', '28', '43', '43,01', '88'}
 
 
 @pytest.mark.network
