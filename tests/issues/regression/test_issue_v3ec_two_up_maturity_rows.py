@@ -63,8 +63,7 @@ DEBT_ROW_RE = re.compile(r"\$(\d[\d,]*?)\s*(\d\.\d+)%,\s+(\w{3} \d{4})")
 
 @pytest.fixture(scope="module")
 def unh_document():
-    if not FIXTURE.exists():
-        pytest.skip(f"UNH 10-K fixture not present at {FIXTURE}")
+    assert FIXTURE.exists(), f"committed UNH 10-K fixture is missing: {FIXTURE}"
     return HTMLParser(ParserConfig(form="10-K")).parse(
         FIXTURE.read_text(errors="ignore"))
 

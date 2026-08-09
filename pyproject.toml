@@ -193,6 +193,7 @@ smoke-filings = "python scripts/batch/batch_filings.py {args}"
 # PyYAML's unsafe loader, so a contributed cassette executes code on your
 # machine the moment a test touches it. CI gates on this too.
 check-cassettes = "python scripts/check_cassettes.py {args}"
+check-regression-skips = "python scripts/check_regression_skips.py {args}"
 # Test categorization commands (sequential execution)
 test-fast = "pytest -m 'fast' {args}"
 test-slow = "pytest -m 'slow' {args}"

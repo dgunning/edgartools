@@ -56,15 +56,14 @@ def _parse(path: Path):
 
 @pytest.fixture(scope="module")
 def aapl_document():
-    if not AAPL_DIR.is_dir() or not os.listdir(AAPL_DIR):
-        pytest.skip(f"AAPL 10-K fixture not present in {AAPL_DIR}")
+    assert AAPL_DIR.is_dir() and os.listdir(AAPL_DIR), (
+        f"committed AAPL 10-K fixture is missing from {AAPL_DIR}")
     return _parse(sorted(AAPL_DIR.glob("*.html"))[0])
 
 
 @pytest.fixture(scope="module")
 def nvda_document():
-    if not NVDA.exists():
-        pytest.skip(f"NVDA 10-K fixture not present at {NVDA}")
+    assert NVDA.exists(), f"committed NVDA 10-K fixture is missing: {NVDA}"
     return _parse(NVDA)
 
 
@@ -119,8 +118,8 @@ class TestLongTableCellsSurvive:
         """
         from edgar.richtools import rich_to_text
 
-        if not AAPL_DIR.is_dir() or not os.listdir(AAPL_DIR):
-            pytest.skip(f"AAPL 10-K fixture not present in {AAPL_DIR}")
+        assert AAPL_DIR.is_dir() and os.listdir(AAPL_DIR), (
+            f"committed AAPL 10-K fixture is missing from {AAPL_DIR}")
         fixture = sorted(AAPL_DIR.glob("*.html"))[0]
 
         def collapsed(s):

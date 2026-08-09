@@ -90,6 +90,15 @@ jobs:
         python -m pip install -e ".[ai]"
         python -m pip install pytest pytest-cov pytest-env pytest-xdist pytest-asyncio pytest-retry pytest-mock pytest-vcr "vcrpy<8.2" freezegun==1.5.1 filelock tqdm responses
 
+    # A source scan, so it runs here rather than as its own job: this is the
+    # only context pull requests are required to report, and adding a second
+    # required one means updating branch protection in lockstep (see the header
+    # of this file). It is also why the check reads source instead of hooking
+    # pytest — half the regression tree is network-marked and runs post-merge,
+    # so a runtime hook would not see those tests on a pull request at all.
+    - name: Check no regression test skips itself
+      run: python scripts/check_regression_skips.py
+
     - name: Run fast tests
       run: |
         # Parallelize fast tests - safe, no SEC API calls.

@@ -57,8 +57,7 @@ MARKDOWN_IMAGE = re.compile(r"!\[(?P<alt>[^\]]*)\]\((?P<src>[^)]*)\)")
 @pytest.fixture(scope="module")
 def nvda_markdown():
     """Render the fixture exactly as the rerouted ``Filing.markdown()`` does."""
-    if not FIXTURE.exists():
-        pytest.skip(f"NVDA 10-K fixture not present at {FIXTURE}")
+    assert FIXTURE.exists(), f"committed NVDA 10-K fixture is missing: {FIXTURE}"
     document = HTMLParser(ParserConfig(form="10-K")).parse(
         FIXTURE.read_text(errors="ignore"))
     document.metadata.url = NVDA_ARCHIVE_DIR
@@ -110,8 +109,7 @@ class TestImagesSurviveIntoMarkdown:
         correct absolute form. Keeping the raw ``src`` is honest; inventing an
         sec.gov prefix would produce links that 404.
         """
-        if not FIXTURE.exists():
-            pytest.skip(f"NVDA 10-K fixture not present at {FIXTURE}")
+        assert FIXTURE.exists(), f"committed NVDA 10-K fixture is missing: {FIXTURE}"
         document = HTMLParser(ParserConfig(form="10-K")).parse(
             FIXTURE.read_text(errors="ignore"))
         markdown = document.to_markdown()
