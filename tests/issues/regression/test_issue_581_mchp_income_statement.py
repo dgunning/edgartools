@@ -31,13 +31,18 @@ class TestIssue581MCHPIncomeStatement:
         filings = company.get_filings(form="10-K")
         filing_2016 = filings.filter(date="2016-01-01:2016-12-31").latest()
 
-        # Skip test if filing couldn't be retrieved (network issues, rate limiting)
-        if filing_2016 is None:
-            pytest.skip("Could not retrieve MCHP 2016 10-K filing (network issue)")
+        # MCHP's FY2016 10-K is a filed historical document (0000827054-16-000344,
+        # 2016-05-24) and does not stop existing. An empty filter result or an
+        # unparseable XBRL is a defect in the filter or the parser, which is
+        # what this test is for -- skipping on it hid both.
+        assert filing_2016 is not None, (
+            "MCHP 10-K filed 2016-05-24 should be reachable by date filter"
+        )
 
         xbrl = filing_2016.xbrl()
-        if xbrl is None:
-            pytest.skip("Could not parse XBRL from MCHP 2016 10-K filing")
+        assert xbrl is not None, (
+            f"MCHP 2016 10-K ({filing_2016.accession_no}) should parse to XBRL"
+        )
 
         return xbrl
 

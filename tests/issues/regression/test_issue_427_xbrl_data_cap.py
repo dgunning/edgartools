@@ -59,9 +59,9 @@ class TestIssue427XBRLDataCap:
         # Get XBRL 10-K filings
         tenk_filings = company.get_filings(form='10-K', is_xbrl=True)
         
-        # Skip if no XBRL filings available
-        if len(tenk_filings) == 0:
-            pytest.skip(f"No XBRL 10-K filings found for {ticker}")
+        # AAPL has 18 and MSFT 17 at the time of writing; zero means the
+        # is_xbrl filter stopped matching, not that the filings went away.
+        assert len(tenk_filings), f"{ticker} should have XBRL 10-K filings"
         
         # Get head filings and create XBRLS
         head_filings = tenk_filings.head(3)  # Use fewer filings for performance

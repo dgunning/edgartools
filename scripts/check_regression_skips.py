@@ -49,24 +49,15 @@ DEFAULT_ROOT = Path(__file__).resolve().parent.parent / "tests" / "issues" / "re
 
 # file name -> number of pytest.skip() calls still to be converted.
 #
-# Each of these needs its data probed before its assertion can be written --
-# what AZN and AAPL got in #1001 -- so they are recorded as debt rather than
-# rewritten by pattern. Lower the number when you convert one; delete the entry
-# at zero. Raising a number, or adding an entry, needs a reason that survives
-# the docstring above, and there is not currently a known one.
-GRANDFATHERED: Dict[str, int] = {
-    "test_issue_581_mchp_income_statement.py": 2,
-    "test_issue_412_historical_periods.py": 1,
-    "test_issue_583_equity_labels.py": 6,
-    "test_issue_452_dnut_fiscal_year.py": 1,
-    "test_issue_762_html_in_dataframe.py": 2,
-    "test_issue_v3ec_two_up_maturity_rows.py": 1,
-    "test_issue_637_ifrs_concept_discovery.py": 1,
-    "test_issue_607_dimension_member_label_reopen.py": 4,
-    "test_issue_603_dimension_member_label.py": 3,
-    "test_issue_460_quarterly_period_labels.py": 1,
-    "test_issue_427_xbrl_data_cap.py": 1,
-}
+# EMPTY, and meant to stay that way. It held 23 while each one's data was being
+# probed -- the condition every skip was hiding had to be checked against a real
+# filing before its assertion could be written -- and all 23 are now assertions.
+#
+# Adding an entry needs a reason that survives the docstring above, and there is
+# not currently a known one. The two shapes that look like reasons are answered
+# there: a missing committed fixture is a broken checkout, and a missing
+# dependency is what @pytest.mark.skipif is for.
+GRANDFATHERED: Dict[str, int] = {}
 
 
 def _is_skip_call(node: ast.AST) -> bool:
@@ -170,8 +161,8 @@ def main() -> int:
         return 1
 
     outstanding = sum(GRANDFATHERED.values())
-    print(f"OK: {scanned} file(s) scanned, no new runtime skips "
-          f"({outstanding} grandfathered still to convert).")
+    tail = f" ({outstanding} grandfathered still to convert)" if outstanding else ""
+    print(f"OK: {scanned} file(s) scanned, no regression test skips itself{tail}.")
     return 0
 
 

@@ -78,7 +78,11 @@ def debt_table(unh_document):
     for node in unh_document.root.walk():
         if isinstance(node, TableNode) and "Carrying Value as of" in (node.text() or ""):
             return node
-    pytest.skip("long-term debt schedule not found in the parsed document")
+    raise AssertionError(
+        "UNH's long-term debt schedule (the table headed 'Carrying Value as of') "
+        "is absent from the parsed document. That table not being found IS the "
+        "v3ec bug's territory, so it fails here rather than skipping."
+    )
 
 
 @pytest.mark.fast
