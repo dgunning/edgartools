@@ -88,18 +88,18 @@ def tesla_2022_10k():
     was recorded, so what remains is a placeholder that keeps record_mode="none"
     satisfied.
     """
-    if _HAS_VCR:
-        # record_mode="once" will record on first run and replay thereafter.
-        with _my_vcr.use_cassette(_TESLA_2022_CASSETTE):
-            return offline_filing("0000950170-23-001409").obj()
-    else:
-        pytest.skip("vcrpy not installed — install it to run this test offline")
+    # record_mode="once" will record on first run and replay thereafter.
+    with _my_vcr.use_cassette(_TESLA_2022_CASSETTE):
+        return offline_filing("0000950170-23-001409").obj()
 
 
 # ---------------------------------------------------------------------------
 # Test cases
 # ---------------------------------------------------------------------------
 
+# See test_issue_879.py: skipif reports these as skipped at collection, where
+# the fixture's pytest.skip() reported them as passed.
+@pytest.mark.skipif(not _HAS_VCR, reason="vcrpy not installed")
 class TestTesla2022PartIII:
     """GH #880: Part III items must be independently extractable."""
 

@@ -42,8 +42,7 @@ def _normalise(text):
 
 @pytest.fixture(scope="module")
 def wfc_sections():
-    if not WFC.exists():
-        pytest.skip("Wells Fargo 10-K fixture not available")
+    assert WFC.exists(), f"committed Wells Fargo 10-K fixture is missing: {WFC}"
     doc = parse_html(WFC.read_bytes().decode("utf-8", "replace"), ParserConfig(form="10-K"))
     sections = {name: _normalise(section.text()) for name, section in doc.sections.items()}
     items = {name: section.item for name, section in doc.sections.items()}

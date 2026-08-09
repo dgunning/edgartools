@@ -47,8 +47,7 @@ MS_10K = Path(__file__).parents[2] / "fixtures" / "html" / "ms" / "10k" / "ms-10
 
 @pytest.fixture(scope="module")
 def ms_doc():
-    if not MS_10K.exists():
-        pytest.skip("Morgan Stanley 10-K fixture not available")
+    assert MS_10K.exists(), f"committed Morgan Stanley 10-K fixture is missing: {MS_10K}"
     doc = parse_html(MS_10K.read_bytes().decode("utf-8", "replace"), ParserConfig(form="10-K"))
     yield doc
     del doc

@@ -45,8 +45,7 @@ FIXTURE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "html" / "abbv"
 @pytest.fixture(scope="module")
 def abbv_document():
     fixtures = sorted(FIXTURE_DIR.glob("*.html"))
-    if not fixtures:
-        pytest.skip(f"ABBV 10-K fixture not present in {FIXTURE_DIR}")
+    assert fixtures, f"committed ABBV 10-K fixture is missing from {FIXTURE_DIR}"
     html = fixtures[0].read_text(errors="ignore")
     return HTMLParser(ParserConfig(form="10-K")).parse(html)
 

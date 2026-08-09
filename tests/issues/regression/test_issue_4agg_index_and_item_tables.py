@@ -60,8 +60,7 @@ pytestmark = pytest.mark.fast
 
 @pytest.fixture(scope="module")
 def citi_html():
-    if not CITI.exists():
-        pytest.skip("Citigroup 10-K fixture not available")
+    assert CITI.exists(), f"committed Citigroup 10-K fixture is missing: {CITI}"
     html = CITI.read_text(encoding="utf-8", errors="replace")
     yield html
     del html
@@ -70,8 +69,7 @@ def citi_html():
 
 @pytest.fixture(scope="module")
 def wfc_html():
-    if not WFC.exists():
-        pytest.skip("Wells Fargo 10-K fixture not available")
+    assert WFC.exists(), f"committed Wells Fargo 10-K fixture is missing: {WFC}"
     html = WFC.read_text(encoding="utf-8", errors="replace")
     yield html
     del html

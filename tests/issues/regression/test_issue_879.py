@@ -199,6 +199,13 @@ class TestSignaturesBoundaryInProcess:
 # VCR ground-truth tests — replay the real filing HTML without re-fetching
 # ---------------------------------------------------------------------------
 
+# vcrpy is a pinned test dependency, so this is gating for an environment that
+# should not occur -- but when it does, skipif says so at collection and marks
+# the tests skipped, where a pytest.skip() inside the helper marked them passed
+# on the strength of a dependency being absent (edgartools-07lk.24 finding 3).
+requires_vcr = pytest.mark.skipif(not _HAS_VCR, reason="vcrpy not installed")
+
+
 def _parse_filing_html(cassette_name: str, filing_html_uri: str, form: str):
     """Fetch the filing HTML from the VCR cassette and parse it.
 
@@ -207,8 +214,6 @@ def _parse_filing_html(cassette_name: str, filing_html_uri: str, form: str):
     to replay the recorded response. Uses httpx (the same transport edgar uses)
     so VCR intercepts the request correctly.
     """
-    if not _HAS_VCR:
-        pytest.skip("vcrpy not installed")
     import httpx
 
     with _my_vcr.use_cassette(cassette_name):
@@ -222,6 +227,7 @@ def _parse_filing_html(cassette_name: str, filing_html_uri: str, form: str):
 
 
 @pytest.mark.fast
+@requires_vcr
 class TestMetaSingleItemGroundTruth:
     """GH #879: Meta 8-K (0001628280-25-058337) — single item, Workiva rendering.
 
@@ -280,6 +286,7 @@ class TestMetaSingleItemGroundTruth:
 
 
 @pytest.mark.fast
+@requires_vcr
 class TestJPMMultiItemGroundTruth:
     """GH #879: JPMorgan 8-K (0000019617-26-000241) — two items.
 
