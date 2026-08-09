@@ -52,9 +52,14 @@ class TestDataFrameNoHtml:
     def msft_xbrl(self):
         from pathlib import Path
         from edgar.xbrl.xbrl import XBRL
-        fixture_dir = Path("tests/fixtures/xbrl/msft/10k_2024")
-        if not fixture_dir.exists() or not any(fixture_dir.iterdir()):
-            pytest.skip("MSFT 10-K fixture not available")
+        # Anchored on __file__, not the process working directory -- as a
+        # cwd-relative path this resolved only under a repo-root invocation and
+        # skipped itself anywhere else. The five fixture files are committed, so
+        # their absence is a broken checkout, not a reason to pass quietly.
+        fixture_dir = Path(__file__).parents[2] / "fixtures" / "xbrl" / "msft" / "10k_2024"
+        assert fixture_dir.exists() and any(fixture_dir.iterdir()), (
+            f"committed MSFT 10-K XBRL fixture is missing: {fixture_dir}"
+        )
         return XBRL.from_directory(fixture_dir)
 
     def test_segment_disclosure_dataframe_has_no_html(self, msft_xbrl):
