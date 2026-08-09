@@ -1,5 +1,5 @@
 """
-Regression tests for ugc2 Theme 4: Helpful warnings on silent None returns.
+Regression tests for edgartools-ugc2 Theme 4: Helpful warnings on silent None returns.
 
 get_fact(), get_annual_fact(), and get_concept() now emit UserWarning with
 "did you mean?" hints when they return None, instead of failing silently.

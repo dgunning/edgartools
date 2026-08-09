@@ -13,7 +13,7 @@ Issue #455: Wrong NET ASSET VALUE PER SHARE for Main Street Capital
 Added us-gaap_NetAssetValuePerShare to eps_concepts list in rendering.py
 so it's formatted as a per-share value without statement-level scaling.
 
-**Reporter**: GitHub user (via issue #455)
+**GitHub Issue**: https://github.com/dgunning/edgartools/issues/455
 **Company**: MAIN (Main Street Capital), CIK 1396440
 **Filing**: 10-K for FY2024, accession 0001396440-25-000018, filed 2025-02-28
 
