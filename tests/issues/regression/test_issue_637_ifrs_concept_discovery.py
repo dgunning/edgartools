@@ -22,8 +22,10 @@ class TestIFRSConceptDiscovery:
         """TSM (Taiwan Semiconductor) - IFRS filer with ifrs-full: prefixed tags."""
         company = Company("TSM")
         facts = company.get_facts()
-        if facts is None:
-            pytest.skip("Could not load TSM company facts (network/cassette issue)")
+        assert facts is not None, (
+            "TSM company facts should load; None is the IFRS filer path failing, "
+            "which is exactly what this class verifies"
+        )
         return facts
 
     def test_discover_concept_tags_finds_ifrs_revenue(self, tsm_facts):

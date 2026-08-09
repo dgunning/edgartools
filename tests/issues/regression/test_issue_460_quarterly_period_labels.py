@@ -109,9 +109,10 @@ class TestQuarterlyPeriodLabels:
         company = Company("WMT")
         stmt = company.income_statement(periods=4, annual=False)
 
-        # Skip if statement not available
-        if stmt is None:
-            pytest.skip("Income statement not available for WMT - company facts may be unavailable")
+        assert stmt is not None, (
+            "WMT should have a quarterly income statement; without one the "
+            "period labelling this test checks cannot be wrong or right"
+        )
 
         # Verify we got periods
         assert len(stmt.periods) > 0, "Should have quarterly periods"

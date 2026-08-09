@@ -46,8 +46,11 @@ def test_issue_607_multi_dimension_correct_label():
     # Some facts have both this axis AND srt:RangeAxis
     df = xbrl.facts.query().by_dimension("PropertyPlantAndEquipmentByTypeAxis").to_dataframe()
 
-    if len(df) == 0:
-        pytest.skip("No facts found with PropertyPlantAndEquipmentByTypeAxis dimension")
+    assert len(df), (
+        "GOOGL 2024 10-K should have facts on PropertyPlantAndEquipmentByTypeAxis "
+        "(18 at the time of writing) -- an empty result is the query breaking, "
+        "which is what this test exists to catch"
+    )
 
     print(f"Found {len(df)} facts with PropertyPlantAndEquipmentByTypeAxis dimension")
 
@@ -87,8 +90,9 @@ def test_issue_607_dimension_field_consistency():
     # Query by a known dimension
     df = xbrl.facts.query().by_dimension("PropertyPlantAndEquipmentByTypeAxis").to_dataframe()
 
-    if len(df) == 0:
-        pytest.skip("No facts found")
+    assert len(df), (
+        "GOOGL 2024 10-K should have facts on PropertyPlantAndEquipmentByTypeAxis"
+    )
 
     # Check that the dimension field reflects the requested dimension
     if 'dimension' in df.columns:
@@ -133,8 +137,10 @@ def test_issue_607_aapl_segment_dimension():
     # Query by StatementBusinessSegmentsAxis
     df = xbrl.facts.query().by_dimension("StatementBusinessSegmentsAxis").to_dataframe()
 
-    if len(df) == 0:
-        pytest.skip("No facts found with StatementBusinessSegmentsAxis dimension")
+    assert len(df), (
+        "GOOGL 2024 10-K should have facts on StatementBusinessSegmentsAxis "
+        "(54 at the time of writing)"
+    )
 
     print(f"Found {len(df)} facts with StatementBusinessSegmentsAxis dimension")
 
@@ -175,8 +181,7 @@ def test_issue_607_no_dimension_query_unchanged():
         lambda f: any(key.startswith('dim_') for key in f.keys())
     ).limit(20).to_dataframe()
 
-    if len(df) == 0:
-        pytest.skip("No dimensional facts found")
+    assert len(df), "GOOGL 2024 10-K should have dimensional facts"
 
     # By default, dimensions are excluded unless by_dimension() is called
     # So dimension columns might not be present, which is expected

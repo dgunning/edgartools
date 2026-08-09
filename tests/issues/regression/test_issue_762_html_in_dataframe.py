@@ -65,8 +65,11 @@ class TestDataFrameNoHtml:
     def test_segment_disclosure_dataframe_has_no_html(self, msft_xbrl):
         """The segment disclosure table DataFrame must not contain HTML."""
         stmt = msft_xbrl.statements.get('Role_DisclosureSEGMENTINFORMATIONANDGEOGRAPHICDATATables')
-        if stmt is None:
-            pytest.skip("Segment disclosure statement not found")
+        assert stmt is not None, (
+            "the committed MSFT fixture carries "
+            "Role_DisclosureSEGMENTINFORMATIONANDGEOGRAPHICDATATables; its "
+            "absence means role lookup broke, not that the data moved"
+        )
 
         df = stmt.to_dataframe()
         assert not df.empty
@@ -79,8 +82,11 @@ class TestDataFrameNoHtml:
     def test_segment_disclosure_has_readable_text(self, msft_xbrl):
         """Sanitized TextBlock values should contain readable financial content."""
         stmt = msft_xbrl.statements.get('Role_DisclosureSEGMENTINFORMATIONANDGEOGRAPHICDATATables')
-        if stmt is None:
-            pytest.skip("Segment disclosure statement not found")
+        assert stmt is not None, (
+            "the committed MSFT fixture carries "
+            "Role_DisclosureSEGMENTINFORMATIONANDGEOGRAPHICDATATables; its "
+            "absence means role lookup broke, not that the data moved"
+        )
 
         df = stmt.to_dataframe()
         text_cells = []

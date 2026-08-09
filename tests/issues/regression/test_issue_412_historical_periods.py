@@ -14,8 +14,10 @@ def test_historical_periods_have_comprehensive_data():
     """Historical periods (3rd, 4th) should have >35% completeness and key balance sheet items."""
     company = Company("TSLA")
     balance_sheet = company.balance_sheet(annual=True, periods=6)
-    if balance_sheet is None:
-        pytest.skip("Balance sheet not available for TSLA")
+    assert balance_sheet is not None, (
+        "TSLA should have an annual balance sheet; None here is the retrieval "
+        "path failing, which is the condition this test exists to catch"
+    )
     df = balance_sheet.to_dataframe()
 
     periods = balance_sheet.periods
