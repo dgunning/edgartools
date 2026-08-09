@@ -108,7 +108,7 @@ def test_explicit_period_keeps_priority_order():
 
 # --- End-to-end: the reported companies under VCR ---------------------------
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
 def test_nvda_capex_resolves_to_recent_tag():
     """NVDA get_concept('capex') returns the current ProductiveAssets value
@@ -122,7 +122,7 @@ def test_nvda_capex_resolves_to_recent_tag():
     assert result['period_end'].year >= 2025
 
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
 def test_amzn_capex_resolves_to_recent_tag():
     """AMZN get_concept('capex') no longer returns the stale 2017 PP&E value

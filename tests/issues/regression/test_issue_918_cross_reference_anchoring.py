@@ -144,7 +144,7 @@ class TestCrossReferenceRescue:
         assert rescued is None or "MARKER_XREF" not in rescued
 
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
 def test_ice_10q_part_ii_item_1_is_not_a_cross_reference():
     """End-to-end on the reported filing: ICE Q3 2024 10-Q.

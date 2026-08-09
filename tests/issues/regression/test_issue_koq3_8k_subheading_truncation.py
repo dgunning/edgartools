@@ -88,7 +88,7 @@ class TestSubheadingDoesNotTruncateItem:
             "Item 5.02 body must belong to item_502, not item_901"
 
 
-@pytest.mark.network
+@pytest.mark.fast
 class TestNvidia8KGroundTruth:
     """Ground-truth assertion against the real filing from GH #871."""
 

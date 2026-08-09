@@ -277,10 +277,10 @@ class TestExtractSectionDoesNotUseAttributeAccess:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.network
 class TestFPIIntegration:
     """Integration tests for real FPI filings."""
 
+    @pytest.mark.network
     def test_biontech_20f_business_section(self):
         """Extract business section from real BioNTech 20-F filing."""
         from edgar import Company
@@ -298,6 +298,7 @@ class TestFPIIntegration:
         # Business section may or may not be present depending on parsing
         # Just verify no exception is raised
 
+    @pytest.mark.network
     def test_biontech_20f_financials(self):
         """Access financials from real BioNTech 20-F (IFRS format)."""
         from edgar import Company
@@ -318,11 +319,24 @@ class TestFPIIntegration:
             except Exception as e:
                 logger.debug("Filing has no XBRL data or income_statement failed: %s", e)
 
-    def test_company_financials_for_fpi(self):
-        """edgar_company should return financials for FPI companies."""
+    @pytest.mark.fast
+    def test_fpi_ticker_resolves_to_cik(self):
+        """An FPI ticker resolves to its CIK from the local reference data.
+
+        This was called `test_company_financials_for_fpi` and its docstring
+        claimed it returned financials for FPI companies. It asserted
+        `company is not None` and `company.cik is not None` and stopped, so it
+        never touched financials -- `test_biontech_20f_financials` above is
+        what actually does. An offline audit found it passing with sockets
+        blocked, which is the tell: ticker resolution reads a local file.
+
+        Renamed to what it checks, and given the CIK so it can fail. Ticker
+        resolution is worth protecting on its own -- every FPI code path in the
+        MCP layer starts here.
+        """
         from edgar import Company
 
         company = Company("BNTX")
-        # Just verify the company can be accessed
-        assert company is not None
-        assert company.cik is not None
+        assert company.cik == 1776985, (
+            f"BNTX should resolve to BioNTech SE, CIK 1776985; got {company.cik}"
+        )

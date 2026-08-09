@@ -116,7 +116,7 @@ class TestRbsxNamedSectionAndRowFallback:
         assert result.get("part_iv_signatures") == "a265"
 
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
 def test_allstate_2026_10k_item_1_present():
     """End-to-end on the reported filing: Allstate FY2025 10-K (Workiva agent).

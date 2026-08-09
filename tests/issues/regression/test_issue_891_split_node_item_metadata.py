@@ -64,7 +64,7 @@ def test_non_item_keys_do_not_resolve():
 
 # --- End-to-end: NATH split-node 10-K under VCR -----------------------------
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
 def test_nathans_famous_split_node_sections_carry_item_metadata():
     """NATH 10-K: MD&A is detected and every semantic section carries .item/.part."""

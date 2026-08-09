@@ -231,7 +231,7 @@ class TestCashFlowFoldBuilder:
 # Ground-truth end-to-end on the reported filing — network + VCR
 # ---------------------------------------------------------------------------
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
 def test_mrvl_cashflow_canonical_da_present():
     """Marvell's standardized cash flow exposes the canonical D&A line.

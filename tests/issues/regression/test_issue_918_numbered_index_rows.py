@@ -139,7 +139,7 @@ class TestNumberedIndexRows:
         assert analyzer._cell_in_numbered_index(cell) is False
 
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
 def test_fmcc_10k_items_are_not_table_captions():
     """End-to-end on the reported filing: Freddie Mac FY2025 10-K.
