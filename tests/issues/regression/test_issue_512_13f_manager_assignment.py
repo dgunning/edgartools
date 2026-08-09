@@ -92,15 +92,42 @@ def test_13f_manager_assignment_integration(state_street_13f, state_street_13f_i
 
 @pytest.mark.network
 def test_13f_backward_compatibility(state_street_13f):
-    """Test that old format (otherManagersInfo) still works if present."""
-    # Test with a filing that might use the old format
-    # Most recent filings should use otherManagers2Info, but code should handle both
-    thirteenf = state_street_13f
+    """A filing with no cover-page manager list still parses, and keeps its data.
 
-    # Should have valid data
-    assert thirteenf is not None
-    assert thirteenf.primary_form_information is not None
-    assert thirteenf.primary_form_information.cover_page is not None
+    NAMING, because it will otherwise mislead: the shared fixture is called
+    ``state_street_13f``, but CIK 70858 is Bank of America Corp. The accession
+    is what determines the content, and 0001102113-24-000030 is BAC's Q3 2024
+    13F-HR.
+
+    WHAT IT ACTUALLY TESTS. Three chained `is not None` assertions could not
+    tell this filing from any other, or a fully parsed cover page from an empty
+    one. This filing's primary_doc.xml carries no ``otherManagersInfo`` block
+    at all -- the old cover-page spelling -- and puts its eight managers in the
+    summary page's ``otherManagers2Info`` instead. So an empty
+    ``cover_page.other_managers`` is this filing's true shape, and the way to
+    show the parser did not simply drop the section is that the rest of the
+    cover page is populated and the eight managers are present on the summary
+    page.
+    """
+    thirteenf = state_street_13f
+    cover = thirteenf.primary_form_information.cover_page
+
+    assert cover.report_calendar_or_quarter == '09-30-2024'
+    assert cover.report_type == '13F HOLDINGS REPORT'
+    assert cover.filing_manager.name == 'BANK OF AMERICA CORP /DE/'
+    assert cover.is_amendment is False
+
+    assert cover.other_managers == [], (
+        f"cover page reports {len(cover.other_managers)} other managers; this "
+        "filing has no otherManagersInfo block, so anything here came from "
+        "somewhere else"
+    )
+
+    # ...and the managers the filing does declare survived, on the summary page.
+    summary = thirteenf.primary_form_information.summary_page
+    assert len(summary.other_managers) == 8
+    assert summary.total_holdings == 26569
+    assert summary.total_value == 1_204_606_558_843
 
 
 @pytest.mark.fast

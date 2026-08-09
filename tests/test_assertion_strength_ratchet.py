@@ -5,8 +5,8 @@ None`` assertions across 125 files", and read that way it is a demoralising
 grind with no obvious end. The count is the wrong measurement. A test that pins
 real values and *also* checks non-nullity is fine; what matters is whether a
 test that passed could have failed. Asked that way, 463 assertions across 125
-files became 15 tests; eight of those have since been given ground truth, and
-what is left is the short list below.
+files came to 15 tests, and all 15 have since been given ground truth. What
+this file does now is keep the count at zero.
 
 This file is the sibling of ``scripts/check_regression_skips.py`` and the two
 parity ratchets, and exists for the same reason they do: an audit nobody re-runs
@@ -50,26 +50,21 @@ import pytest
 
 REGRESSION_DIR = pathlib.Path(__file__).parent / "issues" / "regression"
 
-# Tests whose only assertions are `x is not None`, measured 2026-08-09.
+# Tests whose only assertions are `x is not None`. The list started at 15 on
+# 2026-08-09 and is now EMPTY: every one of them was given ground truth read
+# off a real filing, and one of those readings turned up a live defect
+# (edgartools-gi1n — VALE's cash flow statement is in the filing and
+# unreachable through the API, so an "acceptable empty result" was neither).
 #
-# Each is a real weakness: it cannot distinguish a correct answer from a
-# wrong-but-present one. They are listed rather than fixed in one go because
-# each needs its own ground truth read off a real filing, which is the slow
-# part and the part that must not be rushed -- see the ones already converted
-# in this pass (#334, #403, #469, #486, #631, #637, #672, #844, MCP FPI) for
-# what "fixed" means here.
+# Empty is the state to hold, not a milestone. Anything new that lands here
+# fails `test_no_new_existence_only_tests` on the way in, which is the cheapest
+# moment to fix it: give the test a value assertion — a figure read off the
+# filing — rather than adding a line below.
 #
-# TO FIX ONE: give it a value assertion, then delete its line below. The test
-# `test_a_repaired_test_is_banked` fails if you do the first without the second.
-KNOWN_EXISTENCE_ONLY = {
-    ("test_issue_486_comprehensive_income_zerodiv.py", "test_comprehensive_income_multiple_affected_companies"),
-    ("test_issue_512_13f_manager_assignment.py", "test_13f_backward_compatibility"),
-    ("test_issue_523_13f_other_managers_summary_page.py", "test_other_manager_data_correctness"),
-    ("test_issue_581_mchp_income_statement.py", "test_income_statement_has_revenue"),
-    ("test_issue_599_pandas_futurewarning.py", "test_presentation_values_correct"),
-    ("test_issue_674_fallback_simulation.py", "test_fallback_xbrl_available"),
-    ("test_issue_683_vale_cashflow.py", "test_vale_stitched_cashflow_no_crash"),
-}
+# IF YOU DO ADD ONE: `test_a_repaired_test_is_banked` fails when a listed test
+# is later strengthened and the line is left behind, so the list cannot rot
+# into a record of work already done.
+KNOWN_EXISTENCE_ONLY = set()
 
 # Reviewed and correct as they stand — NOT a work list. Keeping these in
 # KNOWN_EXISTENCE_ONLY would have made that list stop meaning "outstanding
