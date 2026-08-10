@@ -11,6 +11,8 @@ Each test targets a specific bug from the issue:
   Bug 3: Income statement classification (tables classified UNKNOWN → None)
   Bug 4: Row-type metadata prevents share/EPS confusion
   Smoke: Full pipeline positive case (AMT, known-correct from reporter)
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/633
 """
 
 import pandas as pd

@@ -8,6 +8,8 @@ The fix adds these NEW columns to dimensional rows in statement DataFrames:
 
 The existing dimension_label is PRESERVED for backwards compatibility and contains
 the full combined format (e.g., 'srt:ProductOrServiceAxis: Products').
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/574
 """
 
 import pytest

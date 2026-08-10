@@ -3,6 +3,8 @@
 Statement.to_dataframe() on 10-Q filings only showed YTD columns because
 quarterly and YTD periods shared the same end date, causing column name
 collisions. Now disambiguated with (Q2)/(YTD) suffixes.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/743
 """
 import re
 

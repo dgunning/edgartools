@@ -8,6 +8,8 @@ each filer's name with no delimiter. Downstream callers (e.g.
 sec-edgar-mcp) then blow up with "Invalid isoformat string: ...". The fix
 is to pick the block by matching its <div class="infoHead"> label instead
 of by position.
+
+GitHub PR: https://github.com/dgunning/edgartools/pull/787
 """
 
 import pytest

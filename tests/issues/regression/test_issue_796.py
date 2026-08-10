@@ -10,6 +10,8 @@ that won the dedup tiebreaker because the proxy was filed AFTER the 10-K.
 Fix has two layers:
 1. Skip facts with fiscal_period != expected value in derivation methods
 2. Prefer periodic-report sources (10-K, 10-Q) over non-periodic in dedup
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/796
 """
 from datetime import date
 

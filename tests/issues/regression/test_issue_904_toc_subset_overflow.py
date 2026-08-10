@@ -29,6 +29,8 @@ A fourth, belt-and-braces layer (the successor-header guardrail on
 ``HybridSectionDetector``) flags any remaining item section that still embeds
 a line-anchored header of a later, undetected item — the failure class size
 bands can't see (Item 7's band is generous; Item 1B has no band at all).
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/904
 """
 import re
 

@@ -24,6 +24,8 @@ Tables" index rows — is tracked separately and not covered here.)
 
 Unit tests are synthetic (no network); the end-to-end assertion is
 VCR-backed and pinned to the reported filing.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/918
 """
 
 import pytest

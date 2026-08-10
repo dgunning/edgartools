@@ -21,6 +21,8 @@ Note: the magnitude ``get_concept`` returns for a flow concept like capex still
 reflects ``get_fact``'s existing period selection (it does not distinguish a
 single quarter from a fiscal-YTD/cumulative value) — a separate, pre-existing
 concern tracked apart from this tag-staleness fix.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/892
 """
 from datetime import date
 

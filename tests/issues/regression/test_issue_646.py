@@ -6,6 +6,8 @@ DIS (Disney) reports CostOfGoodsAndServicesSold with ONLY dimensional facts
 Before the fix, _generate_line_items picked just one dimensional fact via min(),
 losing the other member. The stitched income statement showed ~$52,677M instead
 of the correct ~$58,766M total (Service + Product).
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/646
 """
 import pytest
 from edgar import Company

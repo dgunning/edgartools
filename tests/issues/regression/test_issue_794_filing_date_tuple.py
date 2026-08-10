@@ -10,6 +10,8 @@ form. Passing a tuple crashed with:
 This regression test asserts the tuple form is now accepted by extract_dates
 (and equivalently by filter_by_date, which delegates to it), preserving the
 public type-hint contract on get_filings.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/794
 """
 
 from datetime import datetime, date

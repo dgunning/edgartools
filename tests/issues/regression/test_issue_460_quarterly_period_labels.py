@@ -14,6 +14,8 @@ For NVIDIA/Autodesk (fiscal year ends in January):
 
 The fix implements `calculate_fiscal_year_for_label()` which derives the fiscal year
 from the period_end date and the company's fiscal year end month.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/460
 """
 
 import pytest

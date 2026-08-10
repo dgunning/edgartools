@@ -14,6 +14,8 @@ Effect on `Company('ADSK').income_statement(periods=4, annual=False)`:
 
 This regression test exercises the validator at the unit level for all four
 FYE patterns, plus the original #781 schedule-fact rejection case.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/779
 """
 
 from datetime import date

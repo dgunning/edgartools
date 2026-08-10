@@ -6,6 +6,8 @@ contain hints in their name ("Noncurrent", "Current") that should be used
 when section-based disambiguation isn't available.
 
 Fix: Added tag-name-based hints to _disambiguate_by_context() in reverse_index.py.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/644
 """
 
 import pytest

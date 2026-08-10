@@ -13,6 +13,8 @@ Fix: _ensure_coding_columns() guarantees those columns exist (default None) in
 both NonDerivativeTable.extract_transactions and
 DerivativeTable.extract_transactions, so uncoded rows degrade to
 TransactionType=None instead of crashing.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/887
 """
 import pytest
 from bs4 import BeautifulSoup

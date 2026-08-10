@@ -5,6 +5,8 @@ When the SEC returns an empty response for a filing's SGML content, the HTTP cac
 stores it forever (cache-forever rule for Archive data). The fix detects empty/truncated
 content immediately after fetch and retries with a direct HTTP request that bypasses
 the cache entirely.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/672
 """
 from unittest.mock import patch, call
 

@@ -2,6 +2,8 @@
 
 13F Value column was in thousands for pre-Q4 2022 filings and dollars for
 post-Q4 2022 filings. Values are now normalized to dollars for all periods.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/749
 """
 from datetime import datetime
 

@@ -21,6 +21,8 @@ Fixes (both in ``edgar/sgml/concept_extractor.py``):
   ``period_headers[0]`` behaviour.
 - B: ``class="th"`` cells are filtered out of ``value_cells`` before
   position assignment.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/818
 """
 
 from pathlib import Path

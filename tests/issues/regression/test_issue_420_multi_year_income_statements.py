@@ -5,6 +5,8 @@ Regression test for GitHub issue #420:
 
 This test ensures that users can successfully retrieve multi-year income statements
 using the correct APIs and that the error conditions are properly handled.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/420
 """
 
 import pytest

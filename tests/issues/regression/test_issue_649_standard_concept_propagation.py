@@ -7,6 +7,8 @@ downstream filtering and cross-company analysis.
 
 Fix: Propagate standard_concept through concept_metadata, output dicts,
 DataFrame columns, and fact extraction.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/649
 """
 
 import pytest

@@ -10,6 +10,8 @@ All three parsing strategies failed:
 
 Solution: Made CrossReferenceIndex detection case-insensitive and hyphen-tolerant,
 supported bare item numbers, en-dash page ranges, and continuation rows.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/251
 """
 
 import pytest

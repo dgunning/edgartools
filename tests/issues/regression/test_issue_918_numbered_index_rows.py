@@ -24,6 +24,8 @@ Unit tests are synthetic (no network); end-to-end assertions are VCR-backed
 and pinned to the reported filing. The FMCC 10-Q half of the fix (the GH
 #905 phantoms, removed at the source by the same guard) is pinned in
 tests/issues/regression/test_issue_905_phantom_part_items.py.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/918
 """
 
 import lxml.html

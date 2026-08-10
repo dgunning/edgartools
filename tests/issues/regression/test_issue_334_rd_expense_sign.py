@@ -31,6 +31,8 @@ figures match the income statements:
 
 Both companies are asserted, and Microsoft is the one that carried the bug —
 dropping it for being "the same as Apple now" would delete the regression.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/334
 """
 import pytest
 

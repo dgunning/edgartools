@@ -21,6 +21,8 @@ Fix:
 The MU 10-Q (accession 0000723125-13-000042) is a structural canary —
 it has BOTH a net loss row AND a separate NCI row, exercising the full
 failure mode.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/814
 """
 import pytest
 from edgar import Company

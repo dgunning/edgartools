@@ -5,6 +5,8 @@ XBRLS cap out at 2018
 
 This test ensures that the .head() method on filings and XBRLS objects
 returns recent data (newer than 2018) for major companies.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/427
 """
 
 import pytest

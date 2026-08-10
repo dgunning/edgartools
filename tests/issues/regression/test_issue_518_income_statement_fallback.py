@@ -5,6 +5,8 @@ when IncomeStatement not found.
 This test ensures that when a filing has ComprehensiveIncome but no separate IncomeStatement,
 the system correctly returns ComprehensiveIncome as a fallback instead of returning a
 completely wrong statement type like CashFlowStatement.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/518
 """
 
 import pytest

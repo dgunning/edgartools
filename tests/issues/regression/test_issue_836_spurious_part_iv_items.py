@@ -25,6 +25,8 @@ as #821).
 The unit tests here exercise ``_make_section_key`` directly (no network). The
 UNH end-to-end assertion is marked ``network`` and pinned to the reported
 filing.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/836
 """
 
 import pytest

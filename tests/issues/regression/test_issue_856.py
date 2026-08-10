@@ -8,6 +8,8 @@ application configures logging itself (see the Python logging HOWTO,
 handler in their ancestry and fall back to the ``logging.lastResort`` handler,
 which writes to stderr -- especially harmful in MCP / stdio environments where
 stray stderr output corrupts the protocol stream.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/856
 """
 
 import logging

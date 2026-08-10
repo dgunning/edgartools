@@ -11,6 +11,8 @@ them into a single row.
 Fix: Add concept-level equivalence pairs in _EQUIVALENT_CONCEPTS that the stitcher
 uses to merge rows with completely different concept names, guarded by value
 agreement on overlapping periods.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/711
 """
 
 import pytest

@@ -24,6 +24,8 @@ colspan-2 cells (ADI's annual columns).
 The network test pins the ADI 2019 10-K; the offline tests guard the
 fix's contract with synthetic table HTML so the unit-level behavior
 can't quietly regress when SEC R*.htm rendering shifts.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/812
 """
 from __future__ import annotations
 

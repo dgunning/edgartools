@@ -7,6 +7,8 @@ footnoteLink elements correctly, without raising UnboundLocalError.
 The bug was in edgar/xbrl/parsers/instance.py where undefined_footnotes was
 declared inside the footnote_link loop but referenced outside it, causing
 UnboundLocalError when no footnoteLink elements existed.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/488
 """
 
 import xml.etree.ElementTree as ET

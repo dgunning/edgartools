@@ -3,6 +3,8 @@ Regression test for GitHub issue #443: JSONDecodeError when fetching certain fil
 
 This test ensures that corrupted submissions cache files are handled gracefully
 by re-downloading the data automatically.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/443
 """
 
 import json

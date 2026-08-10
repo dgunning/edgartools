@@ -7,6 +7,8 @@ Enhance 13F-HR parsing to support multi-manager institutional filings:
 
 Performance: Uses session-scoped fixtures from conftest.py to avoid
 parsing the same 13F filing multiple times (~10s savings per test).
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/512
 """
 import pandas as pd
 import pytest

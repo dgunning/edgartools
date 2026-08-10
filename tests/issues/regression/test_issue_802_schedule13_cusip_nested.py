@@ -10,6 +10,8 @@ The fixtures here are the actual ``primary_doc.xml`` payloads from the
 two filings cited in the issue, so the test exercises the real wire
 format and will fire if the fallback is ever removed or if BeautifulSoup's
 recursive ``find()`` semantics are ever tightened.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/802
 """
 
 from datetime import date

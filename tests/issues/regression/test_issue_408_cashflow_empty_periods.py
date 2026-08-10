@@ -3,6 +3,8 @@ Regression test for Issue #408: Cash flow statement missing values
 
 Ensures that cash flow statements filter out periods containing only empty strings,
 showing only periods with meaningful financial data.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/408
 """
 
 import pytest

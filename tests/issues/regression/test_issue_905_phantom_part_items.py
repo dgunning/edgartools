@@ -14,6 +14,8 @@ to ``ANOMALOUS_CONFIDENCE`` — so callers can tell the Part's boundaries were
 mis-anchored. The content itself is kept: the underlying running-header
 mis-anchoring is a separate, harder problem, and silently dropping the section
 would lose the only copy of the MD&A text.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/905
 """
 import pytest
 

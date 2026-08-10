@@ -12,6 +12,8 @@ filed 2024-10-30, period 2024-09-30). Prior to this pinning, the tests used
 new COIN 10-Qs were filed — a 2026 latest 10-Q has different completeness
 characteristics than the 2024 filing the issue was filed against, and the
 drift caused intermittent regression-test failures unrelated to the fix.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/464
 """
 import re
 

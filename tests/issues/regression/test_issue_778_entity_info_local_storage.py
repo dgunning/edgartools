@@ -20,6 +20,8 @@ Fix:
    is allowed, fetch it from the filing homepage (single HTTP request).
 3. Add allow_network_fallback parameter to use_local_storage() so users
    can opt into strict offline mode.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/778
 """
 import os
 from unittest.mock import MagicMock, patch

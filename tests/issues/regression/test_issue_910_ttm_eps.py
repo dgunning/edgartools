@@ -20,6 +20,8 @@ periods came back NaN.
 
 Root cause (formatting): the renderer formatted anything under $1M as
 f"${value:,.0f}", so EPS of 20.16 displayed as "$20".
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/910
 """
 import pandas as pd
 import pytest

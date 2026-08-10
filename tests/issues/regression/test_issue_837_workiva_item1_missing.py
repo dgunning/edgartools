@@ -22,6 +22,8 @@ the same way the generic parser does.
 
 The unit tests exercise ``_parse_item_from_text`` directly (no network). The
 Allstate end-to-end assertion is VCR-backed and pinned to the reported filing.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/837
 """
 
 import pytest

@@ -17,6 +17,8 @@ Confirmed affected cases:
 - TSLA 2018 Q2 10-Q (0001564590-18-019254): equity statement genuinely absent
 - IBM 2010 10-K (0001047469-10-001151): CI embedded in equity statement
 - GE 2010 10-K: CI embedded in roll-forward equity statement
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/706
 """
 
 import pytest

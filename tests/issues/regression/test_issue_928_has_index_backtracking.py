@@ -25,6 +25,8 @@ locates, and the single mega-pattern is replaced by a linear row-by-row scan
 reusing the row/cell shapes ``parse()`` relies on. Bounding the search window
 alone was *not* sufficient — on dense markup the old pattern exceeded 10s at
 3.6K chars, so any fixed window remained exploitable.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/928
 """
 import re
 import time
