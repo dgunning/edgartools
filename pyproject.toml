@@ -254,6 +254,20 @@ test-ci-slow = "pytest --cov --cov-report=xml -m 'slow and not regression' {args
 test-ci-all = "pytest --cov --cov-report=xml -m 'not regression' --ignore=tests/perf --ignore=tests/issues/regression {args}"
 
 # Regression tests (run separately/on-demand for comprehensive bug prevention)
+#
+# No `--ignore=tests/issues/reproductions` here, deliberately, even though that
+# tree feeding this selection is what bead edgartools-07lk.24 Tier 2 set out to
+# stop. `-m regression` selects on the marker rather than the path, so a marked
+# test in reproductions/ ran in this lane while sitting outside the provenance,
+# no-skip and fast/network gates that apply to tests/issues/regression/ — 32
+# tests across 6 files were in that state on 2026-08-10.
+#
+# The fix is a collection hook in tests/issues/reproductions/conftest.py that
+# fails on the marker outright, which makes the boundary hold by construction
+# rather than by whoever last edited this line. Adding a path exclusion here
+# would be worse than redundant: pytest would stop loading that conftest on
+# exactly the run the check is meant to police, so the guard would be off in
+# the one lane that needs it.
 test-regression = "pytest --cov --cov-report=xml -m regression {args}"
 
 # Other test categories  

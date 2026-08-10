@@ -23,12 +23,60 @@ does not belong in a test tree. Scratch work goes outside the repo.
 Same rule and same reasoning as `scripts/check_regression_skips.py` next door:
 a test that cannot fail is not covering anything, and a directory listing that
 implies otherwise is worse than an empty one.
+
+THE SECOND RULE: nothing here may carry `@pytest.mark.regression`.
+
+A reproduction is a scratch record of a bug as reported. A regression test is a
+permanent guard, and it lives in `tests/issues/regression/`, where the tree-wide
+gates apply to it -- provenance in the docstring
+(`scripts/check_regression_provenance.py`), no runtime `pytest.skip()`
+(`scripts/check_regression_skips.py`), and fast/network classification by
+measurement in `tests/conftest.py`. A regression-marked test *here* is selected
+by `-m regression` and so runs in the regression lane while sitting outside
+every one of those gates.
+
+32 tests across 6 files were in that state on 2026-08-10 (bead
+edgartools-07lk.24, Tier 2). They were nominally duplicates of regression-tree
+files; measured, four of the six were not, and two carried the exact defects the
+gates exist to catch -- a `pytest.skip()` on missing data, and assertions
+wrapped in `if` guards whose false branch was the bug. Their unique coverage was
+ported into the regression tree, one file was moved across whole
+(`test_issue_438_deduplication_integration.py`), one was deleted as a true
+duplicate, and this hook is what stops the boundary re-forming.
+
+It is a collection hook rather than a source scan on purpose: the marker can
+arrive from a decorator, a `pytestmark`, a class, or another hook, and only the
+collected item knows which markers it actually ended up with.
 """
 from pathlib import Path
 
 import pytest
 
 _ALLOWED_NON_TEST = {"conftest.py", "__init__.py"}
+
+_HERE = Path(__file__).parent
+
+
+def pytest_collection_modifyitems(items):
+    """Fail collection if anything in this tree is marked `regression`."""
+    offenders = sorted(
+        item.nodeid
+        for item in items
+        if _HERE in Path(str(item.fspath)).parents
+        and any(m.name == "regression" for m in item.iter_markers())
+    )
+    if offenders:
+        raise pytest.UsageError(
+            f"{len(offenders)} test(s) under tests/issues/reproductions/ are "
+            "marked `regression`:\n  "
+            + "\n  ".join(offenders)
+            + "\n\n`-m regression` selects these, so they run in the regression "
+            "lane while sitting outside the provenance, no-skip and "
+            "fast/network gates that apply to tests/issues/regression/. Move "
+            "the test to tests/issues/regression/ (and give it a provenance "
+            "line in the module docstring), or drop the marker. See this "
+            "file's docstring."
+        )
 
 
 def _stray_files() -> list[str]:

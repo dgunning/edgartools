@@ -182,7 +182,29 @@ yielding 54 tests this way before it was pruned.
 hatch run test-regression                      # the whole tree
 hatch run pytest tests/issues/regression -m fast   # just the PR-gating subset
 python scripts/check_regression_skips.py       # the no-skip gate
+python scripts/check_regression_provenance.py  # the provenance gate
 ```
+
+## Before you delete one
+
+"This file has zero unique coverage" is a measurement, not a hunch, and
+`scripts/coverage_attribution.py` is how you make it:
+
+```bash
+COVERAGE_FILE=/tmp/attrib.coverage \
+  hatch run pytest -m fast -n auto --cov=edgar --cov-context=test --cov-report=
+hatch run python scripts/coverage_attribution.py /tmp/attrib.coverage
+```
+
+Read its docstring before acting on the output. Two things it will not tell
+you:
+
+- **Zero unique coverage does not mean worthless.** A regression test's job is
+  pinning a specific value on specific data, not reaching new lines. It marks a
+  file as a candidate for *consolidation*, never for silent deletion.
+- **It says nothing about runtime.** The eight largest zero-unique files were
+  once read as the ones re-parsing the same big filings; measured, they shared
+  0.59s of redundant parsing between them. Measure parse cost separately.
 
 ---
 *Once we fix a bug, it stays fixed — and the test that proves it actually runs.*

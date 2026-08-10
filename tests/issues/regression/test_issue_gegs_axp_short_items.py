@@ -23,20 +23,33 @@ content, and the large neighbours they used to swallow stay intact.
 """
 from pathlib import Path
 
+import pytest
+
 from edgar.documents.config import ParserConfig
 from edgar.documents.parser import HTMLParser
 
 _FIXTURE = Path(__file__).resolve().parents[2] / "fixtures" / "html" / "axp" / "10k" / "axp-10-k-2025-02-07.html"
 
 
-def _sections():
+@pytest.fixture(scope="module")
+def sections():
+    """Parse the AXP 10-K once for the whole module.
+
+    This was a plain `_sections()` helper called by every test, so the 5.1 MB
+    fixture was parsed once per test: 4 parses, 3.3s of them redundant
+    (measured 2026-08-10, bead edgartools-07lk.24 Tier 3).
+
+    Module scope, not session scope: one parsed 10-K of this size costs ~0.3 GB
+    resident, and `test-ci-fast` runs `-n auto`, so a session-scoped document
+    would be held on every worker that touched this file.
+    """
     doc = HTMLParser(ParserConfig(form="10-K", detect_sections=True)).parse(_FIXTURE.read_text())
     return doc.sections
 
 
-def test_item3_legal_proceedings_stays_a_reference_stub():
+def test_item3_legal_proceedings_stays_a_reference_stub(sections):
     """Item 3 keeps its incorporated-by-reference one-liner (was 166KB over-capture)."""
-    item3 = _sections()["part_i_item_3"].text()
+    item3 = sections["part_i_item_3"].text()
     assert len(item3) < 500, f"Item 3 over-extracted ({len(item3)} chars) — rescue swallowed neighbours"
     assert "LEGAL PROCEEDINGS" in item3
     assert "Note 12" in item3
@@ -44,26 +57,26 @@ def test_item3_legal_proceedings_stays_a_reference_stub():
     assert "MARKET FOR REGISTRANT" not in item3
 
 
-def test_item4_mine_safety_stays_not_applicable():
+def test_item4_mine_safety_stays_not_applicable(sections):
     """Item 4 keeps 'Not applicable' (was 166KB over-capture)."""
-    item4 = _sections()["part_i_item_4"].text()
+    item4 = sections["part_i_item_4"].text()
     assert len(item4) < 300, f"Item 4 over-extracted ({len(item4)} chars)"
     assert "MINE SAFETY" in item4
     assert "Not applicable" in item4
 
 
-def test_item7a_points_to_mda_not_the_financials():
+def test_item7a_points_to_mda_not_the_financials(sections):
     """Item 7A is a pointer to MD&A Risk Management, not the Item 8 financial body."""
-    item7a = _sections()["part_ii_item_7a"].text()
+    item7a = sections["part_ii_item_7a"].text()
     assert len(item7a) < 500, f"Item 7A over-extracted ({len(item7a)} chars) — swallowed Item 8"
     assert "QUANTITATIVE AND QUALITATIVE" in item7a
     # The over-capture used to pull in the financial statements' MD&A report.
     assert "MANAGEMENT'S REPORT" not in item7a.upper()
 
 
-def test_large_neighbours_intact():
+def test_large_neighbours_intact(sections):
     """The genuine large items the rescue used to swallow are unchanged."""
-    secs = _sections()
+    secs = sections
     item7 = secs["part_ii_item_7"].text()
     item8 = secs["part_ii_item_8"].text()
     assert len(item7) > 100_000, f"Item 7 MD&A regressed ({len(item7)} chars)"
