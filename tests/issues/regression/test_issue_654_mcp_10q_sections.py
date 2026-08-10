@@ -8,6 +8,8 @@ objects that only expose content via __getitem__ with Part/Item keys such as
 
 Fix: _extract_section() now uses obj[key] via the SECTION_MAP_10K / SECTION_MAP_10Q
 lookup tables which contain the canonical key formats accepted by TenK/TenQ.__getitem__.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/654
 """
 
 import pytest

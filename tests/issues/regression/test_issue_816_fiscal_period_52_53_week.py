@@ -14,6 +14,8 @@ the period_end can drift into the first days of the following calendar month
 The fix treats end dates within the first 7 days of a month as belonging to
 the previous month for quarter classification, matching the ±15-day tolerance
 already used for fiscal-year-end matching elsewhere in the XBRL package.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/816
 """
 
 from datetime import date

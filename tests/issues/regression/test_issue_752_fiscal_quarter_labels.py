@@ -8,6 +8,8 @@ instead of Q3 for a June period).
 #753: to_dataframe() only added (Qn)/(YTD)/(FY) suffixes when end dates
 collided. Q1 filings (where quarterly = YTD) got no suffix at all.
 Now all duration periods consistently get period-type suffixes.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/752
 """
 import pytest
 from edgar import Filing

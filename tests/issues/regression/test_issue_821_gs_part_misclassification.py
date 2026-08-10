@@ -12,6 +12,8 @@ in its SEC-canonical Part. Item 1 is only checked in Part I; Item 7 is only
 checked in Part II; etc. If the canonical-Part key is missing, the lookup
 falls through to the legacy chunked_document parser rather than silently
 returning content from a wrong Part.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/821
 """
 
 from unittest.mock import MagicMock

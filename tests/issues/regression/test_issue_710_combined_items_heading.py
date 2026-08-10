@@ -7,6 +7,8 @@ part_i_items_1_and_2._business_and_properties, but TenK.__getitem__ builds
 the key part_i_item_1 and never checks the combined-items variant.
 
 Fix: Add combined-items key scan in __getitem__ after standard part lookups.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/710
 """
 
 import pytest

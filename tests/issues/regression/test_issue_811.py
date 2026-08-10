@@ -16,6 +16,8 @@ The currency check passes but ``amount_*`` can still be ``None`` in valid
 N-PORT XBRL, and ``abs(None)`` raises. The fix adds a null guard to both
 assignments. The test constructs the failure mode deterministically by
 mutating a parsed Sample 7 forward — no SEC filing dependency.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/811
 """
 from __future__ import annotations
 

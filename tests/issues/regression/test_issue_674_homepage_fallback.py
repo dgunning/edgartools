@@ -4,6 +4,8 @@ Regression test for GitHub Issue #674: Fallback to FilingHomepage when SGML unav
 When the SEC returns empty content for a filing's .txt file and the direct-fetch retry
 also fails, Filing.sgml() should fall back to constructing a minimal FilingSGML from
 the filing's homepage index page rather than raising an exception.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/674
 """
 from collections import defaultdict
 from unittest.mock import MagicMock, patch

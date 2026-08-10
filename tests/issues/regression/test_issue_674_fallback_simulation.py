@@ -8,6 +8,8 @@ Strategy:
   1. Load a filing normally (SGML path) and capture baseline values
   2. Force fallback by patching FilingSGML.from_filing to raise ValueError
   3. Verify that the fallback path produces equivalent or acceptable results
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/674
 """
 from unittest.mock import patch
 

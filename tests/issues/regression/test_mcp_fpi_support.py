@@ -10,6 +10,8 @@ The core library already supports 20-F and 6-K - the gap was only in the MCP lay
 - SixK = CurrentReport alias exists
 - IFRS tags exist in statement_resolver.py alongside US-GAAP
 - Missing: Section maps in MCP edgar_filing tool
+
+GitHub PR: https://github.com/dgunning/edgartools/pull/660
 """
 
 import logging

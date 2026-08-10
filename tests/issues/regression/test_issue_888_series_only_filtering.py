@@ -13,6 +13,8 @@ Fix: _get_series_filings() resolves the series via SEC browse-edgar (series ID a
 the CIK parameter), which returns exactly that series' filings; and series_only
 now returns an empty Filings rather than the unfiltered trust when the series
 cannot be resolved.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/888
 """
 import pytest
 

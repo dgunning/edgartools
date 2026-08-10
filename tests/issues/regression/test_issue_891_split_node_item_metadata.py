@@ -22,6 +22,8 @@ Note: the reporter's other suggested fixes (split-node header *detection* and a
 zero-candidate raw-HTML recovery) are deferred — MD&A is already recovered on
 this filing today, and a broad zero-candidate fallback risks fabricating
 mis-scoped sections from inline body mentions.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/891
 """
 import pytest
 

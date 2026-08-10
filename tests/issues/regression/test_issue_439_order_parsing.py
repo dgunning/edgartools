@@ -8,6 +8,8 @@ The issue was that CalculationNode.order and PresentationNode.order were showing
 instead of the actual order values specified in the XBRL linkbase files.
 
 Fixed by properly setting the order attribute on child nodes when building the trees.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/439
 """
 
 import pytest

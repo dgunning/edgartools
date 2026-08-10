@@ -17,6 +17,8 @@ This test verifies that:
     1. use_local_storage('/custom/path') sets EDGAR_LOCAL_DATA_DIR
     2. get_edgar_data_directory() returns the custom path
     3. download_bulk_data() would use the custom path (via mocking)
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/381
 """
 import os
 import pytest

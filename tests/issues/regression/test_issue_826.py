@@ -23,6 +23,8 @@ The 20-F section is the high-multiplier (x24) case. It is NOT fully
 dup-free even after the fix — a *separate* anchor-boundary overlap bug
 leaves a small cross-section residual (worst x4) — so its assertion only
 guards that the nested-serialization explosion (this bug) is gone.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/826
 """
 import hashlib
 from collections import Counter

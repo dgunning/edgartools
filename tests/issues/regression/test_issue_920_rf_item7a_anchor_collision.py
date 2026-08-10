@@ -19,6 +19,8 @@ item's own heading behind its own anchor. Item 7 keeps the shared page anchor
 (it owns the page it starts on); Item 7A is re-pointed at its real body heading.
 
 Offline (local fixture).
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/920
 """
 from pathlib import Path
 

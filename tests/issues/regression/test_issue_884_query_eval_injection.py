@@ -8,6 +8,8 @@ builtin namespace and any query string could execute arbitrary code
 The query is now parsed and evaluated against a restricted AST
 (``_AttachmentQuery``). These tests assert that legitimate filter strings still
 work and that injection payloads raise ``ValueError`` instead of executing.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/884
 """
 import pytest
 

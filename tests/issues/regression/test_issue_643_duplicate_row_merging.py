@@ -6,6 +6,8 @@ filings (e.g., label changed between years), stitching could produce
 duplicate rows for the same standard_concept. The merge logic consolidates
 these rows when they map to the same standard_concept and have no
 overlapping periods.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/643
 """
 
 import pytest

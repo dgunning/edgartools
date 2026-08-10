@@ -33,6 +33,8 @@ Cross-company survey (SEC XBRL frames, CY2022-CY2024): ~101 filers report
 ``OtherDepreciationAndAmortization`` with no canonical D&A total — including AMD,
 Workday, Open Text, Elevance, MetLife, Crown Holdings, plus MRVL.
 See engineering/analysis/issue-839-otherDA-survey.md.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/839
 """
 
 from datetime import date

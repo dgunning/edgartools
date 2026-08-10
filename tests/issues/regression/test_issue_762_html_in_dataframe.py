@@ -5,6 +5,8 @@ XBRL TextBlock concepts (e.g., segment disclosure tables) contain HTML-encoded f
 The to_dataframe() path must sanitize these to plain text so DataFrame cells are usable.
 
 Uses the MSFT 10-K fixture which has disclosure tables with TextBlock concepts.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/762
 """
 
 import re

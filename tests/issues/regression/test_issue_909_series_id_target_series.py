@@ -12,6 +12,8 @@ series' data, which is exactly the harm #888 fixed for tickers.
 Fix: backfill ``_target_series_id`` from the resolved hierarchy (self._series)
 when the ticker path did not set it, so all three identifier forms for the same
 fund behave identically.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/909
 """
 import pytest
 

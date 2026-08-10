@@ -6,6 +6,8 @@ IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLoss
 which was in the exclusions list, preventing it from being mapped to PretaxIncomeLoss.
 
 Fix: Removed the tag from exclusions.py and added it to gaap_mappings.json → PretaxIncomeLoss.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/648
 """
 
 import pytest

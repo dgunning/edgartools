@@ -30,6 +30,8 @@ carries the number are recovered when exactly one group has a real target.
 The unit tests exercise ``_analyze_workiva_toc`` on a minimal Tesla-shaped
 TOC (no network). The end-to-end assertions are VCR-backed and pinned to the
 reported filing.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/915
 """
 
 import pytest

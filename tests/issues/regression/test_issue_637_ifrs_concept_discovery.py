@@ -9,6 +9,8 @@ foreign private issuers (20-F filers) invisible to the standardization layer.
 Fix: Added ifrs-full: to the variant search loop in all three methods,
 added IFRS-specific concept names to synonym groups, and expanded
 currency mappings so non-USD monetary values are recognized.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/637
 """
 import pytest
 from edgar import Company

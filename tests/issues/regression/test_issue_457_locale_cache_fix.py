@@ -19,6 +19,8 @@ Implement a one-time cache clearing function that:
 
 This ensures users upgrading from pre-4.19.0 have their old locale-corrupted cache files removed
 automatically on first import.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/457
 """
 
 import locale

@@ -3,6 +3,8 @@ Regression test for Issue #438 - Missing revenue facts in income statement
 
 This test ensures that revenue facts are properly classified and prevents
 future regressions of the us-gaap:Revenues classification issue.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/438
 """
 
 import pytest

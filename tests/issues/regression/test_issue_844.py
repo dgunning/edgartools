@@ -8,6 +8,8 @@ whose ``"<TEXT>" in html[:500]`` check raised
 
 The parser now decodes bytes before those string checks, so bytes and str inputs
 behave identically. No network access required.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/844
 """
 
 import pytest

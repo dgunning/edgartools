@@ -13,6 +13,8 @@ The fix involved:
 1. Replacing assertion with proper IndexError/KeyError exceptions in __getitem__
 2. Overriding __iter__ and __next__ to handle page-relative iteration correctly
 3. Using super().get_filing_at() directly with page-relative indices during iteration
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/441
 """
 
 import pytest

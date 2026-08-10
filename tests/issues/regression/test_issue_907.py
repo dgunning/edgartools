@@ -34,6 +34,8 @@ Ground truth, GOOGL FY2024 investing cash flow (10-K, accession
     Q4 -16.180   = FY      -45.536 - YTD_9M -29.356
                   ------
     sum -45.536  == the reported FY figure
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/907
 """
 
 from datetime import date

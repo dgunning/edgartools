@@ -4,6 +4,8 @@ When _get_context truncates text and adds ellipsis markers, the SearchResult
 start_offset and end_offset must reflect positions within the returned context
 string, not the original text. Otherwise SearchResult.snippet highlights the
 wrong characters.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/860
 """
 
 from edgar.documents.document import Document

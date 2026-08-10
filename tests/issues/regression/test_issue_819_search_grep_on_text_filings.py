@@ -1,4 +1,7 @@
-"""Regression test for #819 — search()/grep() failed on plain-text filings."""
+"""Regression test for #819 — search()/grep() failed on plain-text filings.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/819
+"""
 
 import pytest
 

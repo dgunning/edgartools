@@ -14,6 +14,8 @@ Regression tests for two Offerings bugs reported on Airbnb (ABNB) filings.
 
 Ground truth: Airbnb's December 2020 IPO, registration file 333-250118, led by
 Morgan Stanley with Goldman Sachs, priced at $68.00/share.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/868
 """
 import pytest
 

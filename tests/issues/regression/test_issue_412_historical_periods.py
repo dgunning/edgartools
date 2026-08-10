@@ -4,6 +4,8 @@ Historical periods in entity statements showed sparse data.
 
 Periods 3rd and 4th should have comprehensive balance sheet data,
 not just cash values.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/412
 """
 import pytest
 from edgar import Company

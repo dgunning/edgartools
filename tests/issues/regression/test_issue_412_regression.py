@@ -7,6 +7,8 @@ characters in a single line can be parsed correctly.
 Fixed: SGML header parser was splitting on all '>' characters instead of just the first one,
 causing "ValueError: too many values to unpack" when encountering XBRL inline tags like:
 <ix:nonNumeric id="F_000001" name="dei:AmendmentFlag" contextRef="C_0001318605_20190101_20191231">false</ix:nonNumeric>
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/412
 """
 
 import pytest

@@ -19,6 +19,8 @@ Fix (companion of GH #892's get_concept recency fix):
    warning) when the newest quarter lags the reference date (``as_of``, or today)
    by more than one reporting cycle, so genuinely stale data across *all*
    candidates is still detectable programmatically.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/893
 """
 import datetime
 from datetime import date

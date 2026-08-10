@@ -15,6 +15,8 @@ searched for `class_id == "CNEQ"` (never true) instead of taking the
 ticker-match branch. The fix replaces the naive prefix check with a proper
 Class-ID shape check, `re.match(r'^C\\d+$', identifier)`, mirroring the check
 `get_fund_object` already uses one level up.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/889
 """
 import pandas as pd
 import pytest

@@ -11,6 +11,8 @@ Root cause: total_weight > 0 but sum(weight_map.values()) == 0, causing
 ZeroDivisionError and blocking access to legitimate financial data.
 
 Affected ~9.5% of filings (~2,038 filings, 28+ companies).
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/486
 """
 
 import pytest

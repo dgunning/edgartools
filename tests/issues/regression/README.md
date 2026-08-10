@@ -69,8 +69,32 @@ test_issue_<issue_number>_<short_description>.py
 ```
 
 For bugs with no GitHub number, the beads ID stands in
-(`test_issue_v3ec_two_up_maturity_rows.py`). Put the issue URL in the module
-docstring — most files here predate that habit and are hard to trace back.
+(`test_issue_v3ec_two_up_maturity_rows.py`).
+
+## Provenance — enforced
+
+Every file here names its origin **in the module docstring**, as one of:
+
+```
+GitHub Issue: https://github.com/dgunning/edgartools/issues/<n>
+GitHub PR:    https://github.com/dgunning/edgartools/pull/<n>
+Bead:         edgartools-<id>
+```
+
+`scripts/check_regression_provenance.py` runs as a step in `test-fast` and fails
+the build otherwise. A bare `#819` in prose does **not** satisfy it, deliberately:
+109 files named their issue that way and nothing else, in four different shapes
+(`GH #812`, `GitHub issue #488`, `issue #762`, `#819`), which no tool could
+follow. One canonical form makes "which of these bugs are still open?" a script
+instead of a reading exercise.
+
+The filename is not accepted as the answer either. It usually carries the number,
+but 67 files here are named after a beads slug and 9 are free-form, so it answers
+for part of the tree and silently not the rest.
+
+If you cannot find the origin of an existing file, `git log --reverse -- <file>`
+names the commit that added it, and its pull request or bead ID is the answer —
+that is how the last four in this tree were traced.
 
 ## Writing one
 

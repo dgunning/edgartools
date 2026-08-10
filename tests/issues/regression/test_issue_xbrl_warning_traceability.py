@@ -25,6 +25,8 @@ Three defects combined:
 
 Additionally, lxml's "Document is empty" is benign here - a document with no
 parseable root has no inline XBRL either - so it is now DEBUG, not WARNING.
+
+Bead: edgartools-cxvz
 """
 import logging
 

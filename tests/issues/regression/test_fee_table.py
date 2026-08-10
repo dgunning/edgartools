@@ -5,6 +5,8 @@ Tests extract_registration_fee_table() against ground-truth values from real S-3
 verified by hand from SEC EDGAR.
 
 See: docs-internal/research/sec-filings/forms/s-3/registration-fee-table-analysis.md
+
+Bead: edgartools-4jm1
 """
 import pytest
 

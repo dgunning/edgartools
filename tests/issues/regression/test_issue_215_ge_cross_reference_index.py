@@ -7,6 +7,8 @@ Item headings, causing extraction to fail.
 Solution: CrossReferenceIndex parser in edgar.documents.cross_reference_index
 
 This test ensures the parser continues to work for GE filings.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/215
 """
 
 import pytest

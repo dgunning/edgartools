@@ -6,6 +6,8 @@ against ground-truth values from real SEC filings.
 
 Each test case uses a specific filing accession number and asserts specific
 values verified by hand against the SEC EDGAR filing.
+
+Bead: edgartools-fd3v.6
 """
 import pytest
 

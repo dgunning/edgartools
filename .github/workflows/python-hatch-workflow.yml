@@ -99,6 +99,13 @@ jobs:
     - name: Check no regression test skips itself
       run: python scripts/check_regression_skips.py
 
+    # Same reasoning, different property: a regression test has to name the bug
+    # it guards, or nobody can answer "is this still reachable?" and the tree can
+    # never be pruned. Static like the check above, and for the same reason — it
+    # has to see the post-merge half of the tree on a pull request.
+    - name: Check every regression test names its bug
+      run: python scripts/check_regression_provenance.py
+
     - name: Run fast tests
       run: |
         # Parallelize fast tests - safe, no SEC API calls.
