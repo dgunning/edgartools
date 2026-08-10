@@ -148,6 +148,26 @@ def sha256(text):
 # data — which is what the markdown parity ratchet measures, and where the same
 # fix took the tracked corpus from 902 lost numbers to 739.
 
+# DO NOT WRITE THE NINTH ONE OF THESE BY HAND.
+#
+#     hatch run python scripts/recapture_text_baseline.py --explain "..."
+#
+# It checks out --before (default origin/main) into a temporary worktree,
+# replays these same cassettes there, diffs old against new, rewrites the
+# hashes below and prints the entry to paste above. The claim every entry above
+# makes by hand — "differs by inserted spaces only, no character content
+# changed" — is now checked mechanically, and the script refuses to rewrite a
+# hash when it does not hold.
+#
+# AND IT DOES NOT ALWAYS HOLD. Running it against 9c1488b6~1 (the state before
+# #1006) reproduces that re-capture exactly: 2 of these 5 filings moved, 3 were
+# byte-identical, and both changes are a box-drawing rule shifting by one row as
+# a row leaves the header block — content, not whitespace. So the blanket
+# sentence near the top of this comment block is true of the word-boundary
+# re-captures and NOT of the most recent one, which the eighth entry half-says
+# already ("nothing was repaired in the text itself"). The invariant is a
+# property of an individual re-capture, not of this file.
+
 BASELINE = {
     # Modern iXBRL 10-K
     "0000320193-23-000106": (
