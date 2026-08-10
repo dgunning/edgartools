@@ -33,6 +33,11 @@ on:
       - 'tests/issues/regression/**'
       - 'edgar/**'
       - '.github/workflows/regression-tests.yml'
+      - 'tests/conftest.py'
+      - 'tests/_offline_filings.py'
+      - 'tests/_offline_harness.py'
+      - 'tests/_vcr_safety.py'
+      - 'pyproject.toml'
 
   # Also run on main branch pushes that touch the library.
   #
@@ -42,12 +47,28 @@ on:
   # at all, and that is where the section-extraction defect cluster lives
   # (bead edgartools-07lk.21). `edgar/**` closes the hole as a class instead of
   # one package at a time; docs- and script-only merges still skip it.
+  #
+  # The four test-harness files are here because they decide what this lane
+  # RUNS, not just what it runs against. tests/conftest.py assigns every
+  # regression test its fast/network marker and fails collection on an
+  # unclassified file; _offline_filings.py backs the tests that resolve an
+  # accession without the quarterly index; _offline_harness.py is the offline
+  # measurement; _vcr_safety.py installs the safe YAML loader the cassette gate
+  # exists to protect. A pull request can break this suite by touching only
+  # those and never trigger the lane — PR #1013 was exactly that shape.
+  # pyproject.toml carries the marker registry and pytest options
+  # (xfail_strict among them), which change outcomes suite-wide.
   push:
     branches: [ "main" ]
     paths:
       - 'tests/issues/regression/**'
       - 'edgar/**'
       - '.github/workflows/regression-tests.yml'
+      - 'tests/conftest.py'
+      - 'tests/_offline_filings.py'
+      - 'tests/_offline_harness.py'
+      - 'tests/_vcr_safety.py'
+      - 'pyproject.toml'
 
 # Cancel superseded regression runs on the same ref.
 concurrency:
