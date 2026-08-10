@@ -162,8 +162,8 @@ FILER_TYPE_DOMESTIC_FORMS = frozenset({
 # matching inside common personal names (e.g. "CORP" in "CORPUZ", "BANK" in "BANKS").
 COMPANY_NAME_KEYWORDS = {
     # Corporate structure (long or punctuated - safe as substring)
-    "CORPORATION", "L.L.C.", "L L C", "LIMITED",
-    "L.P.", "L P", "COMPANY", "HOLDINGS",
+    "CORPORATION", "L.L.C.", "LIMITED",
+    "L.P.", "S.A.", "COMPANY", "HOLDINGS",
     "PARTNERS", "PARTNERSHIP",
     # Investment entities
     "CAPITAL", "VENTURES",
@@ -185,6 +185,14 @@ COMPANY_NAME_KEYWORDS_STRICT = {
     "BANK", "FUND", "FUNDS", "TRUST", "GROUP",
 }
 
+# Spaced keywords: legal suffixes written with spaces where the punctuated form
+# has periods ("ACME L P", "ACME L L C"). Neither set above can carry these.
+# As substrings they match across the words of an ordinary personal name --
+# "MICHAE|L P|." and "MICHAE|L L C|OOPER" both scan as companies -- and the
+# strict path splits on \W+, so it only ever compares single tokens. They need
+# whole-word boundaries on a multi-token pattern, which is what this is.
+_SPACED_KEYWORDS_RE = re.compile(r"\b(?:L P|L L C)\b")
+
 # Pre-compiled regex for SEC filing suffixes like /ADR/, /BD/, /TA/
 _SEC_SUFFIX_RE = re.compile(r"/[A-Z0-9-]{2,}(?:/|\s|$)")
 
@@ -201,6 +209,10 @@ def _name_suggests_company(name: str) -> bool:
 
     # Loose keyword match (substring)
     if any(kw in upper for kw in COMPANY_NAME_KEYWORDS):
+        return True
+
+    # Spaced legal suffixes (whole word only - see _SPACED_KEYWORDS_RE)
+    if _SPACED_KEYWORDS_RE.search(upper):
         return True
 
     # Strict keyword match (whole word only)

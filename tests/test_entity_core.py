@@ -305,6 +305,7 @@ CLASSIFICATION_UNIT_TESTS = [
     ("name_corporation", dict(name="MICROSOFT CORPORATION"), False),
     ("name_co_whole_word", dict(name="STANDARD OIL CO"), False),
     ("name_co_not_substring", dict(name="SCOTT JOHNSON"), True),
+    ("name_spaced_lp_not_substring", dict(name="Wyatt Michael P."), True),
     ("name_plain_individual", dict(name="JOHN SMITH"), True),
     # Signal 8: owner flag (weak → individual)
     ("owner_flag_alone", dict(insider_transaction_for_owner_exists=True), True),
@@ -364,6 +365,15 @@ class TestNameSuggestsCompany:
 
     def test_strict_keyword_not_substring(self):
         assert _name_suggests_company("SCOTT JOHNSON") is False
+
+    def test_spaced_keyword_whole_word(self):
+        assert _name_suggests_company("ACME L P") is True
+        assert _name_suggests_company("ACME L L C") is True
+
+    def test_spaced_keyword_not_substring(self):
+        # GH #1019: "MICHAE|L P|." and "MICHAE|L L C|OOPER" are people
+        assert _name_suggests_company("WYATT MICHAEL P.") is False
+        assert _name_suggests_company("MICHAEL L COOPER") is False
 
     def test_sec_suffix(self):
         assert _name_suggests_company("TOYOTA MOTOR CORP /ADR/") is True
