@@ -48,7 +48,7 @@ class CompanyReport:
 
     @property
     def cash_flow_statement(self):
-        return self.financials.cashflow_statement() if self.financials else None
+        return self.financials.cash_flow_statement() if self.financials else None
 
     @cached_property
     def auditor(self):

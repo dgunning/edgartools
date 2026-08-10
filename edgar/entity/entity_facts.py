@@ -1938,7 +1938,18 @@ class EntityFacts:
 
         return df
 
-    def cashflow_statement(self,
+    def cashflow_statement(self, **kwargs):
+        """Deprecated: use :meth:`cash_flow_statement`."""
+        warnings.warn(
+            "cashflow_statement() is deprecated and will be removed in v6.0. "
+            "Use cash_flow_statement(), which matches income_statement() and "
+            "balance_sheet().",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.cash_flow_statement(**kwargs)
+
+    def cash_flow_statement(self,
                            periods: int = 4,
                            period_length: Optional[int] = None,
                            as_dataframe: bool = False,
@@ -1961,14 +1972,14 @@ class EntityFacts:
 
         Example:
             # Get hierarchical multi-period statement (default)
-            stmt = facts.cashflow_statement(periods=4, annual=True)
+            stmt = facts.cash_flow_statement(periods=4, annual=True)
             print(stmt)  # Rich display with hierarchy
 
             # Get DataFrame for analysis
-            df = facts.cashflow_statement(periods=4, as_dataframe=True)
+            df = facts.cash_flow_statement(periods=4, as_dataframe=True)
 
             # Convert statement to DataFrame later
-            stmt = facts.cashflow_statement(periods=4)
+            stmt = facts.cash_flow_statement(periods=4)
             df = stmt.to_dataframe()
         """
         if annual is not None:
@@ -1999,14 +2010,14 @@ class EntityFacts:
 
     def cash_flow(self, periods: int = 4, period_length: Optional[int] = None, as_dataframe: bool = False,
                   annual: bool = True, concise_format: bool = False) -> Union[DataFrame, MultiPeriodStatement]:
-        """Deprecated: Use cashflow_statement() instead."""
+        """Deprecated: Use cash_flow_statement() instead."""
         warnings.warn(
             "cash_flow() is deprecated and will be removed in v6.0. "
-            "Use cashflow_statement() instead.",
+            "Use cash_flow_statement() instead.",
             DeprecationWarning,
             stacklevel=2
         )
-        return self.cashflow_statement(periods=periods, period_length=period_length,
+        return self.cash_flow_statement(periods=periods, period_length=period_length,
                                        as_dataframe=as_dataframe, annual=annual,
                                        concise_format=concise_format)
 

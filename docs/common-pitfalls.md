@@ -87,14 +87,14 @@ revenue = financials.get_revenue()    # e.g. 391035000000
 print(f"${revenue/1e9:.1f}B")         # "$391.0B"
 ```
 
-### The cash flow method is `cashflow_statement()`
+### The cash flow method is `cash_flow_statement()`
 
-The canonical method name is `cashflow_statement()` (no underscore between "cash" and "flow"). The alias `cash_flow_statement()` also works. All three statements follow the same pattern:
+The canonical method name is `cash_flow_statement()` (no underscore between "cash" and "flow"). The alias `cash_flow_statement()` also works. All three statements follow the same pattern:
 
 ```python
 financials.income_statement()       # Income statement
 financials.balance_sheet()          # Balance sheet
-financials.cashflow_statement()     # Cash flow statement (cash_flow_statement() also works)
+financials.cash_flow_statement()     # Cash flow statement (cash_flow_statement() also works)
 ```
 
 ---
@@ -261,7 +261,7 @@ df = financials.to_dataframe()   # AttributeError
 # RIGHT: call to_dataframe() on the individual statement
 df = financials.income_statement().to_dataframe()
 df = financials.balance_sheet().to_dataframe()
-df = financials.cashflow_statement().to_dataframe()
+df = financials.cash_flow_statement().to_dataframe()
 ```
 
 ### Export to CSV or Excel

@@ -167,7 +167,7 @@ def _build_financials(company, periods: int, period: str) -> dict:
 
         # Cash Flow Statement
         try:
-            cash_flow = company.cashflow_statement(period='ttm', periods=periods)
+            cash_flow = company.cash_flow_statement(period='ttm', periods=periods)
             financials["cash_flow"] = _format_statement(cash_flow)
         except Exception as e:
             logger.debug(f"Could not get TTM cash flow: {e}")
@@ -195,7 +195,7 @@ def _build_financials(company, periods: int, period: str) -> dict:
 
         # Cash Flow
         try:
-            cash_flow = facts.cashflow_statement(periods=periods, annual=annual)
+            cash_flow = facts.cash_flow_statement(periods=periods, annual=annual)
             financials["cash_flow"] = _format_statement(cash_flow)
         except Exception as e:
             logger.debug(f"Could not get cash flow: {e}")

@@ -277,7 +277,7 @@ xbrl = filing.xbrl()
 prompt = viewer.compare_context(xbrl, 'balance_sheet')
 
 # Valid statement names: 'balance_sheet', 'income_statement',
-#                        'cashflow_statement', 'comprehensive_income'
+#                        'cash_flow_statement', 'comprehensive_income'
 ```
 
 Pass `prompt` to any LLM for a natural-language audit of the two renderings.

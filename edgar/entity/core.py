@@ -5,6 +5,7 @@ This module provides the main classes for interacting with SEC entities,
 including companies, funds, and individuals.
 """
 import re
+import warnings
 from abc import ABC, abstractmethod
 from datetime import date
 from functools import cached_property
@@ -622,7 +623,7 @@ class Company(Entity):
             financials = Company("AAPL").get_financials()
             financials.income_statement()
             financials.balance_sheet()
-            financials.cashflow_statement()
+            financials.cash_flow_statement()
             financials.get_revenue()        # Quick access to a single value
         """
         tenk_filing = self.latest_tenk
@@ -1106,7 +1107,7 @@ class Company(Entity):
                 log.debug(f"Error getting balance sheet for {self.name}: {e}")
         return None
 
-    def cashflow_statement(
+    def cash_flow_statement(
         self,
         periods: int = 4,
         period: str = 'annual',
@@ -1135,7 +1136,7 @@ class Company(Entity):
             return None
 
         try:
-            return facts.cashflow_statement(
+            return facts.cash_flow_statement(
                 periods=periods,
                 period=period,
                 as_dataframe=as_dataframe,
@@ -1154,22 +1155,29 @@ class Company(Entity):
         as_dataframe: bool = False,
         concise_format: bool = False
     ) -> Union["MultiPeriodStatement", TTMStatement, "pd.DataFrame", None]:
-        """Deprecated: Use cashflow_statement() instead."""
+        """Deprecated: Use cash_flow_statement() instead."""
         import warnings
         warnings.warn(
             "cash_flow() is deprecated and will be removed in v6.0. "
-            "Use cashflow_statement() instead.",
+            "Use cash_flow_statement() instead.",
             DeprecationWarning,
             stacklevel=2
         )
-        return self.cashflow_statement(
+        return self.cash_flow_statement(
             periods=periods, period=period, annual=annual,
             as_dataframe=as_dataframe, concise_format=concise_format
         )
 
-    def cash_flow_statement(self, **kwargs):
-        """Alias for cashflow_statement()."""
-        return self.cashflow_statement(**kwargs)
+    def cashflow_statement(self, **kwargs):
+        """Deprecated: use :meth:`cash_flow_statement`."""
+        warnings.warn(
+            "cashflow_statement() is deprecated and will be removed in v6.0. "
+            "Use cash_flow_statement(), which matches income_statement() and "
+            "balance_sheet().",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.cash_flow_statement(**kwargs)
 
     # -------------------------------------------------------------------------
     # Concept Discovery Methods

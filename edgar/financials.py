@@ -1,3 +1,4 @@
+import warnings
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
@@ -166,7 +167,7 @@ class Financials:
             return None
         return self.xb.statements.income_statement(include_dimensions=include_dimensions, view=view)
 
-    def cashflow_statement(self, include_dimensions: bool = None, view: ViewType = None):
+    def cash_flow_statement(self, include_dimensions: bool = None, view: ViewType = None):
         """
         Get the cash flow statement.
 
@@ -183,11 +184,18 @@ class Financials:
         """
         if self.xb is None:
             return None
-        return self.xb.statements.cashflow_statement(include_dimensions=include_dimensions, view=view)
+        return self.xb.statements.cash_flow_statement(include_dimensions=include_dimensions, view=view)
 
-    def cash_flow_statement(self, **kwargs):
-        """Alias for cashflow_statement()."""
-        return self.cashflow_statement(**kwargs)
+    def cashflow_statement(self, **kwargs):
+        """Deprecated: use :meth:`cash_flow_statement`."""
+        warnings.warn(
+            "cashflow_statement() is deprecated and will be removed in v6.0. "
+            "Use cash_flow_statement(), which matches income_statement() and "
+            "balance_sheet().",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.cash_flow_statement(**kwargs)
 
     def statement_of_equity(self, include_dimensions: bool = None, view: ViewType = None):
         """
@@ -275,7 +283,7 @@ class Financials:
             elif statement_type == 'balance':
                 statement = self.balance_sheet()
             elif statement_type == 'cashflow':
-                statement = self.cashflow_statement()
+                statement = self.cash_flow_statement()
             else:
                 return None
 
@@ -380,7 +388,7 @@ class Financials:
             elif statement_type == 'balance':
                 statement = self.balance_sheet()
             elif statement_type == 'cashflow':
-                statement = self.cashflow_statement()
+                statement = self.cash_flow_statement()
             else:
                 return None
 
@@ -740,7 +748,7 @@ class Financials:
             elif statement_type == 'balance':
                 statement = self.balance_sheet()
             elif statement_type == 'cashflow':
-                statement = self.cashflow_statement()
+                statement = self.cash_flow_statement()
             else:
                 return None
 
@@ -987,7 +995,7 @@ class Financials:
             "AVAILABLE STATEMENTS:",
             "  financials.income_statement()",
             "  financials.balance_sheet()",
-            "  financials.cashflow_statement()",
+            "  financials.cash_flow_statement()",
             "  financials.statement_of_equity()",
             "  financials.comprehensive_income()",
             "",
@@ -1033,12 +1041,19 @@ class MultiFinancials:
     def income_statement(self, view: ViewType = None) -> Optional[StitchedStatement]:
         return self.xbs.statements.income_statement(view=view)
 
-    def cashflow_statement(self, view: ViewType = None) -> Optional[StitchedStatement]:
-        return self.xbs.statements.cashflow_statement(view=view)
+    def cash_flow_statement(self, view: ViewType = None) -> Optional[StitchedStatement]:
+        return self.xbs.statements.cash_flow_statement(view=view)
 
-    def cash_flow_statement(self, **kwargs):
-        """Alias for cashflow_statement()."""
-        return self.cashflow_statement(**kwargs)
+    def cashflow_statement(self, **kwargs):
+        """Deprecated: use :meth:`cash_flow_statement`."""
+        warnings.warn(
+            "cashflow_statement() is deprecated and will be removed in v6.0. "
+            "Use cash_flow_statement(), which matches income_statement() and "
+            "balance_sheet().",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.cash_flow_statement(**kwargs)
 
     def __rich__(self):
         return self.xbs.__rich__()

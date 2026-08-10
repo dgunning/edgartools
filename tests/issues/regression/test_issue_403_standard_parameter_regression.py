@@ -34,7 +34,7 @@ class TestIssue403Regression:
         statement_methods = [
             'income_statement',
             'balance_sheet', 
-            'cashflow_statement',
+            'cash_flow_statement',
             'statement_of_equity',
             'comprehensive_income'
         ]
@@ -108,7 +108,7 @@ class TestIssue403Regression:
         statement_methods = [
             'income_statement',
             'balance_sheet', 
-            'cashflow_statement',
+            'cash_flow_statement',
             'statement_of_equity',
             'comprehensive_income'
         ]
@@ -129,12 +129,12 @@ class TestIssue403Regression:
     # behavioural tests call income_statement alone. A method can carry a
     # correct `standard` parameter in its signature and still drop it on the
     # floor instead of forwarding it, which is issue #403 exactly, and for
-    # balance_sheet, cashflow_statement, statement_of_equity and
+    # balance_sheet, cash_flow_statement, statement_of_equity and
     # comprehensive_income nothing here would have caught that.
     @pytest.mark.parametrize("method_name", [
         'income_statement',
         'balance_sheet',
-        'cashflow_statement',
+        'cash_flow_statement',
         'statement_of_equity',
         'comprehensive_income',
     ])

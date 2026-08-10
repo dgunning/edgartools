@@ -310,7 +310,7 @@ def _extract_financials(obj) -> Optional[str]:
             parts = []
             for name, method in [("Income Statement", "income_statement"),
                                  ("Balance Sheet", "balance_sheet"),
-                                 ("Cash Flow Statement", "cashflow_statement")]:
+                                 ("Cash Flow Statement", "cash_flow_statement")]:
                 try:
                     stmt = getattr(fin, method)()
                     if stmt is not None:
