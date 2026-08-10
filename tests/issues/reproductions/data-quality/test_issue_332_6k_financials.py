@@ -14,6 +14,8 @@ The fix: Make CurrentReport inherit from CompanyReport to get financial function
 
 import pytest
 from unittest.mock import Mock
+
+from edgar import Company
 from edgar.company_reports import CurrentReport, SixK, EightK
 
 
@@ -81,43 +83,40 @@ def test_sixk_financial_properties_callable():
             pytest.fail(f"AttributeError raised when accessing financial properties: {e}")
             
 
-# Integration test (may be skipped if network/data not available)
+# Integration test against a real 6-K.
+#
+# Explicitly `network`. Without the marker this file's name matches a FAST
+# pattern in tests/conftest.py, which put a live Company("ASML") lookup and a
+# filings fetch inside `test-fast (3.13)` — a required pull-request check.
+#
+# It also used to be incapable of failing. An ImportError became a skip, and so
+# did every other exception, including the AttributeError on report.financials
+# that issue #332 is entirely about. Three failure modes, three green skips.
+@pytest.mark.network
 @pytest.mark.regression
 def test_real_filing_integration():
-    """Integration test with real filing data if available"""
-    try:
-        from edgar import get_filings
-        from edgar import Company
-        
-        # Try to get a company with known 6-K filings
-        try:
-            # Try to get recent filings from a major foreign company that files 6-Ks
-            company = Company("ASML")  # ASML Holding N.V. - Dutch company that files 6-Ks
-            filings = company.get_filings(form="6-K")[:1]  # Get just 1 filing
+    """A real 6-K exposes .financials without raising AttributeError (issue #332)."""
+    # ASML Holding N.V. — a Dutch filer that reports on 6-K rather than 8-K.
+    company = Company("ASML")
+    filings = company.get_filings(form="6-K")
+    assert len(filings) > 0, (
+        "ASML returned no 6-K filings. It files them continuously, so an empty "
+        "result is a filing-access defect, not a reason to skip."
+    )
 
-            if filings:
-                filing = filings[0]
-                report = filing.obj()
+    filing = filings.latest()
+    report = filing.obj()
+    assert report is not None, f"filing.obj() returned None for {filing.accession_number}"
+    assert isinstance(report, SixK), (
+        f"6-K {filing.accession_number} produced {type(report).__name__}, expected SixK"
+    )
 
-                # Should not raise AttributeError
-                financials = report.financials
-                assert hasattr(report, 'financials')
-                
-                print(f"Integration test passed with {filing.form} filing")
-            else:
-                pytest.skip("No 6-K filings available for integration test")
-                
-        except Exception as e:
-            pytest.skip(f"Integration test skipped due to data access issue: {e}")
-            
-    except ImportError as e:
-        pytest.skip(f"Integration test skipped due to import issue: {e}")
-
-
-if __name__ == "__main__":
-    test_current_report_inherits_from_company_report()
-    test_sixk_has_financial_properties()
-    test_eightk_alias_inherits_financial_properties()
-    test_current_report_accepts_8k_and_sixk_accepts_6k()
-    test_sixk_financial_properties_callable()
-    print("All basic tests passed!")
+    # The regression itself: CurrentReport did not inherit from CompanyReport, so
+    # this attribute did not exist and raised AttributeError.
+    assert hasattr(report, 'financials'), (
+        f"{type(report).__name__} has no .financials property — issue #332 has regressed"
+    )
+    # Access it too. hasattr() alone passes on a property that exists, and the
+    # bug was in reading it. Its value may legitimately be None: most 6-Ks carry
+    # no XBRL financial statements. Raising is the failure, not returning None.
+    report.financials

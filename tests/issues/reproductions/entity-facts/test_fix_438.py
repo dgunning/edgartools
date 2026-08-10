@@ -98,37 +98,7 @@ def test_regression_no_statement_type_none():
     assert parser._determine_statement_type('us-gaap:Revenues') == 'IncomeStatement'
 
 
-if __name__ == "__main__":
-    # Run the tests directly
-    test_instance = TestIssue438Fix()
-
-    print("Running Issue #438 Fix Verification Tests...")
-
-    try:
-        # Debug: Test primary statement mapping
-        print("Debug - Testing revenue concept mappings:")
-        for concept in ['Revenue', 'Revenues', 'SalesRevenueNet']:
-            result = get_primary_statement(concept)
-            print(f"  {concept}: {result}")
-
-        test_instance.test_revenues_in_statement_mapping()
-        print("✓ test_revenues_in_statement_mapping passed")
-
-        test_instance.test_determine_statement_type_with_revenues()
-        print("✓ test_determine_statement_type_with_revenues passed")
-
-        test_instance.test_edge_case_scenarios()
-        print("✓ test_edge_case_scenarios passed")
-
-        test_instance.test_no_duplicate_entries_created()
-        print("✓ test_no_duplicate_entries_created passed")
-
-        test_regression_no_statement_type_none()
-        print("✓ test_regression_no_statement_type_none passed")
-
-        print("\n🎉 ALL TESTS PASSED - Issue #438 fix verified!")
-
-    except Exception as e:
-        print(f"❌ TEST FAILED: {e}")
-        import traceback
-        traceback.print_exc()
+# The `if __name__ == "__main__"` runner that used to live here called each
+# test inside one try/except Exception, so the first failure printed
+# "❌ TEST FAILED" and the script still exited 0 — and every test after it was
+# skipped silently. Run this file with pytest.

@@ -197,35 +197,8 @@ class TestIssue412Regression:
         
         return non_null_count / total_count if total_count > 0 else 0.0
 
-
-if __name__ == "__main__":
-    # Run the regression tests
-    test = TestIssue412Regression()
-    
-    print("🧪 Running Issue #412 Regression Tests...")
-    
-    try:
-        test.test_tsla_historical_balance_sheet_completeness()
-        print("✅ TSLA historical completeness test passed")
-    except Exception as e:
-        print(f"❌ TSLA historical completeness test failed: {e}")
-    
-    try:
-        test.test_tsla_balance_sheet_key_items_present()
-        print("✅ TSLA key items test passed")
-    except Exception as e:
-        print(f"❌ TSLA key items test failed: {e}")
-    
-    try:
-        test.test_rich_output_shows_historical_data()
-        print("✅ Rich output test passed")
-    except Exception as e:
-        print(f"❌ Rich output test failed: {e}")
-    
-    try:
-        test.test_multiple_companies_no_regression()
-        print("✅ Multi-company regression test passed")
-    except Exception as e:
-        print(f"❌ Multi-company regression test failed: {e}")
-    
-    print("🎉 All regression tests completed!")
+# The `if __name__ == "__main__"` runner that used to live here ran all four
+# tests, caught Exception around each one, printed a ✗ line and finished with
+# "🎉 All regression tests completed!" and exit status 0. Anyone running the
+# file directly to check the fix got a celebration regardless of the result.
+# Run it with pytest, which reports failures as failures.
