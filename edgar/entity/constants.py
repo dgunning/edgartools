@@ -163,7 +163,7 @@ FILER_TYPE_DOMESTIC_FORMS = frozenset({
 COMPANY_NAME_KEYWORDS = {
     # Corporate structure (long or punctuated - safe as substring)
     "CORPORATION", "L.L.C.", "L L C", "LIMITED",
-    "L.P.", "L P", "COMPANY", "HOLDINGS",
+    "L.P.", "COMPANY", "HOLDINGS",
     "PARTNERS", "PARTNERSHIP",
     # Investment entities
     "CAPITAL", "VENTURES",
@@ -188,6 +188,9 @@ COMPANY_NAME_KEYWORDS_STRICT = {
 # Pre-compiled regex for SEC filing suffixes like /ADR/, /BD/, /TA/
 _SEC_SUFFIX_RE = re.compile(r"/[A-Z0-9-]{2,}(?:/|\s|$)")
 
+# Spaced legal suffixes must not match across words in personal names.
+_SPACED_LP_RE = re.compile(r"\bL P\b")
+
 # Pre-compiled regex for joint filer detection (same first word on both sides of &)
 # Matches SEC-format names like "SMITH JOHN & SMITH JANE" where the surname repeats
 _JOINT_FILER_RE = re.compile(r"\b(\w+)\s+\w+.*&.*\b\1\b")
@@ -206,6 +209,9 @@ def _name_suggests_company(name: str) -> bool:
     # Strict keyword match (whole word only)
     words = set(re.split(r"\W+", upper))
     if words & COMPANY_NAME_KEYWORDS_STRICT:
+        return True
+
+    if _SPACED_LP_RE.search(upper):
         return True
 
     # SEC filing suffixes like /ADR/, /BD/, /TA/ indicate companies

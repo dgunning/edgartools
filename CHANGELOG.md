@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`Entity(2037927)` classified Wyatt Michael P. as a company.** The name heuristic treated spaced `L P` as a loose substring, matching across the end of "Michael" and the middle initial. Spaced `L P` now requires whole-word boundaries while remaining a recognized legal suffix. (GH #1019)
+
 - **A table data row rendered only the first line of each cell, discarding the rest.** Header rows were expanded line by line; data rows went through a formatter that did `content.split('\n')[0]`. Both text renderers had the same split — the Rich path paired `overflow="fold"` for headed columns with `overflow="ellipsis"` for headerless ones. Filers from the 1990s and 2000s wrap an entire document in a single-cell layout table, so the cut discarded the filing: Autoliv's 2001 DEFR14A rendered 20,523 characters instead of 83,316, losing its "DEAR STOCKHOLDER" cover letter from an 18,759-character cell. Modern filings lost less but still lost — Apple's FY2024 10-K gains 843 characters of non-whitespace content, AbbVie's 2,828. Exposed rather than caused by the exhibit-index fix, which reclassified three of Autoliv's layout tables from header rows to data rows and so moved them onto the truncating path. (`edgartools-j8bs`)
 
 - **Table lines carried trailing padding to the last column's full width.** Harmless when a tall cell paid it once; now that multi-line cells expand to one line each it is paid per line. Trimmed, which makes rendered text substantially smaller with identical content — Autoliv is 53,278 characters against 83,316 before the truncation bug existed, carrying 39,420 non-whitespace characters against 39,307.
