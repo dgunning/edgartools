@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`edgar` now declares `__all__` — 110 names — so the supported API is answerable.** There was no way to tell an API from an accident: 141 names were reachable from the top level, including `Optional` and `partial` (imported for annotations) and `Document`, the *legacy* `edgar.files` parser, which is a different class from `edgar.documents.Document` and is removed in 6.0. Names left out stay importable; 6.0 makes them private. **`from edgar import *` is narrower** — it no longer yields those 31 names. Direct imports are unaffected.
+
 ### Changed
 
 - **`Filing.markdown()` and `Attachment.markdown()` now render through `edgar.documents`.** They were the last public rendering methods still on the legacy `edgar.files` pipeline, which has no image node at all — `MarkdownRenderer.render` handles text blocks, tables, headings and page breaks, and drops everything else. Every `<img>` in every filing vanished silently. NVIDIA's FY2026 10-K now renders both of its images, including the Item 5 stock performance graph whose five-year return comparison exists only as a chart. Relative `src` values are resolved against the filing's SEC archive directory, so the markdown carries working absolute links rather than bare sibling file names. Output also differs where the two renderers disagree on tables; a parity ratchet pins the numeric content of both. (GH #886)
