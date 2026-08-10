@@ -366,6 +366,13 @@ class TestNameSuggestsCompany:
     def test_strict_keyword_not_substring(self):
         assert _name_suggests_company("SCOTT JOHNSON") is False
 
+    def test_partnership_forms(self):
+        # LLLP entities were detected only by the "L P" inside "AL|L P|RO"
+        assert _name_suggests_company("ALL PRO AERO PARK LLLP") is True
+        assert _name_suggests_company("101 SOUTHHALL REALTY, LLLP") is True
+        assert _name_suggests_company("10ELMS LLP") is True
+        assert _name_suggests_company("BMI WELLNESS CONCEPTS PLLC") is True
+
     def test_spaced_keyword_whole_word(self):
         assert _name_suggests_company("ACME L P") is True
         assert _name_suggests_company("ACME L L C") is True

@@ -181,7 +181,7 @@ COMPANY_NAME_KEYWORDS = {
 # "BANK" in "BANKS", "FUND" in "FUNDBERG", "TRUST" in "TRUSTER")
 COMPANY_NAME_KEYWORDS_STRICT = {
     "CO", "NA", "PLC", "SA",
-    "INC", "CORP", "LLC", "LTD", "LP",
+    "INC", "CORP", "LLC", "LTD", "LP", "LLP", "LLLP", "PLLC",
     "BANK", "FUND", "FUNDS", "TRUST", "GROUP",
 }
 
