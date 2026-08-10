@@ -8,6 +8,48 @@ filing.attachments
 
 ![attachments](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/attachments.png)
 
+## Which of these need parentheses
+
+The rule is worth learning once, because getting it wrong fails quietly rather
+than loudly: **properties hand back something already there; methods do work.**
+
+| | Shape | What you get |
+|---|---|---|
+| `attachment.content` | property | the raw document, as downloaded |
+| `attachment.text()` | **method** | text extracted from HTML |
+| `attachment.markdown()` | **method** | markdown, or `None` if not HTML |
+| `filing.document` | property | the primary document, as an `Attachment` |
+| `filing.text()` | **method** | text of the whole filing |
+
+Two of these surprise people often enough to be worth calling out (GH #841):
+
+**`attachment.text` without parentheses is a method object, not the text** — and
+a method object is always truthy, so the mistake survives an `if`:
+
+```python
+if attachment.text:        # always True, even for an empty document
+    ...
+print(attachment.text)     # <bound method Attachment.text of ...>
+print(attachment.text())   # the actual text
+```
+
+**`filing.document` is an `Attachment`, not a parsed `Document`.** The names are
+close and the objects are not:
+
+```python
+filing.document              # Attachment — the primary document as filed
+filing.document.text()       # its text
+
+from edgar.documents import Document   # a different thing entirely:
+filing.text()                          # the parsed-and-extracted text
+```
+
+`text()` stays a method deliberately rather than becoming a property. It takes
+arguments — `Document.text(clean=..., include_tables=..., max_length=...)` — and
+a property cannot. For the whole filing, `filing.text()` and `filing.markdown()`
+are the entry points; reach for an individual `attachment` when you want one
+exhibit rather than the document.
+
 ### Auto-Parsed Exhibits
 
 Some exhibit types are automatically parsed when accessed through a data object:
