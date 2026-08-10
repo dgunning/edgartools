@@ -193,6 +193,42 @@ COMPANY_NAME_KEYWORDS_STRICT = {
 # whole-word boundaries on a multi-token pattern, which is what this is.
 _SPACED_KEYWORDS_RE = re.compile(r"\b(?:L P|L L C)\b")
 
+# Terminal legal forms: match only as the LAST token of the name, which is where
+# a legal form goes. Anywhere else these are ordinary words or initials -- "AS"
+# is English, "SE" is Spanish, and every two-letter entry here is also a
+# plausible pair of trailing middle initials. The final token is compared with
+# ".", ",", "/" and parentheses removed, so "N.V.", "NV", "A/S" and "S.P.A."
+# resolve to one entry each.
+#
+# DELIBERATELY ABSENT: ASA, KK, AD, PT. Measured against SEC's 1,054,270-name
+# filer list, each is matched or outnumbered by people. "Åsa" is a Nordic given
+# name, so "HEDIN ASA" and "ASK ASA" are individuals in SEC's LAST FIRST order;
+# "ROGERS HUGH A.D.", "GROOM BENJAMIN P.T." and "NGAI ANTHONY K.K." are trailing
+# initials. The companies they would have caught -- Norwegian ASAs, Japanese KKs
+# -- carry tickers or an EIN, which signals 2 and 6 reach before the name is ever
+# consulted. The entries that stayed pay a much better rate: "DAVIES JOHN A.B."
+# and "AL-THANI KHALID NASSER A.S." are the only two people in the ~2,300 filers
+# this set newly identifies.
+COMPANY_NAME_TERMINAL_SUFFIXES = {
+    # Continental Europe
+    "AG", "GMBH", "KGAA",        # German
+    "BV", "NV", "CV",            # Dutch
+    "AB",                        # Swedish
+    "AS", "APS",                 # Norwegian / Danish
+    "OY", "OYJ",                 # Finnish
+    "SPA",                       # Italian
+    "SARL", "SAS",               # French / Luxembourgish
+    "SE",                        # Societas Europaea
+    # Elsewhere
+    "TBK",                       # Indonesian
+    # US forms the strict set never carried
+    "PBC", "REIT", "ETF",
+}
+
+# Characters to drop before comparing a final token to the set above:
+# "N.V." -> "NV", "A/S" -> "AS", "(BV)" -> "BV", "INDOFOOD, TBK" -> "TBK".
+_TERMINAL_PUNCT = str.maketrans("", "", "./,()")
+
 # Pre-compiled regex for SEC filing suffixes like /ADR/, /BD/, /TA/
 _SEC_SUFFIX_RE = re.compile(r"/[A-Z0-9-]{2,}(?:/|\s|$)")
 
@@ -218,6 +254,11 @@ def _name_suggests_company(name: str) -> bool:
     # Strict keyword match (whole word only)
     words = set(re.split(r"\W+", upper))
     if words & COMPANY_NAME_KEYWORDS_STRICT:
+        return True
+
+    # Legal form as the final token ("... N.V.", "... GMBH", "... A/S")
+    tokens = upper.split()
+    if tokens and tokens[-1].translate(_TERMINAL_PUNCT) in COMPANY_NAME_TERMINAL_SUFFIXES:
         return True
 
     # SEC filing suffixes like /ADR/, /BD/, /TA/ indicate companies

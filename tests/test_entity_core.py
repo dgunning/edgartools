@@ -375,6 +375,33 @@ class TestNameSuggestsCompany:
         assert _name_suggests_company("WYATT MICHAEL P.") is False
         assert _name_suggests_company("MICHAEL L COOPER") is False
 
+    @pytest.mark.parametrize("name", [
+        "ABLYNX NV", "ABN AMRO BANK N.V.", "SIEMENS AG", "OHB TECHNOLOGY A.G.",
+        "ADS-TEC HOLDING GMBH", "MERCK KGAA", "AIRBUS SE", "ACHMEA B.V.",
+        "BENCIS VI C.V.", "ASTRAZENECA AB", "AKASTOR AS", "COLOPLAST A/S",
+        "PANCRYOS APS", "ELISA OYJ", "INTRUM OY", "BREMBO S.P.A.",
+        "ALIAN SARL", "6922767 HOLDING S.A.R.L.", "DYNACURE SAS",
+        "PT INDOSAT TBK", "34 LIVES, PBC", "1111 THIRD REIT",
+        "21SHARES DOGECOIN ETF",
+    ])
+    def test_terminal_legal_form(self, name):
+        assert _name_suggests_company(name) is True
+
+    def test_terminal_legal_form_only_at_the_end(self):
+        # The same tokens elsewhere in a name are words or initials, not forms
+        assert _name_suggests_company("SE JONG KIM") is False
+        assert _name_suggests_company("AB TESTER JONES") is False
+
+    @pytest.mark.parametrize("name", [
+        "HEDIN ASA",             # Åsa is a Nordic given name, LAST FIRST order
+        "ABELIOVICH ASA",
+        "NGAI ANTHONY K.K.",     # trailing initials, not a Japanese KK
+        "ROGERS HUGH A.D.",
+        "GROOM BENJAMIN P.T.",
+    ])
+    def test_ambiguous_forms_stay_individual(self, name):
+        assert _name_suggests_company(name) is False
+
     def test_sec_suffix(self):
         assert _name_suggests_company("TOYOTA MOTOR CORP /ADR/") is True
 
