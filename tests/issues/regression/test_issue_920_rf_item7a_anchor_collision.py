@@ -24,6 +24,8 @@ GitHub Issue: https://github.com/dgunning/edgartools/issues/920
 """
 from pathlib import Path
 
+import pytest
+
 from edgar.documents.config import ParserConfig
 from edgar.documents.parser import HTMLParser
 
@@ -31,14 +33,27 @@ _FIXTURE = (Path(__file__).resolve().parents[2]
             / "fixtures" / "html" / "rf" / "10k" / "rf-10-k-2022-02-24.html")
 
 
-def _sections():
+@pytest.fixture(scope="module")
+def sections():
+    """Parse the RF 10-K once for the whole module.
+
+    This was a plain `_sections()` helper that every test called, so the 9.5 MB
+    fixture was parsed once per test. Measured 2026-08-10: 3 parses, 3.7s of
+    them redundant — the largest single such cost in the offline regression
+    tree (bead edgartools-07lk.24, Tier 3).
+
+    Module scope rather than session scope so the parsed document is
+    released when this file finishes; one parsed 10-K of this size costs
+    ~0.3 GB resident, and `test-ci-fast` runs `-n auto`, which would multiply
+    that across workers.
+    """
     doc = HTMLParser(ParserConfig(form="10-K", detect_sections=True)).parse(_FIXTURE.read_text())
     return doc.sections
 
 
-def test_item7a_is_its_own_stub_not_item7():
+def test_item7a_is_its_own_stub_not_item7(sections):
     """Item 7A resolves to its own incorporation-by-reference stub."""
-    secs = _sections()
+    secs = sections
     item7 = secs["part_ii_item_7"].text()
     item7a = secs["part_ii_item_7a"].text()
 
@@ -53,15 +68,15 @@ def test_item7a_is_its_own_stub_not_item7():
     assert "EXECUTIVE OVERVIEW" not in item7a.upper()
 
 
-def test_item7_mda_stays_intact():
+def test_item7_mda_stays_intact(sections):
     """Item 7's MD&A body is unchanged (it keeps the shared page anchor)."""
-    item7 = _sections()["part_ii_item_7"].text()
+    item7 = sections["part_ii_item_7"].text()
     assert len(item7) > 150_000, f"Item 7 MD&A regressed ({len(item7)} chars)"
     assert "EXECUTIVE OVERVIEW" in item7.upper()
 
 
-def test_item7a_does_not_overrun_into_later_items():
+def test_item7a_does_not_overrun_into_later_items(sections):
     """The re-pointed 7A stops before Item 8 — no later item header bleeds in."""
-    item7a = _sections()["part_ii_item_7a"].text().upper()
+    item7a = sections["part_ii_item_7a"].text().upper()
     for later in ("ITEM 8", "ITEM 9", "ITEM 9A"):
         assert later not in item7a, f"Item 7A overran into {later}"
