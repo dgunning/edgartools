@@ -20,7 +20,7 @@ from edgar._filings import Filings
 from edgar.datatools import drop_duplicates_pyarrow
 from edgar.entity.data import EntityData
 from edgar.funds.core import FundClass, FundCompany, FundSeries
-from edgar.httprequests import download_text
+from edgar.httprequests import TRANSPORT_ERRORS, download_text
 
 log = logging.getLogger(__name__)
 
@@ -406,6 +406,17 @@ def direct_get_fund_with_filings(contract_or_series_id: str, filing_type: Option
             return _FundClass(company_info)
         else:
             return _FundSeries(company_info)
+    except TRANSPORT_ERRORS:
+        # "Could not reach SEC" is not "this fund does not exist". Returning None
+        # here made the two indistinguishable, and the caller in funds/core.py
+        # turns None into an EMPTY Filings with no fallback (GH #888 forbids
+        # falling back to the unfiltered trust) — so a network failure silently
+        # told the user the series had filed nothing.
+        #
+        # The genuine not-found signals stay None and are unaffected: an
+        # identifier that is not [CS]\d+, and a browse-edgar page containing
+        # "No matching". Those are answers. This is the absence of one.
+        raise
     except Exception as e:
         log.warning("Error retrieving fund information for %s: %s", contract_or_series_id, e)
         return None

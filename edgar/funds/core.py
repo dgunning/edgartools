@@ -17,6 +17,7 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar.entity.core import Entity
+from edgar.httprequests import TRANSPORT_ERRORS
 from edgar.richtools import repr_rich
 
 if TYPE_CHECKING:
@@ -594,7 +595,16 @@ class Fund:
                 series_filings = getattr(series, 'filings', None)
                 if series_filings is not None and len(series_filings) > 0:
                     filing_tables.append(series_filings.data)
-        except Exception as e:  # network / parse failure — do not fall back to the trust
+        except TRANSPORT_ERRORS:
+            # Let the caller see the outage. The `return None` below means "this
+            # series resolved to nothing", and get_filings turns it into an empty
+            # Filings — correct for a series with no matching filings, a lie for
+            # a failed fetch. There is deliberately no fallback on this path
+            # (GH #888: returning the unfiltered trust would hand back a sibling
+            # series' data), so nothing downstream can notice the difference and
+            # the user is simply told there are no filings.
+            raise
+        except Exception as e:  # parse failure — do not fall back to the trust
             log.debug("Series filing lookup failed for %s: %s", series_id, e)
             return None
 

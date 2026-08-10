@@ -45,6 +45,9 @@ __all__ = [
     "download_datafile",
     "decompress_gzip_with_retry",
     "SSLVerificationError",
+    "TooManyRequestsError",
+    "IdentityNotSetException",
+    "TRANSPORT_ERRORS",
 ]
 
 attempts = 6
@@ -574,6 +577,35 @@ Details: https://github.com/dgunning/edgartools/blob/main/docs/guides/ssl_verifi
 
         message = f"{header}{cause}{diagnostic}{solution}{footer}"
         super().__init__(message)
+
+
+# The errors that mean "we could not ask SEC", as opposed to "we asked and the
+# answer is no". Every lookup that returns None for a missing record needs this
+# distinction, because a bare None collapses the two into one value and the
+# caller cannot tell an absent fund from an outage.
+#
+# It exists because they were being collapsed. `Fund.get_filings(series_only=True)`
+# returned an EMPTY Filings during a network failure — indistinguishable from a
+# series that has filed nothing, and with no fallback path to catch it, because
+# returning the unfiltered trust there would be wrong (GH #888). Found by running
+# the offline audit harness over the network-marked regression tests: six tests
+# failed on `assert None is not None` instead of a connection error, which is the
+# signature of a swallowed transport failure.
+#
+# Catch this tuple and re-raise BEFORE any `except Exception` that converts a
+# failure into None. Not a replacement for the exception hierarchy in bead
+# edgartools-07lk.10 — this is the vocabulary those call sites need today, and it
+# is deliberately a tuple of existing types so it introduces no new public class.
+#
+# IdentityNotSetException belongs here despite not being a transport error: it
+# means no request can be made at all, so reporting it as "not found" is the same
+# lie in a different costume.
+TRANSPORT_ERRORS = (
+    HTTPError,               # httpx base: connect, read, timeout, protocol, status
+    TooManyRequestsError,    # SEC rate limit, after retries are exhausted
+    SSLVerificationError,
+    IdentityNotSetException,
+)
 
 
 def is_redirect(response):
