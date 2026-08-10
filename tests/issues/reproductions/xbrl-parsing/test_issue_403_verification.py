@@ -60,9 +60,9 @@ class TestIssue403Verification:
 
     @pytest.mark.regression
     @patch('edgar.xbrl.statements.StitchedStatement')
-    def test_cashflow_statement_standard_false(self, mock_stitched_statement):
-        """Test that cashflow_statement accepts 'standard=False' parameter."""
-        self.statements.cashflow_statement(standard=False)
+    def test_cash_flow_statement_standard_false(self, mock_stitched_statement):
+        """Test that cash_flow_statement accepts 'standard=False' parameter."""
+        self.statements.cash_flow_statement(standard=False)
         
         mock_stitched_statement.assert_called_once()
         args = mock_stitched_statement.call_args[0]
@@ -96,7 +96,7 @@ class TestIssue403Verification:
         methods = [
             'income_statement',
             'balance_sheet', 
-            'cashflow_statement',
+            'cash_flow_statement',
             'statement_of_equity',
             'comprehensive_income'
         ]
@@ -151,7 +151,7 @@ def test_original_issue_scenario():
     print("Testing all statement methods...")
     print("✓ stmt = xbrls.statements.income_statement(standard=True)")
     print("✓ stmt = xbrls.statements.balance_sheet(standard=True)")  
-    print("✓ stmt = xbrls.statements.cashflow_statement(standard=False)")
+    print("✓ stmt = xbrls.statements.cash_flow_statement(standard=False)")
     print("✓ All statement methods accept standard parameter")
     
     print()

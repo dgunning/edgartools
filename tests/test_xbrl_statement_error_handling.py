@@ -71,7 +71,7 @@ def test_balance_sheet_handles_general_exception():
             assert "RuntimeError: Unexpected error" in warning_message
 
 
-def test_cashflow_statement_handles_missing_attributes():
+def test_cash_flow_statement_handles_missing_attributes():
     """Test error handling when XBRL object is missing expected attributes."""
     
     # Create a mock XBRL object with missing attributes
@@ -89,7 +89,7 @@ def test_cashflow_statement_handles_missing_attributes():
     
     # Should return None and handle missing attributes gracefully
     with patch('edgar.core.log') as mock_log:
-        result = statements.cashflow_statement()
+        result = statements.cash_flow_statement()
         
         # Should return None
         assert result is None
@@ -142,7 +142,7 @@ def test_statement_of_equity_successful_resolution():
 if __name__ == "__main__":
     test_income_statement_handles_low_confidence_error()
     test_balance_sheet_handles_general_exception()
-    test_cashflow_statement_handles_missing_attributes()
+    test_cash_flow_statement_handles_missing_attributes()
     test_statement_of_equity_successful_resolution()
     
     print("✓ All error handling tests passed!")

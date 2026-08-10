@@ -135,7 +135,7 @@ xbrl = filing.xbrl()
 # Access financial statements
 income_stmt = xbrl.statements.income_statement
 balance_sheet = xbrl.statements.balance_sheet
-cash_flow = xbrl.statements.cashflow_statement
+cash_flow = xbrl.statements.cash_flow_statement
 
 # Query specific facts
 facts = xbrl.facts

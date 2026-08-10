@@ -273,6 +273,6 @@ prompt = viewer.compare_context(xbrl, statement='balance_sheet')
 print(prompt[:500])
 ```
 
-Available statements: `'balance_sheet'`, `'income_statement'`, `'cashflow_statement'`, `'comprehensive_income'`.
+Available statements: `'balance_sheet'`, `'income_statement'`, `'cash_flow_statement'`, `'comprehensive_income'`.
 
 The SEC viewer is treated as the authoritative source. The prompt instructs the LLM to flag anything in the XBRL output that differs.

@@ -34,7 +34,7 @@ class TestIssue403Regression:
         statement_methods = [
             'income_statement',
             'balance_sheet', 
-            'cashflow_statement',
+            'cash_flow_statement',
             'statement_of_equity',
             'comprehensive_income'
         ]
@@ -108,7 +108,7 @@ class TestIssue403Regression:
         statement_methods = [
             'income_statement',
             'balance_sheet', 
-            'cashflow_statement',
+            'cash_flow_statement',
             'statement_of_equity',
             'comprehensive_income'
         ]

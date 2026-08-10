@@ -122,7 +122,7 @@ patterns:
       margin = net_income / revenue                      # Example calculation
       income = financials.income_statement()             # 3-year income table
       balance = financials.balance_sheet()               # 2-year balance table
-      cashflow = financials.cashflow_statement()         # 3-year cash flow table
+      cashflow = financials.cash_flow_statement()         # 3-year cash flow table
 
       # ONLY for 4+ year history (slower, more data):
       facts = company.get_facts()

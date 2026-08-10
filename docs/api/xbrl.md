@@ -737,9 +737,9 @@ def balance_sheet(self, view=None, **kwargs) -> Optional[StitchedStatement]
 def income_statement(self, view=None, **kwargs) -> Optional[StitchedStatement]
 ```
 
-#### cashflow_statement()
+#### cash_flow_statement()
 ```python
-def cashflow_statement(self, view=None, **kwargs) -> Optional[StitchedStatement]
+def cash_flow_statement(self, view=None, **kwargs) -> Optional[StitchedStatement]
 ```
 
 #### statement_of_equity()

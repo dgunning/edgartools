@@ -27,7 +27,7 @@ financials = company.get_financials()
 # Access individual statements
 balance_sheet = financials.balance_sheet
 income_statement = financials.income_statement()
-cash_flow = financials.cashflow_statement()
+cash_flow = financials.cash_flow_statement()
 ```
 
 
@@ -51,7 +51,7 @@ statements = xbrl.statements
 # Display financial statements
 balance_sheet = statements.balance_sheet()
 income_statement = statements.income_statement()
-cash_flow = statements.cashflow_statement()
+cash_flow = statements.cash_flow_statement()
 
 print(balance_sheet)  # Rich formatted output
 ```
@@ -353,7 +353,7 @@ multi_financials = MultiFinancials.extract(filings)
 # Access statements spanning multiple years
 balance_sheet = multi_financials.balance_sheet()
 income_statement = multi_financials.income_statement()
-cash_flow = multi_financials.cashflow_statement()
+cash_flow = multi_financials.cash_flow_statement()
 
 # Use view="detailed" to include dimensional breakdowns (e.g., cost by segment)
 income_detailed = multi_financials.income_statement(view="detailed")
@@ -383,7 +383,7 @@ stitched_statements = xbrls.statements
 # Display multi-period statements with intelligent period selection
 income_trend = stitched_statements.income_statement()
 balance_sheet_trend = stitched_statements.balance_sheet()
-cashflow_trend = stitched_statements.cashflow_statement()
+cashflow_trend = stitched_statements.cash_flow_statement()
 
 print("Three-Year Revenue Trend:")
 revenue_trend = income_trend.to_dataframe()
@@ -475,7 +475,7 @@ print(f"Net Margin: {net_margin:.1f}%")
 
 ```python
 # Get cash flow statement
-cash_flow = statements.cashflow_statement()
+cash_flow = statements.cash_flow_statement()
 
 # Convert to DataFrame
 cf_df = cash_flow.to_dataframe()
@@ -792,7 +792,7 @@ xbrl = filing.xbrl()
 # Perform different analyses on same data
 balance_sheet = xbrl.statements.balance_sheet()
 income_statement = xbrl.statements.income_statement()
-cash_flow = xbrl.statements.cashflow_statement()
+cash_flow = xbrl.statements.cash_flow_statement()
 
 # Access facts for custom queries
 facts = xbrl.facts
