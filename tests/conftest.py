@@ -332,9 +332,15 @@ def pytest_collection_modifyitems(config, items):
         'test_twentyfourf',
         # Reproduction scripts under tests/issues/reproductions/ whose names
         # matched nothing. All fetch from SEC (Company(), get_filings()).
-        'test_financial_metrics_fix', 'test_multiperiod_statements',
-        'test_integration_438_fix', 'test_nvda_2020_duplicate_issue',
-        'test_6k_with_financials', 'test_fix_429', 'test_multiple_companies_429',
+        #
+        # Six names were dropped here when the scripts behind them were deleted
+        # (test_financial_metrics_fix, test_multiperiod_statements,
+        # test_nvda_2020_duplicate_issue, test_6k_with_financials, test_fix_429,
+        # test_multiple_companies_429). A pattern for a file that no longer
+        # exists matches nothing, so it is not a bug — but it reads as coverage
+        # this list does not have, and the entries outlived their files by a
+        # release. Delete the pattern in the same commit as the file.
+        'test_integration_438_fix',
     ]
 
     # Regression tests used to carry no fast/network marker at all: this hook

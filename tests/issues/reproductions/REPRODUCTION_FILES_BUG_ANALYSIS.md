@@ -4,6 +4,15 @@
 **Scope:** XBRL parsing and Facts API reproduction files and regression tests  
 **Analyzer:** Bug-hunter agent  
 
+> **Superseded in part (2026-08-09).** Three of the files this report analyses no
+> longer exist: `test_fix_429.py`, `test_multiple_companies_429.py` and
+> `test_company_api_methods.py` were deleted as exploratory scripts that asserted
+> nothing and therefore could never fail. The report is kept as written rather
+> than edited, because its findings are a record of what was true on 2025-09-14.
+> Its central observation — that these files' error handling turns failures into
+> silent passes — was correct, and the fix turned out to be deletion rather than
+> more error handling. See bead `edgartools-07lk.24` finding 3.
+
 ## Executive Summary
 
 Systematic analysis of EdgarTools reproduction files identified **8 significant bugs** ranging from critical period selection error handling issues to medium-priority type safety problems. Most critical concerns involve insufficient error handling that could lead to silent failures in financial data processing.
