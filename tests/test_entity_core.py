@@ -305,6 +305,7 @@ CLASSIFICATION_UNIT_TESTS = [
     ("name_corporation", dict(name="MICROSOFT CORPORATION"), False),
     ("name_co_whole_word", dict(name="STANDARD OIL CO"), False),
     ("name_co_not_substring", dict(name="SCOTT JOHNSON"), True),
+    ("name_spaced_lp_not_substring", dict(name="Wyatt Michael P."), True),
     ("name_plain_individual", dict(name="JOHN SMITH"), True),
     # Signal 8: owner flag (weak → individual)
     ("owner_flag_alone", dict(insider_transaction_for_owner_exists=True), True),
@@ -364,6 +365,49 @@ class TestNameSuggestsCompany:
 
     def test_strict_keyword_not_substring(self):
         assert _name_suggests_company("SCOTT JOHNSON") is False
+
+    def test_partnership_forms(self):
+        # LLLP entities were detected only by the "L P" inside "AL|L P|RO"
+        assert _name_suggests_company("ALL PRO AERO PARK LLLP") is True
+        assert _name_suggests_company("101 SOUTHHALL REALTY, LLLP") is True
+        assert _name_suggests_company("10ELMS LLP") is True
+        assert _name_suggests_company("BMI WELLNESS CONCEPTS PLLC") is True
+
+    def test_spaced_keyword_whole_word(self):
+        assert _name_suggests_company("ACME L P") is True
+        assert _name_suggests_company("ACME L L C") is True
+
+    def test_spaced_keyword_not_substring(self):
+        # GH #1019: "MICHAE|L P|." and "MICHAE|L L C|OOPER" are people
+        assert _name_suggests_company("WYATT MICHAEL P.") is False
+        assert _name_suggests_company("MICHAEL L COOPER") is False
+
+    @pytest.mark.parametrize("name", [
+        "ABLYNX NV", "ABN AMRO BANK N.V.", "SIEMENS AG", "OHB TECHNOLOGY A.G.",
+        "ADS-TEC HOLDING GMBH", "MERCK KGAA", "AIRBUS SE", "ACHMEA B.V.",
+        "BENCIS VI C.V.", "ASTRAZENECA AB", "AKASTOR AS", "COLOPLAST A/S",
+        "PANCRYOS APS", "ELISA OYJ", "INTRUM OY", "BREMBO S.P.A.",
+        "ALIAN SARL", "6922767 HOLDING S.A.R.L.", "DYNACURE SAS",
+        "PT INDOSAT TBK", "34 LIVES, PBC", "1111 THIRD REIT",
+        "21SHARES DOGECOIN ETF",
+    ])
+    def test_terminal_legal_form(self, name):
+        assert _name_suggests_company(name) is True
+
+    def test_terminal_legal_form_only_at_the_end(self):
+        # The same tokens elsewhere in a name are words or initials, not forms
+        assert _name_suggests_company("SE JONG KIM") is False
+        assert _name_suggests_company("AB TESTER JONES") is False
+
+    @pytest.mark.parametrize("name", [
+        "HEDIN ASA",             # Åsa is a Nordic given name, LAST FIRST order
+        "ABELIOVICH ASA",
+        "NGAI ANTHONY K.K.",     # trailing initials, not a Japanese KK
+        "ROGERS HUGH A.D.",
+        "GROOM BENJAMIN P.T.",
+    ])
+    def test_ambiguous_forms_stay_individual(self, name):
+        assert _name_suggests_company(name) is False
 
     def test_sec_suffix(self):
         assert _name_suggests_company("TOYOTA MOTOR CORP /ADR/") is True
