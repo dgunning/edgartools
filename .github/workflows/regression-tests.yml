@@ -9,6 +9,31 @@ on:
   # Run weekly on Sundays
   schedule:
     - cron: '0 8 * * 0'
+
+  # ADVISORY pre-merge run. This lane MUST NEVER become a required check.
+  #
+  # The 647 network-marked regression tests gate nothing today: they run only
+  # after merge, so a break is invisible on the pull request that caused it.
+  # That is not hypothetical — three of four consecutive post-merge runs failed
+  # the week of 2026-08-08 with 16 failures across three files, all network-
+  # marked, one of them genuine content loss in `Filing.text()` that sat on main
+  # for three commits (bead edgartools-07lk.24, finding 1).
+  #
+  # Advisory, for two independent reasons, and both have to hold:
+  #   1. It is paths-filtered. A docs-only pull request produces no run at all,
+  #      and a required check that never reports blocks the pull request forever
+  #      (the deadlock documented at the top of python-hatch-workflow.yml).
+  #   2. It is ~26 minutes against the live SEC, so it is far too slow and too
+  #      network-dependent to sit in front of a merge.
+  # The required contexts stay exactly the two named in python-hatch-workflow.yml.
+  # Making this one required is the fastest way to deadlock the repository.
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'tests/issues/regression/**'
+      - 'edgar/**'
+      - '.github/workflows/regression-tests.yml'
+
   # Also run on main branch pushes that touch the library.
   #
   # This used to name three packages — edgar/xbrl, edgar/entity and the
@@ -22,6 +47,7 @@ on:
     paths:
       - 'tests/issues/regression/**'
       - 'edgar/**'
+      - '.github/workflows/regression-tests.yml'
 
 # Cancel superseded regression runs on the same ref.
 concurrency:
@@ -31,8 +57,17 @@ concurrency:
 jobs:
   # See python-hatch-workflow.yml: cassettes are loaded with PyYAML's unsafe
   # loader, so this has to pass before anything runs pytest.
+  #
+  # The name carries the "(regression)" suffix on purpose. `main` requires the
+  # context "Cassette safety gate", produced by the identically-named job in
+  # python-hatch-workflow.yml. Once this workflow runs on pull requests too, an
+  # unsuffixed name here would put two check runs with that one required name on
+  # every pull request touching edgar/**, and branch protection matches contexts
+  # by name. Either this advisory job's red blocks a merge, or its green
+  # satisfies the requirement the real gate was supposed to answer — and which
+  # of the two you get depends on reporting order. Keep the names distinct.
   cassette-gate:
-    name: Cassette safety gate
+    name: Cassette safety gate (regression)
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -68,8 +103,16 @@ jobs:
     # Persist the SEC HTTP cache — regression tests fetch real filings, and
     # /Archives/edgar/data is cached forever (see CACHE_RULES), so a warm cache
     # serves them from disk instead of re-downloading.
+    #
+    # Restore and save are split so pull requests can READ the cache without
+    # WRITING one. This entry is 857 MB, and the repository was already at
+    # 10.7 GB against a 10 GB ceiling when the pull-request trigger was added,
+    # so it is evicting LRU today. A save on every pull-request run would push
+    # main's warm entry out and leave the lane re-downloading a filing set it
+    # already had — slower, and rude to the SEC. Pull-request runs restore from
+    # whatever main last saved and throw their own copy away.
     - name: Restore SEC HTTP cache
-      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
         path: ${{ github.workspace }}/.edgar-data/_tcache
         key: edgar-tcache-regression-${{ github.run_id }}
@@ -86,9 +129,21 @@ jobs:
       run: |
         pytest --cov --cov-report=xml -m regression --enable-cache
 
+    # `always()`: a run that failed still warmed the cache, and the next one
+    # should not pay for those downloads again.
+    - name: Save SEC HTTP cache
+      if: always() && github.event_name != 'pull_request'
+      uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        path: ${{ github.workspace }}/.edgar-data/_tcache
+        key: edgar-tcache-regression-${{ github.run_id }}
+
+    # Not on pull requests. Codecov posts its own commit statuses, and a partial
+    # `regression`-flag upload from an advisory lane would put a red check on a
+    # pull request that this workflow is explicitly not allowed to influence.
     - name: Upload coverage reports
       uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
-      if: matrix.python-version == '3.12'
+      if: matrix.python-version == '3.12' && github.event_name != 'pull_request'
       with:
         files: coverage.xml
         fail_ci_if_error: false
@@ -110,6 +165,11 @@ jobs:
   # would stay silent for the one failure that stops the suite running at all.
   # Neither a cancelled run (concurrency supersedes one on every push) nor a
   # skipped one is treated as red.
+  #
+  # The `github.event_name != 'pull_request'` guard became load-bearing when the
+  # advisory pre-merge trigger was added: "main is red" is a claim about main,
+  # and a pull request that breaks a regression test must not file it. Its
+  # `issues: write` would not survive a fork pull request anyway.
   report:
     name: Report red main
     needs: [cassette-gate, regression]
