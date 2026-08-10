@@ -149,6 +149,106 @@ get_insider_transaction_filings = partial(get_filings, form=[3, 4, 5])
 get_portfolio_holding_filings = partial(get_filings, form=THIRTEENF_FORMS)
 
 
+# ---------------------------------------------------------------------------
+# The public API
+# ---------------------------------------------------------------------------
+#
+# This list is the supported surface of `edgar`: the names covered by the
+# deprecation policy, and the ones a release may not break without saying so in
+# docs/upgrade/. Until it existed there was no answer to "is this part of the
+# API?" other than whether the import happened to work, which made every
+# removal a guess about who might be relying on what (bead edgartools-07lk.5).
+#
+# WHAT BEING ABSENT FROM THIS LIST MEANS TODAY. Nothing breaks. Every name that
+# was importable before still is; `__all__` only governs `from edgar import *`.
+# What it does say is that a name outside this list is internal, and 6.0 may
+# make it private (bead edgartools-07lk.23 stages the declaration in 5.x and
+# the enforcement in 6.0). If something you depend on is missing here, that is
+# worth an issue before 6.0 rather than after.
+#
+# THREE THINGS DELIBERATELY LEFT OUT, of 141 public names on 2026-08-10:
+#
+#   1. `List`, `Optional`, `Union`, `lru_cache`, `partial` — imported above for
+#      annotations and never API. `from edgar import Optional` works today and
+#      is an accident.
+#   2. `Document`, `detect_page_breaks`, `mark_page_breaks` — these come from
+#      `edgar.files`, which 6.0 removes (bead edgartools-07lk.3). `edgar.Document`
+#      is the LEGACY parser and a different class from `edgar.documents.Document`;
+#      no documentation teaches `from edgar import Document`, and the name
+#      collides with its own replacement.
+#   3. Filesystem/config plumbing (`edgar.paths`), the internal cache-clearing
+#      helpers behind `clear_cache`, and lower-level variants of supported entry
+#      points (`get_by_accession_number_enriched`, `get_entity_submissions`,
+#      `get_cik_lookup_data`, `get_ticker_to_cik_lookup`).
+#
+# Submodules are not listed. `from edgar.xbrl import XBRL` works regardless of
+# `__all__`; this governs the top-level namespace only.
+#
+# Keep it grouped rather than sorted — the grouping is the documentation of what
+# the library is for, and a flat alphabetical list of 110 names is not.
+__all__ = [
+    # -- Entry points --------------------------------------------------------
+    "find", "obj",
+    "get_filings", "get_by_accession_number",
+    "get_current_filings", "get_all_current_filings", "iter_current_filings_pages",
+    "get_latest_filings", "latest_filings", "current_filings",
+    "search_filings",
+    "get_entity", "find_company", "get_company_facts",
+    "get_company_tickers", "get_icon_from_ticker",
+
+    # -- Core objects --------------------------------------------------------
+    "Filing", "Filings", "CurrentFilings",
+    "Company", "CompanyData", "CompanyFiling", "CompanyFilings",
+    "CompanySearchResults", "Entity", "EntityData",
+    "Attachment", "Attachments", "FilingHomepage", "FilingHeader",
+    "CompanyNotFoundError", "DataObjectException",
+
+    # -- Financial statements ------------------------------------------------
+    "Financials", "MultiFinancials", "XBRL",
+
+    # -- Funds ---------------------------------------------------------------
+    "Fund", "FundCompany", "FundClass", "FundSeries",
+    "FundReport", "FundCensus", "FundShareholderReport",
+    "MoneyMarketFund", "Prospectus497K",
+    "find_fund", "find_funds",
+    "get_fund_portfolio_filings", "get_money_market_filings",
+    "get_portfolio_holding_filings",
+
+    # -- Form-specific data objects ------------------------------------------
+    "ThirteenF", "NPX",
+    "ProxyStatement", "ProxyContests", "proxy_contests",
+    "Correspondence", "CorrespondenceThread", "CorrespondenceType",
+    "AlternativeTradingSystem", "AlternativeTradingSystemWithdrawal",
+    "get_insider_transaction_filings", "get_restricted_stock_filings",
+
+    # -- Business development companies --------------------------------------
+    "BDCEntity", "BDCEntities", "get_bdc_list", "get_active_bdc_ciks", "is_bdc_cik",
+
+    # -- Full-text search ----------------------------------------------------
+    "EFTSSearch", "EFTSResult",
+
+    # -- Identity, HTTP and diagnostics --------------------------------------
+    "set_identity", "get_identity",
+    "NORMAL", "CAUTION", "CRAWL",
+    "configure_http", "get_http_config", "diagnose_ssl",
+
+    # -- Local and cloud storage ---------------------------------------------
+    "use_local_storage", "is_using_local_storage", "set_local_storage_path",
+    "download_edgar_data", "download_filings",
+    "use_cloud_storage", "is_cloud_storage_enabled", "sync_to_cloud",
+    "use_datamule_storage", "is_using_datamule_storage",
+    "storage_info", "StorageInfo", "analyze_storage", "StorageAnalysis",
+    "cleanup_storage", "optimize_storage", "clear_cache",
+    "availability_summary", "check_filing", "check_filings_batch",
+
+    # -- Form constants ------------------------------------------------------
+    "ATS_N_FORMS", "ATS_N_ALL_FORMS", "ATS_N_AMENDMENT_FORMS", "ATS_N_WITHDRAWAL_FORMS",
+    "CORRESPONDENCE_FORMS", "MONEY_MARKET_FORMS",
+    "NCEN_FORMS", "NCSR_FORMS", "NMFP2_FORMS", "NMFP3_FORMS", "NPORT_FORMS",
+    "PROSPECTUS497K_FORMS", "PROXY_FORMS", "THIRTEENF_FORMS",
+]
+
+
 @lru_cache(maxsize=16)
 def find(search_id: Union[str, int]) -> Optional[Union[Filing, Entity, CompanySearchResults, FundCompany, FundClass, FundSeries]]:
     """This is an uber search function that can take a variety of search ids and return the appropriate object
