@@ -31,6 +31,14 @@
 # test-network, test-slow and Combine Coverage are deliberately NOT required:
 # they carry `if: github.event_name != 'pull_request'` and so report as skipped
 # on every pull request. They run on push to main, which is the integration gate.
+#
+# Because they cannot gate, they are REPORTED instead — see the `report` job at
+# the end of this file. Combine Coverage is where the 65% floor is enforced
+# (`coverage report --fail-under=65`), and until 2026-08-10 a failure there, or
+# in test-network or test-slow, appeared in the Actions tab and nowhere else.
+# That is the same hole #999 closed for the regression workflow after a red main
+# survived three merges unnoticed (bead edgartools-hwdp); this workflow was left
+# out of that fix even though it carries more.
 
 name: Build and Test Edgartools
 
@@ -285,3 +293,90 @@ jobs:
         files: combined-coverage.xml
         fail_ci_if_error: false
         token: ${{ secrets.CODECOV_TOKEN }}
+
+  # A red `main` has to arrive somewhere a person looks.
+  #
+  # Ported from regression-tests.yml, which got this treatment in #999 after the
+  # post-merge regression lane went red on 2026-08-08 and three more pull
+  # requests merged through it before anyone noticed. THIS workflow never got
+  # one, and it is the lane that carries more: the 65% coverage floor
+  # (`coverage report --fail-under=65`), plus test-network and test-slow. All
+  # three are post-merge only, none is a required check, and until now none of
+  # them could tell anybody they had failed.
+  #
+  # Note what this deliberately does NOT do: make Combine Coverage required.
+  # It cannot be. It `needs` test-network and test-slow, which are skipped on
+  # pull requests, so a required Combine Coverage would never report and would
+  # block every pull request forever — the deadlock described at the top of this
+  # file. Reporting is the right mechanism for a check that cannot gate.
+  #
+  # `needs` names every post-merge job on purpose. A failure in test-network
+  # SKIPS Combine Coverage rather than failing it, so keying on the coverage
+  # result alone would stay silent for the failure that stops the threshold
+  # being evaluated at all.
+  #
+  # Its own label and title, separate from regression-tests.yml's `red-main`.
+  # Sharing one issue would have the two lanes fight over it — whichever went
+  # green last would close an issue the other still needed open.
+  report:
+    name: Report red main (build)
+    needs: [cassette-gate, test-fast, test-network, test-slow, coverage]
+    if: always() && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      SHA: ${{ github.sha }}
+      LABEL: red-main-build
+      TITLE: "Build and Test Edgartools is failing on main"
+      R_GATE: ${{ needs.cassette-gate.result }}
+      R_FAST: ${{ needs.test-fast.result }}
+      R_NETWORK: ${{ needs.test-network.result }}
+      R_SLOW: ${{ needs.test-slow.result }}
+      R_COVERAGE: ${{ needs.coverage.result }}
+    steps:
+    - name: Ensure the tracking label exists
+      run: |
+        gh label create "$LABEL" --repo "$REPO" --color b60205 \
+          --description "Post-merge build/coverage lane is red" 2>/dev/null || true
+
+    - name: Decide whether the lane is red
+      id: verdict
+      run: |
+        red=0
+        for r in "$R_GATE" "$R_FAST" "$R_NETWORK" "$R_SLOW" "$R_COVERAGE"; do
+          [ "$r" = "failure" ] && red=1
+        done
+        echo "red=$red" >> "$GITHUB_OUTPUT"
+
+    - name: Open or update the tracking issue
+      if: steps.verdict.outputs.red == '1'
+      run: |
+        number=$(gh issue list --repo "$REPO" --label "$LABEL" --state all \
+                   --limit 1 --json number --jq '.[0].number // empty')
+        # Name the job that failed. This lane has five, and "the build is red"
+        # without saying which one sends the reader to the Actions tab to find
+        # out — which is the step nobody takes.
+        body=$(printf '%s\n\n- commit: %s\n- run: %s\n\n| job | result |\n| --- | --- |\n| Cassette safety gate | %s |\n| test-fast | %s |\n| test-network | %s |\n| test-slow | %s |\n| Combine Coverage (65%% floor) | %s |\n' \
+                 "The post-merge build lane failed on \`main\`." "$SHA" "$RUN_URL" \
+                 "$R_GATE" "$R_FAST" "$R_NETWORK" "$R_SLOW" "$R_COVERAGE")
+        if [ -z "$number" ]; then
+          gh issue create --repo "$REPO" --label "$LABEL" \
+            --title "$TITLE" --body "$body"
+        else
+          gh issue reopen --repo "$REPO" "$number" 2>/dev/null || true
+          gh issue comment --repo "$REPO" "$number" --body "$body"
+        fi
+
+    - name: Close the tracking issue when main is green again
+      if: steps.verdict.outputs.red == '0'
+      run: |
+        number=$(gh issue list --repo "$REPO" --label "$LABEL" --state open \
+                   --limit 1 --json number --jq '.[0].number // empty')
+        if [ -n "$number" ]; then
+          gh issue close --repo "$REPO" "$number" \
+            --comment "Green again at $SHA — $RUN_URL"
+        fi
