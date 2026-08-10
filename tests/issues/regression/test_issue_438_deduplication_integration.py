@@ -4,6 +4,14 @@ Integration test for Issue #438 fix - Revenue deduplication in real filings
 Verifies that revenue deduplication runs on real income statements, is stable,
 and never invents or multiplies rows.
 
+GitHub Issue: https://github.com/dgunning/edgartools/issues/438
+
+Moved here from tests/issues/reproductions/ on 2026-08-10 (bead
+edgartools-07lk.24, Tier 2). It is the only coverage anywhere that runs
+RevenueDeduplicator against real filing data -- test_issue_438_regression.py
+next door exercises it only on synthetic dicts -- so the Tier 2 plan to delete
+this tree's regression-marked files as duplicates did not apply to this one.
+
 Rewritten 2026-08-09 (bead edgartools-07lk.24, finding 3). Every one of these
 tests used to pass unconditionally:
 
@@ -72,7 +80,6 @@ def _assert_dedup_invariants(ticker: str, raw_data):
     return stats
 
 
-@pytest.mark.regression
 def test_integration_no_regression_with_nvda():
     """NVDA's income statement survives deduplication with its revenue intact."""
     _, income_statement = _latest_10k_income_statement("NVDA")
@@ -92,7 +99,6 @@ def test_integration_no_regression_with_nvda():
     )
 
 
-@pytest.mark.regression
 def test_integration_with_multiple_companies():
     """The same invariants hold across several large filers.
 
@@ -121,7 +127,6 @@ def test_integration_with_multiple_companies():
     )
 
 
-@pytest.mark.regression
 def test_deduplication_scope_is_the_income_statement():
     """Income statements arrive already deduplicated; balance sheets arrive raw.
 

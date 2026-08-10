@@ -122,3 +122,40 @@ class TestIssue332Regression:
         assert company_report_index < object_index, (
             "REGRESSION: CompanyReport should come before object in CurrentReport's MRO"
         )
+
+# Ported here on 2026-08-10 from
+# tests/issues/reproductions/data-quality/test_issue_332_6k_financials.py (bead
+# edgartools-07lk.24, Tier 2). That file was listed for deletion as a duplicate
+# of this one; its mock-based tests were, this one was not. Everything above
+# runs against Mock filings, so it proves the class hierarchy is intact and
+# nothing about whether a real 6-K survives the pipeline that issue #332 was
+# reported against.
+@pytest.mark.network
+def test_real_filing_integration():
+    """A real 6-K exposes .financials without raising AttributeError (issue #332)."""
+    from edgar import Company
+
+    # ASML Holding N.V. — a Dutch filer that reports on 6-K rather than 8-K.
+    company = Company("ASML")
+    filings = company.get_filings(form="6-K")
+    assert len(filings) > 0, (
+        "ASML returned no 6-K filings. It files them continuously, so an empty "
+        "result is a filing-access defect, not a reason to skip."
+    )
+
+    filing = filings.latest()
+    report = filing.obj()
+    assert report is not None, f"filing.obj() returned None for {filing.accession_number}"
+    assert isinstance(report, SixK), (
+        f"6-K {filing.accession_number} produced {type(report).__name__}, expected SixK"
+    )
+
+    # The regression itself: CurrentReport did not inherit from CompanyReport, so
+    # this attribute did not exist and raised AttributeError.
+    assert hasattr(report, 'financials'), (
+        f"{type(report).__name__} has no .financials property — issue #332 has regressed"
+    )
+    # Access it too. hasattr() alone passes on a property that exists, and the
+    # bug was in reading it. Its value may legitimately be None: most 6-Ks carry
+    # no XBRL financial statements. Raising is the failure, not returning None.
+    report.financials

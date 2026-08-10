@@ -300,7 +300,6 @@ def pytest_collection_modifyitems(config, items):
         'test_frontier', 'test_tier_c_judge', 'test_424b_xbrl',
         'test_unavailable_partition',
         'test_offering_consumers', 'test_correspondence',
-        'test_fix_438',
     ]
 
     # Files that need network (fetch from SEC)
@@ -336,11 +335,15 @@ def pytest_collection_modifyitems(config, items):
         # Six names were dropped here when the scripts behind them were deleted
         # (test_financial_metrics_fix, test_multiperiod_statements,
         # test_nvda_2020_duplicate_issue, test_6k_with_financials, test_fix_429,
-        # test_multiple_companies_429). A pattern for a file that no longer
-        # exists matches nothing, so it is not a bug — but it reads as coverage
-        # this list does not have, and the entries outlived their files by a
-        # release. Delete the pattern in the same commit as the file.
-        'test_integration_438_fix',
+        # test_multiple_companies_429), and two more on 2026-08-10 when Tier 2 of
+        # bead edgartools-07lk.24 emptied the tree of regression-marked files:
+        # test_fix_438 (deleted, a true duplicate) and test_integration_438_fix
+        # (moved to tests/issues/regression/ as
+        # test_issue_438_deduplication_integration.py, and now classified by
+        # REGRESSION_NETWORK_FILES below instead). A pattern for a file that no
+        # longer exists matches nothing, so it is not a bug — but it reads as
+        # coverage this list does not have, and the entries outlived their files
+        # by a release. Delete the pattern in the same commit as the file.
     ]
 
     # Regression tests used to carry no fast/network marker at all: this hook
@@ -389,6 +392,9 @@ def pytest_collection_modifyitems(config, items):
         'test_issue_420_multi_year_income_statements.py',
         'test_issue_427_xbrl_data_cap.py',
         'test_issue_429_statement_period_regression.py',
+        # Moved in from tests/issues/reproductions/ on 2026-08-10 (bead
+        # edgartools-07lk.24, Tier 2). Every test in it reads a real 10-K.
+        'test_issue_438_deduplication_integration.py',
         'test_issue_439_order_parsing.py',
         'test_issue_441_current_filings_pagination.py',
         'test_issue_443_corrupted_cache.py',
