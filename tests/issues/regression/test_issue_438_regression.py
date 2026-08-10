@@ -52,7 +52,12 @@ class TestIssue438Regression:
             'ifrs:Revenue',
             'ifrs:Revenues',
             'company:Revenue',
-            'company:Revenues'
+            'company:Revenues',
+            # The dei: pair came from the reproduction file deleted on
+            # 2026-08-10 (bead edgartools-07lk.24, Tier 2), so that deletion
+            # dropped no concept string this tree had not already seen.
+            'dei:Revenue',
+            'dei:Revenues',
         ]
 
         for concept in test_cases:
@@ -62,11 +67,14 @@ class TestIssue438Regression:
 
     def test_statement_mapping_completeness(self):
         """Test that revenue concepts are properly mapped via unified mapper."""
-        # Test via the new unified get_primary_statement API
-        assert get_primary_statement('Revenue') == 'IncomeStatement', \
-            "Revenue should map to IncomeStatement"
-        assert get_primary_statement('Revenues') == 'IncomeStatement', \
-            "Revenues should map to IncomeStatement"
+        # Test via the new unified get_primary_statement API. The last two came
+        # from the reproduction file deleted on 2026-08-10 (bead
+        # edgartools-07lk.24, Tier 2): they were checked below against
+        # _determine_statement_type but not through this API.
+        for concept in ('Revenue', 'Revenues', 'SalesRevenueNet',
+                        'RevenueFromContractWithCustomerExcludingAssessedTax'):
+            assert get_primary_statement(concept) == 'IncomeStatement', \
+                f"{concept} should map to IncomeStatement"
     
     def test_no_none_return_for_common_revenue_concepts(self):
         """Ensure common revenue concepts don't return None."""

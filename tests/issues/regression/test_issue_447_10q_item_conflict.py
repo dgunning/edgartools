@@ -19,7 +19,6 @@ from edgar import Company
 
 
 @pytest.mark.network
-@pytest.mark.regression
 def test_issue_447_aapl_10q_item_conflict():
     """
     Verify issue #447 is fixed with AAPL 10-Q filing.
@@ -71,7 +70,6 @@ def test_issue_447_aapl_10q_item_conflict():
 
 
 @pytest.mark.network
-@pytest.mark.regression
 def test_issue_447_structure_representation():
     """
     Test that get_structure() properly represents PART I and PART II hierarchy.
@@ -100,7 +98,6 @@ def test_issue_447_structure_representation():
 
 
 @pytest.mark.network
-@pytest.mark.regression
 @pytest.mark.parametrize("ticker", ["AAPL", "TSLA"])
 def test_issue_447_multiple_companies(ticker):
     """
@@ -111,8 +108,11 @@ def test_issue_447_multiple_companies(ticker):
     company = Company(ticker)
     tenq = company.latest_tenq
 
-    if tenq is None:
-        pytest.skip(f"Could not retrieve {ticker}'s latest 10-Q")
+    # Not a skip. Both tickers file 10-Qs quarterly, so `None` here means the
+    # retrieval path this test exercises is broken -- which is the failure the
+    # test exists to report, not a reason to stay silent. See
+    # scripts/check_regression_skips.py.
+    assert tenq is not None, f"Could not retrieve {ticker}'s latest 10-Q"
 
     print(f"\n🔍 Testing {ticker} 10-Q")
 
@@ -130,7 +130,6 @@ def test_issue_447_multiple_companies(ticker):
 
 
 @pytest.mark.network
-@pytest.mark.regression
 def test_issue_447_backward_compatibility():
     """
     Test that legacy access patterns still work.
@@ -158,7 +157,6 @@ def test_issue_447_backward_compatibility():
 
 
 @pytest.mark.network
-@pytest.mark.regression
 def test_issue_447_sections_property():
     """
     Test that sections property returns properly keyed sections.

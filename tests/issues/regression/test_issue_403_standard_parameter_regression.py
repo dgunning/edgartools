@@ -116,10 +116,42 @@ class TestIssue403Regression:
         for method_name in statement_methods:
             method = getattr(self.statements, method_name)
             sig = inspect.signature(method)
-            
+
             # Verify defaults
             assert sig.parameters['standard'].default == True, \
                 f"{method_name}: standard default should be True"
+
+    # Ported here on 2026-08-10 from
+    # tests/issues/reproductions/xbrl-parsing/test_issue_403_verification.py
+    # (bead edgartools-07lk.24, Tier 2), which was listed for deletion as a
+    # duplicate of this file and was not one. Everything above checks the other
+    # four methods by INTROSPECTION only -- signature and default -- and the two
+    # behavioural tests call income_statement alone. A method can carry a
+    # correct `standard` parameter in its signature and still drop it on the
+    # floor instead of forwarding it, which is issue #403 exactly, and for
+    # balance_sheet, cashflow_statement, statement_of_equity and
+    # comprehensive_income nothing here would have caught that.
+    @pytest.mark.parametrize("method_name", [
+        'income_statement',
+        'balance_sheet',
+        'cashflow_statement',
+        'statement_of_equity',
+        'comprehensive_income',
+    ])
+    @pytest.mark.parametrize("standard", [True, False])
+    def test_standard_is_forwarded_by_every_method(self, method_name, standard):
+        """Each statement method passes `standard` through to StitchedStatement."""
+        from unittest.mock import patch
+
+        with patch('edgar.xbrl.statements.StitchedStatement') as mock_stitched:
+            getattr(self.statements, method_name)(standard=standard)
+
+            mock_stitched.assert_called_once()
+            args = mock_stitched.call_args[0]
+            assert args[3] is standard, (
+                f"{method_name}(standard={standard}) forwarded {args[3]!r} as the "
+                "4th positional argument to StitchedStatement"
+            )
 
 
 def test_issue_403_does_not_regress():
