@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.47.0] - 2026-08-10
+
 ### Added
 
 - **`edgar` now declares `__all__` — 110 names — so the supported API is answerable.** There was no way to tell an API from an accident: 141 names were reachable from the top level, including `Optional` and `partial` (imported for annotations) and `Document`, the *legacy* `edgar.files` parser, which is a different class from `edgar.documents.Document` and is removed in 6.0. Names left out stay importable; 6.0 makes them private. **`from edgar import *` is narrower** — it no longer yields those 31 names. Direct imports are unaffected.
+
+- **`Filing.text(include_images=True)` and `Document.text(include_images=True)` emit an `[Image: <alt or filename>]` placeholder per image.** This completes the text half of GH #886: a `TextExtractor` flag existed but never fired on a real filing, because SEC filers wrap `<img>` in a paragraph and the paragraph branch returned without descending to it. NVIDIA's 10-K now marks both its images, including the Item 5 stock performance graph whose five-year return comparison has no table beside it. Off by default, so the text feeding sections, search and embeddings stays image-free. (GH #886)
 
 ### Changed
 
@@ -20,10 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`Filing.text()` truncated long table cells at 200 characters, with no ellipsis to show it had happened.** It rendered its document with `rich_to_text(document, width=500)`, but `Document` is not a rich renderable, so rich fell back to `repr()` — and `Document.__repr__` is hardcoded `text(table_max_col_width=200)`. The `500` never reached the table renderer. On Apple's FY2024 10-K that cost 1,434 characters across 8 chunks (whitespace collapsed, so wrapping does not account for it), including 300 characters of the unrecognized-tax-benefits disclosure: `$22.0 billion, of which $10.8 billion, if recognized, would impact the Company's effective tax rate`. Seven of eight 10-K fixtures lost content with no ellipsis marker. `Filing.text()` now calls `document.text(table_max_col_width=500)` directly, which also drops the rich round-trip — a 400 KB string was being rendered through a console and stripped of ANSI to recover text the extractor had already produced. Rendering is 4.5× faster (6.61s → 1.46s across 8 filings).
 
 - **Image `alt` text leaked into `Filing.text()` as unlabelled prose.** `ImageNode.text()` returned `alt`, which `ParagraphNode.text()` aggregates, so the bare string `nvidialogoa10.jpg` appeared inline in NVIDIA's 10-K text with nothing marking it as an image. `alt` describes an image rather than being text the filer wrote, and on SEC filings it is usually just the source file name; it no longer contributes to text. Callers that want images represented ask explicitly — see `include_images` below.
-
-### Added
-
-- **`Filing.text(include_images=True)` and `Document.text(include_images=True)` emit an `[Image: <alt or filename>]` placeholder per image.** This completes the text half of GH #886: a `TextExtractor` flag existed but never fired on a real filing, because SEC filers wrap `<img>` in a paragraph and the paragraph branch returned without descending to it. NVIDIA's 10-K now marks both its images, including the Item 5 stock performance graph whose five-year return comparison has no table beside it. Off by default, so the text feeding sections, search and embeddings stays image-free. (GH #886)
 
 ### Deprecated
 
