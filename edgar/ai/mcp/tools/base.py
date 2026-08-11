@@ -475,8 +475,8 @@ def classify_error(exc: Exception) -> dict[str, Any]:
         pass
 
     try:
-        from edgar.httprequests import IdentityNotSetException
-        if isinstance(exc, IdentityNotSetException):
+        from edgar.exceptions import IdentityNotSetError
+        if isinstance(exc, IdentityNotSetError):
             return {
                 "error_code": "IDENTITY_NOT_SET",
                 "message": "SEC identity not configured. Set the EDGAR_IDENTITY environment variable.",
@@ -508,8 +508,8 @@ def classify_error(exc: Exception) -> dict[str, Any]:
         pass
 
     try:
-        from edgar.entity.entity_facts import NoCompanyFactsFound
-        if isinstance(exc, NoCompanyFactsFound):
+        from edgar.exceptions import CompanyFactsNotFoundError
+        if isinstance(exc, CompanyFactsNotFoundError):
             return {
                 "error_code": "NO_FACTS_DATA",
                 "message": getattr(exc, 'message', str(exc)),
@@ -530,8 +530,8 @@ def classify_error(exc: Exception) -> dict[str, Any]:
         pass
 
     try:
-        from edgar.sgml.sgml_parser import SECFilingNotFoundError
-        if isinstance(exc, SECFilingNotFoundError):
+        from edgar.exceptions import FilingNotFoundError
+        if isinstance(exc, FilingNotFoundError):
             return {
                 "error_code": "FILING_NOT_FOUND",
                 "message": f"SEC filing not found: {exc}",

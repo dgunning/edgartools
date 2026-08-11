@@ -359,15 +359,12 @@ PeriodInput = Union[PeriodType, str]
 StatementInput = Union[StatementType, str]
 
 
-# FEAT-004: Enhanced Parameter Validation Framework
-class ValidationError(ValueError):
-    """Enhanced validation error with suggestions and context."""
-
-    def __init__(self, message: str, parameter: str, invalid_value: Any, suggestions: Optional[List[str]] = None):
-        self.parameter = parameter
-        self.invalid_value = invalid_value
-        self.suggestions = suggestions or []
-        super().__init__(message)
+# FEAT-004: Enhanced Parameter Validation Framework.
+# ValidationError now lives in edgar.exceptions as the fourth branch of the
+# tree (bead edgartools-07lk.10), with `parameter` and `invalid_value` made
+# optional so a plain bad-input raise can use it too. Still a ValueError, same
+# positional order; re-exported here so existing imports keep working.
+from edgar.exceptions import ValidationError  # noqa: E402
 
 
 def fuzzy_match(value: str, valid_options: Set[str], threshold: float = 0.6) -> List[str]:

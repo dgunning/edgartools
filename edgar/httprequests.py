@@ -23,6 +23,7 @@ from tqdm import tqdm
 logging.getLogger("stamina").setLevel(logging.ERROR)
 
 from edgar.core import get_edgar_data_directory, text_extensions
+from edgar.exceptions import IdentityNotSetError, TooManyRequestsError, TransportError
 from edgar.httpclient import async_http_client, http_client
 
 """
@@ -136,70 +137,10 @@ def should_retry(exc: Exception) -> bool:
     return isinstance(exc, RETRYABLE_EXCEPTIONS)
 
 
-class TooManyRequestsError(Exception):
-    """
-    Raised when SEC returns HTTP 429 (Too Many Requests).
-
-    The SEC limits requests to 10 per second. When exceeded, your IP is blocked
-    for approximately 10 minutes. Continuing to send requests during this period
-    will extend the block duration.
-
-    Important: Do NOT retry immediately - wait for the block to expire.
-    """
-
-    BLOCK_DURATION_MINUTES = 10
-
-    def __init__(self, url, retry_after: int = None):
-        self.url = url
-        self.retry_after = retry_after  # From Retry-After header, if present
-
-        # Build informative error message
-        header = f"""
-SEC Rate Limit Exceeded (HTTP 429)
-==================================
-
-URL: {self.url}"""
-
-        if retry_after:
-            wait_info = f"""
-Retry-After: {retry_after} seconds (from SEC response header)"""
-        else:
-            wait_info = f"""
-Estimated Wait: ~{self.BLOCK_DURATION_MINUTES} minutes"""
-
-        cause = """
-
-What happened:
-  Your request rate exceeded the SEC's limit of 10 requests/second.
-  Your IP address has been temporarily blocked."""
-
-        warning = """
-
-{warning} Important: Do NOT retry immediately!
-  Continuing to send requests during the block period will EXTEND it.
-  The SEC penalizes continued requests during timeout.""".format(warning="\u26A0")
-
-        solution = f"""
-
-What to do:
-  1. Wait at least {self.BLOCK_DURATION_MINUTES} minutes before retrying
-  2. Reduce your request rate (edgartools defaults to 9 req/sec)
-  3. Consider using local storage: download_edgar_data()
-
-To adjust rate limit:
-  import os
-  os.environ['EDGAR_RATE_LIMIT_PER_SEC'] = '5'  # More conservative"""
-
-        footer = """
-
-Details: https://www.sec.gov/os/webmaster-faq#developers"""
-
-        message = f"{header}{wait_info}{cause}{warning}{solution}{footer}"
-        super().__init__(message)
-
-
-class IdentityNotSetException(Exception):
-    pass
+# TooManyRequestsError and IdentityNotSetError are defined in edgar.exceptions
+# (bead edgartools-07lk.10) and re-exported here, so `from edgar.httprequests
+# import TooManyRequestsError` keeps working. IdentityNotSetException is the
+# deprecated spelling \u2014 see the module __getattr__ at the end of this file.
 
 
 # =============================================================================
@@ -537,7 +478,7 @@ If that doesn't work, disable SSL verification (last resort):
   configure_http(verify_ssl=False)"""
 
 
-class SSLVerificationError(Exception):
+class SSLVerificationError(TransportError):
     """
     Raised when SSL certificate verification fails.
 
@@ -597,14 +538,14 @@ Details: https://github.com/dgunning/edgartools/blob/main/docs/guides/ssl_verifi
 # edgartools-07lk.10 — this is the vocabulary those call sites need today, and it
 # is deliberately a tuple of existing types so it introduces no new public class.
 #
-# IdentityNotSetException belongs here despite not being a transport error: it
+# IdentityNotSetError belongs here despite not being a transport error: it
 # means no request can be made at all, so reporting it as "not found" is the same
 # lie in a different costume.
 TRANSPORT_ERRORS = (
     HTTPError,               # httpx base: connect, read, timeout, protocol, status
     TooManyRequestsError,    # SEC rate limit, after retries are exhausted
     SSLVerificationError,
-    IdentityNotSetException,
+    IdentityNotSetError,
 )
 
 
@@ -656,7 +597,7 @@ def with_identity(func):
             else:
                 identity = os.environ.get("EDGAR_IDENTITY")
         if identity is None:
-            raise IdentityNotSetException("User-Agent identity is not set")
+            raise IdentityNotSetError()
 
         headers = kwargs.get("headers", {})
         headers["User-Agent"] = identity
@@ -676,7 +617,7 @@ def async_with_identity(func):
             else:
                 identity = os.environ.get("EDGAR_IDENTITY")
         if identity is None:
-            raise IdentityNotSetException("User-Agent identity is not set")
+            raise IdentityNotSetError()
 
         headers = kwargs.get("headers", {})
         headers["User-Agent"] = identity
@@ -1413,3 +1354,13 @@ def download_datafile(data_url: str, local_directory: Optional[Path] = None) -> 
     download_filename = local_directory / filename
     download_file(data_url, path=download_filename)
     return download_filename
+
+
+# ---------------------------------------------------------------------------
+# Deprecated names (bead edgartools-07lk.10). Same objects as the canonical
+# classes, so `except IdentityNotSetException:` still works; touching the name
+# warns. Removed in 6.0.
+# ---------------------------------------------------------------------------
+from edgar._compat import deprecated_alias  # noqa: E402
+
+__getattr__ = deprecated_alias(IdentityNotSetException=IdentityNotSetError)

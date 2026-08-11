@@ -12,7 +12,7 @@ import pyarrow as pa
 import pyarrow.compute as pc
 
 from edgar.core import listify, log
-from edgar.dates import InvalidDateException
+from edgar.dates import InvalidDateError
 from edgar.entity.filings import EntityFilings, empty_company_filings
 from edgar.filtering import filter_by_date, filter_by_form, filter_by_year_quarter
 from edgar.display.formatting import reverse_name
@@ -462,7 +462,7 @@ class EntityData:
         if filing_date:
             try:
                 company_filings = filter_by_date(company_filings, filing_date, 'filing_date')
-            except InvalidDateException as e:
+            except InvalidDateError as e:
                 log.error(e)
                 return None
 

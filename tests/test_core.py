@@ -10,7 +10,7 @@ from freezegun import freeze_time
 from rich.table import Table
 
 import edgar
-from edgar.dates import extract_dates, InvalidDateException
+from edgar.dates import extract_dates, InvalidDateError
 from edgar.display.formatting import display_size, reverse_name, split_camel_case
 from edgar.core import (decode_content,
                         get_identity,
@@ -156,7 +156,7 @@ def test_extract_dates():
     assert extract_dates("2022-03-04:2022-03-04") == (date("2022-03-04"), date("2022-03-04"), True)  # Same date range
     assert extract_dates("1994-07-01") == (date("1994-07-01"), None, False)  # Earliest allowed date
 
-    # Invalid dates - should all raise InvalidDateException
+    # Invalid dates - should all raise InvalidDateError
     invalid_cases = [
         # Empty/None input
         "",
@@ -224,19 +224,19 @@ def test_extract_dates():
 
     for invalid_case in invalid_cases:
         print(invalid_case)
-        with pytest.raises(InvalidDateException):
+        with pytest.raises(InvalidDateError):
             extract_dates(invalid_case)
 
     # Specific error message tests
     try:
         extract_dates("bad")
-    except InvalidDateException as e:
+    except InvalidDateError as e:
         assert "YYYY-MM-DD" in str(e)
         assert "2022-10-27" in str(e)  # Example date in error message
 
 @pytest.mark.fast
 def test_invalid_date_exception():
-    exception = InvalidDateException("Something went wrong")
+    exception = InvalidDateError("Something went wrong")
     assert str(exception) == "Something went wrong"
 
 @pytest.mark.fast

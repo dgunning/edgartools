@@ -8,6 +8,8 @@ from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
+from edgar.exceptions import XBRLProcessingError
+
 # Constants for label roles
 STANDARD_LABEL = "http://www.xbrl.org/2003/role/label"
 TERSE_LABEL = "http://www.xbrl.org/2003/role/terseLabel"
@@ -348,6 +350,5 @@ class Table(BaseModel):
     context_element: str = "segment"
 
 
-class XBRLProcessingError(Exception):
-    """Exception raised for errors during XBRL processing."""
-    pass
+# Defined in edgar.exceptions under the ParsingError branch (07lk.10);
+# re-exported here so existing imports keep working.

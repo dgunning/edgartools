@@ -1,15 +1,19 @@
 import datetime
 from typing import Optional, Sequence, Tuple, Union
 
+from edgar._compat import deprecated_alias
+from edgar.exceptions import InvalidDateError
+
 __all__ = [
     "extract_dates",
-    "InvalidDateException"
+    "InvalidDateError",
+    "InvalidDateException",  # deprecated alias, removed in 6.0
 ]
 
-class InvalidDateException(Exception):
-
-    def __init__(self, message: str):
-        super().__init__(message)
+# InvalidDateException is now InvalidDateError in edgar.exceptions, under the
+# ValidationError branch (bead edgartools-07lk.10) — so it is now also a
+# ValueError, which is what a bad date string always was.
+__getattr__ = deprecated_alias(InvalidDateException=InvalidDateError)
 
 def extract_dates(
     date_str: Union[str, Sequence[Optional[str]]]
@@ -39,23 +43,23 @@ def extract_dates(
         and is_range indicates if this was a date range query
 
     Raises:
-        InvalidDateException: If the date string cannot be parsed
+        InvalidDateError: If the date string cannot be parsed
     """
     if not date_str:
-        raise InvalidDateException("Empty date string provided")
+        raise InvalidDateError("Empty date string provided")
 
     # Normalize tuple/list form into the colon-separated string form so the
     # rest of the parser stays a single code path. None in either slot is
     # treated as the "open" side of a range (same semantics as "start:" / ":end").
     if isinstance(date_str, (tuple, list)):
         if len(date_str) != 2:
-            raise InvalidDateException(
+            raise InvalidDateError(
                 "Date range tuple must have exactly two elements (start, end); "
                 f"got {len(date_str)}"
             )
         start_part, end_part = date_str
         if start_part is None and end_part is None:
-            raise InvalidDateException(
+            raise InvalidDateError(
                 "Date range tuple must have at least one non-None bound"
             )
         date_str = f"{start_part or ''}:{end_part or ''}"
@@ -67,7 +71,7 @@ def extract_dates(
 
         # Handle invalid formats
         if len(parts) != (2 if has_colon else 1):
-            raise InvalidDateException("Invalid date range format")
+            raise InvalidDateError("Invalid date range format")
 
         # Parse start date
         if not has_colon or parts[0]:
@@ -85,7 +89,7 @@ def extract_dates(
 
         # Validate date order if both dates are present
         if has_colon and end_date and start_date > end_date:
-            raise InvalidDateException(
+            raise InvalidDateError(
                 f"Invalid date range: start date ({start_date.date()}) "
                 f"cannot be after end date ({end_date.date()})"
             )
@@ -93,7 +97,7 @@ def extract_dates(
         return start_date, end_date, has_colon
 
     except ValueError as e:
-        raise InvalidDateException(f"""
+        raise InvalidDateError(f"""
         Cannot extract a date or date range from string {date_str}
         Provide either
             1. A date in the format "YYYY-MM-DD" e.g. "2022-10-27"

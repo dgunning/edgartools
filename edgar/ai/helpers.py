@@ -146,7 +146,7 @@ def get_revenue_trend(
     Raises:
         ValueError: If ticker is invalid or company not found
         HTTPError: If SEC Company Facts API request fails
-        NoCompanyFactsFound: If company has no financial data
+        CompanyFactsNotFoundError: If company has no financial data
 
     Examples:
         >>> # Get 3 fiscal years of revenue data (default)

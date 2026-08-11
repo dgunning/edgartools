@@ -261,9 +261,13 @@ def get_bool(value: Optional[str] = None) -> Optional[bool]:
 
 
 class Result:
-    """
-    This class represents the result of an operation which can succeed or fail.
-    It allows for handling the failures more gracefully that using error handling
+    """Deprecated, removed in 6.0. Nothing imports this.
+
+    It was scaffolding for a flagged-result pattern that never got adopted —
+    zero importers anywhere in the codebase. The pattern that *did* get adopted
+    is NonAccrualResult (edgar/bdc/nonaccrual.py): a frozen dataclass carrying
+    the value plus its provenance and warnings, so a caller can tell "genuinely
+    zero" from "we may have failed to parse". Use that shape instead.
     """
 
     def __init__(self,
@@ -324,10 +328,10 @@ def get_edgar_data_directory() -> Path:
     return get_data_directory(create=True)
 
 
-class TooManyRequestsException(Exception):
-
-    def __init__(self, message: str):
-        super().__init__(message)
+# TooManyRequestsException was a dead duplicate of
+# edgar.exceptions.TooManyRequestsError: never raised anywhere, different
+# suffix, same meaning. Kept as a deprecated alias (see the module __getattr__
+# at the end of this file); removed in 6.0.
 
 
 def filing_date_to_year_quarters(filing_date: str) -> List[Tuple[int, int]]:
@@ -695,3 +699,12 @@ for _logger_name, _level in _NOISY_LOGGERS.items():
 # Turn on rich logging if the environment variable is set
 if os.getenv('EDGAR_USE_RICH_LOGGING', '0') == '1':
     initialize_rich_logging()
+
+
+# ---------------------------------------------------------------------------
+# Deprecated names (bead edgartools-07lk.10), removed in 6.0.
+# ---------------------------------------------------------------------------
+from edgar._compat import deprecated_alias  # noqa: E402
+from edgar.exceptions import TooManyRequestsError  # noqa: E402
+
+__getattr__ = deprecated_alias(TooManyRequestsException=TooManyRequestsError)

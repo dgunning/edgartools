@@ -35,11 +35,14 @@ from edgar.xbrl.parsers import XBRLParser
 from edgar.xbrl.period_selector import select_periods
 from edgar.xbrl.periods import get_period_views
 from edgar.xbrl.rendering import RenderedStatement, generate_rich_representation, render_statement
+from edgar.exceptions import NotFoundError
 from edgar.xbrl.statement_resolver import StatementResolver
 from edgar.xbrl.statements import statement_to_concepts
 
 
-class XBRLFilingWithNoXbrlData(Exception):
+
+
+class XBRLFilingWithNoXbrlData(NotFoundError):
     """Exception raised when a filing does not contain XBRL data."""
 
     def __init__(self, message: str):

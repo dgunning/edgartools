@@ -9,7 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`edgar.exceptions` — one exception vocabulary, four branches.** There were 27 exception classes across ten packages with no shared base and no cross-package inheritance, of which exactly two were reachable from the top level, so `except` had to name a type from whichever module happened to raise. There is now a root, `EdgarError`, and four branches that answer the question a caller actually has: `TransportError` (we could not get an answer from SEC), `NotFoundError` (you named a thing and it does not exist), `ParsingError` (we got bytes and could not build the object), `ValidationError` (your input was wrong before we asked). The distinction between the first two is the one that matters most — an outage and an empty result must never arrive as the same value. **Nothing changed about what is raised today**: every existing class was re-based into the tree or kept as a deprecated alias for the same object, so `except StatementNotFound:` and `pytest.raises(SECFilingNotFoundError)` still work. The branches also inherit the builtin they replace — `ValidationError` is a `ValueError`, `NotFoundError` is a `LookupError` — so the `except ValueError:` you wrote against our 135 raw `ValueError` raises keeps working as those convert. Deprecated spellings warn and are removed in 6.0: `StatementNotFound`, `NoCompanyFactsFound`, `SECFilingNotFoundError`, `InvalidDateException`, `IdentityNotSetException`, `TooManyRequestsException`, `DataObjectException`.
+
+- **A missing-attachment lookup raises `AttachmentNotFoundError`** rather than a bare `KeyError`. It *is* a `KeyError`, so existing handlers are unaffected.
+
 - **`edgartools` ships a PEP 561 `py.typed` marker, so its type hints now reach your type checker.** The README has said "type hints throughout" for a long time and it was true of the source and false of the installed package: without the marker, mypy refuses to look inside `edgar` at all — `Skipping analyzing "edgar": module is installed, but missing library stubs or py.typed marker` — and every symbol degrades to `Any`. `Company(cik_or_ticker=[1, 2, 3])` type-checked clean against 5.47.0; it now reports `Argument "cik_or_ticker" to "Company" has incompatible type "list[int]"; expected "str | int"`. Nothing in the library changed — this makes the annotations already there visible, and it is why the typing work behind them was worth doing. Pyright users saw types already, because it reads library source by default; mypy and stub-strict configurations did not.
+
+### Fixed
+
+- **`NoCompanyFactsFound` carried a message nobody could read.** Its `__init__` called `super().__init__()` with no arguments and set `self.message` instead, so `str(exc)` was the empty string — three raise sites whose message never reached a traceback, a log line, or a user. It is now `CompanyFactsNotFoundError` and builds its message through the base class, which makes the empty case unrepresentable rather than merely fixed.
 
 ## [5.47.0] - 2026-08-10
 

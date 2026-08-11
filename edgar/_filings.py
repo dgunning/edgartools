@@ -51,7 +51,7 @@ from edgar.core import (
     parallel_thread_map,
     quarters_in_year,
 )
-from edgar.dates import InvalidDateException
+from edgar.dates import InvalidDateError
 from edgar.display.formatting import accession_number_text, display_size
 from edgar.display.styles import print_info, print_warning
 from edgar.documents import HTMLParser, ParserConfig
@@ -720,7 +720,7 @@ class Filings:
                     latest_date = self.date_range[1]
                     if latest_date is not None and _get_data_staleness_days(latest_date) >= 1:
                         _warn_use_current_filings("", latest_date)
-            except InvalidDateException as e:
+            except InvalidDateError as e:
                 log.error(e)
                 return Filings(_empty_filing_index())
 
@@ -1994,10 +1994,11 @@ class Filing:
             try:
                 self._sgml = FilingSGML.from_filing(self)
             except (ValueError, Exception) as e:
-                from edgar.sgml.sgml_parser import SECIdentityError, SECFilingNotFoundError, SECHTMLResponseError
-                from edgar.httprequests import IdentityNotSetException
+                from edgar.sgml.sgml_parser import SECHTMLResponseError, SECIdentityError
+                from edgar.exceptions import FilingNotFoundError, IdentityNotSetError
+                from edgar.httprequests import IdentityNotSetError
                 # Don't fall back on permanent errors — propagate them
-                if isinstance(e, (SECIdentityError, SECFilingNotFoundError, IdentityNotSetException)):
+                if isinstance(e, (SECIdentityError, FilingNotFoundError, IdentityNotSetError)):
                     raise
                 # Don't fall back on network errors — propagate them so callers
                 # (e.g. xbrl()) can show local-storage-aware error messages

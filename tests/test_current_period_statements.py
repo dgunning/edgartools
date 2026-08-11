@@ -5,7 +5,7 @@ import pandas as pd
 from unittest.mock import Mock, MagicMock
 
 from edgar.xbrl.current_period import CurrentPeriodView, CurrentPeriodStatement
-from edgar.xbrl.exceptions import StatementNotFound
+from edgar.exceptions import StatementNotFoundError
 from edgar.xbrl.rendering import RenderedStatement
 
 
@@ -231,12 +231,12 @@ class TestCurrentPeriodStatementObjects:
     @pytest.mark.fast
     def test_error_handling_for_missing_statements(self):
         """Test error handling when statements are not found"""
-        # Create mock XBRL that will raise StatementNotFound
+        # Create mock XBRL that will raise StatementNotFoundError
         mock_xbrl = Mock()
         mock_xbrl.reporting_periods = [{'key': 'instant_2024-12-31', 'label': 'December 31, 2024'}]
         mock_xbrl.period_of_report = '2024-12-31'
         mock_xbrl.entity_name = 'Test Company'
-        mock_xbrl.find_statement.side_effect = StatementNotFound(
+        mock_xbrl.find_statement.side_effect = StatementNotFoundError(
             statement_type='BalanceSheet',
             confidence=0.0,
             found_statements=[],
@@ -246,8 +246,8 @@ class TestCurrentPeriodStatementObjects:
         
         current = CurrentPeriodView(mock_xbrl)
         
-        # Should raise StatementNotFound
-        with pytest.raises(StatementNotFound):
+        # Should raise StatementNotFoundError
+        with pytest.raises(StatementNotFoundError):
             current.balance_sheet(as_statement=True)
 
     @pytest.mark.fast

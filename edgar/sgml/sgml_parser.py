@@ -16,7 +16,9 @@ log = logging.getLogger(__name__)
 # Some real SEC filings (e.g., 10-Ks with embedded images) can exceed 300MB.
 _MAX_CONTENT_SIZE = 500 * 1024 * 1024
 
-__all__ = ['SGMLParser', 'SGMLFormatType', 'SGMLDocument', 'SECIdentityError', 'SECFilingNotFoundError', 'SECHTMLResponseError']
+__all__ = ['SGMLParser', 'SGMLFormatType', 'SGMLDocument', 'SECIdentityError',
+           'FilingNotFoundError', 'SECHTMLResponseError',
+           'SECFilingNotFoundError']  # last is a deprecated alias, removed in 6.0
 
 # Pre-compiled patterns for content extraction
 _TEXT_RE = re.compile(r'<TEXT>([\s\S]*?)</TEXT>', re.DOTALL | re.IGNORECASE)
@@ -33,19 +35,19 @@ _DOC_META_TAGS = (
 )
 
 
-class SECIdentityError(Exception):
-    """Raised when SEC rejects request due to invalid or missing EDGAR_IDENTITY"""
-    pass
+# These three are branches of the tree in edgar.exceptions (bead
+# edgartools-07lk.10): SECIdentityError joins IdentityNotSetError under
+# IdentityError (same root cause, noticed at different layers), and a filing
+# that does not exist is a NotFoundError like any other missing thing.
+from edgar._compat import deprecated_alias
+from edgar.exceptions import FilingNotFoundError, SECIdentityError, TransportError
 
 
-class SECFilingNotFoundError(Exception):
-    """Raised when SEC returns error for non-existent filing"""
-    pass
-
-
-class SECHTMLResponseError(Exception):
+class SECHTMLResponseError(TransportError):
     """Raised when SEC returns HTML content instead of expected SGML"""
-    pass
+
+
+__getattr__ = deprecated_alias(SECFilingNotFoundError=FilingNotFoundError)
 
 class SGMLFormatType(Enum):
     SEC_DOCUMENT = "sec_document"  # <SEC-DOCUMENT>...<SEC-HEADER> style
@@ -185,7 +187,7 @@ def _raise_sec_html_error(content: str):
 
     Raises:
         SECIdentityError: For identity-related errors
-        SECFilingNotFoundError: For missing filing errors
+        FilingNotFoundError: For missing filing errors
         SECHTMLResponseError: For other HTML/XML responses
     """
     # Check for identity error
@@ -198,14 +200,14 @@ def _raise_sec_html_error(content: str):
 
     # Check for AWS S3 NoSuchKey error (XML format)
     if "<Code>NoSuchKey</Code>" in content and "<Message>The specified key does not exist.</Message>" in content:
-        raise SECFilingNotFoundError(
+        raise FilingNotFoundError(
             "SEC filing not found - the specified key does not exist in EDGAR archives. "
             "Check that the accession number and filing date are correct."
         )
 
     # Check for general not found errors
     if "Not Found" in content or "404" in content:
-        raise SECFilingNotFoundError(
+        raise FilingNotFoundError(
             "SEC filing not found. Check that the accession number and filing date are correct."
         )
 

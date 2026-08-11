@@ -11,7 +11,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from edgar.xbrl.core import format_date, parse_date
-from edgar.xbrl.exceptions import StatementNotFound
+from edgar.exceptions import StatementNotFoundError
 from edgar.xbrl.standardization import standardize_statement
 from edgar.xbrl.stitching.ordering import StatementOrderingManager
 from edgar.xbrl.stitching.periods import determine_optimal_periods
@@ -1015,7 +1015,7 @@ def stitch_statements(
             # cash flow presentation role).  Issue #683.
             try:
                 statement = xbrl.get_statement_by_type(statement_type, include_dimensions=include_dimensions)
-            except StatementNotFound:
+            except StatementNotFoundError:
                 continue
             if statement:
                 # Only include the specific period from this statement
