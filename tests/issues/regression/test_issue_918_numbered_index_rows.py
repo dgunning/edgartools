@@ -155,7 +155,9 @@ def test_fmcc_10k_items_are_not_table_captions():
     """
     obj = offline_filing("0001026214-26-000021").obj()
 
-    content = obj['Item 11'] or ""
+    # .get() — an absent Item 11 is the expected answer here, and the
+    # subscript raises on a miss from 6.0 (bead edgartools-07lk.10).
+    content = obj.get('Item 11', "")
     assert "Table 11" not in content[:100]
 
     sections = obj.document.sections

@@ -37,6 +37,7 @@ from edgar.exceptions import (
     TooManyRequestsError,
     TransportError,
     ValidationError,
+    warn_will_raise,
 )
 from edgar.current_filings import CurrentFilings, get_all_current_filings, get_current_filings, iter_current_filings_pages
 
@@ -307,7 +308,21 @@ def find(search_id: Union[str, int]) -> Optional[Union[Filing, Entity, CompanySe
     elif re.match(r"^[CS]\d+$", search_id):
         return find_fund(search_id)
     elif re.match(r"^\d{6,}-", search_id):
-        # Probably an invalid accession number
+        # It looks like an accession number and is not one. Every other branch
+        # above answers a well-formed identifier; this one only fires on input
+        # that is malformed, so None here means "you typed it wrong" — which is
+        # the one thing a return value cannot say.
+        warn_will_raise(
+            ValidationError(
+                f"'{search_id}' is not a valid accession number.",
+                parameter="search_id",
+                invalid_value=search_id,
+                suggestions=[
+                    "the format is 10 digits, 2 digits, 6 digits: 0000320193-23-000106",
+                    "dashes are optional — 000032019323000106 also works",
+                ],
+            ),
+        )
         return None
     else:
         return find_company(search_id)
@@ -457,11 +472,41 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
     return (False, None, None)
 
 
+def _no_xml_to_parse(sec_filing: Filing) -> DataObjectError:
+    """The error for a form we model whose XML we could not get.
+
+    Built as a value rather than raised, so `warn_will_raise` can decide. It is
+    also why this is not a function that *does* the warning: an extra frame
+    between the warning and the user would land the `stacklevel` on our own
+    source instead of on the line the reader has to change.
+    """
+    return DataObjectError(
+        f"Form {sec_filing.form} filing {sec_filing.accession_no} has no XML document, "
+        f"so there is nothing to build a data object from. This is a property of "
+        f"the filing, not of the form — ownership forms filed before roughly 2003 "
+        f"predate the XML requirement.",
+        form=sec_filing.form,
+        accession_no=sec_filing.accession_no,
+    )
+
+
 def obj(sec_filing: Filing) -> Optional[object]:
     """
     Depending on the filing return the data object that contains the data for the filing
 
     This usually coms from the xml associated with the filing, but it can also come from the extracted xbrl
+
+    Returns:
+        The data object for the filing, or `None` for a form edgartools does not
+        model and whose filing carries no XBRL either. That is the only meaning
+        `None` has here, and it is a statement about our coverage rather than
+        about the filing.
+
+        It is NOT how failure is reported. A form we *do* model whose data we
+        could not read is a `DataObjectError` — today that path emits a
+        `FutureWarning` and still returns `None`, and in 6.0 it raises. Set
+        `EDGARTOOLS_STRICT_ERRORS=1` to get the 6.0 behaviour now.
+
     :param sec_filing: The filing
     :return:
     """
@@ -508,14 +553,17 @@ def obj(sec_filing: Filing) -> Optional[object]:
         xml = sec_filing.xml()
         if xml:
             return Form3(**Ownership.parse_xml(xml))
+        warn_will_raise(_no_xml_to_parse(sec_filing), stacklevel=4)
     elif matches_form(sec_filing, "4"):
         xml = sec_filing.xml()
         if xml:
             return Form4(**Ownership.parse_xml(xml))
+        warn_will_raise(_no_xml_to_parse(sec_filing), stacklevel=4)
     elif matches_form(sec_filing, "5"):
         xml = sec_filing.xml()
         if xml:
             return Form5(**Ownership.parse_xml(xml))
+        warn_will_raise(_no_xml_to_parse(sec_filing), stacklevel=4)
     elif matches_form(sec_filing, ["SCHEDULE 13D", "SC 13D"]):
         return Schedule13D.from_filing(sec_filing)
     elif matches_form(sec_filing, ["SCHEDULE 13G", "SC 13G"]):
@@ -524,10 +572,12 @@ def obj(sec_filing: Filing) -> Optional[object]:
         xml = sec_filing.xml()
         if xml:
             return Effect.from_xml(xml)
+        warn_will_raise(_no_xml_to_parse(sec_filing), stacklevel=4)
     elif matches_form(sec_filing, "D"):
         xml = sec_filing.xml()
         if xml:
             return FormD.from_xml(xml)
+        warn_will_raise(_no_xml_to_parse(sec_filing), stacklevel=4)
     elif matches_form(sec_filing, ["C", "C-U", "C-AR", "C-TR"]):
         return FormC.from_filing(sec_filing)
 
@@ -590,6 +640,14 @@ def obj(sec_filing: Filing) -> Optional[object]:
         if sec_filing.form in XML_FILING_FORMS:
             return XmlFiling.from_filing(sec_filing)
 
+    # XBRL is the backstop for everything that fell through: a form we do not
+    # model may still carry financial data worth handing back.
     filing_xbrl = sec_filing.xbrl()
     if filing_xbrl:
         return filing_xbrl
+
+    # And this is the one legitimate None. Explicit rather than implicit,
+    # because a function whose absence behaviour is a falling-off-the-end has no
+    # way to say which of its several endings a caller reached. Every path that
+    # means "we failed" warned above on its way here.
+    return None

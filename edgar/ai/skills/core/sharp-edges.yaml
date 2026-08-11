@@ -112,3 +112,63 @@ sharp_edges:
     solution: |
       print(str(filings))           # Indexed list, 50 per page
       print(filing.to_context())    # Shows available methods
+
+  - id: catching-httpx-types
+    summary: Catch TransportError, never httpx exception types
+    severity: high
+    solution: |
+      # WRONG - httpx types reach you by accident, not by contract:
+      #   except httpx.ReadTimeout: ...
+      # RIGHT:
+      from edgar.exceptions import TransportError
+      try:
+          filings = company.get_filings(form="10-K")
+      except TransportError as e:
+          if e.status_code is None:
+              ...   # never got an answer: connection, DNS, timeout
+          elif e.status_code == 429:
+              ...   # rate limited: wait ~10 min, do NOT retry immediately
+          # e.__cause__ holds the original httpx exception for debugging
+    detection_pattern: 'except\s+httpx\.|httpx\.(ReadTimeout|ConnectError|HTTPStatusError|HTTPError)'
+
+  - id: none-treated-as-failure
+    summary: None means documented absence, never failure — failures raise
+    severity: high
+    solution: |
+      # None from a probe is an ANSWER about the world, not an error:
+      xbrl = filing.xbrl()
+      if xbrl is None:
+          ...   # this filing genuinely has no XBRL. Many do not.
+      # The SAME call during an SEC outage raises TransportError instead, so
+      # "no XBRL" and "we could not look" are never the same value.
+      #
+      # So: do not report None as an error, and do not retry on it.
+      # Catch the exception branches for failures; test None for absence.
+    detection_pattern: 'is None.*(?i:fail|error|retry)|(?i:if not).*(?i:financials|xbrl).*(?i:error)'
+
+  - id: catch-the-branch-not-the-leaf
+    summary: Catch the four branches, not individual leaf exception classes
+    severity: medium
+    solution: |
+      from edgar.exceptions import EdgarError, NotFoundError, TransportError
+      # NotFoundError covers company, filing, statement, section and attachment
+      # misses; naming the branch means new leaf types cannot slip past.
+      try:
+          company = Company(ticker)
+      except NotFoundError:
+          ...   # no such company
+      except TransportError:
+          ...   # could not reach SEC
+      except EdgarError:
+          ...   # anything else edgartools raises
+
+  - id: getitem-will-raise-in-6
+    summary: Use report.get(item, default) when an absent item is acceptable
+    severity: medium
+    solution: |
+      tenk["Item 7"]              # the item you expect — raises in 6.0 if absent
+      tenk.get("Item 16", "")     # the item that may not be there; never warns
+      # tenk["Item 99"] emits a FutureWarning today and raises
+      # SectionNotFoundError in 6.0. Set EDGARTOOLS_STRICT_ERRORS=1 to get that
+      # behaviour now — including in a test suite, to find out what breaks.
+    detection_pattern: 'tenk\[|tenq\[|report\[.Item'

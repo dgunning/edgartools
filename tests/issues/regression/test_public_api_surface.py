@@ -49,6 +49,12 @@ INTERNAL = {
     # helpers and protocols used inside the package
     "listify", "matches_form", "edgar_mode", "get_obj_info",
     "HasContext", "compose_context",
+    # `warn_will_raise` stages the 6.0 error flips (bead edgartools-07lk.10).
+    # Users observe its effect — a FutureWarning naming what a call will raise —
+    # and never call it; `edgar.exceptions.strict_errors_enabled()` is the
+    # supported way to ask about the behaviour. It is reachable from `edgar`
+    # only because obj() and find() import it. It goes with the flips in 6.0.
+    "warn_will_raise",
     # lower-level variants of supported entry points
     "get_by_accession_number_enriched", "get_entity_submissions",
     "get_cik_lookup_data", "get_ticker_to_cik_lookup",
