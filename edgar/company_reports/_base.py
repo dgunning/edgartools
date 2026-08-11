@@ -55,6 +55,15 @@ def section_not_found(report, item_or_part: str) -> SectionNotFoundError:
         else "no items were detected in this filing at all — check .document",
         f"use .get({item_or_part!r}) if an absent item is an acceptable answer",
     ]
+    # The message above names the filing, and the suggestions name its items;
+    # both vary between two filings that miss the same item on the same line.
+    # The warning has to be the part that does not vary, or a loop over a corpus
+    # warns once per filing — see warn_will_raise.
+    error.warning_summary = (
+        f"{type(report).__name__}[{item_or_part!r}] found no such item in this "
+        f"filing. Items are optional and vary by filer, so this can be a "
+        f"property of the filing rather than a mistake."
+    )
     return error
 
 

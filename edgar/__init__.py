@@ -312,17 +312,24 @@ def find(search_id: Union[str, int]) -> Optional[Union[Filing, Entity, CompanySe
         # above answers a well-formed identifier; this one only fires on input
         # that is malformed, so None here means "you typed it wrong" — which is
         # the one thing a return value cannot say.
-        warn_will_raise(
-            ValidationError(
-                f"'{search_id}' is not a valid accession number.",
-                parameter="search_id",
-                invalid_value=search_id,
-                suggestions=[
-                    "the format is 10 digits, 2 digits, 6 digits: 0000320193-23-000106",
-                    "dashes are optional — 000032019323000106 also works",
-                ],
-            ),
+        malformed = ValidationError(
+            f"'{search_id}' is not a valid accession number.",
+            parameter="search_id",
+            invalid_value=search_id,
+            suggestions=[
+                "the format is 10 digits, 2 digits, 6 digits: 0000320193-23-000106",
+                "dashes are optional — 000032019323000106 also works",
+            ],
         )
+        # The offending value stays on the error — which strict mode raises and
+        # 6.0 will raise — but must stay out of the warning, or a script
+        # validating a list of accessions warns once per bad entry.
+        malformed.warning_summary = (
+            "find() was given something shaped like an accession number that is "
+            "not a valid accession number. The format is 10 digits, 2 digits, "
+            "6 digits: 0000320193-23-000106; dashes are optional."
+        )
+        warn_will_raise(malformed)
         return None
     else:
         return find_company(search_id)
@@ -480,7 +487,7 @@ def _no_xml_to_parse(sec_filing: Filing) -> DataObjectError:
     between the warning and the user would land the `stacklevel` on our own
     source instead of on the line the reader has to change.
     """
-    return DataObjectError(
+    error = DataObjectError(
         f"Form {sec_filing.form} filing {sec_filing.accession_no} has no XML document, "
         f"so there is nothing to build a data object from. This is a property of "
         f"the filing, not of the form — ownership forms filed before roughly 2003 "
@@ -488,6 +495,14 @@ def _no_xml_to_parse(sec_filing: Filing) -> DataObjectError:
         form=sec_filing.form,
         accession_no=sec_filing.accession_no,
     )
+    # Stable across filings so a walk through a company's whole ownership
+    # history warns once, not once per pre-2003 filing — see warn_will_raise.
+    error.warning_summary = (
+        f"Form {sec_filing.form} filings without an XML document cannot build a "
+        f"data object. This is a property of the filing, not of the form — "
+        f"ownership forms filed before roughly 2003 predate the XML requirement."
+    )
+    return error
 
 
 def obj(sec_filing: Filing) -> Optional[object]:

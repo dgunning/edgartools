@@ -234,9 +234,17 @@ class TenK(CompanyReport):
             # replace a specific diagnosis with a generic one.
             if strict_errors_enabled():
                 raise
+            # Which filing failed, and why, goes to the log: naming it in the
+            # warning would put the accession in the text Python dedups on, and
+            # a parser regression across a form-year would then warn once per
+            # filing. The warning dedups on the failure *mode* instead, which is
+            # a bounded set — see warn_will_raise in edgar/exceptions.py.
+            log.warning("HTMLParser failed for 10-K filing %s: %s",
+                        self._filing.accession_number, e)
             warnings.warn(
-                f"HTMLParser failed for 10-K filing {self._filing.accession_number} "
-                f"(falling back to ChunkedDocument): {e}\n"
+                f"HTMLParser raised {type(e).__name__} on a 10-K "
+                f"(falling back to ChunkedDocument); the filing and the parser "
+                f"message are in the log.\n"
                 f"This returns None today and raises in edgartools 6.0. Set "
                 f"EDGARTOOLS_STRICT_ERRORS=1 to get the 6.0 behaviour now.",
                 FutureWarning,

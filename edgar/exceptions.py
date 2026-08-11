@@ -117,18 +117,28 @@ def warn_will_raise(error: "EdgarError", *, stacklevel: int = 3) -> None:
     job exercises and what a user porting early gets. Otherwise it warns and
     returns, and the caller carries on doing exactly what it does today.
 
-    The warning text is the error's own message plus the version it lands in, so
-    the thing the user reads while porting is the thing they will catch. That
-    matters more than it sounds: a warning that says "this will change" without
-    naming what it becomes leaves the reader to go and find out.
+    The warning names what the call becomes, so the thing the user reads while
+    porting is the thing they will catch. That matters more than it sounds: a
+    warning that says "this will change" without naming what it becomes leaves
+    the reader to go and find out.
 
     `FutureWarning`, not `DeprecationWarning`. Nothing here is deprecated —
     these calls stay, they just stop answering `None`. And Python hides
     `DeprecationWarning` outside `__main__` by default, which would silence it
     for exactly the users who most need it: the ones whose code is a library too.
 
-    Python's default filter shows a warning once per call site, so a loop over
-    ten thousand filings warns once rather than ten thousand times.
+    The warning text has to be *stable per call site*, which is why it comes
+    from `error.warning_summary` rather than from `str(error)`. Python's default
+    filter suppresses a repeat only when the text matches exactly, so a message
+    carrying the accession number defeats it: a corpus loop over ten thousand
+    filings emits ten thousand warnings, one per filing, which reads as a broken
+    library rather than a considerate one. The per-filing detail is not lost —
+    it stays on the error, which is what strict mode raises and what 6.0 will
+    raise, and that is the copy the user debugs against.
+
+    An error with no `warning_summary` falls back to `str(error)`; that is safe
+    for a fixed message and wrong for one that interpolates anything
+    per-instance, so new call sites should set it.
 
     `stacklevel` defaults to 3 — helper, the function that called it, then the
     user. Pass a different value where the call sits deeper.
@@ -136,7 +146,7 @@ def warn_will_raise(error: "EdgarError", *, stacklevel: int = 3) -> None:
     if strict_errors_enabled():
         raise error
     warnings.warn(
-        f"{error}\nThis returns None today and raises "
+        f"{error.warning_summary or error}\nThis returns None today and raises "
         f"{type(error).__name__} in edgartools 6.0. Set EDGARTOOLS_STRICT_ERRORS=1 "
         f"to get the 6.0 behaviour now.",
         FutureWarning,
@@ -157,6 +167,14 @@ class EdgarError(Exception):
     replaces (`message, context, suggestions`), so the nine parser subclasses
     and their call sites re-base without edits.
     """
+
+    #: Dedup-stable text for `warn_will_raise`, set by call sites whose message
+    #: interpolates something per-instance. It must not contain an accession
+    #: number, a user-supplied identifier, or anything else that varies between
+    #: two filings hitting the same line — Python's warning filter compares the
+    #: rendered text, so anything that varies turns one warning into thousands.
+    #: `None` means `str(self)` is already stable and is used as-is.
+    warning_summary: Optional[str] = None
 
     def __init__(self,
                  message: str = "",

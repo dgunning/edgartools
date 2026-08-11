@@ -106,6 +106,16 @@ tenk["Item 7"]                      # the item you expect; raises in 6.0 if abse
 tenk.get("Item 16", "")             # the item that may not be there
 ```
 
+### If you process filings in bulk
+
+Each of these warns **once per line of your code, not once per filing** — Python suppresses the repeats. A loop over ten thousand 10-Ks where some omit the item you asked for produces one warning, not ten thousand. The detail about *which* filing (and what items it does have) is on the exception rather than in the warning, so you see it when you turn strict mode on:
+
+```bash
+EDGARTOOLS_STRICT_ERRORS=1 python your_script.py   # raises, with the accession named
+```
+
+If an absent item is a normal outcome for your corpus rather than a problem, `report.get(item, default)` is the call you want — it is silent by design, today and in 6.0.
+
 ### Get the 6.0 behaviour now
 
 Set `EDGARTOOLS_STRICT_ERRORS=1` and every row of that table raises today. Run your test suite with it to find out what breaks while there is still a 5.x release to fix it in:
