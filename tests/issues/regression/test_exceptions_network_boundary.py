@@ -38,6 +38,14 @@ import httpx
 import pytest
 from stamina import retry
 
+# Bound here, at module import time, ON PURPOSE. tests/conftest.py replaces this
+# module attribute with a session-wide memoizing wrapper, and collection runs
+# before session fixtures are set up — so this name is the real function while
+# `submissions.download_entity_submissions_from_sec` is the wrapper. See
+# test_the_submissions_tests_call_the_real_function for what goes wrong without it.
+from edgar.entity.submissions import (
+    download_entity_submissions_from_sec as _real_download_submissions,
+)
 from edgar.exceptions import (
     IdentityNotSetError,
     TooManyRequestsError,
@@ -383,7 +391,7 @@ def test_submissions_404_returns_none_in_both_eras(monkeypatch, raised):
         raise raised
 
     monkeypatch.setattr(submissions, "download_json", fail)
-    assert submissions.download_entity_submissions_from_sec(99999999) is None
+    assert _real_download_submissions(99999999) is None
 
 
 @pytest.mark.parametrize("raised", [
@@ -400,7 +408,27 @@ def test_submissions_outage_is_not_reported_as_an_unknown_cik(monkeypatch, raise
 
     monkeypatch.setattr(submissions, "download_json", fail)
     with pytest.raises(type(raised)):
-        submissions.download_entity_submissions_from_sec(320193)
+        _real_download_submissions(320193)
+
+
+def test_the_submissions_tests_call_the_real_function():
+    """Guard the two tests above against the wrapper that already broke them.
+
+    `tests/conftest.py` memoizes `download_entity_submissions_from_sec` for the
+    whole session by replacing the module attribute. For a CIK some earlier test
+    already fetched — 320193 appears hundreds of times in this suite — the
+    wrapper answers from its cache and never reaches the `except` clause under
+    test. That is a green test that verifies nothing, and it is exactly what
+    happened: both tests passed run alone and failed in the full regression run.
+
+    Binding the function at module import time gets the real one, because
+    collection finishes before session fixtures are set up. This asserts that
+    binding still holds, so the day the import moves the test says so.
+    """
+    assert _real_download_submissions.__name__ == "download_entity_submissions_from_sec", (
+        "the submissions tests are calling conftest's memoizing wrapper, which "
+        "short-circuits on a cache hit and never exercises the code under test"
+    )
 
 
 @pytest.mark.parametrize("raised", [
