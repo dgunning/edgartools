@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MIT
 import logging
 import re
+import warnings
 from functools import lru_cache, partial
 from typing import List, Optional, Union
 
@@ -21,6 +22,22 @@ from edgar._filings import (
 )
 from edgar.context import HasContext, compose_context
 from edgar.core import CAUTION, CRAWL, NORMAL, edgar_mode, get_identity, listify, set_identity
+from edgar.exceptions import (
+    AttachmentNotFoundError,
+    CompanyFactsNotFoundError,
+    CompanyNotFoundError,
+    DataObjectError,
+    EdgarError,
+    FilingNotFoundError,
+    IdentityNotSetError,
+    NotFoundError,
+    ParsingError,
+    SectionNotFoundError,
+    StatementNotFoundError,
+    TooManyRequestsError,
+    TransportError,
+    ValidationError,
+)
 from edgar.current_filings import CurrentFilings, get_all_current_filings, get_current_filings, iter_current_filings_pages
 
 # SSL diagnostic function
@@ -201,7 +218,17 @@ __all__ = [
     "Company", "CompanyData", "CompanyFiling", "CompanyFilings",
     "CompanySearchResults", "Entity", "EntityData",
     "Attachment", "Attachments", "FilingHomepage", "FilingHeader",
-    "CompanyNotFoundError", "DataObjectException",
+    # -- Errors (edgar.exceptions) -------------------------------------------
+    # The four branches plus the concretes users need by name. Everything else
+    # in the tree is importable from edgar.exceptions.
+    "EdgarError",
+    "TransportError", "TooManyRequestsError", "IdentityNotSetError",
+    "NotFoundError", "CompanyNotFoundError", "FilingNotFoundError",
+    "CompanyFactsNotFoundError", "StatementNotFoundError",
+    "SectionNotFoundError", "AttachmentNotFoundError",
+    "ParsingError", "DataObjectError",
+    "ValidationError",
+    "DataObjectException",  # deprecated alias, removed in 6.0
 
     # -- Financial statements ------------------------------------------------
     "Financials", "MultiFinancials", "XBRL",
@@ -295,11 +322,23 @@ def matches_form(sec_filing: Filing,
     return False
 
 
-class DataObjectException(Exception):
+class DataObjectException(DataObjectError):
+    """Deprecated: use edgar.exceptions.DataObjectError. Removed in 6.0.
+
+    Kept as a subclass rather than a plain alias because this one takes a
+    Filing, and DataObjectError takes primitives — edgar.exceptions imports
+    nothing from edgar. It was never raised anywhere, so the constructor is
+    almost certainly unused, but a name in __all__ gets the full treatment.
+    """
 
     def __init__(self, filing: Filing):
-        self.message = f"Could not create a data object for Form {filing.form} filing: {filing.accession_no}"
-        super().__init__(self.message)
+        warnings.warn(
+            "DataObjectException is deprecated and will be removed in v6.0. "
+            "Use DataObjectError instead (from edgar.exceptions import DataObjectError).",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(form=filing.form, accession_no=filing.accession_no)
 
 
 def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:

@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
-from edgar.xbrl.exceptions import StatementNotFound
+from edgar.exceptions import StatementNotFoundError
 from edgar.xbrl.statements import statement_to_concepts
 
 
@@ -1286,7 +1286,7 @@ class StatementResolver:
             period_of_report = getattr(self.xbrl, 'period_of_report', 'Unknown')
 
             if len(statements) == 0:
-                raise StatementNotFound(
+                raise StatementNotFoundError(
                     statement_type=statement_type,
                     confidence=conf,
                     found_statements=[],
@@ -1297,7 +1297,7 @@ class StatementResolver:
                 )
             elif conf < 0.3:
                 found_statements = [s['definition'] for s in statements]
-                raise StatementNotFound(
+                raise StatementNotFoundError(
                     statement_type=statement_type,
                     confidence=conf,
                     found_statements=found_statements,

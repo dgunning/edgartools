@@ -11,6 +11,8 @@ if TYPE_CHECKING:
 
 import pandas as pd
 from bs4 import BeautifulSoup
+
+from edgar.exceptions import EdgarError
 from httpx import AsyncClient, HTTPStatusError
 from tqdm.auto import tqdm
 
@@ -59,7 +61,8 @@ __all__ = ['download_edgar_data',
            'parse_file_size',
            'latest_filing_date']
 
-class DirectoryBrowsingNotAllowed(Exception):
+
+class DirectoryBrowsingNotAllowed(EdgarError):
 
     def __init__(self, url: str, message: str = "Directory browsing is not allowed for this URL."):
         super().__init__(f"{message} \nurl: {url}")

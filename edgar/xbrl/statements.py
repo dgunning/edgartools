@@ -16,7 +16,7 @@ from rich.table import Table
 
 from edgar.richtools import repr_rich
 from edgar.xbrl.dimensions import is_breakdown_dimension
-from edgar.xbrl.exceptions import StatementNotFound
+from edgar.exceptions import ParsingError, StatementNotFoundError
 from edgar.xbrl.presentation import StatementView, ViewType, normalize_view
 
 # XBRL structural element patterns (Issue #03zg)
@@ -344,7 +344,9 @@ statement_to_concepts = {
 }
 
 
-class StatementValidationError(Exception):
+
+
+class StatementValidationError(ParsingError):
     """Raised when statement validation fails."""
     pass
 
@@ -467,12 +469,12 @@ class Statement:
         from edgar.xbrl.core import STANDARD_TAXONOMIES, STANDARD_LABEL, split_element_id
 
         # Resolve to the statement's role URI using the same path render() uses.
-        # find_statement() raises StatementNotFound for unresolvable inputs;
+        # find_statement() raises StatementNotFoundError for unresolvable inputs;
         # this method should fail silent and return [] instead.
         lookup_key = self.canonical_type if self.canonical_type else self.role_or_type
         try:
             _, role_uri, _ = self.xbrl.find_statement(lookup_key)
-        except StatementNotFound:
+        except StatementNotFoundError:
             return []
         if not role_uri:
             return []
@@ -2435,7 +2437,7 @@ class Statements:
         """
         from edgar.core import log
 
-        if isinstance(e, StatementNotFound):
+        if isinstance(e, StatementNotFoundError):
             # Custom exception already has detailed context
             log.warning(str(e))
         else:

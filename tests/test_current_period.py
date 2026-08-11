@@ -13,7 +13,7 @@ from unittest.mock import Mock, MagicMock
 
 from edgar.xbrl.xbrl import XBRL
 from edgar.xbrl.current_period import CurrentPeriodView
-from edgar.xbrl.exceptions import StatementNotFound
+from edgar.exceptions import StatementNotFoundError
 
 
 @pytest.fixture
@@ -252,7 +252,7 @@ class TestCurrentPeriodView:
         mock_xbrl.find_statement.return_value = ([], None, None)
         current_period = CurrentPeriodView(mock_xbrl)
         
-        with pytest.raises(StatementNotFound):
+        with pytest.raises(StatementNotFoundError):
             current_period.balance_sheet()
 
     @pytest.mark.fast
@@ -262,7 +262,7 @@ class TestCurrentPeriodView:
         current_period = CurrentPeriodView(mock_xbrl)
         
         # Test with DataFrame mode (as_statement=False)
-        with pytest.raises(StatementNotFound):
+        with pytest.raises(StatementNotFoundError):
             current_period.income_statement(as_statement=False)
 
     @pytest.mark.fast
@@ -394,7 +394,7 @@ class TestCurrentPeriodIntegration:
                 # Should have some assets data
                 assets_data = df[df['label'].str.contains('Assets', case=False, na=False)]
                 assert not assets_data.empty
-        except StatementNotFound:
+        except StatementNotFoundError:
             # It's okay if the specific statement isn't found in test data
             pytest.skip("Balance sheet not available in test data")
 
@@ -417,7 +417,7 @@ class TestCurrentPeriodIntegration:
                 # Should have revenue or income data
                 revenue_data = df[df['label'].str.contains('Revenue|Income', case=False, na=False)]
                 # It's okay if no revenue data is found in test fixtures
-        except StatementNotFound:
+        except StatementNotFoundError:
             pytest.skip("Income statement not available in test data")
 
     @pytest.mark.fast
@@ -438,7 +438,7 @@ class TestCurrentPeriodIntegration:
             if not df.empty:
                 # Should have raw concept columns
                 assert 'original_concept' in df.columns or 'concept' in df.columns
-        except StatementNotFound:
+        except StatementNotFoundError:
             pytest.skip("Balance sheet not available in test data")
 
     @pytest.mark.fast

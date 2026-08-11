@@ -31,7 +31,8 @@ from edgar._filings import Filings
 from edgar.company_reports import TenK, TenQ
 from edgar.display.styles import get_style, SYMBOLS
 from edgar.entity.data import Address, CompanyData, EntityData
-from edgar.entity.entity_facts import EntityFacts, NoCompanyFactsFound, get_company_facts
+from edgar.entity.entity_facts import EntityFacts, get_company_facts
+from edgar.exceptions import CompanyFactsNotFoundError, CompanyNotFoundError
 from edgar.entity.tickers import get_icon_from_ticker
 from edgar.financials import Financials
 from edgar.display.formatting import cik_text, datefmt, reverse_name
@@ -62,29 +63,17 @@ __all__ = [
     'ConceptList',
     'get_entity',
     'get_company',
-    'NoCompanyFactsFound',
+    'CompanyFactsNotFoundError',
+    'NoCompanyFactsFound',  # deprecated alias, removed in 6.0
     'has_company_filings',
     'COMPANY_FORMS',
 ]
 
 
-class CompanyNotFoundError(Exception):
-    """Raised when a company cannot be found by ticker, CIK, or name."""
-
-    def __init__(self, identifier, suggestions=None):
-        self.identifier = identifier
-        self.suggestions = suggestions or []
-        super().__init__(str(self))
-
-    def __str__(self):
-        msg = f"Company not found: '{self.identifier}'"
-        if self.suggestions:
-            suggestions_str = ", ".join(
-                f"'{s['ticker']}' ({s['company']})" for s in self.suggestions[:3]
-            )
-            msg += f"\n  Similar: {suggestions_str}"
-        msg += "\n  Tip: Search by name with find_company(\"...\") or pass a CIK directly."
-        return msg
+# CompanyNotFoundError is defined in edgar.exceptions under the NotFoundError
+# branch (bead edgartools-07lk.10) and imported above. It keeps its identifier,
+# its fuzzy suggestions and its message verbatim — it is the one exception this
+# library already documented publicly (docs/api/company.md).
 
 
 def _get_suggestions(identifier: str, max_suggestions: int = 3):
@@ -481,7 +470,7 @@ class Entity(SecFiler):
                 # Apply period type filtering to the facts
                 return facts.filter_by_period_type(period_type)
             return facts
-        except NoCompanyFactsFound:
+        except CompanyFactsNotFoundError:
             return None
 
     def get_structured_statement(self,
@@ -1815,3 +1804,14 @@ def public_companies() -> Iterable[Company]:
         yield c
 
 
+
+
+# ---------------------------------------------------------------------------
+# Deprecated name (bead edgartools-07lk.10): NoCompanyFactsFound is now
+# CompanyFactsNotFoundError. Same object, so `except NoCompanyFactsFound:`
+# still works. Removed in 6.0.
+# ---------------------------------------------------------------------------
+from edgar._compat import deprecated_alias  # noqa: E402
+from edgar.exceptions import CompanyFactsNotFoundError as _CompanyFactsNotFoundError  # noqa: E402
+
+__getattr__ = deprecated_alias(NoCompanyFactsFound=_CompanyFactsNotFoundError)

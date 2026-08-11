@@ -23,7 +23,7 @@ from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
 from edgar.richtools import repr_rich
 from edgar.xbrl.dimensions import is_breakdown_dimension
-from edgar.xbrl.exceptions import StatementNotFound
+from edgar.exceptions import StatementNotFoundError
 from edgar.xbrl.statements import is_xbrl_structural_element
 
 if TYPE_CHECKING:
@@ -443,7 +443,7 @@ class CurrentPeriodView:
             - balance, weight, preferred_sign, parent_concept, parent_abstract_concept
 
         Raises:
-            StatementNotFound: If the requested statement type is not available
+            StatementNotFoundError: If the requested statement type is not available
         """
         try:
             # Select appropriate period based on statement type
@@ -458,7 +458,7 @@ class CurrentPeriodView:
 
             if not statement_data:
                 entity_name = getattr(self.xbrl, 'entity_name', 'Unknown')
-                raise StatementNotFound(
+                raise StatementNotFoundError(
                     statement_type=statement_type,
                     confidence=0.0,
                     found_statements=[],
@@ -557,7 +557,7 @@ class CurrentPeriodView:
             if VERBOSE_EXCEPTIONS:
                 log.error(f"Error retrieving {statement_type} for current period: {str(e)}")
             entity_name = getattr(self.xbrl, 'entity_name', 'Unknown')
-            raise StatementNotFound(
+            raise StatementNotFoundError(
                 statement_type=statement_type,
                 confidence=0.0,
                 found_statements=[],
@@ -578,7 +578,7 @@ class CurrentPeriodView:
             Statement object with current period filtering applied
 
         Raises:
-            StatementNotFound: If the requested statement type is not available
+            StatementNotFoundError: If the requested statement type is not available
         """
         try:
             # Import here to avoid circular imports
@@ -591,7 +591,7 @@ class CurrentPeriodView:
 
             if not found_role:
                 entity_name = getattr(self.xbrl, 'entity_name', 'Unknown')
-                raise StatementNotFound(
+                raise StatementNotFoundError(
                     statement_type=statement_type,
                     confidence=0.0,
                     found_statements=[],
@@ -616,7 +616,7 @@ class CurrentPeriodView:
             if VERBOSE_EXCEPTIONS:
                 log.error(f"Error retrieving {statement_type} statement object for current period: {str(e)}")
             entity_name = getattr(self.xbrl, 'entity_name', 'Unknown')
-            raise StatementNotFound(
+            raise StatementNotFoundError(
                 statement_type=statement_type,
                 confidence=0.0,
                 found_statements=[],
@@ -777,7 +777,7 @@ class CurrentPeriodView:
                 if not df.empty:
                     # Convert DataFrame to list of dicts for JSON serialization
                     result['statements'][stmt_type] = df.to_dict('records')
-            except StatementNotFound:
+            except StatementNotFoundError:
                 result['statements'][stmt_type] = None
 
         return result

@@ -30,6 +30,7 @@ from rich.table import Column, Table
 from rich.text import Text
 
 from edgar.config import SEC_BASE_URL
+from edgar.exceptions import AttachmentNotFoundError
 from edgar.core import binary_extensions, has_html_content, text_extensions
 from edgar.files._deprecation import PAGE_BREAK_DEPRECATION
 from edgar.files.html_documents import get_clean_html
@@ -660,7 +661,7 @@ class Attachments:
             for doc in self._attachments:
                 if doc.document == item:
                     return doc
-        raise KeyError(f"Document not found: {item}")
+        raise AttachmentNotFoundError(f"Document not found: {item}")
 
     def get_by_sequence(self, sequence: Union[str, int]):
         """
@@ -670,7 +671,7 @@ class Attachments:
         for doc in self._attachments:
             if doc.sequence_number == str(sequence):
                 return doc
-        raise KeyError(f"Document not found: {sequence}")
+        raise AttachmentNotFoundError(f"Document not found: {sequence}")
 
     def get_by_index(self, index: int):
         """
