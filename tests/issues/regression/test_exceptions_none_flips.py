@@ -30,8 +30,9 @@ from pathlib import Path
 import pytest
 
 import edgar
+from edgar import _no_xml_to_parse
 from edgar.company_reports import TenK, TenQ
-from edgar.company_reports._base import CompanyReport
+from edgar.company_reports._base import CompanyReport, section_not_found
 from edgar.exceptions import (
     DataObjectError,
     EdgarError,
@@ -90,6 +91,19 @@ class _Report(TenK):
         return _Empty()
 
 
+def _report_filed_as(accession: str) -> _Report:
+    """A `_Report` whose filing carries a specific accession number.
+
+    The dedup tests need many reports that differ only in the identifier the
+    message interpolates, which is exactly the axis a corpus loop varies along.
+    """
+    report = _Report()
+    report._filing = _Filing()
+    report._filing.accession_number = accession
+    report._filing.accession_no = accession
+    return report
+
+
 # ---------------------------------------------------------------------------
 # warn_will_raise, the primitive under all four sites
 # ---------------------------------------------------------------------------
@@ -114,6 +128,74 @@ def test_the_warning_carries_the_error_message_not_just_a_notice(lenient):
     assert "EDGARTOOLS_STRICT_ERRORS" in message, (
         "the warning must say how to get the new behaviour now — otherwise the "
         "only way to test the 6.0 path is to wait for 6.0"
+    )
+
+
+def test_a_corpus_loop_warns_once_not_once_per_filing(lenient):
+    """The warning text must not vary per filing, or the dedup silently dies.
+
+    Python suppresses a repeat only when the rendered text matches exactly, so
+    an accession number interpolated into the *warning* turns one warning into
+    one per filing. A user looping over a few thousand 10-Ks would get a few
+    thousand stderr lines, which reads as a broken library rather than a
+    considerate one — and the flood scales with corpus size, so the people hit
+    hardest are the bulk users we most want to keep.
+
+    `simplefilter("default")` is what a real interpreter applies to
+    FutureWarning; `"always"` (used by the tests above, to inspect a single
+    warning) would defeat the very dedup under test.
+    """
+    errors = [
+        section_not_found(_report_filed_as(f"0000320193-24-{i:06d}"), "Item 99")
+        for i in range(500)
+    ]
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("default")
+        for error in errors:
+            warn_will_raise(error)          # one call site, 500 filings
+    assert len(caught) == 1, (
+        f"500 filings produced {len(caught)} warnings; the warning text is "
+        f"varying per filing. Keep per-filing detail on the error (which strict "
+        f"mode raises) and out of error.warning_summary."
+    )
+
+
+def test_the_error_still_names_the_filing_even_though_the_warning_does_not(lenient):
+    """Deduping the warning must not cost the detail 6.0 raises."""
+    error = section_not_found(_report_filed_as("0000320193-24-000106"), "Item 99")
+    assert "0000320193-24-000106" in str(error), (
+        "the exception is what strict mode raises and what the user debugs "
+        "against; it keeps the accession"
+    )
+    assert "0000320193-24-000106" not in error.warning_summary, (
+        "the warning text is what Python dedups on; it must not"
+    )
+
+
+def test_the_obj_site_dedups_too(lenient):
+    """`filing.obj()` has the same exposure as `report[item]`.
+
+    Walking a company's whole ownership history crosses every Form 3/4/5 filed
+    before roughly 2003, none of which has XML. That is a loop over filings
+    hitting one line, so the accession has to stay out of the warning here for
+    the same reason it does there.
+    """
+    filings = []
+    for i in range(500):
+        filing = _Filing()
+        filing.accession_no = f"0000320193-98-{i:06d}"
+        filing.form = "4"
+        filings.append(filing)
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("default")
+        for filing in filings:
+            warn_will_raise(_no_xml_to_parse(filing))
+    assert len(caught) == 1, (
+        f"500 pre-XML ownership filings produced {len(caught)} warnings"
+    )
+    assert "0000320193-98-000000" in str(_no_xml_to_parse(filings[0])), (
+        "the error still names the filing for whoever turns strict mode on"
     )
 
 
