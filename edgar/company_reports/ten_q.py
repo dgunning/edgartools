@@ -9,12 +9,12 @@ from rich.padding import Padding
 from rich.panel import Panel
 from rich.tree import Tree
 
-from edgar.company_reports._base import CompanyReport
+from edgar.company_reports._base import CompanyReport, report_lookup_miss
 from edgar.company_reports._structures import FilingStructure
 from edgar.core import log
+from edgar.display.formatting import datefmt
 from edgar.documents import HTMLParser, ParserConfig
 from edgar.files.htmltools import ChunkedDocument
-from edgar.display.formatting import datefmt
 
 __all__ = ['TenQ']
 
@@ -384,6 +384,7 @@ class TenQ(CompanyReport):
             except (KeyError, TypeError):
                 pass
 
+        report_lookup_miss(self, item_or_part)
         return None
 
     def get_item_with_part(self, part: str, item: str, markdown: bool = True) -> Optional[str]:

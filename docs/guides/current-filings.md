@@ -359,6 +359,7 @@ for i in range(100):
 
 ```python
 from edgar import get_current_filings
+from edgar.exceptions import TransportError
 import time
 
 def robust_current_filings(form="", max_retries=3):
@@ -368,7 +369,9 @@ def robust_current_filings(form="", max_retries=3):
         try:
             return get_current_filings(form=form)
             
-        except ConnectionError as e:
+        except TransportError as e:
+            # TransportError, not the builtin ConnectionError — nothing in the
+            # HTTP layer raises that one. See guides/error-handling.md.
             print(f"⚠️ Connection error (attempt {attempt + 1}): {e}")
             if attempt < max_retries - 1:
                 time.sleep(2 ** attempt)  # Exponential backoff

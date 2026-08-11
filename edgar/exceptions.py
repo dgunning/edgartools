@@ -37,12 +37,14 @@ RULES FOR THIS MODULE:
 from __future__ import annotations
 
 import os
+import warnings
 from typing import Any, Dict, List, Optional
 
 __all__ = [
     # helpers
     "strict_errors_enabled",
     "http_status",
+    "warn_will_raise",
     # root
     "EdgarError",
     # transport
@@ -105,6 +107,41 @@ def http_status(exc: BaseException) -> Optional[int]:
     if status is not None:
         return status
     return getattr(getattr(exc, "response", None), "status_code", None)
+
+
+def warn_will_raise(error: "EdgarError", *, stacklevel: int = 3) -> None:
+    """Stage a 6.0 error change at the exact line that changes.
+
+    Call this where a function is about to return `None` for something 6.0 will
+    raise on. Under strict it raises `error` now — which is what the strict CI
+    job exercises and what a user porting early gets. Otherwise it warns and
+    returns, and the caller carries on doing exactly what it does today.
+
+    The warning text is the error's own message plus the version it lands in, so
+    the thing the user reads while porting is the thing they will catch. That
+    matters more than it sounds: a warning that says "this will change" without
+    naming what it becomes leaves the reader to go and find out.
+
+    `FutureWarning`, not `DeprecationWarning`. Nothing here is deprecated —
+    these calls stay, they just stop answering `None`. And Python hides
+    `DeprecationWarning` outside `__main__` by default, which would silence it
+    for exactly the users who most need it: the ones whose code is a library too.
+
+    Python's default filter shows a warning once per call site, so a loop over
+    ten thousand filings warns once rather than ten thousand times.
+
+    `stacklevel` defaults to 3 — helper, the function that called it, then the
+    user. Pass a different value where the call sits deeper.
+    """
+    if strict_errors_enabled():
+        raise error
+    warnings.warn(
+        f"{error}\nThis returns None today and raises "
+        f"{type(error).__name__} in edgartools 6.0. Set EDGARTOOLS_STRICT_ERRORS=1 "
+        f"to get the 6.0 behaviour now.",
+        FutureWarning,
+        stacklevel=stacklevel,
+    )
 
 
 class EdgarError(Exception):

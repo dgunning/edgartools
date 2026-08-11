@@ -1,5 +1,6 @@
 """Form 10-K annual report class."""
 import re
+import warnings
 from functools import cached_property
 
 from rich import box
@@ -8,12 +9,13 @@ from rich.padding import Padding
 from rich.panel import Panel
 from rich.tree import Tree
 
-from edgar.company_reports._base import CompanyReport
+from edgar.company_reports._base import CompanyReport, report_lookup_miss
 from edgar.company_reports._structures import FilingStructure
 from edgar.core import log
-from edgar.documents import HTMLParser, ParserConfig, parse_html
-from edgar.files.htmltools import ChunkedDocument
 from edgar.display.formatting import datefmt
+from edgar.documents import HTMLParser, ParserConfig, parse_html
+from edgar.exceptions import strict_errors_enabled
+from edgar.files.htmltools import ChunkedDocument
 
 __all__ = ['TenK']
 
@@ -205,21 +207,39 @@ class TenK(CompanyReport):
 
         Returns:
             Document object from edgar.documents module with sections property,
-            or None if parsing fails (falls back to ChunkedDocument)
+            or None when the filing has no HTML document at all — a real
+            condition for older 10-Ks filed as plain text, and the only thing
+            None means here from 6.0 onwards.
+
+            Today None also comes back when the parser *failed*, with a
+            FutureWarning; in 6.0 that raises instead. Two very different facts
+            were arriving as the same value: "this filing has no HTML" and "this
+            filing has HTML we could not read". Every sibling report class
+            (TenQ, TwentyF, FortyF, CurrentReport) already lets a parse failure
+            propagate — this one was the outlier.
+
+            Set EDGARTOOLS_STRICT_ERRORS=1 for the 6.0 behaviour now.
         """
+        html = self._filing.html()
+        if not html:
+            return None
+        config = ParserConfig(form='10-K')
+        parser = HTMLParser(config)
         try:
-            html = self._filing.html()
-            if not html:
-                return None
-            config = ParserConfig(form='10-K')
-            parser = HTMLParser(config)
             return parser.parse(html)
         except Exception as e:
-            # If new parser fails, log and return None to fall back to old parser
-            import warnings
+            # Deliberately not warn_will_raise(): what 6.0 does here is let the
+            # parser's own ParsingError through, and a bare `raise` keeps its
+            # type, message and traceback. Building a fresh error to raise would
+            # replace a specific diagnosis with a generic one.
+            if strict_errors_enabled():
+                raise
             warnings.warn(
-                f"HTMLParser failed for 10-K filing (falling back to ChunkedDocument): {e}",
-                RuntimeWarning,
+                f"HTMLParser failed for 10-K filing {self._filing.accession_number} "
+                f"(falling back to ChunkedDocument): {e}\n"
+                f"This returns None today and raises in edgartools 6.0. Set "
+                f"EDGARTOOLS_STRICT_ERRORS=1 to get the 6.0 behaviour now.",
+                FutureWarning,
                 stacklevel=2
             )
             return None
@@ -689,6 +709,8 @@ class TenK(CompanyReport):
             last_line = item_text.split("\n")[-1]
             if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
                 item_text = item_text.rstrip(last_line)
+        else:
+            report_lookup_miss(self, item_or_part)
 
         return item_text
 
