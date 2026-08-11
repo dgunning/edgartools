@@ -22,7 +22,7 @@ from edgar.httprequests import (
     post_with_retry,
     post_with_retry_async,
     TooManyRequestsError,
-    IdentityNotSetException,
+    IdentityNotSetError,
     SSLVerificationError,
     is_ssl_error,
     should_retry,
@@ -124,7 +124,7 @@ async def test_post_with_retry_async():
 def test_identity_not_set_exception(monkeypatch):
     # Remove the EDGAR_IDENTITY environment variable
     monkeypatch.delenv("EDGAR_IDENTITY", raising=False)
-    with pytest.raises(IdentityNotSetException):
+    with pytest.raises(IdentityNotSetError):
         get_with_retry("http://example.com")
 
 

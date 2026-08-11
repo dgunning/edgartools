@@ -36,9 +36,13 @@ RULES FOR THIS MODULE:
 """
 from __future__ import annotations
 
+import os
 from typing import Any, Dict, List, Optional
 
 __all__ = [
+    # helpers
+    "strict_errors_enabled",
+    "http_status",
     # root
     "EdgarError",
     # transport
@@ -63,6 +67,44 @@ __all__ = [
     "ValidationError",
     "InvalidDateError",
 ]
+
+
+_TRUTHY = frozenset({"1", "true", "yes", "on"})
+
+
+def strict_errors_enabled() -> bool:
+    """True when `EDGARTOOLS_STRICT_ERRORS` asks for 6.0 error behaviour today.
+
+    Under strict, the changes that would otherwise be a 6.0 break run now: the
+    network boundary wraps httpx errors into `TransportError`, and the silent
+    `None` returns raise instead. Two payoffs — a user can port before the break
+    lands, and our own CI gets a job that runs the whole suite the 6.0 way,
+    which is what flushes out internal code still relying on the old behaviour.
+
+    Read fresh on every call rather than captured at import, so a test can set
+    the variable, exercise a code path, and unset it. The branches this gates
+    are all deleted in 6.0, when strict becomes the only path.
+    """
+    return os.environ.get("EDGARTOOLS_STRICT_ERRORS", "").strip().lower() in _TRUTHY
+
+
+def http_status(exc: BaseException) -> Optional[int]:
+    """The HTTP status behind a failure, whichever era raised it.
+
+    `TransportError` carries `.status_code`; an httpx `HTTPStatusError` carries
+    `.response.status_code`. Every dual-era `except` needs to ask the same
+    question of both, and asking it through `getattr` rather than an isinstance
+    check is what keeps this module free of any httpx import.
+
+    Returns None when we never got an answer at all — a connection failure, a
+    timeout, or a client-side refusal such as a missing identity. That None is
+    load-bearing: it is the discriminator between "SEC said no" and "we could
+    not ask", which is the whole distinction the transport branch exists for.
+    """
+    status = getattr(exc, "status_code", None)
+    if status is not None:
+        return status
+    return getattr(getattr(exc, "response", None), "status_code", None)
 
 
 class EdgarError(Exception):

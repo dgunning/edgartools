@@ -1,4 +1,5 @@
 import gzip
+import inspect
 import logging
 import os
 import shutil
@@ -23,7 +24,12 @@ from tqdm import tqdm
 logging.getLogger("stamina").setLevel(logging.ERROR)
 
 from edgar.core import get_edgar_data_directory, text_extensions
-from edgar.exceptions import IdentityNotSetError, TooManyRequestsError, TransportError
+from edgar.exceptions import (
+    IdentityNotSetError,
+    TooManyRequestsError,
+    TransportError,
+    strict_errors_enabled,
+)
 from edgar.httpclient import async_http_client, http_client
 
 """
@@ -47,8 +53,10 @@ __all__ = [
     "decompress_gzip_with_retry",
     "SSLVerificationError",
     "TooManyRequestsError",
-    "IdentityNotSetException",
+    "IdentityNotSetError",
     "TRANSPORT_ERRORS",
+    "UNREACHABLE_ERRORS",
+    "is_unreachable",
 ]
 
 attempts = 6
@@ -534,19 +542,166 @@ Details: https://github.com/dgunning/edgartools/blob/main/docs/guides/ssl_verifi
 # signature of a swallowed transport failure.
 #
 # Catch this tuple and re-raise BEFORE any `except Exception` that converts a
-# failure into None. Not a replacement for the exception hierarchy in bead
-# edgartools-07lk.10 — this is the vocabulary those call sites need today, and it
-# is deliberately a tuple of existing types so it introduces no new public class.
+# failure into None.
 #
-# IdentityNotSetError belongs here despite not being a transport error: it
-# means no request can be made at all, so reporting it as "not found" is the same
-# lie in a different costume.
+# It is two entries rather than the four it started as, because the tree in
+# edgar.exceptions (bead edgartools-07lk.10) absorbed the other three:
+# TooManyRequestsError, SSLVerificationError and IdentityNotSetError are all
+# TransportError subclasses now. IdentityNotSetError belongs under transport
+# despite no request being made, because "no request can be made at all"
+# reported as "not found" is the same lie in a different costume.
+#
+# Both families stay listed through 6.0 on purpose. `TransportError` is what the
+# boundary wrap raises under strict; `HTTPError` is what still comes through
+# unwrapped when it is off. Keeping both means a call site written against this
+# tuple behaves identically in either era — cheap insurance, and the reason the
+# strict CI job can prove the internal code is ready before the flip lands.
 TRANSPORT_ERRORS = (
-    HTTPError,               # httpx base: connect, read, timeout, protocol, status
-    TooManyRequestsError,    # SEC rate limit, after retries are exhausted
-    SSLVerificationError,
-    IdentityNotSetError,
+    HTTPError,        # httpx base: connect, read, timeout, protocol, status
+    TransportError,   # ours: the wrapped era, plus 429 / SSL / identity always
 )
+
+
+# The subset of transport failures meaning "we never got an answer" — offline,
+# DNS, timeout, connection reset. Callers that quietly degrade when the user is
+# offline want exactly this set and not the rest of TRANSPORT_ERRORS: an SEC
+# 404, an expired certificate or a missing identity are all answers of a kind,
+# and swallowing them would hide a bug behind a plausible empty result.
+UNREACHABLE_ERRORS = (
+    TimeoutException, ConnectError, ReadTimeout,
+    httpcore.TimeoutException, httpcore.ConnectError, httpcore.NetworkError,
+)
+
+
+def is_unreachable(exc: BaseException) -> bool:
+    """True when the request never reached SEC, in either error era.
+
+    The pre-wrap era raises httpx and httpcore types; under the strict wrap the
+    same failure arrives as a `TransportError` carrying no status. Asking this
+    function instead of naming types is what lets one `except` clause mean the
+    same thing before and after the 6.0 flip.
+
+    `SSLVerificationError` and `IdentityNotSetError` are excluded although they
+    too carry no status. They are deterministic and user-fixable: retrying will
+    not help, a fallback path will not help, and the diagnostic message each one
+    carries is the entire value of raising it. Swallowing those as "offline"
+    would throw away the only thing that tells the user what to change.
+    """
+    if isinstance(exc, (SSLVerificationError, IdentityNotSetError)):
+        return False
+    if isinstance(exc, TransportError):
+        return exc.status_code is None
+    return isinstance(exc, UNREACHABLE_ERRORS)
+
+
+def _request_url(exc: BaseException) -> Optional[str]:
+    """The URL an httpx error was raised for, or None if it does not carry one."""
+    # httpx.RequestError.request RAISES RuntimeError when the request was never
+    # attached, so this cannot be a getattr with a default.
+    try:
+        return str(exc.request.url)  # type: ignore[attr-defined]
+    except (AttributeError, RuntimeError):
+        return None
+
+
+def _called_url(args, kwargs) -> Optional[str]:
+    """The URL a boundary function was called with, as a fallback for the above.
+
+    Every boundary function takes `url` either by keyword or as its first string
+    positional — the async pair takes `client` ahead of it, which is not a str.
+    """
+    url = kwargs.get("url")
+    if url is not None:
+        return url
+    return next((arg for arg in args if isinstance(arg, str)), None)
+
+
+def _as_transport_error(exc: HTTPError, url: Optional[str]) -> TransportError:
+    """Translate an httpx failure into our own vocabulary.
+
+    Two outcomes, and the difference between them is the point: a status means
+    SEC answered and refused, no status means we never got that far.
+    """
+    # Not every URL through here is an SEC one — the icon lookup in
+    # reference/tickers.py fetches from GitHub through the same boundary — so
+    # the message names the host it actually got instead of asserting EDGAR.
+    url = _request_url(exc) or url
+    status = getattr(getattr(exc, "response", None), "status_code", None)
+    if status is not None:
+        return TransportError(
+            f"HTTP {status} from {url}",
+            suggestions=[
+                "a 404 means the path is wrong — it is not the same as a filing that does not exist",
+                "a 403 from SEC usually means the identity or the request rate was rejected",
+            ],
+            url=url,
+            status_code=status,
+        )
+    return TransportError(
+        f"Could not reach {url} ({type(exc).__name__}: {exc})",
+        suggestions=[
+            "check your network connection",
+            "check https://www.sec.gov/ — EDGAR takes scheduled maintenance windows",
+        ],
+        url=url,
+    )
+
+
+def wrap_transport_errors(func):
+    """Translate httpx failures into `TransportError` at the network boundary.
+
+    APPLY THIS ABOVE `@retry`, NEVER BELOW IT. stamina decides whether to retry
+    by testing the raised exception against `should_retry`, and `TransportError`
+    is not in `RETRYABLE_EXCEPTIONS`. Wrapping inside the retried function would
+    therefore translate the first attempt's timeout into a type stamina does not
+    recognise and turn every retried request into a single-shot one — a silent
+    reliability regression that no test asserting the exception type would
+    notice. Outside the decorator, the translation only ever sees the exception
+    that survived every attempt.
+
+    Gated on `strict_errors_enabled()` because user code may be catching
+    `httpx.HTTPError` around our calls; the wrap becomes unconditional in 6.0.
+    The original is always the `__cause__`, so `raise ... from e` keeps it
+    reachable for debugging without putting an httpx type in any signature.
+    """
+    # inspect must see through stamina's and with_identity's wrappers.
+    # isgeneratorfunction does not follow __wrapped__ on its own, and reading
+    # the outermost wrapper instead would classify the generator boundary as a
+    # plain function — which returns the generator without entering it, so the
+    # except clause would never fire.
+    target = inspect.unwrap(func)
+
+    if inspect.iscoroutinefunction(target):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            try:
+                return await func(*args, **kwargs)
+            except HTTPError as e:
+                if not strict_errors_enabled():
+                    raise
+                raise _as_transport_error(e, _called_url(args, kwargs)) from e
+        return wrapper
+
+    if inspect.isgeneratorfunction(target):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                yield from func(*args, **kwargs)
+            except HTTPError as e:
+                if not strict_errors_enabled():
+                    raise
+                raise _as_transport_error(e, _called_url(args, kwargs)) from e
+        return wrapper
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except HTTPError as e:
+            if not strict_errors_enabled():
+                raise
+            raise _as_transport_error(e, _called_url(args, kwargs)) from e
+    return wrapper
 
 
 def is_redirect(response):
@@ -628,6 +783,7 @@ def async_with_identity(func):
     return wrapper
 
 
+@wrap_transport_errors
 @retry(
     on=should_retry,
     attempts=QUICK_RETRY_ATTEMPTS,
@@ -653,6 +809,9 @@ def get_with_retry(url, identity=None, identity_callable=None, **kwargs):
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
         SSLVerificationError: If SSL certificate verification fails.
+        TransportError: Under EDGARTOOLS_STRICT_ERRORS (unconditional in 6.0),
+            any other httpx failure that survived every retry, with the original
+            as its ``__cause__``. Without the flag those propagate as httpx types.
     """
     try:
         with http_client() as client:
@@ -668,6 +827,7 @@ def get_with_retry(url, identity=None, identity_callable=None, **kwargs):
         raise
 
 
+@wrap_transport_errors
 @retry(
     on=should_retry,
     attempts=QUICK_RETRY_ATTEMPTS,
@@ -693,6 +853,9 @@ async def get_with_retry_async(client: AsyncClient, url, identity=None, identity
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
         SSLVerificationError: If SSL certificate verification fails.
+        TransportError: Under EDGARTOOLS_STRICT_ERRORS (unconditional in 6.0),
+            any other httpx failure that survived every retry, with the original
+            as its ``__cause__``. Without the flag those propagate as httpx types.
     """
     try:
         response = await client.get(url, **kwargs)
@@ -709,6 +872,7 @@ async def get_with_retry_async(client: AsyncClient, url, identity=None, identity
         raise
 
 
+@wrap_transport_errors
 @retry(
     on=should_retry,
     attempts=BULK_RETRY_ATTEMPTS,
@@ -736,6 +900,9 @@ def stream_with_retry(url, identity=None, identity_callable=None, bypass_cache=F
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
         SSLVerificationError: If SSL certificate verification fails.
+        TransportError: Under EDGARTOOLS_STRICT_ERRORS (unconditional in 6.0),
+            any other httpx failure that survived every retry, with the original
+            as its ``__cause__``. Without the flag those propagate as httpx types.
     """
     try:
         with http_client(bypass_cache=bypass_cache) as client:
@@ -753,6 +920,7 @@ def stream_with_retry(url, identity=None, identity_callable=None, bypass_cache=F
         raise
 
 
+@wrap_transport_errors
 @retry(
     on=should_retry,
     attempts=QUICK_RETRY_ATTEMPTS,
@@ -780,6 +948,9 @@ def post_with_retry(url, data=None, json=None, identity=None, identity_callable=
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
         SSLVerificationError: If SSL certificate verification fails.
+        TransportError: Under EDGARTOOLS_STRICT_ERRORS (unconditional in 6.0),
+            any other httpx failure that survived every retry, with the original
+            as its ``__cause__``. Without the flag those propagate as httpx types.
     """
     try:
         with http_client() as client:
@@ -797,6 +968,7 @@ def post_with_retry(url, data=None, json=None, identity=None, identity_callable=
         raise
 
 
+@wrap_transport_errors
 @retry(
     on=should_retry,
     attempts=QUICK_RETRY_ATTEMPTS,
@@ -824,6 +996,9 @@ async def post_with_retry_async(client: AsyncClient, url, data=None, json=None, 
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
         SSLVerificationError: If SSL certificate verification fails.
+        TransportError: Under EDGARTOOLS_STRICT_ERRORS (unconditional in 6.0),
+            any other httpx failure that survived every retry, with the original
+            as its ``__cause__``. Without the flag those propagate as httpx types.
     """
     try:
         response = await client.post(url, data=data, json=json, **kwargs)
@@ -846,9 +1021,19 @@ def inspect_response(response: Response):
 
     Accepts both 200 (OK) and 304 (Not Modified) as successful responses.
     304 indicates the cached content is still valid.
+
+    This is the sixth network boundary, and it needs the same wrap as the five
+    decorated functions: `raise_for_status()` raises httpx's own
+    `HTTPStatusError`, which would otherwise leak straight out of every caller
+    that inspects a response after the fact.
     """
     if response.status_code not in (200, 304):
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except HTTPError as e:
+            if not strict_errors_enabled():
+                raise
+            raise _as_transport_error(e, str(response.url)) from e
 
 
 def decode_content(content: bytes) -> str:

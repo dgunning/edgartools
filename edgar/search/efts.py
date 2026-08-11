@@ -680,14 +680,23 @@ def resolve_accession(accession_number: str) -> Optional[dict]:
     """
     import orjson
 
-    from edgar.httprequests import get_with_retry
+    from edgar.httprequests import TRANSPORT_ERRORS, get_with_retry
 
     normalized = accession_number.replace("-", "")
 
     try:
         response = get_with_retry(EFTS_BASE_URL, params={"q": f'"{accession_number}"'})
         hits = orjson.loads(response.content).get("hits", {}).get("hits", [])
-    except Exception as exc:  # network, rate limit, schema drift
+    except TRANSPORT_ERRORS:
+        # Let the caller see the outage (bead edgartools-07lk.10, closing the
+        # tg7y follow-up). The `return None` below means "EFTS has no filing at
+        # this accession", which for a pre-2001 accession is the expected answer
+        # and sends the caller to the quarterly index. Collapsing an outage into
+        # that same None tells the caller to go looking somewhere else for a
+        # filing that was there all along, and the only trace is a DEBUG line
+        # nobody has enabled.
+        raise
+    except Exception as exc:  # schema drift, malformed JSON
         logger.debug("EFTS accession lookup failed for %s: %s", accession_number, exc)
         return None
 
