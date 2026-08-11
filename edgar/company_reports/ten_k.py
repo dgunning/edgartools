@@ -330,21 +330,34 @@ class TenK(CompanyReport):
 
         return []
 
+    # These four go through .get() rather than self[...] on purpose, and keep
+    # returning None when the section is absent — in 6.0 too.
+    #
+    # `report[item]` raises in 6.0 because the caller named a specific thing and
+    # `.get()` is there for the callers who would rather have None. A property
+    # has no `.get(default)` form, so flipping these would delete the `if
+    # tenk.risk_factors:` idiom with nowhere to move it to. They read as probes
+    # — "does this filing have an MD&A?" — and a probe answering None is the
+    # documented behaviour, not a silent failure.
     @property
     def business(self):
-        return self['Item 1']
+        """Item 1, or None if this filing has no Part I Item 1."""
+        return self.get('Item 1')
 
     @property
     def risk_factors(self):
-        return self['Item 1A']
+        """Item 1A, or None if this filing has no risk factors section."""
+        return self.get('Item 1A')
 
     @property
     def management_discussion(self):
-        return self['Item 7']
+        """Item 7 (MD&A), or None if this filing has no Part II Item 7."""
+        return self.get('Item 7')
 
     @property
     def directors_officers_and_governance(self):
-        return self['Item 10']
+        """Item 10, or None if this filing has no Part III Item 10."""
+        return self.get('Item 10')
 
     @cached_property
     def subsidiaries(self):
@@ -730,10 +743,12 @@ class TenK(CompanyReport):
         Returns:
             Item text content, or None if not found
         """
-        # Try new parser via __getitem__ (which handles various formats)
+        # Try new parser via __getitem__ (which handles various formats).
+        # .get() because a miss here is not the end of the road — three
+        # fallbacks follow, so this lookup is a probe and must not raise.
         if self.sections:
             # Since 10-K items are unique, just use the item lookup
-            result = self[item]
+            result = self.get(item)
             if result:
                 return result
 
