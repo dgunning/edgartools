@@ -212,8 +212,8 @@ class TestErrorClassification:
         assert any("use_system_certs" in s for s in result["suggestions"])
 
     def test_identity_not_set(self):
-        from edgar.httprequests import IdentityNotSetException
-        result = classify_error(IdentityNotSetException())
+        from edgar.httprequests import IdentityNotSetError
+        result = classify_error(IdentityNotSetError())
         assert result["error_code"] == "IDENTITY_NOT_SET"
         assert any("EDGAR_IDENTITY" in s for s in result["suggestions"])
 

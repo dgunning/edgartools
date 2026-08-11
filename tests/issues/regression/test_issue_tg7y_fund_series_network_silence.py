@@ -32,7 +32,7 @@ import pytest
 from edgar.funds.core import Fund
 from edgar.httprequests import (
     TRANSPORT_ERRORS,
-    IdentityNotSetException,
+    IdentityNotSetError,
     SSLVerificationError,
     TooManyRequestsError,
 )
@@ -143,15 +143,18 @@ def test_transport_errors_tuple_covers_what_the_http_layer_actually_raises():
     """A guard keyed on the wrong types is not a guard.
 
     httpx.HTTPError is the base of ConnectError/ReadTimeout/HTTPStatusError, so
-    naming it covers the transport family without enumerating it. The other three
-    are edgartools' own and are not httpx subclasses, so they have to be listed.
+    naming it covers that family without enumerating it. TransportError covers
+    ours the same way — 429, SSL and identity are all subclasses of it, and so
+    is everything the boundary wrap raises under EDGARTOOLS_STRICT_ERRORS. Both
+    bases stay listed through 6.0 so this tuple means the same thing in either
+    era (bead edgartools-07lk.10).
     """
     assert issubclass(httpx.ConnectError, TRANSPORT_ERRORS)
     assert issubclass(httpx.ReadTimeout, TRANSPORT_ERRORS)
     assert issubclass(httpx.HTTPStatusError, TRANSPORT_ERRORS)
     assert issubclass(TooManyRequestsError, TRANSPORT_ERRORS)
     assert issubclass(SSLVerificationError, TRANSPORT_ERRORS)
-    assert issubclass(IdentityNotSetException, TRANSPORT_ERRORS)
+    assert issubclass(IdentityNotSetError, TRANSPORT_ERRORS)
 
     # And it must NOT swallow ordinary bugs into the transport bucket.
     assert not issubclass(ValueError, TRANSPORT_ERRORS)

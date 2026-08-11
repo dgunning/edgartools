@@ -8,6 +8,7 @@ import httpx
 
 from edgar.core import log
 from edgar.entity.data import parse_entity_submissions
+from edgar.exceptions import TransportError, http_status
 from edgar.httprequests import download_json
 from edgar.storage import get_edgar_data_directory, is_using_local_storage
 
@@ -129,9 +130,10 @@ def download_entity_submissions_from_sec(cik: int) -> Optional[Dict[str, Any]]:
     try:
         from edgar.urls import build_submissions_url
         submission_json = download_json(build_submissions_url(cik))
-    except httpx.HTTPStatusError as e:
-        # Handle the case where the cik is invalid and not found on Edgar
-        if e.response.status_code == 404:
+    except (httpx.HTTPStatusError, TransportError) as e:
+        # Handle the case where the cik is invalid and not found on Edgar.
+        # Only a 404 becomes None — an outage must not read as "no such CIK".
+        if http_status(e) == 404:
             return None
         else:
             raise

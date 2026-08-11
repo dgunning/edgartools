@@ -28,9 +28,10 @@
 #     gh api repos/dgunning/edgartools/branches/main/protection \
 #        --jq .required_status_checks.contexts
 #
-# test-network, test-slow and Combine Coverage are deliberately NOT required:
-# they carry `if: github.event_name != 'pull_request'` and so report as skipped
-# on every pull request. They run on push to main, which is the integration gate.
+# test-strict-errors, test-network, test-slow and Combine Coverage are
+# deliberately NOT required: they carry `if: github.event_name != 'pull_request'`
+# and so report as skipped on every pull request. They run on push to main,
+# which is the integration gate.
 #
 # Because they cannot gate, they are REPORTED instead — see the `report` job at
 # the end of this file. Combine Coverage is where the 65% floor is enforced
@@ -137,6 +138,57 @@ jobs:
           coverage.xml
         include-hidden-files: true
         retention-days: 1
+
+  test-strict-errors:
+    # Runs the offline suite the way 6.0 will behave, today.
+    #
+    # EDGARTOOLS_STRICT_ERRORS=1 turns on the error changes that are otherwise a
+    # 6.0 break (bead edgartools-07lk.10): the network boundary wraps httpx
+    # exceptions into TransportError, and — as PR3 lands them — the silent-None
+    # returns raise instead. The point is not to test users' code; it is to find
+    # OUR code that still relies on the old behaviour, while there is still a
+    # 5.x release to fix it in. Without this job, the first time all the 6.0
+    # error paths run together is 6.0 itself.
+    #
+    # The design for this bead planned it as continue-on-error, on the
+    # assumption it would arrive amber and go green as the flips landed. It
+    # arrives GREEN — the whole fast suite passes under the flag as of PR2 — so
+    # it is a hard failure from the start. An allowed-to-fail lane that is
+    # already passing teaches nobody anything, and this repository has already
+    # paid for the lesson that an unreported post-merge failure survives several
+    # merges (bead edgartools-hwdp, #999). It is in the `report` job's `needs`
+    # accordingly.
+    #
+    # Post-merge only, matching test-network. It cannot be a REQUIRED check
+    # while it skips pull requests — see the deadlock described at the top of
+    # this file — so it is reported rather than gating, and moves to the pull
+    # request leg when the 6.0 branch is cut and strict becomes the only path.
+    if: github.event_name != 'pull_request'
+    needs: cassette-gate
+    runs-on: ubuntu-latest
+    env:
+      EDGARTOOLS_STRICT_ERRORS: '1'
+
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Set up Python 3.13
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      with:
+        python-version: '3.13'
+        cache: 'pip'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -e ".[ai]"
+        python -m pip install pytest pytest-cov pytest-env pytest-xdist pytest-asyncio pytest-retry pytest-mock pytest-vcr "vcrpy<8.2" freezegun==1.5.1 filelock tqdm responses
+
+    - name: Run fast tests with 6.0 error behaviour
+      run: |
+        # Same selection as test-fast. Offline only: what this is looking for is
+        # internal code that mishandles the wrapped exception types, and that
+        # shows up in mocked and cassette-backed tests just as well as in live
+        # ones — without a second pass over the SEC endpoint.
+        pytest -n auto -m 'fast'
 
   test-network:
     # Network tests skip PRs — SEC API behavior doesn't change per-commit.
@@ -300,8 +352,8 @@ jobs:
   # post-merge regression lane went red on 2026-08-08 and three more pull
   # requests merged through it before anyone noticed. THIS workflow never got
   # one, and it is the lane that carries more: the 65% coverage floor
-  # (`coverage report --fail-under=65`), plus test-network and test-slow. All
-  # three are post-merge only, none is a required check, and until now none of
+  # (`coverage report --fail-under=65`), plus test-network, test-slow and
+  # test-strict-errors. All of them are post-merge only, none is a required check, and until now none of
   # them could tell anybody they had failed.
   #
   # Note what this deliberately does NOT do: make Combine Coverage required.
@@ -310,7 +362,10 @@ jobs:
   # block every pull request forever — the deadlock described at the top of this
   # file. Reporting is the right mechanism for a check that cannot gate.
   #
-  # `needs` names every post-merge job on purpose. A failure in test-network
+  # `needs` names every post-merge job on purpose — including test-strict-errors
+  # (bead edgartools-07lk.10), because a lane whose whole job is proving 6.0
+  # error behaviour still holds is worth nothing if it can go red in silence.
+  # A failure in test-network
   # SKIPS Combine Coverage rather than failing it, so keying on the coverage
   # result alone would stay silent for the failure that stops the threshold
   # being evaluated at all.
@@ -320,7 +375,7 @@ jobs:
   # green last would close an issue the other still needed open.
   report:
     name: Report red main (build)
-    needs: [cassette-gate, test-fast, test-network, test-slow, coverage]
+    needs: [cassette-gate, test-fast, test-strict-errors, test-network, test-slow, coverage]
     if: always() && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
@@ -334,6 +389,7 @@ jobs:
       TITLE: "Build and Test Edgartools is failing on main"
       R_GATE: ${{ needs.cassette-gate.result }}
       R_FAST: ${{ needs.test-fast.result }}
+      R_STRICT: ${{ needs.test-strict-errors.result }}
       R_NETWORK: ${{ needs.test-network.result }}
       R_SLOW: ${{ needs.test-slow.result }}
       R_COVERAGE: ${{ needs.coverage.result }}
@@ -347,7 +403,7 @@ jobs:
       id: verdict
       run: |
         red=0
-        for r in "$R_GATE" "$R_FAST" "$R_NETWORK" "$R_SLOW" "$R_COVERAGE"; do
+        for r in "$R_GATE" "$R_FAST" "$R_STRICT" "$R_NETWORK" "$R_SLOW" "$R_COVERAGE"; do
           [ "$r" = "failure" ] && red=1
         done
         echo "red=$red" >> "$GITHUB_OUTPUT"
@@ -360,9 +416,9 @@ jobs:
         # Name the job that failed. This lane has five, and "the build is red"
         # without saying which one sends the reader to the Actions tab to find
         # out — which is the step nobody takes.
-        body=$(printf '%s\n\n- commit: %s\n- run: %s\n\n| job | result |\n| --- | --- |\n| Cassette safety gate | %s |\n| test-fast | %s |\n| test-network | %s |\n| test-slow | %s |\n| Combine Coverage (65%% floor) | %s |\n' \
+        body=$(printf '%s\n\n- commit: %s\n- run: %s\n\n| job | result |\n| --- | --- |\n| Cassette safety gate | %s |\n| test-fast | %s |\n| test-strict-errors | %s |\n| test-network | %s |\n| test-slow | %s |\n| Combine Coverage (65%% floor) | %s |\n' \
                  "The post-merge build lane failed on \`main\`." "$SHA" "$RUN_URL" \
-                 "$R_GATE" "$R_FAST" "$R_NETWORK" "$R_SLOW" "$R_COVERAGE")
+                 "$R_GATE" "$R_FAST" "$R_STRICT" "$R_NETWORK" "$R_SLOW" "$R_COVERAGE")
         if [ -z "$number" ]; then
           gh issue create --repo "$REPO" --label "$LABEL" \
             --title "$TITLE" --body "$body"

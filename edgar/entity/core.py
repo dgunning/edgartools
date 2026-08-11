@@ -605,7 +605,11 @@ class Company(Entity):
         income statement, balance sheet, and cash flow statement.
 
         Returns:
-            Financials object, or None if no annual filing is available
+            Financials object, or None — and None means exactly one thing: this
+            company has filed no 10-K, 20-F or 40-F that we can see. It is never
+            how a failure is reported. If we could not reach SEC, a
+            ``TransportError`` propagates; if the filing was there but would not
+            parse, a ``ParsingError`` does.
 
         Example::
 
@@ -634,7 +638,9 @@ class Company(Entity):
         but with quarterly data instead of annual.
 
         Returns:
-            Financials object, or None if no quarterly filing is available
+            Financials object, or None — and None means exactly one thing: this
+            company has filed no 10-Q or 6-K that we can see. It is never how a
+            failure is reported; a transport or parsing failure raises.
 
         Example::
 

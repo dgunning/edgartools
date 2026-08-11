@@ -46,7 +46,7 @@ from edgar.storage import get_edgar_data_directory, is_using_local_storage
 # never reached a traceback or a log. The canonical class builds the message
 # and passes it up. Old name kept as a deprecated alias below.
 from edgar._compat import deprecated_alias
-from edgar.exceptions import CompanyFactsNotFoundError
+from edgar.exceptions import CompanyFactsNotFoundError, TransportError, http_status
 
 __getattr__ = deprecated_alias(NoCompanyFactsFound=CompanyFactsNotFoundError)
 
@@ -59,8 +59,12 @@ def download_company_facts_from_sec(cik: int) -> Dict[str, Any]:
     company_facts_url = build_company_facts_url(cik)
     try:
         return download_json(company_facts_url)
-    except httpx.HTTPStatusError as err:
-        if err.response.status_code == 404:
+    except (httpx.HTTPStatusError, TransportError) as err:
+        # The model for domain translation across both error eras: a 404 is
+        # something this layer understands, so it becomes the domain's own
+        # NotFoundError. Everything else propagates as a transport failure,
+        # because nobody here knows better than "we could not get an answer".
+        if http_status(err) == 404:
             log.warning(f"No company facts found on url {company_facts_url}")
             raise CompanyFactsNotFoundError(cik=cik) from None
         else:

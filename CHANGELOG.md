@@ -13,11 +13,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **A missing-attachment lookup raises `AttachmentNotFoundError`** rather than a bare `KeyError`. It *is* a `KeyError`, so existing handlers are unaffected.
 
+- **`EDGARTOOLS_STRICT_ERRORS=1` runs 6.0's error behaviour today.** The changes that would otherwise be a break are available behind the flag, so you can port before 6.0 lands rather than after. Today it turns on the network wrap below; the silent-`None` conversions join it as they land. Check it yourself with `edgar.exceptions.strict_errors_enabled()`.
+
+- **Under strict, an httpx failure that survived every retry becomes a `TransportError`.** `httpx.ReadTimeout` and friends were propagating verbatim out of `get_with_retry`, `stream_with_retry`, `post_with_retry` and `inspect_response`, which made a dependency's exception types part of our public contract by accident — and made any future HTTP-client change a breaking one for every `except` clause naming them. The wrap happens once at the boundary, carries `.status_code` (`None` when we never got an answer at all) and `.url`, and always chains the original as `__cause__`, so nothing is lost for debugging. This is a 6.0 flip because user code may be catching `httpx.HTTPError` around our calls; without the flag, nothing changes. `TRANSPORT_ERRORS` now catches both eras, so code written against it needs no revisiting.
+
 - **`edgartools` ships a PEP 561 `py.typed` marker, so its type hints now reach your type checker.** The README has said "type hints throughout" for a long time and it was true of the source and false of the installed package: without the marker, mypy refuses to look inside `edgar` at all — `Skipping analyzing "edgar": module is installed, but missing library stubs or py.typed marker` — and every symbol degrades to `Any`. `Company(cik_or_ticker=[1, 2, 3])` type-checked clean against 5.47.0; it now reports `Argument "cik_or_ticker" to "Company" has incompatible type "list[int]"; expected "str | int"`. Nothing in the library changed — this makes the annotations already there visible, and it is why the typing work behind them was worth doing. Pyright users saw types already, because it reads library source by default; mypy and stub-strict configurations did not.
 
 ### Fixed
 
 - **`NoCompanyFactsFound` carried a message nobody could read.** Its `__init__` called `super().__init__()` with no arguments and set `self.message` instead, so `str(exc)` was the empty string — three raise sites whose message never reached a traceback, a log line, or a user. It is now `CompanyFactsNotFoundError` and builds its message through the base class, which makes the empty case unrepresentable rather than merely fixed.
+
+- **An EFTS outage was reported as "there is no filing at that accession".** `resolve_accession()` wrapped its fetch in `except Exception: return None`, and `None` from that function routes the caller to the quarterly index — the correct answer for a pre-2001 accession and a wrong turn during an SEC outage, with the only trace at DEBUG. Transport failures now propagate; a malformed response still returns `None`, which is what that arm was for. This closes the sibling left open by the `edgartools-tg7y` fix, which fixed the same shape in `edgar/funds/core.py`.
 
 ## [5.47.0] - 2026-08-10
 

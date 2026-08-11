@@ -73,16 +73,25 @@ def _instance(name):
     return getattr(ex, name)(*CONSTRUCTOR_ARGS[name])
 
 
+# `__all__` also exports the two helpers the dual-era call sites use
+# (strict_errors_enabled, http_status), which are functions rather than classes.
+# Everything below is about the tree, so it enumerates the classes only.
+EXCEPTION_NAMES = sorted(
+    name for name in ex.__all__
+    if isinstance(getattr(ex, name), type) and issubclass(getattr(ex, name), BaseException)
+)
+
+
 def test_every_public_class_is_constructible():
     """Guard the guard: the tests below all instantiate the tree."""
-    missing = sorted(set(ex.__all__) - set(CONSTRUCTOR_ARGS))
+    missing = sorted(set(EXCEPTION_NAMES) - set(CONSTRUCTOR_ARGS))
     assert not missing, (
         f"{missing} are exported from edgar.exceptions but have no constructor "
         f"arguments in this file, so nothing below exercises them. Add an entry."
     )
 
 
-@pytest.mark.parametrize("name", sorted(ex.__all__))
+@pytest.mark.parametrize("name", EXCEPTION_NAMES)
 def test_every_public_exception_is_an_edgar_error(name):
     """One root, or `except EdgarError` is a lie."""
     cls = getattr(ex, name)
@@ -93,7 +102,7 @@ def test_the_tree_has_four_branches():
     """The shape is the documentation. A fifth branch is a design decision."""
     branches = {c for c in (ex.TransportError, ex.NotFoundError,
                             ex.ParsingError, ex.ValidationError)}
-    direct_children = {getattr(ex, n) for n in ex.__all__
+    direct_children = {getattr(ex, n) for n in EXCEPTION_NAMES
                        if ex.EdgarError in getattr(ex, n).__bases__}
     assert direct_children == branches, (
         f"direct children of EdgarError are {sorted(c.__name__ for c in direct_children)}; "
@@ -245,7 +254,7 @@ def test_no_third_party_type_in_the_public_tree():
     Owning our own types is what makes swapping the HTTP client a non-event
     rather than a breaking change to every user's `except` clause.
     """
-    for name in ex.__all__:
+    for name in EXCEPTION_NAMES:
         for base in getattr(ex, name).__mro__:
             root = base.__module__.split(".")[0]
             assert root in ("edgar", "builtins"), (

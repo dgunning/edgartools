@@ -10,6 +10,7 @@ import pandas as pd
 import pyarrow as pa
 
 from edgar.core import get_edgar_data_directory, listify, log
+from edgar.exceptions import http_status
 from edgar.httprequests import download_file, download_json
 from edgar.reference.data.common import read_csv_from_package, read_parquet_from_package
 
@@ -622,13 +623,17 @@ def get_icon_from_ticker(ticker: str) -> Optional[bytes]:
         return downloaded if isinstance(downloaded, bytes) else None
     except Exception as e:
         # If the status code is 404, the icon is not available.
-        # Duck-type on the response rather than the exception class: depending on
+        # Duck-type on the status rather than the exception class: depending on
         # the installed httpx build the raised type may not be our imported
         # HTTPStatusError (e.g. CI environments surface it under a different module
-        # identity such as httpx2), so matching on isinstance is fragile. Any
-        # exception that isn't a 404 is re-raised unchanged.
-        response = getattr(e, "response", None)
-        if response is not None and getattr(response, "status_code", None) == 404:
+        # identity such as httpx2), so matching on isinstance is fragile. It is
+        # also why this reads the status through http_status() — under
+        # EDGARTOOLS_STRICT_ERRORS the boundary raises a TransportError, which
+        # carries `.status_code` and no `.response` at all, and a check written
+        # against `.response` silently stops recognising the 404 and starts
+        # raising for every ticker without an icon. Anything that isn't a 404 is
+        # re-raised unchanged.
+        if http_status(e) == 404:
             return None
         raise
 
