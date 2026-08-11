@@ -137,6 +137,10 @@ path = "edgar/__about__.py"
 [tool.hatch.build]
 include = [
   "edgar/**/*.py",
+  # PEP 561 marker. This list is an allowlist and no other pattern here would
+  # match an extensionless file, so dropping this line ships an untyped wheel
+  # while the repo still looks correct — which is what 5.47.0 did.
+  "edgar/py.typed",
   "edgar/**/templates/*.html",
   "edgar/**/docs/*.md",
   "edgar/ai/skills/**/*.yaml",

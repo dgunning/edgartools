@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`edgartools` ships a PEP 561 `py.typed` marker, so its type hints now reach your type checker.** The README has said "type hints throughout" for a long time and it was true of the source and false of the installed package: without the marker, mypy refuses to look inside `edgar` at all — `Skipping analyzing "edgar": module is installed, but missing library stubs or py.typed marker` — and every symbol degrades to `Any`. `Company(cik_or_ticker=[1, 2, 3])` type-checked clean against 5.47.0; it now reports `Argument "cik_or_ticker" to "Company" has incompatible type "list[int]"; expected "str | int"`. Nothing in the library changed — this makes the annotations already there visible, and it is why the typing work behind them was worth doing. Pyright users saw types already, because it reads library source by default; mypy and stub-strict configurations did not.
+
 ## [5.47.0] - 2026-08-10
 
 ### Added
