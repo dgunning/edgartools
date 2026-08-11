@@ -139,6 +139,7 @@ INVESTMENT_TYPES = [
     'Class AA units',
     'Class C-1 units',
     # Member units (used by some BDCs like Main Street)
+    'Class AA Preferred Member Units',
     'Class A Preferred Member Units',
     'Class B Preferred Member Units',
     'Preferred Member Units',
@@ -1117,6 +1118,19 @@ def _parse_investment_identifier(
             relationship_investment.group('type').strip(),
         )
 
+    descriptor_pipe = re.fullmatch(
+        r'(?P<company>.+?)\s+\|\s+[^|]*?\b(?P<type>Debt|Equity)\s+Investment'
+        r'(?:\s+\d+(?:\.\d+)*)?(?:\s+\|\s+.+)?',
+        identifier,
+        re.IGNORECASE,
+    )
+    if descriptor_pipe:
+        return (
+            identifier,
+            descriptor_pipe.group('company').strip(),
+            descriptor_pipe.group('type').strip(),
+        )
+
     if ' | ' in identifier:
         for inv_type in sorted(INVESTMENT_TYPES, key=len, reverse=True):
             pipe_investment = re.fullmatch(
@@ -1139,6 +1153,24 @@ def _parse_investment_identifier(
                     pipe_investment.group('company').strip(),
                     investment_type,
                 )
+
+    # Prefer an explicit trailing delimiter over taxonomy-derived company spans.
+    for inv_type in INVESTMENT_TYPES:
+        trailing_type = re.fullmatch(
+            rf'(?P<company>.+),\s*(?P<type>{re.escape(inv_type)})'
+            r'(?:\s+\d+(?:\.\d+)*)?',
+            identifier,
+            re.IGNORECASE,
+        )
+        if trailing_type:
+            company_name = trailing_type.group('company').strip()
+            company_name = re.sub(
+                r'\s*\|\s*(?=(?:LLC|L\.L\.C\.|LP|L\.P\.|Inc\.?|Corp\.?)\b)',
+                ', ',
+                company_name,
+                flags=re.IGNORECASE,
+            )
+            return identifier, company_name, trailing_type.group('type').strip()
 
     structured_result = _parse_structured_identifier(identifier, member_candidates)
     if structured_result:
@@ -1189,23 +1221,6 @@ def _parse_investment_identifier(
                 # No instrument type found in left side either — bare company name
                 company_name = left_side
                 # Fall through to remaining parsing logic
-
-    # Try standard comma-separated format (investment type at end)
-    for inv_type in INVESTMENT_TYPES:
-        # Look for the investment type at the end, preceded by comma
-        # Support optional numeric suffixes like "1", "2", "1.1", "2.1"
-        pattern = rf',\s*{re.escape(inv_type)}(\s*[\d.]*)?$'
-        match = re.search(pattern, identifier, re.IGNORECASE)
-        if match:
-            company_name = identifier[:match.start()].strip()
-            company_name = re.sub(
-                r'\s*\|\s*(?=(?:LLC|L\.L\.C\.|LP|L\.P\.|Inc\.?|Corp\.?)\b)',
-                ', ',
-                company_name,
-                flags=re.IGNORECASE,
-            )
-            investment_type = identifier[match.start() + 1:].strip()
-            return identifier, company_name, investment_type
 
     # Try HTGC format: "Debt Investments [Industry] and [Company], Senior Secured, ..."
     # Look for ", Senior Secured" anywhere in the string

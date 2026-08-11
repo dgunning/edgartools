@@ -493,6 +493,49 @@ class TestPortfolioInvestments:
 class TestInvestmentIdentifierParsing:
     """Tests for investment identifier parsing."""
 
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'member_candidates', 'expected_company', 'expected_type'),
+        [
+            (
+                'Wingspire Capital Holdings LLC | Specialty finance equity investment | Affiliated',
+                ('specialty finance',),
+                'Wingspire Capital Holdings LLC',
+                'equity',
+            ),
+            (
+                'Wingspire Capital Holdings LLC | Specialty finance equity investment 1',
+                ('specialty finance',),
+                'Wingspire Capital Holdings LLC',
+                'equity',
+            ),
+            (
+                'Controlled/affiliated - debt commitments, First lien senior secured revolving loan',
+                ('debt commitment',),
+                'Controlled/affiliated - debt commitments',
+                'First lien senior secured revolving loan',
+            ),
+            (
+                'DTE Enterprises, LLC | Class AA Preferred Member Units (non-voting)',
+                ('class aa',),
+                'DTE Enterprises, LLC',
+                'Class AA Preferred Member Units (non-voting)',
+            ),
+        ],
+    )
+    def test_parse_cross_issuer_regressions(
+        self,
+        raw_identifier,
+        member_candidates,
+        expected_company,
+        expected_type,
+    ):
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=member_candidates,
+        )
+        assert company == expected_company
+        assert investment_type == expected_type
+
     def test_parse_first_lien_loan(self):
         """Test parsing first lien loan identifier."""
         identifier, company, inv_type = _parse_investment_identifier(
@@ -515,7 +558,7 @@ class TestInvestmentIdentifierParsing:
             'us-gaap:InvestmentIdentifierAxis: Big Company Inc., First lien senior secured loan 2'
         )
         assert company == 'Big Company Inc.'
-        assert 'First lien' in inv_type
+        assert inv_type == 'First lien senior secured loan'
 
     def test_parse_complex_company_name(self):
         """Test parsing with complex company names containing commas."""
