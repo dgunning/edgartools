@@ -7,13 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.48.0] - 2026-08-12
+
 ### Added
 
 - **`edgar.exceptions` — one exception vocabulary, four branches.** There were 27 exception classes across ten packages with no shared base and no cross-package inheritance, of which exactly two were reachable from the top level, so `except` had to name a type from whichever module happened to raise. There is now a root, `EdgarError`, and four branches that answer the question a caller actually has: `TransportError` (we could not get an answer from SEC), `NotFoundError` (you named a thing and it does not exist), `ParsingError` (we got bytes and could not build the object), `ValidationError` (your input was wrong before we asked). The distinction between the first two is the one that matters most — an outage and an empty result must never arrive as the same value. **Nothing changed about what is raised today**: every existing class was re-based into the tree or kept as a deprecated alias for the same object, so `except StatementNotFound:` and `pytest.raises(SECFilingNotFoundError)` still work. The branches also inherit the builtin they replace — `ValidationError` is a `ValueError`, `NotFoundError` is a `LookupError` — so the `except ValueError:` you wrote against our 135 raw `ValueError` raises keeps working as those convert. Deprecated spellings warn and are removed in 6.0: `StatementNotFound`, `NoCompanyFactsFound`, `SECFilingNotFoundError`, `InvalidDateException`, `IdentityNotSetException`, `TooManyRequestsException`, `DataObjectException`.
 
 - **A missing-attachment lookup raises `AttachmentNotFoundError`** rather than a bare `KeyError`. It *is* a `KeyError`, so existing handlers are unaffected.
 
-- **`EDGARTOOLS_STRICT_ERRORS=1` runs 6.0's error behaviour today.** The changes that would otherwise be a break are available behind the flag, so you can port before 6.0 lands rather than after. Today it turns on the network wrap below; the silent-`None` conversions join it as they land. Check it yourself with `edgar.exceptions.strict_errors_enabled()`.
+- **`EDGARTOOLS_STRICT_ERRORS=1` runs 6.0's error behaviour today.** The changes that would otherwise be a break are available behind the flag, so you can port before 6.0 lands rather than after. It turns on both halves of that change: the network wrap below, and the four silent-`None` conversions under **Deprecated**. Check it yourself with `edgar.exceptions.strict_errors_enabled()`.
 
 - **`report.get(item, default)` on every company report.** The counterpart to `report[item]`, and the reason that one can start raising in 6.0: a lookup whose only form raises leaves the "I'll take it if it's there" caller wrapping a one-liner in try/except. It never warns — it is the migration target, and warning there would give the users who took our advice the same noise as the users who ignored it.
 
