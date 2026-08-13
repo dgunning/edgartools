@@ -10,7 +10,7 @@ from rich.panel import Panel
 from rich.tree import Tree
 
 from edgar.company_reports._base import CompanyReport, report_lookup_miss
-from edgar.company_reports._structures import FilingStructure
+from edgar.company_reports._structures import FilingStructure, item_sort_key
 from edgar.core import log
 from edgar.display.formatting import datefmt
 from edgar.documents import HTMLParser, ParserConfig, parse_html
@@ -61,18 +61,10 @@ _ITEM_TO_PART_10K = {
 }
 
 
-def _item_sort_key(item: str) -> tuple:
-    """Sort key producing canonical SEC 10-K item order.
-
-    Sorts by numeric item value first, then by the full token so letter
-    suffixes order correctly within a number (e.g. ``Item 1`` < ``Item 1A``
-    < ``Item 1B``, and ``Item 7`` < ``Item 7A``). Yields the canonical
-    sequence: 1, 1A, 1B, 1C, 2, 3, 4, 5, 6, 7, 7A, 8, 9, 9A, 9B, 9C,
-    10, 11, 12, 13, 14, 15, 16.
-    """
-    token = item.split()[-1]  # "Item 1A" -> "1A"
-    num = int(''.join(c for c in token if c.isdigit()) or '0')
-    return (num, token)
+# The canonical whole-numbered item order (1, 1A, 1B, 2, ... 16). Shared with
+# TwentyF, whose items sort by the same rule; kept bound here because it is
+# imported under this name.
+_item_sort_key = item_sort_key
 
 
 class TenK(CompanyReport):

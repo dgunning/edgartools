@@ -4,7 +4,7 @@ from functools import cached_property
 from typing import List
 
 from edgar.company_reports._base import CompanyReport
-from edgar.company_reports._structures import FilingStructure, extract_items_from_sections
+from edgar.company_reports._structures import FilingStructure, item_sort_key
 from edgar.documents import HTMLParser, ParserConfig
 
 __all__ = ['TwentyF']
@@ -153,23 +153,45 @@ class TwentyF(CompanyReport):
     @property
     def items(self) -> List[str]:
         """
-        List of detected item names (consistent with sections property).
+        List of detected item names in standard "Item X" format.
 
-        Uses chunked_document for 20-F since the pattern-based extractor
-        doesn't handle the Table of Contents format well.
-        Falls back to new parser sections if chunked_document unavailable.
+        Uses the new parser's section detection, falling back to the legacy
+        ChunkedDocument only when the new parser finds nothing — the same shape
+        TenK, TenQ and CurrentReport already use.
+
+        This class was the last one where legacy was PRIMARY. Its stated reason
+        was that "the pattern-based extractor doesn't handle the Table of
+        Contents format well", which the parity corpus does not support: on the
+        one 20-F where legacy clearly won, TOC detection returned no sections at
+        all, so the TOC path was not what was winning. The real cause was a
+        coverage gate in the pattern extractor (edgartools-dt1f Defect 1, fixed).
+
+        Item numbers come from ``Section.item`` rather than from the section key,
+        because the key is not stable across detection strategies: the TOC path
+        emits ``part_i_item_1`` and the pattern path emits ``item_1``, and
+        ``Section.item`` is ``'1'`` either way. Non-item sections (``part_i``,
+        ``signatures``) carry no item and are excluded.
 
         Returns:
-            List of item titles for backward compatibility (e.g., ['Item 5', 'Item 8'])
+            List of unique item titles in canonical SEC order
+            (e.g., ['Item 1', 'Item 2', 'Item 4A', 'Item 16A', 'Item 19']).
         """
-        # For 20-F, prefer chunked_document which handles TOC format better
-        if self._chunked_document:
-            return self._chunked_document.list_items()
+        def _canonical(raw_items):
+            """Deduplicate and sort into canonical SEC 20-F item order."""
+            return sorted(dict.fromkeys(raw_items), key=item_sort_key)
 
-        # Fallback to new parser sections
-        if self.sections and len(self.sections) > 0:
-            item_pattern = re.compile(r'(Item\s+\d+[A-Z]?)', re.IGNORECASE)
-            return extract_items_from_sections(self.sections, item_pattern)
+        # Try the new parser first.
+        sections = self.sections
+        if sections:
+            items = [f"Item {section.item}" for section in sections.values() if section.item]
+            if items:
+                return _canonical(items)
+
+        # Legacy fallback, for filings where the new parser found nothing at all.
+        # This is what recovers 0000928385-01-500187, a 2001 20-F whose only item
+        # legacy finds and the new parser does not.
+        if self._chunked_document:
+            return _canonical(self._chunked_document.list_items())
 
         return []
 
@@ -304,17 +326,13 @@ class TwentyF(CompanyReport):
 
         # Sections
         try:
+            # .items deduplicates and orders canonically on both its paths, so
+            # the local dedup this used to do is no longer reachable.
             items = self.items
             if items:
-                seen = set()
-                unique_items = []
-                for item in items:
-                    if item not in seen:
-                        seen.add(item)
-                        unique_items.append(item)
                 lines.append("")
                 lines.append("SECTIONS:")
-                lines.append(f"  {', '.join(unique_items)}")
+                lines.append(f"  {', '.join(items)}")
         except Exception:
             pass
 
