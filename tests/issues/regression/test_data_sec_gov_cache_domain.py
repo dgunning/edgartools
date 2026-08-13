@@ -116,6 +116,50 @@ def mirror_rules():
     importlib.reload(edgar.config)
 
 
+class TestTheHelperAgreesWithTheRealMatcher:
+    """Everything else in this file asks `_rule_for`, our replica of the matcher. A replica
+    can be wrong in the same direction as the code it is checking, and this one was: an
+    earlier version fell through to later keys, which made every cross-host assertion
+    unable to fail. So the replica itself is pinned, once, against the real
+    `httpxthrottlecache.controller.get_rule_for_request`.
+
+    Only this class imports the dependency's internals. If a future version changes its
+    matching semantics, this fails here -- one clear failure about the contract -- instead
+    of leaving the rest of the file quietly asserting the wrong thing.
+    """
+
+    # Deliberately overlapping keys, which the exact-matching rules no longer produce.
+    # Agreement on non-overlapping keys is free -- any replica gets those right -- so a
+    # check built only from the live rules could not fail. Insertion order is the whole
+    # question: "data.overlap.test" matches both keys, and the library commits to the
+    # first and searches nothing else.
+    OVERLAPPING_RULES = {
+        r".*overlap\.test": {"/Archives/edgar/data": True},
+        r".*data\.overlap\.test": {"/submissions.*": MAX_SUBMISSIONS_AGE_SECONDS},
+    }
+
+    @pytest.mark.parametrize(
+        ("rules_name", "host", "path"),
+        [
+            ("live", "data.sec.gov", "/submissions/CIK0000320193.json"),
+            ("live", "data.sec.gov", "/api/xbrl/companyfacts/CIK0000320193.json"),
+            ("live", "www.sec.gov", "/Archives/edgar/data"),
+            ("live", "example.com", "/submissions/CIK0000320193.json"),
+            ("live", "www.sec.gov.attacker.test", "/Archives/edgar/data"),
+            # The two a fall-through replica gets wrong: the library answers None, because
+            # the first matching key wins and it holds no rule for that path.
+            ("overlapping", "data.overlap.test", "/submissions/CIK0000320193.json"),
+            ("overlapping", "data.overlap.test", "/Archives/edgar/data"),
+        ],
+    )
+    def test_replica_returns_what_the_library_returns(self, rules_name, host, path):
+        from httpxthrottlecache.controller import get_rule_for_request
+
+        rules = _get_cache_rules() if rules_name == "live" else self.OVERLAPPING_RULES
+
+        assert _rule_for(rules, host, path) == get_rule_for_request(request_host=host, target=path, cache_rules=rules)
+
+
 class TestDataSecGovCacheDomainRegex:
     def test_submissions_matches_under_data_sec_gov(self):
         """The bug: this returned None before the fix (rule existed, host never matched)."""
@@ -128,15 +172,24 @@ class TestDataSecGovCacheDomainRegex:
         value = _rule_for(rules, "data.sec.gov", "/api/xbrl/companyfacts/CIK0000320193.json")
         assert value == MAX_SUBMISSIONS_AGE_SECONDS
 
-    def test_www_sec_gov_rules_unaffected(self):
+    @pytest.mark.parametrize(
+        ("path", "expected"),
+        [
+            ("/include/ticker.txt", MAX_SUBMISSIONS_AGE_SECONDS),
+            ("/files/company_tickers.json", MAX_SUBMISSIONS_AGE_SECONDS),
+            ("/Archives/edgar/full-index/2024/QTR4/", MAX_INDEX_AGE_SECONDS),
+        ],
+    )
+    def test_www_sec_gov_ttl_rules_unaffected(self, path, expected):
         """Regression guard: fixing data.sec.gov must not disturb the (already-working)
-        www.sec.gov rules -- ticker files, full-text index, and the cache-forever
-        Archives rule."""
-        rules = _get_cache_rules()
-        assert _rule_for(rules, "www.sec.gov", "/include/ticker.txt") == MAX_SUBMISSIONS_AGE_SECONDS
-        assert _rule_for(rules, "www.sec.gov", "/files/company_tickers.json") == MAX_SUBMISSIONS_AGE_SECONDS
-        assert _rule_for(rules, "www.sec.gov", "/Archives/edgar/full-index/2024/QTR4/") == MAX_INDEX_AGE_SECONDS
-        assert _rule_for(rules, "www.sec.gov", "/Archives/edgar/data") is True
+        www.sec.gov rules. One case per rule, so a break names the rule it broke rather
+        than stopping at the first assert and hiding the ones after it."""
+        assert _rule_for(_get_cache_rules(), "www.sec.gov", path) == expected
+
+    def test_archives_stay_cached_forever(self):
+        """`True` is not a duration, it means never revalidate -- asserted by identity,
+        and apart from the TTL cases, because that distinction is the rule."""
+        assert _rule_for(_get_cache_rules(), "www.sec.gov", "/Archives/edgar/data") is True
 
     def test_unrelated_host_still_uncached(self):
         """A host matching neither pattern must still fall through to no cache policy
@@ -202,17 +255,18 @@ class TestHostKeyUsesTheSameParserAsTheMatcher:
     """
 
     @pytest.mark.parametrize(
-        "data_url",
+        ("data_url", "request_host"),
         [
-            "https://DATA.mirror.example.org",  # httpx lowercases the host
-            "https://data.mirror.example.org:8443",  # ...and the port is not part of it
-            "https://user:pw@data.mirror.example.org",  # ...nor are credentials
+            ("https://DATA.mirror.example.org", "data.mirror.example.org"),  # httpx lowercases the host
+            ("https://data.mirror.example.org:8443", "data.mirror.example.org"),  # ...the port is not part of it
+            ("https://user:pw@data.mirror.example.org", "data.mirror.example.org"),  # ...nor are credentials
+            ("https://mirr%C3%B6r.example.org", "mirr%c3%b6r.example.org"),  # ...and percent-encoding is lowercased
         ],
     )
-    def test_configured_url_forms_still_match_the_real_request_host(self, mirror_rules, data_url):
+    def test_configured_url_forms_still_match_the_real_request_host(self, mirror_rules, data_url, request_host):
         rules = mirror_rules("https://mirror.example.org", data_url)
 
-        assert _rule_for(rules, "data.mirror.example.org", "/submissions/CIK0000320193.json") == MAX_SUBMISSIONS_AGE_SECONDS
+        assert _rule_for(rules, request_host, "/submissions/CIK0000320193.json") == MAX_SUBMISSIONS_AGE_SECONDS
 
     def test_unparseable_url_caches_nothing_rather_than_borrowing_rules(self, mirror_rules, caplog):
         """A misconfigured mirror must degrade to "slow", never to "cached under some
