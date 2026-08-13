@@ -84,7 +84,10 @@ class _Report(TenK):
         return self._items
 
     @property
-    def chunked_document(self):
+    def _chunked_document(self):
+        # The private accessor: it is what TenK's fallback path reads. Stubbing
+        # the public `chunked_document` would leave the real constructor in
+        # play, which needs a filing this fake does not have.
         class _Empty:
             def __getitem__(self, key):
                 return None

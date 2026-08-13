@@ -194,6 +194,26 @@ class CompanyReport:
         return self._parser.parse(self._filing.html())
 
     @cached_property
+    def _chunked_document(self):
+        """Build the legacy chunked document, without warning anybody.
+
+        This is what our own fallback paths read. `items` and `__getitem__` on
+        several report classes try the new parser first and drop back to the old
+        one when it finds nothing, and routing those through the public property
+        told the user their code was deprecated when the choice was ours — a
+        plain `twentyf.items` emitted a `chunked_document is deprecated` warning
+        naming an attribute the caller had never mentioned.
+
+        Subclasses override THIS to change construction (`TenQ` needs
+        `prefix_src`, `CurrentReport` a decimal-aware `chunk_fn`). The
+        deprecation lives once, on the public property below, so an override
+        cannot accidentally drop it — which is exactly what happened before:
+        `TenQ` and `CurrentReport` overrode `chunked_document` itself and
+        silently lost the warning, so their users got no notice at all.
+        """
+        return ChunkedDocument(self._filing.html())
+
+    @cached_property
     def chunked_document(self):
         """
         Get chunked document using old parser.
@@ -207,7 +227,7 @@ class CompanyReport:
             DeprecationWarning,
             stacklevel=2
         )
-        return ChunkedDocument(self._filing.html())
+        return self._chunked_document
 
     @property
     def doc(self):

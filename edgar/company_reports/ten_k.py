@@ -330,11 +330,11 @@ class TenK(CompanyReport):
                     items.append(key)
             if items:
                 return _canonical(items)
-            return _canonical(self.chunked_document.list_items()) if self.chunked_document else []
+            return _canonical(self._chunked_document.list_items()) if self._chunked_document else []
 
         # Fallback to old parser for backward compatibility
-        if self.chunked_document:
-            return _canonical(self.chunked_document.list_items())
+        if self._chunked_document:
+            return _canonical(self._chunked_document.list_items())
 
         return []
 
@@ -387,7 +387,10 @@ class TenK(CompanyReport):
         return None
 
     @cached_property
-    def chunked_document(self):
+    def _chunked_document(self):
+        # Construction only — the deprecation lives on the public
+        # `chunked_document` in CompanyReport. Overriding that one here is what
+        # previously cost TenK users their warning entirely.
         return ChunkedDocument(self._filing.html(), prefix_src=self._filing.base_dir)
 
     @cached_property
@@ -722,7 +725,7 @@ class TenK(CompanyReport):
             f"New parser sections available: {list(self.sections.keys()) if self.sections else 'none'}. "
             f"This fallback will be removed in v6.0."
         )
-        item_text = self.chunked_document[item_or_part]
+        item_text = self._chunked_document[item_or_part]
 
         # Clean up the text if found
         if item_text:
@@ -765,7 +768,7 @@ class TenK(CompanyReport):
             return self.id_parse_document(markdown).get(item.lower())
 
         # Try chunked_document
-        item_text = self.chunked_document.get_item_with_part(part, item, markdown=markdown)
+        item_text = self._chunked_document.get_item_with_part(part, item, markdown=markdown)
         if item_text and item_text.strip():
             return item_text
 
