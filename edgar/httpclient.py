@@ -1,5 +1,6 @@
 import locale
 import os
+import re
 from contextlib import asynccontextmanager, contextmanager
 from typing import AsyncGenerator, Generator, Literal, Optional
 
@@ -25,7 +26,7 @@ except (locale.Error, ValueError):
 # test_verify_reaches_the_transport_params pins the behaviour the patch protected.
 from httpxthrottlecache import HttpxThrottleCache
 
-from edgar.core import get_identity, strtobool
+from edgar.core import get_identity, log, strtobool
 
 from .core import get_edgar_data_directory
 
@@ -42,14 +43,33 @@ MAX_INDEX_AGE_SECONDS = 30 * 60  # Check for updates to index (ie: daily-index) 
 # Note that: revalidation consumes rate limit "hit", but will be served from cache if the data hasn't changed.
 
 
-def _domain_pattern(base_url: str) -> str:
-    """Extract domain pattern from a base URL (e.g., "sec.gov" or "mysite.com")."""
-    import re
+def _host_key(url: str) -> str:
+    """Build a cache-rule key that matches exactly one host.
 
-    domain_match = re.match(r'https?://([^/]+)', base_url)
-    if domain_match:
-        return domain_match.group(1).replace('.', r'\.')
-    return r'.*\.sec\.gov'  # Fallback to default
+    httpxthrottlecache keys its cache rules by a regex matched against
+    ``request.url.host`` (``controller.get_rules``), and returns the FIRST key
+    that matches. Two consequences shape this function:
+
+    * **The only regex we want here is equality.** An unanchored key leaks across
+      hosts: ``.*mirror\\.com`` also matches ``data.mirror.com``, so a base-host
+      rule set would answer for the data host and the data rules would never be
+      reached — the same shape as the bug this fixes, moved from sec.gov to
+      mirrors.
+    * **The host must come from the same parser that produces it at match time.**
+      ``httpx.URL(...).host`` lowercases, drops ``user@`` and the port, and
+      normalises IDNA; a hand-rolled ``https?://([^/]+)`` regex does none of
+      those, so ``EDGAR_DATA_URL=https://DATA.mirror.example.org`` (or a URL
+      carrying a port or credentials) yields a key no real request can match.
+
+    An unparseable URL yields a key that matches nothing: a misconfigured mirror
+    goes uncached, which is slow, rather than borrowing another host's rules,
+    which would be wrong.
+    """
+    host = httpx.URL(url).host
+    if not host:
+        log.warning("No host in %r; requests to it will not be cached.", url)
+        return r"(?!)"  # matches nothing
+    return f"{re.escape(host)}$"
 
 
 def _get_cache_rules() -> dict:
@@ -68,8 +88,8 @@ def _get_cache_rules() -> dict:
     """
     from edgar.config import SEC_BASE_URL, SEC_DATA_URL
 
-    base_domain = _domain_pattern(SEC_BASE_URL)
-    data_domain = _domain_pattern(SEC_DATA_URL)
+    base_domain = _host_key(SEC_BASE_URL)
+    data_domain = _host_key(SEC_DATA_URL)
 
     base_rules = {
         r"/include/ticker\.txt.*": MAX_SUBMISSIONS_AGE_SECONDS,
@@ -88,10 +108,10 @@ def _get_cache_rules() -> dict:
     }
 
     if base_domain == data_domain:
-        return {f".*{base_domain}": {**base_rules, **data_rules}}
+        return {base_domain: {**base_rules, **data_rules}}
     return {
-        f".*{base_domain}": base_rules,
-        f".*{data_domain}": data_rules,
+        base_domain: base_rules,
+        data_domain: data_rules,
     }
 
 # Cache rules evaluated at module load time

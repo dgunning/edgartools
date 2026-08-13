@@ -1,5 +1,5 @@
 """
-Regression test: data.sec.gov cache rules never matched (domain regex bug).
+Regression test: cache rules never matched data.sec.gov (host-key bug).
 
 Root Cause:
 -----------
@@ -23,23 +23,39 @@ httpxthrottlecache.controller against the actual CACHE_RULES dict.
 
 Fix:
 ----
-`_get_cache_rules()` now derives ONE domain pattern per distinct host
-actually used by `edgar.urls` (SEC_BASE_URL for tickers/index/archives,
-SEC_DATA_URL for submissions/companyfacts), and routes each rule under the
-key for the host it is really served from. If a custom mirror points both
-env vars at the same host, the two rule sets merge under one key -- so this
-does not regress the documented "custom SEC mirror" support.
+`_get_cache_rules()` now derives ONE key per distinct host actually used by
+`edgar.urls` (SEC_BASE_URL for tickers/index/archives, SEC_DATA_URL for
+submissions/companyfacts), and routes each rule under the key for the host it
+is really served from. If a custom mirror points both env vars at the same
+host, the two rule sets merge under one key -- so this does not regress the
+documented "custom SEC mirror" support.
 
-This test pins the regression with a deterministic, no-network check: build
-the rules for both the default hosts and for a same-host custom mirror, and
-assert every existing rule is still reachable under the host it is actually
-served from.
+Each key matches its host EXACTLY (`_host_key`), for two reasons that the
+`TestHostKeyIsExact` and `TestHostKeyUsesTheSameParserAsTheMatcher` classes
+below pin as regressions:
+
+* An unanchored key leaks ACROSS hosts. `.*mirror\\.com` matches
+  "data.mirror.com", and `get_rules` returns the FIRST matching key, so a
+  mirror configured as base=mirror.com / data=data.mirror.com would resolve
+  its data requests to the base rule set -- reproducing this very bug for
+  mirror users while fixing it for sec.gov.
+* The host must come from the SAME parser that produces it at match time
+  (`request.url.host`, i.e. httpx). A hand-rolled `https?://([^/]+)` regex
+  keeps case, port, `user@` and percent-encoding that httpx normalises away,
+  so a perfectly valid mirror URL yields a key that cannot match any real
+  request.
+
+The checks are deterministic and hit no network.
 """
 
+import importlib
+import logging
+import os
 import re
 
 import pytest
 
+import edgar.config
 from edgar.httpclient import (
     MAX_INDEX_AGE_SECONDS,
     MAX_SUBMISSIONS_AGE_SECONDS,
@@ -50,13 +66,54 @@ from edgar.httpclient import (
 def _rule_for(cache_rules: dict, host: str, path: str):
     """Mirror httpxthrottlecache.controller.get_rule_for_request without importing it,
     so this test does not silently pass if that dependency's matching semantics change
-    underneath us without our noticing (pin OUR expectation, not their internals)."""
+    underneath us without our noticing (pin OUR expectation, not their internals).
+
+    The single load-bearing detail is that the host loop does NOT continue: `get_rules`
+    returns the FIRST matching key, and `match_request` then searches only that rule set.
+    A helper that falls through to later keys is strictly more permissive than the real
+    matcher, and every cross-host test below would pass on an unanchored key -- green,
+    and unable to fail.
+    """
     for site_pattern, rules in cache_rules.items():
         if re.match(site_pattern, host):
             for rule_pattern, value in rules.items():
                 if re.match(rule_pattern, path):
                     return value
+            return None
     return None
+
+
+@pytest.fixture
+def mirror_rules():
+    """Build the cache rules as a process configured for a given mirror would see them.
+
+    `edgar.config` reads its env vars once at import time, so the reload is what makes an
+    override visible; `_get_cache_rules` imports from it per call, so the function itself
+    needs no re-import.
+
+    Teardown owns the env vars rather than delegating to monkeypatch, because the order
+    matters and is easy to get silently wrong: fixtures unwind in reverse, so a fixture
+    that only reloads would run BEFORE monkeypatch restores the environment and would
+    reload the mirror config back in. The next test then reads a mirror as if it were
+    sec.gov -- and a test asserting "this host gets no rules" passes for the wrong
+    reason, because under a mirror config no sec.gov host matches anything.
+    """
+    saved = {name: os.environ.get(name) for name in ("EDGAR_BASE_URL", "EDGAR_DATA_URL")}
+
+    def build(base_url: str, data_url: str) -> dict:
+        os.environ["EDGAR_BASE_URL"] = base_url
+        os.environ["EDGAR_DATA_URL"] = data_url
+        importlib.reload(edgar.config)
+        return _get_cache_rules()
+
+    yield build
+
+    for name, value in saved.items():
+        if value is None:
+            os.environ.pop(name, None)
+        else:
+            os.environ[name] = value
+    importlib.reload(edgar.config)
 
 
 class TestDataSecGovCacheDomainRegex:
@@ -88,27 +145,86 @@ class TestDataSecGovCacheDomainRegex:
         rules = _get_cache_rules()
         assert _rule_for(rules, "example.com", "/submissions/CIK0000320193.json") is None
 
-    def test_custom_mirror_same_host_merges_rule_sets(self, monkeypatch):
+    def test_custom_mirror_same_host_merges_rule_sets(self, mirror_rules):
         """When EDGAR_BASE_URL and EDGAR_DATA_URL point at the SAME custom host (the
         documented single-mirror case), both rule sets must still resolve under that
         one host -- this is the scenario the original single-domain-key design was
         built for, and the fix must not regress it."""
-        monkeypatch.setenv("EDGAR_BASE_URL", "https://mirror.example.org")
-        monkeypatch.setenv("EDGAR_DATA_URL", "https://mirror.example.org")
-        import importlib
+        rules = mirror_rules("https://mirror.example.org", "https://mirror.example.org")
 
-        import edgar.config as config_module
-
-        importlib.reload(config_module)
-        from edgar.httpclient import _get_cache_rules as get_rules_reloaded
-
-        rules = get_rules_reloaded()
         assert len(rules) == 1, "same-host mirror must not produce two separate keys"
         assert _rule_for(rules, "mirror.example.org", "/submissions/CIK0000320193.json") == MAX_SUBMISSIONS_AGE_SECONDS
         assert _rule_for(rules, "mirror.example.org", "/api/xbrl/companyfacts/CIK0000320193.json") == MAX_SUBMISSIONS_AGE_SECONDS
         assert _rule_for(rules, "mirror.example.org", "/Archives/edgar/data") is True
 
-        importlib.reload(config_module)  # restore for other tests in the session
+
+class TestHostKeyIsExact:
+    """A rule written for one host must never answer for another.
+
+    Every case here passes on an unanchored `.*<domain>` key by matching the WRONG
+    rule set, which is how the data-host rules went missing on sec.gov in the first
+    place (GH #490). The asserts are on the data rules, because those are the ones an
+    over-broad base key silently swallows.
+    """
+
+    def test_mirror_with_separate_data_subdomain(self, mirror_rules):
+        """base=mirror.example.org, data=data.mirror.example.org -- the ordinary
+        two-host mirror, and the exact shape `.*mirror\\.example\\.org` absorbs."""
+        rules = mirror_rules("https://mirror.example.org", "https://data.mirror.example.org")
+
+        assert _rule_for(rules, "data.mirror.example.org", "/submissions/CIK0000320193.json") == MAX_SUBMISSIONS_AGE_SECONDS
+        assert _rule_for(rules, "data.mirror.example.org", "/api/xbrl/companyfacts/CIK0000320193.json") == MAX_SUBMISSIONS_AGE_SECONDS
+        assert _rule_for(rules, "mirror.example.org", "/Archives/edgar/data") is True
+
+    def test_data_host_that_ends_with_the_base_host(self, mirror_rules):
+        """The suffix case: "sec.mirror.test" is a suffix of "data.sec.mirror.test", so
+        an unanchored base key matches the data host and wins on insertion order."""
+        rules = mirror_rules("https://sec.mirror.test", "https://data.sec.mirror.test")
+
+        assert _rule_for(rules, "data.sec.mirror.test", "/submissions/CIK0000320193.json") == MAX_SUBMISSIONS_AGE_SECONDS
+        assert _rule_for(rules, "sec.mirror.test", "/Archives/edgar/data") is True
+
+    def test_lookalike_host_gets_no_rules(self):
+        """ "www.sec.gov.attacker.test" contains our host as a prefix. Under `.*www\\.sec\\.gov`
+        it inherits every rule -- including the cache-forever Archives rule -- so a
+        third party could be served from, and written into, our cache namespace."""
+        rules = _get_cache_rules()
+
+        assert _rule_for(rules, "www.sec.gov.attacker.test", "/Archives/edgar/data") is None
+        assert _rule_for(rules, "data.sec.gov.attacker.test", "/submissions/CIK0000320193.json") is None
+
+
+class TestHostKeyUsesTheSameParserAsTheMatcher:
+    """The key is compared against `request.url.host`, so it must be built by the parser
+    that produces that value. Each URL below is a valid way to configure a mirror whose
+    hand-parsed key (case kept, port kept, `user@` kept) cannot match any real request:
+    the mirror silently loses caching entirely.
+    """
+
+    @pytest.mark.parametrize(
+        "data_url",
+        [
+            "https://DATA.mirror.example.org",  # httpx lowercases the host
+            "https://data.mirror.example.org:8443",  # ...and the port is not part of it
+            "https://user:pw@data.mirror.example.org",  # ...nor are credentials
+        ],
+    )
+    def test_configured_url_forms_still_match_the_real_request_host(self, mirror_rules, data_url):
+        rules = mirror_rules("https://mirror.example.org", data_url)
+
+        assert _rule_for(rules, "data.mirror.example.org", "/submissions/CIK0000320193.json") == MAX_SUBMISSIONS_AGE_SECONDS
+
+    def test_unparseable_url_caches_nothing_rather_than_borrowing_rules(self, mirror_rules, caplog):
+        """A misconfigured mirror must degrade to "slow", never to "cached under some
+        other host's rules". The warning is part of the contract: silence here would be
+        a config error nobody can see."""
+        with caplog.at_level(logging.WARNING):
+            rules = mirror_rules("https://mirror.example.org", "not-a-url")
+
+        assert "not-a-url" in caplog.text
+        assert _rule_for(rules, "data.sec.gov", "/submissions/CIK0000320193.json") is None
+        assert _rule_for(rules, "mirror.example.org", "/submissions/CIK0000320193.json") is None
+        assert _rule_for(rules, "mirror.example.org", "/Archives/edgar/data") is True
 
 
 if __name__ == "__main__":
