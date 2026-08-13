@@ -55,11 +55,13 @@ pytestmark = pytest.mark.slow
 #      is missed on axp/cvx/jnj and one era filing; Item 1C (Cybersecurity, new
 #      in 2023) on bac/jpm/tsla. Both look like detection-pattern holes rather
 #      than per-filing damage, so each is likely one fix for several filings.
-#   2. Five near-total failures, where the new parser returns almost nothing on
-#      a filing legacy handles: wfc/10k (10 core items including 1, 1A, 7, 8 —
-#      a live bug on a modern large-bank filing) and four era fixtures. The
+#   2. Near-total failures, where the new parser returns almost nothing on a
+#      filing legacy handles: wfc/10k (10 core items including 1, 1A, 7, 8 —
+#      a live bug on a modern large-bank filing) and three era fixtures. The
 #      20-F outlier 0001144204-10-017467 is EDGARizer-generated filer-agent
 #      HTML: 12,880 <font> tags and zero <p>, the class edgartools-mpjh tracks.
+#      It left this group on 2026-08-13 (22 gaps -> 8) when dt1f Defect 1 was
+#      fixed; the eight that remain are an ordinary gap, not a collapse.
 #   3. Singletons, most of them pre-2015 HTML.
 #
 # Entries keyed on an accession number come from the untracked era corpus and
@@ -96,10 +98,19 @@ BASELINE_GAPS = {
     ("10-Q", "gs/10q"): ["5", "6"],
     ("20-F", "0000928385-01-500187"): ["7"],
     ("20-F", "0001062993-16-008650"): ["11", "16", "6"],
-    ("20-F", "0001144204-10-017467"): ["1", "10", "11", "12", "13", "14", "15",
-                                       "16A", "16B", "16C", "16D", "16E", "16F",
-                                       "16G", "2", "3", "4A", "5", "6", "7", "8",
-                                       "9"],
+    # Banked 2026-08-13: 22 -> 8, closing edgartools-dt1f Defect 1. The fallback
+    # strategies in the pattern extractor were gated on whether *any* header
+    # mentioned an item; on this filing three promoted headings (one of them a
+    # prose cross-reference) suppressed the strategies that find the other
+    # fifteen, leaving four sections against legacy's twenty-six. The gate now
+    # asks for coverage of the form's item list instead of presence of one item.
+    # Regression test: tests/issues/regression/test_dt1f_item_coverage_gate.py.
+    #
+    # The eight that remain are a different defect and still need diagnosing —
+    # Items 5, 6, 11, 12, 15 and 16D-F are found by neither the promoted headings
+    # nor the fallbacks on this filing.
+    ("20-F", "0001144204-10-017467"): ["11", "12", "15", "16D", "16E", "16F",
+                                       "5", "6"],
 }
 
 # The tracked fixtures every environment must be able to measure. If one of

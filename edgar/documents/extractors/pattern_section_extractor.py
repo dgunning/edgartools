@@ -14,6 +14,13 @@ from edgar.documents.form_schema import get_form_schema
 
 logger = logging.getLogger(__name__)
 
+# A header that *begins* with an item number, capturing the number. Anchored on
+# purpose: the gates below used to ask whether the string "Item 5" appeared
+# anywhere in a header, which counted prose cross-references ("Please refer to
+# Item 6.E, Directors, Senior Management and Employees") as evidence that the
+# filing's item structure had been found.
+_ITEM_HEADER_START = re.compile(r'^\s*item\s+(\d+(?:\.\d+)?[A-Za-z]?)\b', re.IGNORECASE)
+
 
 class SectionExtractor:
     """
@@ -467,6 +474,99 @@ class SectionExtractor:
             logger.debug(f"Failed to extract section text: {e}")
             return ""
 
+    # A filing's item structure counts as "already found" — and the fallback
+    # strategies below stay off — once the headers seen so far name at least this
+    # fraction of the items the form defines.
+    #
+    # Half is not a round number picked for tidiness; it is the middle of a gap
+    # that exists in every form's measured distribution over the parity corpus
+    # (tests/fixtures/parser_corpus). Sorting each form's filings by the share of
+    # canonical items its heading nodes name, the observed values fall into two
+    # clusters with nothing between them:
+    #
+    #     20-F   10%  |  61% 84% 90% 90%
+    #     10-K   17% 22% 39% 48%  |  65% 78% 83% 87% 96% 100%
+    #     10-Q   43%  |  71% 86% 100%
+    #
+    # Filings on the left are ones where heading detection produced a handful of
+    # stray item-ish headings and nothing resembling the form's structure; on the
+    # right it found the structure. A cut anywhere in 49-60% separates them
+    # identically, so the exact value carries no weight — the bimodality does.
+    _ITEM_COVERAGE_FLOOR = 0.5
+
+    @staticmethod
+    def _is_complete_item_header(text: str) -> bool:
+        """Does this header carry title text after the item number?
+
+        "Item 3. Key Information" does; a bare "Item 3." does not. 20-F filers
+        commonly emit the bare form as a heading and the titled form in the body,
+        so a bare header is not evidence that the body header was found.
+        """
+        match = re.match(r'^(Item|ITEM)\s+\d+[A-Za-z]?\.?\s*[-–—.]?\s*(.+)?$', text.strip(), re.IGNORECASE)
+        if match:
+            title = match.group(2)
+            # Must have substantive title text (not just punctuation or whitespace)
+            return bool(title and len(title.strip()) > 3)
+        return False
+
+    @staticmethod
+    def _item_numbers_in(headers: List[Tuple[Node, str, int]]) -> Set[str]:
+        """Distinct item numbers among headers that begin with one."""
+        found = set()
+        for _node, text, _position in headers:
+            match = _ITEM_HEADER_START.match(text)
+            if match:
+                found.add(match.group(1).upper())
+        return found
+
+    def _canonical_item_count(self) -> int:
+        """How many distinct items this form defines.
+
+        Returns 0 when the count is not a usable denominator, which is the case
+        for 8-K and for title-based forms. An 8-K reports only the items that
+        happened to occur, so a two-item 8-K is complete and a coverage ratio
+        against the 33 items the form *allows* would be meaningless — the same
+        reason the parity benchmark gives 8-K no coverage rate. Those forms keep
+        the presence test they have always used.
+        """
+        if not self.form or self.form.startswith('8-K'):
+            return 0
+        schema = get_form_schema(self.form)
+        if schema.title_based:
+            return 0
+        items = {schema.item_for_section_key(key) for key in schema.section_patterns}
+        items.discard(None)
+        return len(items)
+
+    def _item_structure_found(self,
+                              headers: List[Tuple[Node, str, int]],
+                              complete_only: bool = False) -> bool:
+        """Have the strategies so far found this filing's item structure?
+
+        This is the question the fallback strategies in ``_find_section_headers``
+        are gated on, and getting it wrong is expensive in both directions: answer
+        yes too readily and the fallbacks that would have found the real headers
+        never run; answer no too readily and every filing pays for extra tree
+        walks that can only add noise.
+
+        It used to be answered by presence — *any* header mentioning an item meant
+        yes. On a 2010 20-F (0001144204-10-017467) three stray headings, one of
+        them a prose cross-reference, were enough to suppress the strategies that
+        find that filing's 15 real item headers, leaving four sections where
+        legacy ChunkedDocument found 26. Coverage is the question that filing was
+        actually failing: three items out of the thirty-one a 20-F defines is not
+        an item structure.
+        """
+        if complete_only:
+            headers = [h for h in headers if self._is_complete_item_header(h[1])]
+        found = self._item_numbers_in(headers)
+        if not found:
+            return False
+        expected = self._canonical_item_count()
+        if not expected:
+            return True  # No usable denominator — presence is the only test available.
+        return len(found) >= expected * self._ITEM_COVERAGE_FLOOR
+
     def _find_section_headers(self, document: Document) -> List[Tuple[Node, str, int]]:
         """
         Find all potential section headers.
@@ -517,29 +617,30 @@ class SectionExtractor:
 
         # Strategy 3: Fallback to bold ParagraphNode objects
         # Many 8-K filings (55%) use bold paragraphs instead of semantic headings
-        # Only run if no COMPLETE Item headers found yet
+        # Skipped once the COMPLETE Item headers found so far already amount to
+        # the form's item structure — see _item_structure_found for why "found
+        # one" is not the same question as "found the structure".
         # A complete header has title text after the Item number (e.g., "Item 3. Key Information")
         # An incomplete header is just "Item 3." without title - common in 20-F headings
-        def is_complete_item_header(text):
-            """Check if header has title text after Item number."""
-            match = re.match(r'^(Item|ITEM)\s+\d+[A-Za-z]?\.?\s*[-–—.]?\s*(.+)?$', text.strip(), re.IGNORECASE)
-            if match:
-                title = match.group(2)
-                # Must have substantive title text (not just punctuation or whitespace)
-                return title and len(title.strip()) > 3
-            return False
-
-        has_complete_item_headers = any(is_complete_item_header(text) for _, text, _ in headers)
-        if not has_complete_item_headers:
+        if not self._item_structure_found(headers, complete_only=True):
             from edgar.documents.nodes import ParagraphNode
             paragraph_nodes = document.root.find(lambda n: isinstance(n, ParagraphNode))
 
+            # Positions already taken. The strategies below can now run in the
+            # same pass rather than only when every earlier one came up empty, so
+            # a bold "ITEM 5. OPERATING AND FINANCIAL REVIEW" paragraph is a
+            # candidate for both this strategy and Strategy 5 and would otherwise
+            # be appended twice.
+            existing_positions = {pos for _, _, pos in headers}
             for node in paragraph_nodes:
                 if self._is_bold(node):
                     text = node.text()
                     if text and self._looks_like_section_header(text):
                         position = _node_position(node)
+                        if position in existing_positions:
+                            continue
                         headers.append((node, text, position))
+                        existing_positions.add(position)
 
         # Strategy 3b: ParagraphNodes with bold *children* that read as section headers.
         #
@@ -593,10 +694,10 @@ class SectionExtractor:
         # Strategy 4: Fallback to table cells with Item patterns
         # Many 8-K filings use tables for layout with Items in table cells
         # Check again after Strategy 3
-        has_item_headers = any(re.search(r'Item\s+\d', text, re.IGNORECASE) for _, text, _ in headers)
-        if not has_item_headers:
+        if not self._item_structure_found(headers):
             from edgar.documents.table_nodes import TableNode
             table_nodes = document.root.find(lambda n: isinstance(n, TableNode))
+            existing_positions = {pos for _, _, pos in headers}
 
             for table in table_nodes:
                 # Look through table rows for Items.
@@ -625,18 +726,20 @@ class SectionExtractor:
                     # Check if this row contains an Item pattern
                     if re.match(r'^\s*Item\s+\d', row_text, re.IGNORECASE):
                         position = _node_position(table)
-                        headers.append((table, row_text, position))
+                        if position not in existing_positions:
+                            headers.append((table, row_text, position))
+                            existing_positions.add(position)
                         # Only take the first Item from each table to avoid duplicates
                         break
 
         # Strategy 5: Final fallback to ANY paragraph with Item pattern (plain text)
         # For filings that use no bold styling, no headings, and no tables
         # This is the last resort - check all paragraphs for Item patterns
-        has_item_headers = any(re.search(r'Item\s+\d', text, re.IGNORECASE) for _, text, _ in headers)
-        if not has_item_headers:
+        if not self._item_structure_found(headers):
             from edgar.documents.nodes import ParagraphNode
             paragraph_nodes = document.root.find(lambda n: isinstance(n, ParagraphNode))
 
+            existing_positions = {pos for _, _, pos in headers}
             for node in paragraph_nodes:
                 text = node.text()
                 # Look for Item pattern at start of paragraph (first 100 chars)
@@ -646,8 +749,11 @@ class SectionExtractor:
                     # Match Item X.XX at the start
                     if re.match(r'^\s*Item\s+\d', text_start, re.IGNORECASE):
                         position = _node_position(node)
+                        if position in existing_positions:
+                            continue
                         # Use the full paragraph text for matching
                         headers.append((node, text.strip(), position))
+                        existing_positions.add(position)
 
         # Strategy 5b: SIGNATURES terminal header for 8-K (and 8-K/A).
         #
