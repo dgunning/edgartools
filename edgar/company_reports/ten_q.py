@@ -281,11 +281,11 @@ class TenQ(CompanyReport):
                             items.append(f"{part}, Item {item_num}")
                         else:
                             items.append(f"Item {item_num}")
-            return items if items else (self.chunked_document.list_items() if self.chunked_document else [])
+            return items if items else (self._chunked_document.list_items() if self._chunked_document else [])
 
         # Fallback to old parser for backward compatibility
-        if self.chunked_document:
-            return self.chunked_document.list_items()
+        if self._chunked_document:
+            return self._chunked_document.list_items()
 
         return []
 
@@ -371,7 +371,7 @@ class TenQ(CompanyReport):
                         return self.sections[section_key].text()
 
         # Fallback to old chunked_document for backward compatibility
-        if self.chunked_document:
+        if self._chunked_document:
             try:
                 # Log fallback usage for Phase 1 deprecation tracking
                 log.warning(
@@ -380,7 +380,7 @@ class TenQ(CompanyReport):
                     f"New parser sections available: {list(self.sections.keys()) if self.sections else 'none'}. "
                     f"This fallback will be removed in v6.0."
                 )
-                return self.chunked_document[item_or_part]
+                return self._chunked_document[item_or_part]
             except (KeyError, TypeError):
                 pass
 
@@ -434,8 +434,8 @@ class TenQ(CompanyReport):
             return self.id_parse_document(markdown).get(part.lower(), {}).get(item.lower())
 
         # Try chunked_document
-        if self.chunked_document:
-            item_text = self.chunked_document.get_item_with_part(part, item, markdown=markdown)
+        if self._chunked_document:
+            item_text = self._chunked_document.get_item_with_part(part, item, markdown=markdown)
             if item_text and item_text.strip():
                 return item_text
 
@@ -453,7 +453,10 @@ class TenQ(CompanyReport):
         return result
 
     @cached_property
-    def chunked_document(self):
+    def _chunked_document(self):
+        # Construction only — the deprecation warning lives on the public
+        # `chunked_document` in CompanyReport. Overriding that one here is what
+        # previously cost TenQ users their warning entirely.
         return ChunkedDocument(self._filing.html(), prefix_src=self._filing.base_dir)
 
     def get_structure(self):

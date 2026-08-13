@@ -658,7 +658,9 @@ class CurrentReport(CompanyReport):
             return PressReleases(press_release_results)
 
     @cached_property
-    def chunked_document(self):
+    def _chunked_document(self):
+        # Construction only; the deprecation lives on the public property in
+        # CompanyReport. See the note there.
         html = self._filing.html()
         if not html:
             return None
@@ -672,7 +674,7 @@ class CurrentReport(CompanyReport):
 
     @property
     def doc(self):
-        return self.chunked_document
+        return self._chunked_document
 
     @property
     def items(self) -> List[str]:
@@ -712,8 +714,8 @@ class CurrentReport(CompanyReport):
 
         # Strategy 2: chunked parser of the primary document — backfills items the
         # new parser missed; same precision domain (excludes exhibit text).
-        if self.chunked_document:
-            chunked_items = self.chunked_document.list_items()
+        if self._chunked_document:
+            chunked_items = self._chunked_document.list_items()
             if chunked_items:
                 item_set.update(_canonical_item(item) for item in chunked_items)
 
@@ -779,9 +781,9 @@ class CurrentReport(CompanyReport):
         # Only return a hit — chunked_document returns None for an unmatched key
         # (e.g. '1.05' when it indexes by 'Item 1.05'); returning that None here
         # would short-circuit the text-based fallback below. (edgartools-83gh)
-        if self.chunked_document:
+        if self._chunked_document:
             try:
-                result = self.chunked_document[item_name]
+                result = self._chunked_document[item_name]
                 if result:
                     return result
             except (KeyError, TypeError):

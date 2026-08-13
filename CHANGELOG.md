@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`report.items` warned you about `chunked_document`, an attribute you never touched.** `TenK`, `TenQ`, `TwentyF` and `CurrentReport` try the new parser first and fall back to the legacy `ChunkedDocument`, and those fallbacks read the *public* deprecated property — so a plain `twentyf.items` emitted `chunked_document is deprecated` about a choice that was ours, not yours. 20-F got it on every call, because 20-F prefers the legacy path deliberately. If you run `-W error::DeprecationWarning`, that was not a warning but an exception. Internal paths now use a private accessor and say nothing; asking for `chunked_document` yourself still warns.
+
+- **Three report classes had silently lost that deprecation entirely.** `TenK`, `TenQ` and `CurrentReport` each overrode `chunked_document` to change how it was built, and an override that replaces the property also replaces the `warnings.warn` inside it — so their users got no notice that the attribute disappears in 6.0, which is the population the deprecation exists for. Construction now happens in `_chunked_document`, the warning lives in exactly one place, and a test asserts no subclass can take it away again.
+
 ## [5.48.0] - 2026-08-12
 
 ### Added

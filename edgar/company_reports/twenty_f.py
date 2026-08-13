@@ -163,8 +163,8 @@ class TwentyF(CompanyReport):
             List of item titles for backward compatibility (e.g., ['Item 5', 'Item 8'])
         """
         # For 20-F, prefer chunked_document which handles TOC format better
-        if self.chunked_document:
-            return self.chunked_document.list_items()
+        if self._chunked_document:
+            return self._chunked_document.list_items()
 
         # Fallback to new parser sections
         if self.sections and len(self.sections) > 0:
@@ -222,9 +222,9 @@ class TwentyF(CompanyReport):
                     return self.sections[friendly_key].text()
 
         # Fallback to old chunked_document for backward compatibility
-        if self.chunked_document:
+        if self._chunked_document:
             try:
-                return self.chunked_document[item_name]
+                return self._chunked_document[item_name]
             except (KeyError, TypeError):
                 pass
 

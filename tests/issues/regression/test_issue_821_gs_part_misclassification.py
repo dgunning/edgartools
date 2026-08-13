@@ -33,8 +33,11 @@ def make_tenk(monkeypatch):
 
     def _factory(sections_data: dict) -> TenK:
         tenk = TenK.__new__(TenK)
-        tenk.chunked_document = MagicMock()
-        tenk.chunked_document.__getitem__ = MagicMock(return_value=None)
+        # The private accessor, because that is what TenK's own fallback path
+        # reads. Mocking the public `chunked_document` would leave the real one
+        # in play here and quietly stop mocking anything.
+        tenk._chunked_document = MagicMock()
+        tenk._chunked_document.__getitem__ = MagicMock(return_value=None)
         tenk._cross_reference_index = None
         tenk._filing = MagicMock()
         tenk._filing.accession_number = "0000000000-00-000000"
