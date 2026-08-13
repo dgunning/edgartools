@@ -1,6 +1,8 @@
 """
 Regression test: cache rules never matched data.sec.gov (host-key bug).
 
+GitHub PR: https://github.com/dgunning/edgartools/pull/989
+
 Root Cause:
 -----------
 `_get_cache_rules()` (edgar/httpclient.py) derived its single site-pattern key
