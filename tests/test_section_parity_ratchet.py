@@ -55,10 +55,15 @@ pytestmark = pytest.mark.slow
 #
 # Three shapes are visible here, and they are the work list for dt1f:
 #
-#   1. Two systematic pattern gaps on modern 10-Ks. Item 16 (Form 10-K Summary)
-#      is missed on axp/cvx/jnj and one era filing; Item 1C (Cybersecurity, new
-#      in 2023) on bac/jpm/tsla. Both look like detection-pattern holes rather
-#      than per-filing damage, so each is likely one fix for several filings.
+#   1. Two systematic gaps on modern 10-Ks — Item 16 (Form 10-K Summary) on
+#      axp/cvx/jnj and one era filing, Item 1C (Cybersecurity) on bac/jpm/tsla.
+#      CLOSED 2026-08-14, and they were neither two problems nor detection
+#      holes: both items were being found and discarded. The hybrid detector
+#      augments a successful TOC result with pattern-detected items the TOC
+#      omitted, behind a gate that asked whether Part III was complete. Part III
+#      is complete on nearly every filing, so the augmentation almost never ran,
+#      and the items a TOC actually omits — the optional one and the one added
+#      in 2023 — were exactly the ones nobody got. Seven filings, one gate.
 #   2. Near-total failures, where the new parser returns almost nothing on a
 #      filing legacy handles. THE TWO 10-K ENTRIES IN THIS GROUP WERE ONE
 #      DEFECT AND ARE CLOSED (2026-08-14): both filings write their headers as
@@ -114,16 +119,15 @@ BASELINE_GAPS = {
     ("10-K", "0001193125-10-073212"): ["9A"],
     # Banked 2026-08-14: 4 -> 1, same fix.
     ("10-K", "0001193125-21-101193"): ["11"],
-    ("10-K", "0001193125-21-101902"): ["16"],
     # Banked 2026-08-14: 19 -> 1, same fix.
     ("10-K", "0001376474-16-000635"): ["5"],
-    ("10-K", "axp/10k"): ["16"],
-    ("10-K", "bac/10k"): ["1C"],
-    ("10-K", "cvx/10k"): ["16"],
-    ("10-K", "jnj/10k"): ["16"],
-    ("10-K", "jpm/10k"): ["1C"],
-    ("10-K", "tsla/10k"): ["1C"],
-    ("10-Q", "0001193125-21-082408"): ["1"],
+    # CLOSED 2026-08-14, together with axp/bac/cvx/jnj/jpm/tsla and
+    # 0001193125-21-082408: the TOC-augmentation gate asked whether Part III was
+    # complete before running the pattern pass, and Part III is complete on
+    # nearly every filing, so the pass was skipped on filings whose TOC simply
+    # omitted Item 16 or Item 1C. Both items were already being found and thrown
+    # away. Regression test:
+    # tests/issues/regression/test_dt1f_toc_augmentation_gate.py.
     ("10-Q", "gs/10q"): ["5", "6"],
     ("20-F", "0000928385-01-500187"): ["7"],
     ("20-F", "0001062993-16-008650"): ["11", "16", "6"],
