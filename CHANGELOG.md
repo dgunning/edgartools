@@ -103,6 +103,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **BDC investment parsing now recognizes structured Schedule of Investments labels and normalizes trailing numeric XBRL disambiguators out of `investment_type`.** The original label remains available in `identifier`, so separate tranches remain distinguishable while grouping by investment type is stable.
+
 - **On a multi-filer filing, `Filing.cik` and `Filing.company` now name the issuer rather than whichever filer the quarterly index listed first.** Accession lookups go through EDGAR full-text search before falling back to the quarterly index, and the two order a filing's filers differently. `find("0001918704-25-005439")` was `(70858, 'BANK OF AMERICA CORP /DE/')` and is now `(1682472, 'BofA Finance LLC')`. `all_ciks` and `all_entities` still return every filer; single-filer filings are unaffected.
 
 - **`edgar.xbrl.facts.FactQuery.to_dataframe()` returned a different column set depending on which rows matched.** Columns now follow the query's configuration rather than its results. On Foot Locker's FY2024 10-K, `.limit(5)` returned five fewer columns than the same query unlimited, dropping `balance`, `currency`, `decimals`, `unit_ref` and `weight` because those rows were null. Unpopulated columns come back null, and an empty result carries the full column set. (GH #929)
