@@ -500,13 +500,19 @@ class TestInvestmentIdentifierParsing:
                 'Wingspire Capital Holdings LLC | Specialty finance equity investment | Affiliated',
                 ('specialty finance',),
                 'Wingspire Capital Holdings LLC',
-                'equity',
+                'Equity',
             ),
             (
                 'Wingspire Capital Holdings LLC | Specialty finance equity investment 1',
                 ('specialty finance',),
                 'Wingspire Capital Holdings LLC',
-                'equity',
+                'Equity',
+            ),
+            (
+                'AAM Series 2.1 Aviation Feeder, LLC | Specialty finance debt investment | Affiliated',
+                ('specialty finance',),
+                'AAM Series 2.1 Aviation Feeder, LLC',
+                'Debt',
             ),
             (
                 'Controlled/affiliated - debt commitments, First lien senior secured revolving loan',
@@ -535,6 +541,25 @@ class TestInvestmentIdentifierParsing:
         )
         assert company == expected_company
         assert investment_type == expected_type
+
+    @pytest.mark.parametrize(
+        'descriptor',
+        ['equity investment', 'Equity Investment', 'EQUITY INVESTMENT'],
+    )
+    def test_descriptor_type_is_canonically_cased(self, descriptor):
+        """However the filer cased the label, the type comes back one way.
+
+        The match is case-insensitive, so returning the captured span verbatim
+        made the filer's typography part of the value — OBDC's lowercase
+        "equity" became a bucket of its own next to 'Preferred Equity' from
+        every other branch, and grouping by investment_type split the concept
+        in two.
+        """
+        _, _company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: Some Holdings LLC | Specialty finance {descriptor}',
+            member_candidates=('specialty finance',),
+        )
+        assert investment_type == 'Equity'
 
     def test_parse_first_lien_loan(self):
         """Test parsing first lien loan identifier."""

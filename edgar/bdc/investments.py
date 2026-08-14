@@ -1125,10 +1125,17 @@ def _parse_investment_identifier(
         re.IGNORECASE,
     )
     if descriptor_pipe:
+        # Title-cased because the match is case-insensitive and the label's own
+        # casing varies: OBDC writes "Specialty finance equity investment", so
+        # returning the captured span verbatim yielded 'equity' and 'debt' — the
+        # only lowercase-initial types in the vocabulary, sitting beside
+        # 'Preferred Equity' and 'Secured Debt' from every other branch. Grouping
+        # by investment_type then splits the same concept across two buckets,
+        # which is the thing this parsing work is meant to make reliable.
         return (
             identifier,
             descriptor_pipe.group('company').strip(),
-            descriptor_pipe.group('type').strip(),
+            descriptor_pipe.group('type').strip().title(),
         )
 
     if ' | ' in identifier:
