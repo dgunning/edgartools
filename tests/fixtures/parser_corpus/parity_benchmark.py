@@ -86,6 +86,7 @@ sys.path.insert(0, str(_REPO_ROOT))
 warnings.filterwarnings("ignore")
 
 from edgar.documents.config import ParserConfig  # noqa: E402
+from edgar.documents.form_schema import get_form_schema  # noqa: E402
 from edgar.documents.parser import HTMLParser  # noqa: E402
 from edgar.files.htmltools import ChunkedDocument  # noqa: E402
 
@@ -138,17 +139,47 @@ def normalise_new(section_name: str, form: str) -> Optional[str]:
     digits (``item_801`` is Item 8.01); we return the major number only, because
     that is the granularity legacy can also express. ``subitem_of`` below
     recovers the precision for the separate precision report.
+
+    TWO KEY VOCABULARIES, AND MISSING ONE OF THEM COSTS REAL FILINGS. The parser
+    names 10-K sections structurally (``part_ii_item_7``) or by friendly name
+    (``mda``) depending on which detection strategy fired, and both are live on
+    this corpus — ten friendly names appear across the 10-K fixtures. This
+    function originally matched the structural form only, and silently returned
+    None for the rest, which scored a *naming convention* as a parser miss.
+
+    It cost `wfc/10k` ten items: its sections come back as ``business``,
+    ``risk_factors``, ``mda`` and so on, all of them correct and all of them
+    reachable through ``TenK.items`` and ``tenk['Item 1']``. The benchmark
+    reported a near-total failure on a filing the parser handles perfectly, and
+    that reading reached ``BASELINE_GAPS`` and the ratchet's prose, where it sat
+    for a week as "a live bug on a modern large-bank filing".
+
+    The friendly names are resolved through ``FormSchema.item_for_section_key``
+    rather than a second table here, so the benchmark and the library cannot
+    drift about what a section key means. The schema does not know the
+    structural spellings, so the two are complements: the regex handles
+    ``item_1``/``part_i_item_1``, the schema handles ``mda``, and together they
+    cover every key the corpus produces. What neither resolves is genuinely not
+    an item — ``signatures``, ``part_iv_signatures``, ``part_i``.
     """
     if section_name.lower() in NON_ITEM_SECTIONS:
         return None
+
     m = _NEW_ITEM_RE.match(section_name)
-    if not m:
+    if m:
+        digits, suffix = m.group(1), m.group(2)
+        if form == "8-K":
+            # 8-K majors are single-digit (1-9), so a 3-digit group is major+minor.
+            return digits[0] if len(digits) == 3 else digits
+        return f"{digits}{suffix}".upper()
+
+    # Friendly names ('mda', 'risk_factors'), via the library's own mapping.
+    item = get_form_schema(form).item_for_section_key(section_name)
+    if not item:
         return None
-    digits, suffix = m.group(1), m.group(2)
     if form == "8-K":
-        # 8-K majors are single-digit (1-9), so a 3-digit group is major+minor.
-        return digits[0] if len(digits) == 3 else digits
-    return f"{digits}{suffix}".upper()
+        return item.split(".")[0]
+    return item.upper()
 
 
 def subitem_of(section_name: str, form: str) -> Optional[str]:

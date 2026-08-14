@@ -13,8 +13,12 @@ WHAT THIS GUARDS. ``BASELINE_GAPS`` is every (form, filing, item) the legacy
 parser finds and the new one misses, as measured on 2026-08-05. The assertion is
 a **subset** check, mirroring the anomaly census in
 ``test_section_boundary_corpus.py``: the live gap set may shrink freely, and any
-*new* gap fails. So a fix that closes ``wfc/10k`` needs no change here, while a
+*new* gap fails. So a fix that closes an entry needs no change here, while a
 change that breaks a currently-clean filing turns this red.
+
+That asymmetry is why ``wfc/10k`` is no longer listed at all: it now measures
+clean, so any gap appearing on it is a *new* gap and fails. Removing a fixture
+from ``BASELINE_GAPS`` tightens this guard rather than loosening it.
 
 TWO CORPORA, AND ONLY ONE OF THEM REACHES CI. ``tests/fixtures/html`` is tracked.
 ``tests/fixtures/text_boundary_corpus`` — which holds every 8-K and 20-F fixture,
@@ -56,13 +60,28 @@ pytestmark = pytest.mark.slow
 #      in 2023) on bac/jpm/tsla. Both look like detection-pattern holes rather
 #      than per-filing damage, so each is likely one fix for several filings.
 #   2. Near-total failures, where the new parser returns almost nothing on a
-#      filing legacy handles: wfc/10k (10 core items including 1, 1A, 7, 8 —
-#      a live bug on a modern large-bank filing) and three era fixtures. The
-#      20-F outlier 0001144204-10-017467 is EDGARizer-generated filer-agent
-#      HTML: 12,880 <font> tags and zero <p>, the class edgartools-mpjh tracks.
-#      It left this group on 2026-08-13 (22 gaps -> 8) when dt1f Defect 1 was
-#      fixed; the eight that remain are an ordinary gap, not a collapse.
+#      filing legacy handles: two era fixtures. The 20-F outlier
+#      0001144204-10-017467 is EDGARizer-generated filer-agent HTML: 12,880
+#      <font> tags and zero <p>, the class edgartools-mpjh tracks. It left this
+#      group on 2026-08-13 (22 gaps -> 8) when dt1f Defect 1 was fixed; the
+#      eight that remain are an ordinary gap, not a collapse.
 #   3. Singletons, most of them pre-2015 HTML.
+#
+# wfc/10k WAS IN GROUP 2 AND WAS NEVER BROKEN. Removed 2026-08-14 with its
+# fixture unchanged and the parser untouched: all ten "missing" items were a
+# measurement artefact. The benchmark's normalise_new() matched only the
+# structural key spelling (part_ii_item_7) and returned None for the friendly
+# one (mda), so a filing whose sections are named the friendly way scored as a
+# near-total miss. TenK.items lists all 23 items on that filing and
+# tenk['Item 1'] returns 46,618 characters of Wells Fargo's business section —
+# it was correct the whole time.
+#
+# The lesson is about this file as much as that one: a gap recorded here is a
+# claim about the parser, and it sat for a week as "a live bug on a modern
+# large-bank filing" without anyone asking the library the same question the
+# harness was asking. Before triaging any remaining entry, check what a user
+# actually gets — report.items and report['Item N'] — not only what the
+# benchmark reports.
 #
 # Entries keyed on an accession number come from the untracked era corpus and
 # are unmeasurable in CI; the ticker-keyed ones are tracked and always run.
@@ -80,20 +99,19 @@ BASELINE_GAPS = {
     ("8-K", "0001104659-03-004925"): ["9"],
     ("10-K", "0000927356-01-000369"): ["7"],
     ("10-K", "0000950153-99-001234"): ["1", "10", "11", "12", "13", "14", "2",
-                                       "3", "4", "5", "6", "7", "7A", "8", "9"],
+                                       "3", "4", "5", "6", "7", "7A", "9"],
     ("10-K", "0001193125-10-073212"): ["9A"],
-    ("10-K", "0001193125-21-101193"): ["1", "10", "11", "1B", "5"],
+    ("10-K", "0001193125-21-101193"): ["1", "10", "11", "5"],
     ("10-K", "0001193125-21-101902"): ["16"],
     ("10-K", "0001376474-16-000635"): ["1", "10", "11", "12", "13", "14", "15",
                                        "1A", "1B", "2", "3", "4", "5", "6", "7",
-                                       "7A", "8", "9", "9A", "9B"],
+                                       "7A", "9", "9A", "9B"],
     ("10-K", "axp/10k"): ["16"],
     ("10-K", "bac/10k"): ["1C"],
     ("10-K", "cvx/10k"): ["16"],
     ("10-K", "jnj/10k"): ["16"],
     ("10-K", "jpm/10k"): ["1C"],
     ("10-K", "tsla/10k"): ["1C"],
-    ("10-K", "wfc/10k"): ["1", "1A", "1B", "1C", "2", "3", "7", "7A", "8", "9A"],
     ("10-Q", "0001193125-21-082408"): ["1"],
     ("10-Q", "gs/10q"): ["5", "6"],
     ("20-F", "0000928385-01-500187"): ["7"],
