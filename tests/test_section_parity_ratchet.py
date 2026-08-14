@@ -60,7 +60,12 @@ pytestmark = pytest.mark.slow
 #      in 2023) on bac/jpm/tsla. Both look like detection-pattern holes rather
 #      than per-filing damage, so each is likely one fix for several filings.
 #   2. Near-total failures, where the new parser returns almost nothing on a
-#      filing legacy handles: two era fixtures. The 20-F outlier
+#      filing legacy handles. THE TWO 10-K ENTRIES IN THIS GROUP WERE ONE
+#      DEFECT AND ARE CLOSED (2026-08-14): both filings write their headers as
+#      "Item 1:  Business", and the 10-K patterns accepted only a period
+#      between the number and the title, so every item-numbered pattern failed
+#      together and the last detection strategy came back with one section.
+#      Thirty-two items across three filings, from a separator. The 20-F outlier
 #      0001144204-10-017467 is EDGARizer-generated filer-agent HTML: 12,880
 #      <font> tags and zero <p>, the class edgartools-mpjh tracks. It left this
 #      group on 2026-08-13 (22 gaps -> 8) when dt1f Defect 1 was fixed; the
@@ -98,14 +103,20 @@ pytestmark = pytest.mark.slow
 BASELINE_GAPS = {
     ("8-K", "0001104659-03-004925"): ["9"],
     ("10-K", "0000927356-01-000369"): ["7"],
-    ("10-K", "0000950153-99-001234"): ["1", "10", "11", "12", "13", "14", "2",
-                                       "3", "4", "5", "6", "7", "7A", "9"],
+    # Banked 2026-08-14: 14 -> 3, closing the item-separator defect below. What
+    # remains is era semantics plus one regex detail, not separators: in 1999
+    # Item 4 was "Submission of Matters to a Vote of Security Holders" and Item
+    # 14 was "Exhibits ... and Reports on Form 8-K", and the 10-K vocabulary
+    # holds only the modern meanings (Mine Safety, Principal Accountant Fees).
+    # Item 7A's header carries a newline inside it — "Quantitative and
+    # Qualitative\nDisclosures about Market Risk" — and `.` does not cross one.
+    ("10-K", "0000950153-99-001234"): ["14", "4", "7A"],
     ("10-K", "0001193125-10-073212"): ["9A"],
-    ("10-K", "0001193125-21-101193"): ["1", "10", "11", "5"],
+    # Banked 2026-08-14: 4 -> 1, same fix.
+    ("10-K", "0001193125-21-101193"): ["11"],
     ("10-K", "0001193125-21-101902"): ["16"],
-    ("10-K", "0001376474-16-000635"): ["1", "10", "11", "12", "13", "14", "15",
-                                       "1A", "1B", "2", "3", "4", "5", "6", "7",
-                                       "7A", "9", "9A", "9B"],
+    # Banked 2026-08-14: 19 -> 1, same fix.
+    ("10-K", "0001376474-16-000635"): ["5"],
     ("10-K", "axp/10k"): ["16"],
     ("10-K", "bac/10k"): ["1C"],
     ("10-K", "cvx/10k"): ["16"],
@@ -147,6 +158,12 @@ TRACKED_GAP_FIXTURES = (
         ("8-K", "0001437749-16-028287"),
         ("20-F", "0000928385-01-500187"),
         ("20-F", "0001062993-16-008650"),
+        # Copied into parity_gate on 2026-08-14 with the item-separator fix.
+        # It is the filing that fix was found on — colon-separated headers,
+        # every item-numbered pattern failing at once, one section resolved
+        # where legacy found fifteen — and leaving it in the gitignored era
+        # corpus would have made the regression invisible to CI.
+        ("10-K", "0000950153-99-001234"),
     }
 )
 

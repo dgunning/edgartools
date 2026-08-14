@@ -303,6 +303,26 @@ _TEN_Q_SIZE_BANDS = (
     ("6", 518,    20_720),      # Exhibits
 )
 
+# What a filer may put between an item number and its title.
+#
+# Filers write "Item 1.", "Item 1:", "Item 1 -", "Item 1 —", "Item 1. -" and
+# bare "Item 1". The 10-K patterns used to accept only the period (`\.?\s*`),
+# which is not a stylistic detail: on a filing whose headers read
+# "Item 1:  Business" every item-numbered pattern failed at once, and the
+# pattern extractor is the last strategy the hybrid detector tries. Three
+# filings in the parity corpus therefore resolved a single section apiece —
+# 0000950153-99-001234 and 0001376474-16-000635 returned `TenK.items ==
+# ['Item 8']` against legacy's 15 and 20 — and every other item was reachable
+# only through the ChunkedDocument fallback that 6.0 deletes. Restoring the
+# separator recovers 32 items across the corpus and loses none (edgartools-dt1f).
+#
+# 10-Q and 20-F already carried the dash half of this as a second optional slot;
+# both slots are kept so nothing that matched before stops matching, and the
+# colon and semicolon are new for all three forms. 8-K is not a caller: its
+# numbers are dotted ("Item 5.02") and the period there is structural, not a
+# separator.
+_ITEM_SEP = r'\s*[.:;\-–—]?\s*[-–—.]?\s*'
+
 # Per-form section/title vocabulary for the regex pattern extractor (moved here
 # from SectionExtractor.SECTION_PATTERNS — FormSchema is the single home of form
 # knowledge, edgartools-llmp.2 / D2). Item-based forms key on "Item N" headers;
@@ -310,53 +330,53 @@ _TEN_Q_SIZE_BANDS = (
 # of these; a golden parity test guards against drift.
 _TEN_K_SECTION_PATTERNS = {
     'business': (
-        ('^(Item|ITEM)\\s+1\\.?\\s*Business', 'Item 1 - Business'),
+        (f'^(Item|ITEM)\\s+1{_ITEM_SEP}Business', 'Item 1 - Business'),
         ('^Business\\s*$', 'Business'),
         ('^Business Overview', 'Business Overview'),
         ('^Our Business', 'Our Business'),
         ('^Company Overview', 'Company Overview'),
     ),
     'risk_factors': (
-        ('^(Item|ITEM)\\s+1A\\.?\\s*Risk\\s+Factors', 'Item 1A - Risk Factors'),
+        (f'^(Item|ITEM)\\s+1A{_ITEM_SEP}Risk\\s+Factors', 'Item 1A - Risk Factors'),
         ('^Risk\\s+Factors', 'Risk Factors'),
         ('^Factors\\s+That\\s+May\\s+Affect', 'Risk Factors'),
     ),
     'unresolved_staff_comments': (
-        ('^(Item|ITEM)\\s+1B\\.?\\s*Unresolved\\s+Staff\\s+Comments', 'Item 1B - Unresolved Staff Comments'),
+        (f'^(Item|ITEM)\\s+1B{_ITEM_SEP}Unresolved\\s+Staff\\s+Comments', 'Item 1B - Unresolved Staff Comments'),
         ('^Unresolved\\s+Staff\\s+Comments', 'Unresolved Staff Comments'),
     ),
     'cybersecurity': (
-        ('^(Item|ITEM)\\s+1C\\.?\\s*Cybersecurity', 'Item 1C - Cybersecurity'),
+        (f'^(Item|ITEM)\\s+1C{_ITEM_SEP}Cybersecurity', 'Item 1C - Cybersecurity'),
         ('^Cybersecurity\\s+Risk\\s+Management', 'Cybersecurity'),
         ('^Cybersecurity', 'Cybersecurity'),
     ),
     'properties': (
-        ('^(Item|ITEM)\\s+2\\.?\\s*Properties', 'Item 2 - Properties'),
+        (f'^(Item|ITEM)\\s+2{_ITEM_SEP}Properties', 'Item 2 - Properties'),
         ('^Properties', 'Properties'),
         ('^Real\\s+Estate', 'Real Estate'),
     ),
     'legal_proceedings': (
-        ('^(Item|ITEM)\\s+3\\.?\\s*Legal\\s+Proceedings', 'Item 3 - Legal Proceedings'),
+        (f'^(Item|ITEM)\\s+3{_ITEM_SEP}Legal\\s+Proceedings', 'Item 3 - Legal Proceedings'),
         ('^Legal\\s+Proceedings', 'Legal Proceedings'),
         ('^Litigation', 'Litigation'),
     ),
     'market_risk': (
-        ('^(Item|ITEM)\\s+7A\\.?\\s*Quantitative.*Disclosures', 'Item 7A - Market Risk'),
+        (f'^(Item|ITEM)\\s+7A{_ITEM_SEP}Quantitative.*Disclosures', 'Item 7A - Market Risk'),
         ('^Market\\s+Risk', 'Market Risk'),
         ('^Quantitative.*Qualitative.*Market\\s+Risk', 'Market Risk'),
     ),
     'mda': (
-        ('^(Item|ITEM)\\s+7\\.?\\s*Management.*Discussion', 'Item 7 - MD&A'),
+        (f'^(Item|ITEM)\\s+7{_ITEM_SEP}Management.*Discussion', 'Item 7 - MD&A'),
         ('^Management.*Discussion.*Analysis', 'MD&A'),
         ('^MD&A', 'MD&A'),
     ),
     'financial_statements': (
-        ('^(Item|ITEM)\\s+8\\.?\\s*Financial\\s+Statements', 'Item 8 - Financial Statements'),
+        (f'^(Item|ITEM)\\s+8{_ITEM_SEP}Financial\\s+Statements', 'Item 8 - Financial Statements'),
         ('^Financial\\s+Statements', 'Financial Statements'),
         ('^Consolidated\\s+Financial\\s+Statements', 'Consolidated Financial Statements'),
     ),
     'controls_procedures': (
-        ('^(Item|ITEM)\\s+9A\\.?\\s*Controls.*Procedures', 'Item 9A - Controls and Procedures'),
+        (f'^(Item|ITEM)\\s+9A{_ITEM_SEP}Controls.*Procedures', 'Item 9A - Controls and Procedures'),
         ('^Controls.*Procedures', 'Controls and Procedures'),
         ('^Internal\\s+Control', 'Internal Controls'),
     ),
@@ -369,25 +389,25 @@ _TEN_K_SECTION_PATTERNS = {
     # alternative would match unrelated blocks.  Keys use the part_N_item_N
     # convention so Section.parse_section_name() resolves part and item.
     'part_i_item_4': (
-        ('^(Item|ITEM)\\s+4\\.?\\s*Mine\\s+Safety', 'Item 4 - Mine Safety Disclosures'),
+        (f'^(Item|ITEM)\\s+4{_ITEM_SEP}Mine\\s+Safety', 'Item 4 - Mine Safety Disclosures'),
     ),
     'part_ii_item_5': (
-        ('^(Item|ITEM)\\s+5\\.?\\s*Market\\s+for', 'Item 5 - Market for Registrant\'s Common Equity'),
+        (f'^(Item|ITEM)\\s+5{_ITEM_SEP}Market\\s+for', 'Item 5 - Market for Registrant\'s Common Equity'),
     ),
     'part_ii_item_6': (
-        ('^(Item|ITEM)\\s+6\\.?\\s*\\[?\\s*(Reserved|Selected\\s+Financial)', 'Item 6 - [Reserved]'),
+        (f'^(Item|ITEM)\\s+6{_ITEM_SEP}\\[?\\s*(Reserved|Selected\\s+Financial)', 'Item 6 - [Reserved]'),
     ),
     'part_ii_item_9': (
-        ('^(Item|ITEM)\\s+9\\.?\\s*Changes\\s+in\\s+and\\s+Disagreements', 'Item 9 - Changes in and Disagreements with Accountants'),
+        (f'^(Item|ITEM)\\s+9{_ITEM_SEP}Changes\\s+in\\s+and\\s+Disagreements', 'Item 9 - Changes in and Disagreements with Accountants'),
     ),
     'part_ii_item_9b': (
-        ('^(Item|ITEM)\\s+9B\\.?\\s*Other\\s+Information', 'Item 9B - Other Information'),
+        (f'^(Item|ITEM)\\s+9B{_ITEM_SEP}Other\\s+Information', 'Item 9B - Other Information'),
     ),
     'part_ii_item_9c': (
-        ('^(Item|ITEM)\\s+9C\\.?\\s*Disclosure\\s+Regarding\\s+Foreign', 'Item 9C - Disclosure Regarding Foreign Jurisdictions'),
+        (f'^(Item|ITEM)\\s+9C{_ITEM_SEP}Disclosure\\s+Regarding\\s+Foreign', 'Item 9C - Disclosure Regarding Foreign Jurisdictions'),
     ),
     'part_iv_item_15': (
-        ('^(Item|ITEM)\\s+15\\.?\\s*Exhibits?', 'Item 15 - Exhibits and Financial Statement Schedules'),
+        (f'^(Item|ITEM)\\s+15{_ITEM_SEP}Exhibits?', 'Item 15 - Exhibits and Financial Statement Schedules'),
     ),
     # Part III — Items 10-14.  Many filers incorporate these by reference from
     # their proxy statement; the Part III block is a compact "see proxy" stub
@@ -398,201 +418,201 @@ _TEN_K_SECTION_PATTERNS = {
     # that Section.parse_section_name() resolves part="III" and item="N"
     # automatically, matching what _ITEM_TO_PART_10K and __getitem__ expect.
     'part_iii_item_10': (
-        ('^(Item|ITEM)\\s+10\\.?\\s*Directors', 'Item 10 - Directors, Executive Officers and Corporate Governance'),
+        (f'^(Item|ITEM)\\s+10{_ITEM_SEP}Directors', 'Item 10 - Directors, Executive Officers and Corporate Governance'),
     ),
     'part_iii_item_11': (
-        ('^(Item|ITEM)\\s+11\\.?\\s*Executive\\s+Compensation', 'Item 11 - Executive Compensation'),
+        (f'^(Item|ITEM)\\s+11{_ITEM_SEP}Executive\\s+Compensation', 'Item 11 - Executive Compensation'),
     ),
     'part_iii_item_12': (
-        ('^(Item|ITEM)\\s+12\\.?\\s*Security\\s+Ownership', 'Item 12 - Security Ownership of Certain Beneficial Owners'),
+        (f'^(Item|ITEM)\\s+12{_ITEM_SEP}Security\\s+Ownership', 'Item 12 - Security Ownership of Certain Beneficial Owners'),
     ),
     'part_iii_item_13': (
-        ('^(Item|ITEM)\\s+13\\.?\\s*Certain\\s+Relationships', 'Item 13 - Certain Relationships and Related Transactions'),
+        (f'^(Item|ITEM)\\s+13{_ITEM_SEP}Certain\\s+Relationships', 'Item 13 - Certain Relationships and Related Transactions'),
     ),
     'part_iii_item_14': (
-        ('^(Item|ITEM)\\s+14\\.?\\s*Principal\\s+Accountant', 'Item 14 - Principal Accountant Fees and Services'),
+        (f'^(Item|ITEM)\\s+14{_ITEM_SEP}Principal\\s+Accountant', 'Item 14 - Principal Accountant Fees and Services'),
     ),
     # Part IV — Item 16 (Form 10-K Summary, optional).  Item 15 (Exhibits) is
     # already represented in the TOC-extraction path as 'part_iv_item_15'.
     'part_iv_item_16': (
-        ('^(Item|ITEM)\\s+16\\.?\\s*Form\\s+10-K\\s+Summary', 'Item 16 - Form 10-K Summary'),
+        (f'^(Item|ITEM)\\s+16{_ITEM_SEP}Form\\s+10-K\\s+Summary', 'Item 16 - Form 10-K Summary'),
     ),
 }
 
 _TEN_Q_SECTION_PATTERNS = {
     'part_i_item_1': (
-        ('^(Item|ITEM)\\s+1\\.?\\s*[-–—.]?\\s*Financial\\s+Statements', 'Item 1 - Financial Statements'),
+        (f'^(Item|ITEM)\\s+1{_ITEM_SEP}Financial\\s+Statements', 'Item 1 - Financial Statements'),
         ('^Financial\\s+Statements', 'Financial Statements'),
         ('^Condensed.*Financial\\s+Statements', 'Condensed Financial Statements'),
     ),
     'part_i_item_2': (
-        ('^(Item|ITEM)\\s+2\\.?\\s*[-–—.]?\\s*Management.*Discussion', 'Item 2 - MD&A'),
+        (f'^(Item|ITEM)\\s+2{_ITEM_SEP}Management.*Discussion', 'Item 2 - MD&A'),
         ('^Management.*Discussion.*Analysis', 'MD&A'),
     ),
     'part_i_item_3': (
-        ('^(Item|ITEM)\\s+3\\.?\\s*[-–—.]?\\s*Quantitative.*Disclosures', 'Item 3 - Market Risk'),
+        (f'^(Item|ITEM)\\s+3{_ITEM_SEP}Quantitative.*Disclosures', 'Item 3 - Market Risk'),
         ('^Market\\s+Risk', 'Market Risk'),
     ),
     'part_i_item_4': (
-        ('^(Item|ITEM)\\s+4\\.?\\s*[-–—.]?\\s*Controls.*Procedures', 'Item 4 - Controls and Procedures'),
+        (f'^(Item|ITEM)\\s+4{_ITEM_SEP}Controls.*Procedures', 'Item 4 - Controls and Procedures'),
         ('^Controls.*Procedures', 'Controls and Procedures'),
     ),
     'part_ii_item_1': (
-        ('^(Item|ITEM)\\s+1\\.?\\s*[-–—.]?\\s*Legal\\s+Proceedings', 'Item 1 - Legal Proceedings'),
+        (f'^(Item|ITEM)\\s+1{_ITEM_SEP}Legal\\s+Proceedings', 'Item 1 - Legal Proceedings'),
         ('^Legal\\s+Proceedings', 'Legal Proceedings'),
     ),
     'part_ii_item_1a': (
-        ('^(Item|ITEM)\\s+1A\\.?\\s*[-–—.]?\\s*Risk\\s+Factors', 'Item 1A - Risk Factors'),
+        (f'^(Item|ITEM)\\s+1A{_ITEM_SEP}Risk\\s+Factors', 'Item 1A - Risk Factors'),
         ('^Risk\\s+Factors', 'Risk Factors'),
     ),
     'part_ii_item_2': (
-        ('^(Item|ITEM)\\s+2\\.?\\s*[-–—.]?\\s*Unregistered\\s+Sales', 'Item 2 - Unregistered Sales'),
+        (f'^(Item|ITEM)\\s+2{_ITEM_SEP}Unregistered\\s+Sales', 'Item 2 - Unregistered Sales'),
         ('^Unregistered\\s+Sales.*Equity', 'Unregistered Sales'),
     ),
     'part_ii_item_3': (
-        ('^(Item|ITEM)\\s+3\\.?\\s*[-–—.]?\\s*Defaults', 'Item 3 - Defaults Upon Senior Securities'),
+        (f'^(Item|ITEM)\\s+3{_ITEM_SEP}Defaults', 'Item 3 - Defaults Upon Senior Securities'),
         ('^Defaults\\s+Upon\\s+Senior', 'Defaults Upon Senior Securities'),
     ),
     'part_ii_item_4': (
-        ('^(Item|ITEM)\\s+4\\.?\\s*[-–—.]?\\s*Mine\\s+Safety', 'Item 4 - Mine Safety Disclosures'),
+        (f'^(Item|ITEM)\\s+4{_ITEM_SEP}Mine\\s+Safety', 'Item 4 - Mine Safety Disclosures'),
         ('^Mine\\s+Safety', 'Mine Safety Disclosures'),
     ),
     'part_ii_item_5': (
-        ('^(Item|ITEM)\\s+5\\.?\\s*[-–—.]?\\s*Other\\s+Information', 'Item 5 - Other Information'),
+        (f'^(Item|ITEM)\\s+5{_ITEM_SEP}Other\\s+Information', 'Item 5 - Other Information'),
         ('^Other\\s+Information', 'Other Information'),
     ),
     'part_ii_item_6': (
-        ('^(Item|ITEM)\\s+6\\.?\\s*[-–—.]?\\s*Exhibits', 'Item 6 - Exhibits'),
+        (f'^(Item|ITEM)\\s+6{_ITEM_SEP}Exhibits', 'Item 6 - Exhibits'),
         ('^Exhibits', 'Exhibits'),
     ),
 }
 
 _TWENTY_F_SECTION_PATTERNS = {
     'item_1': (
-        ('^(Item|ITEM)\\s+1\\.?\\s*[-–—.]?\\s*Identity.*Directors', 'Item 1 - Identity of Directors, Senior Management and Advisers'),
+        (f'^(Item|ITEM)\\s+1{_ITEM_SEP}Identity.*Directors', 'Item 1 - Identity of Directors, Senior Management and Advisers'),
         ('^Identity.*Directors.*Senior\\s+Management', 'Identity of Directors'),
     ),
     'item_2': (
-        ('^(Item|ITEM)\\s+2\\.?\\s*[-–—.]?\\s*Offer\\s+Statistics', 'Item 2 - Offer Statistics and Expected Timetable'),
+        (f'^(Item|ITEM)\\s+2{_ITEM_SEP}Offer\\s+Statistics', 'Item 2 - Offer Statistics and Expected Timetable'),
         ('^Offer\\s+Statistics.*Timetable', 'Offer Statistics'),
     ),
     'item_3': (
-        ('^(Item|ITEM)\\s+3\\.?\\s*[-–—.]?\\s*Key\\s+Information', 'Item 3 - Key Information'),
+        (f'^(Item|ITEM)\\s+3{_ITEM_SEP}Key\\s+Information', 'Item 3 - Key Information'),
         ('^Key\\s+Information', 'Key Information'),
         ('^Risk\\s+Factors', 'Risk Factors'),
     ),
     'item_4': (
-        ('^(Item|ITEM)\\s+4\\.?\\s*[-–—.]?\\s*Information\\s+on\\s+the\\s+Company', 'Item 4 - Information on the Company'),
+        (f'^(Item|ITEM)\\s+4{_ITEM_SEP}Information\\s+on\\s+the\\s+Company', 'Item 4 - Information on the Company'),
         ('^Information\\s+on\\s+the\\s+Company', 'Information on the Company'),
         ('^Business\\s+Overview', 'Business Overview'),
     ),
     'item_4a': (
-        ('^(Item|ITEM)\\s+4A\\.?\\s*[-–—.]?\\s*Unresolved\\s+Staff', 'Item 4A - Unresolved Staff Comments'),
+        (f'^(Item|ITEM)\\s+4A{_ITEM_SEP}Unresolved\\s+Staff', 'Item 4A - Unresolved Staff Comments'),
         ('^Unresolved\\s+Staff\\s+Comments', 'Unresolved Staff Comments'),
     ),
     'item_5': (
-        ('^(Item|ITEM)\\s+5\\.?\\s*[-–—.]?\\s*Operating.*Financial\\s+Review', 'Item 5 - Operating and Financial Review and Prospects'),
+        (f'^(Item|ITEM)\\s+5{_ITEM_SEP}Operating.*Financial\\s+Review', 'Item 5 - Operating and Financial Review and Prospects'),
         ('^Operating.*Financial\\s+Review', 'Operating and Financial Review'),
         ('^Management.*Discussion.*Analysis', 'MD&A'),
     ),
     'item_6': (
-        ('^(Item|ITEM)\\s+6\\.?\\s*[-–—.]?\\s*Directors.*Senior\\s+Management.*Employees', 'Item 6 - Directors, Senior Management and Employees'),
+        (f'^(Item|ITEM)\\s+6{_ITEM_SEP}Directors.*Senior\\s+Management.*Employees', 'Item 6 - Directors, Senior Management and Employees'),
         ('^Directors.*Senior\\s+Management.*Employees', 'Directors and Employees'),
     ),
     'item_7': (
-        ('^(Item|ITEM)\\s+7\\.?\\s*[-–—.]?\\s*Major\\s+Shareholders', 'Item 7 - Major Shareholders and Related Party Transactions'),
+        (f'^(Item|ITEM)\\s+7{_ITEM_SEP}Major\\s+Shareholders', 'Item 7 - Major Shareholders and Related Party Transactions'),
         ('^Major\\s+Shareholders.*Related\\s+Party', 'Major Shareholders'),
     ),
     'item_8': (
-        ('^(Item|ITEM)\\s+8\\.?\\s*[-–—.]?\\s*Financial\\s+Information', 'Item 8 - Financial Information'),
+        (f'^(Item|ITEM)\\s+8{_ITEM_SEP}Financial\\s+Information', 'Item 8 - Financial Information'),
         ('^Financial\\s+Information', 'Financial Information'),
     ),
     'item_9': (
-        ('^(Item|ITEM)\\s+9\\.?\\s*[-–—.]?\\s*The\\s+Offer\\s+and\\s+Listing', 'Item 9 - The Offer and Listing'),
+        (f'^(Item|ITEM)\\s+9{_ITEM_SEP}The\\s+Offer\\s+and\\s+Listing', 'Item 9 - The Offer and Listing'),
         ('^The\\s+Offer\\s+and\\s+Listing', 'Offer and Listing'),
     ),
     'item_10': (
-        ('^(Item|ITEM)\\s+10\\.?\\s*[-–—.]?\\s*Additional\\s+Information', 'Item 10 - Additional Information'),
+        (f'^(Item|ITEM)\\s+10{_ITEM_SEP}Additional\\s+Information', 'Item 10 - Additional Information'),
         ('^Additional\\s+Information', 'Additional Information'),
     ),
     'item_11': (
-        ('^(Item|ITEM)\\s+11\\.?\\s*[-–—.]?\\s*Quantitative.*Qualitative.*Market\\s+Risk', 'Item 11 - Quantitative and Qualitative Disclosures About Market Risk'),
+        (f'^(Item|ITEM)\\s+11{_ITEM_SEP}Quantitative.*Qualitative.*Market\\s+Risk', 'Item 11 - Quantitative and Qualitative Disclosures About Market Risk'),
         ('^Quantitative.*Qualitative.*Market\\s+Risk', 'Market Risk Disclosures'),
     ),
     'item_12': (
-        ('^(Item|ITEM)\\s+12\\.?\\s*[-–—.]?\\s*Description.*Securities', 'Item 12 - Description of Securities Other Than Equity Securities'),
+        (f'^(Item|ITEM)\\s+12{_ITEM_SEP}Description.*Securities', 'Item 12 - Description of Securities Other Than Equity Securities'),
         ('^Description.*Securities.*Equity', 'Securities Description'),
     ),
     'item_13': (
-        ('^(Item|ITEM)\\s+13\\.?\\s*[-–—.]?\\s*Defaults', 'Item 13 - Defaults, Dividend Arrearages and Delinquencies'),
+        (f'^(Item|ITEM)\\s+13{_ITEM_SEP}Defaults', 'Item 13 - Defaults, Dividend Arrearages and Delinquencies'),
         ('^Defaults.*Dividend.*Arrearages', 'Defaults and Arrearages'),
     ),
     'item_14': (
-        ('^(Item|ITEM)\\s+14\\.?\\s*[-–—.]?\\s*Material\\s+Modifications', 'Item 14 - Material Modifications to the Rights of Security Holders'),
+        (f'^(Item|ITEM)\\s+14{_ITEM_SEP}Material\\s+Modifications', 'Item 14 - Material Modifications to the Rights of Security Holders'),
         ('^Material\\s+Modifications.*Rights', 'Material Modifications'),
     ),
     'item_15': (
-        ('^(Item|ITEM)\\s+15\\.?\\s*[-–—.]?\\s*Controls.*Procedures', 'Item 15 - Controls and Procedures'),
+        (f'^(Item|ITEM)\\s+15{_ITEM_SEP}Controls.*Procedures', 'Item 15 - Controls and Procedures'),
         ('^Controls.*Procedures', 'Controls and Procedures'),
     ),
     'item_16': (
-        ('^(Item|ITEM)\\s+16\\.?\\s*[-–—.]?\\s*\\[?Reserved\\]?', 'Item 16 - [Reserved]'),
+        (f'^(Item|ITEM)\\s+16{_ITEM_SEP}\\[?Reserved\\]?', 'Item 16 - [Reserved]'),
     ),
     'item_16a': (
-        ('^(Item|ITEM)\\s+16A\\.?\\s*[-–—.]?\\s*Audit\\s+Committee', 'Item 16A - Audit Committee Financial Expert'),
+        (f'^(Item|ITEM)\\s+16A{_ITEM_SEP}Audit\\s+Committee', 'Item 16A - Audit Committee Financial Expert'),
         ('^Audit\\s+Committee\\s+Financial\\s+Expert', 'Audit Committee Expert'),
     ),
     'item_16b': (
-        ('^(Item|ITEM)\\s+16B\\.?\\s*[-–—.]?\\s*Code\\s+of\\s+Ethics', 'Item 16B - Code of Ethics'),
+        (f'^(Item|ITEM)\\s+16B{_ITEM_SEP}Code\\s+of\\s+Ethics', 'Item 16B - Code of Ethics'),
         ('^Code\\s+of\\s+Ethics', 'Code of Ethics'),
     ),
     'item_16c': (
-        ('^(Item|ITEM)\\s+16C\\.?\\s*[-–—.]?\\s*Principal\\s+Accountant', 'Item 16C - Principal Accountant Fees and Services'),
+        (f'^(Item|ITEM)\\s+16C{_ITEM_SEP}Principal\\s+Accountant', 'Item 16C - Principal Accountant Fees and Services'),
         ('^Principal\\s+Accountant\\s+Fees', 'Accountant Fees'),
     ),
     'item_16d': (
-        ('^(Item|ITEM)\\s+16D\\.?\\s*[-–—.]?\\s*Exemptions.*Audit\\s+Committees', 'Item 16D - Exemptions from the Listing Standards for Audit Committees'),
+        (f'^(Item|ITEM)\\s+16D{_ITEM_SEP}Exemptions.*Audit\\s+Committees', 'Item 16D - Exemptions from the Listing Standards for Audit Committees'),
         ('^Exemptions.*Listing\\s+Standards', 'Audit Committee Exemptions'),
     ),
     'item_16e': (
-        ('^(Item|ITEM)\\s+16E\\.?\\s*[-–—.]?\\s*Purchases.*Equity\\s+Securities', 'Item 16E - Purchases of Equity Securities by the Issuer'),
+        (f'^(Item|ITEM)\\s+16E{_ITEM_SEP}Purchases.*Equity\\s+Securities', 'Item 16E - Purchases of Equity Securities by the Issuer'),
         ('^Purchases.*Equity\\s+Securities.*Issuer', 'Equity Purchases'),
     ),
     'item_16f': (
-        ('^(Item|ITEM)\\s+16F\\.?\\s*[-–—.]?\\s*Change.*Certifying\\s+Accountant', "Item 16F - Change in Registrant's Certifying Accountant"),
+        (f'^(Item|ITEM)\\s+16F{_ITEM_SEP}Change.*Certifying\\s+Accountant', "Item 16F - Change in Registrant's Certifying Accountant"),
         ('^Change.*Certifying\\s+Accountant', 'Accountant Change'),
     ),
     'item_16g': (
-        ('^(Item|ITEM)\\s+16G\\.?\\s*[-–—.]?\\s*Corporate\\s+Governance', 'Item 16G - Corporate Governance'),
+        (f'^(Item|ITEM)\\s+16G{_ITEM_SEP}Corporate\\s+Governance', 'Item 16G - Corporate Governance'),
         ('^Corporate\\s+Governance', 'Corporate Governance'),
     ),
     'item_16h': (
-        ('^(Item|ITEM)\\s+16H\\.?\\s*[-–—.]?\\s*Mine\\s+Safety', 'Item 16H - Mine Safety Disclosure'),
+        (f'^(Item|ITEM)\\s+16H{_ITEM_SEP}Mine\\s+Safety', 'Item 16H - Mine Safety Disclosure'),
         ('^Mine\\s+Safety\\s+Disclosure', 'Mine Safety'),
     ),
     'item_16i': (
-        ('^(Item|ITEM)\\s+16I\\.?\\s*[-–—.]?\\s*Disclosure.*Foreign\\s+Jurisdictions', 'Item 16I - Disclosure Regarding Foreign Jurisdictions That Prevent Inspections'),
+        (f'^(Item|ITEM)\\s+16I{_ITEM_SEP}Disclosure.*Foreign\\s+Jurisdictions', 'Item 16I - Disclosure Regarding Foreign Jurisdictions That Prevent Inspections'),
         ('^Disclosure.*Foreign\\s+Jurisdictions.*Inspections', 'Foreign Jurisdiction Disclosure'),
-        ('^(Item|ITEM)\\s+16I\\.?\\s*$', 'Item 16I'),
+        (f'^(Item|ITEM)\\s+16I{_ITEM_SEP}$', 'Item 16I'),
     ),
     'item_16j': (
-        ('^(Item|ITEM)\\s+16J\\.?\\s*[-–—.]?\\s*Insider\\s+Trading', 'Item 16J - Insider Trading Policies'),
+        (f'^(Item|ITEM)\\s+16J{_ITEM_SEP}Insider\\s+Trading', 'Item 16J - Insider Trading Policies'),
         ('^Insider\\s+Trading\\s+Policies', 'Insider Trading Policies'),
-        ('^(Item|ITEM)\\s+16J\\.?\\s*$', 'Item 16J'),
+        (f'^(Item|ITEM)\\s+16J{_ITEM_SEP}$', 'Item 16J'),
     ),
     'item_16k': (
-        ('^(Item|ITEM)\\s+16K\\.?\\s*[-–—.]?\\s*Cybersecurity', 'Item 16K - Cybersecurity'),
+        (f'^(Item|ITEM)\\s+16K{_ITEM_SEP}Cybersecurity', 'Item 16K - Cybersecurity'),
         ('^Cybersecurity', 'Cybersecurity'),
-        ('^(Item|ITEM)\\s+16K\\.?\\s*$', 'Item 16K'),
+        (f'^(Item|ITEM)\\s+16K{_ITEM_SEP}$', 'Item 16K'),
     ),
     'item_17': (
-        ('^(Item|ITEM)\\s+17\\.?\\s*[-–—.]?\\s*Financial\\s+Statements', 'Item 17 - Financial Statements'),
+        (f'^(Item|ITEM)\\s+17{_ITEM_SEP}Financial\\s+Statements', 'Item 17 - Financial Statements'),
     ),
     'item_18': (
-        ('^(Item|ITEM)\\s+18\\.?\\s*[-–—.]?\\s*Financial\\s+Statements', 'Item 18 - Financial Statements'),
+        (f'^(Item|ITEM)\\s+18{_ITEM_SEP}Financial\\s+Statements', 'Item 18 - Financial Statements'),
     ),
     'item_19': (
-        ('^(Item|ITEM)\\s+19\\.?\\s*[-–—.]?\\s*Exhibits', 'Item 19 - Exhibits'),
+        (f'^(Item|ITEM)\\s+19{_ITEM_SEP}Exhibits', 'Item 19 - Exhibits'),
         ('^Exhibits', 'Exhibits'),
     ),
     'part_i': (
