@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **BDC investment parsing now recognizes structured Schedule of Investments labels and normalizes trailing numeric XBRL disambiguators out of `investment_type`.** The original label remains available in `identifier`, so separate tranches remain distinguishable while grouping by investment type is stable. Fourteen more BDC tickers parse their investment types, and two label shapes that previously yielded a company name of `'Specialty finance'` or `'Class AA'` now return the issuer. (GH #990)
+
 ### Fixed
 
 - **`Item 1C` (Cybersecurity) and `Item 16` were missing from filings whose table of contents omitted them.** A TOC is something the filer wrote, not a manifest, and items go missing from it routinely — Part III when it is incorporated by reference from the proxy, Item 16 because it is optional and usually empty, Item 1C because it was new in 2023 and templates lagged. The parser already handled this by augmenting a successful TOC result with items found in the body, but the check deciding whether that pass was worth running asked only whether Part III was complete. Part III is complete on nearly every filing, so the pass was skipped nearly always, and the items a TOC actually omits were the ones nobody got: `TenK.items` on Bank of America, JPMorgan and Tesla listed no Item 1C, and American Express, Chevron and Johnson & Johnson no Item 16, on filings where the parser had already found them and thrown the result away. Item 1C has been mandatory since December 2023, so this was most modern 10-Ks rather than a corner case. The check now asks whether the TOC named every item the form defines. Sections are also merged by item rather than by section key, so the same item cannot arrive twice under the two naming conventions the detectors use (`part_ii_item_7` and `mda` are both Item 7). Across the parity corpus this closes seven 10-K filings and one 10-Q, with no filing losing an item and no measurable change in parse time.
@@ -102,8 +106,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [5.46.0] - 2026-08-07
 
 ### Changed
-
-- **BDC investment parsing now recognizes structured Schedule of Investments labels and normalizes trailing numeric XBRL disambiguators out of `investment_type`.** The original label remains available in `identifier`, so separate tranches remain distinguishable while grouping by investment type is stable.
 
 - **On a multi-filer filing, `Filing.cik` and `Filing.company` now name the issuer rather than whichever filer the quarterly index listed first.** Accession lookups go through EDGAR full-text search before falling back to the quarterly index, and the two order a filing's filers differently. `find("0001918704-25-005439")` was `(70858, 'BANK OF AMERICA CORP /DE/')` and is now `(1682472, 'BofA Finance LLC')`. `all_ciks` and `all_entities` still return every filer; single-filer filings are unaffected.
 
