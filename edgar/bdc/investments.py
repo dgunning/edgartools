@@ -53,6 +53,18 @@ INVESTMENT_TYPES = [
     'First lien senior secured delayed draw term loan',
     'First lien senior secured term loan',
     'First lien senior secured loan',
+    'First-lien holdco loan',
+    'First-lien revolving loan',
+    'First-lien loan',
+    'Second-lien loan',
+    'First lien secured debt - delayed draw',
+    'First lien secured debt - revolver',
+    'First lien secured debt - term loan',
+    '1st lien/senior secured debt',
+    '2nd lien/senior secured debt',
+    '1st lien/last-out unitranche',
+    '1st lien, secured loan',
+    '2nd lien, secured loan',
     'Second lien senior secured loan',
     'Senior secured revolving loan',
     'Senior secured term loan',
@@ -60,13 +72,23 @@ INVESTMENT_TYPES = [
     'Senior subordinated loan',
     'Junior secured loan',
     'Subordinated certificate',
+    'Subordinate debt',
     'Subordinated debt',
     'Subordinated loan',
     'Subordinated note',
+    'Structured note',
     'Unsecured debt',
     'Unsecured loan',
     'Mezzanine debt',
     'Mezzanine loan',
+    'Convertible promissory note A',
+    'Promissory note',
+    'Other debt',
+    'Corporate bonds',
+    'Equipment financing',
+    'Secured bond',
+    'Unsecured bond',
+    'Secured loan',
     'Term loan',
     'Revolver',
     'Revolving loan',
@@ -89,6 +111,7 @@ INVESTMENT_TYPES = [
     'Senior preferred units',
     'Senior preferred stock',
     'Junior preferred stock',
+    'Preferred equity interest',
     'Preferred shares',
     'Preferred stock',
     'Preferred units',
@@ -101,6 +124,7 @@ INVESTMENT_TYPES = [
     'Class B common units',
     'Class B common stock',
     'Class C common units',
+    'Common equity/warrants',
     'Common units',
     'Common stock',
     'Common shares',
@@ -112,7 +136,10 @@ INVESTMENT_TYPES = [
     'Class A units',
     'Class B units',
     'Class C units',
+    'Class AA units',
+    'Class C-1 units',
     # Member units (used by some BDCs like Main Street)
+    'Class AA Preferred Member Units',
     'Class A Preferred Member Units',
     'Class B Preferred Member Units',
     'Preferred Member Units',
@@ -130,7 +157,10 @@ INVESTMENT_TYPES = [
     'Class A membership units',
     'Class B membership units',
     'Partnership interest',
+    'Partnership',
+    'Equity interests',
     'Equity interest',
+    'Earnout interests',
     'Equity',
     # Warrants
     'Warrants to purchase shares of common stock',
@@ -138,6 +168,7 @@ INVESTMENT_TYPES = [
     'Warrant to purchase common stock',
     'Warrant to purchase units',
     'Warrants',
+    'Warrant',
     'Options',
     # Series units
     'Series A common units',
@@ -151,14 +182,17 @@ INVESTMENT_TYPES = [
     'Class A preferred units',
     'Class B preferred units',
     # Certificates
+    'Trust certificates',
     'Subordinated certificates',
     'Senior certificates',
     'Certificates',
     # Notes
     'First lien senior secured note',
     'Second lien senior secured note',
-    'Senior subordinated note',
+    'First-lien note',
+    'Second-lien note',
     'Senior secured note',
+    'Senior subordinated note',
     'Subordinated note',
     'Unsecured note',
     # Partnership/LP interests
@@ -184,6 +218,7 @@ INVESTMENT_TYPES = [
     'Series A-3 preferred shares',
     'Series C-3 preferred shares',
     'Middle preferred shares',
+    'Convertible preference shares',
     'Warrant to purchase shares of Series C preferred stock',
     'Warrant to purchase shares of Series A preferred stock',
     'Warrant to purchase shares of Series B preferred stock',
@@ -196,6 +231,8 @@ INVESTMENT_TYPES = [
     'Delayed draw term loan',
     'Delayed draw',
     'Structured mezzanine',
+    'Structured credit',
+    'US Government Securities',
     'ABF Equity',  # Asset-based finance equity
     'Senior secured',  # HTGC format
     # Other
@@ -206,7 +243,743 @@ INVESTMENT_TYPES = [
 ]
 
 
-def _parse_investment_identifier(dimension_label: str) -> tuple[str, str, str]:
+_STRUCTURED_FIELD_RE = re.compile(
+    r'(?:\b(?:Initial Acquisition Date|Issuer Name|Type of Investment|'
+    r'Industry Classification|Industry|Interest Rate|Acquisition|Maturity(?: Date)?)|'
+    r'Investment Type)\b',
+    re.IGNORECASE,
+)
+
+_PAIRED_INVESTMENT_TYPE_RE = re.compile(
+    r'\b(?P<type>(?:First Lien Senior Secured Loan|Lien Senior Secured Loan|'
+    r'First Lien Secured Debt|Second Lien Secured Debt|Unsecured Debt|Secured Debt|'
+    r'Structured Products and Other|Common Equity|Preferred Equity|Warrants)'
+    r'\s*[-\u2013\u2014]\s*.+?)'
+    r'(?=\s+(?:Initial Acquisition Date|Acquisition|Interest Rate|Reference Rate|Maturity(?: Date)?|'
+    r'SOFR|LIBOR|EURIBOR|SONIA|CORRA|BBKM|BBSY|Prime)\b|$)',
+    re.IGNORECASE,
+)
+
+_PORTFOLIO_CATEGORY_RE = re.compile(
+    r'^(?:debt investment|equity investment|affiliate investment|control investment|'
+    r'controlled investment|other investment|equity and other investment|portfolio company|'
+    r'non-controlled|non-affiliate)',
+    re.IGNORECASE,
+)
+
+_GENERIC_COMPANY_MEMBER_RE = re.compile(
+    r'^(?:inc|llc|l l c|lp|l p|ltd|limited|corp|corporation|company|'
+    r'(?:holding|holdco|acquisition|international)(?: usa)?(?: inc| llc| ltd| limited|'
+    r'corp| corporation)?)$',
+    re.IGNORECASE,
+)
+
+
+def _normalize_member_text(value: str) -> str:
+    tokens = re.findall(r'[A-Za-z0-9]+', value.lower())
+    return ' '.join(
+        token[:-1] if len(token) > 3 and token.endswith('s') and not token.endswith('ss') else token
+        for token in tokens
+    )
+
+
+def _strip_trailing_member_candidate(
+    value: str,
+    member_candidates: tuple[str, ...],
+) -> str:
+    """Remove a trailing taxonomy industry while preserving the company span."""
+    normalized_value = _normalize_member_text(value)
+    suffixes = [
+        candidate for candidate in member_candidates
+        if normalized_value.endswith(f' {candidate}')
+        if not _PORTFOLIO_CATEGORY_RE.match(candidate)
+        if not _GENERIC_COMPANY_MEMBER_RE.fullmatch(candidate)
+    ]
+    if not suffixes:
+        return value.strip()
+
+    suffix_tokens = len(max(suffixes, key=len).split())
+    value_tokens = list(re.finditer(r'[A-Za-z0-9]+', value))
+    company_name = value[:value_tokens[-suffix_tokens].start()].rstrip(' ,')
+    return company_name.strip()
+
+
+def _get_investment_member_candidates(xbrl) -> tuple[str, ...]:
+    """Collect normalized taxonomy member labels used to bound company names."""
+    candidates = set()
+    for element_name, element in xbrl.element_catalog.items():
+        if not element_name.lower().endswith('member'):
+            continue
+        for label in element.labels.values():
+            candidate = re.sub(r'\s*\[Member\]\s*$', '', label).strip()
+            if 1 < len(candidate) <= 120:
+                normalized_candidate = _normalize_member_text(candidate)
+                if normalized_candidate:
+                    candidates.add(normalized_candidate)
+    return tuple(candidates)
+
+
+def _known_investment_type_matches(identifier: str) -> list[re.Match]:
+    matches = []
+    for investment_type in INVESTMENT_TYPES:
+        for match in re.finditer(re.escape(investment_type), identifier, re.IGNORECASE):
+            starts_at_boundary = match.start() == 0 or not identifier[match.start() - 1].isalnum()
+            follows_member_code = bool(re.search(r'\b[A-Z]\d{1,3}$', identifier[:match.start()]))
+            ends_at_boundary = match.end() == len(identifier) or not identifier[match.end()].isalnum()
+            if (starts_at_boundary or follows_member_code) and ends_at_boundary:
+                matches.append(match)
+    matches = [
+        match for match in matches
+        if identifier.rfind('(', 0, match.start()) <= identifier.rfind(')', 0, match.start())
+    ]
+    return [
+        match for match in matches
+        if not any(
+            other.start() <= match.start()
+            and other.end() >= match.end()
+            and (other.end() - other.start()) > (match.end() - match.start())
+            for other in matches
+        )
+    ]
+
+
+def _anchored_investment_type_match(identifier: str, type_matches: list[re.Match]) -> Optional[re.Match]:
+    for match in sorted(type_matches, key=lambda item: item.start()):
+        if re.search(
+            r'\bInvestment(?:\s+[A-Z]\d{1,3})?\s*$',
+            identifier[:match.start()],
+            re.IGNORECASE,
+        ):
+            return match
+    return None
+
+
+def _portfolio_company_fields(
+    identifier: str,
+    member_candidates: tuple[str, ...] = (),
+) -> Optional[tuple[str, str]]:
+    relationship_equity = re.match(
+        r'^(?:Control|Affiliate) Investments Equity Investments\s+(?P<company>.+)$',
+        identifier,
+        re.IGNORECASE,
+    )
+    if relationship_equity and not _STRUCTURED_FIELD_RE.search(identifier):
+        return relationship_equity.group('company').strip(), 'Equity'
+
+    relationship_debt = re.match(
+        r'^(?:Control|Affiliate) Investments Debt Investments\s+(?P<body>.+)$',
+        identifier,
+        re.IGNORECASE,
+    )
+    if relationship_debt and not _STRUCTURED_FIELD_RE.search(identifier):
+        body = relationship_debt.group('body')
+        leading_types = [match for match in _known_investment_type_matches(body) if match.start() == 0]
+        if leading_types:
+            type_match = max(leading_types, key=lambda match: match.end())
+            return body[type_match.end():].strip(), type_match.group().strip()
+
+    short_term_investment = re.match(
+        r'^Short-Term Investments\s+(?P<company>.+)$',
+        identifier,
+        re.IGNORECASE,
+    )
+    if short_term_investment:
+        return short_term_investment.group('company').strip(), 'Short-Term Investments'
+
+    truncated_warrants = re.match(r'^/Warrants\s+(?P<company>.+)$', identifier, re.IGNORECASE)
+    if truncated_warrants:
+        company_name = re.sub(
+            r'\s+-\s+Warrants$',
+            '',
+            truncated_warrants.group('company'),
+            flags=re.IGNORECASE,
+        ).strip()
+        return company_name, 'Warrants'
+
+    portfolio_match = re.match(
+        r'^(?:Investments\s+)?in .+? Portfolio Companies\s+(?P<body>.+)$',
+        identifier,
+        re.IGNORECASE,
+    )
+    if not portfolio_match:
+        return None
+
+    body = portfolio_match.group('body')
+    lien_prefix = re.match(
+        r'^(?P<lien>First|Second) Lien\s*/\s*Senior Secured Debt\s+(?P<fields>.+)$',
+        body,
+        re.IGNORECASE,
+    )
+    if lien_prefix:
+        investment_type = f"{lien_prefix.group('lien')} Lien/Senior Secured Debt"
+        company_and_fields = lien_prefix.group('fields').strip()
+    else:
+        leading_types = [
+            match for match in _known_investment_type_matches(body)
+            if match.start() == 0
+        ]
+        if not leading_types:
+            return None
+        type_match = max(leading_types, key=lambda match: match.end())
+        investment_type = type_match.group().strip()
+        company_and_fields = body[type_match.end():].strip()
+
+    continuation_units = re.match(
+        r'^and (?P<type>Membership Units|Units)\s+(?P<fields>.+)$',
+        company_and_fields,
+        re.IGNORECASE,
+    )
+    if continuation_units:
+        investment_type = f"{investment_type} and {continuation_units.group('type')}"
+        company_and_fields = continuation_units.group('fields').strip()
+
+    issuer_path = re.match(
+        r'^(?P<type_path>/.*?)?(?:of Net Assets\s+)?Issuer(?: Name)?\s+(?P<fields>.+)$',
+        company_and_fields,
+        re.IGNORECASE,
+    )
+    if issuer_path:
+        company_and_fields = issuer_path.group('fields').strip()
+        type_path = issuer_path.group('type_path')
+        if type_path:
+            investment_type = f'{investment_type}{type_path.strip()}'
+    field_match = re.search(
+        r'\s+(?:Acquisitions?(?=\s+\d)|Maturity(?: Date)?|Industry(?: Classification)?|'
+        r'Current Coupon|Interest Rate|Reference Rate(?: and Spread)?)\b',
+        company_and_fields,
+        re.IGNORECASE,
+    )
+    company_and_detail = company_and_fields[:field_match.start() if field_match else None].strip()
+    repeated_type = re.match(
+        rf'^(?P<company>.+?)\s+(?:[-\u2013\u2014]\s+)?'
+        rf'(?P<detail>{re.escape(investment_type)}\s*[-\u2013\u2014]\s*.+)$',
+        company_and_detail,
+        re.IGNORECASE,
+    )
+    if repeated_type:
+        company_name = repeated_type.group('company').strip()
+        detail = repeated_type.group('detail').strip()
+    else:
+        company_and_detail = re.split(r'\s+[-\u2013\u2014]\s*', company_and_detail, maxsplit=1)
+        if len(company_and_detail) == 1:
+            legal_suffix_detail = re.match(
+                r'^(?P<company>.+?\b(?:LLC|Inc\.?|LP|Corp\.?))\s*[-\u2013\u2014]\s*(?P<detail>.+)$',
+                company_and_detail[0],
+                re.IGNORECASE,
+            )
+            if legal_suffix_detail:
+                company_and_detail = [
+                    legal_suffix_detail.group('company'),
+                    legal_suffix_detail.group('detail'),
+                ]
+        company_name = company_and_detail[0].strip()
+        detail = company_and_detail[1].strip() if len(company_and_detail) > 1 else ''
+
+    if detail:
+        if detail.casefold().startswith(f'{investment_type.casefold()} -'):
+            investment_type = detail
+        elif detail.casefold() != investment_type.casefold():
+            investment_type = f'{investment_type} - {detail}'
+    company_name = _strip_trailing_member_candidate(company_name, member_candidates)
+    named_facility = re.search(
+        r'\s+(?P<facility>(?:First|Second) Lien,\s*Term Loan [A-Z0-9-]+)$',
+        company_name,
+        re.IGNORECASE,
+    )
+    if named_facility:
+        company_name = company_name[:named_facility.start()].strip()
+        investment_type = f"{investment_type} - {named_facility.group('facility')}"
+    parenthetical_facility = re.search(
+        r'\s+\((?P<facility>Revolver|(?:[^()]+ )?Delayed Draw Term Loan|'
+        r'Term Loan [A-Z0-9-]+|Second Out|Third Out|Super Senior [A-Z])\)$',
+        company_name,
+        re.IGNORECASE,
+    )
+    if parenthetical_facility:
+        company_name = company_name[:parenthetical_facility.start()].strip()
+        investment_type = f"{investment_type} - {parenthetical_facility.group('facility')}"
+    if 'warrant' in investment_type.casefold():
+        company_name = re.sub(r'\s+\(Warrants?\)$', '', company_name, flags=re.IGNORECASE)
+    if investment_type.casefold().startswith('preferred equity'):
+        series = re.search(
+            r'\s+\((?P<series>[A-Z]-\d+\s+Series)\)$',
+            company_name,
+            re.IGNORECASE,
+        )
+        if series:
+            company_name = company_name[:series.start()].strip()
+            investment_type = f"{investment_type} - {series.group('series')}"
+        company_name = re.sub(r'\s+Preferred$', '', company_name, flags=re.IGNORECASE)
+    return company_name, investment_type
+
+
+def _structured_company_window(
+    identifier: str,
+    member_candidates: tuple[str, ...] = (),
+) -> Optional[str]:
+    portfolio_fields = _portfolio_company_fields(identifier, member_candidates)
+    if portfolio_fields:
+        return portfolio_fields[0]
+
+    issuer_match = re.search(r'\bIssuer Name\s+', identifier, re.IGNORECASE)
+    if issuer_match:
+        tail = identifier[issuer_match.end():]
+        end_match = re.search(
+            r'\s+-\s+|\s+(?:First|Second)\s+Lien\s*-\s*|'
+            r'\s+(?:Acquisition|Maturity(?: Date)?|Industry(?: Classification)?|'
+            r'Current Coupon|Interest Rate|Reference Rate)\b',
+            tail,
+            re.IGNORECASE,
+        )
+        return tail[:end_match.start() if end_match else None].strip()
+
+    type_field = re.search(
+        r'(?:Investment Type|\b(?:Type of Investment|Facility Type))\b',
+        identifier,
+        re.IGNORECASE,
+    )
+    if type_field:
+        return identifier[:type_field.start()].strip()
+
+    industry_field = re.search(r'\bIndustry(?: Classification)?\b', identifier, re.IGNORECASE)
+    if industry_field:
+        return identifier[:industry_field.start()].strip()
+
+    type_matches = _known_investment_type_matches(identifier)
+    if type_matches:
+        type_match = _anchored_investment_type_match(identifier, type_matches)
+        if type_match is None:
+            type_match = max(type_matches, key=lambda match: (match.start(), match.end() - match.start()))
+        company_window = identifier[:type_match.start()]
+        return re.sub(
+            r'\bInvestment(?:\s+[A-Z]\d{1,3})?\s*$',
+            '',
+            company_window,
+            flags=re.IGNORECASE,
+        ).strip()
+    return None
+
+
+def _match_company_candidate(window: str, member_candidates: tuple[str, ...]) -> Optional[str]:
+    category_matches = list(
+        re.finditer(
+            r'\b(?:Equity and Other Investments|Debt Investments|Equity Investments|Other Investments)\b',
+            window,
+            re.IGNORECASE,
+        )
+    )
+    if len(category_matches) > 1:
+        window = window[category_matches[-1].start():].strip()
+
+    window_tokens = list(re.finditer(r'[A-Za-z0-9]+', window))
+    normalized_window = _normalize_member_text(window)
+    suffixes = [
+        candidate for candidate in member_candidates
+        if normalized_window == candidate or normalized_window.endswith(f' {candidate}')
+        if not _PORTFOLIO_CATEGORY_RE.match(candidate)
+        if normalized_window == candidate or not _GENERIC_COMPANY_MEMBER_RE.fullmatch(candidate)
+    ]
+    if suffixes:
+        company_tokens = len(max(suffixes, key=len).split())
+        company_start = window_tokens[-company_tokens].start()
+        if window.rfind('(', 0, company_start) <= window.rfind(')', 0, company_start):
+            company_name = window[company_start:].strip()
+            if company_name.count('(') >= company_name.count(')'):
+                return company_name
+
+    other_investments = re.match(r'^Other Investments\s+(?P<company>.+)$', window, re.IGNORECASE)
+    if other_investments:
+        return other_investments.group('company').strip()
+
+    # Typed identifiers may not have a company member. In that case, remove
+    # portfolio/category prefixes and the longest taxonomy industry prefix.
+    cleaned_window = re.sub(
+        r'^(?:(?:[A-Z]?Investments[-\u2013\u2014][\w/-]+|'
+        r'Non-(?:control|controlled)/Non-Affiliate(?:d)?(?: Investments)?|'
+        r'Non-Controlled/Affiliate Investments|'
+        r'Non-affiliate Investments|Controlled Affiliate Investments|Controlled Investments|'
+        r'Affiliate Investments|Control Investments|Debt Investments|Equity Investments|Warrants?|'
+        r'Issuer Name|'
+        r'Equity and Other Investments|Equity Securities|Corporate Bonds|CLO Mezzanine|CLO Equity|'
+        r'US Corporate Debt|U\.S\. Debt|'
+        r'Senior Secured U\.S\. Notes|U\.S\. Dollar|European Currency|British Pound|'
+        r'Canadian Dollar|Australian Dollar|New Zealand Dollar|'
+        r'First Lien Senior Secured U\.S\. Debt|'
+        r'Second Lien Senior Secured(?: U\.S\. Debt)?|'
+        r'First Lien Senior Secured Canadian Debt(?: Information)?|'
+        r'Portfolio Company (?:Debt Securities|Equity Investments|Warrant Investments)\s*'
+        r'[-\u2013\u2014]\s*(?:United States|Canada|Europe))\s+)+',
+        '',
+        window,
+        flags=re.IGNORECASE,
+    )
+    removed_prefix = cleaned_window != window
+    acronym_prefix = re.match(
+        r'^.+?\(["\'](?P<acronym>[^"\']+)["\']\)\s+(?P<company>.+)$',
+        cleaned_window,
+    )
+    if acronym_prefix and _normalize_member_text(acronym_prefix.group('acronym')) in member_candidates:
+        cleaned_window = acronym_prefix.group('company').strip()
+        removed_prefix = True
+    last_prefix = None
+    for _ in range(4):
+        cleaned_tokens = list(re.finditer(r'[A-Za-z0-9]+', cleaned_window))
+        normalized_cleaned = _normalize_member_text(cleaned_window)
+        suffixes = [
+            candidate for candidate in member_candidates
+            if normalized_cleaned == candidate or normalized_cleaned.endswith(f' {candidate}')
+            if not _PORTFOLIO_CATEGORY_RE.match(candidate)
+            if normalized_cleaned == candidate or not _GENERIC_COMPANY_MEMBER_RE.fullmatch(candidate)
+        ]
+        if suffixes:
+            company_tokens = len(max(suffixes, key=len).split())
+            company_start = cleaned_tokens[-company_tokens].start()
+            if cleaned_window.rfind('(', 0, company_start) <= cleaned_window.rfind(')', 0, company_start):
+                company_name = cleaned_window[company_start:].strip()
+                if company_name.count('(') >= company_name.count(')'):
+                    return company_name
+
+        prefixes = [
+            candidate for candidate in member_candidates
+            if normalized_cleaned.startswith(f'{candidate} ')
+            if not _GENERIC_COMPANY_MEMBER_RE.fullmatch(candidate)
+        ]
+        if not prefixes:
+            return cleaned_window.strip() if removed_prefix else None
+        prefix = max(prefixes, key=len)
+        if prefix == last_prefix:
+            return cleaned_window.strip()
+        prefix_tokens = len(prefix.split())
+        prefix_tail = cleaned_window[cleaned_tokens[prefix_tokens - 1].end():].strip()
+        if re.fullmatch(r'[\s.,)]*\([^)]*\)', prefix_tail):
+            return cleaned_window.strip()
+        remaining_window = cleaned_window[cleaned_tokens[prefix_tokens].start():].strip()
+        if _GENERIC_COMPANY_MEMBER_RE.fullmatch(_normalize_member_text(remaining_window)):
+            return cleaned_window.strip()
+        cleaned_window = remaining_window
+        removed_prefix = True
+        last_prefix = prefix
+    return cleaned_window.strip()
+
+
+def _extract_structured_investment_type(
+    identifier: str,
+    member_candidates: tuple[str, ...] = (),
+) -> str:
+    portfolio_fields = _portfolio_company_fields(identifier, member_candidates)
+    if portfolio_fields:
+        return portfolio_fields[1]
+
+    type_field = re.search(
+        r'(?:Investment Type|\b(?:Type of Investment|Facility Type|Security))\s+(?P<type>.+?)'
+        r'(?=\s+(?:Initial Acquisition Date|Investment Date|Acquisition|Maturity(?: Date)?|'
+        r'Interest Rate|Reference Rate|All in Rate|Benchmark|Industry Classification|Current Coupon)\b|$)',
+        identifier,
+        re.IGNORECASE,
+    )
+    if type_field:
+        investment_type = type_field.group('type').strip()
+        warrant_type = re.match(r'Warrants?\b', investment_type, re.IGNORECASE)
+        if warrant_type:
+            return warrant_type.group()
+        return re.split(
+            r'\s+(?=(?:SOFR|LIBOR|Prime|Fixed interest|Variable interest|\d+(?:\.\d+)?%))',
+            investment_type,
+            maxsplit=1,
+            flags=re.IGNORECASE,
+        )[0].strip()
+
+    issuer_match = re.search(r'\bIssuer Name\b', identifier, re.IGNORECASE)
+    if issuer_match:
+        after_issuer = identifier[issuer_match.end():]
+        dash_type = re.search(r'\s+-\s+(?P<type>.+?)\s+Acquisition\b', after_issuer, re.IGNORECASE)
+        if dash_type:
+            return dash_type.group('type').strip()
+
+    type_matches = _known_investment_type_matches(identifier)
+    if type_matches:
+        match = _anchored_investment_type_match(identifier, type_matches)
+        if match is None:
+            match = max(type_matches, key=lambda item: (item.start(), item.end() - item.start()))
+        return match.group().strip()
+    return "Unknown"
+
+
+def _parse_percentage_hierarchy(
+    identifier: str,
+    member_candidates: tuple[str, ...],
+) -> Optional[tuple[str, str]]:
+    company_path = re.split(r'\s+Industry', identifier, maxsplit=1, flags=re.IGNORECASE)[0]
+    company_path = re.sub(
+        r'^(?:Investment\s+)?(?:Debt Investments|Equity Securities)\s*[-\u2013\u2014]\s*',
+        '',
+        company_path,
+        flags=re.IGNORECASE,
+    )
+    hierarchy_match = re.match(
+        r'^\d+(?:\.\d+)?%\s+.+?\s+[-\u2013\u2014]\s+\d+(?:\.\d+)?%\s+'
+        r'(?P<type>.+?)\s+[-\u2013\u2014]\s+\d+(?:\.\d+)?%\s+(?P<company>.+)$',
+        company_path,
+        re.IGNORECASE,
+    )
+    if not hierarchy_match:
+        return None
+
+    company_name = hierarchy_match.group('company').strip()
+    normalized_company = _normalize_member_text(company_name)
+    candidate_prefixes = [
+        candidate for candidate in member_candidates
+        if normalized_company == candidate or normalized_company.startswith(f'{candidate} ')
+        if not _PORTFOLIO_CATEGORY_RE.match(candidate)
+    ]
+    if candidate_prefixes:
+        company_tokens = list(re.finditer(r'[A-Za-z0-9]+', company_name))
+        candidate_token_count = len(max(candidate_prefixes, key=len).split())
+        if candidate_token_count < len(company_tokens):
+            company_name = company_name[:company_tokens[candidate_token_count].start()].strip()
+    investment_type = re.sub(r'\s*\(\d+\)$', '', hierarchy_match.group('type')).strip()
+    return company_name, investment_type
+
+
+def _parse_structured_identifier(
+    identifier: str,
+    member_candidates: tuple[str, ...],
+) -> Optional[tuple[str, str]]:
+    clo_subordinated_note = re.match(
+        r'^(?P<company>.+?)\s+(?P<type>CLO Subordinated Notes)\s+(?P<detail>.+)$',
+        identifier,
+        re.IGNORECASE,
+    )
+    if clo_subordinated_note:
+        return (
+            clo_subordinated_note.group('company').strip(),
+            f"{clo_subordinated_note.group('type')} - "
+            f"{clo_subordinated_note.group('detail').strip()}",
+        )
+
+    labeled_security = re.match(
+        r'^(?P<company>.+?)\s+Industry\s+.+?\s+Security\s+(?P<type>.+?)'
+        r'(?=\s+(?:Interest Rate|(?:\d+[DMY]\s+)?SOFR|Initial Acquisition Date|'
+        r'Acquisition Date|Maturity)\b|$)',
+        identifier,
+        re.IGNORECASE,
+    )
+    if labeled_security:
+        return labeled_security.group('company').strip(), labeled_security.group('type').strip()
+
+    missing_security_label = re.match(
+        r'^(?P<company>.+?)\s+Industry\s+.+?\s+'
+        r'(?P<type>(?:Unsecured|Secured) Bond)\s+'
+        r'(?=Interest Rate|Initial Acquisition Date|Acquisition Date|Maturity\b)',
+        identifier,
+        re.IGNORECASE,
+    )
+    if missing_security_label:
+        return (
+            missing_security_label.group('company').strip(),
+            missing_security_label.group('type').strip(),
+        )
+
+    short_term_security = re.match(
+        r'^(?P<company>.+?)\s+Short-Term Investments\s+'
+        r'(?P<type>Money Market|Treasury Bill)\s+Interest Rate\b',
+        identifier,
+        re.IGNORECASE,
+    )
+    if short_term_security:
+        return (
+            short_term_security.group('company').strip(),
+            f"Short-Term Investments - {short_term_security.group('type').strip()}",
+        )
+
+    continuation_units = re.match(
+        r'^and (?P<type>Membership Units|Units)\s+(?P<company>.+)$',
+        identifier,
+        re.IGNORECASE,
+    )
+    if continuation_units:
+        company_name = _strip_trailing_member_candidate(
+            continuation_units.group('company'),
+            member_candidates,
+        )
+        return company_name, continuation_units.group('type')
+
+    portfolio_category = re.match(
+        r'^Investments in .+? Portfolio Companies\s+'
+        r'(?P<category>Collateralized Loan Obligations|Derivatives|Joint Ventures|'
+        r'Asset Manager Affiliates)\s+(?P<body>.+)$',
+        identifier,
+        re.IGNORECASE,
+    )
+    if portfolio_category:
+        category = portfolio_category.group('category')
+        body = portfolio_category.group('body')
+        clo = re.match(
+            r'(?P<company>.+?)\s+(?P<type>CLO Fund Securities)\s+Maturity\b',
+            body,
+            re.IGNORECASE,
+        )
+        if clo:
+            return clo.group('company').strip(), clo.group('type')
+
+        joint_venture = re.match(r'(?P<company>.+?)\s+Joint Venture$', body, re.IGNORECASE)
+        if joint_venture:
+            return joint_venture.group('company').strip(), 'Joint Venture'
+
+        company_name = _strip_trailing_member_candidate(body, member_candidates)
+        if category.casefold() == 'asset manager affiliates':
+            duplicate_name = re.fullmatch(
+                r'(?P<company>.+)\s+(?P=company)',
+                company_name,
+                re.IGNORECASE,
+            )
+            if duplicate_name:
+                company_name = duplicate_name.group('company')
+        return company_name, category
+
+    us_equity = re.match(
+        r'^U\.S\. (?:Preferred Stock|Warrants)\s+(?P<body>.+?)\s+'
+        r'(?P<type>(?:[A-Z]-\d+\s+)?(?:Preferred|Warrants))\s+'
+        r'Initial Acquisition Date\b',
+        identifier,
+        re.IGNORECASE,
+    )
+    if us_equity:
+        company_name = _match_company_candidate(
+            us_equity.group('body'),
+            member_candidates,
+        )
+        if company_name:
+            return company_name, us_equity.group('type')
+
+    portfolio_fields = _portfolio_company_fields(identifier, member_candidates)
+    if portfolio_fields:
+        return portfolio_fields
+
+    leading_warrant = re.match(
+        r'^(?P<type>Warrants?)\s+(?P<company>.+)$',
+        identifier,
+        re.IGNORECASE,
+    )
+    if leading_warrant:
+        company_name = _match_company_candidate(
+            leading_warrant.group('company'),
+            member_candidates,
+        )
+        if company_name:
+            company_name = re.sub(r'Investment$', '', company_name).rstrip(',').strip()
+            return company_name, leading_warrant.group('type')
+
+    hierarchy_result = _parse_percentage_hierarchy(identifier, member_candidates)
+    if hierarchy_result:
+        return hierarchy_result
+
+    paired_type = _PAIRED_INVESTMENT_TYPE_RE.search(identifier)
+    if paired_type:
+        company_name = _match_company_candidate(
+            identifier[:paired_type.start()].strip(),
+            member_candidates,
+        )
+        if company_name:
+            company_name = re.sub(
+                r'^\(?[^)]*(?:dba|f/?k/?a)[^)]*\)\s+',
+                '',
+                company_name,
+                flags=re.IGNORECASE,
+            )
+            duplicate_name = re.fullmatch(r'(?P<company>.+)\s+(?P=company)', company_name, re.IGNORECASE)
+            if duplicate_name:
+                company_name = duplicate_name.group('company')
+            company_name = re.sub(r'\s+[-\u2013\u2014]\s*$', '', company_name).strip()
+            return company_name, paired_type.group('type').strip()
+
+    if not _STRUCTURED_FIELD_RE.search(identifier) and not _known_investment_type_matches(identifier):
+        return None
+
+    company_window = _structured_company_window(identifier, member_candidates)
+    if not company_window:
+        return None
+
+    security_detail = re.search(
+        r'\s+[-\u2013\u2014]\s+(?P<detail>Series [A-Z0-9-]+|'
+        r'Class [A-Z0-9-]+ Preferred|Preferred|Warrant|Put Option)$',
+        company_window,
+        re.IGNORECASE,
+    )
+    if security_detail:
+        company_window = company_window[:security_detail.start()].strip()
+
+    portfolio_equity_or_warrant = re.match(
+        r'^Portfolio Company (?:Equity|Warrant) Investments\s*[-\u2013\u2014]',
+        identifier,
+        re.IGNORECASE,
+    )
+    if portfolio_equity_or_warrant:
+        company_window = re.sub(
+            r'\s+(?:One|Two|Three)$',
+            '',
+            company_window,
+            flags=re.IGNORECASE,
+        )
+
+    company_name = _match_company_candidate(company_window, member_candidates)
+    if company_name is None and (
+        re.search(r'\bIssuer Name\b', identifier, re.IGNORECASE)
+        or _portfolio_company_fields(identifier, member_candidates)
+    ):
+        company_name = company_window
+    if company_name is None:
+        return None
+
+    investment_type = _extract_structured_investment_type(identifier, member_candidates)
+    if investment_type == "Unknown":
+        return None
+    if portfolio_equity_or_warrant:
+        company_name = re.sub(
+            r'\s+(?:One|Two|Three)$',
+            '',
+            company_name,
+            flags=re.IGNORECASE,
+        )
+        series = re.search(r'\s+Series\s+(?P<series>.+)$', identifier, re.IGNORECASE)
+        if series:
+            investment_type = f"{investment_type} - {series.group('series').strip()}"
+        elif investment_type.casefold() == 'warrant':
+            warrant_detail = re.search(
+                r'\s+(?:Expiration|Maturity) Date\s+[A-Za-z]+\s+\d{1,2},\s+\d{4}\s+'
+                r'(?P<series>Ordinary)$',
+                identifier,
+                re.IGNORECASE,
+            )
+            if warrant_detail:
+                investment_type = f"{investment_type} - {warrant_detail.group('series')}"
+    if security_detail:
+        investment_type = f"{investment_type} - {security_detail.group('detail')}"
+    company_name = re.sub(r'(?<=\S)Investment$', '', company_name).rstrip(',').strip()
+    company_name = re.sub(r'\s+[-\u2013\u2014]\s*$', '', company_name).strip()
+    company_name = re.sub(
+        r'\s*\|\s*(?=(?:LLC|L\.L\.C\.|LP|L\.P\.|Inc\.?|Corp\.?)\b)',
+        ', ',
+        company_name,
+        flags=re.IGNORECASE,
+    ).rstrip('|').strip()
+    facility = re.search(
+        r'\s+\((?P<facility>Revolver|Delayed Draw|Term Loan)\)$',
+        company_name,
+        re.IGNORECASE,
+    )
+    if facility:
+        company_name = company_name[:facility.start()].strip()
+        facility_type = facility.group('facility')
+        if facility_type.casefold() not in investment_type.casefold():
+            investment_type = f'{investment_type} - {facility_type}'
+    return company_name, investment_type
+
+
+def _parse_investment_identifier(
+    dimension_label: str,
+    member_candidates: tuple[str, ...] = (),
+) -> tuple[str, str, str]:
     """
     Parse the dimension label to extract company name and investment type.
 
@@ -214,7 +987,8 @@ def _parse_investment_identifier(dimension_label: str) -> tuple[str, str, str]:
     1. ARCC format: "Company Name, First lien senior secured loan"
     2. HTGC format: "Debt Investments Software and Armis, Inc., Senior Secured, Maturity Date..."
     3. FDUS format: "Non-control/Non-affiliate Investments Company LLC Industry First Lien Debt ..."
-    4. Category rollups: "Debt Investments Software (52.80%)" - treated as Unknown type
+    4. Structured format: "... Issuer Name Company LLC ... Maturity Date ..."
+    5. Category rollups: "Debt Investments Software (52.80%)" - treated as Unknown type
 
     Args:
         dimension_label: The full dimension label, e.g.,
@@ -234,6 +1008,25 @@ def _parse_investment_identifier(dimension_label: str) -> tuple[str, str, str]:
     # These should be excluded as they're not individual investments
     if re.search(r'\(\d+\.\d+%\)\s*$', identifier):
         return identifier, identifier, "Unknown"
+    if re.fullmatch(
+        r'(?:Control|Affiliate|Control and Affiliate) Investments',
+        identifier,
+        re.IGNORECASE,
+    ):
+        return identifier, identifier, "Unknown"
+    if re.fullmatch(
+        r'(?:Prime Rate|(?:SOFR|CORRA) \d+-Month Term Rate|Bank of England Base Rate|'
+        r'Foreign Currency Forward Contracts Counterparty|Formation Transactions)',
+        identifier,
+        re.IGNORECASE,
+    ):
+        return identifier, identifier, "Unknown"
+    if re.fullmatch(
+        r'Non Controlled Affiliated(?: and Controlled)? Investments \[Member\]',
+        identifier,
+        re.IGNORECASE,
+    ):
+        return identifier, identifier, "Unknown"
 
     company_name = identifier
     investment_type = "Unknown"
@@ -251,21 +1044,27 @@ def _parse_investment_identifier(dimension_label: str) -> tuple[str, str, str]:
     # Try FDUS prose format:
     # "Non-control/Non-affiliate Investments Company Name LLC Industry First Lien Debt ..."
     # Some labels omit the trailing "Investments" and some use bare "Subordinated".
-    fdus_match = re.match(
-        r'^(?P<prefix>'
-        r'Non-control/Non-affiliate(?: Investments| Investmnts)?|'
-        r'Affiliate(?: Investments| InvesAffiliate Investments)?|'
-        r'Control(?: Investments)?'
-        r')\s+'
-        r'(?P<body>.+?)\s+'
-        r'(?P<instrument>'
-        r'First Lien Debt|Second Lien Debt|Subordinated Debt|Subordinated|'
-        r'Revolving Loan|Term Loan|Unsecured Debt|Unsecured Loan|'
-        r'Common Equity|Preferred Equity|Warrant|Warrants'
-        r')\b',
+    fdus_match = None
+    if not re.search(
+        r'(?:Investment Type|\b(?:Type of Investment|Facility Type))\b',
         normalized_identifier,
         re.IGNORECASE,
-    )
+    ):
+        fdus_match = re.match(
+            r'^(?P<prefix>'
+            r'Non-control/Non-affiliate(?: Investments| Investmnts)?|'
+            r'Affiliate(?: Investments| InvesAffiliate Investments)?|'
+            r'Control(?: Investments)?'
+            r')\s+'
+            r'(?P<body>.+?)\s+'
+            r'(?P<instrument>'
+            r'First Lien Debt|Second Lien Debt|Subordinated Debt|Subordinated|'
+            r'Revolving Loan|Term Loan|Unsecured Debt|Unsecured Loan|'
+            r'Common Equity|Preferred Equity|Warrant|Warrants'
+            r')\b',
+            normalized_identifier,
+            re.IGNORECASE,
+        )
     if fdus_match:
         company_name = normalized_identifier
         investment_type = fdus_match.group('instrument').strip()
@@ -305,6 +1104,94 @@ def _parse_investment_identifier(dimension_label: str) -> tuple[str, str, str]:
                 company_name = body
         return identifier, company_name, investment_type
 
+    relationship_investment = None
+    if not _STRUCTURED_FIELD_RE.search(identifier):
+        relationship_investment = re.match(
+            r'^(?:Affiliated|Controlled) Investments\s+(?P<company>.+),\s*(?P<type>[^,]+)$',
+            identifier,
+            re.IGNORECASE,
+        )
+    if relationship_investment:
+        return (
+            identifier,
+            relationship_investment.group('company').strip(),
+            relationship_investment.group('type').strip(),
+        )
+
+    descriptor_pipe = re.fullmatch(
+        r'(?P<company>.+?)\s+\|\s+[^|]*?\b(?P<type>Debt|Equity)\s+Investment'
+        r'(?:\s+\d+(?:\.\d+)*)?(?:\s+\|\s+.+)?',
+        identifier,
+        re.IGNORECASE,
+    )
+    if descriptor_pipe:
+        # Title-cased because the match is case-insensitive and the label's own
+        # casing varies: OBDC writes "Specialty finance equity investment", so
+        # returning the captured span verbatim yielded 'equity' and 'debt' — the
+        # only lowercase-initial types in the vocabulary, sitting beside
+        # 'Preferred Equity' and 'Secured Debt' from every other branch. Grouping
+        # by investment_type then splits the same concept across two buckets,
+        # which is the thing this parsing work is meant to make reliable.
+        return (
+            identifier,
+            descriptor_pipe.group('company').strip(),
+            descriptor_pipe.group('type').strip().title(),
+        )
+
+    if ' | ' in identifier:
+        for inv_type in sorted(INVESTMENT_TYPES, key=len, reverse=True):
+            pipe_investment = re.fullmatch(
+                rf'(?P<company>.+?)\s+\|\s+(?P<type>{re.escape(inv_type)})'
+                r'(?P<facility>\s+\([^)]*\))?'
+                r'(?P<detail>\s+-\s+.+?)?(?:\s+\d+(?:\.\d+)*)?',
+                identifier,
+                re.IGNORECASE,
+            )
+            if pipe_investment:
+                investment_type = pipe_investment.group('type')
+                facility = pipe_investment.group('facility')
+                if facility:
+                    investment_type = f'{investment_type}{facility}'
+                detail = pipe_investment.group('detail')
+                if detail:
+                    investment_type = f'{investment_type}{detail}'
+                return (
+                    identifier,
+                    pipe_investment.group('company').strip(),
+                    investment_type,
+                )
+
+    # Prefer an explicit trailing delimiter over taxonomy-derived company spans.
+    for inv_type in INVESTMENT_TYPES:
+        trailing_type = re.fullmatch(
+            rf'(?P<company>.+),\s*(?P<type>{re.escape(inv_type)})'
+            r'(?:\s+\d+(?:\.\d+)*)?',
+            identifier,
+            re.IGNORECASE,
+        )
+        if trailing_type:
+            company_name = trailing_type.group('company').strip()
+            company_name = re.sub(
+                r'\s*\|\s*(?=(?:LLC|L\.L\.C\.|LP|L\.P\.|Inc\.?|Corp\.?)\b)',
+                ', ',
+                company_name,
+                flags=re.IGNORECASE,
+            )
+            return identifier, company_name, trailing_type.group('type').strip()
+
+    structured_result = _parse_structured_identifier(identifier, member_candidates)
+    if structured_result:
+        company_name, investment_type = structured_result
+        return identifier, company_name, investment_type
+
+    relationship_member = re.fullmatch(
+        r'(?P<relationship>Control|Affiliate) Investments\s+(?P<company>.+)',
+        identifier,
+        re.IGNORECASE,
+    )
+    if relationship_member:
+        return identifier, relationship_member.group('company').strip(), 'Unknown'
+
     # Try pipe-separated format (e.g., "Company | Type" or "Company, Type | Industry")
     # Some BDCs (Blue Owl) put instrument type after pipe; others (FSK) put GICS
     # industry category after pipe. We check if the pipe-right matches a known
@@ -316,7 +1203,12 @@ def _parse_investment_identifier(dimension_label: str) -> tuple[str, str, str]:
             # Strip numeric suffix for matching (e.g., "Software & Services 1" → "Software & Services")
             right_base = re.sub(r'\s*\d+\s*$', '', right_side)
             right_is_instrument = any(
-                right_base.lower() == inv_type.lower() for inv_type in INVESTMENT_TYPES
+                re.fullmatch(
+                    rf'{re.escape(inv_type)}(?:\s*\([^)]*\)|\s*[\d.]*)?',
+                    right_base,
+                    re.IGNORECASE,
+                )
+                for inv_type in INVESTMENT_TYPES
             )
             if right_is_instrument:
                 company_name = pipe_parts[0]
@@ -336,17 +1228,6 @@ def _parse_investment_identifier(dimension_label: str) -> tuple[str, str, str]:
                 # No instrument type found in left side either — bare company name
                 company_name = left_side
                 # Fall through to remaining parsing logic
-
-    # Try standard comma-separated format (investment type at end)
-    for inv_type in INVESTMENT_TYPES:
-        # Look for the investment type at the end, preceded by comma
-        # Support optional numeric suffixes like "1", "2", "1.1", "2.1"
-        pattern = rf',\s*{re.escape(inv_type)}(\s*[\d.]*)?$'
-        match = re.search(pattern, identifier, re.IGNORECASE)
-        if match:
-            company_name = identifier[:match.start()].strip()
-            investment_type = identifier[match.start() + 1:].strip()
-            return identifier, company_name, investment_type
 
     # Try HTGC format: "Debt Investments [Industry] and [Company], Senior Secured, ..."
     # Look for ", Senior Secured" anywhere in the string
@@ -1052,6 +1933,7 @@ class PortfolioInvestments:
 
         # Group facts by investment identifier
         investments = {}
+        member_candidates = _get_investment_member_candidates(xbrl)
         for fact in all_facts:
             # Check if this is a relevant concept
             concept = fact.get('concept')
@@ -1074,7 +1956,10 @@ class PortfolioInvestments:
                 # Format: "us-gaap:InvestmentIdentifierAxis: Company Name, Investment Type"
                 # But here we just have the member value, not the axis prefix
                 full_label = f"us-gaap:InvestmentIdentifierAxis: {inv_identifier}"
-                identifier, company_name, inv_type = _parse_investment_identifier(full_label)
+                identifier, company_name, inv_type = _parse_investment_identifier(
+                    full_label,
+                    member_candidates=member_candidates,
+                )
                 investments[inv_identifier] = {
                     'identifier': identifier,
                     'company_name': company_name,

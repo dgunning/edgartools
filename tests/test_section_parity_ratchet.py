@@ -13,8 +13,12 @@ WHAT THIS GUARDS. ``BASELINE_GAPS`` is every (form, filing, item) the legacy
 parser finds and the new one misses, as measured on 2026-08-05. The assertion is
 a **subset** check, mirroring the anomaly census in
 ``test_section_boundary_corpus.py``: the live gap set may shrink freely, and any
-*new* gap fails. So a fix that closes ``wfc/10k`` needs no change here, while a
+*new* gap fails. So a fix that closes an entry needs no change here, while a
 change that breaks a currently-clean filing turns this red.
+
+That asymmetry is why ``wfc/10k`` is no longer listed at all: it now measures
+clean, so any gap appearing on it is a *new* gap and fails. Removing a fixture
+from ``BASELINE_GAPS`` tightens this guard rather than loosening it.
 
 TWO CORPORA, AND ONLY ONE OF THEM REACHES CI. ``tests/fixtures/html`` is tracked.
 ``tests/fixtures/text_boundary_corpus`` — which holds every 8-K and 20-F fixture,
@@ -51,16 +55,43 @@ pytestmark = pytest.mark.slow
 #
 # Three shapes are visible here, and they are the work list for dt1f:
 #
-#   1. Two systematic pattern gaps on modern 10-Ks. Item 16 (Form 10-K Summary)
-#      is missed on axp/cvx/jnj and one era filing; Item 1C (Cybersecurity, new
-#      in 2023) on bac/jpm/tsla. Both look like detection-pattern holes rather
-#      than per-filing damage, so each is likely one fix for several filings.
-#   2. Five near-total failures, where the new parser returns almost nothing on
-#      a filing legacy handles: wfc/10k (10 core items including 1, 1A, 7, 8 —
-#      a live bug on a modern large-bank filing) and four era fixtures. The
-#      20-F outlier 0001144204-10-017467 is EDGARizer-generated filer-agent
-#      HTML: 12,880 <font> tags and zero <p>, the class edgartools-mpjh tracks.
+#   1. Two systematic gaps on modern 10-Ks — Item 16 (Form 10-K Summary) on
+#      axp/cvx/jnj and one era filing, Item 1C (Cybersecurity) on bac/jpm/tsla.
+#      CLOSED 2026-08-14, and they were neither two problems nor detection
+#      holes: both items were being found and discarded. The hybrid detector
+#      augments a successful TOC result with pattern-detected items the TOC
+#      omitted, behind a gate that asked whether Part III was complete. Part III
+#      is complete on nearly every filing, so the augmentation almost never ran,
+#      and the items a TOC actually omits — the optional one and the one added
+#      in 2023 — were exactly the ones nobody got. Seven filings, one gate.
+#   2. Near-total failures, where the new parser returns almost nothing on a
+#      filing legacy handles. THE TWO 10-K ENTRIES IN THIS GROUP WERE ONE
+#      DEFECT AND ARE CLOSED (2026-08-14): both filings write their headers as
+#      "Item 1:  Business", and the 10-K patterns accepted only a period
+#      between the number and the title, so every item-numbered pattern failed
+#      together and the last detection strategy came back with one section.
+#      Thirty-two items across three filings, from a separator. The 20-F outlier
+#      0001144204-10-017467 is EDGARizer-generated filer-agent HTML: 12,880
+#      <font> tags and zero <p>, the class edgartools-mpjh tracks. It left this
+#      group on 2026-08-13 (22 gaps -> 8) when dt1f Defect 1 was fixed; the
+#      eight that remain are an ordinary gap, not a collapse.
 #   3. Singletons, most of them pre-2015 HTML.
+#
+# wfc/10k WAS IN GROUP 2 AND WAS NEVER BROKEN. Removed 2026-08-14 with its
+# fixture unchanged and the parser untouched: all ten "missing" items were a
+# measurement artefact. The benchmark's normalise_new() matched only the
+# structural key spelling (part_ii_item_7) and returned None for the friendly
+# one (mda), so a filing whose sections are named the friendly way scored as a
+# near-total miss. TenK.items lists all 23 items on that filing and
+# tenk['Item 1'] returns 46,618 characters of Wells Fargo's business section —
+# it was correct the whole time.
+#
+# The lesson is about this file as much as that one: a gap recorded here is a
+# claim about the parser, and it sat for a week as "a live bug on a modern
+# large-bank filing" without anyone asking the library the same question the
+# harness was asking. Before triaging any remaining entry, check what a user
+# actually gets — report.items and report['Item N'] — not only what the
+# benchmark reports.
 #
 # Entries keyed on an accession number come from the untracked era corpus and
 # are unmeasurable in CI; the ticker-keyed ones are tracked and always run.
@@ -77,29 +108,42 @@ pytestmark = pytest.mark.slow
 BASELINE_GAPS = {
     ("8-K", "0001104659-03-004925"): ["9"],
     ("10-K", "0000927356-01-000369"): ["7"],
-    ("10-K", "0000950153-99-001234"): ["1", "10", "11", "12", "13", "14", "2",
-                                       "3", "4", "5", "6", "7", "7A", "8", "9"],
+    # Banked 2026-08-14: 14 -> 3, closing the item-separator defect below. What
+    # remains is era semantics plus one regex detail, not separators: in 1999
+    # Item 4 was "Submission of Matters to a Vote of Security Holders" and Item
+    # 14 was "Exhibits ... and Reports on Form 8-K", and the 10-K vocabulary
+    # holds only the modern meanings (Mine Safety, Principal Accountant Fees).
+    # Item 7A's header carries a newline inside it — "Quantitative and
+    # Qualitative\nDisclosures about Market Risk" — and `.` does not cross one.
+    ("10-K", "0000950153-99-001234"): ["14", "4", "7A"],
     ("10-K", "0001193125-10-073212"): ["9A"],
-    ("10-K", "0001193125-21-101193"): ["1", "10", "11", "1B", "5"],
-    ("10-K", "0001193125-21-101902"): ["16"],
-    ("10-K", "0001376474-16-000635"): ["1", "10", "11", "12", "13", "14", "15",
-                                       "1A", "1B", "2", "3", "4", "5", "6", "7",
-                                       "7A", "8", "9", "9A", "9B"],
-    ("10-K", "axp/10k"): ["16"],
-    ("10-K", "bac/10k"): ["1C"],
-    ("10-K", "cvx/10k"): ["16"],
-    ("10-K", "jnj/10k"): ["16"],
-    ("10-K", "jpm/10k"): ["1C"],
-    ("10-K", "tsla/10k"): ["1C"],
-    ("10-K", "wfc/10k"): ["1", "1A", "1B", "1C", "2", "3", "7", "7A", "8", "9A"],
-    ("10-Q", "0001193125-21-082408"): ["1"],
+    # Banked 2026-08-14: 4 -> 1, same fix.
+    ("10-K", "0001193125-21-101193"): ["11"],
+    # Banked 2026-08-14: 19 -> 1, same fix.
+    ("10-K", "0001376474-16-000635"): ["5"],
+    # CLOSED 2026-08-14, together with axp/bac/cvx/jnj/jpm/tsla and
+    # 0001193125-21-082408: the TOC-augmentation gate asked whether Part III was
+    # complete before running the pattern pass, and Part III is complete on
+    # nearly every filing, so the pass was skipped on filings whose TOC simply
+    # omitted Item 16 or Item 1C. Both items were already being found and thrown
+    # away. Regression test:
+    # tests/issues/regression/test_dt1f_toc_augmentation_gate.py.
     ("10-Q", "gs/10q"): ["5", "6"],
     ("20-F", "0000928385-01-500187"): ["7"],
     ("20-F", "0001062993-16-008650"): ["11", "16", "6"],
-    ("20-F", "0001144204-10-017467"): ["1", "10", "11", "12", "13", "14", "15",
-                                       "16A", "16B", "16C", "16D", "16E", "16F",
-                                       "16G", "2", "3", "4A", "5", "6", "7", "8",
-                                       "9"],
+    # Banked 2026-08-13: 22 -> 8, closing edgartools-dt1f Defect 1. The fallback
+    # strategies in the pattern extractor were gated on whether *any* header
+    # mentioned an item; on this filing three promoted headings (one of them a
+    # prose cross-reference) suppressed the strategies that find the other
+    # fifteen, leaving four sections against legacy's twenty-six. The gate now
+    # asks for coverage of the form's item list instead of presence of one item.
+    # Regression test: tests/issues/regression/test_dt1f_item_coverage_gate.py.
+    #
+    # The eight that remain are a different defect and still need diagnosing —
+    # Items 5, 6, 11, 12, 15 and 16D-F are found by neither the promoted headings
+    # nor the fallbacks on this filing.
+    ("20-F", "0001144204-10-017467"): ["11", "12", "15", "16D", "16E", "16F",
+                                       "5", "6"],
 }
 
 # The tracked fixtures every environment must be able to measure. If one of
@@ -118,6 +162,12 @@ TRACKED_GAP_FIXTURES = (
         ("8-K", "0001437749-16-028287"),
         ("20-F", "0000928385-01-500187"),
         ("20-F", "0001062993-16-008650"),
+        # Copied into parity_gate on 2026-08-14 with the item-separator fix.
+        # It is the filing that fix was found on — colon-separated headers,
+        # every item-numbered pattern failing at once, one section resolved
+        # where legacy found fifteen — and leaving it in the gitignored era
+        # corpus would have made the regression invisible to CI.
+        ("10-K", "0000950153-99-001234"),
     }
 )
 

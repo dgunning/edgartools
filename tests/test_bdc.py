@@ -493,6 +493,74 @@ class TestPortfolioInvestments:
 class TestInvestmentIdentifierParsing:
     """Tests for investment identifier parsing."""
 
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'member_candidates', 'expected_company', 'expected_type'),
+        [
+            (
+                'Wingspire Capital Holdings LLC | Specialty finance equity investment | Affiliated',
+                ('specialty finance',),
+                'Wingspire Capital Holdings LLC',
+                'Equity',
+            ),
+            (
+                'Wingspire Capital Holdings LLC | Specialty finance equity investment 1',
+                ('specialty finance',),
+                'Wingspire Capital Holdings LLC',
+                'Equity',
+            ),
+            (
+                'AAM Series 2.1 Aviation Feeder, LLC | Specialty finance debt investment | Affiliated',
+                ('specialty finance',),
+                'AAM Series 2.1 Aviation Feeder, LLC',
+                'Debt',
+            ),
+            (
+                'Controlled/affiliated - debt commitments, First lien senior secured revolving loan',
+                ('debt commitment',),
+                'Controlled/affiliated - debt commitments',
+                'First lien senior secured revolving loan',
+            ),
+            (
+                'DTE Enterprises, LLC | Class AA Preferred Member Units (non-voting)',
+                ('class aa',),
+                'DTE Enterprises, LLC',
+                'Class AA Preferred Member Units (non-voting)',
+            ),
+        ],
+    )
+    def test_parse_cross_issuer_regressions(
+        self,
+        raw_identifier,
+        member_candidates,
+        expected_company,
+        expected_type,
+    ):
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=member_candidates,
+        )
+        assert company == expected_company
+        assert investment_type == expected_type
+
+    @pytest.mark.parametrize(
+        'descriptor',
+        ['equity investment', 'Equity Investment', 'EQUITY INVESTMENT'],
+    )
+    def test_descriptor_type_is_canonically_cased(self, descriptor):
+        """However the filer cased the label, the type comes back one way.
+
+        The match is case-insensitive, so returning the captured span verbatim
+        made the filer's typography part of the value — OBDC's lowercase
+        "equity" became a bucket of its own next to 'Preferred Equity' from
+        every other branch, and grouping by investment_type split the concept
+        in two.
+        """
+        _, _company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: Some Holdings LLC | Specialty finance {descriptor}',
+            member_candidates=('specialty finance',),
+        )
+        assert investment_type == 'Equity'
+
     def test_parse_first_lien_loan(self):
         """Test parsing first lien loan identifier."""
         identifier, company, inv_type = _parse_investment_identifier(
@@ -515,7 +583,7 @@ class TestInvestmentIdentifierParsing:
             'us-gaap:InvestmentIdentifierAxis: Big Company Inc., First lien senior secured loan 2'
         )
         assert company == 'Big Company Inc.'
-        assert 'First lien' in inv_type
+        assert inv_type == 'First lien senior secured loan'
 
     def test_parse_complex_company_name(self):
         """Test parsing with complex company names containing commas."""
@@ -643,6 +711,1500 @@ class TestInvestmentIdentifierParsing:
         )
         assert company == 'Medsurant Holdings LLC'
         assert inv_type == 'Preferred Equity'
+
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'member_candidates', 'expected_company', 'expected_type'),
+        [
+            pytest.param(
+                'Debt Investments Business Services Alpha Midco, Inc. Investment First-lien loan '
+                '($69,624 par, due 8/2028) Initial Acquisition Date 08/15/2019 Reference Rate and '
+                'Spread SOFR + 6.88% Interest Rate 11.20%',
+                ('alpha midco inc', 'business service'),
+                'Alpha Midco, Inc.',
+                'First-lien loan',
+                id='tslx',
+            ),
+            pytest.param(
+                'Investments\u2014non-controlled/non-affiliated Debt Investments Professional Services '
+                'KWOR Acquisition, Inc. Investment First Lien Debt Reference Rate and Spread '
+                'S + 6.25% Interest Rate 10.07% Maturity Date 02/28/2030 One',
+                ('professional service',),
+                'KWOR Acquisition, Inc.',
+                'First Lien Debt',
+                id='msdl',
+            ),
+            pytest.param(
+                'Investments-non-controlled/non-affiliated Debt Investments Commercial Services '
+                '& Supplies Hercules Borrower, LLC Investment C26First Lien Debt Reference Rate '
+                'and Spread C + 4.75% Interest Rate 7.04% Maturity Date 12/15/2028',
+                ('commercial service supplie',),
+                'Hercules Borrower, LLC',
+                'First Lien Debt',
+                id='msdl-concatenated-member-code',
+            ),
+            pytest.param(
+                'vInvestments-non-controlled/non-affiliated Debt Investments Food Products AMCP '
+                'Pet Holdings, Inc. (Brightpet) Investment First Lien Debt Reference Rate and '
+                'Spread S + 7.00% (incl. 3.00% PIK) Interest Rate 10.99% Maturity Date 01/04/2028',
+                ('food product',),
+                'AMCP Pet Holdings, Inc. (Brightpet)',
+                'First Lien Debt',
+                id='msdl-leaked-prefix-character',
+            ),
+            pytest.param(
+                'Investments-non-controlled/non-affiliated Debt Investments-non-controlled/'
+                'non-affiliated Debt Investments Professional Services Deerfield Dakota Holding, '
+                'LLC Investment First Lien Debt Reference Rate and Spread S + 5.75% (incl. 2.75% '
+                'PIK) Interest Rate 9.42% Maturity Date 09/13/2032 One Professional Services '
+                'Deerfield Dakota Holding, LLC Investment First Lien Debt Reference Rate and '
+                'Spread S + 5.75% (incl. 2.75% PIK) Interest Rate 9.42% Maturity Date 09/13/2032 One',
+                ('professional service',),
+                'Deerfield Dakota Holding, LLC',
+                'First Lien Debt',
+                id='msdl-duplicated-investment-path',
+            ),
+            pytest.param(
+                'Investment Debt Investments - 216.4% United States - 205.6% 1st Lien/Senior '
+                'Secured Debt - 195.3% AAG KP Borrower LLC (dba KUIU) Industry Textiles, Apparel '
+                '& Luxury Goods Interest Rate 8.76% Reference Rate and Spread S + 5.00% Maturity 12/05/31',
+                ('aag kp borrower llc dba kuiu',),
+                'AAG KP Borrower LLC (dba KUIU)',
+                '1st Lien/Senior Secured Debt',
+                id='gsbd',
+            ),
+            pytest.param(
+                'Advertising Printing & Publishing Accelerate360 Accelerate360 Holdings, LLC First '
+                'Lien Secured Debt - Term Loan SOFR+600, 1.00% Floor Maturity Date 02/11/27',
+                ('accelerate360 holding llc',),
+                'Accelerate360 Holdings, LLC',
+                'First Lien Secured Debt - Term Loan',
+                id='mfic',
+            ),
+            pytest.param(
+                'Aerospace & Defense ATS First Lien Senior Secured Loan SOFR Spread 5.75% '
+                'Interest Rate 10.05% Maturity Date 7/12/2029',
+                ('ats',),
+                'ATS',
+                'First Lien Senior Secured Loan',
+                id='bcsf',
+            ),
+            pytest.param(
+                'Equity Securities Issuer Name 48Forty Intermediate Holdings, Inc. - Common Equity '
+                'Acquisition 11/5/2024 Industry Containers and Packaging',
+                (),
+                '48Forty Intermediate Holdings, Inc.',
+                'Common Equity',
+                id='pflt',
+            ),
+            pytest.param(
+                'Investments in Non-Controlled, Non-Affiliated Portfolio Companies First Lien '
+                'Secured Debt Marketplace Events Acquisition, LLC Acquisition 12/19/2024 '
+                'Maturity 12/19/2030',
+                (),
+                'Marketplace Events Acquisition, LLC',
+                'First Lien Secured Debt',
+                id='pflt-category-first',
+            ),
+            pytest.param(
+                'CLO Equity BABSN 2018-4A SUB Industry Structured Subordinated Note '
+                'Maturity Date 10/15/2030',
+                ('babsn 2018 4a sub',),
+                'BABSN 2018-4A SUB',
+                'Subordinated Note',
+                id='psbd',
+            ),
+            pytest.param(
+                'Non-Control/Non-Affiliate Investments Debt Investments Systems Software '
+                '3PL Central LLC (dba Extensiv) Investment Type Senior Secured Interest Rate '
+                'SOFR+7.00%, 9.00% floor, 5.00% ETP Initial Acquisition Date 11/9/2022 '
+                'Maturity Date 6/30/2026',
+                ('system software',),
+                '3PL Central LLC (dba Extensiv)',
+                'Senior Secured',
+                id='rway',
+            ),
+            pytest.param(
+                'First Lien Senior Secured Canadian Debt Information Tulip.io Inc. Facility Type '
+                'Term Loan All in Rate 15.00% Benchmark P Spread 4.00% PIK 3.00% Floor 8.00% '
+                'Initial Acquisition Date 11/4/2024 Maturity 11/4/2028',
+                ('tulip io inc',),
+                'Tulip.io Inc.',
+                'Term Loan',
+                id='lien',
+            ),
+            pytest.param(
+                'First Lien Secured Debt Issuer Name Kinetic Purchaser, LLC Acquisition 07/24/23 '
+                'Maturity 11/10/27 Industry Consumer Products Current Coupon 10.15%',
+                (),
+                'Kinetic Purchaser, LLC',
+                'First Lien Secured Debt',
+                id='pnnt',
+            ),
+            pytest.param(
+                'Controlled investments ProAir Holdco, LLC Type of Investment Common Stock and '
+                'Membership Units Industry Classification Trading Companies & Distributors',
+                ('proair holdco llc',),
+                'ProAir Holdco, LLC',
+                'Common Stock and Membership Units',
+                id='bcic',
+            ),
+            pytest.param(
+                'American Coastal Insurance Corp. Industry Insurance Security Unsecured Bond '
+                'Interest Rate 7.25% Initial Acquisition Date 12/20/2022 Maturity 12/15/2027',
+                ('american coastal insurance corp',),
+                'American Coastal Insurance Corp.',
+                'Unsecured Bond',
+                id='gecc',
+            ),
+            pytest.param(
+                '12 Interactive, LLC (D/B/A PerkSpot) | First Lien Debt (Revolver)',
+                (),
+                '12 Interactive, LLC (D/B/A PerkSpot)',
+                'First Lien Debt (Revolver)',
+                id='ofs',
+            ),
+            pytest.param(
+                'Portfolio Company Debt Securities- United States Supply Chain Technology '
+                'Inktavo, LLC Type of Investment Secured Loan Investment Date October 15, 2025 '
+                'Maturity Date October 15, 2031 Interest Rate Variable interest rate SOFR 3 Month '
+                'Term + 6.8%; EOT 0.0%',
+                ('supply chain technology',),
+                'Inktavo, LLC',
+                'Secured Loan',
+                id='trin',
+            ),
+        ],
+    )
+    def test_parse_structured_investment_formats(
+        self,
+        raw_identifier,
+        member_candidates,
+        expected_company,
+        expected_type,
+    ):
+        """Parse structured investment labels used by the Format 1 tickers."""
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=member_candidates,
+        )
+        assert company == expected_company
+        assert investment_type == expected_type
+
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'member_candidates', 'expected_company', 'expected_type'),
+        [
+            pytest.param(
+                'Other Investments Apidos CLO, Series 2015-23A Investment Structured Credit '
+                '($4,000 par, due 10/2038) Initial Acquisition Date 9/3/2025 Reference Rate and '
+                'Spread SOFR + 5.20% Interest Rate 9.10%',
+                (),
+                'Apidos CLO, Series 2015-23A',
+                'Structured Credit',
+                id='structured-credit-with-investment-anchor',
+            ),
+            pytest.param(
+                'Other Investments CIFC Funding Ltd, Series 2020 -4A Structured Credit '
+                '($4,000 par, due 1/2040) Initial Acquisition Date 7/29/2025 Reference Rate and '
+                'Spread SOFR + 4.90% Interest Rate 8.80%',
+                (),
+                'CIFC Funding Ltd, Series 2020 -4A',
+                'Structured Credit',
+                id='structured-credit-without-investment-anchor',
+            ),
+            pytest.param(
+                'Debt Investments Business Services BCTO Ignition Purchaser, Inc Investment '
+                'First-lien holdco loan ($54,435 par, due 10/2030) Initial Acquisition Date '
+                '4/18/2023 Reference Rate and Spread SOFR + 7.50% Interest Rate 11.37% PIK',
+                ('business service',),
+                'BCTO Ignition Purchaser, Inc',
+                'First-lien holdco loan',
+                id='first-lien-holdco-loan',
+            ),
+            pytest.param(
+                'Debt Investments Education Astra Acquisition Corp. Investment Second-lien loan '
+                '($40,804 par, due 10/2029) Initial Acquisition Date 10/22/2021 Reference Rate and '
+                'Spread P + 9.88% Interest Rate 16.63%',
+                ('education',),
+                'Astra Acquisition Corp.',
+                'Second-lien loan',
+                id='second-lien-loan',
+            ),
+            pytest.param(
+                'Debt Investments Financial Services Passport Labs, Inc. Investment Convertible '
+                'Promissory Note A ($1,086 par, due 8/2026) Initial Acquisition Date 3/2/2023 '
+                'Reference Rate and Spread 8.00% Interest Rate 8.00%',
+                ('financial service',),
+                'Passport Labs, Inc.',
+                'Convertible Promissory Note A',
+                id='convertible-promissory-note',
+            ),
+            pytest.param(
+                'Debt Investments Financial Services Payroc Buyer, LLC Investment Promissory Note '
+                '($6,000 par, due 9/2030) Initial Acquisition Date 9/30/2025 Reference Rate and '
+                'Spread 5.50% Interest Rate 5.50%',
+                ('financial service',),
+                'Payroc Buyer, LLC',
+                'Promissory Note',
+                id='promissory-note',
+            ),
+            pytest.param(
+                'Debt Investments Manufacturing ASP Unifrax Holdings, Inc. Second-lien note '
+                '($2,024 par, due 9/2029) Initial Acquisition Date 8/31/2023 Reference Rate and '
+                'Spread 7.10% Interest Rate 7.10% (incl. 1.25% PIK)',
+                ('manufacturing',),
+                'ASP Unifrax Holdings, Inc.',
+                'Second-lien note',
+                id='second-lien-note',
+            ),
+            pytest.param(
+                'Debt Investments Other Boréal Bidco First-lien note (EUR 13,605 par, due 3/2032) '
+                'Initial Acquisition Date 3/24/2025 Reference Rate and Spread E + 7.25% Interest '
+                'Rate 9.27% (inclu. 5.75% PIK)',
+                ('other',),
+                'Boréal Bidco',
+                'First-lien note',
+                id='first-lien-note',
+            ),
+            pytest.param(
+                'Equity and Other Investments Business Services Newark FP Co-Invest, L.P. '
+                'Partnership (2,527,719 units) Initial Acquisition Date 11/8/2023',
+                ('business service',),
+                'Newark FP Co-Invest, L.P.',
+                'Partnership',
+                id='partnership',
+            ),
+            pytest.param(
+                'Equity and Other Investments Financial Services TS Imagine, Inc. Class AA Units '
+                '(19,093 units) Initial Acquisition Date 11/1/2024 Reference Rate and Spread '
+                '20.00% Interest Rate 20.00%',
+                ('financial service',),
+                'TS Imagine, Inc.',
+                'Class AA Units',
+                id='class-aa-units',
+            ),
+            pytest.param(
+                'Equity and Other Investments Hotel, Gaming and Leisure IRGSE Holding Corp. '
+                'Class C-1 Units (8,800,000 units) Initial Acquisition Date 12/21/2018',
+                ('hotel gaming and leisure',),
+                'IRGSE Holding Corp.',
+                'Class C-1 Units',
+                id='class-c1-units',
+            ),
+            pytest.param(
+                'Equity and Other Investments Internet Services Khoros, LLC Earnout Interests '
+                'Initial Acquisition Date 5/23/2025',
+                ('internet service',),
+                'Khoros, LLC',
+                'Earnout Interests',
+                id='earnout-interests',
+            ),
+            pytest.param(
+                'Equity and Other Investments Pharmaceuticals Elysium BidCo Limited Convertible '
+                'Preference Shares (4,976,563 Shares) Initial Acquisition Date 12/11/2024',
+                ('pharmaceutical',),
+                'Elysium BidCo Limited',
+                'Convertible Preference Shares',
+                id='convertible-preference-shares',
+            ),
+            pytest.param(
+                'Equity and Other Investments Financial Services Passport Labs, Inc. Warrants '
+                '(17,534 warrants) Initial Acquisition Date 4/28/2021',
+                ('financial service',),
+                'Passport Labs, Inc.',
+                'Warrants',
+                id='warrant-quantity-is-not-company',
+            ),
+            pytest.param(
+                'Equity and Other Investments Retail and Consumer Products Copper Bidco, LLC '
+                'Trust Certificates (996,958 Certificates) Initial Acquisition Date 1/30/2021',
+                ('retail and consumer product',),
+                'Copper Bidco, LLC',
+                'Trust Certificates',
+                id='certificate-quantity-is-not-company',
+            ),
+        ],
+    )
+    def test_parse_tslx_additional_structured_types(
+        self,
+        raw_identifier,
+        member_candidates,
+        expected_company,
+        expected_type,
+    ):
+        """Parse additional TSLX structured instrument variants."""
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=member_candidates,
+        )
+        assert company == expected_company
+        assert investment_type == expected_type
+
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'expected_company', 'expected_type'),
+        [
+            pytest.param(
+                '2.9% Canada - 0.0% Common Stock - 0.0% Prairie Provident Resources, Inc.',
+                'Prairie Provident Resources, Inc.',
+                'Common Stock',
+                id='common-stock',
+            ),
+            pytest.param(
+                '2.9% United States - 2.9% Preferred Stock - 1.9% CloudBees, Inc.',
+                'CloudBees, Inc.',
+                'Preferred Stock',
+                id='preferred-stock',
+            ),
+            pytest.param(
+                '226.3% United States \u2013 214.3% 1st Lien/Senior Secured Debt \u2013 200.8% '
+                'A Place For Mom, Inc.',
+                'A Place For Mom, Inc.',
+                '1st Lien/Senior Secured Debt',
+                id='first-lien-senior-secured',
+            ),
+            pytest.param(
+                '226.3% United States \u2013 214.3% 2nd Lien/Senior Secured Debt - 3.4% '
+                'MPI Engineered Technologies, LLC',
+                'MPI Engineered Technologies, LLC',
+                '2nd Lien/Senior Secured Debt',
+                id='second-lien-senior-secured',
+            ),
+            pytest.param(
+                '226.3% United States \u2013 214.3% Unsecured Debt - 0.6% Wine.com, Inc.',
+                'Wine.com, Inc.',
+                'Unsecured Debt',
+                id='unsecured-debt',
+            ),
+            pytest.param(
+                'Investment Debt Investments \u2013 226.3% United States \u2013 214.3% '
+                '1st Lien/Last-Out Unitranche (14) - 9.5% EDB Parent, LLC '
+                '(dba Enterprise DB) Industry Software Interest Rate 10.84% Reference Rate and '
+                'Spread S + 7.00% Maturity 07/07/28 Two',
+                'EDB Parent, LLC (dba Enterprise DB)',
+                '1st Lien/Last-Out Unitranche',
+                id='last-out-unitranche',
+            ),
+        ],
+    )
+    def test_parse_gsbd_percentage_hierarchy(
+        self,
+        raw_identifier,
+        expected_company,
+        expected_type,
+    ):
+        """Parse GSBD hierarchy paths without retaining percentage rollups."""
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}'
+        )
+        assert company == expected_company
+        assert investment_type == expected_type
+
+    def test_parse_gsbd_percentage_hierarchy_uses_company_member_boundary(self):
+        """Stop the company before an unlabeled industry and rate fields."""
+        raw_identifier = (
+            'Investment Debt Investments - 226.3% United States - 214.3% '
+            '1st Lien/Senior Secured Debt - 200.8% Rotation Buyer, LLC '
+            '(dba Rotating Machinery Services) Machinery Interest Rate 8.47% '
+            'Reference Rate and Spread S + 4.75% Maturity 12/02/31'
+        )
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=('rotation buyer llc dba rotating machinery service',),
+        )
+        assert company == 'Rotation Buyer, LLC (dba Rotating Machinery Services)'
+        assert investment_type == '1st Lien/Senior Secured Debt'
+
+    def test_parse_gsbd_percentage_hierarchy_handles_joined_industry_field(self):
+        """Handle source labels that omit whitespace after the Industry field."""
+        raw_identifier = (
+            'Investment Debt Investments - 226.3% United States - 214.3% '
+            '1st Lien/Senior Secured Debt - 200.8% Vardiman Black Holdings, LLC '
+            '(dba Specialty Dental Brands) IndustryHealth Care Providers & Services '
+            'Reference Rate and Spread S + 7.00% PIK Maturity 03/18/27'
+        )
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}'
+        )
+        assert company == 'Vardiman Black Holdings, LLC (dba Specialty Dental Brands)'
+        assert investment_type == '1st Lien/Senior Secured Debt'
+
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'member_candidates', 'expected_company', 'expected_type'),
+        [
+            pytest.param(
+                'Trading Companies & Distributors Banner Solutions Banner Parent Holdings, Inc. '
+                'Common Equity - Common Stock',
+                ('trading companie distributor', 'banner solution'),
+                'Banner Parent Holdings, Inc.',
+                'Common Equity - Common Stock',
+                id='common-equity-with-portfolio-alias',
+            ),
+            pytest.param(
+                'Trading Companies & Distributors ORS Nasco WC ORS Holdings, L.P. '
+                'Common Equity - Common Stock',
+                ('trading companie distributor', 'ors nasco'),
+                'WC ORS Holdings, L.P.',
+                'Common Equity - Common Stock',
+                id='company-with-commas',
+            ),
+            pytest.param(
+                'Pharmaceuticals Alcresta Therapeutics Inc. Alcresta Holdings, LP '
+                'Preferred Equity - Preferred Equity',
+                ('pharmaceutical', 'alcresta therapeutic inc'),
+                'Alcresta Holdings, LP',
+                'Preferred Equity - Preferred Equity',
+                id='preferred-equity',
+            ),
+            pytest.param(
+                'Passenger Airlines Merx Aviation Finance, LLC Merx Aviation Finance, LLC '
+                'Common Equity - Membership Interests',
+                ('passenger airline',),
+                'Merx Aviation Finance, LLC',
+                'Common Equity - Membership Interests',
+                id='duplicated-company',
+            ),
+            pytest.param(
+                'Chemicals Carbonfree Chemicals SPE I LLC '
+                '(f/k/a Maxus Capital Carbon SPE I LLC) FC2 LLC Secured Debt - Promissory Note '
+                'Maturity Date 10/14/27',
+                ('chemical', 'carbonfree chemical spe i llc'),
+                'FC2 LLC',
+                'Secured Debt - Promissory Note',
+                id='company-after-former-name',
+            ),
+            pytest.param(
+                'Consumer Finance US Auto Auto Pool 2023 Trust (Del. Stat. Trust) '
+                'Structured Products and Other - Membership Interests Maturity Date 02/28/29',
+                ('consumer finance', 'us auto'),
+                'Auto Pool 2023 Trust (Del. Stat. Trust)',
+                'Structured Products and Other - Membership Interests',
+                id='structured-products',
+            ),
+            pytest.param(
+                'Ground Transportation Third Lane Mobility Inc. Warrants – Warrants',
+                ('ground transportation',),
+                'Third Lane Mobility Inc.',
+                'Warrants – Warrants',
+                id='unicode-type-separator',
+            ),
+            pytest.param(
+                'Commercial Services & Supplies Jacent Jacent Strategic Merchandising, LLC '
+                'Common Equity - Common Stock',
+                (
+                    'commercial service supplie',
+                    'jacent',
+                    'jacent strategic merchandising',
+                ),
+                'Jacent Strategic Merchandising, LLC',
+                'Common Equity - Common Stock',
+                id='prefer-complete-company-member',
+            ),
+            pytest.param(
+                'Software Asure Software Asure Software, Inc. First Lien Secured Debt - Term Loan '
+                'SOFR+500, 2.00% Floor Maturity Date 04/01/30',
+                ('software', 'asure software', 'inc'),
+                'Asure Software, Inc.',
+                'First Lien Secured Debt - Term Loan',
+                id='ignore-generic-company-member',
+            ),
+        ],
+    )
+    def test_parse_mfic_paired_investment_type(
+        self,
+        raw_identifier,
+        member_candidates,
+        expected_company,
+        expected_type,
+    ):
+        """Parse MFIC industry, portfolio company, issuer, and paired type paths."""
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=member_candidates,
+        )
+        assert company == expected_company
+        assert investment_type == expected_type
+
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'expected_company', 'expected_type'),
+        [
+            (
+                'Controlled Investments Merx Aviation Finance, LLC, Membership Interests',
+                'Merx Aviation Finance, LLC',
+                'Membership Interests',
+            ),
+            (
+                'Affiliated Investments Arrivia, Inc. '
+                '(International Cruise & Excursion Gallery, Inc),Membership Interests',
+                'Arrivia, Inc. (International Cruise & Excursion Gallery, Inc)',
+                'Membership Interests',
+            ),
+        ],
+    )
+    def test_parse_mfic_relationship_investment(
+        self,
+        raw_identifier,
+        expected_company,
+        expected_type,
+    ):
+        """Parse MFIC relationship-prefixed comma labels with legal-name commas."""
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}'
+        )
+        assert company == expected_company
+        assert investment_type == expected_type
+
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'member_candidates', 'expected_company', 'expected_type'),
+        [
+            pytest.param(
+                'U.S. Dollar Automotive Cardo First Lien Senior Secured Loan SOFR Spread 5.25% '
+                'Interest Rate 8.98% Maturity Date 5/12/2028',
+                ('automotive',),
+                'Cardo',
+                'First Lien Senior Secured Loan',
+                id='us-dollar-debt',
+            ),
+            pytest.param(
+                'European Currency Healthcare & Pharmaceuticals Mertus 522. GmbH First Lien '
+                'Senior Secured Loan EURIBOR Spread 4.00% (3.00% PIK) Interest Rate 9.12% '
+                'Maturity Date 5/28/2028',
+                ('healthcare pharmaceutical',),
+                'Mertus 522. GmbH',
+                'First Lien Senior Secured Loan',
+                id='european-currency-debt',
+            ),
+            pytest.param(
+                'British Pound Services: Business Parcel2Go Equity Interest',
+                ('service business',),
+                'Parcel2Go',
+                'Equity Interest',
+                id='british-pound-equity',
+            ),
+            pytest.param(
+                'Australian Dollar Media: Advertising, Printing & Publishing T G I Sport Bidco '
+                'Pty Ltd First Lien Senior Secured Loan BBSY Spread 7.00% Interest Rate 10.60% '
+                'Maturity Date 4/30/2026',
+                ('media advertising printing publishing',),
+                'T G I Sport Bidco Pty Ltd',
+                'First Lien Senior Secured Loan',
+                id='australian-dollar-debt',
+            ),
+            pytest.param(
+                'New Zealand Dollar Beverage, Food & Tobacco Hellers First Lien Senior Secured '
+                'Loan - Delayed Draw BBKM Spread 3.63% (1.88% PIK) Interest Rate 9.29% '
+                'Maturity Date 9/27/2030',
+                ('beverage food tobacco',),
+                'Hellers',
+                'First Lien Senior Secured Loan - Delayed Draw',
+                id='new-zealand-dollar-delayed-draw',
+            ),
+            pytest.param(
+                'Non-Controlled/Affiliate Investments Aerospace & Defense Ansett Aviation '
+                'Training Equity Interest',
+                ('aerospace defense',),
+                'Ansett Aviation Training',
+                'Equity Interest',
+                id='non-controlled-affiliate-equity',
+            ),
+            pytest.param(
+                'Non-controlled/Non-Affiliated Investments High Tech Industries Applitools '
+                'Equity Interest One',
+                ('high tech industrie',),
+                'Applitools',
+                'Equity Interest',
+                id='non-affiliated-equity-suffix',
+            ),
+            pytest.param(
+                'Controlled Affiliate Investments Investment Vehicles Bain Capital Senior Loan '
+                'Program, LLC Preferred Equity Interest Investment Vehicles',
+                ('investment vehicle',),
+                'Bain Capital Senior Loan Program, LLC',
+                'Preferred Equity Interest',
+                id='controlled-affiliate-preferred-equity-interest',
+            ),
+            pytest.param(
+                'Non-controlled/Non-Affiliated Investments Automotive Gills Point S First Lien '
+                'Senior Secured Loan - Revolver Maturity Date 5/17/2029',
+                ('automotive',),
+                'Gills Point S',
+                'First Lien Senior Secured Loan - Revolver',
+                id='relationship-prefixed-revolver',
+            ),
+            pytest.param(
+                'High Tech Industries Govineer Solutions (fka Black Mountain) First Lien Senior '
+                'Secured Loan SOFR Spread 5.00% Interest Rate 8.67% Maturity Date 10/7/2030',
+                ('high tech industrie', 'govineer solution', 'black mountain'),
+                'Govineer Solutions (fka Black Mountain)',
+                'First Lien Senior Secured Loan',
+                id='former-name-is-not-company',
+            ),
+            pytest.param(
+                'European Currency Services: Business Fiduciaire Jean-Marc Faber (FJMF) First '
+                'Lien Senior Secured Loan - Delayed Draw EURIBOR Spread 5.50% Interest Rate '
+                '7.58% Maturity Date 4/3/2032',
+                ('service business', 'fiduciaire jean marc faber', 'fjmf'),
+                'Fiduciaire Jean-Marc Faber (FJMF)',
+                'First Lien Senior Secured Loan - Delayed Draw',
+                id='parenthetical-abbreviation-is-not-company',
+            ),
+        ],
+    )
+    def test_parse_bcsf_structured_investment(
+        self,
+        raw_identifier,
+        member_candidates,
+        expected_company,
+        expected_type,
+    ):
+        """Parse BCSF currency and relationship-prefixed investment paths."""
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=member_candidates,
+        )
+        assert company == expected_company
+        assert investment_type == expected_type
+
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'expected_company', 'expected_type'),
+        [
+            pytest.param(
+                'in Non-Controlled, Non-Affiliated Portfolio Companies Common Equity/Warrants '
+                'Magnolia Topco, LP -',
+                'Magnolia Topco, LP',
+                'Common Equity/Warrants',
+                id='truncated-prefix-common-equity-warrants',
+            ),
+            pytest.param(
+                'in Non-Controlled, Non-Affiliated Portfolio Companies Preferred Equity '
+                'Accounting Platform Holdings, Inc. -',
+                'Accounting Platform Holdings, Inc.',
+                'Preferred Equity',
+                id='preferred-equity',
+            ),
+            pytest.param(
+                'Investments in Non-Controlled, Non-Affiliated Portfolio Companies Subordinate '
+                'Debt ORL Holdco, Inc. - Unfunded Convertible Notes Acquisition 8/2/2024 '
+                'Maturity 03/8/2028 Industry Consumer Finance',
+                'ORL Holdco, Inc.',
+                'Subordinate Debt - Unfunded Convertible Notes',
+                id='subordinate-debt-detail',
+            ),
+            pytest.param(
+                'Investments in Non-Controlled, Non-Affiliated Portfolio Companies Subordinate '
+                'Debt Wash & Wax Systems, LLC - Subordinate Debt Acquisition 4/30/2025 '
+                'Maturity 07/30/2028 Industry Consumer Services Current Coupon 12.00%',
+                'Wash & Wax Systems, LLC',
+                'Subordinate Debt',
+                id='repeated-subordinate-debt-detail',
+            ),
+            pytest.param(
+                'Investments in Non-Controlled, Non-Affiliated Portfolio Companies Preferred '
+                'Equity Magnolia Topco, LP - Preferred Equity - Class A Acquisition 7/25/2023 '
+                'Industry Automobiles',
+                'Magnolia Topco, LP',
+                'Preferred Equity - Class A',
+                id='repeated-preferred-equity-prefix',
+            ),
+            pytest.param(
+                'Investments in Non-Controlled, Non-Affiliated Portfolio Companies First Lien '
+                'Secured Debt North American Rail Solutions, LLC - Funded Revolver Acquisitions '
+                '8/29/2025 Maturity 08/29/2031 Industry Manufacturing/Basic Industry',
+                'North American Rail Solutions, LLC',
+                'First Lien Secured Debt - Funded Revolver',
+                id='plural-acquisitions',
+            ),
+            pytest.param(
+                'Investments in Controlled, Affiliated Portfolio Companies Equity Interests '
+                'PennantPark Senior Secured Loan Fund I LLC - Common Equity Acquisition '
+                '6/16/2017 Industry Financial Services',
+                'PennantPark Senior Secured Loan Fund I LLC',
+                'Equity Interests - Common Equity',
+                id='plural-equity-interests',
+            ),
+            pytest.param(
+                'Investments in Non-Controlled, Non-Affiliated Portfolio Companies Preferred '
+                'Equity AFC Acquisitions, Inc. Preferred Equity - Series F-2 Acquisition '
+                '12/7/2023 Industry Distributors',
+                'AFC Acquisitions, Inc.',
+                'Preferred Equity - Series F-2',
+                id='repeated-type-without-company-delimiter',
+            ),
+            pytest.param(
+                'Investments in Non-Controlled, Non-Affiliated Portfolio Companies First Lien '
+                'Secured Debt GGG Midco, LLC – Unfunded Revolver Acquisition 09/27/2024 '
+                'Maturity 09/27/2030 Industry Diversified Consumer Services',
+                'GGG Midco, LLC',
+                'First Lien Secured Debt - Unfunded Revolver',
+                id='unicode-facility-delimiter',
+            ),
+            pytest.param(
+                'Investments in Non-Controlled, Non-Affiliated Portfolio Companies First Lien '
+                'Secured Debt Meadowlark Acquirer, LLC- Funded Revolver Acquisition 12/9/2021 '
+                'Maturity 12/10/2027 Industry Professional Services',
+                'Meadowlark Acquirer, LLC',
+                'First Lien Secured Debt - Funded Revolver',
+                id='unspaced-facility-delimiter',
+            ),
+            pytest.param(
+                '/Warrants Kentucky Racing Holdco, LLC - Warrants',
+                'Kentucky Racing Holdco, LLC',
+                'Warrants',
+                id='truncated-warrants',
+            ),
+        ],
+    )
+    def test_parse_pflt_category_first_investment(
+        self,
+        raw_identifier,
+        expected_company,
+        expected_type,
+    ):
+        """Parse PFLT category-first labels and optional security details."""
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}'
+        )
+        assert company == expected_company
+        assert investment_type == expected_type
+
+    def test_parse_pflt_issuer_name_before_facility_type(self):
+        raw_identifier = (
+            'First Lien Secured Debt Issuer Name Paving Lessor Corp. First Lien -Term Loan '
+            'Acquisition 8/28/2025 Maturity 7/1/2031 Industry Business Services'
+        )
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}'
+        )
+        assert company == 'Paving Lessor Corp.'
+        assert investment_type == 'Term Loan'
+
+    @pytest.mark.parametrize(
+        'company_name',
+        [
+            'Fidelity Investments Money Market Government Portfolio - Institutional Class',
+            'Morgan Stanley Liquidity Funds US Dollar Treasury Liquidity Fund - Institutional Class',
+        ],
+    )
+    def test_parse_psbd_short_term_investment(self, company_name):
+        raw_identifier = f'Short-Term Investments {company_name}'
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}'
+        )
+        assert company == company_name
+        assert investment_type == 'Short-Term Investments'
+
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'expected_company', 'expected_type'),
+        [
+            pytest.param(
+                'CLO Mezzanine AIMCO 2015-AA FR4 Industry Structured Note Interest Rate 11.41% '
+                '(S + 7.18%) Maturity Date 10/17/2038',
+                'AIMCO 2015-AA FR4',
+                'Structured Note',
+                id='clo-mezzanine',
+            ),
+            pytest.param(
+                'Debt Investments Corporate Bonds Altice Financing S.A. Industry Diversified '
+                'Telecommunication Services Interest Rate 0.05 Maturity Date 1/15/2028',
+                'Altice Financing S.A.',
+                'Corporate Bonds',
+                id='corporate-bonds',
+            ),
+            pytest.param(
+                'Equity Investments Aimbridge Acquisition Co., Inc. Industry Hotels, Restaurants '
+                'and Leisure',
+                'Aimbridge Acquisition Co., Inc.',
+                'Equity',
+                id='equity-investments',
+            ),
+        ],
+    )
+    def test_parse_psbd_category_prefixed_investment(
+        self,
+        raw_identifier,
+        expected_company,
+        expected_type,
+    ):
+        """Parse PSBD category-prefixed CLO, bond, and equity labels."""
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}'
+        )
+        assert company == expected_company
+        assert investment_type == expected_type
+
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'member_candidates', 'expected_company', 'expected_type'),
+        [
+            pytest.param(
+                'Warrant Application Software 3DNA Corp. (dba NationBuilder)',
+                ('application software',),
+                '3DNA Corp. (dba NationBuilder)',
+                'Warrant',
+                id='singular-warrant',
+            ),
+            pytest.param(
+                'Warrants Application Software Piano Software, Inc.',
+                ('application software',),
+                'Piano Software, Inc.',
+                'Warrants',
+                id='plural-warrants',
+            ),
+            pytest.param(
+                'Warrant Technology Hardware & Equipment Brivo, Inc.Investment',
+                ('technology hardware equipment',),
+                'Brivo, Inc.',
+                'Warrant',
+                id='attached-investment-token',
+            ),
+            pytest.param(
+                'Warrant Technology Hardware & Equipment Linxup,',
+                ('technology hardware equipment',),
+                'Linxup',
+                'Warrant',
+                id='trailing-comma',
+            ),
+        ],
+    )
+    def test_parse_rway_leading_warrant(
+        self,
+        raw_identifier,
+        member_candidates,
+        expected_company,
+        expected_type,
+    ):
+        """Parse RWAY warrant labels with an industry before the company."""
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=member_candidates,
+        )
+        assert company == expected_company
+        assert investment_type == expected_type
+
+    def test_parse_rway_full_warrant_identifier(self):
+        raw_identifier = (
+            'Non-Control/Non-Affiliate Investments Warrant Application Software 3DNA Corp. '
+            '(dba NationBuilder) Investment Type Warrants Series C-1 Preferred Stock Initial '
+            'Acquisition Date 12/28/2018 Maturity Date 12/28/2028'
+        )
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=('application software',),
+        )
+        assert company == '3DNA Corp. (dba NationBuilder)'
+        assert investment_type == 'Warrants'
+
+    def test_parse_rway_attached_investment_type_field(self):
+        raw_identifier = (
+            'Non-Control/Non-Affiliate Investments Warrant Technology Hardware & Equipment '
+            'Linxup, LLCInvestment Type Warrants Success fee Initial Acquisition Date 11/3/2023 '
+            'Maturity Date 11/3/2033'
+        )
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=('technology hardware equipment',),
+        )
+        assert company == 'Linxup, LLC'
+        assert investment_type == 'Warrants'
+
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'member_candidates', 'expected_company', 'expected_type'),
+        [
+            (
+                'Control Investments Equity Investments Runway-Cadma I LLC',
+                (),
+                'Runway-Cadma I LLC',
+                'Equity',
+            ),
+            (
+                'Affiliate Investments Debt Investments Senior Secured Gynesonics, Inc.',
+                (),
+                'Gynesonics, Inc.',
+                'Senior Secured',
+            ),
+            (
+                'Control Investments Equity Investments Multi-Sector Holdings Runway-Cadma I LLC '
+                'Investment Type Equity 50% Equity Interest Initial Acquisition Date 3/6/2024',
+                ('multi sector holding',),
+                'Runway-Cadma I LLC',
+                'Equity',
+            ),
+        ],
+    )
+    def test_parse_rway_relationship_category(
+        self,
+        raw_identifier,
+        member_candidates,
+        expected_company,
+        expected_type,
+    ):
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=member_candidates,
+        )
+        assert company == expected_company
+        assert investment_type == expected_type
+
+    def test_parse_rway_revolver_metadata(self):
+        raw_identifier = (
+            'Non-Control/Non-Affiliate Investments Debt Investments Systems Software Digicert, '
+            'Inc. (Revolver) Investment Type Senior Secured Interest Rate SOFR+5.75%, 6.50% '
+            'floor Initial Acquisition Date 7/30/2025 Maturity Date 7/30/2030'
+        )
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=('system software', 'revolver'),
+        )
+        assert company == 'Digicert, Inc.'
+        assert investment_type == 'Senior Secured - Revolver'
+
+    def test_parse_rway_revolver_after_company_alias(self):
+        raw_identifier = (
+            'Non-Control/Non-Affiliate Investments Debt Investments Commercial & Professional '
+            'Services Shepherd Intermediate, LLC (dba FHAS) (Revolver) Investment Type Senior '
+            'Secured Interest Rate SOFR+7.25%, 8.25% floor, Initial Acquisition Date 7/10/2025 '
+            'Maturity Date 7/10/2030'
+        )
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=(
+                'commercial professional service',
+                'shepherd intermediate llc dba fha',
+            ),
+        )
+        assert company == 'Shepherd Intermediate, LLC (dba FHAS)'
+        assert investment_type == 'Senior Secured - Revolver'
+
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'expected_type'),
+        [
+            (
+                'U.S. Preferred Stock Real Estate and Rental and Leasing Workbox Holdings Inc. '
+                'A-1 Preferred Initial Acquisition Date 5/20/2024',
+                'A-1 Preferred',
+            ),
+            (
+                'U.S. Warrants Real Estate and Rental and Leasing Workbox Holdings Inc. A-4 '
+                'Warrants Initial Acquisition Date 5/20/2024',
+                'A-4 Warrants',
+            ),
+        ],
+    )
+    def test_parse_lien_us_equity(self, raw_identifier, expected_type):
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=(
+                'real estate and rental and leasing',
+                'workbox holding inc member',
+            ),
+        )
+        assert company == 'Workbox Holdings Inc.'
+        assert investment_type == expected_type
+
+    def test_parse_lien_second_lien_debt(self):
+        raw_identifier = (
+            'US Corporate Debt Second Lien Senior Secured Cannabis Remedy - Maryland Wellness, '
+            'LLC Facility Type Delayed Draw Term Loan All in Rate 20.25% Benchmark P Spread 9.00% '
+            'PIK 3.50% Floor 7.75% Initial Acquisition Date 10/1/2024 Maturity 8/1/2028'
+        )
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=('cannabi', 'remedy maryland wellness llc member'),
+        )
+        assert company == 'Remedy - Maryland Wellness, LLC'
+        assert investment_type == 'Delayed Draw Term Loan'
+
+    def test_parse_lien_company_field_delimiter(self):
+        raw_identifier = (
+            'US Corporate Debt First Lien Senior Secured U.S. Debt Information Protect Animals '
+            'With Satellites LLC (Halo Collar) - Facility Type Incremental Term Loan All in Rate '
+            '13.25% Initial Acquisition Date 10/1/2024 Maturity 11/1/2026'
+        )
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=('information',),
+        )
+        assert company == 'Protect Animals With Satellites LLC (Halo Collar)'
+        assert investment_type == 'Incremental Term Loan'
+
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'expected_company', 'expected_type'),
+        [
+            (
+                'Investments in Non-Controlled, Non-Affiliated Portfolio Companies Second Lien '
+                'Secured Debt of Net Assets Issuer Name Burgess Point Purchaser Corporation '
+                'Acquisition 07/26/2022 Maturity 07/28/2030 Industry Auto Sector Current Coupon '
+                '12.77% Basis Point Spread Above Index 3M SOFR+910',
+                'Burgess Point Purchaser Corporation',
+                'Second Lien Secured Debt',
+            ),
+            (
+                'Investments in Non-Controlled, Non-Affiliated Portfolio Companies Subordinate '
+                'Debt/Corporate Notes of Net Assets Issuer Name Beacon Behavioral Holdings, LLC '
+                'Acquisition 06/21/2024 Maturity 06/21/2030 Industry Healthcare, Education and '
+                'Childcare Current Coupon PIK 15.00%',
+                'Beacon Behavioral Holdings, LLC',
+                'Subordinate Debt/Corporate Notes',
+            ),
+            (
+                'Investments in Non-Controlled, Non-Affiliated Portfolio Companies Preferred '
+                'Equity/Partnership Interests of Net Assets Issuer Name AFC Acquisitions, Inc. '
+                '(F-2 Series) Acquisition 12/07/2023 Industry Distribution',
+                'AFC Acquisitions, Inc.',
+                'Preferred Equity/Partnership Interests - F-2 Series',
+            ),
+            (
+                'Investments in Non-Controlled, Non-Affiliated Portfolio Companies Common Equity/'
+                'Partnership Interests/Warrants of Net Assets Issuer Name Kentucky Racing Holdco, '
+                'LLC (Warrants) Acquisition 04/16/2019 Industry Hotels, Motels, Inns and Gaming',
+                'Kentucky Racing Holdco, LLC',
+                'Common Equity/Partnership Interests/Warrants',
+            ),
+            (
+                'Investments in Non-Controlled, Non-Affiliated Portfolio Companies US Government '
+                'Securities of Net Assets Issuer Name U.S. Treasury Bill Acquisition 01/02/2026 '
+                'Maturity 01/27/2026 Industry Short-Term U.S. Government Securities Current Coupon '
+                '3.98%',
+                'U.S. Treasury Bill',
+                'US Government Securities',
+            ),
+            (
+                'Equity Securities Issuer Name Wash & Wax Group, LP - Common Equity - Common '
+                'Equity Acquisition 04/30/25 Industry Business Services',
+                'Wash & Wax Group, LP',
+                'Common Equity - Common Equity',
+            ),
+            (
+                'Investments in Non-Controlled, Non-Affiliated Portfolio Companies First Lien '
+                'Secured Debt Issuer PCS MIDCO, Inc. - Unfunded Term Loan - Third Amendment '
+                'Acquisition 03/01/2024 Maturity 03/24/2028 Industry Financial Services',
+                'PCS MIDCO, Inc.',
+                'First Lien Secured Debt - Unfunded Term Loan - Third Amendment',
+            ),
+        ],
+    )
+    def test_parse_pnnt_issuer_path(
+        self,
+        raw_identifier,
+        expected_company,
+        expected_type,
+    ):
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}'
+        )
+        assert company == expected_company
+        assert investment_type == expected_type
+
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'member_candidates', 'expected_company', 'expected_type'),
+        [
+            (
+                'Investments in Non-Control, Non-Affiliate Portfolio Companies Common Stock and '
+                'Membership Units AAPC Holdings, LLC Health Care Providers & Services',
+                ('health care provider service',),
+                'AAPC Holdings, LLC',
+                'Common Stock and Membership Units',
+            ),
+            (
+                'Investments in Non-Control, Non-Affiliate Portfolio Companies Common Stock and '
+                'Membership Units BGPT Maverick, L.P. (Metric Inc.) Communications Equipment',
+                ('communication equipment',),
+                'BGPT Maverick, L.P. (Metric Inc.)',
+                'Common Stock and Membership Units',
+            ),
+            (
+                'Investments in Non-Control, Non-Affiliate Portfolio Companies Preferred Stock '
+                'and Units Prosper Marketplace Household Products',
+                ('household product',),
+                'Prosper Marketplace',
+                'Preferred Stock and Units',
+            ),
+        ],
+    )
+    def test_parse_bcic_continuation_units(
+        self,
+        raw_identifier,
+        member_candidates,
+        expected_company,
+        expected_type,
+    ):
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=member_candidates,
+        )
+        assert company == expected_company
+        assert investment_type == expected_type
+
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'member_candidates', 'expected_company', 'expected_type'),
+        [
+            (
+                'Investments in Affiliate Portfolio Companies Collateralized Loan Obligations '
+                'JMP Credit Advisors CLO IV LTD CLO Fund Securities Maturity 07/17/29',
+                (),
+                'JMP Credit Advisors CLO IV LTD',
+                'CLO Fund Securities',
+            ),
+            (
+                'Investments in Affiliate Portfolio Companies Derivatives Princeton Medspa '
+                'Partners, LLC Diversified Consumer Services',
+                ('diversified consumer service',),
+                'Princeton Medspa Partners, LLC',
+                'Derivatives',
+            ),
+            (
+                'Investments in Affiliate Portfolio Companies Joint Ventures Series B-Great '
+                'Lakes Funding II LLC Joint Venture',
+                (),
+                'Series B-Great Lakes Funding II LLC',
+                'Joint Venture',
+            ),
+            (
+                'Investments in Controlled Afilliated Portfolio Companies Asset Manager '
+                'Affiliates Asset Management Company Asset Management Company',
+                (),
+                'Asset Management Company',
+                'Asset Manager Affiliates',
+            ),
+        ],
+    )
+    def test_parse_bcic_portfolio_category(
+        self,
+        raw_identifier,
+        member_candidates,
+        expected_company,
+        expected_type,
+    ):
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=member_candidates,
+        )
+        assert company == expected_company
+        assert investment_type == expected_type
+
+    @pytest.mark.parametrize(
+        'raw_identifier',
+        [
+            'Non Controlled Affiliated Investments [Member]',
+            'Non Controlled Affiliated and Controlled Investments [Member]',
+        ],
+    )
+    def test_parse_bcic_relationship_rollup(self, raw_identifier):
+        _, _, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}'
+        )
+        assert investment_type == 'Unknown'
+
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'member_candidates', 'expected_company', 'expected_type'),
+        [
+            (
+                'Investments in Non-Control, Non-Affiliate Portfolio Companies First Lien /Senior '
+                'Secured Debt Keg Logistics LLC Diversified Consumer Services Interest Rate '
+                '10.73% Reference Rate and Spread SOFR + 6.75%, 0.50% PIK Floor 1.00% Maturity '
+                '11/23/27',
+                ('diversified consumer service',),
+                'Keg Logistics LLC',
+                'First Lien/Senior Secured Debt',
+            ),
+            (
+                'Investments in Non-Control, Non-Affiliate Portfolio Companies First Lien /Senior '
+                'Secured Debt Florida Food Products, LLC First Lien, Term Loan A Food Products '
+                'Interest Rate 9.43% Reference Rate and Spread SOFR + 5.50% Floor 2.00% Maturity '
+                '10/15/30',
+                ('food product',),
+                'Florida Food Products, LLC',
+                'First Lien/Senior Secured Debt - First Lien, Term Loan A',
+            ),
+            (
+                'Investments in Non-Control, Non-Affiliate Portfolio Companies First Lien /Senior '
+                'Secured Debt Morae Global Corporation (Revolver) IT Services Interest Rate '
+                '12.04% Reference Rate and Spread SOFR + 8.00% Floor 2.00% Maturity 10/31/28',
+                ('it service',),
+                'Morae Global Corporation',
+                'First Lien/Senior Secured Debt - Revolver',
+            ),
+            (
+                'Investments in Non-Control, Non-Affiliate Portfolio Companies First Lien/Senior '
+                'Secured Debt Bradshaw International Parent Corp. (Revolver) Specialty Retail '
+                'Reference Rate and Spread SOFR + 5.75% Floor 1.00% Maturity 10/21/26',
+                ('specialty retail',),
+                'Bradshaw International Parent Corp.',
+                'First Lien/Senior Secured Debt - Revolver',
+            ),
+            (
+                'Investments in Non-Control, Non-Affiliate Portfolio Companies First Lien/Senior '
+                'Secured Debt Anthem Sports & Entertainment Inc. (2025 Delayed Draw Term Loan) '
+                'Media Interest Rate 9.43% Reference Rate and Spread SOFR + 5.50%, 9.43% PIK '
+                'Floor 1.00% Maturity 11/15/27',
+                ('media',),
+                'Anthem Sports & Entertainment Inc.',
+                'First Lien/Senior Secured Debt - 2025 Delayed Draw Term Loan',
+            ),
+            (
+                'Investments in Non-Control, Non-Affiliate Portfolio Companies First Lien/Senior '
+                'Secured Debt Dodge Data & Analytics LLC (Second Out) Professional Services '
+                'Interest Rate 8.75% Reference Rate and Spread SOFR + 4.75% Floor 0.50% Maturity '
+                '02/28/29',
+                ('professional service',),
+                'Dodge Data & Analytics LLC',
+                'First Lien/Senior Secured Debt - Second Out',
+            ),
+        ],
+    )
+    def test_parse_bcic_lien_category(
+        self,
+        raw_identifier,
+        member_candidates,
+        expected_company,
+        expected_type,
+    ):
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=member_candidates,
+        )
+        assert company == expected_company
+        assert investment_type == expected_type
+
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'member_candidates', 'expected_company', 'expected_type'),
+        [
+            (
+                'Non-controlled affiliated investments GreenPark Infrastructure, LLC - Series A '
+                'Type of Investment Preferred Stock and Units Industry Classification Commercial '
+                'Services & Supplies',
+                ('greenpark infrastructure llc',),
+                'GreenPark Infrastructure, LLC',
+                'Preferred Stock and Units - Series A',
+            ),
+            (
+                'Non-controlled affiliated investments Princeton Medspa Partners, LLC - Put '
+                'Option Type of Investment Derivatives Industry Classification Diversified '
+                'Consumer Services',
+                ('princeton medspa partner llc',),
+                'Princeton Medspa Partners, LLC',
+                'Derivatives - Put Option',
+            ),
+        ],
+    )
+    def test_parse_bcic_security_detail(
+        self,
+        raw_identifier,
+        member_candidates,
+        expected_company,
+        expected_type,
+    ):
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=member_candidates,
+        )
+        assert company == expected_company
+        assert investment_type == expected_type
+
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'expected_company', 'expected_type'),
+        [
+            (
+                'Advancion Industry Chemicals Security 1st Lien, Secured Loan Interest Rate 1M '
+                'SOFR + 4.00% (7.82%) Initial Acquisition Date 08/26/2025 Maturity 11/24/2027',
+                'Advancion',
+                '1st Lien, Secured Loan',
+            ),
+            (
+                'Blackstone Secured Lending Fund Industry Closed-End Fund Security Common Equity '
+                'Initial Acquisition Date 09/25/2024',
+                'Blackstone Secured Lending Fund',
+                'Common Equity',
+            ),
+            (
+                'Commercial Vehicle Group, Inc. Industry Transportation Equipment Manufacturing '
+                'Security Tranche 1 Warrants Initial Acquisition Date 07/31/2025',
+                'Commercial Vehicle Group, Inc.',
+                'Tranche 1 Warrants',
+            ),
+            (
+                'Ryan, LLC Industry Business Services Security 1st Lien, Secured Loan 1M SOFR + '
+                '3.50% (7.22%) Initial Acquisition Date 11/05/2025 Maturity 11/05/2032',
+                'Ryan, LLC',
+                '1st Lien, Secured Loan',
+            ),
+            (
+                'Trident TPI Holding, Inc. Industry Packaging Unsecured Bond Interest Rate 12.75 '
+                'Initial Acquisition Date 11/26/2025 Maturity 12/31/2028',
+                'Trident TPI Holding, Inc.',
+                'Unsecured Bond',
+            ),
+            (
+                'MFB Northern Inst Funds Treas Portfolio Premier CL Short-Term Investments Money '
+                'Market Interest Rate 4.16%%',
+                'MFB Northern Inst Funds Treas Portfolio Premier CL',
+                'Short-Term Investments - Money Market',
+            ),
+            (
+                'CLO Formation JV, LLC CLO Subordinated Notes Apex Credit CLO 2025-12 Ltd',
+                'CLO Formation JV, LLC',
+                'CLO Subordinated Notes - Apex Credit CLO 2025-12 Ltd',
+            ),
+        ],
+    )
+    def test_parse_gecc_labeled_security(
+        self,
+        raw_identifier,
+        expected_company,
+        expected_type,
+    ):
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}'
+        )
+        assert company == expected_company
+        assert investment_type == expected_type
+
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'expected_company', 'expected_type'),
+        [
+            (
+                '12 Interactive, LLC | First Lien Debt 1',
+                '12 Interactive, LLC',
+                'First Lien Debt',
+            ),
+            (
+                '12 Interactive, LLC (D/B/A PerkSpot) | First Lien Debt (Revolver)',
+                '12 Interactive, LLC (D/B/A PerkSpot)',
+                'First Lien Debt (Revolver)',
+            ),
+            (
+                'RideNow Group, Inc. (F/K/A RumbleOn, Inc.) | Warrants',
+                'RideNow Group, Inc. (F/K/A RumbleOn, Inc.)',
+                'Warrants',
+            ),
+            (
+                'Contract Datascan Holdings, Inc. | Preferred Equity 2',
+                'Contract Datascan Holdings, Inc.',
+                'Preferred Equity',
+            ),
+            (
+                'Planet Bingo | LLC (F/K/A 3rd Rock Gaming Holdings, LLC), First Lien Debt',
+                'Planet Bingo, LLC (F/K/A 3rd Rock Gaming Holdings, LLC)',
+                'First Lien Debt',
+            ),
+            (
+                'Battalion CLO XI Ltd. | Mezzanine Debt - Class E',
+                'Battalion CLO XI Ltd.',
+                'Mezzanine Debt - Class E',
+            ),
+        ],
+    )
+    def test_parse_ofs_pipe_identifier(
+        self,
+        raw_identifier,
+        expected_company,
+        expected_type,
+    ):
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}'
+        )
+        assert company == expected_company
+        assert investment_type == expected_type
+
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'member_candidates', 'expected_company', 'expected_type'),
+        [
+            (
+                'Portfolio Company Equity Investments- Canada Supply Chain Technology GoFor '
+                'Delivers, Inc. Type of Investment Equity Investment Date June 28, 2024 Series '
+                'Preferred Series 2 Seed',
+                ('supply chain technology',),
+                'GoFor Delivers, Inc.',
+                'Equity - Preferred Series 2 Seed',
+            ),
+            (
+                'Portfolio Company Equity Investments- United States Multi-Sector Holdings '
+                'Eagle Point Trinity Senior Secured Lending Company (fka EPT 16 LLC) Type of '
+                'Investment Equity Investment Date June 28, 2024 Series Member Interest',
+                ('multi sector holding',),
+                'Eagle Point Trinity Senior Secured Lending Company (fka EPT 16 LLC)',
+                'Equity - Member Interest',
+            ),
+            (
+                'Portfolio Company Warrant Investments- United States Biotechnology Pendulum '
+                'Therapeutics, Inc. One Type of Investment Warrant Investment Date June 1, 2020 '
+                'Expiration Date July 15, 2030 Series Preferred Series B',
+                ('biotechnology', 'one'),
+                'Pendulum Therapeutics, Inc.',
+                'Warrant - Preferred Series B',
+            ),
+            (
+                'Portfolio Company Warrant Investments – Europe Consumer Products & Services '
+                'Motorway Online, Ltd Type of Investment Warrant Investment Date December 23, '
+                '2035 Expiration Date December 23, 2026 Ordinary',
+                ('consumer product service',),
+                'Motorway Online, Ltd',
+                'Warrant - Ordinary',
+            ),
+        ],
+    )
+    def test_parse_trin_equity_and_warrant(
+        self,
+        raw_identifier,
+        member_candidates,
+        expected_company,
+        expected_type,
+    ):
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=member_candidates,
+        )
+        assert company == expected_company
+        assert investment_type == expected_type
+
+    @pytest.mark.parametrize(
+        ('raw_identifier', 'expected_company', 'expected_type'),
+        [
+            (
+                'Control Investments Autonomy Data Services, Inc.',
+                'Autonomy Data Services, Inc.',
+                'Unknown',
+            ),
+            (
+                'Affiliate Investments GoFor Delivers, Inc.',
+                'GoFor Delivers, Inc.',
+                'Unknown',
+            ),
+            (
+                'Control and Affiliate Investments',
+                'Control and Affiliate Investments',
+                'Unknown',
+            ),
+            (
+                'SOFR 3-Month Term Rate',
+                'SOFR 3-Month Term Rate',
+                'Unknown',
+            ),
+        ],
+    )
+    def test_parse_trin_relationship_member(
+        self,
+        raw_identifier,
+        expected_company,
+        expected_type,
+    ):
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}'
+        )
+        assert company == expected_company
+        assert investment_type == expected_type
+
+    def test_parse_trin_quoted_industry_acronym(self):
+        raw_identifier = (
+            'Portfolio Company Debt Securities- United States Software as a Service ("SaaS") '
+            'Hometown Ticketing, Inc. Type of Investment Secured Loan Investment Date November '
+            '25, 2024 Maturity Date November 25, 2029 Variable interest rate SOFR 3 Month Term + '
+            '7.7%; EOT 0.0%'
+        )
+        _, company, investment_type = _parse_investment_identifier(
+            f'us-gaap:InvestmentIdentifierAxis: {raw_identifier}',
+            member_candidates=('saa',),
+        )
+        assert company == 'Hometown Ticketing, Inc.'
+        assert investment_type == 'Secured Loan'
+
 
 class TestPortfolioInvestmentsIntegration:
     """Integration tests for portfolio investments."""

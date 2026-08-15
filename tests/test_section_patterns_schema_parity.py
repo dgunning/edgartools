@@ -17,6 +17,15 @@ design mandates *before* the move:
     — on a filing whose only usable headers are "Item N" markers those items were
     unrecoverable and their content was absorbed by the preceding item. That
     change is purely additive: no pre-existing pattern was edited or removed.
+    The 10-K, 10-Q and 20-F entries were re-snapshotted again for the
+    item-separator fix (edgartools-dt1f): every item-numbered pattern now takes
+    its separator from ``_ITEM_SEP`` rather than spelling ``\\.?\\s*`` inline,
+    so that "Item 1: Business" and "Item 1 - Business" match as well as
+    "Item 1. Business". Each new pattern accepts a strict superset of what its
+    predecessor accepted — see
+    tests/issues/regression/test_dt1f_item_separator.py, which asserts that
+    superset property against this file's own previous spelling rather than
+    trusting the re-snapshot.
   * The data must actually live on the schema now (``FormSchema.section_patterns``),
     not only on the extractor — that is what lets the Phase 3 routing flip
     (edgartools-llmp.3) feed prospectus section text through the TOC engine using

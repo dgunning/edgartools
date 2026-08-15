@@ -133,14 +133,33 @@ class HybridSectionDetector:
     ) -> Dict[str, Section]:
         """Augment TOC-detected sections with pattern-detected items not in the TOC.
 
-        Some 10-K filers omit Part III (Items 10-14) from the TOC because those
-        items are incorporated by reference from the proxy statement.  The TOC
-        extractor therefore misses them; they are still present as sparse bold
-        paragraphs in the filing body.  This method runs the pattern extractor and
-        merges in any item-numbered sections whose canonical part-based key is
-        absent from the TOC result.  Only Item-based forms benefit (10-K, 10-Q,
-        8-K); the method is a no-op for unsupported forms and does NOT replace or
-        override any TOC section already present.
+        A table of contents is a thing the filer wrote, not a manifest, and items
+        go missing from it routinely: Part III (Items 10-14) when they are
+        incorporated by reference from the proxy, Item 16 (Form 10-K Summary)
+        because it is optional and usually empty, Item 1C (Cybersecurity) because
+        it was new in 2023 and templates lagged. The items are still in the body
+        as sparse bold paragraphs. This method runs the pattern extractor and
+        merges in the ones the TOC did not name. It never replaces or overrides a
+        TOC section: those carry higher confidence and real extracted text.
+
+        WHAT IS MISSING IS THE GATE'S QUESTION, NOT WHICH PART IT IS IN. This
+        used to skip the pattern pass whenever the five Part III keys were
+        present, on the reasoning that Part III is what TOCs omit. That was true
+        of the filings it was written against and false in general — and because
+        Part III is complete on most filings, the skip fired almost always. Six
+        tracked filings lost an item to it: Item 16 on axp, cvx and jnj, and
+        Item 1C on bac, jpm and tsla, each already found by the pattern extractor
+        and thrown away before it ran. Item 1C has been mandatory since December
+        2023, so the population affected is most modern 10-Ks, not an edge case.
+        The gate now asks whether the TOC result is missing any item the form
+        defines, which is the condition the augmentation exists for.
+
+        The pattern pass itself costs 30-260ms on a 2.6-12.9MB 10-K, 3-13% of
+        that filing's parse, and runs only on filings actually missing an item.
+        Total parse time over the 85-filing 10-K/10-Q corpus is unchanged within
+        run-to-run variance (61-62s either way, two runs each): the pass now runs
+        on more filings, and the item-keyed merge below hands far fewer sections
+        to ``_validate_pipeline`` on the filings where it already ran.
 
         Args:
             toc_sections: Validated sections from TOC detection.
@@ -152,39 +171,41 @@ class HybridSectionDetector:
         from edgar.documents.form_schema import get_form_schema
 
         # Only augment for Item-based forms; skip title-based (DEF 14A, 424B, S-1).
-        if get_form_schema(self.form).title_based:
+        schema = get_form_schema(self.form)
+        if schema.title_based:
             return toc_sections
 
-        # Performance gate: only run the pattern pass when there are item-based
-        # sections that the TOC may have missed.  For 10-K, this means Part III
-        # items (10-14) that are commonly omitted from the TOC when incorporated
-        # by reference.  If all expected Part-III keys are already present in the
-        # TOC result, the augmentation is a no-op and we skip the full extraction.
-        if self.form == '10-K':
-            _PART_III_KEYS = {
-                'part_iii_item_10', 'part_iii_item_11', 'part_iii_item_12',
-                'part_iii_item_13', 'part_iii_item_14',
-            }
-            if _PART_III_KEYS.issubset(toc_sections.keys()):
-                return toc_sections  # All Part III items already found; no augmentation needed
-        else:
-            # For other item-based forms (10-Q, 8-K), there is no standard set of
-            # "commonly missed" items — skip augmentation entirely to avoid cost.
+        # 8-K reports only the items that happened to occur, so "missing" has no
+        # meaning there — every 8-K is missing almost all of them — and the gate
+        # below would degenerate into "always run".
+        if not self.form or self.form.startswith('8-K'):
             return toc_sections
+
+        canonical = {schema.item_for_section_key(key) for key in schema.section_patterns}
+        canonical.discard(None)
+        found_items = {sec.item for sec in toc_sections.values() if sec.item}
+        if not canonical or canonical <= found_items:
+            return toc_sections  # The TOC named everything the form defines.
 
         # Run pattern extractor against the same document.
         pattern_sections = self._try_pattern_detection()
         if not pattern_sections:
             return toc_sections
 
-        # Merge in pattern sections whose keys are not already present in the TOC
-        # result.  Existing TOC sections are never overwritten — they carry higher
-        # confidence and real extracted text, whereas a duplicate pattern section
-        # would add noise.
+        # Merge in the pattern sections that add an item the TOC did not have.
+        #
+        # KEYED ON THE ITEM, NOT THE KEY, because the two detectors name the same
+        # section differently: the TOC path emits `part_ii_item_7` and the pattern
+        # path emits `mda`, and `Section.item` is '7' for both. Merging on the key
+        # alone would have added 9-11 duplicate sections per filing here — a
+        # second span of the same item under its other spelling — which is the
+        # same two-vocabulary trap that cost `wfc/10k` a week in BASELINE_GAPS.
+        # It did not bite before only because the Part III gate kept this code
+        # from running on the filings where the TOC succeeds.
         extras = {
             key: sec
             for key, sec in pattern_sections.items()
-            if key not in toc_sections
+            if key not in toc_sections and (not sec.item or sec.item not in found_items)
         }
         if not extras:
             return toc_sections
