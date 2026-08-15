@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.49.0] - 2026-08-15
+
 ### Changed
 
 - **BDC investment parsing now recognizes structured Schedule of Investments labels and normalizes trailing numeric XBRL disambiguators out of `investment_type`.** The original label remains available in `identifier`, so separate tranches remain distinguishable while grouping by investment type is stable. Fourteen more BDC tickers parse their investment types, and two label shapes that previously yielded a company name of `'Specialty finance'` or `'Class AA'` now return the issuer. (GH #990)
