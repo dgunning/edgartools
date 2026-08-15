@@ -61,7 +61,11 @@ dependencies = [
   # 0.5.0 briefly hard-required the httpx2 fork — which is why this was capped
   # below it — and 0.6.0 reversed that, so the cap is no longer needed to stay on
   # plain httpx. Migrating to httpx2 is tracked separately (edgartools-q2iz).
-  "httpxthrottlecache[httpx]>=0.6.0",
+  # The 0.6.1 floor is load-bearing: caching data.sec.gov reaches an age check
+  # that raised uncaught on a machine whose clock trails the origin's Date header
+  # (paultiq/httpxthrottlecache#43), taking down the whole get_facts() call.
+  # 0.6.1 clamps it.
+  "httpxthrottlecache[httpx]>=0.6.1",
   "truststore>=0.9.0",
 ]
 dynamic = ["version"]

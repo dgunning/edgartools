@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`Company.get_facts()` re-downloaded companyfacts on every call, and the 30s `/submissions` TTL never took effect.** Cache rules were keyed off `SEC_BASE_URL` alone, but httpxthrottlecache matches the request host against that key, and `re.match(r'.*www\.sec\.gov', 'data.sec.gov')` is `None` — so a fresh process logs `No patterns matched data.sec.gov` and pays full network cost every time. Keys now come from `httpx.URL(...).host`, one per host, matched exactly, which also restores caching for custom mirrors. Requires `httpxthrottlecache>=0.6.1`. (GH #989)
+
 ## [5.49.0] - 2026-08-15
 
 ### Changed
