@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`Company.get_facts()` re-downloaded companyfacts on every call, and the 30s `/submissions` TTL never took effect.** Cache rules were keyed off `SEC_BASE_URL` alone, but httpxthrottlecache matches the request host against that key, and `re.match(r'.*www\.sec\.gov', 'data.sec.gov')` is `None` — so a fresh process logs `No patterns matched data.sec.gov` and pays full network cost every time. Keys now come from `httpx.URL(...).host`, one per host, matched exactly, which also restores caching for custom mirrors. Requires `httpxthrottlecache>=0.6.1`. (GH #989)
+
 ## [5.49.0] - 2026-08-15
 
 ### Changed
@@ -26,7 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`report.items` warned you about `chunked_document`, an attribute you never touched.** `TenK`, `TenQ`, `TwentyF` and `CurrentReport` try the new parser first and fall back to the legacy `ChunkedDocument`, and those fallbacks read the *public* deprecated property — so a plain `twentyf.items` emitted `chunked_document is deprecated` about a choice that was ours, not yours. 20-F got it on every call, because at the time 20-F took the legacy path first. If you run `-W error::DeprecationWarning`, that was not a warning but an exception. Internal paths now use a private accessor and say nothing; asking for `chunked_document` yourself still warns.
 
 - **Three report classes had silently lost that deprecation entirely.** `TenK`, `TenQ` and `CurrentReport` each overrode `chunked_document` to change how it was built, and an override that replaces the property also replaces the `warnings.warn` inside it — so their users got no notice that the attribute disappears in 6.0, which is the population the deprecation exists for. Construction now happens in `_chunked_document`, the warning lives in exactly one place, and a test asserts no subclass can take it away again.
-- **`Company.get_facts()` re-downloaded companyfacts on every call, and the 30s `/submissions` TTL never took effect.** Cache rules were keyed off `SEC_BASE_URL` alone, but httpxthrottlecache matches the request host against that key, and `re.match(r'.*www\.sec\.gov', 'data.sec.gov')` is `None` — so a fresh process logs `No patterns matched data.sec.gov` and pays full network cost every time. Keys now come from `httpx.URL(...).host`, one per host, matched exactly, which also restores caching for custom mirrors. Requires `httpxthrottlecache>=0.6.1`. (GH #989)
 
 ## [5.48.0] - 2026-08-12
 
