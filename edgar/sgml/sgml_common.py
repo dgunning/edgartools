@@ -13,7 +13,7 @@ from edgar.httprequests import stream_with_retry
 from edgar.sgml.filing_summary import FilingSummary
 from edgar.sgml.sgml_header import FilingHeader
 from edgar.sgml.sgml_parser import SGMLDocument, SGMLFormatType, SGMLParser, parse_document
-from edgar.sgml.text_extraction import primary_document_text
+from edgar.sgml.text_extraction import decode_document_content, primary_document_text
 from edgar.sgml.tools import is_xml
 
 
@@ -292,12 +292,15 @@ class FilingSGML:
 
 
     def html(self):
+        """The HTML of the primary document, or None when there is no HTML to return.
+
+        None covers a missing, empty or binary primary document. ``primary_html_document``
+        falls back to the first primary document when nothing has an .htm/.html extension,
+        so a PDF-only filing arrives here and must not be decoded as text.
+        """
         html_document = self.attachments.primary_html_document
         if html_document and not html_document.is_binary() and not html_document.empty:
-            html_text = self.get_content(html_document.document)
-            if isinstance(html_text, bytes):
-                html_text = html_text.decode('utf-8')
-            return html_text
+            return decode_document_content(self.get_content(html_document.document))
 
     def text(self) -> Optional[str]:
         """
@@ -343,12 +346,10 @@ class FilingSGML:
         return content
 
     def xml(self):
+        """The XML of the primary document, or None when there is no XML to return."""
         xml_document = self.attachments.primary_xml_document
         if xml_document and not xml_document.is_binary() and not xml_document.empty:
-            xml_text = self.get_content(xml_document.document)
-            if isinstance(xml_text, bytes):
-                xml_text = xml_text.decode('utf-8')
-            return xml_text
+            return decode_document_content(self.get_content(xml_document.document))
 
     def get_content(self, filename: str) -> Optional[str]:
         """

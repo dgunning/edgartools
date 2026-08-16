@@ -68,6 +68,110 @@ OWNERSHIP_FORMS = frozenset({'3', '3/A', '4', '4/A', '5', '5/A'})
 _TAG_RE = re.compile(r'<[^>]+>')
 _OWNERSHIP_ROOT_RE = re.compile(r'<(?:[\w.-]+:)?ownershipDocument\b')
 
+#: Anything that may legally precede the root element: the XML declaration and other
+#: processing instructions, comments, and a DOCTYPE (with an optional internal subset).
+_XML_PROLOG_RE = re.compile(
+    r'\s*(?:<\?.*?\?>|<!--.*?-->|<!DOCTYPE[^>\[]*(?:\[.*?\])?\s*>)\s*',
+    re.DOTALL | re.IGNORECASE,
+)
+_ROOT_ELEMENT_RE = re.compile(r'<([A-Za-z_][\w.-]*(?::[\w.-]+)?)')
+_XML_DECLARATION_RE = re.compile(r'<\?xml[\s?]', re.IGNORECASE)
+
+# ── Legacy SGML financial-data-schedule dialect (Filer Manual vol 2, 5.2.1.3-5.2.2) ──
+# Pre-1997 filings mark up fixed-width tables with an HTML-3.2-like dialect that the text
+# pipeline used to pass through verbatim. These patterns are deliberately tight: 1990s
+# filings contain bare "<" as an inequality, and blanket angle-bracket deletion would eat
+# real content (edgartools-puhs).
+
+#: Structural markers that occupy a whole line: <TABLE>, </TABLE>, <CAPTION>.
+_FDS_STRUCTURE_LINE_RE = re.compile(r'^\s*</?(?:TABLE|CAPTION)>\s*$', re.IGNORECASE)
+#: A column-type declaration row — only <S> (stub) and <C> (column) markers and whitespace.
+_FDS_COLUMN_LINE_RE = re.compile(r'^\s*<[SC]>(?:\s*<[SC]>)*\s*$', re.IGNORECASE)
+#: Footnote references, inline in cell data: <F1>, <F12>.
+_FDS_FOOTNOTE_RE = re.compile(r'<(F\d+)>', re.IGNORECASE)
+#: SGML page markers, bare or numbered: <PAGE>, <PAGE 1>.
+_PAGE_MARKER_RE = re.compile(r'<PAGE(?:\s+\d+)?>', re.IGNORECASE)
+
+
+def strip_sgml_dialect_markup(text: str) -> str:
+    """Remove the legacy SGML table dialect from fixed-width filing text.
+
+    Fixed-width layout is the whole point of these documents, so nothing here may change
+    the width of a line that carries data:
+
+    * ``<TABLE>``, ``</TABLE>``, ``<CAPTION>`` and the ``<S>``/``<C>`` column-type row each
+      occupy a line of their own, so the entire line is dropped and no column moves.
+    * Footnote references sit *inline* in cell data (``3,615<F2>``), so they are rewritten
+      rather than deleted — ``<F2>`` becomes ``[F2]``. Keeping the ``F`` makes this
+      width-neutral for every footnote number, since only the delimiters change: ``<F1>``
+      and ``[F1]`` are both 4 characters, ``<F10>`` and ``[F10]`` both 5. Dropping the
+      ``F`` would shrink every reference by one character and shift the rest of the line.
+
+    Deleting the references outright was rejected: they point at footnotes that are still
+    in the document, and this codebase decodes what it recognises rather than deleting it.
+    """
+    lines = [
+        line for line in text.split('\n')
+        if not (_FDS_STRUCTURE_LINE_RE.match(line) or _FDS_COLUMN_LINE_RE.match(line))
+    ]
+    text = '\n'.join(lines)
+    text = _FDS_FOOTNOTE_RE.sub(r'[\1]', text)
+    return _PAGE_MARKER_RE.sub('', text)
+
+#: The prolog is read from the head of the document only. Documents here run to hundreds
+#: of MB and the prolog is a few hundred bytes even when a filer is generous with comments.
+_PROLOG_SCAN_LIMIT = 65536
+
+
+def root_element_name(content: Optional[str]) -> Optional[str]:
+    """The local name of the document's root element, or None if there isn't one.
+
+    Skips the XML declaration, processing instructions, comments and DOCTYPE, then reads
+    the first element name and drops any namespace prefix. ``<twe:edgarSubmission>``
+    gives ``edgarSubmission``.
+    """
+    if not content:
+        return None
+    head = content[:_PROLOG_SCAN_LIMIT]
+    pos = 0
+    while True:
+        match = _XML_PROLOG_RE.match(head, pos)
+        if not match or match.end() == pos:
+            break
+        pos = match.end()
+    match = _ROOT_ELEMENT_RE.match(head, pos)
+    if not match:
+        return None
+    return match.group(1).rsplit(':', 1)[-1]
+
+
+def is_xml_document(content: Optional[str]) -> bool:
+    """True when ``content`` is an XML instance rather than an HTML or text document.
+
+    Requires BOTH an XML declaration and a root element that is not ``<html>``. Each half
+    is load-bearing, and dropping either one misclassifies a real filing:
+
+    * The declaration alone is not enough. Modern inline-XBRL primary documents open with
+      ``<?xml version='1.0'?>``, then comments, then ``<html>`` — they are HTML and must
+      keep rendering as HTML (e.g. AAPL's FY2024 10-K).
+    * The root element alone is not enough. Historic fixed-width filings open with the SGML
+      page marker ``<PAGE>``, which reads as a root element named "PAGE" (e.g. the 1994
+      PRE 14A 0000012400-94-000008). Treating those as XML would skip the ``<PAGE>``
+      stripping they need.
+
+    Deliberately NOT decided by ``is_probably_html()``, which asks whether ``<p>``/``<div``/
+    ``<span`` appears *anywhere* in the string: one such substring inside a 143MB NPORT
+    instance classified the whole document as HTML, and ``text()`` then spent ~1.5 hours
+    walking XML through the HTML renderer (accession 0001193125-25-295554; edgartools-t3iq).
+    """
+    if not content:
+        return False
+    # Bounded slice: `content` can be hundreds of MB, so never lstrip() the whole string.
+    if not _XML_DECLARATION_RE.match(content[:_PROLOG_SCAN_LIMIT].lstrip()):
+        return False
+    root = root_element_name(content)
+    return root is not None and root.lower() != 'html'
+
 
 def is_ownership_form(form: Optional[str]) -> bool:
     """True when ``form`` is a Section 16 ownership form (3, 4, 5 and amendments)."""
@@ -223,9 +327,17 @@ def primary_document_text(
         if rendered:
             return html_to_text(rendered, form=form)
 
+    # XML with no offline renderer is returned verbatim (see the module docstring: rendering
+    # these needs the SEC's XSLT endpoint, which FilingSGML has no network access for). The
+    # point of deciding it HERE is to keep it away from html_to_text() below, which would
+    # strip exactly the tags that carry the meaning — an <invstOrSec> instance rendered as
+    # HTML is a wall of undifferentiated numbers — and which walks the whole tree to do it.
+    if is_xml_document(text):
+        return text
+
     if is_probably_html(text):
         return html_to_text(text, form=form)
 
-    # Plain text (and XML with no offline renderer): return as-is, minus the SGML
-    # page-break markers. Fixed-width layout is preserved, not reflowed.
-    return text.replace("<PAGE>", "")
+    # Plain text: fixed-width layout is preserved, not reflowed. Only the SGML markup
+    # itself is removed, and only in ways that cannot move a column.
+    return strip_sgml_dialect_markup(text)
