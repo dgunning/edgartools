@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **The HTTP cache was wiped twice on every `import edgar`, so it never survived a process.** The two "one-time" import-time cache clears (#457 locale fix, #672 empty-response fix) each kept their marker file inside `_tcache` — the directory the other one `rmtree`s — so each import deleted the other's marker and both clears fired forever, from v5.20.1 onward. Short-lived processes re-downloaded everything from SEC each run, and a wipe landing on a concurrent edgar process's in-flight cache write crashed it with `FileNotFoundError`. Markers now live in `<edgar-data-dir>/.migrations`, outside the cleared directory, and all migrations run as a single pass that clears at most once; the legacy in-cache marker is honored, so upgrading performs at most one final clear. (GH #1051)
+
 ## [5.50.0] - 2026-08-18
 
 ### Fixed

@@ -43,9 +43,11 @@ INTERNAL = {
     "get_data_directory", "get_search_cache_directory", "get_test_directory",
     "set_cache_directory", "set_claude_skills_directory", "set_data_directory",
     "set_test_directory",
-    # internal cache management; clear_cache() is the supported entry point
-    "clear_company_facts_cache", "clear_empty_cached_responses",
-    "clear_locale_corrupted_cache",
+    # internal cache management; clear_cache() is the supported entry point.
+    # clear_empty_cached_responses / clear_locale_corrupted_cache left this
+    # boundary in the #1051 fix: __init__.py now runs the migrations via
+    # _run_import_time_cache_migrations, so they live only in edgar.httpclient.
+    "clear_company_facts_cache",
     # helpers and protocols used inside the package
     "listify", "matches_form", "edgar_mode", "get_obj_info",
     "HasContext", "compose_context",
