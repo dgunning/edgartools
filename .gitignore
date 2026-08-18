@@ -96,3 +96,9 @@ agent_eval_results/
 # Backup this script writes before overwriting the shipped mapping. Anchored and
 # suffixed so it cannot match ct.pq itself — see the hatchling note above.
 /edgar/reference/data/*.bak
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
+.beads/proxieddb/
