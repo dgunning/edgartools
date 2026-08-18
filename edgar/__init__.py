@@ -129,21 +129,15 @@ from edgar.xbrl import XBRL
 # which is especially harmful in MCP / stdio environments.
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
-# Fix for Issue #457: Clear locale-corrupted cache files on first import
-# This is a one-time operation that only runs if the marker file doesn't exist
+# One-time cache clears on first import (#457 locale-corrupted entries, #672 stale
+# empty responses). Run as a single migration pass so the cache is wiped at most
+# once, with markers kept outside the cache directory — one clear can never delete
+# another's marker (#1051).
 try:
-    from edgar.httpclient import clear_locale_corrupted_cache
-    clear_locale_corrupted_cache()
+    from edgar.httpclient import _run_import_time_cache_migrations
+    _run_import_time_cache_migrations()
 except Exception:
     # Silently continue if cache clearing fails - it's not critical
-    pass
-
-# Fix for Issue #672: Clear potentially stale empty cached responses on first import
-# The cache-forever rule could have permanently cached empty SEC responses from transient outages
-try:
-    from edgar.httpclient import clear_empty_cached_responses
-    clear_empty_cached_responses()
-except Exception:
     pass
 
 # Another name for get_current_filings
