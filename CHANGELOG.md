@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **`str(person)` printed the first name twice** instead of the full name. `repr()` was always correct, which is why Rich tables and notebook output looked right while string interpolation did not.
 
+- **`SecForms.load()` returned an object that raised a bewildering `SyntaxError` on use.** It wrapped `list_forms()`, which already returns a `SecForms`, so the forms table ended up nested one level too deep and every read of it went through the wrong `__getitem__` into a pandas query expression. `SecForms.load().get_form("1-A")` now returns Form 1-A, the Regulation A Offering Statement.
+
 ## [5.50.0] - 2026-08-18
 
 ### Fixed

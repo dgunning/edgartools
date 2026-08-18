@@ -22,6 +22,7 @@ No network: `download_file` is patched, which is also what keeps `list_forms`'s
 from pathlib import Path
 from unittest.mock import patch
 
+import pandas as pd
 import pytest
 
 from edgar.config import SEC_BASE_URL
@@ -222,9 +223,14 @@ def test_repr_renders_without_error(forms):
     assert "1-A" in repr(forms)
 
 
-@pytest.mark.xfail(strict=True, reason="edgartools-07rg: SecForms.load() double-wraps list_forms()")
 def test_load_returns_usable_forms():
-    download = _serve()
-    with patch("edgar.forms.download_file", download):
+    """Regression for edgartools-07rg: `load()` used to wrap a `SecForms` in another
+    `SecForms`, so `.data` was not a DataFrame and `summary()`/`repr()` raised a
+    pandas `SyntaxError` that never mentioned forms."""
+    with patch("edgar.forms.download_file", _serve()):
         loaded = SecForms.load()
+
+    assert isinstance(loaded.data, pd.DataFrame)
     assert loaded.get_form("1-A").sec_number == "SEC486"
+    assert list(loaded.summary().columns) == ["Form", "Description", "Topics"]
+    assert "1-A" in repr(loaded)
