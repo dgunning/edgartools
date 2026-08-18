@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Performance
 
+- **Parsing a Form 3, 4 or 5 is 2.7x faster** — 3.35ms to 1.25ms per filing, measured over 69 real ownership filings from five quarters, with every parsed field identical before and after: holdings, transactions, footnotes, signatures, issuer and all 126 reporting owners. The XML layer itself is 28x faster to parse and 4.8x faster to read; what is left is the DataFrame construction, which now dominates. `Form4.transactions` on a portfolio of insider filings is where this shows.
+
 - **Parsing an EFFECT filing is 9.0x faster** — 242µs to 27µs per submission, measured over 39 real EFFECT documents from four quarters, with every parsed field identical before and after. EFFECT notices are small, so the win only shows at volume; a day's worth of them is a few thousand filings.
 
 ### Fixed

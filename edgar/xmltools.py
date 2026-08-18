@@ -32,12 +32,15 @@ from bs4 import BeautifulSoup, Tag
 from lxml import etree
 
 __all__ = [
+    'XmlNode',
     'child_text',
     'child_value',
     'child_texts',
+    'element_text',
     'find_all_elements',
     'find_element',
     'get_footnote_ids',
+    'local_name',
     'optional_decimal',
     'parse_xml',
     'value_or_footnote',
@@ -243,6 +246,34 @@ def find_all_elements(
             return []
         return _find_all(BeautifulSoup(xml_tag_or_string, features="xml"), element_name)
     return _find_all(xml_tag_or_string, element_name)
+
+
+def local_name(node: XmlNode) -> str:
+    """This element's tag without its namespace — the neutral form of `.tag`.
+
+    For checking that a parsed document is the one you expected, which is the only
+    thing `bs4`'s `soup.find("ownershipDocument")` was doing at a parse entry point.
+    A namespaced document's root reads as `{http://www.sec.gov/edgar}ownershipDocument`
+    on lxml, so comparing `.tag` directly is a name check that fails on exactly the
+    documents the local-name matching elsewhere in this module exists to handle.
+    """
+    return node.name if _is_bs4(node) else _local_name(node.tag)
+
+
+def element_text(node: XmlNode) -> str:
+    """All of this element's descendant text, concatenated — bs4 `.text` semantics.
+
+    The backend-neutral replacement for reading `.text` off an element you already
+    hold. It is the difference most likely to survive review unnoticed: lxml's
+    `.text` stops at the first CHILD ELEMENT, so a footnote reading
+    `<footnote>see <i>note</i> below</footnote>` comes back as `'see '` — a
+    plausible string rather than an error.
+
+    `child_text(parent, name)` covers the common case of reading a *named child*
+    and strips the result. Reach for this one only when the element in hand is
+    already the one whose text you want.
+    """
+    return _text(node)
 
 
 def get_footnote_ids(tag: XmlNode,

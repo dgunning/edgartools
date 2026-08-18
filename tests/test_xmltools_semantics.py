@@ -42,11 +42,13 @@ from edgar.xmltools import (
     child_text,
     child_texts,
     child_value,
+    element_text,
     extract_child_text,
     extract_child_value,
     find_all_elements,
     find_element,
     get_footnote_ids,
+    local_name,
     optional_decimal,
     parse_xml,
     value_or_footnote,
@@ -487,3 +489,40 @@ def test_parse_xml_keeps_a_namespaced_root_addressable_by_local_name():
     root = parse_xml(ATOM_XML)
     assert child_text(root, "title") == "EDGAR Filings"
     assert len(find_all_elements(root, "entry")) == 2
+
+
+# --------------------------------------------------- element_text / local_name
+
+# The neutral forms of `.text` and `.tag`, for the dependents that hold an element
+# and need to read it rather than search below it (edgartools-07lk.11.3).
+
+
+def test_element_text_concatenates_the_whole_subtree(parse):
+    """lxml's own `.text` stops at the first child element, so a footnote with any
+    markup in it would read as the fragment before that markup — a plausible
+    string, not an error. This is the trap `element_text` exists to close."""
+    xml = "<r><footnote id='F1'>see <i>note</i> below</footnote></r>"
+    footnote = find_element(parse(xml, "r"), "footnote")
+    assert element_text(footnote) == "see note below"
+
+
+def test_element_text_does_not_strip(parse):
+    """Unlike `child_text`. Callers that want it stripped say so."""
+    xml = "<r><a>  padded  </a></r>"
+    assert element_text(find_element(parse(xml, "r"), "a")) == "  padded  "
+
+
+def test_element_text_of_an_empty_element_is_empty_string(parse):
+    assert element_text(find_element(parse("<r><a/></r>", "r"), "a")) == ""
+
+
+def test_local_name_ignores_the_namespace(parse):
+    """What a root-element check has to compare against. lxml reports a namespaced
+    root as `{http://www.w3.org/2005/Atom}feed`, so comparing `.tag` to `"feed"` is
+    a check that fails on exactly the documents that need it most."""
+    assert local_name(parse(ATOM_XML, "feed")) == "feed"
+    assert local_name(parse(MIXED_NS_XML, "b")) == "b"
+
+
+def test_local_name_of_an_unnamespaced_element_is_the_tag(parse):
+    assert local_name(parse(ISSUER_XML, "primaryIssuer")) == "primaryIssuer"

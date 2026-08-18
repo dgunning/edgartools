@@ -304,6 +304,12 @@ def pytest_collection_modifyitems(config, items):
         # the bs4 to lxml port; both parse inline XML strings and touch no fetch
         # path. Verified with outbound sockets blocked before being called fast.
         'test_party', 'test_forms_listing',
+        # Classified 2026-08-18 (edgartools-07lk.11.3). The offline half of the
+        # Form 3/4/5 parse contract, split out of tests/test_ownership.py so the
+        # regressions the lxml port could introduce silently are caught by the
+        # fast job rather than only by the sequential network suite. Verified
+        # with outbound sockets blocked before being called fast.
+        'test_insider_parse_contract',
     ]
 
     # Files that need network (fetch from SEC)
