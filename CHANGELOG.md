@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Performance
 
+- **Parsing a Form D notice is 8.8x faster** — 2.04ms to 0.23ms per notice, measured over 42 real D and D/A filings from 2022 to 2025, with every field identical before and after: issuer, all 145 related persons and their relationships, the offering sections, sales-compensation recipients and signatures.
+
 - **Parsing a Form 144 notice is 3.1x faster** — 3.74ms to 1.20ms per notice, measured over 31 real 144 and 144/A filings from 2022 to 2025, with every field identical before and after: filer, issuer, address, both securities tables and the notice signature.
 
 - **Parsing a 13F cover page is 5.7x faster** — 717µs to 125µs per primary document, measured over 36 real 13F-HR, 13F-HR/A and 13F-NT filings from 2022 to 2025, with every field identical before and after: manager, address, summary totals, other managers and amendment metadata. This is the parse behind `ThirteenF.filing_manager`, `.total_value` and `.other_managers`.

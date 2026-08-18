@@ -1,6 +1,5 @@
 from typing import Any, Dict, List, Optional
 
-from bs4 import Tag
 from pydantic import BaseModel
 from rich.columns import Columns
 from rich.console import Group
@@ -10,7 +9,7 @@ from rich.text import Text
 
 from edgar.core import IntString
 from edgar.richtools import repr_rich
-from edgar.xmltools import child_text, child_value
+from edgar.xmltools import XmlNode, child_text, child_value, element_text, find_all_elements, find_element
 
 __all__ = [
     'Address',
@@ -134,32 +133,30 @@ class Issuer:
         self.incorporated_within_5_years: bool = incorporated_within_5_years
 
     @classmethod
-    def from_xml(cls, issuer_el: Tag):
+    def from_xml(cls, issuer_el: XmlNode):
         # edgar previous names
-        edgar_previous_names_el = issuer_el.find("edgarPreviousNameList")
-        edgar_previous_names = [el.text
-                                for el in edgar_previous_names_el.find_all("value")
-                                if el.text != 'None'] if edgar_previous_names_el and isinstance(edgar_previous_names_el, Tag) else []
+        edgar_previous_names_el = find_element(issuer_el, "edgarPreviousNameList")
+        edgar_previous_names = [element_text(el)
+                                for el in find_all_elements(edgar_previous_names_el, "value")
+                                if element_text(el) != 'None'] if edgar_previous_names_el is not None else []
 
         # issuer previous names
-        issuer_previous_names_el = issuer_el.find("issuerPreviousNameList")
-        issuer_previous_names = [el.text
-                                 for el in issuer_previous_names_el.find_all("value")
-                                 if el.text != 'None'] if issuer_previous_names_el and isinstance(issuer_previous_names_el, Tag) else []
+        issuer_previous_names_el = find_element(issuer_el, "issuerPreviousNameList")
+        issuer_previous_names = [element_text(el)
+                                 for el in find_all_elements(issuer_previous_names_el, "value")
+                                 if element_text(el) != 'None'] if issuer_previous_names_el is not None else []
 
-        year_of_inc_el = issuer_el.find("yearOfInc")
+        year_of_inc_el = find_element(issuer_el, "yearOfInc")
 
         # Address
-        issuer_address_el = issuer_el.find("issuerAddress")
-        if not isinstance(issuer_address_el, Tag):
-            issuer_address_el = None
+        issuer_address_el = find_element(issuer_el, "issuerAddress")
         address: Address = Address(
-            street1=child_text(issuer_address_el, "street1") if issuer_address_el else None,
-            street2=child_text(issuer_address_el, "street2") if issuer_address_el else None,
-            city=child_text(issuer_address_el, "city") if issuer_address_el else None,
-            state_or_country=child_text(issuer_address_el, "stateOrCountry") if issuer_address_el else None,
-            state_or_country_description=child_text(issuer_address_el, "stateOrCountryDescription") if issuer_address_el else None,
-            zipcode=child_text(issuer_address_el, "zipCode") if issuer_address_el else None
+            street1=child_text(issuer_address_el, "street1") if issuer_address_el is not None else None,
+            street2=child_text(issuer_address_el, "street2") if issuer_address_el is not None else None,
+            city=child_text(issuer_address_el, "city") if issuer_address_el is not None else None,
+            state_or_country=child_text(issuer_address_el, "stateOrCountry") if issuer_address_el is not None else None,
+            state_or_country_description=child_text(issuer_address_el, "stateOrCountryDescription") if issuer_address_el is not None else None,
+            zipcode=child_text(issuer_address_el, "zipCode") if issuer_address_el is not None else None
         )
 
         return cls(
@@ -172,7 +169,8 @@ class Issuer:
             primary_address=address,
             issuer_previous_names=issuer_previous_names,
             year_of_incorporation=child_value(issuer_el, "yearOfInc"),
-            incorporated_within_5_years=year_of_inc_el and child_text(year_of_inc_el, "withinFiveYears") == "true"
+            incorporated_within_5_years=(child_text(year_of_inc_el, "withinFiveYears") == "true"
+                                         if year_of_inc_el is not None else None)
         )
 
     def __rich__(self):

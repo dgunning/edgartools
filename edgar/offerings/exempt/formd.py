@@ -1,7 +1,6 @@
 import re
 from typing import List, Optional
 
-from bs4 import BeautifulSoup, Tag
 from pydantic import BaseModel
 from rich import box
 from rich.columns import Columns
@@ -11,7 +10,16 @@ from rich.table import Table
 
 from edgar._party import Address, Issuer, Person
 from edgar.richtools import repr_rich
-from edgar.xmltools import child_text, child_value
+from edgar.xmltools import (
+    XmlNode,
+    child_text,
+    child_value,
+    element_text,
+    find_all_elements,
+    find_element,
+    local_name,
+)
+from edgar.xmltools import parse_xml as parse_xml_document
 
 __all__ = [
     'FormD',
@@ -116,14 +124,14 @@ class SalesCompensationRecipient:
 
     @classmethod
     def from_xml(cls,
-                 recipient_tag: Tag):
+                 recipient_tag: XmlNode):
         # Name and Crd can be "None"
         name = re.sub("None", "", child_text(recipient_tag, "recipientName") or "")
         crd = re.sub("None", "", child_text(recipient_tag, "recipientCRDNumber") or "")
         associated_bd_name = re.sub("None", "", child_text(recipient_tag, "associatedBDName") or "", flags=re.IGNORECASE)
         associated_bd_crd = re.sub("None", "", child_text(recipient_tag, "associatedBDCRDNumber") or "", flags=re.IGNORECASE)
 
-        address_tag = recipient_tag.find("recipientAddress")
+        address_tag = find_element(recipient_tag, "recipientAddress")
         address = Address(
             street1=child_text(address_tag, "street1"),
             street2=child_text(address_tag, "street2"),
@@ -131,16 +139,18 @@ class SalesCompensationRecipient:
             state_or_country=child_text(address_tag, "stateOrCountry"),
             state_or_country_description=child_text(address_tag, "stateOrCountryDescription"),
             zipcode=child_text(address_tag, "30361")
-        ) if address_tag else None
+        ) if address_tag is not None else None
 
         # States of Solicitation List
-        states_of_solicitation_tag = recipient_tag.find("statesOfSolicitationList")
+        states_of_solicitation_tag = find_element(recipient_tag, "statesOfSolicitationList")
         # Add individual states
-        states_of_solicitation = [el.text for el in
-                                  states_of_solicitation_tag.find_all("state")] if states_of_solicitation_tag else []
+        states_of_solicitation = [element_text(el) for el in
+                                  find_all_elements(states_of_solicitation_tag, "state")
+                                  ] if states_of_solicitation_tag is not None else []
         # Sometimes there are no states but there are values e.g. <value>All States</value>
-        solicitation_values = [el.text for el in
-                               states_of_solicitation_tag.find_all("value")] if states_of_solicitation_tag else []
+        solicitation_values = [element_text(el) for el in
+                               find_all_elements(states_of_solicitation_tag, "value")
+                               ] if states_of_solicitation_tag is not None else []
         states_of_solicitation += solicitation_values
 
         return cls(
@@ -188,89 +198,90 @@ class OfferingData:
         self.use_of_proceeds: UseOfProceeds = use_of_proceeds
 
     @classmethod
-    def from_xml(cls, offering_data_el: Tag):
+    def from_xml(cls, offering_data_el: XmlNode):
         # industryGroup
-        industry_group_el = offering_data_el.find("industryGroup")
-        industry_group_type = child_text(industry_group_el, "industryGroupType") if industry_group_el else ""
-        investment_fund_info_el = industry_group_el.find("investmentFundInfo")
+        industry_group_el = find_element(offering_data_el, "industryGroup")
+        industry_group_type = child_text(industry_group_el, "industryGroupType") if industry_group_el is not None else ""
+        investment_fund_info_el = find_element(industry_group_el, "investmentFundInfo")
         investment_fund_info = InvestmentFundInfo(
             investment_fund_type=child_text(investment_fund_info_el, "investmentFundType"),
             is_40_act=child_text(investment_fund_info_el, "is40Act") == "true"
-        ) if investment_fund_info_el else None
+        ) if investment_fund_info_el is not None else None
 
         industry_group = IndustryGroup(industry_group_type=industry_group_type,
                                        investment_fund_info=investment_fund_info)
 
-        issuer_size_el = offering_data_el.find("issuerSize")
+        issuer_size_el = find_element(offering_data_el, "issuerSize")
         revenue_range = child_text(issuer_size_el, "revenueRange")
 
-        fed_exemptions_el = offering_data_el.find("federalExemptionsExclusions")
-        federal_exemptions = [item_el.text
+        fed_exemptions_el = find_element(offering_data_el, "federalExemptionsExclusions")
+        federal_exemptions = [element_text(item_el)
                               for item_el
-                              in fed_exemptions_el.find_all("item")] if fed_exemptions_el else []
+                              in find_all_elements(fed_exemptions_el, "item")] if fed_exemptions_el is not None else []
 
         # type of filing
-        type_of_filing_el = offering_data_el.find("typeOfFiling")
-        new_or_amendment_el = type_of_filing_el.find("newOrAmendment")
-        new_or_amendment = new_or_amendment_el and child_text(new_or_amendment_el, "isAmendment") == "true"
+        type_of_filing_el = find_element(offering_data_el, "typeOfFiling")
+        new_or_amendment_el = find_element(type_of_filing_el, "newOrAmendment")
+        new_or_amendment = (child_text(new_or_amendment_el, "isAmendment") == "true"
+                            if new_or_amendment_el is not None else None)
         date_of_first_sale = child_value(type_of_filing_el, "dateOfFirstSale")
 
         # Duration of transaction
-        duration_of_offering_el = offering_data_el.find("durationOfOffering")
-        more_than_one_year = duration_of_offering_el and child_text(duration_of_offering_el,
-                                                                    "moreThanOneYear") == "true"
+        duration_of_offering_el = find_element(offering_data_el, "durationOfOffering")
+        more_than_one_year = (child_text(duration_of_offering_el, "moreThanOneYear") == "true"
+                              if duration_of_offering_el is not None else None)
 
         # Type of security
-        type_of_seurity_el = offering_data_el.find("typesOfSecuritiesOffered")
+        type_of_seurity_el = find_element(offering_data_el, "typesOfSecuritiesOffered")
         is_equity = child_text(type_of_seurity_el, "isEquityType") == "true"
         is_pooled_investment = child_text(type_of_seurity_el, "isPooledInvestmentFundType") == "true"
 
         # Businss combination
-        bus_combination_el = offering_data_el.find("businessCombinationTransaction")
+        bus_combination_el = find_element(offering_data_el, "businessCombinationTransaction")
         business_combination_transaction = BusinessCombinationTransaction(
-            is_business_combination=bus_combination_el and child_text(bus_combination_el,
-                                                                      "isBusinessCombinationTransaction") == "true",
+            is_business_combination=child_text(bus_combination_el,
+                                               "isBusinessCombinationTransaction") == "true",
             clarification_of_response=child_text(bus_combination_el, "clarificationOfResponse")
-        ) if bus_combination_el else None
+        ) if bus_combination_el is not None else None
 
         # Minimum investment
         minimum_investment = child_text(offering_data_el, "minimumInvestmentAccepted")
 
         # Sales Compensation List
-        sales_compensation_tag = offering_data_el.find("salesCompensationList")
+        sales_compensation_tag = find_element(offering_data_el, "salesCompensationList")
         sales_compensation_recipients = [
             SalesCompensationRecipient.from_xml(el)
-            for el in sales_compensation_tag.find_all("recipient")
-        ] if sales_compensation_tag else []
+            for el in find_all_elements(sales_compensation_tag, "recipient")
+        ] if sales_compensation_tag is not None else []
 
         # Offering Sales Amount
-        offering_sales_amount_tag: Optional[Tag] = offering_data_el.find("offeringSalesAmounts")
+        offering_sales_amount_tag: Optional[XmlNode] = find_element(offering_data_el, "offeringSalesAmounts")
         offering_sales_amounts = OfferingSalesAmounts(
             total_offering_amount=child_text(offering_sales_amount_tag, "totalOfferingAmount"),
             total_amount_sold=child_text(offering_sales_amount_tag, "totalAmountSold"),
             total_remaining=child_text(offering_sales_amount_tag, "totalRemaining"),
             clarification_of_response=child_text(offering_sales_amount_tag, "clarificationOfResponse")
-        ) if offering_sales_amount_tag else None
+        ) if offering_sales_amount_tag is not None else None
 
         # investors
-        investors_tag: Optional[Tag] = offering_data_el.find("investors")
+        investors_tag: Optional[XmlNode] = find_element(offering_data_el, "investors")
         investors = Investors(
             has_non_accredited_investors=child_text(investors_tag, "hasNonAccreditedInvestors") == "true",
             total_already_invested=child_text(investors_tag, "totalNumberAlreadyInvested")
-        ) if investors_tag else None
+        ) if investors_tag is not None else None
 
         # salesCommissionsFindersFees
-        sales_commission_finders_tag: Optional[Tag] = offering_data_el.find("salesCommissionsFindersFees")
+        sales_commission_finders_tag: Optional[XmlNode] = find_element(offering_data_el, "salesCommissionsFindersFees")
         sales_commission_finders_fees = SalesCommissionFindersFees(
-            sales_commission=child_text(sales_commission_finders_tag.find("salesCommissions"), "dollarAmount"),
-            finders_fees=child_text(sales_commission_finders_tag.find("findersFees"), "dollarAmount"),
+            sales_commission=child_text(find_element(sales_commission_finders_tag, "salesCommissions"), "dollarAmount"),
+            finders_fees=child_text(find_element(sales_commission_finders_tag, "findersFees"), "dollarAmount"),
             clarification_of_response=child_text(sales_commission_finders_tag, "clarificationOfResponse")
-        ) if sales_commission_finders_tag else None
+        ) if sales_commission_finders_tag is not None else None
 
         # useOfProceeds
-        use_of_proceeds_tag = offering_data_el.find("useOfProceeds")
+        use_of_proceeds_tag = find_element(offering_data_el, "useOfProceeds")
         use_of_proceeds = UseOfProceeds(
-            gross_proceeds_used=child_text(use_of_proceeds_tag.find("grossProceedsUsed"), "dollarAmount"),
+            gross_proceeds_used=child_text(find_element(use_of_proceeds_tag, "grossProceedsUsed"), "dollarAmount"),
             clarification_of_response=child_text(use_of_proceeds_tag, "clarificationOfResponse")
         )
 
@@ -329,23 +340,27 @@ class FormD:
 
     @classmethod
     def from_xml(cls, offering_xml: str):
-        soup = BeautifulSoup(offering_xml, "xml")
-        root = soup.find("edgarSubmission")
+        # <edgarSubmission> is the document element of a Form D. Unlike most SEC
+        # form XML this one carries no namespace, but the reads still go through the
+        # helpers rather than the backend (edgartools-07lk.11.3).
+        root = parse_xml_document(offering_xml)
+        if local_name(root) != "edgarSubmission":
+            raise ValueError(f"Expected an edgarSubmission document, got <{local_name(root)}>")
 
         # Parse the issuer
-        primary_issuer_el = root.find("primaryIssuer")
-        primary_issuer:Optional[Tag] = Issuer.from_xml(primary_issuer_el)
+        primary_issuer_el = find_element(root, "primaryIssuer")
+        primary_issuer: Optional[Issuer] = Issuer.from_xml(primary_issuer_el)
         is_live = child_text(root, 'testOrLive') == 'LIVE'
 
         # Parse the related party names
-        related_party_list = root.find("relatedPersonsList")
+        related_party_list = find_element(root, "relatedPersonsList")
         related_persons = []
-        for related_person_el in related_party_list.find_all("relatedPersonInfo"):
-            related_person_name_el = related_person_el.find("relatedPersonName")
+        for related_person_el in find_all_elements(related_party_list, "relatedPersonInfo"):
+            related_person_name_el = find_element(related_person_el, "relatedPersonName")
             first_name = child_text(related_person_name_el, "firstName")
             last_name = child_text(related_person_name_el, "lastName")
 
-            related_person_address_el = related_person_el.find("relatedPersonAddress")
+            related_person_address_el = find_element(related_person_el, "relatedPersonAddress")
             address: Address = Address(
                 street1=child_text(related_person_address_el, "street1"),
                 street2=child_text(related_person_address_el, "street2"),
@@ -357,12 +372,12 @@ class FormD:
             # Related-person relationship(s): Executive Officer / Director / Promoter,
             # plus an optional free-text clarification (GH #874).
             relationships = []
-            relationship_list_el = related_person_el.find("relatedPersonRelationshipList")
-            if isinstance(relationship_list_el, Tag):
+            relationship_list_el = find_element(related_person_el, "relatedPersonRelationshipList")
+            if relationship_list_el is not None:
                 relationships = [
-                    rel.get_text(strip=True)
-                    for rel in relationship_list_el.find_all("relationship")
-                    if rel.get_text(strip=True)
+                    element_text(rel).strip()
+                    for rel in find_all_elements(relationship_list_el, "relationship")
+                    if element_text(rel).strip()
                 ]
             clarification = child_text(related_person_el, "relationshipClarification") or None
 
@@ -375,17 +390,17 @@ class FormD:
             ))
 
         # Get the offering data
-        offering_data = OfferingData.from_xml(root.find("offeringData"))
+        offering_data = OfferingData.from_xml(find_element(root, "offeringData"))
 
         # Get the signature
-        signature_block_tag = root.find("signatureBlock")
+        signature_block_tag = find_element(root, "signatureBlock")
         signatures = [Signature(
             issuer_name=child_text(sig_el, "issuerName") or "",
             signature_name=child_text(sig_el, "signatureName") or "",
             name_of_signer=child_text(sig_el, "nameOfSigner") or "",
             title=child_text(sig_el, "signatureTitle"),
             date=child_text(sig_el, "signatureDate"))
-            for sig_el in signature_block_tag.find_all("signature")
+            for sig_el in find_all_elements(signature_block_tag, "signature")
         ]
         signature_block = SignatureBlock(
             authorized_representative=child_text(signature_block_tag, "authorizedRepresentative") == "true",

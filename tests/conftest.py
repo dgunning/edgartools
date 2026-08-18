@@ -320,6 +320,10 @@ def pytest_collection_modifyitems(config, items):
         # Form 144 notice parse; tests/test_form144.py is network-classified.
         # Verified with outbound sockets blocked.
         'test_144_notice_contract',
+        # Classified 2026-08-18 (edgartools-07lk.11.3). Offline contract for the
+        # Form D notice parse; tests/test_formd_offerings.py is network-classified.
+        # Verified with outbound sockets blocked.
+        'test_regd_notice_contract',
     ]
 
     # Files that need network (fetch from SEC)
