@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import Any, Dict, Iterator, List, Optional
 
 import pandas as pd
-from bs4 import BeautifulSoup, Tag
 from rich import box
 from rich.console import Group
 from rich.panel import Panel
@@ -12,7 +11,8 @@ from rich.text import Text
 from edgar._party import Address, Contact, Filer
 from edgar.entity import Company
 from edgar.richtools import repr_rich
-from edgar.xmltools import child_text, child_texts
+from edgar.xmltools import XmlNode, child_text, child_texts, element_text, find_all_elements, find_element, local_name
+from edgar.xmltools import parse_xml as parse_xml_document
 
 __all__ = ['Form144',
            'SecuritiesHolder',
@@ -68,7 +68,7 @@ class SecuritiesInformation:
         }
 
     @classmethod
-    def from_tag(cls, tag: Tag):
+    def from_tag(cls, tag: XmlNode):
         security_class = child_text(tag, 'securitiesClassTitle')
         units_to_be_sold = child_text(tag, 'noOfUnitsSold')
         aggregate_market_value = child_text(tag, 'aggregateMarketValue')
@@ -77,12 +77,12 @@ class SecuritiesInformation:
         exchange_name = child_text(tag, 'securitiesExchangeName')
 
         # Get the broker or market maker
-        broker_or_marketmaker_tag = tag.find('brokerOrMarketmakerDetails')
-        if isinstance(broker_or_marketmaker_tag, Tag):
+        broker_or_marketmaker_tag = find_element(tag, 'brokerOrMarketmakerDetails')
+        if broker_or_marketmaker_tag is not None:
             broker_name = child_text(broker_or_marketmaker_tag, 'name')
             # Get the address
-            address_el = broker_or_marketmaker_tag.find('address')
-            if isinstance(address_el, Tag):
+            address_el = find_element(broker_or_marketmaker_tag, 'address')
+            if address_el is not None:
                 address = Address(
                     street1=child_text(address_el, 'street1'),
                     street2=child_text(address_el, 'street2'),
@@ -148,7 +148,7 @@ class SecuritiesToBeSold:
         }
 
     @classmethod
-    def from_tag(cls, tag: Tag):
+    def from_tag(cls, tag: XmlNode):
         security_class = child_text(tag, 'securitiesClassTitle')
         acquired_date = child_text(tag, 'acquiredDate')
         nature_of_acquisition_transaction = child_text(tag, 'natureOfAcquisitionTransaction')
@@ -209,11 +209,11 @@ class SecuritiesSoldPast3Months:
         }
 
     @classmethod
-    def from_tag(cls, tag: Tag):
-        seller_details = tag.find('sellerDetails')
+    def from_tag(cls, tag: XmlNode):
+        seller_details = find_element(tag, 'sellerDetails')
         seller_name = child_text(seller_details, 'name')
         # Get the address
-        address_el = seller_details.find('address')
+        address_el = find_element(seller_details, 'address')
         seller_address = Address(
             street1=child_text(address_el, 'street1'),
             street2=child_text(address_el, 'street2'),
@@ -253,10 +253,10 @@ class NoticeSignature:
     signature: str
 
     @classmethod
-    def from_tag(cls, tag: Tag):
+    def from_tag(cls, tag: XmlNode):
         notice_date = child_text(tag, 'noticeDate')
         # Get text directly from each planAdoptionDate tag (child_text looks for nested elements)
-        plan_adoption_dates = [d.text.strip() for d in tag.find_all('planAdoptionDate')]
+        plan_adoption_dates = [element_text(d).strip() for d in find_all_elements(tag, 'planAdoptionDate')]
         signature = child_text(tag, 'signature')
         return cls(
             notice_date=notice_date,
@@ -799,17 +799,20 @@ class Form144:
 
     @staticmethod
     def parse_xml(xml: str) -> Dict[str, object]:
-        soup = BeautifulSoup(xml, 'xml')
-
-        root = soup.find('edgarSubmission')
+        # <edgarSubmission> is the document element. Form 144 carries a default
+        # namespace plus `com:` for the address blocks, so every read below matches
+        # on the LOCAL name via the helpers (edgartools-07lk.11.3).
+        root = parse_xml_document(xml)
+        if local_name(root) != 'edgarSubmission':
+            raise ValueError(f"Expected an edgarSubmission document, got <{local_name(root)}>")
 
         form144 = {}
 
-        header_data = root.find('headerData')
-        filer_info_el = header_data.find('filerInfo')
+        header_data = find_element(root, 'headerData')
+        filer_info_el = find_element(header_data, 'filerInfo')
 
-        filer_el = filer_info_el.find('filer')
-        filer_credentials_el = filer_el.find('filerCredentials')
+        filer_el = find_element(filer_info_el, 'filer')
+        filer_credentials_el = find_element(filer_el, 'filerCredentials')
         form144['filer'] = Filer(
             cik=child_text(filer_credentials_el, 'cik'),
             entity_name=child_text(filer_credentials_el, 'name'),
@@ -817,26 +820,26 @@ class Form144:
         )
 
         # Contact info
-        contact_el = filer_el.find('contact')
+        contact_el = find_element(filer_el, 'contact')
         form144['contact'] = Contact(
             name=child_text(contact_el, 'name'),
             phone_number=child_text(contact_el, 'phone'),
             email=child_text(contact_el, 'email')
-        ) if contact_el else None
+        ) if contact_el is not None else None
 
-        form_data = root.find('formData')
+        form_data = find_element(root, 'formData')
         # Issuer
-        issuer_el = form_data.find('issuerInfo')
+        issuer_el = find_element(form_data, 'issuerInfo')
         form144['issuer_cik'] = child_text(issuer_el, 'issuerCik')
         form144['issuer_name'] = child_text(issuer_el, 'issuerName')
         form144['sec_file_number'] = child_text(issuer_el, 'secFileNumber')
         form144['issuer_contact_phone'] = child_text(issuer_el, 'issuerContactPhone')
         form144['person_selling'] = child_text(issuer_el, 'nameOfPersonForWhoseAccountTheSecuritiesAreToBeSold')
 
-        relationship_el = issuer_el.find('relationshipsToIssuer')
+        relationship_el = find_element(issuer_el, 'relationshipsToIssuer')
         form144['relationships'] = child_texts(relationship_el, 'relationshipToIssuer')
 
-        issuer_address_el = issuer_el.find("issuerAddress")
+        issuer_address_el = find_element(issuer_el, "issuerAddress")
         address: Address = Address(
             street1=child_text(issuer_address_el, "street1"),
             street2=child_text(issuer_address_el, "street2"),
@@ -850,13 +853,13 @@ class Form144:
         # Securities Information
         form144['securities_information'] = pd.DataFrame([
             SecuritiesInformation.from_tag(el).to_dict()
-            for el in form_data.find_all('securitiesInformation')
+            for el in find_all_elements(form_data, 'securitiesInformation')
         ])
 
         # Securities to be sold
         form144['securities_to_be_sold'] = pd.DataFrame([
             SecuritiesToBeSold.from_tag(el).to_dict()
-            for el in form_data.find_all('securitiesToBeSold')
+            for el in find_all_elements(form_data, 'securitiesToBeSold')
         ])
         # Nothing to report flag
         form144['nothing_to_report'] = child_text(form_data, 'nothingToReportFlagOnSecuritiesSoldInPast3Months')
@@ -864,14 +867,14 @@ class Form144:
         # Securities sold in past 3 months
         form144['securities_sold_past_3_months'] = pd.DataFrame([
             SecuritiesSoldPast3Months.from_tag(el).to_dict()
-            for el in form_data.find_all('securitiesSoldInPast3Months')
+            for el in find_all_elements(form_data, 'securitiesSoldInPast3Months')
         ])
 
         # Remarks
         form144['remarks'] = child_text(form_data, 'remarks')
 
         # Notice signature
-        form144['notice_signature'] = NoticeSignature.from_tag(form_data.find('noticeSignature'))
+        form144['notice_signature'] = NoticeSignature.from_tag(find_element(form_data, 'noticeSignature'))
         return form144
 
     @classmethod

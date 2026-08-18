@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Performance
 
+- **Parsing a Form 144 notice is 3.1x faster** — 3.74ms to 1.20ms per notice, measured over 31 real 144 and 144/A filings from 2022 to 2025, with every field identical before and after: filer, issuer, address, both securities tables and the notice signature.
+
 - **Parsing a 13F cover page is 5.7x faster** — 717µs to 125µs per primary document, measured over 36 real 13F-HR, 13F-HR/A and 13F-NT filings from 2022 to 2025, with every field identical before and after: manager, address, summary totals, other managers and amendment metadata. This is the parse behind `ThirteenF.filing_manager`, `.total_value` and `.other_managers`.
 
 - **Reading a filing's report index is 6.9x faster** — 16.2ms to 2.4ms per `FilingSummary.xml`, measured over 31 real filings (10-K, 10-Q, 8-K, 20-F, 2021 to 2025) carrying 1,823 reports between them, with every report, input file and supplemental file identical before and after. This is the parse behind `filing.reports` and behind the note lookup in `TenK.notes`.
