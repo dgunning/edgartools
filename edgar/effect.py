@@ -1,12 +1,11 @@
 from typing import Optional
 
 import pandas as pd
-from bs4 import BeautifulSoup
 from rich.console import Group, Text
 
 from edgar._party import Filer
 from edgar.richtools import df_to_rich_table, repr_rich
-from edgar.xmltools import child_text
+from edgar.xmltools import child_text, find_element, parse_xml
 
 __all__ = [
     'EffectiveData',
@@ -170,36 +169,31 @@ class Effect:
             </effectiveData>
         </edgarSubmission>
         """
-        soup = BeautifulSoup(submission_xml, "xml")
-        root = soup.find("edgarSubmission")
-        schema_version = root.find("schemaVersion").text
-        test_or_live_el = root.find("testOrLive")
-        is_live = test_or_live_el and test_or_live_el.text == 'LIVE'
+        # <edgarSubmission> is this form's document element, so the parsed root is
+        # already it — no search needed (edgartools-07lk.11.3).
+        root = parse_xml(submission_xml)
 
-        # Effective data
-        effectiveness_el = root.find("effectiveData")
-        effectiveness_el.find("finalEffectivenessDispDate")
-
-        filer_el = effectiveness_el.find("filer")
-        accession_no = child_text(effectiveness_el, "accessionNumber")
-        file_number = child_text(effectiveness_el, "fileNumber")
-        source_submission_type = child_text(effectiveness_el, "submissionType")
-        source_form = child_text(effectiveness_el, "form")
+        # The submission carries two <submissionType> elements: the outer one is the
+        # EFFECT notice itself, the inner one the form being made effective. Both
+        # reads below are descendant searches returning the first match in document
+        # order, which is what picks them apart — the same way bs4 did.
+        effectiveness_el = find_element(root, "effectiveData")
+        filer_el = find_element(effectiveness_el, "filer")
 
         return cls(
-            submission_type=root.find("submissionType").text,
-            schema_version=schema_version,
-            is_live=is_live,
+            submission_type=child_text(root, "submissionType"),
+            schema_version=child_text(root, "schemaVersion"),
+            is_live=child_text(root, "testOrLive") == 'LIVE',
             effectiveness_data=EffectiveData(
-                final_effective_date=effectiveness_el.find("finalEffectivenessDispDate").text,
-                accession_no=accession_no,
-                file_number=file_number,
-                submission_type=source_submission_type,
-                form=source_form,
+                final_effective_date=child_text(effectiveness_el, "finalEffectivenessDispDate"),
+                accession_no=child_text(effectiveness_el, "accessionNumber"),
+                file_number=child_text(effectiveness_el, "fileNumber"),
+                submission_type=child_text(effectiveness_el, "submissionType"),
+                form=child_text(effectiveness_el, "form"),
                 filer=Filer(
-                    cik=filer_el.find("cik").text,
-                    entity_name=filer_el.find("entityName").text,
-                    file_number=filer_el.find("fileNumber").text
+                    cik=child_text(filer_el, "cik"),
+                    entity_name=child_text(filer_el, "entityName"),
+                    file_number=child_text(filer_el, "fileNumber")
                 )
             )
         )

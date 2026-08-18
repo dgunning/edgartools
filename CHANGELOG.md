@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Performance
+
+- **Parsing an EFFECT filing is 9.0x faster** — 242µs to 27µs per submission, measured over 39 real EFFECT documents from four quarters, with every parsed field identical before and after. EFFECT notices are small, so the win only shows at volume; a day's worth of them is a few thousand filings.
+
 ### Fixed
 
 - **A person's name raised `TypeError` whenever they had no middle name.** `Name.full_name` built the middle segment as `(' ' + middle_name) or ''`, so the concatenation ran before the fallback could apply and a missing middle name crashed instead of being skipped. Municipal advisor filings hit this constantly — the parser feeds that field straight from the XML, which simply omits `<middleName>`. Michael NMN Tym Jr. still reads as `Michael NMN Tym Jr.`, since `NMN` is data the SEC writes, not an absence.

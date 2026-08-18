@@ -39,6 +39,7 @@ __all__ = [
     'find_element',
     'get_footnote_ids',
     'optional_decimal',
+    'parse_xml',
     'value_or_footnote',
     'extract_child_text',
     'extract_child_value',
@@ -165,6 +166,41 @@ def _attrib(node: XmlNode):
 # ---------------------------------------------------------------------------
 # Public helpers. Signatures unchanged — ~350 call sites depend on them.
 # ---------------------------------------------------------------------------
+
+def parse_xml(xml: Union[str, bytes]) -> etree._Element:
+    """Parse a whole XML document with lxml and return its root element.
+
+    The entry point for the `from_xml(xml: str)` classmethods the dependents expose
+    (EFFECT, Form D, Form C, Form 144, muni advisors, ...). It exists so the two
+    things `BeautifulSoup(xml, "xml")` absorbed silently are handled once here
+    rather than nine times, each time slightly differently:
+
+      leading space  bs4 accepts whitespace or a BOM before the XML declaration;
+                     lxml raises `XMLSyntaxError: XML declaration allowed only at
+                     the start of the document`. Documents that reach us through a
+                     template, a heredoc or a test fixture routinely carry one.
+      encoding       a `str` has already been decoded, but re-encoding it to UTF-8
+                     leaves any `encoding="ISO-8859-1"` declaration standing, and
+                     lxml believes the declaration over the bytes: an entity named
+                     `Café` comes back as `CafÃ©`. Forcing the parser's encoding
+                     overrides the declaration, which is correct because the `str`
+                     was decoded by whoever produced it.
+
+    `bytes` are passed through with their declaration intact — those came off the
+    wire undecoded, so the declaration is the only encoding information there is.
+
+    Unlike bs4, this raises `etree.XMLSyntaxError` on a document that is not XML at
+    all instead of returning a near-empty tree. Callers that must tolerate SEC
+    serving something else (an HTML error page, say) should parse with
+    `etree.XMLParser(recover=True)` themselves and say why.
+    """
+    if isinstance(xml, str):
+        # A fresh parser per call: lxml parsers hold mutable state and must not be
+        # shared across threads, and edgartools parses on worker threads.
+        return etree.fromstring(xml.lstrip('\ufeff \t\r\n').encode('utf-8'),
+                                parser=etree.XMLParser(encoding='utf-8'))
+    return etree.fromstring(xml.lstrip())
+
 
 def find_element(
         xml_tag_or_string: Union[str, XmlNode],
