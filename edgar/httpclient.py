@@ -434,6 +434,86 @@ def get_http_config() -> dict:
 HTTP_MGR = get_http_mgr(request_per_sec_limit=get_edgar_rate_limit_per_sec())
 
 
+# One-time cache-clear migrations (#457, #672).
+#
+# Marker files are kept in <edgar-data-dir>/.migrations — OUTSIDE the cache
+# directory — so that clearing the cache for one migration can never delete
+# another migration's marker (Issue #1051: both markers used to live inside
+# _tcache, so each import wiped the cache twice, forever).
+#
+# Maps migration id (the marker filename in .migrations) to the legacy marker
+# filename that older versions kept inside the cache directory. A legacy marker
+# means the migration already ran under an older version, so it is recorded in
+# the new location without clearing again.
+_CACHE_CLEAR_MIGRATIONS = {
+    "locale_fix_457": ".locale_fix_457_applied",
+    "empty_response_fix_672": ".empty_response_fix_672_applied",
+}
+
+
+def _apply_cache_clear_migrations(migrations: dict) -> bool:
+    """
+    Clear the HTTP cache at most once for whichever of `migrations` are pending.
+
+    All pending/satisfied decisions are made up front, then the cache directory
+    is removed at most once, then every marker is written — so a single pass
+    over multiple migrations performs one clear, not one per migration.
+
+    Returns:
+        bool: True if the cache directory was cleared, False otherwise
+    """
+    import logging
+    import shutil
+    from pathlib import Path
+
+    try:
+        cache_dir = Path(get_cache_directory())
+        migrations_dir = cache_dir.parent / ".migrations"
+
+        # Decide what is pending BEFORE touching anything. A legacy marker
+        # inside the cache directory counts as already applied (#1051).
+        pending, already_applied = [], []
+        for migration, legacy_name in migrations.items():
+            marker_file = migrations_dir / migration
+            try:
+                if marker_file.exists():
+                    continue
+            except (PermissionError, OSError):
+                # If we can't check the marker file, assume we need to proceed
+                pass
+            if (cache_dir / legacy_name).exists():
+                already_applied.append(marker_file)
+            else:
+                pending.append(marker_file)
+
+        if not pending and not already_applied:
+            return False
+
+        migrations_dir.mkdir(parents=True, exist_ok=True)
+
+        cleared = False
+        if pending and cache_dir.exists():
+            shutil.rmtree(cache_dir)
+            cleared = True
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        for marker_file in pending + already_applied:
+            marker_file.touch()
+        return cleared
+
+    except Exception as e:
+        # Log error but don't fail - worst case user still has cache issues
+        logging.getLogger(__name__).warning(
+            "Failed to clear stale cache entries: %s. "
+            "You may need to manually delete ~/.edgar/_tcache directory.", e
+        )
+        return False
+
+
+def _run_import_time_cache_migrations() -> bool:
+    """Run all one-time cache-clear migrations as a single pass (at most one clear)."""
+    return _apply_cache_clear_migrations(_CACHE_CLEAR_MIGRATIONS)
+
+
 def clear_empty_cached_responses():
     """
     One-time cache clearing function to remove potentially stale empty responses (Issue #672).
@@ -449,38 +529,9 @@ def clear_empty_cached_responses():
     Returns:
         bool: True if cache was cleared, False if already cleared previously
     """
-    import logging
-    import shutil
-    from pathlib import Path
-
-    try:
-        cache_dir = Path(get_cache_directory())
-        marker_file = cache_dir / ".empty_response_fix_672_applied"
-
-        # If marker exists, cache was already cleared
-        try:
-            if marker_file.exists():
-                return False
-        except (PermissionError, OSError):
-            pass
-
-        # Clear the cache directory if it exists
-        if cache_dir.exists():
-            shutil.rmtree(cache_dir)
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            marker_file.touch()
-            return True
-        else:
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            marker_file.touch()
-            return False
-
-    except Exception as e:
-        logging.getLogger(__name__).warning(
-            f"Failed to clear stale cache entries (Issue #672): {e}. "
-            "You may need to manually delete ~/.edgar/_tcache directory."
-        )
-        return False
+    return _apply_cache_clear_migrations(
+        {"empty_response_fix_672": _CACHE_CLEAR_MIGRATIONS["empty_response_fix_672"]}
+    )
 
 
 def clear_locale_corrupted_cache():
@@ -492,50 +543,15 @@ def clear_locale_corrupted_cache():
     the locale fix was applied in v4.19.0.
 
     The function:
-    1. Checks for a marker file to avoid repeated clearing
-    2. Clears the HTTP cache directory if marker doesn't exist
-    3. Creates a marker file to prevent future clearing
+    1. Checks for a marker file (kept outside the cache directory) to avoid repeated clearing
+    2. Clears the HTTP cache directory if the migration is pending
+    3. Creates the marker file to prevent future clearing
 
     This is safe to call multiple times - it will only clear cache once per installation.
 
     Returns:
         bool: True if cache was cleared, False if already cleared previously
     """
-    import logging
-    import shutil
-    from pathlib import Path
-
-    try:
-        cache_dir = Path(get_cache_directory())
-        marker_file = cache_dir / ".locale_fix_457_applied"
-
-        # If marker exists, cache was already cleared
-        try:
-            if marker_file.exists():
-                return False
-        except (PermissionError, OSError):
-            # If we can't check marker file, assume we need to proceed
-            pass
-
-        # Clear the cache directory if it exists
-        if cache_dir.exists():
-            # Remove all cache files
-            shutil.rmtree(cache_dir)
-            # Recreate the directory
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            # Create marker file
-            marker_file.touch()
-            return True
-        else:
-            # No cache exists, just create marker
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            marker_file.touch()
-            return False
-
-    except Exception as e:
-        # Log error but don't fail - worst case user still has cache issues
-        logging.getLogger(__name__).warning(
-            f"Failed to clear locale-corrupted cache: {e}. "
-            "You may need to manually delete ~/.edgar/_tcache directory."
-        )
-        return False
+    return _apply_cache_clear_migrations(
+        {"locale_fix_457": _CACHE_CLEAR_MIGRATIONS["locale_fix_457"]}
+    )
