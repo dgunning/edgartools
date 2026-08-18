@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Performance
 
+- **Parsing an MA-I municipal advisor filing is 2.9x faster** — 3.89ms to 1.33ms per filing, measured over 40 real MA-I and MA-I/A filings from 2021 to 2026, with every field identical before and after: filer, contact, notification addresses, applicant and other names, all advisory offices and their addresses, the full employment history and the signature. MA-I mixes three namespaces in one document, so more of the work stays in the local-name fallback than it does for the single-namespace forms.
+
 - **Parsing a Form D notice is 8.8x faster** — 2.04ms to 0.23ms per notice, measured over 42 real D and D/A filings from 2022 to 2025, with every field identical before and after: issuer, all 145 related persons and their relationships, the offering sections, sales-compensation recipients and signatures.
 
 - **Parsing a Form 144 notice is 3.1x faster** — 3.74ms to 1.20ms per notice, measured over 31 real 144 and 144/A filings from 2022 to 2025, with every field identical before and after: filer, issuer, address, both securities tables and the notice signature.
