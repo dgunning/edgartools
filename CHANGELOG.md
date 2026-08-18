@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **`SecForms.load()` returned an object that raised a bewildering `SyntaxError` on use.** It wrapped `list_forms()`, which already returns a `SecForms`, so the forms table ended up nested one level too deep and every read of it went through the wrong `__getitem__` into a pandas query expression. `SecForms.load().get_form("1-A")` now returns Form 1-A, the Regulation A Offering Statement.
 
+## [5.50.1] - 2026-08-18
+
+### Fixed
+
+- **The HTTP cache was wiped twice on every `import edgar`, so it never survived a process.** The two "one-time" import-time cache clears (#457 locale fix, #672 empty-response fix) each kept their marker file inside `_tcache` — the directory the other one `rmtree`s — so each import deleted the other's marker and both clears fired forever, from v5.20.1 onward. Short-lived processes re-downloaded everything from SEC each run, and a wipe landing on a concurrent edgar process's in-flight cache write crashed it with `FileNotFoundError`. Markers now live in `<edgar-data-dir>/.migrations`, outside the cleared directory, and all migrations run as a single pass that clears at most once; the legacy in-cache marker is honored, so upgrading performs at most one final clear. (GH #1051)
+
 ## [5.50.0] - 2026-08-18
 
 ### Fixed
