@@ -15,7 +15,8 @@ from rich.text import Text
 from edgar.core import DataPager, PagingState, log, strtobool
 from edgar.documents import HTMLParser, ParserConfig
 from edgar.richtools import print_rich, repr_rich, rich_to_text
-from edgar.xmltools import child_text
+from edgar.xmltools import child_text, element_text, find_all_elements, find_element, local_name
+from edgar.xmltools import parse_xml as parse_xml_document
 
 __all__ = ['Report', 'Reports', 'File', 'FilingSummary']
 
@@ -421,8 +422,12 @@ class FilingSummary:
 
     @classmethod
     def parse(cls, xml_text:str):
-        soup = BeautifulSoup(xml_text, 'xml')
-        root = soup.find('FilingSummary')
+        # <FilingSummary> is the document element, so the parsed root is already
+        # it. The two BeautifulSoup calls left in this module parse R-file HTML with
+        # `html.parser`, not XML, and are out of scope for edgartools-07lk.11.3.
+        root = parse_xml_document(xml_text)
+        if local_name(root) != 'FilingSummary':
+            raise ValueError(f"Expected a FilingSummary document, got <{local_name(root)}>")
 
         # Main fields
         report_format = child_text(root, 'ReportFormat')
@@ -440,7 +445,7 @@ class FilingSummary:
         short_name_map: Dict[str, Report] = {}
         category_map: Dict[str, List[Report]] = {}
         report_records = []
-        for report_tag in root.find_all("Report"):
+        for report_tag in find_all_elements(root, "Report"):
             record = {
                 'instance': report_tag.get('instance'),
                 'IsDefault': strtobool(child_text(report_tag, 'IsDefault')),
@@ -477,12 +482,12 @@ class FilingSummary:
         # Reports Data
         reports_obj = Reports(data=pa.Table.from_pylist(report_records))
         # Input Files
-        input_files_tag = root.find('InputFiles')
+        input_files_tag = find_element(root, 'InputFiles')
         input_files = []
-        if input_files_tag:
-            for file_tag in input_files_tag.find_all('File'):
+        if input_files_tag is not None:
+            for file_tag in find_all_elements(input_files_tag, 'File'):
                 file = File(
-                        file_name = file_tag.text,
+                        file_name = element_text(file_tag),
                         doc_type = file_tag.get('doctype'),
                         is_definitely_fs = strtobool(file_tag.get('isDefinitelyFs')),
                         is_usgaap = strtobool(file_tag.get('isUsgaap')),
@@ -491,12 +496,12 @@ class FilingSummary:
                 input_files.append(file)
 
         # Supplemental Files
-        supplemental_files_tag = root.find('SupplementalFiles')
+        supplemental_files_tag = find_element(root, 'SupplementalFiles')
         supplemental_files = []
-        if supplemental_files_tag:
-            for file_tag in supplemental_files_tag.find_all('File'):
+        if supplemental_files_tag is not None:
+            for file_tag in find_all_elements(supplemental_files_tag, 'File'):
                 file = File(
-                        file_name = file_tag.text,
+                        file_name = element_text(file_tag),
                         doc_type = file_tag.get('doctype'),
                         is_definitely_fs = strtobool(file_tag.get('isDefinitelyFs')),
                         is_usgaap = strtobool(file_tag.get('isUsgaap')),
