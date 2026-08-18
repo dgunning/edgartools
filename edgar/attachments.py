@@ -353,19 +353,29 @@ class Attachment:
             raise ValueError('sequence_number must be digits or an empty string')
         return v
 
+    @property
+    def normalized_extension(self) -> str:
+        """The extension lowercased, for classification.
+
+        EDGAR filenames carry the filer's own casing, so the same document type arrives as
+        ".pdf", ".PDF" or ".Pdf" depending on who filed it. Every predicate below classifies
+        on this rather than on ``extension`` so that casing cannot decide the answer.
+        """
+        return self.extension.lower()
+
     def is_text(self) -> bool:
         """Is this a text document"""
-        return self.extension in text_extensions
+        return self.normalized_extension in text_extensions
 
     def is_xml(self):
-        return self.extension.lower() in [".xsd", ".xml", ".xbrl"]
+        return self.normalized_extension in [".xsd", ".xml", ".xbrl"]
 
     def is_html(self):
-        return self.extension.lower() in [".htm", ".html"]
+        return self.normalized_extension in [".htm", ".html"]
 
     def is_binary(self) -> bool:
         """Is this a binary document"""
-        return self.extension in binary_extensions
+        return self.normalized_extension in binary_extensions
 
     @property
     def empty(self):

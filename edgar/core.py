@@ -250,9 +250,13 @@ def decode_content(content: bytes):
         return content.decode('latin-1')
 
 
-text_extensions = (".txt", ".htm", ".html", ".xsd", ".xml", "XML", ".json", ".idx", ".paper")
-binary_extensions = (".pdf", ".jpg", ".jpeg", "png", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg", ".webp", ".avif",
-                     ".apng", ".xlsx", ".xls", ".zip", ".docx", ".pptx")
+# Extension tables. Entries MUST be lowercase and dot-prefixed: membership is tested against
+# a normalized extension (see Attachment.is_text/is_binary), so a bare or uppercase entry here
+# can never match. Two such entries ("png", "XML") silently classified nothing for years, which
+# is how a .PDF primary document reached a UTF-8 decode and raised (edgartools-dzwm).
+text_extensions = (".txt", ".htm", ".html", ".xsd", ".xml", ".json", ".idx", ".paper", ".css", ".js")
+binary_extensions = (".pdf", ".jpg", ".jpeg", ".png", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg", ".webp",
+                     ".avif", ".apng", ".xlsx", ".xls", ".zip", ".docx", ".pptx")
 
 
 def get_bool(value: Optional[str] = None) -> Optional[bool]:
@@ -383,25 +387,6 @@ def current_year_and_quarter() -> Tuple[int, int]:
     current_year, current_quarter = now_eastern.year, (now_eastern.month - 1) // 3 + 1
 
     return current_year, current_quarter
-
-
-def filter_by_date(data: pa.Table,
-                   date: Union[str, datetime.datetime],
-                   date_col: str) -> pa.Table:
-    # If datetime convert to string
-    if isinstance(date, datetime.date) or isinstance(date, datetime.datetime):
-        date = date.strftime('%Y-%m-%d')
-
-def decode_content(content: bytes):
-    try:
-        return content.decode('utf-8')
-    except UnicodeDecodeError:
-        return content.decode('latin-1')
-
-
-text_extensions = (".txt", ".htm", ".html", ".xsd", ".xml", "XML", ".json", ".idx", ".paper")
-binary_extensions = (".pdf", ".jpg", ".jpeg", "png", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg", ".webp", ".avif",
-                     ".apng", ".xlsx", ".xls", ".zip", ".docx", ".pptx")
 
 
 class DataPager:
@@ -585,9 +570,11 @@ def is_probably_html(content: str) -> bool:
     if isinstance(content, bytes):
         content = content.decode('utf-8', errors='ignore')
 
-    # Check for common HTML tags
+    # Check for common HTML tags. Lowercase once: `content` can be hundreds of MB and
+    # doing it inside the generator allocated a fresh copy for every tag tried.
     html_tags = ['<html>', '<body>', '<head>', '<title>', '<div', '<span', '<p>']
-    return any(tag in content.lower() for tag in html_tags)
+    lowered = content.lower()
+    return any(tag in lowered for tag in html_tags)
 
 def has_html_content(content: str) -> bool:
     """
