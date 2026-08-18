@@ -7,9 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.50.0] - 2026-08-18
+
 ### Fixed
 
 - **`Company.get_facts()` re-downloaded companyfacts on every call, and the 30s `/submissions` TTL never took effect.** Cache rules were keyed off `SEC_BASE_URL` alone, but httpxthrottlecache matches the request host against that key, and `re.match(r'.*www\.sec\.gov', 'data.sec.gov')` is `None` — so a fresh process logs `No patterns matched data.sec.gov` and pays full network cost every time. Keys now come from `httpx.URL(...).host`, one per host, matched exactly, which also restores caching for custom mirrors. Requires `httpxthrottlecache>=0.6.1`. (GH #989)
+
+- **`FilingSGML.html()` crashed with `UnicodeDecodeError` on filings whose primary document is a PDF.** The binary guard existed but never fired: `is_binary()` compared the raw extension against a lowercase list, so a file named `.PDF` answered False and its bytes went to a bare UTF-8 decode. Three ways to fail open lived in that one path — the case-sensitive compare, a malformed `"png"` entry that matched nothing, and the binary-extension table defined twice with the same typo in both copies. Classification now goes through the attachment's normalized extension, and `html()` and `xml()` route through the decoder that already carried the right contract, including a NUL-byte sniff for what the extension table misses. Ten filings in a 1993–2026 crawl hit this, every one a 40-17G, CERT or 40-24B2/A. (#1047)
+
+- **`FilingSGML.text()` returned raw XML for XML-primary forms beyond ownership — and could take hours doing it.** The HTML sniff asks whether `<p>`, `<div` or `<span` appears anywhere in the string, which inside a 143MB NPORT-P instance is a certainty, so one filing was walked node by node for about an hour and a half; a sniff miss on an X-17A-5 or 24F-2NT returned the markup verbatim, which is why the same bug looked different on different filings. XML documents now get their own branch, keyed on both an XML declaration and a non-`<html>` root — both halves load-bearing, since an iXBRL 10-K opens with `<?xml` and then `<html>`, and a 1994 filing opens with `<PAGE>`, which reads as a root element. The 143MB filing now answers in 2.4 seconds. What `text()` returns for unrenderable XML is unchanged: the document, verbatim. (#1047)
+
+- **`FilingSGML.text()` on pre-1997 filings leaked the era's SGML table dialect — `<TABLE>`, `<CAPTION>`, `<S>`, `<C>` and footnote tags — into the text.** Dialect tags occupying whole lines are dropped whole, so no column moves; inline footnote references are rewritten width-neutrally, `<F2>` becoming `[F2]`, which keeps every fixed-width table aligned. The patterns are deliberately tight, because 1990s filings use a bare `<` as a less-than sign and blanket angle-bracket deletion would eat real content. (#1047)
+
+- **A truncated submission — a download that failed partway, a cut-off local file — parsed "successfully" as zero documents, and `text()` returned `None`.** EDGAR always closes `<DOCUMENT>`, so an unterminated one is structural proof of a cut, and parsing now raises `ValueError` saying how many complete documents preceded the cut and to re-download or clear the cached copy. The header's `PUBLIC DOCUMENT COUNT` is also checked against what was parsed, with a warning on a marked deficit. Both tolerances in that check are measured rather than assumed: complete dissemination files routinely ship one fewer `<DOCUMENT>` block than they declare — Apple's full 10-K declares 103 and ships 102 — so off-by-one stays silent, and a pre-2004 header-only artifact legitimately carries no documents at all. (#1049)
+
+### Performance
+
+- **`FilingSGML.text()` on table-heavy filings peaks ~170MB lower and runs ~13% faster.** Profiling a 25MB ABS-15G whose single table holds 66,929 rows and 1.6 million cells attributed the ~60x peak-memory amplification to the render path materialising the grid as millions of unslotted dataclass instances, each paying for a `__dict__` it never uses. `Cell` and `MatrixCell` now declare `__slots__`, and the parser only retains its copy of the original HTML when section detection is on, since only the section extractors read it. Peak RSS on the profiled filing drops from 1.51GB to 1.34GB with byte-identical output. The remaining amplification is the render pipeline rebuilding the same grid several times over, which is tracked for the 6.0 performance pass. (#1048)
 
 ## [5.49.0] - 2026-08-15
 
