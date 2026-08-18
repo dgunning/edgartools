@@ -4,7 +4,7 @@ from typing import Optional
 
 import pyarrow as pa
 import pyarrow.compute as pc
-from bs4 import BeautifulSoup
+from lxml import etree
 from rich import box
 from rich.console import Group
 from rich.panel import Panel
@@ -17,7 +17,7 @@ from edgar.core import IntString
 from edgar.display.formatting import accepted_time_text, accession_number_text
 from edgar.httprequests import get_with_retry
 from edgar.reference.tickers import find_ticker
-from edgar.xmltools import child_text
+from edgar.xmltools import child_text, find_all_elements
 
 __all__ = [
     'CurrentFilings',
@@ -115,13 +115,33 @@ def get_current_url(atom: bool = True,
     return url
 
 
+def _parse_feed(content: bytes):
+    """Parse the Atom feed, tolerating whatever SEC returns instead of one.
+
+    Returns None when the response has no parseable root at all, which callers read
+    as an empty feed — the behavior bs4 gave us for free.
+    """
+    if not content.strip():
+        return None
+    return etree.fromstring(content, parser=etree.XMLParser(recover=True))
+
+
 def get_current_entries_on_page(count: int, start: int, form: Optional[str] = None, owner: str = 'include'):
     url = get_current_url(count=count, start=start, form=form if form else '', owner=owner, atom=True)
     response = get_with_retry(url)
 
-    soup = BeautifulSoup(response.text, features="xml")
+    # SEC serves this feed as Atom, so every element carries the Atom default
+    # namespace. find_all_elements matches on the local name, which is what bs4 did;
+    # a plain lxml `.//entry` matches nothing here, silently (edgartools-07lk.11.3).
+    #
+    # `recover` is not optional: a page past the end of the feed comes back as HTTP
+    # 503 with an HTML error page, and the pagination in CurrentFilings relies on
+    # that yielding zero entries. bs4's parser recovered from it quietly; lxml's
+    # raises unless asked. (That a 503 reads as end-of-feed at all is a separate
+    # question, and belongs to the error-policy work in edgartools-07lk.10.)
+    feed = _parse_feed(response.content)
     entries = []
-    for entry in soup.find_all("entry"):
+    for entry in find_all_elements(feed, "entry") if feed is not None else []:
         # The title contains the form type, company name, CIK, and status e.g 4 - WILKS LEWIS (0001076463) (Reporting)
         title = child_text(entry, "title")
         form_type, company_name, cik, status = parse_title(title)
