@@ -144,8 +144,12 @@ class HTMLParser:
             metadata.preserve_whitespace = self.config.preserve_whitespace
 
             # Store ORIGINAL unmodified HTML for section extraction (TOC analysis)
-            # Must be the raw HTML before preprocessing
-            metadata.original_html = original_html
+            # Must be the raw HTML before preprocessing. Only the section/TOC
+            # extractors read it, and they all tolerate its absence, so a parse
+            # with detect_sections=False need not keep the input alive for the
+            # life of the Document (edgartools-2248).
+            if self.config.detect_sections:
+                metadata.original_html = original_html
 
             # Add XBRL facts to metadata if found
             if xbrl_facts:
