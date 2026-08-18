@@ -44,6 +44,7 @@ from edgar.xmltools import (
     child_value,
     extract_child_text,
     extract_child_value,
+    find_all_elements,
     find_element,
     get_footnote_ids,
     optional_decimal,
@@ -78,6 +79,11 @@ ISSUER_XML = """<?xml version="1.0"?>
 """
 
 
+def _text_of(el):
+    """Backend-neutral text read, for assertions about elements themselves."""
+    return el.text if isinstance(el, Tag) else "".join(el.itertext())
+
+
 @pytest.fixture(params=["bs4", "lxml"])
 def parse(request):
     """Parse `xml` and return the element named `name`, on each backend in turn.
@@ -92,10 +98,14 @@ def parse(request):
     def _parse(xml: str, name: str):
         if request.param == "bs4":
             return BeautifulSoup(xml, features="xml").find(name)
-        # lxml hands back the root element rather than a document, so a request for
-        # the root itself cannot go through a descendant search.
-        root = etree.fromstring(xml.encode())
-        return root if root.tag == name else root.find(f".//{name}")
+        # Resolved by hand rather than through `find_element`, so that the tests do
+        # not obtain their starting node from the code they are checking. `iter()`
+        # yields the root first, and the local-name compare is what lets a
+        # namespaced root be addressed by its bare name.
+        for element in etree.fromstring(xml.encode()).iter():
+            if isinstance(element.tag, str) and element.tag.rpartition("}")[2] == name:
+                return element
+        return None
 
     return _parse
 
@@ -345,3 +355,82 @@ def test_extract_child_text_returns_a_key_value_pair(issuer):
 def test_extract_child_value_returns_a_key_value_pair(issuer):
     assert extract_child_value(issuer, "year", "yearOfInc") == ("year", "2022")
     assert extract_child_value(issuer, "missing", "notAnElement") == ("missing", None)
+
+
+# ------------------------------------------------------- namespaced documents
+
+# SEC serves the current-filings feed as Atom, so every element is
+# `{http://www.w3.org/2005/Atom}entry`. This is not a hypothetical: a plain lxml
+# `.//entry` matches NOTHING here, so a naive port makes get_current_filings()
+# return an empty feed rather than raising (edgartools-07lk.11.3).
+ATOM_XML = """<?xml version="1.0" encoding="ISO-8859-1"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>EDGAR Filings</title>
+    <entry>
+        <title>4 - WILKS LEWIS (0001076463) (Reporting)</title>
+        <summary>Filed: 2026-08-18 AccNo: 0001076463-26-000012</summary>
+        <updated>2026-08-18T14:09:29-04:00</updated>
+    </entry>
+    <entry>
+        <title>8-K - ACME CORP (0000012345) (Filer)</title>
+        <summary>Filed: 2026-08-18 AccNo: 0000012345-26-000003</summary>
+        <updated>2026-08-18T14:11:02-04:00</updated>
+    </entry>
+</feed>
+"""
+
+# Two namespaces in one document, so the parent's namespace is the wrong guess for
+# some children and only a local-name match finds them.
+MIXED_NS_XML = """<?xml version="1.0"?>
+<r xmlns="http://example.com/outer" xmlns:x="http://example.com/inner">
+    <a>outer-a</a>
+    <x:b>inner-b</x:b>
+</r>
+"""
+
+
+def test_a_default_namespace_does_not_hide_elements(parse):
+    """The whole reason the adapter matches on local names."""
+    feed = parse(ATOM_XML, "feed")
+    entries = find_all_elements(feed, "entry")
+
+    assert len(entries) == 2
+    assert child_text(entries[0], "title") == "4 - WILKS LEWIS (0001076463) (Reporting)"
+    assert child_text(entries[1], "summary") == "Filed: 2026-08-18 AccNo: 0000012345-26-000003"
+    assert child_text(entries[0], "updated") == "2026-08-18T14:09:29-04:00"
+
+
+def test_child_text_reaches_into_a_namespaced_element(parse):
+    assert child_text(parse(ATOM_XML, "feed"), "title") == "EDGAR Filings"
+
+
+def test_a_missing_name_is_still_none_in_a_namespaced_document(parse):
+    """The namespace fallbacks must not turn a genuine miss into a match."""
+    assert child_text(parse(ATOM_XML, "feed"), "notAnElement") is None
+    assert find_all_elements(parse(ATOM_XML, "feed"), "notAnElement") == []
+
+
+def test_elements_are_found_across_several_namespaces(parse):
+    """A document mixing namespaces defeats the parent's-namespace shortcut, so this
+    is what the local-name scan behind it is for."""
+    root = parse(MIXED_NS_XML, "r")
+    assert child_text(root, "a") == "outer-a"
+    assert child_text(root, "b") == "inner-b"
+
+
+# ----------------------------------------------------------- find_all_elements
+
+
+def test_find_all_elements_returns_every_match_in_document_order(parse):
+    xml = "<r><a>one</a><b><a>two</a></b><a>three</a></r>"
+    found = find_all_elements(parse(xml, "r"), "a")
+    assert [_text_of(el) for el in found] == ["one", "two", "three"]
+
+
+def test_find_all_elements_is_empty_when_there_are_none(parse):
+    assert find_all_elements(parse(ATOM_XML, "feed"), "notAnElement") == []
+
+
+def test_find_all_elements_accepts_a_raw_xml_string():
+    assert len(find_all_elements(ATOM_XML, "entry")) == 2
+    assert find_all_elements("not xml at all", "entry") == []
