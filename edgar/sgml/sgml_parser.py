@@ -551,8 +551,16 @@ def _extract_all_documents(content: str, start_pos: int = 0) -> list:
             break
         doc_end = content.find('</DOCUMENT>', doc_start)
         if doc_end < 0:
-            log.warning("Truncated SGML: <DOCUMENT> at offset %d has no matching </DOCUMENT>", doc_start)
-            break
+            # Structural proof of truncation, not a heuristic: EDGAR always closes
+            # <DOCUMENT>. Continuing here silently returned a partial submission —
+            # 0 documents when the cut fell inside the first one (edgartools-88ml).
+            raise ValueError(
+                f"Truncated SGML content: <DOCUMENT> at offset {doc_start:,} has no "
+                f"matching </DOCUMENT> ({len(content):,} bytes total, "
+                f"{len(documents)} complete document(s) before the cut). "
+                "The submission was cut off mid-document — if it was downloaded, "
+                "the transfer likely failed partway; re-download it or clear the cached copy."
+            )
 
         inner_start = doc_start + 10  # len('<DOCUMENT>')
         metadata = _extract_doc_metadata(content, inner_start, doc_end)
@@ -596,7 +604,13 @@ def iter_documents(content: str) -> Iterator[SGMLDocument]:
             break
         doc_end = content.find('</DOCUMENT>', doc_start)
         if doc_end < 0:
-            break
+            # Same truncation contract as _extract_all_documents (edgartools-88ml).
+            raise ValueError(
+                f"Truncated SGML content: <DOCUMENT> at offset {doc_start:,} has no "
+                f"matching </DOCUMENT> ({len(content):,} bytes total). "
+                "The submission was cut off mid-document — if it was downloaded, "
+                "the transfer likely failed partway; re-download it or clear the cached copy."
+            )
 
         inner_start = doc_start + 10
         metadata = _extract_doc_metadata(content, inner_start, doc_end)
