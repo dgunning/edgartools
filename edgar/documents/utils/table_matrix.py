@@ -11,7 +11,9 @@ from edgar.documents.table_nodes import Cell, Row
 logger = logging.getLogger(__name__)
 
 
-@dataclass
+# slots=True: one of these exists per grid position (rows x cols), a second
+# full materialisation of the table on top of Cell (edgartools-2248).
+@dataclass(slots=True)
 class MatrixCell:
     """Cell in the matrix with reference to original cell"""
     original_cell: Optional[Cell] = None

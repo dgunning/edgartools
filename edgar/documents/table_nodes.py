@@ -63,7 +63,10 @@ def _clean_numeric_text(text: str) -> str:
     return clean.replace('(', '-').replace(')', '')
 
 
-@dataclass
+# slots=True: table-heavy filings materialise millions of these (a 25MB
+# ABS-15G held ~3.2M at peak), so the per-instance __dict__ alone was
+# hundreds of MB (edgartools-2248).
+@dataclass(slots=True)
 class Cell:
     """Table cell representation."""
     content: Union[str, Node]
