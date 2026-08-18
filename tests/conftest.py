@@ -300,6 +300,10 @@ def pytest_collection_modifyitems(config, items):
         'test_frontier', 'test_tier_c_judge', 'test_424b_xbrl',
         'test_unavailable_partition',
         'test_offering_consumers', 'test_correspondence',
+        # Classified 2026-08-18 (edgartools-07lk.11.1). Characterization tests for
+        # the bs4 to lxml port; both parse inline XML strings and touch no fetch
+        # path. Verified with outbound sockets blocked before being called fast.
+        'test_party', 'test_forms_listing',
     ]
 
     # Files that need network (fetch from SEC)

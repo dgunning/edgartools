@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **A person's name raised `TypeError` whenever they had no middle name.** `Name.full_name` built the middle segment as `(' ' + middle_name) or ''`, so the concatenation ran before the fallback could apply and a missing middle name crashed instead of being skipped. Municipal advisor filings hit this constantly — the parser feeds that field straight from the XML, which simply omits `<middleName>`. Michael NMN Tym Jr. still reads as `Michael NMN Tym Jr.`, since `NMN` is data the SEC writes, not an absence.
+
+- **`str(person)` printed the first name twice** instead of the full name. `repr()` was always correct, which is why Rich tables and notebook output looked right while string interpolation did not.
+
 ## [5.50.0] - 2026-08-18
 
 ### Fixed
