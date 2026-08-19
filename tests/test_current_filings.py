@@ -332,3 +332,90 @@ def test_get_current_filings_form_4_filtering_issue_501():
         f"out of {len(all_form4)} total. "
         f"Other forms found: {set(f.form for f in non_form4)}"
     )
+
+
+# ---------------------------------------------------------------------------
+# Feed parsing (edgartools-07lk.11.3, bs4 -> lxml)
+#
+# SEC serves this feed as Atom, so every element carries the Atom default
+# namespace and a plain `.//entry` matches nothing at all. And a page past the end
+# of the feed comes back as HTTP 503 with an HTML error page, which the pagination
+# in CurrentFilings relies on yielding zero entries rather than raising. Both
+# behaviors came free with bs4's lenient XML parser and have to be asked for
+# explicitly now, so both are pinned here.
+# ---------------------------------------------------------------------------
+
+ATOM_FEED = b"""<?xml version="1.0" encoding="ISO-8859-1" ?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+<title>Latest Filings</title>
+<entry>
+    <title>4 - WILKS LEWIS (0001076463) (Reporting)</title>
+    <summary>&lt;b&gt;Filed:&lt;/b&gt; 2026-08-18 &lt;b&gt;AccNo:&lt;/b&gt; 0001076463-26-000012 &lt;b&gt;Size:&lt;/b&gt; 5 KB</summary>
+    <updated>2026-08-18T14:09:29-04:00</updated>
+</entry>
+</feed>
+"""
+
+# The shape of SEC's 503, trimmed.
+HTML_ERROR_PAGE = b"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>SEC.gov | Request Rate Threshold Exceeded</title>
+</head>
+<body><h1>Your Request Originates from an Undeclared Automated Tool</h1></body>
+</html>
+"""
+
+
+class _Response:
+    def __init__(self, content: bytes):
+        self.content = content
+
+
+@pytest.fixture
+def _serve_feed(monkeypatch):
+    def serve(content: bytes):
+        # Imported by path: `edgar.current_filings` is rebound in edgar/__init__.py
+        # to the get_current_filings function, so the attribute lookup finds that.
+        import importlib
+        module = importlib.import_module("edgar.current_filings")
+        monkeypatch.setattr(module, "get_with_retry", lambda url: _Response(content))
+    return serve
+
+
+@pytest.mark.fast
+def test_the_atom_namespace_does_not_hide_entries(_serve_feed):
+    """A plain lxml `.//entry` matches nothing in this feed — every element is
+    `{http://www.w3.org/2005/Atom}entry`. Getting this wrong returns an empty feed
+    rather than an error, so it is worth an explicit test."""
+    from edgar.current_filings import get_current_entries_on_page
+    _serve_feed(ATOM_FEED)
+
+    entries = get_current_entries_on_page(count=10, start=0)
+
+    assert len(entries) == 1
+    assert entries[0]["form"] == "4"
+    assert entries[0]["company"] == "WILKS LEWIS"
+    assert entries[0]["cik"] == 1076463
+    assert entries[0]["accession_number"] == "0001076463-26-000012"
+    assert entries[0]["filing_date"] == datetime.date(2026, 8, 18)
+
+
+@pytest.mark.fast
+def test_an_html_error_page_yields_no_entries_rather_than_raising(_serve_feed):
+    """Paging past the end of the feed gets HTTP 503 and this page. Pagination stops
+    because the page parses to zero entries; a strict parser would raise instead."""
+    from edgar.current_filings import get_current_entries_on_page
+    _serve_feed(HTML_ERROR_PAGE)
+
+    assert get_current_entries_on_page(count=10, start=100_000) == []
+
+
+@pytest.mark.fast
+@pytest.mark.parametrize("content", [b"", b"   ", b"garbage, not markup at all"])
+def test_an_unparseable_response_yields_no_entries(_serve_feed, content):
+    from edgar.current_filings import get_current_entries_on_page
+    _serve_feed(content)
+
+    assert get_current_entries_on_page(count=10, start=0) == []

@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Performance
 
+- **Parsing the current-filings feed is 6.1x faster**, measured on a real 100-entry page (9.6ms to 1.6ms). Most of that is invisible behind the network round trip when you fetch one page, but `get_all_current_filings()` pages through the whole feed and pays it every time. Output is byte-identical; the entries, their order, and their fields are unchanged.
+
 - **Parsing an EFFECT filing is 9.0x faster** — 242µs to 27µs per submission, measured over 39 real EFFECT documents from four quarters, with every parsed field identical before and after. EFFECT notices are small, so the win only shows at volume; a day's worth of them is a few thousand filings.
 
 ### Fixed
