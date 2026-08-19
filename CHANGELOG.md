@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **A Form 4 whose XML the SEC did not write quite correctly came back as raw markup instead of a rendered form.** `BeautifulSoup(xml, "xml")` parses with `recover=True`, so for years edgartools read filings like AAR CORP's 2004-02-04 Form 4 — which carries a mangled `<nonDerivativeTable ativeTable>` attribute — without anyone noticing they were malformed. The move to lxml made parsing strict, and `filing.sgml().text()` on those filings went back to dumping `<ownershipDocument>` tags. `xmltools.parse_xml` now recovers exactly as bs4 did, which restores the behaviour for every form migrated so far, not just Forms 3/4/5. A document with no markup at all is still an error.
+
 - **A person's name raised `TypeError` whenever they had no middle name.** `Name.full_name` built the middle segment as `(' ' + middle_name) or ''`, so the concatenation ran before the fallback could apply and a missing middle name crashed instead of being skipped. Municipal advisor filings hit this constantly — the parser feeds that field straight from the XML, which simply omits `<middleName>`. Michael NMN Tym Jr. still reads as `Michael NMN Tym Jr.`, since `NMN` is data the SEC writes, not an absence.
 
 - **`str(person)` printed the first name twice** instead of the full name. `repr()` was always correct, which is why Rich tables and notebook output looked right while string interpolation did not.
