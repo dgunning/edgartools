@@ -904,3 +904,144 @@ def test_total_always_uses_max_never_sum():
 
     assert schedule.total_shares == 5370000  # max, not 3 * 5370000
     assert schedule.total_percent == pytest.approx(16.4, rel=0.01)  # not 49.2%
+
+
+# ---------------------------------------------------------------------------
+# Parse contract for the lxml port (edgartools-07lk.11.3).
+#
+# The assertions above cover the fields a reader of a 13D/G cares about, which is
+# not the same set as the fields the bs4 -> lxml port can break silently. These
+# pin the three that were uncovered: the `com:`-namespaced address children, the
+# 13G items block, and the two guard shapes that change meaning between backends.
+# ---------------------------------------------------------------------------
+
+SCHEDULE_13D_NS = ('xmlns="http://www.sec.gov/edgar/schedule13D" '
+                   'xmlns:com="http://www.sec.gov/edgar/common"')
+SCHEDULE_13G_NS = ('xmlns="http://www.sec.gov/edgar/schedule13g" '
+                   'xmlns:com="http://www.sec.gov/edgar/common"')
+
+
+@pytest.mark.fast
+def test_schedule13d_issuer_address_is_com_namespaced():
+    """The address children live in a DIFFERENT namespace than their parent.
+
+    `<address>` is in the form's own namespace but `<com:street1>` is in
+    http://www.sec.gov/edgar/common, so neither a plain `.//street1` nor the
+    parent's namespace matches. bs4 matched on the local name and every read here
+    has to keep doing so; the failure is a silently empty Address, not an error.
+    """
+    result = Schedule13D.parse_xml(SCHEDULE_13D_XML_PATH.read_text())
+    address = result['issuer_info'].address
+
+    assert address is not None
+    assert address.street1 == '17383 SUNSET AVENUE, SUITE A250'
+    assert address.city == 'PACIFIC PALISADES'
+    assert address.state_or_country == 'X1'
+    assert address.zipcode == '90272'
+
+    # Item 1 reads the same com:-namespaced children out of a different parent and
+    # joins them, so it fails the same way and separately.
+    assert result['items'].item1_issuer_address == (
+        '17383 SUNSET AVENUE, SUITE A250, PACIFIC PALISADES, X1, 90272'
+    )
+
+
+@pytest.mark.fast
+def test_schedule13g_issuer_address_is_com_namespaced():
+    """Same mixed-namespace address, under the 13G's own element name."""
+    result = Schedule13G.parse_xml(SCHEDULE_13G_XML_PATH.read_text())
+    address = result['issuer_info'].address
+
+    assert address is not None
+    assert address.street1 == '301 YAMATO ROAD'
+    assert address.street2 == 'SUITE 3250'
+    assert address.city == 'BOCA RATON'
+    assert address.state_or_country == 'FL'
+    assert address.zipcode == '33431'
+
+
+@pytest.mark.fast
+def test_schedule13g_items_1_to_10():
+    """The whole 13G items block, which no other test reads."""
+    items = Schedule13G.parse_xml(SCHEDULE_13G_XML_PATH.read_text())['items']
+
+    assert items.item1_issuer_name == 'Jushi Holdings Inc.'
+    assert items.item1_issuer_address == '301 YAMATO ROAD, SUITE 3250, BOCA RATON, FLORIDA, 33431'
+    assert 'Marex Securities Products, Inc.' in items.item2_filer_names
+    assert '140 East 45th Street' in items.item2_filer_addresses
+    assert 'Delaware, USA' in items.item2_citizenship
+    assert items.item3_not_applicable is True
+
+    assert items.item4_amount_beneficially_owned == '10000000'
+    assert items.item4_percent_of_class == '5.08'
+    assert items.item4_sole_voting == '10000000'
+    assert items.item4_shared_voting == '0'
+    assert items.item4_sole_dispositive == '10000000'
+    assert items.item4_shared_dispositive == '0'
+
+    assert items.item5_not_applicable is True
+    assert items.item5_ownership_5pct_or_less == 'N'
+    assert items.item6_not_applicable is True
+    assert items.item7_not_applicable is True
+    assert items.item8_not_applicable is True
+    assert items.item9_not_applicable is True
+    assert items.item10_certification.startswith('By signing below I certify')
+
+
+@pytest.mark.fast
+def test_root_check_reads_the_local_name():
+    """<edgarSubmission> is the DOCUMENT element, and it is namespaced.
+
+    Two plausible root checks are both wrong on these documents: comparing the tag
+    directly rejects every real filing, because the tag reads as
+    `{http://www.sec.gov/edgar/schedule13D}edgarSubmission`; and searching
+    descendants never reaches the document element at all. Note the 13G schema
+    spells its namespace with a lower-case `g` where the 13D uses `D`.
+    """
+    assert Schedule13D.parse_xml(
+        f'<?xml version="1.0"?><edgarSubmission {SCHEDULE_13D_NS}>'
+        '<formData><coverPageHeader><issuerInfo>'
+        '<issuerName>Namespaced Co</issuerName></issuerInfo></coverPageHeader>'
+        '</formData></edgarSubmission>'
+    )['issuer_info'].name == 'Namespaced Co'
+
+    assert Schedule13G.parse_xml(
+        f'<?xml version="1.0"?><edgarSubmission {SCHEDULE_13G_NS}>'
+        '<formData><coverPageHeader><issuerInfo>'
+        '<issuerName>Namespaced Co</issuerName></issuerInfo></coverPageHeader>'
+        '</formData></edgarSubmission>'
+    )['issuer_info'].name == 'Namespaced Co'
+
+    # A namespaced document that is simply not a Schedule 13 is still rejected.
+    with pytest.raises(ValueError, match="missing <edgarSubmission>"):
+        Schedule13D.parse_xml(
+            f'<?xml version="1.0"?><ownershipDocument {SCHEDULE_13D_NS}/>'
+        )
+
+
+@pytest.mark.fast
+def test_childless_element_counts_as_present():
+    """An element with no children is PRESENT, and the guards have to say so.
+
+    A bs4 `Tag` is always truthy, so `if address_el:` held for `<address/>`. An
+    lxml element's truthiness is its child count, so the same guard silently drops
+    an empty element — the value comes back as absent rather than blank.
+    """
+    result = Schedule13D.parse_xml(
+        f'<?xml version="1.0"?><edgarSubmission {SCHEDULE_13D_NS}>'
+        '<formData><coverPageHeader><issuerInfo>'
+        '<issuerName>Blank Address Co</issuerName><address/>'
+        '</issuerInfo></coverPageHeader></formData></edgarSubmission>'
+    )
+    assert result['issuer_info'].address is not None
+    assert result['issuer_info'].address.street1 is None
+
+    # The 13G items read the other way round: an ABSENT item defaults to
+    # not-applicable, so a present-but-empty <item3/> is the case that tells a
+    # dropped guard from a working one.
+    items = Schedule13G.parse_xml(
+        f'<?xml version="1.0"?><edgarSubmission {SCHEDULE_13G_NS}>'
+        '<formData><coverPageHeader/><items><item3/></items>'
+        '</formData></edgarSubmission>'
+    )['items']
+    assert items.item3_not_applicable is False
