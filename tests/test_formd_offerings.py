@@ -110,6 +110,18 @@ def test_formd_industry_group_none():
     formd:FormD = filing.obj()
     assert formd.offering_data.industry_group.investment_fund_info is None
 
+def test_formd_sales_compensation_recipient_associated_bd_name():
+    # Regression for edgartools-aq2r: associated_bd_name was a bare annotation
+    # (`self.associated_bd_name: associated_bd_name`), not an assignment, so it
+    # was never set and raised AttributeError on access.
+    offering: FormD = FormD.from_xml(formD_xml1)
+    recipients = offering.offering_data.sales_compensation_recipients
+    assert len(recipients) == 4
+    assert recipients[0].name == "Charles Harrison"
+    assert recipients[0].associated_bd_name == "H & L Equities, LLC"
+    assert recipients[0].associated_bd_crd == "113794"
+
+
 def test_formd_business_combination():
     filing = Filing(form='D/A', filing_date='2024-04-03', company='REMY CAPITAL PARTNERS II L P', cik=920660,
            accession_no='0000935836-24-000336')

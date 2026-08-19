@@ -117,7 +117,7 @@ class SalesCompensationRecipient:
                  states_of_solicitation: Optional[List[str]] = None):
         self.name: str = name
         self.crd: str = crd
-        self.associated_bd_name: associated_bd_name
+        self.associated_bd_name: str = associated_bd_name
         self.associated_bd_crd: str = associated_bd_crd
         self.address: Address = address
         self.states_of_solicitation: List[str] = states_of_solicitation
