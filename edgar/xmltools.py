@@ -233,8 +233,12 @@ def find_element(
     """
     if isinstance(xml_tag_or_string, str):
         # A raw string is still parsed with bs4, so this returns the same backend it
-        # always has. Its one caller (thirteenf/parsers/primary_xml.py) moves to
-        # parsing with lxml itself under edgartools-07lk.11.3.
+        # always has. Its last in-tree caller (thirteenf/parsers/primary_xml.py) moved
+        # to `parse_xml` under edgartools-07lk.11.3, leaving this branch and the one
+        # in `find_all_elements` as the only BeautifulSoup construction in the module.
+        # Both are kept for callers outside the repo and go in the 6.0 window with
+        # the dependency (edgartools-07lk.11 phase 6). New code should call
+        # `parse_xml` and pass the element.
         if "<" not in xml_tag_or_string:
             return None
         return _find(BeautifulSoup(xml_tag_or_string, features="xml"), element_name)

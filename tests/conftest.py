@@ -310,6 +310,12 @@ def pytest_collection_modifyitems(config, items):
         # fast job rather than only by the sequential network suite. Verified
         # with outbound sockets blocked before being called fast.
         'test_insider_parse_contract',
+        # Classified 2026-08-18 (edgartools-07lk.11.3). Offline contract for the
+        # 13F primary-document parse: tests/test_thirteenf.py and the #523
+        # regressions both resolve filings over the wire, so the namespaced
+        # parse this port most endangers had no fast-job coverage. Verified with
+        # outbound sockets blocked.
+        'test_13f_primary_doc_contract',
     ]
 
     # Files that need network (fetch from SEC)
