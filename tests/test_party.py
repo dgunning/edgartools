@@ -110,6 +110,50 @@ def test_issuer_previous_name_lists_keep_real_names_in_order():
     assert issuer.issuer_previous_names == ["Old Name One", "Old Name Two"]
 
 
+def test_issuer_previous_name_lists_read_the_previousName_spelling():
+    """SEC also writes previous names with a `<previousName>` child instead of
+    `<value>`. Ground truth: Shepherd's Finance, LLC (CIK 0001544190, formerly
+    84 RE Partners, LLC), data/D.Shepards.xml. Regression for edgartools-gi0a:
+    this spelling was silently dropped, returning [] instead of the real name.
+    """
+    xml = ISSUER_XML.replace(
+        "<issuerPreviousNameList>\n        <value>None</value>\n    </issuerPreviousNameList>",
+        "<issuerPreviousNameList>"
+        "<previousName>84 RE Partners, LLC</previousName>"
+        "</issuerPreviousNameList>",
+    )
+    issuer = Issuer.from_xml(_issuer_element(xml))
+    assert issuer.issuer_previous_names == ["84 RE Partners, LLC"]
+    assert issuer.edgar_previous_names == []
+
+
+def test_issuer_previous_name_lists_drop_the_literal_none_placeholder_in_either_spelling():
+    """SEC writes the literal 'None' placeholder under both spellings, e.g.
+    data/D.APFund.xml: `<issuerPreviousNameList><previousName>None</previousName>`.
+    """
+    xml = ISSUER_XML.replace(
+        "<issuerPreviousNameList>\n        <value>None</value>\n    </issuerPreviousNameList>",
+        "<issuerPreviousNameList>"
+        "<previousName>None</previousName>"
+        "</issuerPreviousNameList>",
+    )
+    issuer = Issuer.from_xml(_issuer_element(xml))
+    assert issuer.issuer_previous_names == []
+
+
+def test_issuer_previous_name_lists_merge_both_spellings_without_duplicates():
+    xml = ISSUER_XML.replace(
+        "<issuerPreviousNameList>\n        <value>None</value>\n    </issuerPreviousNameList>",
+        "<issuerPreviousNameList>"
+        "<value>Old Name One</value>"
+        "<previousName>Old Name One</previousName>"
+        "<previousName>Old Name Two</previousName>"
+        "</issuerPreviousNameList>",
+    )
+    issuer = Issuer.from_xml(_issuer_element(xml))
+    assert issuer.issuer_previous_names == ["Old Name One", "Old Name Two"]
+
+
 def test_issuer_tolerates_missing_previous_name_lists():
     xml = ISSUER_XML.replace("<issuerPreviousNameList>", "<absentList>").replace(
         "</issuerPreviousNameList>", "</absentList>"
