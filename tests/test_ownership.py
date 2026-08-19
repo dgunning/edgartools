@@ -637,5 +637,3 @@ def test_get_html_from_insider_filing(dayone_filing):
     html = dayone_filing.html()
     assert html
     assert has_html_content(html)
-
-
