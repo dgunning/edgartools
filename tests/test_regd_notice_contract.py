@@ -142,21 +142,15 @@ def test_a_previous_name_list_of_literal_none_reads_as_no_previous_names(ap_fund
     assert FormD.from_xml(REIT_1685.read_text()).primary_issuer.issuer_previous_names == []
 
 
-def test_previous_names_in_the_other_spelling_are_currently_dropped():
-    """Pins existing behavior, which is WRONG — see edgartools-gi0a.
-
-    `Issuer.from_xml` reads only `<value>` children of the previous-name lists, but
-    SEC also writes `<previousName>`, and 7 of 42 Form D filings sampled across
-    2022-2025 use that spelling with real values. Shepherd's Finance was renamed
-    from "84 RE Partners, LLC" and the parser returns an empty list.
-
-    This test exists so the loss is visible and so fixing gi0a is a deliberate,
-    single-line change to an assertion rather than a surprise. It was NOT
-    introduced by the lxml port: both backends drop it identically.
+def test_previous_names_in_the_other_spelling_are_read():
+    """SEC writes previous names as `<value>` in most filings but `<previousName>`
+    in others — 7 of 42 Form D filings sampled across 2022-2025 use that spelling
+    with real values. Both are read (edgartools-gi0a): Shepherd's Finance was
+    renamed from "84 RE Partners, LLC" and the parser returns it.
     """
     shepherds = FormD.from_xml(SHEPHERDS.read_text())
     assert "84 RE Partners, LLC" in SHEPHERDS.read_text()
-    assert shepherds.primary_issuer.issuer_previous_names == []  # should be ["84 RE Partners, LLC"]
+    assert shepherds.primary_issuer.issuer_previous_names == ["84 RE Partners, LLC"]
 
 
 def test_from_xml_rejects_a_document_that_is_not_an_edgar_submission():
