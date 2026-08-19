@@ -478,11 +478,41 @@ def test_parse_xml_honors_the_encoding_declaration_on_bytes():
     assert child_text(parse_xml(xml.encode("ISO-8859-1")), "entityName") == "Café"
 
 
-def test_parse_xml_raises_on_a_document_that_is_not_xml():
-    """The one place the port is deliberately stricter than bs4, which returned a
-    near-empty tree and let the failure surface as `None` several frames later."""
+def test_parse_xml_recovers_from_malformed_markup_exactly_as_bs4_did():
+    """`BeautifulSoup(xml, "xml")` parses with `recover=True`, so this has to too.
+
+    SEC's own XML is not always well-formed. AAR CORP's 2004-02-04 Form 4
+    (0000001750-04-000011) carries a mangled attribute — the shape reproduced here —
+    and bs4 absorbed it for years. A strict parser rejects the whole document, and
+    because `ownership_xml_to_html` catches every exception, the failure showed up
+    not as an error but as a filing's text turning back into raw markup
+    (edgartools-07lk.11.3). Recovery is part of the contract, not a leniency.
+    """
+    root = parse_xml('<ownershipDocument><documentType>4</documentType>'
+                     '<nonDerivativeTable ativeTable><x>y</x></nonDerivativeTable>'
+                     '</ownershipDocument>')
+    assert local_name(root) == "ownershipDocument"
+    assert child_text(root, "documentType") == "4"
+
+
+def test_parse_xml_leaves_a_non_xml_document_for_the_caller_to_reject():
+    """An HTML error page is not a parse failure any more — it is a wrong document.
+
+    It recovers to an `<html>` root, which every dependent's `local_name(root) !=
+    ...` check rejects by name. That is a better message than a parse error, and it
+    is what bs4 did.
+    """
+    assert local_name(parse_xml("<html><body>503 Service Unavailable</body>")) == "html"
+
+
+def test_parse_xml_still_raises_when_there_is_no_markup_to_recover():
+    """Recovery has a floor. lxml returns None rather than raising for content with
+    no markup at all, and a caller handed None fails several frames later with an
+    AttributeError naming the wrong thing — so it is re-raised here."""
     with pytest.raises(etree.XMLSyntaxError):
-        parse_xml("<html><body>503 Service Unavailable</body>")
+        parse_xml("Your request rate has exceeded the SEC limit.")
+    with pytest.raises(etree.XMLSyntaxError):
+        parse_xml("")
 
 
 def test_parse_xml_keeps_a_namespaced_root_addressable_by_local_name():
