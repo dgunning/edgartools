@@ -35,6 +35,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **`str(person)` printed the first name twice** instead of the full name. `repr()` was always correct, which is why Rich tables and notebook output looked right while string interpolation did not.
 
+- **Every disclosure answer on an MA-I municipal advisor filing read `False`, no matter what the filing said.** 40 of the 45 disclosure booleans were read with `child_value()`, which looks for a `<value>` child element — but MA-I disclosure elements carry the answer as their own text, so the lookup always came back empty and a filing disclosing a felony charge reported clean, indistinguishable from one that actually is. Found by a 40-filing corpus comparison during the lxml migration and present long before it; every disclosure class and `Disclosures.any()` now reads the answer the SEC actually wrote.
+
+- **Five more MA-I disclosure fields were hardwired `False` because the parser asked for element names the SEC schema does not use.** Three of the five are the SEC's own misspellings — `isIndependentRelatioship`, `isTrusteeApointed`, `isViloatedIndustryStandard` — which is exactly why the mismatch was easy to miss; the parser searched for the correctly-spelled names and found nothing in any of 40 corpus documents. It now asks for what the SEC writes, with comments guarding each misspelling so nobody corrects them back into brokenness.
+
+- **`Form144.contact` was `None` on every filing.** The parser searched for `<contact>` under `<filer>` when the SEC writes it as a sibling under `<filerInfo>`, and even given the right element it read children named `name`, `phone` and `email` where the schema names them `contactName`, `contactPhoneNumber` and `contactEmailAddress` — two mistakes, each sufficient alone. All 31 corpus filings returned `None`; the SEC's own checked-in sample, whose contact block is populated, now parses.
+
+- **A Form D issuer's previous names vanished when the SEC wrote them with the `<previousName>` spelling.** The previous-name lists were read only through `<value>` children, but 7 of 42 sampled filings from 2022–2025 use `<previousName>` instead, so a renamed company like Shepherd's Finance, LLC parsed as never having been renamed — an empty list, never an error. Both spellings are now read, and the literal `None` placeholder the SEC writes for "no previous names" is filtered under either one.
+
+- **Reading `associated_bd_name` off a Form D sales-compensation recipient raised `AttributeError`.** The constructor line was `self.associated_bd_name: associated_bd_name` — a colon where an equals belongs, a bare annotation that binds nothing — so the value was parsed correctly, passed correctly, and dropped at the moment of assignment. The sibling CRD line was written correctly, which is what made the typo invisible.
+
 - **`SecForms.load()` returned an object that raised a bewildering `SyntaxError` on use.** It wrapped `list_forms()`, which already returns a `SecForms`, so the forms table ended up nested one level too deep and every read of it went through the wrong `__getitem__` into a pandas query expression. `SecForms.load().get_form("1-A")` now returns Form 1-A, the Regulation A Offering Statement.
 
 ## [5.50.1] - 2026-08-18
