@@ -15,7 +15,6 @@ from edgar.richtools import repr_rich
 from edgar.xmltools import (
     child_text,
     child_texts,
-    child_value,
     element_text,
     find_all_elements,
     find_element,
@@ -431,7 +430,9 @@ class MunicipalAdvisorForm:
             municipal_advisor_office = MunicipalAdvisorOffice(
                 cik=element_text(filer_el) if filer_el is not None else "",
                 firm_name=child_text(municipal_firm_el, 'municipalFirmName'),
-                is_independent_relationship=child_text(municipal_firm_el, 'isIndependentRelationship') == 'Y',
+                # 'isIndependentRelatioship' is the SEC schema's own misspelling
+                # (verified in 40/40 sampled MA-I filings) -- do not "fix" it back.
+                is_independent_relationship=child_text(municipal_firm_el, 'isIndependentRelatioship') == 'Y',
                 recent_employment_commenced_date=child_text(municipal_firm_el, 'recentEmploymentCommencedDate'),
                 file_number=file_number,
                 offices=offices
@@ -492,15 +493,15 @@ class MunicipalAdvisorForm:
         criminal_disclosure_el = find_element(disclosure_questions_el, 'criminalDisclosure')
         criminal_disclosure_common_el = find_element(criminal_disclosure_el, 'criminalDisclosureCommonQuestion')
         criminal_disclosure = CriminalDisclosure(
-            is_convicted_of_felony=child_value(criminal_disclosure_common_el, 'isConvictedOfFelony') == "Y",
-            is_charged_with_felony=child_value(criminal_disclosure_common_el, 'isChargedWithFelony') == "Y",
-            is_org_convicted_of_felony=child_value(criminal_disclosure_common_el, 'isOrgConvictedOfFelony') == "Y",
-            is_org_charged_with_felony=child_value(criminal_disclosure_common_el, 'isOrgChargedWithFelony') == "Y",
-            is_convicted_of_misdemeanor=child_value(criminal_disclosure_el, 'isConvictedOfMisdemeanor') == "Y",
-            is_charged_with_misdemeanor=child_value(criminal_disclosure_el, 'isChargedWithMisdemeanor') == "Y",
-            is_org_charged_with_misdemeanor=child_value(criminal_disclosure_el,
+            is_convicted_of_felony=child_text(criminal_disclosure_common_el, 'isConvictedOfFelony') == "Y",
+            is_charged_with_felony=child_text(criminal_disclosure_common_el, 'isChargedWithFelony') == "Y",
+            is_org_convicted_of_felony=child_text(criminal_disclosure_common_el, 'isOrgConvictedOfFelony') == "Y",
+            is_org_charged_with_felony=child_text(criminal_disclosure_common_el, 'isOrgChargedWithFelony') == "Y",
+            is_convicted_of_misdemeanor=child_text(criminal_disclosure_el, 'isConvictedOfMisdemeanor') == "Y",
+            is_charged_with_misdemeanor=child_text(criminal_disclosure_el, 'isChargedWithMisdemeanor') == "Y",
+            is_org_charged_with_misdemeanor=child_text(criminal_disclosure_el,
                                                         'isOrgChargedWithMisdemeanor') == "Y",
-            is_org_convicted_of_misdemeanor=child_value(criminal_disclosure_el,
+            is_org_convicted_of_misdemeanor=child_text(criminal_disclosure_el,
                                                         'isOrgConvictedOfMisdemeanor') == "Y",
         )
         criminal_disclosure = criminal_disclosure
@@ -510,37 +511,37 @@ class MunicipalAdvisorForm:
         regulatory_disclosure_common_el = find_element(regulatory_disclosure_el,
                                                        'regulatoryDisclosureCommonQuestion')
         regulatory_disclosure = RegulatoryDisclosure(
-            is_made_false_statement=child_value(regulatory_disclosure_common_el, 'isMadeFalseStatement') == "Y",
-            is_violated_regulation=child_value(regulatory_disclosure_common_el, 'isViolatedRegulation') == "Y",
-            is_cause_of_denial=child_value(regulatory_disclosure_common_el, 'isCauseOfDenial') == "Y",
-            is_order_against=child_value(regulatory_disclosure_common_el, 'isOrderAgainst') == "Y",
-            is_imposed_penalty=child_value(regulatory_disclosure_common_el, 'isImposedPenalty') == "Y",
-            is_un_ethical=child_value(regulatory_disclosure_common_el, 'isUnEthical') == "Y",
-            is_found_in_violation_of_regulation=child_value(regulatory_disclosure_common_el,
+            is_made_false_statement=child_text(regulatory_disclosure_common_el, 'isMadeFalseStatement') == "Y",
+            is_violated_regulation=child_text(regulatory_disclosure_common_el, 'isViolatedRegulation') == "Y",
+            is_cause_of_denial=child_text(regulatory_disclosure_common_el, 'isCauseOfDenial') == "Y",
+            is_order_against=child_text(regulatory_disclosure_common_el, 'isOrderAgainst') == "Y",
+            is_imposed_penalty=child_text(regulatory_disclosure_common_el, 'isImposedPenalty') == "Y",
+            is_un_ethical=child_text(regulatory_disclosure_common_el, 'isUnEthical') == "Y",
+            is_found_in_violation_of_regulation=child_text(regulatory_disclosure_common_el,
                                                             'isFoundInViolationOfRegulation') == "Y",
-            is_found_in_violation_of_rules=child_value(regulatory_disclosure_common_el,
+            is_found_in_violation_of_rules=child_text(regulatory_disclosure_common_el,
                                                        'isFoundInViolationOfRules') == "Y",
-            is_found_in_cause_of_denial=child_value(regulatory_disclosure_common_el,
+            is_found_in_cause_of_denial=child_text(regulatory_disclosure_common_el,
                                                     'isFoundInCauseOfDenial') == "Y",
-            is_order_against_activity=child_value(regulatory_disclosure_common_el,
+            is_order_against_activity=child_text(regulatory_disclosure_common_el,
                                                   'isOrderAgainstActivity') == "Y",
-            is_denied_license=child_value(regulatory_disclosure_common_el, 'isDeniedLicense') == "Y",
-            is_found_in_cause_of_suspension=child_value(regulatory_disclosure_common_el,
+            is_denied_license=child_text(regulatory_disclosure_common_el, 'isDeniedLicense') == "Y",
+            is_found_in_cause_of_suspension=child_text(regulatory_disclosure_common_el,
                                                         'isFoundInCauseOfSuspension') == "Y",
-            is_discipliend=child_value(regulatory_disclosure_common_el, 'isDiscipliend') == "Y",
-            is_authorized_to_act_attorney=child_value(regulatory_disclosure_common_el,
+            is_discipliend=child_text(regulatory_disclosure_common_el, 'isDiscipliend') == "Y",
+            is_authorized_to_act_attorney=child_text(regulatory_disclosure_common_el,
                                                       'isAuthorizedToActAttorney') == "Y",
-            is_regulatory_complaint=child_value(regulatory_disclosure_common_el, 'isRegulatoryComplaint') == "Y",
-            is_violated_security_act=child_value(regulatory_disclosure_el, 'isViolatedSecurityAct') == "Y",
-            is_will_fully_aided=child_value(regulatory_disclosure_el, 'isWillFullyAided') == "Y",
-            is_failed_to_supervise=child_value(regulatory_disclosure_el, 'isFailedToSupervise') == "Y",
-            is_found_will_fully_aided=child_value(regulatory_disclosure_el, 'isFoundWillFullyAided') == "Y",
-            is_association_bared=child_value(regulatory_disclosure_el, 'isAssociationBared') == "Y",
-            is_final_order=child_value(regulatory_disclosure_el, 'isFinalOrder') == "Y",
-            is_will_fully_violated_security_act=child_value(regulatory_disclosure_el,
+            is_regulatory_complaint=child_text(regulatory_disclosure_common_el, 'isRegulatoryComplaint') == "Y",
+            is_violated_security_act=child_text(regulatory_disclosure_el, 'isViolatedSecurityAct') == "Y",
+            is_will_fully_aided=child_text(regulatory_disclosure_el, 'isWillFullyAided') == "Y",
+            is_failed_to_supervise=child_text(regulatory_disclosure_el, 'isFailedToSupervise') == "Y",
+            is_found_will_fully_aided=child_text(regulatory_disclosure_el, 'isFoundWillFullyAided') == "Y",
+            is_association_bared=child_text(regulatory_disclosure_el, 'isAssociationBared') == "Y",
+            is_final_order=child_text(regulatory_disclosure_el, 'isFinalOrder') == "Y",
+            is_will_fully_violated_security_act=child_text(regulatory_disclosure_el,
                                                             'isWillFullyViolatedSecurityAct') == "Y",
-            is_failed_resonably=child_value(regulatory_disclosure_el, 'isFailedResonably') == "Y",
-            is_found_made_false_statement=child_value(regulatory_disclosure_el,
+            is_failed_resonably=child_text(regulatory_disclosure_el, 'isFailedResonably') == "Y",
+            is_found_made_false_statement=child_text(regulatory_disclosure_el,
                                                       'isFoundMadeFalseStatement') == "Y"
         )
         regulatory_disclosure = regulatory_disclosure
@@ -553,44 +554,53 @@ class MunicipalAdvisorForm:
         # Civil Disclosure
         civil_disclosure_el = find_element(disclosure_questions_el, 'civilDisclosure')
         civil_disclosure = CivilDisclosure(
-            is_enjoined=child_value(civil_disclosure_el, 'isEnjoined') == "Y",
-            is_found_violation_of_regulation=child_value(civil_disclosure_el,
-                                                         'isFoundViolationOfRegulation') == "Y",
-            is_dismissed=child_value(civil_disclosure_el, 'isDismissed') == "Y",
-            is_named_in_civil_proceeding=child_value(civil_disclosure_el,
+            is_enjoined=child_text(civil_disclosure_el, 'isEnjoined') == "Y",
+            # The element is 'isFoundInViolationOfRegulation', not
+            # 'isFoundViolationOfRegulation' -- verified in 40/40 sampled MA-I filings.
+            is_found_violation_of_regulation=child_text(civil_disclosure_el,
+                                                         'isFoundInViolationOfRegulation') == "Y",
+            is_dismissed=child_text(civil_disclosure_el, 'isDismissed') == "Y",
+            is_named_in_civil_proceeding=child_text(civil_disclosure_el,
                                                      'isNamedInCivilProceeding') == "Y")
 
         # Complaint Disclosure
         complaint_disclosure_el = find_element(disclosure_questions_el, 'complaintDisclosure')
         complaint_disclosure = ComplaintDisclosure(
-            is_complaint_pending=child_value(complaint_disclosure_el, 'isComplaintPending') == "Y",
-            is_complaint_settled=child_value(complaint_disclosure_el, 'isComplaintSettled') == "Y",
-            is_fraud_case_pending=child_value(complaint_disclosure_el, 'isFraudCasePending') == "Y",
-            is_fraud_case_resulting_award=child_value(complaint_disclosure_el,
-                                                      'isFraudCaseResultingAward') == "Y",
-            is_fraud_case_settled=child_value(complaint_disclosure_el, 'isFraudCaseSettled') == "Y"
+            is_complaint_pending=child_text(complaint_disclosure_el, 'isComplaintPending') == "Y",
+            is_complaint_settled=child_text(complaint_disclosure_el, 'isComplaintSettled') == "Y",
+            is_fraud_case_pending=child_text(complaint_disclosure_el, 'isFraudCasePending') == "Y",
+            # The element is 'isFraudCaseResultedAward', not
+            # 'isFraudCaseResultingAward' -- the SEC schema's own spelling
+            # (verified in 40/40 sampled MA-I filings) -- do not "fix" it back.
+            is_fraud_case_resulting_award=child_text(complaint_disclosure_el,
+                                                      'isFraudCaseResultedAward') == "Y",
+            is_fraud_case_settled=child_text(complaint_disclosure_el, 'isFraudCaseSettled') == "Y"
         )
 
         # Termination Disclosure
         termination_disclosure_el = find_element(disclosure_questions_el, 'terminationDisclosure')
         termination_disclosure = TerminationDisclosure(
-            is_violated_industry_standards=child_value(termination_disclosure_el,
-                                                       'isViolatedIndustryStandards') == "Y",
-            is_involved_in_fraud=child_value(termination_disclosure_el, 'isInvolvedInFraud') == "Y",
-            is_failed_to_supervise=child_value(termination_disclosure_el, 'isFailedToSupervise') == "Y"
+            # 'isViloatedIndustryStandard' is the SEC schema's own misspelling
+            # (verified in 40/40 sampled MA-I filings) -- do not "fix" it back.
+            is_violated_industry_standards=child_text(termination_disclosure_el,
+                                                       'isViloatedIndustryStandard') == "Y",
+            is_involved_in_fraud=child_text(termination_disclosure_el, 'isInvolvedInFraud') == "Y",
+            is_failed_to_supervise=child_text(termination_disclosure_el, 'isFailedToSupervise') == "Y"
         )
         # Financial Disclosure
         financial_disclosure_el = find_element(disclosure_questions_el, 'financialDisclosure')
         financial_disclosure = FinancialDisclosure(
-            is_compromised=child_value(financial_disclosure_el, 'isCompromised') == "Y",
-            is_bankruptcy_petition=child_value(financial_disclosure_el, 'isBankruptcyPetition') == "Y",
-            is_trustee_appointed=child_value(financial_disclosure_el, 'isTrusteeAppointed') == "Y",
-            is_bond_revoked=child_value(financial_disclosure_el, 'isBondRevoked') == "Y"
+            is_compromised=child_text(financial_disclosure_el, 'isCompromised') == "Y",
+            is_bankruptcy_petition=child_text(financial_disclosure_el, 'isBankruptcyPetition') == "Y",
+            # 'isTrusteeApointed' is the SEC schema's own misspelling
+            # (verified in 40/40 sampled MA-I filings) -- do not "fix" it back.
+            is_trustee_appointed=child_text(financial_disclosure_el, 'isTrusteeApointed') == "Y",
+            is_bond_revoked=child_text(financial_disclosure_el, 'isBondRevoked') == "Y"
         )
         # Judgement Lien Disclosure
         judgement_lien_disclosure_el = find_element(disclosure_questions_el, 'judgmentLienDisclosure')
         judgement_lien_disclosure = JudgementLienDisclosure(
-            is_lien_against=child_value(judgement_lien_disclosure_el, 'isLienAgainst') == "Y"
+            is_lien_against=child_text(judgement_lien_disclosure_el, 'isLienAgainst') == "Y"
         )
 
         # Signature

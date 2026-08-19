@@ -225,40 +225,88 @@ def test_the_investigation_answer_is_read(goldman, minimal):
     assert minimal['disclosures'].investigation_disclosure.is_investigated is True
 
 
-def test_disclosure_answers_read_with_child_value_are_currently_always_false():
-    """Pins existing behavior, which is WRONG — see edgartools-9fy0.
+def test_disclosure_answers_are_read_from_the_elements_own_text(goldman):
+    """edgartools-9fy0: 40 of the 45 disclosure booleans were parsed with
+    `xmltools.child_value`, which reads the text of a `<value>` CHILD. MA-I
+    disclosure elements have no `<value>` child — they hold the answer as their
+    own text, e.g. `<com:isConvictedOfFelony>Y</com:isConvictedOfFelony>` — so
+    `child_value` returned `''` and the `== "Y"` comparison was always False.
+    Fixed by switching these reads to `child_text`, the pattern already used by
+    `investigation_disclosure.is_investigated`.
 
-    40 of the 45 disclosure booleans are parsed with `xmltools.child_value`, which
-    reads the text of a `<value>` CHILD. MA-I disclosure elements have no `<value>`
-    child, so `child_value` returns `''` and the `== "Y"` comparison is always
-    False. Three of the 40 real MA-I filings sampled for the lxml port answer Y to
-    a disclosure question and every one of them reads as clean.
-
-    This was NOT introduced by the port: both backends produce False identically.
-    The test exists so fixing 9fy0 is a deliberate change to these assertions
-    rather than a surprise failure.
+    The checked-in Goldman fixture answers N to every disclosure question, so
+    this asserts on a copy with one answer flipped to Y.
     """
     xml = GOLDMAN.read_text().replace('<com:isConvictedOfFelony>N<',
                                       '<com:isConvictedOfFelony>Y<')
     assert '<com:isConvictedOfFelony>Y<' in xml
     disclosures = MunicipalAdvisorForm.from_xml(xml)['disclosures']
-    assert disclosures.criminal_disclosure.is_convicted_of_felony is False  # should be True
-    assert disclosures.any() is False  # should be True
+    assert disclosures.criminal_disclosure.is_convicted_of_felony is True
+    assert disclosures.any() is True
+
+    # And the clean fixture still reads as clean.
+    assert goldman['disclosures'].criminal_disclosure.is_convicted_of_felony is False
+    assert goldman['disclosures'].any() is False
 
 
-def test_is_independent_relationship_is_currently_always_false():
-    """Pins existing behavior, which is WRONG — see edgartools-x2ko.
-
-    The parser searches for `isIndependentRelationship`; the SEC schema spells it
-    `isIndependentRelatioship`, and does so in all 40 filings sampled for the lxml
-    port. The search finds nothing, so the field is False for every MA-I ever
-    filed. Two of the 40 answer Y. Pre-existing on both backends.
+def test_is_independent_relationship_is_read_from_the_real_sec_element_name():
+    """edgartools-x2ko: the parser searched for `isIndependentRelationship`; the
+    SEC schema spells it `isIndependentRelatioship` (its own typo, present in
+    40/40 sampled MA-I filings). The search found nothing, so the field was
+    False for every MA-I ever filed. Fixed by searching for the real name.
     """
     xml = GOLDMAN.read_text().replace('<isIndependentRelatioship>N<',
                                       '<isIndependentRelatioship>Y<')
     assert '<isIndependentRelatioship>Y<' in xml
     offices = MunicipalAdvisorForm.from_xml(xml)['municipal_advisor_offices']
-    assert offices[0].is_independent_relationship is False  # should be True
+    assert offices[0].is_independent_relationship is True
+
+
+def test_civil_disclosure_is_read_from_the_real_sec_element_name():
+    """edgartools-x2ko: the parser searched for `isFoundViolationOfRegulation`;
+    the SEC schema spells it `isFoundInViolationOfRegulation` (40/40 sampled).
+    Also depends on the 9fy0 child_text fix, since this field is nested inside
+    `<civilDisclosure>` with no `<value>` child."""
+    xml = GOLDMAN.read_text().replace('<com:isFoundInViolationOfRegulation>N</com:isFoundInViolationOfRegulation>\n        <com:isDismissed>',
+                                      '<com:isFoundInViolationOfRegulation>Y</com:isFoundInViolationOfRegulation>\n        <com:isDismissed>')
+    assert '<com:isFoundInViolationOfRegulation>Y</com:isFoundInViolationOfRegulation>\n        <com:isDismissed>' in xml
+    disclosures = MunicipalAdvisorForm.from_xml(xml)['disclosures']
+    assert disclosures.civil_disclosure.is_found_violation_of_regulation is True
+    assert disclosures.civil_disclosure.any() is True
+
+
+def test_complaint_disclosure_is_read_from_the_real_sec_element_name():
+    """edgartools-x2ko: the parser searched for `isFraudCaseResultingAward`; the
+    SEC schema spells it `isFraudCaseResultedAward` (its own typo, 40/40 sampled)."""
+    xml = GOLDMAN.read_text().replace('<isFraudCaseResultedAward>N<',
+                                      '<isFraudCaseResultedAward>Y<')
+    assert '<isFraudCaseResultedAward>Y<' in xml
+    disclosures = MunicipalAdvisorForm.from_xml(xml)['disclosures']
+    assert disclosures.complaint_disclosure.is_fraud_case_resulting_award is True
+    assert disclosures.complaint_disclosure.any() is True
+
+
+def test_termination_disclosure_is_read_from_the_real_sec_element_name():
+    """edgartools-x2ko: the parser searched for `isViolatedIndustryStandards`;
+    the SEC schema spells it `isViloatedIndustryStandard` (its own typo, 40/40
+    sampled)."""
+    xml = GOLDMAN.read_text().replace('<isViloatedIndustryStandard>N<',
+                                      '<isViloatedIndustryStandard>Y<')
+    assert '<isViloatedIndustryStandard>Y<' in xml
+    disclosures = MunicipalAdvisorForm.from_xml(xml)['disclosures']
+    assert disclosures.termination_disclosure.is_violated_industry_standards is True
+    assert disclosures.termination_disclosure.any() is True
+
+
+def test_financial_disclosure_is_read_from_the_real_sec_element_name():
+    """edgartools-x2ko: the parser searched for `isTrusteeAppointed`; the SEC
+    schema spells it `isTrusteeApointed` (its own typo, 40/40 sampled)."""
+    xml = GOLDMAN.read_text().replace('<isTrusteeApointed>N<',
+                                      '<isTrusteeApointed>Y<')
+    assert '<isTrusteeApointed>Y<' in xml
+    disclosures = MunicipalAdvisorForm.from_xml(xml)['disclosures']
+    assert disclosures.financial_disclosure.is_trustee_appointed is True
+    assert disclosures.financial_disclosure.any() is True
 
 
 def test_from_xml_rejects_a_document_that_is_not_an_edgar_submission():
