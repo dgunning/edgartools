@@ -202,7 +202,7 @@ class Person:
         self.relationship_clarification: Optional[str] = relationship_clarification
 
     def __str__(self):
-        return f"{self.first_name} {self.first_name}"
+        return f"{self.first_name} {self.last_name}"
 
     def __repr__(self):
         return f"{self.first_name} {self.last_name}"
@@ -212,9 +212,9 @@ class Name:
 
     def __init__(self,
                  first_name: str,
-                 middle_name: str,
+                 middle_name: Optional[str],
                  last_name: str,
-                 suffix:Optional[str]=None):
+                 suffix: Optional[str] = None):
         self.first_name = first_name
         self.middle_name = middle_name
         self.last_name = last_name
@@ -222,7 +222,12 @@ class Name:
 
     @property
     def full_name(self):
-        return f"{self.first_name}{' ' + self.middle_name or ''} {self.last_name} {self.suffix or ''}".rstrip()
+        # Every part is optional in practice: the XML parsers feed this from
+        # child_text(), which returns None for an absent element — a filer with no
+        # <middleName> is the common case, not an edge case.
+        return " ".join(part for part in
+                        (self.first_name, self.middle_name, self.last_name, self.suffix)
+                        if part)
 
     def __str__(self):
         return self.full_name

@@ -89,7 +89,9 @@ class SecForms:
 
     @classmethod
     def load(cls):
-        return SecForms(list_forms())
+        # list_forms() already returns a SecForms; wrapping it again put a SecForms
+        # in .data where a DataFrame belongs.
+        return list_forms()
 
     def __getitem__(self, item):
         return self.get_form(item)
