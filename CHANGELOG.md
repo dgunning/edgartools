@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Performance
 
+- **Parsing a Schedule 13D or 13G is 4.2x faster** — 2.41ms to 0.57ms per document, measured over 125 real SCHEDULE 13D, 13D/A, 13G and 13G/A filings from all four quarters of 2025, with every parsed field identical before and after: issuer and security info, all reporting persons with their voting and dispositive power, the 13D items 1-7, the 13G items 1-10 and the signatures. Structured XML for these forms only exists from the 2024-12-18 SEC mandate onward; older filings still come back from the SGML header with `has_structured_data == False`.
+
 - **Parsing the current-filings feed is 6.1x faster**, measured on a real 100-entry page (9.6ms to 1.6ms). Most of that is invisible behind the network round trip when you fetch one page, but `get_all_current_filings()` pages through the whole feed and pays it every time. Output is byte-identical; the entries, their order, and their fields are unchanged.
 
 - **Parsing an MA-I municipal advisor filing is 2.9x faster** — 3.89ms to 1.33ms per filing, measured over 40 real MA-I and MA-I/A filings from 2021 to 2026, with every field identical before and after: filer, contact, notification addresses, applicant and other names, all advisory offices and their addresses, the full employment history and the signature. MA-I mixes three namespaces in one document, so more of the work stays in the local-name fallback than it does for the single-namespace forms.

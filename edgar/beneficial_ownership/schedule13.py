@@ -215,9 +215,10 @@ class Schedule13D:
 
         Raises:
             ValueError: If XML structure is invalid
-            lxml.etree.XMLSyntaxError: If the argument is not well-formed XML.
-                bs4 absorbed that case and produced an empty tree, which then
-                surfaced as the ValueError above; lxml says so directly.
+            lxml.etree.XMLSyntaxError: If the argument carries no markup at all.
+                Malformed markup is recovered from, as bs4 did — SEC's own XML is
+                not always well-formed. An HTML error page recovers to an <html>
+                root and so raises the ValueError above, by name.
         """
         # <edgarSubmission> is the document element, so this is a root check rather
         # than a search: a Schedule 13D carries the default namespace
@@ -699,9 +700,10 @@ class Schedule13G:
 
         Raises:
             ValueError: If XML structure is invalid
-            lxml.etree.XMLSyntaxError: If the argument is not well-formed XML.
-                bs4 absorbed that case and produced an empty tree, which then
-                surfaced as the ValueError above; lxml says so directly.
+            lxml.etree.XMLSyntaxError: If the argument carries no markup at all.
+                Malformed markup is recovered from, as bs4 did — SEC's own XML is
+                not always well-formed. An HTML error page recovers to an <html>
+                root and so raises the ValueError above, by name.
         """
         # As in Schedule13D.parse_xml: <edgarSubmission> is the document element, and
         # a Schedule 13G carries the default namespace
