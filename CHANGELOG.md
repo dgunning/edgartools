@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Parsing the current-filings feed is 6.1x faster**, measured on a real 100-entry page (9.6ms to 1.6ms). Most of that is invisible behind the network round trip when you fetch one page, but `get_all_current_filings()` pages through the whole feed and pays it every time. Output is byte-identical; the entries, their order, and their fields are unchanged.
 
+- **Reading a filing's report index is 6.9x faster** — 16.2ms to 2.4ms per `FilingSummary.xml`, measured over 31 real filings (10-K, 10-Q, 8-K, 20-F, 2021 to 2025) carrying 1,823 reports between them, with every report, input file and supplemental file identical before and after. This is the parse behind `filing.reports` and behind the note lookup in `TenK.notes`.
+
 - **Parsing a Form 3, 4 or 5 is 2.7x faster** — 3.35ms to 1.25ms per filing, measured over 69 real ownership filings from five quarters, with every parsed field identical before and after: holdings, transactions, footnotes, signatures, issuer and all 126 reporting owners. The XML layer itself is 28x faster to parse and 4.8x faster to read; what is left is the DataFrame construction, which now dominates. `Form4.transactions` on a portfolio of insider filings is where this shows.
 
 - **Parsing an EFFECT filing is 9.0x faster** — 242µs to 27µs per submission, measured over 39 real EFFECT documents from four quarters, with every parsed field identical before and after. EFFECT notices are small, so the win only shows at volume; a day's worth of them is a few thousand filings.
