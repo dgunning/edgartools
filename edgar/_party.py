@@ -80,6 +80,28 @@ def get_addresses_as_columns(*,
     return Columns(addresses, equal=True, expand=True)
 
 
+def _previous_names(previous_name_list_el: Optional[XmlNode]) -> List[str]:
+    """The previous-name entries of an `<...PreviousNameList>` element.
+
+    SEC writes these as `<value>` in most filings but `<previousName>` in others;
+    both spellings are collected, in document order, filtering the literal `'None'`
+    placeholder SEC writes for "no previous names" and any element that appears
+    under both spellings.
+    """
+    if previous_name_list_el is None:
+        return []
+    names = []
+    seen = set()
+    for el in (find_all_elements(previous_name_list_el, "value")
+              + find_all_elements(previous_name_list_el, "previousName")):
+        text = element_text(el)
+        if text == 'None' or text in seen:
+            continue
+        seen.add(text)
+        names.append(text)
+    return names
+
+
 class Issuer:
     """
      <primaryIssuer>
@@ -136,15 +158,11 @@ class Issuer:
     def from_xml(cls, issuer_el: XmlNode):
         # edgar previous names
         edgar_previous_names_el = find_element(issuer_el, "edgarPreviousNameList")
-        edgar_previous_names = [element_text(el)
-                                for el in find_all_elements(edgar_previous_names_el, "value")
-                                if element_text(el) != 'None'] if edgar_previous_names_el is not None else []
+        edgar_previous_names = _previous_names(edgar_previous_names_el)
 
         # issuer previous names
         issuer_previous_names_el = find_element(issuer_el, "issuerPreviousNameList")
-        issuer_previous_names = [element_text(el)
-                                 for el in find_all_elements(issuer_previous_names_el, "value")
-                                 if element_text(el) != 'None'] if issuer_previous_names_el is not None else []
+        issuer_previous_names = _previous_names(issuer_previous_names_el)
 
         year_of_inc_el = find_element(issuer_el, "yearOfInc")
 

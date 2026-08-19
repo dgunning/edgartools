@@ -82,6 +82,12 @@ def test_parse_offering_with_multiple_signatures():
     print(offering)
     assert len(offering.signature_block.signatures) == 2
 
+    # <issuerPreviousNameList><previousName>None</previousName></issuerPreviousNameList>:
+    # the "no previous names" placeholder written with the <previousName> spelling,
+    # not <value> (edgartools-gi0a). Must be filtered the same way as the <value> spelling.
+    assert offering.primary_issuer.issuer_previous_names == []
+    assert offering.primary_issuer.edgar_previous_names == []
+
 
 def test_parse_offering_with_all_states_sales_compensation():
     offering: FormD = FormD.from_xml(formD_xml3)
@@ -91,6 +97,12 @@ def test_parse_offering_with_all_states_sales_compensation():
     assert offering.offering_data.sales_compensation_recipients[0].name == ""
     assert offering.offering_data.sales_compensation_recipients[0].crd == ""
     assert offering.offering_data.sales_compensation_recipients[0].states_of_solicitation == ["All States"]
+
+    # Regression for edgartools-gi0a: Shepherd's Finance, LLC (CIK 0001544190) was
+    # renamed from 84 RE Partners, LLC. SEC wrote the previous name with the
+    # <previousName> spelling, not <value>, and it was silently dropped.
+    assert offering.primary_issuer.issuer_previous_names == ["84 RE Partners, LLC"]
+    assert offering.primary_issuer.edgar_previous_names == []
 
 
 def test_formd_industry_group_none():
