@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Performance
 
 - **Parsing the current-filings feed is 6.1x faster**, measured on a real 100-entry page (9.6ms to 1.6ms). Most of that is invisible behind the network round trip when you fetch one page, but `get_all_current_filings()` pages through the whole feed and pays it every time. Output is byte-identical; the entries, their order, and their fields are unchanged.
+
 - **Parsing a Form D notice is 8.8x faster** — 2.04ms to 0.23ms per notice, measured over 42 real D and D/A filings from 2022 to 2025, with every field identical before and after: issuer, all 145 related persons and their relationships, the offering sections, sales-compensation recipients and signatures.
 
 - **Parsing a Form 144 notice is 3.1x faster** — 3.74ms to 1.20ms per notice, measured over 31 real 144 and 144/A filings from 2022 to 2025, with every field identical before and after: filer, issuer, address, both securities tables and the notice signature.
