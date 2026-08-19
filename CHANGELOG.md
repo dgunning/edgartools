@@ -9,23 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Performance
 
-- **Parsing a Schedule 13D or 13G is 4.2x faster** — 2.41ms to 0.57ms per document, measured over 125 real SCHEDULE 13D, 13D/A, 13G and 13G/A filings from all four quarters of 2025, with every parsed field identical before and after: issuer and security info, all reporting persons with their voting and dispositive power, the 13D items 1-7, the 13G items 1-10 and the signatures. Structured XML for these forms only exists from the 2024-12-18 SEC mandate onward; older filings still come back from the SGML header with `has_structured_data == False`.
-
 - **Parsing the current-filings feed is 6.1x faster**, measured on a real 100-entry page (9.6ms to 1.6ms). Most of that is invisible behind the network round trip when you fetch one page, but `get_all_current_filings()` pages through the whole feed and pays it every time. Output is byte-identical; the entries, their order, and their fields are unchanged.
 
-- **Parsing an MA-I municipal advisor filing is 2.9x faster** — 3.89ms to 1.33ms per filing, measured over 40 real MA-I and MA-I/A filings from 2021 to 2026, with every field identical before and after: filer, contact, notification addresses, applicant and other names, all advisory offices and their addresses, the full employment history and the signature. MA-I mixes three namespaces in one document, so more of the work stays in the local-name fallback than it does for the single-namespace forms.
-
-- **Parsing a Form D notice is 8.8x faster** — 2.04ms to 0.23ms per notice, measured over 42 real D and D/A filings from 2022 to 2025, with every field identical before and after: issuer, all 145 related persons and their relationships, the offering sections, sales-compensation recipients and signatures.
-
-- **Parsing a Form 144 notice is 3.1x faster** — 3.74ms to 1.20ms per notice, measured over 31 real 144 and 144/A filings from 2022 to 2025, with every field identical before and after: filer, issuer, address, both securities tables and the notice signature.
-
-- **Parsing a 13F cover page is 5.7x faster** — 717µs to 125µs per primary document, measured over 36 real 13F-HR, 13F-HR/A and 13F-NT filings from 2022 to 2025, with every field identical before and after: manager, address, summary totals, other managers and amendment metadata. This is the parse behind `ThirteenF.filing_manager`, `.total_value` and `.other_managers`.
-
-- **Reading a filing's report index is 6.9x faster** — 16.2ms to 2.4ms per `FilingSummary.xml`, measured over 31 real filings (10-K, 10-Q, 8-K, 20-F, 2021 to 2025) carrying 1,823 reports between them, with every report, input file and supplemental file identical before and after. This is the parse behind `filing.reports` and behind the note lookup in `TenK.notes`.
+- **Parsing an EFFECT filing is 9.0x faster** — 242µs to 27µs per submission, measured over 39 real EFFECT documents from four quarters, with every parsed field identical before and after. EFFECT notices are small, so the win only shows at volume; a day's worth of them is a few thousand filings.
 
 - **Parsing a Form 3, 4 or 5 is 2.7x faster** — 3.35ms to 1.25ms per filing, measured over 69 real ownership filings from five quarters, with every parsed field identical before and after: holdings, transactions, footnotes, signatures, issuer and all 126 reporting owners. The XML layer itself is 28x faster to parse and 4.8x faster to read; what is left is the DataFrame construction, which now dominates. `Form4.transactions` on a portfolio of insider filings is where this shows.
 
-- **Parsing an EFFECT filing is 9.0x faster** — 242µs to 27µs per submission, measured over 39 real EFFECT documents from four quarters, with every parsed field identical before and after. EFFECT notices are small, so the win only shows at volume; a day's worth of them is a few thousand filings.
+- **Reading a filing's report index is 6.9x faster** — 16.2ms to 2.4ms per `FilingSummary.xml`, measured over 31 real filings (10-K, 10-Q, 8-K, 20-F, 2021 to 2025) carrying 1,823 reports between them, with every report, input file and supplemental file identical before and after. This is the parse behind `filing.reports` and behind the note lookup in `TenK.notes`.
+
+- **Parsing a 13F cover page is 5.7x faster** — 717µs to 125µs per primary document, measured over 36 real 13F-HR, 13F-HR/A and 13F-NT filings from 2022 to 2025, with every field identical before and after: manager, address, summary totals, other managers and amendment metadata. This is the parse behind `ThirteenF.filing_manager`, `.total_value` and `.other_managers`.
+
+- **Parsing a Form 144 notice is 3.1x faster** — 3.74ms to 1.20ms per notice, measured over 31 real 144 and 144/A filings from 2022 to 2025, with every field identical before and after: filer, issuer, address, both securities tables and the notice signature.
+
+- **Parsing a Form D notice is 8.8x faster** — 2.04ms to 0.23ms per notice, measured over 42 real D and D/A filings from 2022 to 2025, with every field identical before and after: issuer, all 145 related persons and their relationships, the offering sections, sales-compensation recipients and signatures.
+
+- **Parsing an MA-I municipal advisor filing is 2.9x faster** — 3.89ms to 1.33ms per filing, measured over 40 real MA-I and MA-I/A filings from 2021 to 2026, with every field identical before and after: filer, contact, notification addresses, applicant and other names, all advisory offices and their addresses, the full employment history and the signature. MA-I mixes three namespaces in one document, so more of the work stays in the local-name fallback than it does for the single-namespace forms.
+
+- **Parsing a Schedule 13D or 13G is 4.2x faster** — 2.41ms to 0.57ms per document, measured over 125 real SCHEDULE 13D, 13D/A, 13G and 13G/A filings from all four quarters of 2025, with every parsed field identical before and after: issuer and security info, all reporting persons with their voting and dispositive power, the 13D items 1-7, the 13G items 1-10 and the signatures. Structured XML for these forms only exists from the 2024-12-18 SEC mandate onward; older filings still come back from the SGML header with `has_structured_data == False`.
 
 ### Fixed
 
