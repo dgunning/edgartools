@@ -48,6 +48,7 @@ from edgar.xmltools import (
     find_element,
     get_footnote_ids,
     optional_decimal,
+    parse_xml,
     value_or_footnote,
     value_with_footnotes,
 )
@@ -434,3 +435,55 @@ def test_find_all_elements_is_empty_when_there_are_none(parse):
 def test_find_all_elements_accepts_a_raw_xml_string():
     assert len(find_all_elements(ATOM_XML, "entry")) == 2
     assert find_all_elements("not xml at all", "entry") == []
+
+
+# ------------------------------------------------------------------ parse_xml
+
+# `parse_xml` is the lxml-only document entry point the `from_xml(xml: str)`
+# classmethods call instead of `BeautifulSoup(xml, "xml")`, so it is not run through
+# the dual-backend `parse` fixture. What it owes them is everything bs4 absorbed
+# without being asked (edgartools-07lk.11.3).
+
+
+def test_parse_xml_returns_the_root_element_itself():
+    """Not a tree, and not the root's parent — callers read fields straight off it."""
+    root = parse_xml(ISSUER_XML)
+    assert isinstance(root, etree._Element)
+    assert root.tag == "edgarSubmission"
+    assert child_text(root, "entityName") == "1685 38th REIT, L.L.C."
+
+
+def test_parse_xml_tolerates_whitespace_before_the_declaration():
+    """bs4 accepted this; bare lxml raises `XML declaration allowed only at the start
+    of the document`. Test fixtures and templated documents lead with a newline all
+    the time, so a port without this fails on documents that used to work."""
+    assert parse_xml("\n    " + ISSUER_XML).tag == "edgarSubmission"
+    assert parse_xml("\ufeff" + ISSUER_XML).tag == "edgarSubmission"
+
+
+def test_parse_xml_ignores_a_stale_encoding_declaration_on_a_str():
+    """A `str` was already decoded by whoever produced it, so its declaration is
+    stale. Believing it silently mojibakes every non-ASCII entity name — this is
+    `Café` read as `CafÃ©`, which no test would notice from a type or a length."""
+    xml = '<?xml version="1.0" encoding="ISO-8859-1"?><r><entityName>Café Büro</entityName></r>'
+    assert child_text(parse_xml(xml), "entityName") == "Café Büro"
+
+
+def test_parse_xml_honors_the_encoding_declaration_on_bytes():
+    """Undecoded bytes are the one case where the declaration is the only encoding
+    information there is, so it is obeyed rather than overridden."""
+    xml = '<?xml version="1.0" encoding="ISO-8859-1"?><r><entityName>Café</entityName></r>'
+    assert child_text(parse_xml(xml.encode("ISO-8859-1")), "entityName") == "Café"
+
+
+def test_parse_xml_raises_on_a_document_that_is_not_xml():
+    """The one place the port is deliberately stricter than bs4, which returned a
+    near-empty tree and let the failure surface as `None` several frames later."""
+    with pytest.raises(etree.XMLSyntaxError):
+        parse_xml("<html><body>503 Service Unavailable</body>")
+
+
+def test_parse_xml_keeps_a_namespaced_root_addressable_by_local_name():
+    root = parse_xml(ATOM_XML)
+    assert child_text(root, "title") == "EDGAR Filings"
+    assert len(find_all_elements(root, "entry")) == 2
