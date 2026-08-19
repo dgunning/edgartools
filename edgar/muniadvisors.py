@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional
 
-from bs4 import BeautifulSoup
 from rich import box
 from rich.columns import Columns
 from rich.console import Group
@@ -13,7 +12,16 @@ from rich.text import Text
 from edgar import Filing
 from edgar._party import Address, Name
 from edgar.richtools import repr_rich
-from edgar.xmltools import child_text, child_texts, child_value
+from edgar.xmltools import (
+    child_text,
+    child_texts,
+    child_value,
+    element_text,
+    find_all_elements,
+    find_element,
+    local_name,
+    parse_xml,
+)
 
 __all__ = [
     'MunicipalAdvisorForm'
@@ -326,43 +334,44 @@ class MunicipalAdvisorForm:
 
     @classmethod
     def from_xml(cls, xml):
-        soup = BeautifulSoup(xml, 'xml')
+        root = parse_xml(xml)
+        if local_name(root) != 'edgarSubmission':
+            raise ValueError(f"Expected an <edgarSubmission> document but got <{local_name(root)}>")
 
-        root = soup.find('edgarSubmission')
         ma_info = {}
 
         # Header Data
-        header_data = root.find('headerData')
-        filer_info_el = header_data.find('filerInfo')
+        header_data = find_element(root, 'headerData')
+        filer_info_el = find_element(header_data, 'filerInfo')
 
-        filer_el = filer_info_el.find('filer')
+        filer_el = find_element(filer_info_el, 'filer')
         ma_info['filer'] = Filer(
             cik=child_text(filer_el, 'filerId'),
             ccc=child_text(filer_el, 'filerCcc')
         )
 
-        contact_el = filer_info_el.find('contact')
+        contact_el = find_element(filer_info_el, 'contact')
         ma_info['contact'] = Contact(
             name=child_text(contact_el, 'name'),
             phone=child_text(contact_el, 'phoneNumber'),
             email=child_text(filer_info_el, 'contactEmail')
         )
 
-        notification_el = root.find('notifications')
-        if notification_el:
+        notification_el = find_element(root, 'notifications')
+        if notification_el is not None:
             ma_info['internet_notification_addresses'] = child_texts(notification_el, 'internetNotificationAddress')
         else:
             ma_info['internet_notification_addresses'] = []
 
         # Form Data
-        form_data_el = root.find('formData')
+        form_data_el = find_element(root, 'formData')
 
         ma_info['is_amendment'] = child_text(form_data_el, 'isAmendment') == 'Y'
         ma_info['is_individual'] = child_text(form_data_el, 'isIndividual') == 'Y'
         ma_info['previous_accession_no'] = child_text(form_data_el, 'previousAccessionNumber')
 
         # Applicant
-        applicant_el = form_data_el.find('applicantName')
+        applicant_el = find_element(form_data_el, 'applicantName')
         applicant = Applicant(
             name=Name(
                 first_name=child_text(applicant_el, 'firstName'),
@@ -375,9 +384,9 @@ class MunicipalAdvisorForm:
             number_of_advisory_firms=int(child_text(form_data_el, 'noOfAdvisoryFirms'))
         )
         # Other names
-        other_names_el = form_data_el.find('otherNames')
-        if other_names_el:
-            for el in other_names_el.find_all('otherName'):
+        other_names_el = find_element(form_data_el, 'otherNames')
+        if other_names_el is not None:
+            for el in find_all_elements(other_names_el, 'otherName'):
                 applicant.other_names.append(
                     Name(
                         first_name=child_text(el, 'firstName'),
@@ -389,25 +398,25 @@ class MunicipalAdvisorForm:
 
         ma_info['applicant'] = applicant
         # Municipal Advisor Offices
-        ma_offices_el = form_data_el.find('municipalAdvisorOffices')
+        ma_offices_el = find_element(form_data_el, 'municipalAdvisorOffices')
 
         ma_info['municipal_advisor_offices'] = []
 
-        for ma_office_el in ma_offices_el.find_all("municipalAdvisorOffice"):
-            municipal_firm_el = ma_office_el.find('municipalFirm')
-            filer_el = municipal_firm_el.find('filerId')
-            sec_registration_el = ma_office_el.find('secRegistration')
-            advisor_offices_el = ma_office_el.find('advisorOffices')
+        for ma_office_el in find_all_elements(ma_offices_el, "municipalAdvisorOffice"):
+            municipal_firm_el = find_element(ma_office_el, 'municipalFirm')
+            filer_el = find_element(municipal_firm_el, 'filerId')
+            sec_registration_el = find_element(ma_office_el, 'secRegistration')
+            advisor_offices_el = find_element(ma_office_el, 'advisorOffices')
             offices = []
 
-            for advisor_office_el in advisor_offices_el.find_all('advisorOffice'):
-                address_el = advisor_office_el.find('address')
+            for advisor_office_el in find_all_elements(advisor_offices_el, 'advisorOffice'):
+                address_el = find_element(advisor_office_el, 'address')
                 address = Address(
                     street1=child_text(address_el, 'street1'),
                     city=child_text(address_el, 'city'),
                     state_or_country=child_text(address_el, 'stateOrCountry'),
                     zipcode=child_text(address_el, 'zipCode'),
-                ) if address_el else None
+                ) if address_el is not None else None
 
                 office: Office = Office(
                     location_info=child_text(advisor_office_el, 'locationInfo'),
@@ -416,10 +425,11 @@ class MunicipalAdvisorForm:
                 )
                 offices.append(office)
 
-            file_number = child_text(sec_registration_el, 'fileNumber') if sec_registration_el else None
+            file_number = (child_text(sec_registration_el, 'fileNumber')
+                           if sec_registration_el is not None else None)
 
             municipal_advisor_office = MunicipalAdvisorOffice(
-                cik=filer_el.text if filer_el else "",
+                cik=element_text(filer_el) if filer_el is not None else "",
                 firm_name=child_text(municipal_firm_el, 'municipalFirmName'),
                 is_independent_relationship=child_text(municipal_firm_el, 'isIndependentRelationship') == 'Y',
                 recent_employment_commenced_date=child_text(municipal_firm_el, 'recentEmploymentCommencedDate'),
@@ -429,11 +439,11 @@ class MunicipalAdvisorForm:
             ma_info['municipal_advisor_offices'].append(municipal_advisor_office)
 
         # Employment History
-        employment_history_el = form_data_el.find('employmentHistory')
+        employment_history_el = find_element(form_data_el, 'employmentHistory')
         # Current Employer
-        current_employer_el = employment_history_el.find('currentEmployer')
-        address_el = current_employer_el.find('addressInfo')
-        state_or_country_el = address_el.find('stateOrCountry')
+        current_employer_el = find_element(employment_history_el, 'currentEmployer')
+        address_el = find_element(current_employer_el, 'addressInfo')
+        state_or_country_el = find_element(address_el, 'stateOrCountry')
         current_employer = Employer(
             name=child_text(current_employer_el, 'name'),
             start_date=employment_date(child_text(current_employer_el, 'startDate')),
@@ -449,13 +459,13 @@ class MunicipalAdvisorForm:
         )
 
         # Previous employers
-        prior_employers_el = employment_history_el.find('priorEmployers')
+        prior_employers_el = find_element(employment_history_el, 'priorEmployers')
         prior_employers = []
-        if prior_employers_el:
+        if prior_employers_el is not None:
 
-            for prior_employer_el in prior_employers_el.find_all('priorEmployer'):
-                address_el = prior_employer_el.find('addressInfo')
-                state_or_country_el = address_el.find('stateOrCountry')
+            for prior_employer_el in find_all_elements(prior_employers_el, 'priorEmployer'):
+                address_el = find_element(prior_employer_el, 'addressInfo')
+                state_or_country_el = find_element(address_el, 'stateOrCountry')
                 prior_employer = Employer(
                     name=child_text(prior_employer_el, 'name'),
                     start_date=employment_date(child_text(prior_employer_el, 'startDate')),
@@ -477,10 +487,10 @@ class MunicipalAdvisorForm:
         )
 
         # Disclosure Questions
-        disclosure_questions_el = form_data_el.find('disclosureQuestions')
+        disclosure_questions_el = find_element(form_data_el, 'disclosureQuestions')
         # Criminal Disclosure
-        criminal_disclosure_el = disclosure_questions_el.find('criminalDisclosure')
-        criminal_disclosure_common_el = criminal_disclosure_el.find('criminalDisclosureCommonQuestion')
+        criminal_disclosure_el = find_element(disclosure_questions_el, 'criminalDisclosure')
+        criminal_disclosure_common_el = find_element(criminal_disclosure_el, 'criminalDisclosureCommonQuestion')
         criminal_disclosure = CriminalDisclosure(
             is_convicted_of_felony=child_value(criminal_disclosure_common_el, 'isConvictedOfFelony') == "Y",
             is_charged_with_felony=child_value(criminal_disclosure_common_el, 'isChargedWithFelony') == "Y",
@@ -496,8 +506,9 @@ class MunicipalAdvisorForm:
         criminal_disclosure = criminal_disclosure
 
         # Regulatory Disclosure
-        regulatory_disclosure_el = disclosure_questions_el.find('regulatoryDisclosure')
-        regulatory_disclosure_common_el = regulatory_disclosure_el.find('regulatoryDisclosureCommonQuestion')
+        regulatory_disclosure_el = find_element(disclosure_questions_el, 'regulatoryDisclosure')
+        regulatory_disclosure_common_el = find_element(regulatory_disclosure_el,
+                                                       'regulatoryDisclosureCommonQuestion')
         regulatory_disclosure = RegulatoryDisclosure(
             is_made_false_statement=child_value(regulatory_disclosure_common_el, 'isMadeFalseStatement') == "Y",
             is_violated_regulation=child_value(regulatory_disclosure_common_el, 'isViolatedRegulation') == "Y",
@@ -535,12 +546,12 @@ class MunicipalAdvisorForm:
         regulatory_disclosure = regulatory_disclosure
 
         # Investigation Disclosure
-        investigation_disclosure_el = disclosure_questions_el.find('investigationDisclosure')
+        investigation_disclosure_el = find_element(disclosure_questions_el, 'investigationDisclosure')
         investigation_disclosure = InvestigationDisclosure(
             is_investigated=child_text(investigation_disclosure_el, 'isInvestigated') == "Y")
 
         # Civil Disclosure
-        civil_disclosure_el = disclosure_questions_el.find('civilDisclosure')
+        civil_disclosure_el = find_element(disclosure_questions_el, 'civilDisclosure')
         civil_disclosure = CivilDisclosure(
             is_enjoined=child_value(civil_disclosure_el, 'isEnjoined') == "Y",
             is_found_violation_of_regulation=child_value(civil_disclosure_el,
@@ -550,7 +561,7 @@ class MunicipalAdvisorForm:
                                                      'isNamedInCivilProceeding') == "Y")
 
         # Complaint Disclosure
-        complaint_disclosure_el = disclosure_questions_el.find('complaintDisclosure')
+        complaint_disclosure_el = find_element(disclosure_questions_el, 'complaintDisclosure')
         complaint_disclosure = ComplaintDisclosure(
             is_complaint_pending=child_value(complaint_disclosure_el, 'isComplaintPending') == "Y",
             is_complaint_settled=child_value(complaint_disclosure_el, 'isComplaintSettled') == "Y",
@@ -561,7 +572,7 @@ class MunicipalAdvisorForm:
         )
 
         # Termination Disclosure
-        termination_disclosure_el = disclosure_questions_el.find('terminationDisclosure')
+        termination_disclosure_el = find_element(disclosure_questions_el, 'terminationDisclosure')
         termination_disclosure = TerminationDisclosure(
             is_violated_industry_standards=child_value(termination_disclosure_el,
                                                        'isViolatedIndustryStandards') == "Y",
@@ -569,7 +580,7 @@ class MunicipalAdvisorForm:
             is_failed_to_supervise=child_value(termination_disclosure_el, 'isFailedToSupervise') == "Y"
         )
         # Financial Disclosure
-        financial_disclosure_el = disclosure_questions_el.find('financialDisclosure')
+        financial_disclosure_el = find_element(disclosure_questions_el, 'financialDisclosure')
         financial_disclosure = FinancialDisclosure(
             is_compromised=child_value(financial_disclosure_el, 'isCompromised') == "Y",
             is_bankruptcy_petition=child_value(financial_disclosure_el, 'isBankruptcyPetition') == "Y",
@@ -577,13 +588,13 @@ class MunicipalAdvisorForm:
             is_bond_revoked=child_value(financial_disclosure_el, 'isBondRevoked') == "Y"
         )
         # Judgement Lien Disclosure
-        judgement_lien_disclosure_el = disclosure_questions_el.find('judgmentLienDisclosure')
+        judgement_lien_disclosure_el = find_element(disclosure_questions_el, 'judgmentLienDisclosure')
         judgement_lien_disclosure = JudgementLienDisclosure(
             is_lien_against=child_value(judgement_lien_disclosure_el, 'isLienAgainst') == "Y"
         )
 
         # Signature
-        signature_el = form_data_el.find('signature')
+        signature_el = find_element(form_data_el, 'signature')
         ma_info['signature'] = Signature(
             signature=child_text(signature_el, 'signature'),
             date_signed=child_text(signature_el, 'dateSigned'),
