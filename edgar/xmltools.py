@@ -189,20 +189,37 @@ def parse_xml(xml: Union[str, bytes]) -> etree._Element:
                      overrides the declaration, which is correct because the `str`
                      was decoded by whoever produced it.
 
+      recovery     SEC's own XML is not always well-formed, and bs4 hid that for
+                   years: `BeautifulSoup(xml, "xml")` builds its parser with
+                   `recover=True`, so a document carrying an attribute like
+                   `<nonDerivativeTable ativeTable>` parsed fine. A strict parser
+                   rejects it outright. That is not hypothetical — AAR CORP's
+                   2004-02-04 Form 4 (0000001750-04-000011) is exactly this shape,
+                   and strictness turned it from a rendered Form 4 into a dump of
+                   raw markup. Recovery is what makes bs4's behavior the contract
+                   rather than an aspiration.
+
     `bytes` are passed through with their declaration intact — those came off the
     wire undecoded, so the declaration is the only encoding information there is.
 
-    Unlike bs4, this raises `etree.XMLSyntaxError` on a document that is not XML at
-    all instead of returning a near-empty tree. Callers that must tolerate SEC
-    serving something else (an HTML error page, say) should parse with
-    `etree.XMLParser(recover=True)` themselves and say why.
+    A document that is not XML at all is still an error, just a different one. An
+    HTML error page recovers to an `<html>` root, which every caller's root check
+    rejects with a clear "expected <edgarSubmission>" — a better message than a
+    parse error at this level. Content with no markup at all recovers to nothing,
+    and lxml signals that by returning None from `fromstring`; that is re-raised
+    here as `XMLSyntaxError`, because a caller handed None fails several frames
+    later with an AttributeError naming the wrong thing.
     """
     if isinstance(xml, str):
         # A fresh parser per call: lxml parsers hold mutable state and must not be
         # shared across threads, and edgartools parses on worker threads.
-        return etree.fromstring(xml.lstrip('\ufeff \t\r\n').encode('utf-8'),
-                                parser=etree.XMLParser(encoding='utf-8'))
-    return etree.fromstring(xml.lstrip())
+        root = etree.fromstring(xml.lstrip('\ufeff \t\r\n').encode('utf-8'),
+                                parser=etree.XMLParser(encoding='utf-8', recover=True))
+    else:
+        root = etree.fromstring(xml.lstrip(), parser=etree.XMLParser(recover=True))
+    if root is None:
+        raise etree.XMLSyntaxError("Document is not XML: nothing recoverable", None, 1, 1)
+    return root
 
 
 def find_element(

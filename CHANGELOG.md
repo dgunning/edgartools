@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Performance
 
+- **Parsing the current-filings feed is 6.1x faster**, measured on a real 100-entry page (9.6ms to 1.6ms). Most of that is invisible behind the network round trip when you fetch one page, but `get_all_current_filings()` pages through the whole feed and pays it every time. Output is byte-identical; the entries, their order, and their fields are unchanged.
 - **Parsing an MA-I municipal advisor filing is 2.9x faster** — 3.89ms to 1.33ms per filing, measured over 40 real MA-I and MA-I/A filings from 2021 to 2026, with every field identical before and after: filer, contact, notification addresses, applicant and other names, all advisory offices and their addresses, the full employment history and the signature. MA-I mixes three namespaces in one document, so more of the work stays in the local-name fallback than it does for the single-namespace forms.
 
 - **Parsing a Form D notice is 8.8x faster** — 2.04ms to 0.23ms per notice, measured over 42 real D and D/A filings from 2022 to 2025, with every field identical before and after: issuer, all 145 related persons and their relationships, the offering sections, sales-compensation recipients and signatures.
@@ -24,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Parsing an EFFECT filing is 9.0x faster** — 242µs to 27µs per submission, measured over 39 real EFFECT documents from four quarters, with every parsed field identical before and after. EFFECT notices are small, so the win only shows at volume; a day's worth of them is a few thousand filings.
 
 ### Fixed
+
+- **A Form 4 whose XML the SEC did not write quite correctly came back as raw markup instead of a rendered form.** `BeautifulSoup(xml, "xml")` parses with `recover=True`, so for years edgartools read filings like AAR CORP's 2004-02-04 Form 4 — which carries a mangled `<nonDerivativeTable ativeTable>` attribute — without anyone noticing they were malformed. The move to lxml made parsing strict, and `filing.sgml().text()` on those filings went back to dumping `<ownershipDocument>` tags. `xmltools.parse_xml` now recovers exactly as bs4 did, which restores the behaviour for every form migrated so far, not just Forms 3/4/5. A document with no markup at all is still an error.
 
 - **A person's name raised `TypeError` whenever they had no middle name.** `Name.full_name` built the middle segment as `(' ' + middle_name) or ''`, so the concatenation ran before the fallback could apply and a missing middle name crashed instead of being skipped. Municipal advisor filings hit this constantly — the parser feeds that field straight from the XML, which simply omits `<middleName>`. Michael NMN Tym Jr. still reads as `Michael NMN Tym Jr.`, since `NMN` is data the SEC writes, not an absence.
 

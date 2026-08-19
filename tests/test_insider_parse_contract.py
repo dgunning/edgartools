@@ -96,3 +96,37 @@ def test_a_transaction_footnote_id_is_read_from_an_empty_element():
     assert transaction_footnote_id(find_element(root, "footnoteId")) == ('footnote', 'F1')
     # Deduped, first-seen order preserved, collected from the whole transaction.
     assert get_footnotes(root) == "F1\nF2"
+
+
+def test_malformed_ownership_xml_still_parses():
+    """SEC's own Forms 4 are not always well-formed, and bs4 recovered from that.
+
+    AAR CORP's 2004-02-04 Form 4 (0000001750-04-000011) carries a mangled attribute
+    — `<nonDerivativeTable ativeTable>`, reproduced here — which a strict parser
+    rejects outright. bs4 built its XML parser with `recover=True` and read the
+    filing fine for years, so `xmltools.parse_xml` does too.
+
+    This is pinned at the ownership layer as well as in the adapter contract
+    because of how it failed: `edgar/sgml/text_extraction.ownership_xml_to_html`
+    catches every exception and returns None, so a raising parse did not surface as
+    an error — `filing.sgml().text()` quietly went back to dumping raw markup, and
+    only the network regression lane noticed (edgartools-07lk.11.3).
+    """
+    root = parse_xml(
+        "<ownershipDocument><schemaVersion>X0201</schemaVersion>"
+        "<documentType>4</documentType><periodOfReport>2004-01-07</periodOfReport>"
+        "<issuer><issuerCik>0000001750</issuerCik><issuerName>AAR CORP</issuerName>"
+        "<issuerTradingSymbol>AIR</issuerTradingSymbol></issuer>"
+        "<nonDerivativeTable ativeTable>"
+        "<nonDerivativeTransaction><securityTitle><value>Common Stock</value>"
+        "</securityTitle></nonDerivativeTransaction>"
+        "</nonDerivativeTable></ownershipDocument>")
+
+    from edgar.xmltools import child_text, local_name
+
+    assert local_name(root) == "ownershipDocument"
+    assert child_text(root, "documentType") == "4"
+    assert child_text(root, "issuerTradingSymbol") == "AIR"
+    # The content *after* the malformed attribute survives recovery too, which is
+    # the part that decides whether the rendered form has any rows in it.
+    assert child_text(root, "value") == "Common Stock"
