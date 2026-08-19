@@ -334,6 +334,16 @@ def pytest_collection_modifyitems(config, items):
         'test_ncen', 'test_ncsr',
         # XBRL tests that need network (use Company() or XBRL.from_filing)
         'test_xbrl_periods',
+        # Classified 2026-08-19. Every fixture in tests/test_statement_view.py is
+        # `Company("AAPL").get_filings(form="10-K").latest().xbrl()` — three live
+        # fetches. It matched FAST_PATTERNS' 'test_statement' substring and so ran
+        # in the fast job, where it passed only for as long as the CI HTTP cache
+        # stayed warm; on a cold cache all 13 tests error with ConnectError and
+        # the required check fails for a reason unrelated to the pull request that
+        # happens to be running. Measured under tests/_offline_harness.py: 13
+        # errors offline, all 13 pass on the network. NETWORK_PATTERNS is matched
+        # first, so this entry wins over the 'test_statement' fast match.
+        'test_statement_view',
         # Classified 2026-08-04 (see the note in FAST_PATTERNS). These fail with
         # outbound sockets blocked, so they are network by measurement.
         'test_registration_s1', 'test_registration_s4', 'test_prospectus497k',
