@@ -819,12 +819,14 @@ class Form144:
             file_number=child_text(filer_credentials_el, 'secFileNumber')
         )
 
-        # Contact info
-        contact_el = find_element(filer_el, 'contact')
+        # Contact info. <contact> is a sibling of <filer> under <filerInfo>,
+        # not a child of <filer> (edgartools-wsdm), and its children are
+        # contactName / contactPhoneNumber / contactEmailAddress.
+        contact_el = find_element(filer_info_el, 'contact')
         form144['contact'] = Contact(
-            name=child_text(contact_el, 'name'),
-            phone_number=child_text(contact_el, 'phone'),
-            email=child_text(contact_el, 'email')
+            name=child_text(contact_el, 'contactName'),
+            phone_number=child_text(contact_el, 'contactPhoneNumber'),
+            email=child_text(contact_el, 'contactEmailAddress')
         ) if contact_el is not None else None
 
         form_data = find_element(root, 'formData')

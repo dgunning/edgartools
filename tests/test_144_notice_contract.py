@@ -99,25 +99,27 @@ def test_the_amendment_sample_parses_too():
     assert amendment['securities_information'].shape[0] >= 1
 
 
-def test_a_contact_block_under_filer_is_read_when_one_is_present():
+def test_a_contact_block_under_filer_info_is_read_when_one_is_present():
     """The truthiness guard, at the one place in this module where it decides a
     whole object. `<contact>` with children is truthy on both backends, but an
     empty one is falsy only on lxml — so the guard reads `is not None`.
 
-    Note what this does NOT assert: that a real Form 144 ever produces a contact.
-    SEC puts `<contact>` under `<filerInfo>`, not under `<filer>`, and names its
-    children `contactName`/`contactPhoneNumber`/`contactEmailAddress` — so
-    `Form144.parse_xml` returns `contact=None` for every real filing, including
-    SEC's own sample. That is a pre-existing bug (edgartools-wsdm), deliberately
-    left alone here so this migration stays value-for-value identical.
+    SEC puts `<contact>` under `<filerInfo>` as a sibling of `<filer>`, not
+    inside `<filer>`, and names its children `contactName` / `contactPhoneNumber`
+    / `contactEmailAddress`. `Form144.parse_xml` used to search under `<filer>`
+    for `name`/`phone`/`email` and so returned `contact=None` for every real
+    filing, including SEC's own sample. Fixed under edgartools-wsdm;
+    `test_the_contact_block_is_read_from_the_real_sample` below asserts against
+    that real sample.
     """
     parsed = Form144.parse_xml("""<?xml version="1.0" encoding="UTF-8"?>
 <edgarSubmission xmlns="http://www.sec.gov/edgar/ownership"
                  xmlns:com="http://www.sec.gov/edgar/common">
   <headerData><filerInfo><filer>
       <filerCredentials><cik>0000000001</cik></filerCredentials>
-      <contact><name>Dana Reid</name><phone>555-0100</phone><email>dana@example.com</email></contact>
-  </filer></filerInfo></headerData>
+  </filer>
+  <contact><contactName>Dana Reid</contactName><contactPhoneNumber>555-0100</contactPhoneNumber><contactEmailAddress>dana@example.com</contactEmailAddress></contact>
+  </filerInfo></headerData>
   <formData>
     <issuerInfo><issuerCik>0000000002</issuerCik>
       <relationshipsToIssuer><relationshipToIssuer>Officer</relationshipToIssuer></relationshipsToIssuer>
@@ -129,6 +131,24 @@ def test_a_contact_block_under_filer_is_read_when_one_is_present():
     assert parsed['contact'].name == "Dana Reid"
     assert parsed['contact'].phone_number == "555-0100"
     assert parsed['contact'].email == "dana@example.com"
+
+
+def test_the_contact_block_is_read_from_the_real_sample(sample):
+    """Ground truth from SEC's own sample notice (edgartools-wsdm)."""
+    contact = sample['contact']
+    assert contact is not None
+    assert contact.name == "Raj C"
+    assert contact.phone_number == "2025516129"
+    assert contact.email == "joe@gmail.com"
+
+
+def test_contact_is_none_when_the_filing_has_no_contact_block():
+    """A real filing with no `<contact>` element at all must yield `None`,
+    not raise. `data/xml/apple.144.xml` is a genuine SEC Form 144 notice
+    (Apple/Luca Maestri) whose `<filerInfo>` has no `<contact>` child."""
+    xml = Path('data/xml/apple.144.xml').read_text()
+    parsed = Form144.parse_xml(xml)
+    assert parsed['contact'] is None
 
 
 def test_parse_rejects_a_document_that_is_not_an_edgar_submission():
