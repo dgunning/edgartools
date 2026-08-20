@@ -23,7 +23,7 @@ patterns:
       infotable = thirteenf.infotable    # Raw data with OtherManager column
 
       # DataFrame columns:
-      # Issuer, Class, Cusip, Ticker, Value ($1000s), SharesPrnAmount, Type,
+      # Issuer, Class, Cusip, Ticker, Value (dollars), SharesPrnAmount, Type,
       # SoleVoting, SharedVoting, NonVoting
 
   - name: Analyze Portfolio
@@ -31,9 +31,9 @@ patterns:
     code: |
       holdings = thirteenf.holdings
 
-      total_value = holdings['Value'].sum() * 1000  # Convert from $1000s
-      top5 = holdings.nlargest(5, 'Value')          # Top holdings by value
-      apple = holdings[holdings['Ticker'] == 'AAPL'] # Filter by ticker
+      total_value = holdings['Value'].sum()          # Already in dollars (5.28.2+)
+      top5 = holdings.nlargest(5, 'Value')            # Top holdings by value
+      apple = holdings[holdings['Ticker'] == 'AAPL']  # Filter by ticker
 
   - name: Fund Holdings (NPORT)
     when: Mutual fund or ETF portfolio (not institutional 13F)

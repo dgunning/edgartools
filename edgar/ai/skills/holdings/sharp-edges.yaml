@@ -12,19 +12,40 @@ sharp_edges:
     detection_pattern: 'for.*in.*get_filings.*13F.*:.*\.obj\(\)'
 
   - id: value-in-thousands
-    summary: Holdings Value column is in $1000s, not dollars
+    summary: "Fixed in 5.28.2 (GH #749): Value is now normalized to whole dollars automatically -- do not multiply by 1000"
     severity: high
     solution: |
       holdings = thirteenf.holdings
-      total_value = holdings['Value'].sum() * 1000  # Convert to dollars
-    detection_pattern: "holdings\\['Value'\\]\\.sum\\(\\)(?!\\s*\\*\\s*1000)"
+      total_value = holdings['Value'].sum()  # Already in dollars, no conversion needed
+
+      # Before 5.28.2, the SEC's 13F XML schema change around Q4 2022 meant Value
+      # was in $1000s for report periods <= 2022-09-30 and dollars for later
+      # periods, and edgartools didn't normalize the difference -- so summing
+      # Value across that boundary gave nonsensical results, and the old advice
+      # here was to multiply by 1000 unconditionally. That's no longer correct:
+      # 5.28.2 normalizes both infotable['Value'] and total_value to dollars at
+      # parse time regardless of report period. Multiplying by 1000 now on a
+      # current edgartools version will overstate every value 1000x.
+    detection_pattern: "holdings\\['Value'\\]\\.sum\\(\\)\\s*\\*\\s*1000"
 
   - id: holdings-vs-infotable
-    summary: holdings is aggregated, infotable has manager breakdown
+    summary: holdings is aggregated (one row per security); infotable is disaggregated (one row per manager combination) -- compare completeness against infotable, not holdings
     severity: medium
     solution: |
       holdings = thirteenf.holdings      # Aggregated by security
-      infotable = thirteenf.infotable    # Raw with OtherManager column
+      infotable = thirteenf.infotable    # Raw, one row per manager combination
+
+      # For a multi-manager joint filing (e.g. Berkshire Hathaway files jointly
+      # with ~20 subsidiary managers), a security held under more than one
+      # manager combination gets one infotable row per combination but collapses
+      # to a single holdings row -- that's intentional aggregation, not data loss.
+      # The filing's own cover-page "Entry Total" counts the disaggregated rows,
+      # matching infotable, so check completeness against infotable:
+      import re
+      entry_total = int(re.search(r'Entry Total:?\s*[\r\n]*\s*([\d,]+)', filing.text()).group(1).replace(',', ''))
+      len(infotable) == entry_total   # correct completeness check
+      len(holdings) == entry_total    # WRONG for any multi-manager filing -- will
+                                       # look short even when parsing is perfect
 
   - id: cusip-vs-ticker
     summary: CUSIP is authoritative, Ticker may be missing
@@ -56,3 +77,29 @@ sharp_edges:
       if tf.amendment_type == "NEW HOLDINGS":
           holdings = pd.concat([original.holdings, tf.holdings])  # combine, don't replace
     detection_pattern: '13F-HR/A.*\.obj\(\)'
+
+  - id: pre-2013-txt-row-completeness
+    summary: Some pre-2013 TXT-format 13F filings return far fewer infotable rows than the filing's own Entry Total, with no error or warning
+    severity: high
+    solution: |
+      # The column-position TXT parser (edgar/thirteenf/parsers/infotable_txt/
+      # format_multiline.py) slices each row's CUSIP using fixed character
+      # offsets derived from the <S>/<C> marker line. If a filing's data rows
+      # have a field immediately after the CUSIP that isn't marked as its own
+      # <C> column, the CUSIP slice comes back longer than 9 characters and the
+      # row is silently dropped (non-empty result, no exception) rather than
+      # recovered from the still-correct leading 9 characters.
+      #
+      # Confirmed on Gilder Gagnon Howe & Co's pre-2013 filings (as low as 2% of
+      # positions recovered on some quarters). Does not reproduce on every
+      # pre-2013 filer -- Berkshire Hathaway and Soros Fund Management both
+      # parse essentially completely for the same era, so this is filing-format
+      # specific rather than universal. Always reconcile before trusting a
+      # pre-2013 filing's row count, same technique as holdings-vs-infotable:
+      import re
+      infotable = thirteenf.infotable
+      entry_total = int(re.search(r'Entry Total:?\s*[\r\n]*\s*([\d,]+)', filing.text()).group(1).replace(',', ''))
+      if len(infotable) < entry_total:
+          # Under-parsed for this specific filing -- treat as incomplete, don't
+          # trust it silently just because it's non-empty.
+          ...
