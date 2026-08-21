@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **`TenK.items`, `TenQ.items` and `TwentyF.items` no longer fall back to the deprecated legacy parser.** They now report exactly what the modern parser detects. This is not expected to change any result: across a 115-filing corpus spanning 1996 to 2026, removing the fallback changed the item list on zero filings, for every one of 10-K, 10-Q, 20-F and 8-K. The fix that made it redundant was Strategy 5c above, which recovered the last two filings that still needed it. Item *lookup* — `report["Item 7"]` and `get_item_with_part()` — still consults the legacy parser, and still needs to: it is reached whenever one particular item is missing rather than only when the whole document parsed to nothing, so a partial detection miss reaches it. On the same corpus, 15 item lookups return text only because of it.
+
 ### Fixed
 
 - **Filings from before about 2002 returned no items at all from the modern parser.** Those filings are preformatted text wrapped in minimal HTML, so they parse to a container-and-text tree with no headings and no paragraphs — and every header strategy in the section extractor drew its candidates from headings, section nodes, bold paragraphs or table cells. There was no candidate source at all on such a document, so detection returned nothing however well the patterns matched, and `TenK.items` or `TwentyF.items` came back empty unless the deprecated legacy parser rescued them. Bare text nodes are now read as headers, using each node's first line, since one node carries both the heading and the body that follows it. A 2001 10-K and a 2001 20-F recover their Item 7; across a 121-filing corpus this was the last remaining difference between the modern parser and the legacy one on these forms.

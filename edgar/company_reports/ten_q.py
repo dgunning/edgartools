@@ -250,7 +250,10 @@ class TenQ(CompanyReport):
         Returns items in the format "Part I, Item X" or "Part II, Item X"
         to distinguish between same-numbered items in different parts.
 
-        Falls back to old chunked_document if new parser returns no sections.
+        Returns an empty list when the new parser finds no items. The legacy
+        chunked_document fallback that used to sit here was removed after being
+        measured to change no result on any corpus filing (edgartools-07lk.23);
+        ``__getitem__`` and ``get_item_with_part`` still use it.
 
         Returns:
             List of part-qualified item titles (e.g., ['Part I, Item 1', 'Part II, Item 1'])
@@ -281,12 +284,13 @@ class TenQ(CompanyReport):
                             items.append(f"{part}, Item {item_num}")
                         else:
                             items.append(f"Item {item_num}")
-            return items if items else (self._chunked_document.list_items() if self._chunked_document else [])
+            if items:
+                return items
 
-        # Fallback to old parser for backward compatibility
-        if self._chunked_document:
-            return self._chunked_document.list_items()
-
+        # No legacy fallback here any more — see the note in TenK.items
+        # (edgartools-07lk.23). Measured 0 differences across the 115-fixture
+        # corpus. `__getitem__` and `get_item_with_part` below still fall back and
+        # still need to.
         return []
 
     def __getitem__(self, item_or_part: str) -> Optional[str]:

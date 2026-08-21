@@ -5,6 +5,12 @@ PRIMARY source of items; TenK, TenQ and CurrentReport had already flipped, using
 legacy only as an empty-result fallback. Deleting ``edgar.files`` in 6.0 means
 deleting ChunkedDocument, so every remaining primary use has to go first.
 
+UPDATE (edgartools-07lk.23): the fallback this file was written around is now
+gone from ``.items`` in TenK, TenQ and TwentyF alike — measured to change no
+result on any of 115 era-stratified fixtures. See
+``TestLegacyIsNotConsultedAtAll`` below, which replaced the class that pinned the
+old fallback contract.
+
 Its in-code justification for staying legacy-first — that "the pattern-based
 extractor doesn't handle the Table of Contents format well" — did not survive
 measurement. On the one 20-F where legacy clearly beat the new parser, TOC
@@ -123,12 +129,24 @@ class TestItemsComeFromTheNewParser:
 
 
 @pytest.mark.fast
-class TestLegacyIsOnlyAFallback:
+class TestLegacyIsNotConsultedAtAll:
+    """Superseded 07lk.23: legacy is not a fallback here any more, it is gone.
+
+    This class used to assert the *fallback* contract — new parser first, legacy
+    when it finds nothing. That fallback was deleted after measurement showed it
+    changed `.items` on zero filings across the 115-fixture era-stratified corpus;
+    Strategy 5c (edgartools-3dp) had closed its last live case, a 2001 20-F. The
+    assertion that legacy answers when the new parser finds nothing is therefore
+    no longer a description of this code, and pinning it would block the deletion
+    it was written to enable.
+
+    Note this is scoped to `.items`. `TwentyF.__getitem__` still falls back to
+    legacy and still needs to: on the same corpus, five 20-F item lookups return
+    text only because of it (0001144204-10-017467 Items 5, 6, 11, 12 and 15).
+    """
 
     def test_legacy_is_not_consulted_when_the_new_parser_finds_items(self):
-        """The point of the flip: ChunkedDocument is off the primary path.
-
-        Asserted by construction rather than by output, because legacy and new
+        """Asserted by construction rather than by output, because legacy and new
         agree on this document — if `.items` still built a ChunkedDocument the
         answer would look identical and the deletion would still be blocked.
         """
@@ -138,12 +156,15 @@ class TestLegacyIsOnlyAFallback:
         assert report.items
         sentinel.list_items.assert_not_called()
 
-    def test_legacy_answers_when_the_new_parser_finds_nothing(self):
+    def test_legacy_is_not_consulted_when_the_new_parser_finds_nothing_either(self):
+        """The 07lk.23 flip: an empty new-parser result is now the final answer."""
         report = _twenty_f(NO_ITEMS_HTML)
         legacy = MagicMock()
         legacy.list_items.return_value = ['Item 7']
         report.__dict__['_chunked_document'] = legacy
-        assert report.items == ['Item 7']
+
+        assert report.items == []
+        legacy.list_items.assert_not_called()
 
     def test_no_items_anywhere_is_an_empty_list(self):
         """Not None — `for item in report.items` must stay safe."""
