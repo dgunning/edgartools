@@ -28,7 +28,8 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from tqdm import tqdm
 
-from edgar.core import get_edgar_data_directory, log
+from edgar.core import log
+from edgar.settings import get_edgar_data_directory
 
 # Try to import orjson for performance, fall back to stdlib json
 try:

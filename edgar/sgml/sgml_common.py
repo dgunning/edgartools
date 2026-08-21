@@ -28,7 +28,7 @@ def _fetch_url_directly(url: str) -> str:
     bypass_cache parameter has no effect after the client is first created.
     """
     import httpx
-    from edgar.core import get_identity
+    from edgar.settings import get_identity
 
     headers = {"User-Agent": get_identity()}
     with httpx.Client(headers=headers) as client:

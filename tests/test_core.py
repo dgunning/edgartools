@@ -12,17 +12,8 @@ from rich.table import Table
 import edgar
 from edgar.dates import extract_dates, InvalidDateError
 from edgar.display.formatting import display_size, reverse_name, split_camel_case
-from edgar.core import (decode_content,
-                        get_identity,
-                        set_identity,
-                        ask_for_identity,
-                        Result,
-                        CRAWL, CAUTION,
-                        get_bool,
-                        is_start_of_quarter,
-                        has_html_content,
-
-                        parallel_thread_map)
+from edgar.core import decode_content, Result, get_bool, is_start_of_quarter, has_html_content, parallel_thread_map
+from edgar.settings import get_identity, set_identity, ask_for_identity, CRAWL, CAUTION
 from edgar.filtering import (
     filter_by_form,
     filter_by_cik,

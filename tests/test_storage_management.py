@@ -5,7 +5,7 @@ Tests for storage management functionality
 import pytest
 from pathlib import Path
 from edgar.storage._management import storage_info, StorageInfo, _scan_storage
-from edgar.core import get_edgar_data_directory
+from edgar.settings import get_edgar_data_directory
 import time
 
 @pytest.mark.slow
@@ -232,7 +232,7 @@ def test_clear_cache_obsolete_only():
 def test_analyze_storage_detects_obsolete_cache(tmp_path):
     """Test that analyze_storage detects obsolete _pcache directory"""
     from edgar.storage._management import analyze_storage
-    from edgar.core import get_edgar_data_directory
+    from edgar.settings import get_edgar_data_directory
     import os
 
     # Create a temporary _pcache directory with a test file

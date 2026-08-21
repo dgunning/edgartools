@@ -25,7 +25,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import patch, AsyncMock
 
-from edgar.core import get_edgar_data_directory
+from edgar.settings import get_edgar_data_directory
 from edgar.storage import use_local_storage
 
 

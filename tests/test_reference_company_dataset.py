@@ -279,7 +279,7 @@ class TestBuildDatasetReal:
     @pytest.mark.manual
     def test_build_real_dataset(self, tmp_path):
         """Build dataset from real submissions (if available)"""
-        from edgar.core import get_edgar_data_directory
+        from edgar.settings import get_edgar_data_directory
 
         submissions_dir = get_edgar_data_directory() / 'submissions'
 
@@ -311,7 +311,7 @@ class TestGetDataset:
     @pytest.fixture(autouse=True)
     def check_submissions_available(self):
         """Skip all tests in this class if submissions not available"""
-        from edgar.core import get_edgar_data_directory
+        from edgar.settings import get_edgar_data_directory
 
         submissions_dir = get_edgar_data_directory() / 'submissions'
 
@@ -471,7 +471,7 @@ class TestDuckDBIntegration:
         """Build DuckDB from real submissions"""
         pytest.importorskip("duckdb")
 
-        from edgar.core import get_edgar_data_directory
+        from edgar.settings import get_edgar_data_directory
 
         submissions_dir = get_edgar_data_directory() / 'submissions'
 
@@ -511,7 +511,7 @@ class TestPerformance:
     @pytest.fixture(autouse=True)
     def check_submissions_available(self):
         """Skip all tests in this class if submissions not available"""
-        from edgar.core import get_edgar_data_directory
+        from edgar.settings import get_edgar_data_directory
 
         submissions_dir = get_edgar_data_directory() / 'submissions'
 

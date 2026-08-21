@@ -57,7 +57,7 @@ def check_full_dataset_available():
     This is for integration tests marked with @pytest.mark.slow that need
     the real 562K company dataset.
     """
-    from edgar.core import get_edgar_data_directory
+    from edgar.settings import get_edgar_data_directory
 
     submissions_dir = get_edgar_data_directory() / 'submissions'
 

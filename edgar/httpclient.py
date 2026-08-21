@@ -26,9 +26,8 @@ except (locale.Error, ValueError):
 # test_verify_reaches_the_transport_params pins the behaviour the patch protected.
 from httpxthrottlecache import HttpxThrottleCache
 
-from edgar.core import get_identity, log, strtobool
-
-from .core import get_edgar_data_directory
+from edgar.core import log, strtobool
+from edgar.settings import get_edgar_data_directory, get_identity
 
 MAX_SUBMISSIONS_AGE_SECONDS = 30  # Check for submissions every 30 seconds (reduced from 10 min for Issue #471)
 MAX_INDEX_AGE_SECONDS = 30 * 60  # Check for updates to index (ie: daily-index) every 30 minutes

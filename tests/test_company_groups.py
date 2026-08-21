@@ -23,7 +23,7 @@ import pandas as pd
 from dataclasses import dataclass
 
 from edgar import Company
-from edgar.core import set_identity
+from edgar.settings import set_identity
 from edgar.reference.company_subsets import (
     CompanySubset,
     get_popular_companies,

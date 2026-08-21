@@ -348,7 +348,7 @@ def test_http_request_raw() -> Tuple[bool, Optional[int], Optional[str]]:
     try:
         import httpx
 
-        from edgar.core import get_identity
+        from edgar.settings import get_identity
 
         # Quick request to SEC.gov robots.txt (small file)
         # Uses default httpx settings (SSL verification enabled)
@@ -374,7 +374,7 @@ def test_http_request_configured() -> Tuple[bool, Optional[int], Optional[str]]:
     try:
         import httpx
 
-        from edgar.core import get_identity
+        from edgar.settings import get_identity
         from edgar.httpclient import HTTP_MGR
 
         # Get user's configured settings

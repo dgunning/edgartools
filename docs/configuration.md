@@ -571,7 +571,7 @@ from edgar import set_identity
 set_identity("Research Team research@university.edu")
 
 # Verify identity is set
-from edgar.core import get_identity
+from edgar.settings import get_identity
 print(f"Current identity: {get_identity()}")
 ```
 
@@ -594,7 +594,7 @@ print(f"Using local storage: {using_local_storage()}")
 ### HTTP Client Configuration
 
 ```python
-from edgar.core import EdgarSettings
+from edgar.settings import EdgarSettings
 
 # Custom access mode
 custom_settings = EdgarSettings(
@@ -722,7 +722,7 @@ Typical storage usage:
 
 ```python
 import os
-from edgar.core import get_identity
+from edgar.settings import get_identity
 
 # Check identity
 print(f"Identity: {get_identity()}")
@@ -806,7 +806,7 @@ def validate_config():
     
     # Check identity
     try:
-        from edgar.core import get_identity
+        from edgar.settings import get_identity
         identity = get_identity()
         if not identity:
             issues.append("EDGAR_IDENTITY not set")

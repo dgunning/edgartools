@@ -7,7 +7,7 @@ users get predictable results when requesting specific units.
 
 import pytest
 from edgar import Company
-from edgar.core import set_identity
+from edgar.settings import set_identity
 from edgar.entity.unit_handling import UnitNormalizer, UnitResult
 
 
