@@ -4,11 +4,19 @@ The declared public API of `edgar`, pinned.
 Bead: edgartools-07lk.5
 
 `edgar/__init__.py` had no `__all__`, so "is this part of the API?" had no
-answer except whether the import happened to work. 141 names were reachable
-from the top-level namespace, including `Optional` and `partial` — imported for
-annotations and never API — and `Document`, the *legacy* parser from
-`edgar.files`, a different class from `edgar.documents.Document` and scheduled
-for removal in 6.0.
+answer except whether the import happened to work. Everything reachable from the
+top-level namespace looked equally official, including `Optional` and `partial`
+— imported for annotations and never API — and `Document`, the *legacy* parser
+from `edgar.files`, a different class from `edgar.documents.Document` and
+scheduled for removal in 6.0.
+
+NO COUNTS IN THIS PROSE, deliberately. It used to open "141 names were
+reachable"; `edgar/__init__.py` and `docs/upgrade/6.0.md` carried the same figure
+plus "110 names" and "31 names outside `__all__`". Eleven days later the real
+numbers were 153, 123 and 30, and nothing failed — a count written into a
+sentence is prose wearing the costume of a measurement, and no test guarded it.
+`test_report_the_current_surface` below derives them instead, so the numbers come
+from the code that has them rather than from someone remembering to retype them.
 
 WHAT THESE TESTS ARE FOR. Not to freeze the API — names get added, and adding
 one here is a two-line change. They exist so that adding a name to the top-level
@@ -164,4 +172,33 @@ def test_the_exported_document_class_is_not_the_legacy_one():
     assert edgar.Document is not ModernDocument, (
         "edgar.Document now IS edgar.documents.Document — that is a change worth "
         "making deliberately, and this test and __all__ should follow it."
+    )
+
+
+def test_report_the_current_surface(capsys):
+    """Derive the surface counts instead of transcribing them into prose.
+
+    Run with `-s` to read them:
+
+        hatch run test:pytest tests/issues/regression/test_public_api_surface.py \
+            -k report_the_current_surface -s
+
+    This asserts internal consistency rather than a fixed size — pinning the
+    numbers is what rotted last time, and freezing them would fail on every
+    added name, which the tests above deliberately do not do. What it does catch
+    is the surface drifting in a way the classification missed: every public
+    name is either exported or listed INTERNAL, so the three totals must add up.
+    """
+    public = _public_names()
+    exported = set(edgar.__all__)
+    undeclared = public - exported
+
+    print(f"\npublic top-level names: {len(public)}")
+    print(f"declared in __all__:    {len(exported)}")
+    print(f"undeclared (INTERNAL):  {len(undeclared)}")
+
+    assert len(public) == len(exported & public) + len(undeclared)
+    assert undeclared == INTERNAL & public, (
+        "the undeclared set has drifted from INTERNAL — "
+        f"unclassified: {sorted(undeclared - INTERNAL)}"
     )
