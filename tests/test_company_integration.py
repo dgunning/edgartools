@@ -1,93 +1,77 @@
-#!/usr/bin/env python3
+"""Integration tests for FormType against real Company filing lookups.
+
+This file used to be a top-to-bottom demo script: it built ``Company("AAPL")``
+and ran six filing lookups at module scope, printed check marks, and wrapped
+every check in ``try/except`` that printed a cross and carried on. It contained
+no test functions, so it asserted nothing and could never fail a build — but
+pytest still executed the module body during COLLECTION, and a collection error
+aborts the entire session before a single test runs. That is exactly what
+happened in CI when SEC answered 429: a 6,000-test regression run was
+interrupted by this file and one other, whose own tests had been deselected
+anyway.
+
+Rewritten as real tests: the network happens inside a fixture, the checks are
+assertions rather than prints, and a failure here fails these tests instead of
+the suite.
 """
-Integration test for FormType with actual Company usage
-Tests both new typed usage and backwards compatibility
-"""
+import pytest
 
-print("=== Testing Company Integration ===")
+from edgar import Company
+from edgar.enums import FormType
 
-try:
-    from edgar import Company
-    from edgar.enums import FormType
-    print("✅ Imports successful")
-except ImportError as e:
-    print(f"❌ Import failed: {e}")
-    exit(1)
+pytestmark = pytest.mark.network
 
-# Test with a well-known company
-company = Company("AAPL")
-print(f"✅ Company created: {company.name}")
+YEAR = 2023
 
-print("\n=== Testing New FormType Usage ===")
-try:
-    # Test FormType enum usage
-    filings = company.get_filings(form=FormType.ANNUAL_REPORT, year=2023)
-    print(f"✅ FormType usage successful: Found {len(filings)} 10-K filings")
-    
-    # Test quarterly reports
-    filings_q = company.get_filings(form=FormType.QUARTERLY_REPORT, year=2023)
-    print(f"✅ Quarterly FormType: Found {len(filings_q)} 10-Q filings")
-    
-except Exception as e:
-    print(f"❌ FormType usage failed: {e}")
 
-print("\n=== Testing Backwards Compatibility ===")
-try:
-    # Test existing string usage still works
-    filings_str = company.get_filings(form="10-K", year=2023)
-    print(f"✅ String usage works: Found {len(filings_str)} 10-K filings")
-    
-    # Test list of strings still works
-    filings_list = company.get_filings(form=["10-K", "10-Q"], year=2023)
-    print(f"✅ List usage works: Found {len(filings_list)} filings")
-    
-except Exception as e:
-    print(f"❌ Backwards compatibility failed: {e}")
+@pytest.fixture(scope="module")
+def apple():
+    return Company("AAPL")
 
-print("\n=== Testing Mixed Usage ===")
-try:
-    # Test mixed FormType and string in list
-    mixed_filings = company.get_filings(
-        form=[FormType.ANNUAL_REPORT, "8-K"], 
-        year=2023
-    )
-    print(f"✅ Mixed usage works: Found {len(mixed_filings)} filings")
-    
-except Exception as e:
-    print(f"❌ Mixed usage failed: {e}")
 
-print("\n=== Verifying Results are Identical ===")
-try:
-    # FormType and string should give identical results
-    form_type_results = company.get_filings(form=FormType.ANNUAL_REPORT, year=2023)
-    string_results = company.get_filings(form="10-K", year=2023)
-    
-    if len(form_type_results) == len(string_results):
-        print("✅ FormType and string results are identical")
-        
-        # Check accession numbers match
-        form_type_accessions = {f.accession_number for f in form_type_results}
-        string_accessions = {f.accession_number for f in string_results}
-        
-        if form_type_accessions == string_accessions:
-            print("✅ Accession numbers match - perfect backwards compatibility")
-        else:
-            print("⚠️  Accession numbers differ")
-    else:
-        print(f"⚠️  Result counts differ: FormType({len(form_type_results)}) vs String({len(string_results)})")
-        
-except Exception as e:
-    print(f"❌ Results comparison failed: {e}")
+def test_form_type_enum_selects_filings(apple):
+    """FormType members resolve to the same filings a form string selects."""
+    annual = apple.get_filings(form=FormType.ANNUAL_REPORT, year=YEAR)
+    quarterly = apple.get_filings(form=FormType.QUARTERLY_REPORT, year=YEAR)
 
-print("\n=== Testing Developer Experience ===")
-print("When you type 'FormType.' in your IDE, you should see:")
-for form_type in list(FormType)[:5]:  # Show first 5
-    print(f"  • {form_type.name} → '{form_type.value}'")
-print("  • ... and 26 more options")
+    assert len(annual) > 0
+    assert len(quarterly) > 0
+    assert {f.form for f in annual} == {"10-K"}
+    assert {f.form for f in quarterly} == {"10-Q"}
 
-print("\n🎉 Company integration test completed!")
-print("\nThe FormType implementation provides:")
-print("• Perfect backwards compatibility")
-print("• IDE autocomplete for form types") 
-print("• Type safety with runtime validation")
-print("• Identical results for FormType vs string usage")
+
+def test_form_strings_still_work(apple):
+    """The pre-FormType string API is unchanged."""
+    single = apple.get_filings(form="10-K", year=YEAR)
+    combined = apple.get_filings(form=["10-K", "10-Q"], year=YEAR)
+
+    assert len(single) > 0
+    assert len(combined) >= len(single)
+    assert {f.form for f in combined} <= {"10-K", "10-Q"}
+
+
+def test_form_type_and_string_are_mixable(apple):
+    """A list may mix FormType members and plain strings."""
+    mixed = apple.get_filings(form=[FormType.ANNUAL_REPORT, "8-K"], year=YEAR)
+
+    assert len(mixed) > 0
+    assert {f.form for f in mixed} <= {"10-K", "8-K"}
+
+
+def test_form_type_matches_string_exactly(apple):
+    """FormType.ANNUAL_REPORT and "10-K" select the identical filing set.
+
+    Accession numbers, not just counts — equal counts over different filings
+    would still be a compatibility break.
+    """
+    by_enum = apple.get_filings(form=FormType.ANNUAL_REPORT, year=YEAR)
+    by_string = apple.get_filings(form="10-K", year=YEAR)
+
+    assert {f.accession_number for f in by_enum} == {f.accession_number for f in by_string}
+
+
+def test_form_type_values_are_edgar_form_strings():
+    """Offline: every member's value is the literal form string EDGAR uses."""
+    assert FormType.ANNUAL_REPORT.value == "10-K"
+    assert FormType.QUARTERLY_REPORT.value == "10-Q"
+    assert all(isinstance(member.value, str) and member.value for member in FormType)

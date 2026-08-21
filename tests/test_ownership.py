@@ -14,9 +14,29 @@ from edgar.core import has_html_content
 
 pd.options.display.max_columns = None
 
-snow_form3 = Ownership.from_xml(Path('data/ownership/form3.snow.xml').read_text())
-snow_form3_nonderiv = Ownership.from_xml(Path('data/form3.snow.nonderiv.xml').read_text())
-snow_form4 = Ownership.from_xml(Path('data/form4.snow.xml').read_text())
+# These are module-scoped FIXTURES rather than module-level globals on purpose.
+# Ownership.from_xml() resolves the issuer through data.sec.gov, so building them
+# at import time put three network calls inside pytest's COLLECTION phase — and a
+# collection error aborts the whole session before any test runs. That fired in CI
+# when SEC returned 429: the entire 6,000-test regression run was interrupted by
+# two files whose own tests had been deselected anyway. As fixtures the fetch
+# happens inside the tests that ask for it, where a failure fails those tests
+# instead of the suite.
+
+
+@pytest.fixture(scope="module")
+def snow_form3():
+    return Ownership.from_xml(Path('data/ownership/form3.snow.xml').read_text())
+
+
+@pytest.fixture(scope="module")
+def snow_form3_nonderiv():
+    return Ownership.from_xml(Path('data/form3.snow.nonderiv.xml').read_text())
+
+
+@pytest.fixture(scope="module")
+def snow_form4():
+    return Ownership.from_xml(Path('data/form4.snow.xml').read_text())
 @pytest.fixture(scope="module")
 def aapl_form4():
     return Filing(company='Apple Inc.', cik=320193, form='4', filing_date='2023-10-03',
@@ -82,7 +102,7 @@ def test_derivative_table_repr():
     print()
 
 
-def test_non_derivatives_repr():
+def test_non_derivatives_repr(snow_form4):
     form3_content = Path('data/form3.snow.nonderiv.xml').read_text()
     print()
     ownership = Ownership.from_xml(form3_content)
@@ -192,7 +212,7 @@ def test_reporting_relationship():
     assert not owner.is_other
 
 
-def test_post_transaction_values():
+def test_post_transaction_values(snow_form4):
     transaction: NonDerivativeTransaction = snow_form4.non_derivative_table.transactions[0]
     print(transaction)
     assert transaction.security == 'Class A Common Stock'
@@ -204,7 +224,7 @@ def test_post_transaction_values():
     assert transaction.shares == 200000
 
 
-def test_derivative_holdings_get_item():
+def test_derivative_holdings_get_item(snow_form3):
     print()
     print(snow_form3.derivative_table.holdings.data)
     holding = snow_form3.derivative_table.holdings[0]
@@ -218,7 +238,7 @@ def test_derivative_holdings_get_item():
     assert holding.nature_of_ownership == 'Limited Partnership [F4]'
 
 
-def test_non_derivative_holding_get_item():
+def test_non_derivative_holding_get_item(snow_form3_nonderiv):
     print()
     holding = snow_form3_nonderiv.non_derivative_table.holdings[0]
     assert holding.security == 'Class A Common Stock'
@@ -228,7 +248,7 @@ def test_non_derivative_holding_get_item():
     print(holding)
 
 
-def test_derivative_transaction_get_item():
+def test_derivative_transaction_get_item(snow_form4):
     transaction = snow_form4.derivative_table.transactions[0]
     assert transaction.shares == 200000
     assert transaction.price == 0
