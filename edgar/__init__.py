@@ -21,7 +21,8 @@ from edgar._filings import (
     get_filings,
 )
 from edgar.context import HasContext, compose_context
-from edgar.core import CAUTION, CRAWL, NORMAL, edgar_mode, get_identity, listify, set_identity
+from edgar.core import listify
+from edgar.settings import CAUTION, CRAWL, NORMAL, edgar_mode, get_identity, set_identity
 from edgar.exceptions import (
     AttachmentNotFoundError,
     CompanyFactsNotFoundError,

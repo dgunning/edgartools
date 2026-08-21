@@ -16,7 +16,8 @@ from edgar.exceptions import EdgarError, TransportError, http_status
 from httpx import AsyncClient, HTTPStatusError
 from tqdm.auto import tqdm
 
-from edgar.core import filing_date_to_year_quarters, get_edgar_data_directory, log, strtobool
+from edgar.core import filing_date_to_year_quarters, log, strtobool
+from edgar.settings import get_edgar_data_directory
 from edgar.dates import extract_dates
 from edgar.httprequests import download_bulk_data, download_datafile, download_text
 from edgar.urls import build_company_tickers_exchange_url, build_company_tickers_url, build_mutual_fund_tickers_url, build_ticker_url

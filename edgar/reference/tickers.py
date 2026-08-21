@@ -9,7 +9,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import pandas as pd
 import pyarrow as pa
 
-from edgar.core import get_edgar_data_directory, listify, log
+from edgar.core import listify, log
+from edgar.settings import get_edgar_data_directory
 from edgar.exceptions import http_status
 from edgar.httprequests import download_file, download_json
 from edgar.reference.data.common import read_csv_from_package, read_parquet_from_package

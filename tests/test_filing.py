@@ -17,7 +17,7 @@ from edgar import get_filings, Filings, Filing, get_entity, get_by_accession_num
 from edgar._filings import FilingHomepage, read_fixed_width_index, form_specs, company_specs, Attachment, \
     filing_date_to_year_quarters, get_filing_by_accession
 from edgar.company_reports import TenK
-from edgar.core import default_page_size
+from edgar.settings import default_page_size
 from edgar.entity import Company
 from edgar._filings import read_index_file
 

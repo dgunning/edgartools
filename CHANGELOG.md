@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`edgar.settings` — a real home for connection settings and SEC identity.** The access modes (`NORMAL`, `CAUTION`, `CRAWL`), `EdgarSettings`, `set_identity`, `get_identity` and `get_edgar_data_directory` now live in `edgar.settings`. They used to sit in `edgar.core` next to quarter math, HTML sniffing, a pager, thread helpers and the logger — only about a third of that 697-line module was settings, and everything users are told to configure was in that third. Nothing breaks: `edgar.core` re-exports every one of those names, and they are the *same objects*, so `isinstance` checks and identity comparisons behave identically. Code importing from the top-level namespace (`from edgar import set_identity, CAUTION`) is unaffected now and in 6.0. The `edgar.core` re-exports are removed in 6.0; see `docs/upgrade/6.0.md`.
+
 ### Changed
 
 - **`TenK.items`, `TenQ.items` and `TwentyF.items` no longer fall back to the deprecated legacy parser.** They now report exactly what the modern parser detects. This is not expected to change any result: across a 115-filing corpus spanning 1996 to 2026, removing the fallback changed the item list on zero filings, for every one of 10-K, 10-Q, 20-F and 8-K. The fix that made it redundant was Strategy 5c above, which recovered the last two filings that still needed it. Item *lookup* — `report["Item 7"]` and `get_item_with_part()` — still consults the legacy parser, and still needs to: it is reached whenever one particular item is missing rather than only when the whole document parsed to nothing, so a partial detection miss reaches it. On the same corpus, 15 item lookups return text only because of it.

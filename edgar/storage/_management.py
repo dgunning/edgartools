@@ -171,7 +171,7 @@ def _scan_storage(force_refresh: bool = False) -> StorageInfo:
         if time.time() - timestamp < _CACHE_TTL:
             return info
 
-    from edgar.core import get_edgar_data_directory
+    from edgar.settings import get_edgar_data_directory
     storage_path = get_edgar_data_directory()
 
     # Initialize counters
@@ -366,7 +366,7 @@ def analyze_storage(force_refresh: bool = False) -> StorageAnalysis:
         >>> if analysis.potential_savings_bytes > 1e9:
         ...     print(f"Can save {analysis.potential_savings_bytes / 1e9:.1f} GB")
     """
-    from edgar.core import get_edgar_data_directory
+    from edgar.settings import get_edgar_data_directory
 
     info = storage_info(force_refresh=force_refresh)
     storage_path = get_edgar_data_directory()
@@ -497,7 +497,7 @@ def optimize_storage(dry_run: bool = True) -> Dict[str, int]:
     import gzip
     import shutil
 
-    from edgar.core import get_edgar_data_directory
+    from edgar.settings import get_edgar_data_directory
 
     storage_path = get_edgar_data_directory()
     files_compressed = 0
@@ -575,7 +575,7 @@ def cleanup_storage(days: int = 365, dry_run: bool = True) -> Dict[str, int]:
     """
     from datetime import datetime, timedelta
 
-    from edgar.core import get_edgar_data_directory
+    from edgar.settings import get_edgar_data_directory
 
     storage_path = get_edgar_data_directory()
     cutoff_date = datetime.now() - timedelta(days=days)
@@ -660,7 +660,7 @@ def clear_cache(dry_run: bool = True, obsolete_only: bool = False) -> Dict[str, 
         >>> result = clear_cache(dry_run=False)
         >>> print(f"Cleared {result['files_deleted']} cache files")
     """
-    from edgar.core import get_edgar_data_directory
+    from edgar.settings import get_edgar_data_directory
 
     storage_path = get_edgar_data_directory()
     files_deleted = 0

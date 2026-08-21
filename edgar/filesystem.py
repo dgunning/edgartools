@@ -328,7 +328,7 @@ def get_storage_root() -> str:
     """
     if _cloud_uri:
         return _cloud_uri
-    from edgar.core import get_edgar_data_directory
+    from edgar.settings import get_edgar_data_directory
     return str(get_edgar_data_directory())
 
 
@@ -455,7 +455,7 @@ class EdgarPath:
 
     def _local_path(self) -> Path:
         """Get the local Path for this EdgarPath (internal use)."""
-        from edgar.core import get_edgar_data_directory
+        from edgar.settings import get_edgar_data_directory
         return get_edgar_data_directory() / self._path
 
     def exists(self) -> bool:
@@ -625,7 +625,7 @@ class EdgarPath:
 
         if fs is None:
             # Local filesystem
-            from edgar.core import get_edgar_data_directory
+            from edgar.settings import get_edgar_data_directory
             local_base = self._local_path()
             data_dir = get_edgar_data_directory()
             for match in local_base.glob(pattern):
@@ -667,7 +667,7 @@ class EdgarPath:
 
         if fs is None:
             # Local filesystem
-            from edgar.core import get_edgar_data_directory
+            from edgar.settings import get_edgar_data_directory
             local_path = self._local_path()
             data_dir = get_edgar_data_directory()
             for item in local_path.iterdir():
@@ -750,7 +750,7 @@ class EdgarPath:
                 "Cannot get local path when cloud storage is enabled. "
                 "Use read_text(), read_bytes(), or open() instead."
             )
-        from edgar.core import get_edgar_data_directory
+        from edgar.settings import get_edgar_data_directory
         return get_edgar_data_directory() / self._path
 
 
@@ -816,7 +816,7 @@ def sync_to_cloud(
             "  edgar.sync_to_cloud()"
         )
 
-    from edgar.core import get_edgar_data_directory
+    from edgar.settings import get_edgar_data_directory
 
     # Determine source directory
     local_base = get_edgar_data_directory()

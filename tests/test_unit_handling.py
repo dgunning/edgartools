@@ -16,7 +16,7 @@ from edgar.entity.unit_handling import (
 )
 from edgar.entity.models import FinancialFact
 from edgar import Company
-from edgar.core import set_identity
+from edgar.settings import set_identity
 
 
 class TestUnitNormalizer:

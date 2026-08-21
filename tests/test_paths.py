@@ -247,7 +247,7 @@ class TestIntegrationWithEdgarCore:
 
     def test_core_uses_paths_module(self, monkeypatch, tmp_path):
         """edgar.core.get_edgar_data_directory should use paths module."""
-        from edgar.core import get_edgar_data_directory
+        from edgar.settings import get_edgar_data_directory
 
         custom_path = tmp_path / 'edgar_data'
         custom_path.mkdir()

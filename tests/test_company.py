@@ -7,7 +7,7 @@ import pyarrow.compute as pc
 from rich import print
 
 from edgar._filings import Filing, Filings, get_filings
-from edgar.core import default_page_size
+from edgar.settings import default_page_size
 from edgar.entity import public_companies
 from edgar.entity import *
 from edgar.entity.data import preprocess_company
