@@ -155,9 +155,10 @@ class TwentyF(CompanyReport):
         """
         List of detected item names in standard "Item X" format.
 
-        Uses the new parser's section detection, falling back to the legacy
-        ChunkedDocument only when the new parser finds nothing — the same shape
-        TenK, TenQ and CurrentReport already use.
+        Uses the new parser's section detection, and nothing else. The legacy
+        ChunkedDocument fallback that used to back this up was removed once it
+        was measured to change no result on any filing in the corpus
+        (edgartools-07lk.23).
 
         This class was the last one where legacy was PRIMARY. Its stated reason
         was that "the pattern-based extractor doesn't handle the Table of
@@ -187,12 +188,16 @@ class TwentyF(CompanyReport):
             if items:
                 return _canonical(items)
 
-        # Legacy fallback, for filings where the new parser found nothing at all.
-        # This is what recovers 0000928385-01-500187, a 2001 20-F whose only item
-        # legacy finds and the new parser does not.
-        if self._chunked_document:
-            return _canonical(self._chunked_document.list_items())
-
+        # The legacy fallback that used to sit here is gone (edgartools-07lk.23).
+        # It existed for exactly one filing — 0000928385-01-500187, a 2001 20-F
+        # whose only item legacy found and the new parser did not — and Strategy
+        # 5c in the pattern extractor now finds it directly (edgartools-3dp), so
+        # the fallback had stopped doing anything. Measured 0 differences across
+        # the 115-fixture corpus.
+        #
+        # `__getitem__` below is a different matter and keeps its fallback: on
+        # this corpus five 20-F item lookups return text only because of it
+        # (0001144204-10-017467 Items 5, 6, 11, 12, 15).
         return []
 
     def __getitem__(self, item_name: str):

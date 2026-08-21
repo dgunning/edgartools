@@ -322,12 +322,20 @@ class TenK(CompanyReport):
                     items.append(key)
             if items:
                 return _canonical(items)
-            return _canonical(self._chunked_document.list_items()) if self._chunked_document else []
 
-        # Fallback to old parser for backward compatibility
-        if self._chunked_document:
-            return _canonical(self._chunked_document.list_items())
-
+        # No legacy fallback here any more (edgartools-07lk.23). Measured across
+        # the 115-fixture era-stratified corpus: removing it changes `.items` on
+        # ZERO filings, for every one of 10-K, 10-Q, 20-F and 8-K. Strategy 5c in
+        # the pattern extractor closed the last case that needed it — a 2001 10-K
+        # losing Item 7 (edgartools-3dp).
+        #
+        # This says nothing about `__getitem__` below, which still falls back and
+        # still has to: `.items` consulted legacy only when the new parser found
+        # NOTHING, while `__getitem__` consults it whenever THIS item is missing,
+        # so a partial detection miss reaches the second and never the first. That
+        # is not hypothetical — on the same corpus, 15 item lookups return real
+        # text only because of the fallback (e.g. 0000950153-99-001234 Item 14,
+        # 19KB). Deleting that one is a separate, unfinished piece of work.
         return []
 
     # These four go through .get() rather than self[...] on purpose, and keep

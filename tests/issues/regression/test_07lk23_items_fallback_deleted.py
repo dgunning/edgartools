@@ -1,0 +1,141 @@
+"""`.items` no longer consults the legacy parser — and `__getitem__` still does.
+
+edgartools-07lk.23. Two halves, and the second matters as much as the first.
+
+**What was deleted.** `TenK.items`, `TenQ.items` and `TwentyF.items` each ended
+with a fallback to the legacy ``ChunkedDocument`` for filings where the new
+parser found nothing. Strategy 5c (edgartools-3dp) closed the last case that
+needed one, and measurement across the 115-fixture era-stratified corpus put the
+difference at zero filings for all four report forms. The fallbacks are gone.
+
+**What was NOT deleted, and why this file says so out loud.** The same measurement
+found the fallbacks in ``__getitem__`` and ``get_item_with_part`` are very much
+alive: 15 item lookups and 4 part-qualified lookups across the corpus return real
+text only because legacy is still there. The two are not the same question, and
+the reason is structural rather than incidental —
+
+    ``.items``       consults legacy only when the new parser found NOTHING
+    ``__getitem__``  consults legacy whenever THIS ONE item is missing
+
+— so a *partial* detection miss reaches the second and never the first. A filing
+whose Items 1-13 parse cleanly and whose Item 14 does not will never trigger the
+``.items`` fallback, and will always trigger the ``__getitem__`` one. Zero
+difference on the first therefore implies nothing whatever about the second.
+
+The planning note for this work described it as deleting "the now-dead
+``_chunked_document`` fallbacks" from four classes and dropping four
+``edgar.files`` importers. That was measured and is not accurate: only the
+``.items`` third of it is dead, and because ``__getitem__`` still imports
+``ChunkedDocument`` no importer is dropped at all. The live half is pinned below
+so the next person to read that note finds evidence instead of repeating it.
+"""
+import pathlib
+
+import pytest
+
+from edgar.company_reports.ten_k import TenK
+from edgar.company_reports.twenty_f import TwentyF
+
+FIXTURES = pathlib.Path(__file__).parent.parent.parent / "fixtures"
+# Both tracked, so these assertions run in CI. The corpus this was measured on is
+# mostly gitignored (text_boundary_corpus, 91 MB); anchoring on that alone would
+# make the whole file skip in CI while passing locally, which is how parity
+# evidence has been lost here before.
+GATE_10K = FIXTURES / "parity_gate" / "10-K" / "0000950153-99-001234.html"
+GATE_20F = FIXTURES / "parity_gate" / "20-F" / "0001062993-16-008650.html"
+
+
+class FixtureFiling:
+    """The minimum surface the report classes touch, backed by a local file."""
+
+    filing_date = None
+
+    def __init__(self, path: pathlib.Path, form: str):
+        self._path = path
+        self.form = form
+        self.company = "fixture"
+        self.accession_number = path.stem
+        self.base_dir = str(path.parent)
+
+    def html(self):
+        return self._path.read_text(encoding="utf-8", errors="replace")
+
+
+def _without_legacy(cls):
+    """A subclass whose legacy fallback is unavailable.
+
+    Deliberately a throwaway subclass rather than patching and deleting the
+    attribute on ``cls``: TenK, TenQ and CurrentReport each define
+    ``_chunked_document`` on themselves, so ``del cls._chunked_document`` would
+    destroy the real override instead of restoring it, and every later assertion
+    in the session would silently measure a different object.
+    """
+    return type(
+        f"NoLegacy{cls.__name__}",
+        (cls,),
+        {"_chunked_document": property(lambda self: None)},
+    )
+
+
+def test_the_tracked_fixtures_are_present():
+    """Absent is not passing — guard the fixtures the assertions rest on."""
+    for path in (GATE_10K, GATE_20F):
+        assert path.exists(), f"{path} is tracked and must be present"
+
+
+class TestItemsNoLongerNeedsLegacy:
+    """The deleted half: `.items` is identical with and without the fallback."""
+
+    def test_tenk_items_unchanged_without_legacy(self):
+        filing = FixtureFiling(GATE_10K, "10-K")
+        assert TenK(filing).items == _without_legacy(TenK)(filing).items
+
+    def test_twentyf_items_unchanged_without_legacy(self):
+        filing = FixtureFiling(GATE_20F, "20-F")
+        assert TwentyF(filing).items == _without_legacy(TwentyF)(filing).items
+
+    def test_items_is_a_list_when_nothing_is_found(self):
+        """Not None — `for item in report.items` must stay safe now that the
+        fallback that used to backstop an empty result is gone."""
+
+        class Empty(TenK):
+            @property
+            def sections(self):
+                return {}
+
+        empty = _without_legacy(Empty)(FixtureFiling(GATE_10K, "10-K"))
+        assert empty.items == []
+
+
+class TestGetitemStillNeedsLegacy:
+    """The half that was NOT deleted, pinned as live rather than asserted dead.
+
+    If a later change to the pattern extractor makes these pass without legacy,
+    that is good news and this class should be revisited — but it has to be
+    *observed*, not assumed. Failing here means the fallback stopped being
+    load-bearing, so re-measure and then delete it deliberately.
+    """
+
+    @pytest.mark.parametrize("item,least", [("Item 14", 5000), ("Item 7A", 100)])
+    def test_1999_tenk_items_come_only_from_legacy(self, item, least):
+        filing = FixtureFiling(GATE_10K, "10-K")
+
+        text = TenK(filing)[item]
+        assert text and len(text) > least, (
+            f"{item} should still be retrievable via the legacy fallback"
+        )
+
+    @pytest.mark.parametrize("item,least", [("Item 6", 5000), ("Item 11", 100)])
+    def test_2016_twentyf_items_come_only_from_legacy(self, item, least):
+        filing = FixtureFiling(GATE_20F, "20-F")
+
+        text = TwentyF(filing)[item]
+        assert text and len(text) > least
+
+        # And the fallback is why: without it the same lookup returns nothing.
+        # TwentyF.__getitem__ guards its fallback, so this is a clean None rather
+        # than the TypeError that TenK's unguarded deref would raise.
+        assert _without_legacy(TwentyF)(filing)[item] is None, (
+            f"{item} no longer needs the legacy fallback — re-measure "
+            f"edgartools-07lk.23 and delete it deliberately"
+        )
