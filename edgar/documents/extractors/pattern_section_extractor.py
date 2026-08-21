@@ -755,6 +755,45 @@ class SectionExtractor:
                         headers.append((node, text.strip(), position))
                         existing_positions.add(position)
 
+        # Strategy 5c: bare TextNode headers, for filings with no block structure
+        # at all.
+        #
+        # Pre-2002 filings are preformatted text wrapped in minimal HTML, and they
+        # parse to ContainerNode > TextNode with *zero* HeadingNodes and *zero*
+        # ParagraphNodes. Every strategy above draws its candidates from headings,
+        # sections, bold paragraphs or table cells, so on those documents the
+        # header list is not merely short — there is no candidate source at all,
+        # and section detection returns nothing however good the patterns are.
+        # That is why these filings fell through to the legacy ChunkedDocument
+        # fallback in the report classes (edgartools-3dp).
+        #
+        # The header is the node's FIRST LINE, not its whole text: in
+        # preformatted filings a single TextNode carries the heading and the body
+        # that follows it, so the untrimmed text is a thousand characters of prose
+        # that `_looks_like_section_header` rejects on length alone. A title
+        # wrapped across two lines is truncated by this ("...AND RESULTS" without
+        # "OF OPERATIONS"), which costs nothing — the pattern match is anchored at
+        # the start, and the section's title comes from the pattern table rather
+        # than from the matched text.
+        if not self._item_structure_found(headers):
+            from edgar.documents.nodes import TextNode as _BareTextNode
+
+            existing_positions = {pos for _, _, pos in headers}
+            for node in document.root.find(lambda n: isinstance(n, _BareTextNode)):
+                text = node.text()
+                if not text:
+                    continue
+                first_line = text.strip().split("\n", 1)[0].strip()
+                if not re.match(r'^Item\s+\d', first_line, re.IGNORECASE):
+                    continue
+                if not self._looks_like_section_header(first_line):
+                    continue
+                position = _node_position(node)
+                if position in existing_positions:
+                    continue
+                headers.append((node, first_line, position))
+                existing_positions.add(position)
+
         # Strategy 5b: SIGNATURES terminal header for 8-K (and 8-K/A).
         #
         # 8-Ks end with a SIGNATURES block that bounds the last item.  The preceding

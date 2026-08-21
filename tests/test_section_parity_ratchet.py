@@ -107,7 +107,15 @@ pytestmark = pytest.mark.slow
 # when triaging the remaining dt1f gaps — some may be extraction, not detection.
 BASELINE_GAPS = {
     ("8-K", "0001104659-03-004925"): ["9"],
-    ("10-K", "0000927356-01-000369"): ["7"],
+    # CLOSED 2026-08-20, together with ("20-F", "0000928385-01-500187") below:
+    # both were pre-2002 filings that parse to ContainerNode > TextNode with zero
+    # HeadingNodes and zero ParagraphNodes, and every header strategy in the
+    # pattern extractor drew its candidates from headings, sections, bold
+    # paragraphs or table cells. There was no candidate source at all on those
+    # documents, so detection returned nothing however good the patterns were.
+    # Strategy 5c reads bare TextNodes, taking the node's first line as the
+    # header. Regression test:
+    # tests/issues/regression/test_3dp_bare_textnode_headers.py.
     # Banked 2026-08-14: 14 -> 3, closing the item-separator defect below. What
     # remains is era semantics plus one regex detail, not separators: in 1999
     # Item 4 was "Submission of Matters to a Vote of Security Holders" and Item
@@ -129,7 +137,8 @@ BASELINE_GAPS = {
     # away. Regression test:
     # tests/issues/regression/test_dt1f_toc_augmentation_gate.py.
     ("10-Q", "gs/10q"): ["5", "6"],
-    ("20-F", "0000928385-01-500187"): ["7"],
+    # ("20-F", "0000928385-01-500187") CLOSED 2026-08-20 — see the note on the
+    # 10-K entry above; one fix closed both.
     ("20-F", "0001062993-16-008650"): ["11", "16", "6"],
     # Banked 2026-08-13: 22 -> 8, closing edgartools-dt1f Defect 1. The fallback
     # strategies in the pattern extractor were gated on whether *any* header

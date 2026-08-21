@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Filings from before about 2002 returned no items at all from the modern parser.** Those filings are preformatted text wrapped in minimal HTML, so they parse to a container-and-text tree with no headings and no paragraphs — and every header strategy in the section extractor drew its candidates from headings, section nodes, bold paragraphs or table cells. There was no candidate source at all on such a document, so detection returned nothing however well the patterns matched, and `TenK.items` or `TwentyF.items` came back empty unless the deprecated legacy parser rescued them. Bare text nodes are now read as headers, using each node's first line, since one node carries both the heading and the body that follows it. A 2001 10-K and a 2001 20-F recover their Item 7; across a 121-filing corpus this was the last remaining difference between the modern parser and the legacy one on these forms.
+
 ## [5.51.0] - 2026-08-19
 
 ### Performance
