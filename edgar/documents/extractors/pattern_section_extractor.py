@@ -775,7 +775,19 @@ class SectionExtractor:
         # "OF OPERATIONS"), which costs nothing — the pattern match is anchored at
         # the start, and the section's title comes from the pattern table rather
         # than from the matched text.
-        if not self._item_structure_found(headers):
+        # NOT for 8-K/6-K, and the reason generalises: this strategy can only
+        # find the items that happen to START a TextNode, so it may hand back a
+        # PARTIAL header set. For the annual forms a partial set is still an
+        # improvement on nothing. For current reports it is actively worse —
+        # CurrentReport.__getitem__ tries the new parser first and only falls
+        # through to its text-based extraction when the parser yields nothing, so
+        # one detected header makes it stop at a section that runs past the item
+        # it should have ended at. That is a real filing: GMAC 0001047469-05-006981
+        # carries Item 4.02 at the head of one node and Item 8.01 elsewhere, and
+        # asking for 4.02 returned 8.01's text as well (test_issue_l6cl_8k_items_missing).
+        # Current reports already have era-appropriate text extraction; the annual
+        # forms are what had nothing.
+        if not self._item_structure_found(headers) and not self.form.startswith(("8-K", "6-K")):
             from edgar.documents.nodes import TextNode as _BareTextNode
 
             existing_positions = {pos for _, _, pos in headers}
