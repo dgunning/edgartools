@@ -179,7 +179,10 @@ get_portfolio_holding_filings = partial(get_filings, form=THIRTEENF_FORMS)
 # the enforcement in 6.0). If something you depend on is missing here, that is
 # worth an issue before 6.0 rather than after.
 #
-# THREE THINGS DELIBERATELY LEFT OUT, of 141 public names on 2026-08-10:
+# THREE THINGS DELIBERATELY LEFT OUT. (No count here on purpose — this line used
+# to say "of 141 public names on 2026-08-10" and was 153 eleven days later, with
+# nothing to catch it. `tests/issues/regression/test_public_api_surface.py`
+# derives the current figures; run it with `-s` to see them.)
 #
 #   1. `List`, `Optional`, `Union`, `lru_cache`, `partial` — imported above for
 #      annotations and never API. `from edgar import Optional` works today and
@@ -198,7 +201,7 @@ get_portfolio_holding_filings = partial(get_filings, form=THIRTEENF_FORMS)
 # `__all__`; this governs the top-level namespace only.
 #
 # Keep it grouped rather than sorted — the grouping is the documentation of what
-# the library is for, and a flat alphabetical list of 110 names is not.
+# the library is for, and a flat alphabetical list is not.
 __all__ = [
     # -- Entry points --------------------------------------------------------
     "find", "obj",
