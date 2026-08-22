@@ -181,10 +181,25 @@ class HybridSectionDetector:
         if not self.form or self.form.startswith('8-K'):
             return toc_sections
 
-        canonical = {schema.item_for_section_key(key) for key in schema.section_patterns}
-        canonical.discard(None)
+        # What the form defines, and what the TOC named, BOTH AS (part, item)
+        # pairs. On a 10-Q an item number is only unique within its part — Item 1
+        # is Financial Statements in Part I and Legal Proceedings in Part II — so
+        # comparing bare numbers reports a TOC that named one of them as having
+        # named both. That is not a near-miss: on pg/10q the two sets came out
+        # exactly equal, this returned "the TOC named everything", and the
+        # augmentation that would have supplied the missing part_ii_item_1 never
+        # ran at all (edgartools-yrrh).
+        #
+        # `resolve_section_key` is what makes the comparison possible on the
+        # schema side: it recovers ('II', '7') for a semantic key like `mda`,
+        # whose key string carries neither part nor item.
+        canonical = {schema.resolve_section_key(key) for key in schema.section_patterns}
+        canonical = {(part, item) for part, item in canonical if item}
         found_items = {sec.item for sec in toc_sections.values() if sec.item}
-        if not canonical or canonical <= found_items:
+        found_part_items = {
+            (sec.part, sec.item) for sec in toc_sections.values() if sec.item
+        }
+        if not canonical or canonical <= found_part_items:
             return toc_sections  # The TOC named everything the form defines.
 
         # Run pattern extractor against the same document.
@@ -202,10 +217,32 @@ class HybridSectionDetector:
         # same two-vocabulary trap that cost `wfc/10k` a week in BASELINE_GAPS.
         # It did not bite before only because the Part III gate kept this code
         # from running on the filings where the TOC succeeds.
+        #
+        # AND ON THE PART AS WELL AS THE ITEM, because an item number is only
+        # unique within its part. A 10-Q has TWO Item 1s — Financial Statements
+        # in Part I, Legal Proceedings in Part II — so an item-only comparison
+        # reads the second as a duplicate of the first and drops it. On pg/10q
+        # the pattern extractor found part_ii_item_1 and this filter discarded
+        # it, because the TOC had already contributed part_i_item_1 and both
+        # answer '1'; `get_item_with_part('Part II', 'Item 1')` then fell through
+        # to id_parse_document, which returned 222,536 characters for a section
+        # of 1,018 (edgartools-yrrh).
+        #
+        # The 10-K dedup above is unaffected: its pattern sections carry a part
+        # too — `mda` is part 'II', item '7', the same pair as `part_ii_item_7` —
+        # so they still collide. Only a section with no part at all falls back to
+        # comparing the bare item, which is what 20-F and the part-less keys need.
+        def _toc_already_has(sec) -> bool:
+            if not sec.item:
+                return False
+            if sec.part:
+                return (sec.part, sec.item) in found_part_items
+            return sec.item in found_items
+
         extras = {
             key: sec
             for key, sec in pattern_sections.items()
-            if key not in toc_sections and (not sec.item or sec.item not in found_items)
+            if key not in toc_sections and not _toc_already_has(sec)
         }
         if not extras:
             return toc_sections

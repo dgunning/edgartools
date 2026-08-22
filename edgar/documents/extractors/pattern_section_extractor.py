@@ -640,6 +640,27 @@ class SectionExtractor:
             return True  # No usable denominator — presence is the only test available.
         return len(found) >= expected * self._ITEM_COVERAGE_FLOOR
 
+    def _item_structure_complete(self, headers: List[Tuple[Node, str, int]]) -> bool:
+        """Has every item this form defines turned up among the candidates?
+
+        The stricter sibling of ``_item_structure_found``, and a different
+        question: that one asks whether the document parsed at all, this one asks
+        whether there is anything left to look for. A strategy that can only ADD
+        candidates should be gated on this, because "we have enough items" is not
+        a reason to stop when the items already in hand cannot become the missing
+        one — see Strategy 4, where a filer rendering one item in a table and the
+        rest as headings lost that item entirely.
+
+        Forms with no usable denominator (8-K, title-based) are never complete by
+        this test, so they keep running the strategies they have always run:
+        their gate was ``presence``, which is False until something is found, and
+        an 8-K that has found nothing still needs the fallbacks.
+        """
+        expected = self._canonical_item_count()
+        if not expected:
+            return False
+        return len(self._item_numbers_in(headers)) >= expected
+
     def _find_section_headers(self, document: Document) -> List[Tuple[Node, str, int]]:
         """
         Find all potential section headers.
@@ -790,8 +811,23 @@ class SectionExtractor:
 
         # Strategy 4: Fallback to table cells with Item patterns
         # Many 8-K filings use tables for layout with Items in table cells
-        # Check again after Strategy 3
-        if not self._item_structure_found(headers):
+        #
+        # Gated on COMPLETENESS rather than on _item_structure_found, which asks
+        # whether half the form's items have turned up. That is the right
+        # question for "did this document parse at all" and the wrong one here,
+        # because a filer does not have to render every item the same way.
+        # ExxonMobil's 10-Q writes six of its seven items as headings and puts
+        # Item 1 in a table — so the gate was satisfied at 6/7 by the very
+        # headers that could never contribute the missing one, and the strategy
+        # that would have found it never ran. Part I Item 1 is the whole
+        # financial-statement section, and get_item_with_part('Part I', 'Item 1')
+        # fell through to id_parse_document for it (edgartools-yrrh).
+        #
+        # A cheaper strategy having succeeded is not evidence that an expensive
+        # one has nothing to add. Same shape as the TOC-augmentation gate
+        # (edgartools-dt1f), which asked whether Part III was complete before
+        # running the pattern pass and so almost never ran it.
+        if not self._item_structure_complete(headers):
             from edgar.documents.table_nodes import TableNode
             table_nodes = document.root.find(lambda n: isinstance(n, TableNode))
             existing_positions = {pos for _, _, pos in headers}
