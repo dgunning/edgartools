@@ -151,7 +151,12 @@ BASELINE_GAPS = {
     # Banked 2026-08-14: 4 -> 1, same fix.
     ("10-K", "0001193125-21-101193"): ["11"],
     # Banked 2026-08-14: 19 -> 1, same fix.
-    ("10-K", "0001376474-16-000635"): ["5"],
+    # Banked 2026-08-22: 1 -> 0. The last one was Item 5, and the reason was a
+    # word cap rather than a pattern: ContextualDetector — the only detector
+    # that fires on this filer's markup — refuses to call anything over fifteen
+    # words a header, and Item 5's canonical SEC title is seventeen. A filing's
+    # own "Item N"/"PART N" label now waives that length test. Regression test:
+    # tests/issues/regression/test_dt1f1_long_item_titles.py.
     # CLOSED 2026-08-14, together with axp/bac/cvx/jnj/jpm/tsla and
     # 0001193125-21-082408: the TOC-augmentation gate asked whether Part III was
     # complete before running the pattern pass, and Part III is complete on
@@ -226,6 +231,11 @@ TRACKED_GAP_FIXTURES = (
         # it. Membership of this set means "must stay measurable", not "still
         # broken".
         ("10-K", "0001193125-10-073212"),
+        # Copied into parity_gate on 2026-08-22 with the Defect C fix, and
+        # likewise carrying no baseline gap any more. This one is the filing the
+        # item-separator fix was measured on (TenK.items == ['Item 8'] before
+        # it), so it guards two fixes at once and must stay measurable.
+        ("10-K", "0001376474-16-000635"),
     }
 )
 

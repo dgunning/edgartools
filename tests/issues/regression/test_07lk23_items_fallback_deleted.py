@@ -136,16 +136,26 @@ class TestGetitemFallbackIsStillWired:
     through legacy; they are asserted from the other side now, in
     ``test_dt1f1_era_item_titles.py``.
 
-    ONE remains: Item 5 on 0001376474-16-000635, whose bold all-caps header
-    scores below the header-detection threshold because its canonical title runs
-    past ten words. Its filing lives in the gitignored era corpus, so the
-    load-bearing claim can no longer be demonstrated on a TRACKED fixture — which
-    is what this class is now named for. What it pins instead is the wiring: a
+    The last one, Item 5 on 0001376474-16-000635, closed on 2026-08-22 too: its
+    canonical SEC title runs to seventeen words and the contextual detector — the
+    only one that fires on that filer's markup — refuses to call anything over
+    fifteen a header. It is asserted in ``test_dt1f1_long_item_titles.py``.
+
+    NONE REMAIN of the fifteen. That is what this class is now named for: no
+    tracked fixture can show a ``__getitem__`` lookup that needs legacy, because
+    across the whole corpus none does. What it pins instead is the wiring — a
     missing item still reaches the fallback, and TenK dereferences it unguarded
     where TwentyF returns None, the difference 07lk.3 has to handle at both call
-    sites.
+    sites — and the two lookups below, which now answer from the modern parser.
 
-    One and not two: Item 11 on 0001193125-21-101193 was listed here and was
+    THE REMAINING BLOCKER FOR 07lk.3 IS NOT HERE. ``get_item_with_part`` still
+    has two wrong answers (pg/10q Part II Item 1, xom/10q Part I Item 1), and
+    they are wrong rather than missing: when legacy goes they fall through to
+    ``id_parse_document``, which 6.0 also deletes and which returns 222,536
+    characters for a section that is 1,018. That method has no working path once
+    edgar.files goes, and it is its own defect.
+
+    Zero and not one: Item 11 on 0001193125-21-101193 was listed here and was
     DROPPED on 2026-08-22 rather than fixed, because the new parser is right and
     legacy is wrong. That filing is an asset-backed issuer 10-K on Regulation AB
     numbering (Items 1112, 1114(b), 1122, 1123), and ABS filers omit the Part III
