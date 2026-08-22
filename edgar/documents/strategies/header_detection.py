@@ -16,6 +16,11 @@ from edgar.documents.types import HeaderInfo, ParseContext
 # are excluded so a year ('2024') is not caught.
 _BARE_ENUMERATOR = re.compile(r'^[(\[]?\s*(?:\d{1,3}|[ivxlcIVXLC]{1,5}|[a-zA-Z])\s*[)\].]?$')
 
+# A filing's own structural label: "Item 5:", "ITEM 9A(T).", "PART II". Text
+# carrying one is a header on the strength of the label, whatever its length —
+# see _looks_like_header, the one place this is consulted.
+_STRUCTURAL_LABEL = re.compile(r'^\s*(?:Item\s+\d|PART\s+[IVX]+\b)', re.IGNORECASE)
+
 
 def _can_be_heading(text: str) -> bool:
     """Whether this text could be a heading at all, before any confidence is scored.
@@ -342,8 +347,23 @@ class ContextualDetector(HeaderDetector):
 
     def _looks_like_header(self, text: str) -> bool:
         """Check if text looks like a header."""
-        # Short text
-        if len(text.split()) > 15:
+        # Short text — but an Item or Part marker is a header at any length.
+        #
+        # The word cap is a proxy for "too long to be a title", and it is a fair
+        # one for unlabelled text. It is not fair to a labelled one: several of
+        # the SEC's own canonical item titles run past fifteen words, Item 5's
+        # "Market for Registrant's Common Equity, Related Stockholder Matters and
+        # Issuer Purchases of Equity Securities" among them at seventeen. So the
+        # cap systematically rejected exactly the longest *real* headers, and on
+        # 0001376474-16-000635 — where this detector is the only one that fires,
+        # the filer's markup leaving is_bold False on the element that gets
+        # scored — Item 5 was the one item of twenty that never became a heading
+        # (edgartools-dt1f.1 Defect C).
+        #
+        # Only the length test is waived. A prose cross-reference beginning
+        # "Item 5 of this report..." still fails the sentence-punctuation test
+        # below, and the caller still skips anything over 200 characters.
+        if len(text.split()) > 15 and not _STRUCTURAL_LABEL.match(text):
             return False
 
         # No ending punctuation (except colon)
