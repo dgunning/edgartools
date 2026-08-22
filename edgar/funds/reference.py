@@ -475,7 +475,11 @@ def _find_latest_fund_data_url():
 
 
     """
-    list_url = "https://www.sec.gov/about/opendatasetsshtmlinvestment_company"
+    # SEC migrated this page from /about/opendatasets* to /data-research/sec-markets-data/*
+    # in 2026 and left a 301 with a RELATIVE Location behind. redirect_url() in
+    # httprequests follows that correctly now, so the old address still works — this
+    # names the destination directly to save the extra hop, not because the hop breaks.
+    list_url = "https://www.sec.gov/data-research/sec-markets-data/investment-company-series-class-information"
     html_content = download_text(list_url)
     soup = BeautifulSoup(html_content, 'html.parser')
 

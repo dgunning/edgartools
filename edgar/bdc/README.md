@@ -316,7 +316,7 @@ if is_bdc_cik(company.cik):
 
 The SEC maintains an authoritative list of all entities with 814- file numbers.
 
-**URL:** https://www.sec.gov/about/opendatasetsshtmlbdc
+**URL:** https://www.sec.gov/data-research/sec-markets-data/opendatasetsshtmlbdc
 
 **Files:** `business-development-company-{year}.csv` (2016-2025)
 

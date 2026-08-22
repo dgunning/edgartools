@@ -4,8 +4,9 @@ SEC BDC (Business Development Company) reference data.
 This module provides access to the SEC's authoritative list of Business Development Companies
 from the SEC BDC Report, published annually.
 
-Data source: https://www.sec.gov/about/opendatasetsshtmlbdc
+Data source: https://www.sec.gov/data-research/sec-markets-data/opendatasetsshtmlbdc
 """
+import logging
 import io
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
@@ -21,7 +22,9 @@ import httpx
 import pandas as pd
 
 from edgar.display.formatting import cik_text
-from edgar.httprequests import get_with_retry
+from edgar.httprequests import get_with_retry, is_unreachable
+
+log = logging.getLogger(__name__)
 
 __all__ = [
     'BDCEntity',
@@ -35,6 +38,10 @@ __all__ = [
 
 # Base URL for SEC BDC Report files
 BDC_REPORT_BASE_URL = "https://www.sec.gov/files/investment/data/other/business-development-company-report"
+
+# Used only when no year answers a probe. Every use is logged: an unconfirmed
+# year presented as confirmed is how a moved dataset reads as current data.
+_BDC_REPORT_FALLBACK_YEAR = 2024
 
 
 @dataclass
@@ -506,17 +513,48 @@ def get_latest_bdc_report_year() -> int:
         The latest year with an available BDC report.
     """
     current_year = datetime.now().year
+    unreachable = 0
+    probed = 0
 
     for year in range(current_year, 2015, -1):
         url = f"{BDC_REPORT_BASE_URL}/business-development-company-{year}.csv"
+        probed += 1
         try:
             response = get_with_retry(url, timeout=5)
             if response.status_code == 200:
                 return year
-        except Exception:
+        except Exception as e:
+            # A missing year is a 404, which returns a response rather than
+            # raising, so it never reaches here — reaching here means the probe
+            # did not get an answer at all. Counting those separates "SEC has no
+            # report for this year" from "we could not ask", which is the whole
+            # difference between the fallback below being a reasonable default
+            # and being a fabricated claim about what the latest year is.
+            if is_unreachable(e):
+                unreachable += 1
+            else:
+                log.warning(
+                    "Unexpected error probing the %s BDC report (%s: %s); skipping that year.",
+                    year, type(e).__name__, e,
+                )
             continue
 
-    return 2024  # Fallback to known good year
+    # Reaching here means no year answered 200. Say so rather than presenting a
+    # hardcoded year as though it had been confirmed: if SEC moves
+    # BDC_REPORT_BASE_URL the way it moved the fund dataset page, every probe
+    # misses and this silently reports 2024 as current forever.
+    if unreachable == probed:
+        log.warning(
+            "Could not reach SEC for any BDC report year (%s probes failed); "
+            "falling back to %s, which may be stale.", probed, _BDC_REPORT_FALLBACK_YEAR,
+        )
+    else:
+        log.warning(
+            "No BDC report found for any year from %s back to 2016; falling back to %s. "
+            "This usually means the report moved — check %s.",
+            current_year, _BDC_REPORT_FALLBACK_YEAR, BDC_REPORT_BASE_URL,
+        )
+    return _BDC_REPORT_FALLBACK_YEAR
 
 
 @lru_cache(maxsize=4)
