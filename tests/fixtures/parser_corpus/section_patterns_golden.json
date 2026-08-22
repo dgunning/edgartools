@@ -148,6 +148,10 @@
       [
         "^(Item|ITEM)\\s+4(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Mine\\s+Safety",
         "Item 4 - Mine Safety Disclosures"
+      ],
+      [
+        "^(Item|ITEM)\\s+4(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Submission\\s+of\\s+Matters",
+        "Item 4 - Submission of Matters to a Vote of Security Holders"
       ]
     ],
     "part_ii_item_5": [
@@ -214,6 +218,10 @@
       [
         "^(Item|ITEM)\\s+14(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Principal\\s+Accountant",
         "Item 14 - Principal Accountant Fees and Services"
+      ],
+      [
+        "^(Item|ITEM)\\s+14(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Exhibits",
+        "Item 14 - Exhibits, Financial Statement Schedules and Reports on Form 8-K"
       ]
     ],
     "part_iv_item_16": [

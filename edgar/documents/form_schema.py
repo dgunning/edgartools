@@ -399,8 +399,24 @@ _TEN_K_SECTION_PATTERNS = {
     # "Exhibits") are common enough as ordinary headings that a bare-title
     # alternative would match unrelated blocks.  Keys use the part_N_item_N
     # convention so Section.parse_section_name() resolves part and item.
+    # Items 4 and 14 have each carried TWO titles, and only the modern one was
+    # here — so on a pre-2011 filing the header was found as a candidate and
+    # then discarded at match time, and the item was reachable only through the
+    # ChunkedDocument fallback 6.0 deletes (edgartools-dt1f.1 Defect A). The
+    # blast radius is every 10-K from before the relevant renumbering, not the
+    # one fixture that surfaced it.
+    #
+    # Item 4 was "Submission of Matters to a Vote of Security Holders" until the
+    # SEC moved mine-safety disclosure into it in 2011 (Dodd-Frank s.1503).
+    # Both titles are kept, rather than dropping the title requirement: this
+    # form's Item 4 has no bare-title alternative on purpose (see the comment
+    # above), and a title-optional pattern would match any bare "Item 4" marker
+    # — including a filing's own sub-headers, which is what makes the shape
+    # unsafe for Item 14 below.
     'part_i_item_4': (
         (f'^(Item|ITEM)\\s+4{_ITEM_SEP}Mine\\s+Safety', 'Item 4 - Mine Safety Disclosures'),
+        (f'^(Item|ITEM)\\s+4{_ITEM_SEP}Submission\\s+of\\s+Matters',
+         'Item 4 - Submission of Matters to a Vote of Security Holders'),
     ),
     'part_ii_item_5': (
         (f'^(Item|ITEM)\\s+5{_ITEM_SEP}Market\\s+for', 'Item 5 - Market for Registrant\'s Common Equity'),
@@ -440,8 +456,23 @@ _TEN_K_SECTION_PATTERNS = {
     'part_iii_item_13': (
         (f'^(Item|ITEM)\\s+13{_ITEM_SEP}Certain\\s+Relationships', 'Item 13 - Certain Relationships and Related Transactions'),
     ),
+    # Exhibits were Item 14 until the 2003 renumbering (Sarbanes-Oxley
+    # implementation) moved them to Item 15 and gave Item 14 to accountant fees,
+    # so a pre-2003 "Item 14: Exhibits, Financial Statement Schedules and
+    # Reports on Form 8-K" needs the older title here. The key stays
+    # part_iii_item_14 even though that filing files exhibits under Part IV:
+    # TenK.__getitem__ resolves "Item 14" through _ITEM_TO_PART_10K, which is
+    # the modern map, so the canonical key is what the lookup asks for.
+    #
+    # The title is REQUIRED, not optional. This filing writes its own exhibit
+    # sub-headers as bold "Item 14(a)(1):", "Item 14 (a)(2):", "Item 14 (a)(3):"
+    # — bare item markers with no title — and since _ITEM_SEP now absorbs a
+    # one-letter designation, a title-optional Item 14 pattern would match all
+    # three and cut the section into fragments at its own sub-headers.
     'part_iii_item_14': (
         (f'^(Item|ITEM)\\s+14{_ITEM_SEP}Principal\\s+Accountant', 'Item 14 - Principal Accountant Fees and Services'),
+        (f'^(Item|ITEM)\\s+14{_ITEM_SEP}Exhibits',
+         'Item 14 - Exhibits, Financial Statement Schedules and Reports on Form 8-K'),
     ),
     # Part IV — Item 16 (Form 10-K Summary, optional).  Item 15 (Exhibits) is
     # already represented in the TOC-extraction path as 'part_iv_item_15'.

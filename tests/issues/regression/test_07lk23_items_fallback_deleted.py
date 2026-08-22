@@ -12,7 +12,7 @@ difference at zero filings for all four report forms. The fallbacks are gone.
 found the fallbacks in ``__getitem__`` and ``get_item_with_part`` are very much
 alive: 15 item lookups and 4 part-qualified lookups across the corpus return real
 text only because legacy is still there. (Eight of the fifteen closed on
-2026-08-21 with edgartools-dt1f.1 — see ``TestGetitemStillNeedsLegacy`` below —
+2026-08-21 with edgartools-dt1f.1 — see ``TestGetitemFallbackIsStillWired`` below —
 leaving seven and the four.) The two are not the same question, and the reason is
 structural rather than incidental —
 
@@ -109,7 +109,7 @@ class TestItemsNoLongerNeedsLegacy:
         assert empty.items == []
 
 
-class TestGetitemStillNeedsLegacy:
+class TestGetitemFallbackIsStillWired:
     """The half that was NOT deleted, pinned as live rather than asserted dead.
 
     If a later change to the pattern extractor makes these pass without legacy,
@@ -130,9 +130,22 @@ class TestGetitemStillNeedsLegacy:
     separator was taught that "ITEM 9A(T)" carries a designation rather than a
     stray parenthesis (``test_dt1f1_item_9at.py``).
 
-    THREE remain: Items 4 and 14 below, and Item 5 on 0001376474-16-000635.
+    Items 4 and 14 on this filing closed on 2026-08-22 as well, when the 10-K
+    vocabulary gained the titles those items carried before the 2011 and 2003
+    renumberings. They used to be parametrized here, asserted as reachable only
+    through legacy; they are asserted from the other side now, in
+    ``test_dt1f1_era_item_titles.py``.
 
-    Three and not four: Item 11 on 0001193125-21-101193 was listed here and was
+    ONE remains: Item 5 on 0001376474-16-000635, whose bold all-caps header
+    scores below the header-detection threshold because its canonical title runs
+    past ten words. Its filing lives in the gitignored era corpus, so the
+    load-bearing claim can no longer be demonstrated on a TRACKED fixture — which
+    is what this class is now named for. What it pins instead is the wiring: a
+    missing item still reaches the fallback, and TenK dereferences it unguarded
+    where TwentyF returns None, the difference 07lk.3 has to handle at both call
+    sites.
+
+    One and not two: Item 11 on 0001193125-21-101193 was listed here and was
     DROPPED on 2026-08-22 rather than fixed, because the new parser is right and
     legacy is wrong. That filing is an asset-backed issuer 10-K on Regulation AB
     numbering (Items 1112, 1114(b), 1122, 1123), and ABS filers omit the Part III
@@ -144,17 +157,33 @@ class TestGetitemStillNeedsLegacy:
     """
 
     @pytest.mark.parametrize("item,least", [("Item 14", 5000), ("Item 4", 100)])
-    def test_1999_tenk_items_come_only_from_legacy(self, item, least):
+    def test_1999_tenk_items_no_longer_need_legacy(self, item, least):
+        """Formerly the pin; now the completion signal for dt1f.1 Defect A.
+
+        The same two lookups, asserted the other way round: the modern parser
+        answers them on its own. Exact character counts live in
+        ``test_dt1f1_era_item_titles.py`` — what this keeps is the *shape* of the
+        claim this class makes, so the running tally above stays checkable.
+        """
         filing = FixtureFiling(GATE_10K, "10-K")
 
-        text = TenK(filing)[item]
+        text = _without_legacy(TenK)(filing)[item]
         assert text and len(text) > least, (
-            f"{item} should still be retrievable via the legacy fallback"
+            f"{item} should now come from edgar.documents with no legacy fallback"
         )
 
-        # And the fallback is why. TenK.__getitem__ dereferences
-        # ``_chunked_document`` unguarded, so removing it raises rather than
-        # returning None — that difference from TwentyF is itself worth pinning,
-        # since 07lk.3 has to delete both call sites.
+    def test_a_missing_item_still_reaches_the_fallback(self):
+        """The wiring, on an item the filing genuinely does not have.
+
+        A 1999 10-K has no Item 16 — Form 10-K Summary was added in 2016 — so the
+        lookup falls through the new parser and the cross-reference index to
+        ``ChunkedDocument``. TenK dereferences it unguarded and therefore raises
+        once it is None; TwentyF guards and returns None. Both call sites are
+        deleted by 07lk.3, and they do not behave the same way, which is the part
+        worth pinning now that no tracked fixture can show the fallback returning
+        real text.
+        """
         with pytest.raises(TypeError):
-            _without_legacy(TenK)(filing)[item]
+            _without_legacy(TenK)(FixtureFiling(GATE_10K, "10-K"))["Item 16"]
+
+        assert _without_legacy(TwentyF)(FixtureFiling(GATE_20F, "20-F"))["Item 20"] is None

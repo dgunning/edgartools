@@ -132,7 +132,12 @@ BASELINE_GAPS = {
     # here is era semantics: in 1999 Item 4 was "Submission of Matters to a Vote
     # of Security Holders" and Item 14 "Exhibits ... and Reports on Form 8-K",
     # and the 10-K vocabulary holds only the modern meanings.
-    ("10-K", "0000950153-99-001234"): ["14", "4"],
+    # Banked 2026-08-22: 2 -> 0, closing that era gap. Both titles are now
+    # alternatives alongside the modern ones, so the pre-2011 Item 4 and the
+    # pre-2003 Item 14 match instead of being found and discarded. This filing
+    # therefore carries NO gap at all and stays listed only in the
+    # must-stay-measurable set below. Regression test:
+    # tests/issues/regression/test_dt1f1_era_item_titles.py.
     # ("10-K", "0001193125-10-073212") CLOSED 2026-08-22. Its header reads "ITEM
     # 9A(T). CONTROLS AND PROCEDURES" — 9A(T) was the SEC's transitional
     # designation for a smaller reporting company's internal-control report,
