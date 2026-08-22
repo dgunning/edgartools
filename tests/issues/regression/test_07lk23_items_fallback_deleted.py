@@ -148,12 +148,15 @@ class TestGetitemFallbackIsStillWired:
     where TwentyF returns None, the difference 07lk.3 has to handle at both call
     sites — and the two lookups below, which now answer from the modern parser.
 
-    THE REMAINING BLOCKER FOR 07lk.3 IS NOT HERE. ``get_item_with_part`` still
-    has two wrong answers (pg/10q Part II Item 1, xom/10q Part I Item 1), and
-    they are wrong rather than missing: when legacy goes they fall through to
-    ``id_parse_document``, which 6.0 also deletes and which returns 222,536
-    characters for a section that is 1,018. That method has no working path once
-    edgar.files goes, and it is its own defect.
+    ``get_item_with_part`` was the last holdout and closed on 2026-08-22
+    (edgartools-yrrh). Its two remaining rows were WRONG answers rather than
+    missing ones — with legacy gone they fell through to ``id_parse_document``,
+    which 6.0 also deletes and which returned 222,536 characters for a section of
+    975 — and they turned out to be two unrelated defects, a strategy gate on
+    xom/10q and a part-blind item comparison on pg/10q. Both are asserted in
+    ``test_yrrh_get_item_with_part.py``, against a harness that makes
+    ``id_parse_document`` RAISE, because nulling ``_chunked_document`` alone
+    leaves that path answering and a length check cannot tell the two apart.
 
     Zero and not one: Item 11 on 0001193125-21-101193 was listed here and was
     DROPPED on 2026-08-22 rather than fixed, because the new parser is right and
