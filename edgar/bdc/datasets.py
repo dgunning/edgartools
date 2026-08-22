@@ -37,6 +37,7 @@ Example usage:
 import io
 import zipfile
 from dataclasses import dataclass
+import logging
 from datetime import date
 from functools import lru_cache
 from typing import Optional, Union, TYPE_CHECKING
@@ -49,8 +50,10 @@ from rich import box
 from rich.panel import Panel
 from rich.table import Table
 
-from edgar.httprequests import get_with_retry
+from edgar.httprequests import get_with_retry, is_unreachable
 from edgar.richtools import repr_rich
+
+log = logging.getLogger(__name__)
 
 __all__ = [
     'BDCDataset',
@@ -805,16 +808,43 @@ def get_available_quarters(max_years_back: int = 5) -> list[tuple[int, int]]:
     """
     available = []
     current_year = date.today().year
+    unreachable = 0
+    probed = 0
 
     for year in range(current_year, current_year - max_years_back, -1):
         for quarter in range(4, 0, -1):
             url = _build_quarterly_url(year, quarter)
+            probed += 1
             try:
                 response = get_with_retry(url, timeout=5.0)
                 if response.status_code == 200:
                     available.append((year, quarter))
-            except Exception:
+            except Exception as e:
+                # A quarter SEC never published answers 404, which returns a
+                # response rather than raising. Reaching here means the probe got
+                # no answer, which is not evidence of absence.
+                if is_unreachable(e):
+                    unreachable += 1
+                else:
+                    log.warning(
+                        "Unexpected error probing the %sQ%s BDC dataset (%s: %s); skipping it.",
+                        year, quarter, type(e).__name__, e,
+                    )
                 continue
+
+    # An empty list reads as "SEC has published no datasets". Only say that when
+    # the probes actually answered.
+    if not available and probed:
+        if unreachable == probed:
+            log.warning(
+                "Could not reach SEC for any BDC dataset quarter (%s probes failed); "
+                "returning an empty list, which does not mean none exist.", probed,
+            )
+        else:
+            log.warning(
+                "No BDC datasets found in the last %s years — check whether they moved from %s.",
+                max_years_back, BDC_DATASET_BASE_URL,
+            )
 
     return available
 
