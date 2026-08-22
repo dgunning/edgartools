@@ -321,7 +321,18 @@ _TEN_Q_SIZE_BANDS = (
 # colon and semicolon are new for all three forms. 8-K is not a caller: its
 # numbers are dotted ("Item 5.02") and the period there is structural, not a
 # separator.
-_ITEM_SEP = r'\s*[.:;\-–—]?\s*[-–—.]?\s*'
+#
+# The leading slot is a parenthesized designation attached to the item number
+# rather than punctuation: "ITEM 9A(T). CONTROLS AND PROCEDURES". Item 9A(T) was
+# the SEC's transitional designation for a smaller reporting company's
+# internal-control report, roughly 2007-2010, so it is a cohort of filings and
+# not a filer's quirk. Without this slot the "(" stopped the match dead and no
+# controls_procedures section was created, leaving `tenk["Item 9A"]` reachable
+# only through the ChunkedDocument fallback 6.0 deletes (edgartools-dt1f.1
+# Defect B). One letter only, so a Regulation AB number like "Item 1112(b)"
+# cannot be read as item 11 with a designation — and the title that every
+# pattern requires next already rules that out independently.
+_ITEM_SEP = r'(?:\s*\([A-Za-z]\))?\s*[.:;\-–—]?\s*[-–—.]?\s*'
 
 # Per-form section/title vocabulary for the regex pattern extractor (moved here
 # from SectionExtractor.SECTION_PATTERNS — FormSchema is the single home of form
