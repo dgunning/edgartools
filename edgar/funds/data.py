@@ -20,7 +20,7 @@ from edgar._filings import Filings
 from edgar.datatools import drop_duplicates_pyarrow
 from edgar.entity.data import EntityData
 from edgar.funds.core import FundClass, FundCompany, FundSeries
-from edgar.httprequests import TRANSPORT_ERRORS, download_text
+from edgar.httprequests import TRANSPORT_ERRORS, download_text, is_unreachable
 
 log = logging.getLogger(__name__)
 
@@ -594,8 +594,28 @@ def _build_hierarchy_from_mf_tickers(cik: str, identifier_type: str, identifier:
     try:
         from edgar.funds.reference import get_fund_reference_data
         ref_data = get_fund_reference_data()
-    except Exception:
-        pass
+    except Exception as e:
+        # Falling through leaves every series_name/class_name below as its bare
+        # identifier — output that is well-formed, plausible, and wrong. Being
+        # offline is the one cause where that degradation is the right answer;
+        # everything else (SEC restructured the dataset page, the CSV changed
+        # shape, a bug in FundReferenceData) is a defect that must not be
+        # indistinguishable from "this class has no name".
+        #
+        # That distinction is not hypothetical. SEC turned the dataset page into
+        # a 301 with a relative Location, edgartools followed the header
+        # verbatim, and httpx raised UnsupportedProtocol — an error, not an
+        # outage. This except swallowed it, and find_fund("KINCX").name returned
+        # "C000013712" instead of "Advisor Class C" until two literal-value
+        # assertions in tests/test_funds.py happened to catch it.
+        #
+        # The sibling path at the top of this module draws the same line for the
+        # same reason; see the TRANSPORT_ERRORS comment in _get_fund_object.
+        if not is_unreachable(e):
+            log.warning(
+                "Fund reference data unavailable (%s: %s); series and class names "
+                "will fall back to their identifiers.", type(e).__name__, e,
+            )
 
     # Build hierarchy
     all_series = []
