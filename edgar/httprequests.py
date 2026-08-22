@@ -23,7 +23,8 @@ from tqdm import tqdm
 # Suppress stamina retry logging (e.g., "stamina.retry_scheduled" messages)
 logging.getLogger("stamina").setLevel(logging.ERROR)
 
-from edgar.core import get_edgar_data_directory, text_extensions
+from edgar.core import text_extensions
+from edgar.settings import get_edgar_data_directory
 from edgar.exceptions import (
     IdentityNotSetError,
     TooManyRequestsError,
