@@ -122,11 +122,14 @@ class TestGetitemStillNeedsLegacy:
     this filing's Items 6 and 11, 10-K Item 7A, and five on the 2010 20-F — by
     normalizing the source's line wrapping out of header text before matching.
     They are asserted from the other side now, in
-    ``test_dt1f1_wrapped_item_headers.py``. Six remain: Items 4 and 14 below,
-    Item 9A on 0001193125-10-073212, Item 5 on 0001376474-16-000635, and Items 5
-    and 6 on gs/10q.
+    ``test_dt1f1_wrapped_item_headers.py``. Two more — Items 5 and 6 on gs/10q —
+    closed on 2026-08-22 when Strategy 3b was allowed to recover a 10-Q's Part II
+    boundary, and are asserted in ``test_dt1f1_10q_part_boundary.py``.
 
-    Six and not seven: Item 11 on 0001193125-21-101193 was listed here and was
+    FOUR remain: Items 4 and 14 below, Item 9A on 0001193125-10-073212, and Item
+    5 on 0001376474-16-000635.
+
+    Four and not five: Item 11 on 0001193125-21-101193 was listed here and was
     DROPPED on 2026-08-22 rather than fixed, because the new parser is right and
     legacy is wrong. That filing is an asset-backed issuer 10-K on Regulation AB
     numbering (Items 1112, 1114(b), 1122, 1123), and ABS filers omit the Part III
