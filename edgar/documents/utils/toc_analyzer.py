@@ -262,14 +262,19 @@ class TOCAnalyzer:
         if not collisions:
             return result
 
-        if body is None:
-            body = self._analyze_body_item_headers(html_content, tree=tree)
+        # Read the body with abutted titles allowed, whether or not a stricter
+        # scan was already run for the paths above: separating a collision needs
+        # the colliding items' own anchors, and on the filings this repair is for
+        # the strict read is exactly what comes back empty (edgartools-ha11).
+        body = self._analyze_body_item_headers(
+            html_content, tree=tree, allow_abutted_title=True) or body
         if not body:
             # Nothing to re-resolve against — surface the un-separated collision
             # so a filing that duplicates a section stays diagnosable rather than
             # silently returning a neighbour's text.
-            logger.warning("TOC anchor collision(s) %s could not be separated: "
-                           "no body-header anchors available",
+            logger.warning("TOC anchor collision(s) %s left unchanged — no "
+                           "body-header anchors to separate them with; every "
+                           "listed key returns the same span",
                            {a: sorted(keys) for a, keys in collisions.items()})
             return result
 
@@ -282,25 +287,42 @@ class TOCAnalyzer:
             # logically-first item keeps it (MD&A owns the page it starts on).
             owner = next((k for k in keys_sorted if body.get(k) == anchor), keys_sorted[0])
             shared_pos = positions.get(anchor)
+            unresolved: Dict[str, str] = {}
             for key in keys_sorted:
                 if key is owner:
                     continue
                 new_anchor = body.get(key)
-                if not new_anchor or new_anchor == anchor or new_anchor in claimed:
+                if not new_anchor:
+                    unresolved[key] = "no body header for this item"
+                    continue
+                if new_anchor == anchor:
+                    unresolved[key] = "body header shares the same anchor"
+                    continue
+                if new_anchor in claimed:
+                    unresolved[key] = f"body anchor {new_anchor} already claimed"
                     continue
                 new_pos = positions.get(new_anchor)
                 if new_pos is None or shared_pos is None or new_pos <= shared_pos:
+                    unresolved[key] = f"body anchor {new_anchor} does not follow the shared one"
                     continue
                 # Must fall before the next distinct item anchor in document
                 # order, so the re-pointed section stays between its neighbours.
                 nexts = [positions[a] for a in claimed
                          if a in positions and positions[a] > shared_pos]
                 if nexts and new_pos >= min(nexts):
+                    unresolved[key] = f"body anchor {new_anchor} sits past the next item"
                     continue
                 result[key] = new_anchor
                 claimed.add(new_anchor)
                 logger.info("Separated colliding item %s from %s: re-pointed to "
                             "body-header anchor %s", key, owner, new_anchor)
+            # Say what was *done*, not only what was seen: a key left here still
+            # slices to the owner's span, so the duplicate must be nameable.
+            if unresolved:
+                logger.warning("TOC anchor collision on %s: %s keeps the anchor; "
+                               "%s still resolve(s) to the same span (%s)",
+                               anchor, owner, sorted(unresolved),
+                               "; ".join(f"{k}: {why}" for k, why in sorted(unresolved.items())))
 
         return result
 
@@ -794,9 +816,31 @@ class TOCAnalyzer:
     # cross-references like "… in Part II, Item 7 of this Form 10-K …" (which start
     # with "Part", not "Item N.").
     _BODY_ITEM_HEADER = re.compile(r'^Item\s+(\d+)([A-Z]?)\.?\s+\S', re.IGNORECASE)
+    # The same heading when the filer's markup leaves no space between the number
+    # and the title. A two-cell heading row ("Item 5." | "Other Information")
+    # renders as "Item\xa05.Other Information" — P&G's 10-Q — which the pattern
+    # above matches nowhere in the document, so the scan comes back empty and a
+    # colliding anchor has no evidence to be separated with (edgartools-ha11).
+    # A period may stand in for the separator, but only when a digit does not
+    # follow it: that keeps an 8-K subitem heading ("Item 5.02 Departure of
+    # Directors") from being read as a bare Item 5.
+    _BODY_ITEM_HEADER_ABUTTED = re.compile(
+        r'^Item\s+(\d+)([A-Z]?)\s*(?:\.(?!\d)\s*|\s+)\S', re.IGNORECASE)
     _BODY_PART_DIVIDER = re.compile(r'^Part\s+([IVX]+)\b', re.IGNORECASE)
+    # A Part divider a filer left *unbold*. P&G's 10-Q sets "PART I. FINANCIAL
+    # INFORMATION" at font-weight:400 and only "PART II. OTHER INFORMATION" at
+    # 700, so the bold gate above sees the Part II divider and never the Part I
+    # one — every Part I item is then keyed into Part II (edgartools-ha11).
+    # Accepting an unbold divider means accepting one from prose, so this
+    # pattern must match the *whole* text: a bare "PART I", or a Part number
+    # followed by a punctuation separator and a short title. "Part II of this
+    # report contains …" has no separator and does not match.
+    _BODY_PART_DIVIDER_STANDALONE = re.compile(
+        r'^Part\s+([IVX]+)\s*(?:[.\-–—:]\s*[A-Za-z][A-Za-z\s,&/’\'-]{0,60})?$',
+        re.IGNORECASE)
 
-    def _analyze_body_item_headers(self, html_content: str, tree=None) -> Dict[str, str]:
+    def _analyze_body_item_headers(self, html_content: str, tree=None,
+                                   allow_abutted_title: bool = False) -> Dict[str, str]:
         """Map items from bold body headings instead of TOC links.
 
         Some filers (notably Goldman Sachs and Citigroup — large bank 10-Ks)
@@ -809,6 +853,15 @@ class TOCAnalyzer:
         each item to its nearest preceding anchor id — returning the same
         ``{section_key: anchor_id}`` contract as the link-based parsers, so the
         standard boundary/slicing pipeline works unchanged (edgartools-sldz).
+
+        ``allow_abutted_title`` also accepts a heading whose title runs straight
+        into the item number ("Item 5.Other Information"). Only the collision
+        resolver asks for it: that consumer re-points ONE key that is already
+        known to be wrong, while this map's other two consumers can replace or
+        extend a whole filing's mapping. Offering them the looser read moved
+        Wells Fargo's 10-K off the pattern extractor and onto this scan — same
+        spans under different keys — which is a change ha11 has no reason to
+        make (edgartools-ha11).
         """
         try:
             tree = self._ensure_tree(html_content, tree)
@@ -836,15 +889,23 @@ class TOCAnalyzer:
             # and let the inner heading element match.
             if not text or len(text) > 200:
                 continue
-            if not self._is_bold_header(el, tag):
+            bold = self._is_bold_header(el, tag)
+
+            # Part context first: a divider counts when it is bold, and also
+            # when the whole text is divider-shaped, which is the only way an
+            # unbold "PART I. FINANCIAL INFORMATION" can be seen at all.
+            if not re.search(r'item\s+\d', text, re.IGNORECASE):
+                part_m = (self._BODY_PART_DIVIDER.match(text) if bold
+                          else self._BODY_PART_DIVIDER_STANDALONE.match(text))
+                if part_m:
+                    current_part = f"Part {part_m.group(1).upper()}"
+                    continue
+
+            if not bold:
                 continue
 
-            part_m = self._BODY_PART_DIVIDER.match(text)
-            if part_m and not re.search(r'item\s+\d', text, re.IGNORECASE):
-                current_part = f"Part {part_m.group(1).upper()}"
-                continue
-
-            item_m = self._BODY_ITEM_HEADER.match(text)
+            item_m = (self._BODY_ITEM_HEADER_ABUTTED if allow_abutted_title
+                      else self._BODY_ITEM_HEADER).match(text)
             if not item_m:
                 continue
             # An anchor inside the heading's own subtree belongs to THIS item
