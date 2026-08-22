@@ -37,6 +37,15 @@ design mandates *before* the move:
     were asserted mechanically before the file was rewritten, which is the only
     thing that makes a re-snapshot meaningful — a golden regenerated from the
     code it is supposed to be guarding proves nothing on its own.
+    The 10-K entry alone was re-snapshotted on 2026-08-22 for edgartools-dt1f.1
+    Defect A: Items 4 and 14 have each carried two titles, and only the modern
+    one was in the vocabulary, so every pre-2011 "Item 4: Submission of Matters
+    to a Vote of Security Holders" and pre-2003 "Item 14: Exhibits, Financial
+    Statement Schedules and Reports on Form 8-K" was found as a header and then
+    discarded at match time. Two patterns were APPENDED, one to each key; the
+    same mechanical check as above was run first and showed every pre-existing
+    pattern, label and ordering byte-identical, with the diff confined to those
+    two additions.
   * The data must actually live on the schema now (``FormSchema.section_patterns``),
     not only on the extractor — that is what lets the Phase 3 routing flip
     (edgartools-llmp.3) feed prospectus section text through the TOC engine using

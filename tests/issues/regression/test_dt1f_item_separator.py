@@ -237,10 +237,17 @@ class TestTheFilingThatFoundIt:
     """
 
     def test_items_is_no_longer_a_single_item(self, report):
-        """Before the fix this returned exactly ['Item 8']."""
+        """Before the fix this returned exactly ['Item 8'].
+
+        Item 4 joined the list on 2026-08-22: this filing titles it "Submission
+        of Matters to a Vote of Security Holders", the pre-2011 title, and the
+        vocabulary only held the modern "Mine Safety Disclosures"
+        (edgartools-dt1f.1 Defect A). The gap it left is why this assertion used
+        to jump from Item 3 to Item 5.
+        """
         items = report.items
         assert len(items) >= 12, f"expected the full item list, got {items}"
-        assert items[:4] == ["Item 1", "Item 2", "Item 3", "Item 5"]
+        assert items[:4] == ["Item 1", "Item 2", "Item 3", "Item 4"]
 
     def test_item_1_is_the_business_section(self, report):
         text = report["Item 1"]

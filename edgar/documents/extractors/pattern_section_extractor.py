@@ -33,6 +33,22 @@ _PART_HEADER = re.compile(r'^\s*PART\s+(I|II|III|IV|V)\b', re.IGNORECASE)
 # officers appear below" is prose, not a boundary. Same test Strategy 5b uses.
 _SIGNATURES_HEADER = re.compile(r'^\s*SIGNATURES?\s*$', re.IGNORECASE)
 
+# An item's own SUB-header: an item number, one or more parenthesized
+# sub-designations, and nothing else — "Item 14(a)(1):", "Item 14 (a)(2):".
+# Filings that itemize under Regulation S-K's lettered sub-paragraphs write
+# these inside the item they belong to, so they mark a subdivision and never the
+# start of a new section.
+#
+# The whole string must be consumed, which is what separates a sub-header from a
+# designated item header: "ITEM 9A(T). CONTROLS AND PROCEDURES" carries a title
+# and so fails this test and stays a boundary. A bare, undesignated "Item 3." —
+# the shape 20-F headings commonly use — has no parenthesized group and likewise
+# stays a boundary.
+_ITEM_SUBHEADER = re.compile(
+    r'^\s*(?:Item|ITEM)\s+\d+[A-Za-z]?\s*(?:\([A-Za-z0-9]{1,3}\)\s*)+[.:;\-–—]?\s*$',
+    re.IGNORECASE
+)
+
 
 def _normalize_header_text(text: str) -> str:
     """Collapse a header's internal whitespace runs to single spaces.
@@ -1206,8 +1222,26 @@ class SectionExtractor:
                     (boundary_indices is not None and i in boundary_indices)
                     or self._looks_like_section_header(next_text)
                 )
+                # ...but an item's own sub-designated headers are not boundaries,
+                # however much they look like Item headers. The 1999 10-K
+                # 0000950153-99-001234 divides Item 14 with bold "Item 14(a)(1):",
+                # "Item 14 (a)(2):", "Item 14 (a)(3):" markers; without this the
+                # section stopped at the second of them and returned 1,189 of its
+                # 16,063 characters, losing the schedules and the entire exhibit
+                # index (edgartools-dt1f.1 Defect A).
+                if is_boundary and _ITEM_SUBHEADER.match(next_text.strip()):
+                    is_boundary = False
                 if not is_boundary:
                     continue
+
+                # A bare SIGNATURES line ends the last item whatever its level.
+                # Heading level here is a heuristic score, not markup depth, so a
+                # filing whose item headers land at level 1 and whose SIGNATURES
+                # line lands at level 3 would otherwise run the item past the
+                # signature block to the end of the document — which is what the
+                # 1999 10-K does once its Item 14 sub-headers stop closing it.
+                if _SIGNATURES_HEADER.match(next_text.strip()):
+                    return headers[i][2]
 
                 # If next header is at same or higher level, that's our end
                 if next_level <= current_level:
