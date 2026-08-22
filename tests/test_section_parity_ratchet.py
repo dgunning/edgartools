@@ -145,7 +145,15 @@ BASELINE_GAPS = {
     # omitted Item 16 or Item 1C. Both items were already being found and thrown
     # away. Regression test:
     # tests/issues/regression/test_dt1f_toc_augmentation_gate.py.
-    ("10-Q", "gs/10q"): ["5", "6"],
+    # ("10-Q", "gs/10q") CLOSED 2026-08-22. Both items were found and then thrown
+    # away: this filer renders "PART II. OTHER INFORMATION" as a ParagraphNode
+    # whose own style carries no weight and whose child TextNode is bold, a shape
+    # only Strategy 3b catches — and that strategy was gated to 10-K and 8-K. With
+    # no Part II marker, _detect_10q_parts labelled every later header Part I, so
+    # the part_ii_* patterns rejected their own headers on part context and the
+    # filing resolved part_i_item_1..4 and nothing else. Strategy 3b now runs for
+    # 10-Q, restricted to PART boundaries and the terminal SIGNATURES line.
+    # Regression test: tests/issues/regression/test_dt1f1_10q_part_boundary.py.
     # ("20-F", "0000928385-01-500187") CLOSED 2026-08-20 — see the note on the
     # 10-K entry above; one fix closed both.
     # Banked 2026-08-21: 3 -> 1, with the header whitespace normalization noted

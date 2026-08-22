@@ -23,6 +23,16 @@ _ITEM_HEADER_START = re.compile(r'^\s*item\s+(\d+(?:\.\d+)?[A-Za-z]?)\b', re.IGN
 
 _WHITESPACE_RUN = re.compile(r'\s+')
 
+# A Part boundary — "PART II", "PART II. OTHER INFORMATION", "Part I - Financial
+# Information". Anchored, and the numeral must end at a word boundary so
+# "Participation in the plan" is not read as a part header.
+_PART_HEADER = re.compile(r'^\s*PART\s+(I|II|III|IV|V)\b', re.IGNORECASE)
+
+# A bare SIGNATURES line, which terminates the last item of a report. Requires
+# the whole paragraph to be that one word — "Signatures of the undersigned
+# officers appear below" is prose, not a boundary. Same test Strategy 5b uses.
+_SIGNATURES_HEADER = re.compile(r'^\s*SIGNATURES?\s*$', re.IGNORECASE)
+
 
 def _normalize_header_text(text: str) -> str:
     """Collapse a header's internal whitespace runs to single spaces.
@@ -708,10 +718,30 @@ class SectionExtractor:
         # structural headers (Item, SIGNATURES, PART, EXHIBIT, ...) so false
         # positives from stray bold text cannot occur.
         #
-        # Other forms (10-Q, S-1, 424B) are excluded: their stray bold paragraphs
-        # would produce unwanted boundaries.
+        # For 10-Q: PART boundaries and the terminal SIGNATURES line, nothing
+        # else. Goldman's 10-Q renders "PART II. OTHER INFORMATION" in exactly
+        # this shape, and without that marker every header after it is still
+        # labelled Part I by _detect_10q_parts, so the `part_ii_*` patterns
+        # reject their own headers on part context and the filing resolves
+        # part_i_item_1..4 and nothing else. Items 5 and 6 were found and then
+        # thrown away (edgartools-dt1f.1 Defect D). SIGNATURES comes too, for the
+        # same reason 8-K needs it: it is what stops the last item — Item 6,
+        # Exhibits — running to the end of the document.
+        #
+        # Admitting the rest of the `_looks_like_section_header` vocabulary for
+        # 10-Q was tried and reverted. Measured across 31 fixtures it fixed
+        # Goldman's Part II but truncated four other filings, one MD&A from
+        # 33,102 characters to 93, and left Goldman's own Item 6 at 16 — because
+        # a bold "Exhibits" or "Item 6." inside a 10-Q body is ordinarily a
+        # cross-reference, while a bold "PART II" or a bare bold "SIGNATURES" is
+        # not. That is the difference the two patterns encode; it is not a
+        # difference `_looks_like_section_header` can express, since 10-K needs
+        # the wider vocabulary for its Part III stubs.
+        #
+        # S-1 and 424B stay out entirely: they are title-based forms with no
+        # part structure to recover.
         # Deduplicates against positions already captured.
-        if self.form in ('10-K', '8-K'):
+        if self.form in ('10-K', '8-K', '10-Q'):
             existing_positions = {pos for _, _, pos in headers}
             from edgar.documents.nodes import ParagraphNode, TextNode as _TextNode
 
@@ -728,6 +758,10 @@ class SectionExtractor:
                 if not text:
                     continue
                 if not self._looks_like_section_header(text):
+                    continue
+                if self.form == '10-Q' and not (
+                    _PART_HEADER.match(text) or _SIGNATURES_HEADER.match(text)
+                ):
                     continue
                 position = _node_position(node)
                 if position in existing_positions:
