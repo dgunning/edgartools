@@ -21,6 +21,31 @@ logger = logging.getLogger(__name__)
 # filing's item structure had been found.
 _ITEM_HEADER_START = re.compile(r'^\s*item\s+(\d+(?:\.\d+)?[A-Za-z]?)\b', re.IGNORECASE)
 
+_WHITESPACE_RUN = re.compile(r'\s+')
+
+
+def _normalize_header_text(text: str) -> str:
+    """Collapse a header's internal whitespace runs to single spaces.
+
+    Header text arrives carrying the source HTML's line wrapping — a table cell
+    written as::
+
+        <td>ITEM 5. OPERATING
+        AND FINANCIAL REVIEW AND PROSPECTS</td>
+
+    yields ``'ITEM\\n5. OPERATING\\nAND FINANCIAL REVIEW AND PROSPECTS'``. In HTML
+    that newline is just whitespace, but the section patterns join words with
+    ``.*``, which does not cross a newline (they are compiled without DOTALL).
+    So a wrapped header matched or missed depending on which metacharacter its
+    pattern happened to use: ``Information\\s+on\\s+the\\s+Company`` matched
+    because ``\\s`` covers ``\\n``, while ``Operating.*Financial\\s+Review`` did
+    not. On the 2010 20-F ``0001144204-10-017467`` that silently cost Items 5,
+    6, 11, 12, 15 and 16D-16F, and on ``0001062993-16-008650`` Items 6 and 11 —
+    lookups that returned text only via the legacy ChunkedDocument fallback
+    (edgartools-dt1f.1).
+    """
+    return _WHITESPACE_RUN.sub(' ', text).strip()
+
 
 class SectionExtractor:
     """
@@ -495,6 +520,28 @@ class SectionExtractor:
     _ITEM_COVERAGE_FLOOR = 0.5
 
     @staticmethod
+    def _has_page_number_suffix(text: str) -> bool:
+        """Does this header end in a bare page number, the way a TOC row does?
+
+        "ITEM 1. IDENTITY OF DIRECTORS, SENIOR MANAGEMENT AND ADVISERS 5" is a
+        table-of-contents row; the body header is the same words without the 5.
+        Used only to DEMOTE a candidate when a cleaner one exists for the same
+        section, because the number is suggestive rather than conclusive — some
+        filings do carry a stray trailing digit on a real header, and a section
+        whose only candidate is page-numbered is still better found than not.
+
+        `_is_likely_toc_entry` answers the same question from HTML offsets and is
+        the primary guard, but it needs `find_toc_boundaries` to have located a
+        TOC; on 0001144204-10-017467 it locates none, so nothing marked that
+        filing's TOC rows at all.
+
+        The leading item number is stripped before testing so that a bare "ITEM
+        5" header does not read its own number as a page number.
+        """
+        remainder = _ITEM_HEADER_START.sub('', text.strip())
+        return bool(re.search(r'\S\s+\d{1,3}$', remainder))
+
+    @staticmethod
     def _is_complete_item_header(text: str) -> bool:
         """Does this header carry title text after the item number?
 
@@ -843,6 +890,19 @@ class SectionExtractor:
                     existing_positions.add(position)
                     break  # one SIGNATURES header is enough
 
+        # Collapse the source's line wrapping, once, after every strategy has
+        # run. See _normalize_header_text for what it costs to skip this.
+        #
+        # Deliberately last: the `_item_structure_found` gates above decide which
+        # strategies get to run at all, and they were calibrated against raw
+        # header text. Normalizing before them would change which strategies fire
+        # on filings that have nothing to do with this defect; normalizing here
+        # changes only what the patterns are matched against.
+        headers = [
+            (node, _normalize_header_text(text), position)
+            for node, text, position in headers
+        ]
+
         # Sort by position
         headers.sort(key=lambda x: x[2])
 
@@ -997,6 +1057,7 @@ class SectionExtractor:
                             'is_main': is_main,
                             'is_toc_entry': is_toc_entry,
                             'is_item_numbered': self._is_item_numbered_pattern(pattern),
+                            'has_page_number': self._has_page_number_suffix(text),
                             'content_size': end_position - position
                         })
 
@@ -1049,6 +1110,16 @@ class SectionExtractor:
                 item_numbered = [c for c in selection_pool if c['is_item_numbered']]
                 if item_numbered:
                     selection_pool = item_numbered
+
+                # Then drop TOC rows that the HTML-offset guard above did not
+                # catch, but only when a candidate without a page number is
+                # available. Size alone would pick the TOC row every time: it
+                # sits at the front of the filing, so the span it opens runs
+                # through the whole front matter, while the body header it
+                # duplicates opens the item's real (often one-line) content.
+                without_page_number = [c for c in selection_pool if not c['has_page_number']]
+                if without_page_number:
+                    selection_pool = without_page_number
 
                 # Among the selection pool, prefer main headers (uppercase)
                 main_headers = [c for c in selection_pool if c['is_main']]

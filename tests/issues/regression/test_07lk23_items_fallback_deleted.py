@@ -11,8 +11,10 @@ difference at zero filings for all four report forms. The fallbacks are gone.
 **What was NOT deleted, and why this file says so out loud.** The same measurement
 found the fallbacks in ``__getitem__`` and ``get_item_with_part`` are very much
 alive: 15 item lookups and 4 part-qualified lookups across the corpus return real
-text only because legacy is still there. The two are not the same question, and
-the reason is structural rather than incidental —
+text only because legacy is still there. (Eight of the fifteen closed on
+2026-08-21 with edgartools-dt1f.1 — see ``TestGetitemStillNeedsLegacy`` below —
+leaving seven and the four.) The two are not the same question, and the reason is
+structural rather than incidental —
 
     ``.items``       consults legacy only when the new parser found NOTHING
     ``__getitem__``  consults legacy whenever THIS ONE item is missing
@@ -114,9 +116,18 @@ class TestGetitemStillNeedsLegacy:
     that is good news and this class should be revisited — but it has to be
     *observed*, not assumed. Failing here means the fallback stopped being
     load-bearing, so re-measure and then delete it deliberately.
+
+    That is what happened on 2026-08-21, and it is why the 20-F case that used to
+    sit here is gone: edgartools-dt1f.1 closed eight of the fifteen lookups —
+    this filing's Items 6 and 11, 10-K Item 7A, and five on the 2010 20-F — by
+    normalizing the source's line wrapping out of header text before matching.
+    They are asserted from the other side now, in
+    ``test_dt1f1_wrapped_item_headers.py``. Seven remain: Items 4 and 14 below,
+    Item 9A on 0001193125-10-073212, Item 5 on 0001376474-16-000635, Item 11 on
+    0001193125-21-101193, and Items 5 and 6 on gs/10q.
     """
 
-    @pytest.mark.parametrize("item,least", [("Item 14", 5000), ("Item 7A", 100)])
+    @pytest.mark.parametrize("item,least", [("Item 14", 5000), ("Item 4", 100)])
     def test_1999_tenk_items_come_only_from_legacy(self, item, least):
         filing = FixtureFiling(GATE_10K, "10-K")
 
@@ -125,17 +136,9 @@ class TestGetitemStillNeedsLegacy:
             f"{item} should still be retrievable via the legacy fallback"
         )
 
-    @pytest.mark.parametrize("item,least", [("Item 6", 5000), ("Item 11", 100)])
-    def test_2016_twentyf_items_come_only_from_legacy(self, item, least):
-        filing = FixtureFiling(GATE_20F, "20-F")
-
-        text = TwentyF(filing)[item]
-        assert text and len(text) > least
-
-        # And the fallback is why: without it the same lookup returns nothing.
-        # TwentyF.__getitem__ guards its fallback, so this is a clean None rather
-        # than the TypeError that TenK's unguarded deref would raise.
-        assert _without_legacy(TwentyF)(filing)[item] is None, (
-            f"{item} no longer needs the legacy fallback — re-measure "
-            f"edgartools-07lk.23 and delete it deliberately"
-        )
+        # And the fallback is why. TenK.__getitem__ dereferences
+        # ``_chunked_document`` unguarded, so removing it raises rather than
+        # returning None — that difference from TwentyF is itself worth pinning,
+        # since 07lk.3 has to delete both call sites.
+        with pytest.raises(TypeError):
+            _without_legacy(TenK)(filing)[item]

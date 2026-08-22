@@ -121,9 +121,18 @@ BASELINE_GAPS = {
     # Item 4 was "Submission of Matters to a Vote of Security Holders" and Item
     # 14 was "Exhibits ... and Reports on Form 8-K", and the 10-K vocabulary
     # holds only the modern meanings (Mine Safety, Principal Accountant Fees).
-    # Item 7A's header carries a newline inside it — "Quantitative and
-    # Qualitative\nDisclosures about Market Risk" — and `.` does not cross one.
-    ("10-K", "0000950153-99-001234"): ["14", "4", "7A"],
+    # Banked 2026-08-21: 3 -> 2. Item 7A's header carried a newline inside it —
+    # "Quantitative and Qualitative\nDisclosures about Market Risk" — and `.`
+    # does not cross one. That observation turned out to describe a whole class
+    # of misses rather than one filing: header text arrives carrying the source
+    # HTML's line wrapping, so every pattern that joins words with `.*` failed on
+    # a wrapped header while every pattern built from `\s+` matched, and which
+    # items a filing lost was decided by that accident. Header text is now
+    # whitespace-normalized before matching (edgartools-dt1f.1). What remains
+    # here is era semantics: in 1999 Item 4 was "Submission of Matters to a Vote
+    # of Security Holders" and Item 14 "Exhibits ... and Reports on Form 8-K",
+    # and the 10-K vocabulary holds only the modern meanings.
+    ("10-K", "0000950153-99-001234"): ["14", "4"],
     ("10-K", "0001193125-10-073212"): ["9A"],
     # Banked 2026-08-14: 4 -> 1, same fix.
     ("10-K", "0001193125-21-101193"): ["11"],
@@ -139,20 +148,31 @@ BASELINE_GAPS = {
     ("10-Q", "gs/10q"): ["5", "6"],
     # ("20-F", "0000928385-01-500187") CLOSED 2026-08-20 — see the note on the
     # 10-K entry above; one fix closed both.
-    ("20-F", "0001062993-16-008650"): ["11", "16", "6"],
-    # Banked 2026-08-13: 22 -> 8, closing edgartools-dt1f Defect 1. The fallback
+    # Banked 2026-08-21: 3 -> 1, with the header whitespace normalization noted
+    # on the 10-K entry above. Items 6 and 11 were written wrapped across lines
+    # ("Item 6. Directors, Senior Management and\nEmployees") and their patterns
+    # join words with `.*`. Item 16 remains, and it is a separator defect rather
+    # than a wrapping one: this filer writes the lettered subsections as "Item
+    # 16. A. Audit Committee Financial Expert", so neither `item_16a` (which
+    # expects the letter attached, "Item 16A") nor `item_16` (which expects
+    # "[Reserved]") matches, while legacy reads the whole series as Item 16.
+    ("20-F", "0001062993-16-008650"): ["16"],
+    # ("20-F", "0001144204-10-017467") CLOSED 2026-08-21, in two steps. It was
+    # banked 2026-08-13 at 22 -> 8 by edgartools-dt1f Defect 1: the fallback
     # strategies in the pattern extractor were gated on whether *any* header
-    # mentioned an item; on this filing three promoted headings (one of them a
-    # prose cross-reference) suppressed the strategies that find the other
+    # mentioned an item, and on this filing three promoted headings (one of them
+    # a prose cross-reference) suppressed the strategies that find the other
     # fifteen, leaving four sections against legacy's twenty-six. The gate now
     # asks for coverage of the form's item list instead of presence of one item.
     # Regression test: tests/issues/regression/test_dt1f_item_coverage_gate.py.
     #
-    # The eight that remain are a different defect and still need diagnosing —
-    # Items 5, 6, 11, 12, 15 and 16D-F are found by neither the promoted headings
-    # nor the fallbacks on this filing.
-    ("20-F", "0001144204-10-017467"): ["11", "12", "15", "16D", "16E", "16F",
-                                       "5", "6"],
+    # The last eight — Items 5, 6, 11, 12, 15 and 16D-F — were never a detection
+    # miss at all: every one of those headers was in the header list the whole
+    # time, wrapped across lines by the filer's EDGARizer output ("ITEM\n5.
+    # OPERATING\nAND FINANCIAL REVIEW AND PROSPECTS"), and failed only at the
+    # pattern match. Header text is now whitespace-normalized first
+    # (edgartools-dt1f.1). Regression test:
+    # tests/issues/regression/test_dt1f1_wrapped_item_headers.py.
 }
 
 # The tracked fixtures every environment must be able to measure. If one of
