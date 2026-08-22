@@ -133,7 +133,16 @@ BASELINE_GAPS = {
     # of Security Holders" and Item 14 "Exhibits ... and Reports on Form 8-K",
     # and the 10-K vocabulary holds only the modern meanings.
     ("10-K", "0000950153-99-001234"): ["14", "4"],
-    ("10-K", "0001193125-10-073212"): ["9A"],
+    # ("10-K", "0001193125-10-073212") CLOSED 2026-08-22. Its header reads "ITEM
+    # 9A(T). CONTROLS AND PROCEDURES" — 9A(T) was the SEC's transitional
+    # designation for a smaller reporting company's internal-control report,
+    # roughly 2007-2010 — and the "(" was not in the item separator's punctuation
+    # class, so the match died there and no controls_procedures section was
+    # created. _ITEM_SEP now carries an optional parenthesized designation, which
+    # reaches all three item-based forms through the existing drift guard.
+    # Measured across every available fixture, the change adds this one section
+    # and alters nothing else on 55 10-K, 31 10-Q and 18 20-F filings. Regression
+    # test: tests/issues/regression/test_dt1f1_item_9at.py.
     # Banked 2026-08-14: 4 -> 1, same fix.
     ("10-K", "0001193125-21-101193"): ["11"],
     # Banked 2026-08-14: 19 -> 1, same fix.
@@ -205,6 +214,13 @@ TRACKED_GAP_FIXTURES = (
         # where legacy found fifteen — and leaving it in the gitignored era
         # corpus would have made the regression invisible to CI.
         ("10-K", "0000950153-99-001234"),
+        # Copied into parity_gate on 2026-08-22 with the Item 9A(T) fix, for the
+        # same reason. This one carries NO baseline gap — that is the point: it
+        # is listed here so the fixture cannot quietly disappear and take the
+        # only CI-visible evidence for a whole cohort of 2007-2010 filings with
+        # it. Membership of this set means "must stay measurable", not "still
+        # broken".
+        ("10-K", "0001193125-10-073212"),
     }
 )
 

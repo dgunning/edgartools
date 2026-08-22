@@ -26,6 +26,17 @@ design mandates *before* the move:
     tests/issues/regression/test_dt1f_item_separator.py, which asserts that
     superset property against this file's own previous spelling rather than
     trusting the re-snapshot.
+    The same three entries were re-snapshotted once more on 2026-08-22 for
+    edgartools-dt1f.1 Defect B: ``_ITEM_SEP`` gained an optional parenthesized
+    designation, so "ITEM 9A(T). CONTROLS AND PROCEDURES" — the SEC's
+    transitional designation for a smaller reporting company's internal-control
+    report, roughly 2007-2010 — matches item 9A instead of dying on the "(".
+    68 of the 274 patterns changed and every one of them by that substitution
+    alone: no pattern was edited, reordered, relabelled or removed, and the new
+    separator accepts a strict superset of the old spellings. Both properties
+    were asserted mechanically before the file was rewritten, which is the only
+    thing that makes a re-snapshot meaningful — a golden regenerated from the
+    code it is supposed to be guarding proves nothing on its own.
   * The data must actually live on the schema now (``FormSchema.section_patterns``),
     not only on the extractor — that is what lets the Phase 3 routing flip
     (edgartools-llmp.3) feed prospectus section text through the TOC engine using

@@ -126,10 +126,13 @@ class TestGetitemStillNeedsLegacy:
     closed on 2026-08-22 when Strategy 3b was allowed to recover a 10-Q's Part II
     boundary, and are asserted in ``test_dt1f1_10q_part_boundary.py``.
 
-    FOUR remain: Items 4 and 14 below, Item 9A on 0001193125-10-073212, and Item
-    5 on 0001376474-16-000635.
+    Item 9A on 0001193125-10-073212 closed on the same day, once the item
+    separator was taught that "ITEM 9A(T)" carries a designation rather than a
+    stray parenthesis (``test_dt1f1_item_9at.py``).
 
-    Four and not five: Item 11 on 0001193125-21-101193 was listed here and was
+    THREE remain: Items 4 and 14 below, and Item 5 on 0001376474-16-000635.
+
+    Three and not four: Item 11 on 0001193125-21-101193 was listed here and was
     DROPPED on 2026-08-22 rather than fixed, because the new parser is right and
     legacy is wrong. That filing is an asset-backed issuer 10-K on Regulation AB
     numbering (Items 1112, 1114(b), 1122, 1123), and ABS filers omit the Part III
