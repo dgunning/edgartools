@@ -55,11 +55,22 @@ def test_library_bands_match_corpus():
     """Drift guard: the library's hardcoded SIZE_BANDS must match the enforced
     bands in the corpus (tests/fixtures/parser_corpus/size_bands.json). The two
     are maintained by hand-copying on corpus refresh; this catches a stale copy.
+
+    The library keys a 10-Q band by Part ("I:1"), because that form's item
+    numbers repeat and only Part I's Item 1 is enforced (edgartools-xhmd). The
+    corpus file predates that and keys by bare item, collapsing both Item 1s
+    into one bucket by keeping the larger — which is Part I's, so the *numbers*
+    are the ones the library carries and the comparison is exact once the Part
+    qualifier is stripped. Regenerating the corpus per-Part (edgartools-d64d)
+    removes the need for this normalization.
     """
+    def bare(key: str) -> str:
+        return key.split(":")[-1]
+
     corpus = json.loads(CORPUS_BANDS.read_text())["bands"]
     for form, items in corpus.items():
-        enforced = {k: v for k, v in items.items() if v.get("enforce")}
-        lib = SIZE_BANDS.get(form, {})
+        enforced = {bare(k): v for k, v in items.items() if v.get("enforce")}
+        lib = {bare(k): v for k, v in SIZE_BANDS.get(form, {}).items()}
         assert set(lib) == set(enforced), (
             f"{form}: library bands {sorted(lib)} != enforced corpus bands "
             f"{sorted(enforced)} — rerun build_corpus.py and update SIZE_BANDS"
@@ -274,10 +285,16 @@ def test_gs_business_correctly_bounded():
     ("orcl", "orcl/10k/orcl-10-k-2025-06-18.html", "10-K", "part_ii_item_8", 158),
     ("cik915358", "915358/10k/915358-10-k-2025-08-27.html", "10-K", "part_ii_item_8", 112),
     # The deferral pattern is not Item-8-specific: IBM also incorporates MD&A
-    # by reference, and 10-Q filers routinely answer Legal Proceedings with a
-    # pointer into Part I's notes.
+    # by reference.
     ("ibm", "ibm/10k/ibm-10-k-2025-02-25.html", "10-K", "part_ii_item_7", 212),
-    ("ba", "ba/10q/ba-10-q-2025-07-29.html", "10-Q", "part_ii_item_1", 258),
+    # Boeing's 10-Q Part II Item 1 (a 258-char pointer into Part I's notes) was
+    # here too. It is no longer flagged, and deliberately: that item is not
+    # size-enforced since edgartools-xhmd. It only ever reached this warning
+    # because Part II's Legal Proceedings was being judged against Part I's
+    # Financial Statements band, which flagged 18 of 25 corpus 10-Qs — mostly
+    # correct extractions of a legitimately short item. Losing an accurate note
+    # on the few that really are pointers is the price of not crying wolf on the
+    # rest; see test_ten_q_part_ii_items_are_not_judged_by_part_i_bands below.
 ])
 def test_undersized_pointer_section_is_flagged_as_a_cross_reference(filer, path, form, key, length):
     """Ground truth (GH #927): these filers answer an item with a pointer and file

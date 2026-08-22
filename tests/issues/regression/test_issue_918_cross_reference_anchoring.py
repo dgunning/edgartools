@@ -169,10 +169,12 @@ def test_ice_10q_part_ii_item_1_is_not_a_cross_reference():
     assert "Business" not in content
     assert "Regulation" not in content
 
-    # The size guardrail still flags the stub as unusually short for a 10-Q
-    # item — that conservative signal is fine (and is what the bug report
-    # asked for); what matters is the content is no longer 101K chars of
-    # another section's prose at silent full confidence.
+    # The size guardrail no longer flags this stub, and should not: a 10-Q's
+    # Part II Item 1 is Legal Proceedings, which is legitimately a pointer to a
+    # note, and it was only ever judged against Part I's Financial Statements
+    # floor because the bands were keyed on the bare item number
+    # (edgartools-xhmd). What this regression is about is unchanged and asserted
+    # above — the content is no longer 101K chars of another section's prose.
     section = obj.document.sections["part_ii_item_1"]
-    assert section.confidence == 0.5
-    assert section.warnings
+    assert section.confidence == 0.95
+    assert not section.warnings

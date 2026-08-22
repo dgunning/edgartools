@@ -64,47 +64,66 @@ SIZE_BANDS: Dict[str, Dict[str, Dict[str, int]]] = {
 ANOMALOUS_CONFIDENCE = 0.5
 
 
-def band_for(form: Optional[str], item_key: Optional[str]) -> Optional[Dict[str, int]]:
-    """Return the size band for a (form, item), or None if not enforced.
+def band_for(form: Optional[str], item_key: Optional[str],
+             part: Optional[str] = None) -> Optional[Dict[str, int]]:
+    """Return the size band for a (form, part, item), or None if not enforced.
 
     A falsy ``form`` is never enforced (preserves the pre-schema behaviour where
     an unknown/None form missed the table); known forms resolve via the schema,
     whose bands are empty for forms without curated enforcement (8-K, 20-F).
+
+    ``part`` matters on forms whose item numbers repeat across parts. A 10-Q has
+    two Item 1s — Financial Statements in Part I, Legal Proceedings in Part II —
+    and only the first is size-enforced, so a caller that cannot say which Part
+    it holds gets None rather than the wrong item's band (edgartools-xhmd).
     """
     if not form or not item_key:
         return None
-    band = get_form_schema(form).band_for(item_key)
+    band = get_form_schema(form).band_for(item_key, part=part)
     return {"low": band[0], "high": band[1]} if band else None
 
 
-def evaluate_size(form: Optional[str], item_key: Optional[str], length: int) -> Optional[str]:
+def _item_label(item_key: Optional[str], part: Optional[str]) -> str:
+    """How an item is named in a warning: "Item 6" or "Part II Item 6"."""
+    if not part:
+        return f"Item {item_key}"
+    return f"Part {part.upper().replace('PART', '').strip()} Item {item_key}"
+
+
+def evaluate_size(form: Optional[str], item_key: Optional[str], length: int,
+                  part: Optional[str] = None) -> Optional[str]:
     """Return a warning string if ``length`` is outside the band, else None.
 
     ``length`` of 0 or negative is treated as "unknown" and never flagged — an
     empty section is a different signal (missing, not anomalous-size) handled
     upstream by the detector's empty-section skip.
+
+    ``part`` selects the band on forms whose items repeat across parts, and names
+    the section in the warning, where "Item 1" alone is ambiguous on a 10-Q.
     """
-    band = band_for(form, item_key)
+    band = band_for(form, item_key, part=part)
     if band is None or length <= 0:
         return None
+    label = _item_label(item_key, part)
     if length < band["low"]:
-        return (f"Item {item_key} content is {length:,} chars, below the expected "
+        return (f"{label} content is {length:,} chars, below the expected "
                 f"minimum of {band['low']:,} for a {form} — the section anchor may "
                 f"point at a heading rather than the item body (extraction likely truncated).")
     if length > band["high"]:
-        return (f"Item {item_key} content is {length:,} chars, above the expected "
+        return (f"{label} content is {length:,} chars, above the expected "
                 f"maximum of {band['high']:,} for a {form} — the section boundary may "
                 f"overshoot into adjacent items (extraction likely over-captured).")
     return None
 
 
-def is_undersize(form: Optional[str], item_key: Optional[str], length: int) -> bool:
-    """True when ``length`` falls below the (form, item) band's floor.
+def is_undersize(form: Optional[str], item_key: Optional[str], length: int,
+                 part: Optional[str] = None) -> bool:
+    """True when ``length`` falls below the (form, part, item) band's floor.
 
     Lets a caller that already has an :func:`evaluate_size` warning tell which
     side of the band tripped it without matching on the message text.
     """
-    band = band_for(form, item_key)
+    band = band_for(form, item_key, part=part)
     return band is not None and 0 < length < band["low"]
 
 
@@ -165,9 +184,10 @@ def is_cross_reference(text: Optional[str]) -> bool:
     return match is not None and match.start() <= _MAX_POINTER_OFFSET
 
 
-def cross_reference_warning(form: Optional[str], item_key: Optional[str], length: int) -> str:
+def cross_reference_warning(form: Optional[str], item_key: Optional[str], length: int,
+                            part: Optional[str] = None) -> str:
     """The undersize warning for a section the filer incorporated by reference."""
-    return (f"Item {item_key} content is {length:,} chars and reads as an "
+    return (f"{_item_label(item_key, part)} content is {length:,} chars and reads as an "
             f"incorporation by reference — the filer answered this item with a "
             f"pointer to content held elsewhere in the {form} (for Item 8, usually "
             f"under Item 15) rather than printing it under the item heading. The "

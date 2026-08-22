@@ -101,6 +101,14 @@ class FormSchema:
     # flagged with a warning and reduced confidence rather than silently returned
     # (Verification Constitution #2; edgartools-9hwf). Curated from the h44r
     # fixture corpus; empty for forms with no enforced bands.
+    #
+    # On a form whose item numbers repeat across parts the bare item is not a
+    # key: a 10-Q has two Item 1s, Financial Statements in Part I (~90k chars)
+    # and Legal Proceedings in Part II (a few hundred, often a pointer), and
+    # judging the second against the first's band flagged correctly-extracted
+    # sections on most of the corpus (edgartools-xhmd). Such an item is written
+    # part-qualified, ``"II:6"``, and matches only in that Part; a bare key
+    # matches in any Part, which is right for 10-K, whose items are unique.
     size_bands: Tuple[Tuple[str, int, int], ...] = ()
     # Section/title vocabulary for the regex pattern extractor, as
     # {section_key: ((regex, title), ...)}. Item-based forms (10-K/10-Q/20-F/8-K)
@@ -144,18 +152,29 @@ class FormSchema:
                 return i
         return 99999
 
-    def band_for(self, item_key: Optional[str]) -> Optional[Tuple[int, int]]:
-        """Return the ``(low, high)`` size band for a bare item key, or None.
+    def band_for(self, item_key: Optional[str],
+                 part: Optional[str] = None) -> Optional[Tuple[int, int]]:
+        """Return the ``(low, high)`` size band for an item key, or None.
 
         None means the item is not size-enforced on this form (so callers must
         not flag it), matching the pre-schema ``SIZE_BANDS.get(form, {}).get(...)``
         miss behaviour.
+
+        ``part`` is the section's Part ("II", or "Part II"), needed only on forms
+        that qualify a band by Part — see :attr:`size_bands`. A part-qualified
+        band matches only when the caller names that Part, so a caller with no
+        Part context gets None rather than another Part's band.
         """
         if not item_key:
             return None
         key = item_key.upper()
+        want_part = part.upper().replace("PART", "").strip() if part else None
         for k, low, high in self.size_bands:
-            if k == key:
+            if ":" in k:
+                band_part, band_item = (s.strip() for s in k.split(":", 1))
+                if band_item == key and want_part is not None and band_part == want_part:
+                    return (low, high)
+            elif k == key:
                 return (low, high)
         return None
 
@@ -297,10 +316,16 @@ _TEN_K_SIZE_BANDS = (
                                 # Floor was an artifact of Item 16 absorbing the
                                 # signatures block before edgartools-nqzc split it.
 )
+# Every 10-Q band is Part-qualified: this form's item numbers repeat, and the
+# corpus these were derived from collapsed the two Item 1s (and the two Item 2s)
+# into one bucket, keeping the larger. The values below are therefore Part I's
+# all along — they were never a description of Part II's Legal Proceedings or
+# Unregistered Sales, which are legitimately short and are left unenforced
+# (edgartools-xhmd). Part II's Exhibits is the one 10-Q item with no twin.
 _TEN_Q_SIZE_BANDS = (
-    ("1", 18_009, 720_376),     # Financial Statements
-    ("2", 10_134, 405_368),     # MD&A
-    ("6", 518,    20_720),      # Exhibits
+    ("I:1", 18_009, 720_376),   # Part I — Financial Statements
+    ("I:2", 10_134, 405_368),   # Part I — MD&A
+    ("II:6", 518,   20_720),    # Part II — Exhibits
 )
 
 # What a filer may put between an item number and its title.

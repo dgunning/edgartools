@@ -364,7 +364,11 @@ class HybridSectionDetector:
     def _apply_size_guardrail(self, sections: Dict[str, Section]) -> Dict[str, Section]:
         """Flag sections whose extracted content size is anomalous for their item.
 
-        Uses the per-(form, item) bands in ``section_size_bands``. For
+        Uses the per-(form, part, item) bands in ``section_size_bands``. The
+        Part is part of the key because a 10-Q's item numbers repeat: judging
+        Part II's Legal Proceedings against Part I's Financial Statements band
+        flagged a correctly-extracted section on most of the corpus
+        (edgartools-xhmd). For
         TOC-detected sections the content length is already known (stored in
         ``end_offset`` by the detector), so this adds no extraction cost. A
         section outside its band gets a human-readable ``warning`` and its
@@ -401,12 +405,30 @@ class HybridSectionDetector:
             if length <= 0:
                 continue
             item_key = section.item
-            warning = evaluate_size(self.form, item_key, length)
+            part = section.part
+            if evaluate_size(self.form, item_key, length, part=part) is None:
+                continue
+            # The proxy said anomalous; decide on the length the caller will
+            # actually see. end_offset and .text() disagree by a few characters
+            # (nflx 10-Q: 227 vs 223), and a warning that quotes a number the
+            # caller cannot reproduce is not diagnosable (edgartools-xhmd). Only
+            # sections the proxy already flagged pay for this.
+            try:
+                text = section.text()
+            except Exception:  # noqa: BLE001
+                text = None
+                logger.debug("Section %s: text extraction failed; sizing on the "
+                             "offset proxy", section.name, exc_info=True)
+            # An empty render says nothing about size — the proxy stands.
+            if text:
+                length = len(text)
+            warning = evaluate_size(self.form, item_key, length, part=part)
             if warning:
-                if is_undersize(self.form, item_key, length):
+                if text and is_undersize(self.form, item_key, length, part=part):
                     try:
-                        if is_cross_reference(section.text()):
-                            warning = cross_reference_warning(self.form, item_key, length)
+                        if is_cross_reference(text):
+                            warning = cross_reference_warning(self.form, item_key, length,
+                                                              part=part)
                     except Exception:
                         # Keep the size warning: the section is still anomalous,
                         # we just could not tell which cause it is.
