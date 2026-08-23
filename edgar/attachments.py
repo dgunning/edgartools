@@ -239,6 +239,18 @@ def get_file_icon(file_type: str, sequence: Optional[str] = None, filename: Opti
     return icon
 
 
+# The role SEC appends to a filer's name on the filing index page. It renders
+# plain for an ordinary filer -- "Apple Inc. (Filer)" -- but as a LINK for the
+# roles a Form 4 carries: "UFP TECHNOLOGIES INC (<a ...>Issuer</a>)". Both come
+# out of .text the same way, so the old `.replace("(Filer)", "")` stripped one
+# and left the others, and company_name was inconsistent depending on form type.
+# Anchored to the end and limited to known roles so a company whose real name
+# contains parentheses keeps them.
+_FILER_ROLE_SUFFIX = re.compile(
+    r"\s*\((?:Filer|Issuer|Reporting|Subject|Filed by)\)\s*$", re.IGNORECASE
+)
+
+
 class FilerInfo(BaseModel):
     company_name: str
     cik:str
@@ -1118,7 +1130,7 @@ class FilingHomepage:
     def get_filers(self):
         if hasattr(self, '_cached_filers'):
             return self._cached_filers
-        filer_divs = self._soup.find_all("div", id="filerDiv")
+        filer_divs = self._soup.find_all("div", class_="filerDiv")
         filer_infos = []
         for filer_div in filer_divs:
 
@@ -1135,7 +1147,7 @@ class FilingHomepage:
                 cik = parts[1].split()[0] if len(parts) > 1 else ""
 
                 # Clean up the company name
-                company_name = re.sub("\n", "", company_name).replace("(Filer)", "").strip()
+                company_name = _FILER_ROLE_SUFFIX.sub("", re.sub("\n", "", company_name)).strip()
             else:
                 company_name = ""
                 cik = ""

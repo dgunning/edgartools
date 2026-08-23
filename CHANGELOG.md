@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`FilingHomepage.get_filers()` returned an empty list for every filing.** It searched the filer block by `id="filerDiv"`, but SEC emits `class="filerDiv"`, so the selector never matched and the method returned before parsing anything — since 2024-05-28. The filer panel was missing from the homepage display for the same reason. Filer names, CIKs, identification lines and mailing/business addresses now come back, and a Form 4 correctly reports both its issuer and its reporting owner. A filer's name also no longer keeps its role suffix on some forms and not others: SEC writes an ordinary filer's role as plain text but a Form 4's as a link, and only the plain spelling was being stripped.
+
 - **A 10-K item lookup spelled in capitals came back empty.** `tenk["ITEM 7"]` and `get_item_with_part("Part II", "ITEM 7")` returned `None` while `"Item 7"` and `"item 7"` returned the section, because `TenK` matched the spelling case-sensitively in two places — deriving the item number, and mapping it to a friendly section name. The legacy parser underneath had been absorbing this, so removing it (below) made the gap visible. `TenQ`, `TwentyF` and `EightK` were already case-insensitive here. (GH #454)
 
 - **A line break the filer wrote was dropped, gluing the words either side.** A `<br>` between two inline elements — the shape of every 6-K and 8-K cover page — was pruned as an empty node, so `UNITED STATES<br/>SECURITIES AND EXCHANGE COMMISSION` came back as `UNITED STATESSECURITIES AND EXCHANGE COMMISSION`. `<br>` between bare text was never affected. Exelon's 8-K of 2005-04-27 regains two line breaks; its text is otherwise unchanged, at the same 2,629 characters.
