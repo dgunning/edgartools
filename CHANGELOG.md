@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.52.0] - 2026-08-22
+
 ### Added
 
 - **`edgar.settings` — a real home for connection settings and SEC identity.** The access modes (`NORMAL`, `CAUTION`, `CRAWL`), `EdgarSettings`, `set_identity`, `get_identity` and `get_edgar_data_directory` now live in `edgar.settings`. They used to sit in `edgar.core` next to quarter math, HTML sniffing, a pager, thread helpers and the logger — only about a third of that 697-line module was settings, and everything users are told to configure was in that third. Nothing breaks: `edgar.core` re-exports every one of those names, and they are the *same objects*, so `isinstance` checks and identity comparisons behave identically. Code importing from the top-level namespace (`from edgar import set_identity, CAUTION`) is unaffected now and in 6.0. The `edgar.core` re-exports are removed in 6.0; see `docs/upgrade/6.0.md`.
