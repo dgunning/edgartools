@@ -3,9 +3,10 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional, Set, Tuple, Union
 
+import lxml.html as lxml_html
 import pyarrow as pa
 import pyarrow.compute as pc
-from bs4 import BeautifulSoup
+from lxml import etree
 from rich import box
 from rich.console import Group
 from rich.panel import Panel
@@ -14,6 +15,7 @@ from rich.text import Text
 
 from edgar.core import DataPager, PagingState, log, strtobool
 from edgar.documents import HTMLParser, ParserConfig
+from edgar.documents.utils import create_lxml_parser, remove_xml_declaration, terminate_unclosed_comments
 from edgar.richtools import print_rich, repr_rich, rich_to_text
 from edgar.xmltools import child_text, element_text, find_all_elements, find_element, local_name
 from edgar.xmltools import parse_xml as parse_xml_document
@@ -273,8 +275,61 @@ class Report:
     @staticmethod
     def _has_embedded_tables(report_soup) -> bool:
         """True if any TextBlock cell wraps a full HTML table (see issue #755)."""
-        return any(td.find('table') is not None
-                   for td in report_soup.find_all('td', class_='text'))
+        return bool(report_soup.xpath(
+            './/td[contains(concat(" ", normalize-space(@class), " "), " text ")]//table'
+        ))
+
+    @staticmethod
+    def _parse_report_html(content: str):
+        """Parse SEC R-file HTML with the shared recovery and whitespace policy."""
+        content = terminate_unclosed_comments(remove_xml_declaration(content))
+        if not content.strip():
+            return None
+        parser = create_lxml_parser(
+            remove_blank_text=False,
+            remove_comments=True,
+            recover=True,
+            encoding='utf-8',
+        )
+        try:
+            return lxml_html.fromstring(content, parser=parser)
+        except (etree.ParserError, ValueError):
+            return None
+
+    @staticmethod
+    def _first_with_class(element, tag: str, class_name: str):
+        if (
+            isinstance(element.tag, str)
+            and element.tag.lower() == tag
+            and class_name in element.get('class', '').split()
+        ):
+            return element
+        matches = element.xpath(
+            f'.//{tag}[contains(concat(" ", normalize-space(@class), " "), " {class_name} ")]'
+        )
+        return matches[0] if matches else None
+
+    @staticmethod
+    def _text_with_spaces(element) -> str:
+        return ' '.join(text.strip() for text in element.itertext() if text.strip())
+
+    @staticmethod
+    def _narrative_text(text_td) -> str:
+        """Return cell text outside nested tables without serializing and reparsing."""
+        parts = []
+        for text in text_td.xpath('.//text()'):
+            ancestor = text.getparent()
+            if text.is_tail and ancestor is not None:
+                ancestor = ancestor.getparent()
+            inside_nested_table = False
+            while ancestor is not None and ancestor is not text_td:
+                if isinstance(ancestor.tag, str) and ancestor.tag.lower() == 'table':
+                    inside_nested_table = True
+                    break
+                ancestor = ancestor.getparent()
+            if not inside_nested_table and text.strip():
+                parts.append(text.strip())
+        return ' '.join(parts)
 
     def _build_renderable(self, width: int = 500):
         """
@@ -293,8 +348,8 @@ class Report:
         if not content:
             return None
 
-        soup = BeautifulSoup(content, 'html.parser')
-        report = soup.find('table', class_='report')
+        tree = self._parse_report_html(content)
+        report = self._first_with_class(tree, 'table', 'report') if tree is not None else None
         if report is None or not self._has_embedded_tables(report):
             table = self._get_report_table()
             return table.render(width) if table else None
@@ -305,26 +360,24 @@ class Report:
         if title:
             renderables.append(Text(title, style="bold"))
 
-        for tr in report.find_all('tr'):
-            text_td = tr.find('td', class_='text')
-            if not (text_td and text_td.find('table')):
+        for tr in report.xpath('.//tr'):
+            text_td = self._first_with_class(tr, 'td', 'text')
+            if text_td is None or not text_td.xpath('.//table'):
                 continue
 
-            label_td = tr.find('td', class_='pl')
-            label = label_td.get_text(' ', strip=True) if label_td else None
+            label_td = self._first_with_class(tr, 'td', 'pl')
+            label = self._text_with_spaces(label_td) if label_td is not None else None
             if label:
                 renderables.append(Text(label, style="bold cyan"))
 
             # Narrative lead-in: everything in the cell that is not inside a table
-            narrative_soup = BeautifulSoup(str(text_td), 'html.parser')
-            for nested in narrative_soup.find_all('table'):
-                nested.decompose()
-            narrative = narrative_soup.get_text(' ', strip=True)
+            narrative = self._narrative_text(text_td)
             if narrative:
                 renderables.append(Text(narrative))
 
             # Render the embedded table(s) as proper tables
-            cell_doc = parser.parse('<html><body>' + str(text_td) + '</body></html>')
+            cell_html = lxml_html.tostring(text_td, encoding='unicode')
+            cell_doc = parser.parse('<html><body>' + cell_html + '</body></html>')
             for embedded in cell_doc.tables:
                 renderables.append(embedded.render(width))
 
@@ -422,9 +475,7 @@ class FilingSummary:
 
     @classmethod
     def parse(cls, xml_text:str):
-        # <FilingSummary> is the document element, so the parsed root is already
-        # it. The two BeautifulSoup calls left in this module parse R-file HTML with
-        # `html.parser`, not XML, and are out of scope for edgartools-07lk.11.3.
+        # <FilingSummary> is the document element, so the parsed root is already it.
         root = parse_xml_document(xml_text)
         if local_name(root) != 'FilingSummary':
             raise ValueError(f"Expected a FilingSummary document, got <{local_name(root)}>")
