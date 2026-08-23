@@ -48,6 +48,17 @@ _CROSS_REF_ITEM_MAP = {
 }
 
 
+# "Item 7", "ITEM 7", "item 7" are the same lookup. TenQ, TwentyF and
+# CurrentReport already treated them so; TenK matched only the "Item " spelling
+# and leaned on the legacy parser -- which lowercased -- for the rest. Deleting
+# that fallback (edgartools-3dp Group B) made the gap visible as a real miss on
+# `tenk['ITEM 7']` and `get_item_with_part('Part II', 'ITEM 7')`, GH #454.
+# `\s+` rather than the fixed `normalized[5:]` slice it replaces, so "Item  7"
+# works too. The required whitespace is also what keeps "Items 1 and 2" out:
+# after the literal "item" comes "s", not a space, so it does not match here and
+# is left to the combined-items branch below.
+_ITEM_PREFIX = re.compile(r'^item\s+(.+)$', re.IGNORECASE)
+
 # SEC 10-K item-to-part mapping. Each item number has exactly one valid Part
 # per SEC rules. Used to constrain section lookups so a missing Part I item
 # does not silently fall back to a wrong-Part section produced by a flaky
@@ -602,9 +613,10 @@ class TenK(CompanyReport):
             # PRIORITY 1: Try part-based naming convention first (most reliable)
             # These have proper part context (e.g., "part_i_item_1", "part_ii_item_5")
             item_num = None
-            if normalized.startswith('Item '):
-                # Extract item number: "Item 1" -> "1", "Item 1A" -> "1a"
-                item_num = normalized[5:].strip().lower()
+            item_prefix = _ITEM_PREFIX.match(normalized)
+            if item_prefix:
+                # Extract item number: "Item 1" -> "1", "ITEM 1A" -> "1a"
+                item_num = item_prefix.group(1).strip().lower()
             elif re.match(r'^\d+[A-Z]?$', normalized, re.IGNORECASE):
                 # Short format: "1", "1A" -> "1", "1a"
                 item_num = normalized.lower()
@@ -612,6 +624,12 @@ class TenK(CompanyReport):
                 # Friendly name: "business" -> "Item 1" -> "1"
                 item_key = section_to_item[normalized]
                 item_num = item_key[5:].strip().lower()
+
+            # The spelling the two lookup maps are keyed by. They are written
+            # title-case ('Item 1', 'Item 1A'), so matching them against the
+            # caller's raw string only works when the caller happened to type it
+            # that way -- which is the other half of GH #454.
+            canonical_item = f'Item {item_num.upper()}' if item_num else None
 
             if item_num:
                 # Only check the SEC-canonical Part for this item — prevents
@@ -646,11 +664,15 @@ class TenK(CompanyReport):
                 if item_key in self.sections:
                     return self.sections[item_key].text()
 
-            # PRIORITY 4: Handle 'Item X' format -> try friendly name
-            if normalized in item_to_section:
-                friendly_name = item_to_section[normalized]
-                if friendly_name in self.sections:
-                    return self.sections[friendly_name].text()
+            # PRIORITY 4: Handle 'Item X' format -> try friendly name.
+            # Canonical spelling first so 'ITEM 1' and 'item 1' reach the same
+            # entry as 'Item 1'; the raw string stays as a second attempt so no
+            # spelling that resolved before stops resolving.
+            for candidate in (canonical_item, normalized):
+                if candidate and candidate in item_to_section:
+                    friendly_name = item_to_section[candidate]
+                    if friendly_name in self.sections:
+                        return self.sections[friendly_name].text()
 
             # PRIORITY 5: Handle short format '1', '1A', etc. -> convert to 'Item X'
             if re.match(r'^\d+[A-Z]?$', normalized, re.IGNORECASE):
@@ -667,8 +689,9 @@ class TenK(CompanyReport):
             # Legacy fallback: SEC-canonical Part lookup only.
             # Items have exactly one valid Part per SEC rules — see GH #821.
             legacy_item_num = None
-            if normalized.startswith('Item '):
-                legacy_item_num = normalized[5:].strip().lower()
+            legacy_prefix = _ITEM_PREFIX.match(normalized)
+            if legacy_prefix:
+                legacy_item_num = legacy_prefix.group(1).strip().lower()
             elif re.match(r'^\d+[a-z]?$', normalized, re.IGNORECASE):
                 legacy_item_num = normalized.lower()
 
