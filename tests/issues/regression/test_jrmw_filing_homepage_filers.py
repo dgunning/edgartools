@@ -146,8 +146,12 @@ def test_the_homepage_renders_with_real_filer_data():
     """__rich__ builds the filer panel from get_filers() and indexes
     ``addresses[1]``. That index never ran before this fix, so rendering is
     exercised here rather than assumed."""
+    import io
+
     from rich.console import Console
 
-    console = Console(file=open(pathlib.os.devnull, "w"), width=200)
+    # StringIO rather than os.devnull: nothing to close, and `pathlib.os` is an
+    # import artifact that 3.13's pathlib package no longer exposes.
+    console = Console(file=io.StringIO(), width=200)
     for stem in ("aapl-10k-2024", "form4-reporting-owner", "thirteenf-2023"):
         console.print(_homepage(stem))
