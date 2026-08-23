@@ -2,12 +2,13 @@ import re
 from dataclasses import dataclass
 from functools import lru_cache
 
+import lxml.html
 import pandas as pd
-from bs4 import BeautifulSoup
 from rich.console import Group, Text
 from rich.markdown import Markdown
 
 from edgar.config import SEC_BASE_URL
+from edgar.documents.utils.html_utils import create_lxml_parser
 from edgar.httprequests import download_file
 from edgar.richtools import df_to_rich_table, repr_rich
 
@@ -25,18 +26,31 @@ def list_forms():
     rows = []
     for page in range(7):
         forms_html = download_file(f'https://www.sec.gov/forms?page={page}')
-        soup = BeautifulSoup(forms_html, features="lxml")
-        data_table = soup.find("table")
-        tbody = data_table.find("tbody")
+        # This page was already parsed by lxml -- bs4 was only a wrapper over
+        # it (features="lxml") -- so the tree is the same one, minus a layer.
+        # download_file returns bytes for these pages, but str elsewhere and in
+        # tests; bs4 took either. Feeding bytes is also what keeps an encoding
+        # declaration from raising, so normalise toward bytes rather than str.
+        if isinstance(forms_html, str):
+            forms_html = forms_html.encode("utf-8", errors="replace")
+        root = lxml.html.fromstring(forms_html, parser=create_lxml_parser())
+        # descendant-or-self, not .//: lxml roots a document trimmed to a
+        # single <table> AT that table, so a descendant-only search finds
+        # nothing. bs4's find() matched it either way.
+        data_table = root.xpath("descendant-or-self::table")[0]
+        tbody = data_table.xpath("descendant-or-self::tbody")[0]
 
-        for tr in tbody.find_all('tr'):
-            cells = tr.find_all('td')
-            rows.append({"Form": cells[0].text.replace("Number:", "").strip(),
-                         "Description": cells[1].text.replace("Description:", "").strip(),
-                         "Url": f"{SEC_BASE_URL}{cells[1].find('a').attrs['href']}" if cells[1].find('a') else "",
-                         "LastUpdated": cells[2].text.replace("Last Updated:", "").strip(),
-                         "SECNumber": cells[3].text.replace("SEC Number:", "").strip(),
-                         "Topics": cells[4].text.replace("Topic(s):", "").strip()
+        for tr in tbody.xpath('.//tr'):
+            cells = tr.xpath('.//td')
+            # text_content(), not .text: lxml's .text is the node's own leading
+            # text only, where bs4's .text was every descendant's.
+            link = cells[1].find('.//a')
+            rows.append({"Form": cells[0].text_content().replace("Number:", "").strip(),
+                         "Description": cells[1].text_content().replace("Description:", "").strip(),
+                         "Url": f"{SEC_BASE_URL}{link.get('href')}" if link is not None else "",
+                         "LastUpdated": cells[2].text_content().replace("Last Updated:", "").strip(),
+                         "SECNumber": cells[3].text_content().replace("SEC Number:", "").strip(),
+                         "Topics": cells[4].text_content().replace("Topic(s):", "").strip()
                          })
 
     return SecForms(pd.DataFrame(rows))

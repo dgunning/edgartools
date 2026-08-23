@@ -414,6 +414,31 @@ def _extract_business_section(full_text: str) -> Optional[str]:
 # ---------------------------------------------------------------------------
 
 
+def _html_to_text(html: str) -> str:
+    """Plain text of a document, as ``BeautifulSoup(html).get_text()`` gave it.
+
+    ``get_text()`` with no arguments concatenates every descendant string with
+    nothing between them and strips nothing, which is exactly what lxml's
+    ``text_content()`` does -- unlike ``get_text(strip=True)``, which is not.
+
+    The old code wrapped this in ``except ImportError`` with a regex fallback.
+    That branch was already unreachable, since bs4 was a hard dependency, and it
+    still is with lxml; it is left out rather than carried forward dead.
+    """
+    import lxml.html
+    from lxml.etree import ParserError
+
+    from edgar.documents.utils.html_utils import create_lxml_parser
+
+    if isinstance(html, str):
+        html = html.encode("utf-8", errors="replace")
+    try:
+        root = lxml.html.fromstring(html, parser=create_lxml_parser())
+    except ParserError:
+        return ""      # bs4's get_text() on an empty soup
+    return root.text_content()
+
+
 class FortyF(CompanyReport):
     """Canadian MJDS annual report (Form 40-F).
 
@@ -513,13 +538,7 @@ class FortyF(CompanyReport):
         html = self.mda_html
         if not html:
             return None
-        try:
-            from bs4 import BeautifulSoup
-            soup = BeautifulSoup(html, 'html.parser')
-            return soup.get_text()
-        except ImportError:
-            text = re.sub(r'<[^>]+>', ' ', html)
-            return re.sub(r'\s+', ' ', text)
+        return _html_to_text(html)
 
     # -- Business section ----------------------------------------------------
 
@@ -532,14 +551,7 @@ class FortyF(CompanyReport):
         html = self.aif_html
         if not html:
             return None
-        try:
-            from bs4 import BeautifulSoup
-            soup = BeautifulSoup(html, 'html.parser')
-            return soup.get_text()
-        except ImportError:
-            # bs4 unavailable — strip tags with a rough regex
-            text = re.sub(r'<[^>]+>', ' ', html)
-            return re.sub(r'\s+', ' ', text)
+        return _html_to_text(html)
 
     @cached_property
     def business(self) -> Optional[str]:
