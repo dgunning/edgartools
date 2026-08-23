@@ -22,9 +22,13 @@ Value cell classes:
 """
 import re
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
-from bs4 import BeautifulSoup, Tag
+import lxml.html
+from lxml.etree import ParserError
+from lxml.html import HtmlElement
+
+from edgar.documents.utils.html_utils import create_lxml_parser
 
 __all__ = ['ConceptRow', 'ConceptReport', 'extract_concepts_from_report', 'parse_numeric']
 
@@ -44,6 +48,85 @@ _SCALING_MAP = {
     'billions': 1_000_000_000,
     'hundreds': 100,
 }
+
+
+def _parser():
+    """The lxml parser used for R*.htm.
+
+    ``remove_comments=False`` on purpose. bs4 kept comment nodes in the tree
+    and this module reads them two different ways: ``get_text()`` skipped
+    them, but the title walk over ``strong.children`` did NOT -- a
+    ``Comment`` is a ``NavigableString`` subclass, so an HTML comment inside
+    the title cell became part of the title. Dropping comments at parse time
+    would silently change that, and it also merges the text on either side of
+    a comment into one node, which changes ``_text_stripped``:
+    ``A <!--c--> B`` would yield ``"A  B"`` where bs4 gave ``"AB"``.
+    """
+    return create_lxml_parser(remove_comments=False)
+
+
+def _classes(el: HtmlElement) -> List[str]:
+    """Class tokens of an element.
+
+    bs4 returned ``class`` pre-split as a list because it knows the attribute
+    is multi-valued; lxml returns the raw string. Splitting here keeps every
+    ``'tl' in classes`` test a token test rather than a substring test.
+    """
+    return (el.get('class') or '').split()
+
+
+def _text_stripped(el: HtmlElement) -> str:
+    """``el.get_text(strip=True)`` as bs4 computed it.
+
+    Each string is stripped independently and the results are joined with
+    nothing between them. This is NOT ``text_content()``, which strips
+    nothing -- see the note in the 40-F reader for the third variant.
+    Comments contribute no text, in either library.
+    """
+    return ''.join(t.strip() for t in el.itertext())
+
+
+def _child_nodes(el: HtmlElement) -> List[Union[str, HtmlElement]]:
+    """``el.children`` as bs4 produced it: strings and elements interleaved.
+
+    lxml splits the same content into ``.text`` plus each child's ``.tail``,
+    so rebuild the flat sequence. Comments come back as their text, which is
+    what ``str(Comment)`` gave bs4.
+    """
+    nodes: List[Union[str, HtmlElement]] = []
+    if el.text:
+        nodes.append(el.text)
+    for child in el:
+        if isinstance(child.tag, str):
+            nodes.append(child)
+        else:  # comment or processing instruction
+            nodes.append(child.text or '')
+        if child.tail:
+            nodes.append(child.tail)
+    return nodes
+
+
+def _find_by_class(root: HtmlElement, tag: str, cls: str) -> Optional[HtmlElement]:
+    """First ``<tag>`` carrying ``cls`` as a class token, in document order.
+
+    ``descendant-or-self``, not ``.//``: lxml roots a document that is
+    nothing but a ``<table>`` AT that table, so a descendant-only search
+    would find nothing. bs4's ``find()`` matched it either way.
+    """
+    for el in root.xpath(f'descendant-or-self::{tag}'):
+        if cls in _classes(el):
+            return el
+    return None
+
+
+def _child_cells(el: HtmlElement) -> List[HtmlElement]:
+    """Direct ``<th>``/``<td>`` children -- ``find_all(..., recursive=False)``.
+
+    Note this is empty when the rows sit inside a ``<tbody>``. That was true
+    of bs4's ``html.parser`` too, and neither parser invents a ``<tbody>``
+    that the markup does not have, so R*.htm files parse the same way.
+    """
+    return el.xpath('./*[self::th or self::td]')
 
 
 def parse_numeric(value_str: str) -> Optional[float]:
@@ -167,10 +250,11 @@ class ConceptReport:
         return f"ConceptReport({self.title!r}, rows={len(self.rows)}, periods={len(self.period_headers)})"
 
 
-def _extract_concept_id(td: Tag) -> Optional[str]:
+def _extract_concept_id(td: HtmlElement) -> Optional[str]:
     """Extract the concept ID from a label cell's onclick handler."""
-    a_tag = td.find('a')
-    if not a_tag:
+    # ``is None``, not truthiness: an lxml element with no children is falsy.
+    a_tag = td.find('.//a')
+    if a_tag is None:
         return None
     onclick = a_tag.get('onclick', '')
     match = _DEFREF_RE.search(onclick)
@@ -179,48 +263,46 @@ def _extract_concept_id(td: Tag) -> Optional[str]:
     return None
 
 
-def _extract_label(td: Tag) -> str:
+def _extract_label(td: HtmlElement) -> str:
     """Extract the display label text from a label cell."""
-    a_tag = td.find('a')
-    if a_tag:
-        return a_tag.get_text(strip=True)
-    return td.get_text(strip=True)
+    a_tag = td.find('.//a')
+    if a_tag is not None:
+        return _text_stripped(a_tag)
+    return _text_stripped(td)
 
 
-def _is_abstract_row(td: Tag, value_cells: List[Tag]) -> bool:
+def _is_abstract_row(td: HtmlElement, value_cells: List[HtmlElement]) -> bool:
     """Detect abstract rows: bold label and all value cells are empty/text."""
-    strong = td.find('strong')
-    if not strong:
+    strong = td.find('.//strong')
+    if strong is None:
         return False
     # Check that all value cells are empty (class="text" or contain only nbsp)
     for cell in value_cells:
-        css = cell.get('class', [])
-        if isinstance(css, list):
-            css = ' '.join(css)
+        css = ' '.join(_classes(cell))
         if 'nump' in css or 'num' in css:
             return False
     return True
 
 
-def _extract_value(td: Tag) -> str:
+def _extract_value(td: HtmlElement) -> str:
     """Extract the display value from a value cell, preserving sign indicators."""
-    text = td.get_text(strip=True)
+    text = _text_stripped(td)
     # Clean up common HTML entities
     text = text.replace('\xa0', '').replace('\u200b', '')
     return text if text else ''
 
 
-def _th_text(th: Tag) -> str:
+def _th_text(th: HtmlElement) -> str:
     """Extract the visible text from a header <th> cell."""
-    div = th.find('div')
+    div = th.find('.//div')
     if div is not None:
-        return div.get_text(strip=True)
-    return th.get_text(strip=True)
+        return _text_stripped(div)
+    return _text_stripped(th)
 
 
 def _build_header_grid(
-    header_rows: List[Tag],
-) -> List[List[Optional[Tuple[Tag, int]]]]:
+    header_rows: List[HtmlElement],
+) -> List[List[Optional[Tuple[HtmlElement, int]]]]:
     """Build a virtual grid for the table header section.
 
     Returns ``grid[row][col]`` where each cell is ``(th_tag, origin_row)`` if
@@ -231,10 +313,10 @@ def _build_header_grid(
     position rather than by document order (GH #812).
     """
     num_rows = len(header_rows)
-    grid: List[List[Optional[Tuple[Tag, int]]]] = [[] for _ in range(num_rows)]
+    grid: List[List[Optional[Tuple[HtmlElement, int]]]] = [[] for _ in range(num_rows)]
     for r, tr in enumerate(header_rows):
         col = 0
-        for cell in tr.find_all(['th', 'td'], recursive=False):
+        for cell in _child_cells(tr):
             # Skip positions occupied by a rowspan from an earlier row.
             while col < len(grid[r]) and grid[r][col] is not None:
                 col += 1
@@ -264,7 +346,7 @@ class _SemanticColumn:
 
 
 def _extract_period_headers(
-    report_table: Tag,
+    report_table: HtmlElement,
 ) -> Tuple[List[str], List[_SemanticColumn]]:
     """Extract period headers from a report table.
 
@@ -289,12 +371,12 @@ def _extract_period_headers(
     # Header rows are the consecutive <tr> rows at the top of the table
     # whose first cell is a <th> (the title or column header). Once we
     # see a row whose first cell is a <td>, the data section has begun.
-    header_rows: List[Tag] = []
-    for tr in report_table.find_all('tr', recursive=False):
-        first = tr.find(['th', 'td'], recursive=False)
-        if first is None:
+    header_rows: List[HtmlElement] = []
+    for tr in report_table.xpath('./tr'):
+        cells = _child_cells(tr)
+        if not cells:
             continue
-        if first.name != 'th':
+        if cells[0].tag != 'th':
             break
         header_rows.append(tr)
 
@@ -313,7 +395,7 @@ def _extract_period_headers(
         first_entry = grid[0][0]
         if first_entry is not None:
             first_cell, _ = first_entry
-            classes = first_cell.get('class') or []
+            classes = _classes(first_cell)
             if 'tl' in classes:
                 data_col_offset = int(first_cell.get('colspan') or 1)
 
@@ -331,7 +413,7 @@ def _extract_period_headers(
             if entry is None:
                 continue
             cell, origin_row = entry
-            classes = cell.get('class') or []
+            classes = _classes(cell)
             if 'tl' in classes:
                 continue
             rs = int(cell.get('rowspan') or 1)
@@ -367,7 +449,7 @@ def _extract_period_headers(
             if entry is None:
                 continue
             group_cell, _ = entry
-            classes = group_cell.get('class') or []
+            classes = _classes(group_cell)
             if 'tl' in classes:
                 continue
             if group_cell is leaf_cell:
@@ -389,8 +471,8 @@ def _extract_period_headers(
 
 
 def _origin_start_col(
-    grid: List[List[Optional[Tuple[Tag, int]]]],
-    cell: Tag,
+    grid: List[List[Optional[Tuple[HtmlElement, int]]]],
+    cell: HtmlElement,
     origin_row: int,
 ) -> int:
     """Find the leftmost column index where ``cell`` appears in
@@ -403,7 +485,7 @@ def _origin_start_col(
     return -1
 
 
-def _data_cell_positions(value_cells: List[Tag]) -> List[int]:
+def _data_cell_positions(value_cells: List[HtmlElement]) -> List[int]:
     """Return the starting column position (in data-column space) for each
     data ``<td>`` cell, accumulating ``colspan``. Mirrors the grid the
     header parser builds so values can be mapped back to semantic columns
@@ -417,7 +499,7 @@ def _data_cell_positions(value_cells: List[Tag]) -> List[int]:
     return positions
 
 
-def _detect_level(td: Tag) -> int:
+def _detect_level(td: HtmlElement) -> int:
     """Detect indentation level from padding-left style or nesting."""
     style = td.get('style', '')
     # Some R*.htm files use padding-left for indentation
@@ -492,11 +574,18 @@ def extract_concepts_from_report(html_content: str, form: Optional[str] = None) 
     Returns:
         ConceptReport with title, period headers, and concept-annotated rows
     """
-    soup = BeautifulSoup(html_content, 'html.parser')
+    if isinstance(html_content, str):
+        html_content = html_content.encode('utf-8', errors='replace')
+    try:
+        root = lxml.html.fromstring(html_content, parser=_parser())
+    except ParserError:
+        # Empty or whitespace-only input. bs4 built an empty soup, found no
+        # table and returned an empty report; lxml raises, so map it back.
+        return ConceptReport(title='', period_headers=[], rows=[])
 
     # Find the main report table
-    report_table = soup.find('table', class_='report')
-    if not report_table:
+    report_table = _find_by_class(root, 'table', 'report')
+    if report_table is None:
         return ConceptReport(title='', period_headers=[], rows=[])
 
     # Extract title and scaling from the header cell
@@ -504,17 +593,17 @@ def extract_concepts_from_report(html_content: str, form: Optional[str] = None) 
     currency = 'USD'
     currency_scaling = 1
     shares_scaling = 1
-    tl = report_table.find('th', class_='tl')
-    if tl:
-        strong = tl.find('strong')
-        if strong:
-            full_header = strong.get_text()
+    tl = _find_by_class(report_table, 'th', 'tl')
+    if tl is not None:
+        strong = tl.find('.//strong')
+        if strong is not None:
+            full_header = strong.text_content()
             # Title is the first line (before <br>)
             title_parts = []
-            for child in strong.children:
-                if isinstance(child, Tag) and child.name == 'br':
+            for child in _child_nodes(strong):
+                if not isinstance(child, str) and child.tag == 'br':
                     break
-                text = child.string if isinstance(child, str) else child.get_text()
+                text = child if isinstance(child, str) else child.text_content()
                 if text:
                     title_parts.append(text.strip())
             title = ' '.join(title_parts).strip()
@@ -539,19 +628,16 @@ def extract_concepts_from_report(html_content: str, form: Optional[str] = None) 
 
     # Extract data rows
     rows = []
-    for tr in report_table.find_all('tr', recursive=False):
-        css_classes = tr.get('class', [])
-        if isinstance(css_classes, list):
-            row_class = css_classes[0] if css_classes else ''
-        else:
-            row_class = css_classes
+    for tr in report_table.xpath('./tr'):
+        css_classes = _classes(tr)
+        row_class = css_classes[0] if css_classes else ''
 
         if row_class not in _DATA_CLASSES:
             continue
 
         # Find label cell (class="pl")
-        label_cell = tr.find('td', class_='pl')
-        if not label_cell:
+        label_cell = _find_by_class(tr, 'td', 'pl')
+        if label_cell is None:
             continue
 
         concept_id = _extract_concept_id(label_cell)
@@ -562,8 +648,11 @@ def extract_concepts_from_report(html_content: str, form: Optional[str] = None) 
         level = _detect_level(label_cell)
 
         # Collect value cells (everything after the label cell)
-        all_tds = tr.find_all('td', recursive=False)
-        value_cells = [td for td in all_tds if td != label_cell]
+        all_tds = tr.xpath('./td')
+        # Identity, not bs4's structural ``!=`` on tags. The label cell is the
+        # first ``class="pl"`` cell carrying an onclick concept id, so a
+        # second cell equal to it by value cannot occur here.
+        value_cells = [td for td in all_tds if td is not label_cell]
 
         is_abstract = _is_abstract_row(label_cell, value_cells)
         is_total = row_class in _TOTAL_CLASSES
@@ -580,7 +669,7 @@ def extract_concepts_from_report(html_content: str, form: Optional[str] = None) 
         # that happens to also carry ``th`` for styling.
         value_cells = [
             td for td in value_cells
-            if not _is_styling_only_th(td.get('class') or [])
+            if not _is_styling_only_th(_classes(td))
         ]
 
         # Map data cells to semantic columns by column position rather
