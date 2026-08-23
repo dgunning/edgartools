@@ -170,6 +170,60 @@ def test_empty_input_keeps_its_old_answer_rather_than_raising(content):
             local_storage.get_sec_file_listing("https://example/feed/")
 
 
+@pytest.mark.parametrize("tag", ["style", "script", "template"])
+def test_plain_text_leaves_out_stylesheets_and_scripts(tag):
+    """The one place `text_content()` is NOT `get_text()`.
+
+    bs4 classifies the text inside these three tags as Stylesheet, Script and
+    TemplateString, and `get_text()` skips all three. `text_content()` does
+    not, so an exhibit with an inline stylesheet -- which filer-agent HTML
+    routinely has -- would open with a block of CSS. None of the committed
+    EX-21 fixtures contains one, which is why the golden file was silent.
+    """
+    html = f"<html><head><{tag}>MARKER</{tag}></head><body><p>Alpha</p></body></html>"
+    assert _html_to_text(html) == "Alpha"
+
+
+def test_a_stylesheet_in_an_exhibit_is_not_read_as_a_subsidiary():
+    """Same trap, other reader: a <style> block inside a cell would become a
+    subsidiary name. bs4 never saw it."""
+    html = ('<table><tr><th>Subsidiary</th><th>Jurisdiction</th></tr>'
+            '<tr><td><style>td{color:red}</style>Widget Holdings LLC</td>'
+            '<td>Delaware</td></tr></table>')
+    subs = parse_subsidiaries(html)
+    assert [s.name for s in subs] == ["Widget Holdings LLC"]
+
+
+def test_a_script_in_a_listing_cell_is_not_read_as_a_filename():
+    """The SEC serves these listings from a live page, not a trimmed fixture."""
+    html = ('<table><tr><th>Name</th><th>Size</th><th>Modified</th></tr>'
+            '<tr><td><script>t()</script>20240102.nc.tar.gz</td><td>1.2K</td>'
+            '<td>01/02/2024 10:30:00 PM</td></tr></table>')
+    with patch("edgar.storage._local.download_text", return_value=html):
+        df = local_storage.get_sec_file_listing("https://example/feed/")
+    assert list(df["Name"]) == ["20240102.nc.tar.gz"]
+
+
+def test_a_script_in_a_forms_cell_is_not_read_as_a_form_number():
+    """The real /forms page is a full Drupal page; the fixture is a trimmed
+    fragment of it, so the fixture cannot show this."""
+    html = ('<table><tbody><tr>'
+            '<td><script>analytics()</script>10-K</td><td>Annual</td>'
+            '<td>2026</td><td>001</td><td>Reporting</td></tr></tbody></table>')
+    with patch("edgar.forms.download_file", return_value=html):
+        list_forms.cache_clear()
+        try:
+            assert list_forms().data.iloc[0]["Form"] == "10-K"
+        finally:
+            list_forms.cache_clear()
+
+
+def test_plain_text_keeps_what_follows_a_stripped_tag():
+    """`with_tail=False`: the text after `</script>` is ordinary document text
+    and bs4 kept it. Dropping the subtree tail-and-all would delete it."""
+    assert _html_to_text("<html><body><script>x</script>Alpha</body></html>") == "Alpha"
+
+
 def test_html_is_accepted_as_bytes_as_well_as_str():
     """`download_file` hands the forms page back as BYTES. bs4 took either;
     encoding a bytes object raises AttributeError, which is how this was

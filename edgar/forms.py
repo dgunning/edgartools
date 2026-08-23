@@ -4,6 +4,7 @@ from functools import lru_cache
 
 import lxml.html
 import pandas as pd
+from lxml.etree import strip_elements
 from rich.console import Group, Text
 from rich.markdown import Markdown
 
@@ -34,6 +35,9 @@ def list_forms():
         if isinstance(forms_html, str):
             forms_html = forms_html.encode("utf-8", errors="replace")
         root = lxml.html.fromstring(forms_html, parser=create_lxml_parser())
+        # bs4's .text left the text inside these three tags out; text_content()
+        # does not. See the docstring on forty_f._html_to_text.
+        strip_elements(root, "script", "style", "template", with_tail=False)
         # descendant-or-self, not .//: lxml roots a document trimmed to a
         # single <table> AT that table, so a descendant-only search finds
         # nothing. bs4's find() matched it either way.

@@ -421,12 +421,21 @@ def _html_to_text(html: str) -> str:
     nothing between them and strips nothing, which is exactly what lxml's
     ``text_content()`` does -- unlike ``get_text(strip=True)``, which is not.
 
+    With one exception, and it is not a small one on a real filing document:
+    bs4 classifies the text inside ``<script>``, ``<style>`` and ``<template>``
+    as ``Script``/``Stylesheet``/``TemplateString``, and ``get_text()`` leaves
+    all three out. ``text_content()`` includes them, so an exhibit carrying an
+    inline stylesheet -- which filer-agent HTML routinely does -- would gain a
+    block of CSS source at the top of its text. Strip those subtrees first.
+    ``with_tail=False`` keeps the text that FOLLOWS the closing tag, which is
+    ordinary document text and which bs4 kept.
+
     The old code wrapped this in ``except ImportError`` with a regex fallback.
     That branch was already unreachable, since bs4 was a hard dependency, and it
     still is with lxml; it is left out rather than carried forward dead.
     """
     import lxml.html
-    from lxml.etree import ParserError
+    from lxml.etree import ParserError, strip_elements
 
     from edgar.documents.utils.html_utils import create_lxml_parser
 
@@ -436,6 +445,7 @@ def _html_to_text(html: str) -> str:
         root = lxml.html.fromstring(html, parser=create_lxml_parser())
     except ParserError:
         return ""      # bs4's get_text() on an empty soup
+    strip_elements(root, "script", "style", "template", with_tail=False)
     return root.text_content()
 
 

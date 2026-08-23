@@ -625,7 +625,7 @@ def get_sec_file_listing(url:str) -> pd.DataFrame:
         """)
 
     import lxml.html
-    from lxml.etree import ParserError
+    from lxml.etree import ParserError, strip_elements
 
     from edgar.documents.utils.html_utils import create_lxml_parser
 
@@ -637,6 +637,9 @@ def get_sec_file_listing(url:str) -> pd.DataFrame:
         # bs4 gave an empty soup here, and the no-table branch below raised
         # RuntimeError. Keep that, rather than surfacing an lxml exception.
         raise RuntimeError("No table found in the page") from None
+    # bs4's .text left the text inside these three tags out; text_content()
+    # does not. See the docstring on forty_f._html_to_text.
+    strip_elements(root, "script", "style", "template", with_tail=False)
     # descendant-or-self: see the note in edgar/forms.py -- a listing trimmed
     # to its table would otherwise parse to "no table found".
     found = root.xpath('descendant-or-self::table')

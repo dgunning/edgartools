@@ -227,7 +227,7 @@ def parse_subsidiaries(html_content: str) -> List[Subsidiary]:
     - Empty spacer columns (common in SEC HTML formatting)
     """
     import lxml.html
-    from lxml.etree import ParserError
+    from lxml.etree import ParserError, strip_elements
 
     from edgar.documents.utils.html_utils import create_lxml_parser
 
@@ -239,6 +239,10 @@ def parse_subsidiaries(html_content: str) -> List[Subsidiary]:
         # Empty or whitespace-only input. bs4 built an empty soup and this
         # returned []; lxml raises, so map it back.
         return []
+    # bs4's get_text() left the text inside these three tags out; text_content()
+    # does not. See the docstring on forty_f._html_to_text. with_tail=False
+    # keeps the ordinary document text that follows the closing tag.
+    strip_elements(root, "script", "style", "template", with_tail=False)
     # Only use top-level tables to avoid double-counting from nested layout tables
     # descendant-or-self, not .//: an EX-21 that is nothing but a <table> is
     # rooted AT that table, and a descendant-only search would return nothing.
