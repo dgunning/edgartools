@@ -337,7 +337,17 @@ class DocumentBuilder:
                     text_node.set_metadata('original_tag', tag)
                     text_node.set_metadata('inline_via_css', True)
                     return text_node
-                # If no text but inline, still process children inline
+                # If no text but inline, still process children inline.
+                # _get_element_text() only descends into children for elements that
+                # are inline BY TAG, so a div whose content sits entirely in child
+                # <font>/<span> runs yields nothing here. Falling through to a bare
+                # ContainerNode then emits each run as its own block and shatters
+                # words across lines -- `<div style="display:inline"><font>H</font>
+                # <font>unger</font></div>` became "H\n\nunger". A ParagraphNode
+                # concatenates inline children, which is what the normal-block path
+                # below already does for this exact shape.
+                if self._is_inline_run_container(element):
+                    return ParagraphNode(style=style)
                 return ContainerNode(tag_name=tag, style=style)
 
             # Normal block behavior
@@ -613,6 +623,28 @@ class DocumentBuilder:
         if inline and len(text_parts) == 1:
             return text_parts[0]
         return ' '.join(text_parts)
+
+    def _is_inline_run_container(self, element: HtmlElement) -> bool:
+        """Check that every child is a genuine inline run and no block sits below.
+
+        Deliberately stricter than :meth:`_is_text_only_container`, which looks
+        only at DIRECT children and treats any unrecognised tag as inline. IXBRL
+        wrappers are the reason: ``ix:continuation`` and ``ix:nonNumeric`` are not
+        in BLOCK_ELEMENTS, so they pass that test while wrapping whole tables and
+        headings -- on the GS 10-Q fixture exactly two such divs did, and
+        flattening them collapsed rendered tables into run-on lines.
+        """
+        for child in element:
+            if not isinstance(child.tag, str):
+                continue  # comments and processing instructions
+            if child.tag.lower() not in self.INLINE_ELEMENTS:
+                return False
+        for descendant in element.iter():
+            if descendant is element or not isinstance(descendant.tag, str):
+                continue
+            if descendant.tag.lower() in self.BLOCK_ELEMENTS:
+                return False
+        return True
 
     def _is_text_only_container(self, element: HtmlElement) -> bool:
         """Check if element contains only text and inline elements."""
