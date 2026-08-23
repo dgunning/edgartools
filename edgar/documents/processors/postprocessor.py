@@ -87,6 +87,14 @@ class DocumentPostprocessor:
         if node.type == NodeType.IMAGE:
             return False
 
+        # Never remove an explicit line break. Its content is a newline, so every
+        # text check below reads it as empty, but a <br> is content the filer
+        # wrote -- dropping it glues the words either side together. The generic
+        # metadata rule below would also spare it; this is stated separately so
+        # the reason survives any future tightening of that rule.
+        if node.metadata.get('is_line_break'):
+            return False
+
         # Never remove nodes with metadata
         if node.metadata:
             return False

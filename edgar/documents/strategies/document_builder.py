@@ -321,8 +321,14 @@ class DocumentBuilder:
             )
 
         elif tag == 'br':
-            # Line break - add as text node
-            return TextNode(content='\n')
+            # Line break - add as text node. Mark it, because its content is
+            # whitespace and the postprocessor prunes whitespace-only text nodes:
+            # unmarked, a <br> between two inline elements was dropped and the
+            # words either side glued together ("UNITED STATESSECURITIES AND
+            # EXCHANGE COMMISSION" on a 6-K cover page).
+            line_break = TextNode(content='\n')
+            line_break.set_metadata('is_line_break', True)
+            return line_break
 
         elif tag in ['section', 'article']:
             return SectionNode(style=style)
