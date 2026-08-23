@@ -161,7 +161,11 @@ def test_item_5_is_detected(doc):
     # And Item 15 in particular, which the rejected pattern-detector fix would
     # have grown from 2,877 characters to 74,793 by promoting item headers to
     # level 1. See the module docstring.
-    assert len(sections["part_iv_item_15"].text()) == 2877
+    # 2,877 before edgartools-y0ri. Pure gain: ZERO tokens lost, and the two
+    # gained are "(a)" and "(3)" -- exhibit-list labels that lived in a sparsely
+    # filled column the scorer had been reading as spacing. Parentheses balance
+    # 10 -> 12 and every number is still present in order.
+    assert len(sections["part_iv_item_15"].text()) == 2968
 
 
 def test_the_header_became_a_heading(doc):

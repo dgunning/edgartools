@@ -138,7 +138,10 @@ def _parser_only(cls):
         # level: ZERO tokens lost, 570 gained, all of them column headers
         # ("Non-U.S.", "Total", "Segment", "Products"), and the section's first and
         # last 80 characters are unchanged, so the boundaries did not move.
-        ("xom", "Part I", "Item 1", 167042),
+        # 167,042 after kq2q, 170,430 after y0ri/3cis. The second move is again a
+        # pure gain: ZERO tokens lost, 30 gained, all of them recovered label cells
+        # ("Level", "Effect", "Counterparty"), with every number still in order.
+        ("xom", "Part I", "Item 1", 170430),
         ("pg", "Part II", "Item 1", 975),
         # And the two that closed earlier with the 10-Q Part II boundary fix
         # (dt1f.1 Defect D), kept here so the whole method is covered by one
