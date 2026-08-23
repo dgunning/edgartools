@@ -201,9 +201,13 @@ def test_2010_20f_resolves_all_eight_wrapped_items_without_the_legacy_parser():
     filing = FixtureFiling(IGNORED_20F, "20-F")
     report = _without_legacy(TwentyF)(filing)
 
+    # Items 5 and 6 grew by 150 and 20 characters when the fast_table 8-column cap
+    # was removed (edgartools-kq2q) -- they are the two that carry tables. The other
+    # six are unchanged, which is the signal that the cap removal touches table
+    # rendering only and moves no item boundary.
     expected = {
-        "Item 5": 107307,
-        "Item 6": 57841,
+        "Item 5": 107457,
+        "Item 6": 57861,
         "Item 11": 7504,
         "Item 12": 152,
         "Item 15": 14078,

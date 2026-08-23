@@ -132,7 +132,13 @@ def _parser_only(cls):
     "ticker,part,item,expected",
     [
         # The two rows this bead was filed for.
-        ("xom", "Part I", "Item 1", 138607),
+        # 138,607 before the fast_table 8-column cap was removed (edgartools-kq2q).
+        # XOM's Item 1 is financial statements; the segment tables were rendering
+        # without the columns the cap discarded. Verified non-lossy at the word
+        # level: ZERO tokens lost, 570 gained, all of them column headers
+        # ("Non-U.S.", "Total", "Segment", "Products"), and the section's first and
+        # last 80 characters are unchanged, so the boundaries did not move.
+        ("xom", "Part I", "Item 1", 167042),
         ("pg", "Part II", "Item 1", 975),
         # And the two that closed earlier with the 10-Q Part II boundary fix
         # (dt1f.1 Defect D), kept here so the whole method is covered by one
