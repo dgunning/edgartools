@@ -145,6 +145,14 @@ EDGE.update({
         '<tr><td>x</td><th>Q2</th></tr>'
         '<tr class="re"><td class="pl"><a onclick="Show.showAR(this, \'defref_a_B\', window)">L</a></td>'
         '<td class="nump">1</td></tr></table></body></html>',
+    # bs4 left <script>/<style>/<template> text out of get_text(); itertext()
+    # includes it. Every real R*.htm carries a <script>, but outside the table.
+    "style-in-a-value-cell":
+        '<html><head><style>td{color:red}</style></head>'
+        '<body><script>Show.showAR();</script>'
+        '<table class="report"><tr><th class="tl"><strong>T</strong></th><th>Q1</th></tr>'
+        '<tr class="re"><td class="pl"><a onclick="Show.showAR(this, \'defref_a_B\', window)">L</a></td>'
+        '<td class="nump"><style>i{}</style>1</td></tr></table></body></html>',
     # An encoding declaration: lxml refuses to parse this from a str.
     "xml-prolog":
         '<?xml version="1.0" encoding="utf-8"?>'
@@ -207,9 +215,18 @@ def test_edge_inputs_match_the_bs4_baseline(name, form, baseline):
 
 
 def test_the_baseline_is_not_vacuous(baseline):
-    """An extractor that returned empty reports would match a baseline of them."""
-    rows = sum(len(v.get("rows", [])) for v in baseline.values())
-    assert rows == 646
+    """An extractor that returned empty reports would match a baseline of them.
+
+    Counted apart, because the two numbers mean different things: 620 is what
+    44 real SEC reports produce, and it is the figure worth quoting. The 28 is
+    the handful of rows in the hand-written edge inputs.
+    """
+    corpus = sum(len(v.get("rows", [])) for k, v in baseline.items()
+                 if not k.startswith("EDGE:") and k.endswith("form=None"))
+    edge = sum(len(v.get("rows", [])) for k, v in baseline.items()
+               if k.startswith("EDGE:"))
+    assert corpus == 620
+    assert edge == 28
     assert len(CORPUS) == 44
 
 
@@ -267,6 +284,17 @@ def test_an_encoding_declaration_does_not_raise():
     """lxml refuses a str carrying an encoding declaration; the reader
     normalises to bytes first."""
     report = extract_concepts_from_report(EDGE["xml-prolog"])
+    assert report.title == "T"
+    assert [r.values for r in report.rows] == [{"Q1": "1"}]
+
+
+def test_a_stylesheet_in_a_value_cell_is_not_read_as_a_value():
+    """bs4 classified the text inside <script>, <style> and <template> as
+    Script, Stylesheet and TemplateString and left all three out of
+    get_text(); itertext() includes them. Every real R*.htm carries a
+    <script> -- Show.js plus an inline block -- but always outside the report
+    table, so the 44-file corpus cannot show this either way."""
+    report = extract_concepts_from_report(EDGE["style-in-a-value-cell"])
     assert report.title == "T"
     assert [r.values for r in report.rows] == [{"Q1": "1"}]
 

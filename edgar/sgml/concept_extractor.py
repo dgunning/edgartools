@@ -25,7 +25,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple, Union
 
 import lxml.html
-from lxml.etree import ParserError
+from lxml.etree import ParserError, strip_elements
 from lxml.html import HtmlElement
 
 from edgar.documents.utils.html_utils import create_lxml_parser
@@ -582,6 +582,14 @@ def extract_concepts_from_report(html_content: str, form: Optional[str] = None) 
         # Empty or whitespace-only input. bs4 built an empty soup, found no
         # table and returned an empty report; lxml raises, so map it back.
         return ConceptReport(title='', period_headers=[], rows=[])
+    # bs4 classified the text inside these three tags as Script, Stylesheet and
+    # TemplateString and left all three out of get_text(); itertext() and
+    # text_content() include them. Every R*.htm carries a <script> -- they pull
+    # in Show.js and an inline block -- but always outside the report table, so
+    # this changes nothing on real input. It is here so that a <style> smuggled
+    # into a cell cannot become a value. with_tail=False keeps the text that
+    # FOLLOWS the closing tag, which bs4 kept.
+    strip_elements(root, 'script', 'style', 'template', with_tail=False)
 
     # Find the main report table
     report_table = _find_by_class(root, 'table', 'report')

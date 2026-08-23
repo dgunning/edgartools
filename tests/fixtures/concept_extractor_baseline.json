@@ -8646,6 +8646,54 @@
 "shares_scaling": 1,
 "title": "T"
 },
+"EDGE:style-in-a-value-cell|form=10-K": {
+"currency": "USD",
+"currency_scaling": 1,
+"period_headers": [
+"Q1"
+],
+"rows": [
+{
+"concept_id": "a_B",
+"css_class": "re",
+"is_abstract": false,
+"is_header": false,
+"is_total": false,
+"label": "L",
+"level": 0,
+"primary_period": "Q1",
+"values": {
+"Q1": "1"
+}
+}
+],
+"shares_scaling": 1,
+"title": "T"
+},
+"EDGE:style-in-a-value-cell|form=None": {
+"currency": "USD",
+"currency_scaling": 1,
+"period_headers": [
+"Q1"
+],
+"rows": [
+{
+"concept_id": "a_B",
+"css_class": "re",
+"is_abstract": false,
+"is_header": false,
+"is_total": false,
+"label": "L",
+"level": 0,
+"primary_period": "Q1",
+"values": {
+"Q1": "1"
+}
+}
+],
+"shares_scaling": 1,
+"title": "T"
+},
 "EDGE:table-not-report|form=10-K": {
 "currency": "USD",
 "currency_scaling": 1,
