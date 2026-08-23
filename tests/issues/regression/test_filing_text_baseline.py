@@ -181,7 +181,13 @@ BASELINE = {
         # "$98  $204  $269". No value is lost -- every number in the old text is still
         # present, and the only tokens that leave the word Counter do so by gaining a
         # "$" prefix.
-        "a878a2084898cc6bebf519a9b6b765985fc8e8b75e469405ed44e9638676e012",
+        # Re-captured again for edgartools-y0ri / -3cis. Apple's tables regain
+        # sparse label columns ("Number") and merge their affix columns: 18 more
+        # "%" characters appear and "7 %" becomes "7%", "(3) %" becomes "(3)%".
+        # The "$" character count RISES 392 -> 400 (none lost; the standalone ones
+        # merged into their figures), and every number in the old text is still
+        # present IN ORDER, with 5 added.
+        "e3209b778ecea2eb25debbeec095f9662f478a25125d069c96b28341d7dc10e5",
     ),
     # Plain HTML 10-K
     "0001193125-20-052640": (
@@ -192,7 +198,13 @@ BASELINE = {
         # "Stock" headers, 24 "$" markers, and a whole "$2" column that the cap had
         # dropped. Counts of every existing figure (420,083 / 682,494 / 138,450 /
         # 3,437 / 99,869 / 96,431) are unchanged before and after.
-        "0ec6d25aafba3e988faecb31b293b5b781da50cd0a5355b142dcb01d133d70b8",
+        # Re-captured again for edgartools-y0ri / -3cis. The clearest signal here
+        # is parenthesis balance: this filing had 575 "(" against 346 ")" -- every
+        # negative number rendered unclosed. It is now 577 against 556, and
+        # "(31,251" / "(112,485" / "(18,762" render as "(31,251)" / "(112,485)" /
+        # "(18,762)". "$" rises 606 -> 612, and every pre-existing number is still
+        # present in order, with 10 added.
+        "6c84a4404ec72ffbef863c7c92b227be500de7d4fa74beb0de5e7cb8d9eaf862",
     ),
     # CORRESP — the shape where the two paths already agreed before the fix
     "0000065873-05-000060": (

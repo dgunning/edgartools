@@ -152,20 +152,39 @@ def test_gs_10q_resolves_its_part_ii_sections():
                                        "part_ii_item_5", "part_ii_item_6")
             for v in [sections[k]]} == {
         "part_ii_item_1": 1222,
-        "part_ii_item_2": 1976,
+        # 1,976 before edgartools-3cis. This is the one Part II section with a
+        # table in it (issuer purchases of equity securities), and it SHRANK by 96
+        # characters because "$" and "526.80" merged into "$526.80", deleting the
+        # affix column and its padding. The "$" CHARACTER count is unchanged at 8,
+        # all 21 numbers are still present in order, and the first and last 60
+        # characters are byte-identical. The other three Part II sections are pure
+        # prose and are untouched.
+        "part_ii_item_2": 1880,
         "part_ii_item_5": 535,
         "part_ii_item_6": 1188,
     }
 
     # Part I is untouched — the fix adds a boundary, it does not move one.
-    # Both counts grew when the fast_table 8-column cap was removed (edgartools-kq2q):
-    # these two sections carry GS's financial statements, and their wide tables were
-    # rendering without columns the cap had discarded. Verified non-lossy at the word
-    # level -- the only tokens that leave the Counter do so by gaining a "$" prefix
-    # ("1,656,611" -> "$1,656,611"), 139 "$" markers arrive, and the section's first
-    # and last 80 characters are byte-identical, so no boundary moved.
-    assert len(sections["part_i_item_1"].text()) == 632360
-    assert len(sections["part_i_item_2"].text()) == 397515
+    #
+    # These two counts have moved twice for table-rendering work, in OPPOSITE
+    # directions, which is why neither is asserted on its size alone.
+    #
+    # edgartools-kq2q (the 8-column cap) grew both: these sections carry GS's
+    # financial statements and their wide tables were rendering without columns the
+    # cap had discarded.
+    #
+    # edgartools-3cis then SHRANK part_i_item_1, from 632,360 to 627,444. Merging an
+    # affix column into its figure deletes a whole column and its padding: "100" and
+    # a lone "%" two columns over become "100%". 263 standalone "$" tokens and 109
+    # "%" merge that way here. A section getting SMALLER is the shape of content
+    # loss, so it was checked rather than assumed:
+    #   - the "$" character count is unchanged at 2,217 and "%" rises 259 -> 741,
+    #     so no marker was dropped, they moved;
+    #   - every number in the old text is still present IN ORDER, with 2 added;
+    #   - the first and last 80 characters are byte-identical, so no boundary moved;
+    #   - part_ii_item_1 and part_ii_item_6 are byte-identical, as prose should be.
+    assert len(sections["part_i_item_1"].text()) == 627444
+    assert len(sections["part_i_item_2"].text()) == 397582
 
     assert sections["part_ii_item_1"].text().startswith("Item 1. Legal Proceedings")
     assert sections["part_ii_item_6"].text().startswith("Item 6. Exhibits")
@@ -190,8 +209,9 @@ def test_gs_10q_lookups_answer_without_any_legacy_fallback():
 
     # Part I still answers from the new parser too — get_item_with_part must not
     # have started depending on the Part II marker to resolve anything.
-    # Count re-pinned for edgartools-kq2q; see the note in the test above.
-    assert len(report.get_item_with_part("Part I", "Item 1")) == 632360
+    # Count re-pinned for edgartools-kq2q and again for -3cis; see the note in the
+    # test above for why this number went up and then back down.
+    assert len(report.get_item_with_part("Part I", "Item 1")) == 627444
 
 
 def test_signatures_bounds_the_last_item_on_other_filings_too():

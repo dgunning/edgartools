@@ -207,7 +207,10 @@ def test_2010_20f_resolves_all_eight_wrapped_items_without_the_legacy_parser():
     # rendering only and moves no item boundary.
     expected = {
         "Item 5": 107457,
-        "Item 6": 57861,
+        # Item 6 moved twice: 57,841 -> 57,861 for kq2q, then -> 58,425 for
+        # y0ri/3cis, which recovers "Headcount", "Bonus", "Shares" and "Common"
+        # label cells and merges "24.8" + "%" into "24.8%". Numbers unchanged.
+        "Item 6": 58425,
         "Item 11": 7504,
         "Item 12": 152,
         "Item 15": 14078,
