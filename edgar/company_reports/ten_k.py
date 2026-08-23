@@ -414,16 +414,6 @@ class TenK(CompanyReport):
             return index
         return None
 
-    def id_parse_document(self, markdown:bool=False):
-        cache = getattr(self, '_id_parse_cache', {})
-        if markdown in cache:
-            return cache[markdown]
-        from edgar.files.html_documents_id_parser import ParsedHtml10K
-        result = ParsedHtml10K().extract_html(self._filing.html(), self.structure, markdown=markdown)
-        cache[markdown] = result
-        self._id_parse_cache = cache
-        return result
-
     def __str__(self):
         return f"""TenK('{self.company}')"""
 
@@ -717,26 +707,8 @@ class TenK(CompanyReport):
                             item_text = item_text.rstrip(last_line)
                         return item_text
 
-        # Fall back to chunked document for backward compatibility
-        # Log fallback usage for Phase 1 deprecation tracking
-        log.warning(
-            f"TenK falling back to legacy parser for '{item_or_part}' "
-            f"(filing: {self._filing.accession_number}). "
-            f"New parser sections available: {list(self.sections.keys()) if self.sections else 'none'}. "
-            f"This fallback will be removed in v6.0."
-        )
-        item_text = self._chunked_document[item_or_part]
-
-        # Clean up the text if found
-        if item_text:
-            item_text = item_text.rstrip()
-            last_line = item_text.split("\n")[-1]
-            if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
-                item_text = item_text.rstrip(last_line)
-        else:
-            report_lookup_miss(self, item_or_part)
-
-        return item_text
+        report_lookup_miss(self, item_or_part)
+        return None
 
     def get_item_with_part(self, part: str, item: str, markdown:bool=True):
         """
@@ -754,26 +726,17 @@ class TenK(CompanyReport):
         Returns:
             Item text content, or None if not found
         """
-        # Try new parser via __getitem__ (which handles various formats).
-        # .get() because a miss here is not the end of the road — three
-        # fallbacks follow, so this lookup is a probe and must not raise.
+        # .get() rather than self[item] because a miss must return None, not
+        # raise. It used to be a probe ahead of two edgar.files fallbacks; those
+        # are gone (edgartools-3dp Group B) and the modern parser now answers
+        # alone, but the non-raising contract is what callers were given.
         if self.sections:
             # Since 10-K items are unique, just use the item lookup
             result = self.get(item)
             if result:
                 return result
 
-        # Fallback to old implementations
-        if not part:
-            return self.id_parse_document(markdown).get(item.lower())
-
-        # Try chunked_document
-        item_text = self._chunked_document.get_item_with_part(part, item, markdown=markdown)
-        if item_text and item_text.strip():
-            return item_text
-
-        # Final fallback to id_parse_document
-        return self.id_parse_document(markdown).get(part.lower(), {}).get(item.lower())
+        return None
 
     def get_structure(self):
         # Create the main tree

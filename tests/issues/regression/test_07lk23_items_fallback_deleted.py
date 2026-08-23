@@ -12,7 +12,7 @@ difference at zero filings for all four report forms. The fallbacks are gone.
 found the fallbacks in ``__getitem__`` and ``get_item_with_part`` are very much
 alive: 15 item lookups and 4 part-qualified lookups across the corpus return real
 text only because legacy is still there. (Eight of the fifteen closed on
-2026-08-21 with edgartools-dt1f.1 — see ``TestGetitemFallbackIsStillWired`` below —
+2026-08-21 with edgartools-dt1f.1 — see ``TestGetitemFallbackIsGoneToo`` below —
 leaving seven and the four.) The two are not the same question, and the reason is
 structural rather than incidental —
 
@@ -109,8 +109,13 @@ class TestItemsNoLongerNeedsLegacy:
         assert empty.items == []
 
 
-class TestGetitemFallbackIsStillWired:
-    """The half that was NOT deleted, pinned as live rather than asserted dead.
+class TestGetitemFallbackIsGoneToo:
+    """The half that outlived 07lk.23, and was deleted by 3dp Group B.
+
+    Kept under its own name because the history is the evidence: this class
+    pinned the __getitem__ fallback as LIVE while it still was, and each entry
+    below records the date its last legacy-only lookup closed. That is what made
+    the deletion measurable rather than hopeful.
 
     If a later change to the pattern extractor makes these pass without legacy,
     that is good news and this class should be revisited — but it has to be
@@ -185,18 +190,23 @@ class TestGetitemFallbackIsStillWired:
             f"{item} should now come from edgar.documents with no legacy fallback"
         )
 
-    def test_a_missing_item_still_reaches_the_fallback(self):
+    def test_a_missing_item_returns_none_from_every_report_type(self):
         """The wiring, on an item the filing genuinely does not have.
 
-        A 1999 10-K has no Item 16 — Form 10-K Summary was added in 2016 — so the
-        lookup falls through the new parser and the cross-reference index to
-        ``ChunkedDocument``. TenK dereferences it unguarded and therefore raises
-        once it is None; TwentyF guards and returns None. Both call sites are
-        deleted by 07lk.3, and they do not behave the same way, which is the part
-        worth pinning now that no tracked fixture can show the fallback returning
-        real text.
-        """
-        with pytest.raises(TypeError):
-            _without_legacy(TenK)(FixtureFiling(GATE_10K, "10-K"))["Item 16"]
+        A 1999 10-K has no Item 16 — Form 10-K Summary was added in 2016 — and a
+        20-F has no Item 20.
 
+        This used to assert an ASYMMETRY, and pinning it is what made the
+        asymmetry safe to remove. TenK dereferenced ``self._chunked_document``
+        unguarded, so a missing item raised ``TypeError`` once the fallback was
+        nulled, while TwentyF guarded the same call and returned None. That
+        difference was described here as "the part 07lk.3 has to handle at both
+        call sites".
+
+        edgartools-3dp Group B deleted both call sites, which is how it gets
+        handled: there is nothing left to dereference, so every report type now
+        returns None for an item it does not have. The two behaviours converged
+        by deletion rather than by being reconciled.
+        """
+        assert _without_legacy(TenK)(FixtureFiling(GATE_10K, "10-K"))["Item 16"] is None
         assert _without_legacy(TwentyF)(FixtureFiling(GATE_20F, "20-F"))["Item 20"] is None

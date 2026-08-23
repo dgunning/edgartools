@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **A word came back split across lines when the filer bolded one of its letters.** Filers routinely put an acronym's initials in their own `<font>` runs; where those sit inside a `<div>` styled `display:inline`, `Document.text()` emitted each run as its own block. Aardvark Therapeutics' 8-K of 2025-04-01 rendered "(Hunger Elimination or Reduction Objective)" one letter to a line. Such a div now reads as a paragraph — unless it wraps a table or another block, which is how iXBRL containers hold whole statements.
 
+### Removed
+
+- **The legacy-parser fallbacks under item lookup on 10-K, 10-Q, 20-F and 8-K.** `report["Item 7"]` and `get_item_with_part()` used to try the modern parser and then, on a miss, read the filing again with `edgar.files`. Measured over ~2,110 lookups on filings from 2001 to 2025, those paths were reached 86 times and produced content on none of them, so they are gone. `TenK.id_parse_document()` and `TenQ.id_parse_document()` are removed with them. A lookup for an item a filing does not have now returns `None` from every report type — `TenK` previously raised `TypeError` here. The deprecated public `chunked_document` property is unaffected and still available until 6.0.
+
 ## [5.52.0] - 2026-08-22
 
 ### Added
