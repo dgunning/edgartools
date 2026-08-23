@@ -15,8 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **A line break the filer wrote was dropped, gluing the words either side.** A `<br>` between two inline elements — the shape of every 6-K and 8-K cover page — was pruned as an empty node, so `UNITED STATES<br/>SECURITIES AND EXCHANGE COMMISSION` came back as `UNITED STATESSECURITIES AND EXCHANGE COMMISSION`. `<br>` between bare text was never affected. Exelon's 8-K of 2005-04-27 regains two line breaks; its text is otherwise unchanged, at the same 2,629 characters.
 
-### Fixed
-
 - **Wide tables silently lost real columns.** The text renderer scored each column of a table, sorted the scores highest-first, and kept only the top eight. Because of that ordering the discarded columns were not the right-hand edge but whichever scored lowest anywhere in the table, so a 21-column segment table rendered without its `Corporate and unallocated` and `Total` headers, and a 10-column voting table dropped the `% Withheld` figure altogether — 6.45 was in `to_dataframe()` and nowhere in `text()`. Every column that clears the content threshold is now rendered; per-column width is still bounded by `table_max_col_width`.
 
 - **A word came back split across lines when the filer bolded one of its letters.** Filers routinely put an acronym's initials in their own `<font>` runs; where those sit inside a `<div>` styled `display:inline`, `Document.text()` emitted each run as its own block. Aardvark Therapeutics' 8-K of 2025-04-01 rendered "(Hunger Elimination or Reduction Objective)" one letter to a line. Such a div now reads as a paragraph — unless it wraps a table or another block, which is how iXBRL containers hold whole statements.
