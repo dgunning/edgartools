@@ -3,7 +3,8 @@ from typing import Any, Dict, List, Optional
 
 import orjson as json
 import pandas as pd
-from bs4 import BeautifulSoup, Comment, Tag
+from lxml import etree
+from lxml import html as lxml_html
 from pydantic import BaseModel
 from rich import box
 from rich.console import Group
@@ -14,6 +15,7 @@ from rich.text import Text
 from edgar._party import Address, get_addresses_as_columns
 from edgar.config import SEC_BASE_URL
 from edgar.display.formatting import display_size
+from edgar.documents.utils.html_utils import remove_xml_declaration
 from edgar.httprequests import download_file
 from edgar.reference import describe_form
 from edgar.richtools import repr_rich
@@ -256,18 +258,45 @@ class IndexHeaders(BaseModel):
         address_dict['state_or_country'] = address_dict.pop('state', '')
         return Address(**address_dict)
 
+    @staticmethod
+    def _extract_sec_header_comment(html_text: str) -> Optional[str]:
+        """
+        Extract the SEC-HEADER payload from the HTML comment that embeds it.
+        Parsed with lxml.html in recover mode, matching the pattern used by
+        edgar.documents for broken SEC HTML (see create_lxml_parser).
+        """
+        # lxml refuses str input carrying an XML encoding declaration
+        # (gotcha 4 in the #931 porting guide); SEC XHTML carries them.
+        html_text = remove_xml_declaration(html_text)
+        parser = lxml_html.HTMLParser(remove_blank_text=False,
+                                      remove_comments=False,
+                                      recover=True)
+        try:
+            tree = lxml_html.fromstring(html_text, parser=parser)
+        except (etree.ParserError, etree.XMLSyntaxError) as exc:
+            # bs4 tolerated empty/whitespace-only input (empty soup, then
+            # IndexError on comment access); keep that contract under lxml,
+            # which raises on an empty or unusable document.
+            raise IndexError('No SEC-HEADER comment found in the provided HTML content.') from exc
+
+        # Comment nodes carry the etree.Comment callable as their .tag,
+        # unlike regular elements whose .tag is a string.
+        for node in tree.iter():
+            if node.tag is etree.Comment:
+                return node.text.strip() if node.text else None
+        return None
+
     @classmethod
     def load(cls, header_text: str):
         """
         Load the IndexHeaders from the HTML file content.
         """
-        soup = BeautifulSoup(header_text, 'html.parser')
+        header_comment = cls._extract_sec_header_comment(header_text)
+        if header_comment is None:
+            # Preserve the current contract: no SEC-HEADER comment -> IndexError.
+            raise IndexError('No SEC-HEADER comment found in the provided HTML content.')
 
-        # The SEC-HEADER tag contains the filing header information
-        header_text = soup.find_all(string=lambda text: isinstance(text, Comment))[0].strip()
-
-
-        lines = header_text.strip().split("\n")
+        lines = header_comment.strip().split("\n")
         data: Dict[str, Any] = {}
         stack = [data]
 
@@ -473,25 +502,10 @@ class IndexHeaders(BaseModel):
         }
 
         # The <PRE> block contains the HTML for the documents
-        #documents = IndexHeaders._extract_documents_from_pre(soup.find("pre"))
+        # (extraction of the document list from the PRE block is not implemented)
 
         # Initialize IndexHeaders with the parsed data
         return cls(**sec_header_data)
-
-    @staticmethod
-    def _extract_documents_from_pre(pre_tag:Tag):
-        soup = BeautifulSoup(pre_tag.text)
-        document_tags = soup.find_all("document")
-        for document_tag in document_tags:
-            document_tag.find("type")
-
-
-    @staticmethod
-    def _extract_comment_text(soup):
-        comments = soup.find_all(string=lambda text: isinstance(text, Comment))
-        if comments:
-            return comments[0].strip()
-        return None
 
     @staticmethod
     def _extract_accession_number(title: str):
