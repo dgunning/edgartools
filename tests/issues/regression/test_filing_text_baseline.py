@@ -173,13 +173,26 @@ BASELINE = {
     "0000320193-23-000106": (
         dict(form="10-K", filing_date="2023-11-03", company="Apple Inc.",
              cik=320193, accession_no="0000320193-23-000106"),
-        "6147976a87b59b1400d374831c625d023f0202b4d36fda6b931e8407a07a4ccc",
+        # Re-captured for the fast_table column cap: the renderer kept only the 8
+        # highest-scoring columns of a table, so wide financial tables silently lost
+        # real columns. Apple's marketable-securities and stock-performance tables
+        # regain their headers ("September", "Cash", "Unrealized", "Losses",
+        # "Marketable", "Securities") and 22 "$" markers; "98 204 269" becomes
+        # "$98  $204  $269". No value is lost -- every number in the old text is still
+        # present, and the only tokens that leave the word Counter do so by gaining a
+        # "$" prefix.
+        "a878a2084898cc6bebf519a9b6b765985fc8e8b75e469405ed44e9638676e012",
     ),
     # Plain HTML 10-K
     "0001193125-20-052640": (
         dict(form="10-K", filing_date="2020-02-27", company="10x Genomics, Inc.",
              cik=1770787, accession_no="0001193125-20-052640"),
-        "feae74ba4ffd7cb9bc267297bab99ab3f2d0a707cda06ce1bbb6ee19257580df",
+        # Re-captured for the same fast_table column cap. 10x Genomics' statement of
+        # stockholders' equity regains "Accumulated", "Shares", "Amount", "Net" and
+        # "Stock" headers, 24 "$" markers, and a whole "$2" column that the cap had
+        # dropped. Counts of every existing figure (420,083 / 682,494 / 138,450 /
+        # 3,437 / 99,869 / 96,431) are unchanged before and after.
+        "0ec6d25aafba3e988faecb31b293b5b781da50cd0a5355b142dcb01d133d70b8",
     ),
     # CORRESP — the shape where the two paths already agreed before the fix
     "0000065873-05-000060": (
