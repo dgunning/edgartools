@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Filing homepage parsing is about 9x faster.** The filing index page — the source of `filing.attachments`, `filing.homepage.get_filers()` and the filing dates — was parsed with BeautifulSoup's pure-Python `html.parser`; it now uses lxml, measured at 15.8ms to 1.8ms across the five tracked homepage fixtures. Output is unchanged: the whole parse of every fixture, down to each attachment's size and each filer's identification lines, is pinned against a baseline captured from the previous implementation. A blank or truncated index page still yields a homepage with nothing on it rather than raising.
+
+  `FilingHomepage(...)` and `Attachments.load(...)` take an lxml tree now, from the new `edgar.attachments.parse_homepage_html(html)`. Both still accept a BeautifulSoup, and `FilingHomepage(soup=...)` still works, with a `DeprecationWarning`; both go in 6.0. Neither is on the path you take through `filing.homepage`.
+
 - **Filing header parsing is about 7x faster.** `Filing.index_headers` parsed the header page with BeautifulSoup's pure-Python `html.parser`; it now uses lxml, measured at 460µs to 66µs per header across the tracked header corpus. Output is unchanged — the full parsed model is pinned against a baseline captured from the previous implementation. Malformed input behaves as before, including the `IndexError` an empty page has always raised.
 
 - **`PressRelease.text()` now reads through the modern parser.** Output changes slightly, all of it in your favour: the old path leaked raw `<img>` markup into the text and left `&amp;` undecoded as a literal "amp", both of which are gone. Across 12 real 8-K press releases no word is lost that is not one of those artifacts. Table cells no longer repeat the `$` that filers put in their own column; the figures and the header's units are unchanged.

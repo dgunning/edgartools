@@ -13,18 +13,17 @@ GitHub PR: https://github.com/dgunning/edgartools/pull/787
 """
 
 import pytest
-from bs4 import BeautifulSoup
 
-from edgar.attachments import Attachments, FilingHomepage
+from edgar.attachments import Attachments, FilingHomepage, parse_homepage_html
 
 pytestmark = pytest.mark.fast
 
 
 def _homepage_from_html(html: str) -> FilingHomepage:
-    soup = BeautifulSoup(html, "html.parser")
+    root = parse_homepage_html(html)
     # Attachments is irrelevant for these tests; pass an empty instance.
     attachments = Attachments(document_files=[], data_files=[], primary_documents=[])
-    return FilingHomepage(url="http://example/index.html", soup=soup, attachments=attachments)
+    return FilingHomepage(url="http://example/index.html", root=root, attachments=attachments)
 
 
 _FILING_AND_ACCEPTED = """
