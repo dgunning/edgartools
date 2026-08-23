@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **`PressRelease.text()` now reads through the modern parser.** Output changes slightly, all of it in your favour: the old path leaked raw `<img>` markup into the text and left `&amp;` undecoded as a literal "amp", both of which are gone. Across 12 real 8-K press releases no word is lost that is not one of those artifacts. Table cells no longer repeat the `$` that filers put in their own column; the figures and the header's units are unchanged.
+
 ### Fixed
 
 - **A word came back split across lines when the filer bolded one of its letters.** Filers routinely put an acronym's initials in their own `<font>` runs; where those sit inside a `<div>` styled `display:inline`, `Document.text()` emitted each run as its own block. Aardvark Therapeutics' 8-K of 2025-04-01 rendered "(Hunger Elimination or Reduction Objective)" one letter to a line. Such a div now reads as a paragraph — unless it wraps a table or another block, which is how iXBRL containers hold whole statements.
