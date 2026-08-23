@@ -3,7 +3,7 @@ from typing import Optional
 
 from edgar._filings import Attachment, Attachments
 from edgar._markdown import MarkdownContent
-from edgar.files.html_documents import HtmlDocument
+from edgar.documents import parse_html
 from edgar.richtools import repr_rich
 
 __all__ = ['PressRelease', 'PressReleases']
@@ -68,7 +68,7 @@ class PressRelease:
     def text(self) -> Optional[str]:
         html = self.html()
         if html:
-            return HtmlDocument.from_html(html, extract_data=False).text
+            return parse_html(html).text()
         return None
 
     def open(self):
