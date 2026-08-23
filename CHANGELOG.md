@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **R-file report rendering parses about 20x faster.** `filing.reports`, `TenK.reports` and `Report.view()`/`.text()` parsed each R-file with BeautifulSoup's pure-Python `html.parser`; they now use lxml, measured at 438ms to 22ms over the 42 R-files of a tracked AAPL 10-Q. End to end the render is 1.8x faster (1217ms to 680ms) — the remaining time is table layout, not parsing. Output is unchanged: the rendered text of all 42 reports is pinned against a baseline captured from the previous implementation, covering both the ordinary single-table path and the embedded-table path added for issue #755.
+
 - **Filing header parsing is about 7x faster.** `Filing.index_headers` parsed the header page with BeautifulSoup's pure-Python `html.parser`; it now uses lxml, measured at 460µs to 66µs per header across the tracked header corpus. Output is unchanged — the full parsed model is pinned against a baseline captured from the previous implementation. Malformed input behaves as before, including the `IndexError` an empty page has always raised.
 
 - **`PressRelease.text()` now reads through the modern parser.** Output changes slightly, all of it in your favour: the old path leaked raw `<img>` markup into the text and left `&amp;` undecoded as a literal "amp", both of which are gone. Across 12 real 8-K press releases no word is lost that is not one of those artifacts. Table cells no longer repeat the `$` that filers put in their own column; the figures and the header's units are unchanged.
