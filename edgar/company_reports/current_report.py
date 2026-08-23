@@ -681,10 +681,9 @@ class CurrentReport(CompanyReport):
         """
         List of detected item names (consistent with sections property).
 
-        Unions three detection strategies, all reading the primary document:
+        Unions two detection strategies, both reading the primary document:
         1. New parser's section detection (95% accuracy for modern filings)
-        2. Chunked document parser (legacy parser)
-        3. Text-based pattern extraction (all eras including SGML)
+        2. Text-based pattern extraction (all eras including SGML)
 
         The text-based strategy handles legacy SGML filings (1999-2001) where
         SEC metadata is incomplete (GitHub issue #462).
@@ -692,12 +691,12 @@ class CurrentReport(CompanyReport):
         Returns:
             List of item titles for backward compatibility (e.g., ['Item 5.02', 'Item 9.01'])
         """
-        # The new parser (strategy 1) is high-precision for modern filings but can
-        # silently miss an item whose body is present — e.g. an Item 1.05
-        # cybersecurity disclosure that only shows Item 9.01 in the parsed sections
-        # (edgartools-83gh). The chunked parser operates on the same primary
-        # document (no exhibit text, so no false positives from press releases),
-        # so unioning the two recovers missed items without over-reporting.
+        # Two strategies, unioned rather than tried in order. The new parser
+        # (strategy 1) is high-precision but narrow: it reads the parsed section
+        # tree, which is empty on filings whose primary document is plain text in
+        # minimal HTML. The text strategy reads the same primary document (no
+        # exhibit text, so no false positives from press releases), which is what
+        # makes it safe to union rather than merely to fall back to.
         item_set = set()
 
         # Strategy 1: new parser section detection (95% rate for modern filings)
@@ -712,21 +711,13 @@ class CurrentReport(CompanyReport):
             if parser_items and any('.' in item for item in parser_items):
                 item_set.update(_canonical_item(item) for item in parser_items)
 
-        # Strategy 2: chunked parser of the primary document — backfills items the
-        # new parser missed; same precision domain (excludes exhibit text).
-        if self._chunked_document:
-            chunked_items = self._chunked_document.list_items()
-            if chunked_items:
-                item_set.update(_canonical_item(item) for item in chunked_items)
-
-        # Strategy 3: text-based pattern extraction. It is the only source for legacy
-        # SGML filings (1999-2001, no usable HTML), and is unioned in — rather than
-        # used only when the HTML strategies come up empty — because those strategies
-        # can return a partial set on 2005-era filings that are plain text in minimal
-        # HTML (e.g. Cimarex 0001047469-05-006981, where the chunked parser sees only
-        # Item 8.01 of the two items present). filing.text() renders the primary
-        # document alone, so this shares the precision domain of strategies 1 and 2
-        # and adds no exhibit-text false positives. (edgartools-l6cl)
+        # Strategy 2: text-based pattern extraction. It is the only source for legacy
+        # SGML filings (1999-2001, no usable HTML) and for 2005-era filings that are
+        # plain text in minimal HTML, where strategy 1 returns nothing at all — on
+        # Cimarex 0001047469-05-006981 both of the items present come from here.
+        # It is unioned in rather than used only when strategy 1 comes up empty
+        # because a partial section tree is not the same as an absent one.
+        # (edgartools-l6cl)
         filing_text = self._get_filing_text()
         if filing_text:
             # Format for display consistency: ['2.02', '9.01'] -> ['Item 2.02', 'Item 9.01']
