@@ -13,10 +13,13 @@ Usage:
     >>> tenk.notes['Debt'].tables         # Sub-tables within the note
     >>> tenk.notes['Debt'].to_context()   # AI-optimized context
 """
+import copy
 import re
 import uuid
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
+import lxml.html
+from lxml.etree import ParserError
 from rich import box
 from rich.console import Group
 from rich.panel import Panel
@@ -767,6 +770,121 @@ def _is_garbled_markdown(md: str) -> bool:
     return False
 
 
+def _parse_note_html(html: str):
+    """Parse note TextBlock HTML into an lxml tree, or None if unparseable.
+
+    bs4 built an empty soup for blank input where lxml raises ParserError; both
+    callers here treat "nothing to work with" as None already.
+    """
+    from edgar.documents.utils.html_utils import create_lxml_parser
+    if isinstance(html, str):
+        html = html.encode("utf-8", errors="replace")
+    # remove_blank_text stays off: a whitespace-only node between two tags is a
+    # word boundary, and this is the codepath the word-boundary bug family lives
+    # on (edgartools-vfwp). Collapse whitespace, never delete it.
+    parser = create_lxml_parser(remove_blank_text=False, remove_comments=True,
+                                recover=True, encoding="utf-8")
+    # fragments_fromstring, not fromstring. `fromstring` roots a single-element
+    # fragment AT that element but invents a wrapping <div> for a multi-element
+    # one, so there is no way to tell the note's own outermost div from a
+    # synthetic one -- and _inner_html would either drop a real wrapper or add a
+    # phantom, depending on the note. fragments_fromstring returns the top-level
+    # nodes themselves, which is exactly what the soup's children were.
+    try:
+        fragments = lxml.html.fragments_fromstring(html, parser=parser)
+    except ParserError:
+        return None
+
+    root = lxml.html.Element('html')
+    body = lxml.html.Element('body')
+    root.append(body)
+    for fragment in fragments:
+        if isinstance(fragment, str):
+            # Leading or trailing bare text, which bs4 held as its own string.
+            if len(body):
+                body[-1].tail = (body[-1].tail or '') + fragment
+            else:
+                body.text = (body.text or '') + fragment
+        else:
+            body.append(fragment)
+    return root
+
+
+def _inner_html(root) -> str:
+    """Serialize a tree the way ``str(soup)`` did for an html.parser fragment.
+
+    ``BeautifulSoup(html, 'html.parser')`` does NOT invent <html> or <body>; the
+    soup's children are the fragment's own top-level nodes and str() emits just
+    those. lxml always builds a document, so emitting the tree directly would
+    add a wrapper bs4 never produced and hand `process_content` a different
+    input. This emits the body's contents instead.
+    """
+    body = root.find('body')
+    node = body if body is not None else root
+    parts = [node.text or '']
+    parts.extend(lxml.html.tostring(child, encoding='unicode') for child in node)
+    return ''.join(parts)
+
+
+def _text_skipping_tables(element) -> str:
+    """``get_text(separator=' ', strip=True)`` over everything outside a table.
+
+    Two traps in one function. First, this is NOT ``text_content()``: that
+    concatenates descendants with no separator, gluing the last word of one node
+    to the first of the next. Second, it walks rather than removing the tables:
+    dropping an element in lxml deletes its tail, and splicing the tail back
+    onto the previous sibling to save it MERGES two of bs4's separate strings
+    into one, so the separator is then never inserted between them. Both
+    mistakes produce the same symptom -- run-together words -- which is the
+    edgartools-vfwp family this codepath already has a history of.
+    """
+    chunks: List[str] = []
+
+    def walk(el):
+        if el.text and el.text.strip():
+            chunks.append(el.text.strip())
+        for child in el.iterchildren():
+            tag = child.tag
+            if isinstance(tag, str) and tag.lower() != 'table':
+                walk(child)
+            if child.tail and child.tail.strip():
+                chunks.append(child.tail.strip())
+
+    walk(element)
+    return ' '.join(chunks)
+
+
+def _joined_cell_text(element) -> str:
+    """``get_text(strip=True)`` -- each string stripped, joined with NOTHING.
+
+    The empty separator is the point: bs4 strips every string and concatenates,
+    so "<span> 1,234 </span><span> </span>" gives "1,234", where
+    ``text_content()`` would keep the inner padding and give " 1,234  ".
+    """
+    return ''.join(chunk.strip() for chunk in element.itertext())
+
+
+def _without_tables(root):
+    """A copy of the tree with every <table> removed, tails preserved.
+
+    Here splicing the tail onto the previous sibling IS right, unlike in
+    _text_skipping_tables: the result is serialized back to HTML, and
+    serialization concatenates adjacent strings with nothing between them --
+    exactly what bs4's str(soup) did after decompose().
+    """
+    tree = copy.deepcopy(root)
+    for table in tree.xpath('.//table'):
+        parent = table.getparent()
+        if table.tail:
+            previous = table.getprevious()
+            if previous is not None:
+                previous.tail = (previous.tail or '') + table.tail
+            else:
+                parent.text = (parent.text or '') + table.tail
+        parent.remove(table)
+    return tree
+
+
 def _render_statement_to_markdown(stmt: 'Statement', section_title: str,
                                   optimize_for_llm: bool) -> Optional[str]:
     """Render a sub-table/detail Statement to markdown with fallback.
@@ -786,10 +904,9 @@ def _render_statement_to_markdown(stmt: 'Statement', section_title: str,
         return plain if plain else None
 
     try:
-        from bs4 import BeautifulSoup, NavigableString
         from edgar.markdown import process_content
-        soup = BeautifulSoup(html, 'html.parser')
-        html_tables = soup.find_all('table')
+        root = _parse_note_html(html)
+        html_tables = root.xpath('.//table') if root is not None else []
 
         if not html_tables:
             return process_content(html, section_title=section_title) or None
@@ -800,7 +917,10 @@ def _render_statement_to_markdown(stmt: 'Statement', section_title: str,
         run_id = uuid.uuid4().hex[:12]
         for i, table_tag in enumerate(html_tables):
             marker = f'__TBLPH_{run_id}_{i}__'
-            table_html = str(table_tag)
+            # with_tail=False: lxml would otherwise append the text FOLLOWING
+            # the table, which is narrative belonging to the document, not to
+            # this table. bs4's str(tag) never included it.
+            table_html = lxml.html.tostring(table_tag, encoding='unicode', with_tail=False)
 
             # Try pipe-table conversion for this individual table
             md = process_content(table_html, section_title=section_title)
@@ -811,11 +931,24 @@ def _render_statement_to_markdown(stmt: 'Statement', section_title: str,
                 plain = _html_table_to_plain_text(table_tag)
                 placeholders[marker] = plain or ''
 
-            # Replace the tag in the soup with a text marker
-            table_tag.replace_with(NavigableString(f'\n{marker}\n'))
+            # Replace the tag with a text marker. lxml has no text nodes to
+            # swap in, so the marker is spliced onto whatever precedes the
+            # table, carrying the table's own tail after it -- dropping the
+            # element would otherwise take that following text with it.
+            # Merging the strings is safe here, unlike in _text_skipping_tables:
+            # this tree is serialized straight back to HTML, and serialization
+            # concatenates adjacent strings anyway.
+            parent = table_tag.getparent()
+            spliced = f'\n{marker}\n' + (table_tag.tail or '')
+            previous = table_tag.getprevious()
+            if previous is not None:
+                previous.tail = (previous.tail or '') + spliced
+            else:
+                parent.text = (parent.text or '') + spliced
+            parent.remove(table_tag)
 
         # Now process the modified HTML (text + placeholders) for headings/paragraphs
-        modified_html = str(soup)
+        modified_html = _inner_html(root)
         text_md = process_content(modified_html)
 
         # Splice table renderings back in place of placeholders
@@ -838,19 +971,19 @@ def _render_statement_to_markdown(stmt: 'Statement', section_title: str,
 
 
 def _html_table_to_plain_text(table_tag) -> Optional[str]:
-    """Convert a BeautifulSoup <table> tag to aligned plain text.
+    """Convert an lxml <table> element to aligned plain text.
 
     Extracts rows and pads columns for readable alignment when pipe-table
     conversion fails due to complex colspans.
     """
-    rows = table_tag.find_all('tr')
+    rows = table_tag.xpath('.//tr')
     if not rows:
         return None
 
     matrix = []
     for row in rows:
-        cells = row.find_all(['td', 'th'])
-        row_text = [c.get_text(strip=True) for c in cells]
+        cells = row.xpath('.//td | .//th')
+        row_text = [_joined_cell_text(c) for c in cells]
         if any(row_text):  # Skip fully empty rows
             matrix.append(row_text)
 
@@ -884,14 +1017,14 @@ def _extract_narrative_markdown(html: str, optimize_for_llm: bool) -> Optional[s
     from the TextBlock HTML before extracting narrative text.
     """
     try:
-        from bs4 import BeautifulSoup
-        soup = BeautifulSoup(html, 'html.parser')
+        root = _parse_note_html(html)
+        if root is None:
+            return None
 
         # Remove all <table> elements — they're rendered separately
-        for table_tag in soup.find_all('table'):
-            table_tag.decompose()
+        stripped = _without_tables(root)
 
-        remaining = str(soup).strip()
+        remaining = _inner_html(stripped).strip()
         if not remaining or remaining in ('<html></html>', ''):
             return None
 
@@ -900,8 +1033,11 @@ def _extract_narrative_markdown(html: str, optimize_for_llm: bool) -> Optional[s
             md = process_content(remaining)
             return md if md and md.strip() else None
         else:
-            # Plain text extraction
-            text = soup.get_text(separator=' ', strip=True)
+            # Plain text extraction. Walks the ORIGINAL tree skipping tables
+            # rather than taking the text of `stripped`: removing the tables
+            # merged text nodes that bs4 kept separate, and get_text's separator
+            # only goes between separate strings.
+            text = _text_skipping_tables(root)
             # Fix missing spaces between adjacent spans (e.g., "hadno" → "had no")
             text = re.sub(r'([a-z])([A-Z$])', r'\1 \2', text)
             text = re.sub(r'(\w)([$])', r'\1 \2', text)
