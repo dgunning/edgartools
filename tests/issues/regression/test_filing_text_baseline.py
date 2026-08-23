@@ -191,7 +191,15 @@ BASELINE = {
     "0000950137-05-004969": (
         dict(form="8-K", filing_date="2005-04-27", company="EXELON CORP",
              cik=1109357, accession_no="0000950137-05-004969"),
-        "a57148944a33bf13bce04b692856c8ad5a61e50132bc648d480b089a5d7ecdda",
+        # Re-captured for edgartools-hxtd: a <br> between two inline elements was
+        # being pruned as an empty node, so the filer's line breaks arrived as
+        # spaces. This cover page gains two of them back --
+        # "CURRENT REPORT Pursuant to Section 13" -> "CURRENT REPORT\nPursuant to
+        # Section 13", and the same at "April 26, 2005 Date of Report". Length is
+        # unchanged at 2,629 characters and
+        # "".join(before.split()) == "".join(after.split()) holds, so nothing but
+        # whitespace moved. This is the only filing of the five that changed.
+        "37211411d05d2120eece22347d8c7cbfde46680d516751fbcce17f060dcb7b5e",
     ),
     # 424B2 structured note
     "0001481057-23-010389": (
