@@ -11,7 +11,6 @@ from rich.tree import Tree
 
 from edgar.company_reports._base import CompanyReport, report_lookup_miss
 from edgar.company_reports._structures import FilingStructure
-from edgar.core import log
 from edgar.display.formatting import datefmt
 from edgar.documents import HTMLParser, ParserConfig
 from edgar.files.htmltools import ChunkedDocument
@@ -309,7 +308,6 @@ class TenQ(CompanyReport):
         - tenq['Part II, Item 1'] -> Legal Proceedings
         - tenq['Item 1'] -> Financial Statements (Part I, backward compat)
 
-        Falls back to old chunked_document for backward compatibility.
 
         Args:
             item_or_part: Section identifier in various formats
@@ -374,20 +372,6 @@ class TenQ(CompanyReport):
                     if section_key.lower() == f'item {normalized}' or section_key.lower() == f'item{normalized}':
                         return self.sections[section_key].text()
 
-        # Fallback to old chunked_document for backward compatibility
-        if self._chunked_document:
-            try:
-                # Log fallback usage for Phase 1 deprecation tracking
-                log.warning(
-                    f"TenQ falling back to legacy parser for '{item_or_part}' "
-                    f"(filing: {self._filing.accession_number}). "
-                    f"New parser sections available: {list(self.sections.keys()) if self.sections else 'none'}. "
-                    f"This fallback will be removed in v6.0."
-                )
-                return self._chunked_document[item_or_part]
-            except (KeyError, TypeError):
-                pass
-
         report_lookup_miss(self, item_or_part)
         return None
 
@@ -433,28 +417,7 @@ class TenQ(CompanyReport):
                     if key in self.sections:
                         return self.sections[key].text()
 
-        # Fallback to old implementations
-        if not part:
-            return self.id_parse_document(markdown).get(part.lower(), {}).get(item.lower())
-
-        # Try chunked_document
-        if self._chunked_document:
-            item_text = self._chunked_document.get_item_with_part(part, item, markdown=markdown)
-            if item_text and item_text.strip():
-                return item_text
-
-        # Final fallback to id_parse_document
-        return self.id_parse_document(markdown).get(part.lower(), {}).get(item.lower())
-
-    def id_parse_document(self, markdown: bool = True):
-        cache = getattr(self, '_id_parse_cache', {})
-        if markdown in cache:
-            return cache[markdown]
-        from edgar.files.html_documents_id_parser import ParsedHtml10Q
-        result = ParsedHtml10Q().extract_html(self._filing.html(), self.structure, markdown=markdown)
-        cache[markdown] = result
-        self._id_parse_cache = cache
-        return result
+        return None
 
     @cached_property
     def _chunked_document(self):

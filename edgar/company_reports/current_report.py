@@ -743,8 +743,7 @@ class CurrentReport(CompanyReport):
 
         Uses multi-tier fallback strategy:
         1. New parser's section detection (95% accuracy for modern filings)
-        2. Chunked document parser (legacy parser)
-        3. Text-based pattern extraction (100% accuracy, all eras including SGML)
+        2. Text-based pattern extraction (100% accuracy, all eras including SGML)
 
         The text-based fallback handles legacy SGML filings (1999-2001) where
         HTML is unavailable (GitHub issue #462).
@@ -777,19 +776,7 @@ class CurrentReport(CompanyReport):
                 if normalized_key == normalized_input:
                     return section.text()
 
-        # Strategy 2: Fallback to old chunked_document for backward compatibility.
-        # Only return a hit — chunked_document returns None for an unmatched key
-        # (e.g. '1.05' when it indexes by 'Item 1.05'); returning that None here
-        # would short-circuit the text-based fallback below. (edgartools-83gh)
-        if self._chunked_document:
-            try:
-                result = self._chunked_document[item_name]
-                if result:
-                    return result
-            except (KeyError, TypeError):
-                pass
-
-        # Strategy 3: Text-based fallback for legacy SGML filings
+        # Strategy 2: Text-based fallback for legacy SGML filings
         # This handles filings where HTML is unavailable but text exists
         # Use cached text extraction to improve performance
         filing_text = self._get_filing_text()
