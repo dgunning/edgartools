@@ -3,9 +3,10 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional, Set, Tuple, Union
 
+import lxml.html
 import pyarrow as pa
 import pyarrow.compute as pc
-from bs4 import BeautifulSoup
+from lxml.etree import ParserError
 from rich import box
 from rich.console import Group
 from rich.panel import Panel
@@ -14,11 +15,96 @@ from rich.text import Text
 
 from edgar.core import DataPager, PagingState, log, strtobool
 from edgar.documents import HTMLParser, ParserConfig
+from edgar.documents.utils.html_utils import create_lxml_parser
 from edgar.richtools import print_rich, repr_rich, rich_to_text
 from edgar.xmltools import child_text, element_text, find_all_elements, find_element, local_name
 from edgar.xmltools import parse_xml as parse_xml_document
 
 __all__ = ['Report', 'Reports', 'File', 'FilingSummary']
+
+def _parse_report_html(content: str):
+    """Parse an R-file into an lxml tree, or None if there is nothing to parse.
+
+    bs4 built an empty soup for blank input where lxml raises ParserError; the
+    callers here already treat "no report table" as "render it the ordinary
+    way", so None joins that path rather than introducing a new failure mode.
+    """
+    if isinstance(content, str):
+        content = content.encode("utf-8", errors="replace")
+    # remove_blank_text stays off: a whitespace-only node between two tags is a
+    # word boundary and libxml2 deletes rather than collapses it.
+    parser = create_lxml_parser(remove_blank_text=False, remove_comments=True,
+                                recover=True, encoding="utf-8")
+    try:
+        return lxml.html.fromstring(content, parser=parser)
+    except ParserError:
+        return None
+
+
+def _by_class(element, tag: str, class_name: str) -> List:
+    """Elements of `tag` carrying `class_name` among its class tokens.
+
+    `class` is a space-separated list, so `@class="text"` would miss
+    ``class="text foo"`` that bs4's class_= matched, while a bare `contains`
+    would wrongly match ``class="textbox"``. Padding with spaces matches whole
+    tokens, which is what bs4 did.
+    """
+    return element.xpath(
+        f'.//{tag}[contains(concat(" ", normalize-space(@class), " "), " {class_name} ")]'
+    )
+
+
+def _first_by_class(element, tag: str, class_name: str):
+    """The first match, or None -- bs4's ``find`` semantics."""
+    found = _by_class(element, tag, class_name)
+    return found[0] if found else None
+
+
+def _joined_text(element) -> str:
+    """bs4's ``get_text(' ', strip=True)``, which lxml has no equivalent for.
+
+    ``text_content()`` is NOT it: that concatenates every descendant string with
+    no separator, so the last word of one node is glued to the first word of the
+    next -- "Note 5Inventories". bs4 strips each string and joins the non-empty
+    ones with the separator, which is what this does.
+    """
+    return ' '.join(chunk.strip() for chunk in element.itertext() if chunk.strip())
+
+
+def _text_outside_tables(cell) -> str:
+    """The cell's narrative lead-in: its text, skipping any nested table.
+
+    bs4 did this by copying the cell, calling decompose() on each nested table
+    and taking get_text of the rest. The obvious lxml translation -- remove the
+    table, splice its tail back on so it is not deleted with it -- is wrong in a
+    way the R-file corpus does not show: splicing MERGES two of bs4's separate
+    strings into one text node, and the separator that get_text(' ') put between
+    them is then never inserted. "Lead-in.<table/>Trailing." came back as
+    "Lead-in.Trailing.". That is the hxtd/2h2s word-gluing family again, arrived
+    at from the opposite direction -- while fixing tail loss.
+
+    So walk instead of mutate, and keep each of bs4's strings a separate chunk.
+    Document order is: an element's own text, then each child's text and tail in
+    turn, which is exactly the order bs4 yielded them in.
+    """
+    chunks: List[str] = []
+
+    def walk(element):
+        if element.text and element.text.strip():
+            chunks.append(element.text.strip())
+        for child in element.iterchildren():
+            tag = child.tag
+            # A table's contents are not narrative. A non-str tag is a comment
+            # or PI, which bs4's get_text skipped too -- but its tail is real
+            # text either way.
+            if isinstance(tag, str) and tag.lower() != 'table':
+                walk(child)
+            if child.tail and child.tail.strip():
+                chunks.append(child.tail.strip())
+
+    walk(cell)
+    return ' '.join(chunks)
+
 
 class Reports:
 
@@ -271,10 +357,10 @@ class Report:
         return self._cached_report_table
 
     @staticmethod
-    def _has_embedded_tables(report_soup) -> bool:
+    def _has_embedded_tables(report) -> bool:
         """True if any TextBlock cell wraps a full HTML table (see issue #755)."""
-        return any(td.find('table') is not None
-                   for td in report_soup.find_all('td', class_='text'))
+        return any(td.find('.//table') is not None
+                   for td in _by_class(report, 'td', 'text'))
 
     def _build_renderable(self, width: int = 500):
         """
@@ -293,8 +379,8 @@ class Report:
         if not content:
             return None
 
-        soup = BeautifulSoup(content, 'html.parser')
-        report = soup.find('table', class_='report')
+        root = _parse_report_html(content)
+        report = _first_by_class(root, 'table', 'report') if root is not None else None
         if report is None or not self._has_embedded_tables(report):
             table = self._get_report_table()
             return table.render(width) if table else None
@@ -305,26 +391,26 @@ class Report:
         if title:
             renderables.append(Text(title, style="bold"))
 
-        for tr in report.find_all('tr'):
-            text_td = tr.find('td', class_='text')
-            if not (text_td and text_td.find('table')):
+        for tr in report.xpath('.//tr'):
+            text_td = _first_by_class(tr, 'td', 'text')
+            if text_td is None or text_td.find('.//table') is None:
                 continue
 
-            label_td = tr.find('td', class_='pl')
-            label = label_td.get_text(' ', strip=True) if label_td else None
+            label_td = _first_by_class(tr, 'td', 'pl')
+            label = _joined_text(label_td) if label_td is not None else None
             if label:
                 renderables.append(Text(label, style="bold cyan"))
 
             # Narrative lead-in: everything in the cell that is not inside a table
-            narrative_soup = BeautifulSoup(str(text_td), 'html.parser')
-            for nested in narrative_soup.find_all('table'):
-                nested.decompose()
-            narrative = narrative_soup.get_text(' ', strip=True)
+            narrative = _text_outside_tables(text_td)
             if narrative:
                 renderables.append(Text(narrative))
 
-            # Render the embedded table(s) as proper tables
-            cell_doc = parser.parse('<html><body>' + str(text_td) + '</body></html>')
+            # Render the embedded table(s) as proper tables. with_tail=False
+            # because lxml's tostring appends the text that FOLLOWS the cell,
+            # which belongs to the next cell, not this one.
+            cell_html = lxml.html.tostring(text_td, encoding='unicode', with_tail=False)
+            cell_doc = parser.parse('<html><body>' + cell_html + '</body></html>')
             for embedded in cell_doc.tables:
                 renderables.append(embedded.render(width))
 
@@ -423,8 +509,8 @@ class FilingSummary:
     @classmethod
     def parse(cls, xml_text:str):
         # <FilingSummary> is the document element, so the parsed root is already
-        # it. The two BeautifulSoup calls left in this module parse R-file HTML with
-        # `html.parser`, not XML, and are out of scope for edgartools-07lk.11.3.
+        # it. The R-file HTML this module also reads is parsed separately, by
+        # _parse_report_html; both sides are off BeautifulSoup as of 07lk.11.6.
         root = parse_xml_document(xml_text)
         if local_name(root) != 'FilingSummary':
             raise ValueError(f"Expected a FilingSummary document, got <{local_name(root)}>")
