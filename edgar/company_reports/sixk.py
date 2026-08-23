@@ -206,7 +206,7 @@ class SixK:
 
     def _get_exhibit_content(self, exhibit) -> Optional[str]:
         """Get the rendered text content of an exhibit."""
-        from edgar.files.html import Document
+        from edgar.documents import parse_html
 
         if exhibit.empty:
             sgml_document = self._filing.sgml().get_document_by_sequence(exhibit.sequence_number)
@@ -215,8 +215,10 @@ class SixK:
         else:
             html_content = exhibit.download()
             if html_content:
-                document = Document.parse(html_content)
-                return repr_rich(document, width=200, force_terminal=False)
+                # text(table_max_col_width=200) is what the modern Document's own
+                # __repr__ returns; it is spelled out rather than reached through
+                # repr_rich because this Document has no __rich__ to render.
+                return parse_html(html_content).text(table_max_col_width=200)
 
     def _content_renderables(self):
         """Get exhibit content as rich renderables."""
