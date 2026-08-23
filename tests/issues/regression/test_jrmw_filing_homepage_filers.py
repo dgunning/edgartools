@@ -25,9 +25,8 @@ pass on a selector that matched the wrong div.
 import pathlib
 
 import pytest
-from bs4 import BeautifulSoup
 
-from edgar.attachments import Attachments, FilingHomepage
+from edgar.attachments import Attachments, FilingHomepage, parse_homepage_html
 
 pytestmark = pytest.mark.fast
 
@@ -37,8 +36,8 @@ FIXTURES = pathlib.Path(__file__).parent.parent.parent / "fixtures" / "homepages
 def _homepage(stem: str) -> FilingHomepage:
     path = FIXTURES / f"{stem}.html"
     assert path.exists(), f"missing fixture {path}"
-    soup = BeautifulSoup(path.read_text(), "html.parser")
-    return FilingHomepage(f"file://{path}", soup, Attachments.load(soup))
+    root = parse_homepage_html(path.read_bytes())
+    return FilingHomepage(f"file://{path}", root, Attachments.load(root))
 
 
 def test_the_fixture_corpus_is_present():
