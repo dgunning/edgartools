@@ -11,7 +11,6 @@ from rich.tree import Tree
 
 from edgar.company_reports._base import CompanyReport, report_lookup_miss
 from edgar.company_reports._structures import FilingStructure
-from edgar.core import log
 from edgar.display.formatting import datefmt
 from edgar.documents import HTMLParser, ParserConfig
 from edgar.files.htmltools import ChunkedDocument
