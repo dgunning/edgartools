@@ -158,8 +158,14 @@ def test_gs_10q_resolves_its_part_ii_sections():
     }
 
     # Part I is untouched — the fix adds a boundary, it does not move one.
-    assert len(sections["part_i_item_1"].text()) == 620442
-    assert len(sections["part_i_item_2"].text()) == 393389
+    # Both counts grew when the fast_table 8-column cap was removed (edgartools-kq2q):
+    # these two sections carry GS's financial statements, and their wide tables were
+    # rendering without columns the cap had discarded. Verified non-lossy at the word
+    # level -- the only tokens that leave the Counter do so by gaining a "$" prefix
+    # ("1,656,611" -> "$1,656,611"), 139 "$" markers arrive, and the section's first
+    # and last 80 characters are byte-identical, so no boundary moved.
+    assert len(sections["part_i_item_1"].text()) == 632360
+    assert len(sections["part_i_item_2"].text()) == 397515
 
     assert sections["part_ii_item_1"].text().startswith("Item 1. Legal Proceedings")
     assert sections["part_ii_item_6"].text().startswith("Item 6. Exhibits")
@@ -184,7 +190,8 @@ def test_gs_10q_lookups_answer_without_any_legacy_fallback():
 
     # Part I still answers from the new parser too — get_item_with_part must not
     # have started depending on the Part II marker to resolve anything.
-    assert len(report.get_item_with_part("Part I", "Item 1")) == 620442
+    # Count re-pinned for edgartools-kq2q; see the note in the test above.
+    assert len(report.get_item_with_part("Part I", "Item 1")) == 632360
 
 
 def test_signatures_bounds_the_last_item_on_other_filings_too():

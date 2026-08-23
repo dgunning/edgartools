@@ -300,15 +300,21 @@ class FastTableRenderer:
         # Sort by score descending
         column_scores.sort(key=lambda x: x[1], reverse=True)
 
-        # Take columns with meaningful content (score >= 0.5 or among top columns)
+        # Take every column with meaningful content. The score threshold below is the
+        # only filter: there used to be a further `if len(meaningful_columns) >= 8:
+        # break` here, for readability. Because the loop walks the columns in
+        # DESCENDING score order, that cap did not drop the last columns of the table --
+        # it dropped the eight-best-scoring columns' losers wherever they sat, real data
+        # among them. A 21-column segment table kept 8 and silently lost the "Logistics
+        # and other solution services", "Corporate and unallocated" and "Total" headers;
+        # a 10-column voting table lost the "% Withheld" figure entirely, so 6.45 was in
+        # to_dataframe() but nowhere in text(). Width is already bounded per column by
+        # style.max_col_width, so readability does not need a column count as well.
         meaningful_columns = []
         for col_idx, avg_score, total_score in column_scores:
             # Include if it has good average score or significant total content
             if avg_score >= 0.5 or total_score >= 5:
                 meaningful_columns.append(col_idx)
-            # Limit to reasonable number of columns for readability
-            if len(meaningful_columns) >= 8:
-                break
 
         # Sort by original column order
         meaningful_columns.sort()
