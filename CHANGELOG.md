@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **The legacy-parser fallbacks under item lookup on 10-K, 10-Q, 20-F and 8-K.** `report["Item 7"]` and `get_item_with_part()` used to try the modern parser and then, on a miss, read the filing again with `edgar.files`. Measured over ~2,110 lookups on filings from 2001 to 2025, those paths were reached 86 times and produced content on none of them, so they are gone. `TenK.id_parse_document()` and `TenQ.id_parse_document()` are removed with them. A lookup for an item a filing does not have now returns `None` from every report type — `TenK` previously raised `TypeError` here. The deprecated public `chunked_document` property is unaffected and still available until 6.0.
 
+- **The legacy parser's contribution to `EightK.items`.** The item list unioned three detectors; the middle one read the filing again with `edgar.files`. Compared as item SETS — the only comparison that can catch a union quietly dropping a member — across 391 8-K filings from 1995 to 2026, it contributed a unique item to none of them: identical to the surviving detectors on 275, a strict subset on 101, and blind on 82. `.items` still unions the new parser's section tree with the text-based extractor, so item lists are unchanged, including on the pre-2004 and minimal-HTML filings the text extractor exists for.
+
 ## [5.52.0] - 2026-08-22
 
 ### Added
