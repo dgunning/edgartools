@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **A word came back split across lines when the filer bolded one of its letters.** Filers routinely put an acronym's initials in their own `<font>` runs; where those sit inside a `<div>` styled `display:inline`, `Document.text()` emitted each run as its own block. Aardvark Therapeutics' 8-K of 2025-04-01 rendered "(Hunger Elimination or Reduction Objective)" one letter to a line. Such a div now reads as a paragraph — unless it wraps a table or another block, which is how iXBRL containers hold whole statements.
+
 ## [5.52.0] - 2026-08-22
 
 ### Added
