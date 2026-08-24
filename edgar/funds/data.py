@@ -12,12 +12,18 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 if TYPE_CHECKING:
     from bs4 import Tag
 
+import lxml.html
 import pandas as pd
 import pyarrow as pa
+
+# `_FundCompanyInfo` still parses the company-info page with BeautifulSoup; it
+# moves to lxml in its own PR under the same bead (07lk.11.11).
 from bs4 import BeautifulSoup
+from lxml.etree import ParserError
 
 from edgar._filings import Filings
 from edgar.datatools import drop_duplicates_pyarrow
+from edgar.documents.utils.html_utils import create_lxml_parser
 from edgar.entity.data import EntityData
 from edgar.funds.core import FundClass, FundCompany, FundSeries
 from edgar.httprequests import TRANSPORT_ERRORS, download_text, is_unreachable
@@ -421,6 +427,104 @@ def direct_get_fund_with_filings(contract_or_series_id: str, filing_type: Option
         log.warning("Error retrieving fund information for %s: %s", contract_or_series_id, e)
         return None
 
+# ---------------------------------------------------------------------------
+# lxml helpers
+#
+# These replace BeautifulSoup for the two browse-edgar pages below
+# (edgartools-07lk.11.11). The trap that dominates this pair is `.text`: on a
+# bs4 Tag it is `get_text()`, every string in the subtree; on an lxml element it
+# is the text BEFORE THE FIRST CHILD and nothing else. It raises nothing when
+# mistranslated, it just returns a prefix.
+# ---------------------------------------------------------------------------
+
+# Tags whose direct text bs4 gave its own string class (Script, Stylesheet,
+# TemplateString, RubyTextString), which `get_text()` filtered out because it
+# matches the exact type `NavigableString`.
+_STRING_CONTAINER_TAGS = frozenset(("script", "style", "template", "rt", "rp"))
+
+
+def _parse_page(html: str):
+    """Parse a browse-edgar page, or None if lxml cannot root it at all.
+
+    Comments are KEPT, and so are <script>/<style>: both are excluded from the
+    text by `_strings` instead of being removed from the tree. Removing them is
+    the tempting spelling and it is wrong, because dropping an element in lxml
+    forces its tail onto the text before it. bs4 held those as two separate
+    strings, and `get_text(strip=True)` strips each and joins with NOTHING --
+    so `<td>No <style>...</style>Load Class</td>` is "NoLoad Class" to bs4 and
+    becomes "No Load Class" the moment the two strings are merged.
+    """
+    if isinstance(html, str):
+        html = html.encode("utf-8", errors="replace")
+    parser = create_lxml_parser(remove_blank_text=False, remove_comments=False,
+                                recover=True, encoding="utf-8")
+    try:
+        return lxml.html.fromstring(html, parser=parser)
+    except (ParserError, ValueError):
+        return None
+
+
+def _strings(el):
+    """The strings bs4's ``get_text()`` walked, in document order.
+
+    Kept separate rather than concatenated because ``get_text(strip=True)``
+    strips each one and drops the empties BEFORE joining: for
+    ``<td>No <b>Load</b> Class</td>`` bs4 answered "NoLoadClass", where
+    ``text_content().strip()`` answers "No Load Class".
+
+    Comment bodies are not text in either library; the text after a comment is.
+    Nor is anything inside <script>/<style>/<template>/<rt>/<rp>, and that
+    applies to the WHOLE SUBTREE, not just the strings directly inside the tag:
+    bs4 tracked these on a stack while parsing, so the "hidden" in
+    ``<template><b>hidden</b></template>`` is a TemplateString even though its
+    parent is the <b>. Hence the flag is inherited by every level below.
+
+    Iterative rather than recursive -- filers nest layout tables hundreds deep
+    (edgartools-xqvr).
+    """
+    container = el.tag in _STRING_CONTAINER_TAGS
+    if el.text and not container:
+        yield el.text
+    stack = [(iter(el), container, None)]
+    while stack:
+        children, container, tail = stack[-1]
+        node = next(children, None)
+        if node is None:
+            stack.pop()
+            if tail:
+                yield tail
+            continue
+        node_tag = node.tag
+        if isinstance(node_tag, str):
+            node_container = container or node_tag in _STRING_CONTAINER_TAGS
+            if node.text and not node_container:
+                yield node.text
+            stack.append((iter(node), node_container, None if container else node.tail))
+        elif node.tail and not container:
+            yield node.tail
+
+
+def _text(el) -> str:
+    """``Tag.text`` -- every string in the subtree, joined with nothing.
+
+    NOT ``text_content()``, which would splice a stylesheet into the answer.
+    """
+    return "".join(_strings(el))
+
+
+def _text_stripped(el) -> str:
+    """``Tag.get_text(strip=True)``."""
+    return "".join(s for s in (t.strip() for t in _strings(el)) if s)
+
+
+def _find_all(el, tag):
+    """``Tag.find_all(tag)`` -- descendants, in document order.
+
+    ``descendant::``, not ``findall(tag)``, which is direct children only.
+    """
+    return el.xpath(f"descendant::{tag}")
+
+
 def _resolve_company_cik(identifier: str) -> Optional[tuple]:
     """
     Resolve a fund identifier (ticker, series ID, or class ID) to a company CIK and name
@@ -436,15 +540,28 @@ def _resolve_company_cik(identifier: str) -> Optional[tuple]:
     )
     try:
         html = download_text(resolve_url)
-        soup = BeautifulSoup(html, "html.parser")
-        tag = soup.find('span', class_='companyName')
-        if not tag:
+        root = _parse_page(html)
+        if root is None:
             return None
-        company_name = tag.text.split('CIK')[0].strip()
-        cik_link = tag.find('a')
-        if not cik_link:
+        # bs4 matched `class_=` against the multi-valued class LIST, so a span
+        # carrying `class="big companyName"` matched too; in lxml `@class` is
+        # one string, and `@class='companyName'` would miss it.
+        spans = root.xpath(
+            "descendant-or-self::span"
+            "[contains(concat(' ', normalize-space(@class), ' '), ' companyName ')]"
+        )
+        if not spans:
             return None
-        cik = cik_link.text.split(' ')[0].strip()
+        tag = spans[0]
+        company_name = _text(tag).split('CIK')[0].strip()
+        # `.//a`, and `is None`: find() was recursive, and the original tested
+        # the Tag itself -- a bs4 Tag is truthy even with nothing in it, so only
+        # a missing link ever failed that test. An lxml element with no element
+        # children is falsy, which would reject a perfectly good <a>text</a>.
+        cik_link = tag.find('.//a')
+        if cik_link is None:
+            return None
+        cik = _text(cik_link).split(' ')[0].strip()
         return cik, company_name
     except Exception as e:
         log.warning("Error resolving fund identifier %s: %s", identifier, e)
@@ -459,13 +576,16 @@ def _parse_series_table(html: str) -> tuple:
         Tuple of (company_cik, company_name, series_list) where series_list is a list of dicts:
         [{'series_id': str, 'series_name': str, 'classes': [{'class_id': str, 'class_name': str, 'ticker': str}]}]
     """
-    soup = BeautifulSoup(html, "html.parser")
-    tables = soup.find_all("table")
+    root = _parse_page(html)
+    if root is None:
+        return None, None, []
+    # `descendant-or-self`: lxml roots a single-element fragment AT that element.
+    tables = root.xpath("descendant-or-self::table")
     if not tables:
         return None, None, []
 
     table = tables[0]
-    rows = table.find_all('tr')
+    rows = _find_all(table, 'tr')
 
     company_cik = None
     company_name = None
@@ -473,7 +593,7 @@ def _parse_series_table(html: str) -> tuple:
     current_series = None
 
     for row in rows:
-        cells = row.find_all('td')
+        cells = _find_all(row, 'td')
         num_cells = len(cells)
 
         # Skip header rows (0-2) and the large summary row (484+ cells)
@@ -482,19 +602,19 @@ def _parse_series_table(html: str) -> tuple:
 
         # Company row: 2 cells with CIK link + company name link
         if num_cells == 2:
-            links = [a.text.strip() for a in cells[0].find_all('a')]
+            links = [_text(a).strip() for a in _find_all(cells[0], 'a')]
             if links and re.match(r'^0\d{9}$', links[0]):
                 company_cik = links[0]
-                name_links = [a.text.strip() for a in cells[1].find_all('a')]
-                company_name = name_links[0] if name_links else cells[1].get_text(strip=True)
+                name_links = [_text(a).strip() for a in _find_all(cells[1], 'a')]
+                company_name = name_links[0] if name_links else _text_stripped(cells[1])
 
         # Series row: 3 cells — cell[1] has series ID, cell[2] has series name
         elif num_cells == 3:
-            links_1 = [a.text.strip() for a in cells[1].find_all('a')]
+            links_1 = [_text(a).strip() for a in _find_all(cells[1], 'a')]
             if links_1 and re.match(r'^S\d+$', links_1[0]):
                 series_id = links_1[0]
-                name_links = [a.text.strip() for a in cells[2].find_all('a')]
-                series_name = name_links[0] if name_links else cells[2].get_text(strip=True)
+                name_links = [_text(a).strip() for a in _find_all(cells[2], 'a')]
+                series_name = name_links[0] if name_links else _text_stripped(cells[2])
                 current_series = {
                     'series_id': series_id,
                     'series_name': series_name,
@@ -504,11 +624,11 @@ def _parse_series_table(html: str) -> tuple:
 
         # Class row: 4-5 cells — cell[2] has class ID, cell[3] has name, cell[4] has ticker
         elif num_cells in (4, 5) and current_series is not None:
-            links_2 = [a.text.strip() for a in cells[2].find_all('a')]
+            links_2 = [_text(a).strip() for a in _find_all(cells[2], 'a')]
             if links_2 and re.match(r'^C\d+$', links_2[0]):
                 class_id = links_2[0]
-                class_name = cells[3].get_text(strip=True)
-                ticker = cells[4].get_text(strip=True) if num_cells == 5 else ""
+                class_name = _text_stripped(cells[3])
+                ticker = _text_stripped(cells[4]) if num_cells == 5 else ""
                 current_series['classes'].append({
                     'class_id': class_id,
                     'class_name': class_name,
