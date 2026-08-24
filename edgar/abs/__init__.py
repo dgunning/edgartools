@@ -12,10 +12,6 @@ Current support:
 Note: TenD only returns a data object for CMBS filings (with EX-102 XML).
 Non-CMBS 10-D filings return None from filing.obj() since they lack
 structured data worth extracting.
-
-Note: HTML distribution report parsing (DistributionReport) is deferred due to
-format variability across issuers (~42% extraction accuracy). The code is
-preserved in distribution.py for future work.
 """
 
 from edgar.abs.abs_ee import AutoLeaseAssetData, AutoLeaseSummary

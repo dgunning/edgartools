@@ -41,14 +41,6 @@ def _get_cmbs_parser():
     return CMBSAssetData
 
 
-# NOTE: Distribution report parsing deferred due to HTML format variability
-# Validation showed only ~42% extraction accuracy across ABS types.
-# See scripts/validate_distribution_report.py for details.
-# def _get_distribution_report():
-#     from edgar.abs.distribution import DistributionReport
-#     return DistributionReport
-
-
 class ABSType(Enum):
     """Types of Asset-Backed Securities."""
     CMBS = "CMBS"  # Commercial Mortgage-Backed Securities
