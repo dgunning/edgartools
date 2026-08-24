@@ -17,8 +17,8 @@ port must keep these green unchanged.
 """
 
 import pytest
-from bs4 import BeautifulSoup
 
+from edgar._index_parsing import parse_index_html
 from edgar.attachments import Attachment, Attachments, FilingHomepage
 
 pytestmark = pytest.mark.fast
@@ -31,7 +31,7 @@ def _soup(name):
         html = Path(name).read_text()
     else:
         html = Path(f"tests/fixtures/attachments/indexes/{name}").read_text()
-    return BeautifulSoup(html, "html.parser")
+    return parse_index_html(html)
 
 
 def _load(name):

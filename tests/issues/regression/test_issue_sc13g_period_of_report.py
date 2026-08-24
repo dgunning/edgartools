@@ -13,15 +13,15 @@ GitHub PR: https://github.com/dgunning/edgartools/pull/787
 """
 
 import pytest
-from bs4 import BeautifulSoup
 
+from edgar._index_parsing import parse_index_html
 from edgar.attachments import Attachments, FilingHomepage
 
 pytestmark = pytest.mark.fast
 
 
 def _homepage_from_html(html: str) -> FilingHomepage:
-    soup = BeautifulSoup(html, "html.parser")
+    soup = parse_index_html(html)
     # Attachments is irrelevant for these tests; pass an empty instance.
     attachments = Attachments(document_files=[], data_files=[], primary_documents=[])
     return FilingHomepage(url="http://example/index.html", soup=soup, attachments=attachments)

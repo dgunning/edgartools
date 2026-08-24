@@ -9,7 +9,6 @@ import time
 import warnings
 import webbrowser
 import zipfile
-
 from pathlib import Path
 from threading import Thread
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
@@ -20,7 +19,6 @@ if TYPE_CHECKING:
 
 import textwrap
 
-from bs4 import BeautifulSoup
 from pydantic import BaseModel
 from rich import box
 from rich.columns import Columns
@@ -30,8 +28,8 @@ from rich.table import Column, Table
 from rich.text import Text
 
 from edgar.config import SEC_BASE_URL
-from edgar.exceptions import AttachmentNotFoundError
 from edgar.core import binary_extensions, has_html_content, text_extensions
+from edgar.exceptions import AttachmentNotFoundError
 from edgar.files._deprecation import PAGE_BREAK_DEPRECATION
 from edgar.files.html_documents import get_clean_html
 from edgar.files.markdown import to_markdown
@@ -40,6 +38,15 @@ from edgar.httprequests import download_file, download_file_async, get_with_retr
 from edgar.richtools import print_rich, print_xml, repr_rich, rich_to_text
 
 xbrl_document_types = ['XBRL INSTANCE DOCUMENT', 'XBRL INSTANCE FILE', 'EXTRACTED XBRL INSTANCE DOCUMENT']
+
+# lxml.html helpers shared by the attachment index parser (#1102)
+from edgar._index_parsing import (  # noqa: E402
+    _class_tokens,
+    _find_all,
+    _find_one,
+    _text,
+    parse_index_html,
+)
 
 __all__ = ['Attachment', 'Attachments', 'FilingHomepage', 'FilerInfo', 'AttachmentServer', 'sec_document_url', 'get_document_type']
 
@@ -948,11 +955,14 @@ class Attachments:
         return repr_rich(self.__rich__())
 
     @classmethod
-    def load(cls, soup: BeautifulSoup):
+    def load(cls, soup):
         """
         Load the attachments from the SEC filing home page
+
+        Accepts a parsed lxml.html element (or any object exposing an
+        xpath() method). A bs4 soup is no longer accepted.
         """
-        tables = soup.find_all('table', class_='tableFile')
+        tables = _find_all(soup, 'table', class_='tableFile')
 
         def parse_table(table, documents: bool):
             min_seq = None
@@ -960,20 +970,20 @@ class Attachments:
             # Plus additional document with the same sequence number
             primary_documents: List[Attachment] = []
 
-            rows = table.find_all('tr')[1:]  # Skip header row
+            rows = _find_all(table, 'tr')[1:]  # Skip header row
             attachments = []
             for _index, row in enumerate(rows):
-                cols = row.find_all('td')
-                sequence_number = cols[0].text.strip().replace('\xa0', '-')
+                cols = _find_all(row, 'td')
+                sequence_number = _text(cols[0]).strip().replace('\xa0', '-')
 
-                description = cols[1].text.strip()
+                description = _text(cols[1]).strip()
                 # The document text is the text of the document link.
-                document_text = cols[2].text.strip()
+                document_text = _text(cols[2]).strip()
                 document = document_text.split(' ')[0].strip()
                 iXbrl = 'iXBRL' in document_text
-                path = cols[2].a['href'].strip()
-                document_type = cols[3].text.strip()
-                size = cols[4].text.strip()
+                path = cols[2].find('a').get('href').strip()
+                document_type = _text(cols[3]).strip()
+                size = _text(cols[4]).strip()
 
                 try:
                     size = int(size)
@@ -1070,7 +1080,7 @@ class FilingHomepage:
 
     def __init__(self,
                  url: str,
-                 soup: BeautifulSoup,
+                 soup,
                  attachments: Attachments):
         self.attachments = attachments
         self.url = url
@@ -1118,17 +1128,17 @@ class FilingHomepage:
     def get_filers(self):
         if hasattr(self, '_cached_filers'):
             return self._cached_filers
-        filer_divs = self._soup.find_all("div", id="filerDiv")
+        filer_divs = _find_all(self._soup, "div", id="filerDiv")
         filer_infos = []
         for filer_div in filer_divs:
 
             # Get the company name
-            company_info_div = filer_div.find("div", class_="companyInfo")
+            company_info_div = _find_one(filer_div, "div", class_="companyInfo")
 
-            company_name_span = company_info_div.find("span", class_="companyName")
+            company_name_span = _find_one(company_info_div, "span", class_="companyName")
 
             if company_name_span:
-                full_text = company_name_span.text.strip()
+                full_text = _text(company_name_span).strip()
                 # Split the text into company name and CIK
                 parts = full_text.split('CIK: ')
                 company_name = parts[0].strip()
@@ -1141,16 +1151,16 @@ class FilingHomepage:
                 cik = ""
 
             # Get the identification information
-            ident_info_div = company_info_div.find("p", class_="identInfo")
+            ident_info_div = _find_one(company_info_div, "p", class_="identInfo")
 
             # Replace <br> with newlines
-            for br in ident_info_div.find_all("br"):
-                br.replace_with("\n")
+            for br in ident_info_div.iter("br"):
+                br.tail = "\n" + (br.tail or "")
 
-            identification = ident_info_div.text
+            identification = _text(ident_info_div)
 
             # Get the mailing information
-            mailer_divs = filer_div.find_all("div", class_="mailer")
+            mailer_divs = _find_all(filer_div, "div", class_="mailer")
             # For each mailed_div.text remove multiple spaces after a newline
 
             addresses = [re.sub(r'\n\s+', '\n', mailer_div.text.strip())
@@ -1174,7 +1184,7 @@ class FilingHomepage:
         if hasattr(self, '_cached_filing_dates'):
             return self._cached_filing_dates
         # Find the form grouping divs
-        grouping_divs = self._soup.find_all("div", class_="formGrouping")
+        grouping_divs = _find_all(self._soup, "div", class_="formGrouping")
         if len(grouping_divs) == 0:
             return None
 
@@ -1186,16 +1196,16 @@ class FilingHomepage:
         # period of report, which then crashes downstream isoformat parsers.
         label_to_value: Dict[str, str] = {}
         for grouping in grouping_divs:
-            children = [c for c in grouping.find_all("div", recursive=False)
-                        if c.get("class")]
+            children = [c for c in _find_all(grouping, "div", recursive=False)
+                        if _class_tokens(c)]
             current_label: Optional[str] = None
             for child in children:
-                classes = child.get("class") or []
+                classes = _class_tokens(child)
                 if "infoHead" in classes:
-                    current_label = child.text.strip().lower()
+                    current_label = _text(child).strip().lower()
                 elif "info" in classes and current_label is not None:
                     # Only keep the first value for each label.
-                    label_to_value.setdefault(current_label, child.text.strip())
+                    label_to_value.setdefault(current_label, _text(child).strip())
                     current_label = None
 
         filing_date = label_to_value.get("filing date")
@@ -1205,11 +1215,11 @@ class FilingHomepage:
         # Fall back to the legacy positional layout if the label-based lookup
         # missed either of the always-present date fields.
         if filing_date is None or accepted_date is None:
-            info_divs = grouping_divs[0].find_all("div", class_="info")
+            info_divs = _find_all(grouping_divs[0], "div", class_="info")
             if filing_date is None and len(info_divs) >= 1:
-                filing_date = info_divs[0].text.strip()
+                filing_date = _text(info_divs[0]).strip()
             if accepted_date is None and len(info_divs) >= 2:
-                accepted_date = info_divs[1].text.strip()
+                accepted_date = _text(info_divs[1]).strip()
 
         result = filing_date, accepted_date, period
         self._cached_filing_dates = result
@@ -1218,7 +1228,7 @@ class FilingHomepage:
     @classmethod
     def load(cls, url: str):
         response = get_with_retry(url)
-        soup = BeautifulSoup(response.text, 'html.parser')
+        soup = parse_index_html(response.text)
         attachments = Attachments.load(soup)
         return cls(url, soup, attachments)
 
