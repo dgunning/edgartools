@@ -61,10 +61,11 @@ def _strings(el):
     * **Comments are not text.** ``Comment`` subclasses ``str``, but ``get_text``
       matches the exact type ``NavigableString`` and so dropped comment bodies.
       The text FOLLOWING a comment -- its tail, in lxml -- is text in both.
-    * **Neither is the text inside <script>, <style>, <template>, <rt> or <rp>.**
-      Only the strings whose direct parent is one of those tags, which is why the
-      flag below is carried per level rather than per subtree: a ``<p>`` inside a
-      ``<template>`` still contributed its text.
+    * **Neither is anything inside <script>, <style>, <template>, <rt> or <rp>.**
+      That covers the WHOLE SUBTREE, not just the strings directly inside the
+      tag: bs4 tracked these on a stack while parsing, so the "hidden" in
+      ``<template><b>hidden</b></template>`` is a ``TemplateString`` even though
+      its parent is the ``<b>``. The flag is inherited by every level below.
     * **One string per text node.** ``get_text(separator)`` joins bs4's separate
       strings, so the chunks must stay separate here too. Concatenating an
       element's text with the tail of its last child would swallow a separator
@@ -88,7 +89,7 @@ def _strings(el):
             continue
         node_tag = node.tag
         if isinstance(node_tag, str):
-            node_container = node_tag in _STRING_CONTAINER_TAGS
+            node_container = container or node_tag in _STRING_CONTAINER_TAGS
             if node.text and not node_container:
                 yield node.text
             stack.append((iter(node), node_container, None if container else node.tail))

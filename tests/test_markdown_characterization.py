@@ -281,6 +281,14 @@ EDGE = {
         "<ul><li>First item</li><li>Second item</li><li>   </li></ul>"
     ),
     # find_all('li') was recursive, so the outer <ul> reported the nested item too.
+    # bs4 gave a string its container class from the enclosing <template>, not
+    # from its direct parent, so the <b>'s text was excluded too. Carrying the
+    # flag per level instead of per subtree would leak "hidden" into the cell.
+    "template-wrapping-an-element-with-text": (
+        "<table><tr><th>Item</th><th>Amount</th></tr>"
+        "<tr><td>No <template><b>hidden</b></template> Load</td>"
+        "<td>$1,000</td></tr></table>"
+    ),
     "nested-list": (
         "<p>Intro.</p><ul><li>First item<ul><li>Nested item</li></ul></li></ul>"
     ),

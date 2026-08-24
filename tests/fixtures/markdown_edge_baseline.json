@@ -82,6 +82,7 @@
   "table-with-a-spanning-title-row": "\n#### Table: Summary of Significant Accounting Policies\n| label | 2024 | 2023 |\n| --- | ---: | ---: |\n| Revenue | $1,000 | $900 |\n\n",
   "table-with-cells-but-no-row": "Prose.",
   "table-with-only-a-tbody": "Prose.",
+  "template-wrapping-an-element-with-text": "\n#### Table 1: Data\n| label | Amount |\n| --- | ---: |\n| No Load | $1,000 |\n\n",
   "text-between-cells": "\n#### Table 1: Data\n| label | Amount | col_2 |\n| --- | ---: | ---: |\n| Revenue | $1,000 | $1,000 |\n\n",
   "text-follows-a-style-block": "\n#### Table 1: Data\n| label | Amount |\n| --- | ---: |\n| Revenue | $1,000 |\n\n",
   "text-that-mentions-a-tag": "",
