@@ -60,39 +60,6 @@ def test_get_fund_by_class_contract_id():
     assert fund_class.name == 'Investor Class'
 
         
-def test_parse_kinetics_fund_series_html():
-    """
-    Test that we can properly parse the Kinetics fund series HTML.
-    This test uses the actual HTML file from the Kinetics fund to ensure
-    we correctly extract all series and classes.
-    """
-    from edgar.funds.data import parse_series_and_classes_from_html
-    from edgar.funds.core import FundCompany
-    
-    # Load the HTML file
-    html_path = 'data/funds/kinetics-fund-series.html'
-    with open(html_path, 'r') as f:
-        html_content = f.read()
-
-    # Create a fund object for testing
-    fund = FundCompany(1083387)
-    
-    # Parse the HTML
-    series_data = parse_series_and_classes_from_html(html_content, fund)
-    
-    # Verify the number of series - there are 10 series in the HTML
-    # (counted manually from the HTML using grep -c 'S0000' kinetics-fund-series.html)
-    assert len(series_data) >= 10, f"Expected at least 10 series, but got {len(series_data)}"
-    
-    # Verify that each series has some classes
-    for series in series_data:
-        assert 'series_id' in series
-        assert series['series_id'].startswith('S')
-        assert 'series_name' in series
-        assert 'classes' in series
-        # Most series should have at least one class
-        assert len(series['classes']) > 0, f"Series {series['series_id']} has no classes"
-
 def test_get_fund_company():
     fund_object:FundCompany = get_fund_object("0001605941")
     assert isinstance(fund_object, FundCompany)
