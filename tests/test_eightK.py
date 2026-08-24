@@ -213,3 +213,59 @@ def test_render_eightk_with_rich_like_markup():
     eightk:EightK = filing.obj()
     text = repr(eightk)
     assert "(/she)" in text
+
+def test_press_release_markdown_renders_through_edgar_documents():
+    """Press release markdown comes from edgar.documents, with images resolved.
+
+    ``PressRelease.to_markdown()`` used to route through
+    ``MarkdownContent.from_html`` -> ``HtmlDocument`` (the legacy
+    ``edgar.files`` stack that 6.0 removes). It delegates to
+    ``Attachment.markdown()`` now, which sets the archive folder as the base
+    URL -- so image ``src`` values come out ABSOLUTE. The legacy renderer
+    emitted a root-relative ``/ex99-1_001.jpg``, which resolves to nothing.
+    """
+    import re
+
+    filing = Filing(form='8-K', filing_date='2024-01-19', company='DatChat, Inc.',
+                    cik=1648960, accession_no='0001213900-24-004875')
+    press_release: PressRelease = filing.obj().press_releases[0]
+
+    content = press_release.to_markdown()
+    md = content.md
+
+    assert content.title == "8-K Press Release"
+    assert "DatChat" in md
+    assert "Announces Proposed Underwritten" in md
+
+    images = re.findall(r'!\[[^\]]*\]\(([^)]+)\)', md)
+    assert images == [
+        "https://www.sec.gov/Archives/edgar/data/1648960/000121390024004875/ex99-1_001.jpg"
+    ]
+
+    # The rich view is the whole point of returning MarkdownContent; it must build.
+    assert "DatChat" in repr(press_release)
+
+
+def test_press_release_markdown_is_empty_not_broken_for_non_html_attachment():
+    """An attachment with no usable HTML renders empty, it does not raise.
+
+    ``Attachment.markdown()`` returns None for anything that is not HTML.
+    ``to_markdown()`` feeds the rich view, so it absorbs that into an empty
+    panel rather than raising -- the legacy path used to die inside
+    ``HtmlDocument.from_html(None)`` with an AttributeError instead. Pinned
+    because it is a deliberate choice, not an accident of the rewrite.
+    """
+    class NonHtmlAttachment:
+        url = "https://www.sec.gov/Archives/edgar/data/1/2/exhibit.txt"
+        document = "exhibit.txt"
+        description = "PRESS RELEASE"
+
+        def markdown(self, **kwargs):
+            return None
+
+    press_release = PressRelease(NonHtmlAttachment())
+    content = press_release.to_markdown()
+
+    assert content.md == ""
+    assert content.title == "8-K Press Release"
+    assert repr(press_release)          # the rich view still builds

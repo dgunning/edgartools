@@ -156,3 +156,30 @@ def test_obscure_filing_to_markdown():
     filing = Filing(form='TA-1/A', filing_date='2024-03-13', company='DB SERVICES AMERICAS INC /TA', cik=1018490, accession_no='0001018490-24-000008')
     md = filing.markdown()
     assert not md
+
+def test_markdown_module_does_not_depend_on_legacy_edgar_files():
+    """``edgar._markdown`` must stay off the legacy ``edgar.files`` stack.
+
+    ``html_to_markdown`` used to call ``HtmlDocument.from_html`` from
+    ``edgar.files.html_documents``, which made every rich markdown view --
+    notably ``PressRelease.to_markdown()`` -- a live consumer of the parser
+    that edgartools 6.0 removes (bead edgartools-07lk.3). It renders through
+    ``edgar.documents`` now. This is a static check on the source rather than
+    a runtime one, because ``edgar/__init__.py`` imports ``edgar.files``
+    regardless, so the module object alone cannot tell us who asked for it.
+    """
+    import ast
+    import pathlib
+
+    import edgar._markdown
+
+    tree = ast.parse(pathlib.Path(edgar._markdown.__file__).read_text())
+    imported = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module:
+            imported.add(node.module)
+        elif isinstance(node, ast.Import):
+            imported.update(alias.name for alias in node.names)
+
+    legacy = {m for m in imported if m == "edgar.files" or m.startswith("edgar.files.")}
+    assert not legacy, f"edgar._markdown re-acquired a legacy edgar.files dependency: {sorted(legacy)}"
