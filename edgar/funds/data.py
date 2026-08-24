@@ -7,18 +7,11 @@ accessing and manipulating fund data.
 import logging
 import re
 from functools import lru_cache
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
-
-if TYPE_CHECKING:
-    from bs4 import Tag
+from typing import Dict, List, Optional, Tuple, Union
 
 import lxml.html
 import pandas as pd
 import pyarrow as pa
-
-# `_FundCompanyInfo` still parses the company-info page with BeautifulSoup; it
-# moves to lxml in its own PR under the same bead (07lk.11.11).
-from bs4 import BeautifulSoup
 from lxml.etree import ParserError
 
 from edgar._filings import Filings
@@ -40,6 +33,145 @@ log = logging.getLogger(__name__)
 # URL constants for fund searches
 fund_class_or_series_search_url = "https://www.sec.gov/cgi-bin/browse-edgar?CIK={}"
 fund_series_direct_url = "https://www.sec.gov/cgi-bin/browse-edgar?CIK={}&scd=series"
+
+# ---------------------------------------------------------------------------
+# lxml helpers
+#
+# These replace BeautifulSoup for the two browse-edgar pages below
+# (edgartools-07lk.11.11). The trap that dominates this pair is `.text`: on a
+# bs4 Tag it is `get_text()`, every string in the subtree; on an lxml element it
+# is the text BEFORE THE FIRST CHILD and nothing else. It raises nothing when
+# mistranslated, it just returns a prefix.
+# ---------------------------------------------------------------------------
+
+# Tags whose direct text bs4 gave its own string class (Script, Stylesheet,
+# TemplateString, RubyTextString), which `get_text()` filtered out because it
+# matches the exact type `NavigableString`.
+_STRING_CONTAINER_TAGS = frozenset(("script", "style", "template", "rt", "rp"))
+
+
+def _parse_page(html: str):
+    """Parse a browse-edgar page, or None if lxml cannot root it at all.
+
+    Comments are KEPT, and so are <script>/<style>: both are excluded from the
+    text by `_strings` instead of being removed from the tree. Removing them is
+    the tempting spelling and it is wrong, because dropping an element in lxml
+    forces its tail onto the text before it. bs4 held those as two separate
+    strings, and `get_text(strip=True)` strips each and joins with NOTHING --
+    so `<td>No <style>...</style>Load Class</td>` is "NoLoad Class" to bs4 and
+    becomes "No Load Class" the moment the two strings are merged.
+    """
+    if isinstance(html, str):
+        html = html.encode("utf-8", errors="replace")
+    parser = create_lxml_parser(remove_blank_text=False, remove_comments=False,
+                                recover=True, encoding="utf-8")
+    try:
+        return lxml.html.fromstring(html, parser=parser)
+    except (ParserError, ValueError):
+        return None
+
+
+def _strings(el):
+    """The strings bs4's ``get_text()`` walked, in document order.
+
+    Kept separate rather than concatenated because ``get_text(strip=True)``
+    strips each one and drops the empties BEFORE joining: for
+    ``<td>No <b>Load</b> Class</td>`` bs4 answered "NoLoadClass", where
+    ``text_content().strip()`` answers "No Load Class".
+
+    Comment bodies are not text in either library; the text after a comment is.
+    Nor is anything inside <script>/<style>/<template>/<rt>/<rp>, and that
+    applies to the WHOLE SUBTREE, not just the strings directly inside the tag:
+    bs4 tracked these on a stack while parsing, so the "hidden" in
+    ``<template><b>hidden</b></template>`` is a TemplateString even though its
+    parent is the <b>. Hence the flag is inherited by every level below.
+
+    Iterative rather than recursive -- filers nest layout tables hundreds deep
+    (edgartools-xqvr).
+    """
+    container = el.tag in _STRING_CONTAINER_TAGS
+    if el.text and not container:
+        yield el.text
+    stack = [(iter(el), container, None)]
+    while stack:
+        children, container, tail = stack[-1]
+        node = next(children, None)
+        if node is None:
+            stack.pop()
+            if tail:
+                yield tail
+            continue
+        node_tag = node.tag
+        if isinstance(node_tag, str):
+            node_container = container or node_tag in _STRING_CONTAINER_TAGS
+            if node.text and not node_container:
+                yield node.text
+            stack.append((iter(node), node_container, None if container else node.tail))
+        elif node.tail and not container:
+            yield node.tail
+
+
+def _text(el) -> str:
+    """``Tag.text`` -- every string in the subtree, joined with nothing.
+
+    NOT ``text_content()``, which would splice a stylesheet into the answer.
+    """
+    return "".join(_strings(el))
+
+
+def _text_stripped(el) -> str:
+    """``Tag.get_text(strip=True)``."""
+    return "".join(s for s in (t.strip() for t in _strings(el)) if s)
+
+
+def _find_all(el, tag):
+    """``Tag.find_all(tag)`` -- descendants, in document order.
+
+    ``descendant::``, not ``findall(tag)``, which is direct children only.
+    """
+    return el.xpath(f"descendant::{tag}")
+
+
+def _find_all_class(el, tag, css_class):
+    """``Tag.find_all(tag, class_=css_class)``.
+
+    bs4 matched against the multi-valued class LIST, so `class="big mailer"`
+    matched `class_="mailer"`. In lxml `@class` is one string, and testing
+    `@class='mailer'` would miss it.
+    """
+    return el.xpath(
+        f"descendant-or-self::{tag}"
+        f"[contains(concat(' ', normalize-space(@class), ' '), ' {css_class} ')]"
+    )
+
+
+def _find_class(el, tag, css_class):
+    """``Tag.find(tag, class_=css_class)`` -- the first one, or None."""
+    found = _find_all_class(el, tag, css_class)
+    return found[0] if found else None
+
+
+def _replace_br_with_newline(el) -> None:
+    """``for tag in el.find_all('br'): tag.replace_with('\n')``.
+
+    bs4 swapped the element for a NavigableString. lxml has no text nodes, so
+    the newline is spliced onto whatever precedes the <br> along with the <br>'s
+    own tail -- which `remove` would otherwise take with it. That merges two of
+    bs4's separate strings into one, and is safe here because both readers of
+    this tree (`identInfo` and the mailer divs) ask for text with NO separator.
+    """
+    for br in _find_all(el, 'br'):
+        parent = br.getparent()
+        if parent is None:
+            continue
+        spliced = "\n" + (br.tail or "")
+        previous = br.getprevious()
+        if previous is not None:
+            previous.tail = (previous.tail or "") + spliced
+        else:
+            parent.text = (parent.text or "") + spliced
+        parent.remove(br)
+
 
 class _FundDTO:
     """
@@ -174,12 +306,13 @@ class _FundCompanyInfo:
         return cik, cik_description
 
     @classmethod
-    def from_html(cls, company_info_html: Union[str, 'Tag']):
+    def from_html(cls, company_info_html: str):
 
-        soup = BeautifulSoup(company_info_html, features="html.parser")
+        root = _parse_page(company_info_html)
 
         # Parse the fund company info
-        content_div = soup.find("div", {"id": "contentDiv"})
+        content_div = None if root is None else next(
+            iter(root.xpath("descendant-or-self::div[@id='contentDiv']")), None)
 
         if content_div is None:
             # Should not reach here, but this is precautionary
@@ -187,28 +320,29 @@ class _FundCompanyInfo:
             return None
 
         ident_info_dict = {}
-        company_info_div = content_div.find("div", class_="companyInfo")
-        company_name_tag = company_info_div.find('span', class_='companyName')
-        company_name = company_name_tag.text.split('CIK')[0].strip()
+        company_info_div = _find_class(content_div, "div", "companyInfo")
+        company_name_tag = _find_class(company_info_div, 'span', 'companyName')
+        company_name = _text(company_name_tag).split('CIK')[0].strip()
 
-        cik = company_name_tag.a.text.split(' ')[0]
+        # `.a` was bs4 shorthand for find('a') -- the first <a> DESCENDANT, not
+        # a child, so a link wrapped in <b> still counted.
+        cik = _text(company_name_tag.find('.//a')).split(' ')[0]
 
         # Extract the identifying information
-        for tag in company_info_div.find_all('br'):
-            tag.replace_with('\n')
-        ident_info = company_info_div.find('p', class_='identInfo')
-        ident_line = ident_info.get_text().replace("|", "\n").strip()
+        _replace_br_with_newline(company_info_div)
+        ident_info = _find_class(company_info_div, 'p', 'identInfo')
+        ident_line = _text(ident_info).replace("|", "\n").strip()
         for line in ident_line.split("\n"):
             if ":" in line:
                 key, value = line.split(":")
                 ident_info_dict[key.strip()] = value.strip().replace("\xa0", " ")
 
         # Addresses
-        mailer_divs = content_div.find_all("div", class_="mailer")
-        addresses = [re.sub(r'\n\s+', '\n', mailer_div.text.strip())
+        mailer_divs = _find_all_class(content_div, "div", "mailer")
+        addresses = [re.sub(r'\n\s+', '\n', _text(mailer_div).strip())
                      for mailer_div in mailer_divs]
 
-        filing_index = cls._extract_filings(soup, company_name, cik)
+        filing_index = cls._extract_filings(root, company_name, cik)
         filings = Filings(filing_index=filing_index)
 
         return cls(name=company_name,
@@ -218,28 +352,28 @@ class _FundCompanyInfo:
                    addresses=addresses)
 
     @classmethod
-    def _extract_filings(cls, soup, company_name: str, cik: str):
+    def _extract_filings(cls, root, company_name: str, cik: str):
         from datetime import datetime
 
         import pyarrow as pa
 
-        filings_table = soup.find("table", class_="tableFile2")
-        rows = filings_table.find_all("tr")[1:]
+        filings_table = _find_class(root, "table", "tableFile2")
+        rows = _find_all(filings_table, "tr")[1:]
 
         forms, accession_nos, filing_dates = [], [], []
         for row in rows:
-            cells = row.find_all("td")
-            form = cells[0].text
+            cells = _find_all(row, "td")
+            form = _text(cells[0])
             forms.append(form)
 
             # Get the link href from cell[1]
-            link = cells[1].find("a")
-            href = link.attrs["href"]
+            link = cells[1].find(".//a")
+            href = link.attrib["href"]
             accession_no = href.split("/")[-1].replace("-index.htm", "")
             accession_nos.append(accession_no)
 
             # Get the filing_date
-            filing_date = datetime.strptime(cells[3].text, '%Y-%m-%d')
+            filing_date = datetime.strptime(_text(cells[3]), '%Y-%m-%d')
             filing_dates.append(filing_date)
 
         schema = pa.schema([
@@ -397,8 +531,9 @@ def direct_get_fund_with_filings(contract_or_series_id: str, filing_type: Option
             # Get the next page
             next_page = base_url + f"&start={start}&count={count}"
             fund_text = download_text(next_page)
-            soup = BeautifulSoup(fund_text, features="html.parser")
-            filing_index_on_page = _FundCompanyInfo._extract_filings(soup, company_info.name, company_info.cik)
+            page_root = _parse_page(fund_text)
+            filing_index_on_page = _FundCompanyInfo._extract_filings(
+                page_root, company_info.name, company_info.cik)
             if len(filing_index_on_page) == 0:
                 break
             filing_index = pa.concat_tables([filing_index, filing_index_on_page])
@@ -426,104 +561,6 @@ def direct_get_fund_with_filings(contract_or_series_id: str, filing_type: Option
     except Exception as e:
         log.warning("Error retrieving fund information for %s: %s", contract_or_series_id, e)
         return None
-
-# ---------------------------------------------------------------------------
-# lxml helpers
-#
-# These replace BeautifulSoup for the two browse-edgar pages below
-# (edgartools-07lk.11.11). The trap that dominates this pair is `.text`: on a
-# bs4 Tag it is `get_text()`, every string in the subtree; on an lxml element it
-# is the text BEFORE THE FIRST CHILD and nothing else. It raises nothing when
-# mistranslated, it just returns a prefix.
-# ---------------------------------------------------------------------------
-
-# Tags whose direct text bs4 gave its own string class (Script, Stylesheet,
-# TemplateString, RubyTextString), which `get_text()` filtered out because it
-# matches the exact type `NavigableString`.
-_STRING_CONTAINER_TAGS = frozenset(("script", "style", "template", "rt", "rp"))
-
-
-def _parse_page(html: str):
-    """Parse a browse-edgar page, or None if lxml cannot root it at all.
-
-    Comments are KEPT, and so are <script>/<style>: both are excluded from the
-    text by `_strings` instead of being removed from the tree. Removing them is
-    the tempting spelling and it is wrong, because dropping an element in lxml
-    forces its tail onto the text before it. bs4 held those as two separate
-    strings, and `get_text(strip=True)` strips each and joins with NOTHING --
-    so `<td>No <style>...</style>Load Class</td>` is "NoLoad Class" to bs4 and
-    becomes "No Load Class" the moment the two strings are merged.
-    """
-    if isinstance(html, str):
-        html = html.encode("utf-8", errors="replace")
-    parser = create_lxml_parser(remove_blank_text=False, remove_comments=False,
-                                recover=True, encoding="utf-8")
-    try:
-        return lxml.html.fromstring(html, parser=parser)
-    except (ParserError, ValueError):
-        return None
-
-
-def _strings(el):
-    """The strings bs4's ``get_text()`` walked, in document order.
-
-    Kept separate rather than concatenated because ``get_text(strip=True)``
-    strips each one and drops the empties BEFORE joining: for
-    ``<td>No <b>Load</b> Class</td>`` bs4 answered "NoLoadClass", where
-    ``text_content().strip()`` answers "No Load Class".
-
-    Comment bodies are not text in either library; the text after a comment is.
-    Nor is anything inside <script>/<style>/<template>/<rt>/<rp>, and that
-    applies to the WHOLE SUBTREE, not just the strings directly inside the tag:
-    bs4 tracked these on a stack while parsing, so the "hidden" in
-    ``<template><b>hidden</b></template>`` is a TemplateString even though its
-    parent is the <b>. Hence the flag is inherited by every level below.
-
-    Iterative rather than recursive -- filers nest layout tables hundreds deep
-    (edgartools-xqvr).
-    """
-    container = el.tag in _STRING_CONTAINER_TAGS
-    if el.text and not container:
-        yield el.text
-    stack = [(iter(el), container, None)]
-    while stack:
-        children, container, tail = stack[-1]
-        node = next(children, None)
-        if node is None:
-            stack.pop()
-            if tail:
-                yield tail
-            continue
-        node_tag = node.tag
-        if isinstance(node_tag, str):
-            node_container = container or node_tag in _STRING_CONTAINER_TAGS
-            if node.text and not node_container:
-                yield node.text
-            stack.append((iter(node), node_container, None if container else node.tail))
-        elif node.tail and not container:
-            yield node.tail
-
-
-def _text(el) -> str:
-    """``Tag.text`` -- every string in the subtree, joined with nothing.
-
-    NOT ``text_content()``, which would splice a stylesheet into the answer.
-    """
-    return "".join(_strings(el))
-
-
-def _text_stripped(el) -> str:
-    """``Tag.get_text(strip=True)``."""
-    return "".join(s for s in (t.strip() for t in _strings(el)) if s)
-
-
-def _find_all(el, tag):
-    """``Tag.find_all(tag)`` -- descendants, in document order.
-
-    ``descendant::``, not ``findall(tag)``, which is direct children only.
-    """
-    return el.xpath(f"descendant::{tag}")
-
 
 def _resolve_company_cik(identifier: str) -> Optional[tuple]:
     """
