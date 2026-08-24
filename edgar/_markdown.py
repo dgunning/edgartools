@@ -6,7 +6,6 @@ from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.table import Table
 
-from edgar.files.html_documents import HtmlDocument
 from edgar.richtools import repr_rich
 
 __all__ = [
@@ -99,9 +98,13 @@ def fix_markdown(md: str):
 
 
 def html_to_markdown(html: str) -> str:
-    """Convert the html to markdown"""
-    document: HtmlDocument = HtmlDocument.from_html(html)
-    return document.markdown
+    """Convert the html to markdown.
+
+    Imported lazily: ``edgar.documents`` pulls in the parser stack, and this
+    module is imported from ``edgar._filings`` during package import.
+    """
+    from edgar.documents import parse_html
+    return parse_html(html).to_markdown()
 
 
 def text_to_markdown(text: str) -> str:
