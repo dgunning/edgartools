@@ -5,9 +5,11 @@ from functools import lru_cache
 from io import StringIO
 from typing import Dict, List, Optional, Set, Tuple, Union
 
+import lxml.html
 import pandas as pd
-from bs4 import BeautifulSoup
+from lxml.etree import ParserError, strip_elements
 
+from edgar.documents.utils.html_utils import create_lxml_parser
 from edgar.httprequests import download_text
 
 # Base URL for resolving relative links
@@ -462,6 +464,50 @@ class FundReferenceData:
         return pd.DataFrame(records)
 
 
+def _cell_text(element) -> str:
+    """``element.get_text(strip=True)`` as bs4 defined it.
+
+    The second of bs4's three text behaviours: strip each string, drop the ones
+    left empty, join the rest with NOTHING. ``text_content()`` is not it -- that
+    joins the raw strings, so a Format cell typeset as ``C <em>SV</em>`` reads
+    "C SV" and stops matching "CSV".
+
+    ``itertext()`` skips comment text and, because the tree is parsed with
+    ``remove_comments=False``, keeps the strings either side of a comment
+    separate -- which is what makes ``CS <!-- note --> V`` strip and join back
+    to "CSV", exactly as bs4 had it.
+    """
+    return ''.join(chunk.strip() for chunk in element.itertext() if chunk.strip())
+
+
+def _parse_listing_tables(html_content: str) -> list:
+    """Every ``<table>`` on the page, in document order.
+
+    ``descendant-or-self``, not ``.//``: ``lxml.html.fromstring`` roots a
+    single-element fragment AT that element, so a document that *is* a table
+    has no descendant tables at all.
+
+    ``strip_elements`` because bs4 classified the text inside ``<script>``,
+    ``<style>`` and ``<template>`` as Script/Stylesheet/TemplateString and left
+    all three out of ``get_text()``, where lxml puts them in -- enough to turn a
+    decorative cell into a "CSV" match. ``with_tail=False`` keeps the ordinary
+    text that follows the closing tag.
+
+    The encode is not cosmetic: ``download_text`` returns ``str`` and lxml
+    refuses a ``str`` carrying an encoding declaration, which this page has.
+    """
+    if isinstance(html_content, str):
+        html_content = html_content.encode('utf-8', errors='replace')
+    try:
+        root = lxml.html.fromstring(
+            html_content, parser=create_lxml_parser(remove_comments=False)
+        )
+    except ParserError:
+        return []      # bs4's find_all('table') on an empty soup
+    strip_elements(root, 'script', 'style', 'template', with_tail=False)
+    return root.xpath('descendant-or-self::table')
+
+
 def _find_latest_fund_data_url():
     """Find the URL of the latest fund data CSV file from the SEC website.
     The listing looks like this:
@@ -481,14 +527,11 @@ def _find_latest_fund_data_url():
     # names the destination directly to save the extra hop, not because the hop breaks.
     list_url = "https://www.sec.gov/data-research/sec-markets-data/investment-company-series-class-information"
     html_content = download_text(list_url)
-    soup = BeautifulSoup(html_content, 'html.parser')
-
-    # Find all tables on the page
-    tables = soup.find_all('table')
+    tables = _parse_listing_tables(html_content)
 
     for table in tables:
         # Look for a table with a header row containing 'File', 'Format', 'Size'
-        headers = [th.get_text(strip=True) for th in table.find_all('th')]
+        headers = [_cell_text(th) for th in table.iter('th')]
         if 'File' in headers and 'Format' in headers and 'Size' in headers:
             # Find the index of the Format and File columns
             try:
@@ -498,16 +541,18 @@ def _find_latest_fund_data_url():
                 continue # Headers not found in the expected order
 
             # Iterate through the rows of this table
-            for row in table.find_all('tr'):
-                cells = row.find_all('td')
+            for row in table.iter('tr'):
+                cells = list(row.iter('td'))
                 if len(cells) > max(format_index, file_index):
                     # Check if the format is CSV
-                    format_text = cells[format_index].get_text(strip=True)
+                    format_text = _cell_text(cells[format_index])
                     if 'CSV' in format_text:
                         # Find the link in the File column
-                        link_tag = cells[file_index].find('a')
-                        if link_tag and 'href' in link_tag.attrs:
-                            relative_url = link_tag['href']
+                        link_tag = next(cells[file_index].iter('a'), None)
+                        # `if link_tag` would be FALSE for <a>2026</a>: an lxml
+                        # element with no element children is falsy.
+                        if link_tag is not None and 'href' in link_tag.attrib:
+                            relative_url = link_tag.get('href')
                             # Construct the absolute URL
                             absolute_url = urllib.parse.urljoin(SEC_BASE_URL, relative_url)
                             return absolute_url
