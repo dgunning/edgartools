@@ -786,10 +786,21 @@ def _render_statement_to_markdown(stmt: 'Statement', section_title: str,
         return plain if plain else None
 
     try:
-        from bs4 import BeautifulSoup, NavigableString
+        import lxml.html
+        from lxml.etree import ParserError
+
+        from edgar.documents.utils.html_utils import create_lxml_parser
         from edgar.markdown import process_content
-        soup = BeautifulSoup(html, 'html.parser')
-        html_tables = soup.find_all('table')
+
+        parser = create_lxml_parser(remove_comments=False)
+        try:
+            tree = lxml.html.fromstring(html, parser=parser)
+        except ParserError as e:
+            log.warning(f"Per-table rendering failed for '{section_title}': {e}")
+            plain = stmt.text()
+            return plain if plain else None
+
+        html_tables = [el for el in tree.iter() if el.tag == 'table']
 
         if not html_tables:
             return process_content(html, section_title=section_title) or None
@@ -800,7 +811,7 @@ def _render_statement_to_markdown(stmt: 'Statement', section_title: str,
         run_id = uuid.uuid4().hex[:12]
         for i, table_tag in enumerate(html_tables):
             marker = f'__TBLPH_{run_id}_{i}__'
-            table_html = str(table_tag)
+            table_html = lxml.html.tostring(table_tag, encoding='unicode')
 
             # Try pipe-table conversion for this individual table
             md = process_content(table_html, section_title=section_title)
@@ -811,11 +822,23 @@ def _render_statement_to_markdown(stmt: 'Statement', section_title: str,
                 plain = _html_table_to_plain_text(table_tag)
                 placeholders[marker] = plain or ''
 
-            # Replace the tag in the soup with a text marker
-            table_tag.replace_with(NavigableString(f'\n{marker}\n'))
+            # Replace the tag with a text marker. Removing an lxml element
+            # drops its tail, so splice the tail onto the previous sibling
+            # (or the parent's text) together with the marker first.
+            parent = table_tag.getparent()
+            if parent is None:
+                continue
+            tail = table_tag.tail or ''
+            marker_text = f'\n{marker}\n'
+            previous = table_tag.getprevious()
+            if previous is not None:
+                previous.tail = (previous.tail or '') + marker_text + tail
+            else:
+                parent.text = (parent.text or '') + marker_text + tail
+            parent.remove(table_tag)
 
         # Now process the modified HTML (text + placeholders) for headings/paragraphs
-        modified_html = str(soup)
+        modified_html = lxml.html.tostring(tree, encoding='unicode')
         text_md = process_content(modified_html)
 
         # Splice table renderings back in place of placeholders
@@ -831,26 +854,28 @@ def _render_statement_to_markdown(stmt: 'Statement', section_title: str,
         result = re.sub(r'\n{3,}', '\n\n', result).strip()
         return result if result else None
 
-    except (ValueError, TypeError, AttributeError, KeyError) as e:
+    except (ValueError, TypeError, AttributeError, KeyError, ParserError) as e:
         log.warning(f"Per-table rendering failed for '{section_title}': {e}")
         plain = stmt.text()
         return plain if plain else None
 
 
 def _html_table_to_plain_text(table_tag) -> Optional[str]:
-    """Convert a BeautifulSoup <table> tag to aligned plain text.
+    """Convert an lxml <table> element to aligned plain text.
 
     Extracts rows and pads columns for readable alignment when pipe-table
     conversion fails due to complex colspans.
     """
-    rows = table_tag.find_all('tr')
+    rows = table_tag.findall('.//tr')
     if not rows:
         return None
 
     matrix = []
     for row in rows:
-        cells = row.find_all(['td', 'th'])
-        row_text = [c.get_text(strip=True) for c in cells]
+        # iter() walks descendants in document order, matching bs4's
+        # recursive find_all(['td', 'th']).
+        cells = [el for el in row.iter() if el.tag in ('td', 'th')]
+        row_text = [''.join(s.strip() for s in cell.itertext()) for cell in cells]
         if any(row_text):  # Skip fully empty rows
             matrix.append(row_text)
 
@@ -884,15 +909,36 @@ def _extract_narrative_markdown(html: str, optimize_for_llm: bool) -> Optional[s
     from the TextBlock HTML before extracting narrative text.
     """
     try:
-        from bs4 import BeautifulSoup
-        soup = BeautifulSoup(html, 'html.parser')
+        import lxml.html
+        from lxml.etree import ParserError
 
-        # Remove all <table> elements — they're rendered separately
-        for table_tag in soup.find_all('table'):
-            table_tag.decompose()
+        from edgar.documents.utils.html_utils import create_lxml_parser
+        from edgar.markdown import process_content
 
-        remaining = str(soup).strip()
-        if not remaining or remaining in ('<html></html>', ''):
+        parser = create_lxml_parser(remove_comments=False)
+        try:
+            tree = lxml.html.fromstring(html, parser=parser)
+        except ParserError as e:
+            log.warning(f"Narrative extraction failed: {e}")
+            return None
+
+        # Remove all <table> elements — they're rendered separately.
+        # Removing an lxml element drops its tail, so splice each table's
+        # tail onto the previous sibling (or the parent) first.
+        for table_tag in [el for el in tree.iter() if el.tag == 'table']:
+            parent = table_tag.getparent()
+            if parent is None:
+                continue
+            tail = table_tag.tail or ''
+            previous = table_tag.getprevious()
+            if previous is not None:
+                previous.tail = (previous.tail or '') + tail
+            else:
+                parent.text = (parent.text or '') + tail
+            parent.remove(table_tag)
+
+        remaining = lxml.html.tostring(tree, encoding='unicode').strip()
+        if not remaining or remaining in ('<html></html>', '<div/>', '<div></div>'):
             return None
 
         if optimize_for_llm:
@@ -900,8 +946,11 @@ def _extract_narrative_markdown(html: str, optimize_for_llm: bool) -> Optional[s
             md = process_content(remaining)
             return md if md and md.strip() else None
         else:
-            # Plain text extraction
-            text = soup.get_text(separator=' ', strip=True)
+            # Plain text extraction: itertext walks text and tails in
+            # document order, matching bs4's get_text(separator=' ', strip=True).
+            text = ' '.join(
+                s.strip() for s in tree.itertext() if s and s.strip()
+            )
             # Fix missing spaces between adjacent spans (e.g., "hadno" → "had no")
             text = re.sub(r'([a-z])([A-Z$])', r'\1 \2', text)
             text = re.sub(r'(\w)([$])', r'\1 \2', text)

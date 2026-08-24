@@ -9,8 +9,8 @@ recorded Apple 10-K cassette (filing_text_baseline_0000320193-23-000106).
 """
 from pathlib import Path
 
+import lxml.html
 import pytest
-from bs4 import BeautifulSoup
 
 from edgar.xbrl.notes import (
     _extract_narrative_markdown,
@@ -24,17 +24,18 @@ def _read(name) -> str:
     return (NOTES_DIR / name).read_text(encoding='utf-8')
 
 
-def _soup_table(name) -> 'BeautifulSoup':
-    # Same construction the per-table renderer performs on note HTML.
-    return BeautifulSoup(_read(name), 'html.parser')
+def _lxml_table(name):
+    # Post-port, the caller hands this function an lxml <table> element
+    # parsed with the house parser settings.
+    tree = lxml.html.fromstring(_read(name))
+    return [el for el in tree.iter() if el.tag == 'table'][0]
 
 
 # --- _html_table_to_plain_text ------------------------------------------------
 
 @pytest.mark.fast
 def test_clean_table_plain_text_pinned():
-    soup = _soup_table('real-clean-table.html')
-    table_tag = soup.find_all('table')[0]
+    table_tag = _lxml_table('real-clean-table.html')
     result = _html_table_to_plain_text(table_tag)
     assert result is not None
     lines = result.split('\n')
@@ -46,8 +47,7 @@ def test_clean_table_plain_text_pinned():
 
 @pytest.mark.fast
 def test_colspan_table_cells_survive_individually():
-    soup = _soup_table('real-colspan-table.html')
-    table_tag = soup.find_all('table')[0]
+    table_tag = _lxml_table('real-colspan-table.html')
     result = _html_table_to_plain_text(table_tag)
     assert result is not None
     # No cell content may be dropped or merged by the fallback renderer.
@@ -61,8 +61,10 @@ def test_colspan_table_cells_survive_individually():
 @pytest.mark.fast
 def test_empty_and_non_table_input_return_none():
     # An empty <table> has no rows -> None (the real caller never passes
-    # a non-table soup or None, so only the empty-table case is pinned).
-    assert _html_table_to_plain_text(BeautifulSoup('<table></table>', 'html.parser').table) is None
+    # anything else, so only the empty-table case is pinned).
+    tree = lxml.html.fromstring('<table></table>')
+    table = [el for el in tree.iter() if el.tag == 'table'][0]
+    assert _html_table_to_plain_text(table) is None
 
 
 # --- _extract_narrative_markdown ----------------------------------------------
