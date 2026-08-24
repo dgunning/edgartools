@@ -1,5 +1,7 @@
 """Regression tests for GH issue #1072: CUSIP column bleed silently drops rows.
 
+GitHub Issue: https://github.com/dgunning/edgartools/issues/1072
+
 On pre-2013 TXT-format 13F-HR infotables, the fixed-width slice cut from the
 ``<S>/<C>`` marker-line offsets could miss the true CUSIP on both sides: the
 slice started too late (the issuer/class block ran wider than the markers
