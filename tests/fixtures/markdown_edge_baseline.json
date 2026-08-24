@@ -1,0 +1,87 @@
+{
+  "TRACKED-tracked-duplicate-tables": [
+    "\n#### Table: Income Statement\n| label | 2024 | 2023 |\n| --- | ---: | ---: |\n| Revenue | $1,000 | $900 |\n| Net income | $100 | $90 |\n\n",
+    {
+      "details": [
+        {
+          "reason": "Duplicate of earlier table (identical structure and data)",
+          "title": "Income Statement",
+          "type": "duplicate_table"
+        }
+      ],
+      "duplicate_tables": 1,
+      "filtered_text_blocks": 0,
+      "xbrl_metadata_tables": 0
+    }
+  ],
+  "TRACKED-tracked-plain-text": [
+    "\nJust a sentence, no markup.\n",
+    {}
+  ],
+  "TRACKED-tracked-xbrl-metadata": [
+    "\n#### Table: Income Statement\n| label | 2024 | 2023 |\n| --- | ---: | ---: |\n| Revenue | $1,000 | $900 |\n| Net income | $100 | $90 |\n\n",
+    {
+      "details": [
+        {
+          "preview": "Namespace Prefixus-gaap",
+          "reason": "Contains XBRL namespace/type metadata (non-financial content)",
+          "type": "xbrl_metadata_table"
+        }
+      ],
+      "duplicate_tables": 0,
+      "filtered_text_blocks": 0,
+      "xbrl_metadata_tables": 1
+    }
+  ],
+  "bold-span-subsection": "\n### Revenue Recognition\n\n\nThe Company recognises revenue when control transfers.",
+  "cells-separated-by-newlines": "\n#### Table 1: Data\n| label | Amount | col_2 |\n| --- | ---: | ---: |\n| Revenue | $1,000 | $1,000 |\n\n",
+  "centered-span-is-not-a-subsection": "Inventories",
+  "comment-between-paragraphs": "First.\n\nSecond.",
+  "comment-inside-a-cell": "\n#### Table 1: Data\n| label | Amount |\n| --- | ---: |\n| Rev enue | $1,000 |\n\n",
+  "currency-cell-already-has-a-colspan": "\n#### Table 1: Data\n| label | Amount | Prior | col_3 |\n| --- | ---: | ---: | ---: |\n| Revenue | $1,000 | $1,000 | $1,000 |\n\n",
+  "currency-cell-with-markup-inside-the-value": "\n#### Table 1: Data\n| label | Amount | col_2 |\n| --- | ---: | ---: |\n| Revenue | $1,000 | $1,000 |\n\n",
+  "currency-symbol-in-its-own-cell": "\n#### Table 1: Data\n| label | Amount | col_2 |\n| --- | ---: | ---: |\n| Revenue | $1,000 | $1,000 |\n\n",
+  "currency-symbol-is-the-last-cell": "\n#### Table 1: Data\n| label | Amount |\n| --- | --- |\n| Revenue | $ |\n\n",
+  "div-with-one-span": "\n### Inventories\n",
+  "div-with-two-spans": "Inventories",
+  "document-is-a-div": "A standalone paragraph of prose in a div.",
+  "document-is-a-paragraph": "A standalone paragraph of prose.",
+  "document-is-a-table": "\n#### Table: Income Statement\n| label | 2024 | 2023 |\n| --- | ---: | ---: |\n| Revenue | $1,000 | $900 |\n| Net income | $100 | $90 |\n\n",
+  "duplicate-tables": "\n#### Table: Income Statement\n| label | 2024 | 2023 |\n| --- | ---: | ---: |\n| Revenue | $1,000 | $900 |\n| Net income | $100 | $90 |\n\n",
+  "empty": "",
+  "empty-table-element": "Prose.",
+  "encoding-declaration": "Revenue \u2014 recognised on transfer of control.\n\n\n#### Table: Income Statement\n| label | 2024 | 2023 |\n| --- | ---: | ---: |\n| Revenue | $1,000 | $900 |\n| Net income | $100 | $90 |\n\n",
+  "html-headings": "\n### Top\n\n\n\n### Second\n\n\n\n### Third\n\n\nBody text here.",
+  "italic-span-subsection": "\n#### Deferred Revenue\n\n\nDeferred revenue is recorded when cash is received in advance.",
+  "list-item-split-across-tags": "\n<ul><li>First <b>item</b> here</li></ul>\n",
+  "nested-300-deep": "\n#### Table: Income Statement\n| label | 2024 | 2023 |\n| --- | ---: | ---: |\n| Revenue | $1,000 | $900 |\n| Net income | $100 | $90 |\n\n",
+  "nested-table-is-skipped": "\n#### Table 1: Data\n| label | col_1 |\n| --- | ---: |\n| Inner | 1 |\n\n",
+  "ordered-list": "\n<ol><li>Step one</li><li>Step two</li></ol>\n",
+  "percent-close-paren-variant": "\n#### Table 1: Data\n| label | Rate | col_2 |\n| --- | ---: | ---: |\n| Change | (3.2%) | (3.2%) |\n\n",
+  "percent-symbol-in-its-own-cell": "\n#### Table 1: Data\n| label | Rate | col_2 |\n| --- | ---: | ---: |\n| Margin | 42.5% | 42.5% |\n\n",
+  "percent-with-nothing-before-it": "",
+  "plain-text-passthrough": "\nThis is not HTML at all, just a sentence.\n",
+  "pts-variant": "\n#### Table 1: Data\n| label | Change | col_2 |\n| --- | --- | --- |\n| Spread | 15pts | 15pts |\n\n",
+  "script-and-style-are-dropped": "Real prose only.",
+  "simple-table": "\n#### Table: Income Statement\n| label | 2024 | 2023 |\n| --- | ---: | ---: |\n| Revenue | $1,000 | $900 |\n| Net income | $100 | $90 |\n\n",
+  "span-with-a-comment-sibling": "Inventories",
+  "span-with-a-text-sibling": "Inventories and supplies",
+  "span-with-a-whitespace-sibling": "\n### Inventories\n",
+  "span-without-a-margin-top-parent": "Inventories",
+  "style-inside-a-table-cell": "\n#### Table 1: Data\n| label | Amount |\n| --- | ---: |\n| Revenue | $1,000 |\n\n",
+  "table-of-only-layout-rows": "Prose.",
+  "table-with-a-caption": "\n#### Table: Segment Results\n| label | 2024 |\n| --- | ---: |\n| Revenue | $1,000 |\n\n",
+  "table-with-a-spanning-title-row": "\n#### Table: Summary of Significant Accounting Policies\n| label | 2024 | 2023 |\n| --- | ---: | ---: |\n| Revenue | $1,000 | $900 |\n\n",
+  "table-with-cells-but-no-row": "Prose.",
+  "table-with-only-a-tbody": "Prose.",
+  "text-between-cells": "\n#### Table 1: Data\n| label | Amount | col_2 |\n| --- | ---: | ---: |\n| Revenue | $1,000 | $1,000 |\n\n",
+  "text-follows-a-style-block": "\n#### Table 1: Data\n| label | Amount |\n| --- | ---: |\n| Revenue | $1,000 |\n\n",
+  "text-that-mentions-a-tag": "",
+  "two-currency-symbols-in-a-row": "\n#### Table 1: Data\n| label | A | B | col_3 |\n| --- | ---: | ---: | ---: |\n| Revenue | $1,000 | $1,000 | $900 |\n\n",
+  "unclosed-tags": "\n#### Table 1: Data\n| label | Amount Revenue $1,000 |\n| --- | ---: |\n| Revenue $1,000 | $1,000 |\n\n",
+  "unordered-list": "\n<ul><li>First item</li><li>Second item</li><li>   </li></ul>\n",
+  "us-gaap-table-with-dollars-and-years-is-kept": "\n#### Table 1: Data\n| label | 2024 |\n| --- | ---: |\n| Revenue | $1,000 |\n\n",
+  "whitespace": "\n\n",
+  "width-grid-layout-row": "\n#### Table 1: Data\n| label | Amount |\n| --- | ---: |\n| Revenue | $1,000 |\n\n",
+  "xbrl-metadata-namespace-prefix": ""
+}
