@@ -1,0 +1,1490 @@
+{
+  "0000950103-25-008153_exhibit": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": 12119.07,
+    "securities": [
+      {
+        "amount_registered": "27,726,052 (2)",
+        "fee_amount": 12119.07,
+        "fee_rate": 0.0001531,
+        "fee_rule": "457(c)",
+        "max_aggregate_amount": 79157878.46,
+        "price_per_unit": 2.855,
+        "security_title": "Common Shares",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": 0.0,
+    "total_offering_amount": 79157878.46
+  },
+  "0001047469-18-007293_inline": {
+    "carry_forwards": [],
+    "exhibit_url": null,
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 38606063.86
+  },
+  "0001104659-20-040593_inline": {
+    "carry_forwards": [],
+    "exhibit_url": null,
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 30000000.0
+  },
+  "0001104659-23-069410_exhibit": {
+    "carry_forwards": [
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Debt Securities of Credit Suisse AG (3)",
+        "security_type": "Debt"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Senior Debt Securities",
+        "security_type": "Debt"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Subordinated Debt Securities",
+        "security_type": "Debt"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Warrants of Credit Suisse AG (3)",
+        "security_type": "Other"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Debt Warrants",
+        "security_type": "Other"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Other Warrants",
+        "security_type": "Other"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": 0.0,
+        "fee_rate": null,
+        "fee_rule": "415(a)(6)",
+        "max_aggregate_amount": 1.0,
+        "price_per_unit": null,
+        "security_title": "Unallocated (Universal) Shelf",
+        "security_type": "Unallocated (Universal) Shelf"
+      }
+    ],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": true,
+    "has_carry_forward": true,
+    "net_fee_due": 0.0,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": null
+  },
+  "0001104659-23-076317_exhibit": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": 761.12,
+    "securities": [
+      {
+        "amount_registered": "2,666,666",
+        "fee_amount": 761.12,
+        "fee_rate": 0.0001102,
+        "fee_rule": "457(c)",
+        "max_aggregate_amount": 6906664.94,
+        "price_per_unit": 2.59,
+        "security_title": "Common Stock, $0.001 par value(3)",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 6906664.94
+  },
+  "0001104659-25-064107_exhibit": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": true,
+    "has_carry_forward": false,
+    "net_fee_due": 0.0,
+    "securities": [
+      {
+        "amount_registered": "457(r)",
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "Common Stock, $0.0001 par value per share",
+        "max_aggregate_amount": null,
+        "price_per_unit": 0.0001531,
+        "security_title": "Equity",
+        "security_type": "1"
+      },
+      {
+        "amount_registered": "457(r)",
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "Preferred Stock, $0.0001 par value per share",
+        "max_aggregate_amount": null,
+        "price_per_unit": 0.0001531,
+        "security_title": "Equity",
+        "security_type": "2"
+      },
+      {
+        "amount_registered": "457(r)",
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "Debt Securities",
+        "max_aggregate_amount": null,
+        "price_per_unit": 0.0001531,
+        "security_title": "Debt",
+        "security_type": "3"
+      },
+      {
+        "amount_registered": "457(r)",
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "Warrants",
+        "max_aggregate_amount": null,
+        "price_per_unit": 0.0001531,
+        "security_title": "Other",
+        "security_type": "4"
+      },
+      {
+        "amount_registered": "457(r)",
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "Purchase Contracts",
+        "max_aggregate_amount": null,
+        "price_per_unit": 0.0001531,
+        "security_title": "Other",
+        "security_type": "5"
+      },
+      {
+        "amount_registered": "457(r)",
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "Units",
+        "max_aggregate_amount": null,
+        "price_per_unit": 0.0001531,
+        "security_title": "Other",
+        "security_type": "6"
+      }
+    ],
+    "total_fees_previously_paid": 0.0,
+    "total_offering_amount": null
+  },
+  "0001140361-25-024210_exhibit": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": 45930.0,
+    "securities": [
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Common Stock, no par value per share",
+        "security_type": "Equity"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Preferred Stock, no par value per share",
+        "security_type": "Equity"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Depositary Shares",
+        "security_type": "Equity"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Debt Securities",
+        "security_type": "Debt"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Purchase Contracts (2)",
+        "security_type": "Other"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Rights (3)",
+        "security_type": "Other"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Units (4)",
+        "security_type": "Other"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Warrants (5)",
+        "security_type": "Other"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": 45930.0,
+        "fee_rate": 0.0001531,
+        "fee_rule": "457(o)",
+        "max_aggregate_amount": 300000000.0,
+        "price_per_unit": null,
+        "security_title": "Unallocated (Universal) Shelf",
+        "security_type": "Unallocated (Universal) Shelf"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 300000000.0
+  },
+  "0001193125-20-310765_inline": {
+    "carry_forwards": [],
+    "exhibit_url": null,
+    "fee_deferred": true,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": null
+  },
+  "0001193125-22-186192_exhibit": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": 2014.37,
+    "securities": [
+      {
+        "amount_registered": "500,000",
+        "fee_amount": 2014.37,
+        "fee_rate": 9.27e-05,
+        "fee_rule": "457(c)",
+        "max_aggregate_amount": 21730000.0,
+        "price_per_unit": 43.46,
+        "security_title": "Common Stock, $0.0001 par value per share (2)",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 21730000.0
+  },
+  "0001193125-25-066253_exhibit": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": true,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": null,
+        "security_type": "Welltower Inc."
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "Rule 456(b) and Rule 457(r) (2)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Debt securities (2)",
+        "security_type": "Debt"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "Rule 456(b) and Rule 457(r) (2)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Common stock, par value $1.00 per share (2)",
+        "security_type": "Equity"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "Rule 456(b) and Rule 457(r) (2)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Preferred stock, par value $1.00 per share (2)",
+        "security_type": "Equity"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "Rule 456(b) and Rule 457(r) (2)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Depositary Shares representing Preferred Stock (2)(5)",
+        "security_type": "Other"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "Rule 456(b) and Rule 457(r) (2)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Guarantees of Debt Securities (2)(6)",
+        "security_type": "Debt"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "Rule 456(b) and Rule 457(r) (2)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Warrants (2)(7)",
+        "security_type": "Other"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "Rule 456(b) and Rule 457(r) (2)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Units (2)(8)",
+        "security_type": "Other"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "Rule 456(b) and Rule 457(r)(2)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Debt Securities (2)",
+        "security_type": "Debt"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "Rule 456(b) and Rule 457(r)(2)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Guarantees of Debt Securities (2)(9)",
+        "security_type": "Debt"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": null
+  },
+  "0001193125-25-067858_exhibit": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": 1485.73,
+    "securities": [
+      {
+        "amount_registered": "5,376,340 (1)",
+        "fee_amount": 1485.73,
+        "fee_rate": 0.0001531,
+        "fee_rule": "457(c)",
+        "max_aggregate_amount": 9704293.7,
+        "price_per_unit": 1.805,
+        "security_title": "Common Stock, par value $0.0001 per share",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 9704293.7
+  },
+  "0001193125-25-068723_exhibit": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": 15310.0,
+    "securities": [
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "Rule 457(o)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Debt Securities",
+        "security_type": "Debt"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "Rule 457(o)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Common Stock, $0.0001 par value per share",
+        "security_type": "Equity"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "Rule 457(o)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Preferred Stock, $0.0001 par value per share",
+        "security_type": "Equity"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "Rule 457(o)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Depositary Shares",
+        "security_type": "Equity"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "Rule 457(o)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Warrants",
+        "security_type": "Other"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "Rule 457(o)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Rights",
+        "security_type": "Other"
+      },
+      {
+        "amount_registered": "$0.00015310",
+        "fee_amount": 15310.0,
+        "fee_rate": 0.0001531,
+        "fee_rule": "$100,000,000 (3)",
+        "max_aggregate_amount": 100000000.0,
+        "price_per_unit": 15310.0,
+        "security_title": "Rule 457(o)",
+        "security_type": "Unallocated (Universal Shelf)"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 100000000.0
+  },
+  "0001193125-25-068799_exhibit": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": 0.0,
+    "securities": [
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": 0.0001531,
+        "fee_rule": "457(o)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Debt Securities of Thomson Reuters Corporation",
+        "security_type": "Debt"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": 0.0001531,
+        "fee_rule": "457(o)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Debt Securities of TR Finance LLC",
+        "security_type": "Debt"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": 0.0001531,
+        "fee_rule": "457(n)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Guarantees of Debt Securities of Thomson Reuters Corporation",
+        "security_type": "Debt"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": 0.0001531,
+        "fee_rule": "457(n)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Guarantees of Debt Securities of TR Finance LLC",
+        "security_type": "Debt"
+      }
+    ],
+    "total_fees_previously_paid": 16500.0,
+    "total_offering_amount": 3000000000.0
+  },
+  "0001193125-25-068942_exhibit": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": 12120.95,
+    "securities": [
+      {
+        "amount_registered": "41,668,500",
+        "fee_amount": 12120.95,
+        "fee_rate": 0.0001531,
+        "fee_rule": "457(c)",
+        "max_aggregate_amount": 79170150.0,
+        "price_per_unit": 1.9,
+        "security_title": "Common Stock, $0.0001 par value per share",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": 0.0,
+    "total_offering_amount": 79170150.0
+  },
+  "0001213900-25-058997_exhibit": {
+    "carry_forwards": [
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "415(a)(6)",
+        "max_aggregate_amount": 300000000.0,
+        "price_per_unit": null,
+        "security_title": null,
+        "security_type": "Unallocated (Universal) Shelf"
+      }
+    ],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": true,
+    "net_fee_due": 7655.0,
+    "securities": [
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "(1)(2)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Class A Common Stock, par value $0.0001 per share",
+        "security_type": "Equity"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "(1)(2)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Preferred Stock",
+        "security_type": "Equity"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Debt Securities",
+        "security_type": "Debt"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Depositary Shares",
+        "security_type": "Other"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Warrants",
+        "security_type": "Other"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Purchase Contracts",
+        "security_type": "Other"
+      },
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Units",
+        "security_type": "Other"
+      },
+      {
+        "amount_registered": "(1)(2)",
+        "fee_amount": 7655.0,
+        "fee_rate": 0.00015309999999999998,
+        "fee_rule": "457(o)",
+        "max_aggregate_amount": 50000000.0,
+        "price_per_unit": null,
+        "security_title": null,
+        "security_type": "Unallocated (Universal) Shelf"
+      }
+    ],
+    "total_fees_previously_paid": 27810.0,
+    "total_offering_amount": 350000000.0
+  },
+  "0001213900-25-059789_exhibit": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": 29050.73,
+    "securities": [
+      {
+        "amount_registered": "17,250,000",
+        "fee_amount": 26409.75,
+        "fee_rate": 0.00015309999999999998,
+        "fee_rule": "Rule 457(a)",
+        "max_aggregate_amount": 172500000.0,
+        "price_per_unit": 10.0,
+        "security_title": "Units,each consisting of one Class A ordinary share, $0.0001 par value, and one right (2)",
+        "security_type": "Equity"
+      },
+      {
+        "amount_registered": "17,250,000",
+        "fee_amount": null,
+        "fee_rate": 0.00015309999999999998,
+        "fee_rule": "Rule 457(g)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Class A ordinary shares included as part of the units (3)",
+        "security_type": "Equity"
+      },
+      {
+        "amount_registered": "17,250,000",
+        "fee_amount": null,
+        "fee_rate": 0.00015309999999999998,
+        "fee_rule": "Rule 457(g)",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Rights to acquire 1/10 of an ordinary share (3)",
+        "security_type": "Equity"
+      },
+      {
+        "amount_registered": "1,725,000",
+        "fee_amount": 2640.98,
+        "fee_rate": 0.00015309999999999998,
+        "fee_rule": "Rule 457(g)",
+        "max_aggregate_amount": 17250000.0,
+        "price_per_unit": 10.0,
+        "security_title": "Class A ordinary shares underlying rights included as part of the units (3)",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 189750000.0
+  },
+  "0001493152-23-041369_exhibit": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": 22140.0,
+    "securities": [
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Subscription Rights",
+        "security_type": "Other"
+      },
+      {
+        "amount_registered": "(o)",
+        "fee_amount": 22140.0,
+        "fee_rate": 0.0001476,
+        "fee_rule": "457",
+        "max_aggregate_amount": 150000000.0,
+        "price_per_unit": null,
+        "security_title": null,
+        "security_type": "Unallocated (Universal) Shelf (1)"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 150000000.0
+  },
+  "0001654954-21-007440_inline": {
+    "carry_forwards": [],
+    "exhibit_url": null,
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 50000000.0
+  },
+  "EDGE-amount-follows-a-style-block": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": "$10.00",
+        "fee_amount": 1476.0,
+        "fee_rate": 0.0001476,
+        "fee_rule": "1,000,000",
+        "max_aggregate_amount": 10000000.0,
+        "price_per_unit": 10000000.0,
+        "security_title": "Common Stock",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 10000000.0
+  },
+  "EDGE-carry-forward-section": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": "$10.00",
+        "fee_amount": 1476.0,
+        "fee_rate": 0.0001476,
+        "fee_rule": "1,000,000",
+        "max_aggregate_amount": 10000000.0,
+        "price_per_unit": 10000000.0,
+        "security_title": "Common Stock",
+        "security_type": "Equity"
+      },
+      {
+        "amount_registered": "$5,000,000",
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "500,000",
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "Common Stock",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 15000000.0
+  },
+  "EDGE-cell-has-a-comment-inside-a-number": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": "$10.00",
+        "fee_amount": null,
+        "fee_rate": 1476.0,
+        "fee_rule": "1,000,000",
+        "max_aggregate_amount": 0.0001476,
+        "price_per_unit": 10000.0,
+        "security_title": "Common Stock",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 0.0001476
+  },
+  "EDGE-cell-has-a-script": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": "$10.00",
+        "fee_amount": 1476.0,
+        "fee_rate": 0.0001476,
+        "fee_rule": "1,000,000",
+        "max_aggregate_amount": 10000000.0,
+        "price_per_unit": 10000000.0,
+        "security_title": "Common Stock",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 10000000.0
+  },
+  "EDGE-cell-text-padded-with-whitespace": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": "$10.00",
+        "fee_amount": 1476.0,
+        "fee_rate": 0.0001476,
+        "fee_rule": "1,000,000",
+        "max_aggregate_amount": 10000000.0,
+        "price_per_unit": 10000000.0,
+        "security_title": "Common Stock",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 10000000.0
+  },
+  "EDGE-cell-text-split-across-fonts": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": "$10.00",
+        "fee_amount": null,
+        "fee_rate": 1476.0,
+        "fee_rule": "1,000,000",
+        "max_aggregate_amount": 0.0001476,
+        "price_per_unit": 10000.0,
+        "security_title": "Common Stock",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 0.0001476
+  },
+  "EDGE-dollar-sign-in-its-own-cell": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": "$10.00",
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": "1,000,000",
+        "max_aggregate_amount": 1476.0,
+        "price_per_unit": 10000000.0,
+        "security_title": "Common Stock",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 1476.0
+  },
+  "EDGE-earlier-table-matches-only-via-its-style": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": "$10.00",
+        "fee_amount": 1476.0,
+        "fee_rate": 0.0001476,
+        "fee_rule": "1,000,000",
+        "max_aggregate_amount": 10000000.0,
+        "price_per_unit": 10000000.0,
+        "security_title": "Common Stock",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 10000000.0
+  },
+  "EDGE-empty": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": null
+  },
+  "EDGE-header-split-across-inline-tags": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": "$10.00",
+        "fee_amount": 1476.0,
+        "fee_rate": 0.0001476,
+        "fee_rule": "1,000,000",
+        "max_aggregate_amount": 10000000.0,
+        "price_per_unit": 10000000.0,
+        "security_title": "Common Stock",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 10000000.0
+  },
+  "EDGE-header-split-across-nested-spans": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": "$10.00",
+        "fee_amount": 1476.0,
+        "fee_rate": 0.0001476,
+        "fee_rule": "1,000,000",
+        "max_aggregate_amount": 10000000.0,
+        "price_per_unit": 10000000.0,
+        "security_title": "Common Stock",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 10000000.0
+  },
+  "EDGE-header-split-by-a-nonbreaking-space": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": "$10.00",
+        "fee_amount": 1476.0,
+        "fee_rate": 0.0001476,
+        "fee_rule": "1,000,000",
+        "max_aggregate_amount": 10000000.0,
+        "price_per_unit": 10000000.0,
+        "security_title": "Common Stock",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 10000000.0
+  },
+  "EDGE-header-table-has-a-script": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": "$10.00",
+        "fee_amount": 1476.0,
+        "fee_rate": 0.0001476,
+        "fee_rule": "1,000,000",
+        "max_aggregate_amount": 10000000.0,
+        "price_per_unit": 10000000.0,
+        "security_title": "Common Stock",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 10000000.0
+  },
+  "EDGE-header-table-has-a-style": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": "$10.00",
+        "fee_amount": 1476.0,
+        "fee_rate": 0.0001476,
+        "fee_rule": "1,000,000",
+        "max_aggregate_amount": 10000000.0,
+        "price_per_unit": 10000000.0,
+        "security_title": "Common Stock",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 10000000.0
+  },
+  "EDGE-inline-asr-without-a-marker": {
+    "carry_forwards": [],
+    "exhibit_url": null,
+    "fee_deferred": true,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": null
+  },
+  "EDGE-inline-deferral-marker-only-in-a-style-block": {
+    "carry_forwards": [],
+    "exhibit_url": null,
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": null
+  },
+  "EDGE-inline-deferral-marker-outside-the-table": {
+    "carry_forwards": [],
+    "exhibit_url": null,
+    "fee_deferred": true,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": null
+  },
+  "EDGE-inline-deferral-marker-split-across-tags": {
+    "carry_forwards": [],
+    "exhibit_url": null,
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": null
+  },
+  "EDGE-inline-dollar-cell-then-th-number": {
+    "carry_forwards": [],
+    "exhibit_url": null,
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 25000000.0
+  },
+  "EDGE-inline-empty": {
+    "carry_forwards": [],
+    "exhibit_url": null,
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": null
+  },
+  "EDGE-inline-implausibly-large-amount": {
+    "carry_forwards": [],
+    "exhibit_url": null,
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": null
+  },
+  "EDGE-inline-largest-dollar-wins": {
+    "carry_forwards": [],
+    "exhibit_url": null,
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 10000000.0
+  },
+  "EDGE-inline-no-marker-anywhere": {
+    "carry_forwards": [],
+    "exhibit_url": null,
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": null
+  },
+  "EDGE-inline-no-table": {
+    "carry_forwards": [],
+    "exhibit_url": null,
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": null
+  },
+  "EDGE-inline-rows-inside-a-tbody": {
+    "carry_forwards": [],
+    "exhibit_url": null,
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 42000000.0
+  },
+  "EDGE-inline-table-nested-300-deep": {
+    "carry_forwards": [],
+    "exhibit_url": null,
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 77000000.0
+  },
+  "EDGE-ixbrl-namespaced-wrapper": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": "$10.00",
+        "fee_amount": 1476.0,
+        "fee_rate": 0.0001476,
+        "fee_rule": "1,000,000",
+        "max_aggregate_amount": 10000000.0,
+        "price_per_unit": 10000000.0,
+        "security_title": "Common Stock",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 10000000.0
+  },
+  "EDGE-legacy-registration-fee-header": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": null
+  },
+  "EDGE-nested-table-inside-a-cell": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "$99,999,999",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": null
+  },
+  "EDGE-nested-table-inside-the-total-row": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": "$10.00",
+        "fee_amount": 1476.0,
+        "fee_rate": 0.0001476,
+        "fee_rule": "1,000,000",
+        "max_aggregate_amount": 10000000.0,
+        "price_per_unit": 10000000.0,
+        "security_title": "Common Stock",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 99999999.0
+  },
+  "EDGE-no-table": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": null
+  },
+  "EDGE-row-mixes-td-then-th": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": "$10.00",
+        "fee_amount": 1476.0,
+        "fee_rate": 0.0001476,
+        "fee_rule": "1,000,000",
+        "max_aggregate_amount": 10000000.0,
+        "price_per_unit": 10000000.0,
+        "security_title": "Common Stock",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 10000000.0
+  },
+  "EDGE-row-mixes-th-then-td": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": "$10.00",
+        "fee_amount": 1476.0,
+        "fee_rate": 0.0001476,
+        "fee_rule": "1,000,000",
+        "max_aggregate_amount": 10000000.0,
+        "price_per_unit": 10000000.0,
+        "security_title": "Common Stock",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 10000000.0
+  },
+  "EDGE-table-is-the-root": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": "$10.00",
+        "fee_amount": 1476.0,
+        "fee_rate": 0.0001476,
+        "fee_rule": "1,000,000",
+        "max_aggregate_amount": 10000000.0,
+        "price_per_unit": 10000000.0,
+        "security_title": "Common Stock",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 10000000.0
+  },
+  "EDGE-table-nested-300-deep": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": "$10.00",
+        "fee_amount": 1476.0,
+        "fee_rate": 0.0001476,
+        "fee_rule": "1,000,000",
+        "max_aggregate_amount": 10000000.0,
+        "price_per_unit": 10000000.0,
+        "security_title": "Common Stock",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 10000000.0
+  },
+  "EDGE-table-without-the-header-words": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": null
+  },
+  "EDGE-totals-row": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": 1376.0,
+    "securities": [
+      {
+        "amount_registered": "$10.00",
+        "fee_amount": 1476.0,
+        "fee_rate": 0.0001476,
+        "fee_rule": "1,000,000",
+        "max_aggregate_amount": 10000000.0,
+        "price_per_unit": 10000000.0,
+        "security_title": "Common Stock",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": 100.0,
+    "total_offering_amount": 10000000.0
+  },
+  "EDGE-unclosed-tags": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": null,
+        "fee_amount": null,
+        "fee_rate": null,
+        "fee_rule": null,
+        "max_aggregate_amount": null,
+        "price_per_unit": null,
+        "security_title": "$10,000,000",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": null
+  },
+  "EDGE-whitespace": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": null
+  },
+  "EDGE-xml-declaration-says-ascii-but-text-is-not": {
+    "carry_forwards": [],
+    "exhibit_url": "https://example.org/ex107.htm",
+    "fee_deferred": false,
+    "has_carry_forward": false,
+    "net_fee_due": null,
+    "securities": [
+      {
+        "amount_registered": "$10.00",
+        "fee_amount": 1476.0,
+        "fee_rate": 0.0001476,
+        "fee_rule": "1,000,000",
+        "max_aggregate_amount": 10000000.0,
+        "price_per_unit": 10000000.0,
+        "security_title": "Common Stock \u2014 Class A",
+        "security_type": "Equity"
+      }
+    ],
+    "total_fees_previously_paid": null,
+    "total_offering_amount": 10000000.0
+  }
+}
