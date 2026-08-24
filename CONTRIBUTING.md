@@ -102,6 +102,46 @@ Cassettes are loaded as plain data — recorded requests, headers and response
 bodies only. `hatch run check-cassettes` verifies this and runs in CI ahead of
 the test jobs; run it locally if you are about to run a branch you did not write.
 
+## Regression Tests
+
+A regression test is a claim that one specific bug stays fixed. A year from now
+the assertion is the only surviving record of what that bug was, and the only
+question that justifies ever deleting the test is "is this bug still
+reachable?" — which nobody can answer without the report.
+
+**Every file under `tests/issues/regression/` must name its origin in the module
+docstring**, as one of these three shapes:
+
+```
+GitHub Issue: https://github.com/dgunning/edgartools/issues/<n>
+GitHub PR:    https://github.com/dgunning/edgartools/pull/<n>
+Bead:         edgartools-<id>
+```
+
+Anywhere in the docstring is fine; directly under the summary line is the usual
+place.
+
+**A bare `#819` in prose does not count, and that is the point rather than an
+oversight.** 109 files here once named their issue in prose and nothing else.
+The number was present, but it was not a link and the form varied — "GH #812",
+"GitHub issue #488", "issue #762" — so no tool could follow it. Requiring one
+canonical shape is what makes "which of these bugs are still open?" answerable
+by a script instead of by reading 300 docstrings. The filename is not enough
+either: it carries the number for some of the tree and silently not for the
+rest.
+
+**This runs in CI ahead of the test jobs**, as a step inside `test-fast`, so a
+missing line fails your pull request before a single test executes. The failure
+names the exact line to add. Check it before pushing:
+
+```bash
+hatch run check-regression-provenance
+```
+
+Place new regression tests in `tests/issues/regression/test_issue_NNN.py`, and
+assert specific values rather than mere existence — a ground-truth number taken
+from a real filing, verified by hand.
+
 ## Changelog Entries
 
 `CHANGELOG.md` is read by someone deciding whether an upgrade affects them. An
