@@ -14,7 +14,10 @@ import re
 from decimal import Decimal, InvalidOperation
 from typing import Dict, List, Optional, Tuple
 
-from bs4 import BeautifulSoup, Tag
+import lxml.html
+from lxml.etree import ParserError, strip_elements
+
+from edgar.documents.utils.html_utils import create_lxml_parser
 
 log = logging.getLogger(__name__)
 
@@ -97,16 +100,66 @@ def _parse_dollar(text: str) -> Optional[int]:
         return None
 
 
-def _get_cell_text(cell: Tag) -> str:
-    """Get clean text from a table cell."""
-    return cell.get_text(separator=' ', strip=True)
+def _parse_html(html: str):
+    """Parse a 497K document into an lxml tree.
+
+    Replaces ``BeautifulSoup(html, 'lxml')``, which already ran on libxml2 --
+    this removes bs4's tree on top of it rather than swapping the parser. Three
+    details still matter:
+
+    * **bytes, not str.** lxml refuses a ``str`` carrying an encoding
+      declaration, and encoding here makes the parser's own utf-8 win over
+      whatever the document declares.
+    * **``remove_comments=False``.** Removing a comment merges the strings
+      either side into one node, which changes what the per-cell strip-and-join
+      produces for ``Management <!-- note --> Fee``.
+    * **``strip_elements``.** bs4 classified the text inside ``<script>``,
+      ``<style>`` and ``<template>`` as Script/Stylesheet/TemplateString and
+      left all three out of ``get_text()``; lxml puts them in, and a stylesheet
+      inside a fee table is enough to change how ``_classify_table`` labels it.
+      ``with_tail=False`` keeps the ordinary text after the closing tag.
+
+    Returns ``None`` for input lxml cannot root at all, where BeautifulSoup
+    returned an empty soup.
+    """
+    if isinstance(html, str):
+        html = html.encode('utf-8', errors='replace')
+    try:
+        root = lxml.html.fromstring(html, parser=create_lxml_parser(remove_comments=False))
+    except ParserError:
+        return None
+    strip_elements(root, 'script', 'style', 'template', with_tail=False)
+    return root
 
 
-def _table_texts(table: Tag) -> List[List[str]]:
+def _tables(root) -> List:
+    """Every ``<table>``, in document order.
+
+    ``descendant-or-self``, not ``.//``: lxml roots a single-element fragment
+    AT that element, so a document that IS a table has no descendant tables.
+    """
+    return [] if root is None else root.xpath('descendant-or-self::table')
+
+
+def _get_cell_text(cell) -> str:
+    """Get clean text from a table cell.
+
+    ``cell.get_text(separator=' ', strip=True)``: strip each string, drop the
+    ones left empty, join the rest with a single SPACE. ``text_content()`` is
+    not it -- that joins the raw strings, so a label typeset as
+    ``<font>Management</font><font>Fee</font>`` reads "ManagementFee" and
+    ``_is_fee_label`` stops recognising the row.
+    """
+    return ' '.join(chunk.strip() for chunk in cell.itertext() if chunk.strip())
+
+
+def _table_texts(table) -> List[List[str]]:
     """Extract all cell texts from a table as a 2D list."""
     rows = []
-    for tr in table.find_all('tr'):
-        cells = tr.find_all(['td', 'th'])
+    for tr in table.iter('tr'):
+        # ONE list in document order -- not the tds followed by the ths. Every
+        # extractor downstream is positional.
+        cells = list(tr.iter('td', 'th'))
         rows.append([_get_cell_text(c) for c in cells])
     return rows
 
@@ -581,8 +634,7 @@ def extract_fee_tables(html: str, class_info: Optional[List[Dict]] = None) -> Li
         html: The HTML content of the 497K filing
         class_info: Optional list of class dicts from SGML header with 'name' and 'ticker' keys
     """
-    soup = BeautifulSoup(html, 'lxml')
-    tables = soup.find_all('table')
+    tables = _tables(_parse_html(html))
 
     # Classify all tables
     classified = []
@@ -683,8 +735,7 @@ def extract_performance_table(html: str) -> Tuple[List[Dict],
         - best_quarter: (return_pct, date_str) or None
         - worst_quarter: (return_pct, date_str) or None
     """
-    soup = BeautifulSoup(html, 'lxml')
-    tables = soup.find_all('table')
+    tables = _tables(_parse_html(html))
 
     all_performance = []
     best_quarter = None
@@ -718,9 +769,14 @@ def extract_fund_metadata(html: str) -> Dict:
     Returns dict with keys: fund_name, prospectus_date, portfolio_turnover,
     investment_objective, portfolio_managers, min_investments.
     """
-    soup = BeautifulSoup(html, 'lxml')
-    text = soup.get_text(separator='\n', strip=True)
-    lines = [line.strip() for line in text.split('\n') if line.strip()]
+    root = _parse_html(html)
+    # ``get_text(separator='\n', strip=True)``: strip each string, drop the
+    # empties, join with a newline. Every pattern below is DOTALL, so the
+    # separator only has to be whitespace -- but it has to be there, and
+    # ``text_content()`` would not put it there.
+    text = '' if root is None else '\n'.join(
+        chunk.strip() for chunk in root.itertext() if chunk.strip()
+    )
 
     result = {
         'fund_name': None,
