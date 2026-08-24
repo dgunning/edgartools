@@ -9,7 +9,6 @@ from lxml import html as lxml_html
 __all__ = [
     "compress_dataframe",
     "table_html_to_dataframe",
-    "table_tag_to_dataframe",
     "markdown_to_dataframe",
     "dataframe_to_text",
     "clean_column_text",
@@ -159,24 +158,6 @@ def table_html_to_dataframe(html_str: str) -> pd.DataFrame:
     df = pd.DataFrame(data)
     df = adjust_column_headers(df)  # Adjust headers if not promoted
     df = compress_dataframe(df)
-    return df
-
-
-def table_tag_to_dataframe(table_tag):
-    """Convert a BeautifulSoup table Tag to a DataFrame."""
-
-    rows = table_tag.find_all('tr')
-
-    data = []
-
-    for row in rows:
-        # Find all 'td' tags within each 'tr' tag
-        cols = row.find_all('td')
-        # Get the text from each 'td' tag, handling nested tags automatically
-        cols = [clean_column_text(col.get_text(strip=True)) for col in cols]
-        data.append(cols)
-
-    df = pd.DataFrame(data)
     return df
 
 

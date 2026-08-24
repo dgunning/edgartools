@@ -1,0 +1,1475 @@
+{
+  "forms::page0": [
+    {
+      "Description": "Examination Brochure: Information about Examinations (PDF)",
+      "Form": "",
+      "LastUpdated": "March 2023",
+      "SECNumber": "SEC 2389",
+      "Topics": "",
+      "Url": "https://www.sec.gov/files/exam-brochure.pdf"
+    },
+    {
+      "Description": "Supplemental Information for Persons Requested to Supply Information Voluntarily to the Commission's Examination Staff (PDF)",
+      "Form": "",
+      "LastUpdated": "April 2021",
+      "SECNumber": "SEC2866",
+      "Topics": "Other Forms and Materials",
+      "Url": "https://www.sec.gov/files/formsec2866.pdf"
+    },
+    {
+      "Description": "Application for registration or exemption from registration as a national securities exchange (PDF)",
+      "Form": "1",
+      "LastUpdated": "Feb. 1999",
+      "SECNumber": "SEC1935",
+      "Topics": "Self-Regulatory Organizations",
+      "Url": "https://www.sec.gov/files/form1.pdf"
+    },
+    {
+      "Description": "Regulation A Offering Statement (PDF)",
+      "Form": "1-A",
+      "LastUpdated": "Feb. 2025",
+      "SECNumber": "SEC486",
+      "Topics": "Securities Act of 1933, Small Businesses",
+      "Url": "https://www.sec.gov/files/form1a.pdf"
+    },
+    {
+      "Description": "Notification under Regulation E (PDF)",
+      "Form": "1-E",
+      "LastUpdated": "Aug. 2001",
+      "SECNumber": "SEC1807",
+      "Topics": "Investment Company Act of 1940, Small Businesses, Investment Companies",
+      "Url": "https://www.sec.gov/files/form1-e.pdf"
+    },
+    {
+      "Description": "Annual Reports and Special Financial Reports (PDF)",
+      "Form": "1-K",
+      "LastUpdated": "Feb. 2025",
+      "SECNumber": "SEC2913",
+      "Topics": "Securities Act of 1933, Small Businesses",
+      "Url": "https://www.sec.gov/files/form1-k.pdf"
+    },
+    {
+      "Description": "Form and amendments for notice of registration as a national securities exchange for the sole purpose of trading security futures products (PDF)",
+      "Form": "1-N",
+      "LastUpdated": "Dec. 2013",
+      "SECNumber": "SEC2568",
+      "Topics": "Securities Exchange Act of 1934, Self-Regulatory Organizations, Small Businesses",
+      "Url": "https://www.sec.gov/files/form1-n.pdf"
+    },
+    {
+      "Description": "Semiannual Report or Special Financial Report Pursuant to Regulation A (PDF)",
+      "Form": "1-SA",
+      "LastUpdated": "Jan. 2021",
+      "SECNumber": "SEC2914",
+      "Topics": "Securities Act of 1933, Small Businesses",
+      "Url": "https://www.sec.gov/files/form1-sa.pdf"
+    },
+    {
+      "Description": "Current Report Pursuant to Regulation A (PDF)",
+      "Form": "1-U",
+      "LastUpdated": "Feb. 2025",
+      "SECNumber": "SEC2915",
+      "Topics": "Securities Act of 1933, Small Businesses",
+      "Url": "https://www.sec.gov/files/form1-u.pdf"
+    },
+    {
+      "Description": "Exit Report Under Regulation A (PDF)",
+      "Form": "1-Z",
+      "LastUpdated": "June 2015",
+      "SECNumber": "SEC2916",
+      "Topics": "Securities Act of 1933, Small Businesses",
+      "Url": "https://www.sec.gov/files/form1-z.pdf"
+    },
+    {
+      "Description": "General form for registration of securities pursuant to Section 12(b) or (g) (PDF)",
+      "Form": "10",
+      "LastUpdated": "Feb. 2021",
+      "SECNumber": "SEC1396",
+      "Topics": "Securities Exchange Act of 1934",
+      "Url": "https://www.sec.gov/files/form10.pdf"
+    },
+    {
+      "Description": "Asset-Backed Issuer Distribution Report Pursuant to Section 13 or 15(d) of the Securities Exchange Act of 1934 (PDF)",
+      "Form": "10-D",
+      "LastUpdated": "May 2019",
+      "SECNumber": "SEC2503",
+      "Topics": "Securities Exchange Act of 1934",
+      "Url": "https://www.sec.gov/files/form10d.pdf"
+    },
+    {
+      "Description": "Annual report pursuant to Section 13 or 15(d) (PDF)",
+      "Form": "10-K",
+      "LastUpdated": "Feb. 2025",
+      "SECNumber": "SEC1673",
+      "Topics": "Form 10-K, Securities Exchange Act of 1934, Public Companies",
+      "Url": "https://www.sec.gov/files/form10-k.pdf"
+    },
+    {
+      "Description": "Irrevocable Appointment of Agent for Service of Process, Pleadings and Other Papers by Non-Resident General Partner of Broker or Dealer (PDF)",
+      "Form": "10-M",
+      "LastUpdated": "June 2012",
+      "SECNumber": "SEC878",
+      "Topics": "Broker-Dealers",
+      "Url": "https://www.sec.gov/files/form10-m0.pdf"
+    },
+    {
+      "Description": "General form for quarterly reports under Section 13 or 15(d) (PDF)",
+      "Form": "10-Q",
+      "LastUpdated": "Feb. 2025",
+      "SECNumber": "SEC1296",
+      "Topics": "Securities Exchange Act of 1934, Public Companies",
+      "Url": "https://www.sec.gov/files/form10-q.pdf"
+    },
+    {
+      "Description": "Annual reports of employee stock purchase, savings and similar plans pursuant to Section 15(d) (PDF)",
+      "Form": "11-K",
+      "LastUpdated": "July 2022",
+      "SECNumber": "SEC617",
+      "Topics": "Securities Exchange Act of 1934, Public Companies",
+      "Url": "https://www.sec.gov/files/form11-k.pdf"
+    },
+    {
+      "Description": "Notification of late filing (PDF)",
+      "Form": "12b-25",
+      "LastUpdated": "Jan. 2019",
+      "SECNumber": "SEC1344",
+      "Topics": "Securities Exchange Act of 1934, Public Companies",
+      "Url": "https://www.sec.gov/files/form12b-25.pdf"
+    },
+    {
+      "Description": "Information required of institutional investment managers pursuant to Section 13(f) (PDF)",
+      "Form": "13F",
+      "LastUpdated": "July 2023",
+      "SECNumber": "SEC1685",
+      "Topics": "Securities Exchange Act of 1934",
+      "Url": "https://www.sec.gov/files/form13f.pdf"
+    },
+    {
+      "Description": "Information Required of Large Traders Pursuant To Section 13(h) of the Securities Exchange Act of 1934 (PDF)",
+      "Form": "13H",
+      "LastUpdated": "Nov. 2011",
+      "SECNumber": "SEC2858",
+      "Topics": "Securities Exchange Act of 1934",
+      "Url": "https://www.sec.gov/files/form13h.pdf"
+    },
+    {
+      "Description": "Notice of proposed sale of securities pursuant to Rule 144 (PDF)",
+      "Form": "144",
+      "LastUpdated": "July 2022",
+      "SECNumber": "SEC1147",
+      "Topics": "Securities Act of 1933, Investors",
+      "Url": "https://www.sec.gov/files/form144.pdf"
+    },
+    {
+      "Description": "Certification and notice of termination of registration under Section 12(g) or suspension of duty to file reports under Sections 13 and 15(d) (PDF)",
+      "Form": "15",
+      "LastUpdated": "Aug. 2011",
+      "SECNumber": "SEC2069",
+      "Topics": "Securities Exchange Act of 1934",
+      "Url": "https://www.sec.gov/files/form15.pdf"
+    },
+    {
+      "Description": "Certification of a foreign private issuer\u2019s termination of registration of a class of securities under Section 12(g) or its termination of the duty to file reports under Section 13(a) or Section 15(d) (PDF)",
+      "Form": "15F",
+      "LastUpdated": "Jan. 2014",
+      "SECNumber": "",
+      "Topics": "Securities Exchange Act of 1934",
+      "Url": "https://www.sec.gov/files/form15f.pdf"
+    },
+    {
+      "Description": "Risk Assessment for Brokers & Dealers (PDF)",
+      "Form": "17-H",
+      "LastUpdated": "Jan. 2010",
+      "SECNumber": "SEC2332",
+      "Topics": "Broker-Dealers",
+      "Url": "https://www.sec.gov/files/form17-h.pdf"
+    },
+    {
+      "Description": "Application for registration pursuant to Section 12(b) & (c) of the Securities Exchange Act of 1934 (PDF)",
+      "Form": "18",
+      "LastUpdated": "Feb. 2025",
+      "SECNumber": "SEC1421",
+      "Topics": "Securities Exchange Act of 1934, International",
+      "Url": "https://www.sec.gov/files/form18.pdf"
+    },
+    {
+      "Description": "Annual report for foreign governments and political subdivisions thereof (PDF)",
+      "Form": "18-K",
+      "LastUpdated": "April 2007",
+      "SECNumber": "SEC1797",
+      "Topics": "Securities Exchange Act of 1934, International",
+      "Url": "https://www.sec.gov/files/form18-k.pdf"
+    },
+    {
+      "Description": "Examination Brochure: Information about Examinations (PDF)",
+      "Form": "",
+      "LastUpdated": "March 2023",
+      "SECNumber": "SEC 2389",
+      "Topics": "",
+      "Url": "https://www.sec.gov/files/exam-brochure.pdf"
+    },
+    {
+      "Description": "Supplemental Information for Persons Requested to Supply Information Voluntarily to the Commission's Examination Staff (PDF)",
+      "Form": "",
+      "LastUpdated": "April 2021",
+      "SECNumber": "SEC2866",
+      "Topics": "Other Forms and Materials",
+      "Url": "https://www.sec.gov/files/formsec2866.pdf"
+    },
+    {
+      "Description": "Application for registration or exemption from registration as a national securities exchange (PDF)",
+      "Form": "1",
+      "LastUpdated": "Feb. 1999",
+      "SECNumber": "SEC1935",
+      "Topics": "Self-Regulatory Organizations",
+      "Url": "https://www.sec.gov/files/form1.pdf"
+    },
+    {
+      "Description": "Regulation A Offering Statement (PDF)",
+      "Form": "1-A",
+      "LastUpdated": "Feb. 2025",
+      "SECNumber": "SEC486",
+      "Topics": "Securities Act of 1933, Small Businesses",
+      "Url": "https://www.sec.gov/files/form1a.pdf"
+    },
+    {
+      "Description": "Notification under Regulation E (PDF)",
+      "Form": "1-E",
+      "LastUpdated": "Aug. 2001",
+      "SECNumber": "SEC1807",
+      "Topics": "Investment Company Act of 1940, Small Businesses, Investment Companies",
+      "Url": "https://www.sec.gov/files/form1-e.pdf"
+    },
+    {
+      "Description": "Annual Reports and Special Financial Reports (PDF)",
+      "Form": "1-K",
+      "LastUpdated": "Feb. 2025",
+      "SECNumber": "SEC2913",
+      "Topics": "Securities Act of 1933, Small Businesses",
+      "Url": "https://www.sec.gov/files/form1-k.pdf"
+    },
+    {
+      "Description": "Form and amendments for notice of registration as a national securities exchange for the sole purpose of trading security futures products (PDF)",
+      "Form": "1-N",
+      "LastUpdated": "Dec. 2013",
+      "SECNumber": "SEC2568",
+      "Topics": "Securities Exchange Act of 1934, Self-Regulatory Organizations, Small Businesses",
+      "Url": "https://www.sec.gov/files/form1-n.pdf"
+    },
+    {
+      "Description": "Semiannual Report or Special Financial Report Pursuant to Regulation A (PDF)",
+      "Form": "1-SA",
+      "LastUpdated": "Jan. 2021",
+      "SECNumber": "SEC2914",
+      "Topics": "Securities Act of 1933, Small Businesses",
+      "Url": "https://www.sec.gov/files/form1-sa.pdf"
+    },
+    {
+      "Description": "Current Report Pursuant to Regulation A (PDF)",
+      "Form": "1-U",
+      "LastUpdated": "Feb. 2025",
+      "SECNumber": "SEC2915",
+      "Topics": "Securities Act of 1933, Small Businesses",
+      "Url": "https://www.sec.gov/files/form1-u.pdf"
+    },
+    {
+      "Description": "Exit Report Under Regulation A (PDF)",
+      "Form": "1-Z",
+      "LastUpdated": "June 2015",
+      "SECNumber": "SEC2916",
+      "Topics": "Securities Act of 1933, Small Businesses",
+      "Url": "https://www.sec.gov/files/form1-z.pdf"
+    },
+    {
+      "Description": "General form for registration of securities pursuant to Section 12(b) or (g) (PDF)",
+      "Form": "10",
+      "LastUpdated": "Feb. 2021",
+      "SECNumber": "SEC1396",
+      "Topics": "Securities Exchange Act of 1934",
+      "Url": "https://www.sec.gov/files/form10.pdf"
+    },
+    {
+      "Description": "Asset-Backed Issuer Distribution Report Pursuant to Section 13 or 15(d) of the Securities Exchange Act of 1934 (PDF)",
+      "Form": "10-D",
+      "LastUpdated": "May 2019",
+      "SECNumber": "SEC2503",
+      "Topics": "Securities Exchange Act of 1934",
+      "Url": "https://www.sec.gov/files/form10d.pdf"
+    },
+    {
+      "Description": "Annual report pursuant to Section 13 or 15(d) (PDF)",
+      "Form": "10-K",
+      "LastUpdated": "Feb. 2025",
+      "SECNumber": "SEC1673",
+      "Topics": "Form 10-K, Securities Exchange Act of 1934, Public Companies",
+      "Url": "https://www.sec.gov/files/form10-k.pdf"
+    },
+    {
+      "Description": "Irrevocable Appointment of Agent for Service of Process, Pleadings and Other Papers by Non-Resident General Partner of Broker or Dealer (PDF)",
+      "Form": "10-M",
+      "LastUpdated": "June 2012",
+      "SECNumber": "SEC878",
+      "Topics": "Broker-Dealers",
+      "Url": "https://www.sec.gov/files/form10-m0.pdf"
+    },
+    {
+      "Description": "General form for quarterly reports under Section 13 or 15(d) (PDF)",
+      "Form": "10-Q",
+      "LastUpdated": "Feb. 2025",
+      "SECNumber": "SEC1296",
+      "Topics": "Securities Exchange Act of 1934, Public Companies",
+      "Url": "https://www.sec.gov/files/form10-q.pdf"
+    }
+  ],
+  "forms::rowcount": 175,
+  "fortyf::text": {
+    "ex21_aapl.html": "\n\n\nDocumentExhibit 21.1Subsidiaries ofApple Inc.*Jurisdictionof\u00a0IncorporationApple Asia LimitedHong KongApple Asia LLCDelaware, U.S.Apple Canada Inc.CanadaApple Computer Trading (Shanghai) Co., Ltd.ChinaApple Distribution International LimitedIrelandApple India Private LimitedIndiaApple Insurance Company, Inc.Arizona, U.S.Apple Japan, Inc.JapanApple Korea LimitedSouth KoreaApple Operations International LimitedIrelandApple Operations LimitedIrelandApple Operations Mexico, S.A. de C.V.MexicoApple Pty LimitedAustraliaApple Services Pte. Ltd.SingaporeApple South Asia (Thailand) LimitedThailandApple South Asia Pte. Ltd.SingaporeApple Vietnam Limited Liability CompanyVietnamBraeburn Capital, Inc.Nevada,\u00a0U.S.iTunes K.K.Japan*Pursuant to Item 601(b)(21)(ii) of Regulation S-K, the names of other subsidiaries of Apple Inc. are omitted because, considered in the aggregate, they would not constitute a significant subsidiary as of the end of the year covered by this report.",
+    "ex21_jpm.html": "\n\n\nDocumentExhibit\u00a021JPMorgan Chase & Co.List of subsidiariesWhile there are a number of subsidiaries that are required to be reported for various purposes to bank regulators, the following is a list of JPMorgan Chase & Co.\u2019s significant legal entity subsidiaries as of December\u00a031, 2025, as defined by SEC rules. The list includes the parent company of significant subsidiaries even if the parent company did not meet the definition of a significant subsidiary. Excluded from the list are subsidiaries that, if considered in the aggregate, would not constitute a significant subsidiary under SEC rules as of December\u00a031, 2025.Also included in the list are certain subsidiaries that have been designated as material legal entities for resolution planning purposes under the Dodd-Frank Act that did not meet the definition of a significant subsidiary under SEC rules.December\u00a031, 2025NameOrganized Under The Laws OfJPMorgan Chase Bank, National AssociationUnited StatesPaymentech, LLCUnited StatesJ.P. Morgan International Finance LimitedUnited StatesJPMorgan Securities Japan Co., Ltd.JapanJ.P. Morgan Capital Holdings LimitedUnited Kingdom\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0J.P. Morgan Securities plcUnited KingdomJ.P. Morgan SE GermanyJPMorgan Chase Holdings LLCUnited StatesJ.P. Morgan Services India Private LimitedIndiaJPMorgan Asset Management Holdings Inc.United StatesJPMorgan Distribution Services, Inc.United StatesJPMorgan Asset Management International LimitedUnited Kingdom\u00a0JPMorgan Asset Management (UK) LimitedUnited Kingdom\u00a0JPMorgan Asset Management Holdings (Luxembourg) S.\u00e0 r.l.Luxembourg\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0JPMorgan Asset Management (Europe) S.\u00e0 r.l.LuxembourgJ.P. Morgan Investment Management Inc.United StatesJ.P. Morgan Broker-Dealer Holdings Inc.United StatesJ.P. Morgan Securities LLCUnited States",
+    "ex21_xom.html": "\n\n\nDocumentEXHIBIT 21Subsidiaries of the Registrant (1), (2) and (3) \u2013 at December 31, 2025Percentage ofVoting SecuritiesOwned Directlyor Indirectly byRegistrantState orCountry of OrganizationAKG Marketing Company Limited87.5BahamasAl-Jubail Petrochemical Company (4) (5)50Saudi ArabiaAlberta Products Pipe Line Ltd. (5)45CanadaAncon Insurance Company Inc.100VermontBarzan Gas Company Limited (5)7QatarBEB Erdgas und Erdoel GmbH & Co. KG (4) (5)50GermanyCanada Imperial Oil Limited69.6CanadaCaspian Pipeline Consortium (5)7.50Russia/KazakhstanCoral FLNG S.A. (5)25MozambiqueCross Timbers Energy LLC (4) (5)50DelawareDenbury\u00a0Green\u00a0Pipeline-Texas,\u00a0LLC100DelawareDenbury\u00a0Gulf\u00a0Coast\u00a0Pipelines,\u00a0LLC100DelawareDenbury\u00a0Onshore,\u00a0LLC100DelawareEllora Energy Inc.100DelawareEsso Australia Resources Pty Ltd100AustraliaEsso Deutschland GmbH100GermanyEsso Erdgas Beteiligungsgesellschaft mbH100GermanyEsso Exploration and Production Angola (Overseas) Limited100BahamasEsso Exploration and Production Nigeria (Deepwater) Limited100NigeriaEsso Exploration and Production Nigeria Limited100NigeriaEsso Exploration and Production UK Limited100United KingdomEsso Exploration Angola (Block 15) Limited100BahamasEsso Exploration Angola (Block 17) Limited100BahamasEsso Nederland B.V.100NetherlandsEsso Norge AS100NorwayEsso Petroleum Company Limited100United KingdomExxon Azerbaijan Limited100BahamasExxon Chemical Arabia Inc.100DelawareExxonMobil (China) Investment Co. Ltd.100ChinaExxonMobil (Huizhou) Chemical Co. Ltd.100ChinaExxonMobil (Taicang) Petroleum Co. Ltd.100ChinaExxonMobil Abu Dhabi Offshore Petroleum Company Limited100BahamasExxonMobil Africa and Middle East Management Ltd100United Arab EmiratesExxonMobil Alaska Production Inc.100DelawareExxonMobil Asia Pacific Pte. Ltd.100SingaporeExxonMobil Australia Pty Ltd100AustraliaExxonMobil Barzan Limited100BahamasExxonMobil Canada Ltd.100Canada1Percentage ofVoting SecuritiesOwned Directlyor Indirectly byRegistrantState orCountry of OrganizationExxonMobil Canada Properties100CanadaExxonMobil Capital Hungary Kft.100HungaryExxonMobil Central Europe Holding GmbH100GermanyExxonMobil Chemical Gulf Coast Investments LLC100DelawareExxonMobil China Petroleum & Petrochemical Company Private Limited100SingaporeExxonMobil Development Africa B.V.100NetherlandsExxonMobil Egypt (S.A.E.)100EgyptExxonMobil Exploracao Brasil Ltda100BrazilExxonMobil Exploration and Production Malaysia Inc.100DelawareExxonMobil\u00a0Finance\u00a0Company\u00a0Limited100United KingdomExxonMobil\u00a0Financial\u00a0Investment\u00a0Company\u00a0Limited100United KingdomExxonMobil Gas Marketing Europe Limited100United KingdomExxonMobil Global Services Company100DelawareExxonMobil\u00a0Guyana\u00a0Ltd.100BahamasExxonMobil Holding Company Holland LLC100DelawareExxonMobil Kazakhstan Inc.100BahamasExxonMobil Kazakhstan Ventures Inc.100DelawareExxonMobil Marine Limited100United KingdomExxonMobil Mexico S.A. de C.V.100MexicoExxonMobil Oil Corporation100New YorkExxonMobil Permian Highway Pipeline LLC100DelawareExxonMobil Petroleum & Chemical BV100BelgiumExxonMobil Pipeline Company LLC100DelawareExxonMobil PNG Antelope Limited100Papua New GuineaExxonMobil PNG Limited100Papua New GuineaExxonMobil Qatargas (II) Limited100BahamasExxonMobil Qatargas Inc.100DelawareExxonMobil Ras Laffan (III) Limited100BahamasExxonMobil Rasgas Inc.100DelawareExxonMobil\u00a0Sales\u00a0and\u00a0Supply\u00a0LLC100DelawareExxonMobil Technology and  Engineering Company100DelawareExxonMobil Upstream Integrated Solutions Company100DelawareExxonMobil Ventures Cyprus Limited100CyprusFujian Refining & Petrochemical Co. Ltd. (5)25ChinaGasTerra B.V. (5)25NetherlandsGolden Pass LNG Terminal Investments LLC100DelawareGolden Pass LNG Terminal LLC (5)30DelawareGolden Pass Pipeline LLC (5)30Delaware2Percentage ofVoting SecuritiesOwned Directlyor Indirectly byRegistrantState orCountry of OrganizationGulf Coast Growth Ventures LLC (4) (5)50DelawareImperial Oil Limited69.6CanadaImperial Oil Resources Limited69.6CanadaImperial Oil Resources N.W.T. Limited69.6CanadaImperial Oil/Petroliere Imperiale69.6CanadaInfineum USA L.P. (4) (5)50DelawareMarine Well Containment Company LLC (5)12.5DelawareMobil Australia Resources Company Pty Limited100AustraliaMobil Oil Australia Pty Ltd100AustraliaMobil Oil Exploration & Producing Southeast Inc.100DelawareMobil Oil New Zealand Limited100New ZealandMobil Yanbu Petrochemical Company Inc.100DelawareMobil Yanbu Refining Company LLC100DelawareMozambique Rovuma Venture S.p.A. (5)35.714ItalyNederlandse Aardolie Maatschappij B.V. (4) (5)50NetherlandsPalmetto Transoceanic LLC100DelawarePapua New Guinea Liquefied Natural Gas Global Company LDC (5)33.2BahamasPermian Express Partners LLC (5)12.3DelawarePermian Highway Pipeline LLC (5)17DelawarePhillips Exploration LLC100DelawarePioneer Natural Resources Company100DelawarePioneer Natural Resources USA, Inc.100DelawarePioneer Water Management LLC100DelawareQatarEnergy\u00a0LNG\u00a0N\u00a0(2) (5)24.15QatarQatarEnergy\u00a0LNG\u00a0NFE\u00a0(3) (5)25QatarQatarEnergy\u00a0LNG\u00a0S\u00a0(2) (5)30.517QatarQatarEnergy\u00a0LNG\u00a0S\u00a0(3) (5)30QatarSaudi Aramco Mobil Refinery Company Ltd. (4) (5)50Saudi ArabiaSaudi Yanbu Petrochemical Co. (4) (5)50Saudi ArabiaSeaRiver Maritime Inc.100DelawareSeaRiver Maritime LLC100DelawareSouth Hook LNG Terminal Company Limited (5)24.15United KingdomTengizchevroil LLP (5)25KazakhstanWink to Webster Pipeline LLC46.875DelawareXH LLC100DelawareXTO Delaware Basin LLC100TexasXTO Energy Inc.100DelawareXTO Holdings LLC100DelawareXTO Permian Midstream LLC100DelawareXTO Permian Operating LLC100Texas3NOTES:(1)For the purposes of this list, if the registrant owns directly or indirectly approximately 50 percent of the voting securities of any person and approximately 50 percent of the voting securities of such person is owned directly or indirectly by another interest, or if the registrant includes its share of net income of any other unconsolidated person in consolidated net income, such person is deemed to be a subsidiary.(2)With respect to certain companies, shares in names of nominees and qualifying shares in names of directors are included in the above percentages.(3)The names of other subsidiaries have been omitted from the above list since considered in the aggregate, they would not constitute a significant subsidiary under Securities and Exchange Commission Regulation S-X, Rule 1-02(w).(4)The registrant owns directly or indirectly approximately 50 percent of the securities of this person and approximately 50 percent of the voting securities of this person is owned directly or indirectly by another single interest.(5)The investment in this unconsolidated person is represented by the registrant's percentage interest in the underlying net assets of such person. The accounting for these unconsolidated persons is referred to as the equity method of accounting.4"
+  },
+  "listing::records": [
+    {
+      "File": "https://example/feed/20240102.nc.tar.gz",
+      "Modified": "2024-01-02 22:16:11",
+      "Name": "20240102.nc.tar.gz",
+      "Size": 658533376
+    },
+    {
+      "File": "https://example/feed/20240103.nc.tar.gz",
+      "Modified": "2024-01-03 22:15:16",
+      "Name": "20240103.nc.tar.gz",
+      "Size": 852463616
+    },
+    {
+      "File": "https://example/feed/20240104.nc.tar.gz",
+      "Modified": "2024-01-04 22:18:48",
+      "Name": "20240104.nc.tar.gz",
+      "Size": 829017088
+    },
+    {
+      "File": "https://example/feed/20240105.nc.tar.gz",
+      "Modified": "2024-01-05 22:21:15",
+      "Name": "20240105.nc.tar.gz",
+      "Size": 946688000
+    },
+    {
+      "File": "https://example/feed/20240108.nc.tar.gz",
+      "Modified": "2024-01-08 22:21:40",
+      "Name": "20240108.nc.tar.gz",
+      "Size": 1564867584
+    },
+    {
+      "File": "https://example/feed/20240109.nc.tar.gz",
+      "Modified": "2024-01-09 22:17:42",
+      "Name": "20240109.nc.tar.gz",
+      "Size": 975576064
+    },
+    {
+      "File": "https://example/feed/20240110.nc.tar.gz",
+      "Modified": "2024-01-10 22:17:03",
+      "Name": "20240110.nc.tar.gz",
+      "Size": 646867968
+    },
+    {
+      "File": "https://example/feed/20240111.nc.tar.gz",
+      "Modified": "2024-01-11 22:20:44",
+      "Name": "20240111.nc.tar.gz",
+      "Size": 504634368
+    },
+    {
+      "File": "https://example/feed/20240112.nc.tar.gz",
+      "Modified": "2024-01-12 22:15:30",
+      "Name": "20240112.nc.tar.gz",
+      "Size": 649418752
+    },
+    {
+      "File": "https://example/feed/20240116.nc.tar.gz",
+      "Modified": "2024-01-16 22:32:47",
+      "Name": "20240116.nc.tar.gz",
+      "Size": 1917465600
+    },
+    {
+      "File": "https://example/feed/20240117.nc.tar.gz",
+      "Modified": "2024-01-17 22:16:53",
+      "Name": "20240117.nc.tar.gz",
+      "Size": 765200384
+    },
+    {
+      "File": "https://example/feed/20240118.nc.tar.gz",
+      "Modified": "2024-01-18 22:20:06",
+      "Name": "20240118.nc.tar.gz",
+      "Size": 1074606080
+    },
+    {
+      "File": "https://example/feed/20240119.nc.tar.gz",
+      "Modified": "2024-01-19 22:22:49",
+      "Name": "20240119.nc.tar.gz",
+      "Size": 1010558976
+    },
+    {
+      "File": "https://example/feed/20240122.nc.tar.gz",
+      "Modified": "2024-01-22 22:18:52",
+      "Name": "20240122.nc.tar.gz",
+      "Size": 832150528
+    },
+    {
+      "File": "https://example/feed/20240123.nc.tar.gz",
+      "Modified": "2024-01-23 22:15:46",
+      "Name": "20240123.nc.tar.gz",
+      "Size": 670693376
+    },
+    {
+      "File": "https://example/feed/20240124.nc.tar.gz",
+      "Modified": "2024-01-24 22:25:03",
+      "Name": "20240124.nc.tar.gz",
+      "Size": 819940352
+    },
+    {
+      "File": "https://example/feed/20240125.nc.tar.gz",
+      "Modified": "2024-01-25 22:27:56",
+      "Name": "20240125.nc.tar.gz",
+      "Size": 1152211968
+    },
+    {
+      "File": "https://example/feed/20240126.nc.tar.gz",
+      "Modified": "2024-01-26 22:32:20",
+      "Name": "20240126.nc.tar.gz",
+      "Size": 1624639488
+    },
+    {
+      "File": "https://example/feed/20240129.nc.tar.gz",
+      "Modified": "2024-01-29 22:24:02",
+      "Name": "20240129.nc.tar.gz",
+      "Size": 1455781888
+    },
+    {
+      "File": "https://example/feed/20240130.nc.tar.gz",
+      "Modified": "2024-01-30 22:23:18",
+      "Name": "20240130.nc.tar.gz",
+      "Size": 910787584
+    },
+    {
+      "File": "https://example/feed/20240131.nc.tar.gz",
+      "Modified": "2024-01-31 22:25:08",
+      "Name": "20240131.nc.tar.gz",
+      "Size": 1309585408
+    },
+    {
+      "File": "https://example/feed/20240201.nc.tar.gz",
+      "Modified": "2024-02-01 22:23:53",
+      "Name": "20240201.nc.tar.gz",
+      "Size": 1088582656
+    },
+    {
+      "File": "https://example/feed/20240202.nc.tar.gz",
+      "Modified": "2024-02-02 22:24:16",
+      "Name": "20240202.nc.tar.gz",
+      "Size": 1017592832
+    },
+    {
+      "File": "https://example/feed/20240205.nc.tar.gz",
+      "Modified": "2024-02-05 22:18:28",
+      "Name": "20240205.nc.tar.gz",
+      "Size": 781391872
+    },
+    {
+      "File": "https://example/feed/20240206.nc.tar.gz",
+      "Modified": "2024-02-06 22:18:39",
+      "Name": "20240206.nc.tar.gz",
+      "Size": 989272064
+    },
+    {
+      "File": "https://example/feed/20240207.nc.tar.gz",
+      "Modified": "2024-02-07 22:23:04",
+      "Name": "20240207.nc.tar.gz",
+      "Size": 1283945472
+    },
+    {
+      "File": "https://example/feed/20240208.nc.tar.gz",
+      "Modified": "2024-02-08 22:31:56",
+      "Name": "20240208.nc.tar.gz",
+      "Size": 1283740672
+    },
+    {
+      "File": "https://example/feed/20240209.nc.tar.gz",
+      "Modified": "2024-02-09 22:26:38",
+      "Name": "20240209.nc.tar.gz",
+      "Size": 1137717248
+    },
+    {
+      "File": "https://example/feed/20240212.nc.tar.gz",
+      "Modified": "2024-02-12 22:33:16",
+      "Name": "20240212.nc.tar.gz",
+      "Size": 1111228416
+    },
+    {
+      "File": "https://example/feed/20240213.nc.tar.gz",
+      "Modified": "2024-02-13 22:21:47",
+      "Name": "20240213.nc.tar.gz",
+      "Size": 989631488
+    },
+    {
+      "File": "https://example/feed/20240214.nc.tar.gz",
+      "Modified": "2024-02-14 22:25:41",
+      "Name": "20240214.nc.tar.gz",
+      "Size": 1481019392
+    },
+    {
+      "File": "https://example/feed/20240215.nc.tar.gz",
+      "Modified": "2024-02-15 22:41:11",
+      "Name": "20240215.nc.tar.gz",
+      "Size": 2120466432
+    },
+    {
+      "File": "https://example/feed/20240216.nc.tar.gz",
+      "Modified": "2024-02-16 22:21:08",
+      "Name": "20240216.nc.tar.gz",
+      "Size": 1305001984
+    },
+    {
+      "File": "https://example/feed/20240220.nc.tar.gz",
+      "Modified": "2024-02-20 22:21:13",
+      "Name": "20240220.nc.tar.gz",
+      "Size": 2134166528
+    },
+    {
+      "File": "https://example/feed/20240221.nc.tar.gz",
+      "Modified": "2024-02-21 22:41:10",
+      "Name": "20240221.nc.tar.gz",
+      "Size": 2097226752
+    },
+    {
+      "File": "https://example/feed/20240222.nc.tar.gz",
+      "Modified": "2024-02-22 22:36:19",
+      "Name": "20240222.nc.tar.gz",
+      "Size": 2762768384
+    },
+    {
+      "File": "https://example/feed/20240223.nc.tar.gz",
+      "Modified": "2024-02-23 22:31:24",
+      "Name": "20240223.nc.tar.gz",
+      "Size": 2234152960
+    },
+    {
+      "File": "https://example/feed/20240226.nc.tar.gz",
+      "Modified": "2024-02-26 22:21:17",
+      "Name": "20240226.nc.tar.gz",
+      "Size": 1625731072
+    },
+    {
+      "File": "https://example/feed/20240227.nc.tar.gz",
+      "Modified": "2024-02-27 23:06:33",
+      "Name": "20240227.nc.tar.gz",
+      "Size": 4098471936
+    },
+    {
+      "File": "https://example/feed/20240228.nc.tar.gz",
+      "Modified": "2024-02-28 22:34:03",
+      "Name": "20240228.nc.tar.gz",
+      "Size": 3369152512
+    },
+    {
+      "File": "https://example/feed/20240229.nc.tar.gz",
+      "Modified": "2024-02-29 22:58:52",
+      "Name": "20240229.nc.tar.gz",
+      "Size": 4748855296
+    },
+    {
+      "File": "https://example/feed/20240301.nc.tar.gz",
+      "Modified": "2024-03-01 22:24:44",
+      "Name": "20240301.nc.tar.gz",
+      "Size": 1842630656
+    },
+    {
+      "File": "https://example/feed/20240304.nc.tar.gz",
+      "Modified": "2024-03-04 22:19:28",
+      "Name": "20240304.nc.tar.gz",
+      "Size": 1759967232
+    },
+    {
+      "File": "https://example/feed/20240305.nc.tar.gz",
+      "Modified": "2024-03-05 22:24:56",
+      "Name": "20240305.nc.tar.gz",
+      "Size": 2122983424
+    },
+    {
+      "File": "https://example/feed/20240306.nc.tar.gz",
+      "Modified": "2024-03-06 22:26:44",
+      "Name": "20240306.nc.tar.gz",
+      "Size": 1636640768
+    },
+    {
+      "File": "https://example/feed/20240307.nc.tar.gz",
+      "Modified": "2024-03-07 22:25:54",
+      "Name": "20240307.nc.tar.gz",
+      "Size": 1895000064
+    },
+    {
+      "File": "https://example/feed/20240308.nc.tar.gz",
+      "Modified": "2024-03-08 22:27:32",
+      "Name": "20240308.nc.tar.gz",
+      "Size": 2450594816
+    },
+    {
+      "File": "https://example/feed/20240311.nc.tar.gz",
+      "Modified": "2024-03-11 22:21:32",
+      "Name": "20240311.nc.tar.gz",
+      "Size": 2262819840
+    },
+    {
+      "File": "https://example/feed/20240312.nc.tar.gz",
+      "Modified": "2024-03-12 22:18:18",
+      "Name": "20240312.nc.tar.gz",
+      "Size": 2089363456
+    },
+    {
+      "File": "https://example/feed/20240313.nc.tar.gz",
+      "Modified": "2024-03-13 22:27:32",
+      "Name": "20240313.nc.tar.gz",
+      "Size": 1651223552
+    },
+    {
+      "File": "https://example/feed/20240314.nc.tar.gz",
+      "Modified": "2024-03-14 22:33:17",
+      "Name": "20240314.nc.tar.gz",
+      "Size": 2733263872
+    },
+    {
+      "File": "https://example/feed/20240315.nc.tar.gz",
+      "Modified": "2024-03-15 22:49:45",
+      "Name": "20240315.nc.tar.gz",
+      "Size": 3692993536
+    },
+    {
+      "File": "https://example/feed/20240318.nc.tar.gz",
+      "Modified": "2024-03-18 22:20:05",
+      "Name": "20240318.nc.tar.gz",
+      "Size": 1851309056
+    },
+    {
+      "File": "https://example/feed/20240319.nc.tar.gz",
+      "Modified": "2024-03-19 22:25:12",
+      "Name": "20240319.nc.tar.gz",
+      "Size": 2015280128
+    },
+    {
+      "File": "https://example/feed/20240320.nc.tar.gz",
+      "Modified": "2024-03-20 22:20:22",
+      "Name": "20240320.nc.tar.gz",
+      "Size": 1662825472
+    },
+    {
+      "File": "https://example/feed/20240321.nc.tar.gz",
+      "Modified": "2024-03-21 22:32:47",
+      "Name": "20240321.nc.tar.gz",
+      "Size": 3252711424
+    },
+    {
+      "File": "https://example/feed/20240322.nc.tar.gz",
+      "Modified": "2024-03-22 22:26:41",
+      "Name": "20240322.nc.tar.gz",
+      "Size": 3019226112
+    },
+    {
+      "File": "https://example/feed/20240325.nc.tar.gz",
+      "Modified": "2024-03-25 22:21:25",
+      "Name": "20240325.nc.tar.gz",
+      "Size": 1754008576
+    },
+    {
+      "File": "https://example/feed/20240326.nc.tar.gz",
+      "Modified": "2024-03-26 22:24:39",
+      "Name": "20240326.nc.tar.gz",
+      "Size": 3045438464
+    },
+    {
+      "File": "https://example/feed/20240327.nc.tar.gz",
+      "Modified": "2024-03-27 22:41:00",
+      "Name": "20240327.nc.tar.gz",
+      "Size": 3389659136
+    },
+    {
+      "File": "https://example/feed/20240328.nc.tar.gz",
+      "Modified": "2024-03-28 22:59:19",
+      "Name": "20240328.nc.tar.gz",
+      "Size": 5012612096
+    },
+    {
+      "File": "https://example/feed/20240329.nc.tar.gz",
+      "Modified": "2024-03-29 22:33:29",
+      "Name": "20240329.nc.tar.gz",
+      "Size": 2708962304
+    }
+  ],
+  "subsidiaries::ex21_aapl.html": [
+    {
+      "jurisdiction": "Hong Kong",
+      "name": "Apple Asia Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware, U.S.",
+      "name": "Apple Asia LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Canada",
+      "name": "Apple Canada Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "China",
+      "name": "Apple Computer Trading (Shanghai) Co., Ltd.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Ireland",
+      "name": "Apple Distribution International Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "India",
+      "name": "Apple India Private Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Arizona, U.S.",
+      "name": "Apple Insurance Company, Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Japan",
+      "name": "Apple Japan, Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "South Korea",
+      "name": "Apple Korea Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Ireland",
+      "name": "Apple Operations International Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Ireland",
+      "name": "Apple Operations Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Mexico",
+      "name": "Apple Operations Mexico, S.A. de C.V.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Australia",
+      "name": "Apple Pty Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Singapore",
+      "name": "Apple Services Pte. Ltd.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Thailand",
+      "name": "Apple South Asia (Thailand) Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Singapore",
+      "name": "Apple South Asia Pte. Ltd.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Vietnam",
+      "name": "Apple Vietnam Limited Liability Company",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Nevada, U.S.",
+      "name": "Braeburn Capital, Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Japan",
+      "name": "iTunes K.K.",
+      "ownership": null
+    }
+  ],
+  "subsidiaries::ex21_jpm.html": [
+    {
+      "jurisdiction": "United States",
+      "name": "JPMorgan Chase Bank, National Association",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "United States",
+      "name": "Paymentech, LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "United States",
+      "name": "J.P. Morgan International Finance Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Japan",
+      "name": "JPMorgan Securities Japan Co., Ltd.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "United Kingdom",
+      "name": "J.P. Morgan Capital Holdings Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "United Kingdom",
+      "name": "J.P. Morgan Securities plc",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Germany",
+      "name": "J.P. Morgan SE",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "United States",
+      "name": "JPMorgan Chase Holdings LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "India",
+      "name": "J.P. Morgan Services India Private Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "United States",
+      "name": "JPMorgan Asset Management Holdings Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "United States",
+      "name": "JPMorgan Distribution Services, Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "United Kingdom",
+      "name": "JPMorgan Asset Management International Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "United Kingdom",
+      "name": "JPMorgan Asset Management (UK) Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Luxembourg",
+      "name": "JPMorgan Asset Management Holdings (Luxembourg) S.\u00e0 r.l.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Luxembourg",
+      "name": "JPMorgan Asset Management (Europe) S.\u00e0 r.l.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "United States",
+      "name": "J.P. Morgan Investment Management Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "United States",
+      "name": "J.P. Morgan Broker-Dealer Holdings Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "United States",
+      "name": "J.P. Morgan Securities LLC",
+      "ownership": null
+    }
+  ],
+  "subsidiaries::ex21_xom.html": [
+    {
+      "jurisdiction": "Bahamas",
+      "name": "AKG Marketing Company Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Saudi Arabia",
+      "name": "Al-Jubail Petrochemical Company",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Canada",
+      "name": "Alberta Products Pipe Line Ltd.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Vermont",
+      "name": "Ancon Insurance Company Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Qatar",
+      "name": "Barzan Gas Company Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Germany",
+      "name": "BEB Erdgas und Erdoel GmbH & Co. KG",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Canada",
+      "name": "Canada Imperial Oil Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Russia/Kazakhstan",
+      "name": "Caspian Pipeline Consortium",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Mozambique",
+      "name": "Coral FLNG S.A.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Cross Timbers Energy LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Denbury Green Pipeline-Texas, LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Denbury Gulf Coast Pipelines, LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Denbury Onshore, LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Ellora Energy Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Australia",
+      "name": "Esso Australia Resources Pty Ltd",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Germany",
+      "name": "Esso Deutschland GmbH",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Germany",
+      "name": "Esso Erdgas Beteiligungsgesellschaft mbH",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Bahamas",
+      "name": "Esso Exploration and Production Angola (Overseas) Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Nigeria",
+      "name": "Esso Exploration and Production Nigeria (Deepwater) Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Nigeria",
+      "name": "Esso Exploration and Production Nigeria Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "United Kingdom",
+      "name": "Esso Exploration and Production UK Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Bahamas",
+      "name": "Esso Exploration Angola (Block 15) Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Bahamas",
+      "name": "Esso Exploration Angola (Block 17) Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Netherlands",
+      "name": "Esso Nederland B.V.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Norway",
+      "name": "Esso Norge AS",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "United Kingdom",
+      "name": "Esso Petroleum Company Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Bahamas",
+      "name": "Exxon Azerbaijan Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Exxon Chemical Arabia Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "China",
+      "name": "ExxonMobil (China) Investment Co. Ltd.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "China",
+      "name": "ExxonMobil (Huizhou) Chemical Co. Ltd.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "China",
+      "name": "ExxonMobil (Taicang) Petroleum Co. Ltd.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Bahamas",
+      "name": "ExxonMobil Abu Dhabi Offshore Petroleum Company Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "United Arab Emirates",
+      "name": "ExxonMobil Africa and Middle East Management Ltd",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "ExxonMobil Alaska Production Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Singapore",
+      "name": "ExxonMobil Asia Pacific Pte. Ltd.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Australia",
+      "name": "ExxonMobil Australia Pty Ltd",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Bahamas",
+      "name": "ExxonMobil Barzan Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Canada",
+      "name": "ExxonMobil Canada Ltd.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Canada",
+      "name": "ExxonMobil Canada Properties",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Hungary",
+      "name": "ExxonMobil Capital Hungary Kft.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Germany",
+      "name": "ExxonMobil Central Europe Holding GmbH",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "ExxonMobil Chemical Gulf Coast Investments LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Singapore",
+      "name": "ExxonMobil China Petroleum & Petrochemical Company Private Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Netherlands",
+      "name": "ExxonMobil Development Africa B.V.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Egypt",
+      "name": "ExxonMobil Egypt (S.A.E.)",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Brazil",
+      "name": "ExxonMobil Exploracao Brasil Ltda",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "ExxonMobil Exploration and Production Malaysia Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "United Kingdom",
+      "name": "ExxonMobil Finance Company Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "United Kingdom",
+      "name": "ExxonMobil Financial Investment Company Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "United Kingdom",
+      "name": "ExxonMobil Gas Marketing Europe Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "ExxonMobil Global Services Company",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Bahamas",
+      "name": "ExxonMobil Guyana Ltd.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "ExxonMobil Holding Company Holland LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Bahamas",
+      "name": "ExxonMobil Kazakhstan Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "ExxonMobil Kazakhstan Ventures Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "United Kingdom",
+      "name": "ExxonMobil Marine Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Mexico",
+      "name": "ExxonMobil Mexico S.A. de C.V.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "New York",
+      "name": "ExxonMobil Oil Corporation",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "ExxonMobil Permian Highway Pipeline LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Belgium",
+      "name": "ExxonMobil Petroleum & Chemical BV",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "ExxonMobil Pipeline Company LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Papua New Guinea",
+      "name": "ExxonMobil PNG Antelope Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Papua New Guinea",
+      "name": "ExxonMobil PNG Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Bahamas",
+      "name": "ExxonMobil Qatargas (II) Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "ExxonMobil Qatargas Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Bahamas",
+      "name": "ExxonMobil Ras Laffan (III) Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "ExxonMobil Rasgas Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "ExxonMobil Sales and Supply LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "ExxonMobil Technology and Engineering Company",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "ExxonMobil Upstream Integrated Solutions Company",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Cyprus",
+      "name": "ExxonMobil Ventures Cyprus Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "China",
+      "name": "Fujian Refining & Petrochemical Co. Ltd.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Netherlands",
+      "name": "GasTerra B.V.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Golden Pass LNG Terminal Investments LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Golden Pass LNG Terminal LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Golden Pass Pipeline LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Gulf Coast Growth Ventures LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Canada",
+      "name": "Imperial Oil Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Canada",
+      "name": "Imperial Oil Resources Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Canada",
+      "name": "Imperial Oil Resources N.W.T. Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Canada",
+      "name": "Imperial Oil/Petroliere Imperiale",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Infineum USA L.P.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Marine Well Containment Company LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Australia",
+      "name": "Mobil Australia Resources Company Pty Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Australia",
+      "name": "Mobil Oil Australia Pty Ltd",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Mobil Oil Exploration & Producing Southeast Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "New Zealand",
+      "name": "Mobil Oil New Zealand Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Mobil Yanbu Petrochemical Company Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Mobil Yanbu Refining Company LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Italy",
+      "name": "Mozambique Rovuma Venture S.p.A.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Netherlands",
+      "name": "Nederlandse Aardolie Maatschappij B.V.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Palmetto Transoceanic LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Bahamas",
+      "name": "Papua New Guinea Liquefied Natural Gas Global Company LDC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Permian Express Partners LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Permian Highway Pipeline LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Phillips Exploration LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Pioneer Natural Resources Company",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Pioneer Natural Resources USA, Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Pioneer Water Management LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Qatar",
+      "name": "QatarEnergy LNG N",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Qatar",
+      "name": "QatarEnergy LNG NFE",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Qatar",
+      "name": "QatarEnergy LNG S",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Qatar",
+      "name": "QatarEnergy LNG S",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Saudi Arabia",
+      "name": "Saudi Aramco Mobil Refinery Company Ltd.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Saudi Arabia",
+      "name": "Saudi Yanbu Petrochemical Co.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "SeaRiver Maritime Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "SeaRiver Maritime LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "United Kingdom",
+      "name": "South Hook LNG Terminal Company Limited",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Kazakhstan",
+      "name": "Tengizchevroil LLP",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "Wink to Webster Pipeline LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "XH LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Texas",
+      "name": "XTO Delaware Basin LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "XTO Energy Inc.",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "XTO Holdings LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Delaware",
+      "name": "XTO Permian Midstream LLC",
+      "ownership": null
+    },
+    {
+      "jurisdiction": "Texas",
+      "name": "XTO Permian Operating LLC",
+      "ownership": null
+    }
+  ]
+}
