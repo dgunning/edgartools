@@ -69,12 +69,17 @@ class TestParsingHelpers:
         get_text() with no separator collapses '<font>Security</font>
         <font>Type</font>' to 'SecurityType'; _find_fee_table must use a
         separator and normalize whitespace so the data table is still found.
+
+        The parser moved from BeautifulSoup to lxml in edgartools-07lk.11.9.2,
+        so the tree is built by the module's own _parse_html now. The claim is
+        unchanged: text_content() would collapse these two <font>s the same way
+        a separator-less get_text() did.
         """
-        import warnings
-
-        from bs4 import BeautifulSoup
-
-        from edgar.offerings._fee_table import _find_fee_table
+        from edgar.offerings.prospectus._fee_table.parsing import (
+            _cell_text,
+            _find_fee_table,
+            _parse_html,
+        )
         html = (
             "<html><body>"
             "<table><tr>"
@@ -84,11 +89,7 @@ class TestParsingHelpers:
             "<tr><td>Equity</td><td>$79,170,150.00</td></tr></table>"
             "</body></html>"
         )
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            soup = BeautifulSoup(html, "lxml")
-
-        table = _find_fee_table(soup)
+        table = _find_fee_table(_parse_html(html))
         assert table is not None, (
             "_find_fee_table did not match the header; the split-tag text is "
             "'SecurityType' without a separator"
@@ -96,7 +97,7 @@ class TestParsingHelpers:
         # Finding *a* table is not the claim -- the fee table is the one
         # carrying the data row, and returning a wrapper or the wrong table
         # would satisfy `is not None` while extraction downstream got nothing.
-        cells = [td.get_text(" ", strip=True) for td in table.find_all("td")]
+        cells = [_cell_text(td) for td in table.iter("td")]
         # The nbsp in the second header cell is half of what this test exists
         # for, so it is asserted as-is rather than normalised away.
         assert cells == ['Security Type', 'Maximum\xa0Aggregate Offering Price',
