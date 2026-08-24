@@ -1,0 +1,1669 @@
+{
+  "2012q1-1175813": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "",
+        "expense_1yr": 137,
+        "expense_3yr": 459
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": "The Conestoga Mid Cap Fund seeks to provide long-term growth of capital.",
+      "min_investments": {
+        "2500": "initial investment of $2,500",
+        "500": "initial investment under an automatic investment plan is $500,"
+      },
+      "portfolio_managers": [],
+      "portfolio_turnover": "80",
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "2012q1-1493113": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "",
+        "expense_10yr": 2119,
+        "expense_1yr": null,
+        "expense_3yr": null,
+        "expense_5yr": null,
+        "fee_waiver": null,
+        "management_fee": null,
+        "net_expenses": null,
+        "other_expenses": null,
+        "total_annual_expenses": null,
+        "twelve_b1_fee": null
+      },
+      {
+        "class_name": "The Investment Adviser has agreed to waive a portion of the management fee through March\u00a031, 2013. In addition, the Investment Adviser has agreed to reimburse the\nFund for certain Fund operating expenses such that total annual Fund operating expenses (exclusive of any front-end load, deferred sales charge, 12b-1 fees, taxes, income tax expense, brokerage commissions, expenses incurred in connection with any\nmerger or reorganization, acquired fund fees and expenses, or extraordinary expenses such as litigation) will not exceed 1.40% for each of Class\u00a0A Shares, Class C Shares and Class I Shares, subject to possible recoupment from the Fund in future\nyears on a rolling three year basis (within the three years after the fees have been waived and expenses reimbursed) if such recoupment can be achieved within the foregoing expense limits. Such waiver or reimbursement may not be terminated without\nthe consent of the Board of Trustees prior to March 31, 2013 and may be modified or terminated by the Investment Adviser at any time after March 31, 2013.",
+        "expense_10yr": 2119,
+        "expense_1yr": null,
+        "expense_3yr": null,
+        "expense_5yr": null
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": "The Fund\u2019s investment objective is to seek to produce current income and capital appreciation.",
+      "min_investments": {
+        "2000": "initial investment amount for Class\u00a0A Shares and\nClass C Shares is $2,000",
+        "250000": "initial investment. The minimum initial investment amount for Class I Shares is $250,000"
+      },
+      "portfolio_managers": [],
+      "portfolio_turnover": "72.32",
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "2012q1-924211": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "",
+        "expense_10yr": 1465,
+        "expense_1yr": 124,
+        "expense_3yr": 385,
+        "expense_5yr": 666,
+        "management_fee": "1.19",
+        "max_deferred_sales_load": null,
+        "max_sales_load": null,
+        "other_expenses": "0.02",
+        "total_annual_expenses": "1.21",
+        "twelve_b1_fee": null
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": "The fund is an asset allocation fund. That is, it diversifies its assets among various classes of investments such as equity securities, bonds and money market instruments. The fund seeks the highest level of total return consistent with its asset mix.",
+      "min_investments": {
+        "2500": "initial investment amount to open an account is $2,500",
+        "5": "initial investment amount for Institutional Class is generally $5"
+      },
+      "portfolio_managers": [],
+      "portfolio_turnover": "91",
+      "prospectus_date": null
+    },
+    "performance": [
+      {
+        "label": "Investor Class Return Before Taxes",
+        "return_10yr": "5.04",
+        "return_1yr": "-1.93",
+        "return_5yr": "1.63",
+        "return_since_inception": null,
+        "section": ""
+      },
+      {
+        "label": "Return After Taxes on Distributions",
+        "return_10yr": "4.27",
+        "return_1yr": "-2.13",
+        "return_5yr": "0.84",
+        "return_since_inception": null,
+        "section": ""
+      },
+      {
+        "label": "Return After Taxes on Distributions and Sale of Fund Shares",
+        "return_10yr": "4.15",
+        "return_1yr": "-0.98",
+        "return_5yr": "1.19",
+        "return_since_inception": null,
+        "section": ""
+      },
+      {
+        "label": "Institutional Class Return Before Taxes",
+        "return_10yr": "5.26",
+        "return_1yr": "-1.67",
+        "return_5yr": "1.86",
+        "return_since_inception": null,
+        "section": ""
+      },
+      {
+        "label": "A Class 1 Return Before Taxes",
+        "return_10yr": "4.14",
+        "return_1yr": "-7.72",
+        "return_5yr": "0.19",
+        "return_since_inception": null,
+        "section": ""
+      },
+      {
+        "label": "B Class Return Before Taxes",
+        "return_10yr": null,
+        "return_1yr": "-6.89",
+        "return_5yr": "0.43",
+        "return_since_inception": "4.26",
+        "section": ""
+      },
+      {
+        "label": "C Class Return Before Taxes",
+        "return_10yr": "4.01",
+        "return_1yr": "-2.77",
+        "return_5yr": "0.65",
+        "return_since_inception": null,
+        "section": ""
+      },
+      {
+        "label": "R Class Return Before Taxes",
+        "return_10yr": null,
+        "return_1yr": "-2.31",
+        "return_5yr": "1.16",
+        "return_since_inception": "3.98",
+        "section": ""
+      },
+      {
+        "label": "S&P 500 \u00ae Index (reflects no deductions for fees, expenses or taxes)",
+        "return_10yr": "2.92",
+        "return_1yr": "2.11",
+        "return_5yr": "-0.25",
+        "return_since_inception": null,
+        "section": ""
+      },
+      {
+        "label": "Barclays Capital U.S. Aggregate Bond Index (reflects no deductions for fees, expenses or taxes)",
+        "return_10yr": "5.78",
+        "return_1yr": "7.84",
+        "return_5yr": "6.50",
+        "return_since_inception": null,
+        "section": ""
+      },
+      {
+        "label": "Barclays Capital U.S. 1-3 Month Treasury Bill Index (reflects no deductions for fees, expenses or taxes)",
+        "return_10yr": "1.85",
+        "return_1yr": "0.07",
+        "return_5yr": "1.36",
+        "return_since_inception": null,
+        "section": ""
+      }
+    ],
+    "worst_quarter": null
+  },
+  "2016q4-3794": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "",
+        "expense_10yr": null,
+        "expense_1yr": null,
+        "expense_3yr": null,
+        "expense_5yr": null,
+        "fee_waiver": null,
+        "management_fee": null,
+        "max_deferred_sales_load": null,
+        "max_sales_load": null,
+        "net_expenses": null,
+        "other_expenses": null,
+        "total_annual_expenses": null,
+        "twelve_b1_fee": null
+      },
+      {
+        "class_name": "The Adviser has contractually agreed to waive its management fees and/or to bear expenses of the Fund through January\u00a031, 2018 to the extent necessary to prevent total Fund\noperating expenses (excluding acquired fund fees and expenses other than the advisory fees of any AB Mutual Funds in which the Fund may invest, interest expense, taxes, extraordinary expenses, and brokerage commissions and other transaction costs),\non an annualized basis, from exceeding .95%, 1.70%, .70%, 1.20%, .95%, .70% and .70% of average daily net assets, respectively, for Class\u00a0A, Class C, Advisor Class, Class R, Class K, Class I and Class Z shares (\u201cexpense limitations\u201d).\nAny fees waived and expenses borne by the Adviser prior to July\u00a015, 2015 may be reimbursed by the Fund until the end of the third fiscal year after the fiscal period in which the fee was waived or the expense was borne, provided that no\nreimbursement payment will be made that would cause the Fund\u2019s Total Annual Fund Operating Expenses to exceed the expense limitations.",
+        "expense_10yr": null,
+        "expense_1yr": null,
+        "expense_3yr": null,
+        "expense_5yr": null
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": "The Fund\u2019s investment\nobjective is to seek to maximize total return consistent with prudent investment management.",
+      "min_investments": {
+        "2500": "minimum investment is less than $2,500,"
+      },
+      "portfolio_managers": [],
+      "portfolio_turnover": "44",
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "2016q4-814679": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "",
+        "expense_1yr": 83,
+        "expense_3yr": 259,
+        "management_fee": "0.48",
+        "other_expenses": "0.08",
+        "total_annual_expenses": "0.81",
+        "twelve_b1_fee": "0.25"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": "The investment objective of the Portfolio is to\nseek the highest total return for a specific period of time, consistent with the preservation of capital and liquidity needs. Total return is comprised of current income and capital appreciation. PORTFOLIO",
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": "80",
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "2016q4-92751": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "Class Z",
+        "expense_10yr": null,
+        "expense_1yr": null,
+        "expense_3yr": null,
+        "expense_5yr": null,
+        "fee_waiver": null,
+        "management_fee": null,
+        "net_expenses": null,
+        "other_expenses": null,
+        "total_annual_expenses": null,
+        "twelve_b1_fee": null
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": "Alger Responsible Investing Fund seeks long-term capital appreciation. Fund",
+      "min_investments": {
+        "500000": "initial investment of $500,000,"
+      },
+      "portfolio_managers": [],
+      "portfolio_turnover": "16.85",
+      "prospectus_date": null
+    },
+    "performance": [
+      {
+        "label": "Return Before Taxes",
+        "return_1yr": null,
+        "return_5yr": null,
+        "return_since_inception": null,
+        "section": "Class I (Inception 9/24/08)*"
+      },
+      {
+        "label": "Return After Taxes on Distributions",
+        "return_1yr": null,
+        "return_5yr": null,
+        "return_since_inception": null,
+        "section": "Class I (Inception 9/24/08)*"
+      },
+      {
+        "label": "Return After Taxes on Distributions and Sale of Fund Shares",
+        "return_1yr": null,
+        "return_5yr": null,
+        "return_since_inception": null,
+        "section": "Class I (Inception 9/24/08)*"
+      },
+      {
+        "label": "Russell 3000 Growth Index (reflects no deduction for fees, expenses or taxes)",
+        "return_1yr": null,
+        "return_5yr": null,
+        "return_since_inception": null,
+        "section": "Class I (Inception 9/24/08)*"
+      }
+    ],
+    "worst_quarter": null
+  },
+  "2020q2-1027596": {
+    "best_quarter": null,
+    "fee_tables": [],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "2020q2-1556505": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "acquired_fund_fees": "0.10",
+        "class_name": "Investor Class Shares",
+        "expense_1yr": 180,
+        "expense_3yr": 557,
+        "management_fee": "1.00",
+        "other_expenses": "0.42",
+        "total_annual_expenses": "1.77",
+        "twelve_b1_fee": "0.25"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": "The Quantified\nCommon Ground Fund (the \"Fund\") seeks total return.",
+      "min_investments": {
+        "10000": "Initial Investment\nMinimum\nSubsequent Investment\nInvestor\nRegular Account\n$10,000"
+      },
+      "portfolio_managers": [],
+      "portfolio_turnover": "100",
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "2020q2-880859": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "",
+        "expense_10yr": null,
+        "expense_1yr": null,
+        "expense_3yr": 593,
+        "expense_5yr": null,
+        "fee_waiver": null,
+        "management_fee": null,
+        "max_deferred_sales_load": null,
+        "max_sales_load": null,
+        "net_expenses": null,
+        "other_expenses": null,
+        "total_annual_expenses": null,
+        "twelve_b1_fee": null
+      },
+      {
+        "class_name": "\u201cManagement Fees\u201d and \u201cOther Expenses\u201d have been restated to reflect current fees.",
+        "expense_10yr": null,
+        "expense_1yr": null,
+        "expense_3yr": 593,
+        "expense_5yr": null
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": "(s)\nThe Fund\u2019s investment objective is\u00a0long-term growth of capital.",
+      "min_investments": {
+        "1": "initial investment in each share class is $1",
+        "2": "initial investment for Employer\nSponsored Retirement and Benefit Plans investing through a retirement platform that administers at least $2",
+        "25": "minimum investments for Class\u00a0R shares for fund accounts. Class\u00a0A, Class\u00a0C, Class\u00a0R, Class Y and Class\u00a0R5 are closed to new investors. The minimum investments for Class\u00a0A, C and Y shares for fund accounts are as\nfollows:\nType of Account\nInitial\u00a0Investment\nPer Fund\nAdditional\u00a0Investments\nPer Fund\nAsset or\nfee-based\naccounts managed by your financial adviser\nNone\nNone\nEmployer Sponsored Retirement and Benefit Plans and Employer Sponsored IRAs\nNone\nNone\nIRAs and Coverdell ESAs if the new investor is purchasing shares through a systematic purchase plan\n$25"
+      },
+      "portfolio_managers": [],
+      "portfolio_turnover": "116",
+      "prospectus_date": null
+    },
+    "performance": [
+      {
+        "label": "Return Before Taxes",
+        "return_1yr": null,
+        "return_since_inception": "9.76",
+        "section": "Class\u00a0A shares: Inception (7/1/2016)"
+      },
+      {
+        "label": "Return After Taxes on Distributions",
+        "return_1yr": null,
+        "return_since_inception": "9.35",
+        "section": "Class\u00a0A shares: Inception (7/1/2016)"
+      },
+      {
+        "label": "Return After Taxes on Distributions and Sale of Fund Shares",
+        "return_1yr": null,
+        "return_since_inception": "6.06",
+        "section": "Class\u00a0A shares: Inception (7/1/2016)"
+      },
+      {
+        "label": "Class\u00a0C shares: Inception (7/1/2016)",
+        "return_1yr": null,
+        "return_since_inception": "14.31",
+        "section": "Class\u00a0A shares: Inception (7/1/2016)"
+      },
+      {
+        "label": "Class\u00a0R shares: Inception (7/1/2016)",
+        "return_1yr": null,
+        "return_since_inception": "15.90",
+        "section": "Class\u00a0A shares: Inception (7/1/2016)"
+      },
+      {
+        "label": "Class\u00a0Y shares: Inception (7/1/2016)",
+        "return_1yr": null,
+        "return_since_inception": "16.46",
+        "section": "Class\u00a0A shares: Inception (7/1/2016)"
+      },
+      {
+        "label": "Class\u00a0R5 shares: Inception (7/1/2016)",
+        "return_1yr": null,
+        "return_since_inception": "16.46",
+        "section": "Class\u00a0A shares: Inception (7/1/2016)"
+      },
+      {
+        "label": "Class\u00a0R6 shares: Inception (7/1/2016)",
+        "return_1yr": null,
+        "return_since_inception": "16.46",
+        "section": "Class\u00a0A shares: Inception (7/1/2016)"
+      },
+      {
+        "label": "MSCI World SRI Index (Net) (reflects reinvested dividends net of withholding taxes, but\nreflects no deductions for fees, expenses or other taxes) 2",
+        "return_1yr": null,
+        "return_since_inception": "29.76",
+        "section": "Class\u00a0A shares: Inception (7/1/2016)"
+      },
+      {
+        "label": "MSCI World\nIndex SM (Net) (reflects reinvested dividends net of withholding taxes, but reflects no deductions for fees, expenses or other taxes) 2",
+        "return_1yr": null,
+        "return_since_inception": "27.67",
+        "section": "Class\u00a0A shares: Inception (7/1/2016)"
+      },
+      {
+        "label": "Custom Invesco MSCI World SRI Index (Net) (reflects reinvested dividends net of withholding\ntaxes, but reflects no deductions for fees, expenses or other taxes) 3",
+        "return_1yr": null,
+        "return_since_inception": "27.67",
+        "section": "Class\u00a0A shares: Inception (7/1/2016)"
+      },
+      {
+        "label": "Lipper Global Multi-Cap Core Funds\nIndex",
+        "return_1yr": null,
+        "return_since_inception": "24.35",
+        "section": "Class\u00a0A shares: Inception (7/1/2016)"
+      }
+    ],
+    "worst_quarter": null
+  },
+  "2023q1-1027596": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "",
+        "expense_10yr": 192,
+        "expense_1yr": 15,
+        "expense_3yr": 48,
+        "expense_5yr": 85,
+        "management_fee": null,
+        "other_expenses": "0.15",
+        "total_annual_expenses": "0.15"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": "The BBB Bond Fund\u2019s investment objective is to seek to provide a total rate of return that approximates that of bonds rated within the BBB category by credit rating agencies currently registered as nationally recognized statistical rating organizations (\u201cNRSROs\u201d).",
+      "min_investments": {
+        "1000": "initial investment.\n\u2022\nRisks Associated with Inflation and Deflation.\nInflation risk is the risk that increasing prices throughout the economy may erode the purchasing power of an investment over time.  Deflation risk is the risk that prices throughout the economy decline over time \u2014 the opposite of inflation.\n\u2022\nHigh Yield Securities Risk.\nThe BBB Bond Fund may hold high yield securities as a result of credit rating downgrades.  Securities with ratings lower than BBB or Baa are known as \u201chigh yield\u201d securities (commonly known as \u201cjunk bonds\u201d).  High yield securities typically carry higher coupon rates than investment grade securities, but also are considered as speculative and may be subject to greater market price fluctuations, less liquidity and greater risk of loss of income or principal including greater possibility of default and bankruptcy of the issuer of such instruments than more highly rated bonds and loans.\n\u2022\nForeign and Emerging Market Securities Risk.\nInvestments in foreign currencies and foreign issuers are subject to additional risks, including political and economic risks, greater volatility, civil conflicts and war, sanctions or other measures by the United States or other governments, liquidity risks, currency fluctuations, higher transaction costs, delayed settlement, possible foreign controls on investment, expropriation and nationalization risks, and less stringent investor protection and disclosure standards of foreign markets. Events and evolving conditions in certain economies or markets may alter the risks associated with investments tied to countries or regions that historically were perceived as comparatively stable becoming riskier and more volatile.  These risks are magnified in countries in \u201cemerging markets.\u201d Emerging market countries typically have less-established market economies than developed countries and may face greater social, economic, regulatory and political uncertainties.  In addition, emerging markets typically present greater illiquidity and price volatility concerns due to smaller or limited local capital markets and greater difficulty in determining market valuations of securities due to limited public information on issuers.\n\u2022\nCounterparty Risk.\nFund transactions involving a counterparty are subject to the risk that the counterparty or a third party will not fulfill its obligation to the BBB Bond Fund.  Counterparty risk may arise because of the counterparty\u2019s financial condition (\ni.e.\n, financial difficulties, bankruptcy, or insolvency), market activities and developments, or other reasons, whether foreseen or not. A counterparty\u2019s inability to fulfill its obligation may result in significant financial loss to the Fund.\nPerformance\nThe following performance information provides some indication of the risks of investing in the BBB Bond Fund. The bar chart shows the annual returns for the Fund from year to year. The table shows how the Fund\u2019s average annual returns for the one-year, five-year,  ten-year and since inception periods compare with those of a broad measure of market performance.  The Fund\u2019s past performance (before and after taxes) is not necessarily an indication of how the Fund will perform in the future.  Updated performance information is available on the Fund\u2019s website at www.pacificincome.com/mutual-funds or by calling the Fund toll-free at 1-800-251-1970.\n3\nCalendar Year Total Returns as of December 31\nDuring the period shown on the bar chart, the BBB Bond Fund\u2019s highest total return for a quarter was 10.26% (quarter ended June\u00a030, 2020) and the lowest total return for a quarter was -8.02% (quarter ended June\u00a030, 2022).\nAverage Annual Total Returns\n(for the periods ended December 31, 2022)\n1 Year\n5 Years\n10 Years\nSince Inception (9/25/2003)\nPIA BBB Bond Fund\nReturn Before Taxes\n-16.09%\n0.48%\n1.91%\n4.04%\nReturn After Taxes on Distributions\n-17.25%\n-0.95%\n0.24%\n2.18%\nReturn After Taxes on Distributions and Sale of Fund Shares\n-9.51%\n-0.19%\n0.77%\n2.44%\nBloomberg U.S. Credit Baa Bond Index\n(reflects no deduction for fees, expenses or taxes)\n-15.94%\n0.70%\n2.17%\n4.52%\n(1)\nThe BBB Bond Fund was invested primarily in U.S. Treasury securities on the inception date in September 2003 until mid-January 2004 when the Adviser\u2019s clients commenced investing in the Fund and the Fund began pursuing fully its investment strategy. Therefore, performance prior to this time is not fully reflective of the Fund\u2019s investment strategy.\nThe after-tax returns were calculated using the historical highest individual federal marginal income tax rates and do not reflect the impact of state and local taxes. Actual after-tax returns depend on an investor\u2019s tax situation and may differ from those shown, and after-tax returns are not relevant to investors who hold shares of the Fund through tax-deferred arrangements, such as 401(k) plans or individual retirement accounts (\u201cIRAs\u201d). The Return After Taxes on Distributions and Sale of Fund Shares is higher than other return figures when a capital loss occurs upon redemption and provides an assumed tax deduction that benefits the investor.\nManagement\nInvestment Adviser:\nPacific Income Advisers, Inc. is the investment adviser of the BBB Bond Fund.\nPortfolio Managers:\nThe following individuals serve as the BBB Bond Fund\u2019s portfolio managers:\nPortfolio Managers\nYears of Service\nwith the Fund\nPrimary Title with the Adviser\nRory Hargaden, CFA\n5\nVice President, Credit Research/Portfolio Manager\nHsin Tong, CFA\n5\nVice President, Portfolio Manager\nPurchase and Sale of Fund Shares\nEligible investors may purchase, exchange or redeem Fund shares on any business day by written request via mail (PIA BBB Bond Fund, c/o U.S. Bank Global Fund Services, P.O.\u00a0Box\u00a0701, Milwaukee, Wisconsin 53201-0701), by telephone at 1-800-251-1970, or through a financial intermediary. You may also purchase or redeem Fund shares by wire transfer.\n4\nInvestors who wish to purchase, exchange or redeem Fund shares through a financial intermediary should contact the financial intermediary directly.  The minimum initial and subsequent investment amounts are shown below.\nType of Account\nTo Open Your Account\nTo Add to Your Account\nRegular and Retirement Accounts\n$1,000"
+      },
+      "portfolio_managers": [],
+      "portfolio_turnover": "10",
+      "prospectus_date": null
+    },
+    "performance": [
+      {
+        "label": "Return Before Taxes",
+        "return_10yr": "1.91",
+        "return_1yr": "-16.09",
+        "return_5yr": "0.48",
+        "return_since_inception": "4.04",
+        "section": "PIA BBB Bond Fund"
+      },
+      {
+        "label": "Return After Taxes on Distributions",
+        "return_10yr": "0.24",
+        "return_1yr": "-17.25",
+        "return_5yr": "-0.95",
+        "return_since_inception": "2.18",
+        "section": "PIA BBB Bond Fund"
+      },
+      {
+        "label": "Return After Taxes on Distributions and Sale of Fund Shares",
+        "return_10yr": "0.77",
+        "return_1yr": "-9.51",
+        "return_5yr": "-0.19",
+        "return_since_inception": "2.44",
+        "section": "PIA BBB Bond Fund"
+      },
+      {
+        "label": "Bloomberg U.S. Credit Baa Bond Index (reflects no deduction for fees, expenses or taxes)",
+        "return_10yr": "2.17",
+        "return_1yr": "-15.94",
+        "return_5yr": "0.70",
+        "return_since_inception": "4.52",
+        "section": "PIA BBB Bond Fund"
+      }
+    ],
+    "worst_quarter": null
+  },
+  "2023q1-1496608": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "",
+        "expense_1yr": null,
+        "management_fee": null,
+        "other_expenses": null,
+        "total_annual_expenses": null,
+        "twelve_b1_fee": null
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": "The Fund seeks to provide relative stability of",
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": "11",
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "2023q1-1551950": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "",
+        "management_fee": "0.33",
+        "other_expenses": "0.00",
+        "total_annual_expenses": "0.33",
+        "twelve_b1_fee": "0.00"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": "Columbia Research Enhanced Real Estate ETF (the Fund) seeks\ninvestment results that, before",
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": "80",
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "2025q3-1928561": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "acquired_fund_fees": "0.02",
+        "class_name": "",
+        "management_fee": "0.95",
+        "other_expenses": "0.00",
+        "twelve_b1_fee": "0.00"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": "The Fund\u2019s primary investment objective\nis to provide current income. The Fund\u2019s secondary investment objective is to provide exposure to the price return of one or more\nexchange-traded products that hold bitcoin, subject to a limit on potential investment gains.",
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": "80",
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "2025q3-766285": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "Investor Shares",
+        "expense_10yr": 1019,
+        "expense_1yr": 84,
+        "expense_3yr": 263,
+        "expense_5yr": 458,
+        "management_fee": "0.50",
+        "other_expenses": "0.07",
+        "total_annual_expenses": "0.82",
+        "twelve_b1_fee": "0.25"
+      },
+      {
+        "class_name": "Institutional Shares",
+        "expense_10yr": 738,
+        "expense_1yr": 60,
+        "expense_3yr": 189,
+        "expense_5yr": 329,
+        "management_fee": "0.50",
+        "other_expenses": "0.09",
+        "total_annual_expenses": "0.59",
+        "twelve_b1_fee": null
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": "Capital preservation and current income, consistent with Islamic principles. Capital preservation is its primary objective.",
+      "min_investments": {
+        "100000": "minimum\ninvestment of $100,000"
+      },
+      "portfolio_managers": [],
+      "portfolio_turnover": "21.50",
+      "prospectus_date": null
+    },
+    "performance": [
+      {
+        "label": "Return before taxes",
+        "return_1yr": "3.75",
+        "return_5yr": "1.35",
+        "section": "Participation Fund Investor Shares (AMAPX)"
+      },
+      {
+        "label": "Return before taxes",
+        "return_1yr": "4.00",
+        "return_5yr": "1.57",
+        "section": "Participation Fund Institutional Shares (AMIPX)"
+      },
+      {
+        "label": "Return after taxes on distributions",
+        "return_1yr": "2.56",
+        "return_5yr": "0.57",
+        "section": "Participation Fund Institutional Shares (AMIPX)"
+      },
+      {
+        "label": "Return after taxes on distributions and sale of Fund shares",
+        "return_1yr": "2.42",
+        "return_5yr": "0.73",
+        "section": "Participation Fund Institutional Shares (AMIPX)"
+      }
+    ],
+    "worst_quarter": null
+  },
+  "2025q3-845376": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "",
+        "expense_1yr": 3,
+        "fee_waiver": "-0.01",
+        "management_fee": "0.20",
+        "max_deferred_sales_load": "0.75",
+        "max_sales_load": "2.50",
+        "net_expenses": "0.43",
+        "other_expenses": "0.09",
+        "total_annual_expenses": "0.44",
+        "twelve_b1_fee": "0.15"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": "The fund\u2019s investment\nobjective is to provide you with current income exempt from regular federal income tax, consistent with the maturity and quality standards\ndescribed in this prospectus, and to preserve capital.",
+      "min_investments": {
+        "1": "minimum investment amount is $1"
+      },
+      "portfolio_managers": [],
+      "portfolio_turnover": "56",
+      "prospectus_date": null
+    },
+    "performance": [
+      {
+        "label": "F-2 \u2212 Before taxes",
+        "return_10yr": "1.22",
+        "return_1yr": "2.61",
+        "return_5yr": "1.18",
+        "section": ""
+      },
+      {
+        "label": "\u2212\n    After taxes on distributions",
+        "return_10yr": "1.19",
+        "return_1yr": "2.61",
+        "return_5yr": "1.14",
+        "section": ""
+      },
+      {
+        "label": "\u2212\n    After taxes on distributions and sale of fund shares",
+        "return_10yr": null,
+        "return_1yr": "1.25",
+        "return_5yr": "1.26",
+        "section": ""
+      },
+      {
+        "label": "A (with maximum sales charge)",
+        "return_10yr": "0.88",
+        "return_1yr": null,
+        "return_5yr": "0.55",
+        "section": ""
+      },
+      {
+        "label": "F-1",
+        "return_10yr": "0.92",
+        "return_1yr": "2.29",
+        "return_5yr": "0.87",
+        "section": ""
+      },
+      {
+        "label": "F-3",
+        "return_10yr": null,
+        "return_1yr": "2.68",
+        "return_5yr": "1.25",
+        "section": ""
+      },
+      {
+        "label": "Bloomberg\n    Municipal Bond Index (reflects no deductions for sales charges, account fees, expenses or U.S. federal income taxes)",
+        "return_10yr": "2.25",
+        "return_1yr": "1.05",
+        "return_5yr": "0.99",
+        "section": ""
+      },
+      {
+        "label": "Bloomberg\n    Municipal Short 1-5 Years Index (reflects no deductions for sales charges, account fees, expenses or U.S. federal income taxes)",
+        "return_10yr": "1.38",
+        "return_1yr": "2.07",
+        "return_5yr": "1.10",
+        "section": ""
+      }
+    ],
+    "worst_quarter": null
+  },
+  "EDGE-bar-chart-years": {
+    "best_quarter": null,
+    "fee_tables": [],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-class-info-reordered-by-html": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_id": null,
+        "class_name": "Class A",
+        "management_fee": "0.50",
+        "other_expenses": "0.15",
+        "ticker": "AAAAX",
+        "total_annual_expenses": "0.90",
+        "twelve_b1_fee": "0.25"
+      },
+      {
+        "class_id": null,
+        "class_name": "Class C",
+        "management_fee": "0.50",
+        "other_expenses": "0.15",
+        "ticker": "CCCCX",
+        "total_annual_expenses": "1.65",
+        "twelve_b1_fee": "1.00"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-comment-inside-a-percentage": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "Class A",
+        "management_fee": null
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-empty": {
+    "best_quarter": null,
+    "fee_tables": [],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-encoding-declaration": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "Class A",
+        "management_fee": "0.50",
+        "other_expenses": "0.15",
+        "total_annual_expenses": "0.90",
+        "twelve_b1_fee": "0.25"
+      },
+      {
+        "class_name": "Class C",
+        "management_fee": "0.50",
+        "other_expenses": "0.15",
+        "total_annual_expenses": "1.65",
+        "twelve_b1_fee": "1.00"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": "42",
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-everything": {
+    "best_quarter": [
+      "12.34",
+      "June 30, 2020"
+    ],
+    "fee_tables": [
+      {
+        "class_name": "Class A",
+        "management_fee": "0.50",
+        "other_expenses": "0.15",
+        "total_annual_expenses": "0.90",
+        "twelve_b1_fee": "0.25"
+      },
+      {
+        "class_name": "Class C",
+        "management_fee": "0.50",
+        "other_expenses": "0.15",
+        "total_annual_expenses": "1.65",
+        "twelve_b1_fee": "1.00"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": "The Fund seeks long-term capital appreciation. It invests broadly. Portfolio Turnover: the Fund's portfolio turnover rate was 42% of the average value of its portfolio.",
+      "min_investments": {
+        "2500": "initial investment: $2,500"
+      },
+      "portfolio_managers": [],
+      "portfolio_turnover": "42",
+      "prospectus_date": null
+    },
+    "performance": [
+      {
+        "label": "Return Before Taxes",
+        "return_10yr": "6.00",
+        "return_1yr": "10.00",
+        "return_5yr": "8.00",
+        "section": ""
+      },
+      {
+        "label": "Return After Taxes on Distributions",
+        "return_10yr": "5.00",
+        "return_1yr": "9.00",
+        "return_5yr": "7.00",
+        "section": ""
+      }
+    ],
+    "worst_quarter": [
+      "-9.87",
+      "March 31, 2020"
+    ]
+  },
+  "EDGE-expense-example-dollars": {
+    "best_quarter": null,
+    "fee_tables": [],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-fee-cell-has-a-style": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "Class A",
+        "management_fee": "0.50"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-fee-label-follows-a-style-block": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "Class A",
+        "management_fee": "0.50"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-fee-label-interrupted-by-a-comment": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "Class A",
+        "management_fee": "0.50"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-fee-label-padded-with-whitespace": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "Class A",
+        "management_fee": "0.50"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-fee-label-split-across-inline-tags": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "Class A",
+        "management_fee": "0.50",
+        "total_annual_expenses": "0.90"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-fee-table-is-the-root": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "Class A",
+        "management_fee": "0.50",
+        "other_expenses": "0.15",
+        "total_annual_expenses": "0.90",
+        "twelve_b1_fee": "0.25"
+      },
+      {
+        "class_name": "Class C",
+        "management_fee": "0.50",
+        "other_expenses": "0.15",
+        "total_annual_expenses": "1.65",
+        "twelve_b1_fee": "1.00"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-fee-table-only": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "Class A",
+        "management_fee": "0.50",
+        "other_expenses": "0.15",
+        "total_annual_expenses": "0.90",
+        "twelve_b1_fee": "0.25"
+      },
+      {
+        "class_name": "Class C",
+        "management_fee": "0.50",
+        "other_expenses": "0.15",
+        "total_annual_expenses": "1.65",
+        "twelve_b1_fee": "1.00"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-metadata-only": {
+    "best_quarter": null,
+    "fee_tables": [],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": "The Fund seeks long-term capital appreciation. It invests broadly. Portfolio Turnover: the Fund's portfolio turnover rate was 42% of the average value of its portfolio.",
+      "min_investments": {
+        "2500": "initial investment: $2,500"
+      },
+      "portfolio_managers": [],
+      "portfolio_turnover": "42",
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-nested-300-deep": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "Class A",
+        "management_fee": "0.50",
+        "other_expenses": "0.15",
+        "total_annual_expenses": "0.90",
+        "twelve_b1_fee": "0.25"
+      },
+      {
+        "class_name": "Class C",
+        "management_fee": "0.50",
+        "other_expenses": "0.15",
+        "total_annual_expenses": "1.65",
+        "twelve_b1_fee": "1.00"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-nested-cell-shifts-the-class-columns": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "Class A",
+        "management_fee": "9.99",
+        "total_annual_expenses": "0.90"
+      },
+      {
+        "class_name": "Class C",
+        "management_fee": "9.99",
+        "total_annual_expenses": "1.65"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-nested-table-inside-a-fee-row": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "Class A",
+        "management_fee": "9.99"
+      },
+      {
+        "class_name": "",
+        "management_fee": "9.99"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-no-tables": {
+    "best_quarter": null,
+    "fee_tables": [],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-objective-runs-into-the-fee-heading": {
+    "best_quarter": null,
+    "fee_tables": [],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": "Seeks income.",
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-percentage-split-across-tags": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "Class A",
+        "management_fee": null
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-performance-label-follows-a-script": {
+    "best_quarter": null,
+    "fee_tables": [],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [
+      {
+        "label": "Return Before Taxes",
+        "return_1yr": "10.00",
+        "section": ""
+      }
+    ],
+    "worst_quarter": null
+  },
+  "EDGE-performance-table-is-the-root": {
+    "best_quarter": null,
+    "fee_tables": [],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [
+      {
+        "label": "Return Before Taxes",
+        "return_10yr": "6.00",
+        "return_1yr": "10.00",
+        "return_5yr": "8.00",
+        "section": ""
+      },
+      {
+        "label": "Return After Taxes on Distributions",
+        "return_10yr": "5.00",
+        "return_1yr": "9.00",
+        "return_5yr": "7.00",
+        "section": ""
+      }
+    ],
+    "worst_quarter": null
+  },
+  "EDGE-performance-table-only": {
+    "best_quarter": null,
+    "fee_tables": [],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [
+      {
+        "label": "Return Before Taxes",
+        "return_10yr": "6.00",
+        "return_1yr": "10.00",
+        "return_5yr": "8.00",
+        "section": ""
+      },
+      {
+        "label": "Return After Taxes on Distributions",
+        "return_10yr": "5.00",
+        "return_1yr": "9.00",
+        "return_5yr": "7.00",
+        "section": ""
+      }
+    ],
+    "worst_quarter": null
+  },
+  "EDGE-quarter-table-only": {
+    "best_quarter": [
+      "12.34",
+      "June 30, 2020"
+    ],
+    "fee_tables": [],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": [
+      "-9.87",
+      "March 31, 2020"
+    ]
+  },
+  "EDGE-row-ends-with-a-th": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "Class A",
+        "management_fee": "0.50"
+      },
+      {
+        "class_name": "Class C",
+        "management_fee": "0.60"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-row-mixes-th-label-with-td-figures": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "Class A",
+        "management_fee": "0.50"
+      },
+      {
+        "class_name": "Class C",
+        "management_fee": "0.60"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-rows-inside-a-tbody": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "Class A",
+        "management_fee": "0.50",
+        "total_annual_expenses": "0.90"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-shareholder-fees": {
+    "best_quarter": null,
+    "fee_tables": [],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-table-with-no-rows": {
+    "best_quarter": null,
+    "fee_tables": [],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-turnover-only-in-a-style-block": {
+    "best_quarter": null,
+    "fee_tables": [],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-turnover-split-across-tags": {
+    "best_quarter": null,
+    "fee_tables": [],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": "7",
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-two-minimum-investments": {
+    "best_quarter": null,
+    "fee_tables": [],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {
+        "1000": "Minimum investment for retirement accounts: $1,000",
+        "2500": "initial investment: $2,500"
+      },
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-unclosed-tags": {
+    "best_quarter": null,
+    "fee_tables": [
+      {
+        "class_name": "Class A",
+        "management_fee": "0.50"
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "EDGE-whitespace": {
+    "best_quarter": null,
+    "fee_tables": [],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": null,
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": null,
+      "prospectus_date": null
+    },
+    "performance": [],
+    "worst_quarter": null
+  },
+  "known-0000035341-25-000099": {
+    "best_quarter": [
+      "15.54",
+      "December 31, 2020"
+    ],
+    "fee_tables": [
+      {
+        "class_name": "",
+        "expense_10yr": 579,
+        "expense_1yr": 47,
+        "expense_3yr": 148,
+        "expense_5yr": 258,
+        "management_fee": "0.45",
+        "other_expenses": "0.01",
+        "total_annual_expenses": "0.46",
+        "twelve_b1_fee": null
+      },
+      {
+        "class_name": "",
+        "expense_10yr": 665,
+        "expense_1yr": 54,
+        "expense_3yr": 170,
+        "expense_5yr": 296,
+        "management_fee": "0.53",
+        "other_expenses": "0.00",
+        "total_annual_expenses": "0.53",
+        "twelve_b1_fee": null
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": "Fidelity\u00ae Equity-Income Fund seeks reasonable income. In pursuing this objective, the fund will also consider the potential for capital appreciation. The fund seeks a yield for its shareholders that exceeds the yield on the securities comprising the S&P 500\n\u00ae\nIndex.",
+      "min_investments": {},
+      "portfolio_managers": [],
+      "portfolio_turnover": "19",
+      "prospectus_date": null
+    },
+    "performance": [
+      {
+        "label": "Class K",
+        "return_10yr": "9.33",
+        "return_1yr": "15.37",
+        "return_5yr": "10.05",
+        "section": ""
+      },
+      {
+        "label": "Russell 3000\u00ae Value Index (reflects no deduction for fees, expenses, or taxes)",
+        "return_10yr": "8.40",
+        "return_1yr": "13.98",
+        "return_5yr": "8.60",
+        "section": ""
+      },
+      {
+        "label": "Russell 3000\u00ae Index (reflects no deduction for fees, expenses, or taxes)",
+        "return_10yr": "12.55",
+        "return_1yr": "23.81",
+        "return_5yr": "13.86",
+        "section": ""
+      },
+      {
+        "label": "Return Before Taxes",
+        "return_10yr": "9.23",
+        "return_1yr": "15.29",
+        "return_5yr": "9.96",
+        "section": "Fidelity\u00ae Equity-Income Fund"
+      },
+      {
+        "label": "Return After Taxes on Distributions",
+        "return_10yr": "7.48",
+        "return_1yr": "13.83",
+        "return_5yr": "8.48",
+        "section": "Fidelity\u00ae Equity-Income Fund"
+      },
+      {
+        "label": "Return After Taxes on Distributions and Sale of Fund Shares",
+        "return_10yr": "7.00",
+        "return_1yr": "10.08",
+        "return_5yr": "7.63",
+        "section": "Fidelity\u00ae Equity-Income Fund"
+      },
+      {
+        "label": "Russell 3000\u00ae Value Index (reflects no deduction for fees, expenses, or taxes)",
+        "return_10yr": "8.40",
+        "return_1yr": "13.98",
+        "return_5yr": "8.60",
+        "section": "Fidelity\u00ae Equity-Income Fund"
+      },
+      {
+        "label": "Russell 3000\u00ae Index (reflects no deduction for fees, expenses, or taxes)",
+        "return_10yr": "12.55",
+        "return_1yr": "23.81",
+        "return_5yr": "13.86",
+        "section": "Fidelity\u00ae Equity-Income Fund"
+      }
+    ],
+    "worst_quarter": [
+      "-22.03",
+      "March 31, 2020"
+    ]
+  },
+  "known-0001683863-25-002784": {
+    "best_quarter": [
+      "8.80",
+      "December 31, 2023"
+    ],
+    "fee_tables": [
+      {
+        "class_name": "Investor Shares",
+        "expense_10yr": 179,
+        "expense_1yr": 14,
+        "expense_3yr": 45,
+        "expense_5yr": 79,
+        "management_fee": "0.13",
+        "max_sales_load": null,
+        "other_expenses": "0.01",
+        "redemption_fee": null,
+        "total_annual_expenses": "0.14",
+        "twelve_b1_fee": null
+      },
+      {
+        "class_name": "Admiral Shares",
+        "expense_10yr": 115,
+        "expense_1yr": 9,
+        "expense_3yr": 29,
+        "expense_5yr": 51,
+        "management_fee": "0.08",
+        "max_sales_load": null,
+        "other_expenses": "0.01",
+        "redemption_fee": null,
+        "total_annual_expenses": "0.09",
+        "twelve_b1_fee": null
+      }
+    ],
+    "metadata": {
+      "fund_name": null,
+      "investment_objective": "The Fund seeks to provide current income that is exempt from both federal and\nCalifornia personal income taxes. The Fund is intended for California\nresidents only.",
+      "min_investments": {
+        "1": "minimum investment amount\nrequired to add to an existing Fund account is generally $1",
+        "3000": "minimum investment amount\n5\nrequired to open and maintain a Fund account for Investor Shares or Admiral\nShares is $3,000"
+      },
+      "portfolio_managers": [],
+      "portfolio_turnover": "81",
+      "prospectus_date": null
+    },
+    "performance": [
+      {
+        "label": "Return Before Taxes",
+        "return_10yr": "2.61",
+        "return_1yr": "2.09",
+        "return_5yr": "1.20",
+        "section": "Vanguard California Long-Term Tax-Exempt Fund Investor Shares"
+      },
+      {
+        "label": "Return After Taxes on Distributions",
+        "return_10yr": "2.58",
+        "return_1yr": "2.09",
+        "return_5yr": "1.14",
+        "section": "Vanguard California Long-Term Tax-Exempt Fund Investor Shares"
+      },
+      {
+        "label": "Return After Taxes on Distributions and Sale of Fund Shares",
+        "return_10yr": "2.71",
+        "return_1yr": "2.58",
+        "return_5yr": "1.56",
+        "section": "Vanguard California Long-Term Tax-Exempt Fund Investor Shares"
+      },
+      {
+        "label": "Return Before Taxes",
+        "return_10yr": "2.70",
+        "return_1yr": "2.17",
+        "return_5yr": "1.28",
+        "section": "Vanguard California Long-Term Tax-Exempt Fund Admiral Shares"
+      },
+      {
+        "label": "Bloomberg CA Municipal Bond Index (reflects no deduction for fees, expenses, or taxes)",
+        "return_10yr": "2.23",
+        "return_1yr": "1.02",
+        "return_5yr": "0.96",
+        "section": "Vanguard California Long-Term Tax-Exempt Fund Admiral Shares"
+      },
+      {
+        "label": "Bloomberg Municipal Bond Index (reflects no deduction for fees, expenses, or taxes)",
+        "return_10yr": "2.25",
+        "return_1yr": "1.05",
+        "return_5yr": "0.99",
+        "section": "Vanguard California Long-Term Tax-Exempt Fund Admiral Shares"
+      }
+    ],
+    "worst_quarter": [
+      "-6.78",
+      "March 31, 2022"
+    ]
+  }
+}
