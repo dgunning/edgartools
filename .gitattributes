@@ -12,3 +12,13 @@ docs/* linguist-documentation
 # Mark notebooks as binary to avoid messy JSON diffs
 *.ipynb diff=jupyternotebook
 *.ipynb merge=jupyternotebook
+
+# Every branch adds its own bullets to the [Unreleased] block, at the same
+# place, so any two of them conflict on lines neither one actually disputes.
+# `union` keeps both sides of a conflicting hunk instead of stopping.
+#
+# This is right for a changelog that is only ever APPENDED to, and it is the
+# whole risk too: if two branches edit the SAME bullet, union keeps both
+# versions rather than choosing. That shows up as an obvious duplicate in
+# review, where a silently dropped bullet does not.
+CHANGELOG.md merge=union
