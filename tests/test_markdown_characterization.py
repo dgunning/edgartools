@@ -235,6 +235,55 @@ EDGE = {
     ),
     # 300 nested <div>s -- see edgartools-xqvr.
     "nested-300-deep": "<div>" * 300 + _TABLE + "</div>" * 300,
+    # --- inputs that exist to kill a specific mistranslation ---------------------
+    # `get_text(sep, strip=True)` strips each string and DROPS the empty ones
+    # before joining. Stripping without dropping doubles the separator, and the
+    # inferred title is the one place a doubled space survives `clean_text`.
+    "empty-string-between-two-words": (
+        "<table><tr><td>Year Ended <b> </b> December 31,</td><td>2024</td></tr>"
+        "<tr><td>Revenue</td><td>$1,000</td></tr></table>"
+    ),
+    # An lxml element with no ELEMENT children is falsy, so `if el.find(...)` reads
+    # a childless <table> as "not found" -- where bs4's Tag was truthy either way.
+    # Both of these render the table (or the prose) twice if that is mistranslated.
+    "empty-nested-table-is-still-a-nested-table": (
+        "<table><tr><td>Item</td><td>2024</td></tr>"
+        "<tr><td>Revenue<table></table></td><td>$1,000</td></tr></table>"
+    ),
+    "empty-table-inside-a-div-of-prose": (
+        "<div>Prose that must not be emitted twice.<table></table></div>"
+    ),
+    # bs4's find() searched every descendant. libxml2 leaves a <caption> where the
+    # filer nested it, so a direct-children search misses this one.
+    "caption-inside-a-tbody": (
+        "<table><tbody><caption>Segment Results</caption>"
+        "<tr><th>Item</th><th>2024</th></tr>"
+        "<tr><td>Revenue</td><td>$1,000</td></tr></tbody></table>"
+    ),
+    # ... and find_all was recursive too: this row's only label cell is a
+    # grandchild, so a direct-children walk loses a column.
+    "cell-nested-in-a-div-inside-the-row": (
+        "<table><tr><th>Item</th><th>Amount</th></tr>"
+        "<tr><div><td>Revenue</td></div><td>$1,000</td></tr></table>"
+    ),
+    # find_all('span', recursive=False) was NOT recursive. Searching descendants
+    # instead finds the span, and then reads the margin-top off <b> rather than
+    # the div -- promoting a plain paragraph to a heading.
+    "span-wrapped-in-bold-with-the-margin-on-the-bold": (
+        "<div><b style='margin-top:10pt'>"
+        "<span style='font-weight:700'>Inventories</span></b></div>"
+    ),
+    # The <p> is load-bearing: `is_html` only fires on <table|div|p|h1-6>, so the
+    # three list cases above never reach the list code at all -- they pin the
+    # non-HTML passthrough branch instead. These two reach it.
+    "list-after-a-paragraph": (
+        "<p>The Company has the following obligations:</p>"
+        "<ul><li>First item</li><li>Second item</li><li>   </li></ul>"
+    ),
+    # find_all('li') was recursive, so the outer <ul> reported the nested item too.
+    "nested-list": (
+        "<p>Intro.</p><ul><li>First item<ul><li>Nested item</li></ul></li></ul>"
+    ),
 }
 
 # `track_filtered=True` returns a (markdown, metadata) tuple and counts what was
@@ -245,6 +294,24 @@ EDGE_TRACKED = {
     ),
     "tracked-duplicate-tables": f"<div>{_TABLE}{_TABLE}</div>",
     "tracked-plain-text": "Just a sentence, no markup.",
+}
+
+
+# The one place the port deliberately changes the answer. `html.parser` does not
+# auto-close `<th>`/`<td>`/`<tr>`, so it nested the whole table inside its own
+# first cell and every cell's text swallowed the rest of the table -- a two-by-two
+# table rendered as one column reading "Amount Revenue $1,000". libxml2 in recover
+# mode closes the tags and reads back the table the filer wrote. The new answer is
+# the right one and this is the OPPOSITE direction to edgartools-rck1, where bs4
+# was the lenient one. Recorded rather than preserved; the baseline keeps bs4's
+# value so it stays a faithful record of what BeautifulSoup did.
+DIVERGES_FROM_BS4 = {
+    "unclosed-tags": (
+        "\n#### Table 1: Data\n"
+        "| label | Amount |\n"
+        "| --- | ---: |\n"
+        "| Revenue | $1,000 |\n\n"
+    ),
 }
 
 
@@ -285,7 +352,14 @@ def _run(html, track_filtered=False):
 def test_edge_markdown_matches_baseline(name):
     baseline = json.loads(EDGE_BASELINE.read_text())
     assert name in baseline, f"{name} is missing from the baseline -- recapture it"
-    assert _run(EDGE[name]) == baseline[name]
+    assert _run(EDGE[name]) == DIVERGES_FROM_BS4.get(name, baseline[name])
+
+
+@pytest.mark.parametrize("name", list(DIVERGES_FROM_BS4))
+def test_recorded_divergences_really_diverge(name):
+    """A divergence that stopped diverging is an entry to delete, not to keep."""
+    baseline = json.loads(EDGE_BASELINE.read_text())
+    assert DIVERGES_FROM_BS4[name] != baseline[name]
 
 
 @pytest.mark.parametrize("name", list(EDGE_TRACKED))
@@ -294,6 +368,27 @@ def test_tracked_markdown_matches_baseline(name):
     key = f"TRACKED-{name}"
     assert key in baseline, f"{key} is missing from the baseline -- recapture it"
     assert _run(EDGE_TRACKED[name], track_filtered=True) == baseline[key]
+
+
+def test_html_to_json_leaves_its_input_alone():
+    """The cell merging is destructive, so it has to run on a copy.
+
+    bs4 got its copy by re-parsing `str(table_soup)`; the port deep-copies
+    instead. Dropping the copy is invisible to every assertion above -- nothing
+    reads the element again afterwards -- but `html_to_json` is public, and a
+    caller whose tree came back with its `$` cells dissolved would have no way
+    to see it coming.
+    """
+    import lxml.html
+
+    from edgar.markdown import html_to_json
+
+    html = ("<table><tr><th>Item</th><th>Amount</th></tr>"
+            "<tr><td>Revenue</td><td>$</td><td>1,000</td></tr></table>")
+    table = lxml.html.fromstring(html)
+    before = lxml.html.tostring(table, encoding="unicode")
+    html_to_json(table)
+    assert lxml.html.tostring(table, encoding="unicode") == before
 
 
 def test_golden_covers_every_note():

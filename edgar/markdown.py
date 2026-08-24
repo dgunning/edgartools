@@ -12,11 +12,15 @@ Key features:
 - Markdown generation optimized for LLM readability
 """
 
+import copy
 import re
 from collections import deque
 from typing import Optional, Tuple
 
-from bs4 import BeautifulSoup
+import lxml.html
+from lxml.etree import ParserError
+
+from edgar.documents.utils.html_utils import create_lxml_parser
 
 __all__ = [
     'preprocess_currency_cells',
@@ -31,6 +35,194 @@ __all__ = [
     'is_noise_text',
     'postprocess_text',
 ]
+
+
+# -----------------------------
+# lxml Helpers
+# -----------------------------
+#
+# This module reads and MUTATES an HTML tree. It ran on BeautifulSoup until
+# edgartools-07lk.11.11; each helper below stands in for one bs4 habit that does
+# not survive a naive translation, and every one of them is pinned by
+# tests/test_markdown_characterization.py.
+
+# Tags whose direct text bs4 gave its own string class (Script, Stylesheet,
+# TemplateString, RubyTextString...). `get_text()` filters on the exact type
+# `NavigableString`, so all of it was left out -- while lxml's `text_content()`
+# splices a stylesheet straight into the middle of a cell.
+_STRING_CONTAINER_TAGS = frozenset(("script", "style", "template", "rt", "rp"))
+
+
+def _strings(el):
+    """Yield the strings ``Tag.get_text()`` would have walked, in document order.
+
+    Three bs4 behaviours have to be reproduced by hand:
+
+    * **Comments are not text.** ``Comment`` subclasses ``str``, but ``get_text``
+      matches the exact type ``NavigableString`` and so dropped comment bodies.
+      The text FOLLOWING a comment -- its tail, in lxml -- is text in both.
+    * **Neither is the text inside <script>, <style>, <template>, <rt> or <rp>.**
+      Only the strings whose direct parent is one of those tags, which is why the
+      flag below is carried per level rather than per subtree: a ``<p>`` inside a
+      ``<template>`` still contributed its text.
+    * **One string per text node.** ``get_text(separator)`` joins bs4's separate
+      strings, so the chunks must stay separate here too. Concatenating an
+      element's text with the tail of its last child would swallow a separator
+      and glue two words together, which is the edgartools-vfwp family.
+
+    Iterative rather than recursive: filers nest divs hundreds deep
+    (edgartools-xqvr), and one Python frame per level would not survive it.
+    """
+    container = el.tag in _STRING_CONTAINER_TAGS
+    if el.text and not container:
+        yield el.text
+    # (children, is-that-level-a-string-container, tail to emit once exhausted)
+    stack = [(iter(el), container, None)]
+    while stack:
+        children, container, tail = stack[-1]
+        node = next(children, None)
+        if node is None:
+            stack.pop()
+            if tail:
+                yield tail
+            continue
+        node_tag = node.tag
+        if isinstance(node_tag, str):
+            node_container = node_tag in _STRING_CONTAINER_TAGS
+            if node.text and not node_container:
+                yield node.text
+            stack.append((iter(node), node_container, None if container else node.tail))
+        elif node.tail and not container:
+            # A comment or processing instruction: its body is not text, its
+            # tail is.
+            yield node.tail
+
+
+def _text(el, separator="", strip=False) -> str:
+    """``Tag.get_text(separator, strip)`` -- all three of its behaviours.
+
+    Only the no-argument form is ``text_content()``. ``strip=True`` strips each
+    string and drops the ones left empty BEFORE joining, so the separator lands
+    between surviving strings only.
+    """
+    if strip:
+        return separator.join(s for s in (t.strip() for t in _strings(el)) if s)
+    return separator.join(_strings(el))
+
+
+def _find_all(el, *tags):
+    """``Tag.find_all([tags])`` -- every descendant so tagged, in document order.
+
+    ``descendant::``, not ``.//`` on a tag name: bs4 searched for any of several
+    tags at once and returned them interleaved in document order, which a union
+    of separate searches does not give.
+    """
+    return el.xpath("descendant::*[" + " or ".join(f"self::{t}" for t in tags) + "]")
+
+
+def _find_parent(el, tag):
+    """``Tag.find_parent(tag)`` -- the nearest ancestor so tagged, or None.
+
+    Ancestors only, never the element itself, and ``None`` when there is no such
+    ancestor: the caller tests that result for membership in a set of tables,
+    where ``None`` is simply absent.
+    """
+    parent = el.getparent()
+    while parent is not None:
+        if parent.tag == tag:
+            return parent
+        parent = parent.getparent()
+    return None
+
+
+def _cells(row):
+    """Every ``<td>``/``<th>`` under a row, nested tables included, as bs4 did."""
+    return _find_all(row, "td", "th")
+
+
+def _set_string(el, value: str) -> None:
+    """``tag.string = value`` -- replace the element's entire contents with text.
+
+    Children go with their tails; the element keeps its own attributes and its
+    own tail, exactly as bs4's ``clear()``-then-append did.
+    """
+    for child in list(el):
+        el.remove(child)
+    el.text = value
+
+
+def _decompose(el) -> None:
+    """``tag.decompose()`` -- drop the tag and its contents, keep the text around it.
+
+    lxml's ``remove`` takes the element's tail with it: the text FOLLOWING the
+    tag, which bs4 held as a separate sibling string and decompose() left
+    untouched. It is spliced back onto whatever precedes the tag. That MERGES
+    two of bs4's strings into one, which would matter to anything asking for the
+    parent's text with a separator -- the one caller that does, ``is_width_grid_row``,
+    joins with the empty string, where the merge is invisible.
+    """
+    parent = el.getparent()
+    if parent is None:
+        return
+    if el.tail:
+        previous = el.getprevious()
+        if previous is not None:
+            previous.tail = (previous.tail or "") + el.tail
+        else:
+            parent.text = (parent.text or "") + el.tail
+    parent.remove(el)
+
+
+def _parse_html(html: str):
+    """Parse a fragment into a tree shaped like ``BeautifulSoup(html, "html.parser")``.
+
+    ``fragments_fromstring``, not ``fromstring``, and then a synthetic wrapper:
+
+    * ``fromstring`` roots a single-element fragment AT that element -- and this
+      module's busiest caller (``edgar/xbrl/notes.py``) hands it one ``<table>``
+      at a time. The element sweep would then have to search from a node that is
+      already the answer.
+    * ``fromstring`` invents a wrapping ``<div>`` for a multi-element fragment,
+      and that phantom div is in the set of tags this module renders -- it would
+      emit the whole document over again as one paragraph.
+    * The fragments are then wrapped, because the element sweep needs ONE root to
+      search from and a fragment list is not that. ``<html><body>`` because
+      neither tag is one this module renders, so the wrapper cannot appear in
+      the sweep's results the way a synthetic ``<div>`` would. It also stands in
+      for the soup as a top-level element's parent, which only the public
+      ``is_subsection_heading`` can observe -- reached through ``process_content``
+      that function always ends up reading the style off a real ``<div>``.
+
+    Comments are KEPT (``remove_comments=False``): dropping one merges the text
+    either side of it, and ``is_subsection_heading`` counts a comment as a child.
+
+    Returns ``None`` for input lxml cannot root at all, where BeautifulSoup
+    built an empty soup -- both render as no output.
+    """
+    if isinstance(html, str):
+        html = html.encode("utf-8", errors="replace")
+    # lxml refuses a `str` carrying an encoding declaration, and SEC TextBlocks
+    # arrive already decoded, so the bytes are re-declared as utf-8 here.
+    parser = create_lxml_parser(remove_blank_text=False, remove_comments=False,
+                                recover=True, encoding="utf-8")
+    try:
+        fragments = lxml.html.fragments_fromstring(html, parser=parser)
+    except ParserError:
+        return None
+
+    root = lxml.html.Element("html")
+    body = lxml.html.Element("body")
+    root.append(body)
+    for fragment in fragments:
+        if isinstance(fragment, str):
+            # Leading or trailing bare text, which bs4 held as its own string.
+            if len(body):
+                body[-1].tail = (body[-1].tail or "") + fragment
+            else:
+                body.text = (body.text or "") + fragment
+        else:
+            body.append(fragment)
+    return root
 
 
 # -----------------------------
@@ -187,11 +379,11 @@ def is_subsection_heading(element) -> tuple[bool, str]:
         heading_level is "###" for bold or "####" for italic
     """
     # Must be a span or div tag
-    if element.name not in ('span', 'div'):
+    if element.tag not in ('span', 'div'):
         return False, ""
 
     # Get text
-    text = element.get_text().strip()
+    text = _text(element).strip()
 
     # Must be short (< 80 chars) and start with capital
     if not text or len(text) > 80:
@@ -227,12 +419,14 @@ def is_subsection_heading(element) -> tuple[bool, str]:
         return False, ""
 
     # For div elements, check if it contains a single span child
-    if element.name == 'div':
+    if element.tag == 'div':
         # Check if this div contains a single span as subsection
-        spans = element.find_all('span', recursive=False)
+        # findall() on a tag name is direct children only, which is what
+        # find_all(recursive=False) meant -- and it skips comments.
+        spans = element.findall('span')
         if len(spans) == 1:
             span = spans[0]
-            span_text = span.get_text().strip()
+            span_text = _text(span).strip()
             # Check if span text matches the div text (meaning it's the only content)
             if span_text == text:
                 element = span  # Use the span for style checking
@@ -242,17 +436,28 @@ def is_subsection_heading(element) -> tuple[bool, str]:
             return False, ""
 
     # Must have siblings check (for span elements)
-    parent = element.parent
-    if parent:
-        # Get all children, filtering out whitespace-only text nodes
-        # Note: NavigableString has name=None, Tag elements have name set
-        children = [
-            child for child in parent.children
-            if (hasattr(child, 'name') and child.name is not None) or (isinstance(child, str) and child.strip())
-        ]
+    parent = element.getparent()
+    if parent is not None:
+        # Count the children bs4 counted: every element, plus every text node
+        # that is not pure whitespace. A COMMENT counts as a text node -- bs4's
+        # Comment subclasses str, so it failed the `name is not None` test and
+        # was caught by `isinstance(child, str)` instead. Keeping that means a
+        # filer's `<!-- note -->` beside a span still disqualifies the heading.
+        children = 0
+        if parent.text and parent.text.strip():
+            children += 1
+        for child in parent:
+            if isinstance(child.tag, str):
+                children += 1
+            elif child.text and child.text.strip():
+                children += 1  # a comment, which bs4 saw as a text node
+            if child.tail and child.tail.strip():
+                children += 1
+            if children > 1:
+                break
 
         # If more than one non-whitespace child, it's not standalone
-        if len(children) > 1:
+        if children > 1:
             return False, ""
 
         # Check parent style for top margin (indicates section break)
@@ -285,7 +490,7 @@ def is_subsection_heading(element) -> tuple[bool, str]:
 
 def is_xbrl_metadata_table(soup_table) -> bool:
     """Detect XBRL metadata tables (should be skipped)."""
-    text = soup_table.get_text().lower()
+    text = _text(soup_table).lower()
 
     if "namespace prefix" in text or "xbrli:string" in text:
         return True
@@ -343,9 +548,13 @@ def _is_valid_title(text: str) -> bool:
 
 def _extract_from_caption_tag(table_element) -> Optional[str]:
     """Extract title from HTML <caption> tag (HTML standard)."""
-    caption = table_element.find('caption')
-    if caption:
-        text = caption.get_text(strip=True)
+    # './/caption', not 'caption': bs4's find() searched all descendants.
+    # `is not None`, not a truth test: an lxml element with no ELEMENT children
+    # is falsy, so a plain-text <caption>Segment Results</caption> reads as
+    # empty -- where bs4 counted its text as a child and reported it truthy.
+    caption = table_element.find('.//caption')
+    if caption is not None:
+        text = _text(caption, strip=True)
         if _is_valid_title(text):
             return text
     return None
@@ -362,17 +571,17 @@ def _extract_from_spanning_row(table_element, max_rows: int = 3) -> Optional[str
     - Non-destructive
 
     Args:
-        table_element: BeautifulSoup table element
+        table_element: lxml <table> element
         max_rows: Maximum number of rows to check
 
     Returns:
         Title string if found, None otherwise
     """
-    rows = table_element.find_all('tr')
+    rows = _find_all(table_element, 'tr')
 
     for row_idx in range(min(max_rows, len(rows))):
         row = rows[row_idx]
-        cells = row.find_all(['th', 'td'])
+        cells = _cells(row)
 
         if not cells:
             continue
@@ -381,14 +590,14 @@ def _extract_from_spanning_row(table_element, max_rows: int = 3) -> Optional[str
         if len(cells) == 1:
             cell = cells[0]
             colspan = int(cell.get('colspan', 1))
-            text = cell.get_text(strip=True)
+            text = _text(cell, strip=True)
 
             # If colspan is large (3+) and text is valid
             if colspan >= 3 and _is_valid_title(text):
                 return text
 
         # Case 2: Multiple cells with identical text (merged visually)
-        texts = [c.get_text(strip=True) for c in cells]
+        texts = [_text(c, strip=True) for c in cells]
         unique_texts = set(t for t in texts if t)
 
         if len(unique_texts) == 1:
@@ -409,17 +618,17 @@ def _infer_from_content(table_element) -> Optional[str]:
     - Segment/category patterns
 
     Args:
-        table_element: BeautifulSoup table element
+        table_element: lxml <table> element
 
     Returns:
         Inferred title if pattern matched, None otherwise
     """
-    rows = table_element.find_all('tr')
+    rows = _find_all(table_element, 'tr')
     if not rows:
         return None
 
     # Get text from first few rows
-    all_text = ' '.join([r.get_text(' ', strip=True).lower() for r in rows[:5]])
+    all_text = ' '.join([_text(r, ' ', strip=True).lower() for r in rows[:5]])
 
     # Financial statement patterns
     financial_patterns = {
@@ -468,7 +677,7 @@ def extract_table_title(
     6. Section title from context
 
     Args:
-        table_element: BeautifulSoup table element
+        table_element: lxml <table> element
         section_title: Optional section title
         context: Optional context dict with 'preceding_heading', etc.
 
@@ -514,10 +723,10 @@ def extract_table_title(
 
 def is_width_grid_row(tr) -> bool:
     """Detect layout rows (empty cells with width styling)."""
-    tds = tr.find_all(["td", "th"])
+    tds = _cells(tr)
     if not tds:
         return False
-    if tr.get_text(strip=True):  # Has text content
+    if _text(tr, strip=True):  # Has text content
         return False
 
     width_cells = 0
@@ -535,26 +744,28 @@ def preprocess_currency_cells(table_soup):
 
     Example: [$] [100] -> [$100] with colspan adjustment
 
-    Note: Modifies the BeautifulSoup table in-place.
+    Note: Modifies the tree in-place.
     Safe for SEC financial tables where all rows have consistent structure.
     """
-    rows = table_soup.find_all("tr")
+    rows = _find_all(table_soup, "tr")
     for row in rows:
-        cells = row.find_all(["td", "th"])
+        cells = _cells(row)
         i = 0
         while i < len(cells):
             cell = cells[i]
-            txt = clean_text(cell.get_text())
+            txt = clean_text(_text(cell))
             # If standalone $ symbol and has next cell
             if txt in ["$"] and i + 1 < len(cells):
                 next_cell = cells[i + 1]
-                # Merge: prepend $ to next cell content
-                next_cell.string = txt + clean_text(next_cell.get_text())
+                # Merge: prepend $ to next cell content. This REPLACES whatever
+                # markup the value cell held -- <b>1,</b><i>000</i> becomes the
+                # single string "$1,000".
+                _set_string(next_cell, txt + clean_text(_text(next_cell)))
                 # Adjust colspan (next cell now spans both positions)
-                next_cell["colspan"] = str(int(next_cell.get("colspan", 1)) + 1)
+                next_cell.set("colspan", str(int(next_cell.get("colspan", 1)) + 1))
                 # Remove the $ cell and re-snapshot to avoid stale references
-                cell.decompose()
-                cells = row.find_all(["td", "th"])
+                _decompose(cell)
+                cells = _cells(row)
             else:
                 i += 1
 
@@ -567,27 +778,27 @@ def preprocess_percent_cells(table_soup):
 
     Note: Scans right-to-left to merge % with preceding cell.
     """
-    rows = table_soup.find_all("tr")
+    rows = _find_all(table_soup, "tr")
     for row in rows:
-        cells = row.find_all(["td", "th"])
+        cells = _cells(row)
         i = len(cells) - 1
         while i > 0:
             cell = cells[i]
-            txt = clean_text(cell.get_text())
+            txt = clean_text(_text(cell))
             # If standalone % symbol and has previous cell
             if txt in ["%", "%)", "pts"]:
                 prev_cell = cells[i - 1]
-                prev_txt = clean_text(prev_cell.get_text())
+                prev_txt = clean_text(_text(prev_cell))
                 if prev_txt:
                     # Merge: append % to previous cell
-                    prev_cell.string = prev_txt + txt
+                    _set_string(prev_cell, prev_txt + txt)
                     # Adjust colspan
-                    prev_cell["colspan"] = str(
+                    prev_cell.set("colspan", str(
                         int(prev_cell.get("colspan", 1))
                         + int(cell.get("colspan", 1))
-                    )
+                    ))
                     # Remove the % cell
-                    cell.decompose()
+                    _decompose(cell)
             i -= 1
 
 
@@ -599,7 +810,7 @@ def build_row_values(cells, max_cols):
             colspan = max(1, min(int(cell.get("colspan", 1)), 256))
         except (TypeError, ValueError):
             colspan = 1
-        txt = clean_text(cell.get_text(" ", strip=True)).replace("|", r"\|")
+        txt = clean_text(_text(cell, " ", strip=True)).replace("|", r"\|")
         row_values.append(txt)
         # Repeat value for colspan
         for _ in range(colspan - 1):
@@ -629,11 +840,14 @@ def html_to_json(table_soup):
     This intermediate format enables intelligent column deduplication
     and header merging before markdown generation.
     """
-    table_soup_copy = BeautifulSoup(str(table_soup), "html.parser")
+    # The preprocessing below mutates the tree, so it runs on a copy. bs4 got
+    # one by re-parsing `str(table_soup)`; `deepcopy` skips the round trip and,
+    # unlike it, cannot re-run the recovery rules over already-recovered markup.
+    table_soup_copy = copy.deepcopy(table_soup)
     preprocess_currency_cells(table_soup_copy)
     preprocess_percent_cells(table_soup_copy)
 
-    rows = table_soup_copy.find_all("tr")
+    rows = _find_all(table_soup_copy, "tr")
     if not rows:
         return [], [], None
 
@@ -646,7 +860,7 @@ def html_to_json(table_soup):
     max_cols = 0
     widths = []
     for row in rows:
-        cells = row.find_all(["th", "td"])
+        cells = _cells(row)
         if not cells:
             continue
         width = sum(max(1, min(int(cell.get("colspan", 1)), 256)) for cell in cells)
@@ -669,11 +883,11 @@ def html_to_json(table_soup):
 
     # Build matrix
     for row in rows:
-        cells = row.find_all(["td", "th"])
+        cells = _cells(row)
         if not cells:
             continue
-        row_has_th = any(cell.name == "th" for cell in cells)
-        row_text = " ".join([c.get_text(" ", strip=True) for c in cells])
+        row_has_th = any(cell.tag == "th" for cell in cells)
+        row_text = " ".join([_text(c, " ", strip=True) for c in cells])
 
         # Extract long text as separate blocks
         if len(row_text) > 300:
@@ -1148,6 +1362,12 @@ def process_content(content, section_title=None, track_filtered=False):
     if not content:
         return ("", {}) if track_filtered else ""
 
+    # An element, not the HTML it came from: `str()` on one yields a repr, and
+    # the caller would get it back verbatim as prose. bs4 Tags stringified to
+    # their own markup, so nothing used to need this.
+    if isinstance(content, lxml.html.HtmlElement):
+        content = lxml.html.tostring(content, encoding="unicode", with_tail=False)
+
     raw_str = str(content)
     is_html = bool(re.search(r"<(table|div|p|h[1-6])", raw_str, re.IGNORECASE))
 
@@ -1155,9 +1375,15 @@ def process_content(content, section_title=None, track_filtered=False):
         result = f"\n{raw_str.strip()}\n"
         return (result, {}) if track_filtered else result
 
-    soup = BeautifulSoup(raw_str, "html.parser")
-    for tag in soup(["script", "style", "head", "meta"]):
-        tag.decompose()
+    root = _parse_html(raw_str)
+    if root is None:
+        return ("", {}) if track_filtered else ""
+    # bs4 decomposed <script>, <style>, <head> and <meta> here. Nothing is
+    # removed now, and it does not need to be: the parser drops <head> and its
+    # contents on its own, <meta> is void, and `_strings` leaves script and
+    # style text out the way `get_text()` did. Removing them instead would
+    # splice the text FOLLOWING each one onto the text before it, merging two of
+    # bs4's separate strings and gluing two words together at the seam.
 
     output_parts = []
     processed_tables = set()
@@ -1174,8 +1400,8 @@ def process_content(content, section_title=None, track_filtered=False):
         "details": []
     } if track_filtered else None
 
-    elements = soup.find_all(
-        ["p", "div", "table", "ul", "ol", "h1", "h2", "h3", "h4", "h5", "h6"]
+    elements = _find_all(
+        root, "p", "div", "table", "ul", "ol", "h1", "h2", "h3", "h4", "h5", "h6"
     )
 
     skip_next = False  # Flag to skip elements (e.g., TOC after page number)
@@ -1186,19 +1412,20 @@ def process_content(content, section_title=None, track_filtered=False):
             skip_next = False
             continue
         # Skip if already processed as part of another table
-        if element.find_parent("table") in processed_tables:
+        if _find_parent(element, "table") in processed_tables:
             continue
 
         # Process tables
-        if element.name == "table":
-            # Skip nested tables
-            if element.find("table"):
+        if element.tag == "table":
+            # Skip nested tables. `is not None`: a childless <table> is falsy in
+            # lxml, and this asks whether one was FOUND.
+            if element.find(".//table") is not None:
                 continue
             # Skip XBRL metadata
             if is_xbrl_metadata_table(element):
                 if filtered_metadata is not None:
                     filtered_metadata["xbrl_metadata_tables"] += 1
-                    table_text = element.get_text()[:100]
+                    table_text = _text(element)[:100]
                     filtered_metadata["details"].append({
                         "type": "xbrl_metadata_table",
                         "reason": "Contains XBRL namespace/type metadata (non-financial content)",
@@ -1268,8 +1495,8 @@ def process_content(content, section_title=None, track_filtered=False):
             continue
 
         # Process headings
-        if element.name.startswith("h"):
-            txt = clean_text(element.get_text())
+        if element.tag.startswith("h"):
+            txt = clean_text(_text(element))
             if txt and not is_noise_text(txt):
                 output_parts.append(f"\n### {txt}\n")
             continue
@@ -1277,26 +1504,26 @@ def process_content(content, section_title=None, track_filtered=False):
         # Check for subsection headings (bold/italic spans in standalone divs)
         is_subsection, heading_level = is_subsection_heading(element)
         if is_subsection:
-            txt = clean_text(element.get_text())
+            txt = clean_text(_text(element))
             if txt and not is_noise_text(txt):
                 output_parts.append(f"\n{heading_level} {txt}\n")
             continue
 
         # Process lists
-        if element.name in ["ul", "ol"]:
+        if element.tag in ["ul", "ol"]:
             lines = [
-                f"- {clean_text(li.get_text())}"
-                for li in element.find_all("li")
-                if clean_text(li.get_text())
+                f"- {clean_text(_text(li))}"
+                for li in _find_all(element, "li")
+                if clean_text(_text(li))
             ]
             if lines:
                 output_parts.append("\n".join(lines))
             continue
 
         # Process paragraphs and divs
-        if element.find("table"):  # Skip containers with tables
+        if element.find(".//table") is not None:  # Skip containers with tables
             continue
-        text = clean_text(element.get_text())
+        text = clean_text(_text(element))
         if len(text) <= 5 or is_noise_text(text):
             continue
         if normalized_section and text.lower() == normalized_section:
@@ -1312,7 +1539,7 @@ def process_content(content, section_title=None, track_filtered=False):
             next_text = None
             if idx + 1 < len(elements):
                 next_element = elements[idx + 1]
-                next_text = clean_text(next_element.get_text())
+                next_text = clean_text(_text(next_element))
                 if "table of contents" in next_text.lower():
                     # Skip both this page number and the next TOC text
                     skip_next = True
