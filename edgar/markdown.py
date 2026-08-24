@@ -621,7 +621,8 @@ def html_to_json(table_soup):
 
     Returns:
         (text_blocks, records, derived_title) tuple where:
-        - text_blocks: List of long-form text extracted from table
+        - text_blocks: List of long-form text extracted from table. Empty, not
+          None, when the table yields no usable rows -- callers iterate it.
         - records: List of dicts with 'label' and 'col_N' keys
         - derived_title: Extracted table title if found
 
@@ -634,12 +635,12 @@ def html_to_json(table_soup):
 
     rows = table_soup_copy.find_all("tr")
     if not rows:
-        return None, [], None
+        return [], [], None
 
     # Filter layout rows
     rows = [r for r in rows if not is_width_grid_row(r)]
     if not rows:
-        return None, [], None
+        return [], [], None
 
     # Calculate max columns
     max_cols = 0
@@ -653,7 +654,7 @@ def html_to_json(table_soup):
         max_cols = max(max_cols, width)
 
     if max_cols == 0:
-        return None, [], None
+        return [], [], None
 
     # Use 90th percentile to handle outliers
     if len(widths) >= 5:
