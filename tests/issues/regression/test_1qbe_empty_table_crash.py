@@ -62,9 +62,11 @@ def test_prose_that_merely_mentions_a_table_tag_does_not_raise():
 @pytest.mark.parametrize("name", list(NO_USABLE_ROWS))
 def test_html_to_json_returns_a_list_not_none(name):
     """The documented contract: text_blocks is a list, so callers can iterate it."""
-    from bs4 import BeautifulSoup
+    import lxml.html
 
-    table = BeautifulSoup(NO_USABLE_ROWS[name], "html.parser").find("table")
+    table = lxml.html.fromstring(NO_USABLE_ROWS[name]).find(".//table")
+    if table is None:  # a single-element fragment is rooted AT the table
+        table = lxml.html.fromstring(NO_USABLE_ROWS[name])
     text_blocks, records, derived_title = html_to_json(table)
     assert text_blocks == [], f"{name}: expected an empty list, got {text_blocks!r}"
     assert records == []
