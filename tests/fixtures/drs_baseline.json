@@ -1,0 +1,314 @@
+{
+ "EDGE::amendment-and-form": {
+  "detected": [
+   "S-1",
+   7
+  ],
+  "text": {
+   "chars": 24,
+   "head": "Amendment No. 7 FORM S-1",
+   "sha256": "4c474f0420c0a56b12d6d6327a9e0c8624c6dce04cf78a584b99cabe04c0815a",
+   "tail": "Amendment No. 7 FORM S-1",
+   "words": 5
+  }
+ },
+ "EDGE::bare-fragment": {
+  "detected": [
+   "S-1",
+   null
+  ],
+  "text": {
+   "chars": 31,
+   "head": "FORM S-1 REGISTRATION STATEMENT",
+   "sha256": "9574189ca9c41d3484a5512528011db37c13c896729c375087b768a34744a644",
+   "tail": "FORM S-1 REGISTRATION STATEMENT",
+   "words": 4
+  }
+ },
+ "EDGE::comment-names-another-form": {
+  "detected": [
+   "S-1",
+   null
+  ],
+  "text": {
+   "chars": 31,
+   "head": "FORM S-1 REGISTRATION STATEMENT",
+   "sha256": "9574189ca9c41d3484a5512528011db37c13c896729c375087b768a34744a644",
+   "tail": "FORM S-1 REGISTRATION STATEMENT",
+   "words": 4
+  }
+ },
+ "EDGE::comment-splits-a-form-name": {
+  "detected": [
+   "S-1",
+   null
+  ],
+  "text": {
+   "chars": 31,
+   "head": "FORM S-1 REGISTRATION STATEMENT",
+   "sha256": "9574189ca9c41d3484a5512528011db37c13c896729c375087b768a34744a644",
+   "tail": "FORM S-1 REGISTRATION STATEMENT",
+   "words": 4
+  }
+ },
+ "EDGE::cover-page-nested-300-deep": {
+  "detected": [
+   "F-1",
+   null
+  ],
+  "text": {
+   "chars": 31,
+   "head": "FORM F-1 REGISTRATION STATEMENT",
+   "sha256": "787e1f49d4885a79e9fde0e5f67342ca299be029eab2e3578961230c4aeaf920",
+   "tail": "FORM F-1 REGISTRATION STATEMENT",
+   "words": 4
+  }
+ },
+ "EDGE::empty": {
+  "detected": [
+   "Unknown",
+   null
+  ],
+  "text": {
+   "chars": 0,
+   "head": "",
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "tail": "",
+   "words": 0
+  }
+ },
+ "EDGE::form-just-inside-the-cover-window": {
+  "detected": [
+   "S-4",
+   null
+  ],
+  "text": {
+   "chars": 5431,
+   "head": "padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. pa",
+   "sha256": "3b9775a8f5f485344460dfa019cd673b17b3e3e84c557faacb20cbbbd23f82bb",
+   "tail": "tence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. FORM S-4 REGISTRATION STATEMENT",
+   "words": 604
+  }
+ },
+ "EDGE::form-just-past-the-cover-window": {
+  "detected": [
+   "Unknown",
+   null
+  ],
+  "text": {
+   "chars": 9031,
+   "head": "padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. pa",
+   "sha256": "374fb760f27332559d14e9215605e6eedcfc0de1718a38c6ee7c795049b4f2f4",
+   "tail": "tence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. padding sentence. FORM S-4 REGISTRATION STATEMENT",
+   "words": 1004
+  }
+ },
+ "EDGE::form-split-across-block-tags": {
+  "detected": [
+   "F-1",
+   null
+  ],
+  "text": {
+   "chars": 31,
+   "head": "FORM F-1 REGISTRATION STATEMENT",
+   "sha256": "787e1f49d4885a79e9fde0e5f67342ca299be029eab2e3578961230c4aeaf920",
+   "tail": "FORM F-1 REGISTRATION STATEMENT",
+   "words": 4
+  }
+ },
+ "EDGE::form-split-across-cells": {
+  "detected": [
+   "S-1",
+   null
+  ],
+  "text": {
+   "chars": 8,
+   "head": "FORM S-1",
+   "sha256": "2b287ed53bdeef223f72950e43455a56ebd3c417d34f9ef2bffca409ffb07296",
+   "tail": "FORM S-1",
+   "words": 2
+  }
+ },
+ "EDGE::nbsp-between-words": {
+  "detected": [
+   "S-4",
+   null
+  ],
+  "text": {
+   "chars": 31,
+   "head": "FORM S-4 REGISTRATION STATEMENT",
+   "sha256": "42b10bda65fd7e1d9ea65d49ec1488faf5e8096a6876f6f9f1ad8213b0e5a01e",
+   "tail": "FORM S-4 REGISTRATION STATEMENT",
+   "words": 4
+  }
+ },
+ "EDGE::numeric-entity": {
+  "detected": [
+   "20-F",
+   null
+  ],
+  "text": {
+   "chars": 23,
+   "head": "FORM 20-F ANNUAL REPORT",
+   "sha256": "dd17c398a374ea5e9b9a2ad4510c34ad1da16dc81dd6b25162c34a9771bba1d5",
+   "tail": "FORM 20-F ANNUAL REPORT",
+   "words": 4
+  }
+ },
+ "EDGE::script-block-names-another-form": {
+  "detected": [
+   "S-1",
+   null
+  ],
+  "text": {
+   "chars": 31,
+   "head": "FORM S-1 REGISTRATION STATEMENT",
+   "sha256": "9574189ca9c41d3484a5512528011db37c13c896729c375087b768a34744a644",
+   "tail": "FORM S-1 REGISTRATION STATEMENT",
+   "words": 4
+  }
+ },
+ "EDGE::script-followed-by-the-cover-text": {
+  "detected": [
+   "F-4",
+   null
+  ],
+  "text": {
+   "chars": 31,
+   "head": "FORM F-4 REGISTRATION STATEMENT",
+   "sha256": "ab2344e60be69ecc586db04b9972b4a3cfd785623e7fa0e4b345722f34d43d71",
+   "tail": "FORM F-4 REGISTRATION STATEMENT",
+   "words": 4
+  }
+ },
+ "EDGE::style-block-names-another-form": {
+  "detected": [
+   "S-1",
+   null
+  ],
+  "text": {
+   "chars": 31,
+   "head": "FORM S-1 REGISTRATION STATEMENT",
+   "sha256": "9574189ca9c41d3484a5512528011db37c13c896729c375087b768a34744a644",
+   "tail": "FORM S-1 REGISTRATION STATEMENT",
+   "words": 4
+  }
+ },
+ "EDGE::whitespace": {
+  "detected": [
+   "Unknown",
+   null
+  ],
+  "text": {
+   "chars": 0,
+   "head": "",
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "tail": "",
+   "words": 0
+  }
+ },
+ "EDGE::xml-prolog": {
+  "detected": [
+   "S-3",
+   null
+  ],
+  "text": {
+   "chars": 31,
+   "head": "FORM S-3 REGISTRATION STATEMENT",
+   "sha256": "8e4949f1351df3e7223420c948a06744d9473cb7388cf14a6934fc2acb28c80f",
+   "tail": "FORM S-3 REGISTRATION STATEMENT",
+   "words": 4
+  }
+ },
+ "corpus::html/1013243/8k/1013243-8-k-2001-03-30.html": {
+  "detected": [
+   "Unknown",
+   null
+  ],
+  "text": {
+   "chars": 3743,
+   "head": "1\n\n                       SECURITIES AND EXCHANGE COMMISSION\n                              Washington, DC 20549\n\n\n                                    FORM 8-K\n\n                                 CURRENT",
+   "sha256": "6e7bbdff685e4563174484d2ff162d29cf40d163550f0e99d8d419399a3814b0",
+   "tail": "                      -------\n\n\n         Exhibit 99.1 -- Press release dated March 28, 2001\n         Exhibit 99.2 -- Company Product and Technology Pipeline\n\n\n\n                                       3",
+   "words": 374
+  }
+ },
+ "corpus::html/1018735/20f/1018735-20-f-2025-06-03.html": {
+  "detected": [
+   "Unknown",
+   null
+  ],
+  "text": {
+   "chars": 272421,
+   "head": "nymox_20f.htm 0001018735 false --12-31 false FY 2024 false true false 2222661 2222661 2222661 2222661 0 0 0 0 6350000 6080000 1.67 1.76 P2Y7M24D P2Y10M24D P0Y P3Y8M1D P3Y8M1D five-year five year 0 0 0",
+   "sha256": "7a1fb627f779abf440fc662cb3acbdddc908c37372560f654828a2afc3fbc443",
+   "tail": "906 of the Sarbanes-Oxley Act of 2002 __________ * Portions of this exhibit have been omitted pursuant to a confidential treatment request. Omitted portions have been filed separately with the SEC. 47",
+   "words": 41498
+  }
+ },
+ "corpus::html/1100748/8k/1100748-8-k-2004-09-30.html": {
+  "detected": [
+   "Unknown",
+   null
+  ],
+  "text": {
+   "chars": 8965,
+   "head": "U.S. SECURITIES AND EXCHANGE COMMISSION\n                           Washington, D.C. 20549\n\n\n                                 FORM 8-K\n\n\n                               CURRENT REPORT\n\n                 ",
+   "sha256": "b0ee25332efb578213836c6e0a5377875db853b56276e2940a37d05323ea68fa",
+   "tail": "t of Press Release Issued by the Registrant, dated\n       September 29, 2004 (filed herewith).\n\n99.2   Text of Press Release Issued by the Registrant, dated\n       September 30, 2004 (filed herewith).",
+   "words": 1234
+  }
+ },
+ "corpus::html/786947/8k/786947-8-k-2008-06-30.html": {
+  "detected": [
+   "Unknown",
+   null
+  ],
+  "text": {
+   "chars": 2622,
+   "head": "UNITED\n      STATES SECURITIES\n      AND EXCHANGE COMMISSION WASHINGTON,\n      D. C. 20549 FORM\n      8-K CURRENT\n      REPORT Pursuant\n      to Section 13 or 15(d) of the Securities\n      Exchange Ac",
+   "sha256": "60787b1ecae79006e1b42acc897b27be1631a6eb233a5e88d757902e012f041d",
+   "tail": "nancial\n                Officer Date: June\n      30,\n      2008 EXHIBIT\n      INDEX Exhibit Number Description 99.1 Press\n                Release of the Registrant dated June 30,\n                2008.",
+   "words": 318
+  }
+ },
+ "corpus::html/aapl/10k/aapl-10-k-2024-11-01.html": {
+  "detected": [
+   "Unknown",
+   null
+  ],
+  "text": {
+   "chars": 218687,
+   "head": "aapl-20240928 false 2024 FY 0000320193 P1Y P1Y P1Y P1Y http://fasb.org/us-gaap/2024#MarketableSecuritiesCurrent http://fasb.org/us-gaap/2024#MarketableSecuritiesNoncurrent http://fasb.org/us-gaap/2024",
+   "sha256": "0e886e4d1e1607993536b4f14103e3f22f3268fe728cb8e024b462bc3e29a0bf",
+   "tail": "rector November 1, 2024 MONICA LOZANO /s/    Ronald D. Sugar Director November 1, 2024 RONALD D. SUGAR /s/    Susan L. Wagner Director November 1, 2024 SUSAN L. WAGNER Apple Inc. | 2024 Form 10-K | 57",
+   "words": 31879
+  }
+ },
+ "corpus::html/abnb/s1/abnb-s1-2020-11-16.html": {
+  "detected": [
+   "S-1",
+   null
+  ],
+  "text": {
+   "chars": 1347619,
+   "head": "S-1 Table of Contents As filed with the Securities and Exchange Commission on November 16, 2020. Registration No. 333- UNITED STATES SECURITIES AND EXCHANGE COMMISSION WASHINGTON, D.C. 20549 FORM S-1 ",
+   "sha256": "4ee829c97703d35e84985f86aecba8c42412fcdb781fa4cc6f5ce49881a351ed",
+   "tail": " Director November 16, 2020 /s/ Jeffrey Jordan Jeffrey Jordan Director November 16, 2020 /s/ Alfred Lin Alfred Lin Director November 16, 2020 /s/ Ann Mather Ann Mather Director November 16, 2020 II-10",
+   "words": 212024
+  }
+ },
+ "corpus::html/ibm/10q/ibm-10-q-2025-07-24.html": {
+  "detected": [
+   "Unknown",
+   null
+  ],
+  "text": {
+   "chars": 289344,
+   "head": "ibm-20250630 0000051143 --12-31 2025 Q2 false CHX P3Y http://fasb.org/us-gaap/2025#CostOfRevenue http://fasb.org/us-gaap/2025#InterestExpense http://fasb.org/us-gaap/2025#SellingGeneralAndAdministrati",
+   "sha256": "2e9ebd7e91fb70614aba808d5b748474c2d405ccf34317cbacc462aa8a1e506f",
+   "tail": "y the undersigned thereunto duly authorized. International Business Machines Corporation (Registrant) Date: July 24, 2025 By: /s/ Nicolás A. Fehring Nicolás A. Fehring Vice President and Controller 83",
+   "words": 39608
+  }
+ }
+}
