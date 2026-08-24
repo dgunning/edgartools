@@ -1,0 +1,238 @@
+<!--
+  Captured from
+  https://www.sec.gov/data-research/sec-markets-data/investment-company-series-class-information
+  on 2026-08-24 for edgartools-07lk.11.9.5.
+
+  Trimmed to the two <table> elements, which is all _find_latest_fund_data_url()
+  reads (edgar/funds/reference.py). Both are kept on purpose:
+
+    * the first is the field-glossary table ("Field Name" / "Field Description"),
+      whose headers do NOT match, so it exercises the skip-this-table branch;
+    * the second is the download listing ("File" / "Format" / "Size"), 34 rows,
+      2026 back to 2010, XML row before CSV row in every year -- so it also
+      exercises "do not return the first row, return the first CSV row".
+
+  Page chrome (nav, footer, scripts) removed; the tables themselves are verbatim,
+  byte for byte, including whitespace. Regenerate by re-downloading and slicing
+  from '<table' to '</table>'.
+-->
+<table class="table" border="1" cellpadding="5" cellspacing="0"><thead><tr><th>Field Name</th><th>Field Description</th></tr></thead><tbody><tr><td valign="top">Reporting File Number</td><td valign="top">This is a number with an 811- prefix assigned to filers registered under the Investment Company Act of 1940.</td></tr><tr><td valign="top">CIK</td><td valign="top">The Central Index Key (CIK) is a ten digit number assigned by the SEC to each entity that submits filings.</td></tr><tr><td valign="top">Name of Investment Company</td><td valign="top">This corresponds to the name of the legal entity registered under the Investment Company Act of 1940. (Entered by Filer)</td></tr><tr><td valign="top">Organization Type</td><td valign="top">The Commission's two digit code used to identify the organizational structure of a registrant. The following codes are used: 30 (N-1a/open-end mutual fund filer), 31 (N-3 filer, insurance separate account organized as an open-end fund), 32 (N-4 filer, variable annuity separate account organized as a unit investment trust), 33 (N-6 filer, variable life separate account organized as a unit investment trust), 55 (N-2 filer/closed-end fund), 75 (S-6 filer, non-insurance unit investment trust).</td></tr><tr><td valign="top">Series ID</td><td valign="top">A unique identifier assigned by the SEC to each series of an investment company. The format is an "S" followed by nine digits.</td></tr><tr><td valign="top">Series Name</td><td valign="top">Name of investment company series. (Entered by Filer and may not correspond to the exact legal name of the series).</td></tr><tr><td valign="top">Class ID</td><td valign="top">A unique identifier assigned by the SEC to each series of an investment company. The format is a "C" followed by nine digits.</td></tr><tr><td valign="top">Class Name</td><td valign="top">Name of investment company series. A registered investment company may include one or more series, each of which invests its assets in a separate portfolio of securities. (Entered by Filer and may not correspond to the exact legal name of the class).</td></tr><tr><td valign="top">Class Ticker</td><td valign="top">The stock market symbol (if any) for a class. An investment company series may include one or more share classes with differing sales charges and expenses. This is not a required field and will not be available for every registrant.</td></tr><tr><td valign="top">EDGAR</td><td valign="top">Electronic Data Gathering, Analysis and Retrieval is the Commission's system for electronic filing.</td></tr><tr><td valign="top">Address_1</td><td valign="top">The first line of the registrant's business address.</td></tr><tr><td valign="top">Address_2</td><td valign="top">The second line of the registrant's business address.</td></tr><tr><td valign="top">City</td><td valign="top">The city of the registrant's business address.</td></tr><tr><td valign="top">State</td><td valign="top">The state of the registrant's business address.</td></tr><tr><td valign="top">Zip Code</td><td valign="top">The zip code of the registrant's business address.</td></tr></tbody></table>
+
+<table class="usa-table views-table views-view-table cols-3">
+    <caption class="visually-hidden">
+              
+                </caption>
+          <thead>
+        <tr>
+                                                            <th id="view-field-display-title-table-column" class="views-field views-field-field-display-title" scope="col">File</th>
+                                                            <th id="view-extension-table-column" class="views-field views-field-extension" scope="col">Format</th>
+                                                            <th id="view-filesize-table-column" class="views-field views-field-filesize" scope="col">Size</th>
+                  </tr>
+      </thead>
+        <tbody>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-class-information/investment-company-series-class-2026-xml.xml" download>2026</a>
+<em>Updated 6/1/26</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">XML             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">23.26 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-class-information/investment-company-series-class-2026.csv" download>2026</a>
+<em>Updated 6/1/26</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">CSV             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">7.68 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-class-information/investment_company_series_class_2025-xml.xml" download>2025</a>
+<em>Updated 6/2/25</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">XML             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">13.29 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-class-information/investment-company-series-class-2025.csv" download>2025</a>
+<em>Updated 6/2/25</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">CSV             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">7.25 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-class-information/investment-company-series-class-2024.xml" download>2024</a>
+<em>Updated 6/5/24</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">XML             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">21.86 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment-company-series-class-2024.csv" download>2024</a>
+<em>Updated 6/5/24</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">CSV             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">7.21 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-class-information/investment_company_series_class_2023.xml" download>2023</a>
+<em>Updated 6/8/23</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">XML             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">20.99 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-class-information/investment_company_series_class_2023.csv" download>2023</a>
+<em>Updated 6/8/23</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">CSV             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">7.4 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2022.xml" download>2022</a>
+<em>Updated 6/27/22</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">XML             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">23.71 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2022.csv" download>2022</a>
+<em>Updated 6/27/22</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">CSV             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">7.55 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2021.xml" download>2021</a>
+<em>Updated 7/21/21</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">XML             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">23.82 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2021.csv" download>2021</a>
+<em>Updated 7/12/21</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">CSV             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">7.63 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2020.xml" download>2020</a>
+<em>Updated 7/13/2020</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">XML             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">24.51 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2020.csv" download>2020</a>
+<em>Updated 7/13/2020</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">CSV             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">7.79 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2019.xml" download>2019</a>
+<em>Updated 7/9/2019</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">XML             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">25.46 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2019.csv" download>2019</a>
+<em>Updated 7/9/2019</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">CSV             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">8.07 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2018.xml" download>2018</a>
+<em>Updated 7/23/2018</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">XML             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">25.53 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2018.csv" download>2018</a>
+<em>Updated 7/23/2018</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">CSV             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">8.14 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2017.xml" download>2017</a>
+<em>Updated 9/15/2017</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">XML             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">25.85 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2017.csv" download>2017</a>
+<em>Updated 9/15/2017</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">CSV             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">8.18 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class.csv" download>2016</a>
+<em>Updated 09/23/2016</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">CSV             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">7.79 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class.xml" download>2016</a>
+<em>Updated 09/23/2016</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">XML             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">24.57 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2015.xml" download>2015</a>
+<em>Updated 09/25/2015</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">XML             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">22.89 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2015.csv" download>2015</a>
+<em>Updated 09/25/2015</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">CSV             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">7.43 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2014.xml" download>2014</a>
+<em>Updated 04/01/2014</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">XML             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">22.11 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2014.csv" download>2014</a>
+<em>Updated 04/01/2014</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">CSV             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">7.61 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2013.xml" download>2013</a>
+<em>Updated 06/14/2013</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">XML             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">22.39 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2013.csv" download>2013</a>
+<em>Updated 06/14/2013</em>            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">CSV             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">6.93 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2012.xml" download>2012</a>
+            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">XML             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">22.39 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2012.csv" download>2012</a>
+            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">CSV             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">7.05 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2011.xml" download>2011</a>
+            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">XML             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">20.91 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2011.csv" download>2011</a>
+            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">CSV             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">6.82 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investmentcompanyseriesclass2010.csv" download>2010</a>
+            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">CSV             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">6.85 MB            </td>
+                  </tr>
+              <tr>
+                                                                                                        <td headers="view-field-display-title-table-column" class="views-field views-field-field-display-title">  <a href="/files/investment/data/other/investment-company-series-and-class-information/investment_company_series_class_2010.xml" download>2010</a>
+            </td>
+                                                                                                        <td headers="view-extension-table-column" class="views-field views-field-extension">XML             </td>
+                                                                                                        <td headers="view-filesize-table-column" class="views-field views-field-filesize">20.98 MB            </td>
+                  </tr>
+          </tbody>
+  </table>
