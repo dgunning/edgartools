@@ -28,6 +28,31 @@ from .exclusions import should_exclude, EXCLUDED_TAGS
 
 logger = logging.getLogger(__name__)
 
+# Below this confidence a mapping whose candidates are all total concepts is
+# suppressed (GitHub #914). The colliding rows measured in #914 sit at
+# 0.307-0.319; nothing between 0.5 and 0.9 collided in a 65-filing sample.
+LOW_CONFIDENCE_TOTAL_FLOOR = 0.5
+
+# Concept ids that name an aggregate rather than a line item. A fuzzy match
+# onto one of these from a non-total tag is the #914 failure shape.
+_TOTAL_CONCEPT_IDS = {
+    'Assets',
+    'Liabilities',
+    'CommonEquity',
+    'AllEquityBalance',
+    'AllEquityBalanceIncludingMinorityInterest',
+    'LiabilitiesAndEquity',
+    'CurrentAssetsTotal',
+    'NonCurrentAssetsTotal',
+    'CurrentLiabilitiesTotal',
+    'NonCurrentLiabilitiesTotal',
+}
+
+
+def _is_total_concept(standard_concept: str) -> bool:
+    """True if the concept id names an aggregate (total) rather than a line item."""
+    return standard_concept in _TOTAL_CONCEPT_IDS or 'Total' in standard_concept
+
 
 @dataclass
 class MappingResult:
@@ -270,6 +295,34 @@ class ReverseIndex:
         is_ambiguous = entry.get("ambiguous", False)
         deprecated = entry.get("deprecated")
         comment = entry.get("comment")
+
+        # Low-confidence fuzzy matches onto total concepts are not
+        # authoritative (GitHub #914): on a bank balance sheet,
+        # BankOwnedLifeInsurance resolved to 'Assets', so
+        # standard_concept == 'Assets' matched line items worth tens of
+        # billions alongside the real TOTAL ASSETS row. gaap_mappings.json
+        # is generated upstream and hand edits would not survive
+        # regeneration, so the authority judgement belongs here in the
+        # consumer: below the floor, a mapping whose candidates are all
+        # total concepts is suppressed outright. The confidence
+        # distribution measured in #914 is cleanly split - colliding rows
+        # all sat at 0.307-0.319, nothing between 0.5 and 0.9 collided -
+        # so the floor clears every reproducible case while the mid-band
+        # (harmless, context-disambiguated) and canonical mappings are
+        # untouched. Missing confidence means no signal: keep the mapping.
+        entry_confidence = entry.get('confidence', 1.0) if isinstance(entry, dict) else 1.0
+        if (
+            isinstance(entry, dict)
+            and entry_confidence < LOW_CONFIDENCE_TOTAL_FLOOR
+            and standard_tags
+            and all(_is_total_concept(tag) for tag in standard_tags)
+        ):
+            logger.debug(
+                "Suppressed low-confidence total mapping for %s "
+                "(confidence=%.3f, candidates=%s)",
+                xbrl_tag, entry_confidence, standard_tags
+            )
+            return None
 
         # Resolve display names: prefer embedded display_name, then display_names.json, then concept name
         display_names = []
