@@ -105,7 +105,8 @@ def create_lxml_parser(
     remove_blank_text: bool = False,
     remove_comments: bool = True,
     recover: bool = True,
-    encoding: Optional[str] = 'utf-8'
+    encoding: Optional[str] = 'utf-8',
+    huge_tree: bool = True
 ) -> lxml.html.HTMLParser:
     """
     Create a configured lxml HTMLParser.
@@ -124,6 +125,19 @@ def create_lxml_parser(
             Default True since SEC filings often have HTML issues.
         encoding: Character encoding for the parser.
             Default 'utf-8'. Set to None to disable encoding handling.
+        huge_tree: Lift libxml2's hard-coded parser limits.
+            Default True, and it should stay that way. Without it libxml2
+            stops at a nesting depth of 256 and SILENTLY DISCARDS everything
+            below -- no exception, no entry in the error log, just a shorter
+            document. 2000s-era filings nest layout tables that deep: one 2003
+            S-1 in the corpus reaches depth 284 and loses about 10% of its
+            text, all of it the tail. BeautifulSoup never had this behaviour
+            with either treebuilder -- html.parser has no depth limit, and
+            bs4's own lxml treebuilder passes huge_tree=True -- so leaving it
+            off makes every reader moved from bs4 to lxml quietly lossy.
+            Measured over 282 fixtures, turning it on changes exactly one of
+            them, and only by recovering text that was being dropped; parse
+            time is unchanged.
 
     Returns:
         Configured lxml.html.HTMLParser instance
@@ -141,11 +155,15 @@ def create_lxml_parser(
     Note:
         The recover=True setting is critical for SEC documents which
         often contain non-standard HTML structures.
+
+        huge_tree=True is equally critical and less obvious, because the
+        failure is silent. See the argument description above.
     """
     kwargs = {
         'remove_blank_text': remove_blank_text,
         'remove_comments': remove_comments,
         'recover': recover,
+        'huge_tree': huge_tree,
     }
 
     # Only add encoding if specified
