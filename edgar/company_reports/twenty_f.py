@@ -3,7 +3,7 @@ import re
 from functools import cached_property
 from typing import List
 
-from edgar.company_reports._base import CompanyReport
+from edgar.company_reports._base import CompanyReport, report_lookup_miss
 from edgar.company_reports._structures import FilingStructure, item_sort_key
 from edgar.documents import HTMLParser, ParserConfig
 
@@ -246,6 +246,7 @@ class TwentyF(CompanyReport):
                 if friendly_key in self.sections:
                     return self.sections[friendly_key].text()
 
+        report_lookup_miss(self, item_name)
         return None
 
     def __str__(self):

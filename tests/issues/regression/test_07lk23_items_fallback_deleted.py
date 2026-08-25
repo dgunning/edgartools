@@ -32,7 +32,6 @@ The planning note for this work described it as deleting "the now-dead
 so the next person to read that note finds evidence instead of repeating it.
 """
 import pathlib
-import warnings
 
 import pytest
 
@@ -223,63 +222,38 @@ class TestGetitemFallbackIsGoneToo:
         by deletion rather than by being reconciled.
 
         Pinned under an explicit ``lenient`` rather than under whatever the
-        invoking lane happens to set. Both halves of this assertion are only
-        true with ``EDGARTOOLS_STRICT_ERRORS`` off, and saying so in the
-        signature is what stopped this from failing in one lane and passing in
-        the other -- see ``test_a_missing_item_raises_under_strict_except_20f``.
+        invoking lane happens to set. This assertion is only true with
+        ``EDGARTOOLS_STRICT_ERRORS`` off, and saying so in the signature is what
+        stopped it from passing in one lane and failing in the other -- see
+        ``test_a_missing_item_raises_from_every_report_type_under_strict``.
 
-        The two report types converged on None, but NOT on how they say so, and
-        that difference is asserted rather than glossed: TenK announces the miss
-        and TwentyF does not.
+        "Every report type" is now literally true, which it was not when this
+        test was written: TwentyF used to answer None in SILENCE here, because
+        it overrode ``__getitem__`` and reimplemented the miss path without the
+        ``report_lookup_miss`` call the base class makes (edgartools-sx7y).
         """
-        # TenK routes the miss through report_lookup_miss -> warn_will_raise
-        # (ten_k.py:733), so the user gets told what 6.0 will do.
         with pytest.warns(FutureWarning, match="raises SectionNotFoundError in edgartools 6.0"):
             assert _without_legacy(TenK)(FixtureFiling(GATE_10K, "10-K"))["Item 16"] is None
-
-        # TwentyF does not call report_lookup_miss at all -- twenty_f.py:249 is a
-        # bare `return None`. No warning is emitted, which is the defect pinned
-        # in the sibling test. Asserted with an explicit "no warnings" rather
-        # than by omission, so that wiring it up makes THIS test fail and get
-        # revisited instead of passing quietly on changed behaviour.
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
+        with pytest.warns(FutureWarning, match="raises SectionNotFoundError in edgartools 6.0"):
             assert _without_legacy(TwentyF)(FixtureFiling(GATE_20F, "20-F"))["Item 20"] is None
-        assert not [w for w in caught if issubclass(w.category, FutureWarning)], (
-            "TwentyF now announces a lookup miss -- good. Move it into the "
-            "strict test alongside TenK and delete this assertion."
-        )
 
-    def test_a_missing_item_raises_under_strict_except_20f(self, strict):
-        """The same wiring under the error behaviour 6.0 ships -- and one gap.
+    def test_a_missing_item_raises_from_every_report_type_under_strict(self, strict):
+        """The same wiring under the error behaviour 6.0 ships.
 
         ``report[item]`` raises in 6.0 because the caller named a specific thing
         and ``.get()`` exists for callers who would rather have None; ten_k.py
-        says exactly that at its property block. ``report_lookup_miss`` is what
-        implements it, and ``CompanyReport.__getitem__`` calls it correctly
-        (_base.py:312).
+        says exactly that at its property block, and ``report_lookup_miss``
+        implements it.
 
-        TwentyF overrides ``__getitem__`` and reimplements the miss path without
-        that call -- twenty_f.py:249 is a bare ``return None`` -- so it answers
-        None even under strict. That is a silent None of the kind #933 exists to
-        remove, pinned here rather than left to be discovered in 6.0. It is NOT
-        fixed here: it changes public behaviour for every 20-F user and deserves
-        its own change with its own changelog entry, and it is not the only one
-        (CurrentReport and FortyF override the same method and never name the
-        helper either). Bead edgartools-sx7y carries all three.
-
-        Why this test exists at all: the assertion it replaces pinned only the
-        None half and named no error mode, so it passed in ``test-fast`` and
-        failed in ``test-strict-errors`` -- red across at least five consecutive
-        merges to main, reported into #1033 every time and read as noise each
-        time. A lane that is permanently red cannot warn about anything else,
-        so a second, genuine strict-mode break would have landed invisibly
-        behind this one.
+        Both halves are asserted in both lanes deliberately. The assertion these
+        two replace pinned only the None half and named no error mode, so it
+        passed under ``test-fast`` and failed under ``test-strict-errors`` --
+        red across at least five consecutive merges to main, reported into #1033
+        every time and read as noise every time. A permanently red lane cannot
+        warn about anything else, so a genuine strict-mode break would have
+        landed invisibly behind it.
         """
         with pytest.raises(SectionNotFoundError, match="Item 16"):
             _without_legacy(TenK)(FixtureFiling(GATE_10K, "10-K"))["Item 16"]
-
-        assert _without_legacy(TwentyF)(FixtureFiling(GATE_20F, "20-F"))["Item 20"] is None, (
-            "TwentyF['Item 20'] now raises under strict -- the gap is closed. "
-            "Fold it into the pytest.raises above and close edgartools-sx7y."
-        )
+        with pytest.raises(SectionNotFoundError, match="Item 20"):
+            _without_legacy(TwentyF)(FixtureFiling(GATE_20F, "20-F"))["Item 20"]
