@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **httpx is now capped below 0.29.** httpx upstream has been dormant since 0.28.1 (December 2024) and stopped accepting issues in February 2026, so any future release on PyPI would be unexpected and should not be adopted automatically. Installs resolve to 0.28.1 exactly as before; the planned successor is the httpx2 migration in 6.0.
+
 - **Filing homepage parsing is about 9x faster.** The filing index page — the source of `filing.attachments`, `filing.homepage.get_filers()` and the filing dates — was parsed with BeautifulSoup's pure-Python `html.parser`; it now uses lxml, measured at 15.8ms to 1.8ms across the five tracked homepage fixtures. Output is unchanged: the whole parse of every fixture, down to each attachment's size and each filer's identification lines, is pinned against a baseline captured from the previous implementation. A blank or truncated index page still yields a homepage with nothing on it rather than raising.
 
   `FilingHomepage(...)` and `Attachments.load(...)` take an lxml tree now, from the new `edgar.attachments.parse_homepage_html(html)`. Both still accept a BeautifulSoup, and `FilingHomepage(soup=...)` still works, with a `DeprecationWarning`; both go in 6.0. Neither is on the path you take through `filing.homepage`.
