@@ -18,6 +18,8 @@ This is GH #888's trap on the neighbouring object: that issue fixed
 with the series ID in the CIK slot, and settled that an unresolvable series must
 yield nothing rather than the trust. `FundSeries.get_filings` now takes the same
 path, and `Fund.get_filings()`'s documented trust-wide default is unchanged.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/1143
 """
 
 from unittest.mock import MagicMock, patch
