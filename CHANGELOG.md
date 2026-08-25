@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.53.0] - 2026-08-25
+
 ### Changed
 
 - **httpx is now capped below 0.29.** httpx upstream has been dormant since 0.28.1 (December 2024) and stopped accepting issues in February 2026, so any future release on PyPI would be unexpected and should not be adopted automatically. Installs resolve to 0.28.1 exactly as before; the planned successor is the httpx2 migration in 6.0.
