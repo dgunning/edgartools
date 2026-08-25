@@ -20,7 +20,9 @@ that recovered the numbers but not the issuer — the shape that puts NaN in a
 text column and floats in a numeric one. Frames are built from recorded values,
 so these are unit tests and need no network.
 
-Follow-up to the review on PR #1137 (GH #1136).
+Follow-up to the review on the pull request that fixed the empty holdings list.
+
+GitHub PR: https://github.com/dgunning/edgartools/pull/1137
 """
 
 import json
