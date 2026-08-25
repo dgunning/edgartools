@@ -1,10 +1,12 @@
 from pathlib import Path
-from edgar import Filing, Document
+
 from rich import print
 from rich.panel import Panel
 
-from edgar._markdown import convert_table, MarkdownContent, fix_markdown, markdown_to_rich
+from edgar import Filing
+from edgar._markdown import MarkdownContent, convert_table, markdown_to_rich
 from edgar.datatools import markdown_to_dataframe
+from edgar.documents import parse_html
 
 
 def test_convert_markdown_table():
@@ -38,70 +40,29 @@ def test_markdown_to_rich_for_plain_text():
     print(renderable)
 
 
-def test_markdown_to_html():
+def test_markdown_content_renders_a_real_6k():
+    """MarkdownContent wraps markdown for rich display; it must survive a real filing.
+
+    Built through ``edgar.documents`` rather than the old
+    ``MarkdownContent.from_html``, which was removed along with
+    ``html_to_markdown``: its last production caller went in #1132 when
+    ``PressRelease.to_markdown()`` moved off the legacy stack. This is how the
+    remaining callers construct it.
+    """
     html = Path('data/form.6k.Athena.html').read_text()
-    markdown_content = MarkdownContent.from_html(html)
-    print()
+    markdown_content = MarkdownContent(parse_html(html).to_markdown(), title="6-K")
+
     text = repr(markdown_content)
-    print(text)
     assert text
+    assert markdown_content.title == "6-K"
 
 
-def test_markdown_content_html_with_no_tables():
+def test_markdown_content_renders_a_6k_with_no_tables():
+    """The table-splitting branch of markdown_to_rich must handle prose-only input."""
     html = Path('data/form6k.RoyalPhilips.html').read_text()
-    markdown_content = MarkdownContent.from_html(html)
-    print()
-    text = repr(markdown_content)
-    assert text
+    markdown_content = MarkdownContent(parse_html(html).to_markdown())
 
-
-def test_fix_markdown():
-    # Fix no space between consecutive sentences
-    md = """
-    A copy of this press release is hereby incorporated as Exhibit 99.1  │
-    Condition.On Match 23, 2023
-    """
-    assert "Condition.On" in md
-    assert "Condition. On" in fix_markdown(md)
-
-    md = """
-    Item\n5.02 A copy of this press release is hereby incorporated as Exhibit 99.1  │
-    Condition.On Match 23, 2023
-    """
-    assert "Item\n5.02" in md
-    assert "Item 5.02" in fix_markdown(md)
-
-    md = "ITEM\n1 - BUSINESS"
-    assert "ITEM 1 - BUSINESS" in fix_markdown(md)
-
-    # Cleanup Item\xa01
-    md = fix_markdown("Item\xa01")
-    assert "Item 1" in md
-
-    # Cleanup double asterisks
-    print(fix_markdown('**ITEM**\xa0**1'))
-    import re
-    print(re.sub(r'\*', '', '**ITEM**\xa0**1'))
-    assert "ITEM 1" in fix_markdown('**ITEM**\xa0**1')
-
-    # Fix no newline between items
-    md = """
-    A copy of this press release is hereby incorporated as Exhibit 99.1  │
-    │ hereto. Item 9.01. Financial Statements and Exhibits. (d) Exhibits Exhibit 99.1 - Press Release issued March 16,
-    │ 2023Exhibit 104 – Cover Page Interactive Data File (embedded within Inline XBRL document)
-    """
-    assert ". Item 9.01" in md
-    md_fixed = fix_markdown(md)
-    assert any(line.startswith(" Item 9.01") for line in md_fixed.splitlines())
-
-    # Fix no spaces before Item
-    md = """
-        Repurchases under the September 2021 program may be made in open-market or 
-    privately negotiated transactions.Item 6. ReservedItem 7. Management's 
-    Discussion and Analysis of Financial Condition and Results of 
-    """
-    md_fixed = fix_markdown(md)
-    assert any(line.startswith(" Item 7") for line in md_fixed.splitlines())
+    assert repr(markdown_content)
 
 
 def test_markdown_to_dataframe():
