@@ -91,6 +91,23 @@ async def edgar_ownership(
         return error(str(e), suggestions=get_error_suggestions(e))
 
 
+
+def _cell_number(value: Any) -> Optional[float]:
+    """Coerce a holdings cell to a JSON-serialisable number.
+
+    Pandas hands back numpy scalars, which ``json.dumps`` refuses, and NaN for
+    missing cells. ``value != value`` is the NaN test that needs no import.
+    """
+    if value is None:
+        return None
+    item = getattr(value, "item", None)
+    if callable(item):
+        value = item()
+    if value != value:
+        return None
+    return value
+
+
 async def _get_insider_transactions(identifier: str, days: int, limit: int) -> Any:
     """Get insider trading activity from Form 4 filings."""
     try:
@@ -222,21 +239,31 @@ async def _get_fund_holdings(identifier: str, limit: int) -> Any:
         try:
             obj = latest_13f.obj()
 
-            if hasattr(obj, 'holdings'):
+            holdings_table = getattr(obj, 'holdings', None)
+
+            if holdings_table is not None:
+                # ``ThirteenF.holdings`` is a DataFrame, and iterating one yields
+                # its column names rather than its rows: every attribute probe
+                # missed and the list came back empty for every fund. Walk it the
+                # way ``_get_portfolio_diff`` below already walks its comparison.
                 holdings = []
-                for h in obj.holdings[:limit]:
+                for _, row in holdings_table.head(limit).iterrows():
                     holding = {}
-                    if hasattr(h, 'name') or hasattr(h, 'issuer'):
-                        holding["company"] = getattr(h, 'name', None) or getattr(h, 'issuer', 'Unknown')
-                    if hasattr(h, 'cusip'):
-                        holding["cusip"] = h.cusip
-                    if hasattr(h, 'shares') or hasattr(h, 'value'):
-                        holding["shares"] = getattr(h, 'shares', None)
-                        holding["value"] = getattr(h, 'value', None)
+                    issuer = row.get("Issuer")
+                    if issuer:
+                        holding["company"] = str(issuer)
+                    cusip = row.get("Cusip")
+                    if cusip:
+                        holding["cusip"] = str(cusip)
+                    shares = _cell_number(row.get("SharesPrnAmount"))
+                    value = _cell_number(row.get("Value"))
+                    if shares is not None or value is not None:
+                        holding["shares"] = shares
+                        holding["value"] = value
                     if holding:
                         holdings.append(holding)
 
-                result["holdings_count"] = len(obj.holdings) if hasattr(obj, 'holdings') else 0
+                result["holdings_count"] = len(holdings_table)
                 result["holdings"] = holdings
 
                 # Calculate total value if available
