@@ -7,9 +7,7 @@ Get ownership data: insider transactions, institutional holders, or fund portfol
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional, Union
-
-import pandas as pd
+from typing import Any
 
 from edgar.ai.mcp.tools.base import (
     tool,
@@ -17,6 +15,8 @@ from edgar.ai.mcp.tools.base import (
     error,
     resolve_company,
     get_error_suggestions,
+    _cell_number,
+    _cell_text,
 )
 
 logger = logging.getLogger(__name__)
@@ -92,54 +92,6 @@ async def edgar_ownership(
         logger.exception("Error in edgar_ownership")
         return error(str(e), suggestions=get_error_suggestions(e))
 
-
-
-def _cell_missing(value: Any) -> bool:
-    """True for every shape an absent DataFrame cell arrives in.
-
-    ``None``, ``float("nan")``, ``NaT`` and ``pd.NA`` all mean "nothing here",
-    and only ``pd.isna`` recognises all four: ``value != value`` raises on
-    ``pd.NA``, and ``bool(float("nan"))`` is ``True``.
-    """
-    try:
-        return bool(pd.isna(value))
-    except (TypeError, ValueError):  # arrays, and objects pandas won't judge
-        return False
-
-
-def _cell_text(value: Any) -> Optional[str]:
-    """Coerce a holdings cell to a non-empty string, or ``None``.
-
-    A missing issuer in a text column arrives as NaN, which is truthy and which
-    ``str()`` renders as the literal ``"nan"`` — that is how ``{"company":
-    "nan", "cusip": "nan"}`` reached the response.
-    """
-    if _cell_missing(value):
-        return None
-    text = str(value).strip()
-    return text or None
-
-
-def _cell_number(value: Any, as_int: bool = True) -> Optional[Union[int, float]]:
-    """Coerce a holdings cell to a JSON-serialisable number, or ``None``.
-
-    Pandas hands back numpy scalars, which ``json.dumps`` refuses. One missing
-    cell also makes its whole column float64, so share counts and dollar values
-    would render as ``65950296923.0`` in one walk and ``65950296923`` in the
-    other; ``as_int`` is what keeps the two agreeing. Pass ``as_int=False`` for
-    the genuinely fractional columns, such as percentage changes.
-    """
-    if _cell_missing(value):
-        return None
-    item = getattr(value, "item", None)
-    if callable(item):
-        value = item()
-    if not as_int:
-        return value
-    try:
-        return int(value)
-    except (TypeError, ValueError):  # not a number after all — hand it back
-        return value
 
 
 async def _get_insider_transactions(identifier: str, days: int, limit: int) -> Any:
@@ -289,10 +241,15 @@ async def _get_fund_holdings(identifier: str, limit: int) -> Any:
                     cusip = _cell_text(row.get("Cusip"))
                     if cusip:
                         holding["cusip"] = cusip
-                    shares = _cell_number(row.get("SharesPrnAmount"))
-                    value = _cell_number(row.get("Value"))
-                    if shares is not None or value is not None:
+                    # Independently, the way company and cusip are: writing the
+                    # pair together put an explicit `"value": null` in the
+                    # response for a row whose value did not parse, and a caller
+                    # testing `"value" in holding` reads that as a value.
+                    shares = _cell_number(row.get("SharesPrnAmount"), as_int=True)
+                    if shares is not None:
                         holding["shares"] = shares
+                    value = _cell_number(row.get("Value"), as_int=True)
+                    if value is not None:
                         holding["value"] = value
                     if holding:
                         holdings.append(holding)
@@ -373,29 +330,29 @@ async def _get_portfolio_diff(identifier: str, limit: int) -> Any:
             }
 
             # Current values
-            shares = _cell_number(row.get("Shares"))
+            shares = _cell_number(row.get("Shares"), as_int=True)
             if shares is not None:
                 entry["shares"] = shares
-            value = _cell_number(row.get("Value"))
+            value = _cell_number(row.get("Value"), as_int=True)
             if value is not None:
                 entry["value"] = value
 
             # Previous values
-            prev_shares = _cell_number(row.get("PrevShares"))
+            prev_shares = _cell_number(row.get("PrevShares"), as_int=True)
             if prev_shares is not None:
                 entry["prev_shares"] = prev_shares
-            prev_value = _cell_number(row.get("PrevValue"))
+            prev_value = _cell_number(row.get("PrevValue"), as_int=True)
             if prev_value is not None:
                 entry["prev_value"] = prev_value
 
             # Changes
-            share_change = _cell_number(row.get("ShareChange"))
+            share_change = _cell_number(row.get("ShareChange"), as_int=True)
             if share_change is not None:
                 entry["share_change"] = share_change
-            share_pct = _cell_number(row.get("ShareChangePct"), as_int=False)
+            share_pct = _cell_number(row.get("ShareChangePct"))
             if share_pct is not None:
                 entry["share_change_pct"] = round(share_pct, 1)
-            value_change = _cell_number(row.get("ValueChange"))
+            value_change = _cell_number(row.get("ValueChange"), as_int=True)
             if value_change is not None:
                 entry["value_change"] = value_change
 
