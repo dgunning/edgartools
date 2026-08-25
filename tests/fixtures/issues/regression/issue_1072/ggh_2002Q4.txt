@@ -1,0 +1,330 @@
+
+
+                                      -2-
+
+<PAGE>
+
+                              Form 13F Summary Page
+
+
+                                 Report Summary:
+
+
+
+Number of Other Included Managers:  NONE
+Form 13F Information Table Entry Total:
+192
+- ---------------------------------------
+Form 13F Information Table Value Total:
+$3,251,844,130
+- ---------------------------------------
+List of Other Included Managers:
+
+
+           Provide a numbered list of the name(s) and Form 13F file number(s) of
+all institutional investment managers with respect to which this report is
+filed, other than the manager filing this report.
+
+           NONE.
+
+
+
+                                      -3-
+
+<PAGE>
+
+<TABLE>
+<CAPTION>
+(ITEM 1)                          (ITEM 2)    (ITEM 3)     (ITEM 4)       (ITEM 5)      (ITEM 6)     (ITEM 7)       (ITEM 8)
+                                                                                       INVESTMENT
+                                                                                       DISCRETION               VOTING AUTHORITY
+                                                                                   ------------------         ---------------------
+                                    TITLE                               SHARES OF              SHARES
+                                     OF                       FAIR      PRINCIPLE   SOLE SHARED OTHER          SOLE   SHARED   NONE
+NAME OF ISSUE                       CLASS    CUSIP NO     MARKET VALUE    AMOUNT    (A)   (B)    (C)   MGRS    (A)     (B)     (C)
+- --------------------------------    -----  ------------   ------------  ---------   ---  -----  -----  ----    ---    ------   ----
+<S>                                <C>     <C>             <C>           <C>       <C>   <C>   <C>    <C>    <C>     <C>     <C>
+
+AKBANK TURK ANONIM SIRKETI
+SPONSORED ADR NEW REG S              COM   009719402000      8216154.6    1239800         X                      0     0     1239800
+BUSINESS OBJECTS SA SPONSORED ADR    COM   12328X107000        1825800     121720         X                  23515     0       98205
+GOLD FIELDS LTD NEW SPONSORED ADR    COM   38059T106000       13848.32        992         X                      0     0         992
+KOOKMIN BK NEW SPONSORED ADR         COM   50049M109000          14140        400         X                      0     0         400
+OIL CO LUKOIL-SPONSORED ADR          COM   677862104000    50097393.93     815374         X                  13341     0      802033
+OPEN JT STK CO-VIMPEL,
+  COMMUNICATIONS SPONSORED ADR       COM   68370R109000     4889047.35     152735         X                   4100     0      148635
+RYANAIR HOLDINGS PLC,
+  SPONSORED ADR                      COM   783513104       529422092.8   13519461         X                 363463     0    13155998
+SURGUTNEFTEGAZ JSC
+  SPONSORED ADR                      COM   868861204000    63116347.05    3973330         X                  83172     0     3890158
+UNIFIED ENERGY SYSTEMS OF
+  RUSSIA-SPONSORED ADR               COM   904688108000    41861061.29    3247561         X                  81090     0     3166471
+YUKOS CORP SPONSORED ADR             COM   98849W108000    45891176.83     325631         X                   8575     0      317056
+4 KIDS ENTERTAINMENT INC             COM   350865101000    11236202.88     508886         X                  10990     0      497896
+ACTELION LTD CHF2.50                 COM   H0032X135000    18992826.03     430732         X                      0     0      430732
+AEROPOSTALE                          COM   007865108000     7520512.72     711496         X                  49213     0      662283
+AFC ENTERPRISES INC                  COM   00104Q107000    21369985.34    1017134         X                  23705     0      993429
+AMERICAN TOWER CORP, CL A            COM   029912201000     2622666.45     742965         X                    450     0      742515
+AMERIGROUP CORP                      COM   03073T102000     5334711.55     176005         X                  22220     0      153785
+AMISTAR CORP,                        COM   031535107000          10875      15000         X                  15000     0           0
+AOL TIME WARNER INC                  COM   00184A105000      3794048.2     289622         X                  10975     0      278647
+AON CORP,                            COM   037389103000    51646487.85    2734065         X                 112829     0     2621236
+APOLLO GROUP INC-CL A,               COM   037604105          30180260     685915         X                  19719     0      666196
+APPLE COMPUTER INC,                  COM   037833100000    27081779.78    1889866         X                  79441     0     1810425
+AT ROAD INC                          COM   04648K105000     1811645.15     438655         X                  35280     0      403375
+AUDIOCODES LTD ORD                   COM   M15342104000         380808     147600         X                  18500     0      129100
+AVID TECHNOLOGY INC,                 COM   05367P100000         114750       5000         X                      0     0        5000
+BENIHANA INC-CL A,                   COM   082047200000      4809091.5     356229         X                   1994     0      354235
+BIG 5 SPORTING GOODS CORP            COM   08915P101000     7640765.86     708134         X                  28835     0      679299
+BOSTON SCIENTIFIC CORP               COM   101137107000    23215792.44     545997         X                  13277     0      532720
+                                                           ===========
+                                            Page Total:    963,110,271
+
+<PAGE>
+
+<CAPTION>
+(ITEM 1)                         (ITEM 2)   (ITEM 3)      (ITEM 4)       (ITEM 5)       (ITEM 6)     (ITEM 7)       (ITEM 8)
+                                                                                       INVESTMENT
+                                                                                       DISCRETION               VOTING AUTHORITY
+                                                                                   ------------------         ---------------------
+                                    TITLE                                 SHARES OF             SHARES
+                                     OF                       FAIR        PRINCIPLE  SOLE SHARED OTHER        SOLE   SHARED    NONE
+NAME OF ISSUE                       CLASS    CUSIP NO      MARKET VALUE     AMOUNT   (A)   (B)    (C)   MGRS  (A)     (B)      (C)
+- --------------------------------    -----  ------------   -------------   ---------- ---  -----  -----  ----  ---    ------    ----
+<S>                                <C>     <C>             <C>           <C>       <C>   <C>   <C>    <C>    <C>     <C>     <C>
+BRISTOL MYERS SQUIBB CO,             COM   110122108000     5702053.35     246309         X                   5000     0      241309
+CABOT MICROELECTRONICS CORP          COM   12709P103000     20044707.2     424676         X                   5549     0      419127
+CACHE INC NEW                        COM   127150308000      3071631.6     222582         X                    770     0      221812
+CADIZ INC   COM                      COM   127537108            817245    1485900         X                  64550     0     1421350
+CAL DIVE INTERNATIONAL INC           COM   127914109000      7859081.5     334429         X                      0     0      334429
+CAMECO CORP                          COM   13321L108000     6421068.18     269400         X                      0     0      269400
+CARDIODYNAMICS INTERNATIONAL
+  CORP                               COM   141597104000     3072597.22    1000846         X                  40625     0      960221
+CARMAX INC                           COM   143130102000        3548286     198450         X                  38295     0      160155
+CENDANT CORP,                        COM   151313103000         260690      24875         X                  24875     0           0
+CENTENE CORP DEL                     COM   15135B101000     9820103.68     292352         X                    940     0      291412
+CHICOS FAS INC,                      COM   168615102000    12566659.41     664551         X                  13681     0      650870
+CIENA CORP,                          COM   171779101000     2434653.52     473668         X                   1950     0      471718
+CLEAN HARBORS INC                    COM   184496107000      1681281.6     108330         X                   6715     0      101615
+CNET NETWORKS INC                    COM   12613R104000     1407237.96     519276         X                      0     0      519276
+CNS INC                              COM   126136100000       417546.3      61585         X                      0     0       61585
+COACH INC                            COM   189754104000    18959549.76     575928         X                  14261     0      561667
+COINSTAR INC,                        COM   19259P300         2289688.5     101090         X                   7550     0       93540
+COMMERCE BANCORP INC-N.J.,           COM   200519106000    185151858.9    4286915         X                 112667     0     4174248
+COMPASS BANCSHARES INC ;             COM   20449H109000       25203.62        806         X                      0     0         806
+COMPUTER PROGRAMS & SYS INC          COM   205306103000        3298032     133200         X                   8275     0      124925
+CONEXANT SYSTEMS INC                 COM   207142100000    11816020.23    7339143         X                 266460     0     7072683
+CONNETICS CORP                       COM   208192104000     2229193.14     185457         X                  14504     0      170953
+CONSOLIDATED EDISON INC,             COM   209115104000          17128        400         X                      0     0         400
+COPART INC                           COM   217204106000     1180720.32      99723         X                  20759     0       78964
+CORINTHIAN COLLEGES INC              COM   218868107000     34562204.7     912895         X                  56611     0      856284
+COURIER CORP,                        COM   222660102000     6552644.64     142946         X                   3100     0      139846
+CSX CORP ;                           COM   126408103000    43502504.88    1536648         X                  61924     0     1474724
+CTI MOLECULAR IMAGING INC            COM   22943D105000     4076076.06     165291         X                      0     0      165291
+DRS TECHNOLOGIES INC                 COM   23330X100000     8308997.97     265209         X                      0     0      265209
+DRUGSTORE.COM INC                    COM   262241102000          10704       4460         X                      0     0        4460
+EAST WEST BANCORP INC                COM   27579R104000       10848354     300675         X                   9545     0      291130
+ECHOSTAR COMMUNICATIONS CORP,
+  NEW-CL A                           COM   278762109       99393727.02    4465127         X                  62240     0     4402887
+ECOLLEGE COM                         COM   27887E100000      1948587.6     564808         X                      0     0      564808
+ELECTRONIC ARTS INC                  COM   285512109000    21515819.85     432305         X                  10822     0      421483
+ELECTRONIC DATA SYSTEMS CORP         COM   285661104000      7949780.5     431350         X                  20700     0      410650
+                                                           ===========
+                                            Page Total:    542,761,638
+<PAGE>
+
+<CAPTION>
+(ITEM 1)                         (ITEM 2)   (ITEM 3)      (ITEM 4)       (ITEM 5)       (ITEM 6)     (ITEM 7)       (ITEM 8)
+                                                                                       INVESTMENT
+                                                                                       DISCRETION               VOTING AUTHORITY
+                                                                                   ------------------         ---------------------
+                                    TITLE                               SHARES OF              SHARES
+                                     OF                      FAIR       PRINCIPLE  SOLE  SHARED OTHER          SOLE   SHARED   NONE
+NAME OF ISSUE                       CLASS    CUSIP NO     MARKET VALUE    AMOUNT    (A)   (B)    (C)   MGRS    (A)     (B)     (C)
+- --------------------------------    -----  ------------  -------------  ---------   ---  -----  -----  ----    ---    ------   ----
+<S>                                <C>     <C>             <C>           <C>       <C>   <C>   <C>    <C>    <C>     <C>     <C>
+ENSTAR GROUP INC-GA                  COM   29358R107000        2488747      83515         X                   7920     0       75595
+EXACT SCIENCES CORP                  COM   30063P105000     4305672.27     397569         X                      0     0      397569
+EXTREME NETWORKS INC                 COM   30226D106000      557649.45     170535         X                  32170     0      138365
+EXXON MOBIL CORP                     COM   30231G102000          41928       1200         X                      0     0        1200
+FAIRMONT HOTELS & RESORTS            COM   305204109000     22868839.8     971076         X                  61955     0      909121
+FAMOUS DAVES OF AMERICA INC          COM   307068106000    1591668.775     506095         X                   1745     0      504350
+FASTENAL CO,                         COM   311900104000    23689070.13     633567         X                  12994     0      620573
+FLAGSTAR BANCORP INC                 COM   337930101000      2465899.2     114162         X                  13697     0      100465
+FOREST LABORATORIES INC,             COM   345838106000    26781352.74     272667         X                   7148     0      265519
+FRIENDLY ICE CREAM CORP NEW          COM   358497105000         317400      55200         X                      0     0       55200
+FTI CONSULTING INC ;                 COM   302941109000       40981908    1020720         X                  34988     0      985732
+GAP INC,                             COM   364760108000      1703785.6     109780         X                  25850     0       83930
+GENERAL AMERICAN INVESTORS CO        COM   368802104000        31148.1       1306         X                      0     0        1306
+GENERAL ELECTRIC CO,                 COM   369604103000       155986.1       6406         X                      0     0        6406
+GETTY IMAGES INC,                    COM   374276103000     4636054.15     151753         X                    640     0      151113
+GUIDANT CORP,                        COM   401698105000    61034658.05    1978433         X                  52141     0     1926292
+HALLIBURTON CO                       COM   406216101000    91670805.02    4899562         X                 147721     0     4751841
+HANCOCK FABRICS INC                  COM   409900107000    11279342.25     739629         X                  30911     0      708718
+HCC INSURANCE HOLDINGS INC,          COM   404132102000     11752600.8     477748         X                  10190     0      467558
+HEARTLAND EXPRESS INC                COM   422347104000    28260833.06    1233505         X                  25183     0     1208322
+HECLA MINING CO                      COM   422704106000       12761.32       2522         X                      0     0        2522
+HELATHEXTRAS INC                     COM   422211102000     2853447.75     704555         X                  15050     0      689505
+HIBBETT SPORTING GOODS INC,          COM   428565105000     2727549.76     114028         X                      0     0      114028
+HOLLINGER INTERNATIONAL INC, CL A    COM   435569108000          14732       1450         X                      0     0        1450
+HOLLYWOOD ENTERTAINMENT CORP,        COM   436141105000     25502933.6    1688936         X                  48062     0     1640874
+IGEN INTERNATIONAL INC-DEL           COM   449536101000    12349155.75     288195         X                   8425     0      279770
+INDYMAC MTG HLDGS INC,               COM   456607100000     7248246.41     392009         X                  16245     0      375764
+INFONOW CORPORATION                  COM   456664309000      576421.75     371885         X                   2800     0      369085
+INSIGNIA SYSTEMS INC                 COM   45765Y105000    1860808.425     177575         X                  14935     0      162640
+INTEGRAL SYSTEMS INC-MD,             COM   45810H107        1769392.45      88249         X                      0     0       88249
+INTEL CORP,                          COM   458140100000      1867154.4     119920         X                  30875     0       89045
+INTEREP NATL RADIO SALES INC         COM   45866V109000       659902.6     283220         X                   2945     0      280275
+INTERMUNE INC                        COM   45884X103000         420915      16500         X                      0     0       16500
+JDS UNIPHASE CORP COM                COM   46612J101000      408972.72     165576         X                  14284     0      151292
+JETBLUE AIRWAYS CORP                 COM   477143101000       51495372    1907236         X                  74443     0     1832793
+KINDER MORGAN ENERGY PARTNERS
+  LP-UNITS LTD PARTNERSHIP INT       COM   494550106000        2151625      61475         X                   7810     0       53665
+                                                           ===========
+                                            Page Total:    448,534,739
+
+<PAGE>
+
+<CAPTION>
+(ITEM 1)                         (ITEM 2)   (ITEM 3)      (ITEM 4)       (ITEM 5)       (ITEM 6)     (ITEM 7)       (ITEM 8)
+                                                                                       INVESTMENT
+                                                                                       DISCRETION               VOTING AUTHORITY
+                                                                                   ------------------         ---------------------
+                                    TITLE                               SHARES OF             SHARES
+                                     OF                      FAIR       PRINCIPLE  SOLE SHARED OTHER          SOLE   SHARED   NONE
+NAME OF ISSUE                       CLASS    CUSIP NO     MARKET VALUE    AMOUNT   (A)   (B)    (C)   MGRS    (A)     (B)     (C)
+- --------------------------------    ----   ------------   ------------  ---------  ---  -----  -----  ----    ---    ------   ----
+<S>                                <C>     <C>             <C>           <C>       <C>   <C>   <C>    <C>    <C>     <C>     <C>
+KINDER MORGAN INC KANS               COM   49455P101000     8702336.25     205875         X                   9175     0      196700
+KIRKLANDS INC                        COM   497498105000      4572149.5     404615         X                  12015     0      392600
+KNIGHT TRANSPORTATION INC            COM   499064103000        6485955     308855         X                  34993     0      273862
+KRISPY KREME DOUGHNUTS INC           COM   501014104000    60899906.21    1803373         X                  12076     0     1791297
+LAMAR ADVERTISING CO-CL A,           COM   512815101        4187641.55     124447         X                  10910     0      113537
+LANDEC CORP,                         COM   514766104            908564     454282         X                  25000     0      429282
+LEAPFROG ENTERPRISES INC             COM   52186N106000    42449804.75    1687865         X                  58388     0     1629477
+LENDINGTREE INC                      COM   52602Q105000      2232361.6     173320         X                  20490     0      152830
+LEVEL 3 COMMUNICATIONS INC,          COM   52729N100000     85142782.2   17376078         X                  78443     0    17297635
+LEXAR MEDIA INC                      COM   52886P104000      2303284.5     367350         X                  26585     0      340765
+LIBERTY MEDIA CORP ; SER A NEW       COM   530718105000      4779860.4     534660         X                    500     0      534160
+LIBERTY SATELLITE & TECHNOLOGY
+  INC CL A NEW                       COM   531182301000        92585.7      34938         X                   1095     0       33843
+LITHIA MOTORS INC-CL A,              COM   536797103000        4474788     285200         X                  24500     0      260700
+LOGITECH INTERNATIONAL SA            COM   541419107000      3250840.5     106550         X                   3075     0      103475
+MAGMA DESIGN AUTOMATION INC          COM   559181102000        73670.2       7690         X                      0     0        7690
+MAGNA ENTERTAINMENT CORP SUB VTG CL  COM   559211107000        5758870     928850         X                      0     0      928850
+MANOR CARE INC NEW ;                 COM   564055101000    99253531.84    5333344         X                 118598     0     5214746
+MARIMBA INC                          COM   56781Q109000      756768.25     464275         X                   1600     0      462675
+MARVELL TECHNOLOGY GROUP             COM   G5876H105000      2548080.3     135105         X                  25520     0      109585
+MCDONALDS CORP,                      COM   580135101000          80400       5000         X                   5000     0           0
+MERCK & CO INC,                      COM   589331107000        53779.5        950         X                      0     0         950
+MERIT MEDICAL SYSTEMS INC,           COM   589889104        4988983.92     250451         X                    540     0      249911
+MICHAELS STORES INC                  COM   594087108000        23005.5        735         X                      0     0         735
+MICROCHIP TECHNOLOGY INC,            COM   595017104000     2430207.75      99395         X                  18290     0       81105
+MICROSOFT CORP,                      COM   594918104000          20680        400         X                    400     0           0
+MOBILE TELESYSTEMS OJSC
+  SPONSORED ADR                      COM   607409109000      2882806.8      77620         X                      0     0       77620
+MONSANTO CO NEW                      COM   61166W101000    140906746.8    7319831         X                 184682     0     7135149
+MOTOROLA INC                         COM   620076109000          86500      10000         X                  10000     0           0
+MOVIE GALLERY INC                    COM   624581104000        1413815     108755         X                  20880     0       87875
+MURPHY OIL CORP                      COM   626717102000      8413597.5     196350         X                   5150     0      191200
+NAVIGATORS GROUP INC                 COM   638904102        4400639.55     191749         X                     50     0      191699
+NEOPHARM INC ;                       COM   640919106000    12947553.06    1276879         X                  25275     0     1251604
+NETFLIX COM INC                      COM   64110L106000     2437074.51     221351         X                  21185     0      200166
+NEWMONT MINING CORP,                 COM   651639106000    59079446.51    2035117         X                 118575     0     1916542
+                                                           ===========
+                                            Page Total:    579,039,017
+
+<PAGE>
+
+<CAPTION>
+(ITEM 1)                         (ITEM 2)   (ITEM 3)      (ITEM 4)       (ITEM 5)       (ITEM 6)     (ITEM 7)       (ITEM 8)
+                                                                                       INVESTMENT
+                                                                                       DISCRETION               VOTING AUTHORITY
+                                                                                   ------------------         ---------------------
+                                    TITLE                               SHARES OF             SHARES
+                                     OF                       FAIR      PRINCIPLE  SOLE SHARED OTHER          SOLE   SHARED   NONE
+NAME OF ISSUE                       CLASS    CUSIP NO     MARKET VALUE    AMOUNT   (A)   (B)    (C)   MGRS    (A)     (B)     (C)
+- --------------------------------    ----   ------------   ------------  ---------  ---  -----  -----  ----    ---    ------   ----
+<S>                                <C>     <C>             <C>           <C>       <C>   <C>   <C>    <C>    <C>     <C>     <C>
+NEXTEL COMMUNICATIONS INC-CL A,      COM   65332V103000        2900205     251100         X                   1350     0      249750
+NEXTWAVE TELECOM INC-CL B ;          COM   65332M103000         126000      70000         X                  70000     0           0
+NORTHERN CRANBERRIES INC CL A NEW    COM   666499207000       170955.9     189951         X                   6269     0      183682
+ODYSSEY HEALTHCARE INC               COM   67611V101000     30005332.9     864707         X                  13662     0      851045
+PANERA BREAD CO CL A                 COM   69840W108000    19770235.07     567947         X                  30900     0      537047
+PARTHUSCEVA INC                      COM   70212E106000      4524164.1     765510         X                  86265     0      679245
+PEC SOLUTIONS INC                    COM   705107100000     51067615.3    1707947         X                  56741     0     1651206
+PETCO ANIMAL SUPPLIES INC COM NEW    COM   716016209000    1952820.285      83315         X                   9425     0       73890
+PHARMACEUTICAL RESOURCES INC,        COM   717125108           1798281      60345         X                      0     0       60345
+PLX TECHNOLOGY INC                   COM   693417107000     1024826.64     262104         X                  71765     0      190339
+PROVIDIAN FINANCIAL CORP,            COM   74406A102000      1633078.7     251630         X                  35985     0      215645
+RADIO ONE INC CL D                   COM   75040P405000      2188165.2     151640         X                  11740     0      139900
+RAINDANCE COMMUNICATIONS INC         COM   75086X106000      425794.75     131825         X                  13750     0      118075
+REGAL ENTERTAINMENT GROUP CL A       COM   758766109000    14903329.14     695767         X                  24790     0      670977
+REGENT COMMUNICATIONS INC(DEL)       COM   758865109000      2226060.6     376660         X                      0     0      376660
+RENAISSANCERE HOLDINGS LTD           COM   G7496G103000         491436      12410         X                   4330     0        8080
+RENT A CENTER INC-NEW                COM   76009N100         7592200.2     151996         X                    350     0      151646
+RESTORATION HARDWARE INC DEL,        COM   760981100        3373658.85     673385         X                   1960     0      671425
+RIGHT MANAGEMENT CONSULTANTS INC     COM   766573109000        4595736     346848         X                    776     0      346072
+SAFETY INSURANCE GROUP INC           COM   78648T100000    33581527.72    2335294         X                  39922     0     2295372
+SBC COMMUNICATIONS INC,              COM   78387G103000       42237.38       1558         X                      0     0        1558
+SCP POOL CORP,                       COM   784028102        14226356.8     487204         X                  37315     0      449889
+SEACOR SMIT INC, FORMERLY
+  SECOR HOLDINGS INC                 COM   811904101000         151300       3400         X                   3400     0           0
+SEALED AIR CORP NEW                  COM   81211K100000     11974866.6     321042         X                  15582     0      305460
+SELECT COMFORT CORP OC-CAP STK       COM   81616X103000        1724618     183470         X                  12580     0      170890
+SHARPER IMAGE CORP                   COM   820013100000     1556289.84      89288         X                      0     0       89288
+SOLECTRON CORP,                      COM   834182107         2910098.3     819746         X                  40873     0      778873
+SOUTHWEST AIRLINES CO,               COM   844741108000      5034232.5     362175         X                  24375     0      337800
+STARCRAFT CORP                       COM   855269106000        41820.3       5163         X                      0     0        5163
+SUN INTERBREW LTD GDR CL A  REG S    COM   86677C302000          11700       3000         X                      0     0        3000
+SUNTRON CORP                         COM   86789P100000      879706.58     188374         X                   9325     0      179049
+SYNOPSYS INC                         COM   871607107000       510880.5      11070         X                    160     0       10910
+                                                           ===========
+                                            Page Total:    223,415,530
+
+<PAGE>
+
+<CAPTION>
+(ITEM 1)                         (ITEM 2)   (ITEM 3)      (ITEM 4)       (ITEM 5)       (ITEM 6)     (ITEM 7)       (ITEM 8)
+                                                                                       INVESTMENT
+                                                                                       DISCRETION               VOTING AUTHORITY
+                                                                                   ------------------         ---------------------
+                                    TITLE                               SHARES OF             SHARES
+                                     OF                       FAIR      PRINCIPLE  SOLE SHARED OTHER          SOLE   SHARED   NONE
+NAME OF ISSUE                       CLASS    CUSIP NO     MARKET VALUE    AMOUNT   (A)   (B)    (C)   MGRS    (A)     (B)     (C)
+- --------------------------------    ----   ------------   ------------ ----------  ---  -----  -----  ----    ---    ------   ----
+<S>                                <C>     <C>             <C>           <C>       <C>   <C>   <C>    <C>    <C>     <C>     <C>
+TECH DATA CORP                       COM   878237106000          72792       2700         X                   2700     0           0
+TEMPLE INLAND INC,                   COM   879868107000      107768.05       2405         X                      0     0        2405
+TENET HEALTHCARE CORP ;              COM   88033G100000         268960      16400         X                  16400     0           0
+THESTREET.COM INC                    COM   88368Q103000     2173069.66     741662         X                      0     0      741662
+TRAVELERS PROPERTY
+  CASUALTY CORP CL A                 COM   89420G109000    67391010.85    4600069         X                 194093     0     4405976
+TRC COMPANIES INC,                   COM   872625108000     3824348.84     291268         X                    275     0      290993
+TVX GOLD INC NEW                     COM   87308K309000       20797.56       1323         X                      0     0        1323
+UCBH HOLDINGS INC                    COM   90262T308000     2725077.75      64195         X                   7080     0       57115
+ULTIMATE ELECTRONICS INC             COM   903849107000     2346446.55     231177         X                  11900     0      219277
+UNION PACIFIC CORP,                  COM   907818108000      292644.56       4888         X                     15     0        4873
+UNITED AUTO GROUP INC                COM   909440109000     1299785.51     104233         X                   3670     0      100563
+UNITED INDUSTRIAL CORP               COM   910671106000        1530000      95625         X                      0     0       95625
+UNITED ONLINE INC                    COM   911268100000    19862597.59    1246007         X                  24250     0     1221757
+URBAN OUTFITTERS INC                 COM   917047102000     4731088.25     200725         X                    130     0      200595
+VERIDIAN CORPORATION DEL             COM   92342R203000    25412909.72    1190858         X                  29495     0     1161363
+VIACOM INC-CL B,                     COM   925524308000     2052021.44      50344         X                  19163     0       31181
+VISTACARE INC                        COM   92839Y109000    34522779.26    2156326         X                    494     0     2155832
+VYYO INC NEW                         COM   918458209000        1032637     406550         X                  11117     0      395433
+W R BERKLEY CORP                     COM   084423102000    220331615.3    5562525         X                 175886     0     5386639
+W R GRACE & CO-DEL NEW               COM   38388F108000     1809340.68     923133         X                    229     0      922904
+WALT DISNEY CO HOLDING CO,           COM   254687106000       69040.23       4233         X                      0     0        4233
+WEBMD CORP                           COM   94769M105000     11588755.5    1355410         X                  81020     0     1274390
+WEIGHT WATCHERS INTL INC NEW         COM   948626106000     18492811.6     402280         X                   8945     0      393335
+WELLCHOICE INC                       COM   949475107000     16159112.9     674702         X                   6335     0      668367
+WESTERN DIGITAL CORP,                COM   958102105000    24402457.89    3818851         X                 117666     0     3701185
+WHITE MTNS INS GROUP LTD COM         COM   G9618E107000       26048012      80644         X                   1657     0       78987
+WYEWYETH                             COM   983024100000        18550.4        496         X                      0     0         496
+ZENON ENVIRONMENTAL INC              COM   98942B100000      6396503.4     681930         X                      0     0      681930
+                                                         =============
+                                            Page Total:    494,982,934
+                                           Grand Total:  3,251,844,130
+
+</TABLE>
