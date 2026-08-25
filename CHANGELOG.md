@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **`get_financials()` no longer goes quiet on a filing that has no XBRL.** A company whose latest annual report predates SEC's 2009-2011 XBRL phase-in got a `Financials` object back — a truthy one, so the documented `if financials is not None:` guard passed — whose `income_statement()`, `balance_sheet()` and `cash_flow_statement()` then all returned `None` with nothing said at any level. `Company(104599).get_financials()`, Circuit City's 2008 10-K, is the case. That path now emits a `FutureWarning` naming the filing and raises `XBRLFilingWithNoXbrlData` in 6.0; set `EDGARTOOLS_STRICT_ERRORS=1` for the 6.0 behaviour today. The object itself is unchanged in 5.x, so nothing you branch on today moves.
+
+  `XBRLFilingWithNoXbrlData` was never actually raised anywhere, which is why this was silent: the two `except` clauses written for it — in `Financials.extract` and `Filing.xbrl` — were dead code that read as handling. Both are gone, and the error is raised for the first time. `filing.xbrl()` still answers `None` for a filing without XBRL, quietly, in 5.x and in 6.0: that is a true absence rather than a failure.
+
 ## [5.53.0] - 2026-08-25
 
 ### Changed
