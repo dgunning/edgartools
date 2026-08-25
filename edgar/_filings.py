@@ -72,7 +72,7 @@ from edgar.richtools import Docs, print_rich, repr_rich
 from edgar.search import BM25Search, RegexSearch
 from edgar.sgml import FilingHeader, FilingSGML, Reports, Statements
 from edgar.storage import is_using_local_storage, local_filing_path, resolve_local_filing_path
-from edgar.xbrl import XBRL, XBRLFilingWithNoXbrlData
+from edgar.xbrl import XBRL
 
 """ Contain functionality for working with SEC filing indexes and filings
 
@@ -1859,12 +1859,17 @@ class Filing:
     def xbrl(self) -> Optional[XBRL]:
         """
         Get the XBRL document for the filing, parsed and as a FilingXbrl object
-        :return: Get the XBRL document for the filing, parsed and as a FilingXbrl object, or None
+
+        :return: The parsed XBRL, or `None` when the filing carries no XBRL
+            attachments — a property of the filing, not a failure to read it,
+            and one this keeps answering quietly in 6.0 (docs/upgrade/6.0.md).
         """
+        # The `except XBRLFilingWithNoXbrlData` that used to sit here was dead:
+        # nothing in the library raised that error, and `from_filing` signals
+        # the no-XBRL case by returning None. Removed rather than left as
+        # decoration, so this function's None has one visible source.
         try:
             return XBRL.from_filing(self)
-        except XBRLFilingWithNoXbrlData:
-            return None
         except (*UNREACHABLE_ERRORS, TransportError) as e:
             # Provide helpful message when local storage is enabled but filing content is missing
             if is_unreachable(e) and is_using_local_storage():
