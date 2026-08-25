@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Deprecated
+
+- **`detect_page_breaks()` and `mark_page_breaks()` now warn before 6.0 removes them.** Both are re-exported at the top level, so `from edgar import detect_page_breaks` works — and they were the last names in `edgar.files` a user could reach through the documented import root and get no notice about before the package disappears. They emit a `DeprecationWarning` naming 6.0. There is no replacement, and the warning says so: the `edgar.documents` parser treats page-break `<hr>`s and page-number containers as print chrome and discards them, so page-break positions are not part of the supported document model. Internal callers stay silent as before, so a downstream suite running `-W error` is unaffected unless it calls these itself.
+
 ## [5.53.0] - 2026-08-25
 
 ### Changed
