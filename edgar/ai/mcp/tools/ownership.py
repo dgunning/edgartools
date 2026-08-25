@@ -7,7 +7,9 @@ Get ownership data: insider transactions, institutional holders, or fund portfol
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any, Optional, Union
+
+import pandas as pd
 
 from edgar.ai.mcp.tools.base import (
     tool,
@@ -92,20 +94,52 @@ async def edgar_ownership(
 
 
 
-def _cell_number(value: Any) -> Optional[float]:
-    """Coerce a holdings cell to a JSON-serialisable number.
+def _cell_missing(value: Any) -> bool:
+    """True for every shape an absent DataFrame cell arrives in.
 
-    Pandas hands back numpy scalars, which ``json.dumps`` refuses, and NaN for
-    missing cells. ``value != value`` is the NaN test that needs no import.
+    ``None``, ``float("nan")``, ``NaT`` and ``pd.NA`` all mean "nothing here",
+    and only ``pd.isna`` recognises all four: ``value != value`` raises on
+    ``pd.NA``, and ``bool(float("nan"))`` is ``True``.
     """
-    if value is None:
+    try:
+        return bool(pd.isna(value))
+    except (TypeError, ValueError):  # arrays, and objects pandas won't judge
+        return False
+
+
+def _cell_text(value: Any) -> Optional[str]:
+    """Coerce a holdings cell to a non-empty string, or ``None``.
+
+    A missing issuer in a text column arrives as NaN, which is truthy and which
+    ``str()`` renders as the literal ``"nan"`` — that is how ``{"company":
+    "nan", "cusip": "nan"}`` reached the response.
+    """
+    if _cell_missing(value):
+        return None
+    text = str(value).strip()
+    return text or None
+
+
+def _cell_number(value: Any, as_int: bool = True) -> Optional[Union[int, float]]:
+    """Coerce a holdings cell to a JSON-serialisable number, or ``None``.
+
+    Pandas hands back numpy scalars, which ``json.dumps`` refuses. One missing
+    cell also makes its whole column float64, so share counts and dollar values
+    would render as ``65950296923.0`` in one walk and ``65950296923`` in the
+    other; ``as_int`` is what keeps the two agreeing. Pass ``as_int=False`` for
+    the genuinely fractional columns, such as percentage changes.
+    """
+    if _cell_missing(value):
         return None
     item = getattr(value, "item", None)
     if callable(item):
         value = item()
-    if value != value:
-        return None
-    return value
+    if not as_int:
+        return value
+    try:
+        return int(value)
+    except (TypeError, ValueError):  # not a number after all — hand it back
+        return value
 
 
 async def _get_insider_transactions(identifier: str, days: int, limit: int) -> Any:
@@ -249,12 +283,12 @@ async def _get_fund_holdings(identifier: str, limit: int) -> Any:
                 holdings = []
                 for _, row in holdings_table.head(limit).iterrows():
                     holding = {}
-                    issuer = row.get("Issuer")
+                    issuer = _cell_text(row.get("Issuer"))
                     if issuer:
-                        holding["company"] = str(issuer)
-                    cusip = row.get("Cusip")
+                        holding["company"] = issuer
+                    cusip = _cell_text(row.get("Cusip"))
                     if cusip:
-                        holding["cusip"] = str(cusip)
+                        holding["cusip"] = cusip
                     shares = _cell_number(row.get("SharesPrnAmount"))
                     value = _cell_number(row.get("Value"))
                     if shares is not None or value is not None:
@@ -328,57 +362,42 @@ async def _get_portfolio_diff(identifier: str, limit: int) -> Any:
 
         # Serialize the comparison DataFrame
         df = comparison.data
-        import math
 
         changes = []
         for _, row in df.head(limit).iterrows():
             entry = {
-                "ticker": row.get("Ticker") if row.get("Ticker") and str(row.get("Ticker")) != "nan" else None,
-                "issuer": row.get("Issuer", ""),
-                "cusip": row.get("Cusip", ""),
-                "status": row.get("Status", ""),
+                "ticker": _cell_text(row.get("Ticker")),
+                "issuer": _cell_text(row.get("Issuer")) or "",
+                "cusip": _cell_text(row.get("Cusip")) or "",
+                "status": _cell_text(row.get("Status")) or "",
             }
 
             # Current values
-            def _safe_number(val, as_int=True):
-                """Convert value to int or float, handling None and NaN."""
-                if val is None:
-                    return None
-                if isinstance(val, float) and math.isnan(val):
-                    return None
-                try:
-                    import pandas as pd
-                    if pd.isna(val):
-                        return None
-                except (ValueError, TypeError):
-                    pass
-                return int(val) if as_int else val
-
-            shares = row.get("Shares")
-            if _safe_number(shares) is not None:
-                entry["shares"] = _safe_number(shares)
-            value = row.get("Value")
-            if _safe_number(value) is not None:
-                entry["value"] = _safe_number(value)
+            shares = _cell_number(row.get("Shares"))
+            if shares is not None:
+                entry["shares"] = shares
+            value = _cell_number(row.get("Value"))
+            if value is not None:
+                entry["value"] = value
 
             # Previous values
-            prev_shares = row.get("PrevShares")
-            if _safe_number(prev_shares) is not None:
-                entry["prev_shares"] = _safe_number(prev_shares)
-            prev_value = row.get("PrevValue")
-            if _safe_number(prev_value) is not None:
-                entry["prev_value"] = _safe_number(prev_value)
+            prev_shares = _cell_number(row.get("PrevShares"))
+            if prev_shares is not None:
+                entry["prev_shares"] = prev_shares
+            prev_value = _cell_number(row.get("PrevValue"))
+            if prev_value is not None:
+                entry["prev_value"] = prev_value
 
             # Changes
-            share_change = row.get("ShareChange")
-            if _safe_number(share_change) is not None:
-                entry["share_change"] = _safe_number(share_change)
-            share_pct = row.get("ShareChangePct")
-            if _safe_number(share_pct, as_int=False) is not None:
+            share_change = _cell_number(row.get("ShareChange"))
+            if share_change is not None:
+                entry["share_change"] = share_change
+            share_pct = _cell_number(row.get("ShareChangePct"), as_int=False)
+            if share_pct is not None:
                 entry["share_change_pct"] = round(share_pct, 1)
-            value_change = row.get("ValueChange")
-            if _safe_number(value_change) is not None:
-                entry["value_change"] = _safe_number(value_change)
+            value_change = _cell_number(row.get("ValueChange"))
+            if value_change is not None:
+                entry["value_change"] = value_change
 
             changes.append(entry)
 
