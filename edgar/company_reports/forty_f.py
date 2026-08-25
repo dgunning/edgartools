@@ -9,7 +9,7 @@ from rich.padding import Padding
 from rich.panel import Panel
 from rich.tree import Tree
 
-from edgar.company_reports._base import CompanyReport
+from edgar.company_reports._base import CompanyReport, report_lookup_miss
 from edgar.display.formatting import datefmt
 from edgar.richtools import repr_rich
 
@@ -638,6 +638,11 @@ class FortyF(CompanyReport):
         text = self.aif_text
         positions = self._section_positions
         if not text or not positions:
+            # No AIF text or no detected headers: the named section is absent
+            # just as surely as if it had been searched for and missed. The
+            # error's own suggestion covers this shape ("no items were detected
+            # in this filing at all").
+            report_lookup_miss(self, key)
             return None
 
         key_lower = key.lower().strip()
@@ -654,6 +659,7 @@ class FortyF(CompanyReport):
             if key_lower in name.lower():
                 return _extract_section_text(text, positions, idx)
 
+        report_lookup_miss(self, key)
         return None
 
     # -- LLM context ---------------------------------------------------------

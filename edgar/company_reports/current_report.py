@@ -10,7 +10,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from edgar._filings import Attachments
-from edgar.company_reports._base import CompanyReport
+from edgar.company_reports._base import CompanyReport, report_lookup_miss
 from edgar.company_reports._structures import ItemOnlyFilingStructure, extract_items_from_sections
 from edgar.documents import HTMLParser, ParserConfig
 from edgar.files.html import Document
@@ -776,6 +776,7 @@ class CurrentReport(CompanyReport):
             if content:
                 return content
 
+        report_lookup_miss(self, item_name)
         return None
 
     def view(self, item_or_part: str):
