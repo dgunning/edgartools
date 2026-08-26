@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`edgar_ownership` called a fund's unparsed positions `"nan"`, and `edgar_screen` wrote a bare `NaN` into its JSON.** A missing DataFrame cell is truthy, so `if issuer:` admitted it and `str()` rendered it as `"nan"`; where nothing guarded it, the NaN reached `to_json` as the literal `NaN`, which no strict parser reads back. On Berkshire's Q2 2026 13F-HR (`0001193125-26-352200`) Apple's stake also came back as `65950296923.0` from `fund_portfolio` beside `65950296923` from `portfolio_diff`. One cell reader now lives in `tools/base.py`. (GH #1137)
 - **`find_bdc("Ares")` found nothing, and `find_bdc("Blackstone")` found two.** Names were scored with `fuzz.ratio`, a whole-string similarity, against a threshold of 50, so a query was charged for the length of the name it matched: `ARES` against `ares core infrastructure` scores 28.6 and `ANTARES` against `antares private credit` 48.3, while ten-letter `BLACKSTONE` reaches 57.1. The candidate set already comes from an exact word index, and those hits are now scored with `token_set_ratio`. (GH #1145)
 
 ## [5.53.0] - 2026-08-25

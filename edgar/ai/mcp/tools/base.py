@@ -10,13 +10,81 @@ from __future__ import annotations
 import json
 import logging
 from dataclasses import dataclass, field, asdict
+from decimal import Decimal
 from functools import wraps
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union
+
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
 # Global tool registry
 TOOLS: dict[str, dict[str, Any]] = {}
+
+
+# =============================================================================
+# DATAFRAME CELLS
+# =============================================================================
+#
+# Several tools serialise a pandas frame by hand, and every one of them that
+# grew its own coercion rules got the same two things wrong. A missing cell is
+# not falsy — `bool(float("nan"))` is True — so `if issuer:` admits it and
+# `str()` renders it as the literal "nan"; and a cell that survives as a bare
+# NaN reaches `ToolResponse.to_json`, which writes it as the literal `NaN`, not
+# JSON a strict parser reads back. These live here so a tool does not have to
+# rediscover that.
+
+
+def _cell_missing(value: Any) -> bool:
+    """True for every shape an absent DataFrame cell arrives in.
+
+    ``None``, ``float("nan")``, ``NaT`` and ``pd.NA`` all mean "nothing here",
+    and only ``pd.isna`` recognises all four: ``value != value`` raises on
+    ``pd.NA``, and ``bool(float("nan"))`` is ``True``.
+    """
+    try:
+        return bool(pd.isna(value))
+    except (TypeError, ValueError):  # arrays, and objects pandas won't judge
+        return False
+
+
+def _cell_text(value: Any) -> Optional[str]:
+    """Coerce a cell to a non-empty string, or ``None``.
+
+    A missing name in a text column arrives as NaN, which is truthy and which
+    ``str()`` renders as the literal ``"nan"`` — that is how ``{"company":
+    "nan", "cusip": "nan"}`` reached a response.
+    """
+    if _cell_missing(value):
+        return None
+    text = str(value).strip()
+    return text or None
+
+
+def _cell_number(value: Any, as_int: bool = False) -> Optional[Union[int, float]]:
+    """Coerce a cell to a JSON-serialisable number, or ``None``.
+
+    Pandas hands back numpy scalars and NPORT columns hand back ``Decimal``,
+    neither of which ``json.dumps`` accepts. One missing cell also makes its
+    whole column float64, so a share count or a dollar value renders as
+    ``65950296923.0`` in one tool and ``65950296923`` in another: pass
+    ``as_int=True`` for the whole-number columns and they agree. The default
+    leaves the number alone, because silently flooring a column that turns out
+    to be fractional is the more expensive mistake.
+    """
+    if _cell_missing(value):
+        return None
+    item = getattr(value, "item", None)
+    if callable(item):
+        value = item()
+    if isinstance(value, Decimal):
+        value = float(value)
+    if not as_int:
+        return value
+    try:
+        return int(value)
+    except (TypeError, ValueError):  # not a number after all — hand it back
+        return value
 
 
 # =============================================================================

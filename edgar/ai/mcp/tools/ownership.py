@@ -7,7 +7,7 @@ Get ownership data: insider transactions, institutional holders, or fund portfol
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from edgar.ai.mcp.tools.base import (
     tool,
@@ -15,6 +15,8 @@ from edgar.ai.mcp.tools.base import (
     error,
     resolve_company,
     get_error_suggestions,
+    _cell_number,
+    _cell_text,
 )
 
 logger = logging.getLogger(__name__)
@@ -90,22 +92,6 @@ async def edgar_ownership(
         logger.exception("Error in edgar_ownership")
         return error(str(e), suggestions=get_error_suggestions(e))
 
-
-
-def _cell_number(value: Any) -> Optional[float]:
-    """Coerce a holdings cell to a JSON-serialisable number.
-
-    Pandas hands back numpy scalars, which ``json.dumps`` refuses, and NaN for
-    missing cells. ``value != value`` is the NaN test that needs no import.
-    """
-    if value is None:
-        return None
-    item = getattr(value, "item", None)
-    if callable(item):
-        value = item()
-    if value != value:
-        return None
-    return value
 
 
 async def _get_insider_transactions(identifier: str, days: int, limit: int) -> Any:
@@ -249,16 +235,21 @@ async def _get_fund_holdings(identifier: str, limit: int) -> Any:
                 holdings = []
                 for _, row in holdings_table.head(limit).iterrows():
                     holding = {}
-                    issuer = row.get("Issuer")
+                    issuer = _cell_text(row.get("Issuer"))
                     if issuer:
-                        holding["company"] = str(issuer)
-                    cusip = row.get("Cusip")
+                        holding["company"] = issuer
+                    cusip = _cell_text(row.get("Cusip"))
                     if cusip:
-                        holding["cusip"] = str(cusip)
-                    shares = _cell_number(row.get("SharesPrnAmount"))
-                    value = _cell_number(row.get("Value"))
-                    if shares is not None or value is not None:
+                        holding["cusip"] = cusip
+                    # Independently, the way company and cusip are: writing the
+                    # pair together put an explicit `"value": null` in the
+                    # response for a row whose value did not parse, and a caller
+                    # testing `"value" in holding` reads that as a value.
+                    shares = _cell_number(row.get("SharesPrnAmount"), as_int=True)
+                    if shares is not None:
                         holding["shares"] = shares
+                    value = _cell_number(row.get("Value"), as_int=True)
+                    if value is not None:
                         holding["value"] = value
                     if holding:
                         holdings.append(holding)
@@ -328,57 +319,42 @@ async def _get_portfolio_diff(identifier: str, limit: int) -> Any:
 
         # Serialize the comparison DataFrame
         df = comparison.data
-        import math
 
         changes = []
         for _, row in df.head(limit).iterrows():
             entry = {
-                "ticker": row.get("Ticker") if row.get("Ticker") and str(row.get("Ticker")) != "nan" else None,
-                "issuer": row.get("Issuer", ""),
-                "cusip": row.get("Cusip", ""),
-                "status": row.get("Status", ""),
+                "ticker": _cell_text(row.get("Ticker")),
+                "issuer": _cell_text(row.get("Issuer")) or "",
+                "cusip": _cell_text(row.get("Cusip")) or "",
+                "status": _cell_text(row.get("Status")) or "",
             }
 
             # Current values
-            def _safe_number(val, as_int=True):
-                """Convert value to int or float, handling None and NaN."""
-                if val is None:
-                    return None
-                if isinstance(val, float) and math.isnan(val):
-                    return None
-                try:
-                    import pandas as pd
-                    if pd.isna(val):
-                        return None
-                except (ValueError, TypeError):
-                    pass
-                return int(val) if as_int else val
-
-            shares = row.get("Shares")
-            if _safe_number(shares) is not None:
-                entry["shares"] = _safe_number(shares)
-            value = row.get("Value")
-            if _safe_number(value) is not None:
-                entry["value"] = _safe_number(value)
+            shares = _cell_number(row.get("Shares"), as_int=True)
+            if shares is not None:
+                entry["shares"] = shares
+            value = _cell_number(row.get("Value"), as_int=True)
+            if value is not None:
+                entry["value"] = value
 
             # Previous values
-            prev_shares = row.get("PrevShares")
-            if _safe_number(prev_shares) is not None:
-                entry["prev_shares"] = _safe_number(prev_shares)
-            prev_value = row.get("PrevValue")
-            if _safe_number(prev_value) is not None:
-                entry["prev_value"] = _safe_number(prev_value)
+            prev_shares = _cell_number(row.get("PrevShares"), as_int=True)
+            if prev_shares is not None:
+                entry["prev_shares"] = prev_shares
+            prev_value = _cell_number(row.get("PrevValue"), as_int=True)
+            if prev_value is not None:
+                entry["prev_value"] = prev_value
 
             # Changes
-            share_change = row.get("ShareChange")
-            if _safe_number(share_change) is not None:
-                entry["share_change"] = _safe_number(share_change)
-            share_pct = row.get("ShareChangePct")
-            if _safe_number(share_pct, as_int=False) is not None:
+            share_change = _cell_number(row.get("ShareChange"), as_int=True)
+            if share_change is not None:
+                entry["share_change"] = share_change
+            share_pct = _cell_number(row.get("ShareChangePct"))
+            if share_pct is not None:
                 entry["share_change_pct"] = round(share_pct, 1)
-            value_change = row.get("ValueChange")
-            if _safe_number(value_change) is not None:
-                entry["value_change"] = _safe_number(value_change)
+            value_change = _cell_number(row.get("ValueChange"), as_int=True)
+            if value_change is not None:
+                entry["value_change"] = value_change
 
             changes.append(entry)
 
