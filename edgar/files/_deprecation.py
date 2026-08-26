@@ -35,11 +35,22 @@ PAGE_BREAK_DEPRECATION = (
 # the standard library's dataclasses module. The dataclass machinery
 # emits an __init__ that runs in the *defining* module's namespace, so
 # we also skip the deprecated modules when walking up.
+#
+# EVERY MODULE THAT CALLS THIS HELPER MUST BE LISTED. The walk below starts at
+# the caller's own frame, so a deprecated function whose module is absent here
+# is read as an edgartools-internal call and silenced — the warning becomes a
+# no-op that looks correct at the call site and survives any test that only
+# asserts the call exists. `edgar.files.page_breaks` was added when
+# `detect_page_breaks`/`mark_page_breaks` got their warnings and hit exactly
+# that: they fired for nobody until the module was named here.
+# `test_07lk3_page_break_deprecation.py` derives the caller list by scanning
+# the package, so a new call site is covered the day it lands.
 _TRANSPARENT_MODULES = frozenset({
     'edgar.files._deprecation',
     'edgar.files.html',
     'edgar.files.html_documents',
     'edgar.files.htmltools',
+    'edgar.files.page_breaks',
     'dataclasses',
 })
 

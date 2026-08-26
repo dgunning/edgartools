@@ -10,6 +10,22 @@ from typing import Any, Dict, List
 
 from bs4 import Tag
 
+from edgar.files._deprecation import warn_legacy_html_usage
+
+#: `detect_page_breaks` and `mark_page_breaks` are re-exported from the top
+#: level, so `from edgar import detect_page_breaks` works and is the only way a
+#: user is likely to have reached this module. They go with `edgar.files` in
+#: 6.0 and there is no replacement: the `edgar.documents` builder treats page-
+#: break `<hr>`s and page-number containers as print chrome and discards them,
+#: which is why the whole `include_page_breaks` renderer is going rather than
+#: being ported (see `PAGE_BREAK_DEPRECATION` in `_deprecation`).
+_PAGE_BREAKS_DEPRECATION_MSG = (
+    "{name} is deprecated and will be removed in v6.0 along with the "
+    "edgar.files package. There is no replacement: the edgar.documents parser "
+    "treats page breaks as print chrome and discards them, so page-break "
+    "positions are not part of the supported document model."
+)
+
 
 class PageBreakDetector:
     """Detects page breaks in SEC HTML documents."""
@@ -161,7 +177,13 @@ def detect_page_breaks(html_content: str) -> List[Dict[str, Any]]:
 
     Returns:
         List of dictionaries containing page break information
+
+    .. deprecated:: 5.54
+        Removed in 6.0 with the rest of ``edgar.files``. No replacement — the
+        ``edgar.documents`` parser discards page breaks as print chrome.
     """
+    warn_legacy_html_usage(_PAGE_BREAKS_DEPRECATION_MSG.format(name="detect_page_breaks()"))
+
     from bs4 import BeautifulSoup
 
     soup = BeautifulSoup(html_content, 'html.parser')
@@ -234,10 +256,17 @@ def mark_page_breaks(html_content: str) -> str:
 
     Returns:
         Modified HTML string with page break markers added
+
+    .. deprecated:: 5.54
+        Removed in 6.0 with the rest of ``edgar.files``. No replacement — the
+        ``edgar.documents`` parser discards page breaks as print chrome.
     """
+    warn_legacy_html_usage(_PAGE_BREAKS_DEPRECATION_MSG.format(name="mark_page_breaks()"))
+
     from bs4 import BeautifulSoup
 
     soup = BeautifulSoup(html_content, 'html.parser')
+    # The staticmethod, not this function — no second warning for our own hop.
     PageBreakDetector.mark_page_breaks(soup)
     return str(soup)
 
