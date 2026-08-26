@@ -7,7 +7,6 @@ Get fund, ETF, BDC, and money market fund data from SEC filings.
 from __future__ import annotations
 
 import logging
-import math
 from decimal import Decimal
 from typing import Any, Optional
 
@@ -19,6 +18,7 @@ from edgar.ai.mcp.tools.base import (
     error,
     get_error_suggestions,
     classify_error,
+    _cell_missing,
 )
 
 logger = logging.getLogger(__name__)
@@ -39,12 +39,10 @@ def _df_to_records(df: pd.DataFrame, limit: int, columns: Optional[list[str]] = 
     for _, row in df.head(limit).iterrows():
         record = {}
         for k, v in row.items():
-            if isinstance(v, Decimal):
+            if _cell_missing(v):
+                record[k] = None
+            elif isinstance(v, Decimal):
                 record[k] = float(v)
-            elif isinstance(v, float) and math.isnan(v):
-                record[k] = None
-            elif pd.isna(v):
-                record[k] = None
             else:
                 record[k] = v
         records.append(record)
@@ -319,10 +317,13 @@ async def _fund_portfolio(identifier: str, limit: int) -> Any:
 
         total_holdings = len(portfolio)
 
-        # Try to compute total value
+        # Try to compute total value. 'value_usd' is the real dollar column on
+        # FundReport.investment_data(); the others were dead candidates that
+        # never matched, so this silently fell through to 'balance' (a share/
+        # unit count, not a dollar amount) whenever it was present.
         total_value = None
         value_col = None
-        for col in ['value', 'market_value', 'val', 'balance']:
+        for col in ['value_usd', 'value', 'market_value', 'val', 'balance']:
             if col in portfolio.columns:
                 value_col = col
                 break
