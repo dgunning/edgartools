@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 
 - **`detect_page_breaks()` and `mark_page_breaks()` now warn before 6.0 removes them.** Both are re-exported at the top level, so `from edgar import detect_page_breaks` works — and they were the last names in `edgar.files` a user could reach through the documented import root and get no notice about before the package disappears. They emit a `DeprecationWarning` naming 6.0. There is no replacement, and the warning says so: the `edgar.documents` parser treats page-break `<hr>`s and page-number containers as print chrome and discards them, so page-break positions are not part of the supported document model. Internal callers stay silent as before, so a downstream suite running `-W error` is unaffected unless it calls these itself.
+
 ### Changed
 
 - **`get_financials()` no longer goes quiet on a filing that has no XBRL.** A company whose latest annual report predates SEC's 2009-2011 XBRL phase-in got a `Financials` object back — a truthy one, so the documented `if financials is not None:` guard passed — whose `income_statement()`, `balance_sheet()` and `cash_flow_statement()` then all returned `None` with nothing said at any level. `Company(104599).get_financials()`, Circuit City's 2008 10-K, is the case. That path now emits a `FutureWarning` naming the filing and raises `XBRLFilingWithNoXbrlData` in 6.0; set `EDGARTOOLS_STRICT_ERRORS=1` for the 6.0 behaviour today. The object itself is unchanged in 5.x, so nothing you branch on today moves.
