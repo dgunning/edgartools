@@ -28,6 +28,42 @@ from .exclusions import should_exclude, EXCLUDED_TAGS
 
 logger = logging.getLogger(__name__)
 
+# Below this confidence a mapping whose candidates are all total concepts is
+# suppressed (GitHub #914). The colliding rows measured in #914 sit at
+# 0.307-0.319; nothing between 0.5 and 0.9 collided in a 65-filing sample.
+LOW_CONFIDENCE_TOTAL_FLOOR = 0.5
+
+# Concept ids that name an aggregate rather than a line item. A fuzzy match
+# onto one of these from a non-total tag is the #914 failure shape.
+_TOTAL_CONCEPT_IDS = {
+    'Assets',
+    'Liabilities',
+    'CommonEquity',
+    'AllEquityBalance',
+    'AllEquityBalanceIncludingMinorityInterest',
+    'LiabilitiesAndEquity',
+    'CurrentAssetsTotal',
+    'NonCurrentAssetsTotal',
+    'CurrentLiabilitiesTotal',
+    'NonCurrentLiabilitiesTotal',
+}
+
+
+def _is_total_concept(standard_concept: str) -> bool:
+    """True if the concept id names an aggregate (total) rather than a line item."""
+    return standard_concept in _TOTAL_CONCEPT_IDS or 'Total' in standard_concept
+
+
+def _is_low_confidence_total_mapping(xbrl_tag: str, entry: dict) -> bool:
+    """True for a non-canonical fuzzy mapping whose candidates are all totals."""
+    standard_tags = entry.get("standard_tags", [])
+    return (
+        entry.get("confidence", 1.0) < LOW_CONFIDENCE_TOTAL_FLOOR
+        and bool(standard_tags)
+        and xbrl_tag not in standard_tags
+        and all(_is_total_concept(tag) for tag in standard_tags)
+    )
+
 
 @dataclass
 class MappingResult:
@@ -123,6 +159,14 @@ class ReverseIndex:
 
         # Build the reverse index
         self._index: Dict[str, dict] = self._gaap_mappings
+
+        # Suppression depends only on the generated base mappings. In particular,
+        # a high-confidence industry override must not revive a fuzzy total match.
+        self._suppressed_total_mappings: Set[str] = {
+            tag
+            for tag, entry in self._index.items()
+            if isinstance(entry, dict) and _is_low_confidence_total_mapping(tag, entry)
+        }
 
         # Cache for normalized lookups (strips namespace prefixes)
         self._normalized_cache: Dict[str, str] = {}
@@ -262,8 +306,12 @@ class ReverseIndex:
             return None
 
         # Apply industry overrides if industry is known
-        if industry and isinstance(entry, dict):
+        if industry:
             entry = self._apply_industry_override(entry, industry)
+
+        if normalized in self._suppressed_total_mappings:
+            logger.debug("Suppressed low-confidence total mapping for %s", xbrl_tag)
+            return None
 
         # Extract data from entry
         standard_tags = entry.get("standard_tags", [])
@@ -404,7 +452,7 @@ class ReverseIndex:
             # Phase 4: Special case - if is_total is True (from context or entry), prefer "Total" concepts
             if is_total or entry_is_total:
                 for candidate in candidates:
-                    if 'total' in candidate.lower():
+                    if _is_total_concept(candidate):
                         logger.debug(
                             "Disambiguated %s to %s (is_total=True)",
                             xbrl_tag, candidate
