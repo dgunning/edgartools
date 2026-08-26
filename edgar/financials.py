@@ -5,11 +5,12 @@ from typing import Any, Dict, List, Optional, Union
 import pandas as pd
 
 from edgar.core import log
+from edgar.exceptions import warn_will_raise
 from edgar.richtools import repr_rich
 from edgar.xbrl import XBRL, XBRLS, Statement
 from edgar.xbrl.presentation import ViewType
 from edgar.xbrl.statements import StitchedStatement
-from edgar.xbrl.xbrl import XBRLFilingWithNoXbrlData
+from edgar.xbrl.xbrl import no_xbrl_attachments
 
 # Columns produced by RenderedStatement.to_dataframe() that are metadata, not
 # period values.
@@ -121,13 +122,36 @@ class Financials:
 
     @classmethod
     def extract(cls, filing) -> Optional["Financials"]:
-        try:
-            xb = XBRL.from_filing(filing)
-            return Financials(xb)
-        except XBRLFilingWithNoXbrlData as e:
-            # Handle the case where the filing does not have XBRL data
-            log.warning(f"Filing {filing} does not contain XBRL data: {e}")
-            return None
+        """Build the financials for a filing.
+
+        A filing with no XBRL attachments still yields a `Financials` here —
+        one wrapping `xb=None`, whose every statement accessor answers `None`.
+        That object is why this was a silent failure: it is truthy, so the
+        documented `if financials is not None:` guard passes and the caller
+        then gets `None` from `income_statement()` with nothing explaining it.
+
+        The warning belongs here rather than in `XBRL.from_filing`, even though
+        that is the shared choke point. `filing.xbrl()` answering `None` for a
+        filing without XBRL is a documented true absence that stays quiet in
+        6.0 (docs/upgrade/6.0.md); warning at the choke point would have
+        reversed that. Asking for *financial statements* and silently getting an
+        object that has none is the actual failure, and this is where it happens.
+
+        The hollow object itself stays in 5.x: removing it is the behaviour
+        change, and the warning is the additive half that has to ship first
+        (edgartools-07lk.23). 6.0 raises and the object goes then.
+        """
+        xb = XBRL.from_filing(filing)
+        if xb is None:
+            # stacklevel=3: helper, this classmethod, the caller. The
+            # `get_financials()` chain sits two frames deeper, so the warning
+            # lands inside edgartools there rather than on the user's line —
+            # the message says what happened and does not depend on the line.
+            # There is deliberately no `except XBRLFilingWithNoXbrlData` around
+            # this: under strict, warn_will_raise raises and that error IS the
+            # 6.0 behaviour, so catching it would make strict a no-op here.
+            warn_will_raise(no_xbrl_attachments(filing), stacklevel=3)
+        return Financials(xb)
 
     def balance_sheet(self, include_dimensions: bool = None, view: ViewType = None):
         """
