@@ -64,8 +64,28 @@ def _bdc_score(query: str, value: str, column: str) -> float:
         else:
             return 0
 
-    # For names, use fuzzy matching
-    return fuzz.ratio(query, value)
+    # For names, match on words rather than on the whole string. A BDC's name
+    # is longer than the part of it anyone types, and `fuzz.ratio` charges the
+    # query for that difference: "ARES" against "ARES CORE INFRASTRUCTURE"
+    # scores 28.6 and falls under the 50 threshold, while "BLACKSTONE" against
+    # "BLACKSTONE PRIVATE CREDIT" scores 57.1 and survives — so whether a search
+    # worked depended on how long the query happened to be relative to the name,
+    # not on whether it matched. The candidate set is already built from an
+    # exact word index, so a name that reaches scoring has matched a whole word.
+    #
+    # `token_set_ratio` and not `partial_ratio`: the latter scores "ARES"
+    # against "ANTARES PRIVATE CREDIT" at 100, since ARES is a substring of
+    # ANTARES. Token matching gives that pair 30.8 and keeps it out.
+    score = fuzz.token_set_ratio(query, value)
+    if score < 100:
+        return score
+
+    # Every exact word hit scores 100, which leaves ranking to chance. Break the
+    # tie toward the closer whole name — "ARES" should rank ARES CAPITAL CORP,
+    # which preprocesses to exactly "ARES", above ARES CORE INFRASTRUCTURE. The
+    # nudge stays under a point and only ever applies at 100, so it cannot move
+    # a match across the threshold.
+    return 100 - (100 - fuzz.ratio(query, value)) / 100
 
 
 class BDCSearchResults:
