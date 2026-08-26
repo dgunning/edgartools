@@ -319,10 +319,13 @@ async def _fund_portfolio(identifier: str, limit: int) -> Any:
 
         total_holdings = len(portfolio)
 
-        # Try to compute total value
+        # Try to compute total value. 'value_usd' is the real dollar column on
+        # FundReport.investment_data(); the others were dead candidates that
+        # never matched, so this silently fell through to 'balance' (a share/
+        # unit count, not a dollar amount) whenever it was present.
         total_value = None
         value_col = None
-        for col in ['value', 'market_value', 'val', 'balance']:
+        for col in ['value_usd', 'value', 'market_value', 'val', 'balance']:
             if col in portfolio.columns:
                 value_col = col
                 break
