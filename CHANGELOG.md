@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **`XBRLS.get_statement(use_optimal_periods=False)` crashed instead of returning a statement.** The non-optimal path appended the `(statements, role, statement_type)` tuple from `XBRL.find_statement()` to the list handed to `StatementStitcher`, which then called `.get()` on it and raised `AttributeError: 'tuple' object has no attribute 'get'`. It now calls `get_statement_by_type()`, the same accessor the optimal path uses, and skips filings that lack the statement type. (GH #1173)
+- **`XBRLS.query(standardize=False)` still standardized.** The option was stored under the keyword `standardize` and read back as `standard`, so it never reached `get_statement()` and every query came back with standard-concept mapping applied. Both spellings are now accepted. (GH #1172)
+- **`FactQuery.transform()` and `.scale()` mutated the shared fact cache.** Transformed values were written back into the row dictionaries returned by `get_facts()`, which come from the facts view's cache, so `.scale(1000)` scaled the cache itself and a second identical query returned values divided by a million. Rows are now copied before transformation. `StitchedFactQuery` had the same defect. (GH #1175)
+- **`find()` did not recognize tickers containing `X`.** The ordinary-ticker pattern was `^[A-WYZ]{1,5}([.-][A-Z])?$`, a character class excluding `X` in every position rather than only the trailing position that marks a mutual fund, so `find("XOM")` returned `CompanySearchResults` instead of the `Company` that `Company("XOM")` resolves. The `^[A-Z]{4}X$` fund pattern is now tested first and the ticker pattern admits the full alphabet. (GH #1178)
+
 ## [5.54.0] - 2026-08-30
 
 ### Deprecated
