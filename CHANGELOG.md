@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Deprecated
+
+- **`period_length` on `EntityFacts.income_statement()` and `.cash_flow_statement()` warns before 6.0 removes it.** `period=` is the supported spelling and the only one that can also ask for `'ttm'`. The parameter is honoured now rather than ignored — see Fixed below. (GH #1177)
+
 ### Fixed
 
+- **`period_length` was accepted, documented, and never read.** `EntityFacts.income_statement(period_length=3)` and `.cash_flow_statement(period_length=3)` returned the *annual* statement with no warning — the parameter appeared nowhere in either method body and had not since the Facts API landed. It now selects the period it names, and a value contradicting `period=` or `annual=` raises `ValidationError` instead of being silently resolved. Numbers can change for callers who were passing it: they were reading annual figures under a quarterly label. (GH #1177)
 - **`XBRLS.get_statement(use_optimal_periods=False)` crashed instead of returning a statement.** The non-optimal path appended the `(statements, role, statement_type)` tuple from `XBRL.find_statement()` to the list handed to `StatementStitcher`, which then called `.get()` on it and raised `AttributeError: 'tuple' object has no attribute 'get'`. It now calls `get_statement_by_type()`, the same accessor the optimal path uses, and skips filings that lack the statement type. (GH #1173)
 - **`XBRLS.query(standardize=False)` still standardized.** The option was stored under the keyword `standardize` and read back as `standard`, so it never reached `get_statement()` and every query came back with standard-concept mapping applied. Both spellings are now accepted. (GH #1172)
 - **`FactQuery.transform()` and `.scale()` mutated the shared fact cache.** Transformed values were written back into the row dictionaries returned by `get_facts()`, which come from the facts view's cache, so `.scale(1000)` scaled the cache itself and a second identical query returned values divided by a million. Rows are now copied before transformation. `StitchedFactQuery` had the same defect. (GH #1175)
