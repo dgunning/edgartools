@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **A malformed 13F primary document now says which element is missing.** Seven raises in the primary-document parser — six of them the same sentence with a different noun — became one `_require_element()` helper raising `ValidationError` with the element name and the namespace hint that explains most of these failures. `ValidationError` IS-A `ValueError`, so anything catching the old raise still catches this one.
+
 ### Fixed
 
 - **`XBRLS.get_statement(use_optimal_periods=False)` crashed instead of returning a statement.** The non-optimal path appended the `(statements, role, statement_type)` tuple from `XBRL.find_statement()` to the list handed to `StatementStitcher`, which then called `.get()` on it and raised `AttributeError: 'tuple' object has no attribute 'get'`. It now calls `get_statement_by_type()`, the same accessor the optimal path uses, and skips filings that lack the statement type. (GH #1173)
