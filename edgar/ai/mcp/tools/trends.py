@@ -20,17 +20,99 @@ from edgar.ai.mcp.tools.base import (
 
 logger = logging.getLogger(__name__)
 
-# Map user-friendly concept names to XBRL concept identifiers
+# Map user-friendly concept names to XBRL concepts, in priority order.
+#
+# Fully qualified on purpose. EntityFacts.time_series passes
+# `exact=":" in concept` down to FactQuery.by_concept, so an unqualified name
+# takes the substring branch and matches every concept *containing* it:
+# "Revenue" pulled in CostOfRevenue, DeferredRevenue and
+# ContractWithCustomerLiabilityRevenueRecognized — 14 concepts for NVIDIA — and
+# the tool answered with whichever of them survived truncation. "Assets" and
+# "Liabilities" were worse, matching AssetsCurrent, OtherAssets*,
+# LiabilitiesCurrent and the rest. The colon selects exact matching (GH #1138).
+#
+# Several concepts have more than one legitimate name and companies migrate
+# between them, so each entry lists its variants and the series takes the
+# highest-ranked one present in each period.
 CONCEPT_MAP = {
-    "revenue": "Revenue",
-    "net_income": "NetIncomeLoss",
-    "total_assets": "Assets",
-    "total_liabilities": "Liabilities",
-    "equity": "StockholdersEquity",
-    "gross_profit": "GrossProfit",
-    "operating_income": "OperatingIncomeLoss",
-    "eps": "EarningsPerShareBasic",
+    "revenue": (
+        "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+        "us-gaap:SalesRevenueNet",
+        "us-gaap:Revenues",
+    ),
+    "net_income": ("us-gaap:NetIncomeLoss", "us-gaap:ProfitLoss"),
+    "total_assets": ("us-gaap:Assets",),
+    "total_liabilities": ("us-gaap:Liabilities",),
+    "equity": (
+        "us-gaap:StockholdersEquity",
+        "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+    ),
+    "gross_profit": ("us-gaap:GrossProfit",),
+    "operating_income": ("us-gaap:OperatingIncomeLoss",),
+    "eps": ("us-gaap:EarningsPerShareBasic", "us-gaap:EarningsPerShareBasicAndDiluted"),
 }
+
+# Row cap per concept when pulling facts. The series is cut to the caller's
+# `periods` only after the period-type filter, so this bounds pathological
+# restatement histories rather than the answer.
+_FACT_ROW_CAP = 500
+
+
+
+# Reporting windows, in days, that count as a year and as a quarter. Wide
+# enough for 52/53-week fiscal calendars and for the short stub a company
+# reports when it changes fiscal year end.
+_ANNUAL_DAYS = (300, 400)
+_QUARTERLY_DAYS = (60, 120)
+
+
+def _of_period_type(ts, period):
+    """Rows whose reporting window matches the period type the caller asked for.
+
+    `fiscal_period` does not answer this. Companyfacts labels quarterly facts
+    `FY` as well: General Mills' 90-day Q3 and its 370-day fiscal year are both
+    `fiscal_period == 'FY'` with `fiscal_year == 2026`. Filtering on that alone
+    let a quarter into an annual series, where it rendered under the same year
+    label as the real annual figure — two rows both reading "2026", one of them
+    a quarter.
+
+    `duration_days` is the discriminator, and `time_series` returns it for
+    exactly this reason. Instants have no duration: a balance-sheet concept like
+    Assets is a point in time and belongs in either series, so nulls are kept.
+    """
+    if period == "annual":
+        low, high = _ANNUAL_DAYS
+        rows = ts[ts['fiscal_period'] == 'FY']
+    else:
+        low, high = _QUARTERLY_DAYS
+        rows = ts[ts['fiscal_period'].isin(['Q1', 'Q2', 'Q3', 'Q4', 'FY'])]
+
+    duration = rows['duration_days']
+    return rows[duration.isna() | duration.between(low, high)]
+
+
+def _concept_series(facts, xbrl_concepts):
+    """Rows for the highest-ranked concept variant available in each period.
+
+    Companies migrate between equally valid tags, so a single concept name
+    yields a series with holes — or, worse, one that simply stops. Each variant
+    is pulled separately and tagged with its rank; the caller keeps one row per
+    period after filtering to the period type it wants.
+    """
+    import pandas as pd
+
+    frames = []
+    for rank, concept in enumerate(xbrl_concepts):
+        ts = facts.time_series(concept, periods=_FACT_ROW_CAP)
+        if ts is None or ts.empty:
+            continue
+        ts = ts.copy()
+        ts['_concept_rank'] = rank
+        frames.append(ts)
+
+    if not frames:
+        return None
+    return pd.concat(frames, ignore_index=True)
 
 
 @tool(
@@ -91,30 +173,35 @@ async def edgar_trends(
         trends = {}
 
         for concept_name in concepts:
-            xbrl_concept = CONCEPT_MAP.get(concept_name)
-            if not xbrl_concept:
+            xbrl_concepts = CONCEPT_MAP.get(concept_name)
+            if not xbrl_concepts:
                 continue
 
             try:
-                ts = facts.time_series(xbrl_concept, periods=periods * 3)
+                ts = _concept_series(facts, xbrl_concepts)
 
                 if ts is None or ts.empty:
                     trends[concept_name] = {"error": "No data available"}
                     continue
 
-                # Filter by period type
-                if period == "annual":
-                    filtered = ts[ts['fiscal_period'] == 'FY']
-                else:
-                    filtered = ts[ts['fiscal_period'].isin(['Q1', 'Q2', 'Q3', 'Q4'])]
+                # Filter by period type BEFORE cutting to `periods`. The old
+                # order truncated a mixed pile of annual, quarterly and instant
+                # rows first, so the annual fact the caller asked for could be
+                # cut away entirely and a different concept answered in its
+                # place. It also made the result depend on filing cadence: a new
+                # 10-Q pushed the correct annual row out of the window, which is
+                # why the same call returned different concepts for different
+                # values of `periods` (GH #1138).
+                filtered = _of_period_type(ts, period)
 
-                # When multiple values exist per period_end (e.g., segment vs total),
-                # keep the largest value which is typically the consolidated total
+                # One row per period: the highest-ranked concept present, then
+                # the largest value, which drops segment-level facts reported
+                # under the same concept as the consolidated figure.
                 if not filtered.empty:
                     filtered = (filtered
-                                .sort_values('numeric_value', ascending=False)
-                                .drop_duplicates(subset=['period_end'], keep='first')
-                                .sort_values('period_end', ascending=False))
+                                .sort_values(['period_end', '_concept_rank', 'numeric_value'],
+                                             ascending=[False, True, False])
+                                .drop_duplicates(subset=['period_end'], keep='first'))
 
                 # Limit to requested periods
                 filtered = filtered.head(periods)
