@@ -50,6 +50,83 @@ def _year_quarter_to_filing_date(year, quarter) -> Optional[str]:
     return None
 
 
+def _year_quarter_ranges(year, quarter) -> Optional[List[str]]:
+    """Every ``filing_date`` range covering ``year``/``quarter``, or None.
+
+    ``Entity.get_filings`` accepts a list for either, but ``Filings.filter``
+    takes one ``filing_date`` range, so a list becomes several ranges that the
+    caller unions. Returns None when the pair cannot be expressed as ranges at
+    all, so the caller can refuse rather than answer with everything.
+    """
+    if isinstance(year, int):
+        years = [year]
+    elif isinstance(year, (list, tuple)) and year and all(isinstance(y, int) for y in year):
+        years = list(year)
+    else:
+        return None
+
+    if quarter is None:
+        quarters = [None]
+    elif isinstance(quarter, int):
+        quarters = [quarter]
+    elif isinstance(quarter, (list, tuple)) and quarter:
+        quarters = list(quarter)
+    else:
+        return None
+
+    ranges = []
+    for y in years:
+        for q in quarters:
+            date_range = _year_quarter_to_filing_date(y, q)
+            if date_range is None:
+                return None
+            ranges.append(date_range)
+    return ranges
+
+
+def _apply_series_filters(filings: 'Filings', kwargs: dict) -> 'Filings':
+    """Apply the caller's filters to a series' filings.
+
+    ``_series_filter_kwargs`` translates a scalar ``year``/``quarter``. A list
+    of either is applied here as a union over one range each. Before this, an
+    untranslatable pair was dropped and the caller received the series' entire
+    unfiltered history -- a wrong answer wearing the shape of a filtered one.
+    """
+    from edgar._filings import Filings
+
+    filter_kwargs = _series_filter_kwargs(kwargs)
+    year, quarter = kwargs.get('year'), kwargs.get('quarter')
+    needs_ranges = (year is not None
+                    and not {'filing_date', 'date'} & filter_kwargs.keys())
+    ranges = _year_quarter_ranges(year, quarter) if needs_ranges else None
+
+    if needs_ranges and not ranges:
+        raise ValueError(
+            f"Cannot filter a fund series by year={year!r}, quarter={quarter!r}. "
+            "Use an int year, or a list of int years, optionally with an int or "
+            "list of ints for quarter -- or filter the returned Filings on "
+            "filing_date yourself."
+        )
+
+    if len(filings) == 0 or (not filter_kwargs and not ranges):
+        return filings
+
+    if not ranges:
+        return filings.filter(**filter_kwargs)
+
+    import pyarrow as pa
+
+    from edgar.datatools import drop_duplicates_pyarrow
+    matched = [filings.filter(**filter_kwargs, filing_date=date_range)
+               for date_range in ranges]
+    tables = [m.data for m in matched if m is not None and len(m) > 0]
+    if not tables:
+        return Filings([])
+    combined = pa.concat_tables(tables, mode="default")
+    return Filings(filing_index=drop_duplicates_pyarrow(combined,
+                                                        column_name='accession_number'))
+
+
 def _series_filter_kwargs(kwargs: dict) -> dict:
     """Map entity-style ``get_filings`` kwargs onto the ``Filings.filter``
     interface used by the series (browse-edgar) path.
@@ -149,10 +226,7 @@ def _series_filings(series_id: str, **kwargs) -> Optional['Filings']:
         # Series resolved but has no filings of the requested form(s).
         return Filings([])
 
-    filter_kwargs = _series_filter_kwargs(kwargs)
-    if filter_kwargs and len(filings) > 0:
-        filings = filings.filter(**filter_kwargs)
-    return filings
+    return _apply_series_filters(filings, kwargs)
 
 
 class FundCompany(Entity):
@@ -774,7 +848,11 @@ class Fund:
             form: SEC form type (default 'NPORT-P'). Common values:
                   'NPORT-P', 'N-MFP3', 'N-CEN', 'N-CSR', 'N-CSRS'
         """
-        filings = self.get_filings(form=form)
+        # series_only when this Fund names a series: "the latest report" means
+        # this fund's, and the trust's newest report belongs to whichever
+        # sibling series filed last (GH #1143). The trust-wide default belongs
+        # to get_filings(), not here.
+        filings = self.get_filings(form=form, series_only=bool(self._target_series_id))
         if filings and len(filings) > 0:
             return filings[0].obj()
         return None
