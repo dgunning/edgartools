@@ -177,7 +177,7 @@ def _select_concept_candidate(candidates, prefer_consolidated_total: bool = Fals
     newest = max(_period_key(entry) for entry in candidates)
     in_period = [entry for entry in candidates if _period_key(entry) == newest]
 
-    priority, _fact, unit_result = min(in_period, key=lambda entry: entry[0])
+    _, _, unit_result = min(in_period, key=lambda entry: entry[0])
 
     if prefer_consolidated_total:
         value = unit_result.value
