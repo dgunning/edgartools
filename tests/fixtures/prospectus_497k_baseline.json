@@ -37,13 +37,6 @@
         "other_expenses": null,
         "total_annual_expenses": null,
         "twelve_b1_fee": null
-      },
-      {
-        "class_name": "The Investment Adviser has agreed to waive a portion of the management fee through March\u00a031, 2013. In addition, the Investment Adviser has agreed to reimburse the\nFund for certain Fund operating expenses such that total annual Fund operating expenses (exclusive of any front-end load, deferred sales charge, 12b-1 fees, taxes, income tax expense, brokerage commissions, expenses incurred in connection with any\nmerger or reorganization, acquired fund fees and expenses, or extraordinary expenses such as litigation) will not exceed 1.40% for each of Class\u00a0A Shares, Class C Shares and Class I Shares, subject to possible recoupment from the Fund in future\nyears on a rolling three year basis (within the three years after the fees have been waived and expenses reimbursed) if such recoupment can be achieved within the foregoing expense limits. Such waiver or reimbursement may not be terminated without\nthe consent of the Board of Trustees prior to March 31, 2013 and may be modified or terminated by the Investment Adviser at any time after March 31, 2013.",
-        "expense_10yr": 2119,
-        "expense_1yr": null,
-        "expense_3yr": null,
-        "expense_5yr": null
       }
     ],
     "metadata": {
@@ -185,10 +178,7 @@
     "fee_tables": [
       {
         "class_name": "",
-        "expense_10yr": null,
         "expense_1yr": null,
-        "expense_3yr": null,
-        "expense_5yr": null,
         "fee_waiver": null,
         "management_fee": null,
         "max_deferred_sales_load": null,
@@ -197,13 +187,6 @@
         "other_expenses": null,
         "total_annual_expenses": null,
         "twelve_b1_fee": null
-      },
-      {
-        "class_name": "The Adviser has contractually agreed to waive its management fees and/or to bear expenses of the Fund through January\u00a031, 2018 to the extent necessary to prevent total Fund\noperating expenses (excluding acquired fund fees and expenses other than the advisory fees of any AB Mutual Funds in which the Fund may invest, interest expense, taxes, extraordinary expenses, and brokerage commissions and other transaction costs),\non an annualized basis, from exceeding .95%, 1.70%, .70%, 1.20%, .95%, .70% and .70% of average daily net assets, respectively, for Class\u00a0A, Class C, Advisor Class, Class R, Class K, Class I and Class Z shares (\u201cexpense limitations\u201d).\nAny fees waived and expenses borne by the Adviser prior to July\u00a015, 2015 may be reimbursed by the Fund until the end of the third fiscal year after the fiscal period in which the fee was waived or the expense was borne, provided that no\nreimbursement payment will be made that would cause the Fund\u2019s Total Annual Fund Operating Expenses to exceed the expense limitations.",
-        "expense_10yr": null,
-        "expense_1yr": null,
-        "expense_3yr": null,
-        "expense_5yr": null
       }
     ],
     "metadata": {
@@ -360,13 +343,6 @@
         "other_expenses": null,
         "total_annual_expenses": null,
         "twelve_b1_fee": null
-      },
-      {
-        "class_name": "\u201cManagement Fees\u201d and \u201cOther Expenses\u201d have been restated to reflect current fees.",
-        "expense_10yr": null,
-        "expense_1yr": null,
-        "expense_3yr": 593,
-        "expense_5yr": null
       }
     ],
     "metadata": {

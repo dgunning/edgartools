@@ -177,9 +177,9 @@ def _label_matches(text: str, *patterns: str) -> bool:
 # Table classification
 # ---------------------------------------------------------------------------
 
-_FEE_TABLE_LABELS = (
-    'management fee',
-    'management fees',
+_MANAGEMENT_FEE_LABEL_RE = re.compile(r'\bmanagement fees?\b')
+_FLATTENED_FEE_VALUES_RE = re.compile(
+    r'^(?:\([^)]*\)\s*)?(?:[-+]?\(?\d*\.?\d+\)?\s*%\s*){2}'
 )
 
 _EXPENSE_EXAMPLE_LABELS = (
@@ -211,6 +211,29 @@ _BAR_CHART_LABELS = (
 )
 
 
+def _is_management_fee_row(row: List[str]) -> bool:
+    """Return whether a row has management-fee label/value structure."""
+    if not row:
+        return False
+
+    label = _normalize(row[0])
+    match = _MANAGEMENT_FEE_LABEL_RE.search(label)
+    if match is None:
+        return False
+    if len(row) > 1:
+        return any(
+            _normalize(cell) in {'none', 'n/a', 'na', 'not applicable', '-', '--', '–', '—'}
+            or '%' in cell
+            or (_parse_percentage(cell) is not None and '.' in cell)
+            for cell in row[1:]
+        )
+
+    # Some malformed nested tables flatten all fee rows into one cell. Keep
+    # those only when the label is immediately followed by two percentage values.
+    trailing = label[match.end():].lstrip()
+    return match.start() == 0 and _FLATTENED_FEE_VALUES_RE.match(trailing) is not None
+
+
 def _classify_table(rows: List[List[str]]) -> Optional[str]:
     """Classify a table by its content. Returns a type string or None."""
     all_text = ' '.join(' '.join(row) for row in rows)
@@ -225,8 +248,9 @@ def _classify_table(rows: List[List[str]]) -> Optional[str]:
             ('quarter' in norm or 'return' in norm)):
         return 'quarter'
 
-    # Check for operating expenses table (has "management fee")
-    if any(p in norm for p in _FEE_TABLE_LABELS):
+    # Match the same label/value structure consumed by the fee extractor so
+    # prose-only footnote tables do not change the extraction strategy.
+    if any(_is_management_fee_row(row) for row in rows):
         return 'operating_expenses'
 
     # Tables with year-period columns (1 year, 3 years, etc.)
