@@ -59,6 +59,38 @@ _FACT_ROW_CAP = 500
 
 
 
+# Reporting windows, in days, that count as a year and as a quarter. Wide
+# enough for 52/53-week fiscal calendars and for the short stub a company
+# reports when it changes fiscal year end.
+_ANNUAL_DAYS = (300, 400)
+_QUARTERLY_DAYS = (60, 120)
+
+
+def _of_period_type(ts, period):
+    """Rows whose reporting window matches the period type the caller asked for.
+
+    `fiscal_period` does not answer this. Companyfacts labels quarterly facts
+    `FY` as well: General Mills' 90-day Q3 and its 370-day fiscal year are both
+    `fiscal_period == 'FY'` with `fiscal_year == 2026`. Filtering on that alone
+    let a quarter into an annual series, where it rendered under the same year
+    label as the real annual figure — two rows both reading "2026", one of them
+    a quarter.
+
+    `duration_days` is the discriminator, and `time_series` returns it for
+    exactly this reason. Instants have no duration: a balance-sheet concept like
+    Assets is a point in time and belongs in either series, so nulls are kept.
+    """
+    if period == "annual":
+        low, high = _ANNUAL_DAYS
+        rows = ts[ts['fiscal_period'] == 'FY']
+    else:
+        low, high = _QUARTERLY_DAYS
+        rows = ts[ts['fiscal_period'].isin(['Q1', 'Q2', 'Q3', 'Q4', 'FY'])]
+
+    duration = rows['duration_days']
+    return rows[duration.isna() | duration.between(low, high)]
+
+
 def _concept_series(facts, xbrl_concepts):
     """Rows for the highest-ranked concept variant available in each period.
 
@@ -160,10 +192,7 @@ async def edgar_trends(
                 # 10-Q pushed the correct annual row out of the window, which is
                 # why the same call returned different concepts for different
                 # values of `periods` (GH #1138).
-                if period == "annual":
-                    filtered = ts[ts['fiscal_period'] == 'FY']
-                else:
-                    filtered = ts[ts['fiscal_period'].isin(['Q1', 'Q2', 'Q3', 'Q4'])]
+                filtered = _of_period_type(ts, period)
 
                 # One row per period: the highest-ranked concept present, then
                 # the largest value, which drops segment-level facts reported
