@@ -62,10 +62,7 @@ for cls in classes:
 fund_company = series.fund_company
 print(f"Managed by: {fund_company}")
 
-# Get portfolio holdings from NPORT filings.
-# This returns only THIS series' filings. A trust files one report per series
-# under a single CIK, so `fund_company.get_filings()` would mix every sibling
-# series together and its newest filing could belong to any of them.
+# Get portfolio holdings from NPORT filings
 nport_filings = series.get_filings(form='NPORT-P')
 if nport_filings:
     latest_nport = nport_filings[0]
