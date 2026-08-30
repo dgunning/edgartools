@@ -34,6 +34,7 @@ from rich.text import Text
 
 from edgar.core import log
 from edgar.entity.enhanced_statement import MultiPeriodStatement
+from edgar.entity.utils import is_consolidated_total_over
 from edgar.entity.models import FinancialFact
 from edgar.entity.utils import normalize_period_to_entity_facts
 from edgar.httprequests import download_json
@@ -138,6 +139,35 @@ def get_company_facts(cik: int):
         while len(_company_facts_cache) > _COMPANY_FACTS_CACHE_MAXSIZE:
             _company_facts_cache.popitem(last=False)
     return result
+
+
+def _consolidated_total_fact(chosen, candidates):
+    """Swap ``chosen`` for the consolidated total it is a slice of, if present.
+
+    Ranking by recency answers *which year*; among concepts tagged for that same
+    year it falls back to the variant list's order, which is an order over
+    *names*, not over what those names measure. Insurers and banks report ASC-606
+    contract revenue beside a much larger consolidated ``Revenues`` for the same
+    period, and the contract tag is ranked first — so the getter returned a
+    sliver, a ~32x understatement, and the income statement showed less revenue
+    than operating income (edgartools-fdye).
+
+    Magnitude stays a cross-check on the ranked pick and never the ranking
+    itself: taking the largest outright would prefer ``IncludingAssessedTax``
+    over ``Excluding``, and gross over net.
+
+    Restricted to the chosen fact's own period, so a large figure from an older
+    year can never stand in for this year's total.
+    """
+    if chosen.numeric_value is None:
+        return chosen
+
+    larger = [f for f in candidates
+              if f.period_end == chosen.period_end
+              and is_consolidated_total_over(f.numeric_value, chosen.numeric_value)]
+    if not larger:
+        return chosen
+    return max(larger, key=lambda f: f.numeric_value)
 
 
 class EntityFacts:
@@ -898,7 +928,14 @@ class EntityFacts:
             period=period,
             unit=unit,
             fallback_calculation=self._calculate_revenue_from_components,
-            annual=annual
+            annual=annual,
+            # Revenue's variants are alternative names for one consolidated
+            # total, so a same-period candidate many times larger is that total
+            # rather than a rival name for it. Off elsewhere: net income's
+            # variants are not slices of one another, and preferring the larger
+            # ProfitLoss over NetIncomeLoss would change whose earnings are
+            # reported (edgartools-fdye).
+            prefer_consolidated_total=True
         )
 
     def get_net_income(self, period: Optional[str] = None, unit: Optional[str] = None, annual: bool = True) -> Optional[float]:
@@ -2325,7 +2362,8 @@ class EntityFacts:
                                       fallback_calculation: Optional[Callable] = None,
                                       return_detailed: bool = False,
                                       strict_unit_match: Optional[bool] = None,
-                                      annual: bool = True) -> Optional[float]:
+                                      annual: bool = True,
+                                      prefer_consolidated_total: bool = False) -> Optional[float]:
         """
         Core method for retrieving standardized concept values with enhanced unit handling.
 
@@ -2339,6 +2377,10 @@ class EntityFacts:
                               If None (default), uses strict matching when unit is explicitly provided.
             annual: If True and period is None, prefer annual (FY) facts. Falls back to most
                    recent if no annual facts available. Default: True
+            prefer_consolidated_total: If True, a candidate from the same period that
+                   dwarfs the ranked pick is treated as the consolidated total. Only for
+                   concepts whose variants are alternative names for one total (revenue).
+                   See _consolidated_total_fact.
 
         Returns:
             Numeric value or None if not found (or UnitResult if return_detailed=True)
@@ -2386,6 +2428,14 @@ class EntityFacts:
                 reverse=True,
             )
             for fact in ranked:
+                if prefer_consolidated_total:
+                    # Recency settles which YEAR to answer from; it cannot
+                    # settle which of two concepts tagged for that same year is
+                    # the consolidated total. MetLife tags the ASC-606 slice
+                    # ($2.4B) and Revenues ($77.1B) for FY2025 alike, and the
+                    # variant list ranks the slice first (edgartools-fdye).
+                    fact = _consolidated_total_fact(fact, ranked)
+
                 # Use enhanced unit handling
                 unit_result = UnitNormalizer.get_normalized_value(
                     fact=fact,
