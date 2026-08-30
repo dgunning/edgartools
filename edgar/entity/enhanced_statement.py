@@ -31,7 +31,7 @@ from edgar.entity.mappings_loader import (
     load_virtual_trees,
 )
 from edgar.entity.models import FinancialFact
-from edgar.entity.utils import normalize_period_to_statement
+from edgar.entity.utils import is_consolidated_total_over, normalize_period_to_statement
 
 from edgar.display import get_statement_styles, SYMBOLS, get_style
 from edgar.richtools import repr_rich
@@ -2420,6 +2420,20 @@ class EnhancedStatementBuilder:
 
                         break  # Found value for this period, use highest priority
 
+            # A same-period concept that dwarfs the ranked pick is the
+            # consolidated total the pick is a slice of, not a rival name for
+            # it. Priority alone reported $2.4B of MetLife revenue above $6.1B
+            # of operating income, and disagreed with get_revenue() for the same
+            # company and year (edgartools-fdye).
+            if period_value is not None:
+                for concept in revenue_concepts:
+                    if concept == source_concept or concept not in period_maps[period]:
+                        continue
+                    candidate = period_maps[period][concept]
+                    if is_consolidated_total_over(candidate.numeric_value, period_value):
+                        period_value = candidate.numeric_value
+                        source_concept = concept
+
             # If no explicit revenue found, try to calculate from GrossProfit + CostOfRevenue
             if period_value is None:
                 gross_profit = None
@@ -2453,12 +2467,23 @@ class EnhancedStatementBuilder:
         # Override label to be more descriptive
         best_label = "Total Revenue"
 
-        # Find the highest priority concept that has data to determine other properties
+        # Name the row after a concept the values actually came from. Taking the
+        # highest-priority concept merely *present* would attribute the figure
+        # to a tag that lost the selection -- labelling MetLife's consolidated
+        # Revenues value as ASC-606 contract revenue.
+        used_concepts = {c for c in source_tracking.values()
+                         if c and c != 'Calculated_Revenue'}
         primary_concept = None
         for concept in revenue_concepts:
-            if any(concept in period_maps[p] for p in periods):
+            if concept in used_concepts:
                 primary_concept = concept
                 break
+
+        if not primary_concept:
+            for concept in revenue_concepts:
+                if any(concept in period_maps[p] for p in periods):
+                    primary_concept = concept
+                    break
 
         # If no explicit revenue concepts, use a calculated concept identifier
         if not primary_concept:
