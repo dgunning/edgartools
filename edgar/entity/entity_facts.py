@@ -2355,7 +2355,14 @@ class EntityFacts:
         # Suppress warnings from get_fact()/get_annual_fact() during synonym resolution
         self._suppress_warnings = True
         try:
-            # Try each concept variant in priority order
+            # Collect a matching fact from every concept variant/taxonomy
+            # prefix rather than returning at the first one that matches
+            # anything. A company that migrated its XBRL tag over time (e.g.
+            # NVIDIA: RevenueFromContractWithCustomerExcludingAssessedTax was
+            # used through FY2022, then dropped in favor of Revenues) can have
+            # real data under an earlier-priority tag that is years stale,
+            # which used to "win" purely by being tried first.
+            candidates = []
             for concept in concept_variants:
                 # Try with all known taxonomy prefixes
                 for concept_variant in [concept, f'us-gaap:{concept}', f'ifrs-full:{concept}']:
@@ -2368,18 +2375,29 @@ class EntityFacts:
                     else:
                         fact = self.get_fact(concept_variant, period)
                     if fact and fact.numeric_value is not None:
-                        # Use enhanced unit handling
-                        unit_result = UnitNormalizer.get_normalized_value(
-                            fact=fact,
-                            target_unit=target_unit,
-                            apply_scale=True,
-                            strict_unit_match=strict_unit_match
-                        )
+                        candidates.append(fact)
 
-                        if unit_result.success:
-                            if return_detailed:
-                                return unit_result  # type: ignore[return-value]
-                            return unit_result.value
+            # Prefer the most recent fact across all variants (ties broken
+            # toward non-dimensioned/consolidated facts), falling back to an
+            # older candidate only if unit normalization fails for it.
+            ranked = sorted(
+                candidates,
+                key=lambda f: (f.filing_date, f.period_end, not f.is_dimensioned),
+                reverse=True,
+            )
+            for fact in ranked:
+                # Use enhanced unit handling
+                unit_result = UnitNormalizer.get_normalized_value(
+                    fact=fact,
+                    target_unit=target_unit,
+                    apply_scale=True,
+                    strict_unit_match=strict_unit_match
+                )
+
+                if unit_result.success:
+                    if return_detailed:
+                        return unit_result  # type: ignore[return-value]
+                    return unit_result.value
         finally:
             self._suppress_warnings = False
 
