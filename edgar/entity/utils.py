@@ -154,3 +154,29 @@ def format_cik(cik: Union[str, int], zero_pad: int = 10) -> str:
     """
     normalized_cik = normalize_cik(cik)
     return str(normalized_cik).zfill(zero_pad)
+
+
+# A same-period candidate must exceed the priority pick by this factor before it
+# overrides it. Alternative names for one total sit within a few percent of each
+# other; a component of that total sits far below it. Chosen well clear of the
+# largest legitimate spread (gross vs. net) and far below the observed failures,
+# which run 30x.
+_CONSOLIDATED_TOTAL_FACTOR = 2.0
+
+
+def is_consolidated_total_over(candidate_value, picked_value) -> bool:
+    """Whether ``candidate_value`` is the total that ``picked_value`` is a slice of.
+
+    Two concepts naming the same figure land within a few percent of each other,
+    so a candidate several times larger is a different figure entirely — the
+    consolidated total the ranked pick is a component of. Shared by both places
+    that rank revenue concepts (``_select_concept_candidate`` here and the
+    statement builder's revenue dedup) so the threshold cannot drift between
+    them (edgartools-fdye).
+
+    Only meaningful for positive figures: a ratio test on values that can be
+    negative compares magnitudes across a sign change.
+    """
+    return (picked_value is not None and picked_value > 0
+            and candidate_value is not None
+            and candidate_value >= picked_value * _CONSOLIDATED_TOTAL_FACTOR)

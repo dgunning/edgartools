@@ -34,6 +34,7 @@ from rich.text import Text
 
 from edgar.core import log
 from edgar.entity.enhanced_statement import MultiPeriodStatement
+from edgar.entity.utils import is_consolidated_total_over
 from edgar.entity.models import FinancialFact
 from edgar.entity.utils import normalize_period_to_entity_facts
 from edgar.httprequests import download_json
@@ -138,6 +139,56 @@ def get_company_facts(cik: int):
         while len(_company_facts_cache) > _COMPANY_FACTS_CACHE_MAXSIZE:
             _company_facts_cache.popitem(last=False)
     return result
+
+
+def _select_concept_candidate(candidates, prefer_consolidated_total: bool = False):
+    """Pick one candidate from the matches across all concept variants.
+
+    ``candidates`` is a list of ``(priority, fact, unit_result)``, priority being
+    the index of the concept in the caller's variant list.
+
+    Period first, then priority. The variant list ranks *names for the same
+    figure*; it says nothing about which period a company still tags. Ranking by
+    name first meant an abandoned tag outranked a current one and the getter
+    answered from the wrong year — real data, silently stale (GH #1149). So the
+    newest period any variant reports wins, and the priority list then decides
+    among the names that report it.
+
+    Within that period, ``prefer_consolidated_total`` adds a magnitude
+    cross-check: a candidate that dwarfs the priority pick is not another name
+    for it, it is the total the pick is a slice of. MetLife tags both
+    ``RevenueFromContractWithCustomerExcludingAssessedTax`` ($2.4B, the ASC-606
+    slice) and ``Revenues`` ($77.1B, consolidated) for FY2025, and the static
+    priority takes the slice — a 32x understatement across insurers and banks
+    (edgartools-fdye). Magnitude is only ever a cross-check on the ranked pick,
+    never the primary ranking: picking the largest outright would prefer
+    ``IncludingAssessedTax`` over ``Excluding`` and gross over net.
+
+    It stays opt-in because it is not true of every concept family. Net income's
+    variants are not slices of one another — ``ProfitLoss`` exceeds
+    ``NetIncomeLoss`` by the noncontrolling interest, and preferring it would
+    quietly change whose earnings are being reported.
+    """
+    def _period_key(entry):
+        fact = entry[1]
+        # A fact with no period_end cannot outrank one that has it.
+        return (fact.period_end is not None, fact.period_end)
+
+    newest = max(_period_key(entry) for entry in candidates)
+    in_period = [entry for entry in candidates if _period_key(entry) == newest]
+
+    priority, _fact, unit_result = min(in_period, key=lambda entry: entry[0])
+
+    if prefer_consolidated_total:
+        value = unit_result.value
+        if value is not None and value > 0:
+            larger = [entry for entry in in_period
+                      if is_consolidated_total_over(entry[2].value, value)]
+            if larger:
+                # The largest, then the highest-priority name for it.
+                _, _, unit_result = max(larger, key=lambda entry: (entry[2].value, -entry[0]))
+
+    return unit_result
 
 
 class EntityFacts:
@@ -898,7 +949,12 @@ class EntityFacts:
             period=period,
             unit=unit,
             fallback_calculation=self._calculate_revenue_from_components,
-            annual=annual
+            annual=annual,
+            # Revenue's variants are alternative names for one consolidated
+            # total, so a same-period candidate many times larger than the
+            # ranked pick is that total rather than a rival name for it
+            # (edgartools-fdye).
+            prefer_consolidated_total=True
         )
 
     def get_net_income(self, period: Optional[str] = None, unit: Optional[str] = None, annual: bool = True) -> Optional[float]:
@@ -2325,7 +2381,8 @@ class EntityFacts:
                                       fallback_calculation: Optional[Callable] = None,
                                       return_detailed: bool = False,
                                       strict_unit_match: Optional[bool] = None,
-                                      annual: bool = True) -> Optional[float]:
+                                      annual: bool = True,
+                                      prefer_consolidated_total: bool = False) -> Optional[float]:
         """
         Core method for retrieving standardized concept values with enhanced unit handling.
 
@@ -2339,6 +2396,10 @@ class EntityFacts:
                               If None (default), uses strict matching when unit is explicitly provided.
             annual: If True and period is None, prefer annual (FY) facts. Falls back to most
                    recent if no annual facts available. Default: True
+            prefer_consolidated_total: If True, a same-period candidate that dwarfs the
+                   priority pick is treated as the consolidated total and wins. Only for
+                   concepts whose variants are alternative names for one total (revenue).
+                   See _select_concept_candidate.
 
         Returns:
             Numeric value or None if not found (or UnitResult if return_detailed=True)
@@ -2355,8 +2416,15 @@ class EntityFacts:
         # Suppress warnings from get_fact()/get_annual_fact() during synonym resolution
         self._suppress_warnings = True
         try:
-            # Try each concept variant in priority order
-            for concept in concept_variants:
+            # Collect one candidate per variant rather than returning on the
+            # first hit. Returning early made the answer depend on which tag the
+            # company used *first in this list*, not on which period or which
+            # concept the caller asked about: a company that migrated its tag
+            # kept answering from the abandoned one, years out of date (GH
+            # #1149). Selection happens in _select_concept_candidate below,
+            # where the whole set is visible.
+            candidates = []
+            for priority, concept in enumerate(concept_variants):
                 # Try with all known taxonomy prefixes
                 for concept_variant in [concept, f'us-gaap:{concept}', f'ifrs-full:{concept}']:
                     # Use annual fact if requested and no specific period provided
@@ -2377,11 +2445,17 @@ class EntityFacts:
                         )
 
                         if unit_result.success:
-                            if return_detailed:
-                                return unit_result  # type: ignore[return-value]
-                            return unit_result.value
+                            candidates.append((priority, fact, unit_result))
+                            # One taxonomy prefix per variant, as before.
+                            break
         finally:
             self._suppress_warnings = False
+
+        if candidates:
+            unit_result = _select_concept_candidate(candidates, prefer_consolidated_total)
+            if return_detailed:
+                return unit_result  # type: ignore[return-value]
+            return unit_result.value
 
         # Try fallback calculation if provided
         if fallback_calculation:
