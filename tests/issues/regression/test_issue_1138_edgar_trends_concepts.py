@@ -120,3 +120,47 @@ def test_the_broad_substrings_return_their_own_concept():
 
     assert _trend_values(result, "total_assets")["2025"] == 359_241_000_000
     assert _trend_values(result, "total_liabilities")["2025"] == 285_508_000_000
+
+
+# --- A quarter must not appear in an annual series ---------------------------
+
+def test_the_period_type_filter_uses_the_reporting_window():
+    """`fiscal_period` does not separate annual facts from quarterly ones.
+
+    Companyfacts labels quarterly facts `FY` too: General Mills' 90-day Q3 and
+    its 370-day fiscal year are both `fiscal_period == 'FY'` with
+    `fiscal_year == 2026`. Filtering on that alone let a quarter into the annual
+    series under the same year label as the real annual figure.
+
+    Instants have no duration -- a balance-sheet concept is a point in time --
+    and must survive the filter in either mode.
+    """
+    import pandas as pd
+
+    from edgar.ai.mcp.tools.trends import _of_period_type
+
+    rows = pd.DataFrame([
+        {"fiscal_period": "FY", "duration_days": 370, "numeric_value": 18_424_600_000},
+        {"fiscal_period": "FY", "duration_days": 90, "numeric_value": 4_436_700_000},
+        {"fiscal_period": "FY", "duration_days": None, "numeric_value": 30_000_000_000},
+    ])
+
+    annual = _of_period_type(rows, "annual")
+    assert list(annual['numeric_value']) == [18_424_600_000, 30_000_000_000]
+
+    quarterly = _of_period_type(rows, "quarterly")
+    assert list(quarterly['numeric_value']) == [4_436_700_000, 30_000_000_000]
+
+
+@pytest.mark.network
+@pytest.mark.regression
+def test_an_annual_series_has_one_row_per_year():
+    """GIS returned two rows both labelled 2026, one of them a quarter."""
+    from edgar.ai.mcp.tools.trends import edgar_trends
+
+    values = _trend_values(asyncio.run(
+        edgar_trends("GIS", concepts=["revenue"], periods=3)))
+
+    assert len(values) == 3
+    assert set(values) == {"2026", "2025", "2024"}
+    assert values["2026"] == 18_424_600_000
