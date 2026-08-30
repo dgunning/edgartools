@@ -90,22 +90,16 @@ def _prefer_consolidated_totals(all_rows, chosen):
     """
     from edgar.entity.utils import is_consolidated_total_over
 
-    replacements = {}
-    for period_end, picked in zip(chosen['period_end'], chosen['numeric_value']):
-        same_period = all_rows[all_rows['period_end'] == period_end]
-        larger = [v for v in same_period['numeric_value']
-                  if is_consolidated_total_over(v, picked)]
-        if larger:
-            replacements[period_end] = max(larger)
+    largest = all_rows.groupby('period_end')['numeric_value'].max()
 
-    if not replacements:
-        return chosen
+    def _total_for(row):
+        candidate = largest.get(row.period_end)
+        if is_consolidated_total_over(candidate, row.numeric_value):
+            return candidate
+        return row.numeric_value
 
     chosen = chosen.copy()
-    chosen['numeric_value'] = [
-        replacements.get(period_end, value)
-        for period_end, value in zip(chosen['period_end'], chosen['numeric_value'])
-    ]
+    chosen['numeric_value'] = [_total_for(row) for row in chosen.itertuples()]
     return chosen
 
 
