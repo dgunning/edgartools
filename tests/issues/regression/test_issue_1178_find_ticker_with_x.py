@@ -1,5 +1,7 @@
 """Regression test for issue #1178.
 
+GitHub Issue: https://github.com/dgunning/edgartools/issues/1178
+
 `find()` matched ordinary tickers with `^[A-WYZ]{1,5}...`, a character class that
 excludes `X` in every position — not just the trailing position that marks a
 mutual fund.  XOM, AXP and FIX therefore fell through to ranked company-name

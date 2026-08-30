@@ -1,5 +1,8 @@
 """Regression tests for issues #1172 and #1175.
 
+GitHub Issue: https://github.com/dgunning/edgartools/issues/1172
+GitHub Issue: https://github.com/dgunning/edgartools/issues/1175
+
 #1172 — `XBRLS.query()` stored its option under the keyword `standardize` while
 `StitchedFactQuery` read `standard`, so `standardize=False` was silently dropped
 and standardization stayed on.

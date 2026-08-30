@@ -1,5 +1,7 @@
 """Regression test for issue #1173.
 
+GitHub Issue: https://github.com/dgunning/edgartools/issues/1173
+
 `XBRLS.get_statement(use_optimal_periods=False)` appended the three-item tuple
 returned by `XBRL.find_statement()` to the list of statements handed to
 `StatementStitcher`, which then called `.get()` on it.  The non-optimal path
