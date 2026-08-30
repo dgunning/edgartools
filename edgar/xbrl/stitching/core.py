@@ -1071,8 +1071,18 @@ def stitch_statements(
     # Traditional approach without using entity info
     else:
         for xbrl in xbrl_list:
-            # Get statement data for the specified type
-            statement = xbrl.find_statement(statement_type)
+            # Get statement data for the specified type.  This must be
+            # get_statement_by_type() and not find_statement(): the latter
+            # returns a (statements, role, statement_type) tuple of index
+            # entries, which carries neither 'periods' nor 'data' and which
+            # StatementStitcher cannot read.  Skip filings that lack this
+            # statement type, matching the optimal-periods path above.
+            try:
+                statement = xbrl.get_statement_by_type(
+                    statement_type, include_dimensions=include_dimensions
+                )
+            except StatementNotFoundError:
+                continue
             if statement:
                 statements.append(statement)
 

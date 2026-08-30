@@ -296,13 +296,16 @@ def find(search_id: Union[str, int]) -> Optional[Union[Filing, Entity, CompanySe
         return get_by_accession_number_enriched(accession_number)
     elif re.match(r"\d{4,10}$", search_id):
         return Entity(search_id)
-    elif re.match(r"^[A-WYZ]{1,5}([.-][A-Z])?$", search_id):  # Ticker (including dot or hyphenated)
+    elif re.match(r"^[A-Z]{4}X$", search_id):  # Mutual Fund Ticker
+        # Checked before the ordinary-ticker branch below.  The five-letter
+        # trailing X is the mutual fund convention, so it wins over the more
+        # general ticker shape it would otherwise also match.
+        return find_fund(search_id)
+    elif re.match(r"^[A-Z]{1,5}([.-][A-Z])?$", search_id):  # Ticker (including dot or hyphenated)
         try:
             return Entity(search_id)
         except CompanyNotFoundError:
             return find_company(search_id)
-    elif re.match(r"^[A-Z]{4}X$", search_id):  # Mutual Fund Ticker
-        return find_fund(search_id)
     elif re.match(r"^[CS]\d+$", search_id):
         return find_fund(search_id)
     elif re.match(r"^\d{6,}-", search_id):

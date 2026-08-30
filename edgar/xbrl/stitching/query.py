@@ -278,7 +278,10 @@ class StitchedFactQuery(FactQuery):
 
         # Store query-specific parameters for get_facts
         self._max_periods = kwargs.get('max_periods', 8)
-        self._standard = kwargs.get('standard', True)
+        # XBRLS.query() spells this option 'standardize'; the base FactQuery
+        # spells it 'standard'.  Accept both, or the caller's standardize=False
+        # is silently dropped and standardization stays on.
+        self._standard = kwargs.get('standardize', kwargs.get('standard', True))
         self._statement_types = kwargs.get('statement_types', None)
 
     def __str__(self):
@@ -410,11 +413,18 @@ class StitchedFactQuery(FactQuery):
         for filter_func in self._filters:
             results = [f for f in results if filter_func(f)]
 
-        # Apply transformations
-        for transform_fn in self._transformations:
+        # Apply transformations.  Copy each row before writing to it: get_facts()
+        # hands back the rows from the view's shared cache, so transforming in
+        # place would scale the cache itself and compound on the next query.
+        if self._transformations:
+            transformed = []
             for fact in results:
                 if 'value' in fact and fact['value'] is not None:
-                    fact['value'] = transform_fn(fact['value'])
+                    fact = dict(fact)
+                    for transform_fn in self._transformations:
+                        fact['value'] = transform_fn(fact['value'])
+                transformed.append(fact)
+            results = transformed
 
         # Apply aggregations
         if self._aggregations:
