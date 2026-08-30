@@ -66,6 +66,49 @@ _ANNUAL_DAYS = (300, 400)
 _QUARTERLY_DAYS = (60, 120)
 
 
+# Concept families whose variants are alternative names for one consolidated
+# total, where a same-period candidate many times larger is that total rather
+# than a rival name for it. Not net income: ProfitLoss exceeds NetIncomeLoss by
+# the noncontrolling interest, and preferring it would change whose earnings are
+# reported.
+_CONSOLIDATED_TOTAL_CONCEPTS = frozenset({"revenue"})
+
+
+def _prefer_consolidated_totals(all_rows, chosen):
+    """Replace a ranked pick with the same-period total it is a slice of.
+
+    The variant list orders *names*; it cannot tell that one name measures a
+    part of what another measures. Insurers and banks tag ASC-606 contract
+    revenue beside a far larger consolidated `Revenues` for the same period, and
+    the contract tag ranks first — MetLife's revenue trend read $2.4B against
+    the $77.1B its own income statement reports, and disagreed with
+    `get_revenue()` for the same company and year.
+
+    Uses the same threshold as the standardized getters
+    (`is_consolidated_total_over`) rather than a second copy of the rule, which
+    is what let the two surfaces drift apart in the first place.
+    """
+    from edgar.entity.utils import is_consolidated_total_over
+
+    replacements = {}
+    for period_end, picked in zip(chosen['period_end'], chosen['numeric_value']):
+        same_period = all_rows[all_rows['period_end'] == period_end]
+        larger = [v for v in same_period['numeric_value']
+                  if is_consolidated_total_over(v, picked)]
+        if larger:
+            replacements[period_end] = max(larger)
+
+    if not replacements:
+        return chosen
+
+    chosen = chosen.copy()
+    chosen['numeric_value'] = [
+        replacements.get(period_end, value)
+        for period_end, value in zip(chosen['period_end'], chosen['numeric_value'])
+    ]
+    return chosen
+
+
 def _of_period_type(ts, period):
     """Rows whose reporting window matches the period type the caller asked for.
 
@@ -202,6 +245,9 @@ async def edgar_trends(
                                 .sort_values(['period_end', '_concept_rank', 'numeric_value'],
                                              ascending=[False, True, False])
                                 .drop_duplicates(subset=['period_end'], keep='first'))
+
+                    if concept_name in _CONSOLIDATED_TOTAL_CONCEPTS:
+                        filtered = _prefer_consolidated_totals(ts, filtered)
 
                 # Limit to requested periods
                 filtered = filtered.head(periods)
