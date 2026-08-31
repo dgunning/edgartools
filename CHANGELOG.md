@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`FactQuery.scale()` was a silent no-op on every parsed fact.** Transforms were applied to `fact['value']`, which holds the filed *string*, so `scale()`'s own `isinstance(value, (int, float, Decimal))` guard rejected it and handed it straight back — while `numeric_value`, the float every consumer actually reads, was never transformed on any path. `scale(1000)`, the example in its own docstring, changed nothing. A numeric fact is now transformed on its numeric value and both fields are written together so they cannot disagree; a non-numeric fact keeps being transformed on `value`, so text transforms still work and `scale()` leaves TextBlocks alone through the same guard. `StitchedFactQuery` duplicated the defect and shares the fix. (GH #1187)
+- **`FactQuery.to_dataframe()` served a stale table after the query was narrowed.** The cache was keyed on the column projection alone, so the first `to_dataframe()` answered every later one: after `.by_concept('us-gaap:Assets')`, `execute()` returned 2 rows while `to_dataframe()` still returned the original 1,075, with nothing to say the two disagreed. `FactQuery` is a fluent mutable builder whose methods return `self`, so one object describes a different population after each call, and the key now covers the query configuration as well as the projection. Identical queries are still served from the cache. `StitchedFactQuery` duplicated this one too. (GH #1186)
+
+
 ## [5.55.0] - 2026-08-31
 
 ### Changed
