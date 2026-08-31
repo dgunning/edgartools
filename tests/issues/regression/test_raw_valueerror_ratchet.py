@@ -20,7 +20,9 @@ mechanical fix, so the count is the whole story.
 The number has already moved the wrong way once — the bead recorded 135 on
 2026-07-28 and it was 142 when this test was written, which is the argument for pinning it
 rather than intending to get to it. Tranche 1 (thirteenf/parsers/primary_xml.py,
-seven raises collapsing into one helper) took it to 135.
+seven raises collapsing into one helper) took it to 135, and the #1177
+period-length fix took it to 133 — the ratchet caught that gain on the merge
+that produced it, which is what the fail-on-improvement rule is for.
 """
 
 import ast
@@ -29,7 +31,7 @@ import pathlib
 import pytest
 
 # Lower this when you convert raises. It may never be raised.
-BASELINE = 135
+BASELINE = 133
 
 EDGAR = pathlib.Path(__file__).resolve().parents[3] / "edgar"
 
