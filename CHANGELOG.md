@@ -7,44 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Removed
-
-- **`edgar/files/html_documents_id_parser.py`.** 687 lines and three classes (`AssembleText`, `ParsedHtml10K`, `ParsedHtml10Q`) with no callers anywhere in the library or the tests. The `id_parse_document` path it once served survives only in comments.
-
-### Deprecated
-
-- **`edgar.files.markdown`, `edgar.files.tables` and `edgar.files.text` now warn.** 6.0 deletes the `edgar.files` package, and these three were the user-reachable modules with no deprecation, so code importing them would have got no notice at all — just an `ImportError` on upgrade. They warn for external callers and stay silent for edgartools' own internal use. `edgar.files.styles` is deliberately left unwarned: `parse_style` runs thousands of times per document and the frame check is not free, and its entry points (`Document`, `SECHTMLParser`) already warn.
-
-### Fixed
-
-- **One legacy render no longer emits a pile of deprecation warnings.** The frame check that decides whether a legacy call came from user code skipped every deprecated module rather than only the one raising the warning, so a legacy module calling another read as a user call: `Document.parse(...).to_markdown()` emitted four warnings, two naming modules the caller never touched. It now skips only the warning's own module.
-- **Four dead modules that no longer had callers.** `edgar/tools/` (an empty package), `edgar/analysis/` and `edgar/xbrl/analysis/` (both already emptied of their modules, leaving only stale caches), and `edgar/reference/financials.py` (a seven-line scratch script with a `__main__` block and no importers). Nothing in the library or the tests referenced any of them.
-
-### Deprecated
-
-- **`edgar.effect` and `edgar.form144` moved, with the old paths kept until 6.0.** `Effect` now lives in `edgar.offerings.effect`, beside the S-1/S-3/S-4, 424B and Form C/D parsers — a notice of effectiveness is a registration-lifecycle document. `Form144` now lives in `edgar.ownership.form144`, beside the Forms 3/4/5 parsers — Form 144 is an affiliate's notice of a proposed sale. Neither name was in `edgar.__all__` nor re-exported at the top level, so the module path was their whole public surface; both old paths still work and emit a `DeprecationWarning` naming the new one. The objects are the same objects, not copies, so `isinstance` checks against either path agree. `filing.obj()` routes to the new paths, so ordinary use never triggers the warning. (bead edgartools-07lk.12.1)
-
 ### Changed
 
 - **`edgar.muniadvisors` is a package rather than a single module.** The MA-I parser moved to `edgar/muniadvisors/core.py`, matching `edgar/ownership/` and `edgar/entity/`. Nothing changes for callers: a module converting to a package of the same name keeps the import path identical, and all 19 of its public names still resolve to the same objects — `__all__` named only `MunicipalAdvisorForm`, so a naive re-export would have dropped the other 18. (bead edgartools-07lk.12.1)
 - **The wheel no longer ships development tooling.** `[tool.hatch.build].include` opens with an unrestricted `edgar/**/*.py`, so every install also downloaded the evaluation harnesses, entity training scripts and demos under `edgar/` — about 8,900 lines across `ai/evaluation/`, `ai/examples/`, `entity/training/` and `thirteenf/demo_comparison.py`. They are excluded now; `ai/exporters/` stays, since `export_skill` is public API. A regression test asserts that no shipped module imports any excluded path, which is the property that makes the exclusion safe rather than the exclusion itself.
-
-### Changed
-
 - **Three silently-disabled signals now say when they fail.** An XBRL/SGML date-discrepancy check, foreign-exchange rate extraction, and a municipal advisor's disclosure summary each swallowed their exception and returned a result that looked complete: `CurrencyConverter` reported "no rates found" when extraction had crashed, and an MA-I summary whose disclosure block failed to parse read as a clean compliance record. All three now log a warning and carry the failure — `XBRL.period_validation_unavailable`, `CurrencyConverter.extraction_warnings`, and an explicit line in the advisor summary. No exception propagates that did not before.
 - **A malformed 13F primary document now says which element is missing.** Seven raises in the primary-document parser — six of them the same sentence with a different noun — became one `_require_element()` helper raising `ValidationError` with the element name and the namespace hint that explains most of these failures. `ValidationError` IS-A `ValueError`, so anything catching the old raise still catches this one.
+
 ### Deprecated
 
+- **`edgar.files.markdown`, `edgar.files.tables` and `edgar.files.text` now warn.** 6.0 deletes the `edgar.files` package, and these three were the user-reachable modules with no deprecation, so code importing them would have got no notice at all — just an `ImportError` on upgrade. They warn for external callers and stay silent for edgartools' own internal use. `edgar.files.styles` is deliberately left unwarned: `parse_style` runs thousands of times per document and the frame check is not free, and its entry points (`Document`, `SECHTMLParser`) already warn.
+- **`edgar.effect` and `edgar.form144` moved, with the old paths kept until 6.0.** `Effect` now lives in `edgar.offerings.effect`, beside the S-1/S-3/S-4, 424B and Form C/D parsers — a notice of effectiveness is a registration-lifecycle document. `Form144` now lives in `edgar.ownership.form144`, beside the Forms 3/4/5 parsers — Form 144 is an affiliate's notice of a proposed sale. Neither name was in `edgar.__all__` nor re-exported at the top level, so the module path was their whole public surface; both old paths still work and emit a `DeprecationWarning` naming the new one. The objects are the same objects, not copies, so `isinstance` checks against either path agree. `filing.obj()` routes to the new paths, so ordinary use never triggers the warning. (bead edgartools-07lk.12.1)
 - **`period_length` on `EntityFacts.income_statement()` and `.cash_flow_statement()` warns before 6.0 removes it.** `period=` is the supported spelling and the only one that can also ask for `'ttm'`. The parameter is honoured now rather than ignored — see Fixed below. (GH #1177)
+
+### Removed
+
+- **`edgar/files/html_documents_id_parser.py`.** 687 lines and three classes (`AssembleText`, `ParsedHtml10K`, `ParsedHtml10Q`) with no callers anywhere in the library or the tests. The `id_parse_document` path it once served survives only in comments.
+- **Four dead modules that no longer had callers.** `edgar/tools/` (an empty package), `edgar/analysis/` and `edgar/xbrl/analysis/` (both already emptied of their modules, leaving only stale caches), and `edgar/reference/financials.py` (a seven-line scratch script with a `__main__` block and no importers). Nothing in the library or the tests referenced any of them.
 
 ### Fixed
 
+- **One legacy render no longer emits a pile of deprecation warnings.** The frame check that decides whether a legacy call came from user code skipped every deprecated module rather than only the one raising the warning, so a legacy module calling another read as a user call: `Document.parse(...).to_markdown()` emitted four warnings, two naming modules the caller never touched. It now skips only the warning's own module.
 - **`period_length` was accepted, documented, and never read.** `EntityFacts.income_statement(period_length=3)` and `.cash_flow_statement(period_length=3)` returned the *annual* statement with no warning — the parameter appeared nowhere in either method body and had not since the Facts API landed. It now selects the period it names, and a value contradicting `period=` or `annual=` raises `ValidationError` instead of being silently resolved. Numbers can change for callers who were passing it: they were reading annual figures under a quarterly label. (GH #1177)
 - **`XBRLS.get_statement(use_optimal_periods=False)` crashed instead of returning a statement.** The non-optimal path appended the `(statements, role, statement_type)` tuple from `XBRL.find_statement()` to the list handed to `StatementStitcher`, which then called `.get()` on it and raised `AttributeError: 'tuple' object has no attribute 'get'`. It now calls `get_statement_by_type()`, the same accessor the optimal path uses, and skips filings that lack the statement type. (GH #1173)
 - **`XBRLS.query(standardize=False)` still standardized.** The option was stored under the keyword `standardize` and read back as `standard`, so it never reached `get_statement()` and every query came back with standard-concept mapping applied. Both spellings are now accepted. (GH #1172)
 - **`FactQuery.transform()` and `.scale()` mutated the shared fact cache.** Transformed values were written back into the row dictionaries returned by `get_facts()`, which come from the facts view's cache, so `.scale(1000)` scaled the cache itself and a second identical query returned values divided by a million. Rows are now copied before transformation. `StitchedFactQuery` had the same defect. (GH #1175)
 - **`find()` did not recognize tickers containing `X`.** The ordinary-ticker pattern was `^[A-WYZ]{1,5}([.-][A-Z])?$`, a character class excluding `X` in every position rather than only the trailing position that marks a mutual fund, so `find("XOM")` returned `CompanySearchResults` instead of the `Company` that `Company("XOM")` resolves. The `^[A-Z]{4}X$` fund pattern is now tested first and the ticker pattern admits the full alphabet. (GH #1178)
-
 ## [5.54.0] - 2026-08-30
 
 ### Deprecated
