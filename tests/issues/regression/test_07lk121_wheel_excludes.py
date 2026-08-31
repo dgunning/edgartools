@@ -105,9 +105,17 @@ def test_exporters_is_not_excluded():
 
 
 def test_the_deleted_dead_packages_stay_deleted():
-    for gone in ("tools", "analysis", "reference/financials.py"):
-        assert not (EDGAR / gone).exists(), f"edgar/{gone} came back; it has no callers"
-    assert not (EDGAR / "xbrl" / "analysis").exists()
+    """Assert no SOURCE remains, not that the directory is absent.
+
+    A directory check is fooled by a leftover `__pycache__`: after `git rm` of
+    the last .py, the folder survives on any machine that had imported it, so
+    this passed on CI's fresh checkout and failed on a developer's. Bytecode is
+    a local artifact and never ships — what must stay gone is the source.
+    """
+    for gone in ("tools", "analysis", "xbrl/analysis"):
+        leftovers = sorted(p.name for p in (EDGAR / gone).glob("*.py"))
+        assert not leftovers, f"edgar/{gone} came back: {leftovers}"
+    assert not (EDGAR / "reference" / "financials.py").exists()
 
 
 @pytest.mark.slow
