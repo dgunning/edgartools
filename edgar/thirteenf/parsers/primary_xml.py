@@ -4,6 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from edgar._party import Address
+from edgar.exceptions import ValidationError
 from edgar.thirteenf.models import (
     AmendmentInfo,
     CoverPage,
@@ -17,6 +18,34 @@ from edgar.xmltools import child_text, find_all_elements, find_element, local_na
 from edgar.xmltools import parse_xml as parse_xml_document
 
 __all__ = ['parse_primary_document_xml']
+
+
+def _require_element(parent, name: str):
+    """Return the required child `name`, or say which one was missing.
+
+    Six sites read a required element and raised the same sentence with a
+    different noun in it (bead edgartools-35jj, tranche 1). Collapsing them
+    into one helper is what makes the message worth improving: the caller now
+    learns the element and that a namespace mismatch is the usual cause, which
+    is the failure this parser actually sees (edgartools-07lk.11.3).
+
+    `ValidationError` rather than `ParsingError` because it IS-A `ValueError`,
+    so every `except ValueError:` written against the old raise keeps working.
+    That additivity is the whole reason this conversion is not a 6.0 break.
+    """
+    element = find_element(parent, name)
+    if element is None:
+        raise ValidationError(
+            f"Could not find <{name}> in the 13F primary document.",
+            parameter="primary_document_xml",
+            suggestions=[
+                f"the document is missing <{name}>, or is not a 13F primary document",
+                "13F primary documents carry a default namespace, so elements are "
+                "matched on their local name — a namespace-qualified lookup finds "
+                "nothing here",
+            ],
+        )
+    return element
 
 
 def parse_primary_document_xml(primary_document_xml: str):
@@ -35,24 +64,22 @@ def parse_primary_document_xml(primary_document_xml: str):
     # lxml `.//headerData` finds nothing here — silently (edgartools-07lk.11.3).
     root = parse_xml_document(primary_document_xml)
     if local_name(root) != "edgarSubmission":
-        raise ValueError(f"Expected an edgarSubmission document, got <{local_name(root)}>")
+        raise ValidationError(
+            f"Expected an edgarSubmission document, got <{local_name(root)}>.",
+            parameter="primary_document_xml",
+            invalid_value=local_name(root),
+            suggestions=["this is the 13F primary document parser; check the attachment "
+                         "you passed is the primary document and not an information table"],
+        )
 
     # Header data
-    header_data = find_element(root, "headerData")
-    if header_data is None:
-        raise ValueError("Could not find headerData in XML")
-    filer_info = find_element(header_data, "filerInfo")
-    if filer_info is None:
-        raise ValueError("Could not find filerInfo in XML")
+    header_data = _require_element(root, "headerData")
+    filer_info = _require_element(header_data, "filerInfo")
     report_period = datetime.strptime(child_text(filer_info, "periodOfReport") or "", "%m-%d-%Y")
 
     # Form Data
-    form_data = find_element(root, "formData")
-    if form_data is None:
-        raise ValueError("Could not find formData in XML")
-    cover_page_el = find_element(form_data, "coverPage")
-    if cover_page_el is None:
-        raise ValueError("Could not find coverPage in XML")
+    form_data = _require_element(root, "formData")
+    cover_page_el = _require_element(form_data, "coverPage")
 
     report_calendar_or_quarter = child_text(form_data, "reportCalendarOrQuarter")
     report_type = child_text(cover_page_el, "reportType")
@@ -79,14 +106,10 @@ def parse_primary_document_xml(primary_document_xml: str):
         )
 
     # Filing Manager
-    filing_manager_el = find_element(cover_page_el, "filingManager")
-    if filing_manager_el is None:
-        raise ValueError("Could not find filingManager in XML")
+    filing_manager_el = _require_element(cover_page_el, "filingManager")
 
     # Address
-    address_el = find_element(filing_manager_el, "address")
-    if address_el is None:
-        raise ValueError("Could not find address in XML")
+    address_el = _require_element(filing_manager_el, "address")
     address = Address(
         street1=child_text(address_el, "street1"),
         street2=child_text(address_el, "street2"),
