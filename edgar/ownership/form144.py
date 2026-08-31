@@ -14,6 +14,7 @@ from edgar.richtools import repr_rich
 from edgar.xmltools import XmlNode, child_text, child_texts, element_text, find_all_elements, find_element, local_name
 from edgar.xmltools import parse_xml as parse_xml_document
 
+
 __all__ = ['Form144',
            'SecuritiesHolder',
            'SecuritiesInformationHolder',
@@ -22,6 +23,26 @@ __all__ = ['Form144',
            'concat_securities_information',
            'concat_securities_to_be_sold'
            ]
+
+
+def _yes_no_flag(value: Optional[str]) -> Optional[bool]:
+    """Read an SEC 'Y'/'N' flag as a boolean.
+
+    Anything unrecognized — including an absent element — stays None rather than
+    defaulting, so 'the filer did not answer' is distinguishable from 'the filer
+    answered no'. Returning the raw string is what made gh #1195 possible:
+    ``bool("N")`` is True, so a filing *with* sales to report read as having
+    nothing to report.
+    """
+    if value is None:
+        return None
+    flag = value.strip().upper()
+    if flag == 'Y':
+        return True
+    if flag == 'N':
+        return False
+    return None
+
 
 
 @dataclass(frozen=True)
@@ -451,7 +472,7 @@ class Form144:
                  securities_information: pd.DataFrame,
                  securities_to_be_sold: pd.DataFrame,
                  securities_sold_past_3_months: pd.DataFrame,
-                 nothing_to_report: bool,
+                 nothing_to_report: Optional[bool],
                  remarks: str,
                  notice_signature: NoticeSignature
                  ):
@@ -864,7 +885,8 @@ class Form144:
             for el in find_all_elements(form_data, 'securitiesToBeSold')
         ])
         # Nothing to report flag
-        form144['nothing_to_report'] = child_text(form_data, 'nothingToReportFlagOnSecuritiesSoldInPast3Months')
+        form144['nothing_to_report'] = _yes_no_flag(
+            child_text(form_data, 'nothingToReportFlagOnSecuritiesSoldInPast3Months'))
 
         # Securities sold in past 3 months
         form144['securities_sold_past_3_months'] = pd.DataFrame([

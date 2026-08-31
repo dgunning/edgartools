@@ -138,7 +138,7 @@ class SalesCompensationRecipient:
             city=child_text(address_tag, "city"),
             state_or_country=child_text(address_tag, "stateOrCountry"),
             state_or_country_description=child_text(address_tag, "stateOrCountryDescription"),
-            zipcode=child_text(address_tag, "30361")
+            zipcode=child_text(address_tag, "zipCode")
         ) if address_tag is not None else None
 
         # States of Solicitation List
@@ -222,8 +222,10 @@ class OfferingData:
         # type of filing
         type_of_filing_el = find_element(offering_data_el, "typeOfFiling")
         new_or_amendment_el = find_element(type_of_filing_el, "newOrAmendment")
-        new_or_amendment = (child_text(new_or_amendment_el, "isAmendment") == "true"
-                            if new_or_amendment_el is not None else None)
+        # <isAmendment> answers the opposite question to `is_new`, so it is named for
+        # what it holds and inverted at the point of use (gh #1192).
+        is_amendment = (child_text(new_or_amendment_el, "isAmendment") == "true"
+                        if new_or_amendment_el is not None else None)
         date_of_first_sale = child_value(type_of_filing_el, "dateOfFirstSale")
 
         # Duration of transaction
@@ -288,7 +290,7 @@ class OfferingData:
         return cls(industry_group=industry_group,
                    revenue_range=revenue_range,
                    federal_exemptions=federal_exemptions,
-                   is_new=new_or_amendment,
+                   is_new=None if is_amendment is None else not is_amendment,
                    date_of_first_sale=date_of_first_sale,
                    more_than_one_year=more_than_one_year,
                    is_equity=is_equity,
@@ -426,8 +428,9 @@ class FormD:
         od = self.offering_data
 
         # === IDENTITY ===
-        amendment = "/A" if not self.is_new else ""
-        lines.append(f"FORMD{amendment}: {issuer.entity_name}")
+        # submissionType ("D" / "D/A") is the SEC's own answer, so the heading does not
+        # depend on a derived boolean and cannot disagree with `self.submission_type`.
+        lines.append(f"FORM{self.submission_type or 'D'}: {issuer.entity_name}")
         lines.append("")
 
         # === CORE METADATA ===

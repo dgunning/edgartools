@@ -74,7 +74,9 @@ def test_securities_sold_in_the_past_three_months_are_read(sample):
     assert rows[0]['seller_name'] == "Virtu Financial"
     assert rows[0]['sale_date'] == "08/27/2022"
     assert rows[0]['amount_sold'] == 0
-    assert sample['nothing_to_report'] == "N"
+    # The filed flag is 'N' and there is one sale row above it; the parsed field
+    # is the boolean its annotation always promised, not the raw code (gh #1195).
+    assert sample['nothing_to_report'] is False
 
 
 def test_each_plan_adoption_date_keeps_its_own_text(sample):
