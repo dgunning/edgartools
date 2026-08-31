@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **A filtered or paged `Reports` collection returned reports whose content could not be read.** `Report.content` fetches its R-file through `reports._filing_summary._filing_sgml`, and three of the four methods that return a new collection rebuilt it without that back-reference, so `filter()`, `next()` and `previous()` handed back reports with the right filenames and raised `AttributeError: 'NoneType' object has no attribute '_filing_sgml'` on `.content`. On Apple's FY2024 10-K a multi-row filter now reads R3.htm as the 79,891 characters `get_by_category()` always returned. Only the multi-row branch of `filter()` was affected — filtering to a single report returns a `Report` still attached to the original collection, which is why this stayed hidden. Deriving a collection now goes through one place, so the next method to return a subset carries the context by default. (GH #1191)
+
+
 ## [5.55.0] - 2026-08-31
 
 ### Changed
