@@ -70,7 +70,9 @@ def test_the_offering_sections_are_each_present(ap_fund):
 
     assert offering.revenue_range == "Decline to Disclose"
     assert offering.federal_exemptions == ["06b", "3C.1"]
-    assert offering.is_new is False
+    # D.APFund.xml files <submissionType>D</submissionType> with
+    # <isAmendment>false</isAmendment>, so this is a base notice (gh #1192).
+    assert offering.is_new is True
     assert offering.more_than_one_year is False
     assert offering.is_equity is False
     assert offering.is_pooled_investment is True
