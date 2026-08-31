@@ -1,6 +1,6 @@
 """What `Form144.parse_xml` owes its callers, with no network.
 
-`edgar/form144.py` moved from BeautifulSoup to lxml under edgartools-07lk.11.3.
+`edgar/ownership/form144.py` (then `edgar/form144.py`) moved from BeautifulSoup to lxml under edgartools-07lk.11.3.
 Form 144 XML is namespaced twice — `xmlns="http://www.sec.gov/edgar/ownership"`
 for the body and `xmlns:com="http://www.sec.gov/edgar/common"` for every address
 block — so a plain lxml `.//street1` finds nothing at all, silently. Every read

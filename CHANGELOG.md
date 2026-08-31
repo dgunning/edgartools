@@ -18,6 +18,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **One legacy render no longer emits a pile of deprecation warnings.** The frame check that decides whether a legacy call came from user code skipped every deprecated module rather than only the one raising the warning, so a legacy module calling another read as a user call: `Document.parse(...).to_markdown()` emitted four warnings, two naming modules the caller never touched. It now skips only the warning's own module.
+- **Four dead modules that no longer had callers.** `edgar/tools/` (an empty package), `edgar/analysis/` and `edgar/xbrl/analysis/` (both already emptied of their modules, leaving only stale caches), and `edgar/reference/financials.py` (a seven-line scratch script with a `__main__` block and no importers). Nothing in the library or the tests referenced any of them.
+
+### Deprecated
+
+- **`edgar.effect` and `edgar.form144` moved, with the old paths kept until 6.0.** `Effect` now lives in `edgar.offerings.effect`, beside the S-1/S-3/S-4, 424B and Form C/D parsers — a notice of effectiveness is a registration-lifecycle document. `Form144` now lives in `edgar.ownership.form144`, beside the Forms 3/4/5 parsers — Form 144 is an affiliate's notice of a proposed sale. Neither name was in `edgar.__all__` nor re-exported at the top level, so the module path was their whole public surface; both old paths still work and emit a `DeprecationWarning` naming the new one. The objects are the same objects, not copies, so `isinstance` checks against either path agree. `filing.obj()` routes to the new paths, so ordinary use never triggers the warning. (bead edgartools-07lk.12.1)
+
+### Changed
+
+- **`edgar.muniadvisors` is a package rather than a single module.** The MA-I parser moved to `edgar/muniadvisors/core.py`, matching `edgar/ownership/` and `edgar/entity/`. Nothing changes for callers: a module converting to a package of the same name keeps the import path identical, and all 19 of its public names still resolve to the same objects — `__all__` named only `MunicipalAdvisorForm`, so a naive re-export would have dropped the other 18. (bead edgartools-07lk.12.1)
+- **The wheel no longer ships development tooling.** `[tool.hatch.build].include` opens with an unrestricted `edgar/**/*.py`, so every install also downloaded the evaluation harnesses, entity training scripts and demos under `edgar/` — about 8,900 lines across `ai/evaluation/`, `ai/examples/`, `entity/training/` and `thirteenf/demo_comparison.py`. They are excluded now; `ai/exporters/` stays, since `export_skill` is public API. A regression test asserts that no shipped module imports any excluded path, which is the property that makes the exclusion safe rather than the exclusion itself.
 
 ### Changed
 

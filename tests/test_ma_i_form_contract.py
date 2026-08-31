@@ -1,6 +1,6 @@
 """What `MunicipalAdvisorForm.from_xml` owes its callers, with no network.
 
-`edgar/muniadvisors.py` moved from BeautifulSoup to lxml under
+`edgar/muniadvisors/core.py` (then `edgar/muniadvisors.py`) moved from BeautifulSoup to lxml under
 edgartools-07lk.11.3. MA-I is a heavily namespaced form — a default
 `http://www.sec.gov/edgar/maifiler` namespace for the form's own elements plus
 two prefixed ones (`common_ma`, `common`) that carry most of the leaf values —
