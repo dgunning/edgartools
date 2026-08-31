@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- **Four dead modules that no longer had callers.** `edgar/tools/` (an empty package), `edgar/analysis/` and `edgar/xbrl/analysis/` (both already emptied of their modules, leaving only stale caches), and `edgar/reference/financials.py` (a seven-line scratch script with a `__main__` block and no importers). Nothing in the library or the tests referenced any of them.
+
+### Changed
+
+- **The wheel no longer ships development tooling.** `[tool.hatch.build].include` opens with an unrestricted `edgar/**/*.py`, so every install also downloaded the evaluation harnesses, entity training scripts and demos under `edgar/` — about 8,900 lines across `ai/evaluation/`, `ai/examples/`, `entity/training/` and `thirteenf/demo_comparison.py`. They are excluded now; `ai/exporters/` stays, since `export_skill` is public API. A regression test asserts that no shipped module imports any excluded path, which is the property that makes the exclusion safe rather than the exclusion itself.
+
 ### Deprecated
 
 - **`period_length` on `EntityFacts.income_statement()` and `.cash_flow_statement()` warns before 6.0 removes it.** `period=` is the supported spelling and the only one that can also ask for `'ttm'`. The parameter is honoured now rather than ignored — see Fixed below. (GH #1177)

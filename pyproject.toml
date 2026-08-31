@@ -159,6 +159,23 @@ include = [
   "edgar/xbrl/standardization/*",
   "LICENSE.txt"
 ]
+# Development tooling that lives under edgar/ but is not the library. The
+# `edgar/**/*.py` line above is an unrestricted glob, so without these every
+# user pip-installing edgartools was also downloading ~8,900 lines of eval
+# harnesses, training scripts and demos (bead edgartools-07lk.12.1).
+#
+# Nothing shipped imports any of these — tests/issues/regression/
+# test_07lk121_wheel_excludes.py holds that invariant, which is the thing that
+# makes the exclusion safe rather than the exclusion itself.
+#
+# edgar/ai/exporters/ deliberately STAYS: export_skill is public API, imported
+# by edgar/ai/__init__.py.
+exclude = [
+  "edgar/ai/evaluation/**",
+  "edgar/ai/examples/**",
+  "edgar/entity/training/**",
+  "edgar/thirteenf/demo_comparison.py",
+]
 artifacts = [
   "LICENSE.txt"  # And this line
 ]
