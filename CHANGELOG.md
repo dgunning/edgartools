@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.55.0] - 2026-08-31
+
 ### Changed
 
 - **`edgar.muniadvisors` is a package rather than a single module.** The MA-I parser moved to `edgar/muniadvisors/core.py`, matching `edgar/ownership/` and `edgar/entity/`. Nothing changes for callers: a module converting to a package of the same name keeps the import path identical, and all 19 of its public names still resolve to the same objects — `__all__` named only `MunicipalAdvisorForm`, so a naive re-export would have dropped the other 18. (bead edgartools-07lk.12.1)
@@ -40,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`XBRLS.query(standardize=False)` still standardized.** The option was stored under the keyword `standardize` and read back as `standard`, so it never reached `get_statement()` and every query came back with standard-concept mapping applied. Both spellings are now accepted. (GH #1172)
 - **`FactQuery.transform()` and `.scale()` mutated the shared fact cache.** Transformed values were written back into the row dictionaries returned by `get_facts()`, which come from the facts view's cache, so `.scale(1000)` scaled the cache itself and a second identical query returned values divided by a million. Rows are now copied before transformation. `StitchedFactQuery` had the same defect. (GH #1175)
 - **`find()` did not recognize tickers containing `X`.** The ordinary-ticker pattern was `^[A-WYZ]{1,5}([.-][A-Z])?$`, a character class excluding `X` in every position rather than only the trailing position that marks a mutual fund, so `find("XOM")` returned `CompanySearchResults` instead of the `Company` that `Company("XOM")` resolves. The `^[A-Z]{4}X$` fund pattern is now tested first and the ticker pattern admits the full alphabet. (GH #1178)
+
 ## [5.54.0] - 2026-08-30
 
 ### Deprecated
