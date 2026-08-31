@@ -40,6 +40,27 @@ from edgar.xbrl.statement_resolver import StatementResolver
 from edgar.xbrl.statements import statement_to_concepts
 
 
+def _capture_sgml_period_of_report(xbrl: "XBRL", filing) -> None:
+    """Record the filing header's period_of_report on `xbrl`, or say why not.
+
+    This is the second of the two dates `_get_validated_period_of_report()`
+    compares. When it is missing that method has nothing to check the XBRL date
+    against and returns it unvalidated — the same value it returns when the two
+    dates agree. Swallowing a failure here therefore does not degrade the
+    presentation, it turns off a correctness check while the result continues to
+    look checked, which is what makes it a bug rather than a guard
+    (bead edgartools-35jj).
+    """
+    try:
+        xbrl._sgml_period_of_report = filing.period_of_report
+    except Exception as e:
+        xbrl._period_validation_unavailable = f"{type(e).__name__}: {e}"
+        log.warning(
+            "Could not read period_of_report from the filing header for %s (%s). "
+            "XBRL/SGML date-discrepancy detection is disabled for this filing, so "
+            "period_of_report is the unvalidated XBRL date.",
+            getattr(filing, "accession_no", "<unknown filing>"), e,
+        )
 
 
 class XBRLFilingWithNoXbrlData(NotFoundError):
@@ -160,6 +181,11 @@ class XBRL:
         self._sgml_period_of_report: Optional[str] = None
         self._validated_period_of_report_cache: Optional[str] = None
         self._period_of_report_warning_logged: bool = False
+        # Set when the SGML date could not be read at all, which turns the
+        # discrepancy check off rather than making it disagree. Carried so that
+        # "the dates agreed" and "we never had a second date" are distinguishable
+        # (bead edgartools-35jj).
+        self._period_validation_unavailable: Optional[str] = None
 
         # Standardization cache for this XBRL instance (lazy-initialized)
         self._standardization_cache = None
@@ -424,6 +450,18 @@ class XBRL:
     def period_of_report(self) -> Optional[str]:
         """Get the document period end date, with discrepancy detection."""
         return self._get_validated_period_of_report()
+
+    @property
+    def period_validation_unavailable(self) -> Optional[str]:
+        """Why the XBRL/SGML date cross-check could not run, or None if it could.
+
+        `period_of_report` normally validates the XBRL date against the SGML
+        header date. When the header date cannot be read there is nothing to
+        check against and the XBRL date is returned as-is — the same value the
+        check would return when the dates agree. This says which of the two
+        happened.
+        """
+        return self._period_validation_unavailable
 
     def _get_xbrl_period_of_report(self) -> Optional[str]:
         """Get the raw XBRL document_period_end_date without validation."""
@@ -697,11 +735,8 @@ class XBRL:
                     f"the filing — entity info and facts will be empty."
                 )
 
-        # Capture SGML period_of_report for date discrepancy detection
-        try:
-            xbrl._sgml_period_of_report = filing.period_of_report
-        except Exception:
-            pass
+        # Capture SGML period_of_report for date discrepancy detection.
+        _capture_sgml_period_of_report(xbrl, filing)
 
         # Try to set industry from filing header SIC for industry-specific standardization
         try:

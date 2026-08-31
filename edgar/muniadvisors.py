@@ -11,6 +11,7 @@ from rich.text import Text
 
 from edgar import Filing
 from edgar._party import Address, Name
+from edgar.core import log
 from edgar.richtools import repr_rich
 from edgar.xmltools import (
     child_text,
@@ -679,8 +680,15 @@ class MunicipalAdvisorForm:
                         flags.append(disc_type)
                 if flags:
                     lines.append(f"Disclosures: {', '.join(flags)}")
-        except Exception:
-            pass
+        except Exception as e:
+            # A swallow here inverts the meaning of the summary: no "Disclosures:"
+            # line reads as a clean record, and for a municipal advisor that is a
+            # compliance-relevant claim we have not established. Say so instead
+            # (bead edgartools-35jj).
+            applicant = getattr(self, "applicant", None)
+            log.warning("Could not read disclosures for municipal advisor %s: %s",
+                        getattr(applicant, "full_name", None) or "<unknown>", e)
+            lines.append("Disclosures: could not be read — this is NOT a clean record")
 
         lines.append("")
         lines.append("AVAILABLE ACTIONS:")

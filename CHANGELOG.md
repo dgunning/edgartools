@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **The wheel no longer ships development tooling.** `[tool.hatch.build].include` opens with an unrestricted `edgar/**/*.py`, so every install also downloaded the evaluation harnesses, entity training scripts and demos under `edgar/` — about 8,900 lines across `ai/evaluation/`, `ai/examples/`, `entity/training/` and `thirteenf/demo_comparison.py`. They are excluded now; `ai/exporters/` stays, since `export_skill` is public API. A regression test asserts that no shipped module imports any excluded path, which is the property that makes the exclusion safe rather than the exclusion itself.
 
+### Changed
+
+- **Three silently-disabled signals now say when they fail.** An XBRL/SGML date-discrepancy check, foreign-exchange rate extraction, and a municipal advisor's disclosure summary each swallowed their exception and returned a result that looked complete: `CurrencyConverter` reported "no rates found" when extraction had crashed, and an MA-I summary whose disclosure block failed to parse read as a clean compliance record. All three now log a warning and carry the failure — `XBRL.period_validation_unavailable`, `CurrencyConverter.extraction_warnings`, and an explicit line in the advisor summary. No exception propagates that did not before.
+- **A malformed 13F primary document now says which element is missing.** Seven raises in the primary-document parser — six of them the same sentence with a different noun — became one `_require_element()` helper raising `ValidationError` with the element name and the namespace hint that explains most of these failures. `ValidationError` IS-A `ValueError`, so anything catching the old raise still catches this one.
 ### Deprecated
 
 - **`period_length` on `EntityFacts.income_statement()` and `.cash_flow_statement()` warns before 6.0 removes it.** `period=` is the supported spelling and the only one that can also ask for `'ttm'`. The parameter is honoured now rather than ignored — see Fixed below. (GH #1177)
