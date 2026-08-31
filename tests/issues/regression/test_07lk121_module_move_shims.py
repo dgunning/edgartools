@@ -90,3 +90,55 @@ def test_importing_edgar_emits_no_move_warning():
         warnings.simplefilter("always")
         importlib.reload(importlib.import_module("edgar"))
     assert not [w for w in caught if "has moved" in str(w.message)]
+
+
+# ---------------------------------------------------------------------------
+# edgar.muniadvisors — module became a package of the SAME name
+# ---------------------------------------------------------------------------
+#
+# No shim and no deprecation: the dotted path is unchanged, so this is invisible
+# to callers. What can break is subtler — `__all__` names only
+# MunicipalAdvisorForm while the module carried 19 public top-level names that
+# attribute access could reach. A package __init__ that re-exported `__all__`
+# alone would drop the other 18 and look entirely correct doing it.
+
+MUNI_PUBLIC_NAMES = [
+    "Filer", "Contact", "Employer", "Office", "MunicipalAdvisorOffice",
+    "CriminalDisclosure", "RegulatoryDisclosure", "CivilDisclosure",
+    "ComplaintDisclosure", "TerminationDisclosure", "FinancialDisclosure",
+    "JudgementLienDisclosure", "InvestigationDisclosure", "employment_date",
+    "EmploymentHistory", "Applicant", "Disclosures", "Signature",
+    "MunicipalAdvisorForm",
+]
+
+
+def test_muniadvisors_is_now_a_package():
+    import edgar.muniadvisors as muni
+    assert muni.__file__.endswith("muniadvisors/__init__.py")
+    assert muni.MunicipalAdvisorForm.__module__ == "edgar.muniadvisors.core"
+
+
+def test_the_import_path_is_unchanged_and_does_not_warn():
+    """A same-name package conversion is invisible; a warning here is a bug."""
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        importlib.reload(importlib.import_module("edgar.muniadvisors"))
+    assert not [w for w in caught if issubclass(w.category, DeprecationWarning)]
+
+
+@pytest.mark.parametrize("name", MUNI_PUBLIC_NAMES)
+def test_every_public_name_survived_the_package_conversion(name):
+    import edgar.muniadvisors as muni
+    from edgar.muniadvisors import core
+    assert getattr(muni, name) is getattr(core, name)
+
+
+def test_star_import_surface_is_unchanged():
+    import edgar.muniadvisors as muni
+    assert muni.__all__ == ["MunicipalAdvisorForm"]
+
+
+def test_unknown_attribute_still_raises():
+    import edgar.muniadvisors as muni
+    with pytest.raises(AttributeError):
+        muni.no_such_attribute_anywhere

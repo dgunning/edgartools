@@ -305,7 +305,7 @@ def test_name_full_name_joins_the_parts():
 def test_name_full_name_without_a_middle_name():
     """Regression for edgartools-n921: this used to raise TypeError.
 
-    `child_text` returns None for an absent `<middleName>` (edgar/muniadvisors.py:370),
+    `child_text` returns None for an absent `<middleName>` (edgar/muniadvisors/core.py),
     so this is the common case for muni advisors, not an edge case.
     """
     assert Name(first_name="John", middle_name=None, last_name="Public").full_name == "John Public"
