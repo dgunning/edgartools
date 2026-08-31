@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- **`edgar/files/html_documents_id_parser.py`.** 687 lines and three classes (`AssembleText`, `ParsedHtml10K`, `ParsedHtml10Q`) with no callers anywhere in the library or the tests. The `id_parse_document` path it once served survives only in comments.
+
+### Deprecated
+
+- **`edgar.files.markdown`, `edgar.files.tables` and `edgar.files.text` now warn.** 6.0 deletes the `edgar.files` package, and these three were the user-reachable modules with no deprecation, so code importing them would have got no notice at all — just an `ImportError` on upgrade. They warn for external callers and stay silent for edgartools' own internal use. `edgar.files.styles` is deliberately left unwarned: `parse_style` runs thousands of times per document and the frame check is not free, and its entry points (`Document`, `SECHTMLParser`) already warn.
+
+### Fixed
+
+- **One legacy render no longer emits a pile of deprecation warnings.** The frame check that decides whether a legacy call came from user code skipped every deprecated module rather than only the one raising the warning, so a legacy module calling another read as a user call: `Document.parse(...).to_markdown()` emitted four warnings, two naming modules the caller never touched. It now skips only the warning's own module.
+
 ### Changed
 
 - **Three silently-disabled signals now say when they fail.** An XBRL/SGML date-discrepancy check, foreign-exchange rate extraction, and a municipal advisor's disclosure summary each swallowed their exception and returned a result that looked complete: `CurrencyConverter` reported "no rates found" when extraction had crashed, and an MA-I summary whose disclosure block failed to parse read as a clean compliance record. All three now log a warning and carry the failure — `XBRL.period_validation_unavailable`, `CurrencyConverter.extraction_warnings`, and an explicit line in the advisor summary. No exception propagates that did not before.

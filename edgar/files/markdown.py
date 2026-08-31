@@ -1,14 +1,22 @@
 import re
 from typing import Dict, List, Optional, Tuple
 
+from edgar.files._deprecation import warn_legacy_html_usage
 from edgar.files.html import BaseNode, Document
 from edgar.files.tables import ProcessedTable, TableProcessor
+
+_MARKDOWN_DEPRECATION_MSG = (
+    "edgar.files.markdown renders through the legacy HTML pipeline and is "
+    "removed in edgartools 6.0. Use Filing.markdown() / Attachment.markdown(), "
+    "which route through edgar.documents."
+)
 
 __all__ = ['to_markdown', 'MarkdownRenderer']
 
 
 class MarkdownRenderer:
     def __init__(self, document: Document, start_page_number: int = 0):
+        warn_legacy_html_usage(_MARKDOWN_DEPRECATION_MSG)
         self.document = document
         self.start_page_number = start_page_number
         self.toc_entries: List[Tuple[int, str, str]] = []  # level, text, anchor
@@ -192,6 +200,7 @@ def to_markdown(html_content: str, include_page_breaks: bool = False, start_page
     Returns:
         Markdown string or None if parsing failed
     """
+    warn_legacy_html_usage(_MARKDOWN_DEPRECATION_MSG)
     document = Document.parse(html_content, include_page_breaks=include_page_breaks)
     if document:
         return document.to_markdown(start_page_number=start_page_number)

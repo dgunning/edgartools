@@ -45,12 +45,25 @@ PAGE_BREAK_DEPRECATION = (
 # that: they fired for nobody until the module was named here.
 # `test_07lk3_page_break_deprecation.py` derives the caller list by scanning
 # the package, so a new call site is covered the day it lands.
+#: Frames always skipped regardless of origin: the helper itself, and the
+#: dataclass machinery whose synthesized ``__init__`` runs in the defining
+#: module's namespace.
+_SELF_SKIP = frozenset({'edgar.files._deprecation', 'dataclasses'})
+
+#: Retained for the drift test in
+#: tests/issues/regression/test_07lk3_page_break_deprecation.py, which asserts
+#: every module calling the helper is listed. The walk above no longer reads
+#: this set — it derives the origin from the calling frame — but the list still
+#: documents which modules carry deprecations.
 _TRANSPARENT_MODULES = frozenset({
     'edgar.files._deprecation',
     'edgar.files.html',
     'edgar.files.html_documents',
     'edgar.files.htmltools',
+    'edgar.files.markdown',
     'edgar.files.page_breaks',
+    'edgar.files.tables',
+    'edgar.files.text',
     'dataclasses',
 })
 
@@ -69,9 +82,23 @@ def warn_legacy_html_usage(message: str) -> None:
     """
     current = inspect.currentframe()
     frame = current.f_back if current is not None else None
+
+    # Skip the frames belonging to the module that RAISED this warning, not
+    # every deprecated module. Skipping them all made a legacy module calling
+    # another one look like a user call: `Document.parse(...).to_markdown()`
+    # emitted four warnings, two of them naming `edgar.files.tables` and
+    # `edgar.files.markdown` — modules the caller never touched — because the
+    # walk skipped `edgar.files.html` on its way out and landed on the user.
+    # Four warnings for one call is how a deprecation gets filtered wholesale.
+    #
+    # The self-skip is still required: a dataclass's synthesized `__init__`
+    # runs in its DEFINING module's namespace, so `Document(...)` called by a
+    # user would otherwise read as internal and never warn at all.
+    origin = frame.f_globals.get('__name__', '') if frame is not None else ''
+
     while frame is not None:
         mod_name = frame.f_globals.get('__name__', '')
-        if mod_name in _TRANSPARENT_MODULES:
+        if mod_name == origin or mod_name in _SELF_SKIP:
             frame = frame.f_back
             continue
         if mod_name == 'edgar' or mod_name.startswith('edgar.'):
