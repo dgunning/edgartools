@@ -528,8 +528,8 @@ def obj(sec_filing: Filing) -> Optional[object]:
     """
     from edgar.beneficial_ownership import Schedule13D, Schedule13G
     from edgar.company_reports import CurrentReport, EightK, SixK, TenK, TenQ, TwentyF
-    from edgar.effect import Effect
-    from edgar.form144 import Form144
+    from edgar.offerings.effect import Effect
+    from edgar.ownership.form144 import Form144
     from edgar.muniadvisors import MunicipalAdvisorForm
     from edgar.offerings import FormC, FormD
     from edgar.ownership import Form3, Form4, Form5, Ownership
