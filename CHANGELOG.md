@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Three silently-disabled signals now say when they fail.** An XBRL/SGML date-discrepancy check, foreign-exchange rate extraction, and a municipal advisor's disclosure summary each swallowed their exception and returned a result that looked complete: `CurrencyConverter` reported "no rates found" when extraction had crashed, and an MA-I summary whose disclosure block failed to parse read as a clean compliance record. All three now log a warning and carry the failure — `XBRL.period_validation_unavailable`, `CurrencyConverter.extraction_warnings`, and an explicit line in the advisor summary. No exception propagates that did not before.
 - **A malformed 13F primary document now says which element is missing.** Seven raises in the primary-document parser — six of them the same sentence with a different noun — became one `_require_element()` helper raising `ValidationError` with the element name and the namespace hint that explains most of these failures. `ValidationError` IS-A `ValueError`, so anything catching the old raise still catches this one.
 
 ### Fixed
