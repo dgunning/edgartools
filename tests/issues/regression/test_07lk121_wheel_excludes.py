@@ -19,7 +19,7 @@ cannot be caught by importing edgartools here, so it is checked structurally.
 
 import ast
 import pathlib
-import re
+import shutil
 
 import pytest
 
@@ -111,8 +111,16 @@ def test_the_deleted_dead_packages_stay_deleted():
 
 
 @pytest.mark.slow
+@pytest.mark.skipif(shutil.which("hatch") is None, reason="hatch is not installed")
 def test_a_built_wheel_actually_omits_them():
-    """Ground truth: the config is a claim, the wheel is the fact."""
+    """Ground truth: the config is a claim, the wheel is the fact.
+
+    A missing `hatch` is a missing dependency and belongs in the skipif above,
+    which is declarative and evaluated at collection. A build that RUNS and
+    fails is not a missing dependency — it is the packaging being broken, which
+    is the condition this test exists to catch, so it asserts rather than
+    skipping past it (scripts/check_regression_skips.py).
+    """
     import subprocess
     import tempfile
     import zipfile
@@ -122,8 +130,10 @@ def test_a_built_wheel_actually_omits_them():
             ["hatch", "build", "-t", "wheel", out],
             cwd=ROOT, capture_output=True, text=True,
         )
-        if proc.returncode != 0:
-            pytest.skip(f"hatch build unavailable: {proc.stderr[-300:]}")
+        assert proc.returncode == 0, (
+            f"hatch build failed (rc={proc.returncode}); the wheel this repo "
+            f"publishes cannot be built:\n{proc.stderr[-800:]}"
+        )
         wheels = list(pathlib.Path(out).glob("*.whl"))
         assert wheels, "no wheel produced"
         names = zipfile.ZipFile(wheels[0]).namelist()
