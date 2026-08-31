@@ -153,8 +153,32 @@ class TestUnaccumulateCashflowYTD:
         assert stitcher.data['us-gaap_OperatingCashFlow'][ytd9_pid]['value'] == 250  # 600-350
         assert stitcher.data['us-gaap_OperatingCashFlow'][fy_pid]['value'] == 400    # 1000-600
 
-    def test_concept_missing_in_shorter_period_kept_as_is(self):
-        """If a concept has no value in the shorter period, the longer value is kept unchanged."""
+    def test_concept_missing_in_shorter_period_is_dropped(self):
+        """A concept with no value in the shorter period is dropped, not kept.
+
+        This test asserted the opposite until GH #1179 (bead edgartools-51xd,
+        shipped 5.55.0). Keeping the longer value looks conservative but is not:
+        `_subtract_periods` relabels the period to a discrete quarter for EVERY
+        concept in it, whether or not that concept could be converted, so a kept
+        value is a CUMULATIVE figure sitting under a Q2/Q3/Q4 label. Meta's FY2024
+        "Deferred income taxes" is the filed case — the 10-K and the Q3 10-Q tag
+        the identically-labelled line differently, so the 12-month $(4.738)B had
+        no operand and was presented as Q4.
+
+        The cost is real and worth stating: a concept genuinely absent from the
+        shorter period because the event had not yet occurred (a one-off
+        impairment first reported in Q2) has a 6-month value that IS its discrete
+        quarter, and that true value is dropped too. XBRL absence does not mean
+        zero, so the two cases are indistinguishable here. For a caller who has
+        explicitly asked for `discrete_quarters=True`, an empty cell is the
+        answerable failure and a mislabelled cumulative figure is not.
+
+        The paired assertion lives in
+        tests/issues/regression/test_51xd_period_identity.py
+        ::test_a_quarter_that_cannot_be_derived_is_dropped_not_left_cumulative.
+        If you are here because this test failed, change the code, not the test:
+        the two encode one contract and must not drift apart again.
+        """
         q1_pid = 'duration_2024-01-01_2024-03-31'
         ytd6_pid = 'duration_2024-01-01_2024-06-30'
 
@@ -165,13 +189,22 @@ class TestUnaccumulateCashflowYTD:
                 {'key': 'us-gaap_SpecialItem', 'values': {
                     ytd6_pid: 42,
                 }},
+                # Control: present in both, so Q2 is derivable and must survive.
+                {'key': 'us-gaap_OperatingCashFlow', 'values': {
+                    q1_pid: 100,
+                    ytd6_pid: 350,
+                }},
             ],
         )
 
         stitcher._unaccumulate_cashflow_ytd()
 
-        # Should be kept as-is since there's nothing to subtract
-        assert stitcher.data['us-gaap_SpecialItem'][ytd6_pid]['value'] == 42
+        assert ytd6_pid not in stitcher.data['us-gaap_SpecialItem'], (
+            "the un-derivable cumulative value survived under a discrete-quarter "
+            f"label: {stitcher.data['us-gaap_SpecialItem'].get(ytd6_pid)}")
+        # Dropping the un-derivable cell must not cost the derivable neighbour,
+        # or the fix would empty the column instead of correcting it.
+        assert stitcher.data['us-gaap_OperatingCashFlow'][ytd6_pid]['value'] == 250
 
     def test_different_fiscal_year_starts_handled_independently(self):
         """Periods from different fiscal years don't interfere with each other."""

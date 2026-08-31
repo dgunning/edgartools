@@ -328,6 +328,24 @@ def pytest_collection_modifyitems(config, items):
         # MA-I municipal advisor parse; tests/test_muni_advisors.py matches the
         # 'test_muni' network pattern. Verified with outbound sockets blocked.
         'test_ma_i_form_contract',
+        # Re-classified 2026-08-31. Was in NETWORK_PATTERNS (whole-file, from the
+        # 2026-08-04 pass) because ONE of its 18 tests fetches AAPL from SEC — and
+        # that one already carries its own @pytest.mark.network, which wins over
+        # this list. The whole-file entry bought nothing and cost the 17 synthetic
+        # unit tests of StatementStitcher._unaccumulate_cashflow_ytd, which build
+        # their stitcher in memory and touch no fetch path.
+        #
+        # That is not hypothetical: PR #1204 changed _subtract_periods to drop
+        # un-derivable cells (GH #1179) and left this file's contradicting test
+        # un-updated. It could not fail the pull request, because test-network is
+        # skipped on PRs, so main went red after the merge and the break shipped
+        # in 5.55.0. A test of a function has to run in the lane that gates
+        # changes to that function.
+        #
+        # MEASURED, not guessed: under `pytest -p tests._offline_harness` the file
+        # is 17 passed / 1 failed, the failure being exactly the AAPL test, which
+        # passes on the network.
+        'test_cashflow_unaccumulation',
     ]
 
     # Files that need network (fetch from SEC)
@@ -365,7 +383,7 @@ def pytest_collection_modifyitems(config, items):
         # Classified 2026-08-04 (see the note in FAST_PATTERNS). These fail with
         # outbound sockets blocked, so they are network by measurement.
         'test_registration_s1', 'test_registration_s4', 'test_prospectus497k',
-        'test_cashflow_unaccumulation', 'test_drs', 'test_to_context',
+        'test_drs', 'test_to_context',
         'test_twentyfourf',
         # Reproduction scripts under tests/issues/reproductions/ whose names
         # matched nothing. All fetch from SEC (Company(), get_filings()).
