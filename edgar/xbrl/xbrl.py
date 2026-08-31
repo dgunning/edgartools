@@ -12,6 +12,7 @@ organizing facts according to presentation hierarchies, validating calculations,
 and handling dimensional qualifiers.
 """
 import datetime
+import re
 from pathlib import Path
 from textwrap import dedent
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
@@ -38,6 +39,58 @@ from edgar.xbrl.rendering import RenderedStatement, generate_rich_representation
 from edgar.exceptions import NotFoundError
 from edgar.xbrl.statement_resolver import StatementResolver
 from edgar.xbrl.statements import statement_to_concepts
+
+
+# The word "note" carries two unrelated meanings in a role definition: the
+# financial-statement section, and the debt instrument ("notes payable",
+# "convertible notes").  A role that declares itself a disclosure is one even
+# when notes are its subject, which is what these two helpers separate
+# (issue #1207).
+
+# EDGAR role definitions carry an explicit category segment:
+# "0011 - Disclosure - Promissory Notes Payable".  When the schema definition is
+# missing, the role name stands in for it and the same marker leads it:
+# "DisclosurePromissoryNotesPayable".
+_ROLE_CATEGORY_MARKER = 'disclosure'
+
+# The concept a disclosure role hangs from, e.g. us-gaap_DebtDisclosureAbstract.
+# Matches the Disclosures concept patterns in statement_resolver.py.
+_DISCLOSURE_CONCEPT_RE = re.compile(r"disclosures?abstract$", re.IGNORECASE)
+
+# The section sense of the word, kept deliberately generous: a definition that
+# matches here keeps the classification it already had, so a false positive
+# costs nothing while a false negative would move a real note.
+_NOTES_SECTION_RE = re.compile(
+    r"notes?\s*to\s*[\w\s',&-]*financial\s*statements?"  # Notes to Consolidated Financial Statements
+    r"|notes?\s*\d"                                      # Note 7 - Income Taxes
+    r"|footnotes?"                                       # Footnotes
+    r"|(?:^|\s-\s)notes?$"                               # a role titled only "Notes"
+)
+
+
+def _declares_disclosure(role_def: str, primary_concept: str) -> bool:
+    """Whether a role states that it is a disclosure, rather than merely
+    mentioning the word.
+
+    Args:
+        role_def: Role definition, lowercased.
+        primary_concept: The role's first presentation node.
+    """
+    if _DISCLOSURE_CONCEPT_RE.search(primary_concept or ''):
+        return True
+    if any(part.strip() == _ROLE_CATEGORY_MARKER for part in role_def.split(' - ')):
+        return True
+    return role_def.startswith(_ROLE_CATEGORY_MARKER)
+
+
+def _names_notes_section(role_def: str) -> bool:
+    """Whether a role definition names the notes to the financial statements,
+    as opposed to using "note" as the subject of a disclosure.
+
+    Args:
+        role_def: Role definition, lowercased.
+    """
+    return bool(_NOTES_SECTION_RE.search(role_def))
 
 
 def _capture_sgml_period_of_report(xbrl: "XBRL", filing) -> None:
@@ -1010,9 +1063,21 @@ class XBRL:
 
             # Fall back to keyword-based patterns for notes and disclosures
             if not statement_type:
-                if 'us-gaap_NotesToFinancialStatementsAbstract' in primary_concept or 'note' in role_def:
+                if 'us-gaap_NotesToFinancialStatementsAbstract' in primary_concept:
                     statement_type = "Notes"
                     statement_category = "note"
+                elif 'note' in role_def:
+                    # The bare keyword cannot tell the notes to the financial
+                    # statements from a disclosure whose subject happens to be
+                    # notes payable, so a role that declares itself a disclosure
+                    # is taken at its word unless the definition names the notes
+                    # section itself (issue #1207).
+                    if _names_notes_section(role_def) or not _declares_disclosure(role_def, primary_concept):
+                        statement_type = "Notes"
+                        statement_category = "note"
+                    else:
+                        statement_type = "Disclosures"
+                        statement_category = "disclosure"
                 elif 'us-gaap_DisclosuresAbstract' in primary_concept or 'disclosure' in role_def:
                     statement_type = "Disclosures"
                     statement_category = "disclosure"
