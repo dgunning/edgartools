@@ -1,18 +1,18 @@
 """Three typed fields that were silently wrong (edgartools-xu3z; gh #1192, #1193, #1195).
 
-Every expectation here is read out of the raw XML with the standard library, never
-from the objects under test. That is the whole point of the file. All three bugs
-had existing tests over them, and two of those tests asserted the *parser's* answer
-back at itself -- `test_regd_notice_contract.py` pinned an inverted `is_new` and
+Every expectation here is read out of the raw fixture text, never from the objects
+under test. That is the whole point of the file. All three bugs had existing tests
+over them, and two of those tests asserted the *parser's* answer back at itself --
+`test_regd_notice_contract.py` pinned an inverted `is_new` and
 `test_144_notice_contract.py` pinned the string `"N"` -- so the suite agreed with
 the defect for as long as the defect existed.
 
-Note the `.lstrip()`: two of the three Form D fixtures begin with a blank line
-before the XML declaration, which the stdlib parser rejects and SEC filings
-routinely contain. It is stripped for the ground-truth read only; the library's own
-lenient path is exercised by the parse under test.
+The reads below are deliberately crude string slicing rather than an XML parse.
+These fixtures are small, checked in and static, the values wanted are leaf text,
+and using no parser at all is the strongest available guarantee that the
+expectation is not produced by the machinery under test.
 """
-import xml.etree.ElementTree as ET
+import re
 from pathlib import Path
 
 import pytest
@@ -26,16 +26,21 @@ REIT_1685 = Path('data/D.1685REIT.xml')
 SAMPLE_144 = Path('data/144/EDGAR Form 144 XML Samples/Sample 144.xml')
 
 
-def _root(path: Path) -> ET.Element:
-    # noqa justification: these are checked-in SEC fixtures, not untrusted input,
-    # and the stdlib parser is the point -- the expectation must not be produced
-    # by the same machinery under test.
-    return ET.fromstring(path.read_text().lstrip())  # noqa: S314
+def _section(text: str, tag: str) -> str:
+    """The text between <tag> and </tag>, or '' when the element is absent."""
+    match = re.search(rf"<{tag}\b[^>]*>(.*?)</{tag}>", text, re.DOTALL)
+    return match.group(1) if match else ""
 
 
-def _local(root: ET.Element, name: str):
-    """Form 144 is namespaced; match on the local name the way `xmltools` does."""
-    return [el for el in root.iter() if el.tag.split('}')[-1] == name]
+def _leaves(text: str, tag: str) -> list:
+    """Every <tag>value</tag> in document order. Form 144 is namespaced, so the
+    prefix is optional here the way `xmltools` matches on the local name."""
+    return re.findall(rf"<(?:\w+:)?{tag}\b[^>]*>(.*?)</(?:\w+:)?{tag}>", text, re.DOTALL)
+
+
+def _leaf(text: str, tag: str):
+    values = _leaves(text, tag)
+    return values[0] if values else None
 
 
 # --------------------------------------------------------------------------- #
@@ -46,11 +51,11 @@ def test_sales_compensation_recipients_keep_their_filed_zip_codes():
     """`child_text(address_tag, "30361")` looked for a child element named <30361>,
     so every recipient ZIP was None. The same field on related persons was always
     read correctly, which is why nothing downstream looked wrong."""
-    filed = [el.text for el in _root(REIT_1685)
-             .iterfind('.//salesCompensationList/recipient/recipientAddress/zipCode')]
+    raw = REIT_1685.read_text()
+    filed = _leaves(_section(raw, "salesCompensationList"), "zipCode")
     assert filed == ["30361", "30361", "30361", "30361"], "fixture changed"
 
-    form_d = FormD.from_xml(REIT_1685.read_text())
+    form_d = FormD.from_xml(raw)
     parsed = [r.address.zipcode for r in form_d.offering_data.sales_compensation_recipients]
     assert parsed == filed
 
@@ -58,10 +63,11 @@ def test_sales_compensation_recipients_keep_their_filed_zip_codes():
 def test_related_person_zip_codes_still_work():
     """The control: this read was never broken, and must not regress while the
     sibling one is fixed."""
-    root = _root(REIT_1685)
-    filed = [el.text for el in root.iterfind('.//relatedPersonsList/relatedPersonInfo'
-                                             '/relatedPersonAddress/zipCode')]
-    form_d = FormD.from_xml(REIT_1685.read_text())
+    raw = REIT_1685.read_text()
+    filed = _leaves(_section(raw, "relatedPersonsList"), "zipCode")
+    assert filed, "fixture changed"
+
+    form_d = FormD.from_xml(raw)
     parsed = [p.address.zipcode for p in form_d.related_persons if p.address is not None]
     assert parsed == filed
 
@@ -72,14 +78,13 @@ def test_related_person_zip_codes_still_work():
 
 @pytest.mark.parametrize("path", [AP_FUND, SHEPHERDS, REIT_1685], ids=lambda p: p.stem)
 def test_is_new_agrees_with_the_filed_amendment_flag(path):
-    """`<isAmendment>` answers the opposite question. Both fixtures were wrong in
+    """`<isAmendment>` answers the opposite question. The fixtures were wrong in
     both directions: a base Form D reported is_new=False and a Form D/A reported
     is_new=True."""
-    root = _root(path)
-    filed_is_amendment = root.findtext('.//newOrAmendment/isAmendment') == "true"
+    raw = path.read_text()
+    filed_is_amendment = _leaf(_section(raw, "newOrAmendment"), "isAmendment") == "true"
 
-    form_d = FormD.from_xml(path.read_text())
-    assert form_d.is_new is not filed_is_amendment
+    assert FormD.from_xml(raw).is_new is not filed_is_amendment
 
 
 @pytest.mark.parametrize("path", [AP_FUND, SHEPHERDS, REIT_1685], ids=lambda p: p.stem)
@@ -87,9 +92,11 @@ def test_the_context_heading_agrees_with_the_filed_submission_type(path):
     """The heading rendered the amendment marker off the inverted boolean, so it
     contradicted `submission_type` on the same object. It now comes from the SEC's
     own field and cannot disagree."""
-    filed_submission_type = _root(path).findtext('submissionType')
-    form_d = FormD.from_xml(path.read_text())
+    raw = path.read_text()
+    filed_submission_type = _leaf(raw, "submissionType")
+    assert filed_submission_type in ("D", "D/A"), "fixture changed"
 
+    form_d = FormD.from_xml(raw)
     assert form_d.submission_type == filed_submission_type
     assert form_d.to_context().startswith(f"FORM{filed_submission_type}:")
 
@@ -110,12 +117,12 @@ def test_nothing_to_report_is_a_boolean_that_matches_the_filed_flag():
     """`bool("N")` is True, so `if form.nothing_to_report:` read a filing that
     *does* have sales to report as having nothing to report. The sale rows were
     always present -- only the flag lied."""
-    root = _root(SAMPLE_144)
-    filed_flag = _local(root, 'nothingToReportFlagOnSecuritiesSoldInPast3Months')[0].text
-    filed_sale_rows = len(_local(root, 'securitiesSoldInPast3Months'))
+    raw = SAMPLE_144.read_text()
+    filed_flag = _leaf(raw, "nothingToReportFlagOnSecuritiesSoldInPast3Months")
+    filed_sale_rows = len(_leaves(raw, "securitiesSoldInPast3Months"))
     assert (filed_flag, filed_sale_rows) == ("N", 1), "fixture changed"
 
-    parsed = Form144.parse_xml(SAMPLE_144.read_text())
+    parsed = Form144.parse_xml(raw)
     assert parsed['nothing_to_report'] is False
     assert bool(parsed['nothing_to_report']) is False
 
