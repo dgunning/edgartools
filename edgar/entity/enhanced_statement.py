@@ -22,6 +22,7 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar.core import log
+from edgar.ttm.calculator import QUARTER_MAX_DAYS, QUARTER_MIN_DAYS
 from edgar.entity.mappings_loader import (
     get_all_statements_for_concept,
     get_industry,
@@ -1317,6 +1318,37 @@ def detect_fiscal_year_end(facts: List[FinancialFact]) -> int:
     return most_common[0][0] if most_common else 12
 
 
+def is_forward_looking_schedule(fiscal_year: Optional[int],
+                               period_end: Optional[date],
+                               fiscal_year_end_month: int = 12) -> bool:
+    """Is this fact a forward-looking schedule disclosure rather than reported data?
+
+    `validate_fiscal_year_period_end` answers "does this fiscal_year label agree
+    with this period_end", which two very different populations both fail:
+
+    * **Forward-looking schedules** (Issue #781) -- expected amortization and the
+      like, tagged with the filing's fiscal year but a period_end years ahead of
+      it. These are not reported results and must not feed quarter derivation.
+    * **Comparative re-filings** -- ordinary reported facts that the SEC tags with
+      the FILING's fiscal year, so a real 2021 quarter re-filed in a 2023 10-K
+      carries fy=2023. These are the same values the original filing reported.
+
+    Only the first should be excluded, and the two are told apart by the direction
+    of the disagreement: a schedule's period runs ahead of its label, a
+    comparative's label runs ahead of its period. Rejecting both -- which is what
+    using the validator as an admission gate does -- discarded 4,093 of the 4,099
+    facts it excluded from the Snowflake ledger, including the six-month YTD figure
+    that discrete-quarter derivation subtracts from (GH #1180).
+
+    Returns True only for the forward-looking case.
+    """
+    if fiscal_year is None or period_end is None:
+        return False
+    if validate_fiscal_year_period_end(fiscal_year, period_end, fiscal_year_end_month):
+        return False
+    return fiscal_year < calculate_fiscal_year_for_label(period_end, fiscal_year_end_month)
+
+
 def calculate_fiscal_year_for_label(period_end: date, fiscal_year_end_month: int) -> int:
     """
     Calculate the fiscal year label for a period based on the dominant convention:
@@ -1782,12 +1814,15 @@ class EnhancedStatementBuilder:
                 # tagged with real fp values but future end dates (fy=2021, end=2027).
                 # Must pass FYE month so non-calendar-FYE companies (ADSK, WMT, MSFT)
                 # don't have their forward-fiscal-year quarters incorrectly rejected.
+                # Only the forward-looking direction is rejected: a comparative re-filing
+                # also fails the plain consistency check, and dropping those loses real
+                # reported quarters (GH #1180). See is_forward_looking_schedule.
                 fiscal_year = pk[0]
-                if not validate_fiscal_year_period_end(fiscal_year, period_end_date,
-                                                      fiscal_year_end_month):
+                if is_forward_looking_schedule(fiscal_year, period_end_date,
+                                               fiscal_year_end_month):
                     log.debug(
-                        f"Skipping invalid fiscal_year={fiscal_year} for quarterly period_end={period_end_date} "
-                        f"(likely forward-looking schedule data - Issue #781)"
+                        f"Skipping fiscal_year={fiscal_year} for quarterly period_end={period_end_date} "
+                        f"(forward-looking schedule data - Issue #781)"
                     )
                     continue
 
@@ -1803,6 +1838,7 @@ class EnhancedStatementBuilder:
             # Group by fiscal period label and keep most recent
             # FIX for Issue #460: Calculate fiscal_year from period_end for quarterly labels
             quarterly_by_period = {}
+            quarterly_pks_by_label: Dict[str, List[tuple]] = {}
             for pk, info in valid_quarterly_periods:
                 fiscal_period = pk[1]
                 period_end_date = pk[2]
@@ -1819,6 +1855,14 @@ class EnhancedStatementBuilder:
                 # Store the calculated fiscal year in info for later use
                 info_with_calculated_fy = info.copy()
                 info_with_calculated_fy['calculated_fiscal_year'] = calculated_fiscal_year
+
+                # Every key that maps to this label describes the SAME economic period --
+                # they differ only in the fiscal_year the SEC stamped on them. The winner
+                # below decides the column's metadata; the facts are unioned across all of
+                # them, because a discrete quarter derived from a comparative filing lives
+                # under a different fiscal_year than the YTD figure it should replace and
+                # would otherwise be discarded with its key (GH #1180).
+                quarterly_pks_by_label.setdefault(period_label, []).append(pk)
 
                 if period_label not in quarterly_by_period:
                     quarterly_by_period[period_label] = (pk, info_with_calculated_fy)
@@ -1953,6 +1997,29 @@ class EnhancedStatementBuilder:
                         # Instant facts (balance sheet items) don't have duration
                         filtered_facts.append(fact)
                 period_facts_by_label[label] = filtered_facts
+            elif not annual:
+                for sibling_pk in quarterly_pks_by_label.get(label, []):
+                    if sibling_pk != period_key:
+                        facts_for_period = facts_for_period + period_facts.get(sibling_pk, [])
+                # The mirror of the annual filter above, and its absence was GH #1180.
+                # A quarterly column can collect both a discrete quarter and the YTD
+                # figure ending on the same date -- in a Q3 10-Q the cash-flow lines are
+                # year-to-date, and the SEC labels them fp=Q3 either way. Without a
+                # duration filter the 273-day YTD sits in the Q3 column: Snowflake's
+                # "Purchases of investments" read $3.04B against a true quarter of
+                # $1.05B. Instants (balance-sheet lines) carry no duration and pass.
+                quarter_facts = []
+                for fact in facts_for_period:
+                    if fact.period_start and fact.period_end:
+                        duration = (fact.period_end - fact.period_start).days
+                        if QUARTER_MIN_DAYS <= duration <= QUARTER_MAX_DAYS:
+                            quarter_facts.append(fact)
+                    else:
+                        quarter_facts.append(fact)
+                # Falling back rather than emptying the column: a concept a filer only
+                # ever reports cumulatively has no discrete quarter to show, and showing
+                # the YTD figure is the pre-existing behaviour for it.
+                period_facts_by_label[label] = quarter_facts or facts_for_period
             else:
                 period_facts_by_label[label] = facts_for_period
 

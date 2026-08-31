@@ -600,10 +600,30 @@ class TTMCalculator:
         discrete_quarters.extend(self._derive_q3_from_ytd9(ytd_6m, ytd_9m))
         discrete_quarters.extend(self._derive_q4_from_fy(quarters, ytd_9m, annual))
 
-        # 4. Deduplicate by period_end (keep latest filing)
-        dedup_quarters = self._deduplicate_by_period_end(discrete_quarters)
+        # 4. Enforce the invariant this method's name promises: everything returned
+        #    covers one quarter. A derivation pairs a cumulative fact with an earlier
+        #    one, and if the two belong to different fiscal cycles the subtraction is
+        #    arithmetically fine but describes a nonsense interval -- Snowflake's
+        #    goodwill produced a 457-day "Q2" of -45,711,000 by subtracting a prior
+        #    year's Q1 from the current six-month figure (GH #1197). The operands are
+        #    matched on start date upstream; this is the check that the result is
+        #    actually a quarter, which no amount of operand matching can be trusted to
+        #    guarantee on its own.
+        well_formed = []
+        for fact in discrete_quarters:
+            if self._classify_duration(fact) == DurationBucket.QUARTER:
+                well_formed.append(fact)
+            else:
+                log.debug(
+                    f"Discarding derived {fact.concept} for {fact.period_start}..{fact.period_end}: "
+                    f"not a quarter-length interval (context={fact.calculation_context})"
+                )
+
+        # 5. Deduplicate by period_end (keep latest filing)
+        dedup_quarters = self._deduplicate_by_period_end(well_formed)
         log.debug(f"Quarterization complete: {len(dedup_quarters)} discrete quarters "
-                  f"({len(quarters)} reported + {len(dedup_quarters) - len(quarters)} derived)")
+                  f"({len(quarters)} reported + {len(dedup_quarters) - len(quarters)} derived, "
+                  f"{len(discrete_quarters) - len(well_formed)} malformed discarded)")
 
         return dedup_quarters
 
