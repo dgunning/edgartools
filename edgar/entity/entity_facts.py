@@ -1557,7 +1557,7 @@ class EntityFacts:
         from edgar.ttm.calculator import TTMCalculator
         from edgar.entity.enhanced_statement import (
             detect_fiscal_year_end,
-            validate_fiscal_year_period_end,
+            is_forward_looking_schedule,
         )
 
         # Filter out forward-looking schedule data before TTM derivation (Issues #781, #779).
@@ -1566,14 +1566,18 @@ class EntityFacts:
         # Must be filtered here, before the TTM calculator derives quarters from them.
         # Pass the company's FYE month so non-calendar-FYE companies (ADSK, WMT, MSFT)
         # don't have their forward-fiscal-year quarters incorrectly rejected.
+        #
+        # This asks specifically whether the PERIOD runs ahead of the LABEL. Asking the
+        # weaker question -- do they merely disagree -- also throws out every comparative
+        # re-filing, because the SEC tags those with the filing's fiscal year. On the
+        # Snowflake ledger that discarded 4,093 real facts to exclude 6 schedule ones,
+        # and the casualties included the six-month YTD that Q3 is derived from, so the
+        # quarterly cash-flow statement fell back to a 273-day YTD figure it labelled
+        # Q3 (GH #1180).
         fiscal_year_end_month = detect_fiscal_year_end(facts)
-        filtered_facts = []
-        for fact in facts:
-            if fact.period_end and fact.fiscal_year:
-                if not validate_fiscal_year_period_end(fact.fiscal_year, fact.period_end,
-                                                      fiscal_year_end_month):
-                    continue
-            filtered_facts.append(fact)
+        filtered_facts = [fact for fact in facts
+                          if not is_forward_looking_schedule(fact.fiscal_year, fact.period_end,
+                                                             fiscal_year_end_month)]
 
         concept_facts = defaultdict(list)
         for fact in filtered_facts:

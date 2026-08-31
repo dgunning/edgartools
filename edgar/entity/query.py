@@ -19,6 +19,7 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar.entity.models import DataQuality, FinancialFact
+from edgar.ttm.calculator import ANNUAL_MAX_DAYS, ANNUAL_MIN_DAYS
 
 if TYPE_CHECKING:
     from edgar.entity.statement import FinancialStatement
@@ -435,10 +436,16 @@ class FactQuery:
         # First, get all unique periods
         all_facts = self._apply_current_filters()
 
-        # Group facts by unique periods and calculate period info
+        # Group facts by unique ECONOMIC period -- the dates the fact actually covers.
+        #
+        # The key used to be (fiscal_year, fiscal_period), which is the SEC's filing
+        # focus, not the period. A 20-F reporting 2022, 2023 and 2024 comparatives tags
+        # all three with fy=2024, fp=FY, so they collapsed to one key and
+        # latest_periods(1) returned three distinct years' facts (GH #1185). The same
+        # metadata makes an interim period from a re-filing collide with the annual one.
         period_info = {}
         for fact in all_facts:
-            period_key = (fact.fiscal_year, fact.fiscal_period)
+            period_key = (fact.period_start, fact.period_end)
             if period_key not in period_info:
                 # Calculate period length if we have duration facts
                 period_months = 12  # Default for FY
@@ -446,10 +453,17 @@ class FactQuery:
                     period_months = (fact.period_end.year - fact.period_start.year) * 12
                     period_months += fact.period_end.month - fact.period_start.month + 1
 
+                # Annual-ness comes from the duration, not the label: 154 of Snowflake's
+                # ~92-day facts are tagged fp=FY, and one full year is tagged Q1.
+                is_annual = fact.fiscal_period == 'FY'
+                if fact.period_start and fact.period_end and fact.period_type == 'duration':
+                    duration_days = (fact.period_end - fact.period_start).days
+                    is_annual = ANNUAL_MIN_DAYS <= duration_days <= ANNUAL_MAX_DAYS
+
                 period_info[period_key] = {
                     'end_date': fact.period_end or date.max,
                     'period_months': period_months,
-                    'is_annual': fact.fiscal_period == 'FY',
+                    'is_annual': is_annual,
                     'filing_date': fact.filing_date or date.min
                 }
 
@@ -462,8 +476,9 @@ class FactQuery:
             # When annual=True, only use annual periods - no backfilling with interim periods
             annual_periods = [(pk, info) for pk, info in period_list if info['is_annual']]
 
-            # Sort annual periods by fiscal year (newest first)
-            annual_periods.sort(key=lambda x: x[0][0], reverse=True)  # Sort by fiscal_year
+            # Sort annual periods by when they actually ended (newest first). Sorting on
+            # the fiscal_year label put comparatives that share a label in arbitrary order.
+            annual_periods.sort(key=lambda x: x[1]['end_date'], reverse=True)
 
             # Select only annual periods, up to n
             selected_periods = [pk for pk, _ in annual_periods[:n]]
@@ -473,8 +488,9 @@ class FactQuery:
             selected_periods = [pk for pk, _ in period_list[:n]]
 
         # Filter to only these periods
+        selected_period_set = set(selected_periods)
         self._filters.append(
-            lambda f: (f.fiscal_year, f.fiscal_period) in selected_periods
+            lambda f: (f.period_start, f.period_end) in selected_period_set
         )
         return self
 
