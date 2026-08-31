@@ -30,7 +30,12 @@ from decimal import Decimal
 import pytest
 
 from edgar import find
-from edgar.funds._497k_tables import _extract_operating_expenses, _parse_percentage, extract_fee_tables
+from edgar.funds._497k_tables import (
+    _classify_table,
+    _extract_operating_expenses,
+    _parse_percentage,
+    extract_fee_tables,
+)
 from edgar.funds.prospectus497k import Prospectus497K
 from tests._offline_filings import offline_filing
 
@@ -125,6 +130,197 @@ class TestFeeWaiverFootnoteIsNotAFeeTable:
     )
     def test_prose_management_fee_text_is_not_a_fee_table(self, prose_footnote):
         assert extract_fee_tables(prose_footnote) == []
+
+    @pytest.mark.parametrize(
+        "rows",
+        [
+            [["Management fees are waived for 1 Year at a cost of $25."]],
+            [["The sales charge does not affect waived management fees."]],
+            [
+                ["Management fees are waived for 1 Year."],
+                ["(2)", "0.50%"],
+            ],
+        ],
+    )
+    def test_prose_management_fee_tables_are_terminally_unclassified(self, rows):
+        assert _classify_table(rows) is None
+
+    def test_split_cell_sales_charge_prose_is_terminally_unclassified(self):
+        rows = [
+            [
+                "The sales charge does not affect waived management fees.",
+                "See footnote (2).",
+            ]
+        ]
+
+        assert _classify_table(rows) is None
+
+    def test_percent_bearing_management_fee_prose_is_not_a_fee_table(self):
+        prose_footnote = """
+        <table>
+          <tr>
+            <td>Management Fees</td>
+            <td>may be waived up to 0.50% through 2027</td>
+          </tr>
+        </table>
+        """
+
+        assert extract_fee_tables(prose_footnote) == []
+
+    def test_percent_leading_management_fee_prose_is_not_a_fee_table(self):
+        prose_footnote = """
+        <table>
+          <tr>
+            <td>Management Fees</td>
+            <td>0.50% may be waived through 2027</td>
+          </tr>
+        </table>
+        """
+
+        assert extract_fee_tables(prose_footnote) == []
+
+    @pytest.mark.parametrize(
+        ("management_fee", "expected"),
+        [
+            ("None (1)", None),
+            ("— (1)", None),
+            ("N/A*", None),
+            ("1", Decimal("1")),
+        ],
+    )
+    def test_marked_missing_and_integer_values_keep_fee_table_classified(
+        self, management_fee, expected
+    ):
+        fee_table = f"""
+        <table>
+          <tr><td>Management Fees</td><td>{management_fee}</td></tr>
+          <tr><td>Total Annual Fund Operating Expenses</td><td>0.60%</td></tr>
+        </table>
+        """
+
+        assert extract_fee_tables(fee_table) == [
+            {
+                "class_name": "",
+                "management_fee": expected,
+                "total_annual_expenses": Decimal("0.60"),
+            }
+        ]
+
+    def test_leading_spacer_cells_do_not_hide_fee_labels(self):
+        fee_table = """
+        <table>
+          <tr><td></td><td>Management Fees</td><td>0.65%</td></tr>
+          <tr><td></td><td>Total Annual Fund Operating Expenses</td><td>0.75%</td></tr>
+        </table>
+        """
+
+        assert extract_fee_tables(fee_table) == [
+            {
+                "class_name": "",
+                "management_fee": Decimal("0.65"),
+                "total_annual_expenses": Decimal("0.75"),
+            }
+        ]
+
+    def test_leading_spacer_preserves_multi_class_value_alignment(self):
+        fee_table = """
+        <table>
+          <tr><th></th><th></th><th>Class A</th><th>Class C</th></tr>
+          <tr><td></td><td>Management Fees</td><td>0.50%</td><td>0.60%</td></tr>
+          <tr>
+            <td></td><td>Total Annual Fund Operating Expenses</td>
+            <td>0.75%</td><td>0.85%</td>
+          </tr>
+        </table>
+        """
+
+        assert extract_fee_tables(fee_table) == [
+            {
+                "class_name": "Class A",
+                "management_fee": Decimal("0.50"),
+                "total_annual_expenses": Decimal("0.75"),
+            },
+            {
+                "class_name": "Class C",
+                "management_fee": Decimal("0.60"),
+                "total_annual_expenses": Decimal("0.85"),
+            },
+        ]
+
+    def test_empty_trailing_cell_preserves_flattened_fee_row(self):
+        rows = [["Management Fees 0.65% 0.70%", ""]]
+
+        assert _classify_table(rows) == "operating_expenses"
+
+    def test_management_fee_footnote_does_not_hide_shareholder_fee_table(self):
+        rows = [
+            ["Maximum Sales Charge (Load) Imposed on Purchases", "5.75%"],
+            ["The adviser may waive management fees for some shareholders."],
+        ]
+
+        assert _classify_table(rows) == "shareholder_fees"
+
+    def test_indented_shareholder_row_stays_visible_with_management_fee_footnote(self):
+        rows = [
+            ["", "Maximum Sales Charge (Load) Imposed on Purchases", "5.75%"],
+            ["The adviser may waive management fees for some shareholders."],
+        ]
+
+        assert _classify_table(rows) == "shareholder_fees"
+
+    def test_indented_shareholder_row_preserves_extracted_fee(self):
+        filing_tables = """
+        <table>
+          <tr><td>Management Fees</td><td>0.50%</td></tr>
+          <tr><td>Total Annual Fund Operating Expenses</td><td>0.75%</td></tr>
+        </table>
+        <table>
+          <tr>
+            <td></td>
+            <td>Maximum Sales Charge (Load) Imposed on Purchases</td>
+            <td>5.75%</td>
+          </tr>
+          <tr>
+            <td>The adviser may waive management fees for some shareholders.</td>
+          </tr>
+        </table>
+        """
+
+        assert extract_fee_tables(filing_tables) == [
+            {
+                "class_name": "",
+                "management_fee": Decimal("0.50"),
+                "total_annual_expenses": Decimal("0.75"),
+                "max_sales_load": Decimal("5.75"),
+            }
+        ]
+
+    def test_management_fee_footnote_does_not_hide_expense_example(self):
+        rows = [
+            ["", "1 Year", "3 Years"],
+            ["Class A", "$109", "$381"],
+            ["Management fees may be waived under the expense limitation agreement."],
+        ]
+
+        assert _classify_table(rows) == "expense_example"
+
+    def test_management_fee_footnote_does_not_hide_performance_table(self):
+        rows = [
+            ["", "1 Year", "5 Years"],
+            ["Return", "7.50%", "8.25%"],
+            ["Management fees may be waived under the expense limitation agreement."],
+        ]
+
+        assert _classify_table(rows) == "performance"
+
+    def test_management_fee_footnote_does_not_hide_bar_chart(self):
+        rows = [
+            ["2020", "2021", "2022", "2023"],
+            ["4.25%", "6.10%", "-3.50%", "8.75%"],
+            ["Management fees may be waived under the expense limitation agreement."],
+        ]
+
+        assert _classify_table(rows) == "bar_chart"
 
 
 class TestFeeWaiverIsNotTheNetRatio:
