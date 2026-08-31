@@ -177,10 +177,28 @@ def _label_matches(text: str, *patterns: str) -> bool:
 # Table classification
 # ---------------------------------------------------------------------------
 
-_FEE_TABLE_LABELS = (
-    'management fee',
-    'management fees',
+_MANAGEMENT_FEE_LABEL_RE = re.compile(r'\bmanagement fees?\b')
+_ONE_YEAR_CELL_RE = re.compile(r'^(?:past\s+)?1\s*years?$')
+_FLATTENED_FEE_VALUES_RE = re.compile(
+    r'^(?:\([^)]*\)\s*)?(?:[-+]?\(?\d*\.?\d+\)?\s*%\s*){2}'
 )
+_FEE_VALUE_FOOTNOTE_RE = re.compile(r'(?:\s*\(\s*[\d*†‡§]+\s*\)|\s*[*†‡§]+)\s*$')
+_PERCENT_VALUE_SHAPE_RE = re.compile(
+    r'''
+    ^\s*\(?\s*[-+]?\s*
+    (?:\d+(?:\.\s*\d*)?|\.\s*\d+)
+    \s*\)?\s*%\s*\)?\s*
+    (?:
+        [\d*†‡§\s]+
+        | \(\s*[\d*†‡§\s]+\s*\)
+        | [A-Za-z](?:\s*,\s*[A-Za-z])*
+        | \(\s*[A-Za-z](?:\s*,\s*[A-Za-z])*\s*\)
+    )?
+    \s*$
+    ''',
+    re.VERBOSE,
+)
+_MISSING_FEE_VALUES = {'none', 'n/a', 'na', 'not applicable', '-', '--', '–', '—'}
 
 _EXPENSE_EXAMPLE_LABELS = (
     '1 year',
@@ -211,6 +229,80 @@ _BAR_CHART_LABELS = (
 )
 
 
+def _align_indented_fee_row(row: List[str]) -> List[str]:
+    """Remove empty indentation cells before a fee label, preserving headers."""
+    for index, cell in enumerate(row):
+        if cell.strip():
+            return row[index:] if index and _is_fee_label(cell) else row
+    return row
+
+
+def _align_indented_fee_table(rows: List[List[str]]) -> List[List[str]]:
+    """Remove the shared indentation offset without shifting class columns."""
+    label_columns = [
+        index
+        for row in rows
+        for index, cell in enumerate(row)
+        if _is_fee_label(cell)
+    ]
+    offset = min(label_columns, default=0)
+    return [row[offset:] for row in rows] if offset else rows
+
+
+def _is_fee_value(cell: str) -> bool:
+    """Return whether a cell has a fee value or a marked missing value."""
+    normalized = _FEE_VALUE_FOOTNOTE_RE.sub('', _normalize(cell))
+    if normalized in _MISSING_FEE_VALUES:
+        return True
+    if '%' in normalized:
+        return _PERCENT_VALUE_SHAPE_RE.fullmatch(cell.replace('\xa0', ' ')) is not None
+    return _parse_percentage(cell) is not None
+
+
+def _is_management_fee_row(row: List[str]) -> bool:
+    """Return whether a row has management-fee label/value structure."""
+    if not row:
+        return False
+
+    row = _align_indented_fee_row(row)
+    label = _normalize(row[0])
+    match = _MANAGEMENT_FEE_LABEL_RE.search(label)
+    if match is None:
+        return False
+    if len(row) > 1 and any(cell.strip() for cell in row[1:]):
+        return any(_is_fee_value(cell) for cell in row[1:])
+
+    # Some malformed nested tables flatten all fee rows into one cell. Keep
+    # those only when the label is immediately followed by two percentage values.
+    trailing = label[match.end():].lstrip()
+    return match.start() == 0 and _FLATTENED_FEE_VALUES_RE.match(trailing) is not None
+
+
+def _is_shareholder_fee_row(row: List[str]) -> bool:
+    """Return whether a row has a shareholder-fee label and a separate value."""
+    row = next((row[index:] for index, cell in enumerate(row) if cell.strip()), row)
+    return (
+        len(row) > 1
+        and any(label in _normalize(row[0]) for label in _SHAREHOLDER_FEE_LABELS)
+        and any(_is_fee_value(cell) for cell in row[1:])
+    )
+
+
+def _has_one_year_column(rows: List[List[str]]) -> bool:
+    """Return whether a table has a standalone one-year column label."""
+    return any(
+        _ONE_YEAR_CELL_RE.fullmatch(_normalize(cell)) is not None
+        for row in rows
+        for cell in row
+    )
+
+
+def _has_bar_chart_columns(rows: List[List[str]]) -> bool:
+    """Return whether a table has at least three standalone annual labels."""
+    cells = {_normalize(cell) for row in rows for cell in row}
+    return sum(year in cells for year in _BAR_CHART_LABELS) >= 3
+
+
 def _classify_table(rows: List[List[str]]) -> Optional[str]:
     """Classify a table by its content. Returns a type string or None."""
     all_text = ' '.join(' '.join(row) for row in rows)
@@ -225,9 +317,21 @@ def _classify_table(rows: List[List[str]]) -> Optional[str]:
             ('quarter' in norm or 'return' in norm)):
         return 'quarter'
 
-    # Check for operating expenses table (has "management fee")
-    if any(p in norm for p in _FEE_TABLE_LABELS):
+    # Match the same label/value structure consumed by the fee extractor so
+    # prose-only footnote tables do not change the extraction strategy.
+    if any(_is_management_fee_row(row) for row in rows):
         return 'operating_expenses'
+
+    # Management-fee prose belongs to footnotes, not another table class. Stop
+    # here so words such as "1 Year" or "sales charge" cannot displace the real
+    # expense-example or shareholder-fee table selected later.
+    if (
+        _MANAGEMENT_FEE_LABEL_RE.search(norm)
+        and not any(_is_shareholder_fee_row(row) for row in rows)
+        and not (_has_one_year_column(rows) and ('$' in all_text or '%' in all_text))
+        and not _has_bar_chart_columns(rows)
+    ):
+        return None
 
     # Tables with year-period columns (1 year, 3 years, etc.)
     # Distinguish expense example ($) from performance (%)
@@ -277,6 +381,8 @@ def _extract_operating_expenses(rows: List[List[str]]) -> List[Dict]:
     """
     if not rows:
         return []
+
+    rows = _align_indented_fee_table(rows)
 
     # Detect if first row is a header (class names) or data (fee labels)
     first_row = rows[0]
@@ -359,10 +465,24 @@ def _is_shareholder_fee_label(text: str) -> bool:
     return any(kw in norm for kw in keywords)
 
 
+def _align_indented_shareholder_fee_table(rows: List[List[str]]) -> List[List[str]]:
+    """Remove the shared indentation offset before shareholder-fee labels."""
+    label_columns = [
+        index
+        for row in rows
+        for index, cell in enumerate(row)
+        if _is_shareholder_fee_label(cell)
+    ]
+    offset = min(label_columns, default=0)
+    return [row[offset:] for row in rows] if offset else rows
+
+
 def _extract_shareholder_fees(rows: List[List[str]]) -> List[Dict]:
     """Extract shareholder fees (sales loads, redemption fees)."""
     if not rows:
         return []
+
+    rows = _align_indented_shareholder_fee_table(rows)
 
     # Detect if first row is a header or data
     first_row = rows[0]
