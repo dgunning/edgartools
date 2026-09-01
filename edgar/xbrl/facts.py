@@ -12,7 +12,7 @@ import re
 from decimal import Decimal
 
 from textwrap import dedent
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import pandas as pd
 from rich import box
@@ -21,6 +21,8 @@ from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.table import Column, Table
 from rich.text import Text
+
+from edgar.exceptions import ValidationError
 
 from edgar.richtools import repr_rich
 from edgar.xbrl.core import STANDARD_LABEL, parse_date
@@ -91,7 +93,13 @@ _DIMENSION_COLUMNS: Dict[str, Any] = {
 }
 
 # Never emitted, whatever the configuration.
-_SKIP_COLUMNS = frozenset({'fact_key', 'original_label'})
+# Present on the enriched fact dicts, deliberately not columns of the frame.
+# statement_types/statement_roles carry a fact's full statement membership for
+# by_statement_type() to test against (gh #1242); they are list-valued, and the
+# frame's schema is declared rather than inferred (edgartools-rsyt), so they
+# stay off it rather than widening the contract with two list cells.
+_SKIP_COLUMNS = frozenset({'fact_key', 'original_label',
+                           'statement_types', 'statement_roles'})
 
 
 def _null_column(dtype, index: pd.Index) -> pd.Series:
@@ -690,7 +698,16 @@ class FactQuery:
         Returns:
             Self for method chaining
         """
-        self._filters.append(lambda f: 'statement_type' in f and f['statement_type'] == statement_type)
+        # Membership, not equality: a concept presented in several statements
+        # carries all of them in 'statement_types'. Filtering on the scalar
+        # returned zero rows for a fact that is demonstrably in the requested
+        # statement, just not first in presentation order (gh #1242). The
+        # scalar is still honoured so a fact enriched by an older path, or one
+        # that carries no list, filters as before.
+        self._filters.append(
+            lambda f: statement_type in f.get('statement_types', [])
+            or f.get('statement_type') == statement_type
+        )
         return self
 
     def by_fiscal_period(self, fiscal_period: str) -> FactQuery:
@@ -1208,6 +1225,25 @@ class FactsView:
             if stmt['role'] and stmt['type']:
                 role_to_statement_type[stmt['role']] = (stmt['type'], stmt['role'])
 
+        # Statement membership is a SET: us-gaap:NetIncomeLoss is presented in
+        # the income statement AND the cash flow statement, and often more.
+        # This used to be read per-fact from whichever presentation role the
+        # iteration happened to reach first and stored as a single scalar, so
+        # get_statement_facts('CashFlowStatement') returned zero rows for a
+        # concept by_concept() retrieves without trouble (gh #1242).
+        #
+        # Building the index once here is also strictly less work than the
+        # per-fact tree scan it replaces.
+        element_to_statements: Dict[str, List[Tuple[str, str]]] = {}
+        for role, tree in self.xbrl.presentation_trees.items():
+            entry = role_to_statement_type.get(role)
+            if entry is None:
+                continue
+            for node_id in tree.all_nodes:
+                memberships = element_to_statements.setdefault(node_id, [])
+                if entry not in memberships:
+                    memberships.append(entry)
+
         # Prepare a mapping of period keys to fiscal info for faster lookup
         period_to_fiscal_info = {}
         for period in self.xbrl.reporting_periods:
@@ -1378,23 +1414,21 @@ class FactsView:
             if element_id in self.xbrl.element_catalog:
                 element = self.xbrl.element_catalog[element_id]
 
-                # Combined: Find preferred_label AND statement_type in one tree scan
-                # Previously these were two separate loops over presentation_trees
+                # preferred_label comes from the first presentation tree that
+                # carries one; statement membership comes from the index built
+                # above, which holds every role the element appears in rather
+                # than only the first one reached.
                 preferred_label = None
-                statement_type_found = None
-                statement_role_found = None
-                for role, tree in self.xbrl.presentation_trees.items():
+                for tree in self.xbrl.presentation_trees.values():
                     if element_id in tree.all_nodes:
                         pres_node = tree.all_nodes[element_id]
-                        # Grab preferred_label from first tree that has it
-                        if preferred_label is None and pres_node.preferred_label:
+                        if pres_node.preferred_label:
                             preferred_label = pres_node.preferred_label
-                        # Grab statement_type from first matching role
-                        if statement_type_found is None and role in role_to_statement_type:
-                            statement_type_found, statement_role_found = role_to_statement_type[role]
-                        # Break early if we have both
-                        if preferred_label is not None and statement_type_found is not None:
                             break
+
+                memberships = element_to_statements.get(element_id, [])
+                statement_type_found = memberships[0][0] if memberships else None
+                statement_role_found = memberships[0][1] if memberships else None
 
                 # Add label using the same selection logic as display_label
                 # but including the preferred_label we found above
@@ -1447,10 +1481,24 @@ class FactsView:
                 else:
                     fact_dict['preferred_sign'] = None
 
-                # Use statement_type from the combined tree scan above
+                # The scalars keep their meaning - the primary statement, used
+                # for weight lookup and display - and the lists carry the full
+                # membership that by_statement_type() tests against.
                 if statement_type_found is not None:
                     fact_dict['statement_type'] = statement_type_found
                     fact_dict['statement_role'] = statement_role_found
+                    # Each list is distinct in its own right and the two are NOT
+                    # positionally paired: one statement type can be presented
+                    # through several roles (a filing carries a SegmentDisclosure
+                    # role per segment), so there are usually more roles than
+                    # types. Both preserve presentation order, so element [0] of
+                    # each is the primary that the scalars above report.
+                    seen_types = set()
+                    fact_dict['statement_types'] = [
+                        t for t, _ in memberships
+                        if not (t in seen_types or seen_types.add(t))
+                    ]
+                    fact_dict['statement_roles'] = [r for _, r in memberships]
 
             # Add weight from calculation tree (Issue #463, GH-712)
             # Weight indicates calculation role (1.0 = add, -1.0 = subtract)
@@ -1537,7 +1585,13 @@ class FactsView:
         Returns:
             pandas DataFrame with dimensionally-qualified facts
         """
-        return self.query().by_custom(
+        # include_dimensions is required, not optional, because the predicate
+        # selects rows BY their dim_* keys and to_dataframe()'s projection
+        # drops every dim_* column when it is falsy. Selection and projection
+        # are independent stages, and without this they contradicted each
+        # other: the caller got the right rows with the very information that
+        # made them the right rows removed, and nothing warned (gh #1243).
+        return self.query().with_dimensions().by_custom(
             lambda f: any(key.startswith('dim_') for key in f.keys())
         ).to_dataframe()
 
@@ -1715,6 +1769,71 @@ class FactsView:
 
         return period_views
 
+    def _raise_if_no_such_axis(self, dimension: str) -> None:
+        """Raise if no fact in the document carries the named dimension."""
+        probe = self.query().with_dimensions()
+        all_facts = probe.to_dataframe()
+        available = sorted({c[4:] for c in all_facts.columns if c.startswith('dim_')})
+        if not any(probe._dimension_key_matches(f"dim_{axis}", dimension) for axis in available):
+            raise ValidationError(
+                f"Cannot pivot by dimension {dimension!r}: no fact in this "
+                f"document carries that axis.",
+                parameter='dimension',
+                invalid_value=dimension,
+                suggestions=available,
+            )
+
+    def _pivot_without_losing_collisions(self, df: pd.DataFrame, columns: str,
+                                         what: str) -> pd.DataFrame:
+        """
+        Pivot concepts against ``columns``, keeping colliding rows apart.
+
+        ``pivot_table(aggfunc='first')`` resolves two facts landing in the same
+        cell by keeping one and discarding the other, with nothing to say it
+        happened. When the discarded rows differ only by a column that is not
+        in the index - a concept filed once per currency collides on
+        (concept, label) - the survivor also loses the field that identified
+        it, so it reads as an unqualified number.
+
+        The unit is added to the index when it is what distinguishes the
+        colliding rows, and any collision that still remains is logged with its
+        count rather than silently resolved.
+        """
+        from edgar.core import log
+
+        index = [c for c in ('concept', 'label') if c in df.columns]
+        if not index:
+            return df
+
+        def collisions(keys: List[str]) -> int:
+            return int(df.duplicated(subset=keys + [columns], keep=False).sum())
+
+        remaining = collisions(index)
+        # Only widen on a fully-populated unit column: pivot_table groups on the
+        # index and drops rows whose key is null, so adding a column with gaps
+        # would lose facts rather than separate them.
+        unit_is_usable = 'unit_ref' in df.columns and not df['unit_ref'].isna().any()
+        if remaining and unit_is_usable:
+            widened = index + ['unit_ref']
+            if collisions(widened) < remaining:
+                index = widened
+                remaining = collisions(index)
+
+        if remaining:
+            log.warning(
+                "pivot by %s: %d facts share a cell and only one of each is kept. "
+                "Query the facts directly if you need all of them.",
+                what, remaining
+            )
+
+        pivot = df.pivot_table(
+            values='numeric_value',
+            index=index,
+            columns=columns,
+            aggfunc='first'
+        )
+        return pivot.reset_index()
+
     def pivot_by_period(self, concept_pattern: Optional[str] = None,
                         statement_type: Optional[str] = None) -> pd.DataFrame:
         """
@@ -1742,17 +1861,9 @@ class FactsView:
 
         # Create concept-period pivot
         if 'period_key' in df.columns and 'concept' in df.columns and 'numeric_value' in df.columns:
-            pivot = df.pivot_table(
-                values='numeric_value',
-                index=['concept', 'label'],
-                columns='period_key',
-                aggfunc='first'  # Take first occurrence for each concept-period combo
+            return self._pivot_without_losing_collisions(
+                df, columns='period_key', what='period'
             )
-
-            # Reset index to make 'concept' and 'label' regular columns
-            pivot = pivot.reset_index()
-
-            return pivot
 
         return df  # Return original DataFrame if pivoting isn't possible
 
@@ -1785,25 +1896,42 @@ class FactsView:
         df = query.to_dataframe()
 
         if df.empty:
+            # An axis nobody filed and an axis the caller misspelled both filter
+            # to zero rows, and returning an empty frame for the second reads as
+            # "no data" rather than "no such axis". Distinguish them.
+            self._raise_if_no_such_axis(dimension)
             return pd.DataFrame()
 
-        dim_col = f"dim_{dimension}"
+        # The projected column is always the normalised spelling
+        # (dim_us-gaap_AwardTypeAxis), while callers naturally pass the QName
+        # ("us-gaap:AwardTypeAxis"). Building the name with an f-string off the
+        # raw argument missed, and the method then fell through to `return df`
+        # - the plain unpivoted frame, of plausible shape and not a pivot, with
+        # no warning (gh #1223). by_dimension() above already accepts either
+        # spelling, so the lookup has to as well.
+        dim_col = None
+        for col in df.columns:
+            if col.startswith('dim_') and query._dimension_key_matches(col, dimension):
+                dim_col = col
+                break
 
-        # Create concept-dimension pivot
-        if dim_col in df.columns and 'concept' in df.columns and 'numeric_value' in df.columns:
-            pivot = df.pivot_table(
-                values='numeric_value',
-                index=['concept', 'label'],
-                columns=dim_col,
-                aggfunc='first'  # Take first occurrence for each concept-dimension combo
+        if dim_col is None:
+            raise ValidationError(
+                f"Cannot pivot by dimension {dimension!r}: no such axis in the "
+                f"selected facts.",
+                parameter='dimension',
+                invalid_value=dimension,
+                suggestions=sorted(c[4:] for c in df.columns if c.startswith('dim_')),
+            )
+        if 'concept' not in df.columns or 'numeric_value' not in df.columns:
+            raise ValidationError(
+                "Cannot pivot: the selected facts have no 'concept' or "
+                "'numeric_value' column."
             )
 
-            # Reset index to make 'concept' and 'label' regular columns
-            pivot = pivot.reset_index()
-
-            return pivot
-
-        return df  # Return original DataFrame if pivoting isn't possible
+        return self._pivot_without_losing_collisions(
+            df, columns=dim_col, what=f"dimension {dimension!r}"
+        )
 
     def time_series(self, concept: str, exact: bool = True) -> pd.DataFrame:
         """
