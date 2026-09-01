@@ -156,6 +156,33 @@ class Reports:
         """Display the current page ... which is the default for this filings object"""
         return self
 
+    def _derived(self,
+                 data: pa.Table,
+                 original_state: Optional[PagingState] = None,
+                 title: Optional[str] = None) -> 'Reports':
+        """A new Reports over a subset of this one, carrying the context its Reports need.
+
+        ``Report.content`` reaches back through ``reports._filing_summary._filing_sgml``
+        to fetch the R-file, so a collection built without the filing summary yields
+        Reports with correct metadata and filenames whose ``.content`` raises
+        ``AttributeError: 'NoneType' object has no attribute '_filing_sgml'`` (GH #1191).
+
+        Every method returning a NEW collection derived from this one goes through here.
+        Three of the four such call sites had each dropped the filing summary
+        independently — ``filter()``, ``next()`` and ``previous()``, the last of which
+        was not in the bug report and was found only by grepping for the constructor.
+        That is the argument for a single derivation point rather than three fixed call
+        sites: the next method to return a subset gets it right by default.
+
+        ``Reports(...)`` is still constructed directly in one place, where the filing
+        summary genuinely does not exist yet — ``FilingSummary.from_xml`` builds the
+        root collection and ``FilingSummary.__init__`` back-wires itself onto it.
+        """
+        return Reports(data,
+                       filing_summary=self._filing_summary,
+                       original_state=original_state,
+                       title=self.title if title is None else title)
+
     def next(self):
         """Show the next page"""
         data_page = self.data_pager.next()
@@ -164,7 +191,7 @@ class Reports:
             return None
         start_index, _ = self.data_pager._current_range
         paging_state = PagingState(page_start=start_index, num_records=len(self))
-        return Reports(data_page, original_state=paging_state)
+        return self._derived(data_page, original_state=paging_state)
 
     def previous(self):
         """
@@ -177,7 +204,7 @@ class Reports:
             return None
         start_index, _ = self.data_pager._current_range
         paging_state = PagingState(page_start=start_index, num_records=len(self))
-        return Reports(data_page, original_state=paging_state)
+        return self._derived(data_page, original_state=paging_state)
 
     def to_pandas(self):
         return self.data.to_pandas()
@@ -217,7 +244,7 @@ class Reports:
         Get a single report by category
         """
         data = self.data.filter(pc.equal(self.data['MenuCategory'], category))
-        return Reports(data, filing_summary=self._filing_summary, title=category)
+        return self._derived(data, title=category)
 
     @property
     def statements(self) -> Optional['Statements']:
@@ -261,7 +288,7 @@ class Reports:
         # Return a single Report or new Reports instance
         if len(data) == 1:
             return self.create_from_record(data)
-        return Reports(data)
+        return self._derived(data)
 
     def __rich__(self):
         table = Table(
