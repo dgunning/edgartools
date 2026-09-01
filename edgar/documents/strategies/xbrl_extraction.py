@@ -232,40 +232,57 @@ class XBRLExtractor:
                     context_data['scheme'] = identifier.get('scheme')
 
             # Extract period
-            period = self._find_first(context, 'period')
-            if period is not None:
-                instant = self._find_first(period, 'instant')
-                if instant is not None:
-                    context_data['instant'] = (instant.text or '').strip()
-                    context_data['period_type'] = 'instant'
-                else:
-                    start = self._find_first(period, 'startdate')
-                    end = self._find_first(period, 'enddate')
-                    if start is not None and end is not None:
-                        context_data['start_date'] = (start.text or '').strip()
-                        context_data['end_date'] = (end.text or '').strip()
-                        context_data['period_type'] = 'duration'
+            context_data.update(self._extract_period(context))
 
-            # Extract dimensions. Dimensional members are carried in a segment
-            # or a scenario; the spec allows either and filers use both.
-            dimensions = {}
-            for container_name in ('segment', 'scenario'):
-                container = self._find_first(context, container_name)
-                if container is None:
-                    continue
-                for member in self._find_all(container, 'explicitmember'):
-                    dim = member.get('dimension')
-                    if dim:
-                        dimensions[dim] = (member.text or '').strip()
-                for member in self._find_all(container, 'typedmember'):
-                    dim = member.get('dimension')
-                    if dim:
-                        child = next((c for c in member if isinstance(c.tag, str)), None)
-                        dimensions[dim] = (child.text or '').strip() if child is not None else ''
+            # Extract dimensions
+            dimensions = self._extract_dimensions(context)
             if dimensions:
                 context_data['dimensions'] = dimensions
 
             self.contexts[context_id] = context_data
+
+    def _extract_period(self, context: HtmlElement) -> Dict[str, Any]:
+        """The instant or the start/end pair of a context's period."""
+        period = self._find_first(context, 'period')
+        if period is None:
+            return {}
+
+        instant = self._find_first(period, 'instant')
+        if instant is not None:
+            return {'instant': (instant.text or '').strip(), 'period_type': 'instant'}
+
+        start = self._find_first(period, 'startdate')
+        end = self._find_first(period, 'enddate')
+        if start is not None and end is not None:
+            return {
+                'start_date': (start.text or '').strip(),
+                'end_date': (end.text or '').strip(),
+                'period_type': 'duration',
+            }
+        return {}
+
+    def _extract_dimensions(self, context: HtmlElement) -> Dict[str, str]:
+        """
+        A context's dimensional members, keyed by axis.
+
+        Members are carried in a segment or a scenario; the spec allows either
+        and filers use both.
+        """
+        dimensions: Dict[str, str] = {}
+        for container_name in ('segment', 'scenario'):
+            container = self._find_first(context, container_name)
+            if container is None:
+                continue
+            for member in self._find_all(container, 'explicitmember'):
+                dim = member.get('dimension')
+                if dim:
+                    dimensions[dim] = (member.text or '').strip()
+            for member in self._find_all(container, 'typedmember'):
+                dim = member.get('dimension')
+                if dim:
+                    child = next((c for c in member if isinstance(c.tag, str)), None)
+                    dimensions[dim] = (child.text or '').strip() if child is not None else ''
+        return dimensions
 
     def _extract_units(self, units: List[HtmlElement]):
         """Extract all unit definitions."""

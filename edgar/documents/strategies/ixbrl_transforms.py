@@ -163,6 +163,33 @@ def _numeric(value: str, thousands: str, decimal: str) -> str:
     return ('-' + text) if negative and text.strip('0.') else text
 
 
+_NUMBER_WORDS = {'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+                 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
+                 'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14,
+                 'fifteen': 15, 'sixteen': 16, 'seventeen': 17, 'eighteen': 18,
+                 'nineteen': 19, 'twenty': 20, 'thirty': 30, 'forty': 40,
+                 'fourty': 40, 'fifty': 50, 'sixty': 60, 'seventy': 70,
+                 'eighty': 80, 'ninety': 90}
+
+_NUMBER_SCALES = {'thousand': 1000, 'million': 10 ** 6,
+                  'billion': 10 ** 9, 'trillion': 10 ** 12}
+
+
+def _accumulate_number_word(word: str, total: int, current: int, value: str):
+    """Fold one English number word into the running (total, current) pair."""
+    if word in _NUMBER_WORDS:
+        return total, current + _NUMBER_WORDS[word]
+    if word == 'hundred':
+        return total, (current or 1) * 100
+    if word in _NUMBER_SCALES:
+        return total + (current or 1) * _NUMBER_SCALES[word], 0
+    if word.isdigit():
+        return total, current + int(word)
+    if word in ('a', 'an'):
+        return total, current + 1
+    raise _fail(value, 'an English number')
+
+
 def _num_words_en(value: str) -> str:
     """English cardinal words to a non-negative integer, per ixt-sec:numwordsen."""
     text = _clean(value).lower().replace('-', ' ').replace(' and ', ' ')
@@ -173,32 +200,10 @@ def _num_words_en(value: str) -> str:
     if text in ('no', 'none', 'nil', 'zero'):
         return '0'
 
-    units = {'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
-             'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
-             'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14,
-             'fifteen': 15, 'sixteen': 16, 'seventeen': 17, 'eighteen': 18,
-             'nineteen': 19, 'twenty': 20, 'thirty': 30, 'forty': 40,
-             'fourty': 40, 'fifty': 50, 'sixty': 60, 'seventy': 70,
-             'eighty': 80, 'ninety': 90}
-    scales = {'hundred': 100, 'thousand': 1000, 'million': 10 ** 6,
-              'billion': 10 ** 9, 'trillion': 10 ** 12}
-
     total = current = 0
     saw_word = False
     for word in text.split():
-        if word in units:
-            current += units[word]
-        elif word == 'hundred':
-            current = (current or 1) * 100
-        elif word in scales:
-            total += (current or 1) * scales[word]
-            current = 0
-        elif word.isdigit():
-            current += int(word)
-        elif word in ('a', 'an'):
-            current += 1
-        else:
-            raise _fail(value, 'an English number')
+        total, current = _accumulate_number_word(word, total, current, value)
         saw_word = True
     if not saw_word:
         raise _fail(value, 'an English number')
