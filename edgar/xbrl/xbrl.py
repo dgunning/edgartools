@@ -1072,6 +1072,18 @@ class XBRL:
                     # notes payable, so a role that declares itself a disclosure
                     # is taken at its word unless the definition names the notes
                     # section itself (issue #1207).
+                    #
+                    # Known limitation (issue #1218): this decides one role at a
+                    # time, and in a filing that falls back to role names the
+                    # members of one family do not all carry the same evidence.
+                    # gahc's `ConvertiblePromissoryNotesPayable` hangs from
+                    # us-gaap_DebtDisclosureAbstract and moves; its `Tables` and
+                    # `ScheduleOf...` children hang from a debt-balance abstract
+                    # and their names do not lead with the marker, so they stay
+                    # notes and the family splits across the two accessors. A
+                    # role with a real schema definition - the case in #1207 -
+                    # carries ` - Disclosure - ` on every member, so those move
+                    # together.
                     if _names_notes_section(role_def) or not _declares_disclosure(role_def, primary_concept):
                         statement_type = "Notes"
                         statement_category = "note"

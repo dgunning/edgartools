@@ -23,9 +23,15 @@ from pathlib import Path
 
 import pytest
 
-from edgar.xbrl.xbrl import XBRL, _declares_disclosure, _names_notes_section
+from edgar.xbrl.xbrl import XBRL
 
 DATA = Path(__file__).resolve().parents[3] / "data" / "xbrl" / "datafiles"
+
+# `_declares_disclosure` and `_names_notes_section` are imported inside the
+# tests that use them, not here. They only exist on a tree carrying the fix, and
+# a module-level import would turn this file into a collection error when it is
+# run against an unfixed tree - which is exactly when someone wants to watch it
+# fail. Kept lazy so that run reports test failures instead.
 
 
 # --- the bug: "notes payable" is a disclosure subject, not a notes section ---
@@ -45,6 +51,8 @@ ORACLE_ROLES = [
 
 @pytest.mark.parametrize("definition,concept", ORACLE_ROLES)
 def test_notes_payable_disclosure_roles_declare_themselves_disclosures(definition, concept):
+    from edgar.xbrl.xbrl import _declares_disclosure, _names_notes_section
+
     role_def = definition.lower()
     assert _declares_disclosure(role_def, concept)
     assert not _names_notes_section(role_def)
@@ -58,6 +66,8 @@ def test_notes_payable_disclosure_roles_declare_themselves_disclosures(definitio
     "DisclosureConvertibleNotesPayable",
 ])
 def test_note_bearing_disclosure_titles_are_not_notes_sections(definition):
+    from edgar.xbrl.xbrl import _names_notes_section
+
     assert not _names_notes_section(definition.lower())
 
 
@@ -73,6 +83,8 @@ def test_note_bearing_disclosure_titles_are_not_notes_sections(definition):
     "0010 - Disclosure - Footnotes",
 ])
 def test_notes_sections_are_still_recognised(definition):
+    from edgar.xbrl.xbrl import _names_notes_section
+
     assert _names_notes_section(definition.lower())
 
 
@@ -83,13 +95,15 @@ def test_notes_sections_are_still_recognised(definition):
     ("0011 - Statement - NOTES PAYABLE", "us-gaap_DebtInstrumentsAbstract"),
 ])
 def test_roles_that_do_not_declare_a_disclosure_are_left_alone(definition, concept):
+    from edgar.xbrl.xbrl import _declares_disclosure
+
     assert not _declares_disclosure(definition.lower(), concept)
 
 
 # --- end to end, on filings committed to the repository ---------------------
 
 def test_gahc_notes_payable_roles_are_disclosures():
-    """Great American Holding 10-Q: the debt roles hang from
+    """Global Arena Holding 10-Q: the debt roles hang from
     us-gaap_DebtDisclosureAbstract and were reported as Notes."""
     directory = DATA / "gahc"
     assert directory.exists(), f"missing fixture: {directory}"
