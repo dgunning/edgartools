@@ -13,18 +13,26 @@ Runs offline against the committed Tesla fixture; the ground-truth case uses a
 hand-checked real filing.
 """
 
+from pathlib import Path
+
 import pandas as pd
 import pytest
 
 from edgar.exceptions import ValidationError
 from edgar.xbrl import XBRL
 
-FIXTURE = "tests/fixtures/xbrl/tsla"
+# Anchored on __file__, not the working directory: a path resolved against cwd
+# only works under a repo-root invocation and fails obscurely anywhere else.
+FIXTURE = Path(__file__).resolve().parents[2] / "fixtures" / "xbrl" / "tsla"
 
 
 @pytest.fixture(scope='module')
 def xbrl():
-    return XBRL.from_directory(FIXTURE)
+    assert FIXTURE.is_dir(), (
+        f"committed fixture missing: {FIXTURE}. Its absence means a broken "
+        f"checkout, which belongs in the failure report rather than in a skip."
+    )
+    return XBRL.from_directory(str(FIXTURE))
 
 
 # ---------------------------------------------------------------------------
@@ -131,10 +139,17 @@ def test_get_facts_with_dimensions_keeps_the_dimension_columns(xbrl):
 # ---------------------------------------------------------------------------
 
 def _an_axis(xbrl) -> str:
+    """
+    An axis present in the fixture.
+
+    Asserted rather than skipped: the fixture is committed and demonstrably
+    dimensional, so "no axes" would mean the dimension columns stopped being
+    projected - which is the #1243 defect itself. Skipping on it would retire
+    the tests below exactly when they start mattering.
+    """
     df = xbrl.facts.query().with_dimensions().to_dataframe()
     axes = sorted(c[4:] for c in df.columns if c.startswith('dim_'))
-    if not axes:
-        pytest.skip("fixture has no dimensional axes")
+    assert axes, "the fixture projected no dim_ columns at all"
     return axes[0]
 
 
