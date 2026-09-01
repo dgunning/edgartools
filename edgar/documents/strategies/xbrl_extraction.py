@@ -2,11 +2,22 @@
 XBRL extraction strategy for inline XBRL documents.
 """
 
-from typing import Any, Dict, Optional
+import logging
+from decimal import Decimal, InvalidOperation
+from typing import Any, Dict, List, Optional, Tuple
 
+from lxml.etree import tostring
 from lxml.html import HtmlElement
 
+from edgar.documents.strategies.ixbrl_transforms import (
+    TransformError,
+    UnknownTransformError,
+    apply_scale,
+    apply_transform,
+)
 from edgar.documents.types import XBRLFact
+
+logger = logging.getLogger(__name__)
 
 
 class XBRLExtractor:
@@ -18,6 +29,15 @@ class XBRLExtractor:
     - Context and unit resolution
     - Continuation handling
     - Transformation rules
+
+    Note on the tree this runs against: the caller parses with
+    ``lxml.html.fromstring``, which does not process namespace declarations, so
+    an element written ``<xbrli:context>`` has the literal tag
+    ``"xbrli:context"`` and no namespace URI. Every lookup here therefore
+    matches on the LOCAL NAME rather than using namespace-aware XPath, which
+    silently returns nothing against such a tree. Do not "fix" these back to
+    ``//xbrli:context``; switching the caller to an XML parser instead would
+    change the tree for every other consumer of that pass.
     """
 
     # XBRL namespaces
@@ -28,21 +48,19 @@ class XBRLExtractor:
         'xsi': 'http://www.w3.org/2001/XMLSchema-instance'
     }
 
-    # Common transformation formats
-    TRANSFORMATIONS = {
-        'ixt:numdotdecimal': lambda x: x.replace(',', ''),
-        'ixt:numcommadecimal': lambda x: x.replace('.', '_').replace(',', '.').replace('_', ','),
-        'ixt:zerodash': lambda x: '0' if x == '-' else x,
-        'ixt:datedoteu': lambda x: x.replace('.', '-'),
-        'ixt:datedotus': lambda x: x.replace('.', '/'),
-    }
+    # ix element types that carry a fact. ix:footnote and ix:continuation are
+    # resources and are deliberately absent.
+    FACT_TAGS = frozenset({'nonfraction', 'nonnumeric', 'fraction'})
 
     def __init__(self):
         """Initialize XBRL extractor."""
         self.contexts: Dict[str, Dict[str, Any]] = {}
         self.units: Dict[str, str] = {}
-        self.continuations: Dict[str, str] = {}
+        self.continuations: Dict[str, HtmlElement] = {}
         self._initialized = False
+        # Formats already reported, so a filing that uses an unsupported
+        # transform 3,000 times warns once rather than 3,000 times.
+        self._reported_formats: set = set()
 
     def extract_context(self, element: HtmlElement) -> Optional[Dict[str, Any]]:
         """
@@ -79,13 +97,24 @@ class XBRLExtractor:
         return None
 
     def extract_fact(self, element: HtmlElement) -> Optional[XBRLFact]:
-        """Extract XBRL fact from element."""
+        """
+        Extract XBRL fact from element.
+
+        Only the element types that ARE facts produce one. ix:footnote and
+        ix:continuation are resources: a footnote routed through here yielded a
+        fact with no concept and no value, a non-fact injected into the fact
+        list that corrupted counts and iteration, while a continuation's text
+        belongs to the fact that references it.
+        """
+        if self._get_local_name(element.tag) not in self.FACT_TAGS:
+            return None
+
         context = self.extract_context(element)
         if not context:
             return None
 
         # Get fact value
-        value = self._get_fact_value(element)
+        value, issue = self._get_fact_value(element, escape=bool(context.get('escape')))
 
         # Create fact
         fact = XBRLFact(
@@ -96,7 +125,9 @@ class XBRLExtractor:
             decimals=context.get('decimals'),
             scale=context.get('scale'),
             format=context.get('format'),
-            sign=context.get('sign')
+            sign=context.get('sign'),
+            escape=bool(context.get('escape')),
+            continued_at=context.get('continuedAt')
         )
 
         # Resolve references
@@ -105,6 +136,10 @@ class XBRLExtractor:
 
         if fact.unit_ref and fact.unit_ref in self.units:
             fact.unit = self.units[fact.unit_ref]
+
+        if issue:
+            fact.metadata = fact.metadata or {}
+            fact.metadata['format_issue'] = issue
 
         return fact
 
@@ -122,31 +157,64 @@ class XBRLExtractor:
             tag_lower.startswith('ix:')
         )
 
-    def _get_local_name(self, tag: str) -> str:
+    def _get_local_name(self, tag: Any) -> str:
         """Get local name from qualified tag."""
+        if not isinstance(tag, str):
+            # Comments and processing instructions carry a callable tag.
+            return ''
         if '}' in tag:
             return tag.split('}')[1].lower()
         elif ':' in tag:
             return tag.split(':')[1].lower()
         return tag.lower()
 
+    def _find_all(self, element: HtmlElement, local_name: str) -> List[HtmlElement]:
+        """
+        All descendants whose local name matches, prefix and namespace ignored.
+
+        This is the literal-tag equivalent of ``.//xbrli:<local_name>``. See the
+        class docstring for why namespace-aware XPath cannot be used here.
+        """
+        return [node for node in element.iter()
+                if self._get_local_name(node.tag) == local_name]
+
+    def _find_first(self, element: HtmlElement, local_name: str) -> Optional[HtmlElement]:
+        """First descendant whose local name matches, or None."""
+        for node in element.iter():
+            if node is not element and self._get_local_name(node.tag) == local_name:
+                return node
+        return None
+
     def _initialize_context(self, element: HtmlElement):
-        """Initialize context and unit information from document."""
+        """Initialize context, unit and continuation information from document."""
         # Find root element
         root = element.getroottree().getroot()
 
-        # Extract contexts
-        self._extract_contexts(root)
+        # One pass over the tree, bucketed by local name. Three separate
+        # full-tree scans on a 20MB filing is the kind of cost that shows up.
+        contexts, units, continuations = [], [], []
+        for node in root.iter():
+            local_name = self._get_local_name(node.tag)
+            if local_name == 'context':
+                contexts.append(node)
+            elif local_name == 'unit':
+                units.append(node)
+            elif local_name == 'continuation':
+                continuations.append(node)
 
-        # Extract units
-        self._extract_units(root)
+        self._extract_contexts(contexts)
+        self._extract_units(units)
+
+        for node in continuations:
+            cont_id = node.get('id')
+            if cont_id:
+                self.continuations.setdefault(cont_id, node)
 
         self._initialized = True
 
-    def _extract_contexts(self, root: HtmlElement):
+    def _extract_contexts(self, contexts: List[HtmlElement]):
         """Extract all context definitions."""
-        # Look for xbrli:context elements
-        for context in root.xpath('//xbrli:context', namespaces=self.NAMESPACES):
+        for context in contexts:
             context_id = context.get('id')
             if not context_id:
                 continue
@@ -156,70 +224,84 @@ class XBRLExtractor:
             }
 
             # Extract entity
-            entity = context.find('.//xbrli:entity', namespaces=self.NAMESPACES)
+            entity = self._find_first(context, 'entity')
             if entity is not None:
-                identifier = entity.find('.//xbrli:identifier', namespaces=self.NAMESPACES)
+                identifier = self._find_first(entity, 'identifier')
                 if identifier is not None:
-                    context_data['entity'] = identifier.text
+                    context_data['entity'] = (identifier.text or '').strip()
                     context_data['scheme'] = identifier.get('scheme')
 
             # Extract period
-            period = context.find('.//xbrli:period', namespaces=self.NAMESPACES)
+            period = self._find_first(context, 'period')
             if period is not None:
-                instant = period.find('.//xbrli:instant', namespaces=self.NAMESPACES)
+                instant = self._find_first(period, 'instant')
                 if instant is not None:
-                    context_data['instant'] = instant.text
+                    context_data['instant'] = (instant.text or '').strip()
                     context_data['period_type'] = 'instant'
                 else:
-                    start = period.find('.//xbrli:startDate', namespaces=self.NAMESPACES)
-                    end = period.find('.//xbrli:endDate', namespaces=self.NAMESPACES)
+                    start = self._find_first(period, 'startdate')
+                    end = self._find_first(period, 'enddate')
                     if start is not None and end is not None:
-                        context_data['start_date'] = start.text
-                        context_data['end_date'] = end.text
+                        context_data['start_date'] = (start.text or '').strip()
+                        context_data['end_date'] = (end.text or '').strip()
                         context_data['period_type'] = 'duration'
 
-            # Extract dimensions
-            segment = context.find('.//xbrli:segment', namespaces=self.NAMESPACES)
-            if segment is not None:
-                dimensions = {}
-                for member in segment.findall('.//xbrldi:explicitMember', namespaces=self.NAMESPACES):
+            # Extract dimensions. Dimensional members are carried in a segment
+            # or a scenario; the spec allows either and filers use both.
+            dimensions = {}
+            for container_name in ('segment', 'scenario'):
+                container = self._find_first(context, container_name)
+                if container is None:
+                    continue
+                for member in self._find_all(container, 'explicitmember'):
                     dim = member.get('dimension')
                     if dim:
-                        dimensions[dim] = member.text
-                if dimensions:
-                    context_data['dimensions'] = dimensions
+                        dimensions[dim] = (member.text or '').strip()
+                for member in self._find_all(container, 'typedmember'):
+                    dim = member.get('dimension')
+                    if dim:
+                        child = next((c for c in member if isinstance(c.tag, str)), None)
+                        dimensions[dim] = (child.text or '').strip() if child is not None else ''
+            if dimensions:
+                context_data['dimensions'] = dimensions
 
             self.contexts[context_id] = context_data
 
-    def _extract_units(self, root: HtmlElement):
+    def _extract_units(self, units: List[HtmlElement]):
         """Extract all unit definitions."""
-        # Look for xbrli:unit elements
-        for unit in root.xpath('//xbrli:unit', namespaces=self.NAMESPACES):
+        for unit in units:
             unit_id = unit.get('id')
             if not unit_id:
                 continue
 
-            # Check for simple measure
-            measure = unit.find('.//xbrli:measure', namespaces=self.NAMESPACES)
-            if measure is not None:
-                self.units[unit_id] = self._normalize_unit(measure.text)
-                continue
-
-            # Check for complex unit (divide)
-            divide = unit.find('.//xbrli:divide', namespaces=self.NAMESPACES)
+            # A divide unit also contains measures, so it has to be checked
+            # first or "USD per share" would resolve as plain "USD".
+            divide = self._find_first(unit, 'divide')
             if divide is not None:
-                numerator = divide.find('.//xbrli:unitNumerator/xbrli:measure', namespaces=self.NAMESPACES)
-                denominator = divide.find('.//xbrli:unitDenominator/xbrli:measure', namespaces=self.NAMESPACES)
+                numerator = self._find_first(divide, 'unitnumerator')
+                denominator = self._find_first(divide, 'unitdenominator')
+                num_measure = self._find_first(numerator, 'measure') if numerator is not None else None
+                den_measure = self._find_first(denominator, 'measure') if denominator is not None else None
 
-                if numerator is not None and denominator is not None:
-                    num_unit = self._normalize_unit(numerator.text)
-                    den_unit = self._normalize_unit(denominator.text)
+                if num_measure is not None and den_measure is not None:
+                    num_unit = self._normalize_unit(num_measure.text)
+                    den_unit = self._normalize_unit(den_measure.text)
                     self.units[unit_id] = f"{num_unit}/{den_unit}"
+                    continue
+
+            # Simple unit, or a measure-only <unit> with several measures.
+            measures = self._find_all(unit, 'measure')
+            if measures:
+                self.units[unit_id] = '*'.join(
+                    self._normalize_unit(measure.text) for measure in measures
+                )
 
     def _normalize_unit(self, unit_text: str) -> str:
         """Normalize unit text."""
         if not unit_text:
             return ''
+
+        unit_text = unit_text.strip()
 
         # Remove namespace prefix
         if ':' in unit_text:
@@ -257,34 +339,34 @@ class XBRLExtractor:
             'type': 'nonNumeric',
             'name': element.get('name'),
             'contextRef': element.get('contextRef') or element.get('contextref'),
-            'format': element.get('format')
+            'format': element.get('format'),
+            'escape': self._is_true(element.get('escape')),
+            'continuedAt': element.get('continuedAt') or element.get('continuedat')
         }
 
         # Clean None values
         return {k: v for k, v in metadata.items() if v is not None}
 
     def _extract_continuation(self, element: HtmlElement) -> Dict[str, Any]:
-        """Extract ix:continuation element."""
+        """
+        Describe an ix:continuation element.
+
+        This only reports what the element is. self.continuations maps an id to
+        the continuation ELEMENT and is owned by _initialize_context, because
+        resolving a chain needs the element itself to read its content from;
+        writing a metadata dict in here would give that map two value types.
+        """
         cont_id = element.get('id')
-        continued_at = element.get('continuedAt')
+        continued_at = element.get('continuedAt') or element.get('continuedat')
 
-        if cont_id and continued_at:
-            # Map continuation to original
-            if continued_at in self.continuations:
-                original = self.continuations[continued_at]
-                self.continuations[cont_id] = original
-                return original
-            else:
-                # Store for later resolution
-                metadata = {
-                    'type': 'continuation',
-                    'id': cont_id,
-                    'continuedAt': continued_at
-                }
-                self.continuations[cont_id] = metadata
-                return metadata
+        if not cont_id:
+            return {}
 
-        return {}
+        return {
+            'type': 'continuation',
+            'id': cont_id,
+            'continuedAt': continued_at
+        }
 
     def _extract_footnote(self, element: HtmlElement) -> Dict[str, Any]:
         """Extract ix:footnote element."""
@@ -314,32 +396,132 @@ class XBRLExtractor:
 
         return {k: v for k, v in metadata.items() if v is not None}
 
-    def _get_fact_value(self, element: HtmlElement) -> str:
-        """Get fact value from element with transformations."""
-        # Get raw value
-        value = element.text or ''
+    @staticmethod
+    def _is_true(attr_value: Optional[str]) -> bool:
+        """Read an XML boolean attribute."""
+        return (attr_value or '').strip().lower() in ('true', '1')
+
+    def _collect_content(self, element: HtmlElement, parts: List[str], escape: bool):
+        """
+        Append an element's relevant content to ``parts``.
+
+        Relevant content is the element's own text plus that of its descendants
+        and their tails. An ``ix:exclude`` subtree contributes nothing, but the
+        text FOLLOWING it does, which is the whole point of the construct: it
+        marks up display-only material such as a currency symbol sitting inside
+        the tagged span.
+
+        With ``escape`` set, child markup is serialized rather than flattened,
+        because the fact's value IS that markup (this is how ``*TextBlock``
+        concepts carry a formatted disclosure).
+        """
+        parts.append(element.text or '')
+
+        for child in element:
+            if not isinstance(child.tag, str):
+                # A comment or processing instruction contributes no content,
+                # but the text after it still does.
+                parts.append(child.tail or '')
+                continue
+
+            if self._get_local_name(child.tag) == 'exclude':
+                parts.append(child.tail or '')
+                continue
+
+            if escape and not self._is_xbrl_element(child):
+                # tostring() already includes the child's tail.
+                parts.append(tostring(child, encoding='unicode', method='html'))
+            else:
+                # An ix: element is not XHTML, so escaped content unwraps it:
+                # its own content contributes, its start and end tags do not.
+                # Without this the value of a nested *TextBlock came back with
+                # "<ix:nonnumeric ...>" wrappers embedded in the markup.
+                self._collect_content(child, parts, escape)
+                parts.append(child.tail or '')
+
+    def _relevant_content(self, element: HtmlElement, escape: bool = False) -> str:
+        """
+        Build a fact's full relevant content, following its continuation chain.
+
+        ``element.text`` — which this replaces — is only the text node before
+        the element's first child, so descendant markup, tail text and the
+        ix:continuation chain were all dropped and the truncated string looked
+        like a complete value. continuedAt is how issuers split long narrative
+        disclosures, so that truncation fell on exactly the text an LLM reads.
+        """
+        parts: List[str] = []
+        self._collect_content(element, parts, escape)
+
+        # Follow continuedAt to each ix:continuation in chain order. A filing
+        # whose chain points back at itself must not spin here.
+        seen = {element.get('id')} if element.get('id') else set()
+        next_id = element.get('continuedAt') or element.get('continuedat')
+        while next_id and next_id not in seen:
+            seen.add(next_id)
+            continuation = self.continuations.get(next_id)
+            if continuation is None:
+                logger.debug("iXBRL continuation %r referenced but not found", next_id)
+                break
+            # The whitespace between an origin element and its continuation
+            # lives outside both, so concatenating strictly would glue the last
+            # word of one to the first of the next. Escaped content is markup
+            # and is joined verbatim.
+            if not escape:
+                parts.append(' ')
+            self._collect_content(continuation, parts, escape)
+            next_id = continuation.get('continuedAt') or continuation.get('continuedat')
+
+        content = ''.join(parts)
+        # Escaped content is markup: its whitespace is significant.
+        return content if escape else ' '.join(content.split())
+
+    def _get_fact_value(self, element: HtmlElement,
+                        escape: bool = False) -> Tuple[str, Optional[str]]:
+        """
+        Get fact value from element with transformations.
+
+        Returns the value and, when the declared format could not be applied, a
+        short reason. The reason is recorded on the fact rather than dropped:
+        an untransformed display string is indistinguishable from a real value
+        once it is in the fact list, which is what made this failure invisible.
+        """
+        value = self._relevant_content(element, escape=escape)
+        issue: Optional[str] = None
 
         # Apply format transformation if specified
         format_attr = element.get('format')
-        if format_attr and format_attr in self.TRANSFORMATIONS:
-            transform = self.TRANSFORMATIONS[format_attr]
-            value = transform(value)
+        if format_attr:
+            try:
+                value = apply_transform(format_attr, value)
+            except UnknownTransformError:
+                issue = f"unsupported format {format_attr}"
+                self._report_format_issue(format_attr, issue)
+            except TransformError as e:
+                issue = f"format {format_attr} rejected the content: {e}"
+                self._report_format_issue(format_attr, issue)
 
-        # Apply scale if specified
+        # Apply scale if specified. Decimal, not float: the powers of ten this
+        # attribute names are not representable in binary, and the error used
+        # to be written back into the lexical value (0.006999999999999999 for a
+        # filed 0.007), where numeric_value inherited it.
         scale = element.get('scale')
         if scale:
-            try:
-                scale_factor = int(scale)
-                numeric_value = float(value.replace(',', ''))
-                scaled_value = numeric_value * (10 ** scale_factor)
-                value = str(scaled_value)
-            except (ValueError, TypeError):
-                pass
+            scaled = apply_scale(value, scale)
+            if scaled is not None:
+                value = scaled
 
         # Apply sign if specified
-        sign = element.get('sign')
-        if sign == '-':
-            if value and not value.startswith('-'):
-                value = '-' + value
+        if element.get('sign') == '-' and value:
+            try:
+                value = f"{-Decimal(value):f}"
+            except (InvalidOperation, ValueError):
+                if not value.startswith('-'):
+                    value = '-' + value
 
-        return value.strip()
+        return value.strip(), issue
+
+    def _report_format_issue(self, format_attr: str, message: str):
+        """Warn once per format, so a filing using one 3,000 times says so once."""
+        if format_attr not in self._reported_formats:
+            self._reported_formats.add(format_attr)
+            logger.warning("Inline XBRL: %s; the raw display text is used instead", message)
