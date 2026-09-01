@@ -578,6 +578,12 @@ def determine_periods_to_display(
 
                 # Categorize all duration periods by their length
                 # ENHANCED: More strict duration checking to avoid misclassification
+                # The bucket bounds below count the endpoints exclusively, which
+                # is what they were calibrated against - a 53-week fiscal year
+                # sits exactly on the 370 bound. `days` is therefore local to
+                # the bucketing and is deliberately NOT written back over
+                # period['days'], which the parser fills in with the inclusive
+                # count the XBRL spec defines (issue #1247).
                 for period in duration_periods:
                     try:
                         start_date = datetime.strptime(period['start_date'], '%Y-%m-%d').date()
@@ -591,20 +597,16 @@ def determine_periods_to_display(
                         # Categorize by duration with stricter checks
                         if 80 <= days <= 100:  # Quarterly period (~90 days), slightly wider range
                             period['period_type'] = 'quarterly'
-                            period['days'] = days
                             quarterly_periods.append(period)
                         elif 170 <= days <= 190:  # Semi-annual/YTD for Q2 (~180 days)
                             period['period_type'] = 'semi-annual'
-                            period['days'] = days
                             ytd_periods.append(period)
                         elif 260 <= days <= 280:  # YTD for Q3 (~270 days)
                             period['period_type'] = 'three-quarters'
-                            period['days'] = days
                             ytd_periods.append(period)
                         elif 300 < days <= 370:  # Annual period for comparisons (strict check)
                             # Issue #513: Filter out multi-year periods
                             period['period_type'] = 'annual'
-                            period['days'] = days
                             annual_periods.append(period)
                     except (ValueError, TypeError):
                         continue

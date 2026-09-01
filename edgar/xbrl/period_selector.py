@@ -14,6 +14,8 @@ import logging
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional, Tuple
 
+from edgar.xbrl.core import duration_days
+
 logger = logging.getLogger(__name__)
 
 # Statement types that use equity/roll-forward period selection
@@ -308,7 +310,7 @@ def _select_quarterly_periods(duration_periods: List[Dict], max_periods: int,
             try:
                 start = datetime.strptime(p['start_date'], '%Y-%m-%d').date()
                 end = datetime.strptime(p['end_date'], '%Y-%m-%d').date()
-                return (end - start).days
+                return duration_days(start, end)
             except (ValueError, TypeError, KeyError):
                 return None
 
@@ -329,11 +331,15 @@ def _select_quarterly_periods(duration_periods: List[Dict], max_periods: int,
         try:
             start_date = datetime.strptime(period['start_date'], '%Y-%m-%d').date()
             end_date = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
-            duration_days = (end_date - start_date).days
+            # Named apart from the imported `duration_days` helper: a local of
+            # that name shadows it for this function and every closure inside
+            # it. These bucket bounds are calibrated to the exclusive count,
+            # so it stays exclusive here.
+            period_days = (end_date - start_date).days
 
-            if 80 <= duration_days <= 100:  # Quarterly
+            if 80 <= period_days <= 100:  # Quarterly
                 quarterly_periods.append(period)
-            elif 150 <= duration_days <= 285:  # YTD (semi-annual to 9-month)
+            elif 150 <= period_days <= 285:  # YTD (semi-annual to 9-month)
                 ytd_periods.append(period)
             # Skip periods that are too short (<80 days) or too long (>285 days but <300)
 
@@ -359,7 +365,7 @@ def _select_quarterly_periods(duration_periods: List[Dict], max_periods: int,
             if target_days is None:
                 start = datetime.strptime(anchor['start_date'], '%Y-%m-%d').date()
                 end = datetime.strptime(anchor['end_date'], '%Y-%m-%d').date()
-                target_days = (end - start).days
+                target_days = duration_days(start, end)
             anchor_end = datetime.strptime(anchor['end_date'], '%Y-%m-%d').date()
         except (ValueError, TypeError, KeyError):
             return bucket
@@ -374,7 +380,7 @@ def _select_quarterly_periods(duration_periods: List[Dict], max_periods: int,
             try:
                 p_start = datetime.strptime(p['start_date'], '%Y-%m-%d').date()
                 p_end = datetime.strptime(p['end_date'], '%Y-%m-%d').date()
-                p_days = (p_end - p_start).days
+                p_days = duration_days(p_start, p_end)
             except (ValueError, TypeError, KeyError):
                 continue
             if abs(p_days - target_days) > tolerance:
@@ -481,10 +487,10 @@ def _is_annual_period(period: Dict) -> bool:
     try:
         start_date = datetime.strptime(period['start_date'], '%Y-%m-%d').date()
         end_date = datetime.strptime(period['end_date'], '%Y-%m-%d').date()
-        duration_days = (end_date - start_date).days
+        period_days = (end_date - start_date).days
         # Annual periods should be between 300-400 days
         # This rejects quarterly (~90 days) and multi-year (>400 days) periods
-        return 300 < duration_days <= 400
+        return 300 < period_days <= 400
     except (ValueError, TypeError, KeyError):
         return False
 
