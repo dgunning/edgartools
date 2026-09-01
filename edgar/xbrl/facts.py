@@ -145,6 +145,54 @@ def _unit_currency(unit_info: Optional[Dict[str, Any]]) -> Optional[str]:
     return None
 
 
+def _apply_transformations(results: List[Dict[str, Any]],
+                           transformations: List[Callable[[Any], Any]]) -> List[Dict[str, Any]]:
+    """Apply a transform chain to each fact, on the field that actually holds its value.
+
+    A parsed fact carries the filed string in ``value`` and the parsed float in
+    ``numeric_value``, and ``numeric_value is None`` is what marks a fact as
+    non-numeric (a TextBlock, a string). Measured over a 1,131-fact AAPL 10-K:
+    ``value`` is a ``str`` on every single fact, and ``numeric_value`` is a float
+    on 976 of them and ``None`` on the other 155.
+
+    Transforms used to be handed ``value`` for every fact. Numeric transforms
+    therefore did nothing at all: ``scale()``'s ``value / scale_factor`` hit its
+    own ``isinstance(value, (int, float, Decimal))`` guard, fell through to
+    ``return value``, and handed back the untouched string — while
+    ``numeric_value``, which is what every consumer actually reads, was never
+    transformed on any path (GH #1187).
+
+    So a numeric fact is transformed on its NUMERIC value, and both fields are
+    written back together so they cannot disagree. ``numeric_value`` is the
+    authoritative one; ``value`` is its string rendering, which keeps the
+    all-strings contract that ``value`` has always had.
+
+    A non-numeric fact is still transformed on ``value``, because ``transform()``
+    is a general-purpose hook and text transforms were always able to use it.
+    ``scale()`` leaves those facts alone on its own, via the same isinstance
+    guard — now doing the job it was written for instead of swallowing
+    everything.
+    """
+    if not transformations:
+        return results
+
+    transformed = []
+    for fact in results:
+        numeric = fact.get('numeric_value')
+        if numeric is not None:
+            fact = dict(fact)
+            for transform_fn in transformations:
+                numeric = transform_fn(numeric)
+            fact['numeric_value'] = numeric
+            fact['value'] = str(numeric) if isinstance(numeric, (int, float, Decimal)) else numeric
+        elif fact.get('value') is not None:
+            fact = dict(fact)
+            for transform_fn in transformations:
+                fact['value'] = transform_fn(fact['value'])
+        transformed.append(fact)
+    return transformed
+
+
 class FactQuery:
     """
     A query builder for XBRL facts that enables filtering by various attributes.
@@ -881,18 +929,11 @@ class FactQuery:
         for filter_func in self._filters:
             results = [f for f in results if filter_func(f)]
 
-        # Apply transformations.  Copy each row before writing to it: get_facts()
-        # hands back the rows from FactsView's shared cache, so transforming in
-        # place would scale the cache itself and compound on the next query.
-        if self._transformations:
-            transformed = []
-            for fact in results:
-                if 'value' in fact and fact['value'] is not None:
-                    fact = dict(fact)
-                    for transform_fn in self._transformations:
-                        fact['value'] = transform_fn(fact['value'])
-                transformed.append(fact)
-            results = transformed
+        # Apply transformations.  _apply_transformations copies each row before
+        # writing to it: get_facts() hands back the rows from FactsView's shared
+        # cache, so transforming in place would scale the cache itself and
+        # compound on the next query.
+        results = _apply_transformations(results, self._transformations)
 
         # Apply aggregations
         if self._aggregations:
@@ -947,6 +988,37 @@ class FactQuery:
             declared.update(_DIMENSION_COLUMNS)
         return declared
 
+    def _df_cache_key(self, columns: tuple) -> tuple:
+        """Cache key for to_dataframe(), covering the query configuration and not just
+        the column projection.
+
+        FactQuery is a documented fluent MUTABLE builder: every filter method
+        appends to ``self`` and returns ``self``, so one object describes one
+        population at a time and describes a different one after each call. The
+        key used to be the ``columns`` tuple alone, so the first ``to_dataframe()``
+        answered every later one — narrowing a query left ``execute()`` seeing 2
+        rows while ``to_dataframe()`` still returned the original 1,075, with no
+        warning that the two disagreed (GH #1186).
+
+        The three chains are only ever appended to — there is no pop, clear,
+        reassignment or clone anywhere in this class — so their LENGTHS identify
+        the configuration exactly and cost nothing to compute. The flags go in by
+        value, since those can be set either way.
+        """
+        return (
+            columns,
+            len(self._filters),
+            len(self._transformations),
+            len(self._aggregations),
+            self._include_dimensions,
+            self._include_contexts,
+            self._include_element_info,
+            # getattr, not attribute access: StitchedFactQuery does not call
+            # super().__init__() — it re-initialises the base attributes by hand
+            # and misses this one, so a plain read raises AttributeError there.
+            getattr(self, '_requested_dimension', None),
+        )
+
     def to_dataframe(self, *columns) -> pd.DataFrame:
         """
         Execute the query and return results as a DataFrame.
@@ -967,7 +1039,7 @@ class FactQuery:
 
         See engineering/decisions/facts-dataframe-schema.md.
         """
-        cache_key = columns
+        cache_key = self._df_cache_key(columns)
         cache = getattr(self, '_df_cache', {})
         if cache_key in cache:
             return cache[cache_key]
