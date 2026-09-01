@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Union, Optional
 from lxml import etree as ET
 
 from edgar.core import log
-from edgar.xbrl.core import NAMESPACES, classify_duration
+from edgar.xbrl.core import NAMESPACES, classify_duration, duration_days
 from edgar.xbrl.models import Context, Fact, XBRLProcessingError
 
 from .base import BaseParser
@@ -750,8 +750,9 @@ class InstanceParser(BaseParser):
                     formatted_start = start_obj.strftime('%B %d, %Y')
                     formatted_end = end_obj.strftime('%B %d, %Y')
 
-                    # Calculate duration in days
-                    days = (end_obj - start_obj).days
+                    # Both endpoints belong to the period: a date-only endDate
+                    # runs to 24:00 on that day (issue #1247).
+                    days = duration_days(start_obj, end_obj)
 
                     # Determine period type based on duration
                     period_description = classify_duration(days)
