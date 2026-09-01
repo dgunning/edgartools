@@ -4,7 +4,7 @@ Core utilities for XBRL processing.
 This module provides common functions used throughout the XBRL parser.
 """
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 # Constants for label roles
@@ -119,6 +119,25 @@ def extract_element_id(href: str) -> str:
         Element ID
     """
     return href.split('#')[-1]
+
+
+def duration_days(start: date, end: date) -> int:
+    """Days a date-only XBRL duration covers, counting both endpoints.
+
+    XBRL 2.1 reads a date-only ``endDate`` as the end of that day, so the
+    context runs to 24:00 on it and the final day belongs to the period.
+    Subtracting the two dates counts one day short: a calendar year of
+    2023-01-01 to 2023-12-31 measures 364, and Apple's 53-week FY2023
+    (2022-09-25 to 2023-09-30) measures 370 instead of 371 (issue #1247).
+
+    Args:
+        start: Context startDate.
+        end: Context endDate.
+
+    Returns:
+        Days covered, inclusive of both endpoints.
+    """
+    return (end - start).days + 1
 
 
 def classify_duration(days: int) -> str:
