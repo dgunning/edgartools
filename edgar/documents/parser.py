@@ -312,7 +312,12 @@ class HTMLParser:
                 if element.tag and isinstance(element.tag, str) and 'ix:' in element.tag.lower():
                     # Skip container elements
                     local_name = element.tag.split(':')[-1].lower() if ':' in element.tag else element.tag.lower()
-                    if local_name in ['nonnumeric', 'nonfraction', 'continuation', 'footnote', 'fraction']:
+                    # Facts only. ix:continuation and ix:footnote are resources:
+                    # a footnote routed through extract_fact() produced a fact
+                    # with no concept and no value, a non-fact injected into the
+                    # fact list. A continuation's text reaches its origin fact
+                    # through the continuedAt chain instead.
+                    if local_name in XBRLExtractor.FACT_TAGS:
                         fact = extractor.extract_fact(element)
                         if fact:
                             # Mark if fact was in hidden section or header

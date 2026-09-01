@@ -1327,7 +1327,23 @@ class Document:
         }
 
     def _extract_xbrl_facts(self) -> List[XBRLFact]:
-        """Extract XBRL facts from document."""
+        """
+        Extract XBRL facts from document.
+
+        The inline pre-process pass (HTMLParser._extract_xbrl_pre_process) runs
+        before preprocessing strips ix:hidden and stores its facts on
+        metadata.xbrl_data. That is the pass that resolves contexts, units,
+        continuations and transformations, so it is the source of truth here.
+
+        This used to scan the built node tree for ix_tag node metadata that the
+        inline pass never sets, so the two pipelines were unconnected: a filing
+        with thousands of extracted facts reported has_xbrl False, which reads
+        as an absent feature rather than a broken one. The node scan is kept as
+        a fallback for documents built without that pass.
+        """
+        if self.metadata.xbrl_data:
+            return list(self.metadata.xbrl_data)
+
         facts = []
 
         # Find all nodes with XBRL metadata
