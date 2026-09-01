@@ -19,7 +19,7 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar.richtools import repr_rich
-from edgar.xbrl.facts import FactQuery
+from edgar.xbrl.facts import FactQuery, _apply_transformations
 
 if TYPE_CHECKING:
     from edgar.xbrl.stitching.xbrls import XBRLS
@@ -413,18 +413,12 @@ class StitchedFactQuery(FactQuery):
         for filter_func in self._filters:
             results = [f for f in results if filter_func(f)]
 
-        # Apply transformations.  Copy each row before writing to it: get_facts()
-        # hands back the rows from the view's shared cache, so transforming in
-        # place would scale the cache itself and compound on the next query.
-        if self._transformations:
-            transformed = []
-            for fact in results:
-                if 'value' in fact and fact['value'] is not None:
-                    fact = dict(fact)
-                    for transform_fn in self._transformations:
-                        fact['value'] = transform_fn(fact['value'])
-                transformed.append(fact)
-            results = transformed
+        # Apply transformations.  Shared with FactQuery: this class inherits both
+        # defects it used to duplicate, so the numeric-value fix (GH #1187) has to
+        # land in one place or the stitched path silently keeps the old one.
+        # _apply_transformations copies each row before writing to it, since
+        # get_facts() hands back rows from the view's shared cache.
+        results = _apply_transformations(results, self._transformations)
 
         # Apply aggregations
         if self._aggregations:
@@ -552,6 +546,21 @@ class StitchedFactQuery(FactQuery):
 
         return df
 
+    def _df_cache_key(self, columns: tuple) -> tuple:
+        """The base key plus the stitching configuration.
+
+        execute() here passes max_periods, standard and statement_types to
+        get_facts(), so two queries identical in filters but differing in these
+        return different populations. They are constructor kwargs rather than
+        fluent setters, so they cannot change mid-object today — they are in the
+        key so that stops being something the cache silently depends on.
+        """
+        return super()._df_cache_key(columns) + (
+            self._max_periods,
+            self._standard,
+            tuple(self._statement_types) if isinstance(self._statement_types, list) else self._statement_types,
+        )
+
     def to_dataframe(self, *columns) -> pd.DataFrame:
         """
         Execute the query and return results as a DataFrame.
@@ -562,7 +571,7 @@ class StitchedFactQuery(FactQuery):
         Returns:
             pandas DataFrame with query results
         """
-        cache_key = columns
+        cache_key = self._df_cache_key(columns)
         cache = getattr(self, '_df_cache', {})
         if cache_key in cache:
             return cache[cache_key]
