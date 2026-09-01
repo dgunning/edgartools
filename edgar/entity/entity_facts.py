@@ -232,6 +232,22 @@ class EntityFacts:
         for fact in self._facts:
             # Index by concept
             by_concept[fact.concept].append(fact)
+            # ...and by its LOCAL name, so a lookup can use the name without the
+            # taxonomy prefix. Facts are tagged 'us-gaap:StockholdersEquity', and
+            # only the qualified name and the lowercased label were ever keys, so
+            # get_annual_fact('StockholdersEquity') missed both and reported that
+            # the fact did not exist -- while get_annual_fact('Assets') worked,
+            # purely because us-gaap:Assets happens to be LABELLED 'Assets' and so
+            # matched the label key by coincidence. That is what made this look
+            # intermittent rather than systematic (GH #1202).
+            #
+            # The exact case is indexed, not a lowercased form: measured across
+            # AAPL/JPM/XOM/PFE/KO, 3 to 7 local names per company lowercase onto an
+            # existing label key, so a lowercased bare name would silently merge
+            # two different populations under one key.
+            local_name = fact.concept.rsplit(':', 1)[-1] if fact.concept else None
+            if local_name and local_name != fact.concept:
+                by_concept[local_name].append(fact)
             if fact.label:
                 by_concept[fact.label.lower()].append(fact)
 
@@ -1198,7 +1214,16 @@ class EntityFacts:
                 return value
             return {
                 'value': value,
-                'tag_used': tag,
+                # The fact's OWN qualified concept, not the lookup key that
+                # happened to match it. Since a concept is also indexed under its
+                # bare local name (GH #1202), the variant loop below can match on
+                # 'Revenue' before it reaches 'ifrs-full:Revenue' — the same fact
+                # either way, but reporting the bare key would drop the taxonomy
+                # from the provenance and leave a caller unable to tell an IFRS
+                # value from a us-gaap one (GH #637). `tag` is the key that
+                # resolved; it stays available as the last entry of
+                # 'synonyms_tried'.
+                'tag_used': fact.concept or tag,
                 # Resolved period of the fact actually returned — echoes the
                 # requested period, or the fact's own period when the caller
                 # passed period=None, so a stale pick is visible (GH #892).
