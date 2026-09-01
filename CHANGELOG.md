@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`EntityFacts` lookups reported that present data did not exist.** The fact index was keyed by the qualified name a fact is tagged with (`us-gaap:StockholdersEquity`) and by the lowercased label, never by the bare concept name — so `get_annual_fact('StockholdersEquity')` returned `None` and warned "No fact found", while the value was present and correct. `get_annual_fact('Assets')` worked only because `us-gaap:Assets` happens to be *labelled* "Assets" and matched the label key by coincidence, which is what made this look intermittent rather than systematic: in Snowflake's company facts that coincidence holds for 4 of 339 concepts. The local name is now indexed too, in its filed case — a lowercased form would merge with existing label keys. Across AAPL, JPM and KO, 1,954 of 4,264 concept and label lookups that previously answered `None` now return a fact, with no existing answer changed or lost. `get_fact()` and `available_periods()` shared the defect and share the fix. (GH #1202)
+
+
 ## [5.55.0] - 2026-08-31
 
 ### Changed

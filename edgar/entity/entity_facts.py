@@ -232,6 +232,22 @@ class EntityFacts:
         for fact in self._facts:
             # Index by concept
             by_concept[fact.concept].append(fact)
+            # ...and by its LOCAL name, so a lookup can use the name without the
+            # taxonomy prefix. Facts are tagged 'us-gaap:StockholdersEquity', and
+            # only the qualified name and the lowercased label were ever keys, so
+            # get_annual_fact('StockholdersEquity') missed both and reported that
+            # the fact did not exist -- while get_annual_fact('Assets') worked,
+            # purely because us-gaap:Assets happens to be LABELLED 'Assets' and so
+            # matched the label key by coincidence. That is what made this look
+            # intermittent rather than systematic (GH #1202).
+            #
+            # The exact case is indexed, not a lowercased form: measured across
+            # AAPL/JPM/XOM/PFE/KO, 3 to 7 local names per company lowercase onto an
+            # existing label key, so a lowercased bare name would silently merge
+            # two different populations under one key.
+            local_name = fact.concept.rsplit(':', 1)[-1] if fact.concept else None
+            if local_name and local_name != fact.concept:
+                by_concept[local_name].append(fact)
             if fact.label:
                 by_concept[fact.label.lower()].append(fact)
 
