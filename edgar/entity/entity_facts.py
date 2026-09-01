@@ -1214,7 +1214,16 @@ class EntityFacts:
                 return value
             return {
                 'value': value,
-                'tag_used': tag,
+                # The fact's OWN qualified concept, not the lookup key that
+                # happened to match it. Since a concept is also indexed under its
+                # bare local name (GH #1202), the variant loop below can match on
+                # 'Revenue' before it reaches 'ifrs-full:Revenue' — the same fact
+                # either way, but reporting the bare key would drop the taxonomy
+                # from the provenance and leave a caller unable to tell an IFRS
+                # value from a us-gaap one (GH #637). `tag` is the key that
+                # resolved; it stays available as the last entry of
+                # 'synonyms_tried'.
+                'tag_used': fact.concept or tag,
                 # Resolved period of the fact actually returned — echoes the
                 # requested period, or the fact's own period when the caller
                 # passed period=None, so a stale pick is visible (GH #892).

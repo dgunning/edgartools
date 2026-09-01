@@ -188,3 +188,50 @@ def test_get_fact_and_available_periods_take_the_bare_name_too(facts):
     three; these are the other two."""
     assert facts.get_fact("StockholdersEquity") is not None
     assert facts.available_periods("StockholdersEquity")
+
+
+# --------------------------------------------------------------------------- #
+# Indexing the bare name must not cost the caller the taxonomy.
+# --------------------------------------------------------------------------- #
+
+@pytest.mark.parametrize("concept", [
+    "revenue", "net_income", "total_assets", "stockholders_equity",
+])
+def test_tag_used_stays_qualified_now_that_bare_names_resolve(facts, concept):
+    """get_concept() reports the fact's own tag, not the key that found it.
+
+    This is the half of the bare-name fix that is easy to lose. get_concept() walks
+    ``[concept, 'us-gaap:concept', 'ifrs-full:concept']`` and the BARE variant is tried
+    first, so once the bare name became a key it started matching before either
+    prefixed variant -- the same fact, but reported under a key that no longer says
+    which taxonomy it came from.
+
+    That is not cosmetic. For an IFRS filer it is the difference between
+    'ifrs-full:Revenue' and a bare 'Revenue' that a caller cannot distinguish from a
+    us-gaap tag, which is exactly the provenance GH #637 exists to guarantee (see
+    test_issue_637_ifrs_concept_discovery.py, which caught this in CI and needs the
+    network; this one is offline and fails for the same reason).
+    """
+    result = facts.get_concept(concept, return_metadata=True)
+
+    assert result is not None, f"{concept} did not resolve at all"
+    assert ":" in result["tag_used"], (
+        f"{concept} reported tag_used={result['tag_used']!r} — the bare lookup key "
+        "rather than the fact's qualified concept, so the taxonomy is gone"
+    )
+    assert result["tag_used"].endswith(result["tag_used"].rsplit(":", 1)[-1])
+
+
+def test_tag_used_is_the_facts_own_concept_not_the_matched_key(facts):
+    """The stronger statement: tag_used equals the concept the fact carries.
+
+    Asserted against the fact reached independently by qualified name, so this pins
+    the two to each other rather than to a hardcoded string.
+    """
+    result = facts.get_concept("stockholders_equity", return_metadata=True)
+    fact = facts.get_fact("us-gaap:StockholdersEquity")
+
+    assert result["tag_used"] == fact.concept == "us-gaap:StockholdersEquity"
+    assert result["value"] == fact.numeric_value, (
+        "the bare-name key and the qualified name must reach the same fact"
+    )
