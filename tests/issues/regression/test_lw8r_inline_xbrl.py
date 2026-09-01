@@ -372,7 +372,6 @@ def test_a_document_with_no_inline_xbrl_still_reports_absence():
 # Ground truth: a real filing, hand-checked values
 # ---------------------------------------------------------------------------
 
-@pytest.mark.skipif(not CAT_10K.exists(), reason=f"fixture not present: {CAT_10K}")
 def test_caterpillar_10k_ground_truth():
     """
     Caterpillar's FY2024 10-K, hand-checked against the filing.
@@ -381,6 +380,10 @@ def test_caterpillar_10k_ground_truth():
     $61,363M, which with Financial Products revenues of $3,446M gives the
     $64,809M total sales and revenues on the income statement. Basic EPS $22.17.
     """
+    # Asserted, not skipped: the fixture is committed (git ls-files), so its
+    # absence means a broken checkout and belongs in the failure report.
+    assert CAT_10K.is_file(), f"committed fixture missing: {CAT_10K}"
+
     doc = parse(CAT_10K.read_text(encoding='utf-8', errors='replace'))
     facts = doc.metadata.xbrl_data
 
