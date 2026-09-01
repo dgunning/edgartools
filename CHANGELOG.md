@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **A disclosure whose subject is notes payable was routed to `notes()`.** `get_all_statements()` falls back to keyword matching when a role carries no `FilingSummary` menu category, and that fallback tested the bare substring `"note"` before it tested `"disclosure"`. "Note" names a financial-statement section and a debt instrument, so Oracle's four `Disclosure - NOTES PAYABLE AND OTHER BORROWINGS` roles (10-Q `0000950170-23-047713`) reported `type="Notes"` / `category="note"`, came back from `xbrl.notes()`, and were absent from `xbrl.disclosures()`. The ambiguous word no longer outranks a role that states what it is - by its `Disclosure` category marker, or by the concept it hangs from (`us-gaap_DebtDisclosureAbstract`) - unless the definition names the notes section itself, so `Notes to Consolidated Financial Statements` and `Note 1 - Organization` still classify as notes. Roles whose definition does not contain "note" are classified exactly as before. (GH #1207)
+
 ## [5.55.0] - 2026-08-31
 
 ### Changed
