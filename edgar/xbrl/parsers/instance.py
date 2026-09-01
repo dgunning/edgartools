@@ -427,9 +427,22 @@ class InstanceParser(BaseParser):
                 # Get decimals attribute - direct access
                 decimals = element.get('decimals')
 
-                # Optimize numeric conversion with faster try/except
+                # Optimize numeric conversion with faster try/except.
+                #
+                # A unitRef is what makes a fact numeric. XBRL requires one on
+                # every numeric item and forbids one on non-numeric items, so
+                # its presence is an exact test here, where the element catalog
+                # (and with it the declared type) is not reachable.
+                #
+                # Without the check, float() succeeded on anything that merely
+                # looked like a number, so unitless metadata carried a
+                # numeric_value: dei:DocumentFiscalYearFocus is a gYear, and a
+                # query for facts valued near 2023 returned the fiscal-year
+                # focus alongside real monetary facts. numeric_value is the
+                # field consumers read as "this is a numeric fact", so every
+                # one of them inherited the misclassification (gh #1220).
                 numeric_value = None
-                if value:
+                if value and unit_ref:
                     try:
                         numeric_value = float(value)
                     except (ValueError, TypeError):
