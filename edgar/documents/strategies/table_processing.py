@@ -203,13 +203,19 @@ class TableProcessor:
         """Process table structure (thead, tbody, tfoot)."""
         # Process thead
         thead = self._own_section(element, 'thead')
-        thead_row_ids = set()
-        if thead is not None:
-            for tr in self._own_rows(thead):
-                thead_row_ids.add(id(tr))
-                cells = self._process_row(tr, is_header=True)
-                if cells:
-                    table.headers.append(cells)
+        # Identity, not id(). lxml materializes element proxies on demand and frees them
+        # when the last reference goes; CPython then reuses the freed address, so an id()
+        # taken from a dead thead proxy can be handed to a tbody row, which is skipped as
+        # "already processed" and silently vanishes from the table. Holding the rows in a
+        # list and comparing with `is` removes the hazard by construction rather than by
+        # keeping refs alive and hoping. theads are a handful of rows, so the linear scan
+        # costs nothing. The same trap is documented at
+        # edgar/documents/utils/toc_analyzer.py, above `seen_row_ids` (bead edgartools-gf6v).
+        thead_rows = list(self._own_rows(thead)) if thead is not None else []
+        for tr in thead_rows:
+            cells = self._process_row(tr, is_header=True)
+            if cells:
+                table.headers.append(cells)
 
         # Process tbody (or direct rows)
         tbody = self._own_section(element, 'tbody')
@@ -221,8 +227,8 @@ class TableProcessor:
         data_rows_started = False
 
         for tr in self._own_rows(rows_container):
-            # Skip if already processed in thead
-            if id(tr) in thead_row_ids:
+            # Skip if already processed in thead (identity, never id() - see above)
+            if any(tr is head_row for head_row in thead_rows):
                 continue
 
             # Check if this might be a header row
