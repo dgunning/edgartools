@@ -306,6 +306,21 @@ class CalculationNode(BaseModel):
     period_type: Optional[str] = None  # "instant" or "duration"
 
 
+class CalculationArc(BaseModel):
+    """
+    One parent-to-child summation-item relationship.
+
+    Calculation edges are per relationship, not per concept: a concept may
+    legitimately roll up into two different totals, with a different weight —
+    and often a different sign — under each. `CalculationNode` can only record
+    one of those, so the edges are kept here.
+    """
+    parent_id: str
+    child_id: str
+    weight: float = 1.0
+    order: float = 0.0
+
+
 class CalculationTree(BaseModel):
     """
     A calculation tree for a specific role.
@@ -316,6 +331,10 @@ class CalculationTree(BaseModel):
     definition: str
     root_element_id: str
     all_nodes: Dict[str, CalculationNode] = Field(default_factory=dict)
+    # Every filed relationship in this role. `all_nodes` keeps one node per
+    # concept for lookup and membership; this keeps one entry per edge, which is
+    # what a concept with two calculation parents needs.
+    all_arcs: List[CalculationArc] = Field(default_factory=list)
 
 
 class Axis(BaseModel):
