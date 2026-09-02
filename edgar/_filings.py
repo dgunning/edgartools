@@ -57,9 +57,9 @@ from edgar.display.styles import print_info, print_warning
 from edgar.documents import HTMLParser, ParserConfig
 from edgar.documents.exceptions import ParsingError
 from edgar.exceptions import TransportError, http_status
+from edgar.documents.extractors.chunk_extractor import chunk_html
 from edgar.files._deprecation import PAGE_BREAK_DEPRECATION as _PAGE_BREAK_DEPRECATION
 from edgar.files.html_documents import get_clean_html
-from edgar.files.htmltools import html_sections
 from edgar.files.markdown import to_markdown
 from edgar.filesystem import EdgarPath
 from edgar.filtering import filter_by_accession_number, filter_by_cik, filter_by_date, filter_by_exchange, \
@@ -2136,9 +2136,18 @@ class Filing:
 
     @lru_cache(maxsize=1)
     def sections(self) -> List[str]:
+        """The filing split into passages — what ``search()`` indexes.
+
+        Chunked structurally by ``edgar.documents``: cut at headings, each table
+        its own chunk. This replaced ``edgar.files.htmltools.html_sections``,
+        whose backend 6.0 deletes (bead edgartools-07lk.3). Measured across 41
+        era-stratified fixtures the two index the same words to within 0.04%,
+        and the remaining difference is legacy's own glued words
+        ("jurisdictionof"), which the new parser separates correctly.
+        """
         html = self.html()
         if html is not None:
-            return html_sections(html)
+            return chunk_html(html, form=self.form)
         # Old text-only filings (pre-2002) — chunk on <PAGE> markers.
         text = self.text()
         if not text:
