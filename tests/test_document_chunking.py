@@ -195,11 +195,27 @@ def test_token_budget_is_respected():
 
 def test_overlap_must_advance_the_window():
     """`overlap >= chunk_size` advances by zero and loops forever on any chunk
-    over the budget. It raises rather than hanging."""
-    with pytest.raises(ValueError):
+    over the budget. It raises rather than hanging.
+
+    `ValidationError` rather than a raw `ValueError`: it IS-A `ValueError`, so
+    nothing that catches the plain one breaks, and it carries the `parameter`
+    and `suggestions` the caller needs. The raw-`ValueError` ratchet in
+    tests/issues/regression/ enforces this, and it caught these two.
+    """
+    from edgar.exceptions import ValidationError
+
+    with pytest.raises(ValidationError) as exc:
         ChunkExtractor(chunk_size=100, overlap=100)
-    with pytest.raises(ValueError):
+    assert exc.value.parameter == "overlap"
+    assert exc.value.suggestions
+
+    with pytest.raises(ValidationError):
         ChunkExtractor(chunk_size=100, overlap=150)
+    with pytest.raises(ValidationError):
+        ChunkExtractor(chunk_size=0)
+
+    # Still a ValueError to anyone catching the old shape.
+    assert issubclass(ValidationError, ValueError)
 
 
 # --------------------------------------------------------------------------

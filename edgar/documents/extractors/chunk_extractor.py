@@ -254,12 +254,21 @@ class ChunkExtractor:
     """
 
     def __init__(self, chunk_size: int = 512, overlap: int = 128):
+        from edgar.exceptions import ValidationError
+
         if chunk_size <= 0:
-            raise ValueError("chunk_size must be positive")
+            raise ValidationError(
+                "chunk_size must be a positive number of tokens.",
+                parameter='chunk_size', invalid_value=chunk_size,
+                suggestions=["Pass a positive integer, e.g. chunk_size=512."])
         if not 0 <= overlap < chunk_size:
             # Equal or larger would make the window advance by zero and loop
             # forever on any document with a chunk over the budget.
-            raise ValueError("overlap must be non-negative and smaller than chunk_size")
+            raise ValidationError(
+                f"overlap must be non-negative and smaller than chunk_size "
+                f"({chunk_size}); an overlap that large never advances the window.",
+                parameter='overlap', invalid_value=overlap,
+                suggestions=[f"Try overlap={max(chunk_size // 4, 0)}."])
         self.chunk_size = chunk_size
         self.overlap = overlap
 
