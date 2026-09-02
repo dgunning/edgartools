@@ -309,10 +309,13 @@ class DefinitionParser(BaseParser):
         """Get or create the Axis for one element in one role."""
         axes = self.axes_by_role.setdefault(role, {})
         if element_id not in axes:
+            is_typed, typed_domain_ref = self._typed_dimension_info(element_id)
             axes[element_id] = Axis(
                 element_id=element_id,
                 label=self._get_element_label(element_id),
                 role_uri=role,
+                is_typed_dimension=is_typed,
+                typed_domain_ref=typed_domain_ref,
             )
         return axes[element_id]
 
@@ -354,6 +357,7 @@ class DefinitionParser(BaseParser):
                 merged.domain_id = merged.domain_id or axis.domain_id
                 merged.default_member_id = merged.default_member_id or axis.default_member_id
                 merged.is_typed_dimension = merged.is_typed_dimension or axis.is_typed_dimension
+                merged.typed_domain_ref = merged.typed_domain_ref or axis.typed_domain_ref
 
         for role_domains in self.domains_by_role.values():
             for element_id, domain in role_domains.items():
@@ -366,6 +370,23 @@ class DefinitionParser(BaseParser):
                 for member in domain.members:
                     if member not in merged.members:
                         merged.members.append(member)
+
+    def _typed_dimension_info(self, element_id: str) -> tuple:
+        """
+        Whether an axis is a typed dimension, and the domain it points at.
+
+        A dimension is typed when its element declaration carries
+        xbrldt:typedDomainRef. Reading it from the element catalog is what makes
+        `is_typed_dimension=False` an answer rather than an untouched default.
+
+        An axis declared only in an imported taxonomy is not in the catalog at
+        all — there is no xs:import traversal — so it still reports False. That
+        is the remaining half of gh #1234, tracked as edgartools-0c1q.16.1.
+        """
+        element = self.element_catalog.get(element_id)
+        typed_domain_ref = getattr(element, 'typed_domain_ref', None) if element else None
+
+        return bool(typed_domain_ref), typed_domain_ref or ""
 
     def _get_element_label(self, element_id: str) -> str:
         """Get the label for an element, falling back to the element ID if not found."""

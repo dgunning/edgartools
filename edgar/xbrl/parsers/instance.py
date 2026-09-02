@@ -146,6 +146,11 @@ class InstanceParser(BaseParser):
         # Parse content with optimized settings
         root = ET.XML(content_bytes, parser)
 
+        # Namespace -> prefix, and prefix -> namespace, so two namespaces are
+        # never counted as one concept
+        counted_prefixes = {}
+        counted_claims = {}
+
         # Fast path to identify non-fact elements to skip
         skip_tag_endings = {'}context', '}unit', '}schemaRef'}
 
@@ -186,9 +191,8 @@ class InstanceParser(BaseParser):
                     break
 
             if not prefix and namespace:
-                # Try to extract prefix from the namespace
-                parts = namespace.split('/')
-                prefix = parts[-1] if parts else ''
+                prefix = counted_prefixes.get(namespace) or self._resolve_prefix(
+                    namespace, element, counted_prefixes, counted_claims)
 
             # Construct element ID with optimized string concatenation
             if prefix:
@@ -345,6 +349,54 @@ class InstanceParser(BaseParser):
         except Exception as e:
             raise XBRLProcessingError(f"Error extracting units: {str(e)}") from e
 
+    def _resolve_prefix(self, namespace: str, element,
+                        prefix_map: Dict[str, str],
+                        claimed: Dict[str, str]) -> str:
+        """
+        The prefix for a namespace, resolved so that distinct namespaces keep
+        distinct identities.
+
+        The expanded name — namespace URI plus local name — is what identifies a
+        concept; the prefix is a display choice. Deriving the prefix from the
+        URI's final path segment made that display choice load-bearing, and two
+        taxonomies whose URIs end in the same segment (.../alpha/2024 and
+        .../beta/2024) collapsed into one concept string.
+
+        Two things prevent that. A namespace declared on the fact element rather
+        than the instance root is read from the element's own in-scope
+        declarations, which is where its real prefix is. Where no prefix is
+        declared at all and the URI segment must be used, a segment already
+        claimed by a different namespace is suffixed rather than shared.
+
+        The result is cached in prefix_map, so an unknown namespace is resolved
+        once per document.
+        """
+        prefix = None
+
+        # The prefix the document itself declares, wherever it declares it
+        nsmap = getattr(element, 'nsmap', None)
+        if nsmap:
+            for declared_prefix, declared_uri in nsmap.items():
+                if declared_uri == namespace and declared_prefix:
+                    prefix = declared_prefix
+                    break
+
+        if not prefix:
+            # Nothing declared: fall back to the URI's final path segment
+            parts = namespace.rstrip('/').split('/')
+            prefix = parts[-1] if parts and parts[-1] else namespace
+
+        # Never let two namespaces share one prefix
+        if claimed.get(prefix) not in (None, namespace):
+            base, suffix = prefix, 2
+            while claimed.get(f"{base}_{suffix}") not in (None, namespace):
+                suffix += 1
+            prefix = f"{base}_{suffix}"
+
+        claimed[prefix] = namespace
+        prefix_map[namespace] = prefix
+        return prefix
+
     def _extract_facts(self, root: ET.Element) -> None:
         """Extract facts from instance document."""
         try:
@@ -366,6 +418,9 @@ class InstanceParser(BaseParser):
                         else:
                             prefix = attr_name.split(':', 1)[1]
                         prefix_map[attr_value] = prefix
+
+            # prefix -> namespace, so a prefix is never shared by two namespaces
+            claimed_prefixes = {prefix: uri for uri, prefix in prefix_map.items()}
 
             # Initialize counters and tracking
             fact_count = 0
@@ -417,8 +472,8 @@ class InstanceParser(BaseParser):
                     # Try to extract prefix from the namespace
                     prefix = prefix_map.get(namespace)
                     if not prefix:
-                        parts = namespace.split('/')
-                        prefix = parts[-1] if parts else ''
+                        prefix = self._resolve_prefix(
+                            namespace, element, prefix_map, claimed_prefixes)
                 else:
                     element_name = tag
                     prefix = ''

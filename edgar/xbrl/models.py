@@ -112,6 +112,11 @@ class ElementCatalog:
         balance: The balance type of the element (e.g., "debit", "credit", or None)
         abstract: Whether the element is abstract (True/False)
         labels: A dictionary of labels for the element, keyed by role URI
+        substitution_group: The declared substitutionGroup, which is what marks
+            an element as a dimension ("xbrldt:dimensionItem") or a hypercube
+        typed_domain_ref: The xbrldt:typedDomainRef of a TYPED dimension. Its
+            presence is what makes a dimension typed rather than explicit, so
+            None here means "declared without one", not "we never looked"
     """
 
     def __init__(self,
@@ -120,7 +125,9 @@ class ElementCatalog:
                  period_type: str,
                  balance: Optional[str] = None,
                  abstract: bool = False,
-                 labels: Optional[Dict[str, str]] = None
+                 labels: Optional[Dict[str, str]] = None,
+                 substitution_group: Optional[str] = None,
+                 typed_domain_ref: Optional[str] = None
                  ):
         self.name = name
         self.data_type = data_type
@@ -128,6 +135,8 @@ class ElementCatalog:
         self.balance = balance
         self.abstract = abstract
         self.labels = labels if labels is not None else {}
+        self.substitution_group = substitution_group
+        self.typed_domain_ref = typed_domain_ref
 
     def __str__(self) -> str:
         return self.name
