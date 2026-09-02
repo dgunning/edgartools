@@ -31,7 +31,7 @@ from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
 from edgar.richtools import repr_rich
 from edgar.xbrl.core import STANDARD_LABEL, STANDARD_TAXONOMIES, split_element_id
-from edgar.xbrl.models import PresentationNode
+from edgar.xbrl.models import Axis, Domain, PresentationNode
 from edgar.xbrl.parsers import XBRLParser
 from edgar.xbrl.period_selector import select_periods
 from edgar.xbrl.periods import get_period_views
@@ -401,6 +401,52 @@ class XBRL:
     @property
     def domains(self):
         return self.parser.domains
+
+    @property
+    def axes_by_role(self):
+        """Axes grouped by the extended link role that declares them."""
+        return self.parser.axes_by_role
+
+    @property
+    def domains_by_role(self):
+        """Domains grouped by the extended link role that declares them."""
+        return self.parser.domains_by_role
+
+    def axes_for_role(self, role_uri: str) -> Dict[str, Axis]:
+        """
+        The axes declared for one statement role, keyed on element ID.
+
+        Prefer this over ``xbrl.axes`` whenever the role is known. An axis can
+        be attached to a different domain in each role it appears in, so
+        ``xbrl.axes`` can only offer a merged answer.
+
+        Args:
+            role_uri: The extended link role URI
+
+        Returns:
+            Mapping of element ID to Axis, empty if the role has no definition
+            linkbase.
+        """
+        return self.parser.axes_for_role(role_uri)
+
+    def domains_for_role(self, role_uri: str) -> Dict[str, Domain]:
+        """
+        The domains declared for one statement role, keyed on element ID.
+
+        Prefer this over ``xbrl.domains`` whenever the role is known. The same
+        domain routinely carries different members in different roles — Apple's
+        ``srt_ProductsAndServicesDomain`` splits revenue two ways on the income
+        statement and five ways in the revenue note — so ``xbrl.domains`` can
+        only offer the union.
+
+        Args:
+            role_uri: The extended link role URI
+
+        Returns:
+            Mapping of element ID to Domain, empty if the role has no
+            definition linkbase.
+        """
+        return self.parser.domains_for_role(role_uri)
 
     @property
     def entity_info(self):
