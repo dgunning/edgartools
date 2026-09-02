@@ -2556,7 +2556,7 @@ class EntityFacts:
         # Try fallback calculation if provided
         if fallback_calculation:
             try:
-                fallback_value = fallback_calculation(period, target_unit)
+                fallback_value = fallback_calculation(period, target_unit, strict_unit_match)
                 if fallback_value is not None:
                     if return_detailed:
                         return UnitResult(  # type: ignore[return-value]
@@ -2591,7 +2591,28 @@ class EntityFacts:
 
         return None
 
-    def _calculate_revenue_from_components(self, period: Optional[str] = None, unit: str = 'USD') -> Optional[float]:
+    @staticmethod
+    def _components_answer_unit(component_unit: Optional[str], target_unit: Optional[str],
+                                strict_unit_match: bool) -> bool:
+        """
+        Whether a figure derived from components in `component_unit` answers a
+        request for `target_unit`.
+
+        Same rule the direct path uses: an exact match always answers, and a
+        merely compatible unit answers only when the caller did not pin the unit
+        — where the direct path would return the value with a conversion
+        suggestion rather than refuse it.
+        """
+        from edgar.entity.unit_handling import UnitNormalizer
+
+        if not target_unit:
+            return True
+        if UnitNormalizer.normalize_unit(component_unit or '') == UnitNormalizer.normalize_unit(target_unit):
+            return True
+        return not strict_unit_match and UnitNormalizer.are_compatible(component_unit, target_unit)
+
+    def _calculate_revenue_from_components(self, period: Optional[str] = None, unit: str = 'USD',
+                                               strict_unit_match: bool = False) -> Optional[float]:
         """
         Calculate revenue from Gross Profit + Cost of Revenue when explicit revenue not available.
 
@@ -2618,14 +2639,24 @@ class EntityFacts:
             cost_of_revenue_fact.numeric_value is not None):
 
             # Use enhanced unit compatibility checking
-            gp_result = UnitNormalizer.get_normalized_value(gross_profit_fact, target_unit=unit, apply_scale=True, strict_unit_match=True)
-            cr_result = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, target_unit=unit, apply_scale=True, strict_unit_match=True)
+            gp_result = UnitNormalizer.get_normalized_value(gross_profit_fact, target_unit=unit, apply_scale=True,
+                                                            strict_unit_match=strict_unit_match)
+            cr_result = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, target_unit=unit, apply_scale=True,
+                                                            strict_unit_match=strict_unit_match)
 
             if gp_result.success and cr_result.success:
                 return gp_result.value + cr_result.value
 
-            # Try compatibility check if direct match failed
-            if UnitNormalizer.are_compatible(gross_profit_fact.unit, cost_of_revenue_fact.unit):
+            # Try compatibility check if direct match failed.
+            #
+            # Compatibility BETWEEN THE COMPONENTS says only that they can be
+            # combined with each other. The result still has to answer the unit
+            # the caller asked for, and normalising with no target at all did
+            # not check that: Apple's GrossProfit and CostOfGoodsAndServicesSold
+            # are both USD, so their sum was returned as the answer to
+            # unit='EUR' and to unit='shares' alike.
+            if (UnitNormalizer.are_compatible(gross_profit_fact.unit, cost_of_revenue_fact.unit)
+                    and self._components_answer_unit(gross_profit_fact.unit, unit, strict_unit_match)):
                 # Same unit type but different representations - try calculation anyway
                 gp_normalized = UnitNormalizer.get_normalized_value(gross_profit_fact, apply_scale=True, strict_unit_match=False)
                 cr_normalized = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, apply_scale=True, strict_unit_match=False)
@@ -2635,7 +2666,8 @@ class EntityFacts:
 
         return None
 
-    def _calculate_gross_profit_from_components(self, period: Optional[str] = None, unit: str = 'USD') -> Optional[float]:
+    def _calculate_gross_profit_from_components(self, period: Optional[str] = None, unit: str = 'USD',
+                                                    strict_unit_match: bool = False) -> Optional[float]:
         """
         Calculate gross profit from Revenue - Cost of Revenue when explicit gross profit not available.
         """
@@ -2666,14 +2698,24 @@ class EntityFacts:
             cost_of_revenue_fact.numeric_value is not None):
 
             # Use enhanced unit compatibility checking
-            rev_result = UnitNormalizer.get_normalized_value(revenue_fact, target_unit=unit, apply_scale=True)
-            cr_result = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, target_unit=unit, apply_scale=True)
+            rev_result = UnitNormalizer.get_normalized_value(revenue_fact, target_unit=unit, apply_scale=True,
+                                                             strict_unit_match=strict_unit_match)
+            cr_result = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, target_unit=unit, apply_scale=True,
+                                                            strict_unit_match=strict_unit_match)
 
             if rev_result.success and cr_result.success:
                 return rev_result.value - cr_result.value
 
-            # Try compatibility check if direct match failed
-            if UnitNormalizer.are_compatible(revenue_fact.unit, cost_of_revenue_fact.unit):
+            # Try compatibility check if direct match failed.
+            #
+            # Compatibility BETWEEN THE COMPONENTS says only that they can be
+            # combined with each other. The result still has to answer the unit
+            # the caller asked for, and normalising with no target at all did
+            # not check that: Apple's GrossProfit and CostOfGoodsAndServicesSold
+            # are both USD, so their sum was returned as the answer to
+            # unit='EUR' and to unit='shares' alike.
+            if (UnitNormalizer.are_compatible(revenue_fact.unit, cost_of_revenue_fact.unit)
+                    and self._components_answer_unit(revenue_fact.unit, unit, strict_unit_match)):
                 # Same unit type but different representations - try calculation anyway
                 rev_normalized = UnitNormalizer.get_normalized_value(revenue_fact, apply_scale=True)
                 cr_normalized = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, apply_scale=True)
