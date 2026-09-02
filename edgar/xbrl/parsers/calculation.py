@@ -3,15 +3,34 @@ Calculation parser for XBRL documents.
 
 This module handles parsing of XBRL calculation linkbases and building
 calculation trees with weights for validation.
+
+Calculation edges are PER RELATIONSHIP. A concept may roll up into two different
+totals under the same role, with a different weight — often a different sign —
+under each, so `CalculationTree.all_nodes` (one node per concept) cannot hold
+them. `CalculationTree.all_arcs` holds one entry per filed edge beside it.
+
+Relationships are accumulated across every `parse_calculation_content` call and
+every `calculationLink` element, then the trees are rebuilt from the accumulated
+set. One role may legally be split across several extended links, or files.
 """
 
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-from edgar.xbrl.core import NAMESPACES, extract_element_id
-from edgar.xbrl.models import CalculationNode, CalculationTree, ElementCatalog, Fact, XBRLProcessingError
+from edgar.xbrl.core import extract_element_id
+from edgar.xbrl.models import (
+    CalculationArc,
+    CalculationNode,
+    CalculationTree,
+    ElementCatalog,
+    Fact,
+    XBRLProcessingError,
+)
 
 from .base import BaseParser
+
+XLINK = "{http://www.w3.org/1999/xlink}"
+LINKBASE = "{http://www.xbrl.org/2003/linkbase}"
 
 
 class CalculationParser(BaseParser):
@@ -38,6 +57,11 @@ class CalculationParser(BaseParser):
         self.element_catalog = element_catalog
         self.facts = facts
 
+        # Every relationship seen so far, grouped by the role that declared it.
+        # The trees are rebuilt from this after each parse.
+        self._relationships_by_role: Dict[str, List[Dict[str, Any]]] = {}
+        self._seen_arcs: set = set()
+
     def parse_calculation(self, file_path: Union[str, Path]) -> None:
         """Parse calculation linkbase file and build calculation trees."""
         try:
@@ -49,73 +73,91 @@ class CalculationParser(BaseParser):
     def parse_calculation_content(self, content: str) -> None:
         """Parse calculation linkbase content and build calculation trees."""
         try:
-            # Use safe XML parsing method
             root = self._safe_parse_xml(content)
 
-            # Extract calculation links
-            calculation_links = root.findall('.//{http://www.xbrl.org/2003/linkbase}calculationLink')
-
-            for link in calculation_links:
-                role = link.get('{http://www.w3.org/1999/xlink}role')
+            for link in root.findall(f'.//{LINKBASE}calculationLink'):
+                role = link.get(f'{XLINK}role')
                 if not role:
                     continue
 
-                # Store role information
-                role_id = role.split('/')[-1] if '/' in role else role
-                role_def = role_id.replace('_', ' ')
+                self._record_role(role)
+                self._collect_relationships(link, role)
 
-                self.calculation_roles[role] = {
-                    'roleUri': role,
-                    'definition': role_def,
-                    'roleId': role_id
-                }
-
-                # Extract arcs
-                arcs = link.findall('.//{http://www.xbrl.org/2003/linkbase}calculationArc')
-
-                # Create relationships list
-                relationships = []
-
-                for arc in arcs:
-                    from_ref = arc.get('{http://www.w3.org/1999/xlink}from')
-                    to_ref = arc.get('{http://www.w3.org/1999/xlink}to')
-                    order = self._parse_order_attribute(arc)
-                    weight = float(arc.get('weight', '1.0'))
-
-                    if not from_ref or not to_ref:
-                        continue
-
-                    # Find locators for from/to references
-                    from_loc = link.find(f'.//*[@{{{NAMESPACES["xlink"]}}}label="{from_ref}"]')
-                    to_loc = link.find(f'.//*[@{{{NAMESPACES["xlink"]}}}label="{to_ref}"]')
-
-                    if from_loc is None or to_loc is None:
-                        continue
-
-                    from_href = from_loc.get('{http://www.w3.org/1999/xlink}href')
-                    to_href = to_loc.get('{http://www.w3.org/1999/xlink}href')
-
-                    if not from_href or not to_href:
-                        continue
-
-                    # Extract element IDs
-                    from_element = extract_element_id(from_href)
-                    to_element = extract_element_id(to_href)
-
-                    # Add relationship
-                    relationships.append({
-                        'from_element': from_element,
-                        'to_element': to_element,
-                        'order': order,
-                        'weight': weight
-                    })
-
-                # Build calculation tree for this role
-                if relationships:
-                    self._build_calculation_tree(role, relationships)
+            # Rebuild from everything seen so far, not just this link element:
+            # one role may be split across several extended links or files.
+            self._rebuild_calculation_trees()
 
         except Exception as e:
             raise XBRLProcessingError(f"Error parsing calculation content: {str(e)}") from e
+
+    def _record_role(self, role: str) -> None:
+        """Store the human-readable identity of an extended link role."""
+        role_id = role.split('/')[-1] if '/' in role else role
+
+        self.calculation_roles[role] = {
+            'roleUri': role,
+            'definition': role_id.replace('_', ' '),
+            'roleId': role_id
+        }
+
+    def _collect_relationships(self, link, role: str) -> None:
+        """Extract every calculation arc in one extended link into the store."""
+        relationships = self._relationships_by_role.setdefault(role, [])
+
+        # Resolve every xlink:label once. Searching the link per arc is
+        # quadratic, and an extended link can carry hundreds of each.
+        labels = {}
+        for element in link.iter():
+            label = element.get(f'{XLINK}label')
+            if label is not None:
+                labels.setdefault(label, element)
+
+        for arc in link.findall(f'.//{LINKBASE}calculationArc'):
+            from_ref = arc.get(f'{XLINK}from')
+            to_ref = arc.get(f'{XLINK}to')
+            if not from_ref or not to_ref:
+                continue
+
+            from_loc = labels.get(from_ref)
+            to_loc = labels.get(to_ref)
+            if from_loc is None or to_loc is None:
+                continue
+
+            from_href = from_loc.get(f'{XLINK}href')
+            to_href = to_loc.get(f'{XLINK}href')
+            if not from_href or not to_href:
+                continue
+
+            from_element = extract_element_id(from_href)
+            to_element = extract_element_id(to_href)
+
+            # Re-reading the same linkbase must not duplicate an edge
+            key = (role, from_element, to_element)
+            if key in self._seen_arcs:
+                continue
+            self._seen_arcs.add(key)
+
+            relationships.append({
+                'from_element': from_element,
+                'to_element': to_element,
+                'order': self._parse_order_attribute(arc),
+                'weight': self._parse_weight_attribute(arc),
+            })
+
+    def _parse_weight_attribute(self, arc) -> float:
+        """Parse the weight attribute, defaulting to 1.0 when absent or unusable."""
+        try:
+            return float(arc.get('weight', '1.0'))
+        except (TypeError, ValueError):
+            return 1.0
+
+    def _rebuild_calculation_trees(self) -> None:
+        """Rebuild every role's tree from all the relationships seen so far."""
+        self.calculation_trees.clear()
+
+        for role, relationships in self._relationships_by_role.items():
+            if relationships:
+                self._build_calculation_tree(role, relationships)
 
     def _build_calculation_tree(self, role: str, relationships: List[Dict[str, Any]]) -> None:
         """
@@ -149,12 +191,23 @@ class CalculationParser(BaseParser):
         if not root_elements:
             return  # No root elements found
 
-        # Create calculation tree
+        # Create calculation tree. all_arcs carries every filed relationship;
+        # all_nodes carries one node per concept, so a concept with two parents
+        # is one node and two arcs.
         tree = CalculationTree(
             role_uri=role,
             definition=self.calculation_roles[role]['definition'],
             root_element_id=root_elements[0],  # Use first sorted element
-            all_nodes={}
+            all_nodes={},
+            all_arcs=[
+                CalculationArc(
+                    parent_id=rel['from_element'],
+                    child_id=rel['to_element'],
+                    weight=rel['weight'],
+                    order=rel['order'],
+                )
+                for rel in relationships
+            ],
         )
 
         # Build tree recursively
@@ -166,7 +219,8 @@ class CalculationParser(BaseParser):
 
     def _build_calculation_subtree(self, element_id: str, parent_id: Optional[str],
                                from_map: Dict[str, List[Dict[str, Any]]],
-                               all_nodes: Dict[str, CalculationNode]) -> None:
+                               all_nodes: Dict[str, CalculationNode],
+                               ancestors: tuple = ()) -> None:
         """
         Recursively build a calculation subtree.
 
@@ -175,7 +229,17 @@ class CalculationParser(BaseParser):
             parent_id: Parent element ID
             from_map: Map of relationships by source element
             all_nodes: Dictionary to store all nodes
+            ancestors: Element IDs on the path from the root, to stop a cycle.
+                Merging relationships across extended links makes a directed
+                cycle reachable where building each link separately could not
+                produce one. A cycle is not valid XBRL, but it must fail as a
+                missing edge rather than as a stack overflow. Tracking the path
+                rather than a global visited set keeps a diamond working: a
+                concept legitimately reached twice is still built twice.
         """
+        if element_id in ancestors:
+            return
+
         # Create node
         node = CalculationNode(
             element_id=element_id,
@@ -216,7 +280,8 @@ class CalculationParser(BaseParser):
 
                 # Recursively build child subtree
                 self._build_calculation_subtree(
-                    child_id, element_id, from_map, all_nodes
+                    child_id, element_id, from_map, all_nodes,
+                    ancestors + (element_id,)
                 )
 
                 # Update weight and order after child is built
