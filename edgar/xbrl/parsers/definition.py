@@ -155,9 +155,12 @@ class DefinitionParser(BaseParser):
 
                 # Create or update axis
                 if axis_id not in self.axes:
+                    is_typed, typed_domain_ref = self._typed_dimension_info(axis_id)
                     self.axes[axis_id] = Axis(
                         element_id=axis_id,
-                        label=self._get_element_label(axis_id)
+                        label=self._get_element_label(axis_id),
+                        is_typed_dimension=is_typed,
+                        typed_domain_ref=typed_domain_ref
                     )
 
         # Process dimension-domain relationships to link axes to domains
@@ -225,6 +228,23 @@ class DefinitionParser(BaseParser):
             # Add tables to collection
             if tables_by_role:
                 self.tables[role] = tables_by_role
+
+    def _typed_dimension_info(self, element_id: str) -> tuple:
+        """
+        Whether an axis is a typed dimension, and the domain it points at.
+
+        A dimension is typed when its element declaration carries
+        xbrldt:typedDomainRef. Reading it from the element catalog is what makes
+        `is_typed_dimension=False` an answer rather than an untouched default.
+
+        An axis declared only in an imported taxonomy is not in the catalog at
+        all — there is no xs:import traversal — so it still reports False. That
+        is the remaining half of gh #1234, tracked as edgartools-0c1q.16.1.
+        """
+        element = self.element_catalog.get(element_id)
+        typed_domain_ref = getattr(element, 'typed_domain_ref', None) if element else None
+
+        return bool(typed_domain_ref), typed_domain_ref or ""
 
     def _get_element_label(self, element_id: str) -> str:
         """Get the label for an element, falling back to the element ID if not found."""
