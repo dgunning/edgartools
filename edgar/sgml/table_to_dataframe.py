@@ -6,13 +6,89 @@ company-formatted HTML tables.
 
 import re
 from dataclasses import dataclass
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 import pandas as pd
 
 from edgar.documents import HTMLParser, ParserConfig
 from edgar.documents.table_nodes import TableNode
-from edgar.files.tables import ProcessedTable
+
+
+@dataclass
+class FlatTable:
+    """A table flattened to plain strings: one header label per column, one list
+    of cell strings per row.
+
+    This is the shape the extractor below was written against. It used to arrive
+    as ``edgar.files.tables.ProcessedTable``, read off ``table_node._processed``
+    — an attribute that exists only on the LEGACY ``TableNode``
+    (``edgar/files/html.py``), while this module is annotated and wired for the
+    modern one from ``edgar.documents``. The attribute therefore raised
+    ``AttributeError`` on every call, the bare ``except Exception`` below
+    swallowed it, and the extractor returned an empty DataFrame every time.
+    Measured before the fix: 642 of 642 tables across 21 real filings raised, and
+    ``Report.get_dataframe()`` — public API — answered ``(0, 0)`` for every
+    filing since the parser rewrite. (bead edgartools-yq1l)
+    """
+
+    headers: List[str]
+    data_rows: List[List[str]]
+
+
+def _flatten_table(table: TableNode) -> FlatTable:
+    """Build the flat view from a modern ``TableNode``.
+
+    COLSPANS ARE EXPANDED, AND THE TWO HALVES EXPAND DIFFERENTLY. A header cell
+    spanning two columns is repeated across both, because "3 Months Ended"
+    genuinely qualifies each date beneath it and the metadata pass looks for
+    "ended" to decide duration-vs-instant. A DATA cell spanning two columns is
+    written once and the rest padded blank — repeating a number would invent a
+    figure the filing does not report.
+
+    Header rows are merged column-wise rather than one row being chosen, so a
+    two-row header ("3 Months Ended" over "Mar. 29, 2025") yields a column label
+    carrying both. Without the merge the period columns of an Apple 10-Q are
+    four indistinguishable dates.
+    """
+    def expand(cells, repeat: bool) -> List[str]:
+        out: List[str] = []
+        for cell in cells:
+            text = (cell.text() or '').strip()
+            span = max(int(getattr(cell, 'colspan', 1) or 1), 1)
+            out.append(text)
+            out.extend([text if repeat else ''] * (span - 1))
+        return out
+
+    header_rows = [expand(hr, repeat=True) for hr in (table.headers or [])]
+    data_rows = [expand(r.cells, repeat=False)
+                 for r in list(table.rows or []) + list(table.footer or [])]
+
+    width = max((len(r) for r in header_rows + data_rows), default=0)
+    if not width:
+        return FlatTable(headers=[], data_rows=[])
+
+    # A short header row is RIGHT-aligned, not left. Financial tables carry a
+    # stub column of line-item labels that the period header row does not label:
+    # Apple's Q2 FY2025 income statement has a 5-wide body and a 4-wide date row,
+    # and left-aligning put "Mar. 29, 2025" on the LABEL column and pushed every
+    # date one column left of the figures it belongs to. The result parsed, had
+    # the right shape, and reported the wrong period for every number in it.
+    header_rows = [[''] * (width - len(row)) + row if len(row) < width else row
+                   for row in header_rows]
+
+    headers: List[str] = []
+    for col in range(width):
+        parts: List[str] = []
+        for row in header_rows:
+            part = row[col] if col < len(row) else ''
+            if part and part not in parts:
+                parts.append(part)
+        headers.append(' '.join(parts))
+
+    return FlatTable(
+        headers=headers,
+        data_rows=[row + [''] * (width - len(row)) for row in data_rows],
+    )
 
 
 @dataclass
@@ -29,8 +105,13 @@ class FinancialTableExtractor:
 
     # Common patterns for financial data
     # More comprehensive currency patterns
+    # ISO codes need word boundaries. Without them `AUD` matches inside
+    # "Unaudited" — which appears in the title of essentially every unaudited
+    # interim statement — so Apple's Q2 FY2025 income statement reported its
+    # currency as Australian dollars, from a header that says "USD ($)" four
+    # words later.
     CURRENCY_PATTERN = re.compile(
-        r'\$|USD|EUR|GBP|JPY|CNY|CAD|AUD|CHF|'
+        r'\$|\b(?:USD|EUR|GBP|JPY|CNY|CAD|AUD|CHF)\b|'
         r'£|€|¥|₹|'  # Currency symbols
         r'\bDollars?\b|\bPounds?\b|\bEuros?\b|\bYen\b',
         re.IGNORECASE
@@ -38,6 +119,15 @@ class FinancialTableExtractor:
     # More flexible units pattern
     UNITS_PATTERN = re.compile(
         r'(?:in\s+)?(?:thousands?|millions?|billions?|000s?|000,000s?|mln|mil|bn)',
+        re.IGNORECASE
+    )
+    #: The units phrase that a currency symbol or name qualifies, e.g.
+    #: "$ in Millions". Preferred over UNITS_PATTERN, which matches whichever
+    #: units word comes first and so reads "shares in Thousands" as the money
+    #: scale on any header that mentions share counts before dollars.
+    CURRENCY_UNITS_PATTERN = re.compile(
+        r'(?:\$|USD|£|€|¥|₹|\bdollars?\b)[^.;,\n]{0,20}?'
+        r'(?:thousands?|millions?|billions?|000s?|000,000s?|mln|mil|bn)',
         re.IGNORECASE
     )
     SCALING_PATTERN = re.compile(r'(\d+(?:,\d{3})*)\s*=\s*\$?1')
@@ -67,9 +157,8 @@ class FinancialTableExtractor:
             pd.DataFrame with financial data, periods as columns, line items as index
         """
         try:
-            # Get processed table
-            processed_table = table_node._processed
-            if not processed_table:
+            processed_table = _flatten_table(table_node)
+            if not processed_table.data_rows:
                 return pd.DataFrame()
 
             # Extract metadata from headers
@@ -88,7 +177,7 @@ class FinancialTableExtractor:
             return pd.DataFrame()
 
     @classmethod
-    def _extract_metadata(cls, table_node: TableNode, processed_table: ProcessedTable) -> TableMetadata:
+    def _extract_metadata(cls, table_node: TableNode, processed_table: FlatTable) -> TableMetadata:
         """Extract metadata from table headers and first few rows"""
         metadata = TableMetadata()
 
@@ -101,8 +190,13 @@ class FinancialTableExtractor:
             if currency_match:
                 metadata.currency = currency_match.group(0)
 
-            # Extract units
-            units_match = cls.UNITS_PATTERN.search(header_text)
+            # Extract units. The CURRENCY-QUALIFIED phrase wins where there is
+            # one: SEC R-file headers routinely read "shares in Thousands, $ in
+            # Millions", and taking the first match scaled Apple's net sales by
+            # 1,000 instead of 1,000,000 — off by three orders of magnitude,
+            # from a header that says the right thing a few words later.
+            units_match = (cls.CURRENCY_UNITS_PATTERN.search(header_text)
+                           or cls.UNITS_PATTERN.search(header_text))
             if units_match:
                 unit_text = units_match.group(0).lower()
                 if any(x in unit_text for x in ['thousand', '000s', '000,']):
@@ -128,7 +222,7 @@ class FinancialTableExtractor:
         return metadata
 
     @classmethod
-    def _build_dataframe(cls, processed_table: ProcessedTable, metadata: TableMetadata) -> pd.DataFrame:
+    def _build_dataframe(cls, processed_table: FlatTable, metadata: TableMetadata) -> pd.DataFrame:
         """Build initial DataFrame from processed table"""
         if not processed_table.data_rows:
             return pd.DataFrame()
