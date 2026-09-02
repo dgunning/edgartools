@@ -157,9 +157,27 @@ class StructuralChunker:
         if root is None:
             return []
 
-        out: List[Chunk] = []
-        buffer: List[str] = []
-        heading: Optional[str] = None
+        walk = _StructuralWalk(self.min_chars, self.max_chars)
+        walk.visit(root)
+        walk.flush()
+        return walk.out
+
+
+class _StructuralWalk:
+    """
+    One pass over a document tree, accumulating chunks.
+
+    This is a class rather than a nest of closures only so each step stays
+    small enough to read on its own; the state it carries is exactly what the
+    walk needs to decide where one passage ends and the next begins.
+    """
+
+    def __init__(self, min_chars: int, max_chars: int):
+        self.min_chars = min_chars
+        self.max_chars = max_chars
+        self.out: List[Chunk] = []
+        self.buffer: List[str] = []
+        self.heading: Optional[str] = None
         #: Has body text landed in the buffer since the last heading? Runs of
         #: consecutive headings are one passage, not one chunk each.
         #:
@@ -168,81 +186,84 @@ class StructuralChunker:
         #: out as a chunk per LINE ("UNITED STATES", "SECURITIES AND EXCHANGE
         #: COMMISSION", ...). The legacy chunker carried the same rule under the
         #: names `header_detected` / `accumulating_regular_text`.
-        body_since_heading = False
+        self.body_since_heading = False
 
-        def flush():
-            nonlocal body_since_heading
-            body_since_heading = False
-            if not buffer:
-                return
-            text = '\n'.join(part for part in buffer if part).strip()
-            buffer.clear()
-            if len(text) >= self.min_chars:
-                out.append(Chunk(text=text, kind='text', heading=heading))
+    def flush(self) -> None:
+        """Close the current passage, dropping it if it is too short."""
+        self.body_since_heading = False
+        if not self.buffer:
+            return
+        text = '\n'.join(part for part in self.buffer if part).strip()
+        self.buffer.clear()
+        if len(text) >= self.min_chars:
+            self.out.append(Chunk(text=text, kind='text', heading=self.heading))
 
-        def emit_heading(text):
-            nonlocal heading, body_since_heading
-            if body_since_heading:
-                flush()
-            heading = text
-            body_since_heading = False
-            buffer.append(text)
+    def emit_heading(self, text: str) -> None:
+        """Start a new passage under `text`, unless we are mid-run of headings."""
+        if self.body_since_heading:
+            self.flush()
+        self.heading = text
+        self.body_since_heading = False
+        self.buffer.append(text)
 
-        def visit(node):
-            nonlocal heading, body_since_heading
+    def _append_body(self, text: str) -> None:
+        """Add body text, closing the passage if it has grown past the cap."""
+        self.buffer.append(text)
+        self.body_since_heading = True
+        if self.max_chars and sum(len(b) for b in self.buffer) >= self.max_chars:
+            self.flush()
 
-            if node.type is NodeType.TABLE:
-                flush()
-                rendered = _render_table(node)
-                if len(rendered) >= self.min_chars:
-                    out.append(Chunk(text=rendered, kind='table', heading=heading))
-                return
+    def visit(self, node: 'Node') -> None:
+        if node.type is NodeType.TABLE:
+            self._visit_table(node)
+        elif node.type in _CONTENT_TYPES:
+            self._visit_content(node)
+        elif node.type in _CONTAINER_TYPES:
+            for child in node.children:
+                self.visit(child)
 
-            if node.type in _CONTENT_TYPES:
-                text = (node.text() or '').strip()
-                if not text:
-                    return
+    def _visit_table(self, node: 'Node') -> None:
+        self.flush()
+        rendered = _render_table(node)
+        if len(rendered) >= self.min_chars:
+            self.out.append(Chunk(text=rendered, kind='table', heading=self.heading))
 
-                # A paragraph wrapping headings is structure, not a passage.
-                if (node.type in (NodeType.PARAGRAPH, NodeType.LIST)
-                        and _has_heading_descendant(node)):
-                    for child in node.children:
-                        visit(child)
-                    return
+    def _visit_content(self, node: 'Node') -> None:
+        text = (node.text() or '').strip()
+        if not text:
+            return
 
-                if node.type is NodeType.HEADING and not _NUMBERING_ONLY.match(text):
-                    emit_heading(text)
-                    return
+        # A paragraph wrapping headings is structure, not a passage.
+        if (node.type in (NodeType.PARAGRAPH, NodeType.LIST)
+                and _has_heading_descendant(node)):
+            for child in node.children:
+                self.visit(child)
+            return
 
-                if node.type is NodeType.TEXT:
-                    # Bare text: cut it on Item/Part lines, since a document
-                    # built entirely of these has no other boundary available.
-                    for line in text.splitlines():
-                        stripped = line.strip()
-                        if not stripped:
-                            continue
-                        if _PART_LINE.match(line) or _ITEM_LINE.match(line):
-                            emit_heading(stripped)
-                        else:
-                            buffer.append(stripped)
-                            body_since_heading = True
-                            if self.max_chars and sum(len(b) for b in buffer) >= self.max_chars:
-                                flush()
-                    return
+        if node.type is NodeType.HEADING and not _NUMBERING_ONLY.match(text):
+            self.emit_heading(text)
+            return
 
-                buffer.append(text)
-                body_since_heading = True
-                if self.max_chars and sum(len(b) for b in buffer) >= self.max_chars:
-                    flush()
-                return
+        if node.type is NodeType.TEXT:
+            self._visit_bare_text(text)
+            return
 
-            if node.type in _CONTAINER_TYPES:
-                for child in node.children:
-                    visit(child)
+        self._append_body(text)
 
-        visit(root)
-        flush()
-        return out
+    def _visit_bare_text(self, text: str) -> None:
+        """
+        Cut bare text on Item/Part lines.
+
+        A document built entirely of these has no other boundary available.
+        """
+        for line in text.splitlines():
+            stripped = line.strip()
+            if not stripped:
+                continue
+            if _PART_LINE.match(line) or _ITEM_LINE.match(line):
+                self.emit_heading(stripped)
+            else:
+                self._append_body(stripped)
 
 
 class ChunkExtractor:
