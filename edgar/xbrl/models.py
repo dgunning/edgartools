@@ -326,6 +326,10 @@ class Axis(BaseModel):
     """
     element_id: str
     label: str
+    # The extended link role this axis was declared under. An axis can be
+    # attached to a different domain in each role, so the pair (role_uri,
+    # element_id) is its identity; "" marks an entry merged across roles.
+    role_uri: str = ""
     domain_id: Optional[str] = None
     default_member_id: Optional[str] = None
     is_typed_dimension: bool = False
@@ -340,6 +344,10 @@ class Domain(BaseModel):
     """
     element_id: str
     label: str
+    # The extended link role this domain was declared under. The same domain
+    # routinely carries different members in different roles; "" marks an entry
+    # merged across roles.
+    role_uri: str = ""
     members: List[str] = Field(default_factory=list)  # List of domain member element IDs
     parent: Optional[str] = None  # Parent domain element ID
 
