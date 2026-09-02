@@ -1,5 +1,6 @@
 """Form 8-K and 6-K current report classes."""
 import re
+import warnings
 from datetime import date, datetime
 from functools import cached_property, partial
 from typing import List, Optional
@@ -674,6 +675,32 @@ class CurrentReport(CompanyReport):
 
     @property
     def doc(self):
+        """The legacy chunked document.
+
+        .. deprecated:: 5.56
+            Use :attr:`document` instead. Removed in v6.0 with ``edgar.files``.
+
+        This override is the reason the property carries its own warning rather
+        than inheriting one. ``CompanyReport.doc`` returns ``self.document`` —
+        the *new* parser's document — and every other report class means that by
+        ``.doc``. ``CurrentReport`` alone returns the legacy ``ChunkedDocument``,
+        so the same attribute name hands back two unrelated types depending on
+        the form, and only this one stands on a package 6.0 deletes.
+
+        A plain ``warnings.warn`` rather than the frame-gated
+        ``warn_legacy_html_usage``: nothing inside edgartools reads ``.doc``
+        (measured 2026-09-02 across ``edgar/``), so there is no internal caller
+        to stay quiet for, and this matches the sibling ``chunked_document``
+        property in ``CompanyReport``.
+        """
+        warnings.warn(
+            "CurrentReport.doc returns the legacy ChunkedDocument and is "
+            "deprecated; it will be removed in edgartools 6.0 along with the "
+            "edgar.files package. Use .document for the edgar.documents parser, "
+            "or .items / report[item] for item access.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         return self._chunked_document
 
     @property
