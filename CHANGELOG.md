@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [5.56.0] - 2026-09-02
+
+### Added
+
+- **Role-scoped access to the XBRL dimensional model.** `XBRL.axes_for_role(role_uri)` and `XBRL.domains_for_role(role_uri)` return the axes and domains a single extended link role declares, keyed on element ID. Prefer them over `xbrl.axes` / `xbrl.domains` wherever the role is known: the same domain routinely carries different members in different roles, so the flat views can only offer the union. `Axis` and `Domain` gain `role_uri`, and `XBRL.axes_by_role` / `XBRL.domains_by_role` expose the underlying store.
+- **`CalculationTree.all_arcs`, one entry per filed calculation relationship.** A concept may roll up into two totals with a different weight, and often a different sign, under each, which the one-node-per-concept `all_nodes` map cannot represent. `all_nodes` is unchanged and still the right thing for lookup and membership; `all_arcs` is the graph.
+- **`ElementCatalog.typed_domain_ref` and `ElementCatalog.substitution_group`**, read from the element declaration, which is what lets `Axis.is_typed_dimension` report a dimension the filer declared as typed.
+
 ### Fixed
 
 - **`get_revenue(unit=...)` answered a request for one unit with a figure in another.** When the unit filter correctly rejected every candidate fact, `_get_standardized_concept_value` fell through to its component calculation, and that calculation checked the two components against *each other* — which establishes only that they can be added — before normalising with no target unit at all. Apple's `GrossProfit` and `CostOfGoodsAndServicesSold` are both USD, so their sum was returned as the answer to `unit='EUR'` and to `unit='shares'` alike: 364,357,000,000 in both cases, and both now `None`. The default USD path is unchanged and still answers from the revenue fact itself. Strictness now reaches the fallbacks, and a derived figure has to answer the unit that was asked for — an exact match always does, a merely compatible one only where the caller did not pin the unit, which is the rule the direct path already used. `get_gross_profit()` was leaking the same way for a second reason — its own direct branch never asked for strict matching at all, so a compatible-but-different currency succeeded before the guard was even reached — and both fallbacks now answer by the same rule as the direct path. This was latent until bare concept names were indexed (GH #1202, same release): before that, `get_fact('GrossProfit')` returned `None`, the components were never found, and the fallback returned `None` for the wrong reason. (bead edgartools-885h)
