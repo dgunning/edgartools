@@ -513,13 +513,14 @@ class XBRL:
             )
             menucat = self._filing_summary_menu_categories.get(role_uri)
 
-            for element_id, node in tree.all_nodes.items():
-                if node.parent is None:
-                    # Root node — no arc to emit.
-                    continue
+            # One row per filed edge. Iterating all_nodes would emit one row
+            # per concept, which silently drops the second and later parents of
+            # a concept that rolls up into more than one total.
+            for arc in tree.all_arcs:
+                element_id = arc.child_id
 
                 concept_tax, concept_local = split_element_id(element_id)
-                parent_tax, parent_local = split_element_id(node.parent)
+                parent_tax, parent_local = split_element_id(arc.parent_id)
 
                 elem = self.element_catalog.get(element_id)
                 is_abstract = bool(elem.abstract) if elem else False
@@ -535,7 +536,7 @@ class XBRL:
                     'concept_taxonomy': concept_tax,
                     'parent_concept': parent_local,
                     'parent_taxonomy': parent_tax,
-                    'weight': node.weight,
+                    'weight': arc.weight,
                     'role_uri': role_uri,
                     'role_short': role_short,
                     'menucat': menucat,
