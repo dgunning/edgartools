@@ -2472,14 +2472,23 @@ class Statements:
         concept_info = statement_to_concepts[statement_type]
         concept = concept_info.concept
 
-        # Find all statements of the requested type
-        matching_statements = self.statement_by_type.get(statement_type, [])
+        # Find all statements of the requested type.
+        # GH #1221: a parenthetical role is indexed under its own statement type
+        # ("BalanceSheetParenthetical"), so a parenthetical request has to look
+        # in that bucket — searching the plain one and then filtering for a
+        # parenthetical role inside it can only ever come up empty.
+        matching_statements = list(self.statement_by_type.get(statement_type, []))
+        if is_parenthetical:
+            matching_statements += self.statement_by_type.get(
+                f"{statement_type}Parenthetical", [])
 
         if not matching_statements:
             return None
 
-        # Parenthetical check is only relevant for BalanceSheet
-        check_parenthetical = statement_type == 'BalanceSheet'
+        # GH #1221: the flag used to be honoured for BalanceSheet alone, so an
+        # income-statement or equity-statement parenthetical request was not even
+        # considered. Filings label these roles the same way for every statement.
+        check_parenthetical = True
 
         # Try to find a statement containing the specific concept
         for stmt in matching_statements:
@@ -2514,6 +2523,12 @@ class Statements:
 
                 if is_parenthetical == is_role_parenthetical:
                     return role
+
+        # GH #1221: returning the first statement here answered a parenthetical
+        # request with the ordinary statement — the caller got a correct-looking
+        # statement and no indication that the flag was dropped. Report the miss.
+        if is_parenthetical:
+            return None
 
         # If still no match, return the first statement
         return matching_statements[0]['role']

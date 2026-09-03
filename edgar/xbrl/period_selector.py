@@ -71,8 +71,18 @@ def select_periods(xbrl, statement_type: str, max_periods: int = 4) -> List[Tupl
         # Step 3: Filter out periods with insufficient data
         periods_with_data = _filter_periods_with_sufficient_data(xbrl, candidate_periods, statement_type)
 
+        # Step 4: Re-apply the cap.
+        # GH #1222: the selectors above deliberately over-fetch to max_periods * 3
+        # (issue #464) so that data-quality filtering has candidates to choose
+        # between. That filter only REMOVES periods below the data threshold; it
+        # never truncates to max_periods. For a healthy filing where every
+        # candidate has sufficient data — the normal case — nothing narrowed the
+        # over-fetch and select_periods returned up to 3N. The over-fetch is
+        # correct and stays; the cap is what was missing. Candidates arrive in
+        # priority order (current period, then fiscal year ends, then by
+        # recency), so the head of the list is the right N to keep.
         if periods_with_data:
-            return periods_with_data
+            return periods_with_data[:max_periods]
         else:
             # If no periods have sufficient data, return the candidates anyway
             # Issue #585: Downgrade to debug - this is a normal fallback, not a user-actionable warning
@@ -84,7 +94,7 @@ def select_periods(xbrl, statement_type: str, max_periods: int = 4) -> List[Tupl
                 xbrl.entity_name, statement_type, len(candidate_periods),
                 period_of_report, fiscal_year
             )
-            return candidate_periods
+            return candidate_periods[:max_periods]
 
     except Exception as e:
         logger.error("Period selection failed for %s %s: %s", xbrl.entity_name, statement_type, e)

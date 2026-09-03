@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 
 import pytest
+from edgar.exceptions import StatementNotFoundError
 from edgar.xbrl.xbrl import XBRL
 from edgar.xbrl.statement_resolver import StatementResolver, statement_registry, _ENUM_TO_REGISTRY
 
@@ -212,4 +213,17 @@ def test_detection_of_financial_statements(unp_xbrl):
     assert income_statement
     print(unp_xbrl.statements)
 
-    print(unp_xbrl.find_statement("CashFlow", is_parenthetical=True))
+    # GH #1221: this filing declares no parenthetical cash flow role. The call
+    # used to print the ORDINARY cash flow statement -- a silently unhonoured
+    # request -- and this line asserted nothing about it. Asking for a statement
+    # the filing does not contain now raises, as it already did for any other
+    # absent statement.
+    with pytest.raises(StatementNotFoundError):
+        unp_xbrl.find_statement("CashFlow", is_parenthetical=True)
+
+    # The parenthetical balance sheet, which this filing DOES declare, resolves
+    # to the parenthetical role and not to the face statement.
+    _, paren_role, _ = unp_xbrl.find_statement("BalanceSheet", is_parenthetical=True)
+    _, main_role, _ = unp_xbrl.find_statement("BalanceSheet")
+    assert paren_role != main_role
+    assert "arenthetical" in paren_role
