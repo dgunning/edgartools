@@ -8,7 +8,7 @@ import re
 import warnings
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 import pandas as pd
 from rich import box
@@ -18,6 +18,25 @@ from edgar.richtools import repr_rich
 from edgar.xbrl.dimensions import is_breakdown_dimension
 from edgar.exceptions import ParsingError, StatementNotFoundError
 from edgar.xbrl.presentation import StatementView, ViewType, normalize_view
+
+# Concept candidates for the ratio/trend helpers. Ordered: the first candidate
+# present in a statement wins. GH #1241 — the previous single-name lookups
+# ('us-gaap_CurrentAssets', 'us-gaap_CurrentLiabilities', 'us-gaap_Inventory')
+# had their words reversed and match no us-gaap concept at all, so
+# current_ratio and quick_ratio were never computed for any filing.
+CURRENT_ASSETS_CONCEPTS = ('us-gaap_AssetsCurrent',)
+CURRENT_LIABILITIES_CONCEPTS = ('us-gaap_LiabilitiesCurrent',)
+INVENTORY_CONCEPTS = ('us-gaap_InventoryNet', 'us-gaap_InventoryGross')
+# us-gaap:Revenues leads: where a filer reports both, it is the grand total and
+# the contract-revenue tag is one component of it (an insurer files contract
+# revenue beside investment income). Filers that report no Revenues total —
+# Apple, Microsoft — fall through to the ASC 606 tag, which is their top line.
+REVENUE_CONCEPTS = (
+    'us-gaap_Revenues',
+    'us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax',
+    'us-gaap_RevenueFromContractWithCustomerIncludingAssessedTax',
+    'us-gaap_SalesRevenueNet',
+)
 
 # XBRL structural element patterns (Issue #03zg)
 # These are XBRL metadata, not financial data, and should be filtered from user-facing output
@@ -1736,7 +1755,11 @@ class Statement:
             'concept', 'label', 'level', 'abstract', 'dimension', 'is_breakdown',
             'dimension_axis', 'dimension_member', 'dimension_member_label',
             'dimension_label', 'balance', 'weight', 'preferred_sign',
-            'parent_concept', 'parent_abstract_concept', 'unit', 'point_in_time'
+            'parent_concept', 'parent_abstract_concept', 'unit', 'point_in_time',
+            # GH #1244: standard_concept is emitted by _build_dataframe_from_raw_data
+            # immediately after 'label', so omitting it here made it the first
+            # entry in period_cols and every matrix cell read from it -> all null.
+            'standard_concept'
         }
         period_cols = [col for col in df.columns if col not in metadata_cols]
 
@@ -1930,13 +1953,13 @@ class Statement:
         ratios = {}
 
         # Current ratio
-        current_assets = self._get_concept_value(data, 'us-gaap_CurrentAssets')
-        current_liabilities = self._get_concept_value(data, 'us-gaap_CurrentLiabilities')
+        current_assets = self._get_concept_value(data, CURRENT_ASSETS_CONCEPTS)
+        current_liabilities = self._get_concept_value(data, CURRENT_LIABILITIES_CONCEPTS)
         if current_assets and current_liabilities:
             ratios['current_ratio'] = current_assets / current_liabilities
 
         # Quick ratio
-        inventory = self._get_concept_value(data, 'us-gaap_Inventory')
+        inventory = self._get_concept_value(data, INVENTORY_CONCEPTS)
         if current_assets and current_liabilities and inventory:
             ratios['quick_ratio'] = (current_assets - inventory) / current_liabilities
 
@@ -1947,7 +1970,7 @@ class Statement:
         ratios = {}
 
         # Gross margin
-        revenue = self._get_concept_value(data, 'us-gaap_Revenues')
+        revenue = self._get_concept_value(data, REVENUE_CONCEPTS)
         gross_profit = self._get_concept_value(data, 'us-gaap_GrossProfit')
         if revenue and gross_profit:
             ratios['gross_margin'] = gross_profit / revenue
@@ -1959,13 +1982,24 @@ class Statement:
 
         return ratios
 
-    def _get_concept_value(self, data: List[Dict[str, Any]], concept: str) -> Optional[float]:
-        """Get the value for a specific concept from statement data."""
-        for item in data:
-            if concept in item.get('all_names', []):
-                values = item.get('values', {})
-                if values:
-                    return float(next(iter(values.values())))
+    def _get_concept_value(self, data: List[Dict[str, Any]],
+                           concept: Union[str, Sequence[str]]) -> Optional[float]:
+        """Get the value for a concept from statement data.
+
+        Accepts either a single concept name or an ordered sequence of
+        candidates; the first candidate present in the statement wins. Filers
+        tag the same economic line item with different us-gaap concepts (Apple
+        reports revenue as RevenueFromContractWithCustomerExcludingAssessedTax,
+        Coca-Cola as Revenues), so a single hardcoded name answers for only a
+        fraction of filings.
+        """
+        candidates = [concept] if isinstance(concept, str) else list(concept)
+        for candidate in candidates:
+            for item in data:
+                if candidate in item.get('all_names', []):
+                    values = item.get('values', {})
+                    if values:
+                        return float(next(iter(values.values())))
         return None
 
     def analyze_trends(self, periods: int = 4) -> Dict[str, List[float]]:
@@ -1980,7 +2014,11 @@ class Statement:
         if not period_views:
             return trends
 
-        periods_to_analyze = period_views[0].get('periods', [])[:periods]
+        # GH #1240: generate_period_view() (edgar/xbrl/periods.py) emits
+        # 'period_keys'. Reading 'periods' was a dead lookup, so the loop below
+        # never ran and analyze_trends() returned {} for every filing.
+        period_keys = period_views[0].get('period_keys') or period_views[0].get('periods', [])
+        periods_to_analyze = period_keys[:periods]
 
         for period in periods_to_analyze:
             data = self.get_raw_data(period)
@@ -2014,7 +2052,7 @@ class Statement:
                                         period: str) -> None:
         """Analyze income statement trends."""
         metrics = {
-            'revenue': 'us-gaap_Revenues',
+            'revenue': REVENUE_CONCEPTS,
             'gross_profit': 'us-gaap_GrossProfit',
             'net_income': 'us-gaap_NetIncomeLoss'
         }
