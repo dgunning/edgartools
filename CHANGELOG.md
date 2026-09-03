@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Three public `Statement` helpers had never returned a correct result for any filing.** `analyze_trends()` read `period_views[0]['periods']`, a key the producer never emits — it emits `period_keys` — so the loop never ran and the method returned `{}` every time. `calculate_ratios()` looked up `us-gaap_CurrentAssets`, `us-gaap_CurrentLiabilities` and `us-gaap_Inventory`, none of which is a us-gaap concept (the words are reversed; the real names are `AssetsCurrent`, `LiabilitiesCurrent`, `InventoryNet`), leaving `current_ratio` and `quick_ratio` permanently absent and indistinguishable from "this filing lacks the data". `to_dataframe(matrix=True)` omitted `standard_concept` from its metadata columns, so that column became the first entry in `period_cols` and every matrix cell was read from it: Apple's FY2023 equity statement returned 33 null cells and now returns the filed values, beginning balances of $64,849M in paid-in capital against $-3,068M retained earnings. The ratio and trend lookups also now accept a candidate list, since Apple tags revenue as `RevenueFromContractWithCustomerExcludingAssessedTax` rather than `us-gaap:Revenues` and a single hardcoded name answered for only a fraction of filers. None of the three had a test asserting a real result — `analyze_trends` and `matrix=True` had zero references in the suite, and the four `calculate_ratios` hits either mocked the return value or never asserted on it. (GH #1240, #1241, #1244, bead edgartools-ysr8)
+
 
 ## [5.56.0] - 2026-09-02
 
