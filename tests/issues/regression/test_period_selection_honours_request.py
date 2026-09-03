@@ -3,7 +3,12 @@ Regression tests for GH #1222, #1246 and #1221 — three places where statement
 and period selection accepted what the caller asked for and then quietly
 returned something else.
 
-  GH #1222 (bead rj4b)  select_periods(max_periods=N) never re-applied the cap.
+GitHub Issue: https://github.com/dgunning/edgartools/issues/1222
+GitHub Issue: https://github.com/dgunning/edgartools/issues/1246
+GitHub Issue: https://github.com/dgunning/edgartools/issues/1221
+Beads: edgartools-rj4b, edgartools-zt8u, edgartools-z0y2
+
+  GH #1222 (bead edgartools-rj4b)  select_periods(max_periods=N) never re-applied the cap.
         The selectors deliberately over-fetch to N*3 (issue #464) so that
         data-quality filtering has candidates to choose between, but that filter
         only REMOVES periods below the threshold — it never truncates. For a
@@ -11,14 +16,14 @@ returned something else.
         narrowed the over-fetch and up to 3N periods came back. Microsoft's
         FY2024 balance sheet returned 10 periods for max_periods=4.
 
-  GH #1246 (bead zt8u)  get_period_views()'s instant branch had no
+  GH #1246 (bead edgartools-zt8u)  get_period_views()'s instant branch had no
         fact-sufficiency filter, though the duration branch three lines below
         filters. An incidental instant — a context the filing declares but
         reports no balance-sheet facts against — took a column slot and pushed
         out the populated prior fiscal year. The default (unnamed-view) path
         already filters, which is exactly why the two paths disagreed.
 
-  GH #1221 (bead z0y2)  parenthetical=True was silently ignored. The resolver's
+  GH #1221 (bead edgartools-z0y2)  parenthetical=True was silently ignored. The resolver's
         standard-name matcher sits first at 0.95 confidence against a 0.9
         threshold and never inspected the flag, and two later matchers score on
         content and role text alone — they cannot tell a parenthetical role from
