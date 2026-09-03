@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`get_structured_statement(fiscal_period='FY')` could return the prior-year comparative.** In SEC companyfacts a 10-K tags `fp="FY"` and `fy=<year>` on *every* instant it reports, prior-year comparatives included, and every fact in the filing shares one filing date. Apple's FY2023 10-K therefore carries two `Assets` instants both tagged `fy=2023 fp=FY` — 352,755,000,000 at 2022-09-24 and 352,583,000,000 at 2023-09-30 — and `StatementBuilder._create_fact_map` deduped on filing date alone, so the dates tied, the comparison was never true, and whichever fact the list yielded first won. The comparative did: `Company('AAPL').get_structured_statement('BalanceSheet', fiscal_year=2023, fiscal_period='FY')` came back with `period_end` 2022-09-24 and every figure from the FY2022 column, with `AssetsNoncurrent` reading 217,350,000,000 against the filed 209,017,000,000. The wrong value sits within 0.05% of the right one, which is why nothing caught it. Period end now breaks the filing-date tie, which is the tiebreak `get_annual_fact()` already used; filing recency stays the primary key, so an amendment still wins. `_get_period_end` had the same shape — it returned the first period end it saw as the period the statement claims to cover — and now returns the latest of the already-filtered facts. (bead edgartools-i24a, GH discussion #946)
+
 
 ## [5.56.0] - 2026-09-02
 
