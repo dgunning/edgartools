@@ -31,7 +31,7 @@ from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
 from edgar.richtools import repr_rich
 from edgar.xbrl.core import STANDARD_LABEL, STANDARD_TAXONOMIES, split_element_id
-from edgar.xbrl.models import Axis, Domain, PresentationNode
+from edgar.xbrl.models import Axis, Domain, PresentationNode, is_negated_label_role
 from edgar.xbrl.parsers import XBRLParser
 from edgar.xbrl.period_selector import select_periods
 from edgar.xbrl.periods import get_period_views
@@ -1497,15 +1497,11 @@ class XBRL:
         # This determines display transformation: -1 = negate, 1 = as-is, None = not specified
         preferred_sign_value = None
         if effective_preferred_label:
-            # Check if this is a negatedLabel (indicates value should be negated for display)
-            # Use pattern matching to support any XBRL namespace version (2003, 2009, future versions)
-            # Matches: 'negatedLabel', 'negatedTerseLabel', 'http://www.xbrl.org/YYYY/role/negated*Label', etc.
-            label_lower = effective_preferred_label.lower()
-            is_negated = 'negated' in label_lower and (
-                label_lower.startswith('negated') or  # Short form: 'negatedLabel'
-                '/role/negated' in label_lower        # Full URI: 'http://www.xbrl.org/*/role/negated*'
-            )
-            preferred_sign_value = -1 if is_negated else 1
+            # Negation is decided by the role's local name, which covers every
+            # namespace version and the legacy xbrl.us LRR roles (see
+            # is_negated_label_role). The Facts API reads the same helper so the
+            # two surfaces cannot disagree about a sign.
+            preferred_sign_value = -1 if is_negated_label_role(effective_preferred_label) else 1
 
         # Find facts for any of these concept names
         all_relevant_facts = self._find_facts_for_element(node.element_name, period_filter)

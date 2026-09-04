@@ -26,7 +26,7 @@ from edgar.exceptions import ValidationError
 
 from edgar.richtools import repr_rich
 from edgar.xbrl.core import STANDARD_LABEL, parse_date
-from edgar.xbrl.models import select_display_label
+from edgar.xbrl.models import is_negated_label_role, select_display_label
 
 
 # The pandas default dtype for strings changed in 3.0 (object -> str), and the
@@ -1466,18 +1466,12 @@ class FactsView:
                 # Convert preferredLabel to a numeric sign multiplier for display
                 # -1 means "negate for display", 1 means "use as-is", None means "not specified"
                 if preferred_label:
-                    # Common preferredLabel values that indicate negation
-                    negation_labels = [
-                        'negatedLabel',
-                        'http://www.xbrl.org/2003/role/negatedLabel',
-                        'negatedTerseLabel',
-                        'http://www.xbrl.org/2003/role/negatedTerseLabel',
-                        'negatedPeriodStartLabel',
-                        'http://www.xbrl.org/2003/role/negatedPeriodStartLabel',
-                        'negatedPeriodEndLabel',
-                        'http://www.xbrl.org/2003/role/negatedPeriodEndLabel'
-                    ]
-                    fact_dict['preferred_sign'] = -1 if preferred_label in negation_labels else 1
+                    # This used to be an exact-match whitelist of eight strings,
+                    # which missed the legacy xbrl.us roles entirely and the 2009
+                    # namespace's negatedTotalLabel/negatedNetLabel besides — so
+                    # the Facts API and the statement path disagreed about the
+                    # sign of the same fact. Both now read one matcher.
+                    fact_dict['preferred_sign'] = -1 if is_negated_label_role(preferred_label) else 1
                 else:
                     fact_dict['preferred_sign'] = None
 

@@ -18,6 +18,26 @@ PERIOD_END_LABEL = "http://www.xbrl.org/2003/role/periodEndLabel"
 TOTAL_LABEL = "http://www.xbrl.org/2003/role/totalLabel"
 
 
+def is_negated_label_role(role: Optional[str]) -> bool:
+    """
+    Report whether a preferred-label role asks for the value to be negated for display.
+
+    A negated role is identified by its LOCAL NAME — the segment after the final
+    slash — beginning with "negated". That covers the bare form a linkbase may
+    carry ('negatedLabel'), every XBRL International namespace version
+    ('http://www.xbrl.org/2009/role/negatedTotalLabel') and the legacy xbrl.us
+    LRR roles common in 2009-2011 filings
+    ('http://xbrl.us/us-gaap/role/label/negatedLabel'), whose extra path segment
+    defeats a '/role/negated' substring test.
+
+    Matching on the local name rather than anywhere in the URI also keeps a role
+    that merely happens to contain the word from being treated as negated.
+    """
+    if not role:
+        return False
+    return role.rsplit('/', 1)[-1].lower().startswith('negated')
+
+
 def select_display_label(
         labels: Dict[str, str],
         preferred_label: Optional[str] = None,
