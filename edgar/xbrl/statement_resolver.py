@@ -109,7 +109,13 @@ statement_registry = {
         ],
         role_patterns=[
             r".*[Bb]alance[Ss]heet.*",
-            r".*[Ss]tatement[Oo]f[Ff]inancial[Pp]osition.*",
+            # GH #1221: filings overwhelmingly write the plural ("Consolidated
+            # Statements of Financial Position"). IncomeStatement already allows
+            # it below; BalanceSheet and CashFlowStatement did not, so a role
+            # identifiable only by its name — a parenthetical, whose primary
+            # concept is a share-count abstract rather than a balance-sheet one —
+            # matched no pattern at all. Union Pacific's FY2012 10-K is one.
+            r".*[Ss]tatements?[Oo]f[Ff]inancial[Pp]osition.*",
             r".*StatementConsolidatedBalanceSheets.*"
         ],
         title="Consolidated Balance Sheets",
@@ -171,7 +177,7 @@ statement_registry = {
         ],
         role_patterns=[
             r".*[Cc]ash[Ff]low.*",
-            r".*[Ss]tatement[Oo]f[Cc]ash[Ff]lows.*",
+            r".*[Ss]tatements?[Oo]f[Cc]ash[Ff]lows.*",
             r".*StatementConsolidatedStatementsOfCashFlows.*"
         ],
         title="Consolidated Statement of Cash Flows",
@@ -744,7 +750,8 @@ class StatementResolver:
 
         return [], None, 0.0
 
-    def _score_statement_quality(self, stmt: Dict[str, Any], statement_type: str = "") -> int:
+    def _score_statement_quality(self, stmt: Dict[str, Any], statement_type: str = "",
+                                 is_parenthetical: bool = False) -> int:
         """
         Score a statement to prefer complete financial statements over fragments/details.
 
@@ -813,9 +820,16 @@ class StatementResolver:
 
         # Issue edgartools-8ad8: Penalize parenthetical statements to prefer main statements
         # Parenthetical statements contain supplementary details (e.g., share counts)
-        # and should not be selected when the main statement is available
+        # and should not be selected when the main statement is available.
+        # GH #1221: the penalty is right for the default request and wrong for an
+        # explicit one — it was unconditional, so it also demoted the very roles a
+        # parenthetical=True caller asked for. Invert it rather than remove it, so
+        # 8ad8 (ORCL resolving to the parenthetical equity statement) stays fixed.
         if 'parenthetical' in role_def or 'parenthetical' in role_uri:
-            score -= 80  # Strong penalty to avoid selecting parenthetical over main statement
+            score += 80 if is_parenthetical else -80
+        elif is_parenthetical:
+            # An explicit parenthetical request must not settle for the main statement.
+            score -= 80
 
         # Prefer "Consolidated" statements (primary statements)
         if 'consolidated' in role_def or 'consolidated' in role_uri:
@@ -1008,22 +1022,41 @@ class StatementResolver:
 
         return [], None, 0.0
 
-    def _match_by_standard_name(self, statement_type: str) -> Tuple[List[Dict[str, Any]], Optional[str], float]:
+    def _match_by_standard_name(self, statement_type: str,
+                                is_parenthetical: bool = False) -> Tuple[List[Dict[str, Any]], Optional[str], float]:
         """
         Match statements by standard statement type name.
 
         Args:
             statement_type: Statement type to match
+            is_parenthetical: Whether to look for a parenthetical statement
 
         Returns:
             Tuple of (matching statements, found role, confidence score)
         """
+        # GH #1221: a parenthetical role is indexed under its own type
+        # ("BalanceSheetParenthetical"), so a parenthetical request has to be
+        # looked up in that bucket. This matcher sits first in the cascade at
+        # confidence 0.95 against a 0.9 threshold, so it always won before the
+        # flag-aware matchers below could run; ignoring the flag here meant an
+        # explicit parenthetical=True silently returned the ordinary statement.
+        # Deliberately no fall-back to the plain bucket: answering a
+        # parenthetical request with the main statement is the bug.
+        lookup_type = f"{statement_type}Parenthetical" if is_parenthetical else statement_type
+
         # Check if we have statements of this type
-        if statement_type in self._statement_by_type:
-            statements = self._statement_by_type[statement_type]
+        if lookup_type in self._statement_by_type:
+            statements = self._statement_by_type[lookup_type]
+            if not is_parenthetical:
+                # Keep parenthetical roles that share a bucket out of the default answer.
+                statements = [s for s in statements
+                              if not str(s.get('type', '')).endswith('Parenthetical')]
             if statements:
                 # Issue #506: Sort by statement quality to prefer correct statement type
-                statements = sorted(statements, key=lambda s: self._score_statement_quality(s, statement_type), reverse=True)
+                statements = sorted(
+                    statements,
+                    key=lambda s: self._score_statement_quality(s, statement_type, is_parenthetical),
+                    reverse=True)
                 # Note: essential-concept validation is applied in the cascade in
                 # find_statement(), so we return all candidates here and let the
                 # cascade filter out mislabeled roles (Issue #659).
@@ -1153,17 +1186,31 @@ class StatementResolver:
         # Issue #659: Essential-concept validation applies across ALL cascade steps.
         # A role may have the right name/concept but wrong content (e.g., MTD has
         # StatementOfFinancialPositionAbstract as root but only contains Schedule II).
-        needs_validation = statement_type in ESSENTIAL_CONCEPTS
+        # GH #1221: a parenthetical role legitimately does NOT contain the main
+        # statement's essential concepts — it carries the supplementary detail
+        # (share counts, par values) precisely because the face statement carries
+        # the totals. Validating it against BalanceSheet criteria discards the
+        # only role that can answer the request.
+        needs_validation = statement_type in ESSENTIAL_CONCEPTS and not is_parenthetical
 
         # Cascade through matching strategies in order of confidence
         cascade = [
-            (self._match_by_standard_name(statement_type), 0.9),
+            (self._match_by_standard_name(statement_type, is_parenthetical), 0.9),
             (self._match_by_primary_concept(statement_type, is_parenthetical), 0.8),
             (self._match_by_concept_pattern(statement_type, is_parenthetical), 0.8),
             (self._match_by_role_pattern(statement_type, is_parenthetical), 0.7),
-            (self._match_by_content(statement_type), 0.6),
-            (self._match_by_role_definition(statement_type), 0.5),
         ]
+        if not is_parenthetical:
+            # GH #1221: these two score a role on its concepts and its definition
+            # text alone, with no notion of parenthetical at all. They matched the
+            # ordinary statement at 0.85 against a 0.6 threshold, which is how a
+            # parenthetical request kept being answered with the main statement
+            # even once every flag-aware matcher above had correctly declined.
+            # A matcher that cannot honour the flag must not answer the request.
+            cascade += [
+                (self._match_by_content(statement_type), 0.6),
+                (self._match_by_role_definition(statement_type), 0.5),
+            ]
 
         for match, min_conf in cascade:
             statements, role, conf = match
@@ -1189,7 +1236,9 @@ class StatementResolver:
         # Many filings have ComprehensiveIncome instead of separate IncomeStatement
         # Issue #608: Must validate that ComprehensiveIncome contains actual P&L data (Revenue)
         # Some filings have two roles: one with P&L, one with pure OCI items
-        if statement_type == 'IncomeStatement':
+        # GH #1221: this fallback substitutes a different statement entirely, so
+        # it cannot serve a parenthetical request either.
+        if statement_type == 'IncomeStatement' and not is_parenthetical:
             # Get ALL ComprehensiveIncome candidates from the type index directly.
             # We bypass _match_by_standard_name here because its essential-concept
             # filter (Issue #659) validates against ComprehensiveIncome criteria,
@@ -1276,6 +1325,27 @@ class StatementResolver:
                         result = ([candidate], role, 'StatementOfEquity', 0.75)
                         self._cache[cache_key] = result
                         return result
+
+        # GH #1221: every flag-aware path has now failed, and _get_best_guess is
+        # flag-blind — it would hand back the ordinary statement as the answer to
+        # an explicit parenthetical request, which is the silence this fixes. Say
+        # so instead.
+        if is_parenthetical:
+            available = sorted({
+                str(s.get('type', '')) for s in self._statement_by_type.get(statement_type, [])
+            } | {t for t in self._statement_by_type if t.endswith('Parenthetical')})
+            raise StatementNotFoundError(
+                statement_type=f"{statement_type} (parenthetical)",
+                confidence=0.0,
+                found_statements=available,
+                entity_name=getattr(self.xbrl, 'entity_name', 'Unknown'),
+                cik=getattr(self.xbrl, 'cik', 'Unknown'),
+                period_of_report=getattr(self.xbrl, 'period_of_report', 'Unknown'),
+                reason=(
+                    f"This filing declares no parenthetical role for {statement_type}. "
+                    f"Call without parenthetical=True for the ordinary statement."
+                )
+            )
 
         # No good match found, return best guess with low confidence
         statements, role, conf = self._get_best_guess(statement_type)

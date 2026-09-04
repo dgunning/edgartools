@@ -438,8 +438,13 @@ def test_canonical_type_preservation(tsla_xbrl):
     # It should have the canonical type set
     assert income_stmt.canonical_type == "IncomeStatement"
 
-    # Check that calculate_ratios uses the canonical type
+    # Check that calculate_ratios uses the canonical type.
+    # edgartools-ysr8: this call used to assert nothing, which let three broken
+    # helpers ship looking covered. Assert on the result, not just the call.
     ratios = income_stmt.calculate_ratios()
+    assert ratios, "calculate_ratios() returned nothing for a Tesla income statement"
+    assert 0 < ratios["gross_margin"] < 1
+    assert ratios["net_margin"] < ratios["gross_margin"]
 
     # Get the statement data and make sure it's retrievable
     statement_data = income_stmt.get_raw_data()

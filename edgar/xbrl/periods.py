@@ -218,6 +218,33 @@ def generate_mixed_view(view_config: Dict[str, Any], ytd_periods: List[Dict],
     return None
 
 
+def _filter_instant_periods_with_facts(xbrl_instance, periods: List[Dict[str, Any]],
+                                       statement_type: str) -> List[Dict[str, Any]]:
+    """Drop instant periods that carry no facts for this statement (GH #1246).
+
+    Delegates to the same statement-aware sufficiency filter the default period
+    selection path uses, so a named view and the default view agree about which
+    periods are real. If the filter would leave nothing — a filing whose facts
+    are not typed for this statement at all — the unfiltered list is kept, since
+    offering no view is worse than offering a sparse one.
+    """
+    if not periods:
+        return periods
+
+    from edgar.xbrl.period_selector import _filter_periods_with_sufficient_data
+
+    candidates = [(p['key'], p['label']) for p in periods]
+    try:
+        kept = {key for key, _ in
+                _filter_periods_with_sufficient_data(xbrl_instance, candidates, statement_type)}
+    except Exception:
+        return periods
+
+    if not kept:
+        return periods
+    return [p for p in periods if p['key'] in kept]
+
+
 def get_period_views(xbrl_instance, statement_type: str) -> List[Dict[str, Any]]:
     """
     Get available period views for a statement type.
@@ -256,6 +283,19 @@ def get_period_views(xbrl_instance, statement_type: str) -> List[Dict[str, Any]]
     if period_type == 'duration':
         standard_durations = {'Quarterly', 'Semi-Annual', 'Nine Months', 'Annual'}
         periods = [p for p in periods if p.get('period_type') in standard_durations]
+    else:
+        # GH #1246: instants had no equivalent of the duration filter above, so an
+        # incidental instant context — one the filing declares but reports no
+        # balance-sheet facts against — sorted into a view and took a column slot,
+        # pushing out the populated prior fiscal year. Microsoft's FY2024 10-K
+        # rendered "Current vs. Previous Period" as 2024-06-30 beside an empty
+        # 2023-12-31, with the real 2023-06-30 comparative excluded.
+        #
+        # The default (unnamed-view) path already filters for statement-aware
+        # fact sufficiency, which is exactly why it disagreed with the named
+        # views. Reuse that filter rather than writing a second one: the
+        # divergence between the two paths is the underlying problem.
+        periods = _filter_instant_periods_with_facts(xbrl_instance, periods, statement_type)
     periods = sort_periods(periods, period_type)
 
     # If this statement type allows annual comparison and this is an annual report,
