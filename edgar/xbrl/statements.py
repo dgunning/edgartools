@@ -3276,7 +3276,8 @@ class Statements:
                      statement_type: str,
                      period_view: Optional[str] = None,
                      standard: bool = True,
-                     include_dimensions: bool = False) -> Optional[pd.DataFrame]:
+                     include_dimensions: bool = False,
+                     presentation: bool = True) -> Optional[pd.DataFrame]:
         """
         Convert a statement to a pandas DataFrame.
 
@@ -3285,12 +3286,16 @@ class Statements:
             period_view: Optional period view name
             standard: Whether to use standardized concept labels (default: True)
             include_dimensions: Whether to include dimensional segment data (default: False)
+            presentation: Whether to apply the presentation sign so values match
+                SEC display (default: True), matching ``Statement.to_dataframe()``
 
         Returns:
             pandas DataFrame containing the statement data
         """
         statement = self[statement_type]
-        return statement.render(period_view=period_view, standard=standard, include_dimensions=include_dimensions).to_dataframe()
+        return statement.render(
+            period_view=period_view, standard=standard, include_dimensions=include_dimensions
+        ).to_dataframe(presentation=presentation)
 
 
 class StitchedStatement:

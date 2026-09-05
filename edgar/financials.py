@@ -316,7 +316,11 @@ class Financials:
 
             # Render the statement
             rendered = statement.render(standard=True)
-            df = rendered.to_dataframe()
+            # presentation=False: these helpers look up a filed magnitude, not a
+            # displayed figure. get_free_cash_flow() subtracts capital expenditures,
+            # so a presented (negative) outflow here would add it instead
+            # (edgartools-5ztr).
+            df = rendered.to_dataframe(presentation=False)
 
             if df.empty or 'concept' not in df.columns:
                 return None
@@ -421,7 +425,11 @@ class Financials:
 
             # Render with standardization enabled
             rendered = statement.render(standard=True)
-            df = rendered.to_dataframe()
+            # presentation=False: these helpers look up a filed magnitude, not a
+            # displayed figure. get_free_cash_flow() subtracts capital expenditures,
+            # so a presented (negative) outflow here would add it instead
+            # (edgartools-5ztr).
+            df = rendered.to_dataframe(presentation=False)
 
             if df.empty:
                 return None
@@ -800,7 +808,11 @@ class Financials:
 
             # Render with standardization enabled
             rendered = statement.render(standard=True)
-            df = rendered.to_dataframe()
+            # presentation=False: these helpers look up a filed magnitude, not a
+            # displayed figure. get_free_cash_flow() subtracts capital expenditures,
+            # so a presented (negative) outflow here would add it instead
+            # (edgartools-5ztr).
+            df = rendered.to_dataframe(presentation=False)
 
             if df.empty or 'concept' not in df.columns:
                 return None
