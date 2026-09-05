@@ -49,7 +49,10 @@ class _FakeRendered:
     def __init__(self, df):
         self._df = df
 
-    def to_dataframe(self):
+    def to_dataframe(self, presentation: bool = True):
+        # The real method applies the presentation sign; the helper under test
+        # asks for presentation=False because it wants filed magnitudes
+        # (edgartools-5ztr). These rows are filed values either way.
         return self._df
 
 

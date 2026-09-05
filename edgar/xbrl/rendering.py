@@ -583,12 +583,18 @@ class RenderedStatement:
         from edgar.richtools import rich_to_text
         return rich_to_text(self.__rich__(), width=150)
 
-    def to_dataframe(self, include_unit: bool = False, include_point_in_time: bool = False) -> Any:
+    def to_dataframe(self, include_unit: bool = False, include_point_in_time: bool = False,
+                     presentation: bool = True) -> Any:
         """Convert to a pandas DataFrame
 
         Args:
             include_unit: If True, add a 'unit' column with unit information (e.g., 'usd', 'shares', 'usdPerShare')
             include_point_in_time: If True, add a 'point_in_time' boolean column (True for 'instant', False for 'duration')
+            presentation: If True (default), apply the presentation linkbase's
+                preferred sign so values match SEC display and agree with
+                ``Statement.to_dataframe()`` -- cash outflows negative, contra
+                accounts negative. If False, return raw XBRL instance values,
+                which is what this method returned before edgartools-5ztr.
 
         Returns:
             pd.DataFrame: DataFrame with statement data and optional unit/point-in-time columns
@@ -647,10 +653,21 @@ class RenderedStatement:
                     df_row['point_in_time'] = get_is_point_in_time(period_type)
 
                 # Add cell values using date string column names where available
+                # The cell holds the filed value; the presentation sign lives in
+                # the formatter, so it has to be applied here too or this frame
+                # disagrees with the rendered statement (edgartools-5ztr).
+                preferred_signs = row.metadata.get('preferred_signs', {})
                 for i, cell in enumerate(row.cells):
                     if i < len(self.header.periods):
                         column_name = column_map[i]
-                        df_row[column_name] = cell.value
+                        value = cell.value
+                        if presentation:
+                            value = apply_presentation_sign(
+                                value, self.statement_type, preferred_signs,
+                                self.header.period_keys[i]
+                                if i < len(self.header.period_keys) else None
+                            )
+                        df_row[column_name] = value
 
                 df_row['level'] = row.level
                 df_row['abstract'] = row.is_abstract
@@ -1268,6 +1285,42 @@ def _create_units_note(
         return ""
 
 
+# The statements whose SEC-displayed sign differs from the filed sign.
+# Originally the Income Statement and Cash Flow Statement (Issue #463); extended
+# to the Balance Sheet for contra accounts such as Treasury Stock (Issue #568) --
+# APD, JPM and XOM negate Treasury Stock, JPM also Allowance for Loan Losses.
+PRESENTATION_SIGN_STATEMENTS = ('IncomeStatement', 'CashFlowStatement', 'BalanceSheet')
+
+
+def apply_presentation_sign(
+    value: Any,
+    statement_type: Optional[str],
+    preferred_signs: Optional[Dict[str, Any]],
+    period_key: Optional[str],
+) -> Any:
+    """
+    Turn a filed value into the value the SEC displays.
+
+    ``preferred_sign`` comes from the presentation linkbase's preferredLabel:
+    -1 negates for display (expenses, dividends, outflows, contra accounts),
+    1 shows the value as filed, and None means the linkbase said nothing.
+
+    This lives in one function because the display string and the DataFrame both
+    need it. They used to disagree: the sign was applied only while formatting,
+    so ``Statements.to_dataframe()`` -- which reads the cell values, not their
+    formatted strings -- returned a capex outflow positive where
+    ``Statement.to_dataframe()`` returned it negative (edgartools-5ztr).
+    """
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        return value
+    if not period_key or statement_type not in PRESENTATION_SIGN_STATEMENTS:
+        return value
+    preferred_sign = (preferred_signs or {}).get(period_key)
+    if preferred_sign is None or preferred_sign == 0:
+        return value
+    return value * preferred_sign
+
+
 def _format_value_for_display_as_string(
     value: Any,
     item: Dict[str, Any],
@@ -1331,25 +1384,9 @@ def _format_value_for_display_as_string(
             fact_decimals = decimals_dict.get(period_key, 0) or 0
 
     # Apply presentation logic for display (Issue #463)
-    # Matches SEC HTML filing display - uses preferred_sign from presentation linkbase
-    if value_type in (int, float) and period_key:
-        # Get statement context
-        statement_type = item.get('statement_type')
-
-        # Apply preferred_sign from presentation linkbase for display
-        # preferred_sign comes from preferredLabel in presentation linkbase
-        # -1 = negate for display (e.g., expenses, dividends, outflows, contra accounts)
-        # 1 = show as-is
-        # None = no transformation specified
-        #
-        # Originally only applied to Income Statement and Cash Flow Statement (Issue #463)
-        # Extended to Balance Sheet for contra accounts like Treasury Stock (Issue #568)
-        # - APD, JPM, XOM use preferred_sign=-1 for Treasury Stock
-        # - JPM uses preferred_sign=-1 for Allowance for Loan Losses
-        if statement_type in ('IncomeStatement', 'CashFlowStatement', 'BalanceSheet'):
-            preferred_sign = item.get('preferred_signs', {}).get(period_key)
-            if preferred_sign is not None and preferred_sign != 0:
-                value = value * preferred_sign
+    value = apply_presentation_sign(
+        value, item.get('statement_type'), item.get('preferred_signs'), period_key
+    )
 
     # Format numeric values efficiently
     if value_type in (int, float):
@@ -1883,7 +1920,10 @@ def render_statement(
                 'children': item.get('children', []),
                 'dimension_metadata': item.get('dimension_metadata', {}),
                 'units': item.get('units', {}),  # Pass through unit_ref for each period
-                'period_types': item.get('period_types', {})  # Pass through period_type for each period
+                'period_types': item.get('period_types', {}),  # Pass through period_type for each period
+                # Carried so to_dataframe() can reach the same presentation sign
+                # the display formatter applies (edgartools-5ztr)
+                'preferred_signs': item.get('preferred_signs', {})
             },
             is_abstract=item.get('is_abstract', False),
             is_dimension=is_dim,
