@@ -97,6 +97,26 @@ def test_the_absorbed_row_is_not_deleted(eu_state_aid_rows):
     assert by_value["instant_2022-09-24"] == OUTSTANDING
 
 
+def _load(directory):
+    """Parse a fixture directory, or None if it is not a parseable filing."""
+    try:
+        return XBRL.from_directory(directory)
+    except Exception:
+        return None
+
+
+def _raw_rows(xbrl, role):
+    """The statement's rows, or an empty list if the role cannot be rendered.
+
+    A role that fails to render is covered by its own tests; this sweep is only
+    about rows that DO come back.
+    """
+    try:
+        return xbrl.statements[role].get_raw_data()
+    except Exception:
+        return []
+
+
 def test_no_dimensional_row_merges_across_concepts():
     """
     The corpus-wide invariant. 213 rows violated this before the fix; a single
@@ -104,18 +124,15 @@ def test_no_dimensional_row_merges_across_concepts():
     """
     offenders = []
     for directory in sorted(set(glob.glob("tests/fixtures/xbrl/*/*"))):
-        try:
-            xbrl = XBRL.from_directory(directory)
-        except Exception:  # noqa: S112 - a directory that is not a parseable
-            continue       # filing is not this test's subject
+        xbrl = _load(directory)
+        if xbrl is None:
+            continue
         for role in list(xbrl.presentation_trees):
-            try:
-                rows = xbrl.statements[role].get_raw_data()
-            except Exception:  # noqa: S112 - a role that cannot render is
-                continue       # covered by its own tests
-            for row in rows:
+            for row in _raw_rows(xbrl, role):
                 # A merged row keeps its own concept but gains the other's
-                # period kinds; a dimensional row mixing both is the signature.
+                # period kinds. A concept is either an instant or a duration
+                # concept, never both, so a row reporting both kinds is the
+                # signature of a row that absorbed another concept's facts.
                 if row.get("is_dimension") and len(_period_kinds(row)) > 1:
                     offenders.append((directory, row.get("concept"), row.get("label")))
 
