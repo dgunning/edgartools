@@ -1,6 +1,7 @@
 # `FactsQuery.to_dataframe()` declares its schema
 
 **Status**: Decided (2026-08-03) · **Bead**: `edgartools-rsyt` · **Context**: [GH #929](https://github.com/dgunning/edgartools/issues/929)
+**Extended 2026-09-06** to the entity path (`edgartools-7wtj`) — see [The entity path](#the-entity-path).
 **Supersedes nothing.** Implementation split across 5.x and 6.0 — see [Shipping](#shipping).
 
 ## The problem
@@ -148,6 +149,63 @@ advance, so it goes in the breaking window with a migration-guide entry.
 Every schema change here gets its own CHANGELOG entry, per the commitment in
 [gh-929 comment 5170334125](https://github.com/dgunning/edgartools/issues/929#issuecomment-5170334125).
 
+## The entity path
+
+`edgartools-7wtj`, 2026-09-06. The same rule, decided again on
+`edgar/entity/query.py` and `edgar/entity/entity_facts.py` rather than
+re-derived: EntityFacts and XBRL are the known parallel implementations of the
+same idea, and a rule that holds on one of them and not the other is the failure
+family this repo keeps finding one report at a time.
+
+Two of the four mechanisms are present there, measured across 12 companies in
+different industries (344,769 base rows):
+
+| mechanism | evidence |
+|---|---|
+| dtype inferred per call | `value` flips float64 → int64 on **16 of 36** narrowing queries, whenever the matched rows are all whole numbers |
+| empty result | zero columns, so `df['value']` raises `KeyError`. Reached by a real query: Main Street Capital reports no `Revenues` concept |
+
+The other two do not occur: the record dict is built unconditionally, so no key
+is added conditionally, and there is no `dropna`. The base column set is
+identical across all 12 companies (19 columns), which is the same tractability
+finding that made the XBRL half cheap — declaring codifies what the bare query
+already does.
+
+**`value` is pinned in 5.x, not held for 6.0.** This departs from the XBRL split,
+and the criterion is the one that put `preferred_sign` in the breaking window:
+does the change move the *default* surface's dtype or null sentinel? For `value`
+it does not. The unfiltered surface is already `float64`/`NaN` on all 12
+companies — a Python `float` in 100% of 344,769 rows — so pinning makes narrowed
+queries match the default rather than moving it. `fiscal_year` is the opposite
+case: `int64` by default, so nullable `Int64` moves a sentinel, and it stays in
+the 6.0 window as `edgartools-7wtj.1`.
+
+The pin casts only what is already numeric. `FinancialFact.value` is typed
+`Union[float, int, str]`; a genuine string fact has never been observed on this
+path, but coercing one would destroy data and `astype` would raise, either of
+which is worse than the instability being fixed.
+
+**Declared dtype and materialized dtype are separated.** The XBRL half could use
+one dtype for both because its declared columns already carry nulls, so the
+with-nulls dtype *is* the default dtype. On the entity path `fiscal_year`,
+`is_audited` and `is_estimated` have no nulls, so their default dtypes (`int64`,
+`bool`) cannot hold one. Using the nullable dtype everywhere would make an empty
+result differ from a populated one — the same bug in the zero-row case, which the
+corpus caught. So a zero-row frame keeps the declared dtype, having no values to
+fabricate, while a column that is null for *every returned row* takes a nullable
+dtype from `NULL_DTYPES`. Casting an all-null column to `bool` yields `False`,
+and asserting a fact was not audited because we do not know is exactly the
+failure class this schema exists to prevent.
+
+The residue: a null-for-every-row `fiscal_year` still reads `float64` where a
+populated one reads `int64`. `7wtj.1` removes it.
+
+**One implementation.** `STR_DTYPE`, `null_column`, `apply_declared_schema` and
+`empty_declared_frame` live in `edgar/datatools.py`; `edgar/xbrl/facts.py` was
+moved onto them rather than keeping its own copies. The column specs stay
+per-path — they are genuinely different tables — but the mechanism, including the
+probed string dtype and its `astype('str')` trap, is defined once.
+
 ## Consequences
 
 - The `07lk.1` schema gate becomes meaningful: a diff against
@@ -155,6 +213,7 @@ Every schema change here gets its own CHANGELOG entry, per the commitment in
   rather than which rows a query happened to return.
 - The baseline's own capture of this surface should be re-taken after the 5.x
   half lands; the committed 5.45.1 numbers describe the pre-decision behaviour.
+  This applies to the four entity variants too, as of the `7wtj` extension.
 - Verification needs a check that is currently missing entirely: several
   distinct queries against one instance must produce identical column sets and
   dtypes. That assertion is what would have caught this.

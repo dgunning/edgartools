@@ -21,7 +21,88 @@ __all__ = [
     'repr_df',
     'DataPager',
     'PagingState',
+    'STR_DTYPE',
+    'null_column',
+    'apply_declared_schema',
+    'empty_declared_frame',
 ]
+
+
+# The pandas default dtype for strings changed in 3.0 (object -> str), and the
+# supported floor is still 2.0. Probing it keeps a column that had to be
+# materialized identical to the same column when rows populated it, on either
+# major - and avoids astype('str'), which turns a null into the string "nan".
+STR_DTYPE = pd.Series([""]).dtype
+
+
+def null_column(dtype, index: pd.Index) -> pd.Series:
+    """An all-null column of `dtype`, for a declared column no row populated."""
+    return pd.Series(index=index, dtype=dtype)
+
+
+def apply_declared_schema(df: pd.DataFrame,
+                          declared: dict,
+                          order: list,
+                          pinned: frozenset = frozenset(),
+                          null_dtypes: dict = None) -> pd.DataFrame:
+    """Give `df` the column set and order a caller's configuration declares.
+
+    The rule (engineering/decisions/facts-dataframe-schema.md): the shape of a
+    `to_dataframe()` result is a function of the query's *configuration*, never of
+    the rows that came back. Narrowing a query chooses fewer rows, not a different
+    table, so a declared column no returned row populated is materialized as null
+    rather than silently vanishing.
+
+    `declared` maps column name -> dtype; `order` is the emission order, which may
+    include undeclared columns (a filing-dependent tail) that keep their inferred
+    dtype.
+
+    A declared dtype is applied to a column that had to be materialized, because
+    inference has nothing to work with there and lands somewhere arbitrary. It is
+    applied to a *populated* column only for the names in `pinned`, since pinning a
+    populated column can move a null sentinel that callers rely on.
+
+    `null_dtypes` overrides the dtype used for a materialized column whose declared
+    dtype cannot hold a null. `bool` and `int64` are the cases: casting an all-null
+    column to `bool` yields False and to `int64` raises, so a column that is null
+    for every returned row takes a nullable dtype from here instead. A zero-row
+    frame does not need this — it has no values to fabricate — so
+    `empty_declared_frame` keeps the declared dtype and stays identical to a
+    populated result.
+    """
+    null_dtypes = null_dtypes or {}
+    result = df.reindex(columns=order)
+    for col in order:
+        if col not in declared:
+            continue
+        if result[col].isna().all():
+            target = null_dtypes.get(col, declared[col])
+            # Only when the dtype actually differs. Rewriting a column that already
+            # has its declared dtype changes nothing about the shape and swaps its
+            # null token: `pd.Series(dtype=object)` fills with NaN, so an all-None
+            # date column would come back as floats and break date arithmetic
+            # downstream. Moving a null sentinel is the failure class this schema
+            # exists to prevent, including when this function is the one moving it.
+            if result[col].dtype != target:
+                result[col] = null_column(target, result.index)
+        elif col in pinned and result[col].dtype != declared[col]:
+            # Cast only what is already numeric. `value` is typed
+            # Union[float, int, str]; coercing a genuine string fact would destroy
+            # data and astype would raise, either of which is worse than the
+            # instability being fixed.
+            if pd.api.types.is_numeric_dtype(result[col]):
+                result[col] = result[col].astype(declared[col])
+    return result
+
+
+def empty_declared_frame(declared: dict, order: list) -> pd.DataFrame:
+    """A zero-row frame carrying the declared columns and their dtypes.
+
+    A bare `pd.DataFrame()` has no columns at all, so `df['value']` raises
+    KeyError on an empty result instead of yielding an empty typed column.
+    """
+    index = pd.RangeIndex(0)
+    return pd.DataFrame({name: null_column(declared[name], index) for name in order})
 
 
 def clean_column_text(text: str):
