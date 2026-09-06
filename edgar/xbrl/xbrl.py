@@ -1354,9 +1354,6 @@ class XBRL:
 
         tree = self.presentation_trees[found_role]
 
-        # Find the root element
-        root_id = tree.root_element_id
-
         # If should_display_dimensions wasn't provided, default to True
         # Issue #504: Always include dimensional data by default - users can filter themselves if needed
         if should_display_dimensions is None:
@@ -1366,11 +1363,17 @@ class XBRL:
         # This ensures we only show members that are actually defined in the linkbase
         valid_dimensional_members = self._get_valid_dimensional_members(tree) if should_display_dimensions else {}
 
-        # Generate line items recursively
+        # Generate line items recursively, from EVERY root the role declares.
+        # Walking only tree.root_element_id left everything beneath the second
+        # and later roots unreachable, which silently truncated the statement --
+        # Union Pacific's Leases Details returned 13 rows from a 22-node tree,
+        # and its consolidated statement of comprehensive income is multi-root
+        # too, so this reached a primary face statement (edgartools-0q0d).
         line_items = []
-        self._generate_line_items(root_id, tree.all_nodes, line_items, period_filter, None,
-                                  should_display_dimensions, valid_dimensional_members, view,
-                                  statement_role=found_role)
+        for root_id in tree.root_element_ids:
+            self._generate_line_items(root_id, tree.all_nodes, line_items, period_filter, None,
+                                      should_display_dimensions, valid_dimensional_members, view,
+                                      statement_role=found_role)
 
         # Apply revenue deduplication for income statements to fix Issue #438
         if actual_statement_type == 'IncomeStatement':
@@ -1430,6 +1433,16 @@ class XBRL:
 
         # Get node information
         node = nodes[element_id]
+
+        # This OCCURRENCE's position, taken from the walk rather than from the
+        # shared node. `nodes` is keyed by element ID, so a concept presented
+        # more than once in a role — a roll-forward's beginning and ending
+        # balance, a total repeated under two sections — has a single entry
+        # whose `parent` and `depth` are whichever occurrence the parser wrote
+        # last. Reading them here gave every earlier occurrence the last one's
+        # parent and indentation. The path is the occurrence (edgartools-f07v).
+        occurrence_parent = path[-1] if path else None
+        occurrence_depth = len(path)
 
         # edgartools-0609: Honor this reference's preferred label when it differs
         # from the shared node's (roll-forward concepts referenced more than once).
@@ -1751,9 +1764,9 @@ class XBRL:
                 'preferred_signs': preferred_signs,  # Include preferred_sign for display (Issue #463)
                 'balance': balance,  # Include balance (debit/credit) for display (Issue #463)
                 'weight': weight,  # Include calculation weight for metadata (Issue #463)
-                'parent': node.parent,  # Presentation tree parent (may be abstract) (Issue #514)
+                'parent': occurrence_parent,  # Presentation tree parent (may be abstract) (Issue #514)
                 'calculation_parent': calculation_parent,  # Calculation tree parent (metric) (Issue #514 refinement)
-                'level': node.depth,
+                'level': occurrence_depth,
                 'preferred_label': effective_preferred_label,
                 'is_abstract': node.is_abstract,  # Issue #450: Use node's actual abstract flag
                 'children': node.children,
@@ -1775,9 +1788,9 @@ class XBRL:
                 'preferred_signs': preferred_signs,  # Include preferred_sign for display (Issue #463)
                 'balance': balance,  # Include balance (debit/credit) for display (Issue #463)
                 'weight': weight,  # Include calculation weight for metadata (Issue #463)
-                'parent': node.parent,  # Presentation tree parent (may be abstract) (Issue #514)
+                'parent': occurrence_parent,  # Presentation tree parent (may be abstract) (Issue #514)
                 'calculation_parent': calculation_parent,  # Calculation tree parent (metric) (Issue #514 refinement)
-                'level': node.depth,
+                'level': occurrence_depth,
                 'preferred_label': effective_preferred_label,
                 'is_abstract': node.is_abstract,
                 'children': node.children,
@@ -1881,7 +1894,7 @@ class XBRL:
                     'units': dim_units,  # Include unit_ref for each period
                     'period_types': dim_period_types,  # Include period_type for each period
                     'preferred_signs': dim_preferred_signs,  # Include preferred_sign for display (Issue #463)
-                    'level': node.depth + 1,  # Increase depth by 1
+                    'level': occurrence_depth + 1,  # Increase depth by 1
                     'preferred_label': node.preferred_label,
                     'is_abstract': False,
                     'children': [],

@@ -304,9 +304,30 @@ class PresentationTree(BaseModel):
     """
     role_uri: str
     definition: str
+    # The first root, kept for the many callers that assume one. A role may
+    # legitimately declare several — see `root_element_ids`, which is the
+    # complete list and the thing to traverse.
     root_element_id: str
+    # Every root the linkbase declares, in the same deterministic sorted order
+    # `root_element_id` is taken from. A presentation role with two roots is
+    # ordinary rather than malformed: Union Pacific's FY2012 10-K has seven,
+    # one of them the consolidated statement of comprehensive income. Walking
+    # from `root_element_id` alone reaches only the first subtree and leaves
+    # the rest sitting in `all_nodes` structurally unreachable (edgartools-0q0d).
+    root_element_ids: List[str] = Field(default_factory=list)
+    # Keyed by element ID, so a concept presented twice in one role has ONE
+    # entry here whose `parent`, `depth` and `order` are the last occurrence's.
+    # Use it for lookup and membership, which is what every caller does; for an
+    # occurrence's real position, walk the tree from the roots and track the
+    # path, which is what `XBRL._generate_line_items` does (edgartools-f07v).
     all_nodes: Dict[str, PresentationNode] = Field(default_factory=dict)
     order: int = 0
+
+    def model_post_init(self, __context) -> None:
+        # A tree built by an older caller that only set the scalar still has a
+        # usable root list.
+        if not self.root_element_ids and self.root_element_id:
+            self.root_element_ids = [self.root_element_id]
 
 
 class CalculationNode(BaseModel):
