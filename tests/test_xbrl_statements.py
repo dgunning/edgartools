@@ -148,8 +148,17 @@ def test_statement_to_dataframe(aapl_xbrl):
     # print(cashflow_statement)
     rendered_statement:RenderedStatement = cashflow_statement.render()
     df = rendered_statement.to_dataframe()
-    assert df.columns.tolist() ==['concept', 'label', '2023-09-30', '2022-09-24', '2021-09-25',
+    # render() standardizes by default, and a standardized statement reports the
+    # standard concept beside the filer's own label (edgartools-t3zh). The column
+    # follows the flag, not the data, so it is here for every standardized
+    # statement whether or not a given row resolved.
+    assert df.columns.tolist() ==['concept', 'label', 'standard_concept',
+                                  '2023-09-30', '2022-09-24', '2021-09-25',
                                   'level','abstract', 'dimension', 'is_breakdown']
+
+    assert 'standard_concept' not in (
+        cashflow_statement.render(standard=False).to_dataframe().columns.tolist()
+    )
 
     # Issue #504: Filter for non-dimensional rows to avoid duplicate NetIncomeLoss entries
     net_income_filter = (df.concept == 'us-gaap_NetIncomeLoss') & (df.dimension == False)

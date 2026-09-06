@@ -606,6 +606,9 @@ class RenderedStatement:
             # Create rows for the DataFrame
             df_rows = []
 
+            # Whether this statement was rendered with standardization on.
+            standardized = bool(self.metadata.get('standard'))
+
             # Create column map - use end_date from period data if available
             column_map = {}
             for i, period in enumerate(self.header.periods):
@@ -625,6 +628,21 @@ class RenderedStatement:
                     'concept': row.metadata.get('concept', ''),
                     'label': row.label
                 }
+
+                # Standardization deliberately preserves the filer's label
+                # ("fidelity to the filing") and reports the standard concept
+                # alongside it. That output reached Statement.to_dataframe() and
+                # stopped here, so render(standard=True).to_dataframe() returned
+                # no standardization at all and the flag was inert on this path
+                # (edgartools-t3zh).
+                #
+                # Keyed on the statement's CONFIGURATION, not on whether any row
+                # happened to resolve: the column is present for every
+                # standardized statement and absent otherwise, so a caller's
+                # column set cannot change with the data
+                # (engineering/decisions/facts-dataframe-schema.md, rsyt).
+                if standardized:
+                    df_row['standard_concept'] = row.metadata.get('standard_concept')
 
                 # Add unit column if requested
                 if include_unit:

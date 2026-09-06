@@ -29,6 +29,32 @@ from .exclusions import should_exclude, EXCLUDED_TAGS
 logger = logging.getLogger(__name__)
 
 
+IFRS_PREFIXES = ("ifrs-full:", "ifrs-full_", "ifrs:", "ifrs_")
+
+
+def _is_ifrs_tag(tag: str) -> bool:
+    """Whether a tag names an IFRS concept rather than a US-GAAP one."""
+    return bool(tag) and str(tag).startswith(IFRS_PREFIXES)
+
+
+def _canonical_ifrs_key(tag: str) -> str:
+    """Rewrite any IFRS prefix spelling to the one the index is keyed on."""
+    for prefix in IFRS_PREFIXES:
+        if tag.startswith(prefix):
+            return "ifrs-full_" + tag[len(prefix):]
+    return tag
+
+
+def _denotes_total(display_name: Optional[str]) -> bool:
+    """Whether a standard concept's display name claims to be a statement total.
+
+    The generated mappings mark totals in the display name ("Total Assets",
+    "Total Stockholders' Equity"), which is what a consumer reads when it looks
+    for the total row.
+    """
+    return bool(display_name) and str(display_name).strip().lower().startswith("total")
+
+
 @dataclass
 class MappingResult:
     """Result of a reverse index lookup."""
@@ -183,9 +209,29 @@ class ReverseIndex:
         if tag in self._index:
             return tag
 
+        # IFRS tags are stored in the index WITH their prefix (161 of them), so
+        # the direct match above is the only correct lookup for one. Stripping
+        # the prefix and retrying can therefore only ever match a US-GAAP entry
+        # that happens to share the bare name -- a different taxonomy's concept,
+        # answering for this one. That is how ifrs-full:IntangibleAssetsAndGoodwill
+        # came back as "Total Non-Current Assets", by way of a GAAP fuzzy match
+        # it has nothing to do with (edgartools-gnx5).
+        if _is_ifrs_tag(tag):
+            # The separator still has to be canonicalised: the index keys use
+            # 'ifrs-full_', so a filing spelling it 'ifrs-full:Assets' must
+            # still find its own entry. It is only the GAAP fallback below that
+            # an IFRS tag must never reach.
+            canonical = _canonical_ifrs_key(tag)
+            if canonical in self._index:
+                return canonical
+            cache_key = canonical.lower()
+            if cache_key in self._normalized_cache:
+                return self._normalized_cache[cache_key]
+            return None
+
         # Strip namespace prefix if present
         normalized = tag
-        for prefix in ("us-gaap:", "us-gaap_", "ifrs-full:", "ifrs-full_", "ifrs:", "dei:"):
+        for prefix in ("us-gaap:", "us-gaap_", "dei:"):
             if tag.startswith(prefix):
                 normalized = tag[len(prefix):]
                 break
@@ -276,6 +322,39 @@ class ReverseIndex:
         for tag in standard_tags:
             dn = self._embedded_display_names.get(tag) or self._display_names.get(tag, tag)
             display_names.append(dn)
+
+        # A tag that is not itself a total must not resolve to a TOTAL concept.
+        # The generated mappings assign fuzzy matches a Total* concept regardless
+        # of what the tag means, and the consumer surfaced those as
+        # authoritative: us-gaap:BankOwnedLifeInsurance resolved to "Total
+        # Assets" at confidence 0.319, so a standardized balance sheet returned
+        # several rows all claiming to be total assets and taking the first gave
+        # $7.9B instead of $226.4B for Citizens Financial (edgartools-gnx5).
+        #
+        # The test is `is_total is False`, not a confidence threshold. The
+        # confidence distribution is not bimodal over the whole index -- 1,504
+        # entries sit at exactly 0.5 and 564 at 0.4 -- so any threshold that
+        # caught the fuzzy matches would also discard about a third of the
+        # mappings. `is_total` says what the entry means, and it is exactly the
+        # signal needed: every canonical total (Assets, Liabilities,
+        # AssetsCurrent, ...) carries is_total=True at confidence 1.0, while the
+        # 48 bad entries carry is_total=False.
+        #
+        # A MISSING is_total is left alone rather than treated as False: those
+        # are the IFRS entries (ifrs-full:Assets -> "Total Assets"), which are
+        # correct totals that simply carry no such metadata.
+        if entry.get("is_total") is False:
+            kept = [
+                (tag, dn) for tag, dn in zip(standard_tags, display_names, strict=True)
+                if not _denotes_total(dn)
+            ]
+            if not kept:
+                # Every candidate claimed to be a total and this tag is not one.
+                # No mapping is the right answer; a wrong total is worse than a
+                # missing one, because a caller cannot tell it is wrong.
+                return None
+            standard_tags = [tag for tag, _ in kept]
+            display_names = [dn for _, dn in kept]
 
         return MappingResult(
             standard_concepts=standard_tags,
@@ -396,7 +475,11 @@ class ReverseIndex:
         entry = self._index.get(normalized, {}) if normalized else {}
         entry_section = entry.get('section') if isinstance(entry, dict) else None
         entry_is_total = entry.get('is_total') if isinstance(entry, dict) else None
-        entry_confidence = entry.get('confidence', 0.0) if isinstance(entry, dict) else 0.0
+        # Deliberately no confidence read here. The value was fetched and never
+        # used, which read as though low-confidence mappings were being weighed
+        # when nothing weighed them. They are handled where it is safe to do so,
+        # by `is_total` in lookup(); a numeric threshold cannot be applied at
+        # this layer without discarding legitimate totals (edgartools-gnx5).
 
         try:
             from .sections import get_section_for_concept
