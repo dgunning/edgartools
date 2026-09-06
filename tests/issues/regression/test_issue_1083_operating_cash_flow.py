@@ -28,6 +28,9 @@ Do NOT "fix" a future report of this shape by appending another regex — that
 repairs one filer and leaves the next one broken, which is the whole point of
 this file.
 """
+import re
+from datetime import date
+
 import pandas as pd
 import pytest
 
@@ -151,6 +154,21 @@ def test_apple_10q_ground_truth():
     assert financials.get_free_cash_flow() == 78_283_000_000
 
 
+def _leading_date(column):
+    """The date a period column name starts with, or None for a metadata column.
+
+    Column names are the period end date, optionally with a quarter suffix:
+    "2023-09-30" or "2023-09-30 (FY)".
+    """
+    match = re.match(r"^(\d{4}-\d{2}-\d{2})", str(column))
+    if not match:
+        return None
+    try:
+        return date.fromisoformat(match.group(1))
+    except ValueError:
+        return None
+
+
 @pytest.mark.network
 @pytest.mark.parametrize("ticker", ["MSFT", "KO", "NVDA", "JNJ", "XOM"])
 def test_the_filers_that_already_worked_still_do(ticker):
@@ -168,8 +186,21 @@ def test_the_filers_that_already_worked_still_do(ticker):
     rows = df[df["concept"].astype(str).str.endswith("NetCashProvidedByUsedInOperatingActivities")]
     assert not rows.empty, f"{ticker} has no operating-cash-flow concept to compare against"
 
-    non_period = {"concept", "label", "level", "abstract", "dimension", "is_breakdown", "unit", "point_in_time"}
-    period_columns = [c for c in df.columns if c not in non_period]
-    expected = rows.iloc[0][period_columns[0]]
+    # Pick the period column POSITIVELY, by parsing a date out of the column
+    # name, rather than by excluding a hand-listed set of metadata names. The
+    # exclusion list silently rots whenever the frame gains a column: when
+    # `standard_concept` was added, it became period_columns[0] and this test
+    # tried float('NetCashFromOperatingActivities'). Same failure mode as
+    # GH #1244.
+    dated = []
+    for column in df.columns:
+        parsed = _leading_date(column)
+        if parsed is not None:
+            dated.append((parsed, column))
+    assert dated, f"{ticker}: no date-stamped period column in {list(df.columns)}"
+
+    # The current reporting period is the latest end date on a cash flow
+    # statement, which carries durations only.
+    expected = rows.iloc[0][max(dated)[1]]
 
     assert financials.get_operating_cash_flow() == pytest.approx(float(expected))

@@ -14,8 +14,15 @@ from edgar.xbrl.xbrl import no_xbrl_attachments
 
 # Columns produced by RenderedStatement.to_dataframe() that are metadata, not
 # period values.
+# Every column a rendered statement emits that is NOT a reporting period.
+# `standard_concept` appears whenever the statement was rendered with
+# standard=True (edgartools-t3zh). Missing entries here are currently rescued by
+# _order_period_columns, which pushes columns it cannot map to a period to the
+# end -- but that is a fallback, not the rule, and a metadata column left out of
+# this set is one positional pick away from being read as a value (GH #1244).
 _NON_PERIOD_COLUMNS = frozenset(
-    {'concept', 'label', 'level', 'abstract', 'dimension', 'is_breakdown', 'unit', 'point_in_time'}
+    {'concept', 'label', 'standard_concept', 'level', 'abstract', 'dimension',
+     'is_breakdown', 'unit', 'point_in_time'}
 )
 
 
