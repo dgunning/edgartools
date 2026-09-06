@@ -319,17 +319,30 @@ class InstanceParser(BaseParser):
                 if not unit_id:
                     continue
 
-                # Check for measure
-                measure_elem = unit_elem.find('.//{http://www.xbrl.org/2003/instance}measure')
-                if measure_elem is not None and measure_elem.text:
-                    self.units[unit_id] = {
-                        'type': 'simple',
-                        'measure': measure_elem.text
-                    }
+                # Check for divide FIRST. A divided unit necessarily contains
+                # measures of its own, inside unitNumerator and unitDenominator,
+                # so the descendant `.//measure` search below matches the
+                # numerator and would record `usdPerShare` as plain USD with the
+                # denominator discarded -- making a per-share amount
+                # indistinguishable from a dollar amount, and leaving this
+                # branch unreachable for any well-formed divided unit
+                # (edgartools-uetp).
+                divide_elem = unit_elem.find('.//{http://www.xbrl.org/2003/instance}divide')
+                if divide_elem is None:
+                    # A simple unit's measure is a CHILD of xbrli:unit per the
+                    # spec, so a direct-child search is the precise test; the
+                    # descendant search is kept as a fallback for filings that
+                    # nest it, which is safe now that divide is handled above.
+                    measure_elem = unit_elem.find('{http://www.xbrl.org/2003/instance}measure')
+                    if measure_elem is None:
+                        measure_elem = unit_elem.find('.//{http://www.xbrl.org/2003/instance}measure')
+                    if measure_elem is not None and measure_elem.text:
+                        self.units[unit_id] = {
+                            'type': 'simple',
+                            'measure': measure_elem.text
+                        }
                     continue
 
-                # Check for divide
-                divide_elem = unit_elem.find('.//{http://www.xbrl.org/2003/instance}divide')
                 if divide_elem is not None:
                     # Get numerator
                     numerator_elem = divide_elem.find('.//{http://www.xbrl.org/2003/instance}unitNumerator')

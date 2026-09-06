@@ -30,6 +30,7 @@ from datetime import date, datetime
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from edgar.core import log
+from edgar.xbrl.core import unit_currency
 
 if TYPE_CHECKING:
     from edgar.xbrl import XBRL
@@ -116,12 +117,13 @@ class CurrencyConverter:
         for _, row in facts_df.iterrows():
             unit_ref = row.get('unit_ref')
             if unit_ref and unit_ref in self.xbrl.units:
-                unit_info = self.xbrl.units[unit_ref]
-                if unit_info.get('type') == 'simple':
-                    measure = unit_info.get('measure', '')
-                    if measure.startswith('iso4217:'):
-                        currency = measure.replace('iso4217:', '')
-                        currency_counts[currency] += 1
+                # Counts per-share facts as well: a 'divide' unit denominates
+                # its value in the numerator's currency, and before
+                # edgartools-uetp those units were misparsed as simple, so this
+                # only ever saw the numerator by accident.
+                currency = unit_currency(self.xbrl.units[unit_ref])
+                if currency:
+                    currency_counts[currency] += 1
 
         if not currency_counts:
             return "USD"  # Default if no currency facts found

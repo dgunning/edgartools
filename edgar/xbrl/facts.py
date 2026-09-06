@@ -25,7 +25,7 @@ from rich.text import Text
 from edgar.exceptions import ValidationError
 
 from edgar.richtools import repr_rich
-from edgar.xbrl.core import STANDARD_LABEL, parse_date
+from edgar.xbrl.core import STANDARD_LABEL, iso4217_code, parse_date, unit_currency
 from edgar.xbrl.models import is_negated_label_role, select_display_label
 
 
@@ -123,34 +123,11 @@ def _deduplicate_facts(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def _iso4217_code(measure: Optional[str]) -> Optional[str]:
-    """Return the ISO 4217 code of an ``iso4217:`` unit measure, else ``None``."""
-    if measure and measure.startswith('iso4217:'):
-        return measure[len('iso4217:'):]
-    return None
-
-
-def _unit_currency(unit_info: Optional[Dict[str, Any]]) -> Optional[str]:
-    """Resolve a parsed XBRL unit to its ISO 4217 currency code, or ``None``.
-
-    Currency facts use a simple ``iso4217:`` measure (e.g. ``iso4217:HKD`` ->
-    ``HKD``). Per-share monetary facts use a ``divide`` unit whose numerator is
-    the currency (e.g. ``iso4217:USD`` per ``xbrli:shares``), so the numerator
-    currency is returned. Non-monetary units (shares, pure, ...) return ``None``.
-    The opaque ``unit_ref`` id itself (e.g. ``UNIT_STANDARD_HKD_...``) is never
-    parsed -- only the resolved measure is used (see issue #850).
-    """
-    if not unit_info:
-        return None
-    unit_type = unit_info.get('type')
-    if unit_type == 'simple':
-        return _iso4217_code(unit_info.get('measure'))
-    if unit_type == 'divide':
-        for measure in unit_info.get('numerator', []):
-            code = _iso4217_code(measure)
-            if code:
-                return code
-    return None
+# The unit-currency rule lives in edgar.xbrl.core, where every consumer can
+# reach it. These names are kept as the module-local spelling used throughout
+# this file and by existing tests.
+_iso4217_code = iso4217_code
+_unit_currency = unit_currency
 
 
 def _apply_transformations(results: List[Dict[str, Any]],

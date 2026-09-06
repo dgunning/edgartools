@@ -82,6 +82,15 @@ def is_xbrl_structural_element(item: Dict[str, Any]) -> bool:
     return False
 
 
+def _period_kinds(item: Dict[str, Any]) -> set:
+    """The kinds of period an item reports values for: {'instant'}, {'duration'} or both.
+
+    Period keys are built as ``instant_<date>`` / ``duration_<start>_<end>``, so
+    the prefix is the kind.
+    """
+    return {str(key).split('_', 1)[0] for key in (item.get('values') or {})}
+
+
 def _merge_complementary_rows(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Merge adjacent same-label rows whose period values are complementary.
 
@@ -126,6 +135,25 @@ def _merge_complementary_rows(data: List[Dict[str, Any]]) -> List[Dict[str, Any]
             if a_item.get('level') != b_item.get('level'):
                 continue
             if a_item.get('is_dimension') != b_item.get('is_dimension'):
+                continue
+            # A DIMENSIONAL row's label is the MEMBER's label ("Cerner
+            # Corporation"), which every concept broken down by that member
+            # shares -- so for those rows the label says nothing about which
+            # line item this is, and matching on it merged unrelated concepts.
+            # Measured across the fixture corpus before this guard: 213 of the
+            # 215 merges combined two DIFFERENT concepts and every one of them
+            # was a dimensional row, including a dollar amount merged with a
+            # term in years (CommercialPaper with DebtInstrumentTerm).
+            # The concept-rename case this function exists for is a face line
+            # item, not a member row, so requiring identity here costs it
+            # nothing (edgartools-j7iz).
+            if a_item.get('is_dimension') and a_item.get('concept') != b_item.get('concept'):
+                continue
+            # An instant and a duration are not two observations of one series,
+            # whatever their labels say. This is what made the ORCL row merge:
+            # a duration fact and an instant fact can never collide, so the
+            # complementarity test below is satisfied trivially.
+            if _period_kinds(a_item) != _period_kinds(b_item):
                 continue
             # Check value complementarity
             a_vals = a_item.get('values', {})

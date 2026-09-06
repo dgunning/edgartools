@@ -30,7 +30,7 @@ from edgar.attachments import Attachments
 from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
 from edgar.richtools import repr_rich
-from edgar.xbrl.core import STANDARD_LABEL, STANDARD_TAXONOMIES, split_element_id
+from edgar.xbrl.core import STANDARD_LABEL, STANDARD_TAXONOMIES, split_element_id, unit_currency_measure
 from edgar.xbrl.models import Axis, Domain, PresentationNode, is_negated_label_role
 from edgar.xbrl.parsers import XBRLParser
 from edgar.xbrl.period_selector import select_periods
@@ -2780,9 +2780,13 @@ class XBRL:
         for _, wrapped_fact in facts.items():
             fact = wrapped_fact['fact']
             if hasattr(fact, 'unit_ref') and fact.unit_ref and fact.unit_ref in self.units:
-                unit_info = self.units[fact.unit_ref]
-                if 'measure' in unit_info:
-                    currency_measure = unit_info['measure']
+                # A divided unit (USD per share) carries its currency in the
+                # numerator and has no 'measure' key, so testing for that key
+                # dropped the currency symbol from every per-share cell once
+                # divided units began parsing correctly (edgartools-uetp).
+                measure = unit_currency_measure(self.units[fact.unit_ref])
+                if measure:
+                    currency_measure = measure
                     break
 
         # Cache the result (including None values to avoid repeated lookups)
