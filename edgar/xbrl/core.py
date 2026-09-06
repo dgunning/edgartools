@@ -14,6 +14,60 @@ PERIOD_START_LABEL = "http://www.xbrl.org/2003/role/periodStartLabel"
 PERIOD_END_LABEL = "http://www.xbrl.org/2003/role/periodEndLabel"
 TOTAL_LABEL = "http://www.xbrl.org/2003/role/totalLabel"
 
+
+def iso4217_code(measure: Optional[str]) -> Optional[str]:
+    """Return the ISO 4217 code of an ``iso4217:`` unit measure, else ``None``."""
+    if measure and measure.startswith('iso4217:'):
+        return measure[len('iso4217:'):]
+    return None
+
+
+def unit_currency(unit_info: Optional[Dict[str, Any]]) -> Optional[str]:
+    """Resolve a parsed XBRL unit to its ISO 4217 currency code, or ``None``.
+
+    A currency fact uses a simple ``iso4217:`` measure (``iso4217:HKD`` -> ``HKD``).
+    A per-share monetary fact uses a ``divide`` unit whose numerator is the
+    currency (``iso4217:USD`` per ``xbrli:shares``), so the numerator's currency
+    is the fact's currency. Non-monetary units (shares, pure) return ``None``.
+    The opaque ``unit_ref`` id itself (e.g. ``UNIT_STANDARD_HKD_...``) is never
+    parsed -- only the resolved measure is used (see issue #850).
+
+    This lives here, above every consumer, because three of them need it and a
+    per-unit rule spelled out in three places is how the negated-label matchers
+    drifted apart (edgartools-hxnw). Until edgartools-uetp, divided units were
+    misparsed as simple, so the ``divide`` branch never ran on a real filing.
+    """
+    if not unit_info:
+        return None
+    unit_type = unit_info.get('type')
+    if unit_type == 'simple':
+        return iso4217_code(unit_info.get('measure'))
+    if unit_type == 'divide':
+        for measure in unit_info.get('numerator', []):
+            code = iso4217_code(measure)
+            if code:
+                return code
+    return None
+
+
+def unit_currency_measure(unit_info: Optional[Dict[str, Any]]) -> Optional[str]:
+    """The full ``iso4217:``-prefixed measure a unit denominates its value in.
+
+    Same rule as :func:`unit_currency` but keeping the prefix, for callers that
+    hand the measure to currency-symbol lookup rather than reading the code.
+    """
+    if not unit_info:
+        return None
+    unit_type = unit_info.get('type')
+    if unit_type == 'simple':
+        measure = unit_info.get('measure')
+        return measure if iso4217_code(measure) else None
+    if unit_type == 'divide':
+        for measure in unit_info.get('numerator', []):
+            if iso4217_code(measure):
+                return measure
+    return None
+
 # Standard XBRL taxonomy prefixes. Anything else in an element_id is a filer extension.
 # Used by calculation_linkbase() and Statement.extension_arcs() to distinguish
 # filer-authored concepts from standard taxonomy concepts.
