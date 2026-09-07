@@ -18,11 +18,86 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from edgar.datatools import STR_DTYPE, apply_declared_schema, empty_declared_frame
 from edgar.richtools import repr_rich
 from edgar.xbrl.facts import FactQuery, _apply_transformations
 
 if TYPE_CHECKING:
     from edgar.xbrl.stitching.xbrls import XBRLS
+
+
+# Columns StitchedFactQuery.to_dataframe() declares, in the order it emits them.
+#
+# The rule (engineering/decisions/facts-dataframe-schema.md, beads edgartools-rsyt
+# and edgartools-7wtj, extended here by edgartools-trhe): the column set is a
+# function of the query's configuration, never of the rows that came back.
+#
+# This method is the third implementation of that construction and kept the
+# `dropna(axis=1, how='all')` the other two had removed. Measured across five
+# stitched pairs (AAPL, KO, MSFT), it deleted a column on every filer:
+# `by_statement_type('IncomeStatement')` lost `period_instant` 5 times out of 5,
+# because income-statement rows are all durations, and
+# `by_statement_type('BalanceSheet')` lost `period_start` 5 times out of 5,
+# because balance-sheet rows are all instants. Narrowing to a statement is not a
+# statement about which columns exist.
+#
+# Dtypes are the ones these columns hold today when rows populate them, so an
+# empty result is dtype-identical to a populated one. No column needs pinning:
+# unlike the two sibling paths, nothing here flips dtype across queries (0 flips
+# over 15 query/filer combinations) — the record dict is built unconditionally and
+# `value` is cast to str explicitly.
+_STITCHED_COLUMNS: Dict[str, Any] = {
+    'concept': STR_DTYPE,
+    'label': STR_DTYPE,
+    'original_label': STR_DTYPE,
+    'value': STR_DTYPE,
+    'numeric_value': 'float64',
+    'period_start': STR_DTYPE,
+    'period_end': STR_DTYPE,
+    'decimals': 'int64',
+    'statement_type': STR_DTYPE,
+    'fiscal_period': STR_DTYPE,
+    'standard_concept': STR_DTYPE,
+    'period_type': STR_DTYPE,
+    'period_instant': STR_DTYPE,
+    'period_label': STR_DTYPE,
+    'level': 'int64',
+    'is_abstract': 'bool',
+    'is_total': 'bool',
+    'filing_count': 'int64',
+    'standardized': 'bool',
+    'source_filing_index': 'Int64',
+    'fiscal_year': STR_DTYPE,
+}
+
+# The dtype a column takes when no returned row populated it. Only the columns
+# whose declared dtype cannot hold a null: casting an all-null column to `bool`
+# yields False and to `int64` raises, so declaring those would make the one path
+# that fabricates data the path taken when data is missing.
+#
+_STITCHED_NULL_DTYPES = {
+    'decimals': 'Int64',
+    'level': 'Int64',
+    'filing_count': 'Int64',
+    'is_abstract': 'boolean',
+    'is_total': 'boolean',
+    'standardized': 'boolean',
+}
+
+# `source_filing_index` is declared nullable `Int64` and pinned, rather than taking
+# the int64 it infers when every row happens to have provenance.
+# `_determine_source_filing` returns Optional[int], so nullable is what the column
+# actually is, and without pinning it the empty frame and the populated frame
+# disagree -- which is this bug again in the zero-row case.
+#
+# Pinning a populated column normally moves a null sentinel callers rely on, which
+# is why the sibling paths hold theirs for 6.0. Not here: `dropna` deletes this
+# column from every result today, so there is no dtype for a caller to be relying
+# on and nothing to break.
+_STITCHED_PINNED = frozenset({'source_filing_index'})
+
+# Present on the fact dicts, deliberately not columns of the frame.
+_STITCHED_SKIP_COLUMNS = frozenset({'fact_key', 'period_key'})
 
 
 class StitchedFactsView:
@@ -606,49 +681,64 @@ class StitchedFactQuery(FactQuery):
             return cache[cache_key]
         results = self.execute()
 
+        declared = self._declared_columns()
+        if columns:
+            # Which names are valid used to depend on the rows, because the
+            # projection ran after all-null columns had been deleted.
+            unknown = [col for col in columns if col not in declared]
+            if unknown:
+                raise KeyError(
+                    f"to_dataframe() does not emit {unknown}. "
+                    f"Available: {sorted(declared)}")
+            order = list(columns)
+        else:
+            order = None
+
         if not results:
-            return pd.DataFrame()
+            # Zero rows, but the declared columns and their dtypes. A bare
+            # DataFrame() has no columns at all, so df['value'] raised KeyError on
+            # an empty result -- reachable from a real query, e.g. across_periods(2)
+            # against a single filing.
+            return empty_declared_frame(declared, order or list(declared))
 
         df = pd.DataFrame(results)
         df['value'] = df['value'].astype(str)  # Ensure value is string for display
 
-        # Filter columns based on inclusion flags
         if not self._include_dimensions:
             df = df.loc[:, [col for col in df.columns if not col.startswith('dim_')]]
-
-        if not self._include_contexts:
-            context_cols = ['context_ref', 'entity_identifier', 'entity_scheme',
-                            'period_type']
-            df = df.loc[:, [col for col in df.columns if col not in context_cols]]
 
         if not self._include_element_info:
             element_cols = ['element_id', 'element_name', 'element_type', 'element_period_type',
                             'element_balance', 'element_label']
             df = df.loc[:, [col for col in df.columns if col not in element_cols]]
 
-        # Drop empty columns
-        df = df.dropna(axis=1, how='all')
+        if order is None:
+            # Whatever is present but undeclared is the per-axis dim_<axis> tail,
+            # whose names depend on which axes the filer used. Sorted, because its
+            # order otherwise follows whichever row first introduced each axis.
+            extra = sorted(col for col in df.columns
+                           if col not in declared and col not in _STITCHED_SKIP_COLUMNS)
+            order = list(declared) + extra
 
-        # Filter columns if specified
-        if columns:
-            df = df[list(columns)]
-
-        # Skip these columns
-        skip_columns = ['fact_key', 'period_key']
-
-        # Order columns
-        first_columns = [col for col in
-                         ['concept', 'label', 'original_label', 'value', 'numeric_value',
-                          'period_start', 'period_end', 'decimals', 'statement_type', 'fiscal_period']
-                         if col in df.columns]
-        columns = first_columns + [col for col in df.columns
-                                   if col not in first_columns
-                                   and col not in skip_columns]
-
-        result = df[columns]
+        result = apply_declared_schema(df, declared, order,
+                                       pinned=_STITCHED_PINNED,
+                                       null_dtypes=_STITCHED_NULL_DTYPES)
         cache[cache_key] = result
         self._df_cache = cache
         return result
+
+    def _declared_columns(self) -> Dict[str, Any]:
+        """The columns this query's configuration emits, in emission order.
+
+        `include_contexts` is the only flag that gates a declared column here:
+        `period_type` is the one context column this path builds. The others it
+        names (`context_ref`, `entity_identifier`, `entity_scheme`) are never on a
+        stitched fact, and the `element_*` columns are not either.
+        """
+        declared = dict(_STITCHED_COLUMNS)
+        if not self._include_contexts:
+            declared.pop('period_type', None)
+        return declared
 
     def __rich__(self):
         title = Text.assemble(("Stitched Facts Query"),

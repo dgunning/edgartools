@@ -2,6 +2,7 @@
 
 **Status**: Decided (2026-08-03) · **Bead**: `edgartools-rsyt` · **Context**: [GH #929](https://github.com/dgunning/edgartools/issues/929)
 **Extended 2026-09-06** to the entity path (`edgartools-7wtj`) — see [The entity path](#the-entity-path).
+**Extended 2026-09-07** to the stitching path (`edgartools-trhe`) — see [The stitching path](#the-stitching-path).
 **Supersedes nothing.** Implementation split across 5.x and 6.0 — see [Shipping](#shipping).
 
 ## The problem
@@ -206,8 +207,52 @@ moved onto them rather than keeping its own copies. The column specs stay
 per-path — they are genuinely different tables — but the mechanism, including the
 probed string dtype and its `astype('str')` trap, is defined once.
 
+## The stitching path
+
+`edgartools-trhe`, 2026-09-07. `StitchedFactQuery.to_dataframe()` in
+`edgar/xbrl/stitching/query.py` is the **third** implementation of this
+construction, and it kept the `dropna(axis=1, how='all')` the other two had
+removed. It was found while fixing `edgartools-qbm7`, whose reported symptom was
+"`source_filing_index` is None on all 215 rows" — the field was not None, the
+*column was absent*, because it was all-null and `dropna` deleted it.
+
+Measured across five stitched pairs (AAPL 10-K+10-K, 10-K alone, 10-K+10-Q; KO;
+MSFT), it deleted a column on every filer:
+
+| query | column deleted | hit rate |
+|---|---|---|
+| `by_statement_type("IncomeStatement")` | `period_instant` | 5 of 5 — income-statement rows are all durations |
+| `by_statement_type("BalanceSheet")` | `period_start` | 5 of 5 — balance-sheet rows are all instants |
+| empty result | all of them (bare `DataFrame()`) | — |
+
+Narrowing to a statement is not a statement about which columns exist, and
+`df['period_start']` raising `KeyError` on a balance sheet is the GH #1244
+column-shift shape.
+
+**This path has no breaking half.** Unlike the other two, nothing here flips dtype
+across queries — 0 flips over 15 query/filer combinations — because the fact dict
+is built unconditionally and `value` is cast to `str` explicitly. So the whole
+decision ships at once rather than splitting across 5.x and 6.0.
+
+**`source_filing_index` is declared `Int64` and pinned**, which is the one place a
+pin was not held for the breaking window. `_determine_source_filing` returns
+`Optional[int]`, so nullable is what the column actually is; and without pinning
+it, the empty frame (declared dtype) and the populated frame (materialized
+nullable dtype) disagree — this bug again in the zero-row case, which the
+measurement caught. The pin is additive here for a reason specific to this
+column: `dropna` deletes it from *every* result today, so there is no dtype a
+caller can be relying on and nothing to break.
+
+Only `include_contexts` gates a declared column on this path: `period_type` is the
+one context column the stitched fact carries. The `dim_<axis>` tail stays
+undeclared, as everywhere else.
+
 ## Consequences
 
+- All three implementations of this construction now declare their schema. The
+  mechanism — `STR_DTYPE`, `null_column`, `apply_declared_schema`,
+  `empty_declared_frame` — lives once in `edgar/datatools.py`; only the column
+  specs differ, because they are genuinely different tables.
 - The `07lk.1` schema gate becomes meaningful: a diff against
   `engineering/analysis/perf-baseline/schemas.json` reflects a code change
   rather than which rows a query happened to return.
