@@ -762,6 +762,8 @@ class FactQuery:
 
             records.append({
                 'label': fact.label,
+                'concept': fact.concept,
+                'unit': fact.unit,
                 'numeric_value': fact.numeric_value,
                 'period_key': period_label,
                 'period_end': fact.period_end,
@@ -773,13 +775,16 @@ class FactQuery:
         if df.empty:
             return df
 
+        df['row_key'] = self._pivot_row_keys(df)
+
         # Pivot table
         pivot = df.pivot_table(
-            index='label',
+            index='row_key',
             columns='period_key',
             values='numeric_value',
-            aggfunc='first'  # Should be unique after deduplication
+            aggfunc='first'
         )
+        pivot.index.name = 'label'
 
         # Sort columns by period (newest first)
         # Create a mapping of column names to sort keys
@@ -959,6 +964,80 @@ class FactQuery:
         """
         return len(self._apply_current_filters())
 
+    def _pivot_row_keys(self, df: pd.DataFrame) -> pd.Series:
+        """Build the pivot's row labels so that distinguishable facts stay apart.
+
+        ``pivot_table(aggfunc='first')`` resolves two facts landing in the same cell
+        by keeping one and discarding the other, with nothing to say it happened.
+        This widens the row key until the colliding facts separate, and logs
+        whatever collision is left rather than silently resolving it — the same rule
+        `FactsView._pivot_without_losing_collisions` applies on the XBRL path
+        (bead edgartools-6byc, GH #1196).
+
+        The key stays a single level of readable strings because the result is
+        indexed by label and `FinancialStatement` formats rows by matching concept
+        patterns against it, so the XBRL side's `(concept, label)` MultiIndex is not
+        available here.
+
+        Two widenings, each applied only when it is what separates the rows:
+
+        * **the concept**, when the label cannot identify the row. SEC company facts
+          carry no label at all for IFRS concepts — all 177 of LPA's `ifrs-full`
+          tags have ``label: null`` — so 765 of its 768 facts shared the label ``''``
+          and the whole filing pivoted into a single row.
+        * **the unit**, when one concept is filed once per currency. The survivor of
+          such a collision also loses the field that identified it, so it reads as
+          an unqualified number.
+        """
+        from edgar.core import log
+
+        def local_name(concept: str) -> str:
+            return concept.split(':')[-1] if concept else ''
+
+        labels = df['label'].fillna('').astype(str)
+        # Fall back to the concept wherever the label is empty, rather than
+        # everywhere: a filer's own label is the better row title when it exists.
+        keys = labels.where(labels.str.strip() != '',
+                            df['concept'].map(local_name))
+
+        def collisions(series: pd.Series) -> int:
+            return int(pd.DataFrame({'k': series, 'p': df['period_key']})
+                       .duplicated(keep=False).sum())
+
+        def colliding_mask(series: pd.Series) -> pd.Series:
+            return pd.DataFrame({'k': series, 'p': df['period_key']}).duplicated(keep=False)
+
+        # Each widening is applied only to the rows that actually collide. Suffixing
+        # every row with a discriminator it does not need would make the common case
+        # unreadable to fix the uncommon one.
+        clash = colliding_mask(keys)
+        if clash.any():
+            # A label shared by two different concepts is still ambiguous.
+            qualified = labels + ' [' + df['concept'].map(local_name) + ']'
+            candidate = keys.mask(clash & (labels.str.strip() != ''), qualified)
+            if collisions(candidate) < collisions(keys):
+                keys = candidate
+                clash = colliding_mask(keys)
+
+        if clash.any():
+            units = df['unit'].fillna('').astype(str)
+            # Only where the unit is actually present: a blank suffix would merge
+            # rows back together rather than separate them.
+            usable = clash & (units.str.strip() != '')
+            candidate = keys.mask(usable, keys + ' (' + units + ')')
+            if collisions(candidate) < collisions(keys):
+                keys = candidate
+
+        remaining = collisions(keys)
+        if remaining:
+            log.warning(
+                "pivot by period: %d facts share a cell and only one of each is kept. "
+                "Query the facts directly if you need all of them.",
+                remaining
+            )
+
+        return keys
+
     def _deduplicate_facts(self, facts: List[FinancialFact]) -> List[FinancialFact]:
         """
         Remove duplicate facts for the same concept and period.
@@ -980,11 +1059,18 @@ class FactQuery:
         # Group facts by concept and period
         grouped = defaultdict(list)
         for fact in facts:
-            # Create a key that uniquely identifies the concept and period
+            # Create a key that uniquely identifies the concept and period.
+            #
+            # The unit is part of that identity, not an attribute of it. A concept
+            # filed once per currency — LPA reports ifrs-full:AverageForeignExchangeRate
+            # in COP, CRC and PEN for the same year — is three different facts, and
+            # keying without the unit made them one group from which dedup kept a
+            # single fact and discarded the rest. On that filing 19 distinct facts
+            # were lost this way (bead edgartools-6byc, GH #1196).
             if fact.period_type == 'instant':
-                period_key = (fact.concept, fact.period_end, 'instant')
+                period_key = (fact.concept, fact.unit, fact.period_end, 'instant')
             else:
-                period_key = (fact.concept, fact.period_start, fact.period_end, 'duration')
+                period_key = (fact.concept, fact.unit, fact.period_start, fact.period_end, 'duration')
             grouped[period_key].append(fact)
 
         # Select the best fact from each group
