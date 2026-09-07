@@ -28,6 +28,35 @@ SC_14D9_FORMS = ["SC 14D9", "SC 14D9/A"]
 # boundaries on 10-Q Part II parsing (GH #918).
 _QUOTE_CHARS = "\"“‘'"
 
+# Headings that mark the end of the board's actual recommendation statement and
+# the start of the narrative that routinely poisons naive classification (prior
+# board positions, a since-superseded stance, a financial advisor's opinion
+# summary). Verified present, in this form or a superset of it, in 5 real SC 14D-9
+# filings: Lisata Therapeutics, Genco Shipping & Trading, Woodbridge Liquidation
+# Trust, and Moody National REIT II (two separate filings). Matched as a loose
+# substring (e.g. "background of the" also matches Genco's "Background of the
+# Genco Board's Recommendation Regarding the Offer") rather than an exact heading,
+# since filers word the heading differently.
+_SECTION_BOUNDARY_MARKERS = [
+    r"background of the",
+    r"reasons for the recommendation",
+]
+
+# Hard fallback cap, in characters, for filings that don't use either heading above
+# and so have no detected boundary -- keeps classification bounded rather than
+# running across an entire (possibly 100,000+ character) Item 4 section. Measured
+# recommendation-statement lengths (start of Item 4 to the boundary heading) across
+# the same 5 filings ranged 722-1067 chars, so this cap should rarely bind in
+# practice; when it does, treat it as a sign the filing's structure is unusual and
+# ``recommendation`` may need a second look.
+_RECOMMENDATION_WINDOW_CHARS = 2500
+
+# Checked in this order -- reject, then neutral, then accept -- because reject and
+# neutral phrasing ("recommends...reject the offer", "express no opinion") is more
+# specific and less likely to appear incidentally than accept phrasing ("recommends
+# ...tender your shares"), which is the majority case and could otherwise mask a
+# rarer reject/neutral statement if checked last. Bounding the window above is what
+# actually prevents cross-matching; this ordering is a second line of defense.
 _ACCEPT_PATTERNS = [
     r"recommends?\s+that\s+.{0,80}?accept\s+the\s+offer",
     r"recommends?\s+.{0,60}?tender\s+.{0,40}?shares?",
@@ -35,6 +64,10 @@ _ACCEPT_PATTERNS = [
 _REJECT_PATTERNS = [
     r"recommends?\s+that\s+.{0,80}?reject\s+the\s+offer",
     r"recommends?\s+.{0,60}?not\s+.{0,40}?tender",
+    # "...recommends that the Interestholders not accept the Offer" (Woodbridge
+    # Liquidation Trust, accession 0001140361-20-000734) -- a real rejection that
+    # never uses the word "reject" or "tender" at all.
+    r"recommends?\s+.{0,60}?not\s+.{0,20}?accept\s+the\s+offer",
 ]
 _NEUTRAL_PATTERNS = [
     r"express(?:es|ing)?\s+no\s+opinion",
@@ -84,28 +117,77 @@ def extract_item_section(text: str, item_number: int, next_item_number: int) -> 
     return text[best_span[0] : best_span[1]].strip()
 
 
+def _recommendation_window(item4_text: str) -> str:
+    """
+    The board's recommendation statement: the whitespace-normalized opening of
+    Item 4, cut at the first "Background of the..." / "Reasons for the
+    Recommendation" heading -- whichever comes first -- or at
+    ``_RECOMMENDATION_WINDOW_CHARS`` if neither heading is found.
+
+    Whitespace is fully collapsed (not just nbsp runs) because source HTML line
+    wraps routinely break a recommendation sentence across a newline mid-phrase
+    (e.g. "...recommends that holders of Shares\\nREJECT the Offer..." in Genco
+    Shipping's filing) -- left un-normalized, that newline defeats the ``.``
+    wildcard in the classification patterns, silently missing a real match.
+
+    Cutting at the heading, rather than at a fixed length alone, matters: the
+    longest real recommendation statement measured (1067 chars) is still well
+    inside a fixed cap generous enough to avoid truncating others, which means
+    a length-only cutoff still admits the first few hundred characters of the
+    background narrative -- exactly where a filing may restate an earlier,
+    superseded board position.
+    """
+    normalized = re.sub(r"\s+", " ", item4_text).strip()
+    lowered = normalized.lower()
+
+    boundary = len(normalized)
+    for marker in _SECTION_BOUNDARY_MARKERS:
+        match = re.search(marker, lowered)
+        if match:
+            boundary = min(boundary, match.start())
+
+    boundary = min(boundary, _RECOMMENDATION_WINDOW_CHARS)
+    return normalized[:boundary].strip()
+
+
 def classify_recommendation(item4_text: str) -> Optional[str]:
     """
     Classify the board's recommendation from Item 4 narrative text.
 
     Returns ``"accept"``, ``"reject"``, ``"neutral"``, or ``None``.
 
+    Only ``_recommendation_window(item4_text)`` is examined, not the full
+    section -- see that function's docstring for how the cut point is chosen.
+    Item 4 as a whole also contains "Background of the Offer" / "Reasons for
+    the Recommendation" narrative that can run to 100,000+ characters and
+    routinely mentions earlier, superseded board positions or a financial
+    advisor's opinion; classifying against the full section risks matching
+    that history instead of the board's actual, current recommendation.
+
     Conservative by design: board recommendations are often hedged or
     conditional ("subject to the fiduciary out...", "no recommendation at
     this time pending..."), so this returns ``None`` rather than guessing
     whenever the language does not clearly match one of the three patterns.
     A confident wrong classification is worse than an honest "unknown" here.
+
+    Known limitation: this still misclassifies a hedge that shares the same
+    paragraph as the real recommendation with no heading between them, e.g.
+    "...recommends accept. Previously the company had made no recommendation
+    regarding the earlier proposal." -- there is no structural boundary to cut
+    on there. Not observed in any of the 5 real filings checked against; if it
+    turns up in practice, it needs more than a window (e.g. anchoring the match
+    to the sentence containing "the Board" as subject).
     """
     if not item4_text:
         return None
 
-    lowered = item4_text.lower()
+    window = _recommendation_window(item4_text).lower()
 
-    if any(re.search(p, lowered) for p in _REJECT_PATTERNS):
+    if any(re.search(p, window) for p in _REJECT_PATTERNS):
         return "reject"
-    if any(re.search(p, lowered) for p in _NEUTRAL_PATTERNS):
+    if any(re.search(p, window) for p in _NEUTRAL_PATTERNS):
         return "neutral"
-    if any(re.search(p, lowered) for p in _ACCEPT_PATTERNS):
+    if any(re.search(p, window) for p in _ACCEPT_PATTERNS):
         return "accept"
     return None
 
@@ -189,13 +271,32 @@ class Schedule14D9:
     @property
     def recommendation_text(self) -> str:
         """
-        The Item 4 recommendation text, truncated to the opening statement.
+        The board's recommendation statement: the same bounded, whitespace-
+        normalized window of Item 4 that ``recommendation`` is classified from
+        (see ``_RECOMMENDATION_WINDOW_CHARS``), not an arbitrary truncation.
 
         Use ``item4_text`` for the full Item 4 section (background, reasons,
         fairness opinion summary, etc.), which can be very large.
         """
-        return self.item4_text[:2000]
+        return _recommendation_window(self.item4_text)
+
+    @property
+    def recommendation_text_truncated(self) -> bool:
+        """
+        True if ``recommendation_text`` was cut off before the end of Item 4,
+        i.e. the recommendation statement itself may run longer than the
+        calibrated window. Check this before treating ``recommendation_text``
+        as a complete statement.
+        """
+        return len(re.sub(r"\s+", " ", self.item4_text).strip()) > _RECOMMENDATION_WINDOW_CHARS
+
+    def __rich__(self):
+        """Rich console rendering."""
+        from edgar.tender_offers.rendering import render_schedule14d9
+
+        return render_schedule14d9(self)
 
     def __repr__(self):
-        rec = self.recommendation or "unclear"
-        return f"Schedule14D9(company='{self.company_name}', recommendation='{rec}')"
+        from edgar.richtools import repr_rich
+
+        return repr_rich(self.__rich__())
