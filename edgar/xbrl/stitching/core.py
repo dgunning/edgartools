@@ -90,6 +90,7 @@ class StatementStitcher:
         # Initialize data structures
         self.periods = []  # Ordered list of period identifiers
         self.period_dates = {}  # Maps period ID to display dates
+        self.period_sources = {}  # Maps period ID to the index of the filing it came from
         self.data = defaultdict(dict)  # {concept: {period: value}}
         self.concept_metadata = {}  # Metadata for each concept (level, etc.)
         self.ordering_manager = None  # Will be initialized during stitching
@@ -121,6 +122,7 @@ class StatementStitcher:
         # Reset state
         self.periods = []
         self.period_dates = {}
+        self.period_sources = {}  # Maps period ID to the index of the filing it came from
         self.data = defaultdict(dict)
         self.concept_metadata = {}
         self.original_statement_order = []
@@ -259,6 +261,14 @@ class StatementStitcher:
                 except (ValueError, TypeError, IndexError):
                     # Skip periods with invalid dates
                     continue
+
+        # Retain which filing each surviving period came from. The rule that picks
+        # it lives here -- lower index wins, above -- and the query layer needs the
+        # same answer to attribute a stitched fact to its source filing. Recomputing
+        # it there would be a second copy of this rule, free to drift from it
+        # (bead edgartools-qbm7).
+        self.period_sources = {period_id: statement_index
+                               for period_id, _, statement_index in unique_periods.values()}
 
         # Extract and sort the unique periods
         all_periods = [(period_id, end_date) for period_id, end_date, _ in unique_periods.values()]
@@ -903,6 +913,8 @@ class StatementStitcher:
         # Build the output structure
         result = {
             'periods': [(pid, self.period_dates.get(pid, pid)) for pid in self.periods],
+            'period_sources': {pid: self.period_sources[pid]
+                               for pid in self.periods if pid in self.period_sources},
             'statement_data': []
         }
 

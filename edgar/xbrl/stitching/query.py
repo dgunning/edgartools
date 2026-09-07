@@ -112,6 +112,8 @@ class StitchedFactsView:
         self.xbrls = xbrls
         self._facts_cache = None
         self._last_cache_key = None
+        # period_id -> index of the filing it came from, as resolved by the stitcher.
+        self._period_sources: Dict[str, int] = {}
 
     def __len__(self):
         return len(self.get_facts())
@@ -196,6 +198,10 @@ class StitchedFactsView:
         facts = []
         periods = stitched_data.get('periods', [])
         statement_data = stitched_data.get('statement_data', [])
+        # Provenance for the periods in THIS stitched statement, as the stitcher
+        # resolved it. Merged rather than replaced: get_facts() stitches each
+        # statement type separately and a period can appear in more than one.
+        self._period_sources.update(stitched_data.get('period_sources', {}) or {})
 
         for item in statement_data:
             # Skip abstract items without values
@@ -297,22 +303,45 @@ class StitchedFactsView:
         return None
 
     def _determine_source_filing(self, period_id: str) -> Optional[int]:
-        """Determine which filing this period came from."""
-        # This would require enhanced tracking in the stitching process
-        # For now, return None but this could be enhanced
-        return None
+        """Determine which filing this period came from.
+
+        Previously returned None unconditionally, so `source_filing_index` was never
+        populated and `by_filing_index()` -- a declared public filter -- matched
+        nothing for any argument. A filter that silently returns no rows reads as
+        "no matching data" (bead edgartools-qbm7, GH #1205).
+
+        The answer comes from the stitcher, which already decides it when selecting
+        periods, rather than being recomputed from each filing's reporting periods:
+        the two would have to agree about which filing wins a period both report,
+        and one rule with two implementations is how they stop agreeing.
+        """
+        return self._period_sources.get(period_id)
 
     def _extract_fiscal_info(self, period_id: str) -> Dict[str, Any]:
-        """Extract fiscal period and year information."""
-        fiscal_info = {}
+        """Extract fiscal period and year information for this period's own filing.
 
-        # Try to extract fiscal info from entity_info of the relevant XBRL
-        # This is a simplified approach - could be enhanced with better tracking
-        if self.xbrls.xbrl_list:
-            entity_info = self.xbrls.xbrl_list[0].entity_info
-            if entity_info:
-                fiscal_info['fiscal_period'] = entity_info.get('fiscal_period')
-                fiscal_info['fiscal_year'] = entity_info.get('fiscal_year')
+        This read `xbrl_list[0].entity_info` for *every* period, so all rows carried
+        the newest filing's fiscal focus regardless of the period they covered: on
+        ORCL's 10-K + 10-Q pair the quarter ended 2024-08-31 was reported as
+        `fiscal_year=2026, fiscal_period=FY`, taken from a 10-K filed two years
+        later. The fiscal focus now comes from the filing that reported the period.
+
+        Note this still reads a filing's declared focus rather than deriving the
+        period's identity from its own duration, which is the deeper fix tracked by
+        edgartools-51xd; taking it from the right filing is what this bead covers.
+        """
+        fiscal_info: Dict[str, Any] = {}
+
+        source_index = self._determine_source_filing(period_id)
+        if source_index is None:
+            # Unknown provenance: say nothing rather than assert another filing's
+            # focus, which is the defect this replaces.
+            return fiscal_info
+
+        entity_info = self.xbrls.xbrl_list[source_index].entity_info
+        if entity_info:
+            fiscal_info['fiscal_period'] = entity_info.get('fiscal_period')
+            fiscal_info['fiscal_year'] = entity_info.get('fiscal_year')
 
         return fiscal_info
 
