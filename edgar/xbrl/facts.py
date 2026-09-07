@@ -24,16 +24,15 @@ from rich.text import Text
 
 from edgar.exceptions import ValidationError
 
+from edgar.datatools import STR_DTYPE, null_column as _null_column
 from edgar.richtools import repr_rich
 from edgar.xbrl.core import STANDARD_LABEL, iso4217_code, parse_date, unit_currency
 from edgar.xbrl.models import is_negated_label_role, select_display_label
 
 
-# The pandas default dtype for strings changed in 3.0 (object -> str), and the
-# supported floor is still 2.0. Probing it keeps a column that had to be
-# materialized identical to the same column when rows populated it, on either
-# major — and avoids astype('str'), which turns nulls into the string "nan".
-_STR_DTYPE = pd.Series([""]).dtype
+# Probed once in edgar.datatools, where the entity path's declared schema reads it
+# too — the string dtype's pandas-3.0 change is one rule, so it gets one definition.
+_STR_DTYPE = STR_DTYPE
 
 # Columns FactQuery.to_dataframe() declares, in the order it emits them.
 #
@@ -100,11 +99,6 @@ _DIMENSION_COLUMNS: Dict[str, Any] = {
 # stay off it rather than widening the contract with two list cells.
 _SKIP_COLUMNS = frozenset({'fact_key', 'original_label',
                            'statement_types', 'statement_roles'})
-
-
-def _null_column(dtype, index: pd.Index) -> pd.Series:
-    """An all-null column of `dtype`, for a declared column no row populated."""
-    return pd.Series(index=index, dtype=dtype)
 
 
 def _deduplicate_facts(df: pd.DataFrame) -> pd.DataFrame:

@@ -33,6 +33,8 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar.core import log
+from edgar.datatools import apply_declared_schema, empty_declared_frame
+from edgar.entity.dataframe_schema import NULL_DTYPES, PINNED, entity_facts_columns
 from edgar.entity.enhanced_statement import MultiPeriodStatement
 from edgar.entity.utils import is_consolidated_total_over
 from edgar.entity.models import FinancialFact
@@ -336,6 +338,22 @@ class EntityFacts:
             >>> revenue = df[(df['concept'] == 'Revenues') & (df['filing_date'] <= as_of)]
             >>> latest = revenue.sort_values('filing_date').groupby('period_end').last()
         """
+        # The column set and dtypes follow this call's arguments, never the facts
+        # that came back — see engineering/decisions/facts-dataframe-schema.md
+        # (edgartools-7wtj).
+        declared = entity_facts_columns(pit_mode=pit_mode, include_metadata=include_metadata)
+        if columns is not None:
+            # df[columns] used to raise KeyError on a name this configuration does
+            # not emit. Reindexing would hand back an all-null column instead, so
+            # the caller's typo becomes missing data — keep the error.
+            unknown = [col for col in columns if col not in declared]
+            if unknown:
+                raise KeyError(
+                    f"to_dataframe() does not emit {unknown} with "
+                    f"include_metadata={include_metadata}, pit_mode={pit_mode}. "
+                    f"Available: {sorted(declared)}")
+        order = list(columns) if columns is not None else list(declared)
+
         # Build records from facts
         records = []
         for fact in self._facts:
@@ -374,11 +392,13 @@ class EntityFacts:
             records.append(record)
 
         # Create DataFrame
-        df = pd.DataFrame(records)
+        if not records:
+            # Zero rows, but the declared columns and their dtypes: a bare
+            # DataFrame() has no columns, so df['value'] raised KeyError on an
+            # entity with no facts, and a `columns` projection raised too.
+            return empty_declared_frame(declared, [c for c in order if c in declared])
 
-        # Filter to specific columns if requested
-        if columns is not None:
-            df = df[columns]
+        df = apply_declared_schema(pd.DataFrame(records), declared, order, PINNED, NULL_DTYPES)
 
         # Sort for consistency
         if not df.empty:

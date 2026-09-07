@@ -18,6 +18,8 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from edgar.datatools import apply_declared_schema, empty_declared_frame
+from edgar.entity.dataframe_schema import FACT_QUERY_COLUMNS, NULL_DTYPES, PINNED
 from edgar.entity.models import DataQuality, FinancialFact
 from edgar.ttm.calculator import ANNUAL_MAX_DAYS, ANNUAL_MIN_DAYS
 
@@ -663,11 +665,33 @@ class FactQuery:
 
         Returns:
             DataFrame with query results
+
+        The column set and dtypes are determined by this query's configuration —
+        the ``columns`` given here — and never by which rows the query matched.
+        Narrowing a query returns fewer rows, not a differently shaped table: a
+        column no matching row populated comes back null rather than disappearing,
+        ``value`` stays ``float64`` whether or not the matched rows happen to be
+        whole numbers, and a query matching nothing still carries the full set of
+        columns so ``df['value']`` works on it.
+
+        See engineering/decisions/facts-dataframe-schema.md (edgartools-7wtj).
         """
         facts = self.execute()
 
+        declared = FACT_QUERY_COLUMNS
+        order = [col for col in columns if col in declared] if columns else list(declared)
+        # A projection that names nothing we emit has always fallen back to the
+        # full frame rather than an empty one. Left as it was: it is a caller-
+        # determined shape either way, and changing it is not this fix.
+        if not order:
+            order = list(declared)
+
         if not facts:
-            return pd.DataFrame()
+            # Zero rows, but the declared columns and their dtypes. A bare
+            # DataFrame() has no columns at all, so df['value'] raised KeyError on
+            # an empty result — reachable from a real query, e.g. a BDC that
+            # reports no `Revenues` concept.
+            return empty_declared_frame(declared, order)
 
         # Convert to records
         records = []
@@ -697,13 +721,7 @@ class FactQuery:
 
         df = pd.DataFrame(records)
 
-        # Select columns if specified
-        if columns:
-            available_columns = [col for col in columns if col in df.columns]
-            if available_columns:  # Only select if there are matching columns
-                df = df[available_columns]
-
-        return df
+        return apply_declared_schema(df, declared, order, PINNED, NULL_DTYPES)
 
     def to_llm_context(self) -> List[Dict[str, Any]]:
         """
