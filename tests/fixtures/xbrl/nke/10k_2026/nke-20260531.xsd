@@ -1,0 +1,613 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--XBRL Document Created with the Workiva Platform-->
+<!--Copyright 2026 Workiva-->
+<!--r:019c344a-92ed-73e1-9ce0-4fb5ff56949c,g:6affeaea-97d3-4580-82fe-465dfcea0b24-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:nke="http://www.nike.com/20260531" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:dtr-types="http://www.xbrl.org/dtr/type/2024-01-31" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.nike.com/20260531">
+  <xs:import namespace="http://fasb.org/srt/2025" schemaLocation="https://xbrl.fasb.org/srt/2025/elts/srt-2025.xsd"/>
+  <xs:import namespace="http://fasb.org/us-gaap/2025" schemaLocation="https://xbrl.fasb.org/us-gaap/2025/elts/us-gaap-2025.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/2003/instance" schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/2003/linkbase" schemaLocation="http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/dtr/type/2024-01-31" schemaLocation="https://www.xbrl.org/dtr/type/2024-01-31/types.xsd"/>
+  <xs:import namespace="http://xbrl.org/2005/xbrldt" schemaLocation="http://www.xbrl.org/2005/xbrldt-2005.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/country/2025" schemaLocation="https://xbrl.sec.gov/country/2025/country-2025.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/cyd-af-sub/2025" schemaLocation="https://xbrl.sec.gov/cyd/2025/cyd-af-sub-2025.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/dei/2025" schemaLocation="https://xbrl.sec.gov/dei/2025/dei-2025.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/ecd/2025" schemaLocation="https://xbrl.sec.gov/ecd/2025/ecd-2025.xsd"/>
+  <xs:annotation>
+    <xs:appinfo>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="nke-20260531_pre.xml" xlink:role="http://www.xbrl.org/2003/role/presentationLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="nke-20260531_def.xml" xlink:role="http://www.xbrl.org/2003/role/definitionLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="nke-20260531_lab.xml" xlink:role="http://www.xbrl.org/2003/role/labelLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="nke-20260531_cal.xml" xlink:role="http://www.xbrl.org/2003/role/calculationLinkbaseRef" xlink:type="simple"/>
+      <link:roleType id="COVER" roleURI="http://www.nike.com/role/COVER">
+        <link:definition>0000001 - Document - COVER</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="AUDITINFORMATION" roleURI="http://www.nike.com/role/AUDITINFORMATION">
+        <link:definition>0000002 - Document - AUDIT INFORMATION</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CONSOLIDATEDSTATEMENTSOFINCOME" roleURI="http://www.nike.com/role/CONSOLIDATEDSTATEMENTSOFINCOME">
+        <link:definition>9952151 - Statement - CONSOLIDATED STATEMENTS OF INCOME</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME" roleURI="http://www.nike.com/role/CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME">
+        <link:definition>9952152 - Statement - CONSOLIDATED STATEMENTS OF COMPREHENSIVE INCOME</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CONSOLIDATEDBALANCESHEETS" roleURI="http://www.nike.com/role/CONSOLIDATEDBALANCESHEETS">
+        <link:definition>9952153 - Statement - CONSOLIDATED BALANCE SHEETS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CONSOLIDATEDBALANCESHEETSParenthetical" roleURI="http://www.nike.com/role/CONSOLIDATEDBALANCESHEETSParenthetical">
+        <link:definition>9952154 - Statement - CONSOLIDATED BALANCE SHEETS (Parenthetical)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CONSOLIDATEDSTATEMENTSOFCASHFLOWS" roleURI="http://www.nike.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS">
+        <link:definition>9952155 - Statement - CONSOLIDATED STATEMENTS OF CASH FLOWS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CONSOLIDATEDSTATEMENTSOFSHAREHOLDERSEQUITY" roleURI="http://www.nike.com/role/CONSOLIDATEDSTATEMENTSOFSHAREHOLDERSEQUITY">
+        <link:definition>9952156 - Statement - CONSOLIDATED STATEMENTS OF SHAREHOLDERS' EQUITY</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CONSOLIDATEDSTATEMENTSOFSHAREHOLDERSEQUITYParenthetical" roleURI="http://www.nike.com/role/CONSOLIDATEDSTATEMENTSOFSHAREHOLDERSEQUITYParenthetical">
+        <link:definition>9952157 - Statement - CONSOLIDATED STATEMENTS OF SHAREHOLDERS' EQUITY (Parenthetical)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SUMMARYOFSIGNIFICANTACCOUNTINGPOLICIES" roleURI="http://www.nike.com/role/SUMMARYOFSIGNIFICANTACCOUNTINGPOLICIES">
+        <link:definition>9952158 - Disclosure - SUMMARY OF SIGNIFICANT ACCOUNTING POLICIES</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PROPERTYPLANTANDEQUIPMENT" roleURI="http://www.nike.com/role/PROPERTYPLANTANDEQUIPMENT">
+        <link:definition>9952159 - Disclosure - PROPERTY, PLANT AND EQUIPMENT</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ACCRUEDLIABILITIES" roleURI="http://www.nike.com/role/ACCRUEDLIABILITIES">
+        <link:definition>9952160 - Disclosure - ACCRUED LIABILITIES</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="FAIRVALUEMEASUREMENTS" roleURI="http://www.nike.com/role/FAIRVALUEMEASUREMENTS">
+        <link:definition>9952161 - Disclosure - FAIR VALUE MEASUREMENTS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SHORTTERMBORROWINGSANDCREDITLINES" roleURI="http://www.nike.com/role/SHORTTERMBORROWINGSANDCREDITLINES">
+        <link:definition>9952162 - Disclosure - SHORT-TERM BORROWINGS AND CREDIT LINES</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LONGTERMDEBT" roleURI="http://www.nike.com/role/LONGTERMDEBT">
+        <link:definition>9952163 - Disclosure - LONG-TERM DEBT</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="INCOMETAXES" roleURI="http://www.nike.com/role/INCOMETAXES">
+        <link:definition>9952164 - Disclosure - INCOME TAXES</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="REDEEMABLEPREFERREDSTOCK" roleURI="http://www.nike.com/role/REDEEMABLEPREFERREDSTOCK">
+        <link:definition>9952165 - Disclosure - REDEEMABLE PREFERRED STOCK</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="COMMONSTOCKANDSTOCKBASEDCOMPENSATION" roleURI="http://www.nike.com/role/COMMONSTOCKANDSTOCKBASEDCOMPENSATION">
+        <link:definition>9952166 - Disclosure - COMMON STOCK AND STOCK-BASED COMPENSATION</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EARNINGSPERSHARE" roleURI="http://www.nike.com/role/EARNINGSPERSHARE">
+        <link:definition>9952167 - Disclosure - EARNINGS PER SHARE</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BENEFITPLANS" roleURI="http://www.nike.com/role/BENEFITPLANS">
+        <link:definition>9952168 - Disclosure - BENEFIT PLANS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RISKMANAGEMENTANDDERIVATIVES" roleURI="http://www.nike.com/role/RISKMANAGEMENTANDDERIVATIVES">
+        <link:definition>9952169 - Disclosure - RISK MANAGEMENT AND DERIVATIVES</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ACCUMULATEDOTHERCOMPREHENSIVEINCOMELOSS" roleURI="http://www.nike.com/role/ACCUMULATEDOTHERCOMPREHENSIVEINCOMELOSS">
+        <link:definition>9952170 - Disclosure - ACCUMULATED OTHER COMPREHENSIVE INCOME (LOSS)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="REVENUES" roleURI="http://www.nike.com/role/REVENUES">
+        <link:definition>9952171 - Disclosure - REVENUES</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SEGMENTINFORMATION" roleURI="http://www.nike.com/role/SEGMENTINFORMATION">
+        <link:definition>9952172 - Disclosure - SEGMENT INFORMATION</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="COMMITMENTSANDCONTINGENCIES" roleURI="http://www.nike.com/role/COMMITMENTSANDCONTINGENCIES">
+        <link:definition>9952173 - Disclosure - COMMITMENTS AND CONTINGENCIES</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LEASES" roleURI="http://www.nike.com/role/LEASES">
+        <link:definition>9952174 - Disclosure - LEASES</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SEVERANCERESTRUCTURINGANDOTHEREMPLOYEECOSTS" roleURI="http://www.nike.com/role/SEVERANCERESTRUCTURINGANDOTHEREMPLOYEECOSTS">
+        <link:definition>9952175 - Disclosure - SEVERANCE, RESTRUCTURING AND OTHER EMPLOYEE COSTS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SUPPLIERFINANCEPROGRAMS" roleURI="http://www.nike.com/role/SUPPLIERFINANCEPROGRAMS">
+        <link:definition>9952176 - Disclosure - SUPPLIER FINANCE PROGRAMS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SUMMARYOFSIGNIFICANTACCOUNTINGPOLICIESPolicies" roleURI="http://www.nike.com/role/SUMMARYOFSIGNIFICANTACCOUNTINGPOLICIESPolicies">
+        <link:definition>9955511 - Disclosure - SUMMARY OF SIGNIFICANT ACCOUNTING POLICIES (Policies)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PROPERTYPLANTANDEQUIPMENTTables" roleURI="http://www.nike.com/role/PROPERTYPLANTANDEQUIPMENTTables">
+        <link:definition>9955512 - Disclosure - PROPERTY, PLANT AND EQUIPMENT (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ACCRUEDLIABILITIESTables" roleURI="http://www.nike.com/role/ACCRUEDLIABILITIESTables">
+        <link:definition>9955513 - Disclosure - ACCRUED LIABILITIES (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="FAIRVALUEMEASUREMENTSTables" roleURI="http://www.nike.com/role/FAIRVALUEMEASUREMENTSTables">
+        <link:definition>9955514 - Disclosure - FAIR VALUE MEASUREMENTS (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LONGTERMDEBTTables" roleURI="http://www.nike.com/role/LONGTERMDEBTTables">
+        <link:definition>9955515 - Disclosure - LONG-TERM DEBT (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="INCOMETAXESTables" roleURI="http://www.nike.com/role/INCOMETAXESTables">
+        <link:definition>9955516 - Disclosure - INCOME TAXES (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="COMMONSTOCKANDSTOCKBASEDCOMPENSATIONTables" roleURI="http://www.nike.com/role/COMMONSTOCKANDSTOCKBASEDCOMPENSATIONTables">
+        <link:definition>9955517 - Disclosure - COMMON STOCK AND STOCK-BASED COMPENSATION (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EARNINGSPERSHARETables" roleURI="http://www.nike.com/role/EARNINGSPERSHARETables">
+        <link:definition>9955518 - Disclosure - EARNINGS PER SHARE (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RISKMANAGEMENTANDDERIVATIVESTables" roleURI="http://www.nike.com/role/RISKMANAGEMENTANDDERIVATIVESTables">
+        <link:definition>9955519 - Disclosure - RISK MANAGEMENT AND DERIVATIVES (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ACCUMULATEDOTHERCOMPREHENSIVEINCOMELOSSTables" roleURI="http://www.nike.com/role/ACCUMULATEDOTHERCOMPREHENSIVEINCOMELOSSTables">
+        <link:definition>9955520 - Disclosure - ACCUMULATED OTHER COMPREHENSIVE INCOME (LOSS) (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="REVENUESTables" roleURI="http://www.nike.com/role/REVENUESTables">
+        <link:definition>9955521 - Disclosure - REVENUES (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SEGMENTINFORMATIONTables" roleURI="http://www.nike.com/role/SEGMENTINFORMATIONTables">
+        <link:definition>9955522 - Disclosure - SEGMENT INFORMATION (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LEASESTables" roleURI="http://www.nike.com/role/LEASESTables">
+        <link:definition>9955523 - Disclosure - LEASES (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SUMMARYOFSIGNIFICANTACCOUNTINGPOLICIESDetails" roleURI="http://www.nike.com/role/SUMMARYOFSIGNIFICANTACCOUNTINGPOLICIESDetails">
+        <link:definition>9955524 - Disclosure - SUMMARY OF SIGNIFICANT ACCOUNTING POLICIES (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PROPERTYPLANTANDEQUIPMENTDetails" roleURI="http://www.nike.com/role/PROPERTYPLANTANDEQUIPMENTDetails">
+        <link:definition>9955525 - Disclosure - PROPERTY, PLANT AND EQUIPMENT (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ACCRUEDLIABILITIESDetails" roleURI="http://www.nike.com/role/ACCRUEDLIABILITIESDetails">
+        <link:definition>9955526 - Disclosure - ACCRUED LIABILITIES (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="FAIRVALUEMEASUREMENTSFinancialAssetsMeasuredatFairValueonRecurringBasisDetails" roleURI="http://www.nike.com/role/FAIRVALUEMEASUREMENTSFinancialAssetsMeasuredatFairValueonRecurringBasisDetails">
+        <link:definition>9955527 - Disclosure - FAIR VALUE MEASUREMENTS - Financial Assets Measured at Fair Value on Recurring Basis (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="FAIRVALUEMEASUREMENTSAdditionalInformationDetails" roleURI="http://www.nike.com/role/FAIRVALUEMEASUREMENTSAdditionalInformationDetails">
+        <link:definition>9955528 - Disclosure - FAIR VALUE MEASUREMENTS - Additional Information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="FAIRVALUEMEASUREMENTSDerivativeAssetsandLiabilitiesatFairValueDetails" roleURI="http://www.nike.com/role/FAIRVALUEMEASUREMENTSDerivativeAssetsandLiabilitiesatFairValueDetails">
+        <link:definition>9955529 - Disclosure - FAIR VALUE MEASUREMENTS - Derivative Assets and Liabilities at Fair Value (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SHORTTERMBORROWINGSANDCREDITLINESDetails" roleURI="http://www.nike.com/role/SHORTTERMBORROWINGSANDCREDITLINESDetails">
+        <link:definition>9955530 - Disclosure - SHORT-TERM BORROWINGS AND CREDIT LINES (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LONGTERMDEBTNetofUnamortizedPremiumsDiscountsandDebtIssuanceCostsDetails" roleURI="http://www.nike.com/role/LONGTERMDEBTNetofUnamortizedPremiumsDiscountsandDebtIssuanceCostsDetails">
+        <link:definition>9955531 - Disclosure - LONG-TERM DEBT - Net of Unamortized Premiums, Discounts and Debt Issuance Costs (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LONGTERMDEBTAdditionalInformationDetails" roleURI="http://www.nike.com/role/LONGTERMDEBTAdditionalInformationDetails">
+        <link:definition>9955532 - Disclosure - LONG-TERM DEBT - Additional Information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="INCOMETAXESIncomebeforeIncomeTaxesDetails" roleURI="http://www.nike.com/role/INCOMETAXESIncomebeforeIncomeTaxesDetails">
+        <link:definition>9955533 - Disclosure - INCOME TAXES - Income before Income Taxes (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="INCOMETAXESProvisionforIncomeTaxesDetails" roleURI="http://www.nike.com/role/INCOMETAXESProvisionforIncomeTaxesDetails">
+        <link:definition>9955534 - Disclosure - INCOME TAXES - Provision for Income Taxes (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="INCOMETAXESReconciliationfromUnitedStatesStatutoryFederalIncomeTaxRatetoEffectiveIncomeTaxRateDetails" roleURI="http://www.nike.com/role/INCOMETAXESReconciliationfromUnitedStatesStatutoryFederalIncomeTaxRatetoEffectiveIncomeTaxRateDetails">
+        <link:definition>9955535 - Disclosure - INCOME TAXES - Reconciliation from United States Statutory Federal Income Tax Rate to Effective Income Tax Rate (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="INCOMETAXESAdditionalInformationDetails" roleURI="http://www.nike.com/role/INCOMETAXESAdditionalInformationDetails">
+        <link:definition>9955536 - Disclosure - INCOME TAXES - Additional Information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="INCOMETAXESDeferredIncomeTaxAssetsandLiabilitiesDetails" roleURI="http://www.nike.com/role/INCOMETAXESDeferredIncomeTaxAssetsandLiabilitiesDetails">
+        <link:definition>9955537 - Disclosure - INCOME TAXES - Deferred Income Tax Assets and Liabilities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="INCOMETAXESReconciliationofChangesinGrossBalanceofUnrecognizedTaxBenefitsDetails" roleURI="http://www.nike.com/role/INCOMETAXESReconciliationofChangesinGrossBalanceofUnrecognizedTaxBenefitsDetails">
+        <link:definition>9955538 - Disclosure - INCOME TAXES - Reconciliation of Changes in Gross Balance of Unrecognized Tax Benefits (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="INCOMETAXESCashPaidforIncomeTaxesNetofRefundsReceivedDetails" roleURI="http://www.nike.com/role/INCOMETAXESCashPaidforIncomeTaxesNetofRefundsReceivedDetails">
+        <link:definition>9955539 - Disclosure - INCOME TAXES - Cash Paid for Income Taxes (Net of Refunds Received) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="REDEEMABLEPREFERREDSTOCKDetails" roleURI="http://www.nike.com/role/REDEEMABLEPREFERREDSTOCKDetails">
+        <link:definition>9955540 - Disclosure - REDEEMABLE PREFERRED STOCK (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="COMMONSTOCKANDSTOCKBASEDCOMPENSATIONAdditionalInformationDetails" roleURI="http://www.nike.com/role/COMMONSTOCKANDSTOCKBASEDCOMPENSATIONAdditionalInformationDetails">
+        <link:definition>9955541 - Disclosure - COMMON STOCK AND STOCK-BASED COMPENSATION - Additional Information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="COMMONSTOCKANDSTOCKBASEDCOMPENSATIONTotalStockBasedCompensationExpenseDetails" roleURI="http://www.nike.com/role/COMMONSTOCKANDSTOCKBASEDCOMPENSATIONTotalStockBasedCompensationExpenseDetails">
+        <link:definition>9955542 - Disclosure - COMMON STOCK AND STOCK-BASED COMPENSATION - Total Stock-Based Compensation Expense (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="COMMONSTOCKANDSTOCKBASEDCOMPENSATIONWeightedAverageAssumptionsUsedtoEstimateFairValuesDetails" roleURI="http://www.nike.com/role/COMMONSTOCKANDSTOCKBASEDCOMPENSATIONWeightedAverageAssumptionsUsedtoEstimateFairValuesDetails">
+        <link:definition>9955543 - Disclosure - COMMON STOCK AND STOCK-BASED COMPENSATION - Weighted Average Assumptions Used to Estimate Fair Values (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="COMMONSTOCKANDSTOCKBASEDCOMPENSATIONStockOptionTransactionsUnderPlanDetails" roleURI="http://www.nike.com/role/COMMONSTOCKANDSTOCKBASEDCOMPENSATIONStockOptionTransactionsUnderPlanDetails">
+        <link:definition>9955544 - Disclosure - COMMON STOCK AND STOCK-BASED COMPENSATION - Stock Option Transactions Under Plan (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="COMMONSTOCKANDSTOCKBASEDCOMPENSATIONRestrictedStockandRestrictedStockUnitsDetails" roleURI="http://www.nike.com/role/COMMONSTOCKANDSTOCKBASEDCOMPENSATIONRestrictedStockandRestrictedStockUnitsDetails">
+        <link:definition>9955545 - Disclosure - COMMON STOCK AND STOCK-BASED COMPENSATION - Restricted Stock and Restricted Stock Units (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EARNINGSPERSHAREAdditionalInformationDetails" roleURI="http://www.nike.com/role/EARNINGSPERSHAREAdditionalInformationDetails">
+        <link:definition>9955546 - Disclosure - EARNINGS PER SHARE - Additional Information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EARNINGSPERSHAREReconciliationfromBasicEarningsPerSharetoDilutedEarningsPerShareDetails" roleURI="http://www.nike.com/role/EARNINGSPERSHAREReconciliationfromBasicEarningsPerSharetoDilutedEarningsPerShareDetails">
+        <link:definition>9955547 - Disclosure - EARNINGS PER SHARE- Reconciliation from Basic Earnings Per Share to Diluted Earnings Per Share (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BENEFITPLANSDetails" roleURI="http://www.nike.com/role/BENEFITPLANSDetails">
+        <link:definition>9955548 - Disclosure - BENEFIT PLANS (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RISKMANAGEMENTANDDERIVATIVESFVofDerivativeInstrumentsIncludedwithinConsolidatedBalanceSheetDetails" roleURI="http://www.nike.com/role/RISKMANAGEMENTANDDERIVATIVESFVofDerivativeInstrumentsIncludedwithinConsolidatedBalanceSheetDetails">
+        <link:definition>9955549 - Disclosure - RISK MANAGEMENT AND DERIVATIVES - FV of Derivative Instruments Included within Consolidated Balance Sheet (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RISKMANAGEMENTANDDERIVATIVESAmountsAffectingConsolidatedStatementsofIncomeDetails" roleURI="http://www.nike.com/role/RISKMANAGEMENTANDDERIVATIVESAmountsAffectingConsolidatedStatementsofIncomeDetails">
+        <link:definition>9955550 - Disclosure - RISK MANAGEMENT AND DERIVATIVES - Amounts Affecting Consolidated Statements of Income (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RISKMANAGEMENTANDDERIVATIVESAdditionalInformationDetails" roleURI="http://www.nike.com/role/RISKMANAGEMENTANDDERIVATIVESAdditionalInformationDetails">
+        <link:definition>9955551 - Disclosure - RISK MANAGEMENT AND DERIVATIVES - Additional Information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ACCUMULATEDOTHERCOMPREHENSIVEINCOMELOSSDetails" roleURI="http://www.nike.com/role/ACCUMULATEDOTHERCOMPREHENSIVEINCOMELOSSDetails">
+        <link:definition>9955552 - Disclosure - ACCUMULATED OTHER COMPREHENSIVE INCOME (LOSS) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="REVENUESScheduleofDisaggregationofRevenueDetails" roleURI="http://www.nike.com/role/REVENUESScheduleofDisaggregationofRevenueDetails">
+        <link:definition>9955553 - Disclosure - REVENUES - Schedule of Disaggregation of Revenue (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="REVENUESAdditionalInformationDetails" roleURI="http://www.nike.com/role/REVENUESAdditionalInformationDetails">
+        <link:definition>9955554 - Disclosure - REVENUES - Additional Information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SEGMENTINFORMATIONInformationbyOperatingSegmentsDetails" roleURI="http://www.nike.com/role/SEGMENTINFORMATIONInformationbyOperatingSegmentsDetails">
+        <link:definition>9955555 - Disclosure - SEGMENT INFORMATION - Information by Operating Segments (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SEGMENTINFORMATIONAdditionalInformationDetails" roleURI="http://www.nike.com/role/SEGMENTINFORMATIONAdditionalInformationDetails">
+        <link:definition>9955556 - Disclosure - SEGMENT INFORMATION - Additional Information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SEGMENTINFORMATIONLonglivedAssetsbyGeographicAreasDetails" roleURI="http://www.nike.com/role/SEGMENTINFORMATIONLonglivedAssetsbyGeographicAreasDetails">
+        <link:definition>9955557 - Disclosure - SEGMENT INFORMATION- Long-lived Assets by Geographic Areas (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="COMMITMENTSANDCONTINGENCIESDetails" roleURI="http://www.nike.com/role/COMMITMENTSANDCONTINGENCIESDetails">
+        <link:definition>9955558 - Disclosure - COMMITMENTS AND CONTINGENCIES (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LEASESAdditionalInformationDetails" roleURI="http://www.nike.com/role/LEASESAdditionalInformationDetails">
+        <link:definition>9955559 - Disclosure - LEASES - Additional Information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LEASESMaturitiesDetails" roleURI="http://www.nike.com/role/LEASESMaturitiesDetails">
+        <link:definition>9955560 - Disclosure - LEASES - Maturities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LEASESMaturitiesDetails_1" roleURI="http://www.nike.com/role/LEASESMaturitiesDetails_1">
+        <link:definition>9955560 - Disclosure - LEASES - Maturities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LEASESLeaseTermandDiscountRateDetails" roleURI="http://www.nike.com/role/LEASESLeaseTermandDiscountRateDetails">
+        <link:definition>9955561 - Disclosure - LEASES - Lease Term and Discount Rate (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LEASESSupplementalCashFlowsDetails" roleURI="http://www.nike.com/role/LEASESSupplementalCashFlowsDetails">
+        <link:definition>9955562 - Disclosure - LEASES - Supplemental Cash Flows (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SEVERANCERESTRUCTURINGANDOTHEREMPLOYEECOSTSDetails" roleURI="http://www.nike.com/role/SEVERANCERESTRUCTURINGANDOTHEREMPLOYEECOSTSDetails">
+        <link:definition>9955563 - Disclosure - SEVERANCE, RESTRUCTURING AND OTHER EMPLOYEE COSTS (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SUPPLIERFINANCEPROGRAMSDetails" roleURI="http://www.nike.com/role/SUPPLIERFINANCEPROGRAMSDetails">
+        <link:definition>9955564 - Disclosure - SUPPLIER FINANCE PROGRAMS (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element id="nke_AuditInformationAbstract" abstract="true" name="AuditInformationAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="nke_EarningsPerShareBasicAndDilutedEPSAbstract" abstract="true" name="EarningsPerShareBasicAndDilutedEPSAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="nke_CashPaidDuringPeriodForAbstract" abstract="true" name="CashPaidDuringPeriodForAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="nke_IssuanceOfSharesToEmployeesSharesNetOfSharesWithheldForTaxes" abstract="false" name="IssuanceOfSharesToEmployeesSharesNetOfSharesWithheldForTaxes" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="nke_IssuanceOfSharesToEmployeesValueNetOfSharesWithheldForTaxes" abstract="false" name="IssuanceOfSharesToEmployeesValueNetOfSharesWithheldForTaxes" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_AccruedLiabilitiesDisclosureTextBlock" abstract="false" name="AccruedLiabilitiesDisclosureTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="nke_EmployeeBenefitPlansDisclosureTextBlock" abstract="false" name="EmployeeBenefitPlansDisclosureTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="nke_OperatingOverheadExpensePolicyTextBlock" abstract="false" name="OperatingOverheadExpensePolicyTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="nke_SignificantAccountingPoliciesTable" abstract="true" name="SignificantAccountingPoliciesTable" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType"/>
+  <xs:element id="nke_NIKEBrandMember" abstract="true" name="NIKEBrandMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_ConverseSegmentMember" abstract="true" name="ConverseSegmentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_NorthAmericaSegmentMember" abstract="true" name="NorthAmericaSegmentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_StockIncentivePlanMember" abstract="true" name="StockIncentivePlanMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_SignificantAccountingPoliciesLineItems" abstract="true" name="SignificantAccountingPoliciesLineItems" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="nke_InternationalEmergencyEconomicPowersActExpectedRecoveryOfTariffsPaid" abstract="false" name="InternationalEmergencyEconomicPowersActExpectedRecoveryOfTariffsPaid" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_InternationalEmergencyEconomicPowersActProceedsFromTariffsReceived" abstract="false" name="InternationalEmergencyEconomicPowersActProceedsFromTariffsReceived" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_MachineryEquipmentAndInternalUseSoftwareGrossMember" abstract="true" name="MachineryEquipmentAndInternalUseSoftwareGrossMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_AllowanceForSalesDiscountsAndReturns" abstract="false" name="AllowanceForSalesDiscountsAndReturns" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_AccruedCompensationAndBenefitsExcludingTaxesCurrent" abstract="false" name="AccruedCompensationAndBenefitsExcludingTaxesCurrent" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_CommercialPaperandBondsMember" abstract="true" name="CommercialPaperandBondsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_ReductionInDerivativeLiabilitiesIfNetted" abstract="false" name="ReductionInDerivativeLiabilitiesIfNetted" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_ReductionInDerivativeAssetsIfNetted" abstract="false" name="ReductionInDerivativeAssetsIfNetted" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_RevolvingCreditFacilityOptionToIncreaseUponLenderApprovalMember" abstract="true" name="RevolvingCreditFacilityOptionToIncreaseUponLenderApprovalMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_CommittedCreditFacilityMaturingMarch52027Member" abstract="true" name="CommittedCreditFacilityMaturingMarch52027Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_CommittedCreditFacilityMaturingMarch62026Member" abstract="true" name="CommittedCreditFacilityMaturingMarch62026Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_CommittedCreditFacilityMaturingMarch72030Member" abstract="true" name="CommittedCreditFacilityMaturingMarch72030Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_LineOfCreditFacilityExtensionTerm" abstract="false" name="LineOfCreditFacilityExtensionTerm" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="nke_CorporateBond2.38PercentDueNovember12026Member" abstract="true" name="CorporateBond2.38PercentDueNovember12026Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_CorporateBond2.75PercentDueMarch272027Member" abstract="true" name="CorporateBond2.75PercentDueMarch272027Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_CorporateBond2.85PercentDueMarch272030Member" abstract="true" name="CorporateBond2.85PercentDueMarch272030Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_CorporateBond3.25PercentDueMarch272040Member" abstract="true" name="CorporateBond3.25PercentDueMarch272040Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_CorporateBond3.63PercentDueMay12043Member" abstract="true" name="CorporateBond3.63PercentDueMay12043Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_CorporateBond3.88PercentDueNovember12045Member" abstract="true" name="CorporateBond3.88PercentDueNovember12045Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_CorporateBond3.38PercentDueNovember12046Member" abstract="true" name="CorporateBond3.38PercentDueNovember12046Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_CorporateBond3.38PercentDueMarch272050Member" abstract="true" name="CorporateBond3.38PercentDueMarch272050Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_EffectiveIncomeTaxRateReconciliationWithholdingTaxesAmount" abstract="false" name="EffectiveIncomeTaxRateReconciliationWithholdingTaxesAmount" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_EffectiveIncomeTaxRateReconciliationCrossBorderCurrentSubpartFIncomeAmount" abstract="false" name="EffectiveIncomeTaxRateReconciliationCrossBorderCurrentSubpartFIncomeAmount" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_EffectiveIncomeTaxRateReconciliationCrossBorderDeferredSubpartFIncomeIncludingForeignTaxCreditsAmount" abstract="false" name="EffectiveIncomeTaxRateReconciliationCrossBorderDeferredSubpartFIncomeIncludingForeignTaxCreditsAmount" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_EffectiveIncomeTaxRateReconciliationCrossBorderForeignTaxCreditsAmount" abstract="false" name="EffectiveIncomeTaxRateReconciliationCrossBorderForeignTaxCreditsAmount" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_EffectiveIncomeTaxRateReconciliationWithholdingTaxesPercent" abstract="false" name="EffectiveIncomeTaxRateReconciliationWithholdingTaxesPercent" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="nke_EffectiveIncomeTaxRateReconciliationCrossBorderCurrentSubpartFIncomePercent" abstract="false" name="EffectiveIncomeTaxRateReconciliationCrossBorderCurrentSubpartFIncomePercent" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="nke_EffectiveIncomeTaxRateReconciliationCrossBorderDeferredSubpartFIncomeIncludingForeignTaxCreditsPercent" abstract="false" name="EffectiveIncomeTaxRateReconciliationCrossBorderDeferredSubpartFIncomeIncludingForeignTaxCreditsPercent" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="nke_EffectiveIncomeTaxRateReconciliationCrossBorderForeignTaxCreditsPercent" abstract="false" name="EffectiveIncomeTaxRateReconciliationCrossBorderForeignTaxCreditsPercent" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="nke_EffectiveIncomeTaxRateReconciliationForeignCurrencyLossesPercent" abstract="false" name="EffectiveIncomeTaxRateReconciliationForeignCurrencyLossesPercent" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="nke_EffectiveIncomeTaxRateReconciliationIncomeTaxAuditsAndContingencyReservesPercent" abstract="false" name="EffectiveIncomeTaxRateReconciliationIncomeTaxAuditsAndContingencyReservesPercent" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="nke_OperatingLossCarryforwardsSubjectToExpiration" abstract="false" name="OperatingLossCarryforwardsSubjectToExpiration" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_OperatingLossCarryforwardsNotSubjectToExpiration" abstract="false" name="OperatingLossCarryforwardsNotSubjectToExpiration" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_DeferredTaxAssetsNetTable" abstract="true" name="DeferredTaxAssetsNetTable" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType"/>
+  <xs:element id="nke_DeferredIncomeTaxesAndOtherAssetsNoncurrentMember" abstract="true" name="DeferredIncomeTaxesAndOtherAssetsNoncurrentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_DeferredIncomeTaxesAndOtherLiabilitiesNoncurrentMember" abstract="true" name="DeferredIncomeTaxesAndOtherLiabilitiesNoncurrentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_DeferredTaxAssetsNetLineItems" abstract="true" name="DeferredTaxAssetsNetLineItems" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="nke_DeferredTaxAssetsOperatingLeaseLiabilities" abstract="false" name="DeferredTaxAssetsOperatingLeaseLiabilities" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_DeferredTaxAssetsIntangibleAssets" abstract="false" name="DeferredTaxAssetsIntangibleAssets" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_DeferredTaxAssetsCapitalizedResearchAndDevelopment" abstract="false" name="DeferredTaxAssetsCapitalizedResearchAndDevelopment" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_DeferredTaxAssetsSubpartFDeferredTax" abstract="false" name="DeferredTaxAssetsSubpartFDeferredTax" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_IncomeTaxPaidFederalAfterRefundReceivedTransitionTaxOnRepatriationOfUndistributedEarnings" abstract="false" name="IncomeTaxPaidFederalAfterRefundReceivedTransitionTaxOnRepatriationOfUndistributedEarnings" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_IncomeTaxPaidFederalAfterRefundReceivedEstimatedPaymentsForCertainFederalIncomeTaxMatters" abstract="false" name="IncomeTaxPaidFederalAfterRefundReceivedEstimatedPaymentsForCertainFederalIncomeTaxMatters" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_CommonStockAndShareBasedCompensationTable" abstract="true" name="CommonStockAndShareBasedCompensationTable" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType"/>
+  <xs:element id="nke_RestrictedStockAndRestrictedStockUnitsMember" abstract="true" name="RestrictedStockAndRestrictedStockUnitsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_CommonStockAndShareBasedCompensationLineItems" abstract="true" name="CommonStockAndShareBasedCompensationLineItems" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="nke_CommonStockClassAConversionRatiotoClassB" abstract="false" name="CommonStockClassAConversionRatiotoClassB" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:pureItemType"/>
+  <xs:element id="nke_MinimumTermOfMarketTradedOptionsForEstimatesOfExpectedVolatility" abstract="false" name="MinimumTermOfMarketTradedOptionsForEstimatesOfExpectedVolatility" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="nke_ShareBasedCompensationArrangementByEmployeeStockPurchasePlanStockPurchasesAsPercentageOfEmployeeCompensationMaximum" abstract="false" name="ShareBasedCompensationArrangementByEmployeeStockPurchasePlanStockPurchasesAsPercentageOfEmployeeCompensationMaximum" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="nke_EmployeeStockPurchasePlanOfferingPeriod" abstract="false" name="EmployeeStockPurchasePlanOfferingPeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="nke_DeferredIncomeTaxesAndOtherLongTermAssetsMember" abstract="true" name="DeferredIncomeTaxesAndOtherLongTermAssetsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_DeferredIncomeTaxesAndOtherLongTermLiabilitiesMember" abstract="true" name="DeferredIncomeTaxesAndOtherLongTermLiabilitiesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_ForeignExchangeContractAndEmbeddedDerivativesMember" abstract="true" name="ForeignExchangeContractAndEmbeddedDerivativesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_DemandCreationExpenseMember" abstract="true" name="DemandCreationExpenseMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_OtherIncomeAndExpenseMember" abstract="true" name="OtherIncomeAndExpenseMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_InterestIncomeExpenseNetMember" abstract="true" name="InterestIncomeExpenseNetMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_UndesignatedDerivativeInstrumentMember" abstract="true" name="UndesignatedDerivativeInstrumentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_DerivativesAdditionalPeriodForForecastedTransactionExpectedToOccur" abstract="false" name="DerivativesAdditionalPeriodForForecastedTransactionExpectedToOccur" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="nke_DerivativeInstrumentPeriodInAdvanceOfForecastedTransaction" abstract="false" name="DerivativeInstrumentPeriodInAdvanceOfForecastedTransaction" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="nke_PercentOfAnticipatedExposuresHedged" abstract="false" name="PercentOfAnticipatedExposuresHedged" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="nke_CreditRiskRelatedContingentFeaturesCollateralThreshold" abstract="false" name="CreditRiskRelatedContingentFeaturesCollateralThreshold" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_AccumulatedGainLossNetInvestmentHedgeParentMember" abstract="true" name="AccumulatedGainLossNetInvestmentHedgeParentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_AccumulatedOtherAdjustmentsParentMember" abstract="true" name="AccumulatedOtherAdjustmentsParentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_EuropeMiddleEastAndAfricaSegmentMember" abstract="true" name="EuropeMiddleEastAndAfricaSegmentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_GreaterChinaSegmentMember" abstract="true" name="GreaterChinaSegmentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_AsiaPacificAndLatinAmericaSegmentMember" abstract="true" name="AsiaPacificAndLatinAmericaSegmentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_FootwearMember" abstract="true" name="FootwearMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_ApparelMember" abstract="true" name="ApparelMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_SportingEquipmentMember" abstract="true" name="SportingEquipmentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_SalesChannelWholesaleMember" abstract="true" name="SalesChannelWholesaleMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_SalesChannelOtherMember" abstract="true" name="SalesChannelOtherMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_ProductReturnsEstimatedProductReturns" abstract="false" name="ProductReturnsEstimatedProductReturns" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_EarningsBeforeInterestAndTaxes" abstract="false" name="EarningsBeforeInterestAndTaxes" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nke_NumberOfReportableSegmentsNotDisclosedFlag" abstract="false" name="NumberOfReportableSegmentsNotDisclosedFlag" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="nke_OtherCountriesMember" abstract="true" name="OtherCountriesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nke_LesseeOperatingLeaseLiabilityAgreementsSignedButNotCommencedPaymentsDue" abstract="false" name="LesseeOperatingLeaseLiabilityAgreementsSignedButNotCommencedPaymentsDue" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+</xs:schema>

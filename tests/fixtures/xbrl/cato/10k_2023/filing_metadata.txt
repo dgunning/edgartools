@@ -1,0 +1,6 @@
+Company: CATO CORP
+CIK: 18255
+Form: 10-K
+Filing Date: 2024-03-27
+Accession No: 0001562762-24-000065
+URL: https://www.sec.gov/Archives/edgar/data/18255/0001562762-24-000065-index.html
