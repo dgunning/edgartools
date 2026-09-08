@@ -283,6 +283,22 @@ class FinancialTableExtractor:
                 elif i == 0:  # First column is usually line items
                     line_item_col = i
 
+            if not period_cols and len(headers) > 1:
+                # No header looks like a date, but that does not mean the table
+                # has no data columns. A statement of shareholders' equity is
+                # broken down by equity COMPONENT -- 'Total', 'Retained earnings',
+                # 'Common stock and additional paid-in capital' -- with the period
+                # carried in each row label instead ('Beginning balances at
+                # Sep. 24, 2022'). Requiring a date here selected no columns at
+                # all, so every row was built with an empty value list and the
+                # frame came back with its rows intact and NO columns: Apple's
+                # FY2025 equity statement was (31, 0), and df['Total'] raised
+                # KeyError (bead edgartools-dhbg).
+                #
+                # Everything but the line-item column is data, which is the same
+                # rule the vertical-table branch above already applies.
+                period_cols = [i for i in range(len(headers)) if i != line_item_col]
+
         # Extract data
         data = []
         index = []

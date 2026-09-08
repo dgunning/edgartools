@@ -299,18 +299,27 @@ class TTMCalculator:
         total_available = len(sorted_facts) - 3  # Number of possible TTM windows
         num_to_calculate = min(periods, total_available)
 
+        # A share count or a rate is a level that persists, not a flow that
+        # accumulates, so the trailing-twelve-month figure is the window's average
+        # rather than its total (bead edgartools-djwu).
+        averaged = self._is_window_average_concept(sorted_facts[0]) if sorted_facts else False
+
+        def aggregate(window):
+            total = sum(q.numeric_value for q in window)
+            return total / len(window) if averaged and window else total
+
         # Calculate from most recent backwards
         for offset in range(num_to_calculate):
             i = len(sorted_facts) - 1 - offset
             # TTM window: quarters [i-3, i-2, i-1, i] (4 quarters)
             ttm_window = sorted_facts[i-3:i+1]
-            ttm_value = sum(q.numeric_value for q in ttm_window)
+            ttm_value = aggregate(ttm_window)
 
             # Calculate YoY growth (compare to TTM from 4 quarters ago)
             yoy_growth = None
             if i >= 7:  # Need 8 total quarters for YoY comparison
                 prior_ttm_window = sorted_facts[i-7:i-3]
-                prior_ttm = sum(q.numeric_value for q in prior_ttm_window)
+                prior_ttm = aggregate(prior_ttm_window)
                 # Only calculate YoY for positive prior values (negative = losses)
                 if prior_ttm > 0:
                     yoy_growth = (ttm_value - prior_ttm) / prior_ttm
@@ -455,6 +464,45 @@ class TTMCalculator:
                 filtered.append(fact)
 
         return filtered
+
+    def _is_window_average_concept(self, fact: FinancialFact) -> bool:
+        """Should this concept's TTM value be the window's average rather than its sum?
+
+        This is a DIFFERENT question from `_is_additive_concept`, which asks whether
+        a quarter can be *derived* by subtraction (Q4 = FY - 9M). The two disagree,
+        and reusing that one here would be wrong: it returns False for per-share
+        amounts, but `CommonStockDividendsPerShareDeclared` is a genuine flow --
+        JPMorgan's trailing-twelve-month dividend is the 5.90 it declared over four
+        quarters, not the 1.48 they average to.
+
+        Only two unit types are levels rather than flows:
+
+        * SHARES -- a weighted-average share count already averages within its own
+          quarter, so summing four of them reported roughly four times the shares a
+          company has: Alphabet's Q2 2026 TTM basic count came back 48.5 billion
+          against an actual ~12.1 billion.
+        * RATIO -- a rate cannot be accumulated over time either. Averaging the
+          window is not exactly a twelve-month rate (that would weight each quarter
+          by its base), but it is the right order of magnitude where summing is not.
+          No concept in the measured corpus reaches this path with a ratio unit, so
+          this arm is reasoning rather than measurement.
+
+        Instant facts are not considered: they never reach the TTM rollup, which is
+        fed only duration facts (verified across GOOGL, TSLA, MSFT, JPM and XOM --
+        47 concept/unit combinations, none instant).
+        """
+        if not fact.unit:
+            return False
+
+        from edgar.entity.unit_handling import UnitNormalizer, UnitType
+        norm_unit = UnitNormalizer.normalize_unit(fact.unit)
+
+        # Per-share amounts normalize to CURRENCY, and they are flows -- check the
+        # mapping before the unit type so a dividend per share is not averaged.
+        if norm_unit in UnitNormalizer.PER_SHARE_MAPPINGS:
+            return False
+
+        return UnitNormalizer.get_unit_type(norm_unit) in (UnitType.SHARES, UnitType.RATIO)
 
     def _is_additive_concept(self, fact: FinancialFact) -> bool:
         """Check if a fact represents an additive concept (safe for derivation).

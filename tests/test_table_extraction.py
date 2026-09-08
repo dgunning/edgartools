@@ -105,10 +105,31 @@ def test_nested_tables_do_not_raise():
     assert df is not None
 
 
-def test_a_page_with_no_financial_table_returns_empty():
-    """R6's tables each hold a single "X". Empty is the right answer, and the
-    fix must not manufacture a frame out of them."""
-    assert extract_statement_dataframe((FIXTURES / "R6.htm").read_text(encoding="utf-8")).empty
+def test_a_page_whose_columns_are_equity_components_still_extracts():
+    """R6 is Apple's condensed statement of shareholders' equity, not a junk page.
+
+    This test previously asserted the opposite, on the premise that "R6's tables
+    each hold a single X". R6 holds ELEVEN tables: ten are the SEC's XBRL
+    element-definition expandos, which do each start with an "X", and the first is
+    the statement itself, with real filed values.
+
+    It passed because the extractor kept only columns whose header matched a date,
+    and this statement's columns are equity components ('Total', 'Retained
+    earnings/(Accumulated deficit)') with the period in each row label. That
+    selected no columns, so the frame came back with its 47 rows and none of its
+    columns -- and pandas reports a zero-column frame as `.empty`. The assertion
+    was green because of the defect it should have caught (bead edgartools-dhbg).
+    """
+    df = extract_statement_dataframe((FIXTURES / "R6.htm").read_text(encoding="utf-8"))
+    assert not df.empty
+    assert df.shape == (47, 4)
+    assert list(df.columns)[0] == "Total"
+
+    # Apple's equity at the start of the comparative period, as filed.
+    beginning = df.loc["Beginning balances at Sep. 30, 2023"]
+    assert beginning["Total"] == 62_146_000_000
+    assert beginning["Common stock and additional paid-in capital"] == 73_812_000_000
+    assert beginning["Retained earnings/(Accumulated deficit)"] == -214_000_000
 
 
 def test_extractor_returns_empty_rather_than_raising_on_junk():
