@@ -753,7 +753,7 @@ class RenderedStatement:
                 lines.append("")
 
         # Column header row — right-align numeric columns
-        header = [""] + self.header.columns
+        header = [""] + [_md_cell(column) for column in self.header.columns]
         lines.append("| " + " | ".join(header) + " |")
 
         separator = ["---"] + ["---:" for _ in self.header.columns]
@@ -773,13 +773,14 @@ class RenderedStatement:
                     continue
 
             indent = (NBSP * 2) * row.level
+            row_label = _md_cell(row.label)
 
             if row.is_abstract:
-                label = f"**{indent}{row.label}**"
+                label = f"**{indent}{row_label}**"
             elif row.is_dimension:
-                label = f"*{indent}{row.label}*"
+                label = f"*{indent}{row_label}*"
             else:
-                label = f"{indent}{row.label}"
+                label = f"{indent}{row_label}"
 
             cell_values = []
             for cell in row.cells:
@@ -787,9 +788,9 @@ class RenderedStatement:
                 if cell_value is None or cell_value == "":
                     cell_values.append("")
                 elif isinstance(cell_value, Text):
-                    cell_values.append(str(cell_value))
+                    cell_values.append(_md_cell(str(cell_value)))
                 else:
-                    cell_values.append(cell_value)
+                    cell_values.append(_md_cell(cell_value))
 
             row_data = [label] + cell_values
             lines.append("| " + " | ".join(row_data) + " |")
@@ -806,6 +807,17 @@ class RenderedStatement:
             lines.append(" · ".join(footer_parts))
 
         return "\n".join(lines)
+
+
+def _md_cell(text: Any) -> str:
+    """Make a value safe to place inside a GitHub-Flavored Markdown table cell.
+
+    A filed XBRL label may contain a literal pipe ("... conversion of debt |
+    shares"), which a Markdown parser would read as another column delimiter.
+    Escape it, and fold any embedded newline, which would end the row.
+    """
+    cell = "" if text is None else str(text)
+    return cell.replace("|", r"\|").replace("\r\n", " ").replace("\n", " ").replace("\r", " ")
 
 
 def _format_comparison(pct_change: float, comparison_type: str) -> str:
