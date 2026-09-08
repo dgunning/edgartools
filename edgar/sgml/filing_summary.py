@@ -15,7 +15,11 @@ from rich.text import Text
 
 from edgar.core import DataPager, PagingState, log, strtobool
 from edgar.documents import HTMLParser, ParserConfig
-from edgar.documents.utils.html_utils import create_lxml_parser
+from edgar.documents.utils.html_utils import (
+    create_lxml_parser,
+    text_joined,
+    text_skipping_tables,
+)
 from edgar.richtools import print_rich, repr_rich, rich_to_text
 from edgar.xmltools import child_text, element_text, find_all_elements, find_element, local_name
 from edgar.xmltools import parse_xml as parse_xml_document
@@ -58,52 +62,6 @@ def _first_by_class(element, tag: str, class_name: str):
     """The first match, or None -- bs4's ``find`` semantics."""
     found = _by_class(element, tag, class_name)
     return found[0] if found else None
-
-
-def _joined_text(element) -> str:
-    """bs4's ``get_text(' ', strip=True)``, which lxml has no equivalent for.
-
-    ``text_content()`` is NOT it: that concatenates every descendant string with
-    no separator, so the last word of one node is glued to the first word of the
-    next -- "Note 5Inventories". bs4 strips each string and joins the non-empty
-    ones with the separator, which is what this does.
-    """
-    return ' '.join(chunk.strip() for chunk in element.itertext() if chunk.strip())
-
-
-def _text_outside_tables(cell) -> str:
-    """The cell's narrative lead-in: its text, skipping any nested table.
-
-    bs4 did this by copying the cell, calling decompose() on each nested table
-    and taking get_text of the rest. The obvious lxml translation -- remove the
-    table, splice its tail back on so it is not deleted with it -- is wrong in a
-    way the R-file corpus does not show: splicing MERGES two of bs4's separate
-    strings into one text node, and the separator that get_text(' ') put between
-    them is then never inserted. "Lead-in.<table/>Trailing." came back as
-    "Lead-in.Trailing.". That is the hxtd/2h2s word-gluing family again, arrived
-    at from the opposite direction -- while fixing tail loss.
-
-    So walk instead of mutate, and keep each of bs4's strings a separate chunk.
-    Document order is: an element's own text, then each child's text and tail in
-    turn, which is exactly the order bs4 yielded them in.
-    """
-    chunks: List[str] = []
-
-    def walk(element):
-        if element.text and element.text.strip():
-            chunks.append(element.text.strip())
-        for child in element.iterchildren():
-            tag = child.tag
-            # A table's contents are not narrative. A non-str tag is a comment
-            # or PI, which bs4's get_text skipped too -- but its tail is real
-            # text either way.
-            if isinstance(tag, str) and tag.lower() != 'table':
-                walk(child)
-            if child.tail and child.tail.strip():
-                chunks.append(child.tail.strip())
-
-    walk(cell)
-    return ' '.join(chunks)
 
 
 class Reports:
@@ -424,12 +382,12 @@ class Report:
                 continue
 
             label_td = _first_by_class(tr, 'td', 'pl')
-            label = _joined_text(label_td) if label_td is not None else None
+            label = text_joined(label_td) if label_td is not None else None
             if label:
                 renderables.append(Text(label, style="bold cyan"))
 
             # Narrative lead-in: everything in the cell that is not inside a table
-            narrative = _text_outside_tables(text_td)
+            narrative = text_skipping_tables(text_td)
             if narrative:
                 renderables.append(Text(narrative))
 

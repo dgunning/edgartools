@@ -147,7 +147,7 @@ def test_narrative_text_skips_tables_without_gluing_words(name, inner, expected)
     html = f'<table class="report"><tr><td class="text">{inner}</td></tr></table>'
     root = filing_summary._parse_report_html(html)
     cell = filing_summary._first_by_class(root, "td", "text")
-    assert filing_summary._text_outside_tables(cell) == expected
+    assert filing_summary.text_skipping_tables(cell) == expected
 
 
 def test_joined_text_separates_what_text_content_would_glue():
@@ -159,7 +159,7 @@ def test_joined_text_separates_what_text_content_would_glue():
         '<table><tr><td class="pl"><span>Note 5</span><span>Inventories</span></td></tr></table>')
     cell = filing_summary._first_by_class(root, "td", "pl")
     assert cell.text_content() == "Note 5Inventories"      # what NOT to use
-    assert filing_summary._joined_text(cell) == "Note 5 Inventories"
+    assert filing_summary.text_joined(cell) == "Note 5 Inventories"
 
 
 def test_a_class_is_matched_by_token_not_by_substring():
@@ -170,7 +170,7 @@ def test_a_class_is_matched_by_token_not_by_substring():
         '<td class="textbox">no</td><td class="text foo">yes</td>'
         '</tr></table>')
     found = filing_summary._by_class(root, "td", "text")
-    assert [filing_summary._joined_text(td) for td in found] == ["yes"]
+    assert [filing_summary.text_joined(td) for td in found] == ["yes"]
 
 
 def test_serializing_a_cell_does_not_swallow_the_next_cell():

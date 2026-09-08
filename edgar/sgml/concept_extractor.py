@@ -28,7 +28,7 @@ import lxml.html
 from lxml.etree import ParserError, strip_elements
 from lxml.html import HtmlElement
 
-from edgar.documents.utils.html_utils import create_lxml_parser
+from edgar.documents.utils.html_utils import create_lxml_parser, text_stripped
 
 __all__ = ['ConceptRow', 'ConceptReport', 'extract_concepts_from_report', 'parse_numeric']
 
@@ -73,17 +73,6 @@ def _classes(el: HtmlElement) -> List[str]:
     ``'tl' in classes`` test a token test rather than a substring test.
     """
     return (el.get('class') or '').split()
-
-
-def _text_stripped(el: HtmlElement) -> str:
-    """``el.get_text(strip=True)`` as bs4 computed it.
-
-    Each string is stripped independently and the results are joined with
-    nothing between them. This is NOT ``text_content()``, which strips
-    nothing -- see the note in the 40-F reader for the third variant.
-    Comments contribute no text, in either library.
-    """
-    return ''.join(t.strip() for t in el.itertext())
 
 
 def _child_nodes(el: HtmlElement) -> List[Union[str, HtmlElement]]:
@@ -267,8 +256,8 @@ def _extract_label(td: HtmlElement) -> str:
     """Extract the display label text from a label cell."""
     a_tag = td.find('.//a')
     if a_tag is not None:
-        return _text_stripped(a_tag)
-    return _text_stripped(td)
+        return text_stripped(a_tag)
+    return text_stripped(td)
 
 
 def _is_abstract_row(td: HtmlElement, value_cells: List[HtmlElement]) -> bool:
@@ -286,7 +275,7 @@ def _is_abstract_row(td: HtmlElement, value_cells: List[HtmlElement]) -> bool:
 
 def _extract_value(td: HtmlElement) -> str:
     """Extract the display value from a value cell, preserving sign indicators."""
-    text = _text_stripped(td)
+    text = text_stripped(td)
     # Clean up common HTML entities
     text = text.replace('\xa0', '').replace('\u200b', '')
     return text if text else ''
@@ -296,8 +285,8 @@ def _th_text(th: HtmlElement) -> str:
     """Extract the visible text from a header <th> cell."""
     div = th.find('.//div')
     if div is not None:
-        return _text_stripped(div)
-    return _text_stripped(th)
+        return text_stripped(div)
+    return text_stripped(th)
 
 
 def _build_header_grid(

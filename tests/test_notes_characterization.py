@@ -133,7 +133,7 @@ def test_text_outside_tables_does_not_glue_words(name, html, expected):
     strings. Removing the table and splicing its tail onto the previous sibling
     -- the obvious way to stop lxml deleting that tail -- merges them into one
     string, and the separator never appears. Both `spaced` cases fail then."""
-    assert notes._text_skipping_tables(notes._parse_note_html(html)) == expected
+    assert notes.text_skipping_tables(notes._parse_note_html(html)) == expected
 
 
 @pytest.mark.parametrize("name,html,expected", [
@@ -188,7 +188,7 @@ def test_cell_text_strips_each_string_and_joins_with_nothing(html, expected):
     'NetSales' is what bs4 produced, so it is what the port must produce."""
     root = notes._parse_note_html(html)
     cells = root.xpath(".//td | .//th")
-    assert [notes._joined_cell_text(c) for c in cells] == expected
+    assert [notes.text_stripped(c) for c in cells] == expected
 
 
 def test_unparseable_content_returns_none_rather_than_raising():
