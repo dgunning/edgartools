@@ -120,8 +120,10 @@ Only parallelize fast tests to avoid SEC rate limits.
 
 **Never edit `CHANGELOG.md` in a PR** — concurrent PRs conflict on it. Add a fragment
 `changelog.d/<bead-or-issue-id>.<section>.md` (section: added/changed/fixed/...) with the
-bullet text; see `changelog.d/README.md`. Fragments are folded into `[Unreleased]` at release
-by `scripts/release/assemble_changelog.py`.
+bullet text; see `changelog.d/README.md`. A bullet is a bold headline plus one or two sentences
+with one measured value, **at most 500 characters** — the root cause goes in the commit and PR.
+Fragments are folded into `[Unreleased]` at release by `scripts/release/assemble_changelog.py`.
+Write `Fixes #N` in the PR body so the merge closes the GitHub issue.
 
 ## Version
 

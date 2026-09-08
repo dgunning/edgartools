@@ -32,6 +32,9 @@ FRAGMENT_DIR = ROOT / "changelog.d"
 # Order the sections appear in under [Unreleased].
 SECTIONS = ["Added", "Changed", "Deprecated", "Removed", "Fixed", "Security", "Performance"]
 FRAGMENT_NAME = re.compile(r"^(?P<id>[^.]+)\.(?P<section>[a-z]+)\.md$")
+# A bullet is a bold headline plus one or two sentences with one measured value.
+# The root-cause narrative belongs in the commit and the PR, not here.
+MAX_FRAGMENT_CHARS = 500
 
 
 def _commit_time(path: Path) -> int:
@@ -61,11 +64,14 @@ def load_fragments() -> dict[str, list[tuple[Path, str]]]:
             continue
         if body.startswith("- "):
             body = body[2:]
+        if len(body) > MAX_FRAGMENT_CHARS:
+            bad.append(f"{path.name} ({len(body)} chars, limit {MAX_FRAGMENT_CHARS})")
+            continue
         by_section[section].append((path, "- " + body))
     if bad:
         sys.exit(
-            "Bad changelog fragments (expected <id>.<section>.md with a non-empty body, "
-            f"section in {[s.lower() for s in SECTIONS]}): {', '.join(bad)}"
+            "Bad changelog fragments (expected <id>.<section>.md with a non-empty body of at most "
+            f"{MAX_FRAGMENT_CHARS} chars, section in {[s.lower() for s in SECTIONS]}): {', '.join(bad)}"
         )
     # Newest at the top of each section, matching the hand-written convention.
     # Uncommitted fragments (time 0) sort last, which is fine for --check.
