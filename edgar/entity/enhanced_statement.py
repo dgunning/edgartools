@@ -1126,13 +1126,23 @@ class MultiPeriodItem:
         value = self.values.get(period)
 
         if value is not None:
-            # Check if this is a per-share amount
-            is_per_share = any(indicator in self.concept.lower() or indicator in self.label.lower()
-                             for indicator in ['pershare', 'per share', 'earnings per', 'eps'])
+            # What this line item IS decides how it formats. Both predicates live in
+            # edgar.entity.unit_handling, shared with the TTM renderer -- they were
+            # duplicated, and neither copy knew about share counts, so a count of
+            # shares took the currency path (bead edgartools-djwu).
+            from edgar.entity.unit_handling import is_per_share_label, is_share_count_label
 
-            if is_per_share:
+            if is_per_share_label(self.concept, self.label):
                 # Format per-share amounts with 2 decimal places, no dollar sign
                 return f"{value:.2f}"
+            elif is_share_count_label(self.concept, self.label):
+                # A count of shares is not an amount of money.
+                if abs(value) >= 1_000_000_000:
+                    return f"{value/1_000_000_000:.1f}B shares"
+                elif abs(value) >= 1_000_000:
+                    return f"{value/1_000_000:.1f}M shares"
+                else:
+                    return f"{value:,.0f} shares"
             elif concise_format:
                 # Use concise format ($1.0B, $1.0M, etc.)
                 if abs(value) >= 1_000_000_000:
