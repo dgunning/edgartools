@@ -48,16 +48,16 @@ equivalent the moment that join gained a separator.
 The real page killed 6 of the 18 on its own. The other 11 needed an edge input.
 """
 import json
-import pathlib
 
 import pytest
 
 import edgar.funds.reference as reference
 from edgar.funds.reference import _find_latest_fund_data_url
+from tests.paths import REPO_ROOT
 
 pytestmark = pytest.mark.fast
 
-REPO = pathlib.Path(__file__).parent.parent
+REPO = REPO_ROOT
 FIX = REPO / "tests" / "fixtures"
 BASELINE = FIX / "fund_listing_baseline.json"
 LISTING = FIX / "funds" / "sec_fund_series_class_listing.html"

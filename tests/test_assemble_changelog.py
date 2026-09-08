@@ -5,9 +5,11 @@ from pathlib import Path
 
 import pytest
 
+from tests.paths import REPO_ROOT
+
 pytestmark = pytest.mark.fast
 
-SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "release" / "assemble_changelog.py"
+SCRIPT = REPO_ROOT / "scripts" / "release" / "assemble_changelog.py"
 spec = importlib.util.spec_from_file_location("assemble_changelog", SCRIPT)
 mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)

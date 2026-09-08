@@ -18,9 +18,9 @@ from lxml import etree
 
 from edgar.funds.twentyfourf import FundClassFee, FundFeeNotice, SeriesInfo
 from edgar.xmlfiling import _element_to_dict, _strip_namespaces
+from tests.paths import FIXTURES_DIR
 
-
-FIXTURES = Path(__file__).parent / "fixtures" / "funds" / "twentyfourf"
+FIXTURES = FIXTURES_DIR / "funds" / "twentyfourf"
 SINGLE_BLOCK_XML = FIXTURES / "single_block_advisors_inner_circle.xml"
 MULTI_BLOCK_XML = FIXTURES / "multi_block_bny_mellon_research_growth.xml"
 

@@ -1,11 +1,13 @@
 """
 Tests for Form 10-D Asset-Backed Securities Distribution Report.
 """
-import pytest
 from datetime import date
 
+import pytest
+
 from edgar.abs import TenD
-from edgar.abs.ten_d import ABSType, ABSEntity, DistributionPeriod
+from edgar.abs.ten_d import ABSEntity, ABSType, DistributionPeriod
+from tests.paths import REPO_ROOT
 
 
 class TestTenDDataclasses:
@@ -324,7 +326,7 @@ class TestCMBSAssetDataStandalone:
     def sample_xml(self):
         """Load sample CMBS XML from data directory."""
         import os
-        xml_path = os.path.join(os.path.dirname(__file__), '..', 'data', '10-D', 'exh_102.xml')
+        xml_path = REPO_ROOT / 'data' / '10-D' / 'exh_102.xml'
         if os.path.exists(xml_path):
             with open(xml_path, 'r') as f:
                 return f.read()

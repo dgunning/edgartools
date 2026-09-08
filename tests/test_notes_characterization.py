@@ -42,10 +42,11 @@ import lxml.html
 import pytest
 
 import edgar.xbrl.notes as notes
+from tests.paths import REPO_ROOT
 
 pytestmark = pytest.mark.fast
 
-REPO = pathlib.Path(__file__).parent.parent
+REPO = REPO_ROOT
 CORPUS = REPO / "tests" / "fixtures" / "notes_html"
 BASELINE = CORPUS / "notes_output_baseline.json"
 

@@ -1,13 +1,13 @@
-from pathlib import Path
 
 import pytest
 
 from edgar.npx import NPX, ProxyVotes
 from edgar.npx.parsing import PrimaryDocExtractor, ProxyVoteTableExtractor
+from tests.paths import REPO_ROOT
 
 # Define the path to the sample files
 SAMPLE_FILES_DIR = (
-    Path(__file__).parent.parent / "data" / "NPX" / "EDGAR Form N-PX XML Samples"
+    REPO_ROOT / "data" / "NPX" / "EDGAR Form N-PX XML Samples"
 )
 
 

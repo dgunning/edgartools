@@ -15,13 +15,14 @@ exist over the network, and the local HTTP cache serves before a cassette, so a
 cassette-driven gate proves nothing about CI.
 """
 import json
-import pathlib
 
 import pytest
 
+from tests.paths import REPO_ROOT
+
 pytestmark = pytest.mark.fast
 
-REPO = pathlib.Path(__file__).parent.parent
+REPO = REPO_ROOT
 PAGES = REPO / "tests" / "fixtures" / "funds_company_pages"
 BASELINE = REPO / "tests" / "fixtures" / "funds_company_info_baseline.json"
 

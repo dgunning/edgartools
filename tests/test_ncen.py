@@ -6,7 +6,6 @@ Ground truth filings:
   - ETF: AB Active ETFs, Inc. (accession 0001410368-26-010918)
 """
 from decimal import Decimal
-from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -27,11 +26,11 @@ from edgar.funds.ncen import (
     SignatureInfo,
 )
 from tests._offline_filings import offline_filing
+from tests.paths import CASSETTES_DIR
 
 # Mark all tests in this module as network tests
 pytestmark = pytest.mark.network
 
-CASSETTES_DIR = Path(__file__).parent / "cassettes"
 my_vcr = vcr.VCR(
     cassette_library_dir=str(CASSETTES_DIR),
     record_mode="once",

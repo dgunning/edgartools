@@ -3,14 +3,16 @@ Tests for Cross Reference Index parser.
 """
 
 import pytest
+
 from edgar import Filing
 from edgar.documents.cross_reference_index import (
     CrossReferenceIndex,
-    PageRange,
     IndexEntry,
+    PageRange,
     detect_cross_reference_index,
-    parse_cross_reference_index
+    parse_cross_reference_index,
 )
+from tests.paths import DATA_DIR
 
 
 class TestPageRange:
@@ -85,12 +87,8 @@ class TestCrossReferenceIndex:
     @pytest.fixture
     def ge_sample_html(self):
         """Load GE Cross Reference Index sample."""
-        import os
-        sample_path = os.path.join(
-            os.path.dirname(__file__),
-            'data/cross_reference_index/ge_10k_cross_reference_sample.html'
-        )
-        if os.path.exists(sample_path):
+        sample_path = DATA_DIR / 'cross_reference_index' / 'ge_10k_cross_reference_sample.html'
+        if sample_path.exists():
             with open(sample_path, 'r') as f:
                 return f.read()
         return None
@@ -220,7 +218,6 @@ class TestConvenienceFunctions:
     @pytest.mark.network
     def test_detect_cross_reference_index(self):
         """Test detect_cross_reference_index function."""
-        from edgar import find
 
         # Use specific filing to ensure consistent structure
         filing = Filing(form='10-K', filing_date='2026-01-29', company='GENERAL ELECTRIC CO', cik=40545, accession_no='0000040545-26-000008')

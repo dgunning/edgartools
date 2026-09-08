@@ -19,15 +19,15 @@ raises ``IndexError`` on it -- see the test at the bottom, which pins that as it
 currently is rather than as it should be.
 """
 import json
-import pathlib
 
 import pytest
 
 from edgar.headers import IndexHeaders
+from tests.paths import REPO_ROOT
 
 pytestmark = pytest.mark.fast
 
-REPO = pathlib.Path(__file__).parent.parent
+REPO = REPO_ROOT
 HEADER_DIR = REPO / "data" / "headers"
 BASELINE = REPO / "tests" / "fixtures" / "headers" / "index_headers_baseline.json"
 

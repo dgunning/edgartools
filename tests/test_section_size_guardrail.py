@@ -7,7 +7,6 @@ attaching a human-readable warning and reducing confidence, instead of returning
 wrong content at 0.95 confidence (the GS/Citi silent-failure class).
 """
 import json
-from pathlib import Path
 
 import pytest
 
@@ -19,9 +18,10 @@ from edgar.documents.section_size_bands import (
     is_cross_reference,
     is_undersize,
 )
+from tests.paths import FIXTURES_DIR
 
-HTML_ROOT = Path(__file__).parent / "fixtures" / "html"
-CORPUS_BANDS = Path(__file__).parent / "fixtures" / "parser_corpus" / "size_bands.json"
+HTML_ROOT = FIXTURES_DIR / "html"
+CORPUS_BANDS = FIXTURES_DIR / "parser_corpus" / "size_bands.json"
 
 
 # ---------------------------------------------------------------------------

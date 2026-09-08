@@ -41,10 +41,11 @@ import pytest
 import edgar.sgml.filing_summary as filing_summary
 from edgar.richtools import rich_to_text
 from edgar.sgml.filing_summary import Report
+from tests.paths import REPO_ROOT
 
 pytestmark = pytest.mark.fast
 
-REPO = pathlib.Path(__file__).parent.parent
+REPO = REPO_ROOT
 RFILES = REPO / "tests" / "fixtures" / "attachments" / "aapl" / "20250329"
 BASELINE = REPO / "tests" / "fixtures" / "filing_summary" / "report_render_baseline.json"
 

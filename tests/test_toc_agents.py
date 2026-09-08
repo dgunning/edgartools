@@ -5,8 +5,9 @@ Tests each agent-specific parser with representative HTML snippets
 and verifies the generic fallback still works for unknown agents.
 """
 import pytest
-from edgar.documents.utils.toc_analyzer import TOCAnalyzer
 
+from edgar.documents.utils.toc_analyzer import TOCAnalyzer
+from tests.paths import FIXTURES_DIR
 
 # --- Minimal HTML snippets per agent ---
 
@@ -557,10 +558,9 @@ class TestGoldmanSachsSections:
     GS_FIXTURE = "gs/10k/gs-10-k-2025-02-27.html"
 
     def _sections(self):
-        from pathlib import Path
         from edgar.documents import parse_html
         from edgar.documents.config import ParserConfig
-        root = Path(__file__).parent / "fixtures" / "html"
+        root = FIXTURES_DIR / "html"
         path = root / self.GS_FIXTURE
         if not path.exists():
             pytest.skip(f"GS fixture not available: {path}")
@@ -643,10 +643,9 @@ class TestTenQGroundTruth:
     """Ground-truth keys/content from real 10-Q fixtures (edgartools-3usf)."""
 
     def _sections(self, ticker, fixture):
-        from pathlib import Path
         from edgar.documents import parse_html
         from edgar.documents.config import ParserConfig
-        path = Path(__file__).parent / "fixtures" / "html" / fixture
+        path = FIXTURES_DIR / "html" / fixture
         if not path.exists():
             pytest.skip(f"{ticker} 10-Q fixture not available: {path}")
         return parse_html(path.read_text(), ParserConfig(form="10-Q")).sections
@@ -674,10 +673,9 @@ class TestCaterpillarItem1D:
     Item 1D — a legitimate non-standard suffix the recognizer must accept."""
 
     def test_cat_item_1d_is_canonical_and_correct(self):
-        from pathlib import Path
         from edgar.documents import parse_html
         from edgar.documents.config import ParserConfig
-        path = Path(__file__).parent / "fixtures" / "html" / "cat/10k/cat-10-k-2025-02-14.html"
+        path = FIXTURES_DIR / "html" / "cat/10k/cat-10-k-2025-02-14.html"
         if not path.exists():
             pytest.skip(f"cat 10-K fixture not available: {path}")
         secs = parse_html(path.read_text(), ParserConfig(form="10-K")).sections
@@ -715,8 +713,8 @@ class TestSilentFailureObservability:
     def test_no_blanket_silent_except(self):
         """Guard: no 'except Exception:' in the analyzer is immediately followed by
         a bare 'pass' — every catch logs or is a narrowed typed catch."""
-        import re
         from pathlib import Path
+
         import edgar.documents.utils.toc_analyzer as mod
         src = Path(mod.__file__).read_text().splitlines()
         offenders = [i + 1 for i, line in enumerate(src)

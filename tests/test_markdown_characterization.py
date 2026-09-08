@@ -40,15 +40,15 @@ does three things none of the earlier ports did:
 all appear too.
 """
 import json
-import pathlib
 
 import pytest
 
 from edgar.markdown import process_content
+from tests.paths import REPO_ROOT
 
 pytestmark = pytest.mark.fast
 
-REPO = pathlib.Path(__file__).parent.parent
+REPO = REPO_ROOT
 FIX = REPO / "tests" / "fixtures"
 NOTES = FIX / "notes_html"
 GOLDEN = FIX / "markdown_golden"

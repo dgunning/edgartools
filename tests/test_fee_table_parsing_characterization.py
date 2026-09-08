@@ -62,7 +62,6 @@ the amount, an inner table inside the Total row's label cell, a `$` cell
 followed by a `<th>` holding the number, and rows inside a `<tbody>`.
 """
 import json
-import pathlib
 
 import pytest
 
@@ -70,10 +69,11 @@ from edgar.offerings.prospectus._fee_table.parsing import (
     _parse_fee_table_html,
     _parse_inline_fee_table,
 )
+from tests.paths import REPO_ROOT
 
 pytestmark = pytest.mark.fast
 
-REPO = pathlib.Path(__file__).parent.parent
+REPO = REPO_ROOT
 FIX = REPO / "tests" / "fixtures"
 BASELINE = FIX / "fee_table_parsing_baseline.json"
 CORPUS = FIX / "fee_tables"

@@ -12,25 +12,21 @@ This script tests the new StatementType enum functionality to ensure:
 """
 
 import sys
-from pathlib import Path
+
 import pytest
 
-# Add project root to path for testing
-project_root = Path(__file__).parent.parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
-
 from edgar.enums import (
-    StatementType,
-    StatementInput,
-    validate_statement_type,
-    ValidationError,
-    PRIMARY_STATEMENTS,
-    COMPREHENSIVE_STATEMENTS, 
+    ALL_STATEMENTS,
     ANALYTICAL_STATEMENTS,
+    COMPREHENSIVE_STATEMENTS,
+    PRIMARY_STATEMENTS,
     SPECIALIZED_STATEMENTS,
-    ALL_STATEMENTS
+    StatementInput,
+    StatementType,
+    ValidationError,
+    validate_statement_type,
 )
+
 
 @pytest.mark.fast
 def test_statement_type_enum():

@@ -4,17 +4,17 @@ Tests for the FilingViewer — SEC Interactive Data Viewer equivalent.
 Unit tests use AAPL 10-Q fixtures (no network).
 Integration tests use VCR cassettes.
 """
-import pytest
-from pathlib import Path
 from unittest.mock import MagicMock
 
-from edgar.sgml.metalinks import MetaLinks
-from edgar.sgml.concept_extractor import extract_concepts_from_report
-from edgar.sgml.filing_summary import FilingSummary, Report
-from edgar.xbrl.viewer import FilingViewer, ViewerReport
-from edgar.xbrl.concept_graph import Concept
+import pytest
 
-FIXTURE_DIR = Path(__file__).parent / "fixtures" / "attachments" / "aapl" / "20250329"
+from edgar.sgml.filing_summary import Report
+from edgar.sgml.metalinks import MetaLinks
+from edgar.xbrl.concept_graph import Concept
+from edgar.xbrl.viewer import FilingViewer, ViewerReport
+from tests.paths import FIXTURES_DIR
+
+FIXTURE_DIR = FIXTURES_DIR / "attachments" / "aapl" / "20250329"
 
 
 def _make_mock_report(html_file_name: str, short_name: str, category: str,

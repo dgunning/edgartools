@@ -8,31 +8,29 @@ Tests use both synthetic tar fixtures (backward compat) and the real
 import json
 import tarfile
 from io import BytesIO
-from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 
 import edgar.storage.datamule.storage as _storage_mod
-from edgar.storage.datamule.storage import (
-    use_datamule_storage,
-    is_using_datamule_storage,
-    get_datamule_filing,
-    _normalize_accession,
-)
-from edgar.storage.datamule.metadata import (
-    filing_header_from_metadata,
-    filing_args_from_metadata,
-)
 from edgar.storage.datamule.documents import TarSGMLDocument
-from edgar.storage.datamule.reader import load_filing_from_tar, _infer_doc_type, _get_prefix
-
+from edgar.storage.datamule.metadata import (
+    filing_args_from_metadata,
+    filing_header_from_metadata,
+)
+from edgar.storage.datamule.reader import _get_prefix, _infer_doc_type, load_filing_from_tar
+from edgar.storage.datamule.storage import (
+    _normalize_accession,
+    get_datamule_filing,
+    is_using_datamule_storage,
+    use_datamule_storage,
+)
+from tests.paths import TESTS_DIR
 
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 
-REAL_TAR_PATH = Path(__file__).parent / 'fixtures' / 'datamule_tars' / '000143774924000106.tar'
+REAL_TAR_PATH = TESTS_DIR / 'fixtures' / 'datamule_tars' / '000143774924000106.tar'
 
 # Flat snake_case metadata (original synthetic format for backward-compat tests)
 SAMPLE_METADATA = {

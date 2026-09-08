@@ -19,7 +19,6 @@ Two fixtures, deliberately:
 No network: `download_file` is patched, which is also what keeps `list_forms`'s
 `lru_cache` honest — it is cleared around every test here.
 """
-from pathlib import Path
 from unittest.mock import patch
 
 import pandas as pd
@@ -27,8 +26,9 @@ import pytest
 
 from edgar.config import SEC_BASE_URL
 from edgar.forms import SecForm, SecForms, list_forms
+from tests.paths import FIXTURES_DIR
 
-FIXTURES = Path(__file__).parent / "fixtures" / "forms"
+FIXTURES = FIXTURES_DIR / "forms"
 PAGE_0 = (FIXTURES / "sec_forms_page0.html").read_bytes()
 
 # A page with a well-formed but empty table, standing in for pages 1-6.

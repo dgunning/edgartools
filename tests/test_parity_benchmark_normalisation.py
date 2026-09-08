@@ -18,12 +18,13 @@ exercises it end-to-end but takes ~150s and lives in the slow lane, so a
 normalisation bug could not fail fast. A measurement harness that is wrong is
 worse than no harness, because its output is trusted and acted on.
 """
-import pathlib
 import sys
 
 import pytest
 
-sys.path.insert(0, str(pathlib.Path(__file__).parent / "fixtures" / "parser_corpus"))
+from tests.paths import FIXTURES_DIR
+
+sys.path.insert(0, str(FIXTURES_DIR / "parser_corpus"))
 import parity_benchmark  # noqa: E402
 
 normalise_new = parity_benchmark.normalise_new

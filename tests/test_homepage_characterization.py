@@ -31,10 +31,11 @@ import pathlib
 import pytest
 
 from edgar.attachments import Attachments, FilingHomepage, parse_homepage_html
+from tests.paths import REPO_ROOT
 
 pytestmark = pytest.mark.fast
 
-REPO = pathlib.Path(__file__).parent.parent
+REPO = REPO_ROOT
 HOMEPAGE_DIR = REPO / "tests" / "fixtures" / "homepages"
 BASELINE = HOMEPAGE_DIR / "homepage_baseline.json"
 

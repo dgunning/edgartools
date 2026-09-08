@@ -42,16 +42,16 @@ They are asserted explicitly at the bottom, so a future parser change that
 moves either one is a test failure rather than a surprise.
 """
 import json
-import pathlib
 from dataclasses import asdict
 
 import pytest
 
 from edgar.sgml.concept_extractor import extract_concepts_from_report
+from tests.paths import REPO_ROOT
 
 pytestmark = pytest.mark.fast
 
-REPO = pathlib.Path(__file__).parent.parent
+REPO = REPO_ROOT
 FIX = REPO / "tests" / "fixtures"
 BASELINE = FIX / "concept_extractor_baseline.json"
 CORPUS = sorted(

@@ -53,11 +53,12 @@ asserts something that cannot pass vacuously. A rule with a 100% false-positive
 rate teaches people to silence it.
 """
 import ast
-import pathlib
 
 import pytest
 
-TESTS_DIR = pathlib.Path(__file__).parent
+from tests.paths import TESTS_DIR
+
+TESTS_DIR = TESTS_DIR
 REGRESSION_DIR = TESTS_DIR / "issues" / "regression"
 
 # Tests whose only assertions are `x is not None`. The list started at 15 on

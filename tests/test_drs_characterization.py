@@ -34,15 +34,15 @@ longer than a six-line port deserves:
 """
 import hashlib
 import json
-import pathlib
 
 import pytest
 
 from edgar.offerings.prospectus.drs import _detect_underlying_form, _html_to_text
+from tests.paths import REPO_ROOT
 
 pytestmark = pytest.mark.fast
 
-REPO = pathlib.Path(__file__).parent.parent
+REPO = REPO_ROOT
 FIX = REPO / "tests" / "fixtures"
 BASELINE = FIX / "drs_baseline.json"
 

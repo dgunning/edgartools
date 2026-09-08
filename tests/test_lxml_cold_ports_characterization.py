@@ -32,7 +32,6 @@ bs4's `find("table")` matched it either way. The committed
 which is how it was caught.
 """
 import json
-import pathlib
 from unittest.mock import patch
 
 import pytest
@@ -41,10 +40,11 @@ import edgar.storage._local as local_storage
 from edgar.company_reports.forty_f import _html_to_text
 from edgar.company_reports.subsidiaries import parse_subsidiaries
 from edgar.forms import list_forms
+from tests.paths import REPO_ROOT
 
 pytestmark = pytest.mark.fast
 
-REPO = pathlib.Path(__file__).parent.parent
+REPO = REPO_ROOT
 FIX = REPO / "tests" / "fixtures"
 BASELINE = FIX / "lxml_cold_ports_baseline.json"
 EX21 = sorted(FIX.glob("ex21_*.html"))

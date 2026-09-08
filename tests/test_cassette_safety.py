@@ -22,7 +22,9 @@ from pathlib import Path
 import pytest
 import yaml
 
-SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "check_cassettes.py"
+from tests.paths import REPO_ROOT
+
+SCRIPT = REPO_ROOT / "scripts" / "check_cassettes.py"
 
 # Every spelling below is accepted by vcrpy's loader and constructs a Python
 # object. Only the first contains the literal string "!!python/".
@@ -96,7 +98,7 @@ def test_gate_fails_closed_on_an_unparseable_cassette(tmp_path):
 @pytest.mark.fast
 def test_committed_cassettes_pass_the_gate():
     """The corpus in the repo must stay clean — this is the check CI runs."""
-    result = _run_gate(Path(__file__).resolve().parents[1] / "tests" / "cassettes")
+    result = _run_gate(REPO_ROOT / "tests" / "cassettes")
 
     assert result.returncode == 0, (
         f"a committed cassette carries a disallowed tag:\n{result.stderr}"

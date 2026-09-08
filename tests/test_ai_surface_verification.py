@@ -7,16 +7,17 @@ Follows the Verification Constitution:
 - Solvability (skills are discoverable and well-formed)
 """
 
+
 import pytest
 import yaml
-from pathlib import Path
 
+from tests.paths import REPO_ROOT
 
 # ============================================================================
 # Skill YAML Validity — all skill files parse and have required fields
 # ============================================================================
 
-SKILLS_ROOT = Path(__file__).parent.parent / "edgar" / "ai" / "skills"
+SKILLS_ROOT = REPO_ROOT / "edgar" / "ai" / "skills"
 
 # Collect all skill.yaml files
 SKILL_YAML_FILES = sorted(SKILLS_ROOT.glob("**/skill.yaml"))

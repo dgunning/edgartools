@@ -45,7 +45,6 @@ TWO BUGS THIS FILE WAS WRITTEN AFTER, both of which produced plausible numbers:
     its size cap alone. Chunk counts and recall both looked fine; only counting
     chunks that carry a heading exposed it.
 """
-import pathlib
 import re
 
 import pytest
@@ -56,8 +55,9 @@ from edgar.documents.extractors.chunk_extractor import (
     StructuralChunker,
     chunk_html,
 )
+from tests.paths import FIXTURES_DIR
 
-FIXTURES = pathlib.Path(__file__).parent / "fixtures"
+FIXTURES = FIXTURES_DIR
 # Tracked fixtures. The era corpus this was measured on is gitignored, and
 # anchoring only on that would make this file skip in CI while passing locally.
 MODERN_10K = FIXTURES / "parity_gate" / "10-K" / "0001376474-16-000635.html"
