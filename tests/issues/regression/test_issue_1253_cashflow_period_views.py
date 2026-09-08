@@ -21,7 +21,17 @@ import pytest
 from edgar.xbrl import XBRL
 
 DATA = Path(__file__).resolve().parents[3] / "data" / "xbrl" / "datafiles"
-FIXTURES = ["aapl", "aeon", "aes", "gahc", "msft", "nflx", "tsla", "unp"]
+
+# Not every directory under data/xbrl/datafiles is committed -- `aes` is
+# present locally and untracked, so naming the eight by hand passed here and
+# failed in CI. Read what the checkout actually has, and assert below that it
+# is enough for the sweep to mean something.
+FIXTURES = sorted(path.name for path in DATA.iterdir()
+                  if path.is_dir() and any(path.glob("*_pre.xml")))
+
+
+def test_the_fixture_sweep_is_not_empty():
+    assert len(FIXTURES) >= 5, f"too few committed XBRL fixtures to sweep: {FIXTURES}"
 
 
 @pytest.mark.parametrize("fixture", FIXTURES)
