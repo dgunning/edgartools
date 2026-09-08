@@ -116,6 +116,40 @@ def _capture_sgml_period_of_report(xbrl: "XBRL", filing) -> None:
         )
 
 
+# Members that aggregate other members of the same axis, rather than being a
+# disjoint part of the breakdown. Adding one of these to its own components
+# double-counts them.
+#
+# 'Total' in the local name catches the issuer's own total member, which is how
+# filers usually spell it (Disney files
+# dis:TotalexcludingredeemablenoncontrollinginterestMember). The named members
+# are the standard aggregates whose names do not say so: ParentMember is equity
+# attributable to the parent, i.e. every component except the noncontrolling
+# interest, and ConsolidatedEntitiesMember/ConsolidationEliminationsMember play
+# the same role on a consolidation axis.
+_AGGREGATE_MEMBER_NAMES = frozenset({
+    'parentmember',
+    'consolidatedentitiesmember',
+})
+
+
+def _is_aggregate_member(member: str) -> bool:
+    """Whether a dimension member aggregates other members of its axis.
+
+    Compared on the LOCAL NAME: members reach here with either separator
+    ('us-gaap:ParentMember' from a context, 'us-gaap_ParentMember' from the
+    rendered dimension info), and matching the qualified spelling silently
+    matches neither half the time.
+    """
+    if not member:
+        return False
+    local_name = member.split(':', 1)[-1]
+    if ':' not in member and '_' in local_name:
+        local_name = local_name.split('_', 1)[1]
+    lowered = local_name.lower()
+    return lowered in _AGGREGATE_MEMBER_NAMES or 'total' in lowered
+
+
 class XBRLFilingWithNoXbrlData(NotFoundError):
     """Exception raised when a filing does not contain XBRL data."""
 
@@ -2129,6 +2163,54 @@ class XBRL:
 
         # Pick the axis with most members (most complete breakdown)
         best_axis = max(axis_groups.values(), key=len)
+
+        # Sharing an axis does not make members disjoint. A statement of
+        # shareholders' equity breaks equity down by component AND carries the
+        # filer's own subtotals as members of the same axis, so adding
+        # everything counts the components two or three times over: Disney's
+        # 2022-10-01 beginning balance came out as $292,766,000,000 against a
+        # filed $98,879,000,000, because the four components, their
+        # ParentMember subtotal, the noncontrolling interest and the issuer's
+        # own total member were all added together (gh #1281).
+        aggregates, components = [], []
+        for entry in best_axis:
+            member = (entry[1]['dimension_info'][0].get('member') or '')
+            (aggregates if _is_aggregate_member(member) else components).append(entry)
+
+        if aggregates:
+            # The filing states its own total; report that rather than adding
+            # anything up. Never fall through to the sum here: an aggregate and
+            # its own components in one group is exactly the double count.
+            #
+            # Which aggregate is THE total is settled by agreement with the
+            # components when there are any, since a filing can carry several
+            # nested subtotals -- Disney files ParentMember at 95,008 AND a
+            # total-equity member at 98,879, and only the latter covers the
+            # whole axis.
+            component_total = sum(v for _, _, v in components)
+            if components:
+                scale = max((abs(v) for _, _, v in best_axis), default=0)
+                tolerance = max(abs(component_total), scale) * 1e-6
+                for cid, wf, value in aggregates:
+                    if abs(value - component_total) <= tolerance:
+                        return {'total': value, 'fact': wf['fact'], 'context_id': cid}
+
+            # Either the group is nothing but an aggregate -- Coca-Cola tags
+            # shareowners' equity solely against ParentMember, so there is no
+            # arithmetic to do and no ambiguity -- or several aggregates are
+            # present and none reconciles, which happens when the members are
+            # not parts of one whole at all (Apple's receivable concentration
+            # lists two named customers beside a carriers total). In both cases
+            # a filed total is a better answer than a sum that mixes levels,
+            # so prefer the filer's explicitly named total.
+            named = [e for e in aggregates
+                     if 'total' in (e[1]['dimension_info'][0].get('member') or '').lower()]
+            cid, wf, value = max(named or aggregates, key=lambda e: abs(e[2]))
+            return {'total': value, 'fact': wf['fact'], 'context_id': cid}
+
+        # No aggregate members: a genuine disjoint breakdown, which is the case
+        # this helper was added for (gh #646 -- Disney's own cost of services
+        # and cost of products summing to total costs).
         total = sum(v for _, _, v in best_axis)
         first_cid, first_wf, _ = best_axis[0]
 

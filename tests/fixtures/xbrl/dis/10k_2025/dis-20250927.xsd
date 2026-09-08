@@ -1,0 +1,1111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--XBRL Document Created with the Workiva Platform-->
+<!--Copyright 2025 Workiva-->
+<!--r:75c81969-e150-49ee-8aa3-28a2cdc817a5,g:1558a2f3-96a9-4df5-9203-cd2ef6811555-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:dis="http://corporate.disney.go.com/20250927" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:dtr-types="http://www.xbrl.org/dtr/type/2024-01-31" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://corporate.disney.go.com/20250927">
+  <xs:import namespace="http://fasb.org/srt/2025" schemaLocation="https://xbrl.fasb.org/srt/2025/elts/srt-2025.xsd"/>
+  <xs:import namespace="http://fasb.org/us-gaap/2025" schemaLocation="https://xbrl.fasb.org/us-gaap/2025/elts/us-gaap-2025.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/2003/instance" schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/2003/linkbase" schemaLocation="http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/dtr/type/2024-01-31" schemaLocation="https://www.xbrl.org/dtr/type/2024-01-31/types.xsd"/>
+  <xs:import namespace="http://xbrl.org/2005/xbrldt" schemaLocation="http://www.xbrl.org/2005/xbrldt-2005.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/cyd-af-sub/2025" schemaLocation="https://xbrl.sec.gov/cyd/2025/cyd-af-sub-2025.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/dei/2025" schemaLocation="https://xbrl.sec.gov/dei/2025/dei-2025.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/ecd/2025" schemaLocation="https://xbrl.sec.gov/ecd/2025/ecd-2025.xsd"/>
+  <xs:annotation>
+    <xs:appinfo>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="dis-20250927_pre.xml" xlink:role="http://www.xbrl.org/2003/role/presentationLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="dis-20250927_def.xml" xlink:role="http://www.xbrl.org/2003/role/definitionLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="dis-20250927_lab.xml" xlink:role="http://www.xbrl.org/2003/role/labelLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="dis-20250927_cal.xml" xlink:role="http://www.xbrl.org/2003/role/calculationLinkbaseRef" xlink:type="simple"/>
+      <link:roleType id="AuditInformation" roleURI="http://corporate.disney.go.com/role/AuditInformation">
+        <link:definition>0000001 - Document - Audit Information</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Cover" roleURI="http://corporate.disney.go.com/role/Cover">
+        <link:definition>9952151 - Document - Cover</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CONSOLIDATEDSTATEMENTSOFINCOME" roleURI="http://corporate.disney.go.com/role/CONSOLIDATEDSTATEMENTSOFINCOME">
+        <link:definition>9952152 - Statement - CONSOLIDATED STATEMENTS OF INCOME</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME" roleURI="http://corporate.disney.go.com/role/CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME">
+        <link:definition>9952153 - Statement - CONSOLIDATED STATEMENTS OF COMPREHENSIVE INCOME</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CONSOLIDATEDBALANCESHEETS" roleURI="http://corporate.disney.go.com/role/CONSOLIDATEDBALANCESHEETS">
+        <link:definition>9952154 - Statement - CONSOLIDATED BALANCE SHEETS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CONSOLIDATEDBALANCESHEETSParenthetical" roleURI="http://corporate.disney.go.com/role/CONSOLIDATEDBALANCESHEETSParenthetical">
+        <link:definition>9952155 - Statement - CONSOLIDATED BALANCE SHEETS (Parenthetical)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CONSOLIDATEDSTATEMENTSOFCASHFLOWS" roleURI="http://corporate.disney.go.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS">
+        <link:definition>9952156 - Statement - CONSOLIDATED STATEMENTS OF CASH FLOWS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CONSOLIDATEDSTATEMENTSOFSHAREHOLDERSEQUITY" roleURI="http://corporate.disney.go.com/role/CONSOLIDATEDSTATEMENTSOFSHAREHOLDERSEQUITY">
+        <link:definition>9952157 - Statement - CONSOLIDATED STATEMENTS OF SHAREHOLDERS' EQUITY</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DescriptionoftheBusinessandSegmentInformation" roleURI="http://corporate.disney.go.com/role/DescriptionoftheBusinessandSegmentInformation">
+        <link:definition>9952158 - Disclosure - Description of the Business and Segment Information</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPolicies" roleURI="http://corporate.disney.go.com/role/SummaryofSignificantAccountingPolicies">
+        <link:definition>9952159 - Disclosure - Summary of Significant Accounting Policies</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Revenues" roleURI="http://corporate.disney.go.com/role/Revenues">
+        <link:definition>9952160 - Disclosure - Revenues</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="AcquisitionsandDispositions" roleURI="http://corporate.disney.go.com/role/AcquisitionsandDispositions">
+        <link:definition>9952161 - Disclosure - Acquisitions and Dispositions</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Investments" roleURI="http://corporate.disney.go.com/role/Investments">
+        <link:definition>9952162 - Disclosure - Investments</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="InternationalThemeParks" roleURI="http://corporate.disney.go.com/role/InternationalThemeParks">
+        <link:definition>9952163 - Disclosure - International Theme Parks</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ProducedandAcquiredLicensedContentCostsandAdvances" roleURI="http://corporate.disney.go.com/role/ProducedandAcquiredLicensedContentCostsandAdvances">
+        <link:definition>9952164 - Disclosure - Produced and Acquired/Licensed Content Costs and Advances</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Borrowings" roleURI="http://corporate.disney.go.com/role/Borrowings">
+        <link:definition>9952165 - Disclosure - Borrowings</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxes" roleURI="http://corporate.disney.go.com/role/IncomeTaxes">
+        <link:definition>9952166 - Disclosure - Income Taxes</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PensionandOtherBenefitPrograms" roleURI="http://corporate.disney.go.com/role/PensionandOtherBenefitPrograms">
+        <link:definition>9952167 - Disclosure - Pension and Other Benefit Programs</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Equity" roleURI="http://corporate.disney.go.com/role/Equity">
+        <link:definition>9952168 - Disclosure - Equity</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EquityBasedCompensation" roleURI="http://corporate.disney.go.com/role/EquityBasedCompensation">
+        <link:definition>9952169 - Disclosure - Equity-Based Compensation</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DetailofCertainBalanceSheetAccounts" roleURI="http://corporate.disney.go.com/role/DetailofCertainBalanceSheetAccounts">
+        <link:definition>9952170 - Disclosure - Detail of Certain Balance Sheet Accounts</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CommitmentsandContingencies" roleURI="http://corporate.disney.go.com/role/CommitmentsandContingencies">
+        <link:definition>9952171 - Disclosure - Commitments and Contingencies</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Leases" roleURI="http://corporate.disney.go.com/role/Leases">
+        <link:definition>9952172 - Disclosure - Leases</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="FairValueMeasurement" roleURI="http://corporate.disney.go.com/role/FairValueMeasurement">
+        <link:definition>9952173 - Disclosure - Fair Value Measurement</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DerivativeInstruments" roleURI="http://corporate.disney.go.com/role/DerivativeInstruments">
+        <link:definition>9952174 - Disclosure - Derivative Instruments</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RestructuringandImpairmentCharges" roleURI="http://corporate.disney.go.com/role/RestructuringandImpairmentCharges">
+        <link:definition>9952175 - Disclosure - Restructuring and Impairment Charges</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NewAccountingPronouncementsandOtherDisclosureRules" roleURI="http://corporate.disney.go.com/role/NewAccountingPronouncementsandOtherDisclosureRules">
+        <link:definition>9952176 - Disclosure - New Accounting Pronouncements and Other Disclosure Rules</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPoliciesPolicies" roleURI="http://corporate.disney.go.com/role/SummaryofSignificantAccountingPoliciesPolicies">
+        <link:definition>9955511 - Disclosure - Summary of Significant Accounting Policies (Policies)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DescriptionoftheBusinessandSegmentInformationTables" roleURI="http://corporate.disney.go.com/role/DescriptionoftheBusinessandSegmentInformationTables">
+        <link:definition>9955512 - Disclosure - Description of the Business and Segment Information (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPoliciesTables" roleURI="http://corporate.disney.go.com/role/SummaryofSignificantAccountingPoliciesTables">
+        <link:definition>9955513 - Disclosure - Summary of Significant Accounting Policies (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RevenuesTables" roleURI="http://corporate.disney.go.com/role/RevenuesTables">
+        <link:definition>9955514 - Disclosure - Revenues (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="AcquisitionsandDispositionsTables" roleURI="http://corporate.disney.go.com/role/AcquisitionsandDispositionsTables">
+        <link:definition>9955515 - Disclosure - Acquisitions and Dispositions (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="InvestmentsTables" roleURI="http://corporate.disney.go.com/role/InvestmentsTables">
+        <link:definition>9955516 - Disclosure - Investments (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="InternationalThemeParksTables" roleURI="http://corporate.disney.go.com/role/InternationalThemeParksTables">
+        <link:definition>9955517 - Disclosure - International Theme Parks (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ProducedandAcquiredLicensedContentCostsandAdvancesTables" roleURI="http://corporate.disney.go.com/role/ProducedandAcquiredLicensedContentCostsandAdvancesTables">
+        <link:definition>9955518 - Disclosure - Produced and Acquired/Licensed Content Costs and Advances (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BorrowingsTables" roleURI="http://corporate.disney.go.com/role/BorrowingsTables">
+        <link:definition>9955519 - Disclosure - Borrowings (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesTables" roleURI="http://corporate.disney.go.com/role/IncomeTaxesTables">
+        <link:definition>9955520 - Disclosure - Income Taxes (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PensionandOtherBenefitProgramsTables" roleURI="http://corporate.disney.go.com/role/PensionandOtherBenefitProgramsTables">
+        <link:definition>9955521 - Disclosure - Pension and Other Benefit Programs (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EquityTables" roleURI="http://corporate.disney.go.com/role/EquityTables">
+        <link:definition>9955522 - Disclosure - Equity (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EquityBasedCompensationTables" roleURI="http://corporate.disney.go.com/role/EquityBasedCompensationTables">
+        <link:definition>9955523 - Disclosure - Equity-Based Compensation (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DetailofCertainBalanceSheetAccountsTables" roleURI="http://corporate.disney.go.com/role/DetailofCertainBalanceSheetAccountsTables">
+        <link:definition>9955524 - Disclosure - Detail of Certain Balance Sheet Accounts (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CommitmentsandContingenciesTables" roleURI="http://corporate.disney.go.com/role/CommitmentsandContingenciesTables">
+        <link:definition>9955525 - Disclosure - Commitments and Contingencies (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesTables" roleURI="http://corporate.disney.go.com/role/LeasesTables">
+        <link:definition>9955526 - Disclosure - Leases (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="FairValueMeasurementTables" roleURI="http://corporate.disney.go.com/role/FairValueMeasurementTables">
+        <link:definition>9955527 - Disclosure - Fair Value Measurement (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DerivativeInstrumentsTables" roleURI="http://corporate.disney.go.com/role/DerivativeInstrumentsTables">
+        <link:definition>9955528 - Disclosure - Derivative Instruments (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RestructuringandImpairmentChargesTables" roleURI="http://corporate.disney.go.com/role/RestructuringandImpairmentChargesTables">
+        <link:definition>9955529 - Disclosure - Restructuring and Impairment Charges (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="FinancialInformationbyOperatingSegmentsDetails" roleURI="http://corporate.disney.go.com/role/FinancialInformationbyOperatingSegmentsDetails">
+        <link:definition>9955530 - Disclosure - Financial Information by Operating Segments (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EquityintheIncomeofInvesteesIncludedinSegmentOperatingResultsFootnoteDetails" roleURI="http://corporate.disney.go.com/role/EquityintheIncomeofInvesteesIncludedinSegmentOperatingResultsFootnoteDetails">
+        <link:definition>9955531 - Disclosure - Equity in the Income of Investees Included in Segment Operating Results Footnote (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SupplementalInformationAboutSegmentExpensesDetails" roleURI="http://corporate.disney.go.com/role/SupplementalInformationAboutSegmentExpensesDetails">
+        <link:definition>9955532 - Disclosure - Supplemental Information About Segment Expenses (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ReconciliationofSegmentOperatingIncometoIncomebeforeIncomeTaxesDetails" roleURI="http://corporate.disney.go.com/role/ReconciliationofSegmentOperatingIncometoIncomebeforeIncomeTaxesDetails">
+        <link:definition>9955533 - Disclosure - Reconciliation of Segment Operating Income to Income before Income Taxes (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ReconciliationofSegmentOperatingIncometoIncomeBeforeIncomeTaxesFootnoteDetails" roleURI="http://corporate.disney.go.com/role/ReconciliationofSegmentOperatingIncometoIncomeBeforeIncomeTaxesFootnoteDetails">
+        <link:definition>9955534 - Disclosure - Reconciliation of Segment Operating Income to Income Before Income Taxes Footnote (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CapitalExpendituresDepreciationandAmortizationbySegmentDetails" roleURI="http://corporate.disney.go.com/role/CapitalExpendituresDepreciationandAmortizationbySegmentDetails">
+        <link:definition>9955535 - Disclosure - Capital Expenditures, Depreciation and Amortization by Segment (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LonglivedAssetsbyGeographicalMarketsDetails" roleURI="http://corporate.disney.go.com/role/LonglivedAssetsbyGeographicalMarketsDetails">
+        <link:definition>9955536 - Disclosure - Long-lived Assets by Geographical Markets (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DescriptionofBusinessandSegmentInformationAdditionalInformationDetail" roleURI="http://corporate.disney.go.com/role/DescriptionofBusinessandSegmentInformationAdditionalInformationDetail">
+        <link:definition>9955537 - Disclosure - Description of Business and Segment Information - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPoliciesReconciliationofCashCashEquivalentsandRestrictedCashReportedintheConsolidatedBalanceSheetthatsumtotheTotalAmountintheStatementofCashFlowDetails" roleURI="http://corporate.disney.go.com/role/SummaryofSignificantAccountingPoliciesReconciliationofCashCashEquivalentsandRestrictedCashReportedintheConsolidatedBalanceSheetthatsumtotheTotalAmountintheStatementofCashFlowDetails">
+        <link:definition>9955538 - Disclosure - Summary of Significant Accounting Policies - Reconciliation of Cash, Cash Equivalents and Restricted Cash Reported in the Consolidated Balance Sheet that sum to the Total Amount in the Statement of Cash Flow (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPoliciesDepreciationComputedonStraightLineMethodOverEstimatedUsefulLivesDetail" roleURI="http://corporate.disney.go.com/role/SummaryofSignificantAccountingPoliciesDepreciationComputedonStraightLineMethodOverEstimatedUsefulLivesDetail">
+        <link:definition>9955539 - Disclosure - Summary of Significant Accounting Policies - Depreciation Computed on Straight-Line Method Over Estimated Useful Lives (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPoliciesExpectedAggregateAnnualAmortizationExpenseforExistingAmortizableIntangibleAssetsDetail" roleURI="http://corporate.disney.go.com/role/SummaryofSignificantAccountingPoliciesExpectedAggregateAnnualAmortizationExpenseforExistingAmortizableIntangibleAssetsDetail">
+        <link:definition>9955540 - Disclosure - Summary of Significant Accounting Policies - Expected Aggregate Annual Amortization Expense for Existing Amortizable Intangible Assets (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPoliciesReconciliationofWeightedAverageNumberofCommonandCommonEquivalentSharesOutstandingandNumberofAwardsExcludedfromDilutedEarningsPerShareDetail" roleURI="http://corporate.disney.go.com/role/SummaryofSignificantAccountingPoliciesReconciliationofWeightedAverageNumberofCommonandCommonEquivalentSharesOutstandingandNumberofAwardsExcludedfromDilutedEarningsPerShareDetail">
+        <link:definition>9955541 - Disclosure - Summary of Significant Accounting Policies - Reconciliation of Weighted Average Number of Common and Common Equivalent Shares Outstanding and Number of Awards Excluded from Diluted Earnings Per Share (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPoliciesAdditionalInformationDetail" roleURI="http://corporate.disney.go.com/role/SummaryofSignificantAccountingPoliciesAdditionalInformationDetail">
+        <link:definition>9955542 - Disclosure - Summary of Significant Accounting Policies - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RevenuesDisaggregationofRevenuebyMajorSourceDetails" roleURI="http://corporate.disney.go.com/role/RevenuesDisaggregationofRevenuebyMajorSourceDetails">
+        <link:definition>9955543 - Disclosure - Revenues Disaggregation of Revenue by Major Source (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RevenuesDisaggregationofRevenuebyGeographicalMarketsDetails" roleURI="http://corporate.disney.go.com/role/RevenuesDisaggregationofRevenuebyGeographicalMarketsDetails">
+        <link:definition>9955544 - Disclosure - Revenues Disaggregation of Revenue by Geographical Markets (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RevenuesContractwithCustomerAssetandLiabilityDetails" roleURI="http://corporate.disney.go.com/role/RevenuesContractwithCustomerAssetandLiabilityDetails">
+        <link:definition>9955545 - Disclosure - Revenues Contract with Customer, Asset and Liability (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RevenuesAdditionalInformationDetails" roleURI="http://corporate.disney.go.com/role/RevenuesAdditionalInformationDetails">
+        <link:definition>9955546 - Disclosure - Revenues - Additional Information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DispositionsChangesinCarryingAmountofGoodwillDetail" roleURI="http://corporate.disney.go.com/role/DispositionsChangesinCarryingAmountofGoodwillDetail">
+        <link:definition>9955547 - Disclosure - Dispositions Changes in Carrying Amount of Goodwill (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="AcquisitionsandDispositionsAdditionalInformationDetail" roleURI="http://corporate.disney.go.com/role/AcquisitionsandDispositionsAdditionalInformationDetail">
+        <link:definition>9955548 - Disclosure - Acquisitions and Dispositions - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="InvestmentsDetail" roleURI="http://corporate.disney.go.com/role/InvestmentsDetail">
+        <link:definition>9955549 - Disclosure - Investments (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="InvestmentsAdditionalInformationDetail" roleURI="http://corporate.disney.go.com/role/InvestmentsAdditionalInformationDetail">
+        <link:definition>9955550 - Disclosure - Investments - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="InternationalThemeParksImpactofConsolidatingBalanceSheetsofInternationalThemeParksDetail" roleURI="http://corporate.disney.go.com/role/InternationalThemeParksImpactofConsolidatingBalanceSheetsofInternationalThemeParksDetail">
+        <link:definition>9955551 - Disclosure - International Theme Parks Impact of Consolidating Balance Sheets of International Theme Parks (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="InternationalThemeParksImpactofConsolidatingIncomeStatementsofInternationalThemeParksDetail" roleURI="http://corporate.disney.go.com/role/InternationalThemeParksImpactofConsolidatingIncomeStatementsofInternationalThemeParksDetail">
+        <link:definition>9955552 - Disclosure - International Theme Parks Impact of Consolidating Income Statements of International Theme Parks (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="InternationalThemeParksAdditionalInformationDetail" roleURI="http://corporate.disney.go.com/role/InternationalThemeParksAdditionalInformationDetail">
+        <link:definition>9955553 - Disclosure - International Theme Parks - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BalancesofProducedandLicensedContentCostsDetail" roleURI="http://corporate.disney.go.com/role/BalancesofProducedandLicensedContentCostsDetail">
+        <link:definition>9955554 - Disclosure - Balances of Produced and Licensed Content Costs (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="AmortizationofProducedandLicensedContentCostsDetails" roleURI="http://corporate.disney.go.com/role/AmortizationofProducedandLicensedContentCostsDetails">
+        <link:definition>9955555 - Disclosure - Amortization of Produced and Licensed Content Costs (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ExpectedAmortizationofProducedandLicensedContentDetails" roleURI="http://corporate.disney.go.com/role/ExpectedAmortizationofProducedandLicensedContentDetails">
+        <link:definition>9955556 - Disclosure - Expected Amortization of Produced and Licensed Content (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ProducedandAcquiredLicensedContentCostsandAdvancesAdditionalInformationDetail" roleURI="http://corporate.disney.go.com/role/ProducedandAcquiredLicensedContentCostsandAdvancesAdditionalInformationDetail">
+        <link:definition>9955557 - Disclosure - Produced and Acquired/Licensed Content Costs and Advances - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BorrowingsincludingtheimpactofInterestRateandCrossCurrencySwapsDetail" roleURI="http://corporate.disney.go.com/role/BorrowingsincludingtheimpactofInterestRateandCrossCurrencySwapsDetail">
+        <link:definition>9955558 - Disclosure - Borrowings including the impact of Interest Rate and Cross-Currency Swaps (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BorrowingsBankfacilitiestosupportcommercialpaperborrowingsDetails" roleURI="http://corporate.disney.go.com/role/BorrowingsBankfacilitiestosupportcommercialpaperborrowingsDetails">
+        <link:definition>9955559 - Disclosure - Borrowings Bank facilities to support commercial paper borrowings (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BorrowingsCommercialPaperActivityDetails" roleURI="http://corporate.disney.go.com/role/BorrowingsCommercialPaperActivityDetails">
+        <link:definition>9955560 - Disclosure - Borrowings Commercial Paper Activity (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BorrowingsTotalBorrowingsExcludingMarketValueAdjustmentsScheduledMaturitiesDetail" roleURI="http://corporate.disney.go.com/role/BorrowingsTotalBorrowingsExcludingMarketValueAdjustmentsScheduledMaturitiesDetail">
+        <link:definition>9955561 - Disclosure - Borrowings Total Borrowings Excluding Market Value Adjustments, Scheduled Maturities (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="InterestExpenseNetDetails" roleURI="http://corporate.disney.go.com/role/InterestExpenseNetDetails">
+        <link:definition>9955562 - Disclosure - Interest Expense, Net (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BorrowingsAdditionalInformationDetail" roleURI="http://corporate.disney.go.com/role/BorrowingsAdditionalInformationDetail">
+        <link:definition>9955563 - Disclosure - Borrowings - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeBeforeIncomeTaxesDetail" roleURI="http://corporate.disney.go.com/role/IncomeBeforeIncomeTaxesDetail">
+        <link:definition>9955564 - Disclosure - Income Before Income Taxes (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxExpenseBenefitDetail" roleURI="http://corporate.disney.go.com/role/IncomeTaxExpenseBenefitDetail">
+        <link:definition>9955565 - Disclosure - Income Tax Expense / (Benefit) (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesDeferredTaxAssetsandLiabilitiesDetail" roleURI="http://corporate.disney.go.com/role/IncomeTaxesDeferredTaxAssetsandLiabilitiesDetail">
+        <link:definition>9955566 - Disclosure - Income Taxes - Deferred Tax Assets and Liabilities (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesNetOperatingLossandTaxCreditCarryforwardDetails" roleURI="http://corporate.disney.go.com/role/IncomeTaxesNetOperatingLossandTaxCreditCarryforwardDetails">
+        <link:definition>9955567 - Disclosure - Income Taxes - Net Operating Loss and Tax Credit Carryforward (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesSummaryofValuationAllowanceDetails" roleURI="http://corporate.disney.go.com/role/IncomeTaxesSummaryofValuationAllowanceDetails">
+        <link:definition>9955568 - Disclosure - Income Taxes - Summary of Valuation Allowance (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesReconciliationofEffectiveIncomeTaxRatetoFederalRateDetail" roleURI="http://corporate.disney.go.com/role/IncomeTaxesReconciliationofEffectiveIncomeTaxRatetoFederalRateDetail">
+        <link:definition>9955569 - Disclosure - Income Taxes - Reconciliation of Effective Income Tax Rate to Federal Rate (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesReconciliationofBeginningandEndingAmountofGrossUnrecognizedTaxBenefitsExcludingRelatedAccrualforInterestDetail" roleURI="http://corporate.disney.go.com/role/IncomeTaxesReconciliationofBeginningandEndingAmountofGrossUnrecognizedTaxBenefitsExcludingRelatedAccrualforInterestDetail">
+        <link:definition>9955570 - Disclosure - Income Taxes - Reconciliation of Beginning and Ending Amount of Gross Unrecognized Tax Benefits, Excluding Related Accrual for Interest (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesAdditionalInformationDetail" roleURI="http://corporate.disney.go.com/role/IncomeTaxesAdditionalInformationDetail">
+        <link:definition>9955571 - Disclosure - Income Taxes - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PensionandOtherBenefitProgramsBenefitObligationsAssetsFundedStatusandBalanceSheetImpactsAssociatedwithPensionandPostretirementMedicalBenefitPlansbaseduponActuarialValuationsDetail" roleURI="http://corporate.disney.go.com/role/PensionandOtherBenefitProgramsBenefitObligationsAssetsFundedStatusandBalanceSheetImpactsAssociatedwithPensionandPostretirementMedicalBenefitPlansbaseduponActuarialValuationsDetail">
+        <link:definition>9955572 - Disclosure - Pension and Other Benefit Programs - Benefit Obligations, Assets, Funded Status and Balance Sheet Impacts Associated with Pension and Postretirement Medical Benefit Plans based upon Actuarial Valuations (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PensionandOtherBenefitProgramsNetPeriodicBenefitCostDetail" roleURI="http://corporate.disney.go.com/role/PensionandOtherBenefitProgramsNetPeriodicBenefitCostDetail">
+        <link:definition>9955573 - Disclosure - Pension and Other Benefit Programs - Net Periodic Benefit Cost (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PensionandOtherBenefitProgramsKeyAssumptionsDetail" roleURI="http://corporate.disney.go.com/role/PensionandOtherBenefitProgramsKeyAssumptionsDetail">
+        <link:definition>9955574 - Disclosure - Pension and Other Benefit Programs - Key Assumptions (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PensionandOtherBenefitProgramsAccumulatedOtherComprehensiveLossBeforeTaxnotyetRecognizedinNetPeriodicBenefitCostDetail" roleURI="http://corporate.disney.go.com/role/PensionandOtherBenefitProgramsAccumulatedOtherComprehensiveLossBeforeTaxnotyetRecognizedinNetPeriodicBenefitCostDetail">
+        <link:definition>9955575 - Disclosure - Pension and Other Benefit Programs - Accumulated Other Comprehensive Loss, Before Tax, not yet Recognized in Net Periodic Benefit Cost (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PensionandOtherBenefitProgramsPlanAssetsInvestmentPolicyRangesforMajorAssetClassesDetail" roleURI="http://corporate.disney.go.com/role/PensionandOtherBenefitProgramsPlanAssetsInvestmentPolicyRangesforMajorAssetClassesDetail">
+        <link:definition>9955576 - Disclosure - Pension and Other Benefit Programs - Plan Assets Investment Policy Ranges for Major Asset Classes (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PensionandOtherBenefitProgramsDefinedBenefitPlanAssetsMeasuredatFairValueDetail" roleURI="http://corporate.disney.go.com/role/PensionandOtherBenefitProgramsDefinedBenefitPlanAssetsMeasuredatFairValueDetail">
+        <link:definition>9955577 - Disclosure - Pension and Other Benefit Programs - Defined Benefit Plan Assets Measured at Fair Value (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PensionandOtherBenefitProgramsDefinedBenefitPlanAssetsMeasuredatFairValueParentheticalDetail" roleURI="http://corporate.disney.go.com/role/PensionandOtherBenefitProgramsDefinedBenefitPlanAssetsMeasuredatFairValueParentheticalDetail">
+        <link:definition>9955578 - Disclosure - Pension and Other Benefit Programs - Defined Benefit Plan Assets Measured at Fair Value (Parenthetical) (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PensionandOtherBenefitProgramsEstimatedFutureBenefitPaymentsDetail" roleURI="http://corporate.disney.go.com/role/PensionandOtherBenefitProgramsEstimatedFutureBenefitPaymentsDetail">
+        <link:definition>9955579 - Disclosure - Pension and Other Benefit Programs - Estimated Future Benefit Payments (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PensionandOtherBenefitProgramsEstimatedFutureBenefitPaymentsParentheticalDetail" roleURI="http://corporate.disney.go.com/role/PensionandOtherBenefitProgramsEstimatedFutureBenefitPaymentsParentheticalDetail">
+        <link:definition>9955580 - Disclosure - Pension and Other Benefit Programs - Estimated Future Benefit Payments (Parenthetical) (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PensionandOtherBenefitProgramsLongTermRateofReturnonPlanAssetsDetail" roleURI="http://corporate.disney.go.com/role/PensionandOtherBenefitProgramsLongTermRateofReturnonPlanAssetsDetail">
+        <link:definition>9955581 - Disclosure - Pension and Other Benefit Programs - Long-Term Rate of Return on Plan Assets (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PensionandOtherBenefitProgramsOnePercentagePointpptChangeonProjectedBenefitObligationsDetail" roleURI="http://corporate.disney.go.com/role/PensionandOtherBenefitProgramsOnePercentagePointpptChangeonProjectedBenefitObligationsDetail">
+        <link:definition>9955582 - Disclosure - Pension and Other Benefit Programs - One Percentage Point (ppt) Change on Projected Benefit Obligations (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PensionandOtherBenefitProgramsContributionintoMultiemployerPensionPlansandHealthandWelfarePlansDetail" roleURI="http://corporate.disney.go.com/role/PensionandOtherBenefitProgramsContributionintoMultiemployerPensionPlansandHealthandWelfarePlansDetail">
+        <link:definition>9955583 - Disclosure - Pension and Other Benefit Programs - Contribution into Multiemployer Pension Plans and Health and Welfare Plans (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="PensionandOtherBenefitProgramsAdditionalInformationDetail" roleURI="http://corporate.disney.go.com/role/PensionandOtherBenefitProgramsAdditionalInformationDetail">
+        <link:definition>9955584 - Disclosure - Pension and Other Benefit Programs - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EquityDividendsDeclaredDetails" roleURI="http://corporate.disney.go.com/role/EquityDividendsDeclaredDetails">
+        <link:definition>9955585 - Disclosure - Equity Dividends Declared (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EquityChangesinAccumulatedOtherComprehensiveLossBeforeTaxDetail" roleURI="http://corporate.disney.go.com/role/EquityChangesinAccumulatedOtherComprehensiveLossBeforeTaxDetail">
+        <link:definition>9955586 - Disclosure - Equity Changes in Accumulated Other Comprehensive Loss, Before Tax (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EquityChangesinAccumulatedOtherComprehensiveLossTaxDetails" roleURI="http://corporate.disney.go.com/role/EquityChangesinAccumulatedOtherComprehensiveLossTaxDetails">
+        <link:definition>9955587 - Disclosure - Equity Changes in Accumulated Other Comprehensive Loss, Tax (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EquityChangesinAccumulatedOtherComprehensiveLossNetofTaxDetails" roleURI="http://corporate.disney.go.com/role/EquityChangesinAccumulatedOtherComprehensiveLossNetofTaxDetails">
+        <link:definition>9955588 - Disclosure - Equity Changes in Accumulated Other Comprehensive Loss, Net of Tax (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EquityDetailsaboutAOCIComponentsReclassifiedtoNetIncomeDetails" roleURI="http://corporate.disney.go.com/role/EquityDetailsaboutAOCIComponentsReclassifiedtoNetIncomeDetails">
+        <link:definition>9955589 - Disclosure - Equity Details about AOCI Components Reclassified to Net Income (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EquityAdditionalInformationDetail" roleURI="http://corporate.disney.go.com/role/EquityAdditionalInformationDetail">
+        <link:definition>9955590 - Disclosure - Equity - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EquityBasedCompensationWeightedAverageAssumptionsusedinOptionValuationModelDetail" roleURI="http://corporate.disney.go.com/role/EquityBasedCompensationWeightedAverageAssumptionsusedinOptionValuationModelDetail">
+        <link:definition>9955591 - Disclosure - Equity-Based Compensation - Weighted Average Assumptions used in Option-Valuation Model (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EquityBasedCompensationImpactofStockOptionsRightsandRestrictedStockUnitsonIncomeandCashFlowsDetail" roleURI="http://corporate.disney.go.com/role/EquityBasedCompensationImpactofStockOptionsRightsandRestrictedStockUnitsonIncomeandCashFlowsDetail">
+        <link:definition>9955592 - Disclosure - Equity-Based Compensation - Impact of Stock Options/Rights and Restricted Stock Units on Income and Cash Flows (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EquityBasedCompensationInformationaboutStockOptionTransactionsDetail" roleURI="http://corporate.disney.go.com/role/EquityBasedCompensationInformationaboutStockOptionTransactionsDetail">
+        <link:definition>9955593 - Disclosure - Equity-Based Compensation - Information about Stock Option Transactions (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EquityBasedCompensationInformationaboutStockOptionsVestedandExpectedtoVestDetail" roleURI="http://corporate.disney.go.com/role/EquityBasedCompensationInformationaboutStockOptionsVestedandExpectedtoVestDetail">
+        <link:definition>9955594 - Disclosure - Equity-Based Compensation - Information about Stock Options Vested and Expected to Vest (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EquityBasedCompensationInformationaboutRestrictedStockUnitTransactionsDetail" roleURI="http://corporate.disney.go.com/role/EquityBasedCompensationInformationaboutRestrictedStockUnitTransactionsDetail">
+        <link:definition>9955595 - Disclosure - Equity-Based Compensation - Information about Restricted Stock Unit Transactions (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EquityBasedCompensationAdditionalInformationDetail" roleURI="http://corporate.disney.go.com/role/EquityBasedCompensationAdditionalInformationDetail">
+        <link:definition>9955596 - Disclosure - Equity-Based Compensation - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DetailofCertainBalanceSheetAccountsCurrentReceivablesDetail" roleURI="http://corporate.disney.go.com/role/DetailofCertainBalanceSheetAccountsCurrentReceivablesDetail">
+        <link:definition>9955597 - Disclosure - Detail of Certain Balance Sheet Accounts - Current Receivables (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DetailofCertainBalanceSheetAccountsParksResortsandOtherPropertyatCostDetail" roleURI="http://corporate.disney.go.com/role/DetailofCertainBalanceSheetAccountsParksResortsandOtherPropertyatCostDetail">
+        <link:definition>9955598 - Disclosure - Detail of Certain Balance Sheet Accounts - Parks, Resorts and Other Property, at Cost (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DetailofCertainBalanceSheetAccountsIntangibleAssetsDetail" roleURI="http://corporate.disney.go.com/role/DetailofCertainBalanceSheetAccountsIntangibleAssetsDetail">
+        <link:definition>9955599 - Disclosure - Detail of Certain Balance Sheet Accounts - Intangible Assets (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DetailofCertainBalanceSheetAccountsAccountsPayableandOtherAccruedLiabilitiesDetail" roleURI="http://corporate.disney.go.com/role/DetailofCertainBalanceSheetAccountsAccountsPayableandOtherAccruedLiabilitiesDetail">
+        <link:definition>9955600 - Disclosure - Detail of Certain Balance Sheet Accounts - Accounts Payable and Other Accrued Liabilities (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CommitmentsandContingenciesContractualCommitmentsforBroadcastProgrammingRightsCreativeTalentandOtherCommitmentsDetail" roleURI="http://corporate.disney.go.com/role/CommitmentsandContingenciesContractualCommitmentsforBroadcastProgrammingRightsCreativeTalentandOtherCommitmentsDetail">
+        <link:definition>9955601 - Disclosure - Commitments and Contingencies - Contractual Commitments for Broadcast Programming Rights, Creative Talent and Other Commitments (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CommitmentsandContingenciesAdditionalInformationDetail" roleURI="http://corporate.disney.go.com/role/CommitmentsandContingenciesAdditionalInformationDetail">
+        <link:definition>9955602 - Disclosure - Commitments and Contingencies - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofRightofUseAssetsandLeaseLiabilitiesontheBalanceSheetDetails" roleURI="http://corporate.disney.go.com/role/SummaryofRightofUseAssetsandLeaseLiabilitiesontheBalanceSheetDetails">
+        <link:definition>9955603 - Disclosure - Summary of Right-of-Use Assets and Lease Liabilities on the Balance Sheet (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ComponentsofLeaseCostsDetails" roleURI="http://corporate.disney.go.com/role/ComponentsofLeaseCostsDetails">
+        <link:definition>9955604 - Disclosure - Components of Lease Costs (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofCashFlowsArisingFromLeaseTransactionsDetails" roleURI="http://corporate.disney.go.com/role/SummaryofCashFlowsArisingFromLeaseTransactionsDetails">
+        <link:definition>9955605 - Disclosure - Summary of Cash Flows Arising From Lease Transactions (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeaseLiabilityMaturitiesDetails" roleURI="http://corporate.disney.go.com/role/LeaseLiabilityMaturitiesDetails">
+        <link:definition>9955606 - Disclosure - Lease Liability Maturities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesAdditionalInformationDetails" roleURI="http://corporate.disney.go.com/role/LeasesAdditionalInformationDetails">
+        <link:definition>9955607 - Disclosure - Leases - Additional Information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="FairValueMeasurementAssetsandLiabilitiesMeasuredatFairValueDetail" roleURI="http://corporate.disney.go.com/role/FairValueMeasurementAssetsandLiabilitiesMeasuredatFairValueDetail">
+        <link:definition>9955608 - Disclosure - Fair Value Measurement - Assets and Liabilities Measured at Fair Value (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="FairValueMeasurementsAdditionalInformationDetail" roleURI="http://corporate.disney.go.com/role/FairValueMeasurementsAdditionalInformationDetail">
+        <link:definition>9955609 - Disclosure - Fair Value Measurements - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DerivativeInstrumentsGrossFairValueofDerivativePositionsDetail" roleURI="http://corporate.disney.go.com/role/DerivativeInstrumentsGrossFairValueofDerivativePositionsDetail">
+        <link:definition>9955610 - Disclosure - Derivative Instruments - Gross Fair Value of Derivative Positions (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DerivativeInstrumentsCarryingAmountandCumulativeBasisAdjustmentforFairValueHedgesDetails" roleURI="http://corporate.disney.go.com/role/DerivativeInstrumentsCarryingAmountandCumulativeBasisAdjustmentforFairValueHedgesDetails">
+        <link:definition>9955611 - Disclosure - Derivative Instruments - Carrying Amount and Cumulative Basis Adjustment for Fair Value Hedges (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DerivativeInstrumentsAdjustmentsRelatedtoFairValueHedgesincludedinNetInterestExpenseinConsolidatedStatementsofIncomeDetail" roleURI="http://corporate.disney.go.com/role/DerivativeInstrumentsAdjustmentsRelatedtoFairValueHedgesincludedinNetInterestExpenseinConsolidatedStatementsofIncomeDetail">
+        <link:definition>9955612 - Disclosure - Derivative Instruments - Adjustments Related to Fair Value Hedges included in Net Interest Expense in Consolidated Statements of Income (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DerivativeInstrumentsEffectofforeignCurrencyCashFlowHedgesonAOCIDetails" roleURI="http://corporate.disney.go.com/role/DerivativeInstrumentsEffectofforeignCurrencyCashFlowHedgesonAOCIDetails">
+        <link:definition>9955613 - Disclosure - Derivative Instruments - Effect of foreign Currency Cash Flow Hedges on AOCI (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="AdjustmentsRelatedtoCrossCurrencySwapHedgesIncludedinNetInterestExpenseinCondensedConsolidatedStatementsofIncomeDetails" roleURI="http://corporate.disney.go.com/role/AdjustmentsRelatedtoCrossCurrencySwapHedgesIncludedinNetInterestExpenseinCondensedConsolidatedStatementsofIncomeDetails">
+        <link:definition>9955614 - Disclosure - Adjustments Related to Cross Currency Swap Hedges Included in Net Interest Expense in Condensed Consolidated Statements of Income (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DerivativeInstrumentsAdditionalInformationDetail" roleURI="http://corporate.disney.go.com/role/DerivativeInstrumentsAdditionalInformationDetail">
+        <link:definition>9955615 - Disclosure - Derivative Instruments - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RestructuringandRelatedActivitiesDetails" roleURI="http://corporate.disney.go.com/role/RestructuringandRelatedActivitiesDetails">
+        <link:definition>9955616 - Disclosure - Restructuring and Related Activities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RestructuringandImpairmentChargesAdditionalInformationDetail" roleURI="http://corporate.disney.go.com/role/RestructuringandImpairmentChargesAdditionalInformationDetail">
+        <link:definition>9955617 - Disclosure - Restructuring and Impairment Charges - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element id="dis_AuditInformationAbstract" abstract="true" name="AuditInformationAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_LicensedContentCostsAndAdvances" abstract="false" name="LicensedContentCostsAndAdvances" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_ProducedAndLicensedContentCosts" abstract="false" name="ProducedAndLicensedContentCosts" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_ParksResortsAndOtherPropertyGrossExcludingProjectsAndLand" abstract="false" name="ParksResortsAndOtherPropertyGrossExcludingProjectsAndLand" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_ParksResortsAndOtherPropertyAtCostExcludingProjectsAndLand" abstract="false" name="ParksResortsAndOtherPropertyAtCostExcludingProjectsAndLand" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_PaymentsforPurchaseofNoncontrollingandRedeemableNoncontrollingInterest" abstract="false" name="PaymentsforPurchaseofNoncontrollingandRedeemableNoncontrollingInterest" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_TotalexcludingredeemablenoncontrollinginterestMember" abstract="true" name="TotalexcludingredeemablenoncontrollinginterestMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_NoncontrollingInterestDecreaseFromDistributionsToNoncontrollingInterestHoldersAndOther" abstract="false" name="NoncontrollingInterestDecreaseFromDistributionsToNoncontrollingInterestHoldersAndOther" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_ProducedAndAcquiredLicensedContentCostsAndAdvancesDisclosureTextBlock" abstract="false" name="ProducedAndAcquiredLicensedContentCostsAndAdvancesDisclosureTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="dis_RevenuesandCostsServicesandProductsPolicyTextBlock" abstract="false" name="RevenuesandCostsServicesandProductsPolicyTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="dis_FilmAndTelevisionContentCostsPolicyPolicyTextBlock" abstract="false" name="FilmAndTelevisionContentCostsPolicyPolicyTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="dis_ContentProductionIncentivesPolicyTextBlock" abstract="false" name="ContentProductionIncentivesPolicyTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="dis_SupplementalInformationAboutSegmentExpensesTableTextBlock" abstract="false" name="SupplementalInformationAboutSegmentExpensesTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="dis_CapitalExpendituresDepreciationAndAmortizationBySegmentTableTextBlock" abstract="false" name="CapitalExpendituresDepreciationAndAmortizationBySegmentTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="dis_DisaggregationofRevenuebyMajorSourceTableTextBlock" abstract="false" name="DisaggregationofRevenuebyMajorSourceTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="dis_BalanceSheetMember" abstract="true" name="BalanceSheetMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_IncomeStatementMember" abstract="true" name="IncomeStatementMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_BalancesOfProducedAndLicensedContentCostsTableTextBlock" abstract="false" name="BalancesOfProducedAndLicensedContentCostsTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="dis_AmortizationOfProducedAndLicensedContentCostsTableTextBlock" abstract="false" name="AmortizationOfProducedAndLicensedContentCostsTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="dis_ExpectedAmortizationOfProducedLicensedAndAcquiredContentTableTextBlock" abstract="false" name="ExpectedAmortizationOfProducedLicensedAndAcquiredContentTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="dis_SummaryOfNetOperatingLossAndTaxCreditCarryforwardsTableTextBlock" abstract="false" name="SummaryOfNetOperatingLossAndTaxCreditCarryforwardsTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="dis_BasisUsedToDetermineExpectedLongtermRateOfReturnOnAssetsAssumptionTableTextBlock" abstract="false" name="BasisUsedToDetermineExpectedLongtermRateOfReturnOnAssetsAssumptionTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="dis_ScheduleOfPropertyPlantAndEquipmentTableTextBlock" abstract="false" name="ScheduleOfPropertyPlantAndEquipmentTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="dis_ScheduleOfIntangibleAssetsByMajorClassTextBlock" abstract="false" name="ScheduleOfIntangibleAssetsByMajorClassTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="dis_CommitmentsAndContingenciesDisclosureTableTextBlock" abstract="false" name="CommitmentsAndContingenciesDisclosureTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="dis_SummaryOfRightOfUseAssetsAndLeaseLiabilitiesOnTheBalanceSheetTableTextBlock" abstract="false" name="SummaryOfRightOfUseAssetsAndLeaseLiabilitiesOnTheBalanceSheetTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="dis_ImpactOfLeasePaymentsOnCashFlowsTableTextBlock" abstract="false" name="ImpactOfLeasePaymentsOnCashFlowsTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="dis_EntertainmentSegmentMember" abstract="true" name="EntertainmentSegmentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_SportsSegmentMember" abstract="true" name="SportsSegmentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ExperiencesSegmentMember" abstract="true" name="ExperiencesSegmentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_SegmentEliminationsMember" abstract="true" name="SegmentEliminationsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_EntertainmentThirdPartyMember" abstract="true" name="EntertainmentThirdPartyMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_SportsThirdPartyMember" abstract="true" name="SportsThirdPartyMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_IntersegmentEliminationsMember" abstract="true" name="IntersegmentEliminationsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_TotalSegmentMember" abstract="true" name="TotalSegmentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_TotalSegmentsMember" abstract="true" name="TotalSegmentsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_AEMember" abstract="true" name="AEMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_IndiaJointVentureMember" abstract="true" name="IndiaJointVentureMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ContentLicenseTerminationGain" abstract="false" name="ContentLicenseTerminationGain" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_AmortizationofIntangibleAssetsHeldbyEquityInvestees" abstract="false" name="AmortizationofIntangibleAssetsHeldbyEquityInvestees" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_ProgrammingAndProductionCosts" abstract="false" name="ProgrammingAndProductionCosts" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_OperatingLabor" abstract="false" name="OperatingLabor" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_InfrastructureCosts" abstract="false" name="InfrastructureCosts" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_AmortizationOfIntangibleAssetsAndFairValueStepUpOnFilmAndTelevisionCosts" abstract="false" name="AmortizationOfIntangibleAssetsAndFairValueStepUpOnFilmAndTelevisionCosts" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_TFCFAndHuluAcquisitionAmortization" abstract="false" name="TFCFAndHuluAcquisitionAmortization" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_UnfavorableLegalRulingMember" abstract="true" name="UnfavorableLegalRulingMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_DraftKingsMember" abstract="true" name="DraftKingsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_TFCFandHuluMember" abstract="true" name="TFCFandHuluMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_DomesticMember" abstract="true" name="DomesticMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ForeignMember" abstract="true" name="ForeignMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_LongLivedAssets" abstract="false" name="LongLivedAssets" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_TataPlayLimitedMember" abstract="true" name="TataPlayLimitedMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_NationalGeographicMember" abstract="true" name="NationalGeographicMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ESPNMember" abstract="true" name="ESPNMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_NationalGeographicExpeditionsMember" abstract="true" name="NationalGeographicExpeditionsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_HongKongDisneylandMember" abstract="true" name="HongKongDisneylandMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ShanghaiDisneyResortMember" abstract="true" name="ShanghaiDisneyResortMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_StarIndiaMember" abstract="true" name="StarIndiaMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_DisposalGroupNotDiscontinuedOperationEquityMethodInvestmentRetainedAfterDisposalOwnershipInterestAfterDisposal" abstract="false" name="DisposalGroupNotDiscontinuedOperationEquityMethodInvestmentRetainedAfterDisposalOwnershipInterestAfterDisposal" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="dis_AttractionsBuildingsandImprovementsMember" abstract="true" name="AttractionsBuildingsandImprovementsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_FurnitureFixturesAndEquipmentMember" abstract="true" name="FurnitureFixturesAndEquipmentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_UltimateRevenueFromThetricalReleaseMaximumPeriod" abstract="false" name="UltimateRevenueFromThetricalReleaseMaximumPeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="dis_UltimateRevenuesFromTVSeriesDeliveryOfFirstEpisodeMaximumPeriod" abstract="false" name="UltimateRevenuesFromTVSeriesDeliveryOfFirstEpisodeMaximumPeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="dis_UltimateRevenuesFromTVSeriesDeliveryOfRecentEpisodeMaximumPeriod" abstract="false" name="UltimateRevenuesFromTVSeriesDeliveryOfRecentEpisodeMaximumPeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="dis_AmortizationOfFilmLibraryMaximumPeriod" abstract="false" name="AmortizationOfFilmLibraryMaximumPeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="dis_NumberOfTypesOfDerivatives" abstract="false" name="NumberOfTypesOfDerivatives" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="xbrli:integerItemType"/>
+  <xs:element id="dis_EliminationsAndOtherMember" abstract="true" name="EliminationsAndOtherMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_SubscriptionAndAffiliateFeesMember" abstract="true" name="SubscriptionAndAffiliateFeesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_RetailandwholesalesalesofmerchandisefoodandbeverageMember" abstract="true" name="RetailandwholesalesalesofmerchandisefoodandbeverageMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ResortandvacationsMember" abstract="true" name="ResortandvacationsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_TVVODAndHomeEntertainmentDistributionMember" abstract="true" name="TVVODAndHomeEntertainmentDistributionMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_TheatricaldistributionlicensingMember" abstract="true" name="TheatricaldistributionlicensingMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_OtherRevenueMember" abstract="true" name="OtherRevenueMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ContractWithCustomerMember" abstract="true" name="ContractWithCustomerMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ScenarioUnsatisfiedPerformanceObligationRecognizedInFiscal2026Member" abstract="true" name="ScenarioUnsatisfiedPerformanceObligationRecognizedInFiscal2026Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ScenarioUnsatisfiedPerformanceObligationRecognizedInFiscal2027Member" abstract="true" name="ScenarioUnsatisfiedPerformanceObligationRecognizedInFiscal2027Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ScenarioUnsatisfiedPerformanceObligationRecognizedInFiscal2028Member" abstract="true" name="ScenarioUnsatisfiedPerformanceObligationRecognizedInFiscal2028Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ScenarioUnsatisfiedperformanceobligationrecognizedthereafterMember" abstract="true" name="ScenarioUnsatisfiedperformanceobligationrecognizedthereafterMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_GoodwillAllocation" abstract="false" name="GoodwillAllocation" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_GoodwillTransferToHeldForSale" abstract="false" name="GoodwillTransferToHeldForSale" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_ScheduleOfEquityMethodInvestmentEquityMethodInvesteeNameSecondaryAxis" abstract="true" name="ScheduleOfEquityMethodInvestmentEquityMethodInvesteeNameSecondaryAxis" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:dimensionItem" type="xbrli:stringItemType"/>
+  <xs:element id="dis_ScheduleOfEquityMethodInvestmentEquityMethodInvesteeNameSecondaryDomain" abstract="true" name="ScheduleOfEquityMethodInvestmentEquityMethodInvesteeNameSecondaryDomain" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_NFLMember" abstract="true" name="NFLMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_HearstCorporationMember" abstract="true" name="HearstCorporationMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_EquityInterestHeldByFuboShareholdersMember" abstract="true" name="EquityInterestHeldByFuboShareholdersMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_EquityInterestHeldByRILMember" abstract="true" name="EquityInterestHeldByRILMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_EquityInterestHeldByBodhiTreeSystemsMember" abstract="true" name="EquityInterestHeldByBodhiTreeSystemsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_EquityInterestHeldbyNBCUniversalMember" abstract="true" name="EquityInterestHeldbyNBCUniversalMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_MLBMember" abstract="true" name="MLBMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_FuboOperationsLLCMember" abstract="true" name="FuboOperationsLLCMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_FuboMember" abstract="true" name="FuboMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_HuluLLCMember" abstract="true" name="HuluLLCMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_BAMTechLLCMember" abstract="true" name="BAMTechLLCMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_DomesticDTCSportsBusinessMember" abstract="true" name="DomesticDTCSportsBusinessMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_NFLNetworkMember" abstract="true" name="NFLNetworkMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_JointVentureOwnershipPercentage" abstract="false" name="JointVentureOwnershipPercentage" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="dis_NonCashTaxCharge" abstract="false" name="NonCashTaxCharge" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_PercentageOfTaxBenefitSharedArisingFromNoncontrollingInterestAcquisition" abstract="false" name="PercentageOfTaxBenefitSharedArisingFromNoncontrollingInterestAcquisition" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="dis_ContributionToSubsdiaryNoncontrollingOwner" abstract="false" name="ContributionToSubsdiaryNoncontrollingOwner" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_TaxBenefitAmortizationPeriodArisingFromNoncontrollingInterestAcquisition" abstract="false" name="TaxBenefitAmortizationPeriodArisingFromNoncontrollingInterestAcquisition" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="dis_CTVSpecialtyTelevisionInc.Member" abstract="true" name="CTVSpecialtyTelevisionInc.Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_EpicGamesMember" abstract="true" name="EpicGamesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ScheduleOfCondensedConsolidatingBalanceSheetsTable" abstract="true" name="ScheduleOfCondensedConsolidatingBalanceSheetsTable" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType"/>
+  <xs:element id="dis_InternationalThemeParksMember" abstract="true" name="InternationalThemeParksMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ScheduleOfCondensedConsolidatingBalanceSheetsLineItems" abstract="true" name="ScheduleOfCondensedConsolidatingBalanceSheetsLineItems" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_ScheduleOfCondensedConsolidatingStatementOfOperationsTable" abstract="true" name="ScheduleOfCondensedConsolidatingStatementOfOperationsTable" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType"/>
+  <xs:element id="dis_ScheduleOfCondensedConsolidatingStatementOfOperationsLineItems" abstract="true" name="ScheduleOfCondensedConsolidatingStatementOfOperationsLineItems" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_EuroDisneyMember" abstract="true" name="EuroDisneyMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_AsiaInternationalThemeParksMember" abstract="true" name="AsiaInternationalThemeParksMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ShanghaiDisneyResortManagementCompanyMember" abstract="true" name="ShanghaiDisneyResortManagementCompanyMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ShendiLoanMember" abstract="true" name="ShendiLoanMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ShendiLineOfCreditMember" abstract="true" name="ShendiLineOfCreditMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_HIBORMember" abstract="true" name="HIBORMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_CumulativeContributionStatusAxis" abstract="true" name="CumulativeContributionStatusAxis" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:dimensionItem" type="xbrli:stringItemType"/>
+  <xs:element id="dis_CumulativeContributionStatusDomain" abstract="true" name="CumulativeContributionStatusDomain" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_CumulativeContributionsByAllPartiesMember" abstract="true" name="CumulativeContributionsByAllPartiesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_RoyaltiesAndManagementFees" abstract="false" name="RoyaltiesAndManagementFees" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_VariableInterestEntityFinancialorOtherSupportAmountfromNoncontrollingInterests" abstract="false" name="VariableInterestEntityFinancialorOtherSupportAmountfromNoncontrollingInterests" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_NoncontrollingInterestIncrementalOwnershipPercentagebyNoncontrollingInterestUponAchievingPerformanceTargets" abstract="false" name="NoncontrollingInterestIncrementalOwnershipPercentagebyNoncontrollingInterestUponAchievingPerformanceTargets" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="dis_NoncontrollingInterestOwnershipPercentageParentDilutionPeriod" abstract="false" name="NoncontrollingInterestOwnershipPercentageParentDilutionPeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="dis_ProducedContentAbstract" abstract="true" name="ProducedContentAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_FilmCapitalizedCostReleased" abstract="false" name="FilmCapitalizedCostReleased" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_FilmCapitalizedCostCompletedAndNotReleased" abstract="false" name="FilmCapitalizedCostCompletedAndNotReleased" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_FilmCapitalizedCostProduction" abstract="false" name="FilmCapitalizedCostProduction" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_FilmCapitalizedCostDevelopmentAndPreproduction" abstract="false" name="FilmCapitalizedCostDevelopmentAndPreproduction" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_ProducedAndLicensedContentTotal" abstract="false" name="ProducedAndLicensedContentTotal" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_MonetizationStrategyAxis" abstract="true" name="MonetizationStrategyAxis" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:dimensionItem" type="xbrli:stringItemType"/>
+  <xs:element id="dis_MonetizationStrategyDomain" abstract="true" name="MonetizationStrategyDomain" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_MonetizedIndividuallyMember" abstract="true" name="MonetizedIndividuallyMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_MonetizedAsAGroupMember" abstract="true" name="MonetizedAsAGroupMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_AmortizationOfProducedContentCosts" abstract="false" name="AmortizationOfProducedContentCosts" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_AmortizationOfLicensedTelevisionAndProgrammingRights" abstract="false" name="AmortizationOfLicensedTelevisionAndProgrammingRights" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_AmortizationOfProducedAndLicensedContentCostsTotal" abstract="false" name="AmortizationOfProducedAndLicensedContentCostsTotal" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_ProducedContentMonetizedOnItsOwnExpectedAmortizationAbstract" abstract="true" name="ProducedContentMonetizedOnItsOwnExpectedAmortizationAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_ProducedContentMonetizedInFilmGroupExpectedAmortizationAbstract" abstract="true" name="ProducedContentMonetizedInFilmGroupExpectedAmortizationAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_ProducedContentExpectedAmortizationAbstract" abstract="true" name="ProducedContentExpectedAmortizationAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_FilmReleasedFilmExpectedAmortizationYearOne" abstract="false" name="FilmReleasedFilmExpectedAmortizationYearOne" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_FilmReleasedFilmExpectedAmortizationYearTwo" abstract="false" name="FilmReleasedFilmExpectedAmortizationYearTwo" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_FilmReleasedFilmExpectedAmortizationYearThree" abstract="false" name="FilmReleasedFilmExpectedAmortizationYearThree" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_FilmCompletedAndNotReleasedFilmExpectedAmortizationInNextOperatingCycle" abstract="false" name="FilmCompletedAndNotReleasedFilmExpectedAmortizationInNextOperatingCycle" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_LicensedContentAbstract" abstract="true" name="LicensedContentAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_FiniteLivedContractualRightsExpectedAmortizationYearOne" abstract="false" name="FiniteLivedContractualRightsExpectedAmortizationYearOne" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_FiniteLivedContractualRightsExpectedAmortizationYearTwo" abstract="false" name="FiniteLivedContractualRightsExpectedAmortizationYearTwo" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_FiniteLivedContractualRightsExpectedAmortizationYearThree" abstract="false" name="FiniteLivedContractualRightsExpectedAmortizationYearThree" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_ProducedContentMember" abstract="true" name="ProducedContentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_LicensedProgrammingRightsMember" abstract="true" name="LicensedProgrammingRightsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_UnamortizedAcquiredFilmAndTelevisionLibraries" abstract="false" name="UnamortizedAcquiredFilmAndTelevisionLibraries" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_WeightedAverageRemainingAmortizationPeriod" abstract="false" name="WeightedAverageRemainingAmortizationPeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="dis_ReductionInContentAmortizationExpense" abstract="false" name="ReductionInContentAmortizationExpense" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_ProductionTaxCreditReceivable" abstract="false" name="ProductionTaxCreditReceivable" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_U.S.DollarDenominatedNotesMember" abstract="true" name="U.S.DollarDenominatedNotesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_OtherForeignCurrencyDenominatedDebtMember" abstract="true" name="OtherForeignCurrencyDenominatedDebtMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_DebtOtherMember" abstract="true" name="DebtOtherMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_LongTermDebtCurrentPortionMember" abstract="true" name="LongTermDebtCurrentPortionMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_NonCurrentMember" abstract="true" name="NonCurrentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_CustomLongtermDebtcontra" abstract="false" name="CustomLongtermDebtcontra" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_NotionalAmountOfFloatingInterestRateDebtWithInterestRateHedgeAndCrossCurrencySwap" abstract="false" name="NotionalAmountOfFloatingInterestRateDebtWithInterestRateHedgeAndCrossCurrencySwap" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_FairValueAdjustmentHedgingCarryingAmount" abstract="false" name="FairValueAdjustmentHedgingCarryingAmount" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_BankFacilitiestoSupportCommercialPaperBorrowingsAbstract" abstract="true" name="BankFacilitiestoSupportCommercialPaperBorrowingsAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_ExistingLineofCredit1Member" abstract="true" name="ExistingLineofCredit1Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ExistingLineOfCredit2Member" abstract="true" name="ExistingLineOfCredit2Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ExistingLineofCredit3Member" abstract="true" name="ExistingLineofCredit3Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_CommercialPaperActivityAbstract" abstract="true" name="CommercialPaperActivityAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_CommercialPaperwithoriginalmaturitieslessthatthreemonthsMember" abstract="true" name="CommercialPaperwithoriginalmaturitieslessthatthreemonthsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_CommercialpaperwithoriginalmaturitiesgreaterthanthreemonthsMember" abstract="true" name="CommercialpaperwithoriginalmaturitiesgreaterthanthreemonthsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_LongTermDebtMaturitiesRepaymentsOfPrincipalTable" abstract="true" name="LongTermDebtMaturitiesRepaymentsOfPrincipalTable" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType"/>
+  <xs:element id="dis_BeforeConsolidationMember" abstract="true" name="BeforeConsolidationMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ConsolidatingAdjustmentsMember" abstract="true" name="ConsolidatingAdjustmentsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_LongTermDebtMaturitiesRepaymentsOfPrincipalLineItems" abstract="true" name="LongTermDebtMaturitiesRepaymentsOfPrincipalLineItems" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_EstimatedFutureInterestPaymentAbstract" abstract="true" name="EstimatedFutureInterestPaymentAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_LongTermDebtExpectedInterestPaymentYearOne" abstract="false" name="LongTermDebtExpectedInterestPaymentYearOne" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_LongTermDebtExpectedInterestPaymentYearTwo" abstract="false" name="LongTermDebtExpectedInterestPaymentYearTwo" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_LongTermDebtExpectedInterestPaymentYearThree" abstract="false" name="LongTermDebtExpectedInterestPaymentYearThree" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_LongTermDebtExpectedInterestPaymentYearFour" abstract="false" name="LongTermDebtExpectedInterestPaymentYearFour" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_LongTermDebtExpectedInterestPaymentYearFive" abstract="false" name="LongTermDebtExpectedInterestPaymentYearFive" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_LongTermDebtExpectedInterestPaymentAfterYearFive" abstract="false" name="LongTermDebtExpectedInterestPaymentAfterYearFive" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_LongTermDebtExpectedInterestPaymentGross" abstract="false" name="LongTermDebtExpectedInterestPaymentGross" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_MaturitiesOfLongTermDebtAndInterestAbstract" abstract="true" name="MaturitiesOfLongTermDebtAndInterestAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_LongTermDebtPrincipalAndInterestPaymentsYearOne" abstract="false" name="LongTermDebtPrincipalAndInterestPaymentsYearOne" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_LongTermDebtPrincipalAndInterestPaymentsYearTwo" abstract="false" name="LongTermDebtPrincipalAndInterestPaymentsYearTwo" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_LongTermDebtPrincipalAndInterestPaymentsYearThree" abstract="false" name="LongTermDebtPrincipalAndInterestPaymentsYearThree" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_LongTermDebtPrincipalAndInterestPaymentsYearFour" abstract="false" name="LongTermDebtPrincipalAndInterestPaymentsYearFour" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_LongTermDebtPrincipalAndInterestPaymentsYearFive" abstract="false" name="LongTermDebtPrincipalAndInterestPaymentsYearFive" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_LongTermDebtPrincipalAndInterestPaymentsAfterYearFive" abstract="false" name="LongTermDebtPrincipalAndInterestPaymentsAfterYearFive" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_LongTermDebtPrincipalAndInterestPaymentsGross" abstract="false" name="LongTermDebtPrincipalAndInterestPaymentsGross" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_InterestIncomeExpenseAbstract" abstract="true" name="InterestIncomeExpenseAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_BusinessAxis" abstract="true" name="BusinessAxis" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:dimensionItem" type="xbrli:stringItemType"/>
+  <xs:element id="dis_BusinessDomain" abstract="true" name="BusinessDomain" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_DisneyCruiseLineMember" abstract="true" name="DisneyCruiseLineMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_CreditFacilityRelatedToCruiseShipTreasureMember" abstract="true" name="CreditFacilityRelatedToCruiseShipTreasureMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_CreditFacilityRelatedToCruiseShipDestinyMember" abstract="true" name="CreditFacilityRelatedToCruiseShipDestinyMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ForeignCurrencyDenominatedCanadianDebtMarch2027MaturityMember" abstract="true" name="ForeignCurrencyDenominatedCanadianDebtMarch2027MaturityMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_DeferredTaxAssetsLicensingRevenues" abstract="false" name="DeferredTaxAssetsLicensingRevenues" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_DeferredTaxAssetsLeaseLiabilities" abstract="false" name="DeferredTaxAssetsLeaseLiabilities" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_DeferredTaxLiabilitiesInvestmentinU.S.Entities" abstract="false" name="DeferredTaxLiabilitiesInvestmentinU.S.Entities" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_DeferredTaxLiabilitiesInvestmentinForeignEntities" abstract="false" name="DeferredTaxLiabilitiesInvestmentinForeignEntities" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_DeferredTaxLiabilitiesRightOfUseAssets" abstract="false" name="DeferredTaxLiabilitiesRightOfUseAssets" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_DeferredTaxLiabilitiesbeforevaluationallowance" abstract="false" name="DeferredTaxLiabilitiesbeforevaluationallowance" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_IncomeTaxesTable" abstract="true" name="IncomeTaxesTable" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType"/>
+  <xs:element id="dis_IncomeTaxesLineItems" abstract="true" name="IncomeTaxesLineItems" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_StateNetOperatingLossAndTaxCreditCarryforward" abstract="false" name="StateNetOperatingLossAndTaxCreditCarryforward" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_DeferredTaxAssetsNetOperatingLossAndTaxCreditCarryforward" abstract="false" name="DeferredTaxAssetsNetOperatingLossAndTaxCreditCarryforward" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_DeferredTaxAssetsOperatingLossAndTaxNotSubjectToExpiration" abstract="false" name="DeferredTaxAssetsOperatingLossAndTaxNotSubjectToExpiration" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_OperatingLossAndTaxCreditCarryforwardExpirationDate" abstract="false" name="OperatingLossAndTaxCreditCarryforwardExpirationDate" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:dateItemType"/>
+  <xs:element id="dis_RollForwardDeferredTaxAssetsValuationAllowance" abstract="false" name="RollForwardDeferredTaxAssetsValuationAllowance" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_ValuationAllowanceChangeDueToTFCFAcquisition" abstract="false" name="ValuationAllowanceChangeDueToTFCFAcquisition" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_EffectiveIncomeTaxRateReconciliationChangeInIncomeTaxClassificationPercent" abstract="false" name="EffectiveIncomeTaxRateReconciliationChangeInIncomeTaxClassificationPercent" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="dis_EffectiveIncomeTaxRateReconciliationIncomeTaxAuditsAndReservesPercent" abstract="false" name="EffectiveIncomeTaxRateReconciliationIncomeTaxAuditsAndReservesPercent" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="dis_UnrecognizedTaxBenefitsDecreasesAccruedInterestResultingFromSettlements" abstract="false" name="UnrecognizedTaxBenefitsDecreasesAccruedInterestResultingFromSettlements" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_AdjustmentstoIncomeTaxExpenseIncomeTaxBenefitfromSharebasedCompensation" abstract="false" name="AdjustmentstoIncomeTaxExpenseIncomeTaxBenefitfromSharebasedCompensation" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_ScheduleOfNetPeriodicBenefitCostsWeightedAverageAssumptionsTable" abstract="true" name="ScheduleOfNetPeriodicBenefitCostsWeightedAverageAssumptionsTable" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType"/>
+  <xs:element id="dis_ScheduleOfNetPeriodicBenefitCostsWeightedAverageAssumptionsLineItems" abstract="true" name="ScheduleOfNetPeriodicBenefitCostsWeightedAverageAssumptionsLineItems" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_AlternativeInvestmentsFundsMember" abstract="true" name="AlternativeInvestmentsFundsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ScheduleOfPensionAndOtherPostretirementBenefitsChangesInBenefitObligationAndFairValueOfPlanAssetsTable" abstract="true" name="ScheduleOfPensionAndOtherPostretirementBenefitsChangesInBenefitObligationAndFairValueOfPlanAssetsTable" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType"/>
+  <xs:element id="dis_DerivativeAndOtherContractsMember" abstract="true" name="DerivativeAndOtherContractsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_TotalInvestmentsInFairValueHierarchyMember" abstract="true" name="TotalInvestmentsInFairValueHierarchyMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_CommonCollectiveFundsMember" abstract="true" name="CommonCollectiveFundsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_OtherInvestmentsInFairValueHierarchyMember" abstract="true" name="OtherInvestmentsInFairValueHierarchyMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ScheduleOfPensionAndOtherPostretirementBenefitsChangesInBenefitObligationAndFairValueOfPlanAssetsLineItems" abstract="true" name="ScheduleOfPensionAndOtherPostretirementBenefitsChangesInBenefitObligationAndFairValueOfPlanAssetsLineItems" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_DefinedBenefitPlanFairValueofPlanAssetsintheFairValueHierarchy" abstract="false" name="DefinedBenefitPlanFairValueofPlanAssetsintheFairValueHierarchy" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_UnitedStatesMidLargeCapMember" abstract="true" name="UnitedStatesMidLargeCapMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_SharesHeldInWaltDisneyCompanyMember" abstract="true" name="SharesHeldInWaltDisneyCompanyMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_DefinedBenefitPlanExpectedFutureBenefitPayments" abstract="false" name="DefinedBenefitPlanExpectedFutureBenefitPayments" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_SensitivityAnalysisOfNetPeriodicPensionAndPostretirementMedicalCostImpactOfOnePercentagePointDecreaseInDiscountRate" abstract="false" name="SensitivityAnalysisOfNetPeriodicPensionAndPostretirementMedicalCostImpactOfOnePercentagePointDecreaseInDiscountRate" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_SensitivityAnalysisOfNetPeriodicPensionAndPostretirementMedicalCostImpactOfOnePercentagePointIncreaseInDiscountRate" abstract="false" name="SensitivityAnalysisOfNetPeriodicPensionAndPostretirementMedicalCostImpactOfOnePercentagePointIncreaseInDiscountRate" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_SensitivityAnalysisOfProjectedBenefitObligationsImpactOfOnePercentagePointDecreaseInDiscountRate" abstract="false" name="SensitivityAnalysisOfProjectedBenefitObligationsImpactOfOnePercentagePointDecreaseInDiscountRate" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_SensitivityAnalysisOfProjectedBenefitObligationsImpactOfOnePercentagePointIncreaseInDiscountRate" abstract="false" name="SensitivityAnalysisOfProjectedBenefitObligationsImpactOfOnePercentagePointIncreaseInDiscountRate" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_SensitivityAnalysisOfNetPeriodicPensionAndPostretirementCostImpactOfOnePercentagePointDecreaseInExpectedLongTermRateOfReturnOnAssets" abstract="false" name="SensitivityAnalysisOfNetPeriodicPensionAndPostretirementCostImpactOfOnePercentagePointDecreaseInExpectedLongTermRateOfReturnOnAssets" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_SensitivityAnalysisOfNetPeriodicPensionAndPostretirementCostImpactOfOnePercentagePointIncreaseInExpectedLongTermRateOfReturnOnAssets" abstract="false" name="SensitivityAnalysisOfNetPeriodicPensionAndPostretirementCostImpactOfOnePercentagePointIncreaseInExpectedLongTermRateOfReturnOnAssets" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_DefinedBenefitPlanEmployeeVestingRequirementNew" abstract="false" name="DefinedBenefitPlanEmployeeVestingRequirementNew" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="dis_DefinedBenefitPlanAccumulatedBenefitObligationPercentageVested" abstract="false" name="DefinedBenefitPlanAccumulatedBenefitObligationPercentageVested" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="dis_AdditionalCapitalContributionsCommitment" abstract="false" name="AdditionalCapitalContributionsCommitment" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_DefinedContributionPlanContributionRate" abstract="false" name="DefinedContributionPlanContributionRate" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="dis_AccumulatedNetGainLossFromMarketValueAdjustmentsMember" abstract="true" name="AccumulatedNetGainLossFromMarketValueAdjustmentsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_AOCIReclassificationsToComprehensiveIncomeBeforeTax" abstract="false" name="AOCIReclassificationsToComprehensiveIncomeBeforeTax" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_AOCIReclassificationsToComprehensiveIncomeTax" abstract="false" name="AOCIReclassificationsToComprehensiveIncomeTax" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_AccumulatedOtherComprehensiveIncomeLossRelatedToDefinedBenefitPlans.Member" abstract="true" name="AccumulatedOtherComprehensiveIncomeLossRelatedToDefinedBenefitPlans.Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_AccumulatedNetGainLossFromForeignCurrencyAndOtherAdjustmentsMember" abstract="true" name="AccumulatedNetGainLossFromForeignCurrencyAndOtherAdjustmentsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_AOCIReclassificationsToComprehensiveIncomeNetOfTax" abstract="false" name="AOCIReclassificationsToComprehensiveIncomeNetOfTax" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_ShareBasedCompensationArrangementByShareBasedPaymentAwardFairValueAssumptionsTerminationRate" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardFairValueAssumptionsTerminationRate" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="dis_ShareBasedCompensationArrangementByShareBasedPaymentAwardFairValueAssumptionsExerciseMultiple" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardFairValueAssumptionsExerciseMultiple" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:decimalItemType"/>
+  <xs:element id="dis_SharebasedCompensationArrangementbySharebasedPaymentAwardOptionsNumberofSharesRollForward" abstract="true" name="SharebasedCompensationArrangementbySharebasedPaymentAwardOptionsNumberofSharesRollForward" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsWeightedAverageExercisePriceAbstract" abstract="true" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardOptionsWeightedAverageExercisePriceAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_RangeOneMember" abstract="true" name="RangeOneMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_RangeTwoMember" abstract="true" name="RangeTwoMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_RangeThreeMember" abstract="true" name="RangeThreeMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_RangeFourMember" abstract="true" name="RangeFourMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_RangeFiveMember" abstract="true" name="RangeFiveMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_RangeSixMember" abstract="true" name="RangeSixMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_VestedMember" abstract="true" name="VestedMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ExpectedtoVestMember" abstract="true" name="ExpectedtoVestMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsWeightedAverageGrantDateFairValueAbstract" abstract="true" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsWeightedAverageGrantDateFairValueAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_ShareBasedCompensationArrangementByShareBasedPaymentAwardExercisesAndVestedInPeriodTotalIntrinsicValue" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardExercisesAndVestedInPeriodTotalIntrinsicValue" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_TaxBenefitFromStockOptionsExercisedAndVestingOfRestrictedStockAwardsAndUnits" abstract="false" name="TaxBenefitFromStockOptionsExercisedAndVestingOfRestrictedStockAwardsAndUnits" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_ProductionTaxCreditReceivables" abstract="false" name="ProductionTaxCreditReceivables" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_Attractionsbuildingsandimprovements" abstract="false" name="Attractionsbuildingsandimprovements" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_FurnitureFixturesAndEquipmentGross" abstract="false" name="FurnitureFixturesAndEquipmentGross" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_FiniteLivedCharacterFranchiseIntangiblesCopyrightsAndTrademarksMember" abstract="true" name="FiniteLivedCharacterFranchiseIntangiblesCopyrightsAndTrademarksMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_DistributionAgreementsMember" abstract="true" name="DistributionAgreementsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_CommitmentsAndContingenciesTable" abstract="true" name="CommitmentsAndContingenciesTable" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType"/>
+  <xs:element id="dis_SportsProgrammingMember" abstract="true" name="SportsProgrammingMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_OtherProgrammingMember" abstract="true" name="OtherProgrammingMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_OtherCommitmentsMember" abstract="true" name="OtherCommitmentsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_CommitmentsAndContingenciesLineItems" abstract="true" name="CommitmentsAndContingenciesLineItems" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_CommitmentsAndContingenciesDisclosureTable" abstract="true" name="CommitmentsAndContingenciesDisclosureTable" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType"/>
+  <xs:element id="dis_ProgrammingRightsMember" abstract="true" name="ProgrammingRightsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_AvailableProgrammingMember" abstract="true" name="AvailableProgrammingMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_CommitmentsAndContingenciesDisclosureLineItems" abstract="true" name="CommitmentsAndContingenciesDisclosureLineItems" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="dis_OperatingAndFinancingLeaseTotalRightOfUseAsset" abstract="false" name="OperatingAndFinancingLeaseTotalRightOfUseAsset" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_OperatingAndFinanceLeaseLiabilityCurrent" abstract="false" name="OperatingAndFinanceLeaseLiabilityCurrent" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_OperatingAndFinanceLeaseLiabilityNoncurrent" abstract="false" name="OperatingAndFinanceLeaseLiabilityNoncurrent" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_OperatingAndFinanceLeaseLiability" abstract="false" name="OperatingAndFinanceLeaseLiability" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_CashOutflowFromOperatingAndFinancingLeases" abstract="false" name="CashOutflowFromOperatingAndFinancingLeases" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_TotalOperatingLeaseLiabilityOnTheBalanceSheet" abstract="false" name="TotalOperatingLeaseLiabilityOnTheBalanceSheet" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="dis_FairValueAssetsAndLiabilitiesMeasuredOnRecurringBasisTable" abstract="true" name="FairValueAssetsAndLiabilitiesMeasuredOnRecurringBasisTable" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType"/>
+  <xs:element id="dis_PercentageofCashandCashEquivalentBalancesWithFinancialInstitutions" abstract="false" name="PercentageofCashandCashEquivalentBalancesWithFinancialInstitutions" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="dis_CurrentPortionofBorrowingsMember" abstract="true" name="CurrentPortionofBorrowingsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_HedgedInstrumentsMaturityUpperLimit" abstract="false" name="HedgedInstrumentsMaturityUpperLimit" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="dis_EntertainmentLinearNetworksMember" abstract="true" name="EntertainmentLinearNetworksMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_AEAndTataPlayLimitedMember" abstract="true" name="AEAndTataPlayLimitedMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ContentCurationMember" abstract="true" name="ContentCurationMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_ConsumerProductsAndOnlineAssetImpairmentsMember" abstract="true" name="ConsumerProductsAndOnlineAssetImpairmentsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="dis_RussiaBusinessExitMember" abstract="true" name="RussiaBusinessExitMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+</xs:schema>

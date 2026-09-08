@@ -4,7 +4,7 @@
 #   - Pull requests:  fast tests only, single Python version  (cheap, quick gate)
 #   - Push to main:   fast (full matrix) + network + slow      (real integration gate)
 #   - Nightly (cron): full suite                               (freshness vs SEC API)
-#   - concurrency:    cancel superseded runs on the same ref
+#   - concurrency:    cancel superseded PR runs; main runs always complete
 #   - pip cache:      avoid reinstalling deps from scratch in every job
 #
 # There is deliberately NO paths-ignore. A docs-only change would then report no
@@ -53,10 +53,13 @@ on:
     - cron: '0 7 * * *'
   workflow_dispatch:
 
-# Cancel an in-progress run when a newer commit lands on the same branch/PR.
+# Cancel an in-progress run when a newer commit lands on the same PR. Pushes to
+# main are never cancelled: PRs merge without being up to date with main, so the
+# post-merge run is the only check that the combination works, and back-to-back
+# merges used to cancel it before it finished.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name != 'push' }}
 
 jobs:
   # Must pass before any job that runs pytest. vcrpy loads cassettes with

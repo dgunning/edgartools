@@ -226,6 +226,12 @@ def _bool_ballot_box(value: str) -> str:
 
 _SEPS = r'[./\-\s]'
 
+# A word date's fields are separated by a run of anything that is neither a digit
+# nor a letter, per the Transformation Registry's separator grammar. The month is
+# a NAME here, so the numeric ``_SEPS`` class cannot be reused: it must not eat
+# the letters it sits beside.
+_WORD_DATE_SEPS = re.compile(r'[^0-9A-Za-z]+')
+
 
 def _date_numeric(order: str) -> Callable[[str], str]:
     """
@@ -259,8 +265,13 @@ def _date_words(order: str) -> Callable[[str], str]:
     numeric fields.
     """
     def transform(value: str) -> str:
-        text = _clean(value).replace(',', ' ')
-        tokens = _clean(text).split()
+        # Split on the separator RUN, not on whitespace. Replacing commas with
+        # spaces and calling .split() accepted only space-separated dates, so
+        # '19-Sep-2024' stayed a single token and every hyphenated, dotted or
+        # slashed date was rejected -- across all 13 formats sharing this
+        # tokenizer, not just the one reported. The numeric sibling already
+        # accepted those separators, which is what made the two disagree.
+        tokens = [t for t in _WORD_DATE_SEPS.split(_clean(value)) if t]
         if len(tokens) != len(order):
             raise _fail(value, f'a date of the form {order}')
         fields = dict(zip(order, tokens, strict=True))

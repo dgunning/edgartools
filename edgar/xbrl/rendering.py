@@ -4,6 +4,7 @@ Rendering functions for XBRL data.
 This module provides functions for formatting and displaying XBRL data.
 """
 
+import math
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
@@ -313,6 +314,19 @@ class RenderedStatement:
                 return obj.isoformat()
             if isinstance(obj, ElementCatalog):
                 return {"name": obj.name, "labels": obj.labels}
+            if isinstance(obj, float) and not math.isfinite(obj):
+                # Infinity and NaN are not JSON. Python's encoder emits them as
+                # bare `Infinity`/`NaN` tokens by default, which no standards
+                # compliant reader accepts, and refuses outright under
+                # allow_nan=False -- so a method documented as returning a
+                # JSON-safe dict produced something that would not round-trip.
+                # The generated percentage change is what creates them:
+                # _calculate_comparison returns inf whenever the prior period
+                # is a filed zero, which is ordinary (Cato's basic EPS runs
+                # -1.17, 0, 1.65). null carries the same "no bounded
+                # comparison" meaning and survives serialization; the filed
+                # values in `cells` are untouched and remain finite (gh #1290).
+                return None
             return obj
 
         def _period_to_dict(p: PeriodData) -> Dict[str, Any]:
