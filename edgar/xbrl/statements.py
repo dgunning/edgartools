@@ -462,6 +462,38 @@ class Statement:
         self._report = None  # Set by notes.py when built from FilingSummary
 
     @property
+    def classified_type(self) -> Optional[str]:
+        """What kind of statement this is, for rules that key on the kind.
+
+        ``canonical_type`` answers this only when the caller happened to select
+        the statement by name. Selecting the SAME statement by its role URI
+        leaves it None, because no issuer writes "CashFlowStatement" into
+        ``http://www.apple.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS`` -- so
+        the presentation-sign gate, which keys on the type, silently skipped a
+        correctly hydrated ``preferred_sign`` of -1 and exported Apple's
+        FY2023 capital expenditures as +10,959,000,000 where the by-name
+        accessor gave -10,959,000,000 (gh #1285).
+
+        The resolver has already classified every role; this reads that
+        classification back rather than guessing from the string.
+
+        Deliberately SEPARATE from ``canonical_type``: that attribute also
+        decides WHICH role ``render()`` renders, so populating it for a
+        role-selected statement makes "render this role" mean "render the
+        canonical statement of this kind" -- a different role. Measured on
+        Boeing, that silently dropped a filed FY2020 asset-impairment charge
+        of $24,000,000 from its cash flow statement. Classification and
+        selection are different questions and must stay different fields.
+        """
+        if self.canonical_type:
+            return self.canonical_type
+        for stmt in getattr(self.xbrl, 'get_all_statements', list)() or []:
+            if stmt.get('role') == self.role_or_type:
+                statement_type = stmt.get('type')
+                return statement_type if statement_type in statement_to_concepts else None
+        return None
+
+    @property
     def report(self):
         """The FilingSummary Report backing this statement, if available.
 
@@ -1733,7 +1765,7 @@ class Statement:
         period_cols = [col for col in df.columns if col not in metadata_cols]
 
         # Get statement type
-        statement_type = self.canonical_type if self.canonical_type else self.role_or_type
+        statement_type = self.classified_type
 
         # For Income Statement, Cash Flow Statement, and Balance Sheet: Use preferred_sign
         # Balance Sheet included for contra accounts like Treasury Stock (preferred_sign=-1)

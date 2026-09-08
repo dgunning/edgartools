@@ -497,11 +497,26 @@ class Financials:
             >>> revenue = financials.get_revenue()  # Most recent revenue
             >>> prev_revenue = financials.get_revenue(1)  # Previous period revenue
         """
-        # First try concept-based search using standardization mappings
-        # Try "Contract Revenue" first (more specific), then "Revenue" (more general)
+        # First try concept-based search using standardization mappings.
+        #
+        # The filed TOTAL comes first. A contract-revenue fact can be one
+        # component of us-gaap:Revenues rather than the top line: Cato reports
+        # both in the same face statement, and its calculation linkbase defines
+        # Revenues = RevenueFromContractWithCustomerIncludingAssessedTax +
+        # IncomeOther, so asking for the more specific concept first returned
+        # retail sales as total revenue and understated FY2023 by $7.7M
+        # (gh #1294). Statement.REVENUE_CONCEPTS already ordered it this way,
+        # and this list disagreeing with it is why the same object's
+        # get_revenue() and analyze_trends() reported different revenue.
+        #
+        # A filer whose only top line is contract revenue is unaffected:
+        # 'Revenue' matches nothing and the search falls through. Measured over
+        # the fixture corpus, both concepts resolve in no filing at different
+        # values, and 7 filings (Apple, Microsoft, Amazon, Tesla) resolve only
+        # the contract concept and are unchanged.
         result = self._get_standardized_concept_by_xbrl(
             'income',
-            ['Contract Revenue', 'Revenue'],
+            ['Revenue', 'Contract Revenue'],
             period_offset
         )
 
@@ -634,12 +649,29 @@ class Financials:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
 
         Returns:
-            Total liabilities value if found, None otherwise
+            Total liabilities value if found, None otherwise. A filing that
+            reports no liabilities total returns None rather than a substitute.
         """
+        # Identify the concept, not the filer's prose. The label path alone
+        # returned liabilities AND equity as liabilities (gh #1279): its
+        # r'Liabilities$' pattern matches "TOTAL LIABILITIES AND SHAREHOLDERS'
+        # EQUITY", which is what a balance sheet carries when it reports no
+        # standalone us-gaap:Liabilities total. NIKE's FY2026 10-K returned
+        # $38.410B — its total assets — so debt_to_assets came back as exactly
+        # 1.0 against an actual 0.613. AMZN, WMT, T, DIS, KO and ORCL did the
+        # same; JPMorgan did not, because it files the standalone total.
+        value = self._get_standardized_concept_by_xbrl(
+            'balance', ['Total Liabilities'], period_offset)
+        if value is not None:
+            return value
+
+        # Label fallback for a filer whose total is present but unmapped. Both
+        # patterns are anchored at BOTH ends: '^Total Liabilities' alone still
+        # matches the combined caption, so anchoring only the start would
+        # reintroduce the same defect one pattern later.
         patterns = [
-            r'Total Liabilities$',
-            r'^Total Liabilities',
-            r'Liabilities$'
+            r'^Total Liabilities$',
+            r'^Liabilities$',
         ]
         return self._get_standardized_concept_value('balance', patterns, period_offset)
 
@@ -824,30 +856,48 @@ class Financials:
             if df.empty or 'concept' not in df.columns:
                 return None
 
+            # Drop abstract rows, as the two sibling helpers already do. An
+            # abstract row is a heading: it never carries a value, and it sorts
+            # ABOVE the row it introduces. A filing that presents
+            # WeightedAverageNumberOfSharesOutstandingBasicAbstract over
+            # WeightedAverageNumberOfSharesOutstandingBasic — Auburn National's
+            # 10-K does — otherwise matched the heading first and reported no
+            # shares at all (gh #1291).
+            if 'abstract' in df.columns:
+                df = df[~df['abstract']].copy()
+
+            # Get available period columns, ordered most-recent-first by period
+            # metadata (positional df order is not recency-sorted — GH #885).
+            # Invariant across patterns, so it is resolved once.
+            period_columns = [col for col in df.columns if col not in _NON_PERIOD_COLUMNS]
+            period_columns = _order_period_columns(rendered, period_columns)
+            if len(period_columns) <= period_offset:
+                return None
+            period_col = period_columns[period_offset]
+
             # Find the concept using pattern matching on concept column
             for pattern in concept_patterns:
                 matches = df[df['concept'].str.contains(pattern, case=False, na=False)]
-                if not matches.empty:
-                    # Get available period columns, ordered most-recent-first by
-                    # period metadata (positional df order is not recency-sorted
-                    # — GH #885).
-                    period_columns = [col for col in df.columns if col not in _NON_PERIOD_COLUMNS]
-                    period_columns = _order_period_columns(rendered, period_columns)
+                if matches.empty:
+                    continue
 
-                    if len(period_columns) > period_offset:
-                        period_col = period_columns[period_offset]
-                        value = matches.iloc[0][period_col]
+                # Try each matching ROW before moving to the next pattern.
+                # Reading only matches.iloc[0] and then falling through to the
+                # next pattern skipped the populated rows behind an empty first
+                # match, which is the other half of gh #1291 and how the two
+                # siblings already behave.
+                for idx in range(len(matches)):
+                    value = matches.iloc[idx][period_col]
 
-                        # Skip empty/NA values - try next pattern
-                        if pd.isna(value) or value == '':
-                            continue
+                    # Skip empty/NA values
+                    if pd.isna(value) or value == '':
+                        continue
 
-                        # Convert to numeric
-                        try:
-                            return float(value) if '.' in str(value) else int(value)
-                        except (ValueError, TypeError):
-                            # Non-numeric value, try next pattern
-                            continue
+                    # Convert to numeric
+                    try:
+                        return float(value) if '.' in str(value) else int(value)
+                    except (ValueError, TypeError):
+                        continue
 
             return None
 
