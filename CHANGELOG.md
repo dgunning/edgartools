@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`XBRLS.from_filings()` silently discarded a filing when its parse raised an unexpected exception.** The loop wrapped `XBRL.from_filing(filing)` in a blanket `except Exception: pass`, so the filing vanished from the result with no trace of which one or why, and a caller got a normally-returned `XBRLS` built from only the filings that happened to succeed. The failing filing's accession number, form and exception are now logged. The pre-existing, intentional tolerance for a filing with no XBRL data at all (`XBRL.from_filing()` returning `None`, #459) is unaffected: that path never raises, so it still reaches `xbrl_list` unchanged. (GH #1174)
+
 ## [5.57.0] - 2026-09-08
 
 ### Fixed

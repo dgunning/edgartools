@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import pandas as pd
 
+from edgar.core import log
 from edgar.xbrl.stitching.core import StatementStitcher, stitch_statements
 from edgar.xbrl.stitching.query import StitchedFactQuery, StitchedFactsView
 
@@ -80,8 +81,12 @@ class XBRLS:
             try:
                 xbrl = XBRL.from_filing(filing)
                 xbrl_list.append(xbrl)
-            except Exception:
-                pass
+            except Exception as exc:
+                log.warning(
+                    f"XBRLS.from_filings: filing {getattr(filing, 'accession_no', filing)} "
+                    f"({getattr(filing, 'form', '?')}) raised {exc.__class__.__name__}: {exc}, "
+                    f"skipped from the result."
+                )
 
         return cls(xbrl_list)
 
