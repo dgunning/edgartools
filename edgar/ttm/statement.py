@@ -10,11 +10,15 @@ from typing import Callable, List, Optional, Tuple
 import pandas as pd
 
 from edgar.entity.models import FinancialFact
-from edgar.ttm.calculator import DurationBucket, TTMCalculator
 
 # Matches the per-share detection used by the entity statement renderer
 # (enhanced_statement.py), so both surfaces agree on what is a per-share amount.
-from edgar.entity.unit_handling import is_per_share_label, is_share_count_label
+from edgar.entity.unit_handling import (
+    format_share_count,
+    is_per_share_label,
+    is_share_count_label,
+)
+from edgar.ttm.calculator import DurationBucket, TTMCalculator
 
 
 def _is_per_share_item(item: dict) -> bool:
@@ -181,12 +185,7 @@ class TTMStatement:
                 elif _is_share_count_item(item):
                     # A count of shares is not an amount of money; the currency
                     # path below rendered 12.1 billion shares as "$12.1B".
-                    if abs_value >= 1e9:
-                        value_str = f"{value / 1e9:,.1f}B shares"
-                    elif abs_value >= 1e6:
-                        value_str = f"{value / 1e6:,.1f}M shares"
-                    else:
-                        value_str = f"{value:,.0f} shares"
+                    value_str = format_share_count(value)
                 elif abs_value >= 1e9:
                     value_str = f"${value / 1e9:,.1f}B"
                 elif abs_value >= 1e6:

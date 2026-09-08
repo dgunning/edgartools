@@ -433,6 +433,21 @@ def is_share_count_label(concept: str, label: str) -> bool:
     return any(indicator in haystack for indicator in SHARE_COUNT_INDICATORS)
 
 
+def format_share_count(value: float) -> str:
+    """Render a number of shares, with no currency prefix.
+
+    Both statement renderers need this and neither should own it: they already
+    duplicated the per-share/currency rule, which is how the share-count case came
+    to exist in neither (bead edgartools-djwu).
+    """
+    magnitude = abs(value)
+    if magnitude >= 1_000_000_000:
+        return f"{value / 1_000_000_000:,.1f}B shares"
+    if magnitude >= 1_000_000:
+        return f"{value / 1_000_000:,.1f}M shares"
+    return f"{value:,.0f} shares"
+
+
 def apply_scale_factor(value: float, scale: Optional[int]) -> float:
     """
     Apply scale factor to a value.

@@ -124,3 +124,18 @@ def test_share_counts_do_not_render_as_currency():
     assert is_per_share_label("us-gaap:EarningsPerShareBasic", "Earnings Per Share, Basic")
     assert not is_share_count_label("us-gaap:EarningsPerShareBasic", "Earnings Per Share, Basic")
     assert not is_share_count_label("us-gaap:Revenues", "Total net sales")
+
+
+def test_both_renderers_format_share_counts_through_one_function():
+    """The classifiers were shared but the formatting was duplicated into both.
+
+    Sharing one and copying the other is how the share-count case came to exist in
+    neither renderer to begin with.
+    """
+    from edgar.entity.unit_handling import format_share_count
+
+    assert format_share_count(12_114_500_000) == "12.1B shares"
+    assert format_share_count(3_230_250_000) == "3.2B shares"
+    assert format_share_count(4_500_000) == "4.5M shares"
+    assert format_share_count(1_250) == "1,250 shares"
+    assert "$" not in format_share_count(12_114_500_000)
