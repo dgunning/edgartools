@@ -866,36 +866,38 @@ class Financials:
             if 'abstract' in df.columns:
                 df = df[~df['abstract']].copy()
 
+            # Get available period columns, ordered most-recent-first by period
+            # metadata (positional df order is not recency-sorted — GH #885).
+            # Invariant across patterns, so it is resolved once.
+            period_columns = [col for col in df.columns if col not in _NON_PERIOD_COLUMNS]
+            period_columns = _order_period_columns(rendered, period_columns)
+            if len(period_columns) <= period_offset:
+                return None
+            period_col = period_columns[period_offset]
+
             # Find the concept using pattern matching on concept column
             for pattern in concept_patterns:
                 matches = df[df['concept'].str.contains(pattern, case=False, na=False)]
-                if not matches.empty:
-                    # Get available period columns, ordered most-recent-first by
-                    # period metadata (positional df order is not recency-sorted
-                    # — GH #885).
-                    period_columns = [col for col in df.columns if col not in _NON_PERIOD_COLUMNS]
-                    period_columns = _order_period_columns(rendered, period_columns)
+                if matches.empty:
+                    continue
 
-                    if len(period_columns) > period_offset:
-                        period_col = period_columns[period_offset]
+                # Try each matching ROW before moving to the next pattern.
+                # Reading only matches.iloc[0] and then falling through to the
+                # next pattern skipped the populated rows behind an empty first
+                # match, which is the other half of gh #1291 and how the two
+                # siblings already behave.
+                for idx in range(len(matches)):
+                    value = matches.iloc[idx][period_col]
 
-                        # Try each matching ROW before moving to the next
-                        # pattern. Reading only matches.iloc[0] and then falling
-                        # through to the next pattern skipped the populated rows
-                        # behind an empty first match, which is the other half of
-                        # gh #1291 and how the two siblings already behave.
-                        for idx in range(len(matches)):
-                            value = matches.iloc[idx][period_col]
+                    # Skip empty/NA values
+                    if pd.isna(value) or value == '':
+                        continue
 
-                            # Skip empty/NA values
-                            if pd.isna(value) or value == '':
-                                continue
-
-                            # Convert to numeric
-                            try:
-                                return float(value) if '.' in str(value) else int(value)
-                            except (ValueError, TypeError):
-                                continue
+                    # Convert to numeric
+                    try:
+                        return float(value) if '.' in str(value) else int(value)
+                    except (ValueError, TypeError):
+                        continue
 
             return None
 
