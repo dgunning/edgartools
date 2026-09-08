@@ -2717,8 +2717,21 @@ class Statements:
             if item in self.statement_by_type and self.statement_by_type[item]:
                 return Statement(self.xbrl, item, canonical_type=item)
 
-            # Otherwise, try to use it directly as a role or statement name
-            # Try to determine canonical type from the name
+            # A known ROLE is never typed by sniffing its name. The resolver has
+            # already classified every role, and `canonical_type` is not a
+            # classification: it also decides WHICH role render() renders, so
+            # inferring it from the role's spelling made "render this role" mean
+            # "render the canonical statement of this kind". Asking for Apple's
+            # .../CONSOLIDATEDBALANCESHEETSParenthetical by its own URI returned
+            # the primary balance sheet, and its share counts and par values were
+            # unreachable. Statement.classified_type answers the classification
+            # question -- which is what the presentation-sign gate reads --
+            # without selecting a role.
+            if any(stmt.get('role') == item for stmt in self.statements):
+                return Statement(self.xbrl, item)
+
+            # Not a role: a bare statement name, where the name is all there is
+            # to go on.
             canonical_type = None
             for std_type in statement_to_concepts.keys():
                 if std_type.lower() in item.lower():
