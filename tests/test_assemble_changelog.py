@@ -69,6 +69,9 @@ def test_load_fragments_rejects_bad_names_and_empty_bodies(tmp_path, monkeypatch
     (tmp_path / "efgh.fixed.md").write_text("   \n")
     with pytest.raises(SystemExit, match="efgh.fixed.md \\(empty\\)"):
         mod.load_fragments()
+    (tmp_path / "efgh.fixed.md").write_text("**Long.** " + "x" * mod.MAX_FRAGMENT_CHARS)
+    with pytest.raises(SystemExit, match="efgh.fixed.md \\(51\\d chars, limit 500\\)"):
+        mod.load_fragments()
 
 
 def test_load_fragments_strips_optional_dash_and_ignores_readme(tmp_path, monkeypatch):

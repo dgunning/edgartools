@@ -8,9 +8,13 @@ changelog.d/<id>.<section>.md
 
 - `<id>`: the bead ID (`xn1u`), issue number (`1244`), or a short slug.
 - `<section>`: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`, or `performance`.
-- Body: the bullet text exactly as it should appear in the changelog, e.g.
-  `**A statement whose columns are not dates lost every column.** A column was kept only if ...`
-  The leading `- ` is optional.
+- Body: the bullet text exactly as it should appear in the changelog — a bold headline
+  naming the user-visible defect, then one or two sentences with **one measured value**,
+  then the reference. **At most 500 characters**; the assembler rejects longer ones. The
+  root-cause narrative belongs in the commit message and the PR, not here. The leading
+  `- ` is optional. Example:
+
+  `**`get_revenue()` returned a component of revenue instead of the filed total.** Contract revenue was tried before `Revenues`, understating Cato's FY2023 top line by $7.7M of other income. The order now matches `Statement.REVENUE_CONCEPTS`. (GH #1294, bead edgartools-y4yp.2)`
 
 At release time `python scripts/release/assemble_changelog.py` folds every fragment into
 `[Unreleased]` and deletes it. `--check` validates and previews without changing anything.
