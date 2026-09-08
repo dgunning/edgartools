@@ -398,6 +398,56 @@ class UnitNormalizer:
         return suggestions
 
 
+# --- Statement line-item classification -------------------------------------
+#
+# How a statement cell is formatted follows from what the line item *is*. These
+# two predicates are the single definition of that, used by both statement
+# renderers -- `edgar/ttm/statement.py` and `edgar/entity/enhanced_statement.py`.
+# They were separate copies, and the share-count case existed in neither, so both
+# rendered 12.1 billion shares as "$12.1B" (bead edgartools-djwu).
+
+PER_SHARE_INDICATORS = ('pershare', 'per share', 'earnings per', 'eps')
+
+# A count of shares, not an amount of money.
+SHARE_COUNT_INDICATORS = ('weightedaveragenumberof', 'weighted average number of',
+                          'sharesoutstanding', 'shares outstanding',
+                          'sharesissued', 'shares issued')
+
+
+def is_per_share_label(concept: str, label: str) -> bool:
+    """True when a line item holds a per-share amount (dollars and cents)."""
+    haystack = f"{concept or ''} {label or ''}".lower()
+    return any(indicator in haystack for indicator in PER_SHARE_INDICATORS)
+
+
+def is_share_count_label(concept: str, label: str) -> bool:
+    """True when a line item holds a number of shares, not an amount of money.
+
+    Per-share amounts are excluded first: 'Earnings Per Share' must keep its
+    dollars-and-cents formatting, and 'Weighted Average Number of Shares
+    Outstanding' must not be given a currency prefix.
+    """
+    if is_per_share_label(concept, label):
+        return False
+    haystack = f"{concept or ''} {label or ''}".lower()
+    return any(indicator in haystack for indicator in SHARE_COUNT_INDICATORS)
+
+
+def format_share_count(value: float) -> str:
+    """Render a number of shares, with no currency prefix.
+
+    Both statement renderers need this and neither should own it: they already
+    duplicated the per-share/currency rule, which is how the share-count case came
+    to exist in neither (bead edgartools-djwu).
+    """
+    magnitude = abs(value)
+    if magnitude >= 1_000_000_000:
+        return f"{value / 1_000_000_000:,.1f}B shares"
+    if magnitude >= 1_000_000:
+        return f"{value / 1_000_000:,.1f}M shares"
+    return f"{value:,.0f} shares"
+
+
 def apply_scale_factor(value: float, scale: Optional[int]) -> float:
     """
     Apply scale factor to a value.

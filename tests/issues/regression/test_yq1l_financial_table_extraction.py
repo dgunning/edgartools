@@ -106,8 +106,18 @@ def test_period_type_is_duration_for_an_income_statement(income_statement):
     assert income_statement.attrs["period_type"] == "duration"
 
 
-def test_a_table_with_nothing_financial_in_it_is_still_empty():
-    """R6 holds single-cell "X" tables. Empty is correct; the fix must not
-    manufacture a frame out of them."""
+def test_a_statement_whose_columns_are_not_dates_is_still_extracted():
+    """R6 is a statement of shareholders' equity, and this asserted it was junk.
+
+    The original premise -- "R6 holds single-cell X tables" -- describes ten of its
+    eleven tables (the XBRL element-definition expandos) and misses the first,
+    which is Apple's condensed equity statement with real filed values. The
+    assertion held only because that statement's columns are equity components
+    rather than dates, so every column was dropped and pandas called the resulting
+    zero-column frame `.empty` (bead edgartools-dhbg).
+    """
     r6 = R2.parent / "R6.htm"
-    assert extract_statement_dataframe(r6.read_text(encoding="utf-8")).empty
+    df = extract_statement_dataframe(r6.read_text(encoding="utf-8"))
+    assert not df.empty
+    assert df.shape == (47, 4)
+    assert df.loc["Beginning balances at Sep. 30, 2023", "Total"] == 62_146_000_000

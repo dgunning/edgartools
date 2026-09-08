@@ -10,17 +10,25 @@ from typing import Callable, List, Optional, Tuple
 import pandas as pd
 
 from edgar.entity.models import FinancialFact
-from edgar.ttm.calculator import DurationBucket, TTMCalculator
 
 # Matches the per-share detection used by the entity statement renderer
 # (enhanced_statement.py), so both surfaces agree on what is a per-share amount.
-_PER_SHARE_INDICATORS = ('pershare', 'per share', 'earnings per', 'eps')
+from edgar.entity.unit_handling import (
+    format_share_count,
+    is_per_share_label,
+    is_share_count_label,
+)
+from edgar.ttm.calculator import DurationBucket, TTMCalculator
 
 
 def _is_per_share_item(item: dict) -> bool:
     """True when a statement line item holds a per-share amount."""
-    haystack = f"{item.get('concept', '')} {item.get('label', '')}".lower()
-    return any(indicator in haystack for indicator in _PER_SHARE_INDICATORS)
+    return is_per_share_label(item.get('concept', ''), item.get('label', ''))
+
+
+def _is_share_count_item(item: dict) -> bool:
+    """True when a statement line item holds a number of shares."""
+    return is_share_count_label(item.get('concept', ''), item.get('label', ''))
 
 
 @dataclass
@@ -174,6 +182,10 @@ class TTMStatement:
                     # the whole-dollar format below rendered EPS of 20.16 as
                     # "$20" while to_dataframe() kept the precision (GH #910).
                     value_str = f"{value:,.2f}"
+                elif _is_share_count_item(item):
+                    # A count of shares is not an amount of money; the currency
+                    # path below rendered 12.1 billion shares as "$12.1B".
+                    value_str = format_share_count(value)
                 elif abs_value >= 1e9:
                     value_str = f"${value / 1e9:,.1f}B"
                 elif abs_value >= 1e6:
