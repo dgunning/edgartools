@@ -116,6 +116,13 @@ Only parallelize fast tests to avoid SEC rate limits.
 - **Test error paths**: Verify that failures produce useful messages, not silent `None`
 - **Place regression tests** in `tests/issues/regression/test_issue_NNN.py`
 
+## Changelog
+
+**Never edit `CHANGELOG.md` in a PR** — concurrent PRs conflict on it. Add a fragment
+`changelog.d/<bead-or-issue-id>.<section>.md` (section: added/changed/fixed/...) with the
+bullet text; see `changelog.d/README.md`. Fragments are folded into `[Unreleased]` at release
+by `scripts/release/assemble_changelog.py`.
+
 ## Version
 
 Check `edgar/__about__.py`
