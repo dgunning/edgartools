@@ -126,6 +126,9 @@ def _order_period_columns(rendered, df_period_columns: List[str]) -> List[str]:
 class Financials:
     def __init__(self, xb: Optional[XBRL]):
         self.xb: XBRL = xb
+        # Set to a dict only for the duration of one get_financial_metrics() call;
+        # None the rest of the time. See _render_statement_frame().
+        self._statement_frame_memo: Optional[Dict[str, Any]] = None
 
     @classmethod
     def extract(cls, filing) -> Optional["Financials"]:
@@ -281,6 +284,53 @@ class Financials:
     # These methods provide easy access to common financial metrics
     # using standardized labels across different companies
 
+    def _render_statement_frame(self, statement_type: str):
+        """Render one statement and convert it, reusing the pair within a metrics call.
+
+        Both lookup helpers need exactly this ``(rendered, df)`` pair and every
+        scalar getter goes through one of them, so a single
+        ``get_financial_metrics()`` re-rendered the same three statements 14 times
+        (18 for JPMorgan, 15 for Coca-Cola) over only THREE distinct
+        configurations.
+
+        The memo is scoped to one call: ``get_financial_metrics()`` installs it on
+        entry and discards it on exit. A statement's rendering depends on the view
+        and the periods in force, so a cache outliving the call would answer a
+        later question with an earlier call's configuration. Frames are handed out
+        as copies, because both callers filter and reshape what they receive.
+
+        Returns:
+            ``(rendered, df)``, or ``(None, None)`` when there is no such statement.
+        """
+        memo = self._statement_frame_memo
+        if memo is not None and statement_type in memo:
+            rendered, df = memo[statement_type]
+            return rendered, (None if df is None else df.copy())
+
+        if statement_type == 'income':
+            statement = self.income_statement()
+        elif statement_type == 'balance':
+            statement = self.balance_sheet()
+        elif statement_type == 'cashflow':
+            statement = self.cash_flow_statement()
+        else:
+            return None, None
+
+        if statement is None:
+            return None, None
+
+        rendered = statement.render(standard=True)
+        # presentation=False: these helpers look up a filed magnitude, not a
+        # displayed figure. get_free_cash_flow() subtracts capital expenditures,
+        # so a presented (negative) outflow here would add it instead
+        # (edgartools-5ztr).
+        df = rendered.to_dataframe(presentation=False)
+
+        if memo is not None:
+            memo[statement_type] = (rendered, df)
+            return rendered, (None if df is None else df.copy())
+        return rendered, df
+
     def _get_standardized_concept_by_xbrl(self, statement_type: str,
                                           standard_concept_names: List[str],
                                           period_offset: int = 0) -> Optional[Union[int, float]]:
@@ -308,26 +358,9 @@ class Financials:
             from edgar.xbrl.standardization import get_default_store
             standardizer = get_default_store()
 
-            # Get the appropriate statement
-            if statement_type == 'income':
-                statement = self.income_statement()
-            elif statement_type == 'balance':
-                statement = self.balance_sheet()
-            elif statement_type == 'cashflow':
-                statement = self.cash_flow_statement()
-            else:
+            rendered, df = self._render_statement_frame(statement_type)
+            if df is None:
                 return None
-
-            if statement is None:
-                return None
-
-            # Render the statement
-            rendered = statement.render(standard=True)
-            # presentation=False: these helpers look up a filed magnitude, not a
-            # displayed figure. get_free_cash_flow() subtracts capital expenditures,
-            # so a presented (negative) outflow here would add it instead
-            # (edgartools-5ztr).
-            df = rendered.to_dataframe(presentation=False)
 
             if df.empty or 'concept' not in df.columns:
                 return None
@@ -417,26 +450,9 @@ class Financials:
             return None
 
         try:
-            # Get the appropriate statement
-            if statement_type == 'income':
-                statement = self.income_statement()
-            elif statement_type == 'balance':
-                statement = self.balance_sheet()
-            elif statement_type == 'cashflow':
-                statement = self.cash_flow_statement()
-            else:
+            rendered, df = self._render_statement_frame(statement_type)
+            if df is None:
                 return None
-
-            if statement is None:
-                return None
-
-            # Render with standardization enabled
-            rendered = statement.render(standard=True)
-            # presentation=False: these helpers look up a filed magnitude, not a
-            # displayed figure. get_free_cash_flow() subtracts capital expenditures,
-            # so a presented (negative) outflow here would add it instead
-            # (edgartools-5ztr).
-            df = rendered.to_dataframe(presentation=False)
 
             if df.empty:
                 return None
@@ -832,26 +848,9 @@ class Financials:
             return None
 
         try:
-            # Get the appropriate statement
-            if statement_type == 'income':
-                statement = self.income_statement()
-            elif statement_type == 'balance':
-                statement = self.balance_sheet()
-            elif statement_type == 'cashflow':
-                statement = self.cash_flow_statement()
-            else:
+            rendered, df = self._render_statement_frame(statement_type)
+            if df is None:
                 return None
-
-            if statement is None:
-                return None
-
-            # Render with standardization enabled
-            rendered = statement.render(standard=True)
-            # presentation=False: these helpers look up a filed magnitude, not a
-            # displayed figure. get_free_cash_flow() subtracts capital expenditures,
-            # so a presented (negative) outflow here would add it instead
-            # (edgartools-5ztr).
-            df = rendered.to_dataframe(presentation=False)
 
             if df.empty or 'concept' not in df.columns:
                 return None
@@ -984,6 +983,18 @@ class Financials:
             >>> metrics = financials.get_financial_metrics()
             >>> print(f"Revenue: ${metrics.get('revenue', 'N/A'):,}")
         """
+        # Every getter below funnels into _render_statement_frame(), which without
+        # this memo re-rendered and re-converted the same three statements once per
+        # getter. Installed here and discarded in the finally, so no rendering
+        # outlives the call that produced it.
+        self._statement_frame_memo = {}
+        try:
+            return self._collect_financial_metrics()
+        finally:
+            self._statement_frame_memo = None
+
+    def _collect_financial_metrics(self) -> Dict[str, Any]:
+        """The body of get_financial_metrics(), run with the per-call memo installed."""
         metrics = {}
 
         # Income Statement Metrics
