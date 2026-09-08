@@ -1959,13 +1959,34 @@ class Statement:
 
         return validate_statement(self, self.canonical_type, level=validation_level)
 
-    def calculate_ratios(self) -> Dict[str, float]:
-        """Calculate common financial ratios for this statement."""
+    def calculate_ratios(self, period: Optional[str] = None) -> Dict[str, float]:
+        """Calculate common financial ratios for this statement.
+
+        Args:
+            period: Period key every operand must come from. Defaults to the
+                statement's own most recent period.
+
+        A ratio is only meaningful when its operands describe the same period,
+        and nothing used to enforce that: the data was fetched unfiltered and
+        each operand independently took the first value in ITS OWN dictionary,
+        whose order is insertion order rather than recency. Netflix's Q3 2024
+        net margin came out as 0.2767 -- Q3 2024 net income over Q3 2023
+        revenue -- where the correct figure is 0.2406, and the result matched
+        neither quarter (gh #1280). Filtering to one period first means the
+        operands cannot disagree.
+
+        An operand missing for the chosen period leaves its ratio out of the
+        result, rather than borrowing another period's value.
+        """
         ratios = {}
-        data = self.get_raw_data()
 
         # Use canonical type if available, otherwise use role_or_type
         statement_type = self.canonical_type if self.canonical_type else self.role_or_type
+
+        period = period or self._default_ratio_period(statement_type)
+        if period is None:
+            return ratios
+        data = self.get_raw_data(period_filter=period)
 
         if statement_type == 'BalanceSheet':
             # Calculate balance sheet ratios
@@ -1975,6 +1996,28 @@ class Statement:
             ratios.update(self._calculate_income_statement_ratios(data))
 
         return ratios
+
+    def _available_trend_periods(self, statement_type: str) -> List[tuple]:
+        """The periods this statement can show, newest first."""
+        try:
+            from edgar.xbrl.periods import determine_periods_to_display
+            return determine_periods_to_display(self.xbrl, statement_type) or []
+        except Exception:  # noqa: BLE001 - selection is best-effort here
+            return []
+
+    def _default_ratio_period(self, statement_type: str) -> Optional[str]:
+        """The period a ratio uses when the caller names none.
+
+        The statement's own most recent period, taken from the same selector
+        that decides what the statement displays, so a ratio describes the
+        column a reader is looking at.
+        """
+        try:
+            from edgar.xbrl.periods import determine_periods_to_display
+            periods = determine_periods_to_display(self.xbrl, statement_type)
+        except Exception:  # noqa: BLE001 - selection is best-effort here
+            return None
+        return periods[0][0] if periods else None
 
     def _calculate_balance_sheet_ratios(self, data: List[Dict[str, Any]]) -> Dict[str, float]:
         """Calculate balance sheet specific ratios."""
@@ -2039,13 +2082,23 @@ class Statement:
 
         # Get data for multiple periods
         period_views = self.xbrl.get_period_views(statement_type)
-        if not period_views:
-            return trends
 
-        # GH #1240: generate_period_view() (edgar/xbrl/periods.py) emits
-        # 'period_keys'. Reading 'periods' was a dead lookup, so the loop below
-        # never ran and analyze_trends() returned {} for every filing.
-        period_keys = period_views[0].get('period_keys') or period_views[0].get('periods', [])
+        if period_views:
+            # GH #1240: generate_period_view() (edgar/xbrl/periods.py) emits
+            # 'period_keys'. Reading 'periods' was a dead lookup, so the loop below
+            # never ran and analyze_trends() returned {} for every filing.
+            period_keys = period_views[0].get('period_keys') or period_views[0].get('periods', [])
+        else:
+            # A named view is a convenience, not a precondition. The
+            # IncomeStatement views require three normal durations, so a 10-K
+            # presenting exactly two annual periods had none, and a request for
+            # two periods returned {} even though both were present and
+            # reachable -- Auburn National reports 603,000 and 598,000 of
+            # contract revenue and got an empty result (gh #1292). Fall back to
+            # the periods the statement itself would display.
+            period_keys = [key for key, _label in
+                           self._available_trend_periods(statement_type)]
+
         periods_to_analyze = period_keys[:periods]
 
         for period in periods_to_analyze:

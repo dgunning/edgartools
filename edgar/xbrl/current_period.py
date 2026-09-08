@@ -1091,8 +1091,15 @@ class CurrentPeriodStatement:
         return metadata
 
     def calculate_ratios(self) -> Dict[str, float]:
-        """Calculate common financial ratios for this statement."""
-        return self._statement.calculate_ratios()
+        """Calculate common financial ratios for this statement.
+
+        Honours this wrapper's period filter, which delegating without it did
+        not: the underlying statement carries every period, so a caller who had
+        explicitly narrowed to the current period still got a ratio built from
+        whichever period each operand happened to list first (gh #1280) --
+        while this object's own get_raw_data() returned the right operands.
+        """
+        return self._statement.calculate_ratios(period=self.period_filter)
 
     def __rich__(self) -> Any:
         """Rich console representation."""

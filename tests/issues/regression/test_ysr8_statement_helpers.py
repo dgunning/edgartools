@@ -140,13 +140,21 @@ def test_equity_matrix_is_populated_and_carries_no_metadata_column(xbrl):
 @pytest.mark.parametrize(
     "fixture, gross_margin, current_ratio",
     [
-        # Filed figures. Apple and Microsoft tag revenue as
+        # Filed figures for the period the statement reports. Apple and
+        # Microsoft tag revenue as
         # RevenueFromContractWithCustomerExcludingAssessedTax; Coca-Cola and IBM
         # file a us-gaap:Revenues total.
+        #
+        # Apple's gross margin was 0.3520 here until edgartools-hsgs.1: the
+        # helper took whichever period each concept listed FIRST, and for this
+        # filing that was the oldest comparative, so the assertion pinned
+        # FY2008 (13,197/37,491) on a statement reporting FY2010. The filed
+        # FY2010 figures are gross profit 25,684 on net sales 65,225, and the
+        # 10-K reports a 39.4% gross margin.
         ("tests/fixtures/xbrl/msft/10k_2024", 0.6976, 1.2750),
         ("tests/fixtures/xbrl/ko/10k_2024", 0.5952, 1.1341),
         ("tests/fixtures/xbrl/ibm/10k_2024", 0.5665, 1.0404),
-        ("tests/fixtures/xbrl/aapl/10k_2010", 0.3520, 2.0113),
+        ("tests/fixtures/xbrl/aapl/10k_2010", 0.3938, 2.0113),
     ],
 )
 def test_ratios_across_filers_and_taxonomy_vintages(fixture, gross_margin, current_ratio):
