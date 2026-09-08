@@ -1623,6 +1623,21 @@ def render_statement(
     if statement_type in ['CashFlowStatement', 'IncomeStatement', 'BalanceSheet']:
         periods_to_display = _filter_empty_string_periods(statement_data, periods_to_display)
 
+    # Tell every row which statement it belongs to.
+    #
+    # The cell formatter reads item['statement_type'] to decide whether the
+    # presentation sign applies, and this used to be stamped ONLY on the
+    # standardization fallback path -- so render(standard=False) handed the
+    # formatter rows with no statement type, the sign gate saw None, and a
+    # correctly hydrated preferred_sign of -1 was skipped. Apple's FY2023
+    # capital expenditures displayed as $10,959 under standard=False and
+    # $(10,959) under standard=True, from one statement whose own
+    # to_dataframe(presentation=True) returned the negative value either way
+    # (gh #1289). Whether a row is part of a cash flow statement has nothing
+    # to do with whether its label was standardized.
+    for item in statement_data:
+        item['statement_type'] = statement_type
+
     # Apply standardization if requested
     if standard:
         # Use XBRL instance's standardization cache if available (disable statement caching
@@ -1632,10 +1647,9 @@ def render_statement(
                 statement_data, statement_type, use_cache=False
             )
         else:
-            # Fall back to module-level singleton mapper
+            # Fall back to module-level singleton mapper. statement_type is
+            # already stamped on every item above.
             mapper = standardization.get_default_mapper()
-            for item in statement_data:
-                item['statement_type'] = statement_type
             statement_data = standardization.standardize_statement(statement_data, mapper)
 
         # Add standard_concept metadata to facts if XBRL instance is available
