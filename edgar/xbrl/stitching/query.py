@@ -20,6 +20,7 @@ from rich.text import Text
 
 from edgar.datatools import STR_DTYPE, apply_declared_schema, empty_declared_frame
 from edgar.richtools import repr_rich
+from edgar.xbrl.core import decimals_for_scaling
 from edgar.xbrl.facts import FactQuery, _apply_transformations
 
 if TYPE_CHECKING:
@@ -231,7 +232,10 @@ class StitchedFactsView:
                     # Value information
                     'value': value,
                     'numeric_value': self._convert_to_numeric(value),
-                    'decimals': item.get('decimals', {}).get(period_id, 0),
+                    # This frame declares 'decimals' as an integer column, so
+                    # the 'INF' sentinel a statement now carries (GH #1229) is
+                    # coerced here rather than breaking the declared schema.
+                    'decimals': decimals_for_scaling(item.get('decimals', {}).get(period_id)),
 
                     # Period information
                     'period_key': period_id,
