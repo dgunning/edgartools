@@ -5,7 +5,7 @@ This module provides common functions used throughout the XBRL parser.
 """
 
 from datetime import date, datetime
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 # Constants for label roles
 STANDARD_LABEL = "http://www.xbrl.org/2003/role/label"
@@ -248,12 +248,12 @@ def determine_dominant_scale(statement_data: List[Dict[str, Any]],
         ]):
             continue
 
-        # Get all decimals values for this item
+        # Get all decimals values for this item. A filed 'INF' says the value
+        # is exact, which implies no scale -- the same 0 this collected before
+        # statements began keeping the sentinel (GH #1229).
         for period_key, _ in periods_to_display:
             if period_key in item.get('decimals', {}):
-                decimals = item['decimals'][period_key]
-                if isinstance(decimals, int):
-                    all_decimals.append(decimals)
+                all_decimals.append(decimals_for_scaling(item['decimals'][period_key]))
 
     # If we have decimals information, use that to determine the scale
     if all_decimals:
@@ -605,3 +605,64 @@ def is_annual_document_type(document_type: Optional[str]) -> bool:
 def is_quarterly_document_type(document_type: Optional[str]) -> bool:
     """Whether a dei:DocumentType is a quarterly report, amended or not."""
     return base_document_type(document_type) in QUARTERLY_REPORT_FORMS
+#: The XBRL ``decimals`` sentinel for a value reported exactly, to unlimited
+#: precision. It is not a number and is never interchangeable with 0, which
+#: says the value is rounded to the unit.
+INFINITE_PRECISION = 'INF'
+
+
+def normalize_decimals(decimals: Union[int, str, None]) -> Union[int, str, None]:
+    """Read a fact's ``decimals`` attribute into the form a statement stores.
+
+    Statement assembly used to collapse ``INF`` to integer 0 in five places, so
+    Apple's $0.00001 par value arrived at ``get_statement()`` claiming to be
+    rounded to the dollar while the same fact still read ``'INF'`` through
+    ``FactQuery`` (GH #1229). The sentinel is kept; anything that scales or
+    formats asks :func:`decimals_for_scaling` for a number.
+
+    Returns None when the attribute is absent, so a caller can tell "not filed"
+    from a filed value and leave its map untouched.
+    """
+    if decimals is None:
+        return None
+    if isinstance(decimals, str) and decimals.strip().upper() == INFINITE_PRECISION:
+        return INFINITE_PRECISION
+    try:
+        return int(decimals)
+    except (ValueError, TypeError):
+        return 0
+
+
+def decimals_for_scaling(decimals: Union[int, str, None]) -> int:
+    """The integer a scaling or formatting step can use.
+
+    ``INF`` says the value is exact, so it implies no scale of its own and
+    contributes 0 -- the same number the old code stored, which is why keeping
+    the sentinel upstream leaves rendered statements unchanged.
+    """
+    if isinstance(decimals, bool) or not isinstance(decimals, int):
+        return 0
+    return decimals
+
+
+def row_metadata_value(mapping: Optional[Dict[str, Any]],
+                       period_keys: Iterable[str]) -> Optional[Any]:
+    """Pick a concept-level value (a unit, a period type) out of a per-period map.
+
+    Unit and period type belong to the concept rather than to the column: an
+    element's ``periodType`` is fixed by its declaration, and a statement row
+    does not change unit between periods. Reading only the displayed columns
+    reported nothing whenever the row's facts were filed under other period
+    keys -- a cash flow statement displays duration columns while its beginning
+    and ending balances are instant facts, so their maps shared no key with the
+    columns at all and both ``unit`` and ``point_in_time`` came back empty for
+    Apple's cash balances (GH #1228). Prefer a displayed column, then fall back
+    to anything the row has.
+    """
+    if not mapping:
+        return None
+    for period_key in period_keys:
+        value = mapping.get(period_key)
+        if value is not None:
+            return value
+    return next((value for value in mapping.values() if value is not None), None)
