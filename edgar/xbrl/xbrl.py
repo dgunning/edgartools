@@ -31,7 +31,13 @@ from edgar.attachments import Attachments
 from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
 from edgar.richtools import repr_rich
-from edgar.xbrl.core import STANDARD_LABEL, STANDARD_TAXONOMIES, split_element_id, unit_currency_measure
+from edgar.xbrl.core import (
+    STANDARD_LABEL,
+    STANDARD_TAXONOMIES,
+    normalize_decimals,
+    split_element_id,
+    unit_currency_measure,
+)
 from edgar.xbrl.models import Axis, Domain, PresentationNode, is_negated_label_role
 from edgar.xbrl.parsers import XBRLParser
 from edgar.xbrl.period_selector import select_periods
@@ -1686,15 +1692,10 @@ class XBRL:
                     # Store the selected fact's value
                     values[period_key] = fact.numeric_value if fact.numeric_value is not None else fact.value
 
-                    # Store the decimals info for proper scaling
-                    if fact.decimals is not None:
-                        try:
-                            if fact.decimals == 'INF':
-                                decimals[period_key] = 0  # Infinite precision, no scaling
-                            else:
-                                decimals[period_key] = int(fact.decimals)
-                        except (ValueError, TypeError):
-                            decimals[period_key] = 0  # Default
+                    # Store the decimals info for scaling and for accuracy
+                    fact_decimals = normalize_decimals(fact.decimals)
+                    if fact_decimals is not None:
+                        decimals[period_key] = fact_decimals
 
                     # Store unit_ref for this period
                     units[period_key] = fact.unit_ref
@@ -1735,14 +1736,9 @@ class XBRL:
                         fact = synthetic['fact']
                         context_id = synthetic['context_id']
 
-                        if fact.decimals is not None:
-                            try:
-                                if fact.decimals == 'INF':
-                                    decimals[period_key] = 0
-                                else:
-                                    decimals[period_key] = int(fact.decimals)
-                            except (ValueError, TypeError):
-                                decimals[period_key] = 0
+                        fact_decimals = normalize_decimals(fact.decimals)
+                        if fact_decimals is not None:
+                            decimals[period_key] = fact_decimals
 
                         units[period_key] = fact.unit_ref
 
@@ -1772,15 +1768,10 @@ class XBRL:
 
                     values[period_key] = fact.numeric_value if fact.numeric_value is not None else fact.value
 
-                    # Store the decimals info for proper scaling
-                    if fact.decimals is not None:
-                        try:
-                            if fact.decimals == 'INF':
-                                decimals[period_key] = 0
-                            else:
-                                decimals[period_key] = int(fact.decimals)
-                        except (ValueError, TypeError):
-                            decimals[period_key] = 0
+                    # Store the decimals info for scaling and for accuracy
+                    fact_decimals = normalize_decimals(fact.decimals)
+                    if fact_decimals is not None:
+                        decimals[period_key] = fact_decimals
 
                     units[period_key] = fact.unit_ref
 
@@ -1802,14 +1793,9 @@ class XBRL:
                         fact = synthetic['fact']
                         context_id = synthetic['context_id']
 
-                        if fact.decimals is not None:
-                            try:
-                                if fact.decimals == 'INF':
-                                    decimals[period_key] = 0
-                                else:
-                                    decimals[period_key] = int(fact.decimals)
-                            except (ValueError, TypeError):
-                                decimals[period_key] = 0
+                        fact_decimals = normalize_decimals(fact.decimals)
+                        if fact_decimals is not None:
+                            decimals[period_key] = fact_decimals
 
                         units[period_key] = fact.unit_ref
 
@@ -1916,14 +1902,9 @@ class XBRL:
                             continue
 
                     # Store decimals
-                    if fact.decimals is not None:
-                        try:
-                            if fact.decimals == 'INF':
-                                dim_decimals[period_key] = 0
-                            else:
-                                dim_decimals[period_key] = int(fact.decimals)
-                        except (ValueError, TypeError):
-                            dim_decimals[period_key] = 0
+                    fact_decimals = normalize_decimals(fact.decimals)
+                    if fact_decimals is not None:
+                        dim_decimals[period_key] = fact_decimals
 
                     # Store unit_ref for this period
                     dim_units[period_key] = fact.unit_ref
