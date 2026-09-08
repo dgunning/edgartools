@@ -572,6 +572,39 @@ def is_point_in_time(period_type: Optional[str]) -> Optional[bool]:
     return period_type == 'instant'
 
 
+#: Document types that are annual reports, without the amendment suffix.
+ANNUAL_REPORT_FORMS = frozenset({'10-K', '10-KT', '10-KSB', '20-F', '40-F', '11-K'})
+
+#: Document types that are quarterly reports, without the amendment suffix.
+QUARTERLY_REPORT_FORMS = frozenset({'10-Q', '10-QT', '10-QSB'})
+
+
+def base_document_type(document_type: Optional[str]) -> str:
+    """The document type with its amendment suffix removed: '10-K/A' -> '10-K'."""
+    if not document_type:
+        return ''
+    return document_type.split('/')[0].strip().upper()
+
+
+def is_amendment_document_type(document_type: Optional[str]) -> bool:
+    """Whether a dei:DocumentType carries the amendment suffix."""
+    return bool(document_type) and '/A' in document_type.upper()
+
+
+def is_annual_document_type(document_type: Optional[str]) -> bool:
+    """Whether a dei:DocumentType is an annual report, amended or not.
+
+    An amended annual report is still an annual report. Comparing the whole
+    string against '10-K' made Shopify's 10-K/A report amendment=True alongside
+    annual_report=False, which contradicts its own dei:DocumentAnnualReport
+    (GH #1226).
+    """
+    return base_document_type(document_type) in ANNUAL_REPORT_FORMS
+
+
+def is_quarterly_document_type(document_type: Optional[str]) -> bool:
+    """Whether a dei:DocumentType is a quarterly report, amended or not."""
+    return base_document_type(document_type) in QUARTERLY_REPORT_FORMS
 #: The XBRL ``decimals`` sentinel for a value reported exactly, to unlimited
 #: precision. It is not a number and is never interchangeable with 0, which
 #: says the value is rounded to the unit.
