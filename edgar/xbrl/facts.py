@@ -107,12 +107,29 @@ def _deduplicate_facts(df: pd.DataFrame) -> pd.DataFrame:
 
     SEC XBRL instance documents often contain the same fact tagged multiple times
     (e.g. in the financial statements and again in the notes). This drops rows that
-    are identical on concept, context_ref, value, and decimals — keeping the first
-    occurrence. Rows that share concept+context but differ in value or decimals are
-    preserved, as they represent genuinely different taggings (e.g. precise vs rounded).
+    are identical on concept, context_ref, value, decimals and unit — keeping the
+    first occurrence. Rows that share concept+context but differ in value or decimals
+    are preserved, as they represent genuinely different taggings (e.g. precise vs
+    rounded).
+
+    The unit is part of that identity because XBRL 2.1 §4.10 requires unit equality
+    before two numeric items can be called duplicates. Without it, equal numbers were
+    enough: Aebi Schmidt reports a CHF 10,000,000 and a EUR 10,000,000 shareholder
+    loan in one context, and the EUR fact — a separate economic observation, with its
+    own translated amount in the filing — was deleted as a duplicate of the CHF one
+    (gh #1282). `execute()` returned all four facts; only the frame lost two.
+
+    Deduplicating on `unit_ref` rather than on the resolved measure is deliberate:
+    it is the identity the row actually carries, and it cannot merge two currencies.
+    Its one cost is under-deduplication if a filing declares the same measure under
+    two unit IDs, which keeps a redundant row rather than deleting a real one — the
+    safe direction, and not observed across the fixture corpus.
     """
     dedup_cols = ['concept', 'context_ref', 'value', 'decimals']
     if all(col in df.columns for col in dedup_cols):
+        # Repeated tags of one fact still collapse (gh #769): they share a unit.
+        if 'unit_ref' in df.columns:
+            dedup_cols.append('unit_ref')
         df = df.drop_duplicates(subset=dedup_cols, keep='first')
     return df
 
