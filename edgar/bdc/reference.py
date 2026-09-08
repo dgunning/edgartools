@@ -625,26 +625,81 @@ def fetch_bdc_report(year: Optional[int] = None) -> pd.DataFrame:
     return df
 
 
+#: How many report years get_bdc_list() combines when no year is given.
+#: See _combined_bdc_report for why one year is not enough.
+BDC_REPORT_UNION_YEARS = 3
+
+
+def _combined_bdc_report(union_years: int = BDC_REPORT_UNION_YEARS) -> pd.DataFrame:
+    """Combine the most recent BDC reports into one registrant list.
+
+    Each yearly CSV is a snapshot taken while that year is still running, not a
+    complete register, and a registrant can be absent from it while remaining a
+    BDC. The 2026 report dropped 15 registrants that the 2025 one carried,
+    Ares Capital -- the largest publicly traded BDC -- among them, so reading
+    the newest year alone made ``is_bdc_cik(1287750)`` answer False and
+    ``find_bdc("ARCC")`` return nothing (GH #1146).
+
+    Note that a completeness check on the newest year would not have caught it:
+    the 2026 report has *more* rows than 2025 (212 against 196), because it
+    added 31 registrants while dropping those 15. Presence in any recent report
+    is the signal that survives, so the years are unioned and the most recent
+    row for a CIK wins.
+    """
+    latest = get_latest_bdc_report_year()
+
+    frames = []
+    for year in range(latest, latest - union_years, -1):
+        try:
+            frame = fetch_bdc_report(year).copy()
+        except Exception as e:
+            # A year the SEC has not published is a 404 and an ordinary miss;
+            # anything else is worth a line, but neither is fatal while some
+            # other year answered.
+            log.debug("No BDC report for %s (%s: %s)", year, type(e).__name__, e)
+            continue
+        frame['report_year'] = year
+        frames.append(frame)
+
+    if not frames:
+        # Every year failed. Let the newest year's failure speak rather than
+        # returning an empty register as though the SEC listed no BDCs.
+        return fetch_bdc_report(latest)
+
+    combined = pd.concat(frames, ignore_index=True)
+
+    # Keep one row per registrant, from the most recent report that carries it,
+    # so names and addresses stay current.
+    combined = combined.sort_values('report_year', ascending=False, kind='stable')
+    if 'cik' in combined.columns:
+        combined = combined[combined['cik'].notna()].drop_duplicates(subset='cik', keep='first')
+
+    return combined.drop(columns='report_year')
+
+
 def get_bdc_list(year: Optional[int] = None) -> BDCEntities:
     """
     Get all BDCs from the SEC BDC Report.
 
     Args:
-        year: The report year. If None, uses the latest available year.
+        year: A specific report year, returned exactly as the SEC published it.
+              If None, the most recent BDC_REPORT_UNION_YEARS reports are
+              combined, because a single year's snapshot can omit registrants
+              that are still BDCs (GH #1146).
 
     Returns:
         BDCEntities collection of all BDCs in the report.
 
     Example:
         >>> bdcs = get_bdc_list()
-        >>> len(bdcs)
-        196
+        >>> len(bdcs) > 200
+        True
         >>> bdcs[0]
         BDCEntity(...)
         >>> bdcs.filter(state='NY')
         BDCEntities with NY-based BDCs
     """
-    df = fetch_bdc_report(year)
+    df = fetch_bdc_report(year) if year is not None else _combined_bdc_report()
 
     bdcs = []
     for _, row in df.iterrows():

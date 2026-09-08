@@ -902,7 +902,8 @@ class Company(Entity):
         """
         Check if company is a financial institution.
 
-        Includes Banks, Insurance Companies, Investment Managers, and BDCs.
+        Includes Banks, Credit Agencies, Insurance Companies, Investment
+        Managers, and BDCs.
 
         Returns:
             True if classified as a financial institution
@@ -914,7 +915,7 @@ class Company(Entity):
             False
         """
         return self.business_category in [
-            'Bank', 'Insurance Company', 'Investment Manager', 'BDC'
+            'Bank', 'Credit Agency', 'Insurance Company', 'Investment Manager', 'BDC'
         ]
 
     def is_operating_company(self) -> bool:
