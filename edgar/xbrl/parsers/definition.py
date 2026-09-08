@@ -232,11 +232,21 @@ class DefinitionParser(BaseParser):
 
     def _resolve_axis_domain(self, role: str, domain_role: str, axis: Axis) -> None:
         """Follow dimension-domain and dimension-default arcs for one axis."""
+        # XBRL Dimensions 1.0 s2.5.3 lets one axis carry SEVERAL domain roots, and
+        # a root that parents no member of its own is registered nowhere else: the
+        # domain-hierarchy pass only creates elements that parent at least one
+        # domain-member arc. Stopping at the first arc therefore dropped such a
+        # root from domains_for_role() altogether -- Ellington Financial declares
+        # efc_DerivativeMaturityPeriodDomain and the childless efc_Year2038Member
+        # on one axis, and only the first was ever visible.
+        #
+        # axis.domain_id is a single field and still names the FIRST root, so no
+        # consumer of it sees a different answer.
         for rel in self._arcs(domain_role, DIMENSION_DOMAIN, axis.element_id):
-            axis.domain_id = rel['to_element']
+            if axis.domain_id is None:
+                axis.domain_id = rel['to_element']
             member_role = rel['target_role'] or domain_role
             self._copy_domain_into_role(role, member_role, rel['to_element'])
-            break
 
         for rel in self._arcs(domain_role, DIMENSION_DEFAULT, axis.element_id):
             axis.default_member_id = rel['to_element']
