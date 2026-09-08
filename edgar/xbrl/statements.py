@@ -3503,17 +3503,24 @@ class StitchedStatement:
             )
         return self._statement_data
 
-    def render(self, show_date_range: bool = False) -> Table:
+    def render(self, show_date_range: Optional[bool] = None) -> Table:
         """
         Render the stitched statement as a formatted table.
 
         Args:
-            show_date_range: Whether to show full date ranges for duration periods
+            show_date_range: Whether to show full date ranges for duration periods.
+                             Defaults to the value the accessor stored on this
+                             statement, so an option passed to
+                             ``statements.income_statement(show_date_range=True)``
+                             also reaches ordinary Rich/``repr`` rendering.
 
         Returns:
             Rich Table containing the rendered statement
         """
         from edgar.xbrl.stitching import render_stitched_statement
+
+        if show_date_range is None:
+            show_date_range = self.show_date_range
 
         # Update the render_stitched_statement function call to pass the show_date_range parameter
         return render_stitched_statement(
