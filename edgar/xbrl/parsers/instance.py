@@ -33,6 +33,28 @@ _BLOCK_ELEMENTS = frozenset({
 # Cells sit side by side on one line, so they take a space rather than a break.
 _CELL_ELEMENTS = frozenset({'td', 'th'})
 
+XBRLI_NS = "{http://www.xbrl.org/2003/instance}"
+
+# The structural children of an instance root -- everything that is not a fact.
+#
+# These are FULLY QUALIFIED and compared by equality. Two copies of this set
+# used to exist, and only one of them was right: the counting pass matched the
+# half-qualified '}unit' while the extracting pass matched a bare 'unit' with
+# str.endswith, so any concept whose local name merely ended in one of these
+# words was dropped before its contextRef was ever read (gh #1293 --
+# ctso:NumberOfSharesInAunit, the sole occurrence of that fact in the filing).
+# A suffix test cannot tell a structural element from an issuer's concept;
+# only the expanded name can.
+_STRUCTURAL_ELEMENTS = frozenset({
+    f"{XBRLI_NS}context",
+    f"{XBRLI_NS}unit",
+    f"{LINKBASE_NS}schemaRef",
+    f"{LINKBASE_NS}roleRef",
+    f"{LINKBASE_NS}arcroleRef",
+    f"{LINKBASE_NS}linkbaseRef",
+    f"{LINKBASE_NS}footnoteLink",
+})
+
 
 class InstanceParser(BaseParser):
     """Parser for XBRL instance documents."""
@@ -79,15 +101,36 @@ class InstanceParser(BaseParser):
             instance_id: Optional instance ID for duplicate facts
 
         Returns:
-            Normalized key in format: element_id_context_ref[_instance_id]
+            Normalized key in format: element_id|context_ref[|instance_id]
+
+        The parts are joined with '|' because it cannot occur in either of
+        them: a context ref is an NCName and an element ID is a QName, and
+        neither production admits it. Joining with '_' did (gh #1295), because
+        '_' is legal *inside* an NCName. A filer that names its quarterly
+        contexts 'D20250630_1' alongside year-to-date 'D20250630' -- a common
+        filer-agent convention -- collided the two identities
+
+            (element, 'D20250630_1', no duplicate index)
+            (element, 'D20250630',   duplicate index 1)
+
+        on one key, and ``facts_dict[key] = fact`` silently dropped whichever
+        arrived first. In ClearOne 0001753926-25-001345 that lost 6 of 590
+        facts, including the quarter's revenue and net income, leaving only
+        the six-month figures behind.
+
+        The element ID keeps its ':' -> '_' rewrite: it is what lets a caller
+        holding the underscore spelling find a fact stored under the colon
+        one, which ``XBRL.element_context_index`` relies on. That rewrite is
+        itself ambiguous for a prefix containing '_' (no such filing is known,
+        and removing it would break those lookups), so it is left alone here.
         """
         normalized_element_id = element_id
         if ':' in element_id:
             prefix, name = element_id.split(':', 1)
             normalized_element_id = f"{prefix}_{name}"
         if instance_id is not None:
-            return f"{normalized_element_id}_{context_ref}_{instance_id}"
-        return f"{normalized_element_id}_{context_ref}"
+            return f"{normalized_element_id}|{context_ref}|{instance_id}"
+        return f"{normalized_element_id}|{context_ref}"
 
     def parse_instance(self, file_path: Union[str, Path]) -> None:
         """Parse instance document file and extract contexts, facts, and units."""
@@ -151,9 +194,6 @@ class InstanceParser(BaseParser):
         counted_prefixes = {}
         counted_claims = {}
 
-        # Fast path to identify non-fact elements to skip
-        skip_tag_endings = {'}context', '}unit', '}schemaRef'}
-
         # Track both total instances and unique facts
         total_fact_instances = 0  # Total number of fact references in the document
         unique_facts = set()      # Set of unique element_id + context_ref combinations
@@ -166,9 +206,8 @@ class InstanceParser(BaseParser):
 
             # Skip known non-fact elements
             tag = element.tag
-            for ending in skip_tag_endings:
-                if tag.endswith(ending):
-                    return
+            if tag in _STRUCTURAL_ELEMENTS:
+                return
 
             # Get context reference - key check to identify facts
             context_ref = element.get('contextRef')
@@ -440,16 +479,6 @@ class InstanceParser(BaseParser):
             facts_dict = {}
             base_keys = {}
 
-            # Fast path to identify non-fact elements to skip - compile as set for O(1) lookup
-            skip_tag_endings = {
-                'schemaRef',
-                'roleRef',
-                'arcroleRef',
-                'linkbaseRef',
-                'context',
-                'unit'
-            }
-
             def process_element(element):
                 """Process a single element as a potential fact."""
                 nonlocal fact_count
@@ -465,9 +494,8 @@ class InstanceParser(BaseParser):
                     if not element.values():
                         return
                 tag = element.tag
-                for ending in skip_tag_endings:
-                    if tag.endswith(ending):
-                        return
+                if tag in _STRUCTURAL_ELEMENTS:
+                    return
 
                 # Get context reference - key check to identify facts
                 context_ref = element.get('contextRef')
