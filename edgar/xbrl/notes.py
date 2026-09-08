@@ -27,6 +27,7 @@ from rich.table import Table as RichTable
 from rich.text import Text
 
 from edgar.core import log
+from edgar.documents.utils.html_utils import text_skipping_tables, text_stripped
 from edgar.richtools import repr_rich
 
 if TYPE_CHECKING:
@@ -826,44 +827,6 @@ def _inner_html(root) -> str:
     return ''.join(parts)
 
 
-def _text_skipping_tables(element) -> str:
-    """``get_text(separator=' ', strip=True)`` over everything outside a table.
-
-    Two traps in one function. First, this is NOT ``text_content()``: that
-    concatenates descendants with no separator, gluing the last word of one node
-    to the first of the next. Second, it walks rather than removing the tables:
-    dropping an element in lxml deletes its tail, and splicing the tail back
-    onto the previous sibling to save it MERGES two of bs4's separate strings
-    into one, so the separator is then never inserted between them. Both
-    mistakes produce the same symptom -- run-together words -- which is the
-    edgartools-vfwp family this codepath already has a history of.
-    """
-    chunks: List[str] = []
-
-    def walk(el):
-        if el.text and el.text.strip():
-            chunks.append(el.text.strip())
-        for child in el.iterchildren():
-            tag = child.tag
-            if isinstance(tag, str) and tag.lower() != 'table':
-                walk(child)
-            if child.tail and child.tail.strip():
-                chunks.append(child.tail.strip())
-
-    walk(element)
-    return ' '.join(chunks)
-
-
-def _joined_cell_text(element) -> str:
-    """``get_text(strip=True)`` -- each string stripped, joined with NOTHING.
-
-    The empty separator is the point: bs4 strips every string and concatenates,
-    so "<span> 1,234 </span><span> </span>" gives "1,234", where
-    ``text_content()`` would keep the inner padding and give " 1,234  ".
-    """
-    return ''.join(chunk.strip() for chunk in element.itertext())
-
-
 def _without_tables(root):
     """A copy of the tree with every <table> removed, tails preserved.
 
@@ -983,7 +946,7 @@ def _html_table_to_plain_text(table_tag) -> Optional[str]:
     matrix = []
     for row in rows:
         cells = row.xpath('.//td | .//th')
-        row_text = [_joined_cell_text(c) for c in cells]
+        row_text = [text_stripped(c) for c in cells]
         if any(row_text):  # Skip fully empty rows
             matrix.append(row_text)
 
@@ -1037,7 +1000,7 @@ def _extract_narrative_markdown(html: str, optimize_for_llm: bool) -> Optional[s
             # rather than taking the text of `stripped`: removing the tables
             # merged text nodes that bs4 kept separate, and get_text's separator
             # only goes between separate strings.
-            text = _text_skipping_tables(root)
+            text = text_skipping_tables(root)
             # Fix missing spaces between adjacent spans (e.g., "hadno" → "had no")
             text = re.sub(r'([a-z])([A-Z$])', r'\1 \2', text)
             text = re.sub(r'(\w)([$])', r'\1 \2', text)
