@@ -54,14 +54,14 @@ design mandates *before* the move:
     unchanged (the 424B parity gate called out in the redesign doc).
 """
 import json
-from pathlib import Path
 
 from edgar.documents import parse_html
 from edgar.documents.config import ParserConfig
 from edgar.documents.extractors.pattern_section_extractor import SectionExtractor
 from edgar.documents.form_schema import get_form_schema
+from tests.paths import FIXTURES_DIR
 
-_GOLDEN = Path(__file__).parent / "fixtures" / "parser_corpus" / "section_patterns_golden.json"
+_GOLDEN = FIXTURES_DIR / "parser_corpus" / "section_patterns_golden.json"
 
 
 def _load_golden():

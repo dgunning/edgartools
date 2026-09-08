@@ -1,11 +1,11 @@
 """Verification tests for EX-21 Subsidiaries parser."""
-from pathlib import Path
 
 import pytest
 
 from edgar.company_reports.subsidiaries import Subsidiary, SubsidiaryList, parse_subsidiaries
+from tests.paths import FIXTURES_DIR
 
-FIXTURES = Path(__file__).parent / "fixtures"
+FIXTURES = FIXTURES_DIR
 
 
 class TestParseAAPLSubsidiaries:

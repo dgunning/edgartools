@@ -32,12 +32,13 @@ are pinned here, so the baseline means the same thing in both places — and
 ``test_the_tracked_corpus_is_present`` fails if the tracked half goes missing,
 because "measured nothing" must never read as "nothing wrong".
 """
-import pathlib
 import sys
 
 import pytest
 
-sys.path.insert(0, str(pathlib.Path(__file__).parent / "fixtures" / "parser_corpus"))
+from tests.paths import FIXTURES_DIR
+
+sys.path.insert(0, str(FIXTURES_DIR / "parser_corpus"))
 import markdown_parity  # noqa: E402
 import parity_benchmark  # noqa: E402
 

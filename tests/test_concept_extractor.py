@@ -3,12 +3,13 @@ Tests for R*.htm concept extraction.
 
 Uses AAPL 10-Q fixtures at tests/fixtures/attachments/aapl/20250329/R*.htm.
 """
+
 import pytest
-from pathlib import Path
 
-from edgar.sgml.concept_extractor import ConceptRow, ConceptReport, extract_concepts_from_report, parse_numeric
+from edgar.sgml.concept_extractor import ConceptReport, extract_concepts_from_report
+from tests.paths import FIXTURES_DIR
 
-FIXTURE_DIR = Path(__file__).parent / "fixtures" / "attachments" / "aapl" / "20250329"
+FIXTURE_DIR = FIXTURES_DIR / "attachments" / "aapl" / "20250329"
 
 
 @pytest.fixture(scope="module")

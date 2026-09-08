@@ -51,7 +51,6 @@ the end; it dies on one that shifts the class columns, so each figure lands
 under a different share class.
 """
 import json
-import pathlib
 
 import pytest
 
@@ -60,10 +59,11 @@ from edgar.funds._497k_tables import (
     extract_fund_metadata,
     extract_performance_table,
 )
+from tests.paths import REPO_ROOT
 
 pytestmark = pytest.mark.fast
 
-REPO = pathlib.Path(__file__).parent.parent
+REPO = REPO_ROOT
 FIX = REPO / "tests" / "fixtures"
 BASELINE = FIX / "prospectus_497k_baseline.json"
 CORPUS = FIX / "prospectus_497k"

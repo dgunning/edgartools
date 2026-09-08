@@ -3,15 +3,15 @@ Tests for the ConceptGraph — navigable knowledge graph of XBRL concepts.
 
 Uses AAPL 10-Q fixtures for MetaLinks.json and R*.htm files.
 """
+
 import pytest
-from pathlib import Path
 
+from edgar.sgml.concept_extractor import extract_concepts_from_report, parse_numeric
 from edgar.sgml.metalinks import MetaLinks
-from edgar.sgml.concept_extractor import extract_concepts_from_report
-from edgar.sgml.concept_extractor import parse_numeric
 from edgar.xbrl.concept_graph import Concept, ConceptGraph
+from tests.paths import FIXTURES_DIR
 
-FIXTURE_DIR = Path(__file__).parent / "fixtures" / "attachments" / "aapl" / "20250329"
+FIXTURE_DIR = FIXTURES_DIR / "attachments" / "aapl" / "20250329"
 
 
 @pytest.fixture(scope="module")

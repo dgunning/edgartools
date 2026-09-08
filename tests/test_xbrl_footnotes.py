@@ -1,14 +1,16 @@
 """Test XBRL footnote parsing functionality."""
+
 import pytest
-from pathlib import Path
-from edgar.xbrl.parsers import XBRLParser
+
 from edgar.xbrl.models import Footnote
+from edgar.xbrl.parsers import XBRLParser
+from tests.paths import FIXTURES_DIR
 
 
 def test_footnote_extraction_with_fact_ids():
     """Test that footnotes are correctly extracted and linked to facts."""
     # Use the UNP test file which has facts with ID attributes
-    test_file = Path(__file__).parent / "fixtures" / "xbrl" / "unp" / "unp-20121231.xml"
+    test_file = FIXTURES_DIR / "xbrl" / "unp" / "unp-20121231.xml"
     
     if not test_file.exists():
         pytest.skip(f"Test file not found: {test_file}")
@@ -50,7 +52,7 @@ def test_footnote_extraction_with_fact_ids():
 
 def test_get_footnotes_for_fact():
     """Test the get_footnotes_for_fact method."""
-    test_file = Path(__file__).parent / "fixtures" / "xbrl" / "unp" / "unp-20121231.xml"
+    test_file = FIXTURES_DIR / "xbrl" / "unp" / "unp-20121231.xml"
     
     if not test_file.exists():
         pytest.skip(f"Test file not found: {test_file}")
@@ -82,7 +84,7 @@ def test_get_footnotes_for_fact():
 
 def test_get_facts_with_footnotes():
     """Test the get_facts_with_footnotes method."""
-    test_file = Path(__file__).parent / "fixtures" / "xbrl" / "unp" / "unp-20121231.xml"
+    test_file = FIXTURES_DIR / "xbrl" / "unp" / "unp-20121231.xml"
     
     if not test_file.exists():
         pytest.skip(f"Test file not found: {test_file}")

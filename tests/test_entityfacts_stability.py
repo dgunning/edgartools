@@ -10,9 +10,10 @@ This module validates the recent EntityFacts enhancements:
 Issue: edgartools-7vzq
 """
 
-import pytest
-from pathlib import Path
 
+import pytest
+
+from tests.paths import REPO_ROOT
 
 # =============================================================================
 # 1. Mapper Tests (mappings_loader.py)
@@ -185,9 +186,9 @@ class TestMultiStatementFlow:
 
     def test_fact_belongs_to_statement_primary(self):
         """Test that facts are correctly assigned to their primary statement."""
+
         from edgar.entity.enhanced_statement import _fact_belongs_to_statement
         from edgar.entity.models import FinancialFact
-        from datetime import date
 
         # Create an income statement fact
         income_fact = FinancialFact(
@@ -210,8 +211,8 @@ class TestMultiStatementFlow:
     def test_fact_belongs_to_statement_linked(self):
         """Test that multi-statement concepts are included via linkages."""
         from edgar.entity.enhanced_statement import _fact_belongs_to_statement
-        from edgar.entity.models import FinancialFact
         from edgar.entity.mappings_loader import get_all_statements_for_concept
+        from edgar.entity.models import FinancialFact
 
         # Find a concept that appears in multiple statements
         test_concept = 'NetIncomeLoss'
@@ -330,7 +331,7 @@ class TestIndustryExtensions:
         mappings = load_industry_mappings()
         industries = mappings.get('industries', {})
 
-        data_dir = Path(__file__).parent.parent / 'edgar' / 'entity' / 'data' / 'industry_extensions'
+        data_dir = REPO_ROOT / 'edgar' / 'entity' / 'data' / 'industry_extensions'
 
         for industry_key, industry_info in industries.items():
             extension_file = industry_info.get('extension_file')

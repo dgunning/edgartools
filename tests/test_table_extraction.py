@@ -12,15 +12,15 @@ Ground-truth values for the Apple income statement live in
 `tests/issues/regression/test_yq1l_financial_table_extraction.py`. What this
 file covers is the table SHAPES the extractor has to handle.
 """
-from pathlib import Path
 
 import pytest
 
 from edgar.sgml.table_to_dataframe import FinancialTableExtractor, extract_statement_dataframe
+from tests.paths import FIXTURES_DIR
 
 pytestmark = pytest.mark.fast
 
-FIXTURES = Path(__file__).parent / "fixtures" / "attachments" / "aapl" / "20250329"
+FIXTURES = FIXTURES_DIR / "attachments" / "aapl" / "20250329"
 
 
 def test_income_statement_extracts_typed_numeric_columns():

@@ -1,11 +1,10 @@
-import pytest
+import logging
 from pathlib import Path
 
-from edgar import httpclient
-from edgar import Company
-from edgar._filings import Filing, get_filings
+import pytest
 
-import logging
+from edgar import Company, httpclient
+from edgar._filings import Filing, get_filings
 
 logger = logging.getLogger(__name__)
 
@@ -15,11 +14,12 @@ logger = logging.getLogger(__name__)
 # a test touches it. Raises rather than warning if it can't secure the loader
 # (beads edgartools-j1ui).
 from tests._vcr_safety import install_safe_yaml_deserializer  # noqa: E402
+from tests.paths import CASSETTES_DIR  # noqa: E402
 
 install_safe_yaml_deserializer()
 
-# VCR configuration for recording/replaying HTTP interactions
-CASSETTES_DIR = Path(__file__).parent / "cassettes"
+# VCR configuration for recording/replaying HTTP interactions.
+# CASSETTES_DIR comes from tests.paths so every reader of it agrees (edgartools-07lk.12.2).
 
 
 @pytest.fixture(scope="module")
@@ -194,8 +194,9 @@ def cache_sec_submissions_for_session():
     Set EDGAR_TEST_CACHE_STATS=1 to print hit/miss stats at session end.
     """
     import os
-    import edgar.entity.submissions as _subs
+
     import edgar.entity as _ent
+    import edgar.entity.submissions as _subs
 
     cache = {}
     stats = {"calls": 0, "downloads": 0}

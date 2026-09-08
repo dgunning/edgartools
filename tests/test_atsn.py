@@ -5,7 +5,6 @@ Ground truth filings:
   - Goldman Sigma X2 ATS-N/UA      — accession 0000950123-23-009133
   - J.P. Morgan JPB-X withdrawal   — accession 0000019617-24-000664
 """
-from pathlib import Path
 
 import pytest
 
@@ -23,10 +22,10 @@ from edgar.ats import (
     AlternativeTradingSystemWithdrawal,
 )
 from tests._offline_filings import offline_filing
+from tests.paths import CASSETTES_DIR
 
 pytestmark = pytest.mark.network
 
-CASSETTES_DIR = Path(__file__).parent / "cassettes"
 my_vcr = vcr.VCR(
     cassette_library_dir=str(CASSETTES_DIR),
     record_mode="once",

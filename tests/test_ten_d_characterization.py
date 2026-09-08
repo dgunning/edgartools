@@ -54,15 +54,15 @@ with no ELEMENT children is FALSY, so `if header_row` would skip the table),
 and a class row whose only `<td>` is a descendant rather than a child.
 """
 import json
-import pathlib
 
 import pytest
 
 from edgar.abs.ten_d import TenD
+from tests.paths import REPO_ROOT
 
 pytestmark = pytest.mark.fast
 
-REPO = pathlib.Path(__file__).parent.parent
+REPO = REPO_ROOT
 FIX = REPO / "tests" / "fixtures"
 BASELINE = FIX / "ten_d_baseline.json"
 CORPUS = FIX / "ten_d"

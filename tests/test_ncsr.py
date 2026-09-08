@@ -6,7 +6,6 @@ Ground truth filings:
   - Semi-Annual (N-CSRS): AMERICAN CENTURY QUANTITATIVE EQUITY FUNDS (accession 0000827060-26-000002)
 """
 from decimal import Decimal
-from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -21,11 +20,11 @@ from edgar.funds.ncsr import (
     FundShareholderReport,
 )
 from tests._offline_filings import offline_filing
+from tests.paths import CASSETTES_DIR
 
 # Mark all tests in this module as network tests
 pytestmark = pytest.mark.network
 
-CASSETTES_DIR = Path(__file__).parent / "cassettes"
 my_vcr = vcr.VCR(
     cassette_library_dir=str(CASSETTES_DIR),
     record_mode="once",

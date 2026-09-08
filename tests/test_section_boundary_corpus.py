@@ -21,12 +21,13 @@ xom via the rv86 + Phase work) and pre-existing regressions (edgartools-gegs).
 A full regenerate-and-golden gate is future work once those regressions land; the
 curated ground-truth above is the reliable subset that is stable today.
 """
-import pathlib
 import sys
 
 import pytest
 
-sys.path.insert(0, str(pathlib.Path(__file__).parent / "fixtures" / "parser_corpus"))
+from tests.paths import FIXTURES_DIR
+
+sys.path.insert(0, str(FIXTURES_DIR / "parser_corpus"))
 import scoring  # noqa: E402
 
 # Offline but multi-minute (the census re-parses the whole corpus): run in the

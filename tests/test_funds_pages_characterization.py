@@ -17,13 +17,14 @@ returns a prefix instead of the name the moment a filer's markup puts the name
 in a child tag. It raises nothing; it just returns less.
 """
 import json
-import pathlib
 
 import pytest
 
+from tests.paths import REPO_ROOT
+
 pytestmark = pytest.mark.fast
 
-REPO = pathlib.Path(__file__).parent.parent
+REPO = REPO_ROOT
 PAGES = REPO / "tests" / "fixtures" / "funds_pages"
 BASELINE = REPO / "tests" / "fixtures" / "funds_pages_baseline.json"
 

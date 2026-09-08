@@ -37,12 +37,13 @@ Deliberately NOT asserted: the coverage percentages. They move with the corpus
 and read as precision the sample size does not support. The differential is the
 thing the deletion decision actually rests on.
 """
-import pathlib
 import sys
 
 import pytest
 
-sys.path.insert(0, str(pathlib.Path(__file__).parent / "fixtures" / "parser_corpus"))
+from tests.paths import FIXTURES_DIR
+
+sys.path.insert(0, str(FIXTURES_DIR / "parser_corpus"))
 import parity_benchmark  # noqa: E402
 
 # Offline, but re-parses the corpus through two parsers (~140s locally, less on

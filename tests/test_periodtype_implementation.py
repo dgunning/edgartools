@@ -10,20 +10,11 @@ This script tests the new PeriodType enum functionality to ensure:
 """
 
 import sys
-from pathlib import Path
+
 import pytest
 
-# Add project root to path for testing
-sys.path.insert(0, str(Path(__file__).parent.parent))
+from edgar.enums import ALL_PERIODS, SPECIAL_PERIODS, STANDARD_PERIODS, PeriodInput, PeriodType, validate_period_type
 
-from edgar.enums import (
-    PeriodType,
-    PeriodInput,
-    validate_period_type,
-    STANDARD_PERIODS,
-    SPECIAL_PERIODS,
-    ALL_PERIODS
-)
 
 @pytest.mark.fast
 def test_period_type_enum():
@@ -167,9 +158,10 @@ def test_fact_query_by_period_type():
     print("🔍 Testing FactQuery.by_period_type() method...")
 
     # Mock setup - we'll test the method logic without requiring real data
-    from edgar.entity.query import FactQuery
-    from edgar.entity.models import FinancialFact
     from datetime import date
+
+    from edgar.entity.models import FinancialFact
+    from edgar.entity.query import FactQuery
 
     # Create mock facts with different period lengths
     mock_facts = [
@@ -220,9 +212,10 @@ def test_entity_facts_filter_by_period_type():
     """Test EntityFacts.filter_by_period_type() method."""
     print("🔍 Testing EntityFacts.filter_by_period_type() method...")
 
+    from datetime import date
+
     from edgar.entity.entity_facts import EntityFacts
     from edgar.entity.models import FinancialFact
-    from datetime import date
 
     # Create mock facts
     mock_facts = [

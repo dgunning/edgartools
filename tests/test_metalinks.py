@@ -3,12 +3,13 @@ Tests for MetaLinks.json parser.
 
 Uses the AAPL 10-Q fixture at tests/fixtures/attachments/aapl/20250329/MetaLinks.json.
 """
+
 import pytest
-from pathlib import Path
 
-from edgar.sgml.metalinks import MetaLinks, TagDefinition, CalculationEntry, MetaLinksReport, AuthRef
+from edgar.sgml.metalinks import AuthRef, MetaLinks, MetaLinksReport, TagDefinition
+from tests.paths import FIXTURES_DIR
 
-FIXTURE_PATH = Path(__file__).parent / "fixtures" / "attachments" / "aapl" / "20250329" / "MetaLinks.json"
+FIXTURE_PATH = FIXTURES_DIR / "attachments" / "aapl" / "20250329" / "MetaLinks.json"
 
 
 @pytest.fixture(scope="module")

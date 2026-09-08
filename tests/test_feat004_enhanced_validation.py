@@ -11,24 +11,20 @@ This script tests the enhanced validation framework to ensure:
 """
 
 import sys
-from pathlib import Path
+
 import pytest
 
-# Add project root to path for testing  
-project_root = Path(__file__).parent.parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
-
 from edgar.enums import (
+    FormType,
+    PeriodType,
     ValidationError,
+    detect_common_typos,
     enhanced_validate,
     fuzzy_match,
-    detect_common_typos,
     validate_form_type,
     validate_period_type,
-    FormType,
-    PeriodType
 )
+
 
 @pytest.mark.fast
 def test_fuzzy_matching():

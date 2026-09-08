@@ -3,17 +3,12 @@
 Comprehensive tests and benchmarks for the FastTableRenderer implementation.
 """
 
-import time
 import sys
-from pathlib import Path
+import time
 
-# Add the project root to the path
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
-
-from edgar.documents.renderers.fast_table import FastTableRenderer, TableStyle
-from edgar.documents.table_nodes import TableNode, Row, Cell
 from edgar.documents.config import ParserConfig
+from edgar.documents.renderers.fast_table import FastTableRenderer, TableStyle
+from edgar.documents.table_nodes import Cell, Row, TableNode
 from edgar.richtools import rich_to_text
 
 
@@ -590,7 +585,7 @@ def test_simple_style_preserves_all_columns():
     Test that simple() style preserves all important columns after colspan expansion.
     Regression test for Apple 10-K table 15 issue where "2023" column was missing.
     """
-    from edgar.documents.table_nodes import Cell, Row
+    from edgar.documents.table_nodes import Cell
 
     # Simulate table with meaningful columns that should NOT be filtered out
     header_cells = [

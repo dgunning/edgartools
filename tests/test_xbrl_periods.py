@@ -1,19 +1,19 @@
-from pathlib import Path
 
 try:
     import vcr
 except ImportError:
     vcr = None
-from edgar.xbrl import *
-from rich import print
-from edgar import *
-from edgar.xbrl.periods import determine_periods_to_display
 import pytest
+from rich import print
+
+from edgar import *
+from edgar.xbrl import *
+from edgar.xbrl.periods import determine_periods_to_display
+from tests.paths import CASSETTES_DIR
 
 # Mark all tests in this module as network tests
 pytestmark = pytest.mark.network
 
-CASSETTES_DIR = Path(__file__).parent / "cassettes"
 my_vcr = vcr.VCR(
     cassette_library_dir=str(CASSETTES_DIR),
     record_mode="once",

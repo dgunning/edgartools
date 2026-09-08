@@ -13,12 +13,13 @@ Two tiers:
 Regenerate the corpus with: python tests/fixtures/parser_corpus/build_corpus.py
 """
 import json
-from pathlib import Path
 
 import pytest
 
-CORPUS_DIR = Path(__file__).parent / "fixtures" / "parser_corpus"
-HTML_ROOT = Path(__file__).parent / "fixtures" / "html"
+from tests.paths import FIXTURES_DIR
+
+CORPUS_DIR = FIXTURES_DIR / "parser_corpus"
+HTML_ROOT = FIXTURES_DIR / "html"
 
 RECOGNIZED_MARKERS = {
     "parse_error", "oversized_section", "oversized_business_section",

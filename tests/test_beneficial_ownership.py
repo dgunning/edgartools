@@ -4,28 +4,17 @@ Tests for Schedule 13D and Schedule 13G beneficial ownership reports.
 Tests XML parsing, dataclass creation, amendment tracking, and Rich rendering
 for both Schedule 13D (active ownership) and Schedule 13G (passive ownership).
 """
-import pytest
-from pathlib import Path
-from unittest.mock import Mock
 from datetime import date
+from unittest.mock import Mock
 
-from edgar.beneficial_ownership import (
-    Schedule13D,
-    Schedule13G,
-    ReportingPerson,
-    IssuerInfo,
-    SecurityInfo
-)
-from edgar.beneficial_ownership.amendments import (
-    AmendmentInfo,
-    OwnershipComparison,
-    get_amendment_info,
-    compare_to_previous
-)
+import pytest
 
+from edgar.beneficial_ownership import IssuerInfo, ReportingPerson, Schedule13D, Schedule13G, SecurityInfo
+from edgar.beneficial_ownership.amendments import AmendmentInfo, OwnershipComparison
+from tests.paths import TESTS_DIR
 
 # Test data paths
-TEST_DATA_DIR = Path(__file__).parent / 'data' / 'beneficial_ownership'
+TEST_DATA_DIR = TESTS_DIR / 'data' / 'beneficial_ownership'
 SCHEDULE_13D_XML_PATH = TEST_DATA_DIR / 'schedule13d.xml'
 SCHEDULE_13G_XML_PATH = TEST_DATA_DIR / 'schedule13g.xml'
 
@@ -663,8 +652,9 @@ def test_reporting_person_new_boolean_fields():
 def test_excluded_shares_not_aggregated():
     """Test that shares with is_aggregate_exclude_shares=True are not counted in total_shares"""
     # Create a mock Schedule13D with reporting persons where some have excluded shares
-    from edgar.beneficial_ownership.models import Schedule13DItems
     from unittest.mock import Mock
+
+    from edgar.beneficial_ownership.models import Schedule13DItems
 
     filing = Mock()
     filing.form = 'SCHEDULE 13D'
@@ -734,8 +724,9 @@ def test_excluded_shares_not_aggregated():
 @pytest.mark.fast
 def test_all_excluded_shares_returns_zero():
     """Test that total_shares returns 0 when all shares are excluded"""
-    from edgar.beneficial_ownership.models import Schedule13DItems
     from unittest.mock import Mock
+
+    from edgar.beneficial_ownership.models import Schedule13DItems
 
     filing = Mock()
     filing.form = 'SCHEDULE 13D'
