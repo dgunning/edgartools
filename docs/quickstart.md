@@ -4,7 +4,7 @@ Get up and running with EdgarTools in 5 minutes. By the end, you'll have a compa
 
 ## Prerequisites
 
-- Python 3.8 or higher
+- Python 3.10 or higher
 - Internet connection
 - Basic familiarity with Python
 
@@ -73,7 +73,8 @@ cashflow  = financials.cash_flow_statement()
 That's it — three lines to get any company's income statement, balance sheet, or cash flow.
 
 !!! note "Common gotcha"
-    The canonical method is `cash_flow_statement()`, but `cash_flow_statement()` also works.
+    Use `cash_flow_statement()` for cash flow statements. The older alias
+    `cashflow_statement()` is deprecated and will be removed in v6.0.
     All three statements: `income_statement()`, `balance_sheet()`, `cash_flow_statement()`.
 
 ## Step 5: Get Specific Values
