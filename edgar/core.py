@@ -1,5 +1,4 @@
 import asyncio
-import datetime
 import logging.config
 import os
 import random
@@ -7,17 +6,23 @@ import re
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-from datetime import date
 from functools import lru_cache, partial, wraps
 from typing import Callable, Iterable, List, Optional, Tuple, TypeVar, Union
 
 import pandas as pd
 import pyarrow as pa
-from zoneinfo import ZoneInfo
-from pandas.tseries.offsets import BDay
 from rich.logging import RichHandler
 
 from edgar.datatools import PagingState
+
+# Re-exported for callers that still import them from here. The implementation
+# lives in edgar.dates; 6.0 drops this shim (edgartools-07lk.12.1 item 6).
+from edgar.dates import (  # noqa: F401
+    current_year_and_quarter,
+    filing_date_to_year_quarters,
+    is_start_of_quarter,
+    parse_acceptance_datetime,
+)
 
 log = logging.getLogger(__name__)
 
@@ -220,55 +225,8 @@ def get_resource(file: str):
 # at the end of this file); removed in 6.0.
 
 
-def filing_date_to_year_quarters(filing_date: str) -> List[Tuple[int, int]]:
-    if ":" in filing_date:
-        start_date, end_date = filing_date.split(":")
-
-        if not start_date:
-            # SEC's full-index goes back to 1993 Q1 - see available_quarters() in _filings.py
-            start_date = "1993-01-01"
-
-        if not end_date:
-            end_date = date.today().strftime("%Y-%m-%d")
-
-        start_year, start_month, _ = map(int, start_date.split("-"))
-        end_year, end_month, _ = map(int, end_date.split("-"))
-
-        start_quarter = (start_month - 1) // 3 + 1
-        end_quarter = (end_month - 1) // 3 + 1
-
-        result = []
-        for year in range(start_year, end_year + 1):
-            if year == start_year and year == end_year:
-                quarters = range(start_quarter, end_quarter + 1)
-            elif year == start_year:
-                quarters = range(start_quarter, 5)
-            elif year == end_year:
-                quarters = range(1, end_quarter + 1)
-            else:
-                quarters = range(1, 5)
-
-            for quarter in quarters:
-                result.append((year, quarter))
-
-        return result
-    else:
-        year, month, _ = map(int, filing_date.split("-"))
-        quarter = (month - 1) // 3 + 1
-        return [(year, quarter)]
 
 
-def current_year_and_quarter() -> Tuple[int, int]:
-    # Define the Eastern timezone
-    eastern = ZoneInfo('America/New_York')
-
-    # Get the current time in Eastern timezone
-    now_eastern = datetime.datetime.now(eastern)
-
-    # Calculate the current year and quarter
-    current_year, current_quarter = now_eastern.year, (now_eastern.month - 1) // 3 + 1
-
-    return current_year, current_quarter
 
 
 class DataPager:
@@ -335,8 +293,6 @@ class PagingState:
     page_start: int
     num_records: int
 
-def parse_acceptance_datetime(acceptance_datetime: str) -> datetime.datetime:
-    return datetime.datetime.fromisoformat(acceptance_datetime.replace('Z', '+00:00'))
 
 def sample_table(table, n=None, frac=None, replace=False, random_state=None):
     """Take a sample from a pyarrow Table"""
@@ -403,22 +359,6 @@ def listify(value):
         return [value]
 
 
-def is_start_of_quarter():
-    today = datetime.datetime.now().date()
-
-    # Check if it's the start of a quarter
-    if today.month in [1, 4, 7, 10] and today.day <= 5:
-        # Get the first day of the current quarter
-        first_day_of_quarter = datetime.datetime(today.year, today.month, 1).date()
-
-        # Calculate one business day after the start of the quarter
-        one_business_day_after = (first_day_of_quarter + BDay(1)).date()
-
-        # Check if we haven't passed one full business day yet
-        if today <= one_business_day_after:
-            return True
-
-    return False
 
 
 def cache_except_none(maxsize=128):
