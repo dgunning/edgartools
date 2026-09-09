@@ -10,20 +10,14 @@ from freezegun import freeze_time
 from rich.table import Table
 
 import edgar
-from edgar.dates import extract_dates, InvalidDateError
+from edgar.core import Result, decode_content, get_bool, has_html_content, parallel_thread_map
+from edgar.dates import InvalidDateError, extract_dates, is_start_of_quarter
 from edgar.display.formatting import display_size, reverse_name, split_camel_case
-from edgar.core import decode_content, Result, get_bool, is_start_of_quarter, has_html_content, parallel_thread_map
-from edgar.settings import get_identity, set_identity, ask_for_identity, CRAWL, CAUTION
-from edgar.filtering import (
-    filter_by_form,
-    filter_by_cik,
-    filter_by_accession_number,
-    filter_by_ticker,
-    filter_by_date
-)
-from edgar.richtools import *
-
+from edgar.filtering import filter_by_accession_number, filter_by_cik, filter_by_date, filter_by_form, filter_by_ticker
 from edgar.httpclient import get_http_params
+from edgar.richtools import *
+from edgar.settings import CAUTION, CRAWL, ask_for_identity, get_identity, set_identity
+
 
 def client_headers():
     return get_http_params()["headers"]
@@ -311,8 +305,9 @@ def test_filter_by_ticker():
 
 @pytest.mark.fast
 def test_dataframe_pager():
-    from edgar.core import DataPager
     import numpy as np
+
+    from edgar.core import DataPager
     df = pd.DataFrame({'A': np.random.randint(0, 100, size=150),
                        'B': np.random.randint(0, 100, size=150)})
     pager = DataPager(df, 100)
