@@ -456,10 +456,21 @@ def get_mutual_fund_tickers():
     return pd.DataFrame(data['data'], columns=['cik', 'seriesId', 'classId', 'ticker'])
 
 
-@lru_cache(maxsize=1)
+# The ticker -> CIK dict, memoized against the frame it was built from rather
+# than in its own lru_cache. A second cache layer froze whichever frame
+# get_mutual_fund_tickers() returned first, so a cleared or patched frame left
+# find_mutual_fund_cik() answering from stale data for the rest of the process.
+_mutual_fund_lookup_cache: tuple = (None, None)
+
+
 def get_mutual_fund_lookup():
+    global _mutual_fund_lookup_cache
     df = get_mutual_fund_tickers()
-    return dict(zip(df['ticker'], df['cik'], strict=False))
+    cached_df, lookup = _mutual_fund_lookup_cache
+    if cached_df is not df:
+        lookup = dict(zip(df['ticker'], df['cik'], strict=False))
+        _mutual_fund_lookup_cache = (df, lookup)
+    return lookup
 
 
 def find_mutual_fund_cik(ticker):
