@@ -106,5 +106,5 @@ class TestIssue1174SwallowedExceptions:
                 result = XBRLS.from_filings(filings, filter_amendments=False)
 
         assert not [r for r in caplog.records if r.levelno >= logging.WARNING]
-        assert result.xbrl_list[1] is None
+        assert len(result.xbrl_list) == 1
         assert result.xbrl_list[0].entity_info["entity_name"] == "Good Co"

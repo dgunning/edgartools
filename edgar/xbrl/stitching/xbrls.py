@@ -80,12 +80,20 @@ class XBRLS:
         for filing in sorted_filings:
             try:
                 xbrl = XBRL.from_filing(filing)
+                if xbrl is None:
+                    log.debug(
+                        f"XBRLS.from_filings: filing {getattr(filing, 'accession_no', filing)} "
+                        f"({getattr(filing, 'form', '?')}) has no XBRL attachments, "
+                        f"skipped from the result."
+                    )
+                    continue
                 xbrl_list.append(xbrl)
             except Exception as exc:
                 log.warning(
                     f"XBRLS.from_filings: filing {getattr(filing, 'accession_no', filing)} "
                     f"({getattr(filing, 'form', '?')}) raised {exc.__class__.__name__}: {exc}, "
-                    f"skipped from the result."
+                    f"skipped from the result.",
+                    exc_info=True,
                 )
 
         return cls(xbrl_list)
