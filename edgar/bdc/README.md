@@ -284,7 +284,17 @@ Analyze industry exposure across BDCs:
 dataset = fetch_bdc_dataset(2024, 3)
 summary = dataset.summary_by_industry()
 print(summary.head(10))
+# Returns DataFrame: industry | total_fair_value | num_bdcs | num_investments
 ```
+
+The DERA extract names its columns after XBRL labels, and the label the SEC
+picks for a concept can change between releases (fair value is currently
+headed `Initial fair value of Investment`). `summary_by_industry()`,
+`search()`, `top_companies()` and `to_dataframe(clean=True)` resolve every
+header the SEC has used for fair value, cost, shares, principal and industry to
+one canonical column, and log a warning naming the headers they looked for when
+none is present. The summary counts only rows dated at each filing's own period
+end and takes each filing's industry subtotals where it tags them.
 
 ### 5. BDC Screening
 

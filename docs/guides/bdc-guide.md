@@ -319,6 +319,24 @@ summary = dataset.summary_by_industry()
 print(summary.head(10))
 ```
 
+```
+                      industry  total_fair_value  num_bdcs  num_investments
+0        Software And Services      6.572000e+09         1               1
+1            Healthcare Sector      3.432558e+09         2               2
+```
+
+The summary counts only rows dated at each filing's own period end, so a
+10-K's prior-year comparatives are left out, and within each filing it takes
+the industry subtotal where the filer tags one. Fair value and industry are
+resolved from whichever XBRL label the SEC used as the column header in that
+data set release, so the method keeps working when the header changes; if no
+fair value column can be found, the result carries counts only and a warning
+names the headers that were looked for.
+
+To work with the raw extract yourself, `dataset.schedule_of_investments.to_dataframe(clean=True)`
+applies the same resolution and gives you `fair_value`, `cost`, `shares`,
+`principal` and `industry` columns.
+
 ## Non-Accrual Analysis
 
 BDCs must disclose which portfolio investments are on non-accrual status -- loans where the borrower has stopped paying interest. This is one of the most important credit quality metrics for BDC analysis.
