@@ -38,7 +38,7 @@ Example usage:
 import io
 import logging
 import zipfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 from functools import lru_cache
 from typing import TYPE_CHECKING, Optional, Union
@@ -53,6 +53,7 @@ from rich.table import Table
 
 from edgar.bdc.industry import clean_industry_label, issuer_key, normalize_sector
 from edgar.bdc.investments import grouping_industries, identifier_industry, issuer_from_identifier
+from edgar.exceptions import ValidationError
 from edgar.httprequests import get_with_retry, is_unreachable
 from edgar.richtools import repr_rich
 
@@ -709,6 +710,8 @@ class BDCDataset:
     numbers: pd.DataFrame
     presentation: pd.DataFrame
     soi: pd.DataFrame
+    # (soi frame, resolved industry frame); holding the frame keeps the identity check sound
+    _industry_resolution: tuple = field(default=(None, None), init=False, repr=False, compare=False)
 
     @property
     def period(self) -> str:
@@ -912,6 +915,20 @@ class BDCDataset:
             return None
         return pd.to_numeric(at_period.groupby('adsh')['value'].first(), errors='coerce')
 
+    def _resolved_industry(self) -> pd.DataFrame:
+        """
+        ``industry``, ``industry_source`` and ``sector`` per SOI row, resolved once per ``soi`` frame.
+
+        Resolution parses every untagged identifier and takes seconds on a full
+        quarter, so it is kept on the instance and redone only when ``soi`` is
+        replaced by a different frame.
+        """
+        frame, resolved = self._industry_resolution
+        if frame is not self.soi:
+            resolved = _soi_industry(self.soi)
+            self._industry_resolution = (self.soi, resolved)
+        return resolved
+
     def summary_by_industry(self, by: str = 'industry') -> pd.DataFrame:
         """
         Get a summary of SOI data aggregated by industry.
@@ -949,11 +966,14 @@ class BDCDataset:
             column could be resolved; a warning names the headers looked for.
         """
         if by not in ('industry', 'sector'):
-            raise ValueError(f"by must be 'industry' or 'sector', got {by!r}")
+            raise ValidationError(
+                f"by must be 'industry' or 'sector', got {by!r}",
+                parameter='by', invalid_value=by, suggestions=['industry', 'sector'],
+            )
         if self.soi.empty:
             return pd.DataFrame()
 
-        resolved = _soi_industry(self.soi)
+        resolved = self._resolved_industry()
         if not resolved['industry'].notna().any():
             _warn_unresolved(self.soi, 'industry')
             return pd.DataFrame()
@@ -961,6 +981,7 @@ class BDCDataset:
         frame = pd.DataFrame({
             'adsh': self.soi['adsh'],
             'industry': resolved[by],
+            'filed_label': resolved['industry'],
             'tagged': resolved['industry_source'].isin(['axis', 'enumeration']),
         })
         frame = frame[frame['industry'].notna()]
@@ -986,7 +1007,9 @@ class BDCDataset:
         if frame.empty:
             return pd.DataFrame(columns=[by, 'total_fair_value', 'num_bdcs', 'num_investments'])
 
-        per_filing_industry = frame.groupby(['adsh', 'industry'])['depth']
+        # Depth is chosen per filed label: two spellings a filing uses can fold
+        # into one sector while only one of them carries a subtotal
+        per_filing_industry = frame.groupby(['adsh', 'filed_label'])['depth']
         subtotals = frame[~frame['tagged'] | (frame['depth'] == per_filing_industry.transform('min'))]
         line_items = frame[~frame['tagged'] | (frame['depth'] == per_filing_industry.transform('max'))]
 

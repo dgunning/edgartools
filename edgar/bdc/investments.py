@@ -18,6 +18,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from edgar.bdc.industry import INDUSTRY_SOURCES, clean_industry_label, issuer_key, normalize_sector
+from edgar.exceptions import ValidationError
 from edgar.richtools import repr_rich
 
 log = logging.getLogger(__name__)
@@ -1838,9 +1839,11 @@ class PortfolioInvestment:
         if self.industry is None:
             object.__setattr__(self, 'industry_source', None)
         elif self.industry_source is not None and self.industry_source not in INDUSTRY_SOURCES:
-            raise ValueError(
+            raise ValidationError(
                 f"industry_source must be one of {INDUSTRY_SOURCES} when industry is set, "
-                f"got {self.industry_source!r}"
+                f"got {self.industry_source!r}",
+                parameter='industry_source', invalid_value=self.industry_source,
+                suggestions=list(INDUSTRY_SOURCES),
             )
 
     @property
@@ -2159,7 +2162,10 @@ class PortfolioInvestments:
             empty when the portfolio is.
         """
         if by not in ('sector', 'industry'):
-            raise ValueError(f"by must be 'sector' or 'industry', got {by!r}")
+            raise ValidationError(
+                f"by must be 'sector' or 'industry', got {by!r}",
+                parameter='by', invalid_value=by, suggestions=['sector', 'industry'],
+            )
         if not self._investments:
             return pd.DataFrame(columns=[by, 'num_investments', 'total_fair_value', 'pct_of_portfolio'])
         rows = pd.DataFrame([

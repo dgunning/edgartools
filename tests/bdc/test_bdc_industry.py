@@ -20,6 +20,9 @@ from types import SimpleNamespace
 import pandas as pd
 import pytest
 
+from edgar.bdc import datasets as datasets_module
+from edgar.exceptions import ValidationError
+
 from edgar.bdc.datasets import BDCDataset, _clean_soi_dataframe, _soi_dimension_depth, _soi_industry
 from edgar.bdc.industry import (
     INDUSTRY_SOURCES,
@@ -264,9 +267,10 @@ class TestPortfolioInvestment:
         assert blank.industry is None and blank.industry_source is None
 
     def test_unknown_source_is_refused(self):
-        with pytest.raises(ValueError, match='industry_source'):
+        with pytest.raises(ValidationError, match='industry_source') as refused:
             PortfolioInvestment(identifier='x', company_name='X', investment_type='Loan',
                                 industry='Software', industry_source='guess')
+        assert refused.value.suggestions == ['axis', 'enumeration', 'identifier', 'peer']
 
     def test_filter_and_by_industry(self):
         investments = PortfolioInvestments([
@@ -292,8 +296,9 @@ class TestPortfolioInvestment:
         by_industry = investments.by_industry(by='industry')
         assert list(by_industry['industry'][:2]) == ['Software Sector', 'Software & Services']
         assert PortfolioInvestments([]).by_industry().empty
-        with pytest.raises(ValueError):
+        with pytest.raises(ValidationError) as refused:
             investments.by_industry(by='colour')
+        assert refused.value.parameter == 'by' and refused.value.suggestions == ['sector', 'industry']
 
     def test_dataframe_carries_the_new_columns(self):
         inv = PortfolioInvestment(identifier='x', company_name='X', investment_type='Loan',
@@ -441,8 +446,46 @@ class TestDatasetIndustryFallbacks:
     def test_summary_by_industry_default_keeps_raw_labels(self, soi):
         summary = dataset(soi).summary_by_industry()
         assert list(summary.columns) == ['industry', 'total_fair_value', 'num_bdcs', 'num_investments']
-        with pytest.raises(ValueError):
+        with pytest.raises(ValidationError) as refused:
             dataset(soi).summary_by_industry(by='colour')
+        assert refused.value.parameter == 'by' and refused.value.suggestions == ['industry', 'sector']
+
+    def test_sector_keeps_line_items_of_a_label_without_a_subtotal(self):
+        # Kayne Anderson BDC, 2025Q2: a Machinery subtotal over its line items, and
+        # Electrical Equipment tagged on a line item only. Both fold into Capital
+        # Equipment; picking the subtotal depth per sector dropped the $9,910,000.
+        frame = pd.DataFrame({
+            'adsh': ['0001', '0001', '0001'],
+            'ddate': ['2025-03-31'] * 3,
+            'period': ['2025-03-31'] * 3,
+            'Industry Sector Axis': ['Machinery [Member]', 'Machinery [Member]', 'Electrical Equipment [Member]'],
+            'Investment, Identifier Axis': [None, 'First Lien Loan A', 'First Lien Loan B'],
+            'Investment Owned, Fair Value': [100_026_000.0, 100_026_000.0, 9_910_000.0],
+        })
+        by_industry = dataset(frame).summary_by_industry().set_index('industry')['total_fair_value']
+        assert by_industry.to_dict() == {'Machinery': 100_026_000.0, 'Electrical Equipment': 9_910_000.0}
+        by_sector = dataset(frame).summary_by_industry(by='sector').set_index('sector')
+        assert by_sector.loc['Capital Equipment', 'total_fair_value'] == 109_936_000.0
+        assert by_sector.loc['Capital Equipment', 'num_investments'] == 2
+
+    def test_industry_is_resolved_once_per_soi_frame(self, soi, monkeypatch):
+        calls = []
+        real = datasets_module._resolve_industry
+
+        def counting(df, sources):
+            calls.append(len(df))
+            return real(df, sources)
+
+        monkeypatch.setattr(datasets_module, '_resolve_industry', counting)
+        data = dataset(soi)
+        first = data.summary_by_industry()
+        data.summary_by_industry(by='sector')
+        pd.testing.assert_frame_equal(data.summary_by_industry(), first)
+        assert calls == [len(soi)]
+
+        data.soi = soi.iloc[: len(soi) // 2]   # a different frame is resolved afresh
+        data.summary_by_industry()
+        assert calls == [len(soi), len(soi) // 2]
 
 
 class TestSummaryByCompany:
