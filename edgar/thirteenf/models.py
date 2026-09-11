@@ -9,6 +9,7 @@ import pyarrow.compute as pc
 from lxml import etree
 
 from edgar._party import Address
+from edgar.exceptions import ValidationError
 
 # Preserve private imports used by existing callers and regression tests.
 from edgar.thirteenf.units import (  # noqa: F401
@@ -270,7 +271,11 @@ class ThirteenF:
         from edgar.thirteenf.parsers.primary_xml import parse_primary_document_xml
 
         if value_unit not in (None, 'dollars', 'thousands'):
-            raise ValueError("value_unit must be None, 'dollars', or 'thousands'")
+            raise ValidationError(
+                "value_unit must be None, 'dollars', or 'thousands'",
+                parameter='value_unit', invalid_value=value_unit,
+                suggestions=["Use None, 'dollars', or 'thousands'."],
+            )
         self._value_unit_override = value_unit
         self._value_unit_warning_emitted = False
         assert filing.form in THIRTEENF_FORMS, f"Form {filing.form} is not a valid 13F form"

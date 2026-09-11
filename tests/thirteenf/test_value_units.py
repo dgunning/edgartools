@@ -15,6 +15,7 @@ import pandas as pd
 import pytest
 
 from edgar import ThirteenF
+from edgar.exceptions import ValidationError
 from edgar.thirteenf import Ambiguous13FValueUnitWarning
 from edgar.thirteenf.units import resolve_value_unit
 
@@ -163,9 +164,18 @@ def test_override_bypasses_accession_only_cache(kahn_filing, monkeypatch):
 
 
 @pytest.mark.parametrize('unit', ['', 'auto', 'USD', 'millions', 1000])
-def test_invalid_override_rejected_before_fetching(unit):
-    with pytest.raises(ValueError, match='value_unit must be'):
-        ThirteenF(None, value_unit=unit)
+@pytest.mark.parametrize('parameter, create', [
+    ('value_unit', lambda unit: ThirteenF(None, value_unit=unit)),
+    ('override', lambda unit: resolve_value_unit(None, override=unit)),
+], ids=['constructor', 'resolver'])
+def test_invalid_override_rejected_before_fetching(unit, parameter, create):
+    # Existing callers catching ValueError still receive the structured error.
+    with pytest.raises(ValueError, match=f'{parameter} must be') as caught:
+        create(unit)
+    assert isinstance(caught.value, ValidationError)
+    assert caught.value.parameter == parameter
+    assert caught.value.invalid_value == unit
+    assert caught.value.suggestions == ["Use None, 'dollars', or 'thousands'."]
 
 
 def test_warning_can_be_promoted_to_error(kahn_filing):

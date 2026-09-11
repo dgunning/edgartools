@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal, Optional
 
+from edgar.exceptions import ValidationError
+
 ValueUnit = Literal['dollars', 'thousands']
 
 # Kept as a fallback for filings without usable schema metadata.
@@ -68,7 +70,11 @@ def resolve_value_unit(df, schema_version: Optional[str] = None,
     import pandas as pd
 
     if override not in (None, 'dollars', 'thousands'):
-        raise ValueError("value_unit must be None, 'dollars', or 'thousands'")
+        raise ValidationError(
+            "override must be None, 'dollars', or 'thousands'",
+            parameter='override', invalid_value=override,
+            suggestions=["Use None, 'dollars', or 'thousands'."],
+        )
 
     count = 0
     fraction = None
