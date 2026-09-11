@@ -201,7 +201,43 @@ print(f"Software companies: {len(software)}")
 from decimal import Decimal
 large = investments.filter(min_fair_value=Decimal('100000000'))
 print(f"Positions over $100M: {len(large)}")
+
+# By industry or normalized sector
+software = investments.filter(industry="software")
+print(f"Software positions: {len(software)}")
 ```
+
+### Industry and Sector
+
+Each investment carries the industry as the filer wrote it, where it came
+from, and a normalized sector:
+
+```python
+inv = investments[0]
+inv.industry          # 'Software Sector' (as filed) or None
+inv.industry_source   # 'axis', 'enumeration', 'identifier', 'peer' or None
+inv.sector            # 'Software' (normalized) or None
+
+investments.industry_coverage   # share of positions with an industry
+investments.by_industry()       # sector | num_investments | total_fair_value | pct_of_portfolio
+investments.by_industry(by='industry')   # the labels as filed
+```
+
+Most BDCs tag an industry on the `IndustrySectorAxis` or the industry
+extensible enumeration. The ones that do not (Sixth Street, PennantPark,
+BlackRock TCP, Fidus and others) write it into the investment identifier
+instead, as a schedule grouping ("Debt Investments Automotive Truck-Lite Co.,
+LLC ...") or a labelled field ("... Industry Financial Services Current
+Coupon ..."); `industry_source` is `'identifier'` for those. A position whose
+issuer another position in the same portfolio has tagged takes that industry
+with source `'peer'`. When nothing can be recovered, `industry`,
+`industry_source` and `sector` are all `None`, never an empty string.
+
+`sector` folds the filers' spellings into one vocabulary
+(`edgar.bdc.industry.SECTOR_ALIASES`): "Software Sector", "Software And
+Services" and "Software & Services" are all `'Software'`. A label the table
+does not know passes through as its own sector with a trailing "Sector"
+removed.
 
 ### Convert to DataFrame
 
@@ -333,9 +369,40 @@ data set release, so the method keeps working when the header changes; if no
 fair value column can be found, the result carries counts only and a warning
 names the headers that were looked for.
 
+Filers that tag no industry dimension at all are read from their investment
+identifiers ("Debt Investments Automotive Truck-Lite Co., LLC ..."), and an
+issuer still untagged takes the industry another BDC in the same data set
+tagged for it. In the 2025Q2 file that lifts the filings with a resolvable
+industry from 123 to 158 of 160. Pass `by='sector'` to fold the filers'
+spellings into one row each:
+
+```python
+dataset.summary_by_industry(by='sector')
+```
+
+```
+                sector  total_fair_value  num_bdcs  num_investments
+0             Software      7.002469e+10        88             1041
+1           Healthcare      5.902270e+10       122             1138
+```
+
 To work with the raw extract yourself, `dataset.schedule_of_investments.to_dataframe(clean=True)`
 applies the same resolution and gives you `fair_value`, `cost`, `shares`,
-`principal` and `industry` columns.
+`principal`, `industry`, `industry_source` (`axis`, `enumeration`,
+`identifier` or `peer`) and `sector` columns.
+
+### Per-BDC Totals
+
+```python
+dataset.summary_by_company()
+# cik | name | form | filed | num_investments | total_fair_value
+```
+
+`num_investments` counts each filing's line items at its period end (the
+rows carrying an investment identifier, at the dimension depth where the
+filing has most of them). `total_fair_value` is the filer's own undimensioned
+`InvestmentOwnedAtFairValue` from `dataset.numbers` when the filing reports
+one, and the fair value summed over those line items otherwise.
 
 ## Non-Accrual Analysis
 

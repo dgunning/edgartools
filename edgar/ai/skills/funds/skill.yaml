@@ -51,18 +51,29 @@ patterns:
       arcc = bdcs.get_by_ticker("ARCC")
       soi = arcc.schedule_of_investments()      # From latest 10-K XBRL
       investments = arcc.portfolio_investments() # Parsed individual investments
+      investments.filter(industry="software")    # by industry as filed or normalized sector
+      investments.by_industry()                  # sector | num_investments | total_fair_value | pct_of_portfolio
+      inv = investments[0]
+      inv.industry / inv.sector / inv.industry_source   # as filed / normalized / axis|enumeration|identifier|peer|None
 
       # Bulk cross-BDC analysis via DERA data sets
       dataset = fetch_bdc_dataset(2024, 3)
       dataset.soi                                # Schedule of investments data
       dataset.summary_by_industry()              # industry | total_fair_value | num_bdcs | num_investments
+      dataset.summary_by_industry(by='sector')   # spellings folded: "Software Sector" + "Software & Services" -> Software
+      dataset.summary_by_company()               # cik | name | form | filed | num_investments | total_fair_value
       dataset.schedule_of_investments.search("Ivy Hill")   # Which BDCs hold a company
-      dataset.schedule_of_investments.to_dataframe(clean=True)  # fair_value, cost, industry columns
+      dataset.schedule_of_investments.to_dataframe(clean=True)  # fair_value, cost, industry, industry_source, sector
     note: |
       DERA names SOI columns after XBRL labels that change between releases
       (fair value is currently "Initial fair value of Investment"). Use
       summary_by_industry() or to_dataframe(clean=True) rather than
       dataset.soi['Investment Owned, Fair Value'], which is present but empty.
+      Industry is recovered from the investment identifier for filers that tag
+      no industry dimension (Sixth Street, PennantPark, BlackRock TCP, Fidus)
+      and from a peer BDC's tag for the same issuer; industry_source says
+      which. An investment with no recoverable industry has industry, sector
+      and industry_source all None, never an empty string.
 
   - name: Report Backlinks
     when: Navigate from report to filing
