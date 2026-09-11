@@ -9,13 +9,16 @@ import re
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from datetime import date
-from typing import Optional
+from functools import lru_cache
+from typing import NamedTuple, Optional
 
 import pandas as pd
 from rich import box
 from rich.panel import Panel
 from rich.table import Table
 
+from edgar.bdc.industry import INDUSTRY_SOURCES, clean_industry_label, issuer_key, normalize_sector
+from edgar.exceptions import ValidationError
 from edgar.richtools import repr_rich
 
 log = logging.getLogger(__name__)
@@ -24,6 +27,8 @@ __all__ = [
     'DataQuality',
     'PortfolioInvestment',
     'PortfolioInvestments',
+    'identifier_industry',
+    'parse_investment_identifier',
 ]
 
 # XBRL concepts for investment data
@@ -35,6 +40,8 @@ CONCEPT_INTEREST_RATE = 'us-gaap_InvestmentInterestRate'
 CONCEPT_PIK_RATE = 'us-gaap_InvestmentInterestRatePaidInKind'
 CONCEPT_SPREAD = 'us-gaap_InvestmentBasisSpreadVariableRate'
 CONCEPT_PCT_NET_ASSETS = 'us-gaap_InvestmentOwnedPercentOfNetAssets'
+CONCEPT_INDUSTRY_ENUMERATION = 'us-gaap_InvestmentIndustrySectorExtensibleEnumeration'
+DIM_INDUSTRY_SECTOR = 'dim_us-gaap_IndustrySectorAxis'
 
 # Entity-level aggregate concepts (not per-investment)
 CONCEPT_NONACCRUAL_LOANS_FV = 'us-gaap:FairValueOptionLoansHeldAsAssetsAggregateAmountInNonaccrualStatus'
@@ -273,6 +280,10 @@ _GENERIC_COMPANY_MEMBER_RE = re.compile(
     r'corp| corporation)?)$',
     re.IGNORECASE,
 )
+
+# The labelled industry field some filers write into the identifier; the
+# company-window parser stops at it and identifier_industry reads past it.
+_INDUSTRY_LABEL_RE = re.compile(r'\bIndustry(?: Classification)?\b', re.IGNORECASE)
 
 
 def _normalize_member_text(value: str) -> str:
@@ -541,7 +552,7 @@ def _structured_company_window(
     if type_field:
         return identifier[:type_field.start()].strip()
 
-    industry_field = re.search(r'\bIndustry(?: Classification)?\b', identifier, re.IGNORECASE)
+    industry_field = _INDUSTRY_LABEL_RE.search(identifier)
     if industry_field:
         return identifier[:industry_field.start()].strip()
 
@@ -1255,6 +1266,506 @@ def _parse_investment_identifier(
     return identifier, company_name, investment_type
 
 
+# --- Industry recovered from the investment identifier ------------------------
+#
+# 37 of the 160 filings in the 2025Q2 DERA file tag no industry dimension at
+# all, yet most of them write the industry into the Investment Identifier
+# member: PennantPark labels it ("... Industry Financial Services Current
+# Coupon ..."), Sixth Street and BlackRock prefix the schedule grouping ("Debt
+# Investments Automotive Truck-Lite Co., LLC ..."), SLR and AB pipe-delimit it,
+# Fidus and Saratoga put it between the company and the instrument. The
+# company-name parser above already walks past these spans; identifier_industry
+# is the one place that returns them, for both the per-filing XBRL path and the
+# DERA data set path.
+
+# The labelled fields and instrument words that end an industry span.
+_INDUSTRY_STOP_WORDS = re.compile(
+    r'^(?:first|second|third|1st|2nd|senior|sr|subordinated|sub|unsecured|secured|common|'
+    r'preferred|pref|term|revolv\w*|delayed|draw|warrants?|mezzanine|equity|equities|'
+    r'membership|class|series|units?|shares?|notes?|loans?|debt|bonds?|structured|clo|'
+    r'investments?|investmnts|instrument|issuer|undrawn|unfunded|commitments?|total|net|cash|'
+    r'acquisitions?|maturity|interest|reference|spread|floor|coupon|rate|due|par|pik|sofr|libor|'
+    r'euribor|prime|fixed|variable|initial|original|type|security|securities|ref|yield|'
+    r'exit|fee|expiration|settlement|basis|current|dated?|ordinary|subordinate|protective|advance|'
+    r'junior|lien|related party|'
+    r'inc|llc|corp|ltd|lp|plc|co|sas|gmbh|ag|nv|bv|aps|p\.c)\b',
+    re.IGNORECASE,
+)
+# A stop word that is a legal form closes a company name, not an industry.
+_POSITION_CLOSERS = re.compile(r'^(?:undrawn|unfunded|commitments?)\b', re.IGNORECASE)
+_COMPANY_CLOSERS = re.compile(
+    r'^(?:inc|llc|corp|ltd|lp|plc|co|sas|gmbh|ag|nv|bv|aps|clo|p\.c|sub|merger|'
+    r'acquisitions?(?!\s+date))\b', re.IGNORECASE
+)
+
+# Text that is an instrument, a relationship category, a company or a number
+# rather than an industry, whatever position it sits in.
+_NOT_AN_INDUSTRY_RE = re.compile(
+    r'\d|%|\$|'
+    r'\b(?:loans?|debt|notes?|bonds?|equity|equities|stocks?|shares?|units?|warrants?|interests?|'
+    r'lien|secured|unsecured|subordinated|senior|preferred|common|term|revolv\w*|'
+    r'delayed|draw|mezzanine|clo|investments?|investmnts|securities|issuer|instrument|undrawn|'
+    r'unfunded|commitments?|total|cash|money market|treasury|partnership|membership|class|series|'
+    r'tranche|facility|affiliated?|controlled?|non-?\s?control\w*|portfolio company|net assets|'
+    r'united states|canada|europe|dollar|currency|derivative|counterparty|forward|swap|'
+    r'inc|llc|l\.l\.c|corp|corporation|co|ltd|limited|lp|l\.p|llp|plc|gmbh|s\.a|b\.v|p\.c|'
+    r'(?<!multi-sector )holdings?|'
+    r'holdco|bidco|topco|midco|finco|opco|acquisition|acquisitions|buyer|purchaser|parent|'
+    r'intermediate|intermediateco|group|partners|aggregator|borrower|'
+    r'sas|sarl|s\.a\.r\.l|ag|nv|n\.v|oy|pty|pte|spa|s\.p\.a|se|kg|bv|aps|a/s|ab|'
+    r'super|incremental|last out|first out|second out|portfolio|assets?|liabilities|'
+    r'funds?|obligations|member|sofr|libor|euribor|prime|one|two|three|ii|iii|iv|'
+    r'north|south|east|west|usd|eur|gbp|cad|aud|government|protective|advance|subordinate|'
+    r'receives|pays|corporate debt|company|related party|junior)\b',
+    re.IGNORECASE,
+)
+
+# Identifiers that are cash lines, not investments in a company.
+_CASH_LINE_RE = re.compile(
+    r'^(?:Cash|Money Market|Treasury|Short-Term Investments|Investments and Cash|'
+    r'Restricted Cash|Cash Equivalents|Cash Collateral|Interest Rate Swap|Foreign Currency|'
+    r'Forward|Derivative)\b',
+    re.IGNORECASE,
+)
+
+# DERA cuts identifiers at this length; a span that runs to the end of one is
+# a fragment ("Healthcare, Education and Childcare Cur"), not a label.
+_TRUNCATED_LENGTH = 255
+
+# What a schedule grouping puts in front of the industry: relationship
+# categories, asset classes, instrument types, geographies and percentages.
+_GROUPING_PREFIX_RE = re.compile(
+    r'^(?:(?:'
+    r'Investments?|Debt Investments?|Equity Investments?|Equity and Other Investments|'
+    r'Other Investments|Debt Securities|Equity Securities|Warrants?|Preferred Equity|'
+    r'Common Equity|Common Stocks?|First Lien Debt(?: Investments)?|Second Lien Debt|'
+    r'Senior Secured(?: Loans?| Debt)?|Bank Debt/Senior Secured Loans|Senior loans|'
+    r'Subordinated Debt|Unsecured Debt|\d(?:st|nd|rd) Lien/Senior Secured Debt|'
+    r'First Lien/Senior Secured Debt|'
+    r'Non-?\s?Control(?:led)?[/-]Non-?\s?Affiliated?(?: Investments)?|'
+    r'Non-Controlled/Affiliated?(?: Investments)?|Controlled(?: Affiliated?s?)?(?: Investments)?|'
+    r'Affiliated? [Ii]nvestments|Control Investments|Portfolio Company(?: Investments)?|'
+    r'Portfolio Company (?:Debt Securities|Equity Investments|Warrant Investments)|'
+    r'United States|Canada|Europe|Canadian Corporate Debt|US Corporate Debt|'
+    r'in (?:Non-)?Controlled,? (?:Non-)?Affiliated Portfolio Companies'
+    r')(?![A-Za-z])\s*|[-–—,]\s*|\d+(?:\.\d+)?%(?: of Net Assets)?\s*)+',
+    re.IGNORECASE,
+)
+
+# Where a company name ends: a legal form, optionally a parenthetical alias,
+# then the next capitalised word. Matched without consuming so every legal form
+# in the identifier is tried.
+_AFTER_LEGAL_FORM_RE = re.compile(
+    r'\b(?:LLC|L\.L\.C\.|Inc\.?|Corp\.?|Corporation|Ltd\.?|Limited|L\.P\.|LP|LLP|PLC|GmbH|Co\.|'
+    r'Company|S\.A\.|B\.V\.|Holdings|Group|Partners|SAS|SARL|AG|N\.V\.|NV|Oy|Pty|Pte|SpA|'
+    r'S\.p\.A\.|SE|KG|BV|ApS|A/S|P\.C\.)(?:\s*\([^)]*\))?\s+(?:[-–—]\s+)?(?=[A-Z])'
+)
+_LABELED_INDUSTRY_RE = re.compile(
+    r'\bIndustry(?: Classification)?\s*:?\s*(?P<industry>\S.*?)(?=\s*\||\s*$|'
+    r'\s+(?:Security|Investment Type|Type of Investment|Facility Type|Investment Date|'
+    r'Interest Rate|Reference Rate\w*|Spread above Index|Basis Point Spread|Spread|'
+    r'Initial Acquisition Date|Acquisition Date|Acquisition|Original Purchase Date|'
+    r'Maturity(?: Date)?|Current Coupon|Total Coupon|Coupon|Floor|Instrument|Issuer Name|'
+    r'Due|PIK|SOFR|LIBOR|EURIBOR|Prime|Par|Net Assets|Rate|'
+    r'(?:First|Second|1st|2nd) Lien|Senior Secured|Subordinated|Unsecured|Common (?:Stock|Equity|Units|Shares)|'
+    r'Preferred (?:Stock|Equity|Units|Shares)|Term Loan|Revolv\w+|Warrants?|Delayed Draw|Mezzanine|\d)\b)',
+    re.IGNORECASE,
+)
+_EDGE_CHARS = ' ,.;:-?|'
+_SMALL_WORDS_RE = re.compile(r'(?:^(?:the|and|of|&)\s+)|(?:\s+(?:the|and|of|&))+$', re.IGNORECASE)
+_NET_ASSETS_TAIL_RE = re.compile(r',?\s*%?\s*of Net Assets.*$', re.IGNORECASE)
+
+
+def _industry_key(text: str) -> str:
+    """Comparison key shared by the candidate vocabulary and identifier spans."""
+    return ' '.join(
+        token for token in _normalize_member_text(text).split()
+        if token not in ('and', 'of', 'the')
+    )
+
+
+@lru_cache(maxsize=1)
+def _sector_vocabulary() -> frozenset:
+    from edgar.bdc.industry import SECTOR_ALIASES
+    return frozenset(_industry_key(key) for key in SECTOR_ALIASES)
+
+
+def _tidy_industry(text: str) -> str:
+    """Strip the punctuation and dangling small words a span picks up at its edges."""
+    text = text.strip(_EDGE_CHARS)
+    for _ in range(3):
+        stripped = _SMALL_WORDS_RE.sub('', text).strip(_EDGE_CHARS)
+        if stripped == text:
+            break
+        text = stripped
+    return text
+
+
+def _looks_like_industry(text: str) -> bool:
+    text = _tidy_industry(text)
+    words = text.split()
+    if not words or len(words) > 7:
+        return False
+    if _NOT_AN_INDUSTRY_RE.search(text):
+        return False
+    if text.count('(') != text.count(')') or text.count('"') % 2:
+        return False
+    if len(words) == 1 and len(re.sub(r'[^A-Za-z]', '', text)) < 4:
+        return False
+    return bool(re.search(r'[A-Za-z]{3}', text))
+
+
+def _split_at_stop_word(text: str) -> tuple[str, Optional[str]]:
+    """
+    The words before the first stop word, and the text from that stop word on
+    (None when the text runs out without one).
+    """
+    kept = []
+    words = text.split()
+    for index, word in enumerate(words):
+        if _INDUSTRY_STOP_WORDS.match(word):
+            return _tidy_industry(' '.join(kept)), ' '.join(words[index:])
+        kept.append(word)
+    return _tidy_industry(' '.join(kept)), None
+
+
+def _longest_known_prefix(text: str, known: frozenset) -> Optional[str]:
+    tokens = list(re.finditer(r'[A-Za-z0-9]+', text))
+    for count in range(min(7, len(tokens)), 0, -1):
+        span = text[:tokens[count - 1].end()]
+        if _industry_key(span) in known:
+            return _tidy_industry(span)
+    return None
+
+
+def _industry_from_label(identifier: str) -> Optional[str]:
+    match = _LABELED_INDUSTRY_RE.search(identifier)
+    if not match:
+        return None
+    industry, closer = _split_at_stop_word(match.group('industry'))
+    if closer is None and len(identifier) >= _TRUNCATED_LENGTH and identifier.endswith(industry):
+        return None
+    return industry if _looks_like_industry(industry) else None
+
+
+def _industry_from_pipes(identifier: str, known: frozenset) -> Optional[str]:
+    segments = [segment.strip() for segment in identifier.split('|')]
+    if len(segments) < 2:
+        return None
+    cleaned = [re.sub(r'\s+\d+(?:\.\d+)?\s*%?\s*$', '', segment).strip() for segment in segments]
+    for segment in cleaned:
+        if segment and _industry_key(segment) in known and _looks_like_industry(segment):
+            return _tidy_industry(segment)
+    for segment in cleaned[1:]:
+        if _looks_like_industry(segment):
+            return _tidy_industry(segment)
+    return None
+
+
+def _industry_before_company(
+    identifier: str,
+    company_name: Optional[str],
+    strong: frozenset,
+    known: frozenset,
+) -> Optional[str]:
+    """
+    A schedule grouping that opens the identifier, ahead of the company.
+
+    The grouping is recognised as the longest known industry spelling that
+    opens the text after any category prefix. Without a category prefix a
+    single-word match is only trusted when the filer's own groupings name it
+    or an instrument follows it (a subtotal row like "Software First and
+    Second Lien Debt"); otherwise "Service Logic Acquisition, Inc." would
+    yield "Service".
+    """
+    prefix = _GROUPING_PREFIX_RE.match(identifier)
+    remainder = identifier[prefix.end():] if prefix else identifier
+    if not remainder.strip():
+        return None
+    span = _longest_known_prefix(remainder, known)
+    if span:
+        rest = remainder[len(span):].strip(_EDGE_CHARS) if remainder.startswith(span) else ''
+        if not rest:
+            rest = remainder[remainder.find(span) + len(span):].strip(_EDGE_CHARS)
+        if not re.search(r'[A-Za-z]', rest):
+            return None     # the identifier is the grouping itself, a subtotal row
+        if not _looks_like_industry(span):
+            return None
+        if len(identifier) >= _TRUNCATED_LENGTH and identifier.endswith(span):
+            return None
+        trusted = (
+            prefix is not None
+            or len(span.split()) > 1
+            or _industry_key(span) in strong
+            or _INDUSTRY_STOP_WORDS.match(rest) is not None
+        )
+        if trusted:
+            return span
+    if company_name and company_name not in (identifier, remainder):
+        position = remainder.find(company_name)
+        if position > 0:
+            before = _tidy_industry(remainder[:position])
+            if _looks_like_industry(before):
+                return before
+    return None
+
+
+def _closed_span(tail: str, known: frozenset) -> Optional[str]:
+    """
+    The industry that opens ``tail``, if something closes it.
+
+    A span is accepted when a labelled field, an instrument word, a dash, a
+    pipe or a parenthesis follows it, or when it is a known industry spelling.
+    A run of capitalised words that simply reaches the end of the identifier
+    is more often a company name than an industry, and a span closed by a
+    legal form ("Any Hour LLC") is one.
+    """
+    head = re.split(r'\s+[-–—]\s+|\s*[|(]', tail, maxsplit=1)
+    span, closer = _split_at_stop_word(head[0])
+    if closer and _COMPANY_CLOSERS.match(closer):
+        return None
+    if not span:
+        return None
+    known_prefix = _longest_known_prefix(span, known)
+    if known_prefix and _looks_like_industry(known_prefix):
+        return known_prefix
+    if not _looks_like_industry(span):
+        return None
+    if closer or len(head) > 1:
+        return span
+    return None
+
+
+def _industry_after_company(identifier: str, company_name: Optional[str], known: frozenset) -> Optional[str]:
+    if company_name and company_name != identifier:
+        position = identifier.find(company_name)
+        if position >= 0:
+            tail = identifier[position + len(company_name):]
+            tail = re.sub(r'^\s*\([^)]*\)', '', tail).strip(' ,;:')
+            tail = re.sub(r'^[-–—]\s*', '', tail)
+            candidate = _closed_span(tail, known)
+            if candidate:
+                return candidate
+    prefix = _GROUPING_PREFIX_RE.match(identifier)
+    remainder = identifier[prefix.end():] if prefix else identifier
+    for match in _AFTER_LEGAL_FORM_RE.finditer(remainder):
+        candidate = _closed_span(remainder[match.end():], known)
+        if candidate:
+            return candidate
+    return None
+
+
+def grouping_industries(identifiers) -> tuple[str, ...]:
+    """
+    The industries a filer uses as schedule groupings, read from its identifiers.
+
+    A grouping row is an identifier that is nothing but a category prefix, an
+    industry and, at most, instrument words: "Debt Investments Automotive",
+    "Non-Controlled/Non-Affiliated Investments, Entertainment, First Lien -
+    Secured Debt", "Software First and Second Lien Debt". These are the
+    strongest evidence for what the same filer wrote in front of its
+    companies, so :func:`identifier_industry` takes them as ``candidates``.
+    """
+    found: dict[str, str] = {}
+    for identifier in identifiers:
+        if not isinstance(identifier, str) or _CASH_LINE_RE.match(identifier):
+            continue
+        prefix = _GROUPING_PREFIX_RE.match(identifier)
+        remainder = identifier[prefix.end():] if prefix else identifier
+        remainder = _NET_ASSETS_TAIL_RE.sub('', remainder)
+        if '|' in remainder or not remainder.strip():
+            continue
+        span, closer = _split_at_stop_word(remainder)
+        if not span or (closer and (_COMPANY_CLOSERS.match(closer) or _POSITION_CLOSERS.match(closer))):
+            continue
+        rest = remainder[remainder.find(span) + len(span):]
+        leftover = [
+            word for word in re.findall(r'[A-Za-z]+', rest)
+            if not _INDUSTRY_STOP_WORDS.match(word) and word.lower() not in ('and', 'of', 'the')
+        ]
+        if leftover or not _looks_like_industry(span):
+            continue
+        vocabulary = _sector_vocabulary()
+        if prefix is None and _industry_key(span) not in vocabulary:
+            continue    # "Vitesse Systems, Secured Debt 1" is a position, not a grouping
+        if _industry_key(span) not in vocabulary:
+            # "Business Services Carestream Health" is a company subtotal under
+            # its industry; keep the industry the vocabulary recognises, and a
+            # spelling outside it only when it is short enough to be a label.
+            known_prefix = _longest_known_prefix(span, vocabulary)
+            if known_prefix:
+                span = known_prefix
+            elif closer is None and len(span.split()) > 4:
+                continue
+        found.setdefault(_industry_key(span), span)
+    return tuple(found.values())
+
+
+def identifier_industry(
+    identifier: str,
+    company_name: Optional[str] = None,
+    candidates: tuple[str, ...] = (),
+) -> Optional[str]:
+    """
+    The industry a filer wrote into an Investment Identifier member, or None.
+
+    Four placements are recognised, in this order:
+
+    1. A labelled field: ``"... Issuer Name JF Holdings Corp. Maturity 07/31/2026
+       Industry Distribution Current Coupon 11.30% ..."`` -> ``"Distribution"``.
+    2. A pipe-delimited segment: ``"AAH Topco., LLC | Diversified Consumer
+       Services | S+525 | ..."`` -> ``"Diversified Consumer Services"``.
+    3. A schedule grouping in front of the company: ``"Debt Investments
+       Automotive Truck-Lite Co., LLC Investment First-lien loan ..."`` ->
+       ``"Automotive"``. The grouping is recognised from ``candidates`` (the
+       filer's own grouping rows, see :func:`grouping_industries`, or its
+       taxonomy members) and the sector vocabulary, or from ``company_name``
+       when the caller has parsed it. A bare grouping row such as ``"Debt
+       Investments Automotive"`` is a subtotal, not an investment, and yields
+       None.
+    4. Between the company and the instrument: ``"... Donovan Food Brokerage,
+       LLC Business Services First Lien Debt ..."`` -> ``"Business Services"``.
+
+    Cash lines yield None.
+
+    Args:
+        identifier: The member text, with or without the axis prefix.
+        company_name: The company as parsed from the same identifier, if known.
+        candidates: Industry spellings this filer is known to use; compared with
+            punctuation, case, plurals and "and" ignored.
+
+    Returns:
+        The industry as filed, never an empty string, or None.
+    """
+    if not isinstance(identifier, str) or not identifier.strip():
+        return None
+    if ': ' in identifier and identifier.split(': ', 1)[0].endswith('Axis'):
+        identifier = identifier.split(': ', 1)[1].strip()
+    if _CASH_LINE_RE.match(identifier):
+        return None
+    strong = frozenset(_industry_key(candidate) for candidate in candidates)
+    known = _sector_vocabulary() | strong
+
+    industry = _industry_from_label(identifier)
+    if industry is None and '|' in identifier:
+        industry = _industry_from_pipes(identifier, known)
+    if industry is None:
+        industry = _industry_before_company(identifier, company_name, strong, known)
+    if industry is None:
+        industry = _industry_after_company(identifier, company_name, known)
+    return industry or None
+
+
+_ISSUER_END_RE = re.compile(
+    r'^(?P<name>.+?\b(?:LLC|L\.L\.C\.|Inc\.?|Corp\.?|Corporation|Ltd\.?|Limited|L\.P\.|LP|LLP|PLC|'
+    r'GmbH|Co\.|Company|S\.A\.|B\.V\.|SAS|SARL|AG|N\.V\.|NV|Oy|Pty|Pte|SpA|S\.p\.A\.|SE|KG|BV|ApS|'
+    r'A/S|P\.C\.|PBC)(?:\s*\([^)]*\))?)(?![A-Za-z])'
+)
+
+
+def issuer_from_identifier(identifier: str) -> Optional[str]:
+    """
+    The issuer key an identifier names, without the full company parse.
+
+    The DERA data sets carry 70,000 identifiers a quarter and the company
+    parser takes milliseconds each, so cross-filer matching reads the company
+    the cheap way: drop any schedule grouping and industry in front, then take
+    the text up to and including the first legal form ("Truck-Lite Co., LLC"),
+    or up to the first instrument word, comma, pipe or dash when there is
+    none ("Acronis International"). Returns :func:`issuer_key` of that span,
+    or None when nothing company-like is left.
+    """
+    if not isinstance(identifier, str) or _CASH_LINE_RE.match(identifier):
+        return None
+    if ': ' in identifier and identifier.split(': ', 1)[0].endswith('Axis'):
+        identifier = identifier.split(': ', 1)[1].strip()
+    prefix = _GROUPING_PREFIX_RE.match(identifier)
+    text = identifier[prefix.end():] if prefix else identifier
+    text = re.sub(r'^.*?\bIssuer Name\s+', '', text, count=1, flags=re.IGNORECASE)
+    leading = _longest_known_prefix(text, _sector_vocabulary())
+    if leading and _looks_like_industry(leading):
+        text = text[text.find(leading) + len(leading):].lstrip(' ,:-')
+        if not text.strip():
+            return None
+    if '|' in text:
+        segments = [segment.strip() for segment in text.split('|')]
+        text = next((segment for segment in segments if _ISSUER_END_RE.match(segment)), segments[0])
+    match = _ISSUER_END_RE.match(text)
+    if match:
+        return issuer_key(match.group('name'))
+    head = re.split(r'\s+[-\u2013\u2014]\s+|\s*[|(]|,\s', text, maxsplit=1)[0]
+    span, _ = _split_at_stop_word(head)
+    if not span or _NOT_AN_INDUSTRY_RE.search(span) and not re.search(r'[A-Za-z]{3}', span):
+        return None
+    return issuer_key(span)
+
+
+def _fill_industries(investments: dict, member_candidates: tuple[str, ...] = ()) -> None:
+    """
+    Give every parsed investment an industry where one can be recovered.
+
+    ``investments`` maps identifier -> field dict, as the constructors build
+    it; entries the filer tagged (``industry_source`` 'axis' or 'enumeration')
+    are left alone. The rest are read from the identifier text, with the
+    filer's own grouping rows and taxonomy members as the vocabulary, and
+    finally from a peer: another position in the same portfolio, for the same
+    company, that did get an industry.
+    """
+    candidates = tuple(member_candidates) + grouping_industries(investments.keys())
+    for identifier, fields in investments.items():
+        if fields.get('industry'):
+            continue
+        company = fields.get('company_name')
+        anchor = company if company and company != fields.get('identifier', identifier) else None
+        industry = identifier_industry(fields.get('identifier', identifier), company_name=anchor, candidates=candidates)
+        if industry:
+            fields['industry'] = industry
+            fields['industry_source'] = 'identifier'
+            if company and company.startswith(industry + ' ') and len(company) > len(industry) + 1:
+                # "Automotive Truck-Lite Co., LLC": the grouping was parsed as
+                # part of the company because no taxonomy member bounded it
+                fields['company_name'] = company[len(industry) + 1:].lstrip(' ,:-')
+
+    by_company: dict[str, str] = {}
+    for fields in investments.values():
+        key = issuer_key(fields.get('company_name'))
+        if key and fields.get('industry') and key not in by_company:
+            by_company[key] = fields['industry']
+    for fields in investments.values():
+        if fields.get('industry'):
+            continue
+        key = issuer_key(fields.get('company_name'))
+        if key and key in by_company:
+            fields['industry'] = by_company[key]
+            fields['industry_source'] = 'peer'
+
+
+class ParsedInvestmentIdentifier(NamedTuple):
+    """What one Investment Identifier member says about the position."""
+    identifier: str
+    company_name: str
+    investment_type: str
+    industry: Optional[str]
+
+
+def parse_investment_identifier(
+    dimension_label: str,
+    member_candidates: tuple[str, ...] = (),
+) -> ParsedInvestmentIdentifier:
+    """
+    Parse an identifier into company, investment type and industry.
+
+    The company and investment type come from :func:`_parse_investment_identifier`;
+    the industry from :func:`identifier_industry`, anchored on the parsed company.
+    """
+    identifier, company_name, investment_type = _parse_investment_identifier(
+        dimension_label, member_candidates=member_candidates,
+    )
+    anchor = company_name if company_name != identifier else None
+    industry = identifier_industry(identifier, company_name=anchor, candidates=member_candidates)
+    return ParsedInvestmentIdentifier(identifier, company_name, investment_type, industry)
+
+
 @dataclass(frozen=True)
 class DataQuality:
     """
@@ -1319,6 +1830,26 @@ class PortfolioInvestment:
     pik_rate: Optional[float] = None  # Paid-in-kind interest rate
     spread: Optional[float] = None
     percent_of_net_assets: Optional[float] = None
+    industry: Optional[str] = None  # As filed; None when the filing gives none
+    industry_source: Optional[str] = None  # 'axis', 'enumeration', 'identifier', 'peer' or None
+
+    def __post_init__(self):
+        if self.industry is not None and not str(self.industry).strip():
+            object.__setattr__(self, 'industry', None)
+        if self.industry is None:
+            object.__setattr__(self, 'industry_source', None)
+        elif self.industry_source is not None and self.industry_source not in INDUSTRY_SOURCES:
+            raise ValidationError(
+                f"industry_source must be one of {INDUSTRY_SOURCES} when industry is set, "
+                f"got {self.industry_source!r}",
+                parameter='industry_source', invalid_value=self.industry_source,
+                suggestions=list(INDUSTRY_SOURCES),
+            )
+
+    @property
+    def sector(self) -> Optional[str]:
+        """The normalized sector for ``industry`` ('Software Sector' -> 'Software'), or None."""
+        return normalize_sector(self.industry)
 
     @property
     def unrealized_gain_loss(self) -> Optional[Decimal]:
@@ -1369,6 +1900,8 @@ class PortfolioInvestment:
         table.add_column("Value")
 
         table.add_row("Type", self.investment_type)
+        if self.industry is not None:
+            table.add_row("Industry", f"{self.industry} [dim]({self.industry_source})[/dim]")
 
         if self.fair_value is not None:
             table.add_row("Fair Value", f"${self.fair_value:,.0f}")
@@ -1559,6 +2092,7 @@ class PortfolioInvestments:
         investment_type: Optional[str] = None,
         company_name: Optional[str] = None,
         min_fair_value: Optional[Decimal] = None,
+        industry: Optional[str] = None,
     ) -> 'PortfolioInvestments':
         """
         Filter investments by criteria.
@@ -1567,6 +2101,8 @@ class PortfolioInvestments:
             investment_type: Filter by investment type (partial match, case-insensitive)
             company_name: Filter by company name (partial match, case-insensitive)
             min_fair_value: Minimum fair value threshold
+            industry: Filter by industry or normalized sector (partial match,
+                case-insensitive). Investments with no industry never match.
 
         Returns:
             New PortfolioInvestments with matching investments
@@ -1585,6 +2121,14 @@ class PortfolioInvestments:
                 if company_name.lower() in inv.company_name.lower()
             ]
 
+        if industry:
+            needle = industry.lower()
+            investments = [
+                inv for inv in investments
+                if inv.industry is not None
+                and (needle in inv.industry.lower() or needle in (inv.sector or '').lower())
+            ]
+
         if min_fair_value is not None:
             investments = [
                 inv for inv in investments
@@ -1593,6 +2137,54 @@ class PortfolioInvestments:
 
         return PortfolioInvestments(investments, period=self._period,
                                     nonaccrual_fair_value=self._nonaccrual_fair_value)
+
+    @property
+    def industry_coverage(self) -> float:
+        """Share of investments with an industry, from any source."""
+        if not self._investments:
+            return 0.0
+        return sum(1 for inv in self._investments if inv.industry is not None) / len(self._investments)
+
+    def by_industry(self, by: str = 'sector') -> pd.DataFrame:
+        """
+        Aggregate the portfolio by industry.
+
+        Args:
+            by: ``'sector'`` (default) groups by the normalized sector so
+                "Software Sector" and "Software & Services" land in one row;
+                ``'industry'`` keeps the labels as filed.
+
+        Returns:
+            DataFrame with columns ``sector`` (or ``industry``), ``num_investments``,
+            ``total_fair_value`` and ``pct_of_portfolio``, sorted by fair value
+            descending. Investments with no industry are gathered in a final
+            row labelled ``None`` so the totals still add up; the frame is
+            empty when the portfolio is.
+        """
+        if by not in ('sector', 'industry'):
+            raise ValidationError(
+                f"by must be 'sector' or 'industry', got {by!r}",
+                parameter='by', invalid_value=by, suggestions=['sector', 'industry'],
+            )
+        if not self._investments:
+            return pd.DataFrame(columns=[by, 'num_investments', 'total_fair_value', 'pct_of_portfolio'])
+        rows = pd.DataFrame([
+            {
+                by: inv.sector if by == 'sector' else inv.industry,
+                'fair_value': float(inv.fair_value) if inv.fair_value is not None else 0.0,
+            }
+            for inv in self._investments
+        ])
+        grouped = rows.groupby(by, dropna=False).agg(
+            num_investments=('fair_value', 'size'),
+            total_fair_value=('fair_value', 'sum'),
+        ).reset_index()
+        total = grouped['total_fair_value'].sum()
+        grouped['pct_of_portfolio'] = grouped['total_fair_value'] / total if total else 0.0
+        grouped[by] = grouped[by].astype(object).where(grouped[by].notna(), None)
+        known = grouped[grouped[by].notna()].sort_values('total_fair_value', ascending=False)
+        unknown = grouped[grouped[by].isna()]
+        return pd.concat([known, unknown]).reset_index(drop=True)
 
     def to_context(self, detail: str = 'standard') -> str:
         """
@@ -1617,6 +2209,8 @@ class PortfolioInvestments:
 
         dq = self.data_quality
         lines.append(f'Composition: {dq.debt_count} debt, {dq.equity_count} equity')
+        if self.industry_coverage:
+            lines.append(f'Industry Coverage: {self.industry_coverage:.0%}')
 
         # Health metrics
         if self._nonaccrual_fair_value is not None:
@@ -1650,7 +2244,8 @@ class PortfolioInvestments:
         if detail == 'standard':
             lines.append('')
             lines.append('AVAILABLE ACTIONS:')
-            lines.append('  .filter(investment_type=, company_name=)   Filter investments')
+            lines.append('  .filter(investment_type=, company_name=, industry=)   Filter investments')
+            lines.append('  .by_industry()       Fair value by normalized sector')
             lines.append('  .to_dataframe()      All holdings as DataFrame')
             lines.append('  .data_quality        Coverage metrics')
             lines.append('  .non_accrual_rate    Non-accrual rate at FV')
@@ -1665,9 +2260,17 @@ class PortfolioInvestments:
         for t, c in type_counts.most_common(15):
             lines.append(f'  {t}: {c}')
 
+        if self.industry_coverage:
+            lines.append('')
+            lines.append('SECTOR BREAKDOWN (fair value):')
+            for row in self.by_industry().head(10).itertuples(index=False):
+                label = row.sector if row.sector is not None else 'No industry'
+                lines.append(f'  {label}: ${row.total_fair_value:,.0f} ({row.pct_of_portfolio:.1%})')
+
         lines.append('')
         lines.append('AVAILABLE ACTIONS:')
-        lines.append('  .filter(investment_type=, company_name=)   Filter investments')
+        lines.append('  .filter(investment_type=, company_name=, industry=)   Filter investments')
+        lines.append('  .by_industry()       Fair value by normalized sector')
         lines.append('  .to_dataframe()      All holdings as DataFrame')
         lines.append('  .data_quality        Coverage metrics')
         lines.append('  .non_accrual_rate    Non-accrual rate at FV')
@@ -1688,6 +2291,9 @@ class PortfolioInvestments:
                 'pik_rate': inv.pik_rate,
                 'spread': inv.spread,
                 'percent_of_net_assets': inv.percent_of_net_assets,
+                'industry': inv.industry,
+                'sector': inv.sector,
+                'industry_source': inv.industry_source,
             }
             for inv in self._investments
         ])
@@ -1824,6 +2430,9 @@ class PortfolioInvestments:
                     'company_name': company_name,
                     'investment_type': inv_type,
                 }
+            if concept == CONCEPT_INDUSTRY_ENUMERATION and isinstance(value, str) and value.strip():
+                investments[dim_label]['industry'] = clean_industry_label(value)
+                investments[dim_label]['industry_source'] = 'enumeration'
 
             # Map concept to field
             inv = investments[dim_label]
@@ -1852,6 +2461,8 @@ class PortfolioInvestments:
             except (ValueError, TypeError, InvalidOperation):
                 # Skip values that can't be converted
                 pass
+
+        _fill_industries(investments)
 
         # Create PortfolioInvestment objects
         portfolio = [
@@ -1929,6 +2540,7 @@ class PortfolioInvestments:
             'us-gaap:InvestmentInterestRatePaidInKind': 'pik_rate',
             'us-gaap:InvestmentBasisSpreadVariableRate': 'spread',
             'us-gaap:InvestmentOwnedPercentOfNetAssets': 'percent_of_net_assets',
+            'us-gaap:InvestmentIndustrySectorExtensibleEnumeration': 'industry_enumeration',
         }
 
         # Group facts by investment identifier
@@ -1966,11 +2578,23 @@ class PortfolioInvestments:
                     'investment_type': inv_type,
                 }
 
+            # The industry the filer tagged on this fact, if any
+            axis_industry = fact.get(DIM_INDUSTRY_SECTOR)
+            if axis_industry and not investments[inv_identifier].get('industry'):
+                investments[inv_identifier]['industry'] = clean_industry_label(str(axis_industry))
+                investments[inv_identifier]['industry_source'] = 'axis'
+
             # Map the value to the appropriate field
             field_name = relevant_concepts[concept]
             value = fact.get('numeric_value') or fact.get('value')
 
             if value is None or pd.isna(value):
+                continue
+
+            if field_name == 'industry_enumeration':
+                if investments[inv_identifier].get('industry_source') != 'axis' and str(value).strip():
+                    investments[inv_identifier]['industry'] = clean_industry_label(str(value))
+                    investments[inv_identifier]['industry_source'] = 'enumeration'
                 continue
 
             try:
@@ -2004,6 +2628,8 @@ class PortfolioInvestments:
                         except (ValueError, InvalidOperation):
                             pass
                         break
+
+        _fill_industries(investments, member_candidates)
 
         # Create PortfolioInvestment objects
         portfolio = [
