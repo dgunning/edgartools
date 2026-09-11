@@ -20,7 +20,7 @@ patterns:
       holdings = thirteenf.holdings      # DataFrame sorted by value (aggregated)
       holdings.head(10)                  # Top 10 positions
 
-      infotable = thirteenf.infotable    # Raw data with OtherManager column
+      infotable = thirteenf.infotable    # Dollar values with OtherManager column
 
       # DataFrame columns:
       # Issuer, Class, Cusip, Ticker, Value (dollars), SharesPrnAmount, Type,
@@ -34,6 +34,19 @@ patterns:
       total_value = holdings['Value'].sum()          # Already in dollars (5.28.2+)
       top5 = holdings.nlargest(5, 'Value')            # Top holdings by value
       apple = holdings[holdings['Ticker'] == 'AAPL']  # Filter by ticker
+
+  - name: Inspect Ambiguous Value Units
+    when: Historical values appear 1000x too large or an Ambiguous13FValueUnitWarning is emitted
+    code: |
+      from edgar import ThirteenF
+      resolution = thirteenf.value_unit_resolution  # Unit, multiplier, source, ambiguity
+      raw = thirteenf.raw_infotable                 # Original reported values
+      # Only after independently verifying this specific filing reports dollars:
+      corrected = ThirteenF(filing, value_unit='dollars')
+    note: |
+      Metadata fallbacks are not independent verification. Avoid automatic corrections
+      based only on portfolio size or maximum share price. Overrides affect one filing
+      and both its holdings and summary; they bypass accession-only holdings caches.
 
   - name: Fund Holdings (NPORT)
     when: Mutual fund or ETF portfolio (not institutional 13F)
