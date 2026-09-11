@@ -32,13 +32,13 @@ report.holdings
 |--------|-----------|
 | `Issuer` | Company name (`"APPLE INC"`) |
 | `Ticker` | Resolved ticker symbol (`"AAPL"`) |
-| `Value` | Market value in **thousands** of dollars |
+| `Value` | Market value in **dollars** |
 | `SharesPrnAmount` | Share count or principal amount |
 | `Cusip` | 9-character CUSIP |
 | `Type` | `"Shares"` or `"Principal"` |
 | `PutCall` | `"PUT"`, `"CALL"`, or empty |
 
-Values are in thousands -- the SEC's reporting unit. `Value` of 135,364 means $135.4 million.
+Values are normalized to dollars. A `Value` of 135,364,000 means $135.4 million.
 
 ---
 
@@ -193,7 +193,8 @@ for mgr in report.other_managers:
 | `management_company_name` | Company that filed | `"Berkshire Hathaway Inc"` |
 | `report_period` | Quarter end date | `"2024-03-31"` |
 | `filing_date` | Date filed | `"2024-05-15"` |
-| `total_value` | Portfolio value ($000s) | `Decimal('313218000')` |
+| `total_value` | Reported portfolio value in dollars | `Decimal('313218000000')` |
+| `value_unit_resolution` | Raw unit, multiplier, evidence and ambiguity | `report.value_unit_resolution.multiplier` |
 | `total_holdings` | Number of positions | `40` |
 | `filing_signer_name` | Who signed | `"Marc D. Hamburg"` |
 | `filing_signer_title` | Signer's title | `"Senior Vice President"` |
@@ -208,7 +209,8 @@ for mgr in report.other_managers:
 | Call | Returns | What it does |
 |------|---------|-------------|
 | `report.holdings` | `DataFrame` | Aggregated holdings, one row per security |
-| `report.infotable` | `DataFrame` | Raw holdings, disaggregated by manager |
+| `report.infotable` | `DataFrame` | Holdings in dollars, disaggregated by manager |
+| `report.raw_infotable` | `DataFrame` | Holdings in original filing units, disaggregated by manager |
 | `report.holdings_view()` | `HoldingsView` | Rich-renderable, iterable holdings |
 | `report.compare_holdings()` | `HoldingsComparison` | Quarter-over-quarter changes with status labels |
 | `report.holding_history(periods=4)` | `HoldingsHistory` | Multi-quarter share trends with sparklines |
@@ -220,7 +222,59 @@ for mgr in report.other_managers:
 
 ## Things to Know
 
-**Values are in thousands.** The SEC requires 13F values in $000s. A `Value` of 135,364 is $135.4 million.
+**Values are normalized to dollars.** `infotable['Value']`, `holdings['Value']` and
+`total_value` already include any thousands-to-dollars conversion. Do not multiply
+them by 1,000. Use `raw_infotable` to inspect original reported values.
+
+### Ambiguous reporting units
+
+Some filings contain dollars despite using an older reporting convention. Kahn
+Brothers' Q1 2022 filing (`0001039565-22-000009`) is one example. Share prices alone
+cannot reliably distinguish such filings from portfolios of high-priced stocks
+reported in thousands. Schema and period defaults are conventions, not proof.
+
+Inspect `report.value_unit_resolution` for the selected `unit`, `multiplier`,
+`source`, `ambiguous`, `priceable_rows`, `fraction_sub_dollar`, `schema_version`
+and `report_period`. These diagnostics and `raw_infotable` do not emit warnings.
+Automatic unit choices remain backward compatible. When an ambiguous fallback
+would multiply priceable holdings by 1,000, reading normalized values emits
+`Ambiguous13FValueUnitWarning` once per report. Other metadata fallbacks remain
+visible through the diagnostics without warning. The sub-dollar-price heuristic
+is evidence, not independent price verification; unusual portfolios still require
+review.
+
+After independently verifying a filing's units, construct a new report with
+`value_unit='dollars'` or `value_unit='thousands'`. The override applies to both
+holdings and the summary, and is recorded with `source='override'`. It affects
+only that report, not previous periods or other filings.
+With an override, reading an XML filing's `total_value` uses the summary without
+fetching its holdings attachment. Reading holdings or diagnostics still parses
+the attachment and surfaces any retrieval or parsing errors.
+
+For `filing` representing Kahn's Q1 2022 accession above:
+
+```python
+from decimal import Decimal
+from edgar import ThirteenF
+
+report = ThirteenF(filing, value_unit='dollars')
+assert report.infotable['Value'].sum() == 787_553_692
+assert report.total_value == Decimal('787553693')
+assert report.value_unit_resolution.multiplier == 1
+assert report.value_unit_resolution.source == 'override'
+```
+
+The one-dollar difference is present in the original filing; the library preserves
+it. Overrides bypass external accession-only holdings caches, whose values may
+have been calculated using a different unit. For default reports, an external
+cache remains responsible for the correctness of the data it returns.
+
+To reject ambiguous conversions in an ingestion pipeline, promote the warning
+to an exception with
+`warnings.simplefilter('error', Ambiguous13FValueUnitWarning)`, importing the
+warning from `edgar.thirteenf`. Verify the unit before retrying with an override.
+
+### Other considerations
 
 **`holdings` vs `infotable`.** Use `holdings` (aggregated by CUSIP) for portfolio analysis. Use `infotable` only when you need per-manager detail in multi-manager filings.
 
