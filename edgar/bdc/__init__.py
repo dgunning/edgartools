@@ -41,7 +41,8 @@ Example usage:
     # Bulk analysis with DERA data sets
     >>> from edgar.bdc import fetch_bdc_dataset
     >>> dataset = fetch_bdc_dataset(2024, 3)
-    >>> dataset.soi.groupby('industry')['fair_value'].sum()
+    >>> dataset.summary_by_industry()
+    >>> dataset.schedule_of_investments.to_dataframe(clean=True)
 """
 from edgar.bdc.datasets import (
     BDCDataset,

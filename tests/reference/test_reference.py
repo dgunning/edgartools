@@ -2,6 +2,7 @@ import json
 from unittest.mock import patch
 
 import pandas as pd
+import pytest
 
 from edgar.reference import cusip_ticker_mapping, get_ticker_from_cusip, describe_form
 from edgar.reference.tickers import get_cik_tickers, find_cik, get_company_ticker_name_exchange, \
@@ -90,9 +91,49 @@ def test_find_cik():
 
 
 
-def test_find_mutual_fund_cik():
+# A slice of https://www.sec.gov/files/company_tickers_mf.json as served on
+# 2026-09-11, in the file's own shape. The live file is checked by the network
+# contract test in test_sec_reference_contract.py.
+MUTUAL_FUND_TICKERS_JSON = {
+    "fields": ["cik", "seriesId", "classId", "symbol"],
+    "data": [
+        [3794, "S000027378", "C000152483", "ABNZX"],
+        [3794, "S000010305", "C000028493", "ABQUX"],
+        [36405, "S000002839", "C000007825", "CRBRX"],
+    ],
+}
+
+
+@pytest.fixture
+def bundled_mutual_fund_tickers():
+    """Serve the mutual fund ticker file from memory and leave no cached frame behind."""
+    get_mutual_fund_tickers.cache_clear()
+    with patch('edgar.reference.tickers.download_json', return_value=MUTUAL_FUND_TICKERS_JSON):
+        yield
+    get_mutual_fund_tickers.cache_clear()
+
+
+def test_find_mutual_fund_cik(bundled_mutual_fund_tickers):
     assert find_mutual_fund_cik("ABNZX") == 3794
+    assert find_mutual_fund_cik("abnzx") == 3794
     assert find_mutual_fund_cik("NOTTHERE") is None
+
+
+def test_mutual_fund_lookup_follows_the_frame():
+    """
+    The lookup dict must be rebuilt when the ticker frame changes. Stacking a
+    second lru_cache on top of get_mutual_fund_tickers() froze the first frame
+    a worker saw, so a sibling test that patched the frame poisoned this one.
+    """
+    fake = pd.DataFrame([{'cik': 1, 'seriesId': 'S1', 'classId': 'C1', 'ticker': 'FAKEX'}])
+    with patch('edgar.reference.tickers.get_mutual_fund_tickers', return_value=fake):
+        assert find_mutual_fund_cik("FAKEX") == 1
+        assert find_mutual_fund_cik("ABNZX") is None
+    get_mutual_fund_tickers.cache_clear()
+    with patch('edgar.reference.tickers.download_json', return_value=MUTUAL_FUND_TICKERS_JSON):
+        assert find_mutual_fund_cik("ABNZX") == 3794
+        assert find_mutual_fund_cik("FAKEX") is None
+    get_mutual_fund_tickers.cache_clear()
 
 
 def test_company_ticker_name_exchange():
@@ -111,7 +152,7 @@ def test_get_companies_by_exchange():
     assert 'Nasdaq' in data.exchange.tolist()
 
 
-def test_get_mutual_fund_tickers():
+def test_get_mutual_fund_tickers(bundled_mutual_fund_tickers):
     data = get_mutual_fund_tickers()
     assert data.columns.tolist() == ['cik', 'seriesId', 'classId', 'ticker']
 

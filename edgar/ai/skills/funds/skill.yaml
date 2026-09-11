@@ -55,6 +55,14 @@ patterns:
       # Bulk cross-BDC analysis via DERA data sets
       dataset = fetch_bdc_dataset(2024, 3)
       dataset.soi                                # Schedule of investments data
+      dataset.summary_by_industry()              # industry | total_fair_value | num_bdcs | num_investments
+      dataset.schedule_of_investments.search("Ivy Hill")   # Which BDCs hold a company
+      dataset.schedule_of_investments.to_dataframe(clean=True)  # fair_value, cost, industry columns
+    note: |
+      DERA names SOI columns after XBRL labels that change between releases
+      (fair value is currently "Initial fair value of Investment"). Use
+      summary_by_industry() or to_dataframe(clean=True) rather than
+      dataset.soi['Investment Owned, Fair Value'], which is present but empty.
 
   - name: Report Backlinks
     when: Navigate from report to filing
