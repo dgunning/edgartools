@@ -1,1 +1,0 @@
-**The installation guide's Python requirement was outdated.** `docs/installation.md` listed Python 3.8+ in two places (System Requirements and the venv setup section) while `pyproject.toml` requires `>=3.10`. Both now read 3.10, matching package metadata.
