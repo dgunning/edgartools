@@ -1,1 +1,0 @@
-**Quickstart prerequisites and cash flow guidance were outdated.** The guide now requires Python 3.10, matching package metadata, and identifies `cashflow_statement()` as deprecated in favor of `cash_flow_statement()`.

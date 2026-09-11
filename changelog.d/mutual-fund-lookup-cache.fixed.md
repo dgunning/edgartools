@@ -1,1 +1,0 @@
-**`find_mutual_fund_cik()` could answer from a stale ticker frame.** The ticker-to-CIK dict had its own cache stacked on the cached frame, so clearing or replacing the frame left the lookup frozen for the rest of the process. The dict now follows the frame it was built from, and the fast test serves a 3-row slice of the SEC file instead of downloading it.

@@ -1,1 +1,0 @@
-**`ThirteenF` could silently inflate ambiguous filing values by 1,000x.** It now warns on ambiguous thousands conversions and exposes raw values and unit diagnostics. A verified `value_unit='dollars'` override reads Kahn Brothers' Q1 2022 holdings as $787,553,692; the SEC summary remains $1 higher. Automatic unit choices are unchanged.
