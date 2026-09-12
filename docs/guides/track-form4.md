@@ -378,10 +378,10 @@ When working with large volumes of Form 4 filings:
 3. **Filter Early**: Apply filters early in your pipeline to reduce the dataset size
 
 ```python
-from edgar import enable_local_storage
+from edgar import use_local_storage
 
 # Enable local storage
-enable_local_storage("/path/to/storage")
+use_local_storage("/path/to/storage")
 
 # Process filings in batches
 all_filings = get_filings(form="4", year=2024)

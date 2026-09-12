@@ -74,16 +74,20 @@ Based on your specific use case, choose the most efficient access pattern:
 
 ## Rate Limiting Considerations
 
-By default, edgartools limits requests to a maximum of 10 per second to comply with SEC EDGAR's rate limits. Exceeding these limits can result in your IP being temporarily blocked.
+By default, edgartools limits requests to 9 per second, under SEC EDGAR's limit of 10. Exceeding the SEC's limit can result in your IP being temporarily blocked.
+
+The limit is read from the `EDGAR_RATE_LIMIT_PER_SEC` environment variable when `edgar` is first imported, so set it before the import:
 
 ```python
-# Default rate limit is 10 requests per second
-# You can adjust it if needed (use with caution)
-from edgar import set_rate_limit
+import os
 
-# Decrease rate limit for more conservative approach
-set_rate_limit(5)  # 5 requests per second
+# Decrease the rate limit for a more conservative approach (default is 9)
+os.environ["EDGAR_RATE_LIMIT_PER_SEC"] = "5"
+
+from edgar import Company
 ```
+
+See [Configuration](../configuration.md#edgar_rate_limit_per_sec) for the other environment variables.
 
 ## Using Local Storage for Performance
 
@@ -96,10 +100,10 @@ One of the most effective ways to improve performance is to use local storage. T
 ### Setting Up Local Storage
 
 ```python
-from edgar import enable_local_storage
+from edgar import use_local_storage
 
 # Enable local storage
-enable_local_storage("/path/to/storage")
+use_local_storage("/path/to/storage")
 
 # Now filings will be stored locally
 company = Company("MSFT")
