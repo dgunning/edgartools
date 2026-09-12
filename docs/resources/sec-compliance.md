@@ -71,7 +71,7 @@ The SEC doesn't publish specific rate limits, but based on their guidelines and 
 
 By default, edgartools implements conservative rate limiting:
 
-- Maximum of 10 requests per second
+- 9 requests per second by default (`EDGAR_RATE_LIMIT_PER_SEC`)
 - Built-in delays between requests
 - Automatic retries with exponential backoff for 429 errors
 
@@ -79,13 +79,15 @@ This default configuration is designed to keep you compliant with SEC guidelines
 
 ## Customizing Rate Limits
 
-You can adjust the rate limits in edgartools if needed:
+The default is 9 requests per second. To be more conservative, set `EDGAR_RATE_LIMIT_PER_SEC` before `edgar` is first imported, since the limiter is built at import time:
 
 ```python
-from edgar import set_rate_limit
+import os
 
 # Set a more conservative rate limit (requests per second)
-set_rate_limit(5)  # 5 requests per second
+os.environ["EDGAR_RATE_LIMIT_PER_SEC"] = "5"
+
+from edgar import Company
 ```
 
 For high-volume or production use cases, consider being more conservative with your rate limits to avoid potential IP blocks.
@@ -118,9 +120,9 @@ set_identity(
 Reduce the number of requests by storing filings locally:
 
 ```python
-from edgar import enable_local_storage
+from edgar import use_local_storage
 
-enable_local_storage("/path/to/storage")
+use_local_storage("/path/to/storage")
 ```
 
 ### 3. Implement Appropriate Delays

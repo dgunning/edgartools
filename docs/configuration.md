@@ -534,7 +534,7 @@ The cache directory is set in `httpclient.CACHE_DIRECTORY`, set to `_cache` by d
 
 #### Caching Rules
 The SEC marks all requests as either NO-STORE or NO-CACHE, therefore a custom cache controller was implemented with the following rules: 
-- `/submissions` URLs for up to 10 minutes by default, set in `MAX_SUBMISSIONS_AGE_SECONDS`
+- `/submissions` URLs for up to 30 seconds by default, set in `MAX_SUBMISSIONS_AGE_SECONDS`
 - `.*index/.*` URLs for up to 30 minutes by default, set in `MAX_INDEX_AGE_SECONDS`
 - `/Archives/edgar/data` URLs indefinitely (forever)
 
