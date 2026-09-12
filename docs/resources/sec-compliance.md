@@ -71,7 +71,7 @@ The SEC doesn't publish specific rate limits, but based on their guidelines and 
 
 By default, edgartools implements conservative rate limiting:
 
-- Maximum of 10 requests per second
+- 9 requests per second by default (`EDGAR_RATE_LIMIT_PER_SEC`)
 - Built-in delays between requests
 - Automatic retries with exponential backoff for 429 errors
 
