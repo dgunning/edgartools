@@ -395,6 +395,8 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
         'SC 13D': ('Schedule13D', 'beneficial ownership report (5%+ stake, active)'),
         'SCHEDULE 13G': ('Schedule13G', 'beneficial ownership report (5%+ stake, passive)'),
         'SC 13G': ('Schedule13G', 'beneficial ownership report (5%+ stake, passive)'),
+        'SC 14D9': ('Schedule14D9', 'target company board recommendation on a tender offer'),
+        'SC 14D9/A': ('Schedule14D9', 'target company board recommendation on a tender offer (amendment)'),
         '144': ('Form144', 'restricted stock sale notice'),
         'MA-I': ('MunicipalAdvisorForm', 'municipal advisor registration'),
         '3': ('Form3', 'initial insider ownership'),
@@ -533,6 +535,7 @@ def obj(sec_filing: Filing) -> Optional[object]:
     from edgar.muniadvisors import MunicipalAdvisorForm
     from edgar.offerings import FormC, FormD
     from edgar.ownership import Form3, Form4, Form5, Ownership
+    from edgar.tender_offers import Schedule14D9
 
     if matches_form(sec_filing, "6-K"):
         return SixK(sec_filing)
@@ -584,6 +587,8 @@ def obj(sec_filing: Filing) -> Optional[object]:
         return Schedule13D.from_filing(sec_filing)
     elif matches_form(sec_filing, ["SCHEDULE 13G", "SC 13G"]):
         return Schedule13G.from_filing(sec_filing)
+    elif matches_form(sec_filing, "SC 14D9"):
+        return Schedule14D9.from_filing(sec_filing)
     elif matches_form(sec_filing, "EFFECT"):
         xml = sec_filing.xml()
         if xml:

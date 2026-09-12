@@ -25,6 +25,7 @@ mappings:
     "institutional holdings|13f": "13F-HR"
     "activist investor|5% stake": "SC 13D"
     "passive 5%": "SC 13G"
+    "tender offer recommendation|target board recommendation|14D-9": "SC 14D9"
 
   proxy:
     "proxy statement|executive comp": "DEF 14A"
@@ -40,6 +41,7 @@ gotchas:
   - "13F-HR has holdings data; 13F-NT is just a notice (no data)"
   - "/A suffix = amendment (10-K/A, 8-K/A)"
   - "Form 4 = insider trades; SC 13D = 5%+ ownership disclosure"
+  - "SC 14D9 = target board's accept/reject/neutral recommendation on a tender offer; filing.obj() -> Schedule14D9; .recommendation is None (not a bug) when the board's language is genuinely ambiguous"
   - "DEF 14A = final proxy; PRE 14A = preliminary draft"
   - "424B5 = shelf takedown supplement; 424B4 = IPO final; 424B3 = resale; 424B2 = structured notes"
   - "S-4/F-4 = securities registered in a merger/business combination; filing.obj() -> RegistrationS4 (fee table, cover page, offering_type)"
