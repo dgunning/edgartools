@@ -315,11 +315,25 @@ def _strip_trailing_member_candidate(
     return company_name.strip()
 
 
+# The members of srt:RangeAxis bound a range, never a company or an industry,
+# and filers label them for the interest-rate range tables they sit in: BXSL
+# and CGBD label srt:MaximumMember "High" and srt:MinimumMember "Low". A one-word
+# candidate reads as a schedule grouping in front of any borrower whose name
+# opens with it, so BXSL's "High Street Buyer, Inc." came back as "Street
+# Buyer, Inc." with industry "High" on every one of its four positions.
+_RANGE_BOUND_MEMBERS = frozenset({
+    'srt_MaximumMember', 'srt_MinimumMember', 'srt_WeightedAverageMember',
+    'srt_ArithmeticAverageMember', 'srt_MedianMember',
+})
+
+
 def _get_investment_member_candidates(xbrl) -> tuple[str, ...]:
     """Collect normalized taxonomy member labels used to bound company names."""
     candidates = set()
     for element_name, element in xbrl.element_catalog.items():
         if not element_name.lower().endswith('member'):
+            continue
+        if element_name.replace(':', '_') in _RANGE_BOUND_MEMBERS:
             continue
         for label in element.labels.values():
             candidate = re.sub(r'\s*\[Member\]\s*$', '', label).strip()
