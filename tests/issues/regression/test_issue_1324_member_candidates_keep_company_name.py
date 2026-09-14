@@ -82,11 +82,12 @@ def test_the_name_is_the_same_with_and_without_the_standard_members():
 def test_range_bound_members_are_not_candidates_and_every_other_member_still_is():
     catalog = {
         'srt_MaximumMember': SRT_MAXIMUM,
-        'srt:MinimumMember': SRT_MINIMUM,
+        'srt_MinimumMember': SRT_MINIMUM,
+        'srt_RangeMember': SimpleNamespace(labels={LABEL: 'Statistical Measurement [Domain]', TERSE: 'Range'}),
         'srt_WeightedAverageMember': SimpleNamespace(labels={LABEL: 'Weighted Average [Member]'}),
         'us-gaap_InvestmentsMember': SimpleNamespace(labels={LABEL: 'Investments [Member]', TERSE: 'Total'}),
         'bxsl_SoftwareMember': SimpleNamespace(labels={LABEL: 'Software [Member]'}),
-        'bxsl:HealthCareProvidersAndServicesMember': SimpleNamespace(
+        'bxsl_HealthCareProvidersAndServicesMember': SimpleNamespace(
             labels={LABEL: 'Health Care Providers and Services [Member]'}),
     }
     candidates = _get_investment_member_candidates(SimpleNamespace(element_catalog=catalog))

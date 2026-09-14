@@ -321,9 +321,11 @@ def _strip_trailing_member_candidate(
 # candidate reads as a schedule grouping in front of any borrower whose name
 # opens with it, so BXSL's "High Street Buyer, Inc." came back as "Street
 # Buyer, Inc." with industry "High" on every one of its four positions.
+# srt_RangeMember is the domain itself; it passes the "ends with Member" filter
+# and a filer can terse-label it with one word just as BXSL did its children.
 _RANGE_BOUND_MEMBERS = frozenset({
-    'srt_MaximumMember', 'srt_MinimumMember', 'srt_WeightedAverageMember',
-    'srt_ArithmeticAverageMember', 'srt_MedianMember',
+    'srt_RangeMember', 'srt_MaximumMember', 'srt_MinimumMember',
+    'srt_WeightedAverageMember', 'srt_ArithmeticAverageMember', 'srt_MedianMember',
 })
 
 
@@ -333,7 +335,7 @@ def _get_investment_member_candidates(xbrl) -> tuple[str, ...]:
     for element_name, element in xbrl.element_catalog.items():
         if not element_name.lower().endswith('member'):
             continue
-        if element_name.replace(':', '_') in _RANGE_BOUND_MEMBERS:
+        if element_name in _RANGE_BOUND_MEMBERS:
             continue
         for label in element.labels.values():
             candidate = re.sub(r'\s*\[Member\]\s*$', '', label).strip()
