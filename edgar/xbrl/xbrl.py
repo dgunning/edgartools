@@ -100,6 +100,54 @@ def _names_notes_section(role_def: str) -> bool:
     return bool(_NOTES_SECTION_RE.search(role_def))
 
 
+# A filing that falls back to role names spells a family as a stem and a
+# suffix: "ConvertiblePromissoryNotesPayable", "...Tables",
+# "...ScheduleOfConvertiblePromissoryNotesPayableDetails".  Only the stem
+# hangs from the disclosure concept, so the children cannot declare
+# themselves and are classified with their parent instead (issue #1218).
+_ROLE_FAMILY_SUFFIX_RE = re.compile(r"(?:tables?|details?|policies|parenthetical|textuals?)$")
+
+# Plural markers on CamelCase word boundaries.  gahc names the parent
+# "ConvertiblePromissoryNotesPayable" and two of its children
+# "ConvertiblePromissoryNotePayableScheduleOf...", so the family key drops them.
+_CAMEL_PLURAL_RE = re.compile(r"s(?=[A-Z]|$)")
+
+
+def _role_family_key(definition: str) -> str:
+    """The part of a role definition its family shares, for prefix comparison.
+
+    Args:
+        definition: Role definition as written, so that CamelCase boundaries
+            are still visible.
+    """
+    return _CAMEL_PLURAL_RE.sub('', definition).lower()
+
+
+def _follows_disclosure_family(role_def: str, family_key: str, stem_declares_disclosure: Dict[str, bool]) -> bool:
+    """Whether a role that does not declare itself is a Tables or Details
+    member of a family whose stem does.
+
+    The stem is the longest stem role whose key is a proper prefix of this
+    one, so `NotesPayableRelatedPartyDetails` follows `NotesPayableRelatedParty`
+    rather than the shorter `NotesPayable`, and stays with its own family
+    when that stem does not declare a disclosure.
+
+    Args:
+        role_def: Role definition, lowercased.
+        family_key: The role's `_role_family_key`.
+        stem_declares_disclosure: Family key of every role in the filing
+            that is not itself a Tables or Details role, mapped to whether
+            it declares a disclosure.
+    """
+    if not _ROLE_FAMILY_SUFFIX_RE.search(role_def):
+        return False
+    stems = [key for key in stem_declares_disclosure
+             if key != family_key and family_key.startswith(key)]
+    if not stems:
+        return False
+    return stem_declares_disclosure[max(stems, key=len)]
+
+
 def _capture_sgml_period_of_report(xbrl: "XBRL", filing) -> None:
     """Record the filing header's period_of_report on `xbrl`, or say why not.
 
@@ -1097,6 +1145,26 @@ class XBRL:
         self._statement_by_role_uri = {}
         self._statement_by_role_name = {}
 
+        # Family key of every stem role and whether it declares itself a
+        # disclosure, so that a Tables or Details role can follow its nearest
+        # stem below (issue #1218).  Every stem is recorded, not only the
+        # declaring ones, so that `NotesPayableRelatedPartyDetails` resolves to
+        # `NotesPayableRelatedParty` and not past it to `NotesPayable`.  Roles
+        # that are themselves Tables or Details are not stems: gahc's
+        # `...DetailsParenthetical` must reach the family stem, not the
+        # `...Details` it extends.
+        stem_declares_disclosure: Dict[str, bool] = {}
+        for tree in self.presentation_trees.values():
+            if not isinstance(tree.definition, str):
+                continue
+            role_def = tree.definition.lower()
+            if _ROLE_FAMILY_SUFFIX_RE.search(role_def):
+                continue
+            declares = (_declares_disclosure(role_def, next(iter(tree.all_nodes)))
+                        and not _names_notes_section(role_def))
+            key = _role_family_key(tree.definition)
+            stem_declares_disclosure[key] = stem_declares_disclosure.get(key, False) or declares
+
         for role, tree in self.presentation_trees.items():
             # Check if this role appears to be a financial statement
             role_def = tree.definition.lower()
@@ -1161,23 +1229,24 @@ class XBRL:
                     # is taken at its word unless the definition names the notes
                     # section itself (issue #1207).
                     #
-                    # Known limitation (issue #1218): this decides one role at a
-                    # time, and in a filing that falls back to role names the
-                    # members of one family do not all carry the same evidence.
-                    # gahc's `ConvertiblePromissoryNotesPayable` hangs from
-                    # us-gaap_DebtDisclosureAbstract and moves; its `Tables` and
-                    # `ScheduleOf...` children hang from a debt-balance abstract
-                    # and their names do not lead with the marker, so they stay
-                    # notes and the family splits across the two accessors. A
-                    # role with a real schema definition - the case in #1207 -
-                    # carries ` - Disclosure - ` on every member, so those move
-                    # together.
-                    if _names_notes_section(role_def) or not _declares_disclosure(role_def, primary_concept):
+                    # In a filing that falls back to role names only the family
+                    # stem carries that evidence: gahc's
+                    # `ConvertiblePromissoryNotesPayable` hangs from
+                    # us-gaap_DebtDisclosureAbstract, while its `Tables` and
+                    # `ScheduleOf...Details` children hang from a debt-balance
+                    # abstract.  Those follow their stem so the family stays
+                    # together across notes() and disclosures() (issue #1218).
+                    if _names_notes_section(role_def):
                         statement_type = "Notes"
                         statement_category = "note"
-                    else:
+                    elif (_declares_disclosure(role_def, primary_concept)
+                          or _follows_disclosure_family(role_def, _role_family_key(tree.definition),
+                                                        stem_declares_disclosure)):
                         statement_type = "Disclosures"
                         statement_category = "disclosure"
+                    else:
+                        statement_type = "Notes"
+                        statement_category = "note"
                 elif 'us-gaap_DisclosuresAbstract' in primary_concept or 'disclosure' in role_def:
                     statement_type = "Disclosures"
                     statement_category = "disclosure"

@@ -125,6 +125,97 @@ def test_gahc_notes_payable_roles_are_disclosures():
     assert not target & note_roles
 
 
+# --- issue #1218: a role family classifies as a unit -------------------------
+#
+# gahc falls back to role names.  Only the family stem hangs from
+# us-gaap_DebtDisclosureAbstract; its Tables and ScheduleOf...Details children
+# hang from a debt-balance abstract and two of them spell the stem in the
+# singular, so neither signal in `_declares_disclosure` reaches them.
+
+GAHC_CONVERTIBLE_FAMILY = [
+    "ConvertiblePromissoryNotesPayable",
+    "ConvertiblePromissoryNotesPayableTables",
+    "ConvertiblePromissoryNotePayableScheduleOfConvertiblePromissoryNotesPayableDetails",
+    "ConvertiblePromissoryNotePayableScheduleOfConvertiblePromissoryNotesPayableDetailsParenthetical",
+    "ConvertiblePromissoryNotesPayableScheduleOfRollfowardOfConvertiblePromissoryNotesPayableDetails",
+]
+
+
+def _stems(**declares_by_definition):
+    """Family key of each stem role -> declares-a-disclosure, as the pre-pass
+    builds it.  Tables and Details roles are not stems and are left out."""
+    from edgar.xbrl.xbrl import _ROLE_FAMILY_SUFFIX_RE, _role_family_key
+    return {_role_family_key(d): declares for d, declares in declares_by_definition.items()
+            if not _ROLE_FAMILY_SUFFIX_RE.search(d.lower())}
+
+
+def _follows(definition, stems):
+    from edgar.xbrl.xbrl import _follows_disclosure_family, _role_family_key
+    return _follows_disclosure_family(definition.lower(), _role_family_key(definition), stems)
+
+
+@pytest.mark.parametrize("definition", GAHC_CONVERTIBLE_FAMILY[1:])
+def test_family_children_follow_a_stem_that_declares_a_disclosure(definition):
+    stems = _stems(ConvertiblePromissoryNotesPayable=True,
+                   **{d: False for d in GAHC_CONVERTIBLE_FAMILY[1:]})
+    assert _follows(definition, stems)
+
+
+def test_children_are_not_stems():
+    """`...DetailsParenthetical` extends `...Details`, which does not declare
+    a disclosure; it must reach the family stem, not stop at its sibling."""
+    parenthetical, details = GAHC_CONVERTIBLE_FAMILY[3], GAHC_CONVERTIBLE_FAMILY[2]
+    assert parenthetical.startswith(details)
+    stems = _stems(ConvertiblePromissoryNotesPayable=True, **{details: False})
+    assert len(stems) == 1  # the Details role was left out
+    assert _follows(parenthetical, stems)
+
+
+@pytest.mark.parametrize("definition", [
+    "PromissoryNotesPayable",                 # a stem, not a child
+    "OtherNotesReceivableTables",             # a child of some other family
+    "ConvertiblePromissoryNotesPayableNarrative",  # no family suffix
+])
+def test_roles_outside_the_family_do_not_follow_it(definition):
+    stems = _stems(ConvertiblePromissoryNotesPayable=True)
+    assert not _follows(definition, stems)
+
+
+def test_child_follows_its_nearest_stem_not_a_shorter_disclosure_stem():
+    """`NotesPayable` declares a disclosure and `NotesPayableRelatedParty` does
+    not.  The related-party Details belong to the longer stem and stay with
+    it, while the plain Details still follow `NotesPayable`."""
+    stems = _stems(NotesPayable=True, NotesPayableRelatedParty=False)
+    assert _follows("NotesPayableDetails", stems)
+    assert not _follows("NotesPayableRelatedPartyDetails", stems)
+    # The sibling stem is not a child of `NotesPayable`, whatever prefixes it.
+    assert not _follows("NotesPayableRelatedParty", stems)
+
+
+def test_gahc_convertible_note_family_classifies_as_a_unit():
+    """Global Arena Holding 10-Q: the whole family is returned by
+    disclosures() and none of it by notes()."""
+    directory = DATA / "gahc"
+    assert directory.exists(), f"missing fixture: {directory}"
+    xbrl = XBRL.from_directory(directory)
+
+    by_definition = {s["definition"]: s for s in xbrl.get_all_statements()}
+    family = [by_definition[d] for d in GAHC_CONVERTIBLE_FAMILY]
+    assert [s["category"] for s in family] == ["disclosure"] * 5
+    assert [s["type"] for s in family] == ["Disclosures"] * 5
+
+    note_roles = {s.role_or_type for s in xbrl.notes()}
+    disclosure_roles = {s.role_or_type for s in xbrl.disclosures()}
+    family_roles = {s["role"] for s in family}
+    assert family_roles <= disclosure_roles
+    assert not family_roles & note_roles
+
+    # The only note-bearing roles left as notes are accounting-policy roles,
+    # which never entered the ambiguous branch.
+    assert {s["type"] for s in xbrl.get_all_statements()
+            if s["category"] == "note"} == {"AccountingPolicies"}
+
+
 def test_aeon_convertible_note_roles_are_disclosures():
     """AEON Biopharma 10-Q: the role names lead with the Disclosure marker."""
     directory = DATA / "aeon"
