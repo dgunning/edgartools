@@ -1155,6 +1155,8 @@ class XBRL:
         # `...Details` it extends.
         stem_declares_disclosure: Dict[str, bool] = {}
         for tree in self.presentation_trees.values():
+            if not isinstance(tree.definition, str):
+                continue
             role_def = tree.definition.lower()
             if _ROLE_FAMILY_SUFFIX_RE.search(role_def):
                 continue
