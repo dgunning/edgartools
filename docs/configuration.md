@@ -42,31 +42,25 @@ set_identity("John Doe john.doe@company.com")
 
 ### Performance and Access Control
 
-#### EDGAR_ACCESS_MODE
-Controls HTTP request behavior and connection limits to manage SEC server load.
+#### EDGAR_ACCESS_MODE (deprecated, removed in 6.0)
+`EDGAR_ACCESS_MODE` and the `NORMAL` / `CAUTION` / `CRAWL` modes are deprecated and
+have no effect. They advertised a timeout, connection-limit and retry policy that
+was never wired into the HTTP client, so setting a mode has never changed how
+edgartools talks to SEC. Setting the variable, or importing one of the mode
+objects, now raises a `DeprecationWarning`.
+
+Use the two settings that do work:
+
+| Setting | Controls | See |
+|---------|----------|-----|
+| `EDGAR_RATE_LIMIT_PER_SEC` | Requests per second against SEC | [below](#edgar_rate_limit_per_sec) |
+| `EDGAR_HTTP_TIMEOUT` | Per-request timeout in seconds | [below](#edgar_http_timeout) |
 
 ```bash
-export EDGAR_ACCESS_MODE="NORMAL"
-```
-
-**Available Modes:**
-
-| Mode | Timeout | Max Connections | Retries | Use Case |
-|------|---------|----------------|---------|----------|
-| `NORMAL` | 15s | 10 | 3 | Default - balanced performance |
-| `CAUTION` | 20s | 5 | 3 | Conservative - reduces server load |
-| `CRAWL` | 25s | 2 | 2 | Minimal impact - bulk processing |
-
-**Examples:**
-```bash
-# High-performance research (default)
-export EDGAR_ACCESS_MODE="NORMAL"
-
-# Conservative access for production
-export EDGAR_ACCESS_MODE="CAUTION"
-
-# Bulk data processing with minimal server impact
-export EDGAR_ACCESS_MODE="CRAWL"
+# Replaces CAUTION / CRAWL: slow down by lowering the rate limit,
+# and raise the timeout if slow responses are timing out.
+export EDGAR_RATE_LIMIT_PER_SEC="5"
+export EDGAR_HTTP_TIMEOUT="25"
 ```
 
 ### Local Data Storage
@@ -313,7 +307,6 @@ export EDGAR_BASE_URL="https://sec-mirror.company.com"
 export EDGAR_DATA_URL="https://sec-data.company.com"
 export EDGAR_XBRL_URL="https://sec-xbrl.company.com"
 export EDGAR_RATE_LIMIT_PER_SEC="50"
-export EDGAR_ACCESS_MODE="NORMAL"
 export EDGAR_USE_LOCAL_DATA="True"
 export EDGAR_LOCAL_DATA_DIR="/var/lib/edgar"
 ```
@@ -336,7 +329,6 @@ export EDGAR_IDENTITY="International Analyst analyst@company.com"
 export EDGAR_BASE_URL="https://sec-eu.example.com"
 export EDGAR_DATA_URL="https://sec-data-eu.example.com"
 export EDGAR_RATE_LIMIT_PER_SEC="15"
-export EDGAR_ACCESS_MODE="NORMAL"
 ```
 
 #### Development/Testing Environment
@@ -388,7 +380,6 @@ ENV EDGAR_IDENTITY="Container App app@company.com"
 ENV EDGAR_BASE_URL="https://sec-mirror.company.com"
 ENV EDGAR_DATA_URL="https://sec-data.company.com"
 ENV EDGAR_RATE_LIMIT_PER_SEC="50"
-ENV EDGAR_ACCESS_MODE="CAUTION"
 ENV EDGAR_USE_LOCAL_DATA="True"
 ENV EDGAR_LOCAL_DATA_DIR="/app/edgar_data"
 
@@ -613,7 +604,6 @@ Optimized for interactive research and analysis:
 
 ```bash
 export EDGAR_IDENTITY="Researcher researcher@university.edu"
-export EDGAR_ACCESS_MODE="NORMAL"
 export EDGAR_USE_LOCAL_DATA="True"
 export EDGAR_USE_RICH_LOGGING="1"
 ```
@@ -623,7 +613,6 @@ Conservative settings for production environments:
 
 ```bash
 export EDGAR_IDENTITY="Production System api@company.com"
-export EDGAR_ACCESS_MODE="CAUTION"
 export EDGAR_USE_LOCAL_DATA="True"
 export EDGAR_LOCAL_DATA_DIR="/var/lib/edgar"
 export EDGAR_VERIFY_SSL="true"
@@ -634,7 +623,6 @@ Minimal server impact for large-scale data processing:
 
 ```bash
 export EDGAR_IDENTITY="Bulk Processor batch@company.com"
-export EDGAR_ACCESS_MODE="CRAWL"
 export EDGAR_USE_LOCAL_DATA="True"
 export EDGAR_LOCAL_DATA_DIR="/data/edgar"
 ```
@@ -644,7 +632,6 @@ Flexible settings for development and testing:
 
 ```bash
 export EDGAR_IDENTITY="Developer dev@company.com"
-export EDGAR_ACCESS_MODE="NORMAL"
 export EDGAR_USE_LOCAL_DATA="True"
 export EDGAR_USE_RICH_LOGGING="1"
 export EDGAR_VERIFY_SSL="false"  # Only if needed for proxy
@@ -670,7 +657,6 @@ Create a `.env` file in your project root:
 ```bash
 # .env file
 EDGAR_IDENTITY=John Doe john.doe@company.com
-EDGAR_ACCESS_MODE=NORMAL
 EDGAR_USE_LOCAL_DATA=True
 EDGAR_LOCAL_DATA_DIR=./edgar_data
 EDGAR_USE_RICH_LOGGING=1
@@ -692,7 +678,6 @@ Add to your shell profile (`.bashrc`, `.zshrc`, etc.):
 ```bash
 # Edgar Tools Configuration
 export EDGAR_IDENTITY="Your Name your.email@company.com"
-export EDGAR_ACCESS_MODE="NORMAL"
 export EDGAR_USE_LOCAL_DATA="True"
 export EDGAR_LOCAL_DATA_DIR="$HOME/.edgar"
 ```
@@ -727,8 +712,9 @@ from edgar.settings import get_identity
 # Check identity
 print(f"Identity: {get_identity()}")
 
-# Check access mode
-print(f"Access Mode: {os.getenv('EDGAR_ACCESS_MODE', 'NORMAL')}")
+# Check the request settings that actually apply
+print(f"Rate limit/sec: {os.getenv('EDGAR_RATE_LIMIT_PER_SEC', '9')}")
+print(f"HTTP timeout:   {os.getenv('EDGAR_HTTP_TIMEOUT', '30.0')}s")
 
 # Check local data settings
 print(f"Use Local Data: {os.getenv('EDGAR_USE_LOCAL_DATA', 'False')}")
@@ -764,8 +750,9 @@ export EDGAR_VERIFY_SSL="false"
 #### Connection Timeouts
 ```bash
 # Error: Connection timeouts in slow network
-# Solution: Use more conservative settings
-export EDGAR_ACCESS_MODE="CAUTION"
+# Solution: raise the per-request timeout, and slow the request rate
+export EDGAR_HTTP_TIMEOUT="30"
+export EDGAR_RATE_LIMIT_PER_SEC="5"
 ```
 
 ## Security Best Practices
@@ -783,7 +770,6 @@ For containerized deployments:
 ```dockerfile
 # Dockerfile
 ENV EDGAR_IDENTITY="Container App app@company.com"
-ENV EDGAR_ACCESS_MODE="CAUTION"
 ENV EDGAR_USE_LOCAL_DATA="True"
 ENV EDGAR_LOCAL_DATA_DIR="/app/edgar_data"
 

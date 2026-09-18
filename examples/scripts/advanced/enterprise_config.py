@@ -86,7 +86,6 @@ def configure_regional_mirror():
     os.environ['EDGAR_BASE_URL'] = "https://sec-eu.example.com"
     os.environ['EDGAR_DATA_URL'] = "https://sec-data-eu.example.com"
     os.environ['EDGAR_RATE_LIMIT_PER_SEC'] = "15"
-    os.environ['EDGAR_ACCESS_MODE'] = "NORMAL"
     print("✓ Configured for regional mirror (15 req/sec)")
 
 
@@ -266,7 +265,7 @@ def show_current_config():
         ("Data URL", os.getenv('EDGAR_DATA_URL', 'https://data.sec.gov (default)')),
         ("XBRL URL", os.getenv('EDGAR_XBRL_URL', 'https://www.sec.gov (default)')),
         ("Rate Limit", f"{os.getenv('EDGAR_RATE_LIMIT_PER_SEC', '9')} req/sec"),
-        ("Access Mode", os.getenv('EDGAR_ACCESS_MODE', 'NORMAL (default)')),
+        ("HTTP Timeout", f"{os.getenv('EDGAR_HTTP_TIMEOUT', '30.0')}s (default)"),
         ("Local Data", os.getenv('EDGAR_USE_LOCAL_DATA', 'False (default)')),
         ("SSL Verify", os.getenv('EDGAR_VERIFY_SSL', 'true (default)')),
     ]
