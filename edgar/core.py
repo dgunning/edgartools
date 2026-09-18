@@ -45,10 +45,10 @@ __all__ = [
     'log',
     'Result',
     'get_bool',
-    'edgar_mode',
-    'NORMAL',
-    'CRAWL',
-    'CAUTION',
+    'edgar_mode',  # noqa: F822 -- served by the module __getattr__ (deprecated, GH #1326)
+    'NORMAL',  # noqa: F822 -- served by the module __getattr__ (deprecated, GH #1326)
+    'CRAWL',  # noqa: F822 -- served by the module __getattr__ (deprecated, GH #1326)
+    'CAUTION',  # noqa: F822 -- served by the module __getattr__ (deprecated, GH #1326)
     'IntString',
     'get_identity',
     'python_version',
@@ -103,25 +103,52 @@ DATE_RANGE_PATTERN = re.compile(f"^({YYYY_MM_DD}(:({YYYY_MM_DD})?)?|:({YYYY_MM_D
 # attribute access), so a re-export covers 100% of them.
 # ---------------------------------------------------------------------------
 from edgar.settings import (  # noqa: E402,F401  -- re-exports, intentionally unused here
-    CAUTION,
-    CRAWL,
-    NORMAL,
     EdgarSettings,
     ask_for_identity,
     default_http_timeout,
     default_max_connections,
     default_page_size,
     default_retries,
-    edgar_access_mode,
     edgar_data_dir,
     edgar_identity,
-    edgar_mode,
     get_edgar_data_directory,
     get_identity,
     identity_prompt,
     limits,
     set_identity,
 )
+
+# NORMAL / CAUTION / CRAWL / edgar_mode / edgar_access_mode are deliberately NOT
+# imported above. They are deprecated (GH #1326) and importing them here would
+# fire the DeprecationWarning once at `import edgar.core`, for every user,
+# naming this module rather than the code that actually reached for one. Routed
+# through __getattr__ instead so the warning lands on the real call site, and
+# so `from edgar.core import NORMAL` keeps working until 6.0.
+
+
+def _access_mode_getattr(name: str):
+    """Resolve the deprecated access modes without eager-importing them.
+
+    Chained into this module's __getattr__ at the bottom of the file; core.py
+    already installs one via edgar._compat.deprecated_alias, and assigning a
+    second would silently replace the first.
+    """
+    from edgar import settings as _settings
+
+    if name in _settings.DEPRECATED_ACCESS_MODE_NAMES:
+        # One frame deeper than the other two paths: deprecated_alias's own
+        # __getattr__ sits between the caller and this function, and without
+        # accounting for it the warning points at edgar/_compat.py instead of
+        # the code that asked for the mode.
+        _settings.warn_access_mode_deprecated(name, stacklevel=4)
+        return _settings.DEPRECATED_ACCESS_MODE_NAMES[name]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def __dir__():
+    from edgar import settings as _settings
+
+    return sorted(set(globals()) | set(_settings.DEPRECATED_ACCESS_MODE_NAMES))
 
 
 def strtobool (val:str):
@@ -516,4 +543,5 @@ if os.getenv('EDGAR_USE_RICH_LOGGING', '0') == '1':
 from edgar._compat import deprecated_alias  # noqa: E402
 from edgar.exceptions import TooManyRequestsError  # noqa: E402
 
-__getattr__ = deprecated_alias(TooManyRequestsException=TooManyRequestsError)
+__getattr__ = deprecated_alias(_access_mode_getattr,
+                               TooManyRequestsException=TooManyRequestsError)

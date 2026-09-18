@@ -22,7 +22,7 @@ from edgar._filings import (
 )
 from edgar.context import HasContext, compose_context
 from edgar.core import listify
-from edgar.settings import CAUTION, CRAWL, NORMAL, edgar_mode, get_identity, set_identity
+from edgar.settings import get_identity, set_identity
 from edgar.exceptions import (
     AttachmentNotFoundError,
     CompanyFactsNotFoundError,
@@ -667,3 +667,36 @@ def obj(sec_filing: Filing) -> Optional[object]:
     # way to say which of its several endings a caller reached. Every path that
     # means "we failed" warned above on its way here.
     return None
+
+
+# ---------------------------------------------------------------------------
+# Deprecated access modes (GH #1326), removed in 6.0.
+#
+# NORMAL / CAUTION / CRAWL stay in __all__ and importable from the top-level
+# namespace, but are served lazily so that `import edgar` does not itself raise
+# the DeprecationWarning. Importing them eagerly here would warn every user on
+# every import, naming this module instead of the code reaching for a mode.
+# ---------------------------------------------------------------------------
+# Exactly the four names the eager `from edgar.settings import ...` used to place
+# in this namespace, and no more. They are still reachable, so `dir(edgar)` still
+# reports them - deprecating a name does not remove it, and a name you can read
+# but cannot see is a worse surface than either.
+#
+# `edgar_access_mode` is deliberately excluded. It has never been reachable from
+# the top-level namespace (only from edgar.core and edgar.settings), and serving
+# it here would widen the public surface in a change whose purpose is to narrow
+# it. Reach it at edgar.settings.edgar_access_mode, where it has always lived.
+_DEPRECATED_TOP_LEVEL_NAMES = ("CAUTION", "CRAWL", "NORMAL", "edgar_mode")
+
+
+def __getattr__(name: str):
+    if name in _DEPRECATED_TOP_LEVEL_NAMES:
+        from edgar import settings as _settings
+
+        _settings.warn_access_mode_deprecated(name)
+        return _settings.DEPRECATED_ACCESS_MODE_NAMES[name]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def __dir__():
+    return sorted(set(globals()) | set(_DEPRECATED_TOP_LEVEL_NAMES))

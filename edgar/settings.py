@@ -1,8 +1,10 @@
 """Connection settings and SEC identity for edgartools.
 
 This is the canonical home for everything a user is *told* to configure: the
-access modes (:data:`NORMAL`, :data:`CAUTION`, :data:`CRAWL`), the identity
-functions the SEC requires you to set, and the local data directory.
+identity functions the SEC requires you to set, and the local data directory.
+
+The access modes (:data:`NORMAL`, :data:`CAUTION`, :data:`CRAWL`) still live here
+but are deprecated and have no effect - see GH #1326 and the block below.
 
 Historically all of this lived in ``edgar.core`` alongside quarter math, HTML
 sniffing, a pager, thread helpers and the logger — only about a third of that
@@ -18,9 +20,9 @@ modes are re-exported on the top-level ``edgar`` namespace.
 import logging
 import os
 import threading
+import warnings
 from _thread import interrupt_main
 from dataclasses import dataclass
-from functools import cached_property
 from pathlib import Path
 
 import httpx
@@ -29,19 +31,19 @@ from rich.prompt import Prompt
 log = logging.getLogger(__name__)
 
 __all__ = [
-    'CAUTION',
-    'CRAWL',
-    'NORMAL',
+    'CAUTION',  # noqa: F822 -- served by the module __getattr__ (deprecated, GH #1326)
+    'CRAWL',  # noqa: F822 -- served by the module __getattr__ (deprecated, GH #1326)
+    'NORMAL',  # noqa: F822 -- served by the module __getattr__ (deprecated, GH #1326)
     'EdgarSettings',
     'ask_for_identity',
     'default_http_timeout',
     'default_max_connections',
     'default_page_size',
     'default_retries',
-    'edgar_access_mode',
+    'edgar_access_mode',  # noqa: F822 -- served by the module __getattr__ (deprecated, GH #1326)
     'edgar_data_dir',
     'edgar_identity',
-    'edgar_mode',
+    'edgar_mode',  # noqa: F822 -- served by the module __getattr__ (deprecated, GH #1326)
     'get_edgar_data_directory',
     'get_identity',
     'identity_prompt',
@@ -63,10 +65,6 @@ class EdgarSettings:
     max_connections: int
     retries: int = 3
 
-    @cached_property
-    def limits(self):
-        return httpx.Limits(max_connections=default_max_connections)
-
     def __eq__(self, othr):
         return (isinstance(othr, type(self))
                 and (self.http_timeout, self.max_connections, self.retries) ==
@@ -76,27 +74,76 @@ class EdgarSettings:
         return hash((self.http_timeout, self.max_connections, self.retries))
 
 
-# Modes of accessing edgar
+# Modes of accessing edgar -- DEPRECATED, removed in 6.0 (GH #1326).
+#
+# The modes advertised a timeout / connection-limit / retry policy that was never
+# wired into the HTTP client, so selecting one has never changed how edgartools
+# talks to SEC. What actually protects you is EDGAR_RATE_LIMIT_PER_SEC, with
+# EDGAR_HTTP_TIMEOUT for the request timeout; both work today.
+#
+# The objects stay module-level singletons built once, so `mode is NORMAL` and
+# identity across the edgar / edgar.core / edgar.settings paths keep holding.
+# They are resolved through the module __getattr__ below purely so that reaching
+# for one raises a DeprecationWarning at the point of use.
 
-# The normal mode of accessing edgar
-NORMAL = EdgarSettings(http_timeout=15, max_connections=10)
+_NORMAL = EdgarSettings(http_timeout=15, max_connections=10)
+_CAUTION = EdgarSettings(http_timeout=20, max_connections=5)
+_CRAWL = EdgarSettings(http_timeout=25, max_connections=2, retries=2)
 
-# A bit more cautious mode of accessing edgar
-CAUTION = EdgarSettings(http_timeout=20, max_connections=5)
-
-# Use this setting when you have long-running jobs and want to avoid breaching Edgar limits
-CRAWL = EdgarSettings(http_timeout=25, max_connections=2, retries=2)
-
-edgar_access_mode = os.getenv('EDGAR_ACCESS_MODE', 'NORMAL')
-if edgar_access_mode == 'CAUTION':
-    # A bit more cautious mode of accessing edgar
-    edgar_mode = CAUTION
-elif edgar_access_mode == 'CRAWL':
-    # Use this setting when you have long-running jobs and want to avoid breaching Edgar limits
-    edgar_mode = CRAWL
+_edgar_access_mode = os.getenv('EDGAR_ACCESS_MODE', 'NORMAL')
+if _edgar_access_mode == 'CAUTION':
+    _edgar_mode = _CAUTION
+elif _edgar_access_mode == 'CRAWL':
+    _edgar_mode = _CRAWL
 else:
-    # The normal mode of accessing edgar
-    edgar_mode = NORMAL
+    _edgar_mode = _NORMAL
+
+DEPRECATED_ACCESS_MODE_NAMES: dict = {
+    'NORMAL': _NORMAL,
+    'CAUTION': _CAUTION,
+    'CRAWL': _CRAWL,
+    'edgar_mode': _edgar_mode,
+    'edgar_access_mode': _edgar_access_mode,
+}
+
+ACCESS_MODE_DEPRECATION_MESSAGE = (
+    "{name} is deprecated and has no effect; it will be removed in edgartools 6.0. "
+    "The access modes advertise a timeout, connection limit and retry policy that "
+    "was never wired into the HTTP client, so selecting a mode has never changed "
+    "how edgartools talks to SEC. Set EDGAR_RATE_LIMIT_PER_SEC to stay within SEC "
+    "rate limits, and EDGAR_HTTP_TIMEOUT to set the request timeout."
+)
+
+
+def warn_access_mode_deprecated(name: str, stacklevel: int = 3) -> None:
+    """Raise the deprecation for `name`, from the caller's frame."""
+    warnings.warn(
+        ACCESS_MODE_DEPRECATION_MESSAGE.format(name=name),
+        DeprecationWarning,
+        stacklevel=stacklevel,
+    )
+
+
+def __getattr__(name: str):
+    """PEP 562 hook: serve the deprecated access modes, loudly.
+
+    Only the names in DEPRECATED_ACCESS_MODE_NAMES route through here; everything
+    else in this module is a normal module global and never reaches __getattr__.
+    """
+    if name in DEPRECATED_ACCESS_MODE_NAMES:
+        warn_access_mode_deprecated(name)
+        return DEPRECATED_ACCESS_MODE_NAMES[name]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def __dir__():
+    return sorted(set(globals()) | set(DEPRECATED_ACCESS_MODE_NAMES))
+
+
+# Setting the env var is an explicit, deliberate act, so it earns a warning at
+# import rather than waiting for someone to read one of the names back.
+if os.getenv('EDGAR_ACCESS_MODE') is not None:
+    warn_access_mode_deprecated('EDGAR_ACCESS_MODE', stacklevel=2)
 
 edgar_identity = 'EDGAR_IDENTITY'
 
