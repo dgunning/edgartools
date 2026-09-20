@@ -1,6 +1,8 @@
 """GH #1325: importing an ``edgar`` submodule from a thread while another thread
 imports ``edgar`` fails deterministically.
 
+GitHub Issue: https://github.com/dgunning/edgartools/issues/1325
+
 `docs/common-pitfalls.md` tells users to import ``edgar`` once on the main thread
 before starting any thread that imports a submodule. This pins that advice: if the
 documented pattern ever stops working, the documentation is wrong and this fails.
