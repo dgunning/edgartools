@@ -181,6 +181,19 @@ def test_roles_outside_the_family_do_not_follow_it(definition):
     assert not _follows(definition, stems)
 
 
+@pytest.mark.parametrize("stem,member,stranger", [
+    ("Debt", "DebtDetails", "DebtorNotesDetails"),
+    ("ConvertibleNote", "ConvertibleNotesDetails", "ConvertibleNoteholderRightsDetails"),
+])
+def test_a_stem_claims_only_names_that_extend_it_on_a_segment_boundary(stem, member, stranger):
+    """A short stem is a character prefix of unrelated role names.  `Debt`
+    leads `DebtorNotesDetails` and `ConvertibleNote` leads
+    `ConvertibleNoteholderRightsDetails`, and neither is a family member."""
+    stems = _stems(**{stem: True})
+    assert _follows(member, stems)
+    assert not _follows(stranger, stems)
+
+
 def test_child_follows_its_nearest_stem_not_a_shorter_disclosure_stem():
     """`NotesPayable` declares a disclosure and `NotesPayableRelatedParty` does
     not.  The related-party Details belong to the longer stem and stay with
@@ -214,6 +227,43 @@ def test_gahc_convertible_note_family_classifies_as_a_unit():
     # which never entered the ambiguous branch.
     assert {s["type"] for s in xbrl.get_all_statements()
             if s["category"] == "note"} == {"AccountingPolicies"}
+
+
+def test_gahc_notes_are_still_built_without_a_filing_summary():
+    """`Notes._build_from_xbrl_only` used to select `category == 'note'`
+    roles of type `Notes`.  Moving the family to `disclosure` emptied that
+    bucket, so `Notes.from_xbrl` returned nothing and the concept index
+    behind `StatementLineItem.note` was empty.  gahc has no FilingSummary,
+    so every `XBRL.from_directory` caller took this path."""
+    from edgar.xbrl.notes import Notes, get_notes_for_concept
+
+    directory = DATA / "gahc"
+    assert directory.exists(), f"missing fixture: {directory}"
+    xbrl = XBRL.from_directory(directory)
+    assert xbrl._filing_summary is None
+
+    notes = Notes.from_xbrl(xbrl)
+    assert len(notes) == 7
+    assert [note.role.rsplit("/", 1)[-1] for note in notes] == [
+        "SummaryOfSignificantAccountingPolicies",
+        "PromissoryNotesPayable",
+        "DerivativeFinancialInstruments",
+        "CommitmentsAndContingencies",
+        "ConvertiblePromissoryNotesPayable",
+        "Agreements",
+        "SOFTWARE",
+    ]
+
+    convertible = notes["Convertible Promissory Notes Payable"]
+    assert convertible is not None
+    assert convertible.role.endswith("/ConvertiblePromissoryNotesPayable")
+    assert len(convertible.tables) == 1
+    assert len(convertible.policies) == 0
+    assert len(convertible.details) == 3
+
+    # The data concepts live in the Details roles; the index must reach them.
+    hits = get_notes_for_concept("us-gaap_ConvertibleNotesPayableCurrent", xbrl)
+    assert [note.role for note in hits] == [convertible.role]
 
 
 def test_aeon_convertible_note_roles_are_disclosures():

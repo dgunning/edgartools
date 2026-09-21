@@ -16,7 +16,7 @@ import itertools
 import re
 from pathlib import Path
 from textwrap import dedent
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 if TYPE_CHECKING:
     from edgar.xbrl.facts import FactQuery
@@ -100,37 +100,108 @@ def _names_notes_section(role_def: str) -> bool:
     return bool(_NOTES_SECTION_RE.search(role_def))
 
 
-# A filing that falls back to role names spells a family as a stem and a
-# suffix: "ConvertiblePromissoryNotesPayable", "...Tables",
-# "...ScheduleOfConvertiblePromissoryNotesPayableDetails".  Only the stem
-# hangs from the disclosure concept, so the children cannot declare
-# themselves and are classified with their parent instead (issue #1218).
-_ROLE_FAMILY_SUFFIX_RE = re.compile(r"(?:tables?|details?|policies|parenthetical|textuals?)$")
+# A role family is a stem and its members, spelled either way a filing names
+# its roles: the schema definition "Debt", "Debt (Tables)", "Debt - Summary
+# (Details)", or the bare role name "ConvertiblePromissoryNotesPayable",
+# "...Tables", "...ScheduleOf...Details", "...Details1Parentheticals".  Only
+# the stem hangs from the disclosure concept, so in a filing that falls back
+# to role names the members cannot declare themselves and are classified with
+# their stem instead (issue #1218).
+#
+# The bare spelling is only read as a member suffix when it is glued to the
+# name: Apple's "Consolidated Financial Statement Details" is a note, and its
+# members say so with the parenthesised form.
+_ROLE_FAMILY_SUFFIX_RE = re.compile(
+    r"(?:\((?:tables?|details?|policies|textuals?)(?:\s+textuals?)?\)(?:[\s-]*\(?parentheticals?\)?)?"
+    r"|(?<![\s(])(?:tables?|details?|policies|textuals?|parentheticals?)\d*(?:parentheticals?)?)$"
+)
 
-# Plural markers on CamelCase word boundaries.  gahc names the parent
-# "ConvertiblePromissoryNotesPayable" and two of its children
-# "ConvertiblePromissoryNotePayableScheduleOf...", so the family key drops them.
-_CAMEL_PLURAL_RE = re.compile(r"s(?=[A-Z]|$)")
+# CamelCase segments of a role name: "ConvertiblePromissoryNotesPayable" ->
+# Convertible, Promissory, Notes, Payable.  An all-caps run is one segment.
+_CAMEL_SEGMENT_RE = re.compile(r"[A-Z]+(?![a-z])|[A-Z]?[a-z]+|\d+")
+
+# The sort index a schema definition leads with: "0000017 - Disclosure - Debt".
+# It differs between a stem and its members, so it is no part of the family.
+_ROLE_INDEX_RE = re.compile(r"^\s*\d+\s*-\s*")
 
 
-def _role_family_key(definition: str) -> str:
-    """The part of a role definition its family shares, for prefix comparison.
+def _role_family_key(definition: str) -> Tuple[str, ...]:
+    """The role definition as lowercased CamelCase segments, so that a stem
+    is compared with a member segment by segment and `Debt` never claims
+    `DebtorNotesDetails`.
 
     Args:
         definition: Role definition as written, so that CamelCase boundaries
             are still visible.
     """
-    return _CAMEL_PLURAL_RE.sub('', definition).lower()
+    definition = _ROLE_INDEX_RE.sub('', definition)
+    return tuple(segment.lower() for segment in _CAMEL_SEGMENT_RE.findall(definition))
 
 
-def _follows_disclosure_family(role_def: str, family_key: str, stem_declares_disclosure: Dict[str, bool]) -> bool:
+def _segments_match(a: str, b: str) -> bool:
+    """Two segments name the same word when they differ at most by a plural
+    marker.  gahc names its stem "ConvertiblePromissoryNotesPayable" and two
+    members "ConvertiblePromissoryNotePayableScheduleOf...".
+
+    Only a trailing "s" is tolerated, deliberately: "Inventory" against
+    "InventoriesDetails" or "Liability" against "LiabilitiesDetails" does not
+    match, so a member spelled with an "-ies" plural stays classified on its
+    own.  No committed fixture exhibits that shape; widen this when one does.
+    """
+    return a == b or a + 's' == b or b + 's' == a
+
+
+def _is_family_stem_of(stem_key: Tuple[str, ...], family_key: Tuple[str, ...]) -> bool:
+    """Whether `stem_key` is a proper, segment-aligned prefix of `family_key`."""
+    return (len(stem_key) < len(family_key)
+            and all(_segments_match(a, b) for a, b in zip(stem_key, family_key)))
+
+
+def _role_family_members(definitions: Iterable[str]) -> Set[str]:
+    """The role definitions that are Tables, Policies or Details members of a
+    family: each carries a member suffix and extends the name of another role
+    in the filing.  A role that only carries the suffix is a stem - Apple's
+    "Consolidated Financial Statement Details", gahc's
+    "SummaryOfSignificantAccountingPolicies" - and so is a member whose stem
+    the filing does not name, since nothing else stands for it.
+
+    Args:
+        definitions: Every role definition in the filing.
+    """
+    keys = {definition: _role_family_key(definition) for definition in definitions}
+    return {definition for definition, key in keys.items()
+            if _ROLE_FAMILY_SUFFIX_RE.search(definition.lower())
+            and any(other and _is_family_stem_of(other, key) for other in keys.values())}
+
+
+def _role_family_stem(family_key: Tuple[str, ...],
+                      stem_keys: Iterable[Tuple[str, ...]]) -> Optional[Tuple[str, ...]]:
+    """The stem a family member belongs to: the longest stem whose segments
+    lead the member's, so `NotesPayableRelatedPartyDetails` belongs to
+    `NotesPayableRelatedParty` rather than the shorter `NotesPayable`.  Two
+    stems of one length are told apart by how many segments match exactly
+    rather than by plural.  None when no stem leads the member.
+
+    Args:
+        family_key: The member's `_role_family_key`.
+        stem_keys: Family key of every stem role in the filing.
+    """
+    best_rank = None
+    best = None
+    for stem_key in stem_keys:
+        if not stem_key or not _is_family_stem_of(stem_key, family_key):
+            continue
+        rank = (len(stem_key), sum(a == b for a, b in zip(stem_key, family_key)))
+        if best_rank is None or rank > best_rank:
+            best_rank, best = rank, stem_key
+    return best
+
+
+def _follows_disclosure_family(role_def: str, family_key: Tuple[str, ...],
+                               stem_declares_disclosure: Dict[Tuple[str, ...], bool]) -> bool:
     """Whether a role that does not declare itself is a Tables or Details
-    member of a family whose stem does.
-
-    The stem is the longest stem role whose key is a proper prefix of this
-    one, so `NotesPayableRelatedPartyDetails` follows `NotesPayableRelatedParty`
-    rather than the shorter `NotesPayable`, and stays with its own family
-    when that stem does not declare a disclosure.
+    member of a family whose stem does.  A member stays with its own family
+    when its stem does not declare a disclosure, whatever a shorter stem says.
 
     Args:
         role_def: Role definition, lowercased.
@@ -141,11 +212,8 @@ def _follows_disclosure_family(role_def: str, family_key: str, stem_declares_dis
     """
     if not _ROLE_FAMILY_SUFFIX_RE.search(role_def):
         return False
-    stems = [key for key in stem_declares_disclosure
-             if key != family_key and family_key.startswith(key)]
-    if not stems:
-        return False
-    return stem_declares_disclosure[max(stems, key=len)]
+    stem_key = _role_family_stem(family_key, stem_declares_disclosure)
+    return stem_key is not None and stem_declares_disclosure[stem_key]
 
 
 def _capture_sgml_period_of_report(xbrl: "XBRL", filing) -> None:
@@ -1152,17 +1220,23 @@ class XBRL:
         # `NotesPayableRelatedParty` and not past it to `NotesPayable`.  Roles
         # that are themselves Tables or Details are not stems: gahc's
         # `...DetailsParenthetical` must reach the family stem, not the
-        # `...Details` it extends.
-        stem_declares_disclosure: Dict[str, bool] = {}
+        # `...Details` it extends.  A definition with no segments at all is
+        # a prefix of every other and is left out.
+        definitions = [tree.definition for tree in self.presentation_trees.values()
+                       if isinstance(tree.definition, str)]
+        members = _role_family_members(definitions)
+        stem_declares_disclosure: Dict[Tuple[str, ...], bool] = {}
         for tree in self.presentation_trees.values():
-            if not isinstance(tree.definition, str):
+            if not isinstance(tree.definition, str) or tree.definition in members:
+                continue
+            key = _role_family_key(tree.definition)
+            if not key:
                 continue
             role_def = tree.definition.lower()
-            if _ROLE_FAMILY_SUFFIX_RE.search(role_def):
-                continue
             declares = (_declares_disclosure(role_def, next(iter(tree.all_nodes)))
                         and not _names_notes_section(role_def))
-            key = _role_family_key(tree.definition)
+            # Two trees spell one definition only when a filing repeats a
+            # role; the family is the same either way.
             stem_declares_disclosure[key] = stem_declares_disclosure.get(key, False) or declares
 
         for role, tree in self.presentation_trees.items():
