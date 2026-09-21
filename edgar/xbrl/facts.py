@@ -1146,6 +1146,26 @@ class FactQuery:
                 needed.append(col)
         return list(dict.fromkeys(needed))
 
+    def _build_deduplicated_frame(self, results: List[Dict[str, Any]],
+                                  columns: tuple) -> pd.DataFrame:
+        """The source rows as a frame, de-duplicated, no wider than this call needs.
+
+        Splitting this out of `to_dataframe()` keeps the projection decision in
+        one place and off that method's branch count.
+        """
+        frame_columns = self._projection_source_columns(columns, results)
+        if frame_columns is None:
+            return _deduplicate_facts(pd.DataFrame(results))
+
+        df = pd.DataFrame(results, columns=frame_columns)
+        # Only de-duplicate when the full-width frame would have. Constructing with
+        # an explicit column list fabricates any missing name as nulls, which would
+        # otherwise switch de-duplication ON for a source that is missing one of
+        # the identity columns.
+        if all(col in frame_columns for col in _DEDUP_REQUIRED):
+            df = _deduplicate_facts(df)
+        return df
+
     def to_dataframe(self, *columns) -> pd.DataFrame:
         """
         Execute the query and return results as a DataFrame.
@@ -1181,18 +1201,7 @@ class FactQuery:
             return pd.DataFrame({name: _null_column(declared[name], pd.RangeIndex(0))
                                  for name in names})
 
-        frame_columns = self._projection_source_columns(columns, results)
-        if frame_columns is None:
-            df = pd.DataFrame(results)
-            df = _deduplicate_facts(df)
-        else:
-            df = pd.DataFrame(results, columns=frame_columns)
-            # Only de-duplicate when the full-width frame would have. Constructing
-            # with an explicit column list fabricates any missing name as nulls,
-            # which would otherwise switch de-duplication ON for a source that is
-            # missing one of the identity columns.
-            if all(col in frame_columns for col in _DEDUP_REQUIRED):
-                df = _deduplicate_facts(df)
+        df = self._build_deduplicated_frame(results, columns)
 
         # GH-607: When a specific dimension was requested via by_dimension(),
         # update dimension fields to reflect that dimension's member info
