@@ -101,6 +101,34 @@ _SKIP_COLUMNS = frozenset({'fact_key', 'original_label',
                            'statement_types', 'statement_roles'})
 
 
+# The fact identity used for de-duplication, in one place: `_deduplicate_facts`
+# applies it, and `to_dataframe()`'s early projection has to keep these columns
+# in the frame long enough for it to run (gh #1181). Two spellings of one rule is
+# the bug this file has produced most often, so both read these names.
+_DEDUP_REQUIRED = ('concept', 'context_ref', 'value', 'decimals')
+_DEDUP_OPTIONAL = ('unit_ref',)
+
+
+def _source_column_presence(results: List[Dict[str, Any]], names) -> set:
+    """Which of `names` at least one source row actually carries.
+
+    Stops as soon as every name has been seen, so the common case costs one row.
+    Presence is read from the source dicts rather than from a constructed frame
+    because `pd.DataFrame(rows, columns=[...])` fabricates a null column for a
+    name no row has, which would make an absent column look present.
+    """
+    remaining = set(names)
+    present = set()
+    for row in results:
+        if not remaining:
+            break
+        hit = remaining.intersection(row.keys())
+        if hit:
+            present |= hit
+            remaining -= hit
+    return present
+
+
 def _deduplicate_facts(df: pd.DataFrame) -> pd.DataFrame:
     """
     Remove true duplicate facts from a DataFrame.
@@ -125,11 +153,10 @@ def _deduplicate_facts(df: pd.DataFrame) -> pd.DataFrame:
     two unit IDs, which keeps a redundant row rather than deleting a real one — the
     safe direction, and not observed across the fixture corpus.
     """
-    dedup_cols = ['concept', 'context_ref', 'value', 'decimals']
+    dedup_cols = list(_DEDUP_REQUIRED)
     if all(col in df.columns for col in dedup_cols):
         # Repeated tags of one fact still collapse (gh #769): they share a unit.
-        if 'unit_ref' in df.columns:
-            dedup_cols.append('unit_ref')
+        dedup_cols.extend(col for col in _DEDUP_OPTIONAL if col in df.columns)
         df = df.drop_duplicates(subset=dedup_cols, keep='first')
     return df
 
@@ -1077,6 +1104,48 @@ class FactQuery:
             getattr(self, '_requested_dimension', None),
         )
 
+    def _projection_source_columns(self, columns: tuple, results: List[Dict[str, Any]]):
+        """The source keys a projected `to_dataframe(*columns)` actually needs.
+
+        Returns None to mean "build the full frame", which is the old behaviour.
+
+        Asking for two columns used to cost the same as asking for all of them:
+        the full-width frame was built first and the caller's projection applied
+        only at the end, so a 2-column call on the JPM fixture allocated the same
+        7.6 MiB as a 103-column one (gh #1181). The columns are chosen here so the
+        steps between construction and projection still see everything they read:
+
+        - the de-duplication identity, so the row set does not change. `unit_ref`
+          is part of that identity and is easy to forget: without it two facts
+          that differ only by currency collapse into one (gh #1282).
+        - `statement_role`, which is what `statement_name` is derived from.
+
+        The include_* flags only ever DROP columns, and they run after
+        de-duplication, so they need nothing held open. The requested-dimension
+        rewrite is the one step whose reads cannot be predicted from `columns`,
+        so its presence falls back to the full frame rather than guessing.
+        """
+        if not columns:
+            return None
+        if getattr(self, '_requested_dimension', None) and self._include_dimensions:
+            return None
+
+        declared = self._declared_columns()
+        # A name no row carries must not be added: pandas would fabricate a null
+        # column for it, and an undeclared name that is absent is supposed to be
+        # dropped, not returned full of nulls.
+        undeclared_requested = [col for col in columns if col not in declared]
+        present = _source_column_presence(
+            results, set(_DEDUP_REQUIRED) | set(_DEDUP_OPTIONAL) | set(undeclared_requested))
+
+        needed = [col for col in (*_DEDUP_REQUIRED, *_DEDUP_OPTIONAL) if col in present]
+        if 'statement_name' in columns:
+            needed.append('statement_role')
+        for col in columns:
+            if col in declared or col in present:
+                needed.append(col)
+        return list(dict.fromkeys(needed))
+
     def to_dataframe(self, *columns) -> pd.DataFrame:
         """
         Execute the query and return results as a DataFrame.
@@ -1112,8 +1181,18 @@ class FactQuery:
             return pd.DataFrame({name: _null_column(declared[name], pd.RangeIndex(0))
                                  for name in names})
 
-        df = pd.DataFrame(results)
-        df = _deduplicate_facts(df)
+        frame_columns = self._projection_source_columns(columns, results)
+        if frame_columns is None:
+            df = pd.DataFrame(results)
+            df = _deduplicate_facts(df)
+        else:
+            df = pd.DataFrame(results, columns=frame_columns)
+            # Only de-duplicate when the full-width frame would have. Constructing
+            # with an explicit column list fabricates any missing name as nulls,
+            # which would otherwise switch de-duplication ON for a source that is
+            # missing one of the identity columns.
+            if all(col in frame_columns for col in _DEDUP_REQUIRED):
+                df = _deduplicate_facts(df)
 
         # GH-607: When a specific dimension was requested via by_dimension(),
         # update dimension fields to reflect that dimension's member info
