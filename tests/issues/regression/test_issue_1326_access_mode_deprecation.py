@@ -21,6 +21,7 @@ each has a test below:
    re-export site instead of the code that reached for a mode - noise that
    trains people to filter the warning rather than act on it.
 """
+import os
 import subprocess
 import sys
 import warnings
@@ -56,11 +57,21 @@ def _no_shadowing_globals():
 REPLACEMENTS = ["EDGAR_RATE_LIMIT_PER_SEC", "EDGAR_HTTP_TIMEOUT"]
 
 
-def _run(code: str) -> subprocess.CompletedProcess:
-    """Run `code` in a clean interpreter with deprecations made visible."""
+def _run(code: str, **env_overrides: str) -> subprocess.CompletedProcess:
+    """Run `code` in a clean interpreter with deprecations made visible.
+
+    EDGAR_ACCESS_MODE is stripped from the child's environment unless the caller
+    asks for it. Inheriting it would fire the import-time deprecation inside the
+    child, and under `-W error` that exits non-zero - so the silence tests would
+    fail for exactly the users this deprecation is aimed at, the ones who already
+    set the variable.
+    """
+    env = {**os.environ}
+    env.pop("EDGAR_ACCESS_MODE", None)
+    env.update(env_overrides)
     return subprocess.run(  # noqa: S603 -- sys.executable with a literal argv, no shell
         [sys.executable, "-W", "always::DeprecationWarning", "-c", code],
-        capture_output=True, text=True, timeout=180,
+        capture_output=True, text=True, timeout=180, env=env,
     )
 
 
@@ -154,7 +165,6 @@ class TestImportingEdgarIsSilent:
     def test_setting_the_env_var_warns_at_import(self):
         """Setting it is deliberate, so it does not wait to be read back."""
         r = _run(
-            "import os; os.environ['EDGAR_ACCESS_MODE'] = 'CRAWL';\n"
             "import warnings\n"
             "with warnings.catch_warnings(record=True) as caught:\n"
             "    warnings.simplefilter('always')\n"
@@ -162,7 +172,8 @@ class TestImportingEdgarIsSilent:
             "msgs = [str(w.message) for w in caught if issubclass(w.category, DeprecationWarning)]\n"
             "assert any('EDGAR_ACCESS_MODE' in m for m in msgs), msgs\n"
             "assert any('EDGAR_RATE_LIMIT_PER_SEC' in m for m in msgs), msgs\n"
-            "print('OK')"
+            "print('OK')",
+            EDGAR_ACCESS_MODE="CRAWL",
         )
         assert r.returncode == 0, f"env-var deprecation did not fire:\n{r.stdout}\n{r.stderr}"
 

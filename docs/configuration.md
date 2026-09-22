@@ -212,6 +212,34 @@ export EDGAR_RATE_LIMIT_PER_SEC="50"
 export EDGAR_BASE_URL="https://sec-mirror.company.com"
 ```
 
+#### EDGAR_HTTP_TIMEOUT
+Per-request timeout in seconds, applied to every HTTP call edgartools makes.
+
+```bash
+export EDGAR_HTTP_TIMEOUT="30"
+```
+
+**Default:** `30.0` seconds
+
+**Values:**
+- Any positive number - timeout in seconds
+- `none`, `unlimited`, `0`, or empty - no timeout is set on the client
+
+Zero and negative values route to the unlimited path rather than being passed
+through, because httpx treats a `0.0` read timeout as immediate-timeout.
+
+Pass an explicit `timeout` to `configure_http()` to change it at runtime instead.
+
+**Example:**
+```bash
+# Slow network or a mirror with high latency
+export EDGAR_HTTP_TIMEOUT="60"
+
+# Long-running bulk job on an unreliable link, paired with a lower rate
+export EDGAR_HTTP_TIMEOUT="120"
+export EDGAR_RATE_LIMIT_PER_SEC="5"
+```
+
 **Python Alternative:**
 ```python
 from edgar import httpclient
@@ -503,6 +531,7 @@ export REQUESTS_CA_BUNDLE="/path/to/company-ca-bundle.crt"
 | Variable | Default | Purpose | Enterprise Use Case |
 |----------|---------|---------|---------------------|
 | `EDGAR_RATE_LIMIT_PER_SEC` | `9` | Request rate limit | Custom mirrors, authorized high-volume apps |
+| `EDGAR_HTTP_TIMEOUT` | `30.0` | Per-request timeout (seconds) | Slow mirrors, long-running bulk jobs |
 | `EDGAR_USE_HTTP2` | `false` | HTTP/2 vs HTTP/1.1 | Stable interactive use (enable); cloud fan-out jobs (keep default) |
 | `EDGAR_BASE_URL` | `https://www.sec.gov` | SEC website base URL | Corporate mirrors, regional mirrors |
 | `EDGAR_DATA_URL` | `https://data.sec.gov` | Data archives URL | CDN acceleration, private repositories |
