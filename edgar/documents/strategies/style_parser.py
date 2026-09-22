@@ -104,6 +104,13 @@ class StyleParser:
             elif value == 'normal':
                 style.font_style = 'normal'
 
+        elif prop == 'font-family':
+            # Only the first family is kept, unquoted and case-folded: it is used to tell a
+            # symbol glyph (Wingdings) apart from body text, not to render anything.
+            first = value.split(',')[0].strip().strip('\'"').strip()
+            if first:
+                style.font_family = first.lower()
+
         # Text properties
         elif prop == 'text-align':
             if value in ['left', 'right', 'center', 'justify']:

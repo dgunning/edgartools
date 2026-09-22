@@ -4,7 +4,7 @@ Get started with edgartools in minutes. This guide covers all installation metho
 
 ## System Requirements
 
-- **Python**: 3.8 or higher
+- **Python**: 3.10 or higher
 
 ## Quick Installation
 
@@ -159,7 +159,7 @@ If you encounter issues:
 
 For isolated development, use virtual environments:
 
-### Using venv (Python 3.8+)
+### Using venv (Python 3.10+)
 
 ```bash
 # Create virtual environment

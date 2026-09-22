@@ -359,7 +359,7 @@ use_local_storage("/shared/team/edgar_data")
 ### 3. Monitor Storage Usage
 
 ```python
-from edgar.core import get_edgar_data_directory
+from edgar.settings import get_edgar_data_directory
 import shutil
 
 storage_path = get_edgar_data_directory()

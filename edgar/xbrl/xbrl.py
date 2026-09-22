@@ -12,9 +12,11 @@ organizing facts according to presentation hierarchies, validating calculations,
 and handling dimensional qualifiers.
 """
 import datetime
+import itertools
+import re
 from pathlib import Path
 from textwrap import dedent
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 if TYPE_CHECKING:
     from edgar.xbrl.facts import FactQuery
@@ -29,21 +31,323 @@ from edgar.attachments import Attachments
 from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
 from edgar.richtools import repr_rich
-from edgar.xbrl.core import STANDARD_LABEL, STANDARD_TAXONOMIES, split_element_id
-from edgar.xbrl.models import PresentationNode
+from edgar.xbrl.core import (
+    STANDARD_LABEL,
+    STANDARD_TAXONOMIES,
+    normalize_decimals,
+    split_element_id,
+    unit_currency_measure,
+)
+from edgar.xbrl.models import Axis, Domain, PresentationNode, is_negated_label_role
 from edgar.xbrl.parsers import XBRLParser
 from edgar.xbrl.period_selector import select_periods
 from edgar.xbrl.periods import get_period_views
 from edgar.xbrl.rendering import RenderedStatement, generate_rich_representation, render_statement
+from edgar.exceptions import NotFoundError
 from edgar.xbrl.statement_resolver import StatementResolver
 from edgar.xbrl.statements import statement_to_concepts
 
 
-class XBRLFilingWithNoXbrlData(Exception):
+# The word "note" carries two unrelated meanings in a role definition: the
+# financial-statement section, and the debt instrument ("notes payable",
+# "convertible notes").  A role that declares itself a disclosure is one even
+# when notes are its subject, which is what these two helpers separate
+# (issue #1207).
+
+# EDGAR role definitions carry an explicit category segment:
+# "0011 - Disclosure - Promissory Notes Payable".  When the schema definition is
+# missing, the role name stands in for it and the same marker leads it:
+# "DisclosurePromissoryNotesPayable".
+_ROLE_CATEGORY_MARKER = 'disclosure'
+
+# The concept a disclosure role hangs from, e.g. us-gaap_DebtDisclosureAbstract.
+# Matches the Disclosures concept patterns in statement_resolver.py.
+_DISCLOSURE_CONCEPT_RE = re.compile(r"disclosures?abstract$", re.IGNORECASE)
+
+# The section sense of the word, kept deliberately generous: a definition that
+# matches here keeps the classification it already had, so a false positive
+# costs nothing while a false negative would move a real note.
+_NOTES_SECTION_RE = re.compile(
+    r"notes?\s*to\s*[\w\s',&-]*financial\s*statements?"  # Notes to Consolidated Financial Statements
+    r"|notes?\s*\d"                                      # Note 7 - Income Taxes
+    r"|footnotes?"                                       # Footnotes
+    r"|(?:^|\s-\s)notes?$"                               # a role titled only "Notes"
+)
+
+
+def _declares_disclosure(role_def: str, primary_concept: str) -> bool:
+    """Whether a role states that it is a disclosure, rather than merely
+    mentioning the word.
+
+    Args:
+        role_def: Role definition, lowercased.
+        primary_concept: The role's first presentation node.
+    """
+    if _DISCLOSURE_CONCEPT_RE.search(primary_concept or ''):
+        return True
+    if any(part.strip() == _ROLE_CATEGORY_MARKER for part in role_def.split(' - ')):
+        return True
+    return role_def.startswith(_ROLE_CATEGORY_MARKER)
+
+
+def _names_notes_section(role_def: str) -> bool:
+    """Whether a role definition names the notes to the financial statements,
+    as opposed to using "note" as the subject of a disclosure.
+
+    Args:
+        role_def: Role definition, lowercased.
+    """
+    return bool(_NOTES_SECTION_RE.search(role_def))
+
+
+# A role family is a stem and its members, spelled either way a filing names
+# its roles: the schema definition "Debt", "Debt (Tables)", "Debt - Summary
+# (Details)", or the bare role name "ConvertiblePromissoryNotesPayable",
+# "...Tables", "...ScheduleOf...Details", "...Details1Parentheticals".  Only
+# the stem hangs from the disclosure concept, so in a filing that falls back
+# to role names the members cannot declare themselves and are classified with
+# their stem instead (issue #1218).
+#
+# The bare spelling is only read as a member suffix when it is glued to the
+# name: Apple's "Consolidated Financial Statement Details" is a note, and its
+# members say so with the parenthesised form.
+_ROLE_FAMILY_SUFFIX_RE = re.compile(
+    r"(?:\((?:tables?|details?|policies|textuals?)(?:\s+textuals?)?\)(?:[\s-]*\(?parentheticals?\)?)?"
+    r"|(?<![\s(])(?:tables?|details?|policies|textuals?|parentheticals?)\d*(?:parentheticals?)?)$"
+)
+
+# CamelCase segments of a role name: "ConvertiblePromissoryNotesPayable" ->
+# Convertible, Promissory, Notes, Payable.  An all-caps run is one segment.
+_CAMEL_SEGMENT_RE = re.compile(r"[A-Z]+(?![a-z])|[A-Z]?[a-z]+|\d+")
+
+# The sort index a schema definition leads with: "0000017 - Disclosure - Debt".
+# It differs between a stem and its members, so it is no part of the family.
+_ROLE_INDEX_RE = re.compile(r"^\s*\d+\s*-\s*")
+
+
+def _role_family_key(definition: str) -> Tuple[str, ...]:
+    """The role definition as lowercased CamelCase segments, so that a stem
+    is compared with a member segment by segment and `Debt` never claims
+    `DebtorNotesDetails`.
+
+    Args:
+        definition: Role definition as written, so that CamelCase boundaries
+            are still visible.
+    """
+    definition = _ROLE_INDEX_RE.sub('', definition)
+    return tuple(segment.lower() for segment in _CAMEL_SEGMENT_RE.findall(definition))
+
+
+def _segments_match(a: str, b: str) -> bool:
+    """Two segments name the same word when they differ at most by a plural
+    marker.  gahc names its stem "ConvertiblePromissoryNotesPayable" and two
+    members "ConvertiblePromissoryNotePayableScheduleOf...".
+
+    Only a trailing "s" is tolerated, deliberately: "Inventory" against
+    "InventoriesDetails" or "Liability" against "LiabilitiesDetails" does not
+    match, so a member spelled with an "-ies" plural stays classified on its
+    own.  No committed fixture exhibits that shape; widen this when one does.
+    """
+    return a == b or a + 's' == b or b + 's' == a
+
+
+def _is_family_stem_of(stem_key: Tuple[str, ...], family_key: Tuple[str, ...]) -> bool:
+    """Whether `stem_key` is a proper, segment-aligned prefix of `family_key`."""
+    return (len(stem_key) < len(family_key)
+            and all(_segments_match(a, b) for a, b in zip(stem_key, family_key)))
+
+
+# A role name may lead with the section it sits in.  UNP spells most of one
+# family "DisclosureDebtDetails1" and two members of it "DebtDetails6", and
+# names the Leases stem "Leases" but its Tables "DisclosureLeasesTables", so the
+# marker is not part of the family name (edgartools-uqp2).
+_SECTION_MARKER_SEGMENTS = frozenset({'disclosure', 'disclosures', 'statement', 'statements'})
+
+
+def _without_section_marker(key: Tuple[str, ...]) -> Tuple[str, ...]:
+    """`key` without a leading section-marker segment, else `key` unchanged."""
+    return key[1:] if key and key[0] in _SECTION_MARKER_SEGMENTS else key
+
+
+def _leads_family(stem_key: Tuple[str, ...], family_key: Tuple[str, ...]) -> bool:
+    """`_is_family_stem_of`, retried with a leading section marker ignored on
+    either side.
+
+    The marker is dropped only as a fallback, never from the key itself: a
+    filing that names both a `Debt` family and a separate `DisclosureDebt`
+    family must keep them apart, and erasing the marker outright would merge
+    them.  Ignoring it only when nothing aligns without doing so leaves the
+    unambiguous case untouched, and `_role_family_stem` still ranks a stem that
+    aligns strictly above one that needs the fallback.
+    """
+    if _is_family_stem_of(stem_key, family_key):
+        return True
+    bare_stem = _without_section_marker(stem_key)
+    bare_family = _without_section_marker(family_key)
+    if bare_stem == stem_key and bare_family == family_key:
+        return False
+    if not bare_stem:
+        # A stem named only for its section ("Disclosure") says nothing about a
+        # family, and an empty key leads every other one.
+        return False
+    return _is_family_stem_of(bare_stem, bare_family)
+
+
+def _role_family_members(definitions: Iterable[str]) -> Set[str]:
+    """The role definitions that are Tables, Policies or Details members of a
+    family: each carries a member suffix and extends the name of another role
+    in the filing.  A role that only carries the suffix is a stem - Apple's
+    "Consolidated Financial Statement Details", gahc's
+    "SummaryOfSignificantAccountingPolicies" - and so is a member whose stem
+    the filing does not name, since nothing else stands for it.
+
+    Args:
+        definitions: Every role definition in the filing.
+    """
+    keys = {definition: _role_family_key(definition) for definition in definitions}
+    return {definition for definition, key in keys.items()
+            if _ROLE_FAMILY_SUFFIX_RE.search(definition.lower())
+            and any(other and _leads_family(other, key) for other in keys.values())}
+
+
+def _role_family_stem(family_key: Tuple[str, ...],
+                      stem_keys: Iterable[Tuple[str, ...]]) -> Optional[Tuple[str, ...]]:
+    """The stem a family member belongs to: the longest stem whose segments
+    lead the member's, so `NotesPayableRelatedPartyDetails` belongs to
+    `NotesPayableRelatedParty` rather than the shorter `NotesPayable`.  Two
+    stems of one length are told apart by how many segments match exactly
+    rather than by plural.  None when no stem leads the member.
+
+    Args:
+        family_key: The member's `_role_family_key`.
+        stem_keys: Family key of every stem role in the filing.
+    """
+    best_rank = None
+    best = None
+    for stem_key in stem_keys:
+        if not stem_key or not _leads_family(stem_key, family_key):
+            continue
+        # A stem that aligns without ignoring a section marker outranks one that
+        # needs the fallback, so `DebtDetails` prefers a `Debt` stem over a
+        # `DisclosureDebt` stem when the filing names both.
+        strict = _is_family_stem_of(stem_key, family_key)
+        rank = (strict, len(stem_key), sum(a == b for a, b in zip(stem_key, family_key)))
+        if best_rank is None or rank > best_rank:
+            best_rank, best = rank, stem_key
+    return best
+
+
+def _follows_disclosure_family(role_def: str, family_key: Tuple[str, ...],
+                               stem_declares_disclosure: Dict[Tuple[str, ...], bool]) -> bool:
+    """Whether a role that does not declare itself is a Tables or Details
+    member of a family whose stem does.  A member stays with its own family
+    when its stem does not declare a disclosure, whatever a shorter stem says.
+
+    Args:
+        role_def: Role definition, lowercased.
+        family_key: The role's `_role_family_key`.
+        stem_declares_disclosure: Family key of every role in the filing
+            that is not itself a Tables or Details role, mapped to whether
+            it declares a disclosure.
+    """
+    if not _ROLE_FAMILY_SUFFIX_RE.search(role_def):
+        return False
+    stem_key = _role_family_stem(family_key, stem_declares_disclosure)
+    return stem_key is not None and stem_declares_disclosure[stem_key]
+
+
+def _capture_sgml_period_of_report(xbrl: "XBRL", filing) -> None:
+    """Record the filing header's period_of_report on `xbrl`, or say why not.
+
+    This is the second of the two dates `_get_validated_period_of_report()`
+    compares. When it is missing that method has nothing to check the XBRL date
+    against and returns it unvalidated — the same value it returns when the two
+    dates agree. Swallowing a failure here therefore does not degrade the
+    presentation, it turns off a correctness check while the result continues to
+    look checked, which is what makes it a bug rather than a guard
+    (bead edgartools-35jj).
+    """
+    try:
+        xbrl._sgml_period_of_report = filing.period_of_report
+    except Exception as e:
+        xbrl._period_validation_unavailable = f"{type(e).__name__}: {e}"
+        log.warning(
+            "Could not read period_of_report from the filing header for %s (%s). "
+            "XBRL/SGML date-discrepancy detection is disabled for this filing, so "
+            "period_of_report is the unvalidated XBRL date.",
+            getattr(filing, "accession_no", "<unknown filing>"), e,
+        )
+
+
+# Members that aggregate other members of the same axis, rather than being a
+# disjoint part of the breakdown. Adding one of these to its own components
+# double-counts them.
+#
+# 'Total' in the local name catches the issuer's own total member, which is how
+# filers usually spell it (Disney files
+# dis:TotalexcludingredeemablenoncontrollinginterestMember). The named members
+# are the standard aggregates whose names do not say so: ParentMember is equity
+# attributable to the parent, i.e. every component except the noncontrolling
+# interest, and ConsolidatedEntitiesMember/ConsolidationEliminationsMember play
+# the same role on a consolidation axis.
+_AGGREGATE_MEMBER_NAMES = frozenset({
+    'parentmember',
+    'consolidatedentitiesmember',
+})
+
+
+def _is_aggregate_member(member: str) -> bool:
+    """Whether a dimension member aggregates other members of its axis.
+
+    Compared on the LOCAL NAME: members reach here with either separator
+    ('us-gaap:ParentMember' from a context, 'us-gaap_ParentMember' from the
+    rendered dimension info), and matching the qualified spelling silently
+    matches neither half the time.
+    """
+    if not member:
+        return False
+    local_name = member.split(':', 1)[-1]
+    if ':' not in member and '_' in local_name:
+        local_name = local_name.split('_', 1)[1]
+    lowered = local_name.lower()
+    return lowered in _AGGREGATE_MEMBER_NAMES or 'total' in lowered
+
+
+class XBRLFilingWithNoXbrlData(NotFoundError):
     """Exception raised when a filing does not contain XBRL data."""
 
     def __init__(self, message: str):
         super().__init__(message)
+
+
+def no_xbrl_attachments(filing) -> XBRLFilingWithNoXbrlData:
+    """The error for a filing that carries no XBRL attachments at all.
+
+    Built as a value rather than raised, so `warn_will_raise` decides — and so
+    the frame between the warning and the user is not one of ours, which is
+    what keeps `stacklevel` pointing at the line the reader has to change. Same
+    shape as `_no_xml_to_parse` in `edgar/__init__.py`, for the same reasons.
+
+    Lives here, next to the class and the condition it describes, but is raised
+    from `Financials.extract` rather than from `from_filing`: `filing.xbrl()`
+    answering `None` is a documented true absence, while a truthy `Financials`
+    whose accessors all answer `None` is the failure worth naming.
+    """
+    error = XBRLFilingWithNoXbrlData(
+        f"Filing {filing.accession_no} ({filing.form}) has no XBRL attachments, "
+        f"so there are no financial statements to read from it. This is a "
+        f"property of the filing, not of the form — SEC phased XBRL in between "
+        f"2009 and 2011, and filings from before then carry none."
+    )
+    # Stable across filings so a walk through a company's whole filing history
+    # warns once, not once per pre-2009 filing — see warn_will_raise.
+    error.warning_summary = (
+        "This filing has no XBRL attachments, so there are no financial "
+        "statements to read from it. This is a property of the filing, not of "
+        "the form — SEC phased XBRL in between 2009 and 2011, and filings from "
+        "before then carry none."
+    )
+    return error
 
 
 class XBRLAttachments:
@@ -127,6 +431,11 @@ class XBRL:
         self._sgml_period_of_report: Optional[str] = None
         self._validated_period_of_report_cache: Optional[str] = None
         self._period_of_report_warning_logged: bool = False
+        # Set when the SGML date could not be read at all, which turns the
+        # discrepancy check off rather than making it disagree. Carried so that
+        # "the dates agreed" and "we never had a second date" are distinguishable
+        # (bead edgartools-35jj).
+        self._period_validation_unavailable: Optional[str] = None
 
         # Standardization cache for this XBRL instance (lazy-initialized)
         self._standardization_cache = None
@@ -291,6 +600,52 @@ class XBRL:
         return self.parser.domains
 
     @property
+    def axes_by_role(self):
+        """Axes grouped by the extended link role that declares them."""
+        return self.parser.axes_by_role
+
+    @property
+    def domains_by_role(self):
+        """Domains grouped by the extended link role that declares them."""
+        return self.parser.domains_by_role
+
+    def axes_for_role(self, role_uri: str) -> Dict[str, Axis]:
+        """
+        The axes declared for one statement role, keyed on element ID.
+
+        Prefer this over ``xbrl.axes`` whenever the role is known. An axis can
+        be attached to a different domain in each role it appears in, so
+        ``xbrl.axes`` can only offer a merged answer.
+
+        Args:
+            role_uri: The extended link role URI
+
+        Returns:
+            Mapping of element ID to Axis, empty if the role has no definition
+            linkbase.
+        """
+        return self.parser.axes_for_role(role_uri)
+
+    def domains_for_role(self, role_uri: str) -> Dict[str, Domain]:
+        """
+        The domains declared for one statement role, keyed on element ID.
+
+        Prefer this over ``xbrl.domains`` whenever the role is known. The same
+        domain routinely carries different members in different roles — Apple's
+        ``srt_ProductsAndServicesDomain`` splits revenue two ways on the income
+        statement and five ways in the revenue note — so ``xbrl.domains`` can
+        only offer the union.
+
+        Args:
+            role_uri: The extended link role URI
+
+        Returns:
+            Mapping of element ID to Domain, empty if the role has no
+            definition linkbase.
+        """
+        return self.parser.domains_for_role(role_uri)
+
+    @property
     def entity_info(self):
         return self.parser.entity_info
 
@@ -355,13 +710,14 @@ class XBRL:
             )
             menucat = self._filing_summary_menu_categories.get(role_uri)
 
-            for element_id, node in tree.all_nodes.items():
-                if node.parent is None:
-                    # Root node — no arc to emit.
-                    continue
+            # One row per filed edge. Iterating all_nodes would emit one row
+            # per concept, which silently drops the second and later parents of
+            # a concept that rolls up into more than one total.
+            for arc in tree.all_arcs:
+                element_id = arc.child_id
 
                 concept_tax, concept_local = split_element_id(element_id)
-                parent_tax, parent_local = split_element_id(node.parent)
+                parent_tax, parent_local = split_element_id(arc.parent_id)
 
                 elem = self.element_catalog.get(element_id)
                 is_abstract = bool(elem.abstract) if elem else False
@@ -377,7 +733,7 @@ class XBRL:
                     'concept_taxonomy': concept_tax,
                     'parent_concept': parent_local,
                     'parent_taxonomy': parent_tax,
-                    'weight': node.weight,
+                    'weight': arc.weight,
                     'role_uri': role_uri,
                     'role_short': role_short,
                     'menucat': menucat,
@@ -391,6 +747,18 @@ class XBRL:
     def period_of_report(self) -> Optional[str]:
         """Get the document period end date, with discrepancy detection."""
         return self._get_validated_period_of_report()
+
+    @property
+    def period_validation_unavailable(self) -> Optional[str]:
+        """Why the XBRL/SGML date cross-check could not run, or None if it could.
+
+        `period_of_report` normally validates the XBRL date against the SGML
+        header date. When the header date cannot be read there is nothing to
+        check against and the XBRL date is returned as-is — the same value the
+        check would return when the dates agree. This says which of the two
+        happened.
+        """
+        return self._period_validation_unavailable
 
     def _get_xbrl_period_of_report(self) -> Optional[str]:
         """Get the raw XBRL document_period_end_date without validation."""
@@ -591,7 +959,9 @@ class XBRL:
             filing: Filing object with attachments containing XBRL files
 
         Returns:
-            XBRL object with parsed data
+            XBRL object with parsed data, or `None` when the filing carries no
+            XBRL attachments at all — a property of the filing, not a failure to
+            read it, and one this keeps answering with a quiet `None` in 6.0.
         """
         if filing.form.endswith("/A"):
             log.debug(dedent(f"""
@@ -605,6 +975,12 @@ class XBRL:
         xbrl_attachments = XBRLAttachments(filing.attachments)
 
         if xbrl_attachments.empty:
+            # Silent on purpose. `filing.xbrl()` answering None for a filing
+            # with no XBRL is a true absence, not a failure, and docs/upgrade/
+            # 6.0.md commits to it staying that way. The silent-None bug this
+            # module was implicated in (edgartools-07lk.10.1) is one level up,
+            # where `Financials` wraps this None into a truthy object whose
+            # every accessor answers None — so that is where the warning went.
             log.debug(f"No XBRL attachments found in filing {filing}")
             return None
 
@@ -656,11 +1032,8 @@ class XBRL:
                     f"the filing — entity info and facts will be empty."
                 )
 
-        # Capture SGML period_of_report for date discrepancy detection
-        try:
-            xbrl._sgml_period_of_report = filing.period_of_report
-        except Exception:
-            pass
+        # Capture SGML period_of_report for date discrepancy detection.
+        _capture_sgml_period_of_report(xbrl, filing)
 
         # Try to set industry from filing header SIC for industry-specific standardization
         try:
@@ -880,6 +1253,32 @@ class XBRL:
         self._statement_by_role_uri = {}
         self._statement_by_role_name = {}
 
+        # Family key of every stem role and whether it declares itself a
+        # disclosure, so that a Tables or Details role can follow its nearest
+        # stem below (issue #1218).  Every stem is recorded, not only the
+        # declaring ones, so that `NotesPayableRelatedPartyDetails` resolves to
+        # `NotesPayableRelatedParty` and not past it to `NotesPayable`.  Roles
+        # that are themselves Tables or Details are not stems: gahc's
+        # `...DetailsParenthetical` must reach the family stem, not the
+        # `...Details` it extends.  A definition with no segments at all is
+        # a prefix of every other and is left out.
+        definitions = [tree.definition for tree in self.presentation_trees.values()
+                       if isinstance(tree.definition, str)]
+        members = _role_family_members(definitions)
+        stem_declares_disclosure: Dict[Tuple[str, ...], bool] = {}
+        for tree in self.presentation_trees.values():
+            if not isinstance(tree.definition, str) or tree.definition in members:
+                continue
+            key = _role_family_key(tree.definition)
+            if not key:
+                continue
+            role_def = tree.definition.lower()
+            declares = (_declares_disclosure(role_def, next(iter(tree.all_nodes)))
+                        and not _names_notes_section(role_def))
+            # Two trees spell one definition only when a filing repeats a
+            # role; the family is the same either way.
+            stem_declares_disclosure[key] = stem_declares_disclosure.get(key, False) or declares
+
         for role, tree in self.presentation_trees.items():
             # Check if this role appears to be a financial statement
             role_def = tree.definition.lower()
@@ -934,9 +1333,34 @@ class XBRL:
 
             # Fall back to keyword-based patterns for notes and disclosures
             if not statement_type:
-                if 'us-gaap_NotesToFinancialStatementsAbstract' in primary_concept or 'note' in role_def:
+                if 'us-gaap_NotesToFinancialStatementsAbstract' in primary_concept:
                     statement_type = "Notes"
                     statement_category = "note"
+                elif 'note' in role_def:
+                    # The bare keyword cannot tell the notes to the financial
+                    # statements from a disclosure whose subject happens to be
+                    # notes payable, so a role that declares itself a disclosure
+                    # is taken at its word unless the definition names the notes
+                    # section itself (issue #1207).
+                    #
+                    # In a filing that falls back to role names only the family
+                    # stem carries that evidence: gahc's
+                    # `ConvertiblePromissoryNotesPayable` hangs from
+                    # us-gaap_DebtDisclosureAbstract, while its `Tables` and
+                    # `ScheduleOf...Details` children hang from a debt-balance
+                    # abstract.  Those follow their stem so the family stays
+                    # together across notes() and disclosures() (issue #1218).
+                    if _names_notes_section(role_def):
+                        statement_type = "Notes"
+                        statement_category = "note"
+                    elif (_declares_disclosure(role_def, primary_concept)
+                          or _follows_disclosure_family(role_def, _role_family_key(tree.definition),
+                                                        stem_declares_disclosure)):
+                        statement_type = "Disclosures"
+                        statement_category = "disclosure"
+                    else:
+                        statement_type = "Notes"
+                        statement_category = "note"
                 elif 'us-gaap_DisclosuresAbstract' in primary_concept or 'disclosure' in role_def:
                     statement_type = "Disclosures"
                     statement_category = "disclosure"
@@ -1154,9 +1578,6 @@ class XBRL:
 
         tree = self.presentation_trees[found_role]
 
-        # Find the root element
-        root_id = tree.root_element_id
-
         # If should_display_dimensions wasn't provided, default to True
         # Issue #504: Always include dimensional data by default - users can filter themselves if needed
         if should_display_dimensions is None:
@@ -1166,11 +1587,17 @@ class XBRL:
         # This ensures we only show members that are actually defined in the linkbase
         valid_dimensional_members = self._get_valid_dimensional_members(tree) if should_display_dimensions else {}
 
-        # Generate line items recursively
+        # Generate line items recursively, from EVERY root the role declares.
+        # Walking only tree.root_element_id left everything beneath the second
+        # and later roots unreachable, which silently truncated the statement --
+        # Union Pacific's Leases Details returned 13 rows from a 22-node tree,
+        # and its consolidated statement of comprehensive income is multi-root
+        # too, so this reached a primary face statement (edgartools-0q0d).
         line_items = []
-        self._generate_line_items(root_id, tree.all_nodes, line_items, period_filter, None,
-                                  should_display_dimensions, valid_dimensional_members, view,
-                                  statement_role=found_role)
+        for root_id in tree.root_element_ids:
+            self._generate_line_items(root_id, tree.all_nodes, line_items, period_filter, None,
+                                      should_display_dimensions, valid_dimensional_members, view,
+                                      statement_role=found_role)
 
         # Apply revenue deduplication for income statements to fix Issue #438
         if actual_statement_type == 'IncomeStatement':
@@ -1186,7 +1613,50 @@ class XBRL:
         # Issue edgartools-os99: Adjust levels when calculation tree reveals flat subtotal patterns
         line_items = self._adjust_levels_by_calculation_parent(line_items)
 
+        line_items = self._prune_empty_structural_items(line_items)
+
         return line_items
+
+    @staticmethod
+    def _prune_empty_structural_items(line_items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Drop abstract line items whose subtree carries no filed value.
+
+        A presentation linkbase declares its hypercube inline -- ``[Table]``,
+        ``[Axis]``, ``[Domain]``, then one node per axis member -- and every one
+        of those nodes becomes a line item even though no fact ever hangs off it.
+        Tesla's operations statement emits four automotive member headings that
+        way, so a view filtering the dimensional facts leaves a run of labels
+        that read like data rows and are permanently empty (GH #1224). Keep an
+        abstract row only when it, or something under it, carries a value.
+        """
+        def carries_value(item: Dict[str, Any]) -> bool:
+            return bool(item.get('has_values')) or bool(item.get('values'))
+
+        def is_structural(item: Dict[str, Any]) -> bool:
+            # A hypercube node is not a line item whichever way the filing was
+            # loaded. from_files() reads the schema and marks these abstract;
+            # from_directory() does not always find the .xsd, and then only the
+            # concept name and the bracketed standard label say what they are.
+            if item.get('is_abstract'):
+                return True
+            concept = item.get('concept') or ''
+            label = item.get('label') or ''
+            return (concept.endswith(('Axis', 'Domain', 'Member', 'LineItems', 'Table'))
+                    or any(bracket in label for bracket in
+                           ('[Axis]', '[Domain]', '[Member]', '[Line Items]', '[Table]')))
+
+        pruned = []
+        for index, item in enumerate(line_items):
+            if is_structural(item) and not carries_value(item):
+                level = item.get('level', 0)
+                subtree = itertools.takewhile(
+                    lambda descendant: descendant.get('level', 0) > level,
+                    line_items[index + 1:]
+                )
+                if not any(carries_value(descendant) for descendant in subtree):
+                    continue
+            pruned.append(item)
+        return pruned
 
     def _generate_line_items(self, element_id: str, nodes: Dict[str, PresentationNode],
                              result: List[Dict[str, Any]], period_filter: Optional[str] = None,
@@ -1230,6 +1700,16 @@ class XBRL:
 
         # Get node information
         node = nodes[element_id]
+
+        # This OCCURRENCE's position, taken from the walk rather than from the
+        # shared node. `nodes` is keyed by element ID, so a concept presented
+        # more than once in a role — a roll-forward's beginning and ending
+        # balance, a total repeated under two sections — has a single entry
+        # whose `parent` and `depth` are whichever occurrence the parser wrote
+        # last. Reading them here gave every earlier occurrence the last one's
+        # parent and indentation. The path is the occurrence (edgartools-f07v).
+        occurrence_parent = path[-1] if path else None
+        occurrence_depth = len(path)
 
         # edgartools-0609: Honor this reference's preferred label when it differs
         # from the shared node's (roll-forward concepts referenced more than once).
@@ -1297,15 +1777,11 @@ class XBRL:
         # This determines display transformation: -1 = negate, 1 = as-is, None = not specified
         preferred_sign_value = None
         if effective_preferred_label:
-            # Check if this is a negatedLabel (indicates value should be negated for display)
-            # Use pattern matching to support any XBRL namespace version (2003, 2009, future versions)
-            # Matches: 'negatedLabel', 'negatedTerseLabel', 'http://www.xbrl.org/YYYY/role/negated*Label', etc.
-            label_lower = effective_preferred_label.lower()
-            is_negated = 'negated' in label_lower and (
-                label_lower.startswith('negated') or  # Short form: 'negatedLabel'
-                '/role/negated' in label_lower        # Full URI: 'http://www.xbrl.org/*/role/negated*'
-            )
-            preferred_sign_value = -1 if is_negated else 1
+            # Negation is decided by the role's local name, which covers every
+            # namespace version and the legacy xbrl.us LRR roles (see
+            # is_negated_label_role). The Facts API reads the same helper so the
+            # two surfaces cannot disagree about a sign.
+            preferred_sign_value = -1 if is_negated_label_role(effective_preferred_label) else 1
 
         # Find facts for any of these concept names
         all_relevant_facts = self._find_facts_for_element(node.element_name, period_filter)
@@ -1399,15 +1875,10 @@ class XBRL:
                     # Store the selected fact's value
                     values[period_key] = fact.numeric_value if fact.numeric_value is not None else fact.value
 
-                    # Store the decimals info for proper scaling
-                    if fact.decimals is not None:
-                        try:
-                            if fact.decimals == 'INF':
-                                decimals[period_key] = 0  # Infinite precision, no scaling
-                            else:
-                                decimals[period_key] = int(fact.decimals)
-                        except (ValueError, TypeError):
-                            decimals[period_key] = 0  # Default
+                    # Store the decimals info for scaling and for accuracy
+                    fact_decimals = normalize_decimals(fact.decimals)
+                    if fact_decimals is not None:
+                        decimals[period_key] = fact_decimals
 
                     # Store unit_ref for this period
                     units[period_key] = fact.unit_ref
@@ -1448,14 +1919,9 @@ class XBRL:
                         fact = synthetic['fact']
                         context_id = synthetic['context_id']
 
-                        if fact.decimals is not None:
-                            try:
-                                if fact.decimals == 'INF':
-                                    decimals[period_key] = 0
-                                else:
-                                    decimals[period_key] = int(fact.decimals)
-                            except (ValueError, TypeError):
-                                decimals[period_key] = 0
+                        fact_decimals = normalize_decimals(fact.decimals)
+                        if fact_decimals is not None:
+                            decimals[period_key] = fact_decimals
 
                         units[period_key] = fact.unit_ref
 
@@ -1485,15 +1951,10 @@ class XBRL:
 
                     values[period_key] = fact.numeric_value if fact.numeric_value is not None else fact.value
 
-                    # Store the decimals info for proper scaling
-                    if fact.decimals is not None:
-                        try:
-                            if fact.decimals == 'INF':
-                                decimals[period_key] = 0
-                            else:
-                                decimals[period_key] = int(fact.decimals)
-                        except (ValueError, TypeError):
-                            decimals[period_key] = 0
+                    # Store the decimals info for scaling and for accuracy
+                    fact_decimals = normalize_decimals(fact.decimals)
+                    if fact_decimals is not None:
+                        decimals[period_key] = fact_decimals
 
                     units[period_key] = fact.unit_ref
 
@@ -1515,14 +1976,9 @@ class XBRL:
                         fact = synthetic['fact']
                         context_id = synthetic['context_id']
 
-                        if fact.decimals is not None:
-                            try:
-                                if fact.decimals == 'INF':
-                                    decimals[period_key] = 0
-                                else:
-                                    decimals[period_key] = int(fact.decimals)
-                            except (ValueError, TypeError):
-                                decimals[period_key] = 0
+                        fact_decimals = normalize_decimals(fact.decimals)
+                        if fact_decimals is not None:
+                            decimals[period_key] = fact_decimals
 
                         units[period_key] = fact.unit_ref
 
@@ -1555,9 +2011,9 @@ class XBRL:
                 'preferred_signs': preferred_signs,  # Include preferred_sign for display (Issue #463)
                 'balance': balance,  # Include balance (debit/credit) for display (Issue #463)
                 'weight': weight,  # Include calculation weight for metadata (Issue #463)
-                'parent': node.parent,  # Presentation tree parent (may be abstract) (Issue #514)
+                'parent': occurrence_parent,  # Presentation tree parent (may be abstract) (Issue #514)
                 'calculation_parent': calculation_parent,  # Calculation tree parent (metric) (Issue #514 refinement)
-                'level': node.depth,
+                'level': occurrence_depth,
                 'preferred_label': effective_preferred_label,
                 'is_abstract': node.is_abstract,  # Issue #450: Use node's actual abstract flag
                 'children': node.children,
@@ -1579,9 +2035,9 @@ class XBRL:
                 'preferred_signs': preferred_signs,  # Include preferred_sign for display (Issue #463)
                 'balance': balance,  # Include balance (debit/credit) for display (Issue #463)
                 'weight': weight,  # Include calculation weight for metadata (Issue #463)
-                'parent': node.parent,  # Presentation tree parent (may be abstract) (Issue #514)
+                'parent': occurrence_parent,  # Presentation tree parent (may be abstract) (Issue #514)
                 'calculation_parent': calculation_parent,  # Calculation tree parent (metric) (Issue #514 refinement)
-                'level': node.depth,
+                'level': occurrence_depth,
                 'preferred_label': effective_preferred_label,
                 'is_abstract': node.is_abstract,
                 'children': node.children,
@@ -1629,14 +2085,9 @@ class XBRL:
                             continue
 
                     # Store decimals
-                    if fact.decimals is not None:
-                        try:
-                            if fact.decimals == 'INF':
-                                dim_decimals[period_key] = 0
-                            else:
-                                dim_decimals[period_key] = int(fact.decimals)
-                        except (ValueError, TypeError):
-                            dim_decimals[period_key] = 0
+                    fact_decimals = normalize_decimals(fact.decimals)
+                    if fact_decimals is not None:
+                        dim_decimals[period_key] = fact_decimals
 
                     # Store unit_ref for this period
                     dim_units[period_key] = fact.unit_ref
@@ -1685,7 +2136,7 @@ class XBRL:
                     'units': dim_units,  # Include unit_ref for each period
                     'period_types': dim_period_types,  # Include period_type for each period
                     'preferred_signs': dim_preferred_signs,  # Include preferred_sign for display (Issue #463)
-                    'level': node.depth + 1,  # Increase depth by 1
+                    'level': occurrence_depth + 1,  # Increase depth by 1
                     'preferred_label': node.preferred_label,
                     'is_abstract': False,
                     'children': [],
@@ -1721,15 +2172,34 @@ class XBRL:
         The definition linkbase defines member-to-member relationships (e.g.,
         AutomotiveRevenuesMember → AutomotiveSalesMember). This method uses
         those relationships to set proper nesting depth for dimensional items.
+
+        Only single-axis rows participate. A two-axis fact's first member is
+        often a shared qualifier (``OperatingSegmentsMember``) that several
+        distinct combinations share; keying the map on ``meta[0]`` last-wins
+        those rows away as soon as any same-axis parent/child pair activates
+        the reorder (GH #1331).
+
+        A member filed on two different axes at once does not participate
+        either. ``member_to_item`` is keyed on the member alone, so the two
+        rows would collide and the earlier one would be dropped; the domain
+        hierarchy cannot say which axis's row it nests, so neither is
+        reordered and both pass through (edgartools-3h3q).
         """
-        # Collect member IDs from dimensional items
         member_to_item = {}
+        ambiguous = set()
         for item in dim_items:
-            meta = item.get('dimension_metadata')
-            if meta and len(meta) >= 1:
-                member_id = meta[0].get('member')
-                if member_id:
-                    member_to_item[member_id] = item
+            meta = item.get('dimension_metadata') or []
+            if len(meta) != 1:
+                continue
+            member_id = meta[0].get('member')
+            if not member_id:
+                continue
+            if member_id in member_to_item:
+                ambiguous.add(member_id)
+                continue
+            member_to_item[member_id] = item
+        for member_id in ambiguous:
+            member_to_item.pop(member_id, None)
 
         if len(member_to_item) <= 1:
             return
@@ -1766,8 +2236,10 @@ class XBRL:
         for member_id, item in member_to_item.items():
             item['level'] += depth_offset[member_id]
 
-        # Reorder: parents before children
-        ordered = []
+        # Reorder single-axis parents before their children; leave every other
+        # row (including multi-axis combinations) at its original position.
+        child_members = {child for children in member_children.values() for child in children}
+        ordered: List[Dict[str, Any]] = []
         processed = set()
 
         def add_with_children(member_id):
@@ -1778,16 +2250,25 @@ class XBRL:
             for child_id in member_children.get(member_id, []):
                 add_with_children(child_id)
 
-        # First add items that are top-level (depth 0)
-        for member_id in member_to_item:
-            if depth_offset[member_id] == 0:
+        for item in dim_items:
+            meta = item.get('dimension_metadata') or []
+            if len(meta) != 1:
+                ordered.append(item)
+                continue
+            member_id = meta[0].get('member')
+            if member_id in processed:
+                continue
+            if member_id in child_members:
+                continue
+            if member_id in member_to_item:
                 add_with_children(member_id)
-        # Then any remaining
+            else:
+                ordered.append(item)
+
         for member_id in member_to_item:
             if member_id not in processed:
                 add_with_children(member_id)
 
-        # Replace items in-place
         dim_items[:] = ordered
 
     @staticmethod
@@ -1920,6 +2401,54 @@ class XBRL:
 
         # Pick the axis with most members (most complete breakdown)
         best_axis = max(axis_groups.values(), key=len)
+
+        # Sharing an axis does not make members disjoint. A statement of
+        # shareholders' equity breaks equity down by component AND carries the
+        # filer's own subtotals as members of the same axis, so adding
+        # everything counts the components two or three times over: Disney's
+        # 2022-10-01 beginning balance came out as $292,766,000,000 against a
+        # filed $98,879,000,000, because the four components, their
+        # ParentMember subtotal, the noncontrolling interest and the issuer's
+        # own total member were all added together (gh #1281).
+        aggregates, components = [], []
+        for entry in best_axis:
+            member = (entry[1]['dimension_info'][0].get('member') or '')
+            (aggregates if _is_aggregate_member(member) else components).append(entry)
+
+        if aggregates:
+            # The filing states its own total; report that rather than adding
+            # anything up. Never fall through to the sum here: an aggregate and
+            # its own components in one group is exactly the double count.
+            #
+            # Which aggregate is THE total is settled by agreement with the
+            # components when there are any, since a filing can carry several
+            # nested subtotals -- Disney files ParentMember at 95,008 AND a
+            # total-equity member at 98,879, and only the latter covers the
+            # whole axis.
+            component_total = sum(v for _, _, v in components)
+            if components:
+                scale = max((abs(v) for _, _, v in best_axis), default=0)
+                tolerance = max(abs(component_total), scale) * 1e-6
+                for cid, wf, value in aggregates:
+                    if abs(value - component_total) <= tolerance:
+                        return {'total': value, 'fact': wf['fact'], 'context_id': cid}
+
+            # Either the group is nothing but an aggregate -- Coca-Cola tags
+            # shareowners' equity solely against ParentMember, so there is no
+            # arithmetic to do and no ambiguity -- or several aggregates are
+            # present and none reconciles, which happens when the members are
+            # not parts of one whole at all (Apple's receivable concentration
+            # lists two named customers beside a carriers total). In both cases
+            # a filed total is a better answer than a sum that mixes levels,
+            # so prefer the filer's explicitly named total.
+            named = [e for e in aggregates
+                     if 'total' in (e[1]['dimension_info'][0].get('member') or '').lower()]
+            cid, wf, value = max(named or aggregates, key=lambda e: abs(e[2]))
+            return {'total': value, 'fact': wf['fact'], 'context_id': cid}
+
+        # No aggregate members: a genuine disjoint breakdown, which is the case
+        # this helper was added for (gh #646 -- Disney's own cost of services
+        # and cost of products summing to total costs).
         total = sum(v for _, _, v in best_axis)
         first_cid, first_wf, _ = best_axis[0]
 
@@ -2571,9 +3100,13 @@ class XBRL:
         for _, wrapped_fact in facts.items():
             fact = wrapped_fact['fact']
             if hasattr(fact, 'unit_ref') and fact.unit_ref and fact.unit_ref in self.units:
-                unit_info = self.units[fact.unit_ref]
-                if 'measure' in unit_info:
-                    currency_measure = unit_info['measure']
+                # A divided unit (USD per share) carries its currency in the
+                # numerator and has no 'measure' key, so testing for that key
+                # dropped the currency symbol from every per-share cell once
+                # divided units began parsing correctly (edgartools-uetp).
+                measure = unit_currency_measure(self.units[fact.unit_ref])
+                if measure:
+                    currency_measure = measure
                     break
 
         # Cache the result (including None values to avoid repeated lookups)

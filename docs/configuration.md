@@ -534,7 +534,7 @@ The cache directory is set in `httpclient.CACHE_DIRECTORY`, set to `_cache` by d
 
 #### Caching Rules
 The SEC marks all requests as either NO-STORE or NO-CACHE, therefore a custom cache controller was implemented with the following rules: 
-- `/submissions` URLs for up to 10 minutes by default, set in `MAX_SUBMISSIONS_AGE_SECONDS`
+- `/submissions` URLs for up to 30 seconds by default, set in `MAX_SUBMISSIONS_AGE_SECONDS`
 - `.*index/.*` URLs for up to 30 minutes by default, set in `MAX_INDEX_AGE_SECONDS`
 - `/Archives/edgar/data` URLs indefinitely (forever)
 
@@ -571,7 +571,7 @@ from edgar import set_identity
 set_identity("Research Team research@university.edu")
 
 # Verify identity is set
-from edgar.core import get_identity
+from edgar.settings import get_identity
 print(f"Current identity: {get_identity()}")
 ```
 
@@ -594,7 +594,7 @@ print(f"Using local storage: {using_local_storage()}")
 ### HTTP Client Configuration
 
 ```python
-from edgar.core import EdgarSettings
+from edgar.settings import EdgarSettings
 
 # Custom access mode
 custom_settings = EdgarSettings(
@@ -722,7 +722,7 @@ Typical storage usage:
 
 ```python
 import os
-from edgar.core import get_identity
+from edgar.settings import get_identity
 
 # Check identity
 print(f"Identity: {get_identity()}")
@@ -806,7 +806,7 @@ def validate_config():
     
     # Check identity
     try:
-        from edgar.core import get_identity
+        from edgar.settings import get_identity
         identity = get_identity()
         if not identity:
             issues.append("EDGAR_IDENTITY not set")

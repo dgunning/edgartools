@@ -13,6 +13,7 @@ Key features:
 - Beginner-friendly API design
 """
 
+import warnings
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
@@ -22,7 +23,7 @@ from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
 from edgar.richtools import repr_rich
 from edgar.xbrl.dimensions import is_breakdown_dimension
-from edgar.xbrl.exceptions import StatementNotFound
+from edgar.exceptions import StatementNotFoundError
 from edgar.xbrl.statements import is_xbrl_structural_element
 
 if TYPE_CHECKING:
@@ -342,7 +343,18 @@ class CurrentPeriodView:
         return self._get_statement_dataframe('IncomeStatement', raw_concepts=raw_concepts,
                                              include_dimensions=include_dimensions)
 
-    def cashflow_statement(self, raw_concepts: bool = False, as_statement: bool = True,
+    def cashflow_statement(self, **kwargs):
+        """Deprecated: use :meth:`cash_flow_statement`."""
+        warnings.warn(
+            "cashflow_statement() is deprecated and will be removed in v6.0. "
+            "Use cash_flow_statement(), which matches income_statement() and "
+            "balance_sheet().",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.cash_flow_statement(**kwargs)
+
+    def cash_flow_statement(self, raw_concepts: bool = False, as_statement: bool = True,
                             include_dimensions: bool = False) -> Union[pd.DataFrame, 'Statement']:
         """
         Get current period cash flow statement data.
@@ -360,10 +372,10 @@ class CurrentPeriodView:
             or pandas DataFrame if as_statement=False
 
         Example:
-            >>> stmt = xbrl.current_period.cashflow_statement()
+            >>> stmt = xbrl.current_period.cash_flow_statement()
             >>> print(stmt)  # Rich formatted table
 
-            >>> df = xbrl.current_period.cashflow_statement(as_statement=False)
+            >>> df = xbrl.current_period.cash_flow_statement(as_statement=False)
             >>> operating_cf = df[df['label'].str.contains('Operating')]['value'].iloc[0]
         """
         if as_statement:
@@ -431,7 +443,7 @@ class CurrentPeriodView:
             - balance, weight, preferred_sign, parent_concept, parent_abstract_concept
 
         Raises:
-            StatementNotFound: If the requested statement type is not available
+            StatementNotFoundError: If the requested statement type is not available
         """
         try:
             # Select appropriate period based on statement type
@@ -446,7 +458,7 @@ class CurrentPeriodView:
 
             if not statement_data:
                 entity_name = getattr(self.xbrl, 'entity_name', 'Unknown')
-                raise StatementNotFound(
+                raise StatementNotFoundError(
                     statement_type=statement_type,
                     confidence=0.0,
                     found_statements=[],
@@ -545,7 +557,7 @@ class CurrentPeriodView:
             if VERBOSE_EXCEPTIONS:
                 log.error(f"Error retrieving {statement_type} for current period: {str(e)}")
             entity_name = getattr(self.xbrl, 'entity_name', 'Unknown')
-            raise StatementNotFound(
+            raise StatementNotFoundError(
                 statement_type=statement_type,
                 confidence=0.0,
                 found_statements=[],
@@ -566,7 +578,7 @@ class CurrentPeriodView:
             Statement object with current period filtering applied
 
         Raises:
-            StatementNotFound: If the requested statement type is not available
+            StatementNotFoundError: If the requested statement type is not available
         """
         try:
             # Import here to avoid circular imports
@@ -579,7 +591,7 @@ class CurrentPeriodView:
 
             if not found_role:
                 entity_name = getattr(self.xbrl, 'entity_name', 'Unknown')
-                raise StatementNotFound(
+                raise StatementNotFoundError(
                     statement_type=statement_type,
                     confidence=0.0,
                     found_statements=[],
@@ -604,7 +616,7 @@ class CurrentPeriodView:
             if VERBOSE_EXCEPTIONS:
                 log.error(f"Error retrieving {statement_type} statement object for current period: {str(e)}")
             entity_name = getattr(self.xbrl, 'entity_name', 'Unknown')
-            raise StatementNotFound(
+            raise StatementNotFoundError(
                 statement_type=statement_type,
                 confidence=0.0,
                 found_statements=[],
@@ -765,7 +777,7 @@ class CurrentPeriodView:
                 if not df.empty:
                     # Convert DataFrame to list of dicts for JSON serialization
                     result['statements'][stmt_type] = df.to_dict('records')
-            except StatementNotFound:
+            except StatementNotFoundError:
                 result['statements'][stmt_type] = None
 
         return result
@@ -1079,8 +1091,15 @@ class CurrentPeriodStatement:
         return metadata
 
     def calculate_ratios(self) -> Dict[str, float]:
-        """Calculate common financial ratios for this statement."""
-        return self._statement.calculate_ratios()
+        """Calculate common financial ratios for this statement.
+
+        Honours this wrapper's period filter, which delegating without it did
+        not: the underlying statement carries every period, so a caller who had
+        explicitly narrowed to the current period still got a ratio built from
+        whichever period each operand happened to list first (gh #1280) --
+        while this object's own get_raw_data() returned the right operands.
+        """
+        return self._statement.calculate_ratios(period=self.period_filter)
 
     def __rich__(self) -> Any:
         """Rich console representation."""

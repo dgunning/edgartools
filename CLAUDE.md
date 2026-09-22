@@ -116,6 +116,15 @@ Only parallelize fast tests to avoid SEC rate limits.
 - **Test error paths**: Verify that failures produce useful messages, not silent `None`
 - **Place regression tests** in `tests/issues/regression/test_issue_NNN.py`
 
+## Changelog
+
+**Never edit `CHANGELOG.md` in a PR** — concurrent PRs conflict on it. Add a fragment
+`changelog.d/<bead-or-issue-id>.<section>.md` (section: added/changed/fixed/...) with the
+bullet text; see `changelog.d/README.md`. A bullet is a bold headline plus one or two sentences
+with one measured value, **at most 500 characters** — the root cause goes in the commit and PR.
+Fragments are folded into `[Unreleased]` at release by `scripts/release/assemble_changelog.py`.
+Write `Fixes #N` in the PR body so the merge closes the GitHub issue.
+
 ## Version
 
 Check `edgar/__about__.py`

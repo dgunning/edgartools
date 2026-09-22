@@ -12,7 +12,106 @@ from edgar.documents.cache_mixin import CacheableMixin
 from edgar.documents.types import NodeType, SemanticType, Style
 
 
-@dataclass
+def _has_left_gap(node) -> bool:
+    """Whether the filer drew a word gap with CSS instead of with whitespace."""
+    style = getattr(node, 'style', None)
+    if style is None:
+        return False
+    return bool((style.padding_left or 0) > 0 or (style.margin_left or 0) > 0)
+
+
+def _is_marker_box(node) -> bool:
+    """Whether this node is a fixed-width box holding a list marker.
+
+    A filer who writes `<span style="display:inline-block;width:0.25in">-</span>` has
+    reserved a quarter inch for the dash, so the text after it starts at the far edge of
+    that box. Same gap as a padding-left on the text, drawn from the other side — it is
+    how SigmaTron's FY2025 10-K lays out its risk-factor bullets.
+    """
+    style = getattr(node, 'style', None)
+    if style is None:
+        return False
+    return bool(style.display and 'inline-block' in style.display and style.width)
+
+
+_SYMBOL_MARKERS = frozenset('•◦▪▸‣·*†‡§☐☑☒')
+# Rendered in Wingdings these are checkboxes; in the character stream they are letters.
+_LETTER_MARKERS = frozenset('oýþ¨')
+_MARKER_GLYPHS = _SYMBOL_MARKERS | _LETTER_MARKERS
+
+
+def _is_bare_marker(part: str, next_text: str = '') -> bool:
+    """Whether the text so far ends in a standalone list or checkbox marker.
+
+    A checkbox and its label, or a footnote asterisk and its note, are two runs the filer
+    does not separate with whitespace — `☐ Yes`, `* Certain projects have multiple wells`.
+    Unlike `_has_left_gap` this reads the text rather than the style, which is what makes
+    it reach the cover-page checkboxes: SigmaTron writes
+    `style="…font-family: "Wingdings""`, nested double quotes inside a double-quoted
+    attribute, so `font-family` parses as empty for us and for a browser alike and no
+    style-based rule can fire there.
+
+    The letter markers need the second guard. This branch is reached before any test for
+    a mid-word split, and filers do split words across elements — A-Power's FY2009 20-F
+    writes `our` as `o`+`ur`, which without the guard extracts as `o ur wind turbine
+    business`. A checkbox label is `Yes` or `No`, never a lowercase continuation.
+    """
+    stripped = part.rstrip()
+    if not stripped:
+        return False
+    glyph = stripped[-1]
+    if glyph not in _MARKER_GLYPHS:
+        return False
+    # A standalone glyph, not the last letter of a word ('o' ends 'Chevro', 'Tokyo').
+    if not (len(stripped) == 1 or not stripped[-2].isalnum()):
+        return False
+    if glyph in _LETTER_MARKERS and next_text[:1].islower():
+        return False
+    return True
+
+
+def _ends_with_tail_whitespace(node) -> bool:
+    """Whether this node's content ends with whitespace that was in the source.
+
+    DocumentBuilder records a whitespace-only tail as metadata on the element that owns
+    it, which is the innermost one — but the spacing decision here is made between that
+    element's ancestors, so reading the flag off the sibling alone misses it whenever the
+    whitespace sits inside a wrapper. Chevron's FY2024 10-K puts a run-in heading in an
+    <ix:nonNumeric> and the gap after it in a spacer span inside that element, two levels
+    below the sibling being compared, and shipped 'GeneralThe Company follows'.
+
+    Walking the rightmost spine is enough: whitespace anywhere else in the subtree is not
+    at the boundary being decided.
+    """
+    while node is not None:
+        if hasattr(node, 'get_metadata') and node.get_metadata('has_tail_whitespace'):
+            return True
+        children = getattr(node, 'children', None)
+        node = children[-1] if children else None
+    return False
+
+
+# eq=False on Node and every subclass: nodes compare by identity, as plain
+# objects do.
+#
+# The generated __eq__ compared field by field and recursed through `parent` and
+# `children`, so every `==`, `in`, `.index()` and `.remove()` on a node bought a
+# deep structural walk of the tree where the caller meant identity. It cost real
+# time — `n.parent not in nodes_in_range` was 10.5s of Citigroup's 18s sections
+# stage (edgartools-llmp.6.10) — and on one input it did not return at all:
+#
+#     a = ParagraphNode(); a.add_child(TextNode(content='x'))
+#     a == copy.deepcopy(a)     # RecursionError: parent -> children -> parent
+#
+# deepcopy preserves `id`, so the uuid that normally decides the comparison on
+# its first field stops short-circuiting and the walk turns back on itself.
+#
+# Nothing observable changes. `id` is a uuid compared first, so two distinct
+# nodes were already unequal and a node was already equal to itself; identity
+# was the only answer equality could give that was not a crash. Nodes also
+# become hashable again — eq=True sets __hash__ to None, so sets and dicts of
+# nodes had to be keyed on id() (edgartools-llmp.10).
+@dataclass(eq=False)
 class Node(ABC):
     """
     Base node class for document tree.
@@ -140,7 +239,7 @@ class Node(ABC):
         return key in self.metadata
 
 
-@dataclass
+@dataclass(eq=False)
 class DocumentNode(Node, CacheableMixin):
     """Root document node."""
     type: NodeType = field(default=NodeType.DOCUMENT, init=False)
@@ -172,7 +271,7 @@ class DocumentNode(Node, CacheableMixin):
 </html>"""
 
 
-@dataclass
+@dataclass(eq=False)
 class TextNode(Node):
     """Plain text content node."""
     type: NodeType = field(default=NodeType.TEXT, init=False)
@@ -192,7 +291,7 @@ class TextNode(Node):
         return text
 
 
-@dataclass
+@dataclass(eq=False)
 class ParagraphNode(Node, CacheableMixin):
     """Paragraph node."""
     type: NodeType = field(default=NodeType.PARAGRAPH, init=False)
@@ -213,7 +312,7 @@ class ParagraphNode(Node, CacheableMixin):
                         should_add_space = False
 
                         # Add space if previous child had tail whitespace
-                        if hasattr(prev_child, 'get_metadata') and prev_child.get_metadata('has_tail_whitespace'):
+                        if _ends_with_tail_whitespace(prev_child):
                             should_add_space = True
 
                         # Add space if current text starts with space (preserve intended spacing)
@@ -229,11 +328,22 @@ class ParagraphNode(Node, CacheableMixin):
                             if not self._is_abbreviation_ending(parts[-1]):
                                 should_add_space = True
 
-                        # Add space between adjacent inline elements if the current text starts with a letter/digit
-                        # This handles cases where whitespace was stripped but spacing is semantically important
-                        elif (text and text[0].isalpha() and
-                              parts and parts[-1] and not parts[-1].endswith(' ') and
-                              hasattr(child, 'get_metadata') and child.get_metadata('original_tag') in ['span', 'a', 'em', 'strong', 'i', 'b']):
+                        # The filer drew a word gap without using whitespace: a bullet
+                        # glyph and its item text, a footnote marker and its note, a
+                        # cover-page checkbox and its label. Three signals, each reading
+                        # the boundary rather than guessing at it — a CSS gap on the text
+                        # that follows, a fixed-width box around the marker before it, or
+                        # a standalone marker glyph in the text itself.
+                        #
+                        # These replace a `original_tag in ['span','a','em',...]`
+                        # allowlist that stood in for them until 2026-08-02, and that
+                        # spaced any two adjacent inline elements whatever sat between
+                        # them — inventing far more boundaries than it restored, notably
+                        # inside Item headings ('Item 1A. RI SK FACTORS'). See the
+                        # CHANGELOG and edgartools-jysx for the measurement.
+                        elif (parts and parts[-1] and not parts[-1].endswith(' ')
+                              and (_has_left_gap(child) or _is_marker_box(prev_child)
+                                   or _is_bare_marker(parts[-1], text))):
                             should_add_space = True
 
                         if should_add_space:
@@ -291,7 +401,7 @@ class ParagraphNode(Node, CacheableMixin):
         return ''
 
 
-@dataclass
+@dataclass(eq=False)
 class HeadingNode(Node):
     """Heading node with level."""
     type: NodeType = field(default=NodeType.HEADING, init=False)
@@ -328,7 +438,7 @@ class HeadingNode(Node):
         return ''
 
 
-@dataclass
+@dataclass(eq=False)
 class ContainerNode(Node, CacheableMixin):
     """Generic container node (div, section, etc.)."""
     type: NodeType = field(default=NodeType.CONTAINER, init=False)
@@ -371,7 +481,7 @@ class ContainerNode(Node, CacheableMixin):
         return ''
 
 
-@dataclass
+@dataclass(eq=False)
 class SectionNode(ContainerNode):
     """Document section node."""
     type: NodeType = field(default=NodeType.SECTION, init=False)
@@ -383,7 +493,7 @@ class SectionNode(ContainerNode):
             self.set_metadata('section_name', self.section_name)
 
 
-@dataclass
+@dataclass(eq=False)
 class ListNode(Node):
     """List node (ordered or unordered)."""
     type: NodeType = field(default=NodeType.LIST, init=False)
@@ -409,7 +519,7 @@ class ListNode(Node):
         return f'<{tag}>\n{items}\n</{tag}>'
 
 
-@dataclass
+@dataclass(eq=False)
 class ListItemNode(Node):
     """List item node."""
     type: NodeType = field(default=NodeType.LIST_ITEM, init=False)
@@ -429,7 +539,7 @@ class ListItemNode(Node):
         return f'<li>{content}</li>'
 
 
-@dataclass
+@dataclass(eq=False)
 class LinkNode(Node):
     """Hyperlink node."""
     type: NodeType = field(default=NodeType.LINK, init=False)
@@ -456,7 +566,7 @@ class LinkNode(Node):
         return f'<a{href_attr}{title_attr}>{content}</a>'
 
 
-@dataclass
+@dataclass(eq=False)
 class ImageNode(Node):
     """Image node."""
     type: NodeType = field(default=NodeType.IMAGE, init=False)
@@ -466,8 +576,19 @@ class ImageNode(Node):
     height: Optional[int] = None
 
     def text(self) -> str:
-        """Extract image alt text."""
-        return self.alt or ''
+        """Images contribute no document text.
+
+        ``alt`` is a description *of* an image, not text the filer wrote into
+        the document, and it is frequently just the source file name
+        ("nvidialogoa10.jpg"). Returning it here leaked bare filenames into
+        ``Filing.text()`` through ``ParagraphNode.text()``, which aggregates
+        child ``text()``, with nothing marking them as image captions.
+
+        Callers that want images represented ask for it explicitly and read
+        ``alt``/``src`` themselves: ``TextExtractor(include_images=True)``
+        emits ``[Image: ...]`` and ``MarkdownRenderer`` emits ``![alt](src)``.
+        """
+        return ''
 
     def html(self) -> str:
         """Generate image HTML."""

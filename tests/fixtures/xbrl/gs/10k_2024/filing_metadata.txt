@@ -1,6 +1,0 @@
-Company: GOLDMAN SACHS GROUP INC
-CIK: 886982
-Form: 10-K
-Filing Date: 2024-02-23
-Accession No: 0000886982-24-000006
-URL: https://www.sec.gov/Archives/edgar/data/886982/0000886982-24-000006-index.html

@@ -55,6 +55,7 @@ class Style:
     font_size: Optional[float] = None
     font_weight: Optional[str] = None
     font_style: Optional[str] = None
+    font_family: Optional[str] = None
     text_align: Optional[str] = None
     text_decoration: Optional[str] = None
     color: Optional[str] = None
@@ -156,6 +157,12 @@ class XBRLFact:
     format: Optional[str] = None
     sign: Optional[str] = None
 
+    # escape="true" means the fact's value IS the child markup rather than the
+    # text flattened out of it; continued_at names the next ix:continuation in
+    # the chain whose content is part of this fact.
+    escape: bool = False
+    continued_at: Optional[str] = None
+
     # Resolved references
     context: Optional[Dict[str, Any]] = None
     unit: Optional[str] = None
@@ -189,6 +196,8 @@ class XBRLFact:
             'scale': self.scale,
             'format': self.format,
             'sign': self.sign,
+            'escape': self.escape,
+            'continued_at': self.continued_at,
             'context': self.context,
             'unit': self.unit,
             'is_numeric': self.is_numeric,

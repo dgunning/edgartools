@@ -265,7 +265,7 @@ xbrl = filing.xbrl()
 # Statements from specific filing
 income = xbrl.statements.income_statement()
 balance = xbrl.statements.balance_sheet()
-cash = xbrl.statements.cashflow_statement()
+cash = xbrl.statements.cash_flow_statement()
 ```
 
 ### Output Formats

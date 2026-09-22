@@ -3,6 +3,8 @@ Tests for Issue #464 - Missing period_key column in DataFrame exports
 
 This module tests that the period_key column is included in DataFrame exports
 to enable time series analysis across periods.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/464
 """
 
 import pytest

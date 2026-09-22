@@ -203,7 +203,7 @@ from edgar import Filing  # noqa: E402
 from edgar.thirteenf.models import ThirteenF  # noqa: E402
 
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
 def test_post_cutover_thousands_filing_is_scaled_up():
     """Direction 1: a POST-cutover (period 2022-12-31) filing that still reports in
@@ -231,7 +231,7 @@ def test_post_cutover_thousands_filing_is_scaled_up():
     assert tf.total_value == Decimal('192767000')
 
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
 def test_pre_cutover_dollars_filing_is_not_scaled():
     """Direction 2: a PRE-cutover period (2021-12-31) filed late (2023-03-23) using the
@@ -260,7 +260,7 @@ def test_pre_cutover_dollars_filing_is_not_scaled():
     assert tf.total_value == Decimal('11019796')  # NOT 11,019,796,000
 
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
 def test_presplit_megacap_thousands_filing_uses_fraction_not_median():
     """Direction 1, hard case: a small THOUSANDS filing concentrated in >$1000 pre-split

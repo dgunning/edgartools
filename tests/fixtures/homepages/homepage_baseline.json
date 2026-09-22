@@ -1,0 +1,867 @@
+{
+  "aapl-10k-2024.html": {
+    "data_files": [
+      {
+        "description": "XBRL TAXONOMY EXTENSION SCHEMA DOCUMENT",
+        "document": "aapl-20240928.xsd",
+        "document_type": "EX-101.SCH",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/aapl-20240928.xsd",
+        "purpose": null,
+        "sequence_number": "14",
+        "size": 58200
+      },
+      {
+        "description": "XBRL TAXONOMY EXTENSION CALCULATION LINKBASE DOCUMENT",
+        "document": "aapl-20240928_cal.xml",
+        "document_type": "EX-101.CAL",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/aapl-20240928_cal.xml",
+        "purpose": null,
+        "sequence_number": "15",
+        "size": 150261
+      },
+      {
+        "description": "XBRL TAXONOMY EXTENSION DEFINITION LINKBASE DOCUMENT",
+        "document": "aapl-20240928_def.xml",
+        "document_type": "EX-101.DEF",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/aapl-20240928_def.xml",
+        "purpose": null,
+        "sequence_number": "16",
+        "size": 232678
+      },
+      {
+        "description": "XBRL TAXONOMY EXTENSION LABEL LINKBASE DOCUMENT",
+        "document": "aapl-20240928_lab.xml",
+        "document_type": "EX-101.LAB",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/aapl-20240928_lab.xml",
+        "purpose": null,
+        "sequence_number": "17",
+        "size": 779708
+      },
+      {
+        "description": "XBRL TAXONOMY EXTENSION PRESENTATION LINKBASE DOCUMENT",
+        "document": "aapl-20240928_pre.xml",
+        "document_type": "EX-101.PRE",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/aapl-20240928_pre.xml",
+        "purpose": null,
+        "sequence_number": "18",
+        "size": 509625
+      },
+      {
+        "description": "EXTRACTED XBRL INSTANCE DOCUMENT",
+        "document": "aapl-20240928_htm.xml",
+        "document_type": "XML",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/aapl-20240928_htm.xml",
+        "purpose": null,
+        "sequence_number": "106",
+        "size": 1355849
+      }
+    ],
+    "documents": [
+      {
+        "description": "10-K",
+        "document": "aapl-20240928.htm",
+        "document_type": "10-K",
+        "ixbrl": true,
+        "path": "/ix?doc=/Archives/edgar/data/320193/000032019324000123/aapl-20240928.htm",
+        "purpose": null,
+        "sequence_number": "1",
+        "size": 1503780
+      },
+      {
+        "description": "EX-4.1",
+        "document": "a10-kexhibit4109282024.htm",
+        "document_type": "EX-4.1",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/a10-kexhibit4109282024.htm",
+        "purpose": null,
+        "sequence_number": "2",
+        "size": 120785
+      },
+      {
+        "description": "EX-10.19",
+        "document": "a10-kexhibit10199282024.htm",
+        "document_type": "EX-10.19",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/a10-kexhibit10199282024.htm",
+        "purpose": null,
+        "sequence_number": "3",
+        "size": 56948
+      },
+      {
+        "description": "EX-10.20",
+        "document": "a10-kexhibit10209282024.htm",
+        "document_type": "EX-10.20",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/a10-kexhibit10209282024.htm",
+        "purpose": null,
+        "sequence_number": "4",
+        "size": 74591
+      },
+      {
+        "description": "EX-10.21",
+        "document": "a10-kexhibit10219282024.htm",
+        "document_type": "EX-10.21",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/a10-kexhibit10219282024.htm",
+        "purpose": null,
+        "sequence_number": "5",
+        "size": 60845
+      },
+      {
+        "description": "EX-10.22",
+        "document": "a10-kexhibit10229282024.htm",
+        "document_type": "EX-10.22",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/a10-kexhibit10229282024.htm",
+        "purpose": null,
+        "sequence_number": "6",
+        "size": 75240
+      },
+      {
+        "description": "EX-19.1",
+        "document": "a10-kexhibit1919282024.htm",
+        "document_type": "EX-19.1",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/a10-kexhibit1919282024.htm",
+        "purpose": null,
+        "sequence_number": "7",
+        "size": 44108
+      },
+      {
+        "description": "EX-21.1",
+        "document": "a10-kexhibit21109282024.htm",
+        "document_type": "EX-21.1",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/a10-kexhibit21109282024.htm",
+        "purpose": null,
+        "sequence_number": "8",
+        "size": 11229
+      },
+      {
+        "description": "EX-23.1",
+        "document": "a10-kexhibit23109282024.htm",
+        "document_type": "EX-23.1",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/a10-kexhibit23109282024.htm",
+        "purpose": null,
+        "sequence_number": "9",
+        "size": 5018
+      },
+      {
+        "description": "EX-31.1",
+        "document": "a10-kexhibit31109282024.htm",
+        "document_type": "EX-31.1",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/a10-kexhibit31109282024.htm",
+        "purpose": null,
+        "sequence_number": "10",
+        "size": 10508
+      },
+      {
+        "description": "EX-31.2",
+        "document": "a10-kexhibit31209282024.htm",
+        "document_type": "EX-31.2",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/a10-kexhibit31209282024.htm",
+        "purpose": null,
+        "sequence_number": "11",
+        "size": 10544
+      },
+      {
+        "description": "EX-32.1",
+        "document": "a10-kexhibit32109282024.htm",
+        "document_type": "EX-32.1",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/a10-kexhibit32109282024.htm",
+        "purpose": null,
+        "sequence_number": "12",
+        "size": 8357
+      },
+      {
+        "description": "EX-97.1",
+        "document": "a10-kexhibit97109282024.htm",
+        "document_type": "EX-97.1",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/a10-kexhibit97109282024.htm",
+        "purpose": null,
+        "sequence_number": "13",
+        "size": 13555
+      },
+      {
+        "description": "",
+        "document": "aapl-20240928_g1.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/aapl-20240928_g1.jpg",
+        "purpose": null,
+        "sequence_number": "19",
+        "size": 10963
+      },
+      {
+        "description": "",
+        "document": "aapl-20240928_g2.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/aapl-20240928_g2.jpg",
+        "purpose": null,
+        "sequence_number": "20",
+        "size": 154498
+      },
+      {
+        "description": "",
+        "document": "image_0.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/image_0.jpg",
+        "purpose": null,
+        "sequence_number": "21",
+        "size": 2374
+      },
+      {
+        "description": "",
+        "document": "image_01.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/image_01.jpg",
+        "purpose": null,
+        "sequence_number": "22",
+        "size": 2563
+      },
+      {
+        "description": "Complete submission text file",
+        "document": "0000320193-24-000123.txt",
+        "document_type": "",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/320193/000032019324000123/0000320193-24-000123.txt",
+        "purpose": null,
+        "sequence_number": "",
+        "size": 9759333
+      }
+    ],
+    "filers": [
+      {
+        "addresses": [
+          "Mailing Address\nONE APPLE PARK WAY\nCUPERTINO       CA\n95014",
+          "Business Address\nONE APPLE PARK WAY\nCUPERTINO       CA\n95014      \n(408) 996-1010"
+        ],
+        "cik": "0000320193",
+        "company_name": "Apple Inc.",
+        "identification": "EIN.: 942404110 | State of Incorp.: CA | Fiscal Year End: 0928\nType: 10-K | Act: 34 | File No.: 001-36743 | Film No.: 241416806\nSIC: 3571 Electronic Computers\n(CF Office: 06 Technology)"
+      }
+    ],
+    "filing_dates": [
+      "2024-11-01",
+      "2024-11-01 06:01:36",
+      "2024-09-28"
+    ],
+    "primary_documents": [
+      {
+        "description": "10-K",
+        "document": "aapl-20240928.htm",
+        "document_type": "10-K",
+        "ixbrl": true,
+        "path": "/ix?doc=/Archives/edgar/data/320193/000032019324000123/aapl-20240928.htm",
+        "purpose": null,
+        "sequence_number": "1",
+        "size": 1503780
+      }
+    ]
+  },
+  "eightk-2005.html": {
+    "data_files": [],
+    "documents": [
+      {
+        "description": "8-K",
+        "document": "a2153970z8-k.htm",
+        "document_type": "8-K",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/1168054/000104746905006981/a2153970z8-k.htm",
+        "purpose": null,
+        "sequence_number": "1",
+        "size": 11946
+      },
+      {
+        "description": "EX 99.1",
+        "document": "a2153970zex-99_1.htm",
+        "document_type": "EX-99.1",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/1168054/000104746905006981/a2153970zex-99_1.htm",
+        "purpose": null,
+        "sequence_number": "2",
+        "size": 7295
+      },
+      {
+        "description": "Complete submission text file",
+        "document": "0001047469-05-006981.txt",
+        "document_type": "",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/1168054/000104746905006981/0001047469-05-006981.txt",
+        "purpose": null,
+        "sequence_number": "",
+        "size": 21100
+      }
+    ],
+    "filers": [
+      {
+        "addresses": [
+          "Mailing Address\n1700 LINCOLN STREET\nSUITE 1800\nDENVER       CO\n80203-4518",
+          "Business Address\n1700 LINCOLN STREET\nSUITE 1800\nDENVER       CO\n80203-4518      \n303-295-3995"
+        ],
+        "cik": "0001168054",
+        "company_name": "CIMAREX ENERGY CO",
+        "identification": "EIN.: 450466694 | State of Incorp.: DE | Fiscal Year End: 1231\nType: 8-K | Act: 34 | File No.: 001-31446 | Film No.: 05690525\nSIC: 1311 Crude Petroleum & Natural Gas"
+      }
+    ],
+    "filing_dates": [
+      "2005-03-18",
+      "2005-03-18 10:07:40",
+      "2005-03-17"
+    ],
+    "primary_documents": [
+      {
+        "description": "8-K",
+        "document": "a2153970z8-k.htm",
+        "document_type": "8-K",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/1168054/000104746905006981/a2153970z8-k.htm",
+        "purpose": null,
+        "sequence_number": "1",
+        "size": 11946
+      }
+    ]
+  },
+  "form4-reporting-owner.html": {
+    "data_files": [],
+    "documents": [
+      {
+        "description": "STATEMENT OF CHANGES IN BENEFICIAL OWNERSHIP OF SECURITIES",
+        "document": "form4.html",
+        "document_type": "4",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/914156/000106299324012217/xslF345X05/form4.xml",
+        "purpose": null,
+        "sequence_number": "1",
+        "size": null
+      },
+      {
+        "description": "STATEMENT OF CHANGES IN BENEFICIAL OWNERSHIP OF SECURITIES",
+        "document": "form4.xml",
+        "document_type": "4",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/914156/000106299324012217/form4.xml",
+        "purpose": null,
+        "sequence_number": "1",
+        "size": 5393
+      },
+      {
+        "description": "Complete submission text file",
+        "document": "0001062993-24-012217.txt",
+        "document_type": "",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/914156/000106299324012217/0001062993-24-012217.txt",
+        "purpose": null,
+        "sequence_number": "",
+        "size": 6848
+      }
+    ],
+    "filers": [
+      {
+        "addresses": [
+          "Mailing Address\n100 HALE STREET\nNEWBURYPORT       MA\n01950",
+          "Business Address\n100 HALE STREET\nNEWBURYPORT       MA\n01950      \n978-352-2200"
+        ],
+        "cik": "0000914156",
+        "company_name": "UFP TECHNOLOGIES INC",
+        "identification": "EIN.: 042314970 | State of Incorp.: DE | Fiscal Year End: 1231\nSIC: 3841 Surgical & Medical Instruments & Apparatus\n(CF Office: 08 Industrial Applications and Services)"
+      },
+      {
+        "addresses": [
+          "Mailing Address\nONE TECHNOLOGY WAY\nNORWOOD       MA\n02062",
+          "Business Address"
+        ],
+        "cik": "0001641388",
+        "company_name": "Hassett Joseph",
+        "identification": "Type: 4 | Act: 34 | File No.: 001-12648 | Film No.: 241030989"
+      }
+    ],
+    "filing_dates": [
+      "2024-06-07",
+      "2024-06-07 18:10:30",
+      "2024-06-05"
+    ],
+    "primary_documents": [
+      {
+        "description": "STATEMENT OF CHANGES IN BENEFICIAL OWNERSHIP OF SECURITIES",
+        "document": "form4.html",
+        "document_type": "4",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/914156/000106299324012217/xslF345X05/form4.xml",
+        "purpose": null,
+        "sequence_number": "1",
+        "size": null
+      },
+      {
+        "description": "STATEMENT OF CHANGES IN BENEFICIAL OWNERSHIP OF SECURITIES",
+        "document": "form4.xml",
+        "document_type": "4",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/914156/000106299324012217/form4.xml",
+        "purpose": null,
+        "sequence_number": "1",
+        "size": 5393
+      }
+    ]
+  },
+  "s4-multifiler.html": {
+    "data_files": [],
+    "documents": [
+      {
+        "description": "REGISTRATION STATEMENT",
+        "document": "ea0201675-04.htm",
+        "document_type": "S-4",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/ea0201675-04.htm",
+        "purpose": null,
+        "sequence_number": "1",
+        "size": 13643022
+      },
+      {
+        "description": "CERTIFICATE OF INCORPORATION OF PURCHASER",
+        "document": "ea020167504ex3-3_acricap1.htm",
+        "document_type": "EX-3.3",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/ea020167504ex3-3_acricap1.htm",
+        "purpose": null,
+        "sequence_number": "2",
+        "size": 5161
+      },
+      {
+        "description": "CONSENT OF MARCUM LLP, INDEPENDENT REGISTERED PUBLIC ACCOUNTING FIRM TO ACAC",
+        "document": "ea020167504ex23-1_acricap1.htm",
+        "document_type": "EX-23.1",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/ea020167504ex23-1_acricap1.htm",
+        "purpose": null,
+        "sequence_number": "3",
+        "size": 2220
+      },
+      {
+        "description": "CONSENT OF MARCUM LLP, INDEPENDENT REGISTERED PUBLIC ACCOUNTING FIRM TO FOXX",
+        "document": "ea020167504ex23-2_acricap1.htm",
+        "document_type": "EX-23.2",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/ea020167504ex23-2_acricap1.htm",
+        "purpose": null,
+        "sequence_number": "4",
+        "size": 2549
+      },
+      {
+        "description": "CONSENT OF \"EVA\" YIQING MIAO (PUBCO'S DIRECTOR NOMINEE)",
+        "document": "ea020167504ex99-1_acricap1.htm",
+        "document_type": "EX-99.1",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/ea020167504ex99-1_acricap1.htm",
+        "purpose": null,
+        "sequence_number": "5",
+        "size": 2780
+      },
+      {
+        "description": "CONSENT OF EDMUND R. MILLER (PUBCO'S DIRECTOR NOMINEE)",
+        "document": "ea020167504ex99-2_acricap1.htm",
+        "document_type": "EX-99.2",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/ea020167504ex99-2_acricap1.htm",
+        "purpose": null,
+        "sequence_number": "6",
+        "size": 3007
+      },
+      {
+        "description": "CONSENT OF \"JEFF\" FENG JIANG (PUBCO'S DIRECTOR NOMINEE)",
+        "document": "ea020167504ex99-3_acricap1.htm",
+        "document_type": "EX-99.3",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/ea020167504ex99-3_acricap1.htm",
+        "purpose": null,
+        "sequence_number": "7",
+        "size": 2722
+      },
+      {
+        "description": "FILING FEE TABLE",
+        "document": "ea020167504ex-fee_acricap1.htm",
+        "document_type": "EX-FILING FEES",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/ea020167504ex-fee_acricap1.htm",
+        "purpose": null,
+        "sequence_number": "8",
+        "size": 102217
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "tflowchart_001.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/tflowchart_001.jpg",
+        "purpose": null,
+        "sequence_number": "9",
+        "size": 157679
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "tflowchart_002.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/tflowchart_002.jpg",
+        "purpose": null,
+        "sequence_number": "10",
+        "size": 93770
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "timage_002.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/timage_002.jpg",
+        "purpose": null,
+        "sequence_number": "11",
+        "size": 518944
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "timage_005.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/timage_005.jpg",
+        "purpose": null,
+        "sequence_number": "12",
+        "size": 246454
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "timage_006.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/timage_006.jpg",
+        "purpose": null,
+        "sequence_number": "13",
+        "size": 184355
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "timage_007.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/timage_007.jpg",
+        "purpose": null,
+        "sequence_number": "14",
+        "size": 172516
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "timage_008.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/timage_008.jpg",
+        "purpose": null,
+        "sequence_number": "15",
+        "size": 188564
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "timage_009.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/timage_009.jpg",
+        "purpose": null,
+        "sequence_number": "16",
+        "size": 413510
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "timage_010.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/timage_010.jpg",
+        "purpose": null,
+        "sequence_number": "17",
+        "size": 468782
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "timage_011.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/timage_011.jpg",
+        "purpose": null,
+        "sequence_number": "18",
+        "size": 190721
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "timage_012.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/timage_012.jpg",
+        "purpose": null,
+        "sequence_number": "19",
+        "size": 363740
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "timage_013.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/timage_013.jpg",
+        "purpose": null,
+        "sequence_number": "20",
+        "size": 534592
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "timage_014.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/timage_014.jpg",
+        "purpose": null,
+        "sequence_number": "21",
+        "size": 485930
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "timage_016.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/timage_016.jpg",
+        "purpose": null,
+        "sequence_number": "22",
+        "size": 501361
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "timage_022.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/timage_022.jpg",
+        "purpose": null,
+        "sequence_number": "23",
+        "size": 408932
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "timage_017.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/timage_017.jpg",
+        "purpose": null,
+        "sequence_number": "24",
+        "size": 215306
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "timage_023.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/timage_023.jpg",
+        "purpose": null,
+        "sequence_number": "25",
+        "size": 128721
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "timage_024.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/timage_024.jpg",
+        "purpose": null,
+        "sequence_number": "26",
+        "size": 242800
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "timage_020.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/timage_020.jpg",
+        "purpose": null,
+        "sequence_number": "27",
+        "size": 435269
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "timage_021.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/timage_021.jpg",
+        "purpose": null,
+        "sequence_number": "28",
+        "size": 532161
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "tfoxxd_text.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/tfoxxd_text.jpg",
+        "purpose": null,
+        "sequence_number": "29",
+        "size": 11636
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "tfoxxd_logo.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/tfoxxd_logo.jpg",
+        "purpose": null,
+        "sequence_number": "30",
+        "size": 13151
+      },
+      {
+        "description": "GRAPHIC",
+        "document": "tmiro_text.jpg",
+        "document_type": "GRAPHIC",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/tmiro_text.jpg",
+        "purpose": null,
+        "sequence_number": "31",
+        "size": 13322
+      },
+      {
+        "description": "Complete submission text file",
+        "document": "0001213900-24-057319.txt",
+        "document_type": "",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/0001213900-24-057319.txt",
+        "purpose": null,
+        "sequence_number": "",
+        "size": 22751245
+      }
+    ],
+    "filers": [
+      {
+        "addresses": [
+          "Mailing Address\n13284 POND SPRINGS RD\nSTE 405\nAUSTIN       TX\n78729",
+          "Business Address\n13284 POND SPRINGS RD\nSTE 405\nAUSTIN       TX\n78729      \n512-666-1277"
+        ],
+        "cik": "0002013807",
+        "company_name": "Acri Capital Merger Sub I Inc.",
+        "identification": "EIN.: 000000000 | State of Incorp.: DE | Fiscal Year End: 1231\nType: S-4 | Act: 33 | File No.: 333-280613 | Film No.: 241087082\nSIC: 3576 Computer Communications Equipment\n(CF Office: 06 Technology)"
+      }
+    ],
+    "filing_dates": [
+      "2024-06-28",
+      "2024-06-28 17:29:32",
+      null
+    ],
+    "primary_documents": [
+      {
+        "description": "REGISTRATION STATEMENT",
+        "document": "ea0201675-04.htm",
+        "document_type": "S-4",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/2013807/000121390024057319/ea0201675-04.htm",
+        "purpose": null,
+        "sequence_number": "1",
+        "size": 13643022
+      }
+    ]
+  },
+  "thirteenf-2023.html": {
+    "data_files": [],
+    "documents": [
+      {
+        "description": "",
+        "document": "primary_doc.html",
+        "document_type": "13F-HR",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/1894188/000189418823000007/xslForm13F_X02/primary_doc.xml",
+        "purpose": null,
+        "sequence_number": "1",
+        "size": null
+      },
+      {
+        "description": "",
+        "document": "primary_doc.xml",
+        "document_type": "13F-HR",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/1894188/000189418823000007/primary_doc.xml",
+        "purpose": null,
+        "sequence_number": "1",
+        "size": 2028
+      },
+      {
+        "description": "",
+        "document": "index.html",
+        "document_type": "INFORMATION TABLE",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/1894188/000189418823000007/xslForm13F_X02/index.xml",
+        "purpose": null,
+        "sequence_number": "2",
+        "size": null
+      },
+      {
+        "description": "",
+        "document": "index.xml",
+        "document_type": "INFORMATION TABLE",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/1894188/000189418823000007/index.xml",
+        "purpose": null,
+        "sequence_number": "2",
+        "size": 7578
+      },
+      {
+        "description": "Complete submission text file",
+        "document": "0001894188-23-000007.txt",
+        "document_type": "",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/1894188/000189418823000007/0001894188-23-000007.txt",
+        "purpose": null,
+        "sequence_number": "",
+        "size": 10769
+      }
+    ],
+    "filers": [
+      {
+        "addresses": [
+          "Mailing Address\n650 MADISON AVENUE, 15TH FLOOR\nNEW YORK       NY\n10022",
+          "Business Address\n650 MADISON AVENUE, 15TH FLOOR\nNEW YORK       NY\n10022      \n646-860-0181"
+        ],
+        "cik": "0001894188",
+        "company_name": "LTS One Management LP",
+        "identification": "EIN.: 871396377 | State of Incorp.: DE | Fiscal Year End: 1231\nType: 13F-HR | Act: 34 | File No.: 028-22111 | Film No.: 231402140"
+      }
+    ],
+    "filing_dates": [
+      "2023-11-14",
+      "2023-11-14 09:38:54",
+      "2023-09-30"
+    ],
+    "primary_documents": [
+      {
+        "description": "",
+        "document": "primary_doc.html",
+        "document_type": "13F-HR",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/1894188/000189418823000007/xslForm13F_X02/primary_doc.xml",
+        "purpose": null,
+        "sequence_number": "1",
+        "size": null
+      },
+      {
+        "description": "",
+        "document": "primary_doc.xml",
+        "document_type": "13F-HR",
+        "ixbrl": false,
+        "path": "/Archives/edgar/data/1894188/000189418823000007/primary_doc.xml",
+        "purpose": null,
+        "sequence_number": "1",
+        "size": 2028
+      }
+    ]
+  }
+}

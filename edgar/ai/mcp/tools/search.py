@@ -16,6 +16,7 @@ from edgar.ai.mcp.tools.base import (
     resolve_company,
     format_filing_summary,
     get_error_suggestions,
+    _cell_text,
 )
 
 logger = logging.getLogger(__name__)
@@ -124,10 +125,13 @@ async def _search_companies(query: str, limit: int) -> list[dict]:
         for _, row in matches.results.iterrows():
             company_dict = {
                 "cik": str(row.cik),
-                "name": row.company,
+                "name": _cell_text(row.company) or "",
             }
-            if row.ticker:
-                company_dict["ticker"] = row.ticker
+            # NaN is truthy: `if row.ticker:` admitted a missing ticker and put
+            # a bare NaN in the response.
+            ticker = _cell_text(row.ticker)
+            if ticker:
+                company_dict["ticker"] = ticker
             if hasattr(row, 'score'):
                 company_dict["match_score"] = int(row.score)
             companies.append(company_dict)

@@ -1,0 +1,12 @@
+# Test fixtures are third-party documents, not our source.
+#
+# tests/fixtures holds SEC filings captured verbatim — filer-agent HTML from
+# 1996 onward, with the malformed markup that is the whole reason we keep it.
+# Linting it reports faults in EDGAR, not in edgartools, and the findings can
+# never be acted on: correcting a fixture would destroy the input the parser
+# tests are written against.
+#
+# Adding six 8-K/20-F fixtures in #984 produced 117 such findings in one PR,
+# which is the kind of noise that teaches people to stop reading the check.
+exclude_paths:
+  - "tests/fixtures/**"

@@ -4,6 +4,13 @@ Regression test for duplicate quarterly periods bug.
 Issue: Company.balance_sheet(annual=False) shows duplicate fiscal periods
 Root Cause: SEC Facts API includes comparative data with same fiscal_period
 Fix: Validate period_end matches expected month for fiscal_period
+
+Everything here that calls ``Company(...)`` is marked ``network``: it reads the
+SEC Facts API live. Four of them carried ``fast`` instead, which cost nothing
+while the whole regression tree was excluded from the pull-request gate and
+would have broken it the moment the tree was let in (bead edgartools-07lk.21).
+Only ``test_validate_quarterly_period_end`` is genuinely offline — it calls the
+validation function directly.
 """
 
 import pytest
@@ -12,7 +19,7 @@ from datetime import date
 from edgar import Company
 
 
-@pytest.mark.fast
+@pytest.mark.network
 def test_no_duplicate_quarterly_periods_apple():
     """Apple Q3 2025 should appear only once, not twice"""
     c = Company("AAPL")
@@ -26,7 +33,7 @@ def test_no_duplicate_quarterly_periods_apple():
     assert len(bs.periods) == len(set(bs.periods)), "Periods should be unique"
 
 
-@pytest.mark.fast
+@pytest.mark.network
 def test_quarterly_period_values_are_correct():
     """Q3 2025 should show June 2025 data, not September 2024 data"""
     c = Company("AAPL")
@@ -76,7 +83,7 @@ def test_validate_quarterly_period_end():
     assert validate_quarterly_period_end('Q3', date(2025, 9, 30), 12) == True
 
 
-@pytest.mark.fast
+@pytest.mark.network
 def test_quarterly_income_statement_no_duplicates():
     """Test quarterly income statement also has no duplicates"""
     c = Company("AAPL")
@@ -88,7 +95,7 @@ def test_quarterly_income_statement_no_duplicates():
     assert not duplicates, f"Found duplicate periods in income statement: {duplicates}"
 
 
-@pytest.mark.fast
+@pytest.mark.network
 def test_quarterly_cash_flow_no_duplicates():
     """Test quarterly cash flow statement also has no duplicates"""
     c = Company("AAPL")

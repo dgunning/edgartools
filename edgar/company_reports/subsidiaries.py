@@ -226,11 +226,28 @@ def parse_subsidiaries(html_content: str) -> List[Subsidiary]:
     - Header rows, section labels, footnotes
     - Empty spacer columns (common in SEC HTML formatting)
     """
-    from bs4 import BeautifulSoup
+    import lxml.html
+    from lxml.etree import ParserError, strip_elements
 
-    soup = BeautifulSoup(html_content, 'html.parser')
+    from edgar.documents.utils.html_utils import create_lxml_parser
+
+    if isinstance(html_content, str):
+        html_content = html_content.encode("utf-8", errors="replace")
+    try:
+        root = lxml.html.fromstring(html_content, parser=create_lxml_parser())
+    except ParserError:
+        # Empty or whitespace-only input. bs4 built an empty soup and this
+        # returned []; lxml raises, so map it back.
+        return []
+    # bs4's get_text() left the text inside these three tags out; text_content()
+    # does not. See the docstring on forty_f._html_to_text. with_tail=False
+    # keeps the ordinary document text that follows the closing tag.
+    strip_elements(root, "script", "style", "template", with_tail=False)
     # Only use top-level tables to avoid double-counting from nested layout tables
-    tables = [t for t in soup.find_all('table') if t.find_parent('table') is None]
+    # descendant-or-self, not .//: an EX-21 that is nothing but a <table> is
+    # rooted AT that table, and a descendant-only search would return nothing.
+    tables = [t for t in root.xpath('descendant-or-self::table')
+              if not t.xpath('ancestor::table')]
 
     if not tables:
         return []
@@ -238,15 +255,18 @@ def parse_subsidiaries(html_content: str) -> List[Subsidiary]:
     subsidiaries = []
 
     for table in tables:
-        rows = table.find_all('tr')
+        rows = table.xpath('.//tr')
         if not rows:
             continue
 
         # Extract all rows as lists of cell text
         all_cells = []
         for row in rows:
-            cells = row.find_all(['td', 'th'])
-            cell_texts = [_clean_text(cell.get_text()) for cell in cells]
+            cells = row.xpath('.//td | .//th')
+            # get_text() with no arguments concatenates every descendant string
+            # with nothing between them and strips nothing -- which is exactly
+            # text_content(). (get_text(strip=True) would NOT be.)
+            cell_texts = [_clean_text(cell.text_content()) for cell in cells]
             all_cells.append(cell_texts)
 
         if not all_cells:

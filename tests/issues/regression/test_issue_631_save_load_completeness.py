@@ -55,6 +55,11 @@ def test_issue_631_save_populates_sgml():
             "Filing._sgml should be populated after save/load, "
             "but was None (the original bug)"
         )
+        # A populated attribute is not the same as a populated document. The
+        # pickle round-trip has to bring the parsed submission back with it,
+        # so check it is the right filing rather than merely truthy.
+        assert loaded._sgml.header.accession_number == '0000320193-24-000123'
+        assert loaded._sgml.header.form == '10-K'
 
 
 @pytest.mark.network
@@ -75,10 +80,31 @@ def test_issue_631_loaded_filing_xbrl_works():
         filing.save(filepath)
 
         loaded = Filing.load(filepath)
-        # This should work without any network calls since SGML is embedded
         xbrl_data = loaded.xbrl()
+
+        # ON THE "WITHOUT NETWORK ACCESS" IN THE DOCSTRING. This test cannot
+        # prove that, and a guard that appears to is worse than none. Stubbing
+        # the fetch entry points was tried -- download_file, download_text,
+        # get_with_retry, read_content_as_string, _fetch_url_directly -- and a
+        # filing with NOTHING embedded still reached xbrl() through every one
+        # of them, because the HTTP cache serves the request before any of
+        # those are called. The stub would have passed whether or not the fix
+        # existed.
+        #
+        # What answers that question is tests/_offline_harness.py, which blocks
+        # outbound sockets and clears the caches that mask this:
+        #     hatch run test-offline-audit tests/issues/regression/
+        # What this test can prove is that the pickle carries a usable filing,
+        # so that is what it asserts.
         assert xbrl_data is not None, (
-            "xbrl() should work on a loaded filing without network access"
+            "xbrl() returned None on a loaded filing — the saved pickle did "
+            "not carry the SGML it needs"
+        )
+        income = xbrl_data.statements.income_statement()
+        assert income is not None, "loaded filing produced no income statement"
+        assert not income.to_dataframe().empty, (
+            "loaded filing's income statement is empty, so the embedded SGML "
+            "did not carry usable XBRL"
         )
 
 
@@ -103,7 +129,7 @@ def test_issue_631_save_to_directory():
         assert loaded._sgml is not None
 
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.regression
 def test_issue_631_xbrl_attachments_none_content_guard():
     """

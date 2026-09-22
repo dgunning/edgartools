@@ -36,7 +36,7 @@ Common EdgarTools operations at a glance. For a step-by-step introduction, see t
 | 📊 Get a company's financials            | `financials = company.get_financials()`                       |
 | 📈 Get the income statement              | `financials.income_statement()`                               |
 | 🏦 Get the balance sheet                 | `financials.balance_sheet()`                                  |
-| 💸 Get the cash flow statement           | `financials.cashflow_statement()`                             |
+| 💸 Get the cash flow statement           | `financials.cash_flow_statement()`                             |
 | 💰 Get revenue                           | `financials.get_revenue()`                                    |
 | 💵 Get net income                        | `financials.get_net_income()`                                 |
 | 📊 Get operating income                  | `financials.get_operating_income()`                           |

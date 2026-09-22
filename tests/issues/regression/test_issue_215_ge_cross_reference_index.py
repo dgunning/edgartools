@@ -7,6 +7,8 @@ Item headings, causing extraction to fail.
 Solution: CrossReferenceIndex parser in edgar.documents.cross_reference_index
 
 This test ensures the parser continues to work for GE filings.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/215
 """
 
 import pytest
@@ -211,8 +213,20 @@ class TestIssue215TenKIntegration:
 
         assert directors is not None, \
             "tenk.directors_officers_and_governance should not return None for GE"
-        assert len(directors) > 5000, \
+
+        # The old floor here was 5000, which this section cleared only because
+        # the Cross Reference Index branch returned raw HTML — markup inflated
+        # the length. Now that it returns text (GH #821 "HTML leakage"), the
+        # same section is ~4,970 characters. Assert on content instead of on a
+        # markup-inflated length, and pin the text-not-markup property that
+        # the shorter length actually reflects.
+        assert len(directors) > 1000, \
             f"Directors section should have content (got {len(directors)} chars)"
+        assert 'DIRECTORS, EXECUTIVE OFFICERS' in directors.upper(), \
+            "Directors section should carry its own heading"
+        leaked_markup = '<div' in directors or '<span' in directors
+        assert not leaked_markup, \
+            f"Directors section returned raw HTML: {directors[:120]!r}"
 
     def test_tenk_getitem_direct_access(self, ge_tenk):
         """Test direct access via tenk['Item 1A'] for GE."""

@@ -14,6 +14,8 @@ the smallest depth observed in the report becomes 0.
 The lazy-on-access design avoids re-entering the (stateful) FilingSummary
 ``Reports`` iterator during construction, which previously truncated
 ``viewer.financial_statements``.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/799
 """
 from __future__ import annotations
 

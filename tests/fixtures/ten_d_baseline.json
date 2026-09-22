@@ -1,0 +1,983 @@
+{
+  "2006q3-1349731": {
+    "depositor": null,
+    "distribution_period": [
+      "2006-08-22",
+      "2006-09-20"
+    ],
+    "issuing_entity": null,
+    "security_classes": [],
+    "sponsors": []
+  },
+  "2006q3-1354955": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [],
+    "sponsors": []
+  },
+  "2006q3-1360497": {
+    "depositor": null,
+    "distribution_period": [
+      "2006-08-02",
+      "2006-09-01"
+    ],
+    "issuing_entity": null,
+    "security_classes": [],
+    "sponsors": []
+  },
+  "2010q2-1356284": {
+    "depositor": null,
+    "distribution_period": [
+      "2010-05-17",
+      "2010-06-15"
+    ],
+    "issuing_entity": null,
+    "security_classes": [],
+    "sponsors": []
+  },
+  "2010q2-1477336": {
+    "depositor": null,
+    "distribution_period": [
+      "2010-05-01",
+      "2010-05-31"
+    ],
+    "issuing_entity": null,
+    "security_classes": [],
+    "sponsors": []
+  },
+  "2010q2-1487211": {
+    "depositor": null,
+    "distribution_period": [
+      "2010-05-01",
+      "2010-05-31"
+    ],
+    "issuing_entity": null,
+    "security_classes": [],
+    "sponsors": []
+  },
+  "2015q1-1290205": {
+    "depositor": null,
+    "distribution_period": [
+      "2015-02-01",
+      "2015-02-28"
+    ],
+    "issuing_entity": null,
+    "security_classes": [
+      "Series 2012-2 Asset Backed Notes in the classes specified herein",
+      "Series 2012-3 Asset Backed Notes in the classes specified herein",
+      "Series 2012-4 Asset Backed Notes in the classes specified herein",
+      "Series 2013-1 Asset Backed Notes in the classes specified herein",
+      "Series 2014-1 Asset Backed Notes in the classes specified herein",
+      "Series 2014-2 Asset Backed Notes in the classes specified herein",
+      "Series 2015-1 Asset Backed Notes in the classes specified herein",
+      "Series 2015-2 Asset Backed Notes in the classes specified herein"
+    ],
+    "sponsors": []
+  },
+  "2015q1-1529534": {
+    "depositor": null,
+    "distribution_period": [
+      "2015-02-01",
+      "2015-02-28"
+    ],
+    "issuing_entity": null,
+    "security_classes": [],
+    "sponsors": []
+  },
+  "2015q1-1566528": {
+    "depositor": null,
+    "distribution_period": [
+      "2015-02-01",
+      "2015-02-28"
+    ],
+    "issuing_entity": null,
+    "security_classes": [],
+    "sponsors": []
+  },
+  "2019q3-1698685": {
+    "depositor": [
+      "Wells Fargo Commercial Mortgage Securities, Inc.",
+      "850779",
+      "333-206677"
+    ],
+    "distribution_period": [
+      "2019-08-17",
+      "2019-09-17"
+    ],
+    "issuing_entity": [
+      "BANK 2017-BNK4",
+      "1698685",
+      "333-206677-15"
+    ],
+    "security_classes": [
+      "A-1",
+      "A-2",
+      "A-SB",
+      "A-3",
+      "A-4",
+      "X-A",
+      "X-B",
+      "A-S",
+      "B",
+      "C"
+    ],
+    "sponsors": [
+      [
+        "Wells Fargo Bank, National Association",
+        "740906",
+        null
+      ],
+      [
+        "Bank of America, National Association",
+        "1102113",
+        null
+      ],
+      [
+        "Morgan Stanley Mortgage Capital Holdings LLC",
+        "1541557",
+        null
+      ]
+    ]
+  },
+  "2019q3-1714679": {
+    "depositor": [
+      "Wells Fargo Commercial Mortgage Securities, Inc.",
+      "850779",
+      "333-206677"
+    ],
+    "distribution_period": [
+      "2019-08-17",
+      "2019-09-17"
+    ],
+    "issuing_entity": [
+      "BANK 2017-BNK7",
+      "1714679",
+      "333-206677-18"
+    ],
+    "security_classes": [
+      "A-1",
+      "A-2",
+      "A-3",
+      "A-SB",
+      "A-4",
+      "A-5",
+      "X-A",
+      "X-B",
+      "A-S",
+      "B",
+      "C"
+    ],
+    "sponsors": [
+      [
+        "Wells Fargo Bank, National Association",
+        "740906",
+        null
+      ],
+      [
+        "Morgan Stanley Mortgage Capital Holdings LLC",
+        "1541557",
+        null
+      ],
+      [
+        "Bank of America, National Association",
+        "1102113",
+        null
+      ],
+      [
+        "National Cooperative Bank, N.A.",
+        "1577313",
+        null
+      ]
+    ]
+  },
+  "2019q3-1728085": {
+    "depositor": [
+      "Wells Fargo Commercial Mortgage Securities, Inc.",
+      "850779",
+      "333-206677"
+    ],
+    "distribution_period": [
+      "2019-08-17",
+      "2019-09-17"
+    ],
+    "issuing_entity": [
+      "BANK 2018-BNK10",
+      "1728085",
+      "333-206677-22"
+    ],
+    "security_classes": [
+      "A-1",
+      "A-2",
+      "A-3",
+      "A-SB",
+      "A-4",
+      "A-5",
+      "X-A",
+      "X-B",
+      "A-S",
+      "B",
+      "C"
+    ],
+    "sponsors": [
+      [
+        "Morgan Stanley Mortgage Capital Holdings LLC",
+        "1541557",
+        null
+      ],
+      [
+        "Wells Fargo Bank, National Association",
+        "740906",
+        null
+      ],
+      [
+        "Bank of America, National Association",
+        "1102113",
+        null
+      ],
+      [
+        "National Cooperative Bank, N.A.",
+        "1577313",
+        null
+      ]
+    ]
+  },
+  "2023q2-1706303": {
+    "depositor": [
+      "Morgan Stanley Capital I Inc.",
+      "1547361",
+      "333-206582"
+    ],
+    "distribution_period": [
+      "2023-05-18",
+      "2023-06-16"
+    ],
+    "issuing_entity": [
+      "BANK 2017-BNK5",
+      "1706303",
+      "333-206582-11"
+    ],
+    "security_classes": [
+      "A-1",
+      "A-2",
+      "A-SB",
+      "A-3",
+      "A-4",
+      "A-5",
+      "X-A",
+      "X-B",
+      "A-S",
+      "B",
+      "C"
+    ],
+    "sponsors": [
+      [
+        "Wells Fargo Bank, National Association",
+        "740906",
+        null
+      ],
+      [
+        "Bank of America, National Association",
+        "1102113",
+        null
+      ],
+      [
+        "Morgan Stanley Mortgage Capital Holdings LLC",
+        "1541557",
+        null
+      ],
+      [
+        "National Cooperative Bank, N.A.",
+        "1577313",
+        null
+      ]
+    ]
+  },
+  "2023q2-1718322": {
+    "depositor": [
+      "Morgan Stanley Capital I Inc.",
+      "1547361",
+      "333-206582"
+    ],
+    "distribution_period": [
+      "2023-05-18",
+      "2023-06-16"
+    ],
+    "issuing_entity": [
+      "BANK 2017-BNK8",
+      "1718322",
+      "333-206582-12"
+    ],
+    "security_classes": [
+      "A-1",
+      "A-2",
+      "A-SB",
+      "A-3",
+      "A-4",
+      "X-A",
+      "X-B",
+      "A-S",
+      "B",
+      "C"
+    ],
+    "sponsors": [
+      [
+        "Bank of America, National Association",
+        "1102113",
+        null
+      ],
+      [
+        "Wells Fargo Bank, National Association",
+        "740906",
+        null
+      ],
+      [
+        "Morgan Stanley Mortgage Capital Holdings LLC",
+        "1541557",
+        null
+      ],
+      [
+        "National Cooperative Bank, N.A.",
+        "1577313",
+        null
+      ]
+    ]
+  },
+  "2023q2-1890702": {
+    "depositor": [
+      "3650 REIT Commercial Mortgage Securities II LLC",
+      "1856217",
+      "333-255181"
+    ],
+    "distribution_period": [
+      "2023-05-18",
+      "2023-06-16"
+    ],
+    "issuing_entity": [
+      "3650R 2021-PF1 Commercial Mortgage Trust",
+      "1890702",
+      "333-255181-01"
+    ],
+    "security_classes": [
+      "A-1",
+      "A-3",
+      "A-4",
+      "A-5",
+      "A-SB",
+      "X-A",
+      "X-B",
+      "A-S",
+      "B",
+      "C"
+    ],
+    "sponsors": [
+      [
+        "3650 Real Estate Investment Trust 2 LLC",
+        "1840727",
+        null
+      ],
+      [
+        "Citi Real Estate Funding Inc.",
+        "1701238",
+        null
+      ],
+      [
+        "German American Capital Corporation",
+        "1541294",
+        null
+      ]
+    ]
+  },
+  "2025q4-1706303": {
+    "depositor": [
+      "Morgan Stanley Capital I Inc.",
+      "1547361",
+      "333-206582"
+    ],
+    "distribution_period": [
+      "2025-11-19",
+      "2025-12-17"
+    ],
+    "issuing_entity": [
+      "BANK 2017-BNK5",
+      "1706303",
+      "333-206582-11"
+    ],
+    "security_classes": [
+      "A-1",
+      "A-2",
+      "A-SB",
+      "A-3",
+      "A-4",
+      "A-5",
+      "X-A",
+      "X-B",
+      "A-S",
+      "B",
+      "C"
+    ],
+    "sponsors": [
+      [
+        "Wells Fargo Bank, National Association",
+        "740906",
+        null
+      ],
+      [
+        "Bank of America, National Association",
+        "1102113",
+        null
+      ],
+      [
+        "Morgan Stanley Mortgage Capital Holdings LLC",
+        "1541557",
+        null
+      ],
+      [
+        "National Cooperative Bank, N.A.",
+        "1577313",
+        null
+      ]
+    ]
+  },
+  "2025q4-1718322": {
+    "depositor": [
+      "Morgan Stanley Capital I Inc.",
+      "1547361",
+      "333-206582"
+    ],
+    "distribution_period": [
+      "2025-11-19",
+      "2025-12-17"
+    ],
+    "issuing_entity": [
+      "BANK 2017-BNK8",
+      "1718322",
+      "333-206582-12"
+    ],
+    "security_classes": [
+      "A-1",
+      "A-2",
+      "A-SB",
+      "A-3",
+      "A-4",
+      "X-A",
+      "X-B",
+      "A-S",
+      "B",
+      "C"
+    ],
+    "sponsors": [
+      [
+        "Bank of America, National Association",
+        "1102113",
+        null
+      ],
+      [
+        "Wells Fargo Bank, National Association",
+        "740906",
+        null
+      ],
+      [
+        "Morgan Stanley Mortgage Capital Holdings LLC",
+        "1541557",
+        null
+      ],
+      [
+        "National Cooperative Bank, N.A.",
+        "1577313",
+        null
+      ]
+    ]
+  },
+  "2025q4-1731627": {
+    "depositor": [
+      "Morgan Stanley Capital I Inc.",
+      "1547361",
+      "333-206582"
+    ],
+    "distribution_period": [
+      "2025-11-19",
+      "2025-12-17"
+    ],
+    "issuing_entity": [
+      "BANK 2018-BNK11",
+      "1731627",
+      "333-206582-14"
+    ],
+    "security_classes": [
+      "A-1",
+      "A-SB",
+      "A-2",
+      "A-3",
+      "X-A",
+      "X-B",
+      "A-S",
+      "B",
+      "C"
+    ],
+    "sponsors": [
+      [
+        "Wells Fargo Bank, National Association",
+        "740906",
+        null
+      ],
+      [
+        "Bank of America, National Association",
+        "1102113",
+        null
+      ],
+      [
+        "Morgan Stanley Mortgage Capital Holdings LLC",
+        "1541557",
+        null
+      ],
+      [
+        "National Cooperative Bank, N.A.",
+        "1577313",
+        null
+      ]
+    ]
+  },
+  "EDGE-class-name-has-a-comment": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [
+      "ClassC-1"
+    ],
+    "sponsors": []
+  },
+  "EDGE-class-name-has-a-script": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [
+      "Class D-1"
+    ],
+    "sponsors": []
+  },
+  "EDGE-class-name-padded-with-whitespace": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [
+      "Class A-9"
+    ],
+    "sponsors": []
+  },
+  "EDGE-class-name-split-across-tags": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [
+      "ClassA-1"
+    ],
+    "sponsors": []
+  },
+  "EDGE-class-row-td-nested-in-a-div": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [
+      "Divided Class"
+    ],
+    "sponsors": []
+  },
+  "EDGE-class-rows-use-th-not-td": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [],
+    "sponsors": []
+  },
+  "EDGE-class-table-header-has-a-style": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [
+      "Class B-1"
+    ],
+    "sponsors": []
+  },
+  "EDGE-class-table-header-in-a-thead": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [
+      "Class A-1",
+      "Class A-2"
+    ],
+    "sponsors": []
+  },
+  "EDGE-class-table-header-split-across-tags": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [
+      "Class A-1"
+    ],
+    "sponsors": []
+  },
+  "EDGE-comment-interrupts-the-name": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": [
+      "ACME 2025-1 Trust",
+      "1888524",
+      null
+    ],
+    "security_classes": [],
+    "sponsors": []
+  },
+  "EDGE-duplicate-class-names": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [
+      "Class A-1",
+      "Class A-2"
+    ],
+    "sponsors": []
+  },
+  "EDGE-empty": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [],
+    "sponsors": []
+  },
+  "EDGE-encoding-declaration": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": [
+      "ACME \u2014 2025-1 Trust",
+      "1888524",
+      null
+    ],
+    "security_classes": [
+      "Class A-1",
+      "Class A-2"
+    ],
+    "sponsors": []
+  },
+  "EDGE-header-and-table": {
+    "depositor": [
+      "Acme Depositor LLC",
+      "876543",
+      null
+    ],
+    "distribution_period": [
+      "2025-10-21",
+      "2025-11-18"
+    ],
+    "issuing_entity": [
+      "ACME 2025-1 Trust",
+      "1888524",
+      "333-123456-01"
+    ],
+    "security_classes": [
+      "Class A-1",
+      "Class A-2"
+    ],
+    "sponsors": [
+      [
+        "Acme Sponsor Bank",
+        "112233",
+        null
+      ]
+    ]
+  },
+  "EDGE-header-only": {
+    "depositor": [
+      "Acme Depositor LLC",
+      "876543",
+      null
+    ],
+    "distribution_period": [
+      "2025-10-21",
+      "2025-11-18"
+    ],
+    "issuing_entity": [
+      "ACME 2025-1 Trust",
+      "1888524",
+      "333-123456-01"
+    ],
+    "security_classes": [],
+    "sponsors": [
+      [
+        "Acme Sponsor Bank",
+        "112233",
+        null
+      ]
+    ]
+  },
+  "EDGE-header-row-has-text-but-no-cells": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [
+      "Class A-1"
+    ],
+    "sponsors": []
+  },
+  "EDGE-label-and-value-in-separate-cells": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": [
+      "ACME 2025-1 Trust",
+      "1888524",
+      null
+    ],
+    "security_classes": [],
+    "sponsors": []
+  },
+  "EDGE-nested-300-deep": {
+    "depositor": [
+      "Acme Depositor LLC",
+      "876543",
+      null
+    ],
+    "distribution_period": [
+      "2025-10-21",
+      "2025-11-18"
+    ],
+    "issuing_entity": [
+      "ACME 2025-1 Trust",
+      "1888524",
+      "333-123456-01"
+    ],
+    "security_classes": [
+      "Class A-1",
+      "Class A-2"
+    ],
+    "sponsors": [
+      [
+        "Acme Sponsor Bank",
+        "112233",
+        null
+      ]
+    ]
+  },
+  "EDGE-nested-table-inside-a-class-row": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [
+      "Inner Class",
+      "Class A-1"
+    ],
+    "sponsors": []
+  },
+  "EDGE-no-header-no-table": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [],
+    "sponsors": []
+  },
+  "EDGE-script-names-another-entity": {
+    "depositor": [
+      "Acme Depositor LLC",
+      "876543",
+      null
+    ],
+    "distribution_period": [
+      "2025-10-21",
+      "2025-11-18"
+    ],
+    "issuing_entity": [
+      "ACME 2025-1 Trust",
+      "1888524",
+      "333-123456-01"
+    ],
+    "security_classes": [],
+    "sponsors": [
+      [
+        "Acme Sponsor Bank",
+        "112233",
+        null
+      ]
+    ]
+  },
+  "EDGE-script-tail-carries-the-entity-cik": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": [
+      "TAIL TRUST",
+      "1888524",
+      null
+    ],
+    "security_classes": [],
+    "sponsors": []
+  },
+  "EDGE-second-table-is-the-class-table": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [
+      "Class A-1",
+      "Class A-2"
+    ],
+    "sponsors": []
+  },
+  "EDGE-stray-row-above-the-header": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [],
+    "sponsors": []
+  },
+  "EDGE-style-tail-carries-the-class-header": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [
+      "Class A-1"
+    ],
+    "sponsors": []
+  },
+  "EDGE-style-tail-carries-the-class-name": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [
+      "Class E-1"
+    ],
+    "sponsors": []
+  },
+  "EDGE-stylesheet-names-another-entity": {
+    "depositor": [
+      "Acme Depositor LLC",
+      "876543",
+      null
+    ],
+    "distribution_period": [
+      "2025-10-21",
+      "2025-11-18"
+    ],
+    "issuing_entity": [
+      "ACME 2025-1 Trust",
+      "1888524",
+      "333-123456-01"
+    ],
+    "security_classes": [],
+    "sponsors": [
+      [
+        "Acme Sponsor Bank",
+        "112233",
+        null
+      ]
+    ]
+  },
+  "EDGE-table-is-the-root": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [
+      "Class A-1",
+      "Class A-2"
+    ],
+    "sponsors": []
+  },
+  "EDGE-table-only": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [
+      "Class A-1",
+      "Class A-2"
+    ],
+    "sponsors": []
+  },
+  "EDGE-unclosed-tags": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [
+      "Class A-1Class A-2",
+      "Class A-2"
+    ],
+    "sponsors": []
+  },
+  "EDGE-value-split-across-inline-tags": {
+    "depositor": [
+      "876543 Acme Depositor LLC",
+      "0",
+      null
+    ],
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [],
+    "sponsors": []
+  },
+  "EDGE-whitespace": {
+    "depositor": null,
+    "distribution_period": null,
+    "issuing_entity": null,
+    "security_classes": [],
+    "sponsors": []
+  },
+  "bank5-cmbs-2025": {
+    "depositor": [
+      "J.P. Morgan Chase Commercial Mortgage Securities Corp.",
+      "1013611",
+      "333-258342"
+    ],
+    "distribution_period": [
+      "2025-10-21",
+      "2025-11-18"
+    ],
+    "issuing_entity": [
+      "BANK5 2024-5YR9",
+      "2032772",
+      "333-258342-05"
+    ],
+    "security_classes": [
+      "A-1",
+      "A-2",
+      "A-2-1",
+      "A-2-2",
+      "A-2-X1",
+      "A-2-X2",
+      "A-3",
+      "A-3-1",
+      "A-3-2",
+      "A-3-X1",
+      "A-3-X2",
+      "X-A",
+      "X-B",
+      "A-S",
+      "A-S-1",
+      "A-S-2",
+      "A-S-X1",
+      "A-S-X2",
+      "B",
+      "B-1",
+      "B-2",
+      "B-X1",
+      "B-X2",
+      "C",
+      "C-1",
+      "C-2",
+      "C-X1",
+      "C-X2"
+    ],
+    "sponsors": [
+      [
+        "JPMorgan Chase Bank, National Association",
+        "835271",
+        null
+      ],
+      [
+        "Morgan Stanley Mortgage Capital Holdings LLC",
+        "1541557",
+        null
+      ],
+      [
+        "Wells Fargo Bank, National Association",
+        "740906",
+        null
+      ]
+    ]
+  }
+}

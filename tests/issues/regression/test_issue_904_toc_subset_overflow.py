@@ -29,6 +29,8 @@ A fourth, belt-and-braces layer (the successor-header guardrail on
 ``HybridSectionDetector``) flags any remaining item section that still embeds
 a line-anchored header of a later, undetected item — the failure class size
 bands can't see (Item 7's band is generous; Item 1B has no band at all).
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/904
 """
 import re
 
@@ -41,6 +43,7 @@ from edgar.documents.document import Section
 from edgar.documents.extractors.hybrid_section_detector import HybridSectionDetector
 from edgar.documents.nodes import SectionNode
 from edgar.documents.utils.toc_analyzer import TOCAnalyzer
+from tests._offline_filings import offline_filing
 
 pytestmark = pytest.mark.regression
 
@@ -447,13 +450,12 @@ def test_successor_pre_gate_still_scans_when_mandatory_item_missing_mid_ladder()
 
 # --- End-to-end: Coeur Mining 10-K under VCR ----------------------------------
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
 def test_coeur_item7_bounded_and_body_items_recovered():
     """Coeur 10-K: Item 7 stops at Item 7A; 7A/8/9A exist; Item 1B is a stub."""
-    from edgar import get_by_accession_number
 
-    tenk = get_by_accession_number("0000215466-26-000004").obj()
+    tenk = offline_filing("0000215466-26-000004").obj()
     sections = tenk.document.sections
 
     # The body-header items missing from the TOC are recovered.

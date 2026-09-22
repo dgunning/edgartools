@@ -1,0 +1,539 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:cato="http://www.catofashions.com/20240203" xmlns:dtr-types="http://www.xbrl.org/dtr/type/2022-03-31" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:nonnum="http://www.xbrl.org/dtr/type/non-numeric" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:num="http://www.xbrl.org/dtr/type/numeric" xmlns:xl="http://www.xbrl.org/2003/XLink" xmlns:negated="http://www.xbrl.org/2009/role/negated" xmlns:us-gaap="http://fasb.org/us-gaap/2023" xmlns:dei="http://xbrl.sec.gov/dei/2023" xmlns:ecd="http://xbrl.sec.gov/ecd/2023" targetNamespace="http://www.catofashions.com/20240203" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo>
+      <link:roleType id="ELRID_DocumentAndEntityInformation" roleURI="http://www.catofashions.com/role/DocumentDocumentAndEntityInformation">
+        <link:definition>000100 - Document - Document and Entity Information</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ConsolidatedStatementsOfIncomeLossAndComprehensiveIncomeLoss" roleURI="http://www.catofashions.com/role/ConsolidatedStatementsOfIncomeLossAndComprehensiveIncomeLoss">
+        <link:definition>000200 - Statement - Consolidated Statements Of Income (Loss) And Comprehensive Income (Loss)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ConsolidatedBalanceSheets" roleURI="http://www.catofashions.com/role/StatementConsolidatedBalanceSheets">
+        <link:definition>000300 - Statement - Consolidated Balance Sheets</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ConsolidatedBalanceSheetsParentheticals" roleURI="http://www.catofashions.com/role/ConsolidatedBalanceSheetsParentheticals">
+        <link:definition>000400 - Statement - Consolidated Balance Sheets (Parentheticals)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ConsolidatedStatementsOfCashFlows" roleURI="http://www.catofashions.com/role/StatementConsolidatedStatementsOfCashFlows">
+        <link:definition>000500 - Statement - Consolidated Statements of Cash Flows</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_SummaryOfSignificantAccountingPoliciesEarningsPerShareDetails" roleURI="http://www.catofashions.com/role/SummaryOfSignificantAccountingPoliciesEarningsPerShareDetails">
+        <link:definition>004015 - Disclosure - Summary of Significant Accounting Policies - Earnings Per Share (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_FinancingArrangementsDetails" roleURI="http://www.catofashions.com/role/FinancingArrangementsDetails">
+        <link:definition>004080 - Disclosure - Financing Arrangements (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ReportableSegmentInformationCertainSegmentInformationDetails" roleURI="http://www.catofashions.com/role/ReportableSegmentInformationCertainSegmentInformationDetails">
+        <link:definition>004130 - Disclosure - Reportable Segment Information - Certain Segment Information (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_IncomeTaxes" roleURI="http://www.catofashions.com/role/IncomeTaxes">
+        <link:definition>001120 - Disclosure - Income Taxes</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_FairValueMeasurementsFairValueMeasurementsDetails" roleURI="http://www.catofashions.com/role/FairValueMeasurementsFairValueMeasurementsDetails">
+        <link:definition>004040 - Disclosure - Fair Value Measurements - Fair Value Measurements (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_InterestAndOtherIncome" roleURI="http://www.catofashions.com/role/InterestAndOtherIncome">
+        <link:definition>001020 - Disclosure - Interest and Other Income</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_AccountsReceivable" roleURI="http://www.catofashions.com/role/AccountsReceivable">
+        <link:definition>001050 - Disclosure - Accounts Receivable</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_PropertyAndEquipment" roleURI="http://www.catofashions.com/role/PropertyAndEquipment">
+        <link:definition>001060 - Disclosure - Property and Equipment</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_AccruedExpenses" roleURI="http://www.catofashions.com/role/AccruedExpenses">
+        <link:definition>001070 - Disclosure - Accrued Expenses</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_EmployeeBenefitPlans" roleURI="http://www.catofashions.com/role/DisclosureEmployeeBenefitPlans">
+        <link:definition>001100 - Disclosure - Employee Benefit Plans</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_Leases" roleURI="http://www.catofashions.com/role/Leases">
+        <link:definition>001110 - Disclosure - Leases</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_CommitmentsAndContingencies" roleURI="http://www.catofashions.com/role/CommitmentsAndContingencies">
+        <link:definition>001150 - Disclosure - Commitments and Contingencies</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_SummaryOfSignificantAccountingPoliciesTables" roleURI="http://www.catofashions.com/role/SummaryOfSignificantAccountingPoliciesTables">
+        <link:definition>003001 - Disclosure - Summary of Significant Accounting Policies (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_FinancingArrangements" roleURI="http://www.catofashions.com/role/FinancingArrangements">
+        <link:definition>001080 - Disclosure - Financing Arrangements</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ReportableSegmentInformation" roleURI="http://www.catofashions.com/role/ReportableSegmentInformation">
+        <link:definition>001130 - Disclosure - Reportable Segment Information</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ReportableSegmentInformationTables" roleURI="http://www.catofashions.com/role/ReportableSegmentInformationTables">
+        <link:definition>003130 - Disclosure - Reportable Segment Information (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_StockBasedCompensationTables" roleURI="http://www.catofashions.com/role/StockBasedCompensationTables">
+        <link:definition>003140 - Disclosure - Stock Based Compensation (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_StockBasedCompensation" roleURI="http://www.catofashions.com/role/StockBasedCompensation">
+        <link:definition>001140 - Disclosure - Stock Based Compensation</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_FairValueMeasurements" roleURI="http://www.catofashions.com/role/FairValueMeasurements">
+        <link:definition>001040 - Disclosure - Fair Value Measurements</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_FairValueMeasurementsTables" roleURI="http://www.catofashions.com/role/FairValueMeasurementsTables">
+        <link:definition>003040 - Disclosure - Fair Value Measurements (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_FairValueMeasurementsLevel3RollDetails" roleURI="http://www.catofashions.com/role/FairValueMeasurementsLevel3RollDetails">
+        <link:definition>004041 - Disclosure - Fair Value Measurements - Level 3 Roll (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ReportableSegmentInformationDirectExpensesOfTheCreditSegmentDetails" roleURI="http://www.catofashions.com/role/ReportableSegmentInformationDirectExpensesOfTheCreditSegmentDetails">
+        <link:definition>004131 - Disclosure - Reportable Segment Information - Direct Expenses of the Credit Segment (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_StockBasedCompensationPlansDetails" roleURI="http://www.catofashions.com/role/StockBasedCompensationPlansDetails">
+        <link:definition>004142 - Disclosure - Stock Based Compensation - Plans (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_StockBasedCompensationScheduleOfRestrictedStockOutstandingDetails" roleURI="http://www.catofashions.com/role/StockBasedCompensationScheduleOfRestrictedStockOutstandingDetails">
+        <link:definition>004143 - Disclosure - Stock Based Compensation - Schedule of Restricted Stock Outstanding (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_StockBasedCompensationNarrativeDetails" roleURI="http://www.catofashions.com/role/StockBasedCompensationNarrativeDetails">
+        <link:definition>004141 - Disclosure - Stock Based Compensation - Narrative (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_SummaryOfSignificantAccountingPoliciesNarrativeDetails" roleURI="http://www.catofashions.com/role/SummaryOfSignificantAccountingPoliciesNarrativeDetails">
+        <link:definition>004011 - Disclosure - Summary of Significant Accounting Policies - Narrative (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_IncomeTaxesUnrecognizedTaxBenefitRollForwardDetails" roleURI="http://www.catofashions.com/role/IncomeTaxesUnrecognizedTaxBenefitRollForwardDetails">
+        <link:definition>004122 - Disclosure - Income Taxes - Unrecognized Tax Benefit Roll Forward (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ConsolidatedStatementsOfStockholdersEquity" roleURI="http://www.catofashions.com/role/StatementConsolidatedStatementsOfStockholdersEquity">
+        <link:definition>000600 - Statement - Consolidated Statements of Stockholders' Equity</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ConsolidatedStatementsOfStockholdersEquityParentheticals" roleURI="http://www.catofashions.com/role/ConsolidatedStatementsOfStockholdersEquityParentheticals">
+        <link:definition>000650 - Statement - Consolidated Statements of Stockholders' Equity (Parentheticals)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_StockholdersEquity" roleURI="http://www.catofashions.com/role/StockholdersEquity">
+        <link:definition>001090 - Disclosure - Stockholders' Equity</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_PropertyPlantAndEquipmentTables" roleURI="http://www.catofashions.com/role/PropertyPlantAndEquipmentTables">
+        <link:definition>003060 - Disclosure - Property Plant and Equipment - (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_PropertyAndEquipmentDetails" roleURI="http://www.catofashions.com/role/PropertyAndEquipmentDetails">
+        <link:definition>004060 - Disclosure - Property and Equipment  (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_AccountsReceivablesTables" roleURI="http://www.catofashions.com/role/AccountsReceivablesTables">
+        <link:definition>003050 - Disclosure - Accounts Receivables (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_AccountsReceivablesAccountsReceivableComponentsDetails" roleURI="http://www.catofashions.com/role/AccountsReceivablesAccountsReceivableComponentsDetails">
+        <link:definition>004052 - Disclosure - Accounts Receivables - Accounts Receivable Components (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_AccruedExpensesTables" roleURI="http://www.catofashions.com/role/AccruedExpensesTables">
+        <link:definition>003070 - Disclosure - Accrued Expenses (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_AccruedExpensesDetails" roleURI="http://www.catofashions.com/role/AccruedExpensesDetails">
+        <link:definition>004070 - Disclosure - Accrued Expenses (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ShortTermInvestments" roleURI="http://www.catofashions.com/role/ShortTermInvestments">
+        <link:definition>001030 - Disclosure - Short-Term Investments</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ShortTermInvestmentsTables" roleURI="http://www.catofashions.com/role/ShortTermInvestmentsTables">
+        <link:definition>003030 - Disclosure - Short-Term Investments  (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ShortTermInvestmentsDetails" roleURI="http://www.catofashions.com/role/ShortTermInvestmentsDetails">
+        <link:definition>004030 - Disclosure - Short-Term Investments (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ShortTermInvestmentAccumulatedOtherComprehensiveIncomeDetails" roleURI="http://www.catofashions.com/role/ShortTermInvestmentAccumulatedOtherComprehensiveIncomeDetails">
+        <link:definition>004031 - Disclosure - Short-Term Investment - Accumulated Other Comprehensive Income (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_InterestAndOtherIncomeTables" roleURI="http://www.catofashions.com/role/InterestAndOtherIncomeTables">
+        <link:definition>003020 - Disclosure - Interest and Other Income (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_InterestAndOtherIncomeDetails" roleURI="http://www.catofashions.com/role/InterestAndOtherIncomeDetails">
+        <link:definition>004020 - Disclosure - Interest and Other Income (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_StockholdersEquityDetails" roleURI="http://www.catofashions.com/role/StockholdersEquityDetails">
+        <link:definition>004090 - Disclosure - Stockholders' Equity (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_EmployeeBenefitPlans401kPlanDetails" roleURI="http://www.catofashions.com/role/EmployeeBenefitPlans401kPlanDetails">
+        <link:definition>004100 - Disclosure - Employee Benefit Plans - 401(k) Plan (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_EmployeeBenefitPlansESOPPlanDetails" roleURI="http://www.catofashions.com/role/EmployeeBenefitPlansESOPPlanDetails">
+        <link:definition>004101 - Disclosure - Employee Benefit Plans - ESOP Plan (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_IncomeTaxesTables" roleURI="http://www.catofashions.com/role/IncomeTaxesTables">
+        <link:definition>003120 - Disclosure - Income Taxes (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_IncomeTaxesProvisionForIncomeTaxExpenseDetails" roleURI="http://www.catofashions.com/role/IncomeTaxesProvisionForIncomeTaxExpenseDetails">
+        <link:definition>004123 - Disclosure - Income Taxes - Provision for Income Tax Expense (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_IncomeTaxesDeferredTaxAssetAndLiabilityComponentsDetails" roleURI="http://www.catofashions.com/role/IncomeTaxesDeferredTaxAssetAndLiabilityComponentsDetails">
+        <link:definition>004124 - Disclosure - Income Taxes - Deferred Tax Asset and Liability Components (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_IncomeTaxesReconciliationOfEffectiveTaxRateDetails" roleURI="http://www.catofashions.com/role/IncomeTaxesReconciliationOfEffectiveTaxRateDetails">
+        <link:definition>004125 - Disclosure - Income Taxes - Reconciliation of Effective Tax Rate (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_IncomeTaxesNarrativeDetails" roleURI="http://www.catofashions.com/role/IncomeTaxesNarrativeDetails">
+        <link:definition>004121 - Disclosure - Income Taxes - Narrative (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_AccountsReceivablesNarrativeDetails" roleURI="http://www.catofashions.com/role/AccountsReceivablesNarrativeDetails">
+        <link:definition>004051 - Disclosure - Accounts Receivables - Narrative (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_SummaryOfSignificantAccountingPoliciesPolicies" roleURI="http://www.catofashions.com/role/SummaryOfSignificantAccountingPoliciesPolicies">
+        <link:definition>002000 - Disclosure - Summary of Significant Accounting Policies (Policies)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ConsolidatedStatementsOfIncomeLossAndComprehensiveIncomeLossParentheticals" roleURI="http://www.catofashions.com/role/ConsolidatedStatementsOfIncomeLossAndComprehensiveIncomeLossParentheticals">
+        <link:definition>000250 - Statement - Consolidated Statements Of Income (Loss) And Comprehensive Income (Loss) (Parentheticals)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_AccumulatedOtherComprehensiveIncomeReclassificationOutOfAccumulatedOtherComprehensiveIncomeDetails" roleURI="http://www.catofashions.com/role/AccumulatedOtherComprehensiveIncomeReclassificationOutOfAccumulatedOtherComprehensiveIncomeDetails">
+        <link:definition>004180 - Disclosure - Accumulated Other Comprehensive Income - Reclassification Out Of Accumulated Other Comprehensive Income (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_AccumulatedOtherComprehensiveIncomeTables" roleURI="http://www.catofashions.com/role/AccumulatedOtherComprehensiveIncomeTables">
+        <link:definition>003160 - Disclosure - Accumulated Other Comprehensive Income (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_AccumulatedOtherComprehensiveIncome" roleURI="http://www.catofashions.com/role/AccumulatedOtherComprehensiveIncome">
+        <link:definition>001160 - Disclosure - Accumulated Other Comprehensive Income</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_AccumulatedOtherComprehensiveIncomeFootnoteDetails" roleURI="http://www.catofashions.com/role/AccumulatedOtherComprehensiveIncomeFootnoteDetails">
+        <link:definition>004181 - Disclosure - Accumulated Other Comprehensive Income - Footnote (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_SummaryOfSignificantAccountingPoliciesOtherAssetsDetails" roleURI="http://www.catofashions.com/role/SummaryOfSignificantAccountingPoliciesOtherAssetsDetails">
+        <link:definition>004013 - Disclosure - Summary of Significant Accounting Policies - Other Assets (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_CommitmentsAndContingenciesDetails" roleURI="http://www.catofashions.com/role/CommitmentsAndContingenciesDetails">
+        <link:definition>004150 - Disclosure - Commitments and Contingencies (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_SummaryOfSignificantAccountingPoliciesRevenueRecognitionDetails" roleURI="http://www.catofashions.com/role/SummaryOfSignificantAccountingPoliciesRevenueRecognitionDetails">
+        <link:definition>004014 - Disclosure - Summary of Significant Accounting Policies - Revenue Recognition (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_LeasesTables" roleURI="http://www.catofashions.com/role/LeasesTables">
+        <link:definition>003110 - Disclosure - Leases (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_LeasesNarrativeDetails" roleURI="http://www.catofashions.com/role/LeasesNarrativeDetails">
+        <link:definition>004110 - Disclosure - Leases - Narrative (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_SummaryOfSignificantAccountingPolicies" roleURI="http://www.catofashions.com/role/SummaryOfSignificantAccountingPolicies">
+        <link:definition>001010 - Disclosure - Summary of Significant Accounting Policies</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_LeasesLesseeOperatingLeaseLiabilityMaturityDetails" roleURI="http://www.catofashions.com/role/LeasesLesseeOperatingLeaseLiabilityMaturityDetails">
+        <link:definition>004113 - Disclosure - Leases - Lessee, Operating Lease, Liability, Maturity (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_LeasesComponentsOfLeaseCostDetails" roleURI="http://www.catofashions.com/role/LeasesComponentsOfLeaseCostDetails">
+        <link:definition>004112 - Disclosure - Leases - Components of Lease Cost (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ValuationAndQualifyingAccountsDetails" roleURI="http://www.catofashions.com/role/ValuationAndQualifyingAccountsDetails">
+        <link:definition>004191 - Schedule - Valuation and Qualifying Accounts (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ValuationAndQualifyingAccounts" roleURI="http://www.catofashions.com/role/ValuationAndQualifyingAccounts">
+        <link:definition>001170 - Disclosure - Valuation and Qualifying Accounts</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_InsiderTradingArrangementsDetails" roleURI="http://www.catofashions.com/role/InsiderTradingArrangementsDetails">
+        <link:definition>004201 - Disclosure - Insider Trading Arrangements (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_SummaryOfSignificantAccountingPoliciesEstimatedUsefulLivesDetails" roleURI="http://www.catofashions.com/role/SummaryOfSignificantAccountingPoliciesEstimatedUsefulLivesDetails">
+        <link:definition>004012 - Disclosure - Summary of Significant Accounting Policies - Estimated Useful Lives (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:linkbaseRef xlink:type="simple" xlink:href="cato-20240203_lab.xml" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:role="http://www.xbrl.org/2003/role/labelLinkbaseRef"></link:linkbaseRef>
+      <link:linkbaseRef xlink:type="simple" xlink:href="cato-20240203_pre.xml" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:role="http://www.xbrl.org/2003/role/presentationLinkbaseRef"></link:linkbaseRef>
+      <link:linkbaseRef xlink:type="simple" xlink:href="cato-20240203_cal.xml" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:role="http://www.xbrl.org/2003/role/calculationLinkbaseRef"></link:linkbaseRef>
+      <link:linkbaseRef xlink:type="simple" xlink:href="cato-20240203_def.xml" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:role="http://www.xbrl.org/2003/role/definitionLinkbaseRef"></link:linkbaseRef>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:import namespace="http://www.xbrl.org/2003/instance" schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd"></xs:import>
+  <xs:import namespace="http://xbrl.org/2005/xbrldt" schemaLocation="http://www.xbrl.org/2005/xbrldt-2005.xsd"></xs:import>
+  <xs:import namespace="http://www.xbrl.org/dtr/type/non-numeric" schemaLocation="http://www.xbrl.org/dtr/type/nonNumeric-2009-12-16.xsd"></xs:import>
+  <xs:import namespace="http://www.xbrl.org/dtr/type/numeric" schemaLocation="http://www.xbrl.org/dtr/type/numeric-2009-12-16.xsd"></xs:import>
+  <xs:import namespace="http://www.xbrl.org/2009/role/negated" schemaLocation="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd"></xs:import>
+  <xs:import namespace="http://www.xbrl.org/dtr/type/2022-03-31" schemaLocation="https://www.xbrl.org/dtr/type/2022-03-31/types.xsd"></xs:import>
+  <xs:import namespace="http://fasb.org/us-gaap/2023" schemaLocation="https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd"></xs:import>
+  <xs:import namespace="http://xbrl.sec.gov/dei/2023" schemaLocation="https://xbrl.sec.gov/dei/2023/dei-2023.xsd"></xs:import>
+  <xs:import namespace="http://xbrl.sec.gov/ecd/2023" schemaLocation="https://xbrl.sec.gov/ecd/2023/ecd-2023.xsd"></xs:import>
+  <xs:element id="cato_IncomeOther" nillable="true" name="IncomeOther" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="cato_OtherNoncurrentLiabilitiesPrimarilyDeferredRent" nillable="true" name="OtherNoncurrentLiabilitiesPrimarilyDeferredRent" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="cato_DocumentAndEntityInformationAbstract" abstract="true" nillable="true" name="DocumentAndEntityInformationAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_ConsolidatedBalanceSheetParentheticalAbstract" abstract="true" nillable="true" name="ConsolidatedBalanceSheetParentheticalAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_RevolvingcreditfacilitymemberMember" abstract="true" nillable="true" name="RevolvingcreditfacilitymemberMember" substitutionGroup="xbrli:item" type="nonnum:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_ReportableSegmentsRetailMember" abstract="true" nillable="true" name="ReportableSegmentsRetailMember" substitutionGroup="xbrli:item" type="nonnum:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_ReportableSegmentsCreditMember" abstract="true" nillable="true" name="ReportableSegmentsCreditMember" substitutionGroup="xbrli:item" type="nonnum:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_PrivatelyManagedFundsMember" abstract="true" nillable="true" name="PrivatelyManagedFundsMember" substitutionGroup="xbrli:item" type="nonnum:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_StockBasedCompensationPlansTableTextBlock" nillable="true" name="StockBasedCompensationPlansTableTextBlock" substitutionGroup="xbrli:item" type="nonnum:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_StockPlanTableTable" abstract="true" nillable="true" name="StockPlanTableTable" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_StockPlan1987Member" abstract="true" nillable="true" name="StockPlan1987Member" substitutionGroup="xbrli:item" type="nonnum:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_StockPlan2004Member" abstract="true" nillable="true" name="StockPlan2004Member" substitutionGroup="xbrli:item" type="nonnum:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_AuthorizedAndAvailableForGrantLineItems" abstract="true" nillable="true" name="AuthorizedAndAvailableForGrantLineItems" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_OptionsAndOrRestrictedStockInitiallyAuthorized" nillable="true" name="OptionsAndOrRestrictedStockInitiallyAuthorized" substitutionGroup="xbrli:item" type="xbrli:sharesItemType" xbrli:periodType="instant"></xs:element>
+  <xs:element id="cato_OptionsAndOrRestrictedStockAvailableForGrant" nillable="true" name="OptionsAndOrRestrictedStockAvailableForGrant" substitutionGroup="xbrli:item" type="xbrli:sharesItemType" xbrli:periodType="instant"></xs:element>
+  <xs:element id="cato_Employeestockpurchaseplanshareawardpurchasepricediscount" nillable="true" name="Employeestockpurchaseplanshareawardpurchasepricediscount" substitutionGroup="xbrli:item" type="num:perShareItemType" xbrli:periodType="instant"></xs:element>
+  <xs:element id="cato_DeferredTaxAssetsFederalBenefitOfUncertainTaxPositions" nillable="true" name="DeferredTaxAssetsFederalBenefitOfUncertainTaxPositions" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="cato_Storeopeningcostspolicytextblock" nillable="true" name="Storeopeningcostspolicytextblock" substitutionGroup="xbrli:item" type="nonnum:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_Selfinsurancepolicytextblock" nillable="true" name="Selfinsurancepolicytextblock" substitutionGroup="xbrli:item" type="nonnum:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_Sharerepurchasepolicytextblock" nillable="true" name="Sharerepurchasepolicytextblock" substitutionGroup="xbrli:item" type="nonnum:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_Accumulatedothercomprehensiveincomelossdisclosureabstract" abstract="true" nillable="true" name="Accumulatedothercomprehensiveincomelossdisclosureabstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_AccumulatedOtherComprehensiveIncomeLossTextBlock" nillable="true" name="AccumulatedOtherComprehensiveIncomeLossTextBlock" substitutionGroup="xbrli:item" type="nonnum:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_AccumulatedothercomprenesiveincomeLineItems" abstract="true" nillable="true" name="AccumulatedothercomprenesiveincomeLineItems" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_Accumulatedothercomprehensiveincomelossrollforward" abstract="true" nillable="true" name="Accumulatedothercomprehensiveincomelossrollforward" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_StockPlan2013Member" abstract="true" nillable="true" name="StockPlan2013Member" substitutionGroup="xbrli:item" type="nonnum:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_DeferredtaxassetstaxdeferredincentiveCompensationexpense" nillable="true" name="DeferredtaxassetstaxdeferredincentiveCompensationexpense" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="cato_PurchasePremiumAndPremiumAmortization" nillable="true" name="PurchasePremiumAndPremiumAmortization" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="cato_OtherAssetPolicyTextBlock" nillable="true" name="OtherAssetPolicyTextBlock" substitutionGroup="xbrli:item" type="nonnum:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_BuildingsHeldForInvestment" nillable="true" name="BuildingsHeldForInvestment" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="cato_AccruedPPE" nillable="true" name="AccruedPPE" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="cato_Effectiveincometaxratereconciliationuncertaintaxpositions" nillable="true" name="Effectiveincometaxratereconciliationuncertaintaxpositions" substitutionGroup="xbrli:item" type="dtr-types:percentItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_Deemedrepatriation" nillable="true" name="Deemedrepatriation" substitutionGroup="xbrli:item" type="dtr-types:percentItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_Ratechangedeferredtaxes" nillable="true" name="Ratechangedeferredtaxes" substitutionGroup="xbrli:item" type="dtr-types:percentItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_Addbackwagerelatedcredits" nillable="true" name="Addbackwagerelatedcredits" substitutionGroup="xbrli:item" type="dtr-types:percentItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_StockPlan2018Member" abstract="true" nillable="true" name="StockPlan2018Member" substitutionGroup="xbrli:item" type="nonnum:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_Changeoperatingleaseassetandliabilitiesnet" nillable="true" name="Changeoperatingleaseassetandliabilitiesnet" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="cato_Deferredtaxassetoperatingleaseliability" nillable="true" name="Deferredtaxassetoperatingleaseliability" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="cato_DeferredTaxLiabilitiesOperatingLeaseAsset" nillable="true" name="DeferredTaxLiabilitiesOperatingLeaseAsset" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="cato_Effectiveincometaxratereconciliationoffshoreclaim" nillable="true" name="Effectiveincometaxratereconciliationoffshoreclaim" substitutionGroup="xbrli:item" type="dtr-types:percentItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_Effectiveincometaxratereconciliationworkoppurtunitycredit" nillable="true" name="Effectiveincometaxratereconciliationworkoppurtunitycredit" substitutionGroup="xbrli:item" type="dtr-types:percentItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_StopLossinsurancecoverage" nillable="true" name="StopLossinsurancecoverage" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant"></xs:element>
+  <xs:element id="cato_Employeehealthcarecoverage" nillable="true" name="Employeehealthcarecoverage" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant"></xs:element>
+  <xs:element id="cato_Generalliabilitycoverage" nillable="true" name="Generalliabilitycoverage" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant"></xs:element>
+  <xs:element id="cato_BankcardreceivableMember" abstract="true" nillable="true" name="BankcardreceivableMember" substitutionGroup="xbrli:item" type="nonnum:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_IncomeTaxReceivableMember" abstract="true" nillable="true" name="IncomeTaxReceivableMember" substitutionGroup="xbrli:item" type="nonnum:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_CaresActCarrybackDifferential" nillable="true" name="CaresActCarrybackDifferential" substitutionGroup="xbrli:item" type="dtr-types:percentItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_GovernmentGrants" nillable="true" name="GovernmentGrants" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="cato_MaximumPercentageOfEmployeeAnnualCompensationToMaximumElectiveDeferral" nillable="true" name="MaximumPercentageOfEmployeeAnnualCompensationToMaximumElectiveDeferral" substitutionGroup="xbrli:item" type="num:percentItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_StateNetOperatingLossCarryforwardsMember" abstract="true" nillable="true" name="StateNetOperatingLossCarryforwardsMember" substitutionGroup="xbrli:item" type="nonnum:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_PercentageOfDiscountEmployeeStockPurchasePlan" nillable="true" name="PercentageOfDiscountEmployeeStockPurchasePlan" substitutionGroup="xbrli:item" type="num:percentItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_GiftCardBreakageMember" abstract="true" nillable="true" name="GiftCardBreakageMember" substitutionGroup="xbrli:item" type="nonnum:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_StateMunicipalAndCorporateBondsAndAssetBackedSecuritiesMember" abstract="true" nillable="true" name="StateMunicipalAndCorporateBondsAndAssetBackedSecuritiesMember" substitutionGroup="xbrli:item" type="nonnum:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_UsTreasuryNotesAndCertificatesOfDepositMember" abstract="true" nillable="true" name="UsTreasuryNotesAndCertificatesOfDepositMember" substitutionGroup="xbrli:item" type="nonnum:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_PreferentialDistributionPerShareOfNetAssets" nillable="true" name="PreferentialDistributionPerShareOfNetAssets" substitutionGroup="xbrli:item" type="num:perShareItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_PercentageOfDividedReceivedDeduction" nillable="true" name="PercentageOfDividedReceivedDeduction" substitutionGroup="xbrli:item" type="num:percentItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_WithholdingTaxRateOnAnyUnremittedEarnings" nillable="true" name="WithholdingTaxRateOnAnyUnremittedEarnings" substitutionGroup="xbrli:item" type="num:percentItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_EarningsFromNonUsSubsidiaries" nillable="true" name="EarningsFromNonUsSubsidiaries" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="cato_NumberOfLongTermCompensationPlans" nillable="true" name="NumberOfLongTermCompensationPlans" substitutionGroup="xbrli:item" type="xbrli:decimalItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_DirectExpensesOfReportableSegmentTableTextBlock" nillable="true" name="DirectExpensesOfReportableSegmentTableTextBlock" substitutionGroup="xbrli:item" type="nonnum:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_ScheduleOfPropertyPlantAndEquipmentUsefulLifeTableTextBlock" nillable="true" name="ScheduleOfPropertyPlantAndEquipmentUsefulLifeTableTextBlock" substitutionGroup="xbrli:item" type="nonnum:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_EffectiveIncomeTaxRateReconciliationTaxCreditInsurancePercent" nillable="true" name="EffectiveIncomeTaxRateReconciliationTaxCreditInsurancePercent" substitutionGroup="xbrli:item" type="dtr-types:percentItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_RevenueVendorAllowancesPolicyTextBlock" nillable="true" name="RevenueVendorAllowancesPolicyTextBlock" substitutionGroup="xbrli:item" type="nonnum:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_ValuationAllowancesAndReservesAdditionsReductionsChargeToOtherAccount" nillable="true" name="ValuationAllowancesAndReservesAdditionsReductionsChargeToOtherAccount" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="cato_EstimatedCostToRepairCorporateJetMember" abstract="true" nillable="true" name="EstimatedCostToRepairCorporateJetMember" substitutionGroup="xbrli:item" type="nonnum:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_DeferredTaxAssetsAmortization" nillable="true" name="DeferredTaxAssetsAmortization" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="cato_OtherDeferredTaxAssetsAffectingStateIncomeTaxMember" abstract="true" nillable="true" name="OtherDeferredTaxAssetsAffectingStateIncomeTaxMember" substitutionGroup="xbrli:item" type="nonnum:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_USFederalNetOperatingLossCarryforwardsOtherCreditCarryforwardsAndOtherDeferredTaxAssetsNetOfDeferredTaxLiabilitiesMember" abstract="true" nillable="true" name="USFederalNetOperatingLossCarryforwardsOtherCreditCarryforwardsAndOtherDeferredTaxAssetsNetOfDeferredTaxLiabilitiesMember" substitutionGroup="xbrli:item" type="nonnum:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_USFederalNetOperatingLossCarryforwardsMember" abstract="true" nillable="true" name="USFederalNetOperatingLossCarryforwardsMember" substitutionGroup="xbrli:item" type="nonnum:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_CreditCarryforwardsMember" abstract="true" nillable="true" name="CreditCarryforwardsMember" substitutionGroup="xbrli:item" type="nonnum:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_DeferredTaxAssetsNetOfDeferredTaxLiabilitiesMember" abstract="true" nillable="true" name="DeferredTaxAssetsNetOfDeferredTaxLiabilitiesMember" substitutionGroup="xbrli:item" type="nonnum:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_PaymentsForProceedsFromOtherProjects" nillable="true" name="PaymentsForProceedsFromOtherProjects" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="cato_TreasuryStockAcquiredAndRetiredCostMethodAmount" nillable="true" name="TreasuryStockAcquiredAndRetiredCostMethodAmount" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="cato_TreasuryStockSharesAcquiredAndRetired" nillable="true" name="TreasuryStockSharesAcquiredAndRetired" substitutionGroup="xbrli:item" type="xbrli:sharesItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_EffectiveIncomeTaxRateReconciliationNondeductibleExpenseCharitableContributionOfInventoryPercent" nillable="true" name="EffectiveIncomeTaxRateReconciliationNondeductibleExpenseCharitableContributionOfInventoryPercent" substitutionGroup="xbrli:item" type="dtr-types:percentItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="cato_DeferredIncomeTaxBenefitExpense" nillable="true" name="DeferredIncomeTaxBenefitExpense" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+</xs:schema>

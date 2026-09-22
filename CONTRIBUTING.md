@@ -102,6 +102,121 @@ Cassettes are loaded as plain data — recorded requests, headers and response
 bodies only. `hatch run check-cassettes` verifies this and runs in CI ahead of
 the test jobs; run it locally if you are about to run a branch you did not write.
 
+## Regression Tests
+
+A regression test is a claim that one specific bug stays fixed. A year from now
+the assertion is the only surviving record of what that bug was, and the only
+question that justifies ever deleting the test is "is this bug still
+reachable?" — which nobody can answer without the report.
+
+**Every file under `tests/issues/regression/` must name its origin in the module
+docstring**, as one of these three shapes:
+
+```
+GitHub Issue: https://github.com/dgunning/edgartools/issues/<n>
+GitHub PR:    https://github.com/dgunning/edgartools/pull/<n>
+Bead:         edgartools-<id>
+```
+
+Anywhere in the docstring is fine; directly under the summary line is the usual
+place.
+
+**A bare `#819` in prose does not count, and that is the point rather than an
+oversight.** 109 files here once named their issue in prose and nothing else.
+The number was present, but it was not a link and the form varied — "GH #812",
+"GitHub issue #488", "issue #762" — so no tool could follow it. Requiring one
+canonical shape is what makes "which of these bugs are still open?" answerable
+by a script instead of by reading 300 docstrings. The filename is not enough
+either: it carries the number for some of the tree and silently not for the
+rest.
+
+**This runs in CI ahead of the test jobs**, as a step inside `test-fast`, so a
+missing line fails your pull request before a single test executes. The failure
+names the exact line to add. Check it before pushing:
+
+```bash
+hatch run check-regression-provenance
+```
+
+Place new regression tests in `tests/issues/regression/test_issue_NNN.py`, and
+assert specific values rather than mere existence — a ground-truth number taken
+from a real filing, verified by hand.
+
+## Changelog Entries
+
+`CHANGELOG.md` is read by someone deciding whether an upgrade affects them. An
+entry is the compiled short view of a change, not the record of the
+investigation behind it. New entries go under `## [Unreleased]`, in the
+`### Added` / `### Changed` / `### Fixed` / `### Performance` / `### Removed`
+section they belong to, and are folded into a dated version at release.
+
+**Symptom first, in a bold sentence-case lead that names the public symbol in
+backticks** — what a user saw go wrong, not what the code did. Then one to three
+sentences for the cause and the fix. Eighty words is the cap for the whole
+entry. An entry that will not fit is carrying material that belongs somewhere
+else.
+
+**Give it one ground-truth anchor.** Name a real filing and put the wrong value
+beside the right one — "on Ambac's FY2022 10-K (`0000874501-23-000040`) Item 7
+was cut off at 149,459 of its 158,411 characters". A number the reader can check
+against SEC is what separates an entry from a claim, and it is usually the same
+number the regression test asserts.
+
+**End with `(GH #NNN)`, and nothing else.** No commit hashes, and no bead IDs:
+`.beads/` is not in a clone, so an internal issue ID in a public file points at
+something no reader can open. Keep contributor attribution —
+`(GH #NNN, thanks @kmatosli)`.
+
+**Name the import path when the symbol is ambiguous.** `edgar.xbrl.facts.FactQuery`
+and `edgar.entity.query.FactQuery` are different classes with the same method
+names, so "`FactQuery.to_dataframe()` changed" sends a reader to the wrong one.
+
+**The long version is relocated, not deleted.** The regex that backtracked, the
+corpus of 1,940 tables, the three different messages pandas produced — that
+belongs in the PR body and the commit message, and in the docstring of the
+regression test under `tests/issues/regression/`. Someone debugging the same
+code finds it there; someone reading the changelog wants to know whether the bug
+reached them.
+
+**Write the entry from the code, not from your notes.** Run every claim before
+you write it down. The changelog is a compiled view and drifts from the source,
+so transcribing a figure out of it is how a wrong number ships.
+
+**A breaking change carries one more obligation.** The entry goes under
+`### Changed` or `### Removed`, and the same PR adds a section to
+`docs/upgrade/<next-major>.md` giving the behaviour before, the behaviour after,
+and the mechanical rewrite where one exists.
+
+### Calibration
+
+Before — the entry as filed in 5.44.1: 171 words, an accurate account of the
+investigation, abridged here:
+
+> **`filing["Item 7"]` hung indefinitely on some 10-Ks** — `CrossReferenceIndex.has_index()`
+> matched the cross-reference heading, then probed for the index table with a
+> single regex nesting six lazy quantifiers under `DOTALL` against the *entire*
+> filing HTML. Where the heading matched but the table shape did not, it
+> backtracked catastrophically: on ODP Corp's FY2025 10-K (5.6MB) the call did
+> not finish within 45 seconds. A successful match returned instantly, so only
+> the non-matching case was affected. It is reached from `TenK.__getitem__`, so
+> any item lookup on an affected 10-K hung — and because `re` holds the GIL
+> throughout, one such filing froze every other thread in the process […]
+> (GH #928)
+
+After — 75 words, the same change:
+
+> **`filing["Item 7"]` hung indefinitely on 10-Ks with a cross-reference heading
+> but no index table.** The detection probe was a regex nesting six lazy
+> quantifiers under `DOTALL` and ran against the entire filing HTML, so it
+> backtracked catastrophically. ODP Corp's FY2025 10-K (5.6MB) did not finish
+> within 45 seconds, and because `re` holds the GIL, one such filing froze every
+> other thread in the process. Detection now scans the index table row by row.
+> (GH #928)
+
+Nothing in the first version was wrong; all of it is still on record, in the PR
+and the regression test. The standard applies from adoption forward — existing
+entries are not rewritten.
+
 ## Documentation Structure
 
 EdgarTools uses a three-tier documentation system:

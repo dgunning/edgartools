@@ -29,6 +29,9 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
+from edgar.core import log
+from edgar.xbrl.core import unit_currency
+
 if TYPE_CHECKING:
     from edgar.xbrl import XBRL
 
@@ -92,6 +95,9 @@ class CurrencyConverter:
     target_currency: str = "USD"
     exchange_rates: Dict[int, ExchangeRate] = field(default_factory=dict, init=False)
     _rate_scale: float = field(default=100.0, init=False)  # Rates are per 100 USD
+    # Populated when rate extraction RAISED, as opposed to finding nothing.
+    # Without it both outcomes present as "no rates found" (edgartools-35jj).
+    _extraction_warnings: List[str] = field(default_factory=list, init=False)
 
     def __post_init__(self):
         """Initialize by detecting currency and extracting rates."""
@@ -111,12 +117,13 @@ class CurrencyConverter:
         for _, row in facts_df.iterrows():
             unit_ref = row.get('unit_ref')
             if unit_ref and unit_ref in self.xbrl.units:
-                unit_info = self.xbrl.units[unit_ref]
-                if unit_info.get('type') == 'simple':
-                    measure = unit_info.get('measure', '')
-                    if measure.startswith('iso4217:'):
-                        currency = measure.replace('iso4217:', '')
-                        currency_counts[currency] += 1
+                # Counts per-share facts as well: a 'divide' unit denominates
+                # its value in the numerator's currency, and before
+                # edgartools-uetp those units were misparsed as simple, so this
+                # only ever saw the numerator by accident.
+                currency = unit_currency(self.xbrl.units[unit_ref])
+                if currency:
+                    currency_counts[currency] += 1
 
         if not currency_counts:
             return "USD"  # Default if no currency facts found
@@ -140,6 +147,7 @@ class CurrencyConverter:
             Dict mapping year to ExchangeRate objects
         """
         rates: Dict[int, ExchangeRate] = {}
+        self._extraction_warnings = []
 
         # Build the expected unit_ref pattern for home currency to USD
         # e.g., 'dkkPerUSD', 'eurPerUSD'
@@ -179,8 +187,19 @@ class CurrencyConverter:
                             if year not in rates:
                                 rates[year] = ExchangeRate(year=year)
                             rates[year].average = value
-        except Exception:
-            pass  # No average rates found
+        except Exception as e:
+            # Not "no average rates found": that is what an empty frame means.
+            # This is the extraction itself failing, which is indistinguishable
+            # from a filing that genuinely publishes no rate unless it is
+            # recorded (bead edgartools-35jj).
+            self._extraction_warnings.append(
+                f"average exchange rates could not be extracted: {type(e).__name__}: {e}"
+            )
+            log.warning(
+                "Could not extract %s foreign-exchange rates from the filing (%s). "
+                "to_usd() will return None for periods that depend on them rather "
+                "than converting with a wrong rate.", "average", e,
+            )
 
         # Extract closing rates (for balance sheet / instant periods)
         try:
@@ -200,8 +219,19 @@ class CurrencyConverter:
                             if year not in rates:
                                 rates[year] = ExchangeRate(year=year)
                             rates[year].closing = value
-        except Exception:
-            pass  # No closing rates found
+        except Exception as e:
+            # Not "no closing rates found": that is what an empty frame means.
+            # This is the extraction itself failing, which is indistinguishable
+            # from a filing that genuinely publishes no rate unless it is
+            # recorded (bead edgartools-35jj).
+            self._extraction_warnings.append(
+                f"closing exchange rates could not be extracted: {type(e).__name__}: {e}"
+            )
+            log.warning(
+                "Could not extract %s foreign-exchange rates from the filing (%s). "
+                "to_usd() will return None for periods that depend on them rather "
+                "than converting with a wrong rate.", "closing", e,
+            )
 
         # Auto-detect rate scale by checking if rates look like "per 100" or direct
         # Rates > 10 are likely "per 100 USD" format, rates < 10 are direct rates
@@ -331,8 +361,32 @@ class CurrencyConverter:
             return rate_obj.closing
         return None
 
+    @property
+    def extraction_warnings(self) -> List[str]:
+        """Failures hit while reading exchange rates from the filing.
+
+        Empty means the rates on this object are everything the filing published.
+        Non-empty means extraction failed and the rates may be incomplete, which
+        is not the same thing as a filer publishing no rate at all.
+        """
+        # getattr, not attribute access: instances built with __new__ (as the
+        # unit tests and any pickling path do) never run the dataclass defaults,
+        # and a __repr__ that raises AttributeError would be a worse version of
+        # the failure this whole change is about.
+        return list(getattr(self, "_extraction_warnings", []))
+
+    @property
+    def has_warnings(self) -> bool:
+        return bool(getattr(self, "_extraction_warnings", []))
+
     def __repr__(self) -> str:
         if not self.has_rates:
+            if self.has_warnings:
+                # "no rates found" would be a claim about the filing; this was a
+                # failure on our side and must not read as the filer's silence.
+                return (f"CurrencyConverter(home={self.home_currency}, "
+                        f"target={self.target_currency}, rate extraction failed: "
+                        f"{self.extraction_warnings[0]})")
             return f"CurrencyConverter(home={self.home_currency}, target={self.target_currency}, no rates found)"
 
         lines = [f"CurrencyConverter(home={self.home_currency}, target={self.target_currency})"]
@@ -352,6 +406,10 @@ class CurrencyConverter:
             if rate.closing is not None:
                 parts.append(f"close={rate.closing:.4f}" if rate.closing < 10 else f"close={rate.closing:.1f}")
             lines.append(f"    {year}: {', '.join(parts)}")
+
+        if self.has_warnings:
+            warnings_ = self.extraction_warnings
+            lines.append(f"  Warnings ({len(warnings_)}): {warnings_[0]}")
 
         return "\n".join(lines)
 
@@ -373,5 +431,11 @@ class CurrencyConverter:
             avg_str = f"{rate.average:.2f}" if rate.average is not None else "N/A"
             close_str = f"{rate.closing:.2f}" if rate.closing is not None else "N/A"
             table.add_row(str(year), avg_str, close_str)
+
+        if self.has_warnings:
+            # An empty table and a table missing rows look identical; say which.
+            table.caption = (f"[red]Rate extraction failed "
+                             f"({len(self.extraction_warnings)}): "
+                             f"{self.extraction_warnings[0]}[/red]")
 
         return table

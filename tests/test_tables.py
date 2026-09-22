@@ -1,8 +1,12 @@
 from bs4 import BeautifulSoup
 
 from edgar.files.html_documents import table_to_markdown, table_to_text
-from edgar.files.html import BaseNode
-from edgar import *
+# Document here is the LEGACY edgar.files parser, not edgar.documents.Document.
+# It used to arrive via `from edgar import *`; declaring __all__ stopped exporting
+# it (bead edgartools-07lk.5), because the top-level name collided with its own
+# replacement and edgar.files is removed in 6.0 (bead edgartools-07lk.3).
+from edgar.files.html import BaseNode, Document
+from edgar import *  # noqa: F403
 from edgar.files.htmltools import ChunkedDocument
 from edgar.richtools import rich_to_text
 from pathlib import Path

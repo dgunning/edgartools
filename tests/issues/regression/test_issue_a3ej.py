@@ -74,9 +74,19 @@ def test_out_of_window_returns_none(tmp_path, monkeypatch):
 
 @pytest.mark.parametrize("read_key", ["1995-12-28", "19951228"])
 def test_accepts_str_and_yyyymmdd_dates(tmp_path, monkeypatch, read_key):
+    """Both date spellings resolve to the same staged file.
+
+    `is not None` was the whole assertion, which cannot tell the two spellings
+    apart from each other or from a lucky hit on some other day's folder. The
+    path is fully determined here -- the fixture was staged by this test -- so
+    it is asserted exactly.
+    """
     monkeypatch.setenv("EDGAR_LOCAL_DATA_DIR", str(tmp_path))
     _stage(tmp_path, FEED_DATE)
-    assert resolve_local_filing_path(read_key, ACCESSION) is not None
+    path = resolve_local_filing_path(read_key, ACCESSION)
+    assert path == tmp_path / "filings" / FEED_DATE / f"{ACCESSION}.nc", (
+        f"read key {read_key!r} resolved to {path}"
+    )
 
 
 def test_filing_sgml_resolves_offline_from_feed_folder(tmp_path, monkeypatch):

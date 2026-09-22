@@ -20,6 +20,8 @@ to the FY-minus-Q1Q2Q3 fallback path.
 
 Correct Q4 for GAIN FY2026 = 57,162,000 - (28,788,000 + 9,289,000 + 9,528,000)
                            = 9,557,000.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/848
 """
 
 from datetime import date

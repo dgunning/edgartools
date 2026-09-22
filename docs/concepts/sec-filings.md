@@ -149,7 +149,7 @@ financials = company.get_financials()
 # Access specific statements
 balance_sheet = financials.balance_sheet()
 income_stmt = financials.income_statement()
-cash_flow = financials.cashflow_statement()
+cash_flow = financials.cash_flow_statement()
 
 # Get specific values directly
 revenue = financials.get_revenue()

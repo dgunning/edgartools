@@ -14,6 +14,8 @@ Fix:
 
 Reporter: miruddfan
 Ticker: MSFT
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/553
 """
 
 import pytest

@@ -7,6 +7,8 @@ to enable programmatic analysis of XBRL concept relationships.
 Issue #514 refinement: Distinguish between calculation parent (metric) and presentation parent (abstract).
 - parent_concept: Calculation tree parent (always a metric concept for summation math)
 - parent_abstract_concept: Presentation tree parent (may be abstract, for display hierarchy)
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/514
 """
 import pytest
 from edgar import Company

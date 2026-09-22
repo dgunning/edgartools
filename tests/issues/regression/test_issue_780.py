@@ -10,6 +10,8 @@ silently dropped during stitching.
 The fix adds an opt-in ``include_quarterly`` parameter that surfaces both the
 discrete-quarter and YTD/annual periods from each filing. Default behavior is
 unchanged.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/780
 """
 from __future__ import annotations
 

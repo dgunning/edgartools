@@ -4,7 +4,7 @@ Get up and running with EdgarTools in 5 minutes. By the end, you'll have a compa
 
 ## Prerequisites
 
-- Python 3.8 or higher
+- Python 3.10 or higher
 - Internet connection
 - Basic familiarity with Python
 
@@ -65,7 +65,7 @@ financials = company.get_financials()
 # The three financial statements
 income    = financials.income_statement()
 balance   = financials.balance_sheet()
-cashflow  = financials.cashflow_statement()
+cashflow  = financials.cash_flow_statement()
 ```
 
 ![AAPL Income Statement](images/aapl-income-xbrl.webp)
@@ -73,8 +73,9 @@ cashflow  = financials.cashflow_statement()
 That's it — three lines to get any company's income statement, balance sheet, or cash flow.
 
 !!! note "Common gotcha"
-    The canonical method is `cashflow_statement()`, but `cash_flow_statement()` also works.
-    All three statements: `income_statement()`, `balance_sheet()`, `cashflow_statement()`.
+    Use `cash_flow_statement()` for cash flow statements. The older alias
+    `cashflow_statement()` is deprecated and will be removed in v6.0.
+    All three statements: `income_statement()`, `balance_sheet()`, `cash_flow_statement()`.
 
 ## Step 5: Get Specific Values
 
@@ -129,7 +130,7 @@ Company("AAPL")                        # Start here — look up a company
   ├── .get_financials()                  # Annual financials from 10-K (RECOMMENDED)
   │     ├── .income_statement()          #   Revenue, expenses, profit
   │     ├── .balance_sheet()             #   Assets, liabilities, equity
-  │     ├── .cashflow_statement()        #   Cash in and out
+  │     ├── .cash_flow_statement()        #   Cash in and out
   │     ├── .get_revenue()               #   Quick: just the revenue number
   │     └── .get_net_income()            #   Quick: just net income
   │

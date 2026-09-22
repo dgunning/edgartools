@@ -31,13 +31,18 @@ class TestIssue581MCHPIncomeStatement:
         filings = company.get_filings(form="10-K")
         filing_2016 = filings.filter(date="2016-01-01:2016-12-31").latest()
 
-        # Skip test if filing couldn't be retrieved (network issues, rate limiting)
-        if filing_2016 is None:
-            pytest.skip("Could not retrieve MCHP 2016 10-K filing (network issue)")
+        # MCHP's FY2016 10-K is a filed historical document (0000827054-16-000344,
+        # 2016-05-24) and does not stop existing. An empty filter result or an
+        # unparseable XBRL is a defect in the filter or the parser, which is
+        # what this test is for -- skipping on it hid both.
+        assert filing_2016 is not None, (
+            "MCHP 10-K filed 2016-05-24 should be reachable by date filter"
+        )
 
         xbrl = filing_2016.xbrl()
-        if xbrl is None:
-            pytest.skip("Could not parse XBRL from MCHP 2016 10-K filing")
+        assert xbrl is not None, (
+            f"MCHP 2016 10-K ({filing_2016.accession_no}) should parse to XBRL"
+        )
 
         return xbrl
 
@@ -57,29 +62,45 @@ class TestIssue581MCHPIncomeStatement:
 
     @pytest.mark.network
     def test_income_statement_has_revenue(self, mchp_2016_xbrl):
-        """Test that income statement has revenue and proper financial data."""
-        income_statement = mchp_2016_xbrl.statements.income_statement()
+        """The income statement carries MCHP's FY2016 figures, not a tax table.
 
+        Concept-name presence was the whole test: "some row mentions Revenue,
+        some row mentions GrossProfit". The tax disclosure this bug selected
+        contains an income-tax reconciliation, and a wrong-but-plausible
+        statement — a later fiscal year, the wrong column, a sign flip — passes
+        every one of those checks. The figures below are read off the filing
+        itself (0000827054-16-000344, FY ended 2016-03-31), which is a historic
+        document and does not move.
+
+            Net sales        $2,173,334k     Gross profit  $1,205,464k
+            Operating income $  352,345k     Net income    $  324,132k
+                                             (attributable to Microchip)
+        """
+        income_statement = mchp_2016_xbrl.statements.income_statement()
         assert income_statement is not None, "Should have income statement"
 
-        # Convert to dataframe and check for key concepts
         df = income_statement.to_dataframe()
+        fy2016 = '2016-03-31 (FY)'
+        assert fy2016 in df.columns, (
+            f"FY2016 column missing; got {[c for c in df.columns if '20' in c]}. "
+            "A statement without the filing's own fiscal year is the wrong "
+            "statement."
+        )
 
-        # Check for revenue-related concepts
-        concepts = df['concept'].tolist()
-        labels = df['label'].tolist()
+        def face_value(concept, label):
+            """The undimensioned row for a concept — segment rows repeat the
+            concept with a different label and would otherwise match first."""
+            rows = df[(df['concept'] == concept) & (df['label'] == label)]
+            assert len(rows) == 1, (
+                f"expected one {concept} row labelled {label!r}, found {len(rows)}"
+            )
+            return rows.iloc[0][fy2016]
 
-        # Should have revenue concepts (not just tax items)
-        has_revenue = any('Revenue' in str(c) or 'Revenue' in str(l)
-                         for c, l in zip(concepts, labels))
-        has_gross_profit = any('GrossProfit' in str(c) or 'Gross Profit' in str(l)
-                              for c, l in zip(concepts, labels))
-        has_operating_income = any('OperatingIncome' in str(c) or 'Operating Income' in str(l)
-                                   for c, l in zip(concepts, labels))
-
-        assert has_revenue, "Income statement should have revenue"
-        assert has_gross_profit, "Income statement should have gross profit"
-        assert has_operating_income, "Income statement should have operating income"
+        assert face_value('us-gaap_SalesRevenueNet', 'Net sales') == 2_173_334_000
+        assert face_value('us-gaap_GrossProfit', 'Gross profit') == 1_205_464_000
+        assert face_value('us-gaap_OperatingIncomeLoss', 'Operating income') == 352_345_000
+        assert face_value('us-gaap_NetIncomeLoss',
+                          'Net income attributable to Microchip Technology') == 324_132_000
 
     @pytest.mark.network
     def test_income_statement_not_all_tax_items(self, mchp_2016_xbrl):

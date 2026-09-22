@@ -7,6 +7,8 @@ Enhance 13F-HR parsing to support multi-manager institutional filings:
 
 Performance: Uses session-scoped fixtures from conftest.py to avoid
 parsing the same 13F filing multiple times (~10s savings per test).
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/512
 """
 import pandas as pd
 import pytest
@@ -60,7 +62,6 @@ def test_13f_cover_page_other_managers_2(state_street_13f):
         assert hasattr(first_manager, 'cik'), "Manager should have cik"
         assert hasattr(first_manager, 'name'), "Manager should have name"
         assert hasattr(first_manager, 'file_number'), "Manager should have file_number"
-        print(f"Found {len(other_managers)} other managers on cover page")
 
 
 @pytest.mark.network
@@ -80,27 +81,61 @@ def test_13f_manager_assignment_integration(state_street_13f, state_street_13f_i
     assert isinstance(holdings_df, pd.DataFrame), "holdings should be a DataFrame"
     assert 'OtherManager' in holdings_df.columns, "OtherManager column should exist"
 
-    # Print summary
-    print(f"\nCover page managers: {len(cover_page_managers)}")
-    print(f"Holdings with manager assignments: {len(holdings_with_managers)}")
-    print(f"Total holdings: {len(holdings_df)}")
+    # `has_data` used to be computed here and then PRINTED, never asserted, so
+    # a build that assigned no manager to any holding passed this test with a
+    # tidy "Has manager data: False" in output pytest hides by default.
+    assert len(cover_page_managers) > 0 or len(holdings_with_managers) > 0, (
+        f"neither the cover page ({len(cover_page_managers)} managers) nor the "
+        f"holdings ({len(holdings_with_managers)} of {len(holdings_df)} "
+        "assigned) carries manager data, which is the whole subject of #512"
+    )
 
-    # For multi-manager filings, at least one of these should have data
-    has_data = len(cover_page_managers) > 0 or len(holdings_with_managers) > 0
-    print(f"Has manager data: {has_data}")
+    # This filing assigns a manager to EVERY holding — the ids are the
+    # summary-page sequence numbers, zero-padded, with '43,01' where two
+    # managers share a position.
+    assert len(holdings_with_managers) == len(holdings_df) == 26569
+    assert set(holdings_df['OtherManager'].unique()) == \
+        {'00', '01', '02', '03', '05', '06', '28', '43', '43,01', '88'}
 
 
 @pytest.mark.network
 def test_13f_backward_compatibility(state_street_13f):
-    """Test that old format (otherManagersInfo) still works if present."""
-    # Test with a filing that might use the old format
-    # Most recent filings should use otherManagers2Info, but code should handle both
-    thirteenf = state_street_13f
+    """A filing with no cover-page manager list still parses, and keeps its data.
 
-    # Should have valid data
-    assert thirteenf is not None
-    assert thirteenf.primary_form_information is not None
-    assert thirteenf.primary_form_information.cover_page is not None
+    NAMING, because it will otherwise mislead: the shared fixture is called
+    ``state_street_13f``, but CIK 70858 is Bank of America Corp. The accession
+    is what determines the content, and 0001102113-24-000030 is BAC's Q3 2024
+    13F-HR.
+
+    WHAT IT ACTUALLY TESTS. Three chained `is not None` assertions could not
+    tell this filing from any other, or a fully parsed cover page from an empty
+    one. This filing's primary_doc.xml carries no ``otherManagersInfo`` block
+    at all -- the old cover-page spelling -- and puts its eight managers in the
+    summary page's ``otherManagers2Info`` instead. So an empty
+    ``cover_page.other_managers`` is this filing's true shape, and the way to
+    show the parser did not simply drop the section is that the rest of the
+    cover page is populated and the eight managers are present on the summary
+    page.
+    """
+    thirteenf = state_street_13f
+    cover = thirteenf.primary_form_information.cover_page
+
+    assert cover.report_calendar_or_quarter == '09-30-2024'
+    assert cover.report_type == '13F HOLDINGS REPORT'
+    assert cover.filing_manager.name == 'BANK OF AMERICA CORP /DE/'
+    assert cover.is_amendment is False
+
+    assert cover.other_managers == [], (
+        f"cover page reports {len(cover.other_managers)} other managers; this "
+        "filing has no otherManagersInfo block, so anything here came from "
+        "somewhere else"
+    )
+
+    # ...and the managers the filing does declare survived, on the summary page.
+    summary = thirteenf.primary_form_information.summary_page
+    assert len(summary.other_managers) == 8
+    assert summary.total_holdings == 26569
+    assert summary.total_value == 1_204_606_558_843
 
 
 @pytest.mark.fast

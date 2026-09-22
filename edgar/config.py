@@ -11,7 +11,7 @@ URL Configuration (via environment variables):
 Behavior Configuration (via environment variables):
 - EDGAR_VERBOSE_EXCEPTIONS: Enable verbose logging for caught exceptions (default: False)
   Set to 'true', '1', 'yes', or 'on' to enable detailed exception logging for debugging.
-  By default, caught exceptions (like StatementNotFound) don't spam the console,
+  By default, caught exceptions (like StatementNotFoundError) don't spam the console,
   following the Python idiom that caught exceptions should be silent.
 
 Example:

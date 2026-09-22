@@ -8,6 +8,8 @@ other concepts across all statement types.
 Fix: Removed the merge heuristic entirely.  No concepts are merged or dropped
 during statement rendering.  Duplicate-label rows (from XBRL concept switches)
 are preserved as-is — data correctness over cosmetics.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/703
 """
 
 import pytest

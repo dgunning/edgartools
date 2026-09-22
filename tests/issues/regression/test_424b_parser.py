@@ -6,22 +6,21 @@ against ground-truth values from real SEC filings.
 
 Each test case uses a specific filing accession number and asserts specific
 values verified by hand against the SEC EDGAR filing.
+
+Bead: edgartools-fd3v.6
 """
 import pytest
-from edgar import find
-from edgar._filings import Filing
+
 from edgar.offerings.prospectus import (
-    Prospectus424B,
-    ShelfLifecycle,
+    PROSPECTUS_FORMS,
+    CoverPageData,
     Deal,
     OfferingType,
-    CoverPageData,
-    PROSPECTUS_FORMS,
+    Prospectus424B,
+    ShelfLifecycle,
     _parse_sec_number,
 )
-from edgar.offerings._424b_classifier import classify_offering_type
-from edgar.offerings._424b_cover import extract_cover_page_fields
-
+from tests._offline_filings import offline_filing
 
 # ============================================================
 # Test: obj() dispatch returns Prospectus424B
@@ -32,19 +31,19 @@ class TestObjDispatch:
 
     @pytest.mark.vcr
     def test_424b5_returns_prospectus(self):
-        filing = find("0001493152-25-029712")
+        filing = offline_filing("0001493152-25-029712")
         result = filing.obj()
         assert isinstance(result, Prospectus424B)
 
     @pytest.mark.vcr
     def test_424b2_returns_prospectus(self):
-        filing = find("0001918704-24-002559")
+        filing = offline_filing("0001918704-24-002559")
         result = filing.obj()
         assert isinstance(result, Prospectus424B)
 
     @pytest.mark.vcr
     def test_424b4_returns_prospectus(self):
-        filing = find("0001104659-24-132924")
+        filing = offline_filing("0001104659-24-132924")
         result = filing.obj()
         assert isinstance(result, Prospectus424B)
 
@@ -59,7 +58,7 @@ class TestCoverPageExtraction:
     @pytest.mark.vcr
     def test_imunon_424b5_cover_page(self):
         """Imunon best-efforts PIPE offering."""
-        filing = find("0001493152-25-029712")
+        filing = offline_filing("0001493152-25-029712")
         p = Prospectus424B.from_filing(filing)
 
         assert p.form == "424B5"
@@ -75,7 +74,7 @@ class TestCoverPageExtraction:
     @pytest.mark.vcr
     def test_nextera_424b5_atm(self):
         """NextEra at-the-market equity program."""
-        filing = find("0001193125-25-338333")
+        filing = offline_filing("0001193125-25-338333")
         p = Prospectus424B.from_filing(filing)
 
         assert p.is_atm is True
@@ -89,7 +88,7 @@ class TestCoverPageExtraction:
     @pytest.mark.vcr
     def test_bofa_424b2_structured_note(self):
         """BofA structured note — preliminary, no ticker."""
-        filing = find("0001918704-24-002559")
+        filing = offline_filing("0001918704-24-002559")
         p = Prospectus424B.from_filing(filing)
 
         assert p.is_preliminary is True
@@ -100,7 +99,7 @@ class TestCoverPageExtraction:
     @pytest.mark.vcr
     def test_traws_pharma_424b4(self):
         """Traws Pharma best-efforts PIPE supplement."""
-        filing = find("0001104659-24-132924")
+        filing = offline_filing("0001104659-24-132924")
         p = Prospectus424B.from_filing(filing)
 
         assert p.ticker == "TRAW"
@@ -117,29 +116,25 @@ class TestOfferingTypeClassification:
 
     @pytest.mark.vcr
     def test_imunon_best_efforts(self):
-        filing = find("0001493152-25-029712")
+        filing = offline_filing("0001493152-25-029712")
         p = Prospectus424B.from_filing(filing)
         assert p.offering_type == OfferingType.BEST_EFFORTS
 
     @pytest.mark.vcr
     def test_nextera_atm(self):
-        # Construct the Filing directly rather than find() — find() downloads the
-        # whole quarterly full-index to resolve one accession, which bloats the
-        # cassette ~30x (edgartools-9q82 cassette cleanup).
-        filing = Filing(form='424B5', company='NEXTERA ENERGY INC', cik=753308,
-                        filing_date='2025-12-31', accession_no='0001193125-25-338333')
+        filing = offline_filing("0001193125-25-338333")
         p = Prospectus424B.from_filing(filing)
         assert p.offering_type == OfferingType.ATM
 
     @pytest.mark.vcr
     def test_bofa_structured_note(self):
-        filing = find("0001918704-24-002559")
+        filing = offline_filing("0001918704-24-002559")
         p = Prospectus424B.from_filing(filing)
         assert p.offering_type == OfferingType.STRUCTURED_NOTE
 
     @pytest.mark.vcr
     def test_traws_pharma_best_efforts(self):
-        filing = find("0001104659-24-132924")
+        filing = offline_filing("0001104659-24-132924")
         p = Prospectus424B.from_filing(filing)
         assert p.offering_type in (OfferingType.BEST_EFFORTS, OfferingType.FIRM_COMMITMENT)
 
@@ -153,7 +148,7 @@ class TestConvenienceProperties:
 
     @pytest.mark.vcr
     def test_shortcut_properties(self):
-        filing = find("0001493152-25-029712")
+        filing = offline_filing("0001493152-25-029712")
         p = Prospectus424B.from_filing(filing)
 
         # These should delegate to cover_page
@@ -167,7 +162,7 @@ class TestConvenienceProperties:
 
     @pytest.mark.vcr
     def test_filing_metadata_properties(self):
-        filing = find("0001493152-25-029712")
+        filing = offline_filing("0001493152-25-029712")
         p = Prospectus424B.from_filing(filing)
 
         assert p.form == filing.form
@@ -186,7 +181,7 @@ class TestRichDisplay:
 
     @pytest.mark.vcr
     def test_repr_produces_output(self):
-        filing = find("0001493152-25-029712")
+        filing = offline_filing("0001493152-25-029712")
         p = Prospectus424B.from_filing(filing)
         text = repr(p)
         assert "Imunon" in text
@@ -195,7 +190,7 @@ class TestRichDisplay:
 
     @pytest.mark.vcr
     def test_str_produces_output(self):
-        filing = find("0001493152-25-029712")
+        filing = offline_filing("0001493152-25-029712")
         p = Prospectus424B.from_filing(filing)
         text = str(p)
         assert "Prospectus424B" in text
@@ -212,7 +207,7 @@ class TestFilingFees:
     @pytest.mark.vcr
     def test_imunon_no_filing_fees(self):
         """Imunon 424B5 may or may not have filing fees exhibit."""
-        filing = find("0001493152-25-029712")
+        filing = offline_filing("0001493152-25-029712")
         p = Prospectus424B.from_filing(filing)
         # Just verify it doesn't crash — coverage varies
         assert isinstance(p.filing_fees.has_exhibit, bool)
@@ -228,7 +223,7 @@ class TestTableClassification:
     @pytest.mark.vcr
     def test_traws_pharma_has_pricing_table(self):
         """Traws Pharma 424B4 should have a pricing table."""
-        filing = find("0001104659-24-132924")
+        filing = offline_filing("0001104659-24-132924")
         p = Prospectus424B.from_filing(filing)
         assert p.pricing is not None
         assert len(p.pricing.columns) == 2
@@ -237,7 +232,7 @@ class TestTableClassification:
     @pytest.mark.vcr
     def test_traws_pharma_pricing_values(self):
         """Traws Pharma pricing: per-share price = $5.103."""
-        filing = find("0001104659-24-132924")
+        filing = offline_filing("0001104659-24-132924")
         p = Prospectus424B.from_filing(filing)
         assert p.pricing is not None
         per_share = p.pricing.columns[0]
@@ -248,7 +243,7 @@ class TestTableClassification:
     @pytest.mark.vcr
     def test_traws_pharma_has_dilution(self):
         """Traws Pharma has a dilution table."""
-        filing = find("0001104659-24-132924")
+        filing = offline_filing("0001104659-24-132924")
         p = Prospectus424B.from_filing(filing)
         assert p.dilution is not None
         assert p.dilution.public_offering_price == "$5.103"
@@ -257,7 +252,7 @@ class TestTableClassification:
     @pytest.mark.vcr
     def test_traws_pharma_has_capitalization(self):
         """Traws Pharma has a capitalization table."""
-        filing = find("0001104659-24-132924")
+        filing = offline_filing("0001104659-24-132924")
         p = Prospectus424B.from_filing(filing)
         assert p.capitalization is not None
         assert p.capitalization.cash_actual == "5,410,000"
@@ -267,14 +262,14 @@ class TestTableClassification:
     @pytest.mark.vcr
     def test_nextera_atm_no_pricing(self):
         """NextEra ATM offering should have no pricing table."""
-        filing = find("0001193125-25-338333")
+        filing = offline_filing("0001193125-25-338333")
         p = Prospectus424B.from_filing(filing)
         assert p.pricing is None
 
     @pytest.mark.vcr
     def test_nextera_atm_no_dilution(self):
         """NextEra ATM has no dilution or capitalization."""
-        filing = find("0001193125-25-338333")
+        filing = offline_filing("0001193125-25-338333")
         p = Prospectus424B.from_filing(filing)
         assert p.dilution is None
         assert p.capitalization is None
@@ -360,7 +355,7 @@ class TestUnderwritingExtraction:
     @pytest.mark.vcr
     def test_traws_pharma_placement_agent(self):
         """Traws Pharma has a sole placement agent from cover page text."""
-        filing = find("0001104659-24-132924")
+        filing = offline_filing("0001104659-24-132924")
         p = Prospectus424B.from_filing(filing)
         assert p.underwriting is not None
         assert p.underwriting.lead_manager is not None
@@ -370,7 +365,7 @@ class TestUnderwritingExtraction:
     @pytest.mark.vcr
     def test_nextera_atm_no_underwriting(self):
         """NextEra ATM: sales agents may or may not appear as underwriting."""
-        filing = find("0001193125-25-338333")
+        filing = offline_filing("0001193125-25-338333")
         p = Prospectus424B.from_filing(filing)
         # ATMs may have sales agents or no underwriting - both are valid
         if p.underwriting is not None:
@@ -387,7 +382,7 @@ class TestStructuredNoteTerms:
     @pytest.mark.vcr
     def test_bofa_structured_note_terms(self):
         """BofA structured note should have key terms."""
-        filing = find("0001918704-24-002559")
+        filing = offline_filing("0001918704-24-002559")
         p = Prospectus424B.from_filing(filing)
         # Structured note should have key terms table
         if p.structured_note_terms is not None:
@@ -406,7 +401,7 @@ class TestSellingStockholders:
     @pytest.mark.vcr
     def test_imunon_no_selling_stockholders(self):
         """Imunon best-efforts has no selling stockholders."""
-        filing = find("0001493152-25-029712")
+        filing = offline_filing("0001493152-25-029712")
         p = Prospectus424B.from_filing(filing)
         assert p.selling_stockholders is None
 
@@ -421,7 +416,7 @@ class TestShelfLifecycle:
     @pytest.mark.vcr
     def test_lifecycle_returns_shelf_lifecycle(self):
         """lifecycle property should return a ShelfLifecycle object."""
-        filing = find("0001214659-26-002941")  # Alzamend 424B5
+        filing = offline_filing("0001214659-26-002941")  # Alzamend 424B5
         p = Prospectus424B.from_filing(filing)
         lc = p.lifecycle
         assert lc is not None
@@ -430,7 +425,7 @@ class TestShelfLifecycle:
     @pytest.mark.vcr
     def test_alzamend_shelf_filed_date(self):
         """Alzamend shelf was filed 2023-08-02."""
-        filing = find("0001214659-26-002941")
+        filing = offline_filing("0001214659-26-002941")
         p = Prospectus424B.from_filing(filing)
         lc = p.lifecycle
         assert lc is not None
@@ -439,7 +434,7 @@ class TestShelfLifecycle:
     @pytest.mark.vcr
     def test_alzamend_takedown_position(self):
         """Alzamend 424B5 is takedown #5 of 5."""
-        filing = find("0001214659-26-002941")
+        filing = offline_filing("0001214659-26-002941")
         p = Prospectus424B.from_filing(filing)
         lc = p.lifecycle
         assert lc is not None
@@ -450,7 +445,7 @@ class TestShelfLifecycle:
     @pytest.mark.vcr
     def test_alzamend_shelf_registration(self):
         """Shelf registration should be an S-3 variant."""
-        filing = find("0001214659-26-002941")
+        filing = offline_filing("0001214659-26-002941")
         p = Prospectus424B.from_filing(filing)
         lc = p.lifecycle
         assert lc is not None
@@ -461,7 +456,7 @@ class TestShelfLifecycle:
     @pytest.mark.vcr
     def test_alzamend_effective_date(self):
         """Alzamend shelf was declared effective on 2023-08-10."""
-        filing = find("0001214659-26-002941")
+        filing = offline_filing("0001214659-26-002941")
         p = Prospectus424B.from_filing(filing)
         lc = p.lifecycle
         assert lc is not None
@@ -470,7 +465,7 @@ class TestShelfLifecycle:
     @pytest.mark.vcr
     def test_alzamend_review_period(self):
         """S-3 to EFFECT was 8 days."""
-        filing = find("0001214659-26-002941")
+        filing = offline_filing("0001214659-26-002941")
         p = Prospectus424B.from_filing(filing)
         lc = p.lifecycle
         assert lc is not None
@@ -485,7 +480,7 @@ class TestShelfLifecycle:
         (edgartools-fu3x).
         """
         from datetime import date
-        filing = find("0001214659-26-002941")
+        filing = offline_filing("0001214659-26-002941")
         p = Prospectus424B.from_filing(filing)
         lc = p.lifecycle
         assert lc is not None
@@ -494,7 +489,7 @@ class TestShelfLifecycle:
     @pytest.mark.vcr
     def test_alzamend_cadence(self):
         """Average days between takedowns should be positive."""
-        filing = find("0001214659-26-002941")
+        filing = offline_filing("0001214659-26-002941")
         p = Prospectus424B.from_filing(filing)
         lc = p.lifecycle
         assert lc is not None
@@ -504,7 +499,7 @@ class TestShelfLifecycle:
     @pytest.mark.vcr
     def test_alzamend_filings_returns_full_set(self):
         """filings property should return all related filings."""
-        filing = find("0001214659-26-002941")
+        filing = offline_filing("0001214659-26-002941")
         p = Prospectus424B.from_filing(filing)
         lc = p.lifecycle
         assert lc is not None
@@ -513,7 +508,7 @@ class TestShelfLifecycle:
     @pytest.mark.vcr
     def test_imunon_lifecycle_accessible(self):
         """Imunon 424B5 should have an accessible lifecycle."""
-        filing = find("0001493152-25-029712")
+        filing = offline_filing("0001493152-25-029712")
         p = Prospectus424B.from_filing(filing)
         lc = p.lifecycle
         # lifecycle may or may not be available depending on filing metadata
@@ -526,22 +521,43 @@ class TestShelfLifecycle:
     @pytest.mark.vcr
     def test_backward_compat_shelf_registration(self):
         """Prospectus424B.shelf_registration should delegate to lifecycle."""
-        filing = find("0001214659-26-002941")
+        filing = offline_filing("0001214659-26-002941")
         p = Prospectus424B.from_filing(filing)
         assert p.shelf_registration is not None
         assert p.shelf_registration is p.lifecycle.shelf_registration
 
     @pytest.mark.vcr
     def test_backward_compat_related_filings(self):
-        """Prospectus424B.related_filings should delegate to lifecycle."""
-        filing = find("0001214659-26-002941")
+        """Prospectus424B.related_filings should delegate to lifecycle.
+
+        `is not None` did not test the delegation at all -- any non-empty
+        result, from any file number, satisfied it. What is asserted instead is
+        that the property returns exactly what the lifecycle returns, and that
+        the set is Alzamend's shelf: the 2023 S-3, its EFFECT notice, and the
+        five takedowns off it, ending with this filing.
+        """
+        filing = offline_filing("0001214659-26-002941")
         p = Prospectus424B.from_filing(filing)
-        assert p.related_filings is not None
+
+        related = p.related_filings
+        assert related is not None
+        accessions = [f.accession_no for f in related]
+        assert accessions == [f.accession_no for f in p.lifecycle.filings], \
+            "related_filings does not return the lifecycle's filings"
+        assert accessions == [
+            "0001214659-23-010661",   # S-3, 2023-08-02
+            "9999999995-23-002345",   # EFFECT, 2023-08-10
+            "0001214659-23-012226",   # 424B5
+            "0001214659-24-008532",   # 424B5
+            "0001214659-24-008760",   # 424B5
+            "0001214659-24-017145",   # 424B5
+            "0001214659-26-002941",   # 424B5 — this filing
+        ], f"shelf resolved to {accessions}"
 
     @pytest.mark.vcr
     def test_lifecycle_rich_display(self):
         """Rich display should render without error."""
-        filing = find("0001214659-26-002941")
+        filing = offline_filing("0001214659-26-002941")
         p = Prospectus424B.from_filing(filing)
         lc = p.lifecycle
         assert lc is not None
@@ -552,7 +568,7 @@ class TestShelfLifecycle:
     @pytest.mark.vcr
     def test_lifecycle_str(self):
         """str() should produce readable summary."""
-        filing = find("0001214659-26-002941")
+        filing = offline_filing("0001214659-26-002941")
         p = Prospectus424B.from_filing(filing)
         lc = p.lifecycle
         assert lc is not None
@@ -633,21 +649,21 @@ class TestDeal:
     @pytest.mark.vcr
     def test_deal_always_returned(self):
         """prospectus.deal never returns None."""
-        filing = find("0001214659-26-002941")  # Alzamend 424B5
+        filing = offline_filing("0001214659-26-002941")  # Alzamend 424B5
         p = Prospectus424B.from_filing(filing)
         assert isinstance(p.deal, Deal)
 
     @pytest.mark.vcr
     def test_deal_is_cached(self):
         """deal property returns same instance on repeated access."""
-        filing = find("0001214659-26-002941")
+        filing = offline_filing("0001214659-26-002941")
         p = Prospectus424B.from_filing(filing)
         assert p.deal is p.deal
 
     @pytest.mark.vcr
     def test_alzamend_offering_type(self):
         """Alzamend is an ATM offering."""
-        filing = find("0001214659-26-002941")
+        filing = offline_filing("0001214659-26-002941")
         p = Prospectus424B.from_filing(filing)
         deal = p.deal
         assert deal.offering_type == OfferingType.ATM
@@ -656,7 +672,7 @@ class TestDeal:
     @pytest.mark.vcr
     def test_alzamend_security_type(self):
         """Alzamend offers common stock."""
-        filing = find("0001214659-26-002941")
+        filing = offline_filing("0001214659-26-002941")
         p = Prospectus424B.from_filing(filing)
         deal = p.deal
         assert deal.security_type is not None
@@ -665,7 +681,7 @@ class TestDeal:
     @pytest.mark.vcr
     def test_traws_pharma_price(self):
         """Traws Pharma per-share price from pricing table = $5.103."""
-        filing = find("0001104659-24-132924")
+        filing = offline_filing("0001104659-24-132924")
         p = Prospectus424B.from_filing(filing)
         deal = p.deal
         assert deal.price == pytest.approx(5.103, abs=0.01)
@@ -673,7 +689,7 @@ class TestDeal:
     @pytest.mark.vcr
     def test_traws_pharma_fee_per_share(self):
         """Traws Pharma has placement agent fee per share."""
-        filing = find("0001104659-24-132924")
+        filing = offline_filing("0001104659-24-132924")
         p = Prospectus424B.from_filing(filing)
         deal = p.deal
         assert deal.fee_per_share is not None
@@ -682,7 +698,7 @@ class TestDeal:
     @pytest.mark.vcr
     def test_traws_pharma_discount_rate(self):
         """Discount rate is fee_per_share / price."""
-        filing = find("0001104659-24-132924")
+        filing = offline_filing("0001104659-24-132924")
         p = Prospectus424B.from_filing(filing)
         deal = p.deal
         if deal.discount_rate is not None:
@@ -691,7 +707,7 @@ class TestDeal:
     @pytest.mark.vcr
     def test_traws_pharma_dilution(self):
         """Traws Pharma has dilution data: $5.046/share."""
-        filing = find("0001104659-24-132924")
+        filing = offline_filing("0001104659-24-132924")
         p = Prospectus424B.from_filing(filing)
         deal = p.deal
         assert deal.dilution_per_share == pytest.approx(5.046, abs=0.01)
@@ -699,7 +715,7 @@ class TestDeal:
     @pytest.mark.vcr
     def test_traws_pharma_gross_proceeds(self):
         """Traws Pharma gross proceeds from pricing table total column."""
-        filing = find("0001104659-24-132924")
+        filing = offline_filing("0001104659-24-132924")
         p = Prospectus424B.from_filing(filing)
         deal = p.deal
         assert deal.gross_proceeds is not None
@@ -708,7 +724,7 @@ class TestDeal:
     @pytest.mark.vcr
     def test_traws_pharma_net_proceeds(self):
         """Traws Pharma net proceeds from pricing table total column."""
-        filing = find("0001104659-24-132924")
+        filing = offline_filing("0001104659-24-132924")
         p = Prospectus424B.from_filing(filing)
         deal = p.deal
         assert deal.net_proceeds is not None
@@ -718,7 +734,7 @@ class TestDeal:
     @pytest.mark.vcr
     def test_traws_pharma_underwriting(self):
         """Traws Pharma has Tungsten Advisors as placement agent."""
-        filing = find("0001104659-24-132924")
+        filing = offline_filing("0001104659-24-132924")
         p = Prospectus424B.from_filing(filing)
         deal = p.deal
         assert deal.lead_bookrunner is not None
@@ -728,7 +744,7 @@ class TestDeal:
     @pytest.mark.vcr
     def test_bofa_structured_note_graceful(self):
         """BofA 424B2 structured note: most equity fields should be None."""
-        filing = find("0001918704-24-002559")
+        filing = offline_filing("0001918704-24-002559")
         p = Prospectus424B.from_filing(filing)
         deal = p.deal
         assert isinstance(deal, Deal)
@@ -739,7 +755,7 @@ class TestDeal:
     @pytest.mark.vcr
     def test_to_dict_no_none_values(self):
         """to_dict() should not contain any None values."""
-        filing = find("0001104659-24-132924")
+        filing = offline_filing("0001104659-24-132924")
         p = Prospectus424B.from_filing(filing)
         d = p.deal.to_dict()
         for key, val in d.items():
@@ -750,7 +766,7 @@ class TestDeal:
     @pytest.mark.vcr
     def test_to_dict_has_core_fields(self):
         """to_dict() for Traws Pharma should have price and gross_proceeds."""
-        filing = find("0001104659-24-132924")
+        filing = offline_filing("0001104659-24-132924")
         p = Prospectus424B.from_filing(filing)
         d = p.deal.to_dict()
         assert 'price' in d
@@ -759,7 +775,7 @@ class TestDeal:
     @pytest.mark.vcr
     def test_to_context_produces_text(self):
         """to_context() should produce readable LLM context."""
-        filing = find("0001104659-24-132924")
+        filing = offline_filing("0001104659-24-132924")
         p = Prospectus424B.from_filing(filing)
         ctx = p.deal.to_context()
         assert "DEAL SUMMARY" in ctx
@@ -768,7 +784,7 @@ class TestDeal:
     @pytest.mark.vcr
     def test_deal_repr(self):
         """repr() should produce rich output without crashing."""
-        filing = find("0001104659-24-132924")
+        filing = offline_filing("0001104659-24-132924")
         p = Prospectus424B.from_filing(filing)
         text = repr(p.deal)
         assert "Deal" in text
@@ -776,7 +792,7 @@ class TestDeal:
     @pytest.mark.vcr
     def test_deal_str(self):
         """str() should produce readable summary."""
-        filing = find("0001104659-24-132924")
+        filing = offline_filing("0001104659-24-132924")
         p = Prospectus424B.from_filing(filing)
         text = str(p.deal)
         assert "Deal" in text
@@ -796,6 +812,7 @@ class TestDilutionDollarPrefix:
     @staticmethod
     def _table(rows):
         from types import SimpleNamespace
+
         from edgar.documents.table_nodes import Cell, Row
         return SimpleNamespace(rows=[
             Row(cells=[Cell(content=c) for c in cells]) for cells in rows

@@ -10,6 +10,8 @@ The core library already supports 20-F and 6-K - the gap was only in the MCP lay
 - SixK = CurrentReport alias exists
 - IFRS tags exist in statement_resolver.py alongside US-GAAP
 - Missing: Section maps in MCP edgar_filing tool
+
+GitHub PR: https://github.com/dgunning/edgartools/pull/660
 """
 
 import logging
@@ -277,52 +279,98 @@ class TestExtractSectionDoesNotUseAttributeAccess:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.network
 class TestFPIIntegration:
     """Integration tests for real FPI filings."""
 
+    @staticmethod
+    def _latest_original_20f():
+        """BioNTech's most recent 20-F, excluding amendments.
+
+        ``get_filings(form="20-F")`` returns 20-F/A alongside 20-F, and the
+        newest filing is often an amendment. That matters: an amendment carries
+        only the parts being amended, so BNTX's 2026-07-30 20-F/A has no Item 4
+        at all and its 2026-04-01 20-F/A has no income statement. Both tests
+        below took ``filings[0]`` and so silently tested whichever of those
+        happened to be newest -- which is why neither could afford to assert
+        anything. Anchoring on the original filing is what makes the assertions
+        below possible.
+        """
+        from edgar import Company
+
+        filings = Company("BNTX").get_filings(form="20-F")
+        assert len(filings) > 0, "BioNTech should have 20-F filings"
+        originals = [f for f in filings if f.form == "20-F"]
+        assert originals, (
+            f"BNTX returned {len(filings)} filings but none was an unamended "
+            "20-F, so there is nothing to extract a full annual report from"
+        )
+        return originals[0]
+
+    @pytest.mark.network
     def test_biontech_20f_business_section(self):
         """Extract business section from real BioNTech 20-F filing."""
-        from edgar import Company
-
-        company = Company("BNTX")
-        filings = company.get_filings(form="20-F")
-        assert len(filings) > 0, "BioNTech should have 20-F filings"
-
-        filing = filings[0]
-        obj = filing.obj()
+        obj = self._latest_original_20f().obj()
         assert obj is not None, "Should be able to create TwentyF object"
 
-        # Try to get business section
         business = obj["Item 4"]
-        # Business section may or may not be present depending on parsing
-        # Just verify no exception is raised
+        assert business is not None, (
+            "Item 4 (Information on the Company) is absent. This test used to "
+            "discard the result and assert nothing, so it reported green while "
+            "extracting nothing at all."
+        )
+        # Item 4 is the bulk of a 20-F -- every BNTX original runs 330k-430k
+        # characters. The floor is deliberately far below that: the claim is
+        # that a real business section came back, not that it is a given size.
+        text = str(business)
+        assert len(text) > 50_000, (
+            f"Item 4 extracted only {len(text)} characters; a 20-F business "
+            "section is the largest item in the filing"
+        )
+        assert "BioNTech" in text, "Item 4 does not mention the registrant"
 
+    @pytest.mark.network
     def test_biontech_20f_financials(self):
         """Access financials from real BioNTech 20-F (IFRS format)."""
+        obj = self._latest_original_20f().obj()
+
+        fin = getattr(obj, 'financials', None)
+        assert fin is not None, (
+            "TwentyF.financials is None for BioNTech, so IFRS financial access "
+            "-- the thing this test is named for -- does not work"
+        )
+
+        income = fin.income_statement()
+        assert income is not None, "income_statement() returned None for an IFRS filer"
+        df = income.to_dataframe()
+        assert not df.empty, "the IFRS income statement rendered no rows"
+
+        # IFRS, not US-GAAP: the taxonomy is the point of FPI support. BioNTech
+        # reports under IFRS and its income statement is rooted at the IFRS
+        # `Profit or loss` presentation, with `Revenues` rather than us-gaap's
+        # `RevenueFromContractWithCustomer...` labelling.
+        labels = {str(v).lower() for v in df['label']}
+        assert any('revenue' in v for v in labels), (
+            f"no revenue line in the IFRS income statement; labels were {sorted(labels)[:15]}"
+        )
+
+    @pytest.mark.fast
+    def test_fpi_ticker_resolves_to_cik(self):
+        """An FPI ticker resolves to its CIK from the local reference data.
+
+        This was called `test_company_financials_for_fpi` and its docstring
+        claimed it returned financials for FPI companies. It asserted
+        `company is not None` and `company.cik is not None` and stopped, so it
+        never touched financials -- `test_biontech_20f_financials` above is
+        what actually does. An offline audit found it passing with sockets
+        blocked, which is the tell: ticker resolution reads a local file.
+
+        Renamed to what it checks, and given the CIK so it can fail. Ticker
+        resolution is worth protecting on its own -- every FPI code path in the
+        MCP layer starts here.
+        """
         from edgar import Company
 
         company = Company("BNTX")
-        filings = company.get_filings(form="20-F")
-        assert len(filings) > 0
-
-        filing = filings[0]
-        obj = filing.obj()
-
-        # Try to access financials (should work for IFRS filers)
-        if hasattr(obj, 'financials') and obj.financials is not None:
-            fin = obj.financials
-            # Just verify we can access without exception
-            try:
-                _ = fin.income_statement()
-            except Exception as e:
-                logger.debug("Filing has no XBRL data or income_statement failed: %s", e)
-
-    def test_company_financials_for_fpi(self):
-        """edgar_company should return financials for FPI companies."""
-        from edgar import Company
-
-        company = Company("BNTX")
-        # Just verify the company can be accessed
-        assert company is not None
-        assert company.cik is not None
+        assert company.cik == 1776985, (
+            f"BNTX should resolve to BioNTech SE, CIK 1776985; got {company.cik}"
+        )

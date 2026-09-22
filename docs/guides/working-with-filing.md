@@ -156,6 +156,14 @@ text = filing.text()
 print(text[:500])  # First 500 characters
 ```
 
+Images contribute nothing by default. To mark where they were — useful when a
+chart carries content the surrounding prose does not repeat:
+
+```python
+text = filing.text(include_images=True)
+# ... [Image: nvidialogoa10.jpg] ...
+```
+
 ### Get Markdown
 
 ```python
@@ -166,11 +174,17 @@ with open("filing.md", "w") as f:
     f.write(md)
 ```
 
-With page breaks:
+Images are rendered as Markdown image links with absolute SEC archive URLs, so
+charts that exist only as images — a 10-K's stock performance graph, for example
+— survive into the export and stay viewable.
 
-```python
-md = filing.markdown(include_page_breaks=True, start_page_number=1)
-```
+!!! warning "`include_page_breaks` is deprecated"
+
+    `filing.markdown(include_page_breaks=True, start_page_number=1)` inserts
+    `{N}----` delimiters, but page-break rendering exists only in the legacy
+    renderer, so the flag routes the whole document through it — and that
+    renderer drops every image and formats tables differently. It will be
+    removed in 6.0. Prefer `filing.markdown()`.
 
 ### Get XML
 
@@ -489,8 +503,8 @@ for filing in filings:
 company = Company("NVDA")
 filing = company.get_filings(form="10-K").latest()
 
-# Export to markdown
-md = filing.markdown(include_page_breaks=True)
+# Export to markdown — tables, links and images all preserved
+md = filing.markdown()
 
 # Save for processing
 with open("nvidia_10k_for_analysis.md", "w") as f:

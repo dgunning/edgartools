@@ -1,6 +1,0 @@
-Company: HUBSPOT INC
-CIK: 1404655
-Form: 10-K
-Filing Date: 2023-02-16
-Accession No: 0000950170-23-003077
-URL: https://www.sec.gov/Archives/edgar/data/1404655/0000950170-23-003077-index.html

@@ -10,6 +10,8 @@ it always silently fell through and returned all series.
 
 The fix adds EFTSSearch.to_filings() and rewrites the series_only path to page
 through the EFTS hits and convert them to a Filings index.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/843
 """
 from datetime import date
 

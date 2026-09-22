@@ -1,0 +1,222 @@
+{
+ "0001971857-23-000246-index-headers.html": {
+  "acceptance_datetime": "2023-06-12T15:05:50",
+  "accession_number": "0001971857-23-000246",
+  "date_of_filing_date_change": "2023-06-12",
+  "effectiveness_date": null,
+  "filer": null,
+  "filing_date": "2023-06-12",
+  "form": "144",
+  "issuer": null,
+  "items": [],
+  "period": null,
+  "public_document_count": 1,
+  "reporting_owner": {
+   "company_data": {
+    "assigned_sic": null,
+    "cik": "0001701746",
+    "conformed_name": "Hendrian Catherine A",
+    "fiscal_year_end": null,
+    "irs_number": null,
+    "organization_name": null
+   },
+   "filing_values": {
+    "act": "",
+    "file_number": "",
+    "film_number": "",
+    "form_type": "144"
+   },
+   "mail_address": {
+    "city": "JACKSON",
+    "state_or_country": "MI",
+    "state_or_country_description": null,
+    "street1": "ONE ENERGY PLAZA",
+    "street2": null,
+    "zipcode": "49201"
+   },
+   "owner_data": null
+  },
+  "subject_company": {
+   "business_address": {
+    "city": "JACKSON",
+    "state_or_country": "MI",
+    "state_or_country_description": null,
+    "street1": "ONE ENERGY PLAZA",
+    "street2": null,
+    "zipcode": "49201"
+   },
+   "company_data": {
+    "assigned_sic": "4931",
+    "cik": "0000201533",
+    "conformed_name": "CONSUMERS ENERGY CO",
+    "fiscal_year_end": "1231",
+    "irs_number": "380442310",
+    "organization_name": null
+   },
+   "filing_values": {
+    "act": "33",
+    "file_number": "001-05611",
+    "film_number": "231007818",
+    "form_type": "144"
+   },
+   "former_company": [],
+   "mail_address": {
+    "city": "JACKSON",
+    "state_or_country": "MI",
+    "state_or_country_description": null,
+    "street1": "ONE ENERGY PLAZA",
+    "street2": null,
+    "zipcode": "49201"
+   }
+  }
+ },
+ "23AndMe.index-headers.html": {
+  "acceptance_datetime": "2024-06-03T08:06:02",
+  "accession_number": "0001193125-24-152391",
+  "date_of_filing_date_change": "2024-06-03",
+  "effectiveness_date": null,
+  "filer": {
+   "business_address": {
+    "city": "SOUTH SAN FRANCISCO",
+    "state_or_country": "CA",
+    "state_or_country_description": null,
+    "street1": "349 OYSTER POINT BOULEVARD",
+    "street2": null,
+    "zipcode": "94080"
+   },
+   "company_data": {
+    "assigned_sic": "2834",
+    "cik": "0001804591",
+    "conformed_name": "23andMe Holding Co.",
+    "fiscal_year_end": "0331",
+    "irs_number": "871240344",
+    "organization_name": "03 Life Sciences"
+   },
+   "filing_values": {
+    "act": "34",
+    "file_number": "001-39587",
+    "film_number": "241012050",
+    "form_type": "8-K"
+   },
+   "former_company": [],
+   "mail_address": {
+    "city": "SOUTH SAN FRANCISCO",
+    "state_or_country": "CA",
+    "state_or_country_description": null,
+    "street1": "349 OYSTER POINT BOULEVARD",
+    "street2": null,
+    "zipcode": "94080"
+   }
+  },
+  "filing_date": "2024-06-03",
+  "form": "8-K",
+  "issuer": null,
+  "items": [
+   "7.01",
+   "9.01"
+  ],
+  "period": "20240603",
+  "public_document_count": 14,
+  "reporting_owner": null,
+  "subject_company": null
+ },
+ "form4.index-headers.html": {
+  "__error__": "IndexError: list index out of range"
+ },
+ "index-headers.html": {
+  "acceptance_datetime": "2024-06-03T16:08:21",
+  "accession_number": "0000905729-24-000095",
+  "date_of_filing_date_change": "2024-06-03",
+  "effectiveness_date": null,
+  "filer": {
+   "business_address": {
+    "city": "SPARTA",
+    "state_or_country": "MI",
+    "state_or_country_description": null,
+    "street1": "109 E DIVISION",
+    "street2": "P O BOX 186",
+    "zipcode": "49345-0186"
+   },
+   "company_data": {
+    "assigned_sic": "6022",
+    "cik": "0000803164",
+    "conformed_name": "CHOICEONE FINANCIAL SERVICES INC",
+    "fiscal_year_end": "1231",
+    "irs_number": "382659066",
+    "organization_name": "02 Finance"
+   },
+   "filing_values": {
+    "act": "34",
+    "file_number": "001-39209",
+    "film_number": "241013654",
+    "form_type": "8-K"
+   },
+   "former_company": [],
+   "mail_address": {
+    "city": "SPARTA",
+    "state_or_country": "MI",
+    "state_or_country_description": null,
+    "street1": "109 EAST DIVISION",
+    "street2": "P O BOX 186",
+    "zipcode": "49345-0186"
+   }
+  },
+  "filing_date": "2024-06-03",
+  "form": "8-K",
+  "issuer": null,
+  "items": [
+   "5.07"
+  ],
+  "period": "20240529",
+  "public_document_count": 13,
+  "reporting_owner": null,
+  "subject_company": null
+ },
+ "objectivecapital.form144-index-headers.html": {
+  "acceptance_datetime": "2024-06-05T14:37:19",
+  "accession_number": "0001924152-24-000002",
+  "date_of_filing_date_change": "2024-06-05",
+  "effectiveness_date": "20240605",
+  "filer": {
+   "business_address": {
+    "city": "PEPPER PIKE",
+    "state_or_country": "OH",
+    "state_or_country_description": null,
+    "street1": "29325 CHAGRIN BLVD., SUITE 204",
+    "street2": null,
+    "zipcode": "44122"
+   },
+   "company_data": {
+    "assigned_sic": null,
+    "cik": "0001924152",
+    "conformed_name": "Objective Capital Management, LLC",
+    "fiscal_year_end": "1231",
+    "irs_number": "274511658",
+    "organization_name": ""
+   },
+   "filing_values": {
+    "act": "34",
+    "file_number": "028-22421",
+    "film_number": "241021676",
+    "form_type": "13F-HR"
+   },
+   "former_company": [],
+   "mail_address": {
+    "city": "PEPPER PIKE",
+    "state_or_country": "OH",
+    "state_or_country_description": null,
+    "street1": "29325 CHAGRIN BLVD., SUITE 204",
+    "street2": null,
+    "zipcode": "44122"
+   }
+  },
+  "filing_date": "2024-06-05",
+  "form": "13F-HR",
+  "issuer": null,
+  "items": [],
+  "period": "20240331",
+  "public_document_count": 2,
+  "reporting_owner": null,
+  "subject_company": null
+ }
+}

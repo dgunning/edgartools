@@ -61,6 +61,25 @@ _AMENDMENT_RE = re.compile(
 )
 
 
+def _html_to_text(html: str) -> str:
+    """``BeautifulSoup(html, 'lxml').get_text(separator=' ', strip=True)``.
+
+    The variant lxml has no equivalent for: strip each string, drop the ones left
+    empty, join the rest with a single space. ``text_content()`` is NOT this -- it
+    joins with nothing, so a cover page that typesets "FORM" and "S-1" in adjacent
+    cells reads as "FORMS-1" and the detector below finds nothing.
+
+    ``remove_comments=False`` because a comment can fall inside a form name, and
+    dropping one at parse time merges the text either side of it into a single
+    node -- stripped once rather than twice. Both details, and the
+    <script>/<style>/<template> exclusion, are documented on the shared helper
+    (edgartools-07lk.11.12).
+    """
+    from edgar.documents.utils.html_utils import html_to_text
+
+    return html_to_text(html, separator=' ', remove_comments=False)
+
+
 def _detect_underlying_form(html: str) -> tuple[str, Optional[int]]:
     """Detect the underlying form type from DRS HTML content.
 
@@ -68,10 +87,7 @@ def _detect_underlying_form(html: str) -> tuple[str, Optional[int]]:
     detection fails. amendment_number is None if not an amendment or
     the number cannot be determined.
     """
-    from bs4 import BeautifulSoup
-
-    soup = BeautifulSoup(html, 'lxml')
-    text = soup.get_text(separator=' ', strip=True)
+    text = _html_to_text(html)
     cover = text[:8000]
 
     # Detect form type

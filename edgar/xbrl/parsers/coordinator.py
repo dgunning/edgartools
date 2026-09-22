@@ -61,6 +61,8 @@ class XBRLParser:
         # Definition (dimensional) structures
         self.definition_roles: Dict[str, Dict[str, Any]] = {}
         self.tables: Dict[str, List[Table]] = {}
+        # Merged views over the role-scoped stores below, kept for callers that
+        # ask about a concept without naming a role
         self.axes: Dict[str, Axis] = {}
         self.domains: Dict[str, Domain] = {}
 
@@ -292,6 +294,24 @@ class XBRLParser:
     def parse_definition(self, file_path: Union[str, Path]) -> None:
         """Parse definition linkbase file and build dimensional structures."""
         return self.definition_parser.parse_definition(file_path)
+
+    @property
+    def axes_by_role(self) -> Dict[str, Dict[str, Axis]]:
+        """The role-scoped axis store the merged `axes` view is derived from."""
+        return self.definition_parser.axes_by_role
+
+    @property
+    def domains_by_role(self) -> Dict[str, Dict[str, Domain]]:
+        """The role-scoped domain store the merged `domains` view is derived from."""
+        return self.definition_parser.domains_by_role
+
+    def axes_for_role(self, role_uri: str) -> Dict[str, Axis]:
+        """The axes declared for one extended link role, keyed on element ID."""
+        return self.definition_parser.axes_for_role(role_uri)
+
+    def domains_for_role(self, role_uri: str) -> Dict[str, Domain]:
+        """The domains declared for one extended link role, keyed on element ID."""
+        return self.definition_parser.domains_for_role(role_uri)
 
     def parse_definition_content(self, content: str) -> None:
         """Parse definition linkbase content and build dimensional structures."""

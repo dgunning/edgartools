@@ -122,7 +122,7 @@ patterns:
       margin = net_income / revenue                      # Example calculation
       income = financials.income_statement()             # 3-year income table
       balance = financials.balance_sheet()               # 2-year balance table
-      cashflow = financials.cashflow_statement()         # 3-year cash flow table
+      cashflow = financials.cash_flow_statement()         # 3-year cash flow table
 
       # ONLY for 4+ year history (slower, more data):
       facts = company.get_facts()
@@ -174,7 +174,50 @@ patterns:
       for filing in filings:
           data = filing.obj()               # Cached after first download
 
+errors: |
+  # One vocabulary, four branches. Catch the BRANCH, not the leaf.
+  from edgar.exceptions import EdgarError, TransportError, NotFoundError, ParsingError, ValidationError
+
+  #   TransportError   we could not get an answer from SEC  (outage, rate limit, TLS, no identity)
+  #   NotFoundError    you named a thing and it does not exist
+  #   ParsingError     we got the bytes and could not build the object
+  #   ValidationError  your input was wrong before we ever asked   (IS-A ValueError)
+  #   EdgarError       the root — everything above is one of these
+
+  try:
+      financials = Company("AAPL").get_financials()
+  except TransportError:
+      ...   # never reached SEC — retry later; the data is probably fine
+  except NotFoundError:
+      ...   # SEC answered and there is no such thing — retrying will not help
+  except EdgarError:
+      ...   # outer net
+
+  # NEVER catch httpx types (httpx.ReadTimeout, httpx.HTTPStatusError) around
+  # edgartools calls. TransportError is the supported type; the httpx original
+  # is on exc.__cause__ if you need it. exc.status_code is None means we never
+  # got an HTTP answer at all, which is different from SEC answering with 404.
+
+  # None NEVER means failure. Where a call can legitimately answer "no such
+  # thing" it returns None and its docstring names that exact condition;
+  # everything else raises. filing.xbrl() is None only when the filing truly has
+  # no XBRL — during an outage it raises.
+
+  # Absent-item lookups have a non-raising form; use it when absence is fine:
+  tenk["Item 7"]              # the item you expect
+  tenk.get("Item 16", "")     # the item that may not be there
+
+  # EDGARTOOLS_STRICT_ERRORS=1 turns on 6.0 error behaviour today.
+
 avoid:
+  - pattern: "except httpx.ReadTimeout:"
+    fix: "except TransportError:  # from edgar.exceptions"
+    why: httpx types reach you by accident, not by contract; 6.0 raises TransportError instead
+
+  - pattern: "if company.get_financials() is None: print('request failed')"
+    fix: "None means this company filed no annual report; a failure raises"
+    why: treating None as failure hides the real error and invents one that did not happen
+
   - pattern: "for f in company.get_filings(): process(f)"
     fix: "for f in company.get_filings(form='10-K').head(10): process(f)"
     why: get_filings() can return 500+ results; each .obj() is a network call

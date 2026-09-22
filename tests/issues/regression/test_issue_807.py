@@ -18,6 +18,8 @@ Acceptance criteria from the issue:
 1. ALGN balance sheet and income statement scaling agree
 2. ABNB scaling consistent across years
 3. Canary 5-ticker subset shows only ``{1, 1_000, 1_000_000}``
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/807
 """
 from __future__ import annotations
 

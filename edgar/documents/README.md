@@ -76,7 +76,6 @@ config = ParserConfig(
     # Performance
     use_cache=True,
     cache_size=10000,
-    streaming_threshold=50_000_000,  # 50MB
     max_document_size=500_000_000,   # 500MB
     
     # Processing
@@ -251,18 +250,13 @@ for cache_name, cache_stats in stats.items():
     print(f"{cache_name}: Hit rate: {cache_stats.hit_rate:.2%}")
 ```
 
-### Streaming Parser
+### Large Documents
 
-For documents exceeding the streaming threshold:
-
-```python
-# Automatic streaming for large docs
-config = ParserConfig(streaming_threshold=10_000_000)  # 10MB
-parser = HTMLParser(config)
-
-# Processes document in chunks to minimize memory
-document = parser.parse(large_html)
-```
+All documents take the same pipeline regardless of size, bounded by
+`max_document_size` (160MB default). There is no separate streaming mode:
+the former `StreamingParser` produced divergent, lossy text (it dropped
+div-hosted content entirely) and was removed; `streaming_threshold` is
+retained on `ParserConfig` as a deprecated no-op.
 
 ## Migration from Old Parser
 
@@ -405,7 +399,6 @@ Tested on SEC 10-K filings:
 | Small (<1MB) | 250ms | 25ms | 10x |
 | Medium (1-10MB) | 2.5s | 200ms | 12.5x |
 | Large (10-50MB) | 15s | 1.2s | 12.5x |
-| Huge (>50MB) | OOM | 3.5s (streaming) | ∞ |
 
 ## License
 

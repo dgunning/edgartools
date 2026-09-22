@@ -1,3 +1,4 @@
+import logging
 import zipfile
 from collections import defaultdict
 from functools import cached_property
@@ -13,7 +14,7 @@ from edgar.httprequests import stream_with_retry
 from edgar.sgml.filing_summary import FilingSummary
 from edgar.sgml.sgml_header import FilingHeader
 from edgar.sgml.sgml_parser import SGMLDocument, SGMLFormatType, SGMLParser, parse_document
-from edgar.sgml.text_extraction import primary_document_text
+from edgar.sgml.text_extraction import decode_document_content, primary_document_text
 from edgar.sgml.tools import is_xml
 
 
@@ -27,7 +28,7 @@ def _fetch_url_directly(url: str) -> str:
     bypass_cache parameter has no effect after the client is first created.
     """
     import httpx
-    from edgar.core import get_identity
+    from edgar.settings import get_identity
 
     headers = {"User-Agent": get_identity()}
     with httpx.Client(headers=headers) as client:
@@ -220,6 +221,25 @@ def parse_submission_text(content: str) -> Tuple[FilingHeader, DefaultDict[str, 
         else:
             doc = SGMLDocument.from_parsed_data(doc_data)
         documents[doc.sequence].append(doc)
+
+    # Cross-check the header's declared count against what was actually parsed
+    # (edgartools-r5ye). Markedly fewer parsed than declared means documents
+    # were lost — truncation inside a document raises in the parser, but a cut
+    # between documents, or an extraction miss, lands here. Two deliberate
+    # tolerances keep this signal, not noise: a deficit of exactly one is
+    # normal (complete dissemination .txt files routinely carry declared-1
+    # <DOCUMENT> blocks — e.g. Apple 10-K 0000320193-24-000123 declares 103,
+    # ships 102), and zero parsed is the pre-2004 header-only artifact, which
+    # declares its real submission's count while legitimately carrying no
+    # document body.
+    parsed_count = sum(len(docs) for docs in documents.values())
+    declared_count = header.document_count
+    if declared_count and 0 < parsed_count < declared_count - 1:
+        logging.getLogger(__name__).warning(
+            "SGML header declares %d public document(s) but only %d were parsed "
+            "(accession %s). The submission may be truncated or malformed.",
+            declared_count, parsed_count, header.accession_number,
+        )
     return header, documents
 
 
@@ -292,12 +312,15 @@ class FilingSGML:
 
 
     def html(self):
+        """The HTML of the primary document, or None when there is no HTML to return.
+
+        None covers a missing, empty or binary primary document. ``primary_html_document``
+        falls back to the first primary document when nothing has an .htm/.html extension,
+        so a PDF-only filing arrives here and must not be decoded as text.
+        """
         html_document = self.attachments.primary_html_document
         if html_document and not html_document.is_binary() and not html_document.empty:
-            html_text = self.get_content(html_document.document)
-            if isinstance(html_text, bytes):
-                html_text = html_text.decode('utf-8')
-            return html_text
+            return decode_document_content(self.get_content(html_document.document))
 
     def text(self) -> Optional[str]:
         """
@@ -343,12 +366,10 @@ class FilingSGML:
         return content
 
     def xml(self):
+        """The XML of the primary document, or None when there is no XML to return."""
         xml_document = self.attachments.primary_xml_document
         if xml_document and not xml_document.is_binary() and not xml_document.empty:
-            xml_text = self.get_content(xml_document.document)
-            if isinstance(xml_text, bytes):
-                xml_text = xml_text.decode('utf-8')
-            return xml_text
+            return decode_document_content(self.get_content(xml_document.document))
 
     def get_content(self, filename: str) -> Optional[str]:
         """

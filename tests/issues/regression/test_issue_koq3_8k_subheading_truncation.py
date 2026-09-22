@@ -28,6 +28,7 @@ import pytest
 from edgar.documents import parse_html
 from edgar.documents.config import ParserConfig
 from edgar.documents.nodes import HeadingNode
+from tests._offline_filings import offline_filing
 
 
 class TestSubheadingDoesNotTruncateItem:
@@ -55,14 +56,26 @@ class TestSubheadingDoesNotTruncateItem:
 
         This is what makes it a candidate section boundary; if the parser ever
         stops doing this the test below would pass trivially, so assert it.
+
+        Searching for a heading containing 'Adoption' and asserting it was
+        found is the weakest form of that: it holds for a heading carrying only
+        part of the line, and it says nothing about the item header, which must
+        NOT be a heading (it is a bold paragraph — that asymmetry is the whole
+        setup). Both are pinned instead.
         """
         doc = self._doc()
-        sub = next(
-            (n for n in doc.root.walk()
-             if isinstance(n, HeadingNode) and 'Adoption' in (n.text() or '')),
-            None,
+        headings = [n for n in doc.root.walk() if isinstance(n, HeadingNode)]
+        texts = [(n.text() or '').strip() for n in headings]
+        assert texts == ['Adoption of Fiscal Year 2027 Variable Compensation Plan'], (
+            "expected exactly one HeadingNode, the internal sub-heading; got "
+            f"{texts}. If the bold Item 5.02 line has become a heading too, "
+            "this fixture no longer reproduces the NVDA structure."
         )
-        assert sub is not None, "Sub-heading should be parsed as a HeadingNode"
+        assert headings[0].level == 1, (
+            f"sub-heading parsed at level {headings[0].level}. It closed the "
+            "item because its level was at or above the item header's; a "
+            "deeper level would make this fixture stop reproducing the bug."
+        )
 
     def test_item_body_not_truncated_at_subheading(self):
         """The Item 5.02 body must survive the internal bold sub-heading."""
@@ -87,18 +100,17 @@ class TestSubheadingDoesNotTruncateItem:
             "Item 5.02 body must belong to item_502, not item_901"
 
 
-@pytest.mark.network
+@pytest.mark.fast
 class TestNvidia8KGroundTruth:
     """Ground-truth assertion against the real filing from GH #871."""
 
     @pytest.mark.vcr
     def test_nvidia_item_502_full_body(self):
-        import edgar
 
         # NVIDIA 8-K, 2026-03-06, items 5.02 + 9.01. Item 5.02 has an internal
         # bold sub-heading ("Adoption of Fiscal Year 2027 Variable Compensation
         # Plan"). Before the fix this returned a 214-char stub.
-        filing = edgar.get_by_accession_number("0001045810-26-000024")
+        filing = offline_filing("0001045810-26-000024")
         ek = filing.obj()
 
         text = ek["Item 5.02"]

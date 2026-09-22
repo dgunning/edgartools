@@ -17,13 +17,15 @@ This test verifies that:
     1. use_local_storage('/custom/path') sets EDGAR_LOCAL_DATA_DIR
     2. get_edgar_data_directory() returns the custom path
     3. download_bulk_data() would use the custom path (via mocking)
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/381
 """
 import os
 import pytest
 from pathlib import Path
 from unittest.mock import patch, AsyncMock
 
-from edgar.core import get_edgar_data_directory
+from edgar.settings import get_edgar_data_directory
 from edgar.storage import use_local_storage
 
 
@@ -105,20 +107,37 @@ class TestDownloadBulkDataRespectsLocalStorage:
 
                 # The function will try to extract - mock that too
                 with patch('zipfile.ZipFile'):
+                    # Mocking the download means the call is expected to fail
+                    # somewhere after stream_file; the path resolution has
+                    # already happened by then. The exception is kept rather
+                    # than swallowed so it can explain a missing call below.
+                    download_error = None
                     try:
                         await download_bulk_data(url=test_url)
-                    except Exception:
-                        # We expect some error since we're mocking, but we can still check the path
-                        pass
+                    except Exception as exc:  # noqa: BLE001 — expected, see above
+                        download_error = exc
 
-                # Verify stream_file was called with path under custom_path
-                if mock_stream.called:
-                    call_args = mock_stream.call_args
-                    # stream_file is called with (url, client=..., path=...)
-                    called_path = call_args.kwargs.get('path') or call_args.args[2] if len(call_args.args) > 2 else None
-                    if called_path:
-                        assert str(custom_path) in str(called_path), \
-                            f"download_bulk_data used path {called_path}, expected path under {custom_path}"
+                # Every check below used to be behind an `if`, so a run where
+                # stream_file was never called, or was called without a path,
+                # asserted nothing at all and still reported green. Both
+                # conditions are now failures: this test exists to prove the
+                # path came from use_local_storage, and it cannot prove that
+                # without a call to inspect.
+                assert mock_stream.called, (
+                    "download_bulk_data never reached stream_file, so this test "
+                    "could not check which directory it resolved. Call raised: "
+                    f"{download_error!r}"
+                )
+                call_args = mock_stream.call_args
+                # stream_file is called with (url, client=..., path=...)
+                called_path = (call_args.kwargs.get('path')
+                               or (call_args.args[2] if len(call_args.args) > 2 else None))
+                assert called_path is not None, (
+                    "stream_file was called without a path argument, so the "
+                    f"directory cannot be verified: {call_args!r}"
+                )
+                assert str(custom_path) in str(called_path), \
+                    f"download_bulk_data used path {called_path}, expected path under {custom_path}"
         finally:
             # Restore EDGAR_LOCAL_DATA_DIR
             if original_data_dir is not None:

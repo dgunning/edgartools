@@ -181,6 +181,15 @@ investments.total_cost           # Decimal('25100000000')
 # Filtering
 first_lien = investments.filter(investment_type="First lien")
 large = investments.filter(min_fair_value=Decimal('100000000'))
+software = investments.filter(industry="software")   # industry as filed, or normalized sector
+
+# Industry
+inv = investments[0]
+inv.industry                     # 'Software Sector' as filed, or None
+inv.industry_source              # 'axis' | 'enumeration' | 'identifier' | 'peer' | None
+inv.sector                       # 'Software' (normalized), or None
+investments.industry_coverage    # 0.94
+investments.by_industry()        # sector | num_investments | total_fair_value | pct_of_portfolio
 
 # Iteration
 for inv in investments:
@@ -284,7 +293,30 @@ Analyze industry exposure across BDCs:
 dataset = fetch_bdc_dataset(2024, 3)
 summary = dataset.summary_by_industry()
 print(summary.head(10))
+# Returns DataFrame: industry | total_fair_value | num_bdcs | num_investments
+
+dataset.summary_by_industry(by='sector')   # sector | ... with the spellings folded together
+dataset.summary_by_company()               # cik | name | form | filed | num_investments | total_fair_value
 ```
+
+The DERA extract names its columns after XBRL labels, and the label the SEC
+picks for a concept can change between releases (fair value is currently
+headed `Initial fair value of Investment`). `summary_by_industry()`,
+`search()`, `top_companies()` and `to_dataframe(clean=True)` resolve every
+header the SEC has used for fair value, cost, shares, principal and industry to
+one canonical column, and log a warning naming the headers they looked for when
+none is present. The summary counts only rows dated at each filing's own period
+end and takes each filing's industry subtotals where it tags them.
+
+Filers that tag no industry dimension are read from their investment
+identifiers ("Debt Investments Automotive Truck-Lite Co., LLC ...", "...
+Industry Financial Services Current Coupon ..."), and an issuer still untagged
+takes the industry another BDC in the data set tagged for it; in 2025Q2 that
+lifts the filings with a resolvable industry from 123 to 158 of 160.
+`to_dataframe(clean=True)` carries `industry` (as filed), `industry_source`
+(`axis`, `enumeration`, `identifier` or `peer`) and the normalized `sector`.
+The sector table is `edgar.bdc.industry.SECTOR_ALIASES`, shared with
+`PortfolioInvestment.sector`.
 
 ### 5. BDC Screening
 
@@ -316,7 +348,7 @@ if is_bdc_cik(company.cik):
 
 The SEC maintains an authoritative list of all entities with 814- file numbers.
 
-**URL:** https://www.sec.gov/about/opendatasetsshtmlbdc
+**URL:** https://www.sec.gov/data-research/sec-markets-data/opendatasetsshtmlbdc
 
 **Files:** `business-development-company-{year}.csv` (2016-2025)
 
@@ -338,7 +370,7 @@ https://www.sec.gov/files/datastandardsinnovation/data/business-development-comp
 | `sub.tsv` | Submissions | adsh, cik, name, form, filed |
 | `num.tsv` | Numeric facts | adsh, tag, value, uom |
 | `pre.tsv` | Presentation | adsh, stmt, line, tag |
-| `soi.tsv` | Schedule of Investments | company, industry, fair_value |
+| `soi.tsv` | Schedule of Investments | company, industry, industry_source, sector, fair_value |
 
 ## Two Data Approaches
 

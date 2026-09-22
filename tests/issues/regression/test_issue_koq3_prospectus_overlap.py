@@ -22,6 +22,8 @@ Fix:
 This is the silent-regression guard the existing prospectus test could not catch:
 ``TestProspectusSections.test_section_text_extraction`` only asserts sections are
 non-empty, and bleeding makes a section *longer*, never empty.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/871
 """
 from edgar.documents import parse_html
 from edgar.documents.config import ParserConfig

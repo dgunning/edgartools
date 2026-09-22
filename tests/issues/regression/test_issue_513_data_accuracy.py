@@ -14,6 +14,8 @@ Root causes:
 3. XBRL DocumentPeriodEndDate (2011-12-31) was wrong, SGML header had correct date (2012-12-31)
    - Fix: Added date discrepancy detection in XBRL.period_of_report to prefer SGML date when
      there's a mismatch and SGML year has annual data in the filing
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/513
 """
 
 import pytest

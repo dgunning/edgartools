@@ -14,6 +14,8 @@ to ``ANOMALOUS_CONFIDENCE`` — so callers can tell the Part's boundaries were
 mis-anchored. The content itself is kept: the underlying running-header
 mis-anchoring is a separate, harder problem, and silently dropping the section
 would lose the only copy of the MD&A text.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/905
 """
 import pytest
 
@@ -23,6 +25,7 @@ from edgar.documents.document import Section
 from edgar.documents.extractors.hybrid_section_detector import HybridSectionDetector
 from edgar.documents.form_schema import get_form_schema
 from edgar.documents.nodes import SectionNode
+from tests._offline_filings import offline_filing
 
 pytestmark = pytest.mark.regression
 
@@ -110,24 +113,38 @@ def test_part_validity_skips_partless_sections():
 
 # --- End-to-end: Freddie Mac 10-Q under VCR ------------------------------------
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
-def test_fmcc_phantom_items_carry_warnings():
-    """FMCC 10-Q: the phantom part_i_item_5/6 are flagged and downgraded, so
-    the mis-anchored Part I map is no longer silently wrong."""
-    from edgar import get_by_accession_number
+def test_fmcc_phantom_items_are_prevented():
+    """FMCC 10-Q: the phantom part_i_item_5/6 no longer exist at all.
 
-    tenq = get_by_accession_number("0001026214-26-000027").obj()
+    When #905 was fixed, the phantoms could only be *flagged*: the generic
+    TOC scan read the bare row-number cells of FMCC's MD&A "List of Tables"
+    index as item numbers, and every Part I item anchored on a "Table N"
+    caption. The numbered-index header guard (GH #918, second defect —
+    tests/issues/regression/test_issue_918_numbered_index_rows.py) removes
+    the phantoms at the source, and the surviving Part I items anchor on
+    their real content — part_i_item_2 is the actual MD&A, not 1.2K chars of
+    table prose. The schema-validity stage this file pins in its unit tests
+    still guards any future mis-anchored map.
+    """
+    tenq = offline_filing("0001026214-26-000027").obj()
     sections = tenq.document.sections
 
     for phantom in ("part_i_item_5", "part_i_item_6"):
-        assert phantom in sections, f"{phantom} not present; got {sorted(sections.keys())}"
-        section = sections[phantom]
-        assert any(f"has no Item {section.item}" in w for w in section.warnings), (
-            f"{phantom} missing the schema-validity warning: {section.warnings}"
-        )
-        assert section.confidence == 0.5
+        assert phantom not in sections, f"{phantom} resurfaced: {sorted(sections.keys())}"
 
-    # A schema-valid Part I item is not flagged by the validity stage.
+    # The surviving Part I items carry their real content at full confidence.
+    mda = sections["part_i_item_2"]
+    assert mda.confidence == 0.95
+    mda_text = mda.text()
+    assert len(mda_text) == 51_860
+    assert mda_text.lstrip().startswith("Management's Discussion and Analysis")
+    assert not mda_text.lstrip().startswith("Table")
+
     item3 = sections["part_i_item_3"]
     assert not any("has no Item" in w for w in item3.warnings)
+    assert item3.text().lstrip().startswith("Market Risk")
+
+    # Part II is unchanged: Legal Proceedings still opens on its own heading.
+    assert (sections["part_ii_item_1"].text() or "").lstrip().startswith("LEGAL PROCEEDINGS")

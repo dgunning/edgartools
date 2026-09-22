@@ -5,18 +5,19 @@ Tests extract_registration_fee_table() against ground-truth values from real S-3
 verified by hand from SEC EDGAR.
 
 See: docs-internal/research/sec-filings/forms/s-3/registration-fee-table-analysis.md
+
+Bead: edgartools-4jm1
 """
 import pytest
-from edgar import find, get_by_accession_number
+
 from edgar.offerings._fee_table import (
-    extract_registration_fee_table,
-    _parse_fee_table_html,
     _join_dollar_cells,
     _parse_dollar_amount,
     _parse_fee_rate,
+    extract_registration_fee_table,
 )
-from edgar.offerings.prospectus import RegistrationFeeTable, FeeTableSecurity
-
+from edgar.offerings.prospectus import FeeTableSecurity, RegistrationFeeTable
+from tests._offline_filings import offline_filing
 
 # ============================================================
 # Unit tests for parsing helpers
@@ -68,10 +69,17 @@ class TestParsingHelpers:
         get_text() with no separator collapses '<font>Security</font>
         <font>Type</font>' to 'SecurityType'; _find_fee_table must use a
         separator and normalize whitespace so the data table is still found.
+
+        The parser moved from BeautifulSoup to lxml in edgartools-07lk.11.9.2,
+        so the tree is built by the module's own _parse_html now. The claim is
+        unchanged: text_content() would collapse these two <font>s the same way
+        a separator-less get_text() did.
         """
-        import warnings
-        from bs4 import BeautifulSoup
-        from edgar.offerings._fee_table import _find_fee_table
+        from edgar.offerings.prospectus._fee_table.parsing import (
+            _cell_text,
+            _find_fee_table,
+            _parse_html,
+        )
         html = (
             "<html><body>"
             "<table><tr>"
@@ -81,10 +89,20 @@ class TestParsingHelpers:
             "<tr><td>Equity</td><td>$79,170,150.00</td></tr></table>"
             "</body></html>"
         )
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            soup = BeautifulSoup(html, "lxml")
-        assert _find_fee_table(soup) is not None
+        table = _find_fee_table(_parse_html(html))
+        assert table is not None, (
+            "_find_fee_table did not match the header; the split-tag text is "
+            "'SecurityType' without a separator"
+        )
+        # Finding *a* table is not the claim -- the fee table is the one
+        # carrying the data row, and returning a wrapper or the wrong table
+        # would satisfy `is not None` while extraction downstream got nothing.
+        cells = [_cell_text(td) for td in table.iter("td")]
+        # The nbsp in the second header cell is half of what this test exists
+        # for, so it is asserted as-is rather than normalised away.
+        assert cells == ['Security Type', 'Maximum\xa0Aggregate Offering Price',
+                         'Equity', '$79,170,150.00'], \
+            f"matched a table whose cells are {cells}"
 
 
 # ============================================================
@@ -97,7 +115,7 @@ class TestFeeTableExtraction:
     @pytest.mark.vcr
     def test_adc_therapeutics_simple_equity(self):
         """ADC Therapeutics S-3 — simple single equity security."""
-        filing = find("0000950103-25-008153")
+        filing = offline_filing("0000950103-25-008153")
         fee_table = extract_registration_fee_table(filing)
 
         assert fee_table is not None
@@ -112,7 +130,7 @@ class TestFeeTableExtraction:
     @pytest.mark.vcr
     def test_central_pacific_universal_shelf(self):
         """Central Pacific Financial S-3 — universal shelf with multiple security types."""
-        filing = find("0001140361-25-024210")
+        filing = offline_filing("0001140361-25-024210")
         fee_table = extract_registration_fee_table(filing)
 
         assert fee_table is not None
@@ -125,7 +143,7 @@ class TestFeeTableExtraction:
     @pytest.mark.vcr
     def test_gcm_grosvenor_carry_forward(self):
         """GCM Grosvenor S-3 — carry-forward from prior registration."""
-        filing = find("0001213900-25-058997")
+        filing = offline_filing("0001213900-25-058997")
         fee_table = extract_registration_fee_table(filing)
 
         assert fee_table is not None
@@ -137,7 +155,7 @@ class TestFeeTableExtraction:
     @pytest.mark.vcr
     def test_aerovironment_s3asr_deferred(self):
         """AeroVironment S-3ASR — deferred fee under Rule 457(r)."""
-        filing = find("0001104659-25-064107")
+        filing = offline_filing("0001104659-25-064107")
         fee_table = extract_registration_fee_table(filing)
 
         assert fee_table is not None
@@ -148,7 +166,7 @@ class TestFeeTableExtraction:
     @pytest.mark.vcr
     def test_anterix_2022_pre_xbrl(self):
         """Anterix S-3 (2022) — pre-inline-XBRL, simpler column format."""
-        filing = find("0001193125-22-186192")
+        filing = offline_filing("0001193125-22-186192")
         fee_table = extract_registration_fee_table(filing)
 
         assert fee_table is not None
@@ -169,7 +187,7 @@ class TestFeeTableExtraction:
         security fee_rate parsed to 153.1 instead of 0.0001531 (the basis was
         dropped), making fee / rate reconcile to ~190 instead of the $189.75M
         offering amount. Ground truth from the filing's own fee exhibit."""
-        ft = extract_registration_fee_table(find("0001213900-25-059789"))
+        ft = extract_registration_fee_table(offline_filing("0001213900-25-059789"))
         assert ft is not None
         assert ft.total_offering_amount == pytest.approx(189750000.0, rel=0.01)
         priced = [s for s in ft.securities if s.fee_rate and s.fee_amount]
@@ -182,7 +200,7 @@ class TestFeeTableExtraction:
     @pytest.mark.vcr
     def test_filing_without_fee_exhibit(self):
         """A 10-K has no EX-FILING FEES exhibit — returns None."""
-        filing = find("0000320193-24-000123")  # Apple 10-K
+        filing = offline_filing("0000320193-24-000123")  # Apple 10-K
         fee_table = extract_registration_fee_table(filing)
         assert fee_table is None
 
@@ -196,7 +214,7 @@ class TestFeeTableExtraction:
         _find_fee_table used get_text() with no separator, collapsing it to
         'securitytype' so the data table was never found (returned None).
         """
-        fee_table = extract_registration_fee_table(find("0001193125-25-068942"))
+        fee_table = extract_registration_fee_table(offline_filing("0001193125-25-068942"))
         assert fee_table is not None
         assert fee_table.total_offering_amount == pytest.approx(79170150.0, rel=0.01)
 
@@ -208,7 +226,7 @@ class TestFeeTableExtraction:
         fallback matched a footnote paragraph table ('...calculating the
         registration fee...'), yielding None. Now the data table is found.
         """
-        fee_table = extract_registration_fee_table(find("0001193125-25-067858"))
+        fee_table = extract_registration_fee_table(offline_filing("0001193125-25-067858"))
         assert fee_table is not None
         assert fee_table.total_offering_amount == pytest.approx(9704293.70, rel=0.01)
 
@@ -220,7 +238,7 @@ class TestFeeTableExtraction:
         genuinely indeterminate, so total_offering_amount must be None (not a
         parsed 0.0) and fee_deferred must be True.
         """
-        fee_table = extract_registration_fee_table(find("0001193125-25-066253"))
+        fee_table = extract_registration_fee_table(offline_filing("0001193125-25-066253"))
         assert fee_table is not None
         assert fee_table.total_offering_amount is None
         assert fee_table.fee_deferred is True
@@ -238,14 +256,14 @@ class TestAmendmentFeeSourceFallback:
     @pytest.mark.vcr
     def test_vincerx_s3a_recovers_from_original(self):
         """Vincerx S-3/A (no fee exhibit) recovers $100M from the original S-3."""
-        fee_table = extract_registration_fee_table(find("0001193125-25-068723"))
+        fee_table = extract_registration_fee_table(offline_filing("0001193125-25-068723"))
         assert fee_table is not None
         assert fee_table.total_offering_amount == pytest.approx(100000000.0, rel=0.01)
 
     @pytest.mark.vcr
     def test_tr_finance_f3a_recovers_from_original(self):
         """TR Finance F-3/A (no fee exhibit) recovers $3B from the original F-3."""
-        fee_table = extract_registration_fee_table(find("0001193125-25-068799"))
+        fee_table = extract_registration_fee_table(offline_filing("0001193125-25-068799"))
         assert fee_table is not None
         assert fee_table.total_offering_amount == pytest.approx(3000000000.0, rel=0.01)
 
@@ -253,9 +271,7 @@ class TestAmendmentFeeSourceFallback:
     def test_424b_takedown_stays_none(self):
         """Silence check: a 424B takedown is not a registration form, so the
         family is not walked and the result stays an honest None."""
-        # get_by_accession_number (year from the accession) is date-stable; find()
-        # walks date-derived quarterly indexes whose cassette drifts over time.
-        fee_table = extract_registration_fee_table(get_by_accession_number("0001918704-25-005439"))
+        fee_table = extract_registration_fee_table(offline_filing("0001918704-25-005439"))
         assert fee_table is None
 
 
@@ -318,7 +334,7 @@ class TestXn7eMisparsedTotalOfferingAmount:
     def test_typo_summary_prefers_per_security_aggregate(self):
         """333-273015 (S-1 @2023-06-29): summary cell '$761,12' is a typo for the
         fee; the registered $6,906,664.94 is recovered from securities[0]."""
-        ft = extract_registration_fee_table(find("0001104659-23-076317"))
+        ft = extract_registration_fee_table(offline_filing("0001104659-23-076317"))
         assert ft is not None
         assert ft.securities[0].max_aggregate_amount == pytest.approx(6906664.94)
         assert ft.total_offering_amount == pytest.approx(6906664.94, rel=0.01)
@@ -328,7 +344,7 @@ class TestXn7eMisparsedTotalOfferingAmount:
     def test_column_misalignment_recovers_offering_amount(self):
         """333-275559 (S-3 @2023-11-15): a split '(3)' footnote shifted $150M into
         the fee column; the fee-rate anchor recovers it."""
-        ft = extract_registration_fee_table(find("0001493152-23-041369"))
+        ft = extract_registration_fee_table(offline_filing("0001493152-23-041369"))
         assert ft is not None
         assert ft.total_offering_amount == pytest.approx(150000000.0, rel=0.01)
         assert ft.net_fee_due == pytest.approx(22140.0, rel=0.01)
@@ -338,7 +354,7 @@ class TestXn7eMisparsedTotalOfferingAmount:
         """333-272539 (F-3 @2023-06-08): a carry-forward-only registration with a
         nominal '$1' summary registers an indeterminate amount -> None, not the
         footnote-fused 11234 the old parser produced."""
-        ft = extract_registration_fee_table(find("0001104659-23-069410"))
+        ft = extract_registration_fee_table(offline_filing("0001104659-23-069410"))
         assert ft is not None
         assert ft.total_offering_amount is None
         assert ft.has_carry_forward is True
@@ -432,28 +448,28 @@ class TestInlineFeeTablePreEX107:
     @pytest.mark.network
     def test_kingold_multi_row_total(self):
         """Kingold Jewelry S-3 (2020): inline table, $30M shelf, fee $3,894."""
-        ft = extract_registration_fee_table(find("0001104659-20-040593"))
+        ft = extract_registration_fee_table(offline_filing("0001104659-20-040593"))
         assert ft is not None
         assert ft.total_offering_amount == pytest.approx(30000000.0, rel=0.01)
 
     @pytest.mark.network
     def test_plug_single_row_resale(self):
         """Plug Power S-3 (2018): single-class resale, $38,606,063.86."""
-        ft = extract_registration_fee_table(find("0001047469-18-007293"))
+        ft = extract_registration_fee_table(offline_filing("0001047469-18-007293"))
         assert ft is not None
         assert ft.total_offering_amount == pytest.approx(38606063.86, rel=0.01)
 
     @pytest.mark.network
     def test_dynatronics_amendment_body(self):
         """Dynatronics S-3/A (2021): inline table in the amendment body, $50M."""
-        ft = extract_registration_fee_table(find("0001654954-21-007440"))
+        ft = extract_registration_fee_table(offline_filing("0001654954-21-007440"))
         assert ft is not None
         assert ft.total_offering_amount == pytest.approx(50000000.0, rel=0.01)
 
     @pytest.mark.network
     def test_schwab_indeterminate_asr_deferred(self):
         """Charles Schwab S-3ASR (2020): indeterminate 457(r) shelf -> deferred."""
-        ft = extract_registration_fee_table(find("0001193125-20-310765"))
+        ft = extract_registration_fee_table(offline_filing("0001193125-20-310765"))
         assert ft is not None
         assert ft.total_offering_amount is None
         assert ft.fee_deferred is True
@@ -492,9 +508,7 @@ class TestProspectusSections:
     @pytest.mark.vcr
     def test_sections_returns_sections_object(self):
         """Verify that prospectus.sections returns a Sections dict."""
-        # get_by_accession_number (year from the accession) is date-stable; find()
-        # walks date-derived quarterly indexes whose cassette drifts over time.
-        filing = get_by_accession_number("0001493152-25-029712")  # A 424B5
+        filing = offline_filing("0001493152-25-029712")  # A 424B5
         prospectus = filing.obj()
         sections = prospectus.sections
         # Should return a dict-like Sections object (may be empty if no patterns match)
@@ -504,7 +518,7 @@ class TestProspectusSections:
     @pytest.mark.vcr
     def test_section_text_extraction(self):
         """Verify individual sections have extractable text."""
-        filing = get_by_accession_number("0001493152-25-029712")
+        filing = offline_filing("0001493152-25-029712")
         prospectus = filing.obj()
         sections = prospectus.sections
         # If any sections were detected, verify they have text

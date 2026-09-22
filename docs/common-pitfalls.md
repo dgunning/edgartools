@@ -87,14 +87,14 @@ revenue = financials.get_revenue()    # e.g. 391035000000
 print(f"${revenue/1e9:.1f}B")         # "$391.0B"
 ```
 
-### The cash flow method is `cashflow_statement()`
+### The cash flow method is `cash_flow_statement()`
 
-The canonical method name is `cashflow_statement()` (no underscore between "cash" and "flow"). The alias `cash_flow_statement()` also works. All three statements follow the same pattern:
+The canonical method name is `cash_flow_statement()` (no underscore between "cash" and "flow"). The alias `cash_flow_statement()` also works. All three statements follow the same pattern:
 
 ```python
 financials.income_statement()       # Income statement
 financials.balance_sheet()          # Balance sheet
-financials.cashflow_statement()     # Cash flow statement (cash_flow_statement() also works)
+financials.cash_flow_statement()     # Cash flow statement (cash_flow_statement() also works)
 ```
 
 ---
@@ -261,7 +261,7 @@ df = financials.to_dataframe()   # AttributeError
 # RIGHT: call to_dataframe() on the individual statement
 df = financials.income_statement().to_dataframe()
 df = financials.balance_sheet().to_dataframe()
-df = financials.cashflow_statement().to_dataframe()
+df = financials.cash_flow_statement().to_dataframe()
 ```
 
 ### Export to CSV or Excel
@@ -318,3 +318,41 @@ Different companies use different concept names for the same thing (e.g., "Reven
 # Instead of guessing concept names:
 revenue = company.get_financials().get_revenue()
 ```
+
+---
+
+## Threads and Imports
+
+### Import `edgar` once before starting threads
+
+Import the package on the main thread before any thread imports a submodule. Warming imports on a background thread while another thread reaches into a submodule makes both imports fail.
+
+```python
+# WRONG: a worker imports a submodule while the main thread is still importing edgar
+import threading
+
+def worker():
+    from edgar.reference import describe_form   # may raise ImportError
+    ...
+
+threading.Thread(target=worker).start()
+import edgar                                     # may raise ImportError
+```
+
+```python
+# RIGHT: warm the package first, then start threads
+import edgar                                     # completes on the main thread
+import threading
+
+def worker():
+    from edgar.reference import describe_form    # safe
+    ...
+
+threading.Thread(target=worker).start()
+```
+
+The failure is deterministic rather than intermittent, and it is silent in the sense that it raises where the import happened, which on a daemon thread may be nowhere you are watching. The error reads `cannot import name ... from partially initialized module`, or on some versions `_DeadlockError`.
+
+Importing `edgar` at module scope, which is what most applications already do, is enough. The rule only matters if you defer the first import into a thread, such as warming caches in a background thread at web application startup.
+
+This applies to any submodule, not just `edgar.reference`.

@@ -1,0 +1,1942 @@
+{
+  "RESOLVE-EDGE-cik-link-split-so-lxml-text-is-empty": [
+    "0000012345",
+    "Acme Funds 0000012345 (see all)"
+  ],
+  "RESOLVE-EDGE-comment-inside-the-span": [
+    "0000012345",
+    "Acme  Funds 0000012345 (see all)"
+  ],
+  "RESOLVE-EDGE-companyName-among-several-classes": [
+    "0000012345",
+    "Acme Funds 0000012345 (see all)"
+  ],
+  "RESOLVE-EDGE-link-nested-inside-bold": [
+    "0000012345",
+    "Acme Funds 0000012345 (see all)"
+  ],
+  "RESOLVE-EDGE-link-text-split-across-tags": [
+    "0000012345",
+    "Acme Funds 0000012345 (see all)"
+  ],
+  "RESOLVE-EDGE-name-split-across-child-tags": [
+    "0001083387",
+    "Kinetics Mutual Funds Inc 0001083387 (see all company filings)"
+  ],
+  "RESOLVE-EDGE-no-cik-marker-in-the-text": [
+    "0000012345",
+    "Acme Funds 0000012345 (see all)"
+  ],
+  "RESOLVE-EDGE-no-company-span": null,
+  "RESOLVE-EDGE-second-span-is-the-company-one": [
+    "0000012345",
+    "Acme Funds 0000012345 (see all)"
+  ],
+  "RESOLVE-EDGE-span-with-text-but-no-link": null,
+  "RESOLVE-EDGE-style-inside-the-span": [
+    "0000012345",
+    "Acme Funds 0000012345 (see all)"
+  ],
+  "RESOLVE-resolve-0001083387": [
+    "0001083387",
+    "KINETICS MUTUAL FUNDS INC"
+  ],
+  "RESOLVE-resolve-C000000000": null,
+  "RESOLVE-resolve-C000032628": [
+    "0001040587",
+    "DIREXION FUNDS"
+  ],
+  "RESOLVE-resolve-KINCX": [
+    "0001083387",
+    "KINETICS MUTUAL FUNDS INC"
+  ],
+  "RESOLVE-resolve-S000009184": [
+    "0000002110",
+    "COLUMBIA ACORN TRUST"
+  ],
+  "RESOLVE-resolve-VFIAX": [
+    "0000036405",
+    "VANGUARD INDEX FUNDS"
+  ],
+  "SERIES-EDGE-cik-that-does-not-match-the-pattern": [
+    null,
+    null,
+    [
+      {
+        "classes": [],
+        "series_id": "S000009184",
+        "series_name": "Kinetics Paradigm Fund"
+      }
+    ]
+  ],
+  "SERIES-EDGE-class-link-split-so-lxml-text-is-empty": [
+    null,
+    null,
+    [
+      {
+        "classes": [
+          {
+            "class_id": "C000032628",
+            "class_name": "No Load Class",
+            "ticker": "WWNPX"
+          }
+        ],
+        "series_id": "S000009184",
+        "series_name": "Kinetics Paradigm Fund"
+      }
+    ]
+  ],
+  "SERIES-EDGE-class-name-and-ticker-split-across-tags": [
+    null,
+    null,
+    [
+      {
+        "classes": [
+          {
+            "class_id": "C000032628",
+            "class_name": "NoLoadClass",
+            "ticker": "WWNPX"
+          }
+        ],
+        "series_id": "S000009184",
+        "series_name": "Kinetics Paradigm Fund"
+      }
+    ]
+  ],
+  "SERIES-EDGE-class-row-before-any-series-is-dropped": [
+    null,
+    null,
+    []
+  ],
+  "SERIES-EDGE-class-row-with-four-cells-has-no-ticker": [
+    null,
+    null,
+    [
+      {
+        "classes": [
+          {
+            "class_id": "C000032628",
+            "class_name": "No Load Class",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000009184",
+        "series_name": "Kinetics Paradigm Fund"
+      }
+    ]
+  ],
+  "SERIES-EDGE-comment-inside-a-cell": [
+    null,
+    null,
+    [
+      {
+        "classes": [],
+        "series_id": "S000009184",
+        "series_name": "Kinetics Paradigm Fund"
+      }
+    ]
+  ],
+  "SERIES-EDGE-comment-inside-a-class-name-cell": [
+    null,
+    null,
+    [
+      {
+        "classes": [
+          {
+            "class_id": "C000032628",
+            "class_name": "NoLoad Class",
+            "ticker": "WWNPX"
+          }
+        ],
+        "series_id": "S000009184",
+        "series_name": "Kinetics Paradigm Fund"
+      }
+    ]
+  ],
+  "SERIES-EDGE-company-link-split-so-lxml-text-is-empty": [
+    "0001083387",
+    "KINETICS MUTUAL FUNDS INC",
+    [
+      {
+        "classes": [],
+        "series_id": "S000009184",
+        "series_name": "Kinetics Paradigm Fund"
+      }
+    ]
+  ],
+  "SERIES-EDGE-company-name-split-and-without-a-link": [
+    "0001083387",
+    "KINETICSMUTUALFUNDS",
+    [
+      {
+        "classes": [],
+        "series_id": "S000009184",
+        "series_name": "Kinetics Paradigm Fund"
+      }
+    ]
+  ],
+  "SERIES-EDGE-company-series-and-class": [
+    "0001083387",
+    "KINETICS MUTUAL FUNDS INC",
+    [
+      {
+        "classes": [
+          {
+            "class_id": "C000032628",
+            "class_name": "No Load Class",
+            "ticker": "WWNPX"
+          }
+        ],
+        "series_id": "S000009184",
+        "series_name": "Kinetics Paradigm Fund"
+      }
+    ]
+  ],
+  "SERIES-EDGE-empty-table": [
+    null,
+    null,
+    []
+  ],
+  "SERIES-EDGE-nested-300-deep": [
+    null,
+    null,
+    [
+      {
+        "classes": [
+          {
+            "class_id": "C000032628",
+            "class_name": "No Load Class",
+            "ticker": "WWNPX"
+          }
+        ],
+        "series_id": "S000009184",
+        "series_name": "Kinetics Paradigm Fund"
+      }
+    ]
+  ],
+  "SERIES-EDGE-nested-table-shifts-the-cell-count": [
+    null,
+    null,
+    []
+  ],
+  "SERIES-EDGE-no-tables": [
+    null,
+    null,
+    []
+  ],
+  "SERIES-EDGE-row-with-too-many-cells-is-skipped": [
+    null,
+    null,
+    [
+      {
+        "classes": [],
+        "series_id": "S000009184",
+        "series_name": "Kinetics Paradigm Fund"
+      }
+    ]
+  ],
+  "SERIES-EDGE-second-table-is-ignored": [
+    null,
+    null,
+    [
+      {
+        "classes": [],
+        "series_id": "S000000001",
+        "series_name": "First Table Series"
+      }
+    ]
+  ],
+  "SERIES-EDGE-series-link-text-split-across-tags": [
+    null,
+    null,
+    [
+      {
+        "classes": [],
+        "series_id": "S000009184",
+        "series_name": "Kinetics Paradigm Fund"
+      }
+    ]
+  ],
+  "SERIES-EDGE-series-name-split-across-tags": [
+    null,
+    null,
+    [
+      {
+        "classes": [],
+        "series_id": "S000009184",
+        "series_name": "Kinetics Paradigm Fund"
+      }
+    ]
+  ],
+  "SERIES-EDGE-series-name-split-and-without-a-link": [
+    null,
+    null,
+    [
+      {
+        "classes": [],
+        "series_id": "S000009184",
+        "series_name": "KineticsParadigmFund"
+      }
+    ]
+  ],
+  "SERIES-EDGE-series-name-without-a-link": [
+    null,
+    null,
+    [
+      {
+        "classes": [],
+        "series_id": "S000009184",
+        "series_name": "Kinetics Paradigm Fund"
+      }
+    ]
+  ],
+  "SERIES-EDGE-style-inside-a-class-name-cell": [
+    null,
+    null,
+    [
+      {
+        "classes": [
+          {
+            "class_id": "C000032628",
+            "class_name": "NoLoad Class",
+            "ticker": "WWNPX"
+          }
+        ],
+        "series_id": "S000009184",
+        "series_name": "Kinetics Paradigm Fund"
+      }
+    ]
+  ],
+  "SERIES-EDGE-template-wrapping-an-element-with-text": [
+    null,
+    null,
+    [
+      {
+        "classes": [
+          {
+            "class_id": "C000032628",
+            "class_name": "NoLoad Class",
+            "ticker": "WWNPX"
+          }
+        ],
+        "series_id": "S000009184",
+        "series_name": "Kinetics Paradigm Fund"
+      }
+    ]
+  ],
+  "SERIES-EDGE-th-cells-are-not-td-cells": [
+    null,
+    null,
+    [
+      {
+        "classes": [],
+        "series_id": "S000009184",
+        "series_name": "Kinetics Paradigm Fund"
+      }
+    ]
+  ],
+  "SERIES-EDGE-ticker-split-with-whitespace-between-the-tags": [
+    null,
+    null,
+    [
+      {
+        "classes": [
+          {
+            "class_id": "C000032628",
+            "class_name": "No Load Class",
+            "ticker": "WWNPX"
+          }
+        ],
+        "series_id": "S000009184",
+        "series_name": "Kinetics Paradigm Fund"
+      }
+    ]
+  ],
+  "SERIES-EDGE-unclosed-tags": [
+    null,
+    null,
+    [
+      {
+        "classes": [],
+        "series_id": "S000009184",
+        "series_name": "Kinetics Paradigm Fund"
+      }
+    ]
+  ],
+  "SERIES-series-1002809": [
+    null,
+    null,
+    []
+  ],
+  "SERIES-series-1083387": [
+    "0001083387",
+    "KINETICS MUTUAL FUNDS INC",
+    [
+      {
+        "classes": [
+          {
+            "class_id": "C000013711",
+            "class_name": "Advisor Class B",
+            "ticker": ""
+          },
+          {
+            "class_id": "C000013712",
+            "class_name": "Advisor Class C",
+            "ticker": "KINCX"
+          },
+          {
+            "class_id": "C000013713",
+            "class_name": "Institutional Class",
+            "ticker": ""
+          },
+          {
+            "class_id": "C000013714",
+            "class_name": "No Load Class",
+            "ticker": "WWWFX"
+          },
+          {
+            "class_id": "C000013715",
+            "class_name": "Advisor Class A",
+            "ticker": "KINAX"
+          }
+        ],
+        "series_id": "S000005029",
+        "series_name": "Kinetics Internet Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000013716",
+            "class_name": "Advisor Class B",
+            "ticker": ""
+          },
+          {
+            "class_id": "C000013717",
+            "class_name": "No Load Class",
+            "ticker": "WWNPX"
+          },
+          {
+            "class_id": "C000013718",
+            "class_name": "Advisor Class A",
+            "ticker": "KNPAX"
+          },
+          {
+            "class_id": "C000013719",
+            "class_name": "Advisor Class C",
+            "ticker": "KNPCX"
+          },
+          {
+            "class_id": "C000013720",
+            "class_name": "Institutional Class",
+            "ticker": "KNPYX"
+          }
+        ],
+        "series_id": "S000005030",
+        "series_name": "Kinetics Paradigm Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000013721",
+            "class_name": "Advisor Class B",
+            "ticker": ""
+          },
+          {
+            "class_id": "C000013722",
+            "class_name": "Advisor Class C",
+            "ticker": "KSOCX"
+          },
+          {
+            "class_id": "C000013723",
+            "class_name": "No Load Class",
+            "ticker": "KSCOX"
+          },
+          {
+            "class_id": "C000013724",
+            "class_name": "Advisor Class A",
+            "ticker": "KSOAX"
+          },
+          {
+            "class_id": "C000013725",
+            "class_name": "Institutional Class",
+            "ticker": "KSCYX"
+          }
+        ],
+        "series_id": "S000005031",
+        "series_name": "Kinetics Small Cap Opportunities Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000013726",
+            "class_name": "Advisor Class A",
+            "ticker": "KGLAX"
+          },
+          {
+            "class_id": "C000013727",
+            "class_name": "Advisor Class B",
+            "ticker": ""
+          },
+          {
+            "class_id": "C000013728",
+            "class_name": "Advisor Class C",
+            "ticker": "KGLCX"
+          },
+          {
+            "class_id": "C000013729",
+            "class_name": "Institutional Class",
+            "ticker": ""
+          },
+          {
+            "class_id": "C000013730",
+            "class_name": "No Load Class",
+            "ticker": "WWWEX"
+          }
+        ],
+        "series_id": "S000005032",
+        "series_name": "Kinetics Global Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000013731",
+            "class_name": "Advisor Class B",
+            "ticker": ""
+          },
+          {
+            "class_id": "C000013732",
+            "class_name": "Advisor Class C",
+            "ticker": "KRXCX"
+          },
+          {
+            "class_id": "C000013733",
+            "class_name": "Institutional Class",
+            "ticker": ""
+          },
+          {
+            "class_id": "C000013734",
+            "class_name": "No Load Class",
+            "ticker": "MEDRX"
+          },
+          {
+            "class_id": "C000013735",
+            "class_name": "Advisor Class A",
+            "ticker": "KRXAX"
+          }
+        ],
+        "series_id": "S000005033",
+        "series_name": "Kinetics Medical Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000013736",
+            "class_name": "No Load Class",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000005034",
+        "series_name": "Kinetics Government Money Market Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000013737",
+            "class_name": "No Load Class",
+            "ticker": "KMKNX"
+          },
+          {
+            "class_id": "C000013738",
+            "class_name": "Advisor Class A",
+            "ticker": "KMKAX"
+          },
+          {
+            "class_id": "C000013739",
+            "class_name": "Advisor Class B",
+            "ticker": ""
+          },
+          {
+            "class_id": "C000013740",
+            "class_name": "Advisor Class C",
+            "ticker": "KMKCX"
+          },
+          {
+            "class_id": "C000013741",
+            "class_name": "Institutional Class",
+            "ticker": "KMKYX"
+          }
+        ],
+        "series_id": "S000005035",
+        "series_name": "Kinetics Market Opportunities Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000049583",
+            "class_name": "Advisor Class A",
+            "ticker": "KWIAX"
+          },
+          {
+            "class_id": "C000049584",
+            "class_name": "Advisor Class C",
+            "ticker": "KWICX"
+          },
+          {
+            "class_id": "C000049585",
+            "class_name": "No Load Class",
+            "ticker": "KWINX"
+          },
+          {
+            "class_id": "C000049586",
+            "class_name": "Institutional Class",
+            "ticker": "KWIIX"
+          }
+        ],
+        "series_id": "S000017862",
+        "series_name": "Kinetics Alternative Income Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000058159",
+            "class_name": "No Load",
+            "ticker": "KMDNX"
+          },
+          {
+            "class_id": "C000058160",
+            "class_name": "Advisor Class A",
+            "ticker": "KMDAX"
+          },
+          {
+            "class_id": "C000058161",
+            "class_name": "Advisor Class C",
+            "ticker": "KMDCX"
+          },
+          {
+            "class_id": "C000058162",
+            "class_name": "Institutional Class",
+            "ticker": "KMDYX"
+          }
+        ],
+        "series_id": "S000020819",
+        "series_name": "Kinetics Multi-Disciplinary Income Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000082349",
+            "class_name": "No Load Class",
+            "ticker": "KPANX"
+          },
+          {
+            "class_id": "C000082350",
+            "class_name": "Advisor Class A",
+            "ticker": "KPARX"
+          },
+          {
+            "class_id": "C000082351",
+            "class_name": "Advisor Class C",
+            "ticker": "KPACX"
+          },
+          {
+            "class_id": "C000082352",
+            "class_name": "Institutional Class",
+            "ticker": "KPAYX"
+          }
+        ],
+        "series_id": "S000027305",
+        "series_name": "Kinetics Tactical Paradigm Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000192497",
+            "class_name": "Advisor Class A",
+            "ticker": "LSHAX"
+          },
+          {
+            "class_id": "C000192498",
+            "class_name": "Advisor Class C",
+            "ticker": "LSHCX"
+          },
+          {
+            "class_id": "C000192499",
+            "class_name": "Institutional Class",
+            "ticker": "LSHUX"
+          },
+          {
+            "class_id": "C000192500",
+            "class_name": "No Load Class",
+            "ticker": "LSHEX"
+          }
+        ],
+        "series_id": "S000058593",
+        "series_name": "Kinetics Spin-Off and Corporate Restructuring Fund"
+      }
+    ]
+  ],
+  "SERIES-series-1496998": [
+    "0001496998",
+    "AMERICAN FUNDS MORTGAGE FUND",
+    [
+      {
+        "classes": [
+          {
+            "class_id": "C000092896",
+            "class_name": "Class A",
+            "ticker": "MFAAX"
+          },
+          {
+            "class_id": "C000092897",
+            "class_name": "Class 529-F-1",
+            "ticker": "CMFFX"
+          },
+          {
+            "class_id": "C000092898",
+            "class_name": "Class R-1",
+            "ticker": "RMAAX"
+          },
+          {
+            "class_id": "C000092899",
+            "class_name": "Class R-2",
+            "ticker": "RMABX"
+          },
+          {
+            "class_id": "C000092900",
+            "class_name": "Class R-3",
+            "ticker": "RMACX"
+          },
+          {
+            "class_id": "C000092901",
+            "class_name": "Class R-4",
+            "ticker": "RMAEX"
+          },
+          {
+            "class_id": "C000092902",
+            "class_name": "Class R-5",
+            "ticker": "RMAFX"
+          },
+          {
+            "class_id": "C000092903",
+            "class_name": "Class R-6",
+            "ticker": "RMAGX"
+          },
+          {
+            "class_id": "C000092904",
+            "class_name": "Class B",
+            "ticker": "MFABX"
+          },
+          {
+            "class_id": "C000092905",
+            "class_name": "Class C",
+            "ticker": "MFACX"
+          },
+          {
+            "class_id": "C000092906",
+            "class_name": "Class F-1",
+            "ticker": "MFAEX"
+          },
+          {
+            "class_id": "C000092907",
+            "class_name": "Class F-2",
+            "ticker": "MFAFX"
+          },
+          {
+            "class_id": "C000092908",
+            "class_name": "Class 529-A",
+            "ticker": "CMFAX"
+          },
+          {
+            "class_id": "C000092909",
+            "class_name": "Class 529-B",
+            "ticker": "CMFBX"
+          },
+          {
+            "class_id": "C000092910",
+            "class_name": "Class 529-C",
+            "ticker": "CMFCX"
+          },
+          {
+            "class_id": "C000092911",
+            "class_name": "Class 529-E",
+            "ticker": "CMFEX"
+          },
+          {
+            "class_id": "C000148445",
+            "class_name": "Class R-2E",
+            "ticker": "RMBEX"
+          },
+          {
+            "class_id": "C000164806",
+            "class_name": "Class R-5E",
+            "ticker": "RMAHX"
+          },
+          {
+            "class_id": "C000180009",
+            "class_name": "Class F-3",
+            "ticker": "AFFMX"
+          },
+          {
+            "class_id": "C000189492",
+            "class_name": "Class 529-T",
+            "ticker": "TMFMX"
+          },
+          {
+            "class_id": "C000189493",
+            "class_name": "Class T",
+            "ticker": "TFMFX"
+          },
+          {
+            "class_id": "C000224553",
+            "class_name": "Class 529-F-2",
+            "ticker": "FFMFX"
+          },
+          {
+            "class_id": "C000224554",
+            "class_name": "Class 529-F-3",
+            "ticker": "FMMFX"
+          }
+        ],
+        "series_id": "S000030190",
+        "series_name": "AMERICAN FUNDS MORTGAGE FUND"
+      }
+    ]
+  ],
+  "SERIES-series-1618627": [
+    "0001618627",
+    "RBB Fund Trust",
+    [
+      {
+        "classes": [
+          {
+            "class_id": "C000151486",
+            "class_name": "Institutional Class",
+            "ticker": "PSMPX"
+          },
+          {
+            "class_id": "C000151487",
+            "class_name": "Investor Class",
+            "ticker": "PSMQX"
+          }
+        ],
+        "series_id": "S000048026",
+        "series_name": "Penn Capital Mid Cap Core Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000151488",
+            "class_name": "Institutional Class",
+            "ticker": "PSCNX"
+          },
+          {
+            "class_id": "C000151489",
+            "class_name": "Investor Class",
+            "ticker": "PSCQX"
+          }
+        ],
+        "series_id": "S000048027",
+        "series_name": "Penn Capital Special Situations Small Cap Equity Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000151490",
+            "class_name": "Institutional Class",
+            "ticker": "PHYNX"
+          },
+          {
+            "class_id": "C000151491",
+            "class_name": "Investor Class",
+            "ticker": "PHYVX"
+          }
+        ],
+        "series_id": "S000048028",
+        "series_name": "Penn Capital Opportunistic High Income Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000151492",
+            "class_name": "Institutional Class",
+            "ticker": "PFRNX"
+          },
+          {
+            "class_id": "C000151493",
+            "class_name": "Investor Class",
+            "ticker": "PFRVX"
+          }
+        ],
+        "series_id": "S000048029",
+        "series_name": "Penn Capital Floating Rate Income Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000190040",
+            "class_name": "Institutional Class",
+            "ticker": "PSHNX"
+          }
+        ],
+        "series_id": "S000058052",
+        "series_name": "Penn Capital Short Duration High Income Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000190041",
+            "class_name": "Institutional Class",
+            "ticker": "PMCNX"
+          }
+        ],
+        "series_id": "S000058053",
+        "series_name": "Penn Capital Micro Cap Equity Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000190042",
+            "class_name": "Institutional Class",
+            "ticker": "PVSNX"
+          }
+        ],
+        "series_id": "S000058054",
+        "series_name": "Penn Capital Enterprise Value Small Cap Equity Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000238702",
+            "class_name": "Investor Class",
+            "ticker": "PEIGX"
+          },
+          {
+            "class_id": "C000238703",
+            "class_name": "Class A",
+            "ticker": "PEIAX"
+          },
+          {
+            "class_id": "C000238704",
+            "class_name": "Institutional Class",
+            "ticker": "PEIEX"
+          }
+        ],
+        "series_id": "S000077983",
+        "series_name": "P/E GLOBAL ENHANCED INTERNATIONAL FUND"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000239714",
+            "class_name": "Investor Class",
+            "ticker": "EVGBX"
+          },
+          {
+            "class_id": "C000239715",
+            "class_name": "Institutional Class",
+            "ticker": "EVGIX"
+          }
+        ],
+        "series_id": "S000078923",
+        "series_name": "Evermore Global Value Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000240014",
+            "class_name": "Torray Equity Income Fund",
+            "ticker": "TORYX"
+          }
+        ],
+        "series_id": "S000079134",
+        "series_name": "Torray Equity Income Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000240353",
+            "class_name": "The Energy & Minerals Group EV, Solar & Battery Materials (Lithium, Nickel, Copper, Cobalt) Futures Strategy ETF",
+            "ticker": "CHRG"
+          }
+        ],
+        "series_id": "S000079345",
+        "series_name": "The Energy & Minerals Group EV, Solar & Battery Materials (Lithium, Nickel, Copper, Cobalt) Futures Strategy ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000251942",
+            "class_name": "Longview Advantage ETF",
+            "ticker": "EBI"
+          }
+        ],
+        "series_id": "S000086399",
+        "series_name": "Longview Advantage ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000255627",
+            "class_name": "First Eagle Global Equity ETF",
+            "ticker": "FEGE"
+          }
+        ],
+        "series_id": "S000089122",
+        "series_name": "First Eagle Global Equity ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000255628",
+            "class_name": "First Eagle Overseas Equity ETF",
+            "ticker": "FEOE"
+          }
+        ],
+        "series_id": "S000089123",
+        "series_name": "First Eagle Overseas Equity ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000255972",
+            "class_name": "Tweedy, Browne Insider + Value ETF",
+            "ticker": "COPY"
+          }
+        ],
+        "series_id": "S000089439",
+        "series_name": "Tweedy, Browne Insider + Value ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000259083",
+            "class_name": "Prospera Tactical Income ETF",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000091418",
+        "series_name": "Prospera Tactical Income ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000259469",
+            "class_name": "Advent Convertible Bond ETF",
+            "ticker": "ACVT"
+          }
+        ],
+        "series_id": "S000091735",
+        "series_name": "Advent Convertible Bond ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000259526",
+            "class_name": "Twin Oak Enhanced Credit ETF",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000091759",
+        "series_name": "Twin Oak Enhanced Credit ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000261004",
+            "class_name": "Twin Oak Active Opportunities II ETF",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000092954",
+        "series_name": "Twin Oak Active Opportunities II ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000261005",
+            "class_name": "Twin Oak Active Opportunities III ETF",
+            "ticker": "TOAO"
+          }
+        ],
+        "series_id": "S000092955",
+        "series_name": "Twin Oak Active Opportunities III ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000261006",
+            "class_name": "Twin Oak Endure ETF",
+            "ticker": "SPYA"
+          }
+        ],
+        "series_id": "S000092956",
+        "series_name": "Twin Oak Endure ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000261884",
+            "class_name": "MUFG Japan Small Cap Active ETF",
+            "ticker": "MJSC"
+          }
+        ],
+        "series_id": "S000093543",
+        "series_name": "MUFG Japan Small Cap Active ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000263348",
+            "class_name": "Tweedy, Browne International Insider + Value ETF",
+            "ticker": "ICPY"
+          }
+        ],
+        "series_id": "S000094804",
+        "series_name": "Tweedy, Browne International Insider + Value ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000264710",
+            "class_name": "Wayfinder Dynamic U.S. Interest Rate ETF",
+            "ticker": "CMBO"
+          }
+        ],
+        "series_id": "S000095928",
+        "series_name": "Wayfinder Dynamic U.S. Interest Rate ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000264711",
+            "class_name": "Wayfinder Gold ETF",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000095929",
+        "series_name": "Wayfinder Gold ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000264712",
+            "class_name": "Wayfinder Oil ETF",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000095930",
+        "series_name": "Wayfinder Oil ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000264713",
+            "class_name": "Wayfinder Saber ETF",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000095931",
+        "series_name": "Wayfinder Saber ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000264714",
+            "class_name": "Wayfinder U.S. Dispersion ETF",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000095932",
+        "series_name": "Wayfinder U.S. Dispersion ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000264715",
+            "class_name": "Wayfinder U.S. Market Better Beta ETF",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000095933",
+        "series_name": "Wayfinder U.S. Market Better Beta ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000267783",
+            "class_name": "Twin Oak Enhanced Equity ETF",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000098126",
+        "series_name": "Twin Oak Enhanced Equity ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000267784",
+            "class_name": "Twin Oak Enhanced Fixed Income ETF",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000098127",
+        "series_name": "Twin Oak Enhanced Fixed Income ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000267785",
+            "class_name": "Twin Oak Global Equity ETF",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000098128",
+        "series_name": "Twin Oak Global Equity ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000267786",
+            "class_name": "Twin Oak Strategic Solutions ETF",
+            "ticker": "TOS"
+          }
+        ],
+        "series_id": "S000098129",
+        "series_name": "Twin Oak Strategic Solutions ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000267787",
+            "class_name": "Twin Oak Hedged Opportunities ETF",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000098130",
+        "series_name": "Twin Oak Hedged Opportunities ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000269378",
+            "class_name": "Longview Advantage Fixed Income ETF",
+            "ticker": "LVIG"
+          }
+        ],
+        "series_id": "S000099601",
+        "series_name": "Longview Advantage Fixed Income ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000269379",
+            "class_name": "Longview Advantage Real Estate ETF",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000099602",
+        "series_name": "Longview Advantage Real Estate ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000269741",
+            "class_name": "Pathfinder Disciplined US Equity ETF",
+            "ticker": "PFDE"
+          }
+        ],
+        "series_id": "S000099936",
+        "series_name": "Pathfinder Disciplined US Equity ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000269742",
+            "class_name": "Pathfinder Focused Opportunities ETF",
+            "ticker": "PFOE"
+          }
+        ],
+        "series_id": "S000099937",
+        "series_name": "Pathfinder Focused Opportunities ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000271349",
+            "class_name": "M.D. Sass Concentrated Value ETF",
+            "ticker": "SASS"
+          }
+        ],
+        "series_id": "S000101252",
+        "series_name": "M.D. Sass Concentrated Value ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000272240",
+            "class_name": "The Snowball ETF",
+            "ticker": "CPD"
+          }
+        ],
+        "series_id": "S000101883",
+        "series_name": "The Snowball ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000272400",
+            "class_name": "Equity Partners ETF",
+            "ticker": "LTEQ"
+          }
+        ],
+        "series_id": "S000101983",
+        "series_name": "Equity Partners ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000272823",
+            "class_name": "Twin Oak Apex Opportunities ETF",
+            "ticker": "TPEX"
+          }
+        ],
+        "series_id": "S000102354",
+        "series_name": "Twin Oak Apex Opportunities ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000272824",
+            "class_name": "Twin Oak Horizons ETF",
+            "ticker": "TOHZ"
+          }
+        ],
+        "series_id": "S000102355",
+        "series_name": "Twin Oak Horizons ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000275580",
+            "class_name": "Synera Funds Japan Active+ ETF",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000104922",
+        "series_name": "Synera Funds Japan Active+ ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000277001",
+            "class_name": "Polen Dividend Income ETF",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000106168",
+        "series_name": "Polen Dividend Income ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000277002",
+            "class_name": "Polen International Dividend Income ETF",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000106169",
+        "series_name": "Polen International Dividend Income ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000278738",
+            "class_name": "Pathfinder Disciplined Midcap Equity ETF",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000107763",
+        "series_name": "Pathfinder Disciplined Midcap Equity ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000281063",
+            "class_name": "Park Edge Adaptive Risk ETF",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000109929",
+        "series_name": "Park Edge Adaptive Risk ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000281195",
+            "class_name": "Longview Advantage Expected Return ETF",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000109971",
+        "series_name": "Longview Advantage Expected Return ETF"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000281196",
+            "class_name": "Longview Advantage US Equity ETF",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000109972",
+        "series_name": "Longview Advantage US Equity ETF"
+      }
+    ]
+  ],
+  "SERIES-series-36405": [
+    "0000036405",
+    "VANGUARD INDEX FUNDS",
+    [
+      {
+        "classes": [
+          {
+            "class_id": "C000007773",
+            "class_name": "Investor Shares",
+            "ticker": "VFINX"
+          },
+          {
+            "class_id": "C000007774",
+            "class_name": "Admiral Shares",
+            "ticker": "VFIAX"
+          },
+          {
+            "class_id": "C000035202",
+            "class_name": "Signal Shares",
+            "ticker": "VIFSX"
+          },
+          {
+            "class_id": "C000092055",
+            "class_name": "ETF Shares",
+            "ticker": "VOO"
+          },
+          {
+            "class_id": "C000170274",
+            "class_name": "Institutional Select Shares",
+            "ticker": "VFFSX"
+          },
+          {
+            "class_id": "C000179712",
+            "class_name": "Institutional Shares",
+            "ticker": ""
+          },
+          {
+            "class_id": "C000179713",
+            "class_name": "Institutional Plus Shares",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000002839",
+        "series_name": "Vanguard 500 Index Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000007775",
+            "class_name": "Investor Shares",
+            "ticker": "VIVAX"
+          },
+          {
+            "class_id": "C000007776",
+            "class_name": "Admiral Shares",
+            "ticker": "VVIAX"
+          },
+          {
+            "class_id": "C000007777",
+            "class_name": "Institutional Shares",
+            "ticker": "VIVIX"
+          },
+          {
+            "class_id": "C000007778",
+            "class_name": "ETF Shares",
+            "ticker": "VTV"
+          },
+          {
+            "class_id": "C000035203",
+            "class_name": "Signal Shares",
+            "ticker": "VVISX"
+          }
+        ],
+        "series_id": "S000002840",
+        "series_name": "Vanguard Value Index Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000007779",
+            "class_name": "Investor Shares",
+            "ticker": "VEXMX"
+          },
+          {
+            "class_id": "C000007780",
+            "class_name": "Admiral Shares",
+            "ticker": "VEXAX"
+          },
+          {
+            "class_id": "C000007781",
+            "class_name": "Institutional Shares",
+            "ticker": "VIEIX"
+          },
+          {
+            "class_id": "C000007782",
+            "class_name": "ETF Shares",
+            "ticker": "VXF"
+          },
+          {
+            "class_id": "C000035204",
+            "class_name": "Signal Shares",
+            "ticker": "VEMSX"
+          },
+          {
+            "class_id": "C000096110",
+            "class_name": "Institutional Plus Shares",
+            "ticker": "VEMPX"
+          },
+          {
+            "class_id": "C000170275",
+            "class_name": "Institutional Select Shares",
+            "ticker": "VSEMX"
+          }
+        ],
+        "series_id": "S000002841",
+        "series_name": "Vanguard Extended Market Index Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000007783",
+            "class_name": "Investor Shares",
+            "ticker": "VIGRX"
+          },
+          {
+            "class_id": "C000007784",
+            "class_name": "Admiral Shares",
+            "ticker": "VIGAX"
+          },
+          {
+            "class_id": "C000007785",
+            "class_name": "Institutional Shares",
+            "ticker": "VIGIX"
+          },
+          {
+            "class_id": "C000007786",
+            "class_name": "ETF Shares",
+            "ticker": "VUG"
+          },
+          {
+            "class_id": "C000035205",
+            "class_name": "Signal Shares",
+            "ticker": "VIGSX"
+          }
+        ],
+        "series_id": "S000002842",
+        "series_name": "Vanguard Growth Index Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000007787",
+            "class_name": "Investor Shares",
+            "ticker": "VLACX"
+          },
+          {
+            "class_id": "C000007788",
+            "class_name": "Admiral Shares",
+            "ticker": "VLCAX"
+          },
+          {
+            "class_id": "C000007789",
+            "class_name": "Institutional Shares",
+            "ticker": "VLISX"
+          },
+          {
+            "class_id": "C000007790",
+            "class_name": "ETF Shares",
+            "ticker": "VV"
+          },
+          {
+            "class_id": "C000035206",
+            "class_name": "Signal Shares",
+            "ticker": "VLCSX"
+          }
+        ],
+        "series_id": "S000002843",
+        "series_name": "Vanguard Large-Cap Index Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000007791",
+            "class_name": "Investor Shares",
+            "ticker": "VIMSX"
+          },
+          {
+            "class_id": "C000007792",
+            "class_name": "Admiral Shares",
+            "ticker": "VIMAX"
+          },
+          {
+            "class_id": "C000007793",
+            "class_name": "Institutional Shares",
+            "ticker": "VMCIX"
+          },
+          {
+            "class_id": "C000007794",
+            "class_name": "ETF Shares",
+            "ticker": "VO"
+          },
+          {
+            "class_id": "C000035207",
+            "class_name": "Signal Shares",
+            "ticker": "VMISX"
+          },
+          {
+            "class_id": "C000096111",
+            "class_name": "Institutional Plus Shares",
+            "ticker": "VMCPX"
+          }
+        ],
+        "series_id": "S000002844",
+        "series_name": "Vanguard Mid-Cap Index Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000007795",
+            "class_name": "Investor Shares",
+            "ticker": "NAESX"
+          },
+          {
+            "class_id": "C000007796",
+            "class_name": "Admiral Shares",
+            "ticker": "VSMAX"
+          },
+          {
+            "class_id": "C000007797",
+            "class_name": "Institutional Shares",
+            "ticker": "VSCIX"
+          },
+          {
+            "class_id": "C000007798",
+            "class_name": "ETF Shares",
+            "ticker": "VB"
+          },
+          {
+            "class_id": "C000035208",
+            "class_name": "Signal Shares",
+            "ticker": "VSISX"
+          },
+          {
+            "class_id": "C000096112",
+            "class_name": "Institutional Plus Shares",
+            "ticker": "VSCPX"
+          }
+        ],
+        "series_id": "S000002845",
+        "series_name": "Vanguard Small-Cap Index Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000007799",
+            "class_name": "Investor Shares",
+            "ticker": "VISGX"
+          },
+          {
+            "class_id": "C000007800",
+            "class_name": "Institutional Shares",
+            "ticker": "VSGIX"
+          },
+          {
+            "class_id": "C000007801",
+            "class_name": "ETF Shares",
+            "ticker": "VBK"
+          },
+          {
+            "class_id": "C000035209",
+            "class_name": "Signal Shares",
+            "ticker": ""
+          },
+          {
+            "class_id": "C000105304",
+            "class_name": "Admiral Shares",
+            "ticker": "VSGAX"
+          }
+        ],
+        "series_id": "S000002846",
+        "series_name": "Vanguard Small-Cap Growth Index Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000007802",
+            "class_name": "Investor Shares",
+            "ticker": "VISVX"
+          },
+          {
+            "class_id": "C000007803",
+            "class_name": "Institutional Shares",
+            "ticker": "VSIIX"
+          },
+          {
+            "class_id": "C000007804",
+            "class_name": "ETF Shares",
+            "ticker": "VBR"
+          },
+          {
+            "class_id": "C000035210",
+            "class_name": "Signal Shares",
+            "ticker": ""
+          },
+          {
+            "class_id": "C000105305",
+            "class_name": "Admiral Shares",
+            "ticker": "VSIAX"
+          }
+        ],
+        "series_id": "S000002847",
+        "series_name": "Vanguard Small-Cap Value Index Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000007805",
+            "class_name": "Investor Shares",
+            "ticker": "VTSMX"
+          },
+          {
+            "class_id": "C000007806",
+            "class_name": "Admiral Shares",
+            "ticker": "VTSAX"
+          },
+          {
+            "class_id": "C000007807",
+            "class_name": "Institutional Shares",
+            "ticker": "VITSX"
+          },
+          {
+            "class_id": "C000007808",
+            "class_name": "ETF Shares",
+            "ticker": "VTI"
+          },
+          {
+            "class_id": "C000035211",
+            "class_name": "Signal Shares",
+            "ticker": "VTSSX"
+          },
+          {
+            "class_id": "C000155407",
+            "class_name": "Institutional Plus Shares",
+            "ticker": "VSMPX"
+          },
+          {
+            "class_id": "C000170276",
+            "class_name": "Institutional Select Shares",
+            "ticker": "VSTSX"
+          }
+        ],
+        "series_id": "S000002848",
+        "series_name": "Vanguard Total Stock Market Index Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000034427",
+            "class_name": "Investor Shares",
+            "ticker": "VMGIX"
+          },
+          {
+            "class_id": "C000034428",
+            "class_name": "ETF Shares",
+            "ticker": "VOT"
+          },
+          {
+            "class_id": "C000035212",
+            "class_name": "Signal Shares",
+            "ticker": ""
+          },
+          {
+            "class_id": "C000105306",
+            "class_name": "Admiral Shares",
+            "ticker": "VMGMX"
+          }
+        ],
+        "series_id": "S000012756",
+        "series_name": "Vanguard Mid-Cap Growth Index Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000034429",
+            "class_name": "Investor Shares",
+            "ticker": "VMVIX"
+          },
+          {
+            "class_id": "C000034430",
+            "class_name": "ETF Shares",
+            "ticker": "VOE"
+          },
+          {
+            "class_id": "C000035213",
+            "class_name": "Signal Shares",
+            "ticker": ""
+          },
+          {
+            "class_id": "C000105307",
+            "class_name": "Admiral Shares",
+            "ticker": "VMVAX"
+          }
+        ],
+        "series_id": "S000012757",
+        "series_name": "Vanguard Mid-Cap Value Index Fund"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000092033",
+            "class_name": "ETF Shares",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000030011",
+        "series_name": "Vanguard Unused Series"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000095411",
+            "class_name": "Vanguard Extended Market Index Fund Institutional Plus Shares",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000030776",
+        "series_name": "S000002841"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000095412",
+            "class_name": "Vanguard Mid-Cap Index Fund Institutional Plus Shares",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000030777",
+        "series_name": "S000002844"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000095413",
+            "class_name": "Vanguard Small-Cap Index Fund Institutional Plus Shares",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000030778",
+        "series_name": "S000002845"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000168157",
+            "class_name": "Institutional Select Shares",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000053495",
+        "series_name": "Vanguard 500 Index"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000168158",
+            "class_name": "Institutional Select Shares",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000053496",
+        "series_name": "Vanguard Extended Market Index"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000168159",
+            "class_name": "Institutional Select Shares",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000053497",
+        "series_name": "Vanguard Total Stock Market Index"
+      }
+    ]
+  ],
+  "SERIES-series-832574": [
+    "0000832574",
+    "REYNOLDS FUNDS INC",
+    [
+      {
+        "classes": [
+          {
+            "class_id": "C000002480",
+            "class_name": "REYNOLDS BALANCED FUND",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000000864",
+        "series_name": "REYNOLDS BALANCED FUND"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000002481",
+            "class_name": "REYNOLDS BLUE CHIP GROWTH FUND",
+            "ticker": "RBCGX"
+          }
+        ],
+        "series_id": "S000000865",
+        "series_name": "REYNOLDS BLUE CHIP GROWTH FUND"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000002482",
+            "class_name": "REYNOLDS FUND",
+            "ticker": "REYFX"
+          }
+        ],
+        "series_id": "S000000866",
+        "series_name": "REYNOLDS FUND"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000002483",
+            "class_name": "REYNOLDS MONEY MARKET FUND",
+            "ticker": ""
+          }
+        ],
+        "series_id": "S000000867",
+        "series_name": "REYNOLDS MONEY MARKET FUND"
+      },
+      {
+        "classes": [
+          {
+            "class_id": "C000002484",
+            "class_name": "REYNOLDS OPPORTUNITY FUND",
+            "ticker": "ROPPX"
+          }
+        ],
+        "series_id": "S000000868",
+        "series_name": "REYNOLDS OPPORTUNITY FUND"
+      }
+    ]
+  ]
+}

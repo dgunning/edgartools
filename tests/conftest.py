@@ -1,11 +1,10 @@
-import pytest
+import logging
 from pathlib import Path
 
-from edgar import httpclient
-from edgar import Company
-from edgar._filings import Filing, get_filings
+import pytest
 
-import logging
+from edgar import Company, httpclient
+from edgar._filings import Filing, get_filings
 
 logger = logging.getLogger(__name__)
 
@@ -15,11 +14,12 @@ logger = logging.getLogger(__name__)
 # a test touches it. Raises rather than warning if it can't secure the loader
 # (beads edgartools-j1ui).
 from tests._vcr_safety import install_safe_yaml_deserializer  # noqa: E402
+from tests.paths import CASSETTES_DIR  # noqa: E402
 
 install_safe_yaml_deserializer()
 
-# VCR configuration for recording/replaying HTTP interactions
-CASSETTES_DIR = Path(__file__).parent / "cassettes"
+# VCR configuration for recording/replaying HTTP interactions.
+# CASSETTES_DIR comes from tests.paths so every reader of it agrees (edgartools-07lk.12.2).
 
 
 @pytest.fixture(scope="module")
@@ -124,6 +124,36 @@ def pytest_addoption(parser):
     parser.addoption("--enable-cache", action="store_true", help="Enable HTTP cache")
 
 
+def _require_vcr_plugin_if_cassettes_are_used(config, items):
+    """Fail loudly when cassette-backed tests run without the plugin that replays them.
+
+    The ``vcr`` marker is registered in pyproject, so an environment with no
+    pytest-vcr installed does not warn about an unknown marker — it silently
+    ignores the marker, opens no cassette, and lets the request go to the network
+    or the local HTTP cache. The run still reports passed, which makes it worse
+    than a failure: the suite looks like it verified against recorded responses
+    while verifying against whatever the machine happened to have.
+
+    That is what the hatch ``test`` matrix env did until its dependency list was
+    brought in step with CI (bead edgartools-ov2m). This hook is the guard, not
+    the fix — it turns a silent downgrade into a collection error the next time
+    the two lists drift apart.
+    """
+    if not any(item.get_closest_marker("vcr") for item in items):
+        return
+    # pytest-vcr registers under the short name "vcr"; the module name is checked
+    # too so that disabling it explicitly (-p no:vcr) is caught the same way.
+    if any(config.pluginmanager.hasplugin(name) for name in ("vcr", "pytest_vcr")):
+        return
+    raise pytest.UsageError(
+        "Tests marked @pytest.mark.vcr were collected, but pytest-vcr is not "
+        "installed in this environment, so no cassette would be replayed and the "
+        "tests would reach the network while still reporting passed. Install "
+        "pytest-vcr and vcrpy<8.2 (see [tool.hatch.envs.test] in pyproject.toml), "
+        "or deselect the cassette-backed tests."
+    )
+
+
 def pytest_configure(config):
     """
     - Disables caching for testing
@@ -164,8 +194,9 @@ def cache_sec_submissions_for_session():
     Set EDGAR_TEST_CACHE_STATS=1 to print hit/miss stats at session end.
     """
     import os
-    import edgar.entity.submissions as _subs
+
     import edgar.entity as _ent
+    import edgar.entity.submissions as _subs
 
     cache = {}
     stats = {"calls": 0, "downloads": 0}
@@ -211,7 +242,7 @@ def pytest_runtest_call(item):
             pytest.skip(f"SEC returned transient empty response: {exc_value}")
 
 
-def pytest_collection_modifyitems(items):
+def pytest_collection_modifyitems(config, items):
     """
     Automatically add markers to tests based on file patterns.
 
@@ -222,6 +253,8 @@ def pytest_collection_modifyitems(items):
 
     Only adds markers to tests that don't already have fast/network/slow markers.
     """
+    _require_vcr_plugin_if_cassettes_are_used(config, items)
+
     # Files that are definitely fast (no network calls - parsing, processing, rendering)
     FAST_PATTERNS = [
         'test_html', 'test_documents', 'test_xbrl', 'test_tables', 'test_table',
@@ -250,6 +283,70 @@ def pytest_collection_modifyitems(items):
         'test_currency', 'test_thirteenf_rendering', 'test_sections_membership',
         'test_standardization', 'test_abstract_detection', 'test_xbrl_validation',
         'test_urls', 'test_toc_filter', 'test_preprocessing',
+        # Classified 2026-08-04 while closing the marker fall-through hole.
+        # Each of these ran in NO CI job because its name matched no pattern
+        # here. Every one was verified to pass with outbound sockets blocked
+        # before being called fast — the heuristic guess was wrong for five of
+        # them, so the offline run is the authority, not the filename.
+        'test_toc_analyzer_form_aware_bare_item', 'test_toc_agents',
+        'test_toc_hierarchy_bounding', 'test_toc_title_vocabulary',
+        'test_toc_name_anchors', 'test_toc_authoritative_span',
+        'test_toc_fragment_coalescing', 'test_toc_analyzer_part_context',
+        'test_form_schema', 'test_v530_coverage', 'test_concept_graph',
+        'test_concept_extractor', 'test_metalinks', 'test_viewer',
+        'test_viewer_validation', 'test_registration_s3', 'test_datefmt_hardening',
+        'test_internal_deprecation_silence', 'test_parser_corpus',
+        'test_prospectus_section_flip_gate', 'test_prospectus_sections_surface',
+        's1_section_flip_gate', 'test_def14a_section_flip_gate',
+        'test_frontier', 'test_tier_c_judge', 'test_424b_xbrl',
+        'test_unavailable_partition',
+        'test_offering_consumers', 'test_correspondence',
+        # Classified 2026-08-18 (edgartools-07lk.11.1). Characterization tests for
+        # the bs4 to lxml port; both parse inline XML strings and touch no fetch
+        # path. Verified with outbound sockets blocked before being called fast.
+        'test_party', 'test_forms_listing',
+        # Classified 2026-08-18 (edgartools-07lk.11.3). The offline half of the
+        # Form 3/4/5 parse contract, split out of tests/test_ownership.py so the
+        # regressions the lxml port could introduce silently are caught by the
+        # fast job rather than only by the sequential network suite. Verified
+        # with outbound sockets blocked before being called fast.
+        'test_insider_parse_contract',
+        # Classified 2026-08-18 (edgartools-07lk.11.3). Offline contract for the
+        # 13F primary-document parse: tests/test_thirteenf.py and the #523
+        # regressions both resolve filings over the wire, so the namespaced
+        # parse this port most endangers had no fast-job coverage. Verified with
+        # outbound sockets blocked.
+        'test_13f_primary_doc_contract',
+        # Classified 2026-08-18 (edgartools-07lk.11.3). Offline contract for the
+        # Form 144 notice parse; tests/test_form144.py is network-classified.
+        # Verified with outbound sockets blocked.
+        'test_144_notice_contract',
+        # Classified 2026-08-18 (edgartools-07lk.11.3). Offline contract for the
+        # Form D notice parse; tests/test_formd_offerings.py is network-classified.
+        # Verified with outbound sockets blocked.
+        'test_regd_notice_contract',
+        # Classified 2026-08-18 (edgartools-07lk.11.3). Offline contract for the
+        # MA-I municipal advisor parse; tests/test_muni_advisors.py matches the
+        # 'test_muni' network pattern. Verified with outbound sockets blocked.
+        'test_ma_i_form_contract',
+        # Re-classified 2026-08-31. Was in NETWORK_PATTERNS (whole-file, from the
+        # 2026-08-04 pass) because ONE of its 18 tests fetches AAPL from SEC — and
+        # that one already carries its own @pytest.mark.network, which wins over
+        # this list. The whole-file entry bought nothing and cost the 17 synthetic
+        # unit tests of StatementStitcher._unaccumulate_cashflow_ytd, which build
+        # their stitcher in memory and touch no fetch path.
+        #
+        # That is not hypothetical: PR #1204 changed _subtract_periods to drop
+        # un-derivable cells (GH #1179) and left this file's contradicting test
+        # un-updated. It could not fail the pull request, because test-network is
+        # skipped on PRs, so main went red after the merge and the break shipped
+        # in 5.55.0. A test of a function has to run in the lane that gates
+        # changes to that function.
+        #
+        # MEASURED, not guessed: under `pytest -p tests._offline_harness` the file
+        # is 17 passed / 1 failed, the failure being exactly the AAPL test, which
+        # passes on the network.
+        'test_cashflow_unaccumulation',
     ]
 
     # Files that need network (fetch from SEC)
@@ -274,7 +371,128 @@ def pytest_collection_modifyitems(items):
         'test_ncen', 'test_ncsr',
         # XBRL tests that need network (use Company() or XBRL.from_filing)
         'test_xbrl_periods',
+        # Classified 2026-08-19. Every fixture in tests/test_statement_view.py is
+        # `Company("AAPL").get_filings(form="10-K").latest().xbrl()` — three live
+        # fetches. It matched FAST_PATTERNS' 'test_statement' substring and so ran
+        # in the fast job, where it passed only for as long as the CI HTTP cache
+        # stayed warm; on a cold cache all 13 tests error with ConnectError and
+        # the required check fails for a reason unrelated to the pull request that
+        # happens to be running. Measured under tests/_offline_harness.py: 13
+        # errors offline, all 13 pass on the network. NETWORK_PATTERNS is matched
+        # first, so this entry wins over the 'test_statement' fast match.
+        'test_statement_view',
+        # Classified 2026-08-04 (see the note in FAST_PATTERNS). These fail with
+        # outbound sockets blocked, so they are network by measurement.
+        'test_registration_s1', 'test_registration_s4', 'test_prospectus497k',
+        'test_drs', 'test_to_context',
+        'test_twentyfourf',
+        # Reproduction scripts under tests/issues/reproductions/ whose names
+        # matched nothing. All fetch from SEC (Company(), get_filings()).
+        #
+        # Six names were dropped here when the scripts behind them were deleted
+        # (test_financial_metrics_fix, test_multiperiod_statements,
+        # test_nvda_2020_duplicate_issue, test_6k_with_financials, test_fix_429,
+        # test_multiple_companies_429), and two more on 2026-08-10 when Tier 2 of
+        # bead edgartools-07lk.24 emptied the tree of regression-marked files:
+        # test_fix_438 (deleted, a true duplicate) and test_integration_438_fix
+        # (moved to tests/issues/regression/ as
+        # test_issue_438_deduplication_integration.py, and now classified by
+        # REGRESSION_NETWORK_FILES below instead). A pattern for a file that no
+        # longer exists matches nothing, so it is not a bug — but it reads as
+        # coverage this list does not have, and the entries outlived their files
+        # by a release. Delete the pattern in the same commit as the file.
     ]
+
+    # Regression tests used to carry no fast/network marker at all: this hook
+    # marked them `regression` and stopped. All three PR-facing CI selectors read
+    # 'fast and not regression', 'network and not slow and not regression' and
+    # 'slow and not regression', so every one of the 1,746 tests under
+    # tests/issues/regression/ was deselected on every pull request and ran only
+    # after merge, on the weekly/main-push Regression Tests workflow. A PR could
+    # break any of them and merge green (bead edgartools-07lk.21). CLAUDE.md
+    # tells every bug fix to put its regression test in that tree, so the better
+    # a contributor followed the docs, the less their test gated anything.
+    #
+    # Classifying them lets the offline half gate pull requests. Which half is
+    # which was MEASURED, not guessed (2026-08-04): the tree was run with
+    # outbound TCP and DNS blocked, and everything that failed was re-run with
+    # the network to separate "needs SEC" from "already broken" — all 159
+    # passed, so none was broken. Re-measure the same way rather than editing
+    # this by eye; the filename heuristic was wrong for five files the last time
+    # a classification was done here.
+    #
+    # The measurement is a committed harness, so it does not have to be rebuilt
+    # again (bead edgartools-nx3h — it had been written from scratch three times):
+    #
+    #     hatch run test-offline-audit tests/issues/regression/
+    #
+    # Failures there are candidates, not verdicts. Re-run each one WITHOUT the
+    # harness before adding it below: failing offline and being broken look
+    # identical from inside the run. See tests/_offline_harness.py.
+    #
+    # "Offline" means offline *alone*: the measurement clears every functools
+    # cache in the edgar package before each test, so no test is credited with a
+    # fetch an earlier one had already cached. That is stricter than CI, where
+    # xdist workers share warm caches, and deliberately so. It is also what
+    # caught the quarterly-index coupling: four cassette-backed files were
+    # mostly offline, but 64 of their 170 tests also fetched the quarterly form
+    # index to resolve an accession through find(), which no cassette records,
+    # so whether a test needed the network depended on the xdist worker count.
+    # They build their Filings from tests/_offline_filings.py instead (bead
+    # edgartools-zuuu), which put 165 of those 170 into the gate: five carry an
+    # explicit `network` marker from their authors (400 KB+ primary documents).
+    REGRESSION_NETWORK_FILES = {
+        'test_entityfacts_no_duplicate_quarterly_periods.py',
+        'test_issue_282_xbrl_api_regression.py',
+        'test_issue_408_cashflow_empty_periods.py',
+        'test_issue_416_segment_member_values.py',
+        'test_issue_420_multi_year_income_statements.py',
+        'test_issue_427_xbrl_data_cap.py',
+        'test_issue_429_statement_period_regression.py',
+        # Moved in from tests/issues/reproductions/ on 2026-08-10 (bead
+        # edgartools-07lk.24, Tier 2). Every test in it reads a real 10-K.
+        'test_issue_438_deduplication_integration.py',
+        'test_issue_439_order_parsing.py',
+        'test_issue_441_current_filings_pagination.py',
+        'test_issue_443_corrupted_cache.py',
+        'test_issue_446_20f_ifrs_statements.py',
+        'test_issue_451_expense_sign_regression.py',
+        'test_issue_464_period_key.py',
+        'test_issue_513_data_accuracy.py',
+        'test_issue_518_income_statement_fallback.py',
+        'test_issue_633_earnings_data_accuracy.py',
+        'test_issue_637_ifrs_concept_discovery.py',
+        'test_issue_706_missing_statements.py',
+        'test_issue_712_xbrl_weight_sign.py',
+        'test_issue_880.py',
+        'test_issue_ugc2_discovery.py',
+        'test_issue_xvxp_footnoted_shares.py',
+    }
+
+    # Files whose tests split: everything else in them runs offline.
+    #
+    # The two Airbnb S-1 tests used to be held out here, because their cassettes
+    # were 105 MB each and GitHub's 100 MB per-file limit is a hard one. They
+    # were that size for a reason unrelated to the S-1: each had recorded THREE
+    # full Airbnb submissions where the test replays one. Trimmed to what is
+    # actually played back they are 43.6 MB and 31.8 MB, so they are tracked and
+    # both tests gate normally now.
+    # test_issue_455 is listed per test rather than per file for the reason this
+    # set exists. Its two filing-backed tests read MAIN's FY2024 10-K and have no
+    # cassette yet, but its third asserts only that
+    # `us-gaap_NetAssetValuePerShare` is still in `eps_concepts` -- which is the
+    # #455 fix itself, needs no filing, and costs nothing. Marking the file
+    # `network` would push that guard out of the pull-request gate too.
+    REGRESSION_NETWORK_TESTS = {
+        'tests/issues/regression/test_issue_455_nav_per_share_scaling.py::test_main_nav_per_share_not_scaled',
+        'tests/issues/regression/test_issue_455_nav_per_share_scaling.py::test_main_nav_per_share_renders_unscaled',
+        'tests/issues/regression/test_issue_863_10b5_plan_detection.py::test_aff10b5_one_checkbox_flows_through_xml_parsing_end_to_end',
+        'tests/issues/regression/test_issue_i5wx_api_consistency.py::test_form4_tables_and_remarks_always_present_when_xml_omits_them',
+        'tests/issues/regression/test_issue_t043_footnote_attribution.py::test_footnote_ids_are_deduped_within_a_transaction',
+        'tests/issues/regression/test_issue_t043_footnote_attribution.py::test_transaction_footnote_ids_are_populated_from_whole_transaction',
+    }
+
+    unclassified = []
 
     for item in items:
         test_path = str(item.fspath)
@@ -284,8 +502,21 @@ def pytest_collection_modifyitems(items):
         is_regression = "/regression/" in test_path or "\\regression\\" in test_path
         if is_regression:
             item.add_marker(pytest.mark.regression)
+            existing_markers = {m.name for m in item.iter_markers()}
+            if not existing_markers & {'fast', 'network', 'slow'}:
+                # Unlisted means fast, deliberately. A new regression test that
+                # needs SEC and says so gets `network` from its own marker; one
+                # that needs SEC and forgets fails the pull-request gate on its
+                # first run, which is loud and one marker from fixed. Defaulting
+                # the other way would file it back into the post-merge-only tree
+                # silently — the defect this classification exists to close.
+                needs_network = (
+                    Path(test_path).name in REGRESSION_NETWORK_FILES
+                    or item.nodeid in REGRESSION_NETWORK_TESTS
+                )
+                item.add_marker(pytest.mark.network if needs_network
+                                else pytest.mark.fast)
             logger.debug(f"Auto-marked regression test: {item.nodeid}")
-            # Don't auto-mark regression tests with fast/network - they need explicit markers
             continue
 
         # Skip if test already has fast/network/slow marker
@@ -302,8 +533,32 @@ def pytest_collection_modifyitems(items):
             item.add_marker(pytest.mark.fast)
             logger.debug(f"Auto-marked fast test: {item.nodeid}")
         else:
-            # Warn about tests that don't match any pattern — they won't run in CI
-            logger.warning(f"Test has no marker and matches no auto-marking pattern: {item.nodeid}")
+            unclassified.append(item.nodeid)
+
+    # A file matching no pattern used to emit a logger.warning and carry on.
+    # Nothing selects it after that: CI runs -m 'fast and not regression',
+    # 'network and not slow and not regression' and 'slow and not regression',
+    # so an unmatched file runs in NO job while CI reports green. It is the one
+    # way left for a pull request to pass a gate it never actually met, and it
+    # silently weakened every other gate. 740 tests across 35 files were sitting
+    # in that state when this check was added (2026-08-04), including ~155
+    # covering the TOC analyzer.
+    #
+    # A warning was the wrong severity: nobody reads pytest's captured log on a
+    # green run, which is exactly why it went unnoticed. Fail collection instead.
+    if unclassified:
+        files = sorted({nodeid.split("::")[0] for nodeid in unclassified})
+        raise pytest.UsageError(
+            f"{len(unclassified)} test(s) in {len(files)} file(s) match no "
+            f"auto-marking pattern, so no CI job would run them:\n"
+            + "".join(f"  {name}\n" for name in files)
+            + "Fix by either adding the filename stem to FAST_PATTERNS or "
+              "NETWORK_PATTERNS in tests/conftest.py, or marking the tests "
+              "explicitly with @pytest.mark.fast / @pytest.mark.network.\n"
+              "Decide fast vs network by RUNNING the file with outbound sockets "
+              "blocked, not by reading its name — the filename heuristic was "
+              "wrong for five of the files classified on 2026-08-04."
+        )
 
 
 # Session-scoped company fixtures for performance optimization

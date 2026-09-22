@@ -16,6 +16,8 @@ Related Issues:
 - Issue #334: R&D expense sign inconsistency (resolved with same pattern)
 
 Reporter: @Velikolay
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/451
 """
 
 import pytest

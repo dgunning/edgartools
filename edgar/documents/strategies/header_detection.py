@@ -12,6 +12,41 @@ from edgar.documents.config import ParserConfig
 from edgar.documents.types import HeaderInfo, ParseContext
 
 
+# A bare list or footnote enumerator: '1', '(1)', '(a)', 'iv.', 'b)'. Four or more digits
+# are excluded so a year ('2024') is not caught.
+_BARE_ENUMERATOR = re.compile(r'^[(\[]?\s*(?:\d{1,3}|[ivxlcIVXLC]{1,5}|[a-zA-Z])\s*[)\].]?$')
+
+# A filing's own structural label: "Item 5:", "ITEM 9A(T).", "PART II". Text
+# carrying one is a header on the strength of the label, whatever its length —
+# see _looks_like_header, the one place this is consulted.
+_STRUCTURAL_LABEL = re.compile(r'^\s*(?:Item\s+\d|PART\s+[IVX]+\b)', re.IGNORECASE)
+
+
+def _can_be_heading(text: str) -> bool:
+    """Whether this text could be a heading at all, before any confidence is scored.
+
+    Filers put a bullet glyph or a footnote marker in its own styled span, and the
+    detectors below score that span on everything except what it says: ContextualDetector
+    awards +0.3 whenever the next element is three times longer, which a one-character
+    text passes against almost anything, and another +0.3 when the *previous* sibling
+    looks like a heading. A '•' clears the 0.6 threshold on borrowed evidence alone.
+
+    Across the 57 fixtures that promoted 2,818 headings with no alphanumeric character at
+    all (2,636 of them a bare '•') and 1,199 bare enumerators, together 23.6% of every
+    HeadingNode built. Meta's FY2024 10-K was 180 of 296. They reach users through
+    doc.headings, through the markdown renderer as '### •' and its table of contents, and
+    through the heading index that DocumentSearch scores.
+
+    This is a content floor rather than a confidence adjustment because no amount of
+    styling makes a bullet a heading, and the detectors have no way to express that.
+    """
+    if not any(c.isalnum() for c in text):
+        return False
+    if _BARE_ENUMERATOR.match(text):
+        return False
+    return True
+
+
 class HeaderDetector(ABC):
     """Abstract base class for header detectors."""
 
@@ -312,8 +347,23 @@ class ContextualDetector(HeaderDetector):
 
     def _looks_like_header(self, text: str) -> bool:
         """Check if text looks like a header."""
-        # Short text
-        if len(text.split()) > 15:
+        # Short text — but an Item or Part marker is a header at any length.
+        #
+        # The word cap is a proxy for "too long to be a title", and it is a fair
+        # one for unlabelled text. It is not fair to a labelled one: several of
+        # the SEC's own canonical item titles run past fifteen words, Item 5's
+        # "Market for Registrant's Common Equity, Related Stockholder Matters and
+        # Issuer Purchases of Equity Securities" among them at seventeen. So the
+        # cap systematically rejected exactly the longest *real* headers, and on
+        # 0001376474-16-000635 — where this detector is the only one that fires,
+        # the filer's markup leaving is_bold False on the element that gets
+        # scored — Item 5 was the one item of twenty that never became a heading
+        # (edgartools-dt1f.1 Defect C).
+        #
+        # Only the length test is waived. A prose cross-reference beginning
+        # "Item 5 of this report..." still fails the sentence-punctuation test
+        # below, and the caller still skips anything over 200 characters.
+        if len(text.split()) > 15 and not _STRUCTURAL_LABEL.match(text):
             return False
 
         # No ending punctuation (except colon)
@@ -376,6 +426,10 @@ class HeaderDetectionStrategy:
         # Skip if element has no text
         text = element.text_content().strip()
         if not text:
+            return None
+
+        # A bullet or a bare enumerator is not a heading however it is styled.
+        if not _can_be_heading(text):
             return None
 
         # Collect results from all detectors

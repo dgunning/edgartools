@@ -7,7 +7,7 @@ enabling section extraction for API filings with generated anchor IDs.
 import logging
 import re
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 from lxml import html as lxml_html
 
@@ -262,14 +262,19 @@ class TOCAnalyzer:
         if not collisions:
             return result
 
-        if body is None:
-            body = self._analyze_body_item_headers(html_content, tree=tree)
+        # Read the body with abutted titles allowed, whether or not a stricter
+        # scan was already run for the paths above: separating a collision needs
+        # the colliding items' own anchors, and on the filings this repair is for
+        # the strict read is exactly what comes back empty (edgartools-ha11).
+        body = self._analyze_body_item_headers(
+            html_content, tree=tree, allow_abutted_title=True) or body
         if not body:
             # Nothing to re-resolve against — surface the un-separated collision
             # so a filing that duplicates a section stays diagnosable rather than
             # silently returning a neighbour's text.
-            logger.warning("TOC anchor collision(s) %s could not be separated: "
-                           "no body-header anchors available",
+            logger.warning("TOC anchor collision(s) %s left unchanged — no "
+                           "body-header anchors to separate them with; every "
+                           "listed key returns the same span",
                            {a: sorted(keys) for a, keys in collisions.items()})
             return result
 
@@ -282,25 +287,42 @@ class TOCAnalyzer:
             # logically-first item keeps it (MD&A owns the page it starts on).
             owner = next((k for k in keys_sorted if body.get(k) == anchor), keys_sorted[0])
             shared_pos = positions.get(anchor)
+            unresolved: Dict[str, str] = {}
             for key in keys_sorted:
                 if key is owner:
                     continue
                 new_anchor = body.get(key)
-                if not new_anchor or new_anchor == anchor or new_anchor in claimed:
+                if not new_anchor:
+                    unresolved[key] = "no body header for this item"
+                    continue
+                if new_anchor == anchor:
+                    unresolved[key] = "body header shares the same anchor"
+                    continue
+                if new_anchor in claimed:
+                    unresolved[key] = f"body anchor {new_anchor} already claimed"
                     continue
                 new_pos = positions.get(new_anchor)
                 if new_pos is None or shared_pos is None or new_pos <= shared_pos:
+                    unresolved[key] = f"body anchor {new_anchor} does not follow the shared one"
                     continue
                 # Must fall before the next distinct item anchor in document
                 # order, so the re-pointed section stays between its neighbours.
                 nexts = [positions[a] for a in claimed
                          if a in positions and positions[a] > shared_pos]
                 if nexts and new_pos >= min(nexts):
+                    unresolved[key] = f"body anchor {new_anchor} sits past the next item"
                     continue
                 result[key] = new_anchor
                 claimed.add(new_anchor)
                 logger.info("Separated colliding item %s from %s: re-pointed to "
                             "body-header anchor %s", key, owner, new_anchor)
+            # Say what was *done*, not only what was seen: a key left here still
+            # slices to the owner's span, so the duplicate must be nameable.
+            if unresolved:
+                logger.warning("TOC anchor collision on %s: %s keeps the anchor; "
+                               "%s still resolve(s) to the same span (%s)",
+                               anchor, owner, sorted(unresolved),
+                               "; ".join(f"{k}: {why}" for k, why in sorted(unresolved.items())))
 
         return result
 
@@ -333,7 +355,12 @@ class TOCAnalyzer:
             toc_sections = []
             current_part = self.schema.seed_part  # Track part context; seeds Part I for 10-Q
 
-            for link in anchor_links:
+            # A two-column TOC interleaves its columns in source order, so a
+            # single running part context is whipsawed between them. Read one
+            # column at a time instead — the order a human reads it in.
+            ordered_links = self._order_links_by_toc_column(anchor_links)
+
+            for _column, link in ordered_links:
                 href = link.get('href', '').strip()
                 text = (link.text_content() or '').strip()
 
@@ -789,9 +816,31 @@ class TOCAnalyzer:
     # cross-references like "… in Part II, Item 7 of this Form 10-K …" (which start
     # with "Part", not "Item N.").
     _BODY_ITEM_HEADER = re.compile(r'^Item\s+(\d+)([A-Z]?)\.?\s+\S', re.IGNORECASE)
+    # The same heading when the filer's markup leaves no space between the number
+    # and the title. A two-cell heading row ("Item 5." | "Other Information")
+    # renders as "Item\xa05.Other Information" — P&G's 10-Q — which the pattern
+    # above matches nowhere in the document, so the scan comes back empty and a
+    # colliding anchor has no evidence to be separated with (edgartools-ha11).
+    # A period may stand in for the separator, but only when a digit does not
+    # follow it: that keeps an 8-K subitem heading ("Item 5.02 Departure of
+    # Directors") from being read as a bare Item 5.
+    _BODY_ITEM_HEADER_ABUTTED = re.compile(
+        r'^Item\s+(\d+)([A-Z]?)\s*(?:\.(?!\d)\s*|\s+)\S', re.IGNORECASE)
     _BODY_PART_DIVIDER = re.compile(r'^Part\s+([IVX]+)\b', re.IGNORECASE)
+    # A Part divider a filer left *unbold*. P&G's 10-Q sets "PART I. FINANCIAL
+    # INFORMATION" at font-weight:400 and only "PART II. OTHER INFORMATION" at
+    # 700, so the bold gate above sees the Part II divider and never the Part I
+    # one — every Part I item is then keyed into Part II (edgartools-ha11).
+    # Accepting an unbold divider means accepting one from prose, so this
+    # pattern must match the *whole* text: a bare "PART I", or a Part number
+    # followed by a punctuation separator and a short title. "Part II of this
+    # report contains …" has no separator and does not match.
+    _BODY_PART_DIVIDER_STANDALONE = re.compile(
+        r'^Part\s+([IVX]+)\s*(?:[.\-–—:]\s*[A-Za-z][A-Za-z\s,&/’\'-]{0,60})?$',
+        re.IGNORECASE)
 
-    def _analyze_body_item_headers(self, html_content: str, tree=None) -> Dict[str, str]:
+    def _analyze_body_item_headers(self, html_content: str, tree=None,
+                                   allow_abutted_title: bool = False) -> Dict[str, str]:
         """Map items from bold body headings instead of TOC links.
 
         Some filers (notably Goldman Sachs and Citigroup — large bank 10-Ks)
@@ -804,6 +853,15 @@ class TOCAnalyzer:
         each item to its nearest preceding anchor id — returning the same
         ``{section_key: anchor_id}`` contract as the link-based parsers, so the
         standard boundary/slicing pipeline works unchanged (edgartools-sldz).
+
+        ``allow_abutted_title`` also accepts a heading whose title runs straight
+        into the item number ("Item 5.Other Information"). Only the collision
+        resolver asks for it: that consumer re-points ONE key that is already
+        known to be wrong, while this map's other two consumers can replace or
+        extend a whole filing's mapping. Offering them the looser read moved
+        Wells Fargo's 10-K off the pattern extractor and onto this scan — same
+        spans under different keys — which is a change ha11 has no reason to
+        make (edgartools-ha11).
         """
         try:
             tree = self._ensure_tree(html_content, tree)
@@ -831,25 +889,37 @@ class TOCAnalyzer:
             # and let the inner heading element match.
             if not text or len(text) > 200:
                 continue
-            if not self._is_bold_header(el, tag):
+            bold = self._is_bold_header(el, tag)
+
+            # Part context first: a divider counts when it is bold, and also
+            # when the whole text is divider-shaped, which is the only way an
+            # unbold "PART I. FINANCIAL INFORMATION" can be seen at all.
+            if not re.search(r'item\s+\d', text, re.IGNORECASE):
+                part_m = (self._BODY_PART_DIVIDER.match(text) if bold
+                          else self._BODY_PART_DIVIDER_STANDALONE.match(text))
+                if part_m:
+                    current_part = f"Part {part_m.group(1).upper()}"
+                    continue
+
+            if not bold:
                 continue
 
-            part_m = self._BODY_PART_DIVIDER.match(text)
-            if part_m and not re.search(r'item\s+\d', text, re.IGNORECASE):
-                current_part = f"Part {part_m.group(1).upper()}"
-                continue
-
-            item_m = self._BODY_ITEM_HEADER.match(text)
+            item_m = (self._BODY_ITEM_HEADER_ABUTTED if allow_abutted_title
+                      else self._BODY_ITEM_HEADER).match(text)
             if not item_m:
                 continue
-            if not last_anchor_id:
+            # An anchor inside the heading's own subtree belongs to THIS item
+            # and outranks the running one, which at this point still holds the
+            # previous item's anchor (see _own_anchor_id).
+            anchor_id = self._own_anchor_id(el) or last_anchor_id
+            if not anchor_id:
                 continue
             item_name = f"Item {item_m.group(1)}{item_m.group(2).upper()}"
             key = self._make_section_key(item_name, current_part)
             # First occurrence in document order wins (the body heading; a
             # link-less TOC has no competing "Item N. Title" span).
             if key:
-                mapping.setdefault(key, last_anchor_id)
+                mapping.setdefault(key, anchor_id)
 
         # The whole contract rests on each header having its own preceding
         # anchor. Filers that don't emit per-item anchor divs (Nathan's Famous)
@@ -868,6 +938,38 @@ class TOCAnalyzer:
                     len(mapping), distinct)
                 return {}
         return mapping
+
+    @staticmethod
+    def _own_anchor_id(el) -> Optional[str]:
+        """The anchor id carried *inside* a body heading's own subtree, if any.
+
+        The scan's premise is that a heading is **preceded** by its anchor, which
+        holds for the filers it was built for (Goldman, Citi: an empty
+        ``<div id="…">`` immediately before the heading). Novaworks instead nests
+        the anchor in the heading's first bold span::
+
+            <p><b><i><a id="item1a"/>Item</i></b>&#160;<b><i>1A. Risk Factors</i></b></p>
+
+        ``tree.iter()`` yields the heading element before its own descendants, so
+        when the header matches, ``last_anchor_id`` still holds the *previous*
+        item's anchor. Every item then resolves one slot late and the whole map
+        shifts — silently, since each anchor is still distinct and real, which is
+        why the stale-anchor guard below does not catch it (GH #923).
+
+        Only ``<a id=…>`` counts. Inline-XBRL wrappers (``ix:nonNumeric``) carry
+        generated ids that are not navigable anchors, and a heading that tags a
+        fact would otherwise resolve to one of those instead of its own anchor.
+        """
+        for desc in el.iter():
+            tag = desc.tag
+            if not isinstance(tag, str):
+                continue
+            if tag.rsplit('}', 1)[-1].lower() != 'a':
+                continue
+            anchor_id = desc.get('id')
+            if anchor_id:
+                return anchor_id
+        return None
 
     # Minimum share of body-scan items that must resolve to their own anchor
     # id for the map to be trusted. Filings this scan is built for (GS, Citi,
@@ -992,6 +1094,39 @@ class TOCAnalyzer:
 
         return None
 
+    @staticmethod
+    def _item_label_from_text(text: str) -> Optional[str]:
+        """Normalize a leading ``Item N`` label, ignoring a title glued onto it.
+
+        A letter straight after the number is an item suffix ("Item 1A") unless
+        it is the first letter of a title with no separator before it. TOC rows
+        routinely split the label and the title across cells::
+
+            <td>Item 4</td><td>Mine Safety Disclosures</td>
+
+        and ``text_content()`` joins them with nothing in between, so
+        "Item 4Mine Safety Disclosures" read as **Item 4M**. Foot Locker's FY2013
+        10-K (``0001144204-14-019510``) produced a full set of codes that do not
+        exist in Reg S-K this way — 2P, 3L, 4M, 5M, 6S, 7M, 8C, 10D, 11E, 12S,
+        13C, 14P, 15E — each letter the initial of its own title, each one a
+        phantom section sitting alongside the real one.
+
+        The discriminator: a real suffix letter is never followed by a lowercase
+        letter, and a glued title's initial always is. This deliberately is not a
+        closed valid-set check — filers do use company-specific suffixes (the
+        body-scan counter already allows for Caterpillar's Item 1D) — and it
+        keeps a genuinely glued suffix working: "Item 1ARisk Factors" -> Item 1A.
+
+        Returns ``None`` when the text does not open with an item label. (GH #923)
+        """
+        match = re.match(r'item\s+(\d+)([A-Za-z])?', text, re.IGNORECASE)
+        if not match:
+            return None
+        num, letter = match.group(1), match.group(2)
+        if letter and text[match.end():][:1].islower():
+            letter = None
+        return f"Item {num}{(letter or '').upper()}"
+
     def _parse_item_from_text(self, text: str) -> Optional[str]:
         """
         Extract a normalized item/part name from TOC entry text.
@@ -1007,9 +1142,9 @@ class TOCAnalyzer:
         # Strip zero-width spaces
         text = text.replace('\u200b', '').replace('\u200c', '').replace('\u200d', '')
 
-        item_match = re.match(r'(?:item|ITEM)\s+(\d+[A-Za-z]?)', text, re.IGNORECASE)
-        if item_match:
-            return f"Item {item_match.group(1).upper()}"
+        item_label = self._item_label_from_text(text)
+        if item_label:
+            return item_label
 
         part_match = re.match(r'(?:part|PART)\s+([IVXivx]+)', text, re.IGNORECASE)
         if part_match:
@@ -1146,6 +1281,149 @@ class TOCAnalyzer:
             total += -v if v < prev else v
             prev = max(prev, v)
         return total
+
+    @staticmethod
+    def _toc_cell_column(link) -> Optional[int]:
+        """Which half of its table row a link sits in: 0 (left) or 1 (right).
+
+        ``None`` when the link is not inside a table row, so callers can treat it
+        as belonging to the single default column.
+        """
+        current = link
+        for _ in range(6):
+            parent = current.getparent()
+            if parent is None:
+                return None
+            if parent.tag in ('td', 'th'):
+                row = parent.getparent()
+                if row is None or row.tag != 'tr':
+                    return None
+                cells = [c for c in row if c.tag in ('td', 'th')]
+                try:
+                    index = cells.index(parent)
+                except ValueError:
+                    return None
+                return 0 if index * 2 < len(cells) else 1
+            current = parent
+        return None
+
+    # A TOC link whose whole text is a page number carries no section title, so
+    # it never counts as one of a row's side-by-side entries. Neither does a bare
+    # "Item 1" / "PART II" label: filing agents routinely split a single entry
+    # into [Item 1][Business][5] links, which would otherwise read as two
+    # side-by-side titles and mis-detect every such TOC as two-column.
+    _TOC_PAGE_NUMBER_TEXT = re.compile(r'^\d{1,4}$')
+    # Matches "Item 1" / "Item 1A." and the label standing alone — "1", "1A.",
+    # "7A." — which is how most agents render the label cell. No section title is
+    # ever a bare number with an optional suffix letter, so this cannot swallow
+    # one; J&J's TOC puts "1A." and "Risk factors" in opposite halves of the row,
+    # which would otherwise read as two side-by-side titles.
+    _TOC_BARE_LABEL_TEXT = re.compile(
+        r'^(?:(?:item\s+)?\d+\s*[a-z]?|part\s+[ivx]+)\s*[.:]?$', re.IGNORECASE)
+
+    # How many rows must carry two titled entries before a TOC counts as
+    # two-column. One such row is a formatting accident; a real two-column TOC
+    # has one for every pair of items it lists (Ambac's has nine).
+    _MIN_TWO_COLUMN_ROWS = 3
+
+    def _detect_two_column_toc(self, links: List) -> bool:
+        """True when the TOC lists two items side by side in the same row.
+
+        Deliberately conservative, because the consequences of a false positive
+        land on 10-Q: its items repeat across parts, so a 10-Q part must be
+        *detected* and never inferred, and mis-scoping its part headers moves
+        Part II items under Part I. Counting cells is not enough to tell the
+        layouts apart — a single-column row is commonly ``[label][title][page]``,
+        whose page cell already sits in the right-hand half. What distinguishes a
+        real two-column TOC is two *titled* links in one row; a page number is
+        not a title.
+        """
+        # Hold every row in a list while deduplicating: lxml hands out transient
+        # proxy objects, so an id() recorded for a row that has since been freed
+        # can be handed to an unrelated row and silently skip it.
+        rows: List = []
+        seen_row_ids = set()
+
+        for link in links:
+            href = (link.get('href') or '').strip()
+            if not href.startswith('#'):
+                continue
+            row = None
+            current = link
+            for _ in range(10):
+                parent = current.getparent()
+                if parent is None:
+                    break
+                if parent.tag == 'tr':
+                    row = parent
+                    break
+                current = parent
+            if row is None or id(row) in seen_row_ids:
+                continue
+            rows.append(row)
+            seen_row_ids.add(id(row))
+
+        rows_with_two_titles = 0
+        for row in rows:
+            halves = set()
+            for candidate in row.xpath('.//a[@href]'):
+                if not (candidate.get('href') or '').strip().startswith('#'):
+                    continue
+                text = " ".join((candidate.text_content() or '').split())
+                if (not text
+                        or self._TOC_PAGE_NUMBER_TEXT.match(text)
+                        or self._TOC_BARE_LABEL_TEXT.match(text)):
+                    continue
+                half = self._toc_cell_column(candidate)
+                if half is not None:
+                    halves.add(half)
+            # Two titles *side by side* — in opposite halves of the row. Counting
+            # titles alone is not enough: J&J splits a single heading across
+            # several links in one cell ("P" / "art" / "I"), which reads as
+            # several titles but occupies one column.
+            if len(halves) >= 2:
+                rows_with_two_titles += 1
+                if rows_with_two_titles >= self._MIN_TWO_COLUMN_ROWS:
+                    return True
+
+        return False
+
+    def _order_links_by_toc_column(self, links: List) -> List[Tuple[Optional[int], object]]:
+        """Group a TOC's links by column, left column first, when it has two.
+
+        Ambac's FY2022 10-K lays its table of contents out in two side-by-side
+        columns — Parts I and II down the left, Parts III and IV down the right —
+        and the HTML interleaves them one row at a time::
+
+            Item 3  Legal Proceedings  | Item 10  Directors, Executive Officers
+            Item 4  Mine Safety        | Item 11  Executive Compensation
+            PART II                    | Item 12  Security Ownership
+
+        A linear scan therefore sees the part headers of *both* columns in one
+        running context, so items inherit whichever column last declared a part:
+        Items 7A-9B came out under Part I and Items 13-14 under Part II. Wrong
+        parts scramble the logical order that ``_analyze_sections`` sorts
+        boundaries by, which inverted three spans and ran Item 7 to 538,701 chars
+        — roughly 70% of it Items 8, 9A and 10-15 (GH #924).
+
+        Reading a column at a time restores the filer's intended sequence. This
+        only reorders anything when the layout really is two-column, signalled by
+        part headers appearing in *both* halves; every single-column TOC keeps
+        its exact source order, and so does any TOC that declares its parts in
+        one column only.
+        """
+        if not self._detect_two_column_toc(links):
+            self._toc_two_column = False
+            return [(None, link) for link in links]
+
+        self._toc_two_column = True
+        annotated = [(self._toc_cell_column(link), link) for link in links]
+        logger.debug("Two-column TOC detected; reading columns in order")
+        # Stable sort keeps each column's own source order intact.
+        return sorted(
+            ((column, link) for column, link in annotated),
+            key=lambda pair: (pair[0] is None, pair[0]),
+        )
 
     def _make_section_key(self, item_name: str, current_part: Optional[str]) -> Optional[str]:
         """
@@ -1680,10 +1958,48 @@ class TOCAnalyzer:
             # This handles TOCs where item number is not in the immediately adjacent cell
             # Example: ['Business', 'I', '1', '5'] where '1' is the item number
             if td_element is not None:
+                # In a two-column TOC both columns share one row, so scanning
+                # leftwards runs out of the link's own column and into its
+                # neighbour's — where the last cell before the gap is the other
+                # column's *page number*. Ambac's FY2022 10-K lays out a row as
+                # ['', 'Available Information', '10', '', '', 'Non-GAAP Financial
+                # Measures', '54']: the right column's title took "10" for its
+                # item label and produced a `part_ii_item_10` section sitting
+                # inside MD&A, truncating Item 7 at the Non-GAAP heading
+                # (edgartools-fhk1). Stop at the column boundary.
+                #
+                # Only on a TOC confirmed two-column. A single-column row is
+                # routinely ['Item', '1', 'Business', '5'] — the label cell is in
+                # the *other* half by the same midpoint test, so applying this
+                # unconditionally would discard the label it exists to find. Same
+                # scoping, and the same reason for gating it, as
+                # `_infer_part_from_row_context`.
+                #
+                # `foreign_cells` holds the row's cells that belong to the other
+                # column, split at the midpoint `_toc_cell_column` uses. Only a
+                # right-column link has any — nothing to a left-column link's
+                # left is foreign. `cells` outlives the set on purpose: a freed
+                # lxml proxy hands its id to an unrelated element.
+                foreign_cells: Set[int] = set()
+                if getattr(self, '_toc_two_column', False):
+                    row = td_element.getparent()
+                    if row is not None and row.tag == 'tr':
+                        cells = [c for c in row if c.tag in ('td', 'th')]
+                        try:
+                            own_index = cells.index(td_element)
+                        except ValueError:
+                            own_index = None
+                        if own_index is not None and own_index * 2 >= len(cells):
+                            midpoint = (len(cells) + 1) // 2
+                            foreign_cells = {id(c) for c in cells[:midpoint]}
+
                 # Check all preceding siblings (rightmost to leftmost)
                 prev_sibling = td_element.getprevious()
                 while prev_sibling is not None:
                     if prev_sibling.tag in ['td', 'th']:
+                        if id(prev_sibling) in foreign_cells:
+                            break
+
                         prev_text = (prev_sibling.text_content() or '').strip()
 
                         # Look for "Item X" or just "X" (bare number) pattern
@@ -1707,7 +2023,8 @@ class TOCAnalyzer:
                         # rather than allowing any `\d`.
                         max_item_num = self.schema.max_bare_item
                         bare_item_match = re.match(r'^([1-9]\d?)([A-Za-z]?)\.?\s*$', prev_text, re.IGNORECASE)
-                        if bare_item_match and 1 <= int(bare_item_match.group(1)) <= max_item_num:
+                        if (bare_item_match and 1 <= int(bare_item_match.group(1)) <= max_item_num
+                                and not self._cell_in_numbered_index(prev_sibling)):
                             item_num = bare_item_match.group(1)
                             item_letter = bare_item_match.group(2).upper()
                             return f"Item {item_num}{item_letter}"
@@ -1742,6 +2059,44 @@ class TOCAnalyzer:
 
         return ''
 
+    # Column headers that name a table's numbering as something other than
+    # items. Exact cell match only — "Table of Contents" is not "Table".
+    _NUMBERED_INDEX_HEADERS = frozenset(
+        ('table', 'tables', 'figure', 'figures', 'chart', 'charts',
+         'exhibit', 'exhibits', 'note', 'notes'))
+
+    def _cell_in_numbered_index(self, cell) -> bool:
+        """Return True when ``cell`` belongs to a numbered table/figure index.
+
+        Freddie Mac's MD&A "List of Tables" (GH #918) has rows shaped exactly
+        like bare-number TOC rows — ``11 | Other Investments Portfolio | 18``
+        — but the numbers are table captions, and reading them as item numbers
+        mapped every Item 1–15 onto MD&A tables at full confidence. The index
+        is recognisable by its header row, which names the numbering:
+        "Table | Description | Page". A genuine TOC either heads its number
+        column "Item" (Morgan Stanley: "Table of Contents | Part | Item |
+        Page") or carries no header at all, so only a header row with an
+        exact "Table"/"Figure"/… cell and no "Item" cell disqualifies the
+        bare numbers. Validating each row's link target instead does not
+        work: many filers' TOC anchors land nowhere near the item heading,
+        so demanding per-row corroboration silently dropped real items
+        (MS 10-K: 19 item sections → 6).
+        """
+        try:
+            table = cell.getparent()
+            while table is not None and table.tag != 'table':
+                table = table.getparent()
+            if table is None:
+                return False
+            for header_row in table.xpath('./tr | ./thead/tr | ./tbody/tr')[:4]:
+                texts = [(c.text_content() or '').strip().rstrip(':').lower()
+                         for c in header_row.xpath('./td | ./th')]
+                if any(t in self._NUMBERED_INDEX_HEADERS for t in texts):
+                    return not any(t == 'item' for t in texts)
+        except Exception:
+            logger.debug("Numbered-index header check failed", exc_info=True)
+        return False
+
     def _extract_part_context(self, text: str) -> Optional[str]:
         """Extract normalized part label from text, e.g., "Part II"."""
         part_match = re.match(r'^\s*part\s+([ivx]+)\b', text, re.IGNORECASE)
@@ -1758,8 +2113,22 @@ class TOCAnalyzer:
         rows that do not contain links. This method finds the nearest preceding
         sibling row with a part marker and returns it as context for the current
         linked item row.
+
+        In a two-column TOC each column carries its own Part headers in its own
+        half of the row, so only headers from the link's own column count. Ambac's
+        FY2022 10-K runs Parts I-II down the left column and III-IV down the
+        right; scanning every cell let the left column's "PART II" govern
+        right-column items, putting Items 7A-9B under Part I and 13-14 under
+        Part II (GH #924). Returning ``None`` here leaves the caller's running
+        context in place, which for the first items of a column is the part the
+        previous column ended in — how the layout actually reads.
         """
         max_rows_to_scan = 200
+        # Only scope by column on a TOC confirmed to be two-column. On a
+        # single-column layout the cell-half test is meaningless and would
+        # discard the very Part headers a 10-Q depends on.
+        link_column = (self._toc_cell_column(link_element)
+                       if getattr(self, '_toc_two_column', False) else None)
 
         try:
             # Find containing row for this link.
@@ -1788,7 +2157,11 @@ class TOCAnalyzer:
                     # artifacts like "PART I3" when a page number is in another cell.
                     cells = prev.xpath('./td|./th')
                     if cells:
-                        for cell in cells:
+                        for index, cell in enumerate(cells):
+                            # Only this link's own column governs it.
+                            if link_column is not None and (
+                                    (0 if index * 2 < len(cells) else 1) != link_column):
+                                continue
                             cell_text = (cell.text_content() or '').strip()
                             part = self._extract_part_context(cell_text)
                             if part:
@@ -1904,10 +2277,11 @@ class TOCAnalyzer:
                 return f"Part {part_num}"
 
         # THIRD PRIORITY: Text-based normalization
-        # Handle common Item patterns in text
-        item_match = re.match(r'item\s+(\d+[a-z]?)', text, re.IGNORECASE)
-        if item_match:
-            return f"Item {item_match.group(1).upper()}"
+        # Handle common Item patterns in text. A title glued straight onto the
+        # item number must not be read as a suffix — see _item_label_from_text.
+        item_label = self._item_label_from_text(text)
+        if item_label:
+            return item_label
 
         # Handle Part patterns
         part_match = re.match(r'part\s+([ivx]+)', text, re.IGNORECASE)

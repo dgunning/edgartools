@@ -30,6 +30,8 @@ carries the number are recovered when exactly one group has a real target.
 The unit tests exercise ``_analyze_workiva_toc`` on a minimal Tesla-shaped
 TOC (no network). The end-to-end assertions are VCR-backed and pinned to the
 reported filing.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/915
 """
 
 import pytest
@@ -111,7 +113,7 @@ class TestWorkivaSplitHrefRows:
         }
 
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
 def test_tesla_2023_10k_item_3_does_not_overflow():
     """End-to-end on the reported filing: Tesla FY2023 10-K (Workiva agent).

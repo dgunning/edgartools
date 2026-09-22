@@ -9,7 +9,6 @@ footnotes. They are re-exported from ``edgar.ownership.ownershipforms`` and the
 from typing import Dict, List, Optional
 
 import pandas as pd
-from bs4 import Tag
 from rich import box
 from rich.console import Group, Text
 from rich.panel import Panel
@@ -17,6 +16,7 @@ from rich.table import Table
 
 from edgar.core import IntString
 from edgar.richtools import repr_rich
+from edgar.xmltools import XmlNode, element_text, find_all_elements, find_element
 
 __all__ = [
     'Issuer',
@@ -221,10 +221,13 @@ class Footnotes:
 
     @classmethod
     def extract(cls,
-                tag: Tag):
-        footnotes_el = tag.find("footnotes")
+                tag: XmlNode):
+        footnotes_el = find_element(tag, "footnotes")
+        # `element_text`, not `.text`: a footnote that wraps part of its text in
+        # markup would otherwise be truncated at the first child element on lxml,
+        # returning a plausible fragment rather than failing (edgartools-07lk.11.3).
         return cls(
-            {el.attrs['id']: el.text.strip()
-             for el in footnotes_el.find_all("footnote") if isinstance(el, Tag)
-             } if footnotes_el and isinstance(footnotes_el, Tag) else {}
+            {el.get('id'): element_text(el).strip()
+             for el in find_all_elements(footnotes_el, "footnote") if el.get('id')
+             } if footnotes_el is not None else {}
         )

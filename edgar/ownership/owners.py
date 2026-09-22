@@ -8,7 +8,6 @@ tags (resolving each owner's entity to decide whether to reverse the name).
 from dataclasses import dataclass
 from typing import List, Optional
 
-from bs4 import ResultSet
 from rich import box
 from rich.panel import Panel
 from rich.table import Column, Table
@@ -18,7 +17,7 @@ from edgar.core import get_bool
 from edgar.display.formatting import reverse_name
 from edgar.entity import Entity
 from edgar.richtools import repr_rich
-from edgar.xmltools import child_text
+from edgar.xmltools import XmlNode, child_text, find_element
 
 __all__ = [
     'Owner',
@@ -101,12 +100,12 @@ class ReportingOwners():
         return repr_rich(self.__rich__())
 
     @classmethod
-    def from_reporting_owner_tags(cls, reporting_owners: ResultSet, remarks: str = ''):
+    def from_reporting_owner_tags(cls, reporting_owners: List[XmlNode], remarks: str = ''):
         # Reporting Owner
         owners = []
 
         for reporting_owner_tag in reporting_owners:
-            reporting_owner_id_tag = reporting_owner_tag.find("reportingOwnerId")
+            reporting_owner_id_tag = find_element(reporting_owner_tag, "reportingOwnerId")
 
             cik = child_text(reporting_owner_id_tag, "rptOwnerCik")
             unreversed_owner_name = child_text(reporting_owner_id_tag, "rptOwnerName")
@@ -121,9 +120,9 @@ class ReportingOwners():
             else:
                 owner_name = unreversed_owner_name
 
-            reporting_owner_address_tag = reporting_owner_tag.find("reportingOwnerAddress")
+            reporting_owner_address_tag = find_element(reporting_owner_tag, "reportingOwnerAddress")
 
-            reporting_owner_rel_tag = reporting_owner_tag.find("reportingOwnerRelationship")
+            reporting_owner_rel_tag = find_element(reporting_owner_tag, "reportingOwnerRelationship")
 
             is_director = get_bool(child_text(reporting_owner_rel_tag, "isDirector"))
             is_officer = get_bool(child_text(reporting_owner_rel_tag, "isOfficer"))

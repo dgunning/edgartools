@@ -82,7 +82,7 @@ patterns:
     note: |
       stmt['label'] is EXACT match (case-insensitive). Use stmt.search('keyword') for fuzzy.
       .note returns the single most relevant Note. .notes returns all matches ranked by specificity.
-      Works on any Statement: balance_sheet, income_statement, cashflow_statement.
+      Works on any Statement: balance_sheet, income_statement, cash_flow_statement.
 
   - name: 10-Q Sections
     when: Extract quarterly report sections

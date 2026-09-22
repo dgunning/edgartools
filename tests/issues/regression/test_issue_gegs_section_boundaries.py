@@ -16,31 +16,44 @@ Offline (local fixture); asserts ranges + content, not exact recovery lengths.
 """
 from pathlib import Path
 
+import pytest
+
 from edgar.documents.config import ParserConfig
 from edgar.documents.parser import HTMLParser
 
 _FIXTURE = Path(__file__).resolve().parents[2] / "fixtures" / "html" / "cvx" / "10k" / "cvx-10-k-2025-02-21.html"
 
 
-def _sections():
+@pytest.fixture(scope="module")
+def sections():
+    """Parse the CVX 10-K once for the whole module.
+
+    This was a plain `_sections()` helper called by every test, so the 6.0 MB
+    fixture was parsed once per test: 3 parses, 2.6s of them redundant
+    (measured 2026-08-10, bead edgartools-07lk.24 Tier 3).
+
+    Module scope, not session scope: one parsed 10-K of this size costs ~0.3 GB
+    resident, and `test-ci-fast` runs `-n auto`, so a session-scoped document
+    would be held on every worker that touched this file.
+    """
     doc = HTMLParser(ParserConfig(form="10-K", detect_sections=True)).parse(_FIXTURE.read_text())
     return doc.sections
 
 
-def test_cvx_mda_recovered_not_a_pointer_stub():
+def test_cvx_mda_recovered_not_a_pointer_stub(sections):
     """Item 7 carries the real MD&A, not the 242-char incorporation pointer."""
-    item7 = _sections()["part_ii_item_7"].text()
+    item7 = sections["part_ii_item_7"].text()
     assert len(item7) > 50_000, f"Item 7 MD&A not recovered (got {len(item7)} chars)"
     assert "Management" in item7 and "Discussion" in item7
 
 
-def test_cvx_financials_recovered():
+def test_cvx_financials_recovered(sections):
     """Item 8 carries the financial statements, not the 158-char stub."""
-    item8 = _sections()["part_ii_item_8"].text()
+    item8 = sections["part_ii_item_8"].text()
     assert len(item8) > 50_000, f"Item 8 financials not recovered (got {len(item8)} chars)"
 
 
-def test_cvx_item14_not_over_extracted():
+def test_cvx_item14_not_over_extracted(sections):
     """Item 14 (Principal Accountant Fees) no longer absorbs the financial body."""
-    item14 = _sections()["part_iii_item_14"].text()
+    item14 = sections["part_iii_item_14"].text()
     assert len(item14) < 50_000, f"Item 14 over-extracted ({len(item14)} chars) — clamp failed"

@@ -14,13 +14,14 @@ Regression tests for two Offerings bugs reported on Airbnb (ABNB) filings.
 
 Ground truth: Airbnb's December 2020 IPO, registration file 333-250118, led by
 Morgan Stanley with Goldman Sachs, priced at $68.00/share.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/868
 """
 import pytest
 
-from edgar import get_by_accession_number
 from edgar.offerings import RegistrationS1
-from edgar.offerings.prospectus import Prospectus424B, OfferingType
-
+from edgar.offerings.prospectus import OfferingType, Prospectus424B
+from tests._offline_filings import offline_filing
 
 # gh-868 — the lock-up table header that must never appear as an underwriter.
 _LOCKUP_JUNK = "Earliest Date Available for Sale in the Public Market"
@@ -32,7 +33,7 @@ class TestIssue868S1Underwriters:
     @pytest.mark.vcr
     def test_s1_lead_manager_is_real_underwriter(self):
         # Airbnb S-1 (2020-11-16), registration file 333-250118.
-        obj = get_by_accession_number("0001193125-20-294801").obj()
+        obj = offline_filing("0001193125-20-294801").obj()
         assert isinstance(obj, RegistrationS1)
         uw = obj.underwriting
         assert uw is not None
@@ -49,7 +50,7 @@ class TestIssue868S1Underwriters:
     @pytest.mark.vcr
     def test_s1a_lead_manager_is_real_underwriter(self):
         # Airbnb S-1/A (2020-12-07), same registration file.
-        obj = get_by_accession_number("0001193125-20-311265").obj()
+        obj = offline_filing("0001193125-20-311265").obj()
         uw = obj.underwriting
         assert uw is not None
         names = [u.name for u in uw.underwriters]
@@ -63,7 +64,7 @@ class TestIssue869IpoClassification:
     @pytest.mark.vcr
     def test_abnb_424b4_classified_as_ipo(self):
         # Airbnb 424B4 (2020-12-11), IPO final pricing prospectus.
-        f = get_by_accession_number("0001193125-20-315318")
+        f = offline_filing("0001193125-20-315318")
         obj = f.obj()
         assert isinstance(obj, Prospectus424B)
 

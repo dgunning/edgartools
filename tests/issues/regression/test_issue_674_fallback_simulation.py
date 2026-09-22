@@ -8,9 +8,12 @@ Strategy:
   1. Load a filing normally (SGML path) and capture baseline values
   2. Force fallback by patching FilingSGML.from_filing to raise ValueError
   3. Verify that the fallback path produces equivalent or acceptable results
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/674
 """
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 from edgar._filings import Filing
 from edgar.sgml.sgml_common import FilingSGML
@@ -22,7 +25,15 @@ class TestFallbackSimulation:
 
     @pytest.fixture(scope="class")
     def nvidia_10k(self):
-        """NVIDIA 2021 10-K — the filing that triggered issue #672."""
+        """The NVIDIA filing that triggered issue #672.
+
+        Described here and in the #672 tests as the "2021 10-K"; accession
+        0001045810-21-000064 is in fact NVIDIA's 10-Q for the quarter ended
+        2021-05-02, filed 2021-05-26. The form and filing_date passed below are
+        the fixture's own metadata and do not change what is fetched, so the
+        label has been harmless — but the figures asserted in this file come
+        from that quarter, not from a fiscal year.
+        """
         return Filing(form='10-K', company='NVIDIA CORP', cik=1045810,
                       filing_date='2021-06-28', accession_no='0001045810-21-000064')
 
@@ -37,6 +48,9 @@ class TestFallbackSimulation:
             'attachment_count': len(filing.attachments),
             'has_primary_doc': filing.document is not None,
             'primary_doc_name': filing.document.document if filing.document else None,
+            # Captured on the SGML path so the fallback can be compared with it
+            # rather than merely checked for non-emptiness.
+            'fact_count': len(filing.xbrl().facts.to_dataframe()),
         }
 
     def _make_fallback_filing(self):
@@ -94,7 +108,18 @@ class TestFallbackSimulation:
         assert len(html) > 100  # Should be substantial HTML content
 
     def test_fallback_xbrl_available(self, baseline):
-        """XBRL should be parseable under fallback (downloads attachments individually)."""
+        """XBRL under fallback must carry the same facts as the SGML path.
+
+        `xbrl is not None` and `xbrl.facts is not None` were the assertions, and
+        a fallback that downloaded the attachments but parsed nothing usable
+        satisfies both -- an empty facts container is not None. This is the one
+        test in the file where "equivalent results", the stated strategy at the
+        top, was never actually compared against the baseline.
+
+        GROUND TRUTH, read from the filing (NVIDIA, quarter ended 2021-05-02):
+        revenue $5,661M against $3,080M a year earlier, net income $1,912M
+        against $917M.
+        """
         filing = self._make_fallback_filing()
 
         with patch.object(FilingSGML, 'from_filing',
@@ -102,8 +127,18 @@ class TestFallbackSimulation:
             xbrl = filing.xbrl()
 
         assert xbrl is not None
-        # Should have parsed financial data
-        assert xbrl.facts is not None
+        facts = xbrl.facts.to_dataframe()
+        assert len(facts) == baseline['fact_count'], (
+            f"fallback parsed {len(facts)} facts, the SGML path "
+            f"{baseline['fact_count']}; the two paths must agree"
+        )
+
+        def undimensioned(concept):
+            rows = facts[(facts['concept'] == concept) & (~facts['is_dimensioned'])]
+            return sorted(rows['numeric_value'].dropna())
+
+        assert undimensioned('us-gaap:Revenues') == [3_080_000_000, 5_661_000_000]
+        assert undimensioned('us-gaap:NetIncomeLoss') == [917_000_000, 1_912_000_000]
 
     def test_fallback_text_available(self, baseline):
         """Text extraction should work under fallback."""

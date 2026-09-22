@@ -1,0 +1,519 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/320193/000032019324000061/0000320193-24-000061.txt
+  response:
+    body:
+      string: "<SEC-DOCUMENT>0000320193-24-000061.txt : 20240614\n<SEC-HEADER>0000320193-24-000061.hdr.sgml
+        : 20240614\n<ACCEPTANCE-DATETIME>20240429090018\n<PRIVATE-TO-PUBLIC>\nACCESSION
+        NUMBER:\t\t0000320193-24-000061\nCONFORMED SUBMISSION TYPE:\tCORRESP\nPUBLIC
+        DOCUMENT COUNT:\t\t1\nFILED AS OF DATE:\t\t20240429\n\nFILER:\n\n\tCOMPANY
+        DATA:\t\n\t\tCOMPANY CONFORMED NAME:\t\t\tApple Inc.\n\t\tCENTRAL INDEX KEY:\t\t\t0000320193\n\t\tSTANDARD
+        INDUSTRIAL CLASSIFICATION:\tELECTRONIC COMPUTERS [3571]\n\t\tORGANIZATION
+        NAME:           \t06 Technology\n\t\tIRS NUMBER:\t\t\t\t942404110\n\t\tSTATE
+        OF INCORPORATION:\t\t\tCA\n\t\tFISCAL YEAR END:\t\t\t0928\n\n\tFILING VALUES:\n\t\tFORM
+        TYPE:\t\tCORRESP\n\n\tBUSINESS ADDRESS:\t\n\t\tSTREET 1:\t\tONE APPLE PARK
+        WAY\n\t\tCITY:\t\t\tCUPERTINO\n\t\tSTATE:\t\t\tCA\n\t\tZIP:\t\t\t95014\n\t\tBUSINESS
+        PHONE:\t\t(408) 996-1010\n\n\tMAIL ADDRESS:\t\n\t\tSTREET 1:\t\tONE APPLE
+        PARK WAY\n\t\tCITY:\t\t\tCUPERTINO\n\t\tSTATE:\t\t\tCA\n\t\tZIP:\t\t\t95014\n\n\tFORMER
+        COMPANY:\t\n\t\tFORMER CONFORMED NAME:\tAPPLE INC\n\t\tDATE OF NAME CHANGE:\t20070109\n\n\tFORMER
+        COMPANY:\t\n\t\tFORMER CONFORMED NAME:\tAPPLE COMPUTER INC\n\t\tDATE OF NAME
+        CHANGE:\t19970808\n</SEC-HEADER>\n<DOCUMENT>\n<TYPE>CORRESP\n<SEQUENCE>1\n<FILENAME>filename1.htm\n<TEXT>\n<html><head>\n<!--
+        Document created using Wdesk -->\n<!-- Copyright 2024 Workiva -->\n<title>Document</title></head><body><div
+        id=\"i3a10fd4b738d41988da84d930f52fe74_1\"></div><div style=\"min-height:92.16pt;width:100%\"><div><font><br></font></div></div><div
+        style=\"text-align:center\"><font><br></font></div><div><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:700;line-height:120%\">FOIA
+        CONFIDENTIAL TREATMENT REQUESTED PURSUANT TO RULE 83 (17 C.F.R. &#167; 200.83)</font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><table style=\"border-collapse:collapse;display:inline-table;margin-bottom:5pt;vertical-align:text-bottom;width:91.166%\"><tr><td
+        style=\"width:1.0%\"></td><td style=\"width:57.400%\"></td><td style=\"width:0.1%\"></td><td
+        style=\"width:1.0%\"></td><td style=\"width:40.400%\"></td><td style=\"width:0.1%\"></td></tr><tr><td
+        colspan=\"3\" style=\"padding:2px 1pt;text-align:left;vertical-align:top\"><div
+        style=\"padding-right:-9pt;text-align:justify\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">Apple
+        Inc.</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">One
+        Apple Park Way</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">Cupertino,
+        CA 95014 </font></div></td><td colspan=\"3\" style=\"padding:2px 1pt;text-align:right;vertical-align:top\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:100%\">April
+        29, 2024</font></td></tr></table></div><div style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-left:36pt;padding-right:-9pt;text-align:justify;text-indent:-36pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:700;line-height:120%;text-decoration:underline\">BY
+        EDGAR</font></div><div style=\"padding-left:36pt;padding-right:-9pt;text-align:justify;text-indent:-36pt\"><font><br></font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><table style=\"border-collapse:collapse;display:inline-table;margin-bottom:5pt;vertical-align:text-bottom;width:56.000%\"><tr><td
+        style=\"width:1.0%\"></td><td style=\"width:9.614%\"></td><td style=\"width:0.1%\"></td><td
+        style=\"width:1.0%\"></td><td style=\"width:88.186%\"></td><td style=\"width:0.1%\"></td></tr><tr><td
+        colspan=\"3\" style=\"padding:2px 1pt;text-align:left;vertical-align:top\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:100%\">To&#58;</font></td><td
+        colspan=\"3\" style=\"padding:2px 1pt;text-align:left;vertical-align:top\"><div
+        style=\"padding-right:-9pt;text-align:justify\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">U.S.
+        Securities and Exchange Commission</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">Division
+        of Corporation Finance</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">Office
+        of Technology</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">100
+        F Street, NE</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">Washington,
+        D.C. 20549</font></div></td></tr></table></div><div style=\"padding-left:18pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font><br></font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><table style=\"border-collapse:collapse;display:inline-table;margin-bottom:5pt;vertical-align:text-bottom;width:66.000%\"><tr><td
+        style=\"width:1.0%\"></td><td style=\"width:7.990%\"></td><td style=\"width:0.1%\"></td><td
+        style=\"width:1.0%\"></td><td style=\"width:89.810%\"></td><td style=\"width:0.1%\"></td></tr><tr><td
+        colspan=\"3\" style=\"padding:2px 1pt;text-align:left;vertical-align:top\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:100%\">Re&#58;</font></td><td
+        colspan=\"3\" style=\"padding:2px 1pt;text-align:left;vertical-align:top\"><div
+        style=\"padding-right:-9pt;text-align:justify\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">Apple
+        Inc. </font></div><div style=\"padding-right:-9pt;text-align:justify\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">Form
+        10-K for the fiscal year ended September 30, 2023</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">Response
+        dated March 20, 2024</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">File
+        No. 001-36743</font></div></td></tr></table></div><div style=\"padding-left:27pt;padding-right:-9pt;text-align:justify;text-indent:-27pt\"><font><br></font></div><div
+        style=\"padding-left:27pt;padding-right:-9pt;text-align:justify;text-indent:-27pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">Dear
+        Mses. Kindelan and Collins,</font></div><div style=\"padding-left:27pt;padding-right:-9pt;text-align:justify;text-indent:-27pt\"><font><br></font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">Apple
+        Inc. (the &#8220;Company&#8221;) provides the following response (the &#8220;Response
+        Letter&#8221;) to the comments contained in the letter (the &#8220;Comment
+        Letter&#8221;) of the staff of the Division of Corporation Finance (the &#8220;Staff&#8221;)
+        of the U.S. Securities and Exchange Commission (the&#160;&#8220;Commission&#8221;),
+        dated April 2, 2024, relating to the above-referenced filing. </font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">Because
+        of the commercially sensitive nature of information contained herein, we have
+        filed a separate letter (the &#8220;Request Letter&#8221;) with the Office
+        of FOIA Services (the &#8220;FOIA Office&#8221;) in connection with a request
+        for confidential treatment of certain portions of this Response Letter under
+        the Freedom of Information Act, 5 U.S.C. &#167; 552 (&#8220;FOIA&#8221;),
+        17 C.F.R. &#167; 200.83 (&#8220;Rule 83&#8221;), and the Commission&#8217;s
+        rules and regulations promulgated under FOIA. For the Staff&#8217;s reference,
+        we have enclosed a copy of the Request Letter, which includes a version of
+        this Response Letter that has been redacted to indicate the portions for which
+        the Company is requesting confidential treatment. </font></div><div style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">In
+        accordance with Rule 83, the Company requests confidential treatment of (a)
+        the marked portions (the &#8220;Confidential Information&#8221;) of this Response
+        Letter and (b) the accompanying Request Letter (collectively, the &#8220;Confidential
+        Material&#8221;). Please promptly inform the undersigned of any request for
+        disclosure of the Confidential Material made pursuant to FOIA or otherwise
+        so that the undersigned may substantiate the foregoing request for confidential
+        treatment in accordance with Rule 83.</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">In
+        accordance with Rule 83, this Response Letter has also been clearly marked
+        with the legend &#8220;Confidential Treatment Requested by Apple Inc.&#8221;
+        and each page is marked for the record with the identifying numbers and code
+        &#8220;AI-001&#8221; through &#8220;AI-006.&#8221;</font></div><div><font><br></font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">In
+        response to the Comment Letter, and to facilitate review, we have repeated
+        the text of each of the Staff&#8217;s comments below and followed each comment
+        with the Company&#8217;s response.</font></div><div style=\"height:87.84pt;position:relative;width:100%\"><div
+        style=\"bottom:0;position:absolute;width:100%\"><div style=\"padding-right:18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:111%\">Confidential
+        Treatment Requested by Apple Inc.</font></div><div><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:100%\">AI-001&#160;&#160;&#160;&#160;</font></div><div><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:100%\">***
+        - Information omitted and provided under separate cover to the Staff pursuant
+        to Rule 83</font></div><div><font><br></font></div></div></div><hr style=\"page-break-after:always\"><div
+        style=\"min-height:92.16pt;width:100%\"><div><table style=\"border-collapse:collapse;display:inline-table;margin-bottom:5pt;vertical-align:text-bottom;width:100.000%\"><tr><td
+        style=\"width:1.0%\"></td><td style=\"width:48.651%\"></td><td style=\"width:0.1%\"></td><td
+        style=\"width:1.0%\"></td><td style=\"width:49.149%\"></td><td style=\"width:0.1%\"></td></tr><tr><td
+        colspan=\"3\" style=\"padding:2px 1pt;text-align:left;vertical-align:top\"><div><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%\">U.S.
+        Securities and Exchange Commission</font></div><div><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%\">April
+        29, 2024</font></div><div><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%\">Page
+        2</font></div></td><td colspan=\"3\" style=\"padding:2px 1pt;text-align:left;vertical-align:top\"><div
+        style=\"text-align:right\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:100%\">Confidential
+        Treatment Requested by Apple Inc.</font></div></td></tr></table></div></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div><table
+        style=\"border-collapse:collapse;display:inline-table;margin-bottom:5pt;vertical-align:text-bottom;width:100.000%\"><tr><td
+        style=\"width:1.0%\"></td><td style=\"width:98.233%\"></td><td style=\"width:0.1%\"></td><td
+        style=\"width:0.1%\"></td><td style=\"width:0.467%\"></td><td style=\"width:0.1%\"></td></tr><tr><td
+        colspan=\"3\" style=\"border-bottom:1pt solid #000;border-left:1pt solid #000;border-top:1pt
+        solid #000;padding:2px 1pt;text-align:left;vertical-align:top\"><div style=\"padding-left:20.75pt;padding-right:-6.25pt;text-indent:-18pt\"><font><br></font></div><div
+        style=\"padding-right:-6.25pt;text-align:justify\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-style:italic;font-weight:400;line-height:100%\">Form
+        10-K for the fiscal year ended September 30, 2023</font></div><div style=\"padding-right:-6.25pt;text-align:justify\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-style:italic;font-weight:400;line-height:100%\">Management&#8217;s
+        Discussion and Analysis of Financial Condition and Results of Operations</font></div><div
+        style=\"padding-right:-6.25pt;text-align:justify\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-style:italic;font-weight:400;line-height:100%\">Products
+        and Services Performance, page 22</font></div><div style=\"padding-right:-6.25pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-left:22.5pt;padding-right:-6.25pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-style:italic;font-weight:400;line-height:100%\">1.</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-style:italic;font-weight:400;line-height:100%;padding-left:9.66pt\">We
+        note your response to prior comment 1. Please describe further the qualitative
+        factors considered in assessing the level of disclosures provided in your
+        results of operations discussion and specifically how you applied such factors
+        to your current discussion of changes in Services revenue.</font></div><div
+        style=\"padding-left:36pt;padding-right:-6.25pt;text-align:justify;text-indent:-36pt\"><font><br></font></div></td><td
+        colspan=\"3\" style=\"border-bottom:1pt solid #000;border-right:1pt solid
+        #000;border-top:1pt solid #000;padding:0 1pt\"></td></tr></table></div><div><font><br></font></div><div><font><br></font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">The
+        Company respectfully advises the Staff that, as noted in response to prior
+        comment 1 in the Company&#8217;s letter dated March 20, 2024 (the &#8220;Prior
+        Response Letter&#8221;), in applying Item 303(b) of Regulation S-K to the
+        Company&#8217;s Management&#8217;s Discussion and Analysis of Financial Condition
+        and Results of Operations (&#8220;MD&#38;A&#8221;), management considers both
+        a quantitative threshold and applicable qualitative factors when assessing
+        materiality. As the relevant components approach the quantitative threshold
+        or qualitative factors are identified, management evaluates providing additional
+        disclosures.</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">In
+        assessing qualitative factors when preparing disclosures regarding the Company&#8217;s
+        results of operations, including with respect to discussing the Company&#8217;s
+        Services net sales, management is mindful of the objective under Item 303(a)
+        of Regulation S-K to provide material information relevant to an assessment
+        of the results of operations. This includes disclosure of matters that have
+        had a material impact on reported operations or that management assesses are
+        reasonably likely to have a material impact on future operations, and data
+        that will enhance a reader's understanding of the Company&#8217;s results
+        of operations. As such, management&#8217;s evaluation of qualitative factors
+        is intended to result in disclosure of non-routine events or trends that are,
+        or are reasonably likely to be, material to an understanding of the Company&#8217;s
+        reported results of operations. Qualitative factors management considers in
+        assessing the level of information provided in the Company&#8217;s results
+        of operations disclosures include, but are not limited to, the following&#58;
+        \ </font></div><div style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-left:36pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#8226;</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%;padding-left:14.5pt\">Whether
+        a discussion of a component of the Company&#8217;s results of operations would
+        highlight a change in earnings not otherwise apparent from the reported results
+        or reveal other trends, in each case material to an understanding of the business&#59;</font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-left:36pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#8226;</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%;padding-left:14.5pt\">Whether
+        a discussion of a component of the Company&#8217;s results of operations would
+        highlight any non-routine or non-recurring event or factor material to an
+        understanding of the business&#59;</font></div><div style=\"padding-left:36pt;padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-left:36pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#8226;</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%;padding-left:14.5pt\">Whether
+        the Company&#8217;s ability to meet, or any failure to meet, analysts&#8217;
+        consensus expectations was materially impacted due to factors that were unexpected
+        or due to drivers that would be difficult for analysts and investors to discern&#59;</font></div><div
+        style=\"padding-left:36pt\"><font><br></font></div><div style=\"padding-left:36pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#8226;</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%;padding-left:14.5pt\">Whether
+        there are non-routine business, political or regulatory developments that
+        materially affected demand for the Company&#8217;s products or services or
+        the Company&#8217;s ability to provide products or services to customers.</font></div><div
+        style=\"padding-left:36pt\"><font><br></font></div><div><font><br></font></div><div
+        style=\"height:87.84pt;position:relative;width:100%\"><div style=\"bottom:0;position:absolute;width:100%\"><div
+        style=\"padding-right:18pt\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:111%\">Confidential
+        Treatment Requested by Apple Inc.</font></div><div><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:100%\">AI-002</font></div><div><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:100%\">***
+        - Information omitted and provided under separate cover to the Staff pursuant
+        to Rule 83</font></div></div></div><hr style=\"page-break-after:always\"><div
+        style=\"min-height:92.16pt;width:100%\"><div><table style=\"border-collapse:collapse;display:inline-table;margin-bottom:5pt;vertical-align:text-bottom;width:100.000%\"><tr><td
+        style=\"width:1.0%\"></td><td style=\"width:48.651%\"></td><td style=\"width:0.1%\"></td><td
+        style=\"width:1.0%\"></td><td style=\"width:49.149%\"></td><td style=\"width:0.1%\"></td></tr><tr><td
+        colspan=\"3\" style=\"padding:2px 1pt;text-align:left;vertical-align:top\"><div><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%\">U.S.
+        Securities and Exchange Commission</font></div><div><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%\">April
+        29, 2024</font></div><div><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%\">Page
+        3</font></div></td><td colspan=\"3\" style=\"padding:2px 1pt;text-align:left;vertical-align:top\"><div
+        style=\"text-align:right\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:100%\">Confidential
+        Treatment Requested by Apple Inc.</font></div></td></tr></table></div></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">With
+        respect to the discussion of the Company&#8217;s Services net sales in the
+        Annual Report on Form 10-K for the fiscal year ended September 30, 2023, management
+        concluded that the change in Services net sales was both quantitatively and
+        qualitatively immaterial and, as such, concluded that no additional disclosures
+        would be required under Item 303(a) of Regulation S-K to enhance a reader&#8217;s
+        understanding of the Company&#8217;s results of operations. The Company respectfully
+        notes that the </font><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-style:italic;font-weight:400;line-height:120%\">Commission
+        Guidance Regarding Management's Discussion and Analysis of Financial Condition
+        and Results of Operations, Release No. 33-8350 (effective Dec. 29, 2003)</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">
+        specifically directs companies to (i) &#8220;eliminate immaterial information
+        that does not promote understanding of companies&#8217; financial condition,
+        liquidity and capital resources, changes in financial condition and results
+        of operations&#8221;&#59; (ii) &#8220;avoid the unnecessary information overload
+        for investors that can result from disclosure of information that is not required,
+        is immaterial, and does not promote understanding&#8221;&#59; (iii) &#8220;de-emphasize
+        (or, if appropriate, delete) immaterial information that is not required and
+        does not promote understanding&#8221;&#59; and (iv) &#8220;avoid unnecessary
+        duplication and immaterial detail that is not required and does not promote
+        understanding of a company&#8217;s overall financial condition and operating
+        performance.&#8221; </font><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-style:italic;font-weight:400;line-height:120%\">See</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">
+        Release No. 33-8350, Sections I.B., I.C. &#38; III.B.</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div><table
+        style=\"border-collapse:collapse;display:inline-table;margin-bottom:5pt;vertical-align:text-bottom;width:100.000%\"><tr><td
+        style=\"width:1.0%\"></td><td style=\"width:98.233%\"></td><td style=\"width:0.1%\"></td><td
+        style=\"width:0.1%\"></td><td style=\"width:0.467%\"></td><td style=\"width:0.1%\"></td></tr><tr><td
+        colspan=\"3\" style=\"border-bottom:1pt solid #000;border-left:1pt solid #000;border-top:1pt
+        solid #000;padding:2px 1pt;text-align:left;vertical-align:top\"><div style=\"padding-left:20.75pt;padding-right:-6.25pt;text-indent:-18pt\"><font><br></font></div><div
+        style=\"padding-right:-6.25pt;text-align:justify\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-style:italic;font-weight:400;line-height:100%\">Form
+        10-K for the fiscal year ended September 30, 2023</font></div><div style=\"padding-right:-6.25pt;text-align:justify\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-style:italic;font-weight:400;line-height:100%\">Notes
+        to Consolidated Financial Statements</font></div><div style=\"padding-right:-6.25pt;text-align:justify\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-style:italic;font-weight:400;line-height:100%\">Note
+        2 - Revenue, page 35</font></div><div style=\"padding-right:-6.25pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-left:22.5pt;padding-right:-6.25pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-style:italic;font-weight:400;line-height:100%\">2.</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-style:italic;font-weight:400;line-height:100%;padding-left:9.66pt\">We
+        note your response to prior comment 2 that you believe the services included
+        within Services net sales to be similar in nature as they all represent services
+        delivered to Apple product customers related to Apple products. Please expand
+        on your analysis supporting your conclusion that each of the various types
+        of services within the &#8220;Services&#8221; grouping are similar for the
+        purpose of providing disclosures pursuant to ASC 280-10-50-40. As part of
+        your response, address the following&#58;</font></div><div style=\"text-align:justify\"><font><br></font></div><div
+        style=\"padding-left:36pt;text-align:justify;text-indent:-9pt\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-style:italic;font-weight:400;line-height:100%\">&#8226;
+        Expand on the descriptions of the various categories of services provided
+        in your prior response, including the similarities and differences between
+        them. For example, describe the specific type or types of advertising services
+        and tell us how they are similar to or different from streaming or purchasing
+        video and music media under digital content and extended warranty contracts
+        and out-of-warranty repairs under AppleCare.</font></div><div style=\"text-align:justify\"><font><br></font></div><div
+        style=\"padding-left:36pt;text-align:justify;text-indent:-9pt\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-style:italic;font-weight:400;line-height:100%\">&#8226;
+        Tell us how you considered differences in revenue recognition between each
+        of the categories of services and reasons underlying such differences. For
+        example, tell us how you considered differences between services where the
+        company accounts for sales on a net basis (e.g., third-party application&#8211;related
+        sales through the App Store) and those services you account for on a gross
+        basis. </font></div><div style=\"text-align:justify\"><font><br></font></div><div
+        style=\"padding-left:36pt;text-align:justify;text-indent:-9pt\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-style:italic;font-weight:400;line-height:100%\">&#8226;
+        Tell us how you considered differences in the customers for each category
+        of your services. In this regard, you indicate advertising net sales are amounts
+        earned from businesses for Apple customer activity on Apple products whereas
+        Digital Content net sales are amounts earned from Apple customers for streaming
+        or purchasing video, music, etc. </font></div><div style=\"text-align:justify\"><font><br></font></div><div
+        style=\"padding-left:36pt;text-align:justify;text-indent:-9pt\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-style:italic;font-weight:400;line-height:100%\">&#8226;
+        Explain how you considered the quantitative significance of various categories
+        of services. </font></div><div style=\"padding-left:36pt;text-indent:-36pt\"><font><br></font></div></td><td
+        colspan=\"3\" style=\"border-bottom:1pt solid #000;border-right:1pt solid
+        #000;border-top:1pt solid #000;padding:0 1pt\"></td></tr></table></div><div><font><br></font></div><div
+        style=\"text-align:justify\"><font><br></font></div><div style=\"height:87.84pt;position:relative;width:100%\"><div
+        style=\"bottom:0;position:absolute;width:100%\"><div style=\"padding-right:18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:111%\">Confidential
+        Treatment Requested by Apple Inc.</font></div><div><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:100%\">AI-003</font></div><div><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:100%\">***
+        - Information omitted and provided under separate cover to the Staff pursuant
+        to Rule 83</font></div></div></div><hr style=\"page-break-after:always\"><div
+        style=\"min-height:92.16pt;width:100%\"><div><table style=\"border-collapse:collapse;display:inline-table;margin-bottom:5pt;vertical-align:text-bottom;width:100.000%\"><tr><td
+        style=\"width:1.0%\"></td><td style=\"width:48.651%\"></td><td style=\"width:0.1%\"></td><td
+        style=\"width:1.0%\"></td><td style=\"width:49.149%\"></td><td style=\"width:0.1%\"></td></tr><tr><td
+        colspan=\"3\" style=\"padding:2px 1pt;text-align:left;vertical-align:top\"><div><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%\">U.S.
+        Securities and Exchange Commission</font></div><div><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%\">April
+        29, 2024</font></div><div><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%\">Page
+        4</font></div></td><td colspan=\"3\" style=\"padding:2px 1pt;text-align:left;vertical-align:top\"><div
+        style=\"text-align:right\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:100%\">Confidential
+        Treatment Requested by Apple Inc.</font></div></td></tr></table></div></div><div
+        style=\"text-align:justify\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">The
+        Company respectfully advises the Staff that expanded descriptions of the various
+        main categories of services are as follows&#58;</font></div><div style=\"text-align:justify\"><font><br></font></div><div
+        style=\"padding-left:36pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#8226;</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%;padding-left:14.5pt\">Advertising
+        net sales consist of Browser and Platform.</font></div><div style=\"padding-left:72pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#9702;</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%;padding-left:14.59pt\">Browser
+        represents Apple&#8217;s share of advertising net sales generated by searches
+        on third-party search platforms through Apple devices. &#91;***&#93; with
+        the customer being third-party search platforms.</font></div><div style=\"padding-left:72pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#9702;</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%;padding-left:14.59pt\">Platform
+        represents advertising generated on the App Store. &#91;***&#93; with the
+        customer being App developers.</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-left:36pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#8226;</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%;padding-left:14.5pt\">App
+        Store net sales consist of Apps and Subscriptions.</font></div><div style=\"padding-left:72pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#9702;</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%;padding-left:14.59pt\">Apps
+        represent Apple&#8217;s share of the sale of third-party apps on the App Store
+        and any subsequent in-app purchases. &#91;***&#93; with the customer being
+        Apple device end users.</font></div><div style=\"padding-left:72pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#9702;</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%;padding-left:14.59pt\">Subscriptions
+        represent Apple&#8217;s share of subscriptions to third-party services sold
+        on the App Store. &#91;***&#93; with the customer being Apple device end users.</font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-left:36pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#8226;</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%;padding-left:14.5pt\">Digital
+        Content net sales consist of Apple Streaming Services and Digital Purchases.</font></div><div
+        style=\"padding-left:72pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#9702;</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%;padding-left:14.59pt\">Apple
+        Streaming Services represent subscriptions to various Apple services (e.g.,
+        Apple TV+, Apple Music). &#91;***&#93; with the customer being Apple device
+        end users.</font></div><div style=\"padding-left:72pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#9702;</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%;padding-left:14.59pt\">Digital
+        Purchases represent discrete sales of digital content (e.g., downloading a
+        song, renting a movie). &#91;***&#93; with the customer being Apple device
+        end users.</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-left:36pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#8226;</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%;padding-left:14.5pt\">AppleCare
+        net sales consist of Extended Warranty, Business-to-Business and Out-of-Warranty.</font></div><div
+        style=\"padding-left:72pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#9702;</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%;padding-left:14.59pt\">Extended
+        Warranty represents extended service agreements for Apple products, generally
+        entered into at the time of sale of the device. &#91;***&#93; with the customer
+        being Apple device end users.</font></div><div style=\"padding-left:72pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#9702;</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%;padding-left:14.59pt\">Business-to-Business
+        represents discrete sales of service parts for third-party repair of Apple
+        products. &#91;***&#93; with the customer being third-party service providers.</font></div><div
+        style=\"padding-left:72pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#9702;</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%;padding-left:14.59pt\">Out-of-Warranty
+        represents the discrete repair of an Apple device after the contractual warranty
+        period has expired. &#91;***&#93; with the customer being Apple device end
+        users.</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-left:36pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#8226;</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%;padding-left:14.5pt\">Cloud
+        Services net sales represent the subscription to access additional iCloud
+        storage using Apple devices. &#91;***&#93; with the customer being Apple device
+        end users.</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">ASC
+        280-10-50-40 requires disclosure of &#8220;revenues from external customers
+        for each product and service or each group of similar products and services
+        unless it is impractical to do so.&#8221; The guidance, however, does not
+        provide a definition of &#8220;similar.&#8221; When considering the Company&#8217;s
+        services for the purpose of providing disclosures pursuant to ASC 280-10-50-40,
+        management views &#91;***&#93;</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"height:87.84pt;position:relative;width:100%\"><div style=\"bottom:0;position:absolute;width:100%\"><div
+        style=\"padding-right:18pt\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:111%\">Confidential
+        Treatment Requested by Apple Inc.</font></div><div><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:100%\">AI-004</font></div><div><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:100%\">***
+        - Information omitted and provided under separate cover to the Staff pursuant
+        to Rule 83</font></div></div></div><hr style=\"page-break-after:always\"><div
+        style=\"min-height:92.16pt;width:100%\"><div><table style=\"border-collapse:collapse;display:inline-table;margin-bottom:5pt;vertical-align:text-bottom;width:100.000%\"><tr><td
+        style=\"width:1.0%\"></td><td style=\"width:48.651%\"></td><td style=\"width:0.1%\"></td><td
+        style=\"width:1.0%\"></td><td style=\"width:49.149%\"></td><td style=\"width:0.1%\"></td></tr><tr><td
+        colspan=\"3\" style=\"padding:2px 1pt;text-align:left;vertical-align:top\"><div><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%\">U.S.
+        Securities and Exchange Commission</font></div><div><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%\">April
+        29, 2024</font></div><div><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%\">Page
+        5</font></div></td><td colspan=\"3\" style=\"padding:2px 1pt;text-align:left;vertical-align:top\"><div
+        style=\"text-align:right\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:100%\">Confidential
+        Treatment Requested by Apple Inc.</font></div></td></tr></table></div></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#91;***&#93;</font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-right:-4.5pt;text-align:center\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">*&#160;&#160;&#160;&#160;*
+        \ &#160;&#160;&#160;&#160;*</font></div><div style=\"padding-right:-4.5pt;text-align:center\"><font><br></font></div><div
+        style=\"height:87.84pt;position:relative;width:100%\"><div style=\"bottom:0;position:absolute;width:100%\"><div
+        style=\"padding-right:18pt\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:111%\">Confidential
+        Treatment Requested by Apple Inc.</font></div><div><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:100%\">AI-005</font></div><div><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:100%\">***
+        - Information omitted and provided under separate cover to the Staff pursuant
+        to Rule 83</font></div></div></div><hr style=\"page-break-after:always\"><div
+        style=\"min-height:92.16pt;width:100%\"><div><table style=\"border-collapse:collapse;display:inline-table;margin-bottom:5pt;vertical-align:text-bottom;width:100.000%\"><tr><td
+        style=\"width:1.0%\"></td><td style=\"width:48.651%\"></td><td style=\"width:0.1%\"></td><td
+        style=\"width:1.0%\"></td><td style=\"width:49.149%\"></td><td style=\"width:0.1%\"></td></tr><tr><td
+        colspan=\"3\" style=\"padding:2px 1pt;text-align:left;vertical-align:top\"><div><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%\">U.S.
+        Securities and Exchange Commission</font></div><div><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%\">April
+        29, 2024</font></div><div><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%\">Page
+        6</font></div></td><td colspan=\"3\" style=\"padding:2px 1pt;text-align:left;vertical-align:top\"><div
+        style=\"text-align:right\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:100%\">Confidential
+        Treatment Requested by Apple Inc.</font></div></td></tr></table></div></div><div
+        style=\"padding-right:-9pt\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:100%\">The
+        Company acknowledges that&#58;</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-left:36pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#8226;</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%;padding-left:14.5pt\">the
+        Company is responsible for the adequacy and accuracy of the disclosure in
+        the filing&#59;</font></div><div style=\"padding-left:36pt;padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-left:36pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#8226;</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%;padding-left:14.5pt\">Staff
+        comments or changes to disclosure in response to Staff comments do not foreclose
+        the Commission from taking any action with respect to the filing&#59; and</font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-left:36pt;padding-right:-9pt;text-align:justify;text-indent:-18pt\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#8226;</font><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%;padding-left:14.5pt\">the
+        Company may not assert Staff comments as a defense in any proceeding initiated
+        by the Commission or any person under federal securities laws of the United
+        States.</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"text-align:justify\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">If
+        you have any questions regarding the Company&#8217;s responses, you may contact
+        me at (408) 862-1401 or Sam Whittington, Senior Director, Corporate Law, at
+        (415) 361-0600.</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">Very
+        truly yours,</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">&#47;s&#47;
+        Luca Maestri</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">Luca
+        Maestri</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:10pt;font-weight:400;line-height:120%\">Senior
+        Vice President, Chief Financial Officer</font></div><div style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><font><br></font></div><div
+        style=\"padding-right:-9pt;text-align:justify\"><table style=\"border-collapse:collapse;display:inline-table;margin-bottom:5pt;vertical-align:text-bottom;width:100.000%\"><tr><td
+        style=\"width:1.0%\"></td><td style=\"width:6.886%\"></td><td style=\"width:0.1%\"></td><td
+        style=\"width:1.0%\"></td><td style=\"width:90.914%\"></td><td style=\"width:0.1%\"></td></tr><tr><td
+        colspan=\"3\" style=\"padding:2px 1pt;text-align:left;vertical-align:top\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:100%\">cc&#58;</font></td><td
+        colspan=\"3\" style=\"padding:2px 1pt;text-align:left;vertical-align:bottom\"><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:400;line-height:112%\">Kate
+        Adams, Senior Vice President, General Counsel and Secretary, Apple Inc.<br>Chris
+        Kondo, Senior Director, Corporate Accounting and Principal Accounting Officer,
+        Apple Inc.<br>Sam Whittington, Senior Director, Corporate Law, Apple Inc.<br>Ian
+        Schuman, Latham &#38; Watkins LLP<br>Jenna Cooper, Latham &#38; Watkins LLP</font></td></tr></table></div><div><font><br></font></div><div
+        style=\"height:87.84pt;position:relative;width:100%\"><div style=\"bottom:0;position:absolute;width:100%\"><div
+        style=\"padding-right:18pt\"><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:111%\">Confidential
+        Treatment Requested by Apple Inc.</font></div><div><font style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:100%\">AI-006</font></div><div><font
+        style=\"color:#000000;font-family:'Helvetica',sans-serif;font-size:9pt;font-weight:700;line-height:100%\">***
+        - Information omitted and provided under separate cover to the Staff pursuant
+        to Rule 83</font></div></div></div></body></html>\n</TEXT>\n</DOCUMENT>\n</SEC-DOCUMENT>\n"
+    headers:
+      accept-ranges:
+      - bytes
+      content-length:
+      - '49069'
+      content-type:
+      - text/plain
+      date:
+      - Mon, 08 Jun 2026 15:07:25 GMT
+      etag:
+      - '"c97705befd5a99f2724b9fead3ceb840-gzip"'
+      last-modified:
+      - Fri, 14 Jun 2024 12:56:40 GMT
+      strict-transport-security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      vary:
+      - Accept-Encoding
+      x-amz-id-2:
+      - 6FfFBF6cJauHsdKpKzxWLz7fwgsoJhSTmFZsaYFo+TdhgUiTu5ebWyW944SjI17Bnib3HPTqqBrRxDfnI91zSDlrT89+VF1X
+      x-amz-meta-mode:
+      - '33188'
+      x-amz-replication-status:
+      - COMPLETED
+      x-amz-request-id:
+      - TFBCFM6FCQ3G2B16
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - GF77f5oTcYG9rKZhhRXA0IgKNGBP7XA0
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: null
+version: 1

@@ -14,6 +14,8 @@ Affected concepts confirmed:
 - us-gaap:IncomeTaxExpenseBenefit (Income Statement) — weight was 1.0, should be -1.0
 - us-gaap:IncreaseDecreaseInInventories (Cash Flow) — already correct, regression guard
 - us-gaap:IncreaseDecreaseInOtherOperatingAssets (Cash Flow) — already correct, regression guard
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/712
 """
 
 import pytest

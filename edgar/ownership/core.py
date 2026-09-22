@@ -4,10 +4,10 @@ from typing import Any, Dict, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from bs4 import Tag
 from lxml import etree  # type: ignore[import-untyped]
 
 from edgar.ownership.models import TransactionCode
+from edgar.xmltools import XmlNode, find_all_elements
 
 __all__ = ['is_numeric', 'compute_average_price', 'compute_total_value',
            'format_currency', 'format_amount', 'safe_numeric', 'format_numeric',
@@ -66,32 +66,33 @@ def translate_ownership(value: str) -> str:
     return translate(value, DIRECT_OR_INDIRECT_OWNERSHIP)
 
 
-def transaction_footnote_id(tag: Tag) -> Tuple[str, Optional[str]]:
-    footnote_id = tag.attrs.get("id") if tag else None
+def transaction_footnote_id(tag: Optional[XmlNode]) -> Tuple[str, Optional[str]]:
+    # `is not None`, not truthiness: a <footnoteId id="F1"/> carries an attribute
+    # and no children, which lxml considers false (edgartools-07lk.11.3).
+    footnote_id = tag.get("id") if tag is not None else None
     # Ensure we get a string, not AttributeValueList
     if isinstance(footnote_id, list):
         footnote_id = footnote_id[0] if footnote_id else None
     return 'footnote', str(footnote_id) if footnote_id else None
 
 
-def get_footnotes(tag: Tag) -> str:
+def get_footnotes(tag: XmlNode) -> str:
     # A single transaction can reference the same footnote id from several
     # sub-elements (e.g. securityTitle and shares), so dedupe while preserving
     # first-seen order to avoid resolving the same footnote text twice.
     footnotes: list[str] = []
     seen = set()
-    for el in tag.find_all("footnoteId"):
-        if isinstance(el, Tag):
-            footnote_id = el.attrs.get('id')
+    for el in find_all_elements(tag, "footnoteId"):
+        footnote_id = el.get('id')
+        if footnote_id:
+            # Ensure string type (handle AttributeValueList)
+            if isinstance(footnote_id, list):
+                footnote_id = footnote_id[0] if footnote_id else None
             if footnote_id:
-                # Ensure string type (handle AttributeValueList)
-                if isinstance(footnote_id, list):
-                    footnote_id = footnote_id[0] if footnote_id else None
-                if footnote_id:
-                    footnote_id = str(footnote_id)
-                    if footnote_id not in seen:
-                        seen.add(footnote_id)
-                        footnotes.append(footnote_id)
+                footnote_id = str(footnote_id)
+                if footnote_id not in seen:
+                    seen.add(footnote_id)
+                    footnotes.append(footnote_id)
     return '\n'.join(footnotes)
 
 

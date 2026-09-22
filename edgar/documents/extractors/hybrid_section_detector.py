@@ -96,8 +96,23 @@ class HybridSectionDetector:
                 )
             return augmented
 
+        # Strategy 1.5: Cross-reference index.
+        #
+        # Ranked directly below the TOC because it is the same kind of evidence:
+        # the filer stating where each item is, rather than us inferring it. It
+        # only ever fires on filings that publish a "Form 10-K Cross-Reference
+        # Index" and have no navigable TOC — Citigroup, whose 16.7MB 10-K used to
+        # fall all the way through to keyword matching and surface four
+        # non-canonical keys (`mda`, `risk_factors`, ...) while a caller asking
+        # for part_ii_item_7 got nothing (edgartools-4agg).
+        logger.debug("TOC detection failed, trying cross-reference index detection...")
+        sections = self._try_index_detection()
+        if sections:
+            logger.info(f"Cross-reference index detection successful: {len(sections)} sections found")
+            return self._validate_pipeline(sections, enable_cross_validation=False)
+
         # Strategy 2: Heading-based (fallback)
-        logger.debug("TOC detection failed, trying heading detection...")
+        logger.debug("Index detection failed, trying heading detection...")
         sections = self._try_heading_detection()
         if sections:
             logger.info(f"Heading detection successful: {len(sections)} sections found")
@@ -118,14 +133,33 @@ class HybridSectionDetector:
     ) -> Dict[str, Section]:
         """Augment TOC-detected sections with pattern-detected items not in the TOC.
 
-        Some 10-K filers omit Part III (Items 10-14) from the TOC because those
-        items are incorporated by reference from the proxy statement.  The TOC
-        extractor therefore misses them; they are still present as sparse bold
-        paragraphs in the filing body.  This method runs the pattern extractor and
-        merges in any item-numbered sections whose canonical part-based key is
-        absent from the TOC result.  Only Item-based forms benefit (10-K, 10-Q,
-        8-K); the method is a no-op for unsupported forms and does NOT replace or
-        override any TOC section already present.
+        A table of contents is a thing the filer wrote, not a manifest, and items
+        go missing from it routinely: Part III (Items 10-14) when they are
+        incorporated by reference from the proxy, Item 16 (Form 10-K Summary)
+        because it is optional and usually empty, Item 1C (Cybersecurity) because
+        it was new in 2023 and templates lagged. The items are still in the body
+        as sparse bold paragraphs. This method runs the pattern extractor and
+        merges in the ones the TOC did not name. It never replaces or overrides a
+        TOC section: those carry higher confidence and real extracted text.
+
+        WHAT IS MISSING IS THE GATE'S QUESTION, NOT WHICH PART IT IS IN. This
+        used to skip the pattern pass whenever the five Part III keys were
+        present, on the reasoning that Part III is what TOCs omit. That was true
+        of the filings it was written against and false in general — and because
+        Part III is complete on most filings, the skip fired almost always. Six
+        tracked filings lost an item to it: Item 16 on axp, cvx and jnj, and
+        Item 1C on bac, jpm and tsla, each already found by the pattern extractor
+        and thrown away before it ran. Item 1C has been mandatory since December
+        2023, so the population affected is most modern 10-Ks, not an edge case.
+        The gate now asks whether the TOC result is missing any item the form
+        defines, which is the condition the augmentation exists for.
+
+        The pattern pass itself costs 30-260ms on a 2.6-12.9MB 10-K, 3-13% of
+        that filing's parse, and runs only on filings actually missing an item.
+        Total parse time over the 85-filing 10-K/10-Q corpus is unchanged within
+        run-to-run variance (61-62s either way, two runs each): the pass now runs
+        on more filings, and the item-keyed merge below hands far fewer sections
+        to ``_validate_pipeline`` on the filings where it already ran.
 
         Args:
             toc_sections: Validated sections from TOC detection.
@@ -137,39 +171,78 @@ class HybridSectionDetector:
         from edgar.documents.form_schema import get_form_schema
 
         # Only augment for Item-based forms; skip title-based (DEF 14A, 424B, S-1).
-        if get_form_schema(self.form).title_based:
+        schema = get_form_schema(self.form)
+        if schema.title_based:
             return toc_sections
 
-        # Performance gate: only run the pattern pass when there are item-based
-        # sections that the TOC may have missed.  For 10-K, this means Part III
-        # items (10-14) that are commonly omitted from the TOC when incorporated
-        # by reference.  If all expected Part-III keys are already present in the
-        # TOC result, the augmentation is a no-op and we skip the full extraction.
-        if self.form == '10-K':
-            _PART_III_KEYS = {
-                'part_iii_item_10', 'part_iii_item_11', 'part_iii_item_12',
-                'part_iii_item_13', 'part_iii_item_14',
-            }
-            if _PART_III_KEYS.issubset(toc_sections.keys()):
-                return toc_sections  # All Part III items already found; no augmentation needed
-        else:
-            # For other item-based forms (10-Q, 8-K), there is no standard set of
-            # "commonly missed" items — skip augmentation entirely to avoid cost.
+        # 8-K reports only the items that happened to occur, so "missing" has no
+        # meaning there — every 8-K is missing almost all of them — and the gate
+        # below would degenerate into "always run".
+        if not self.form or self.form.startswith('8-K'):
             return toc_sections
+
+        # What the form defines, and what the TOC named, BOTH AS (part, item)
+        # pairs. On a 10-Q an item number is only unique within its part — Item 1
+        # is Financial Statements in Part I and Legal Proceedings in Part II — so
+        # comparing bare numbers reports a TOC that named one of them as having
+        # named both. That is not a near-miss: on pg/10q the two sets came out
+        # exactly equal, this returned "the TOC named everything", and the
+        # augmentation that would have supplied the missing part_ii_item_1 never
+        # ran at all (edgartools-yrrh).
+        #
+        # `resolve_section_key` is what makes the comparison possible on the
+        # schema side: it recovers ('II', '7') for a semantic key like `mda`,
+        # whose key string carries neither part nor item.
+        canonical = {schema.resolve_section_key(key) for key in schema.section_patterns}
+        canonical = {(part, item) for part, item in canonical if item}
+        found_items = {sec.item for sec in toc_sections.values() if sec.item}
+        found_part_items = {
+            (sec.part, sec.item) for sec in toc_sections.values() if sec.item
+        }
+        if not canonical or canonical <= found_part_items:
+            return toc_sections  # The TOC named everything the form defines.
 
         # Run pattern extractor against the same document.
         pattern_sections = self._try_pattern_detection()
         if not pattern_sections:
             return toc_sections
 
-        # Merge in pattern sections whose keys are not already present in the TOC
-        # result.  Existing TOC sections are never overwritten — they carry higher
-        # confidence and real extracted text, whereas a duplicate pattern section
-        # would add noise.
+        # Merge in the pattern sections that add an item the TOC did not have.
+        #
+        # KEYED ON THE ITEM, NOT THE KEY, because the two detectors name the same
+        # section differently: the TOC path emits `part_ii_item_7` and the pattern
+        # path emits `mda`, and `Section.item` is '7' for both. Merging on the key
+        # alone would have added 9-11 duplicate sections per filing here — a
+        # second span of the same item under its other spelling — which is the
+        # same two-vocabulary trap that cost `wfc/10k` a week in BASELINE_GAPS.
+        # It did not bite before only because the Part III gate kept this code
+        # from running on the filings where the TOC succeeds.
+        #
+        # AND ON THE PART AS WELL AS THE ITEM, because an item number is only
+        # unique within its part. A 10-Q has TWO Item 1s — Financial Statements
+        # in Part I, Legal Proceedings in Part II — so an item-only comparison
+        # reads the second as a duplicate of the first and drops it. On pg/10q
+        # the pattern extractor found part_ii_item_1 and this filter discarded
+        # it, because the TOC had already contributed part_i_item_1 and both
+        # answer '1'; `get_item_with_part('Part II', 'Item 1')` then fell through
+        # to id_parse_document, which returned 222,536 characters for a section
+        # of 1,018 (edgartools-yrrh).
+        #
+        # The 10-K dedup above is unaffected: its pattern sections carry a part
+        # too — `mda` is part 'II', item '7', the same pair as `part_ii_item_7` —
+        # so they still collide. Only a section with no part at all falls back to
+        # comparing the bare item, which is what 20-F and the part-less keys need.
+        def _toc_already_has(sec) -> bool:
+            if not sec.item:
+                return False
+            if sec.part:
+                return (sec.part, sec.item) in found_part_items
+            return sec.item in found_items
+
         extras = {
             key: sec
             for key, sec in pattern_sections.items()
-            if key not in toc_sections
+            if key not in toc_sections and not _toc_already_has(sec)
         }
         if not extras:
             return toc_sections
@@ -291,15 +364,31 @@ class HybridSectionDetector:
     def _apply_size_guardrail(self, sections: Dict[str, Section]) -> Dict[str, Section]:
         """Flag sections whose extracted content size is anomalous for their item.
 
-        Uses the per-(form, item) bands in ``section_size_bands``. For
+        Uses the per-(form, part, item) bands in ``section_size_bands``. The
+        Part is part of the key because a 10-Q's item numbers repeat: judging
+        Part II's Legal Proceedings against Part I's Financial Statements band
+        flagged a correctly-extracted section on most of the corpus
+        (edgartools-xhmd). For
         TOC-detected sections the content length is already known (stored in
         ``end_offset`` by the detector), so this adds no extraction cost. A
         section outside its band gets a human-readable ``warning`` and its
         confidence reduced to ``ANOMALOUS_CONFIDENCE`` — the section is still
         returned (callers can introspect ``.warnings``), it is just no longer
         presented as high-confidence wrong content.
+
+        Undersize sections are then split by cause (GH #927): a filer that
+        incorporates the item by reference is short *and correctly extracted*,
+        so it gets the cross-reference warning rather than the truncation one.
+        Only sections the bands already flagged pay for the text extraction that
+        test needs — a healthy filing does no extra work.
         """
-        from edgar.documents.section_size_bands import ANOMALOUS_CONFIDENCE, evaluate_size
+        from edgar.documents.section_size_bands import (
+            ANOMALOUS_CONFIDENCE,
+            cross_reference_warning,
+            evaluate_size,
+            is_cross_reference,
+            is_undersize,
+        )
 
         for section in sections.values():
             # Only TOC sections set end_offset to the extracted *text length*
@@ -316,8 +405,35 @@ class HybridSectionDetector:
             if length <= 0:
                 continue
             item_key = section.item
-            warning = evaluate_size(self.form, item_key, length)
+            part = section.part
+            if evaluate_size(self.form, item_key, length, part=part) is None:
+                continue
+            # The proxy said anomalous; decide on the length the caller will
+            # actually see. end_offset and .text() disagree by a few characters
+            # (nflx 10-Q: 227 vs 223), and a warning that quotes a number the
+            # caller cannot reproduce is not diagnosable (edgartools-xhmd). Only
+            # sections the proxy already flagged pay for this.
+            try:
+                text = section.text()
+            except Exception:  # noqa: BLE001
+                text = None
+                logger.debug("Section %s: text extraction failed; sizing on the "
+                             "offset proxy", section.name, exc_info=True)
+            # An empty render says nothing about size — the proxy stands.
+            if text:
+                length = len(text)
+            warning = evaluate_size(self.form, item_key, length, part=part)
             if warning:
+                if text and is_undersize(self.form, item_key, length, part=part):
+                    try:
+                        if is_cross_reference(text):
+                            warning = cross_reference_warning(self.form, item_key, length,
+                                                              part=part)
+                    except Exception:
+                        # Keep the size warning: the section is still anomalous,
+                        # we just could not tell which cause it is.
+                        logger.debug("Section %s: cross-reference test failed; "
+                                     "keeping the size warning", section.name, exc_info=True)
                 section.warnings.append(warning)
                 section.confidence = min(section.confidence, ANOMALOUS_CONFIDENCE)
                 logger.info(f"Section {section.name}: {warning}")
@@ -501,6 +617,21 @@ class HybridSectionDetector:
 
         except Exception as e:
             logger.warning(f"Heading detection failed: {e}")
+            return None
+
+    def _try_index_detection(self) -> Optional[Dict[str, Section]]:
+        """Try Cross Reference Index detection.
+
+        Returns:
+            Dictionary of sections if the filing publishes a usable index,
+            None otherwise.
+        """
+        try:
+            from edgar.documents.extractors.index_section_detector import IndexSectionDetector
+
+            return IndexSectionDetector(self.document, self.form).detect()
+        except Exception as e:
+            logger.warning(f"Index detection failed: {e}")
             return None
 
     def _try_pattern_detection(self) -> Optional[Dict[str, Section]]:

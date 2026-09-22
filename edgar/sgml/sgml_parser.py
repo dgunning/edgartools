@@ -16,7 +16,9 @@ log = logging.getLogger(__name__)
 # Some real SEC filings (e.g., 10-Ks with embedded images) can exceed 300MB.
 _MAX_CONTENT_SIZE = 500 * 1024 * 1024
 
-__all__ = ['SGMLParser', 'SGMLFormatType', 'SGMLDocument', 'SECIdentityError', 'SECFilingNotFoundError', 'SECHTMLResponseError']
+__all__ = ['SGMLParser', 'SGMLFormatType', 'SGMLDocument', 'SECIdentityError',
+           'FilingNotFoundError', 'SECHTMLResponseError',
+           'SECFilingNotFoundError']  # last is a deprecated alias, removed in 6.0
 
 # Pre-compiled patterns for content extraction
 _TEXT_RE = re.compile(r'<TEXT>([\s\S]*?)</TEXT>', re.DOTALL | re.IGNORECASE)
@@ -33,19 +35,19 @@ _DOC_META_TAGS = (
 )
 
 
-class SECIdentityError(Exception):
-    """Raised when SEC rejects request due to invalid or missing EDGAR_IDENTITY"""
-    pass
+# These three are branches of the tree in edgar.exceptions (bead
+# edgartools-07lk.10): SECIdentityError joins IdentityNotSetError under
+# IdentityError (same root cause, noticed at different layers), and a filing
+# that does not exist is a NotFoundError like any other missing thing.
+from edgar._compat import deprecated_alias
+from edgar.exceptions import FilingNotFoundError, SECIdentityError, TransportError
 
 
-class SECFilingNotFoundError(Exception):
-    """Raised when SEC returns error for non-existent filing"""
-    pass
-
-
-class SECHTMLResponseError(Exception):
+class SECHTMLResponseError(TransportError):
     """Raised when SEC returns HTML content instead of expected SGML"""
-    pass
+
+
+__getattr__ = deprecated_alias(SECFilingNotFoundError=FilingNotFoundError)
 
 class SGMLFormatType(Enum):
     SEC_DOCUMENT = "sec_document"  # <SEC-DOCUMENT>...<SEC-HEADER> style
@@ -185,7 +187,7 @@ def _raise_sec_html_error(content: str):
 
     Raises:
         SECIdentityError: For identity-related errors
-        SECFilingNotFoundError: For missing filing errors
+        FilingNotFoundError: For missing filing errors
         SECHTMLResponseError: For other HTML/XML responses
     """
     # Check for identity error
@@ -198,14 +200,14 @@ def _raise_sec_html_error(content: str):
 
     # Check for AWS S3 NoSuchKey error (XML format)
     if "<Code>NoSuchKey</Code>" in content and "<Message>The specified key does not exist.</Message>" in content:
-        raise SECFilingNotFoundError(
+        raise FilingNotFoundError(
             "SEC filing not found - the specified key does not exist in EDGAR archives. "
             "Check that the accession number and filing date are correct."
         )
 
     # Check for general not found errors
     if "Not Found" in content or "404" in content:
-        raise SECFilingNotFoundError(
+        raise FilingNotFoundError(
             "SEC filing not found. Check that the accession number and filing date are correct."
         )
 
@@ -214,6 +216,38 @@ def _raise_sec_html_error(content: str):
         "SEC returned HTML or XML content instead of expected SGML filing data. "
         "This may indicate an invalid request or temporary SEC server issue."
     )
+
+
+_HEADER_ROOT_TAGS = ('<SEC-HEADER>', '<IMS-HEADER>')
+
+
+def _is_tagged_header_dialect(content_stripped: str) -> bool:
+    """Is this header written in the hyphenated tag dialect?
+
+    Pre-2004 ``.hdr.sgml`` artifacts served as the submission text file use
+    tags, e.g. accession 0000950123-96-000525::
+
+        <SEC-HEADER>0000950123-96-000525.hdr.sgml : 19960213
+        <ACCESSION-NUMBER>0000950123-96-000525
+        <TYPE>SC 13G/A
+
+    while the same root tag can also introduce the tab-indented "space"
+    dialect (``ACCESSION NUMBER:\t0000950123-96-000524``). The distinction is
+    load-bearing: SubmissionFormatParser skips every line of the space dialect
+    and yields an empty header *without raising*, so misrouting here produces a
+    silent all-None header rather than an error. Decide on the first header
+    line after the root tag.
+    """
+    # Skip the root tag's own line, which carries the "<file> : <date>" stamp.
+    newline = content_stripped.find('\n')
+    if newline < 0:
+        return False
+    for line in content_stripped[newline + 1:].splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        return stripped.startswith('<') and not stripped.startswith('</')
+    return False
 
 
 class SGMLParser:
@@ -234,6 +268,14 @@ class SGMLParser:
         elif '<DOCUMENT>' in content[:1000]:
             # For old filings from the 1990's
             return SGMLFormatType.SEC_DOCUMENT
+        elif content_stripped.startswith(_HEADER_ROOT_TAGS):
+            # Pre-2004: EDGAR sometimes serves the .hdr.sgml artifact as the
+            # submission text file. There is no <SEC-DOCUMENT> wrapper and often
+            # no document body at all. Route on the header dialect, since the two
+            # are read by different parsers.
+            return (SGMLFormatType.SUBMISSION
+                    if _is_tagged_header_dialect(content_stripped)
+                    else SGMLFormatType.SEC_DOCUMENT)
 
         # Only check for HTML content if it's not valid SGML structure
         # This prevents false positives when SGML contains HTML within <TEXT> sections
@@ -509,8 +551,16 @@ def _extract_all_documents(content: str, start_pos: int = 0) -> list:
             break
         doc_end = content.find('</DOCUMENT>', doc_start)
         if doc_end < 0:
-            log.warning("Truncated SGML: <DOCUMENT> at offset %d has no matching </DOCUMENT>", doc_start)
-            break
+            # Structural proof of truncation, not a heuristic: EDGAR always closes
+            # <DOCUMENT>. Continuing here silently returned a partial submission —
+            # 0 documents when the cut fell inside the first one (edgartools-88ml).
+            raise ValueError(
+                f"Truncated SGML content: <DOCUMENT> at offset {doc_start:,} has no "
+                f"matching </DOCUMENT> ({len(content):,} bytes total, "
+                f"{len(documents)} complete document(s) before the cut). "
+                "The submission was cut off mid-document — if it was downloaded, "
+                "the transfer likely failed partway; re-download it or clear the cached copy."
+            )
 
         inner_start = doc_start + 10  # len('<DOCUMENT>')
         metadata = _extract_doc_metadata(content, inner_start, doc_end)
@@ -554,7 +604,13 @@ def iter_documents(content: str) -> Iterator[SGMLDocument]:
             break
         doc_end = content.find('</DOCUMENT>', doc_start)
         if doc_end < 0:
-            break
+            # Same truncation contract as _extract_all_documents (edgartools-88ml).
+            raise ValueError(
+                f"Truncated SGML content: <DOCUMENT> at offset {doc_start:,} has no "
+                f"matching </DOCUMENT> ({len(content):,} bytes total). "
+                "The submission was cut off mid-document — if it was downloaded, "
+                "the transfer likely failed partway; re-download it or clear the cached copy."
+            )
 
         inner_start = doc_start + 10
         metadata = _extract_doc_metadata(content, inner_start, doc_end)

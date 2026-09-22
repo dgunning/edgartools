@@ -4,6 +4,8 @@ Schedule13D exposed the triggering-event date as ``date_of_event`` while
 Schedule13G exposed it as ``event_date``, breaking duck-typing across a
 mixed list of 13D/13G filings. Both classes now accept either name as a
 read-only alias for the underlying attribute.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/804
 """
 
 from datetime import date

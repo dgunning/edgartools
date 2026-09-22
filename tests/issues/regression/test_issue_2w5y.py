@@ -18,6 +18,7 @@ Ground truth verified by hand against SEC EDGAR on 2026-06-18/20.
 from datetime import date
 
 import pytest
+from freezegun import freeze_time
 
 from edgar import Company
 from edgar.offerings.prospectus import ShelfLifecycle
@@ -52,26 +53,43 @@ def test_first_bancshares_revival_is_lapsed_not_continuous():
     assert lc._generations[0].year == 2013
     assert lc._generations[-1].year == 2025
 
-    # status: effective (live, not yet past the 2028 expiry).
-    assert lc.status == "effective"
+    # The revived clock runs from 2025-04-09, so it expires 2028-04-09 — a
+    # durable fact, unlike `status`, which is a function of today. (The Alzamend
+    # test above asserted a live status until the shelf expired under it; this
+    # one would have done the same in 2028.)
+    assert lc.current_effective_date == "2025-04-09"
+    assert lc.shelf_expires == date(2028, 4, 9)
 
-    # program_age measured from the CURRENT generation (2025), so well under the
-    # ~12 years that an original-anchored age would (wrongly) report.
-    assert lc.program_age_days is not None
-    assert lc.program_age_days < 366 * 4
+    # program_age runs from the CURRENT generation (2025-04-09), not the dead
+    # 2013 one — stated exactly rather than as an upper bound, because a bound
+    # loose enough to survive the years is also loose enough to pass if the
+    # anchor silently moved.
+    assert lc.program_age_days == (date.today() - date(2025, 4, 9)).days
 
 
 @pytest.mark.network
 def test_alzamend_single_generation_is_continuous():
-    """Alzamend single-generation S-3 (333-273610): continuous, not re-registered."""
+    """Alzamend single-generation S-3 (333-273610): continuous, not re-registered.
+
+    This test asserted ``status == 'effective'`` until the shelf's Rule 415(a)(5)
+    clock ran out on 2026-08-10 — three years to the day after the EFFECT notice
+    — and then failed everywhere, permanently. Status is a function of today; it
+    does not belong in a test pinning what this shelf *is*. The dates below are
+    the durable facts (they are what the SEC filed), and the status rule itself
+    is covered deterministically by the synthetic boundary tests at the bottom of
+    this file.
+    """
     lc = _lifecycle(1677077, "333-273610")
 
     assert lc.is_effective is True
     assert lc.is_re_registered is False
     assert lc.has_registration_gap is False
     assert lc.continuity == "continuous"
-    assert lc.status == "effective"
     assert len(lc._generations) == 1
+
+    # The clock and where it runs from: EFFECT 2023-08-10, so expiry 2026-08-10.
+    assert lc.current_effective_date == "2023-08-10"
+    assert lc.shelf_expires == date(2026, 8, 10)
 
     # 5 takedowns off this shelf; standard cadence (<= 50).
     assert lc.total_takedowns == 5
@@ -187,10 +205,43 @@ def test_takedown_only_old_shelf_is_expired():
     assert lc.status == "expired"
 
 
+@freeze_time("2025-10-01")
 def test_takedown_only_recent_shelf_is_effective():
-    """A recent takedown (within 3y) without a visible EFFECT stays 'effective'."""
+    """A recent takedown (within 3y) without a visible EFFECT stays 'effective'.
+
+    "Recent" is a claim about the gap between the takedown and today, so today
+    is pinned. Left to the real clock, this test passes until 2028 and then
+    reports a bug that does not exist — which is exactly how the Alzamend shelf
+    above broke.
+    """
     lc = _lc([
         _FakeFiling("424B5", "2024-05-01"),
         _FakeFiling("424B5", "2025-09-01"),
     ])
     assert lc.status == "effective"
+
+
+# The expiry boundary itself: `status` flips the day AFTER expiry, not on it.
+# The Alzamend network test covered this rule incidentally, and only until the
+# shelf it watched expired. Time is frozen here, so these two never go stale.
+
+@freeze_time("2027-03-15")
+def test_shelf_is_effective_on_its_expiry_date():
+    """Three years to the day is the last effective day, not the first dead one."""
+    lc = _lc([
+        _FakeFiling("S-3", "2024-03-07"),
+        _FakeFiling("EFFECT", "2024-03-15"),
+    ])
+    assert lc.shelf_expires == date(2027, 3, 15)
+    assert lc.status == "effective"
+
+
+@freeze_time("2027-03-16")
+def test_shelf_is_expired_the_day_after_expiry():
+    """One day past the three-year clock and the shelf is expired."""
+    lc = _lc([
+        _FakeFiling("S-3", "2024-03-07"),
+        _FakeFiling("EFFECT", "2024-03-15"),
+    ])
+    assert lc.shelf_expires == date(2027, 3, 15)
+    assert lc.status == "expired"

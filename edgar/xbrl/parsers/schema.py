@@ -15,6 +15,8 @@ from edgar.xbrl.models import ElementCatalog, XBRLProcessingError
 
 from .base import BaseParser
 
+XBRLDT_NS = "{http://xbrl.org/2005/xbrldt}"
+
 
 class SchemaParser(BaseParser):
     """Parser for XBRL taxonomy schemas."""
@@ -99,6 +101,11 @@ class SchemaParser(BaseParser):
                                 if period_element is not None:
                                     period_type = period_element.text
 
+                # A dimension is typed when its declaration carries
+                # xbrldt:typedDomainRef; without reading it, every dimension
+                # looks explicit and the False is a default, not an answer.
+                typed_domain_ref = element.get(f'{XBRLDT_NS}typedDomainRef')
+
                 # Create element catalog entry
                 self.element_catalog[element_id] = ElementCatalog(
                     name=element_id,
@@ -106,7 +113,9 @@ class SchemaParser(BaseParser):
                     period_type=period_type or "duration",  # Default to duration
                     balance=balance_type,
                     abstract=abstract,
-                    labels={}
+                    labels={},
+                    substitution_group=element.get('substitutionGroup'),
+                    typed_domain_ref=typed_domain_ref
                 )
 
             # Extract embedded linkbases if present

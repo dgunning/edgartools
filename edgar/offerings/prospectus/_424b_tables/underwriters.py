@@ -70,8 +70,16 @@ def _clean_underwriter_name(name: str) -> str:
 
 
 # Lowercase words allowed mid-name: connectors and corporate-form tokens.
+#
+# 'a' and 'division' are here because a boutique underwriter is very often a
+# division of its broker-dealer rather than a firm in its own right, and it
+# files under the full construction: 'EF Hutton, division of Benchmark
+# Investments, LLC', 'ThinkEquity, a division of Fordham Financial Management,
+# Inc.'. Both are well under the 80-char cap and were rejected on the single
+# token 'division', which dropped them from the roster and left lead_manager
+# None on every filing they led (bead edgartools-ji90).
 _UW_NAME_LOWER_OK = {
-    'and', 'of', 'the', 'de', 'für',
+    'and', 'of', 'the', 'de', 'für', 'a', 'an', 'division',
     'llc', 'lp', 'plc', 'sa', 'ag', 'na', 'nv', 'co', 'inc', 'ltd',
 }
 
@@ -129,6 +137,42 @@ def is_plausible_underwriter_name(name: str) -> bool:
     return not _looks_like_term_fragment(stripped)
 
 
+# A beneficial-ownership table has the same shape as an underwriter allocation
+# table — a name column beside a 'Number of Shares' column — so it satisfies
+# has_row_based_header, and having no bank names in its rows it satisfies
+# trust_structure too, which then accepts every row label as a firm.
+#
+# Rejected at the table rather than at the name, because no per-name heuristic
+# can do it: 'Before Offering' is a perfectly plausible firm name, and so are the
+# individual directors listed underneath it. Only the table knows what it is
+# (bead edgartools-4x3k).
+_OWNERSHIP_HEADER_MARKERS = (
+    'beneficial owner', 'beneficially owned', 'beneficial ownership',
+    'before offering', 'after offering',
+)
+
+
+def _is_ownership_table(headers_list, rows) -> bool:
+    """Whether this table's header region marks it as beneficial ownership.
+
+    Only the header region is read — real headers plus the first two rows, since
+    these tables routinely stack a second header row ('Before Offering | After
+    Offering') under the first. And only label-length cells: a genuine
+    underwriter table can carry a footnote mentioning beneficial ownership, and
+    discarding the table over prose would lose the syndicate.
+    """
+    cells = list(headers_list)
+    for row in rows[:2]:
+        cells.extend(row)
+    for cell in cells:
+        text = ' '.join(cell.split()).lower()
+        if len(text) > 80:
+            continue
+        if any(marker in text for marker in _OWNERSHIP_HEADER_MARKERS):
+            return True
+    return False
+
+
 def extract_underwriting_from_tables(document) -> list:
     """
     Find underwriter/agent info from tables in a parsed Document.
@@ -154,6 +198,11 @@ def extract_underwriting_from_tables(document) -> list:
         rows = _get_row_texts(table)
         row_cells = _get_table_cells(table)
         row_text = ' '.join(row_cells).lower()
+
+        # Before any pattern is considered: an ownership table is not an
+        # underwriting table, whatever its shape looks like.
+        if _is_ownership_table(headers_list, rows):
+            continue
 
         bank_hits_headers = _count_bank_hits(header_text)
         bank_hits_rows = _count_bank_hits(row_text)

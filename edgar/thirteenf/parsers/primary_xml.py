@@ -3,10 +3,8 @@
 from datetime import datetime
 from decimal import Decimal
 
-
-from bs4 import Tag
-
 from edgar._party import Address
+from edgar.exceptions import ValidationError
 from edgar.thirteenf.models import (
     AmendmentInfo,
     CoverPage,
@@ -16,9 +14,38 @@ from edgar.thirteenf.models import (
     Signature,
     SummaryPage,
 )
-from edgar.xmltools import child_text, find_element
+from edgar.xmltools import child_text, find_all_elements, find_element, local_name
+from edgar.xmltools import parse_xml as parse_xml_document
 
 __all__ = ['parse_primary_document_xml']
+
+
+def _require_element(parent, name: str):
+    """Return the required child `name`, or say which one was missing.
+
+    Six sites read a required element and raised the same sentence with a
+    different noun in it (bead edgartools-35jj, tranche 1). Collapsing them
+    into one helper is what makes the message worth improving: the caller now
+    learns the element and that a namespace mismatch is the usual cause, which
+    is the failure this parser actually sees (edgartools-07lk.11.3).
+
+    `ValidationError` rather than `ParsingError` because it IS-A `ValueError`,
+    so every `except ValueError:` written against the old raise keeps working.
+    That additivity is the whole reason this conversion is not a 6.0 break.
+    """
+    element = find_element(parent, name)
+    if element is None:
+        raise ValidationError(
+            f"Could not find <{name}> in the 13F primary document.",
+            parameter="primary_document_xml",
+            suggestions=[
+                f"the document is missing <{name}>, or is not a 13F primary document",
+                "13F primary documents carry a default namespace, so elements are "
+                "matched on their local name — a namespace-qualified lookup finds "
+                "nothing here",
+            ],
+        )
+    return element
 
 
 def parse_primary_document_xml(primary_document_xml: str):
@@ -31,23 +58,28 @@ def parse_primary_document_xml(primary_document_xml: str):
     Returns:
         PrimaryDocument13F: Parsed primary document data
     """
-    root = find_element(primary_document_xml, "edgarSubmission")
+    # 13F primary documents carry a default namespace
+    # (`xmlns="http://www.sec.gov/edgar/thirteenffiler"`) plus a second one for
+    # `com:` elements, so every read below has to match on the LOCAL name. A plain
+    # lxml `.//headerData` finds nothing here — silently (edgartools-07lk.11.3).
+    root = parse_xml_document(primary_document_xml)
+    if local_name(root) != "edgarSubmission":
+        raise ValidationError(
+            f"Expected an edgarSubmission document, got <{local_name(root)}>.",
+            parameter="primary_document_xml",
+            invalid_value=local_name(root),
+            suggestions=["this is the 13F primary document parser; check the attachment "
+                         "you passed is the primary document and not an information table"],
+        )
+
     # Header data
-    header_data = root.find("headerData")
-    if not isinstance(header_data, Tag):
-        raise ValueError("Could not find headerData in XML")
-    filer_info = header_data.find("filerInfo")
-    if not isinstance(filer_info, Tag):
-        raise ValueError("Could not find filerInfo in XML")
+    header_data = _require_element(root, "headerData")
+    filer_info = _require_element(header_data, "filerInfo")
     report_period = datetime.strptime(child_text(filer_info, "periodOfReport") or "", "%m-%d-%Y")
 
     # Form Data
-    form_data = root.find("formData")
-    if not isinstance(form_data, Tag):
-        raise ValueError("Could not find formData in XML")
-    cover_page_el = form_data.find("coverPage")
-    if not isinstance(cover_page_el, Tag):
-        raise ValueError("Could not find coverPage in XML")
+    form_data = _require_element(root, "formData")
+    cover_page_el = _require_element(form_data, "coverPage")
 
     report_calendar_or_quarter = child_text(form_data, "reportCalendarOrQuarter")
     report_type = child_text(cover_page_el, "reportType")
@@ -62,8 +94,8 @@ def parse_primary_document_xml(primary_document_xml: str):
         amendment_number = None
 
     amendment_info = None
-    amendment_info_el = cover_page_el.find("amendmentInfo")
-    if isinstance(amendment_info_el, Tag):
+    amendment_info_el = find_element(cover_page_el, "amendmentInfo")
+    if amendment_info_el is not None:
         conf_text = child_text(amendment_info_el, "confDeniedExpired")
         amendment_info = AmendmentInfo(
             amendment_type=child_text(amendment_info_el, "amendmentType"),
@@ -74,14 +106,10 @@ def parse_primary_document_xml(primary_document_xml: str):
         )
 
     # Filing Manager
-    filing_manager_el = cover_page_el.find("filingManager")
-    if not isinstance(filing_manager_el, Tag):
-        raise ValueError("Could not find filingManager in XML")
+    filing_manager_el = _require_element(cover_page_el, "filingManager")
 
     # Address
-    address_el = filing_manager_el.find("address")
-    if not isinstance(address_el, Tag):
-        raise ValueError("Could not find address in XML")
+    address_el = _require_element(filing_manager_el, "address")
     address = Address(
         street1=child_text(address_el, "street1"),
         street2=child_text(address_el, "street2"),
@@ -92,9 +120,9 @@ def parse_primary_document_xml(primary_document_xml: str):
     filing_manager = FilingManager(name=child_text(filing_manager_el, "name") or "", address=address)
 
     # Summary Page
-    summary_page_el = form_data.find("summaryPage")
+    summary_page_el = find_element(form_data, "summaryPage")
     other_managers = []
-    if summary_page_el and isinstance(summary_page_el, Tag):
+    if summary_page_el is not None:
         other_included_managers_count = child_text(summary_page_el,
                                                    "otherIncludedManagersCount")
         if other_included_managers_count:
@@ -109,18 +137,18 @@ def parse_primary_document_xml(primary_document_xml: str):
             total_value = Decimal(total_value)
 
         # Issue #523: Parse other managers from summaryPage instead of coverPage
-        other_manager_info_el = summary_page_el.find("otherManagers2Info")
-        if other_manager_info_el:
+        other_manager_info_el = find_element(summary_page_el, "otherManagers2Info")
+        if other_manager_info_el is not None:
             # New format: otherManagers2Info -> otherManager2 -> sequenceNumber + otherManager
-            for other_manager_wrapper in other_manager_info_el.find_all("otherManager2"):
+            for other_manager_wrapper in find_all_elements(other_manager_info_el, "otherManager2"):
                 seq_raw = child_text(other_manager_wrapper, "sequenceNumber")
                 try:
                     sequence_number = int(seq_raw) if seq_raw is not None else None
                 except ValueError:
                     sequence_number = None
 
-                other_manager_el = other_manager_wrapper.find("otherManager")
-                if other_manager_el and isinstance(other_manager_el, Tag):
+                other_manager_el = find_element(other_manager_wrapper, "otherManager")
+                if other_manager_el is not None:
                     other_managers.append(
                         OtherManager(
                             cik=child_text(other_manager_el, "cik") or "",
@@ -135,7 +163,7 @@ def parse_primary_document_xml(primary_document_xml: str):
         total_value = 0
 
     # Signature Block
-    signature_block_el = form_data.find("signatureBlock")
+    signature_block_el = find_element(form_data, "signatureBlock")
     signature = Signature(
         name=child_text(signature_block_el, "name"),
         title=child_text(signature_block_el, "title"),

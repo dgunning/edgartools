@@ -1,7 +1,11 @@
 # Hardened PyPI publishing via Trusted Publishing (OIDC) — Posture B.
 #
+# Releases are cut and published by the maintainer alone. This file is public because
+# workflows have to be; the runbook that operates it is not, and is deliberately not
+# in this repository.
+#
 # ⚠️  INERT UNTIL ACTIVATED. This workflow does nothing useful until you:
-#   1. Register a PyPI Trusted Publisher for this repo (see docs/internal/release-publishing.md):
+#   1. Register a PyPI Trusted Publisher for this repo:
 #        Project: edgartools | Owner: dgunning | Repo: edgartools
 #        Workflow: release-publish.yml | Environment: pypi
 #   2. Create a GitHub Environment named "pypi" with a REQUIRED REVIEWER (you),

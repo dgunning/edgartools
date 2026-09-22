@@ -1,5 +1,6 @@
 """Form 8-K and 6-K current report classes."""
 import re
+import warnings
 from datetime import date, datetime
 from functools import cached_property, partial
 from typing import List, Optional
@@ -10,7 +11,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from edgar._filings import Attachments
-from edgar.company_reports._base import CompanyReport
+from edgar.company_reports._base import CompanyReport, report_lookup_miss
 from edgar.company_reports._structures import ItemOnlyFilingStructure, extract_items_from_sections
 from edgar.documents import HTMLParser, ParserConfig
 from edgar.files.html import Document
@@ -658,7 +659,9 @@ class CurrentReport(CompanyReport):
             return PressReleases(press_release_results)
 
     @cached_property
-    def chunked_document(self):
+    def _chunked_document(self):
+        # Construction only; the deprecation lives on the public property in
+        # CompanyReport. See the note there.
         html = self._filing.html()
         if not html:
             return None
@@ -672,17 +675,42 @@ class CurrentReport(CompanyReport):
 
     @property
     def doc(self):
-        return self.chunked_document
+        """The legacy chunked document.
+
+        .. deprecated:: 5.56
+            Use :attr:`document` instead. Removed in v6.0 with ``edgar.files``.
+
+        This override is the reason the property carries its own warning rather
+        than inheriting one. ``CompanyReport.doc`` returns ``self.document`` —
+        the *new* parser's document — and every other report class means that by
+        ``.doc``. ``CurrentReport`` alone returns the legacy ``ChunkedDocument``,
+        so the same attribute name hands back two unrelated types depending on
+        the form, and only this one stands on a package 6.0 deletes.
+
+        A plain ``warnings.warn`` rather than the frame-gated
+        ``warn_legacy_html_usage``: nothing inside edgartools reads ``.doc``
+        (measured 2026-09-02 across ``edgar/``), so there is no internal caller
+        to stay quiet for, and this matches the sibling ``chunked_document``
+        property in ``CompanyReport``.
+        """
+        warnings.warn(
+            "CurrentReport.doc returns the legacy ChunkedDocument and is "
+            "deprecated; it will be removed in edgartools 6.0 along with the "
+            "edgar.files package. Use .document for the edgar.documents parser, "
+            "or .items / report[item] for item access.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        return self._chunked_document
 
     @property
     def items(self) -> List[str]:
         """
         List of detected item names (consistent with sections property).
 
-        Unions three detection strategies, all reading the primary document:
+        Unions two detection strategies, both reading the primary document:
         1. New parser's section detection (95% accuracy for modern filings)
-        2. Chunked document parser (legacy parser)
-        3. Text-based pattern extraction (all eras including SGML)
+        2. Text-based pattern extraction (all eras including SGML)
 
         The text-based strategy handles legacy SGML filings (1999-2001) where
         SEC metadata is incomplete (GitHub issue #462).
@@ -690,12 +718,12 @@ class CurrentReport(CompanyReport):
         Returns:
             List of item titles for backward compatibility (e.g., ['Item 5.02', 'Item 9.01'])
         """
-        # The new parser (strategy 1) is high-precision for modern filings but can
-        # silently miss an item whose body is present — e.g. an Item 1.05
-        # cybersecurity disclosure that only shows Item 9.01 in the parsed sections
-        # (edgartools-83gh). The chunked parser operates on the same primary
-        # document (no exhibit text, so no false positives from press releases),
-        # so unioning the two recovers missed items without over-reporting.
+        # Two strategies, unioned rather than tried in order. The new parser
+        # (strategy 1) is high-precision but narrow: it reads the parsed section
+        # tree, which is empty on filings whose primary document is plain text in
+        # minimal HTML. The text strategy reads the same primary document (no
+        # exhibit text, so no false positives from press releases), which is what
+        # makes it safe to union rather than merely to fall back to.
         item_set = set()
 
         # Strategy 1: new parser section detection (95% rate for modern filings)
@@ -710,21 +738,13 @@ class CurrentReport(CompanyReport):
             if parser_items and any('.' in item for item in parser_items):
                 item_set.update(_canonical_item(item) for item in parser_items)
 
-        # Strategy 2: chunked parser of the primary document — backfills items the
-        # new parser missed; same precision domain (excludes exhibit text).
-        if self.chunked_document:
-            chunked_items = self.chunked_document.list_items()
-            if chunked_items:
-                item_set.update(_canonical_item(item) for item in chunked_items)
-
-        # Strategy 3: text-based pattern extraction. It is the only source for legacy
-        # SGML filings (1999-2001, no usable HTML), and is unioned in — rather than
-        # used only when the HTML strategies come up empty — because those strategies
-        # can return a partial set on 2005-era filings that are plain text in minimal
-        # HTML (e.g. Cimarex 0001047469-05-006981, where the chunked parser sees only
-        # Item 8.01 of the two items present). filing.text() renders the primary
-        # document alone, so this shares the precision domain of strategies 1 and 2
-        # and adds no exhibit-text false positives. (edgartools-l6cl)
+        # Strategy 2: text-based pattern extraction. It is the only source for legacy
+        # SGML filings (1999-2001, no usable HTML) and for 2005-era filings that are
+        # plain text in minimal HTML, where strategy 1 returns nothing at all — on
+        # Cimarex 0001047469-05-006981 both of the items present come from here.
+        # It is unioned in rather than used only when strategy 1 comes up empty
+        # because a partial section tree is not the same as an absent one.
+        # (edgartools-l6cl)
         filing_text = self._get_filing_text()
         if filing_text:
             # Format for display consistency: ['2.02', '9.01'] -> ['Item 2.02', 'Item 9.01']
@@ -741,8 +761,7 @@ class CurrentReport(CompanyReport):
 
         Uses multi-tier fallback strategy:
         1. New parser's section detection (95% accuracy for modern filings)
-        2. Chunked document parser (legacy parser)
-        3. Text-based pattern extraction (100% accuracy, all eras including SGML)
+        2. Text-based pattern extraction (100% accuracy, all eras including SGML)
 
         The text-based fallback handles legacy SGML filings (1999-2001) where
         HTML is unavailable (GitHub issue #462).
@@ -775,19 +794,7 @@ class CurrentReport(CompanyReport):
                 if normalized_key == normalized_input:
                     return section.text()
 
-        # Strategy 2: Fallback to old chunked_document for backward compatibility.
-        # Only return a hit — chunked_document returns None for an unmatched key
-        # (e.g. '1.05' when it indexes by 'Item 1.05'); returning that None here
-        # would short-circuit the text-based fallback below. (edgartools-83gh)
-        if self.chunked_document:
-            try:
-                result = self.chunked_document[item_name]
-                if result:
-                    return result
-            except (KeyError, TypeError):
-                pass
-
-        # Strategy 3: Text-based fallback for legacy SGML filings
+        # Strategy 2: Text-based fallback for legacy SGML filings
         # This handles filings where HTML is unavailable but text exists
         # Use cached text extraction to improve performance
         filing_text = self._get_filing_text()
@@ -796,6 +803,7 @@ class CurrentReport(CompanyReport):
             if content:
                 return content
 
+        report_lookup_miss(self, item_name)
         return None
 
     def view(self, item_or_part: str):

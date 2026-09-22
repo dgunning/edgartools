@@ -199,6 +199,13 @@ class TestSignaturesBoundaryInProcess:
 # VCR ground-truth tests — replay the real filing HTML without re-fetching
 # ---------------------------------------------------------------------------
 
+# vcrpy is a pinned test dependency, so this is gating for an environment that
+# should not occur -- but when it does, skipif says so at collection and marks
+# the tests skipped, where a pytest.skip() inside the helper marked them passed
+# on the strength of a dependency being absent (edgartools-07lk.24 finding 3).
+requires_vcr = pytest.mark.skipif(not _HAS_VCR, reason="vcrpy not installed")
+
+
 def _parse_filing_html(cassette_name: str, filing_html_uri: str, form: str):
     """Fetch the filing HTML from the VCR cassette and parse it.
 
@@ -207,8 +214,6 @@ def _parse_filing_html(cassette_name: str, filing_html_uri: str, form: str):
     to replay the recorded response. Uses httpx (the same transport edgar uses)
     so VCR intercepts the request correctly.
     """
-    if not _HAS_VCR:
-        pytest.skip("vcrpy not installed")
     import httpx
 
     with _my_vcr.use_cassette(cassette_name):
@@ -222,6 +227,7 @@ def _parse_filing_html(cassette_name: str, filing_html_uri: str, form: str):
 
 
 @pytest.mark.fast
+@requires_vcr
 class TestMetaSingleItemGroundTruth:
     """GH #879: Meta 8-K (0001628280-25-058337) — single item, Workiva rendering.
 
@@ -280,6 +286,7 @@ class TestMetaSingleItemGroundTruth:
 
 
 @pytest.mark.fast
+@requires_vcr
 class TestJPMMultiItemGroundTruth:
     """GH #879: JPMorgan 8-K (0000019617-26-000241) — two items.
 
@@ -287,7 +294,10 @@ class TestJPMMultiItemGroundTruth:
     not bold. Tests that middle items are untouched and the last item is bounded.
     Ground truth:
     - Item 5.02: 4097 chars (middle item, unchanged)
-    - Item 9.01: 794 chars (last item; before fix this contained the sig block)
+    - Item 9.01: 602 chars (last item; before fix this contained the sig block).
+      Was 794 until the table renderer stopped padding each line out to the
+      last column's full width (edgartools-j8bs). Whitespace only — the
+      non-whitespace content is 486 characters before and after.
     Cassette: tests/cassettes/test_issue_879_jpm_8k.yaml
     """
 
@@ -325,11 +335,18 @@ class TestJPMMultiItemGroundTruth:
         )
 
     def test_last_item_901_ground_truth_length(self, doc):
-        """Item 9.01 post-fix exact length is ~794 chars (allow ±15%)."""
+        """Item 9.01 post-fix exact length is ~602 chars (allow ±15%)."""
         sections = doc.sections
         text = sections["item_901"].text().strip()
-        # Ground truth: 794 chars. Allow ±15% (674–913).
-        assert 674 <= len(text) <= 913, (
+        # Ground truth: 602 chars. Allow ±15% (512-692).
+        #
+        # Was 794 until trailing cell padding stopped being emitted
+        # (edgartools-j8bs). Content is unchanged: 486 non-whitespace characters
+        # on both sides of that commit, so what left the string was spaces at
+        # end of line. Asserted on len() rather than content because the point
+        # of this test is that the item is BOUNDED and no longer swallows the
+        # signature block.
+        assert 512 <= len(text) <= 692, (
             f"JPM Item 9.01 length {len(text)} outside expected range [674, 913]"
         )
 

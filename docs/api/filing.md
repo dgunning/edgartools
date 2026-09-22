@@ -143,6 +143,18 @@ if "artificial intelligence" in text.lower():
     print("AI mentioned in filing")
 ```
 
+Images contribute nothing by default, which keeps the text that feeds sections,
+search and embeddings clean. Pass `include_images=True` to mark where they were:
+
+```python
+text = filing.text(include_images=True)
+# ... [Image: nvidialogoa10.jpg] ...
+```
+
+That matters for filings where a chart carries the content — a 10-K's Item 5
+stock performance graph is usually an image with no table beside it, so without
+a placeholder there is nothing to show the reader anything was there.
+
 #### markdown()
 ```python
 def markdown(
@@ -598,13 +610,18 @@ for exhibit in filing.exhibits:
 ```python
 filing = company.get_filings(form="10-K").latest()
 
-# Export to markdown
-md = filing.markdown(include_page_breaks=True)
+# Export to markdown — tables, links and images all preserved
+md = filing.markdown()
 
 # Save for LLM processing
 with open("filing_for_analysis.md", "w") as f:
     f.write(md)
 ```
+
+!!! warning "`include_page_breaks` is deprecated"
+
+    It routes the document through the legacy renderer, which drops images.
+    Removed in 6.0.
 
 ## Error Handling
 

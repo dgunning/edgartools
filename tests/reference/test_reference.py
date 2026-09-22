@@ -1,0 +1,194 @@
+import json
+from unittest.mock import patch
+
+import pandas as pd
+import pytest
+
+from edgar.reference import cusip_ticker_mapping, get_ticker_from_cusip, describe_form
+from edgar.reference.tickers import get_cik_tickers, find_cik, get_company_ticker_name_exchange, \
+    get_companies_by_exchange, get_mutual_fund_tickers, find_mutual_fund_cik, get_company_tickers, \
+    sanitize_cusip_tickers
+
+
+def test_cusip_ticker_mapping():
+    data = cusip_ticker_mapping()
+    assert data.loc['15101T102'].Ticker == 'CLXX'
+
+
+def test_get_ticker_from_cusip():
+    assert get_ticker_from_cusip('000307108') == 'AACH'
+    assert get_ticker_from_cusip('74349L108') == 'PGUCY'
+    assert get_ticker_from_cusip('037833100') == 'AAPL'
+    assert get_ticker_from_cusip('59021J679') == 'MNK'
+
+
+def test_get_ticker_from_cusip_missing():
+    """Missing CUSIPs return None instead of raising KeyError."""
+    assert get_ticker_from_cusip('XXXXXXXXX') is None
+    assert get_ticker_from_cusip('000000000') is None
+    assert get_ticker_from_cusip('') is None
+    assert get_ticker_from_cusip(None) is None
+
+
+def test_get_ticker_from_cusip_with_multiple_tickers():
+    # Bundled data is now deduplicated — each CUSIP maps to one ticker
+    assert get_ticker_from_cusip('000307108') == 'AACH'
+
+
+def test_cusip_ticker_mapping_not_allowing_duplicates():
+    data = cusip_ticker_mapping(allow_duplicate_cusips=False)
+    tickers = data.loc['000307108']
+    assert len(tickers) == 1
+
+    data = cusip_ticker_mapping(allow_duplicate_cusips=True)
+    tickers = data.loc['000307108']
+    assert len(tickers) == 1
+
+
+def test_bundled_cusip_tickers_are_well_formed():
+    """No symbol in the bundled mapping may be junk.
+
+    This is the guard against a bad data refresh, which is why it lives here and
+    not in tests/issues/regression — the regression suite runs on demand, this
+    runs in CI on every push.
+    """
+    df = cusip_ticker_mapping().reset_index()
+    _, stats = sanitize_cusip_tickers(df)
+
+    rejected = stats["dropped_empty"] + stats["dropped_malformed"]
+    assert stats["placeholder_suffix_stripped"] == 0, (
+        f"{stats['placeholder_suffix_stripped']} tickers carry the XXXX placeholder"
+    )
+    assert rejected == 0, f"{rejected} tickers are not shaped like symbols"
+
+
+def test_get_ticker_from_cusip_has_no_placeholder_suffix():
+    """Ground truth from the reporter of GH #978, hand-checked against SEC filings."""
+    assert get_ticker_from_cusip('G3421J106') == 'FERG'   # Ferguson
+    assert get_ticker_from_cusip('13645T100') == 'CP'     # Canadian Pacific
+    assert get_ticker_from_cusip('001228105') == 'MITT'   # AG Mortgage Investment Trust
+
+
+def test_describe_form():
+    assert describe_form('10-K') == 'Form 10-K: Annual report for public companies'
+    assert describe_form('10-K/A') == 'Form 10-K Amendment: Annual report for public companies'
+    assert describe_form('15F-12B') == 'Form 15F-12B: Foreign private issuer equity securities termination'
+    assert describe_form('NOMA') == 'Form NOMA'
+    assert describe_form('3') == 'Form 3: Initial statement of beneficial ownership'
+
+    assert describe_form('10-K', prepend_form=False) == 'Annual report for public companies'
+
+
+
+def test_find_cik():
+    assert find_cik('AAPL') == 320193
+    assert find_cik('TSLA') == 1318605
+    assert find_cik('MSFT') == 789019
+    assert find_cik('GOOGL') == 1652044
+    assert find_cik("BRK-B") == find_cik("BRK.B") == find_cik("BRK") == 1067983
+    assert find_cik("BH-A") == find_cik("BH") == 1726173
+    assert find_cik("NOTTHERE") is None
+
+
+
+# A slice of https://www.sec.gov/files/company_tickers_mf.json as served on
+# 2026-09-11, in the file's own shape. The live file is checked by the network
+# contract test in test_sec_reference_contract.py.
+MUTUAL_FUND_TICKERS_JSON = {
+    "fields": ["cik", "seriesId", "classId", "symbol"],
+    "data": [
+        [3794, "S000027378", "C000152483", "ABNZX"],
+        [3794, "S000010305", "C000028493", "ABQUX"],
+        [36405, "S000002839", "C000007825", "CRBRX"],
+    ],
+}
+
+
+@pytest.fixture
+def bundled_mutual_fund_tickers():
+    """Serve the mutual fund ticker file from memory and leave no cached frame behind."""
+    get_mutual_fund_tickers.cache_clear()
+    with patch('edgar.reference.tickers.download_json', return_value=MUTUAL_FUND_TICKERS_JSON):
+        yield
+    get_mutual_fund_tickers.cache_clear()
+
+
+def test_find_mutual_fund_cik(bundled_mutual_fund_tickers):
+    assert find_mutual_fund_cik("ABNZX") == 3794
+    assert find_mutual_fund_cik("abnzx") == 3794
+    assert find_mutual_fund_cik("NOTTHERE") is None
+
+
+def test_mutual_fund_lookup_follows_the_frame():
+    """
+    The lookup dict must be rebuilt when the ticker frame changes. Stacking a
+    second lru_cache on top of get_mutual_fund_tickers() froze the first frame
+    a worker saw, so a sibling test that patched the frame poisoned this one.
+    """
+    fake = pd.DataFrame([{'cik': 1, 'seriesId': 'S1', 'classId': 'C1', 'ticker': 'FAKEX'}])
+    with patch('edgar.reference.tickers.get_mutual_fund_tickers', return_value=fake):
+        assert find_mutual_fund_cik("FAKEX") == 1
+        assert find_mutual_fund_cik("ABNZX") is None
+    get_mutual_fund_tickers.cache_clear()
+    with patch('edgar.reference.tickers.download_json', return_value=MUTUAL_FUND_TICKERS_JSON):
+        assert find_mutual_fund_cik("ABNZX") == 3794
+        assert find_mutual_fund_cik("FAKEX") is None
+    get_mutual_fund_tickers.cache_clear()
+
+
+def test_company_ticker_name_exchange():
+    data = get_company_ticker_name_exchange()
+    assert ['cik', 'name', 'ticker', 'exchange'] == data.columns.tolist()
+    print()
+
+
+def test_get_companies_by_exchange():
+    data = get_companies_by_exchange('NYSE')
+    assert 'NYSE' in data.exchange.tolist()
+    assert 'Nasdaq' not in data.exchange.tolist()
+
+    data = get_companies_by_exchange(['NYSE', 'NASDAQ'])
+    assert 'NYSE' in data.exchange.tolist()
+    assert 'Nasdaq' in data.exchange.tolist()
+
+
+def test_get_mutual_fund_tickers(bundled_mutual_fund_tickers):
+    data = get_mutual_fund_tickers()
+    assert data.columns.tolist() == ['cik', 'seriesId', 'classId', 'ticker']
+
+    assert not data.query("ticker == 'CRBRX'").empty
+
+
+def test_get_cik_tickers_uses_bundled_data():
+    """
+    Test that get_cik_tickers() uses bundled parquet data by default.
+
+    The bundled data provides instant offline access without network calls.
+    This is the primary data source since ticker.txt is deprecated by SEC.
+    """
+    from edgar.reference.tickers import _get_company_tickers_raw
+
+    # Clear the lru_cache to ensure we're not getting cached results
+    get_cik_tickers.cache_clear()
+    _get_company_tickers_raw.cache_clear()
+
+    # Patch network calls to verify they're NOT called when bundled data exists
+    with patch('edgar.reference.tickers.download_file') as mock_download_file, \
+            patch('edgar.reference.tickers.download_json') as mock_download_json:
+
+        data = get_cik_tickers()
+
+        # Verify the result uses bundled data
+        assert isinstance(data, pd.DataFrame), "Result should be a pandas DataFrame"
+        assert set(data.columns) == {'ticker', 'cik'}, \
+            f"Columns should be 'ticker' and 'cik', got {data.columns}"
+        assert len(data) > 10000, \
+            f"Bundled data should have >10000 entries, got {len(data)}"
+
+        # Verify key tickers are present
+        assert 'AAPL' in data['ticker'].values, "AAPL should be in the data"
+        assert 'MSFT' in data['ticker'].values, "MSFT should be in the data"
+
+        # Verify no network calls were made (bundled data was used)
+        mock_download_file.assert_not_called()
+        mock_download_json.assert_not_called()

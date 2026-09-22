@@ -1,0 +1,6 @@
+Company: NIKE, Inc.
+CIK: 320187
+Form: 10-K
+Filing Date: 2026-07-15
+Accession No: 0000320187-26-000088
+URL: https://www.sec.gov/Archives/edgar/data/320187/0000320187-26-000088-index.html

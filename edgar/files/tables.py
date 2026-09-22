@@ -6,6 +6,7 @@ if TYPE_CHECKING:
 import re
 from functools import lru_cache
 
+from edgar.files._deprecation import warn_legacy_html_usage
 from edgar.richtools import rich_to_text
 
 
@@ -75,10 +76,21 @@ def is_number(s: str) -> bool:
     except ValueError:
         return False
 
+_TABLES_DEPRECATION_MSG = (
+    "edgar.files.tables belongs to the legacy HTML parser and is removed in "
+    "edgartools 6.0. Use edgar.documents, whose table nodes carry the same "
+    "data."
+)
+
+
 class TableProcessor:
     @staticmethod
     def process_table(node) -> Optional[ProcessedTable]:
         """Process table node into a format ready for rendering"""
+        # Once per table, not per cell: the frame walk in the helper is not
+        # free, which is also why edgar.files.styles.parse_style is left
+        # unwarned (thousands of calls per document).
+        warn_legacy_html_usage(_TABLES_DEPRECATION_MSG)
         if not isinstance(node.content, list) or not node.content:
             return None
 

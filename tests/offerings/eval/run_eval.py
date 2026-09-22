@@ -16,6 +16,7 @@ Buckets per facet:
     deferred legitimately indeterminate (fee capacity on pay-as-you-go ASRs)
     bad      garbage or out-of-range  <-- the thing we never want to ship
     error    extractor raised
+    unavailable  SEC did not serve the filing — unmeasured, excluded from n
 
 Metrics:  coverage = (ok + deferred) / n     bad_rate = (bad + error + suspect) / n
 (a justified `deferred` is a correct resolution — an indeterminate pay-as-you-go
@@ -186,6 +187,31 @@ FACETS = {
 
 # --------------------------------------------------------------------------
 
+def _is_transport_failure(ex: BaseException) -> bool:
+    """Whether ``ex`` means "SEC did not give us the filing", not "the extractor broke".
+
+    The distinction decides whether an entry is measured at all. A filing that
+    could not be fetched is *unmeasured*: counting it as a defect makes the
+    ratchet report an extraction regression whenever the network is slow, which
+    is what made the guardrail fail under full-suite load — the suite shares one
+    rate limiter, so a busy run starves this eval's 44 fetches and the failures
+    land in bad_rate.
+
+    Deliberately narrow. Only transport and HTTP-status failures qualify; an
+    extractor that raises TypeError on a real response is still an ``error``,
+    which is the thing this eval exists to catch.
+    """
+    import httpx
+
+    if isinstance(ex, (httpx.HTTPError, ConnectionError, TimeoutError)):
+        return True
+    # edgar wraps some fetch failures in its own types; match on the SEC-facing
+    # ones by name so this does not depend on their import path staying put.
+    return type(ex).__name__ in {
+        "SECFilingNotFoundError", "SECHTMLResponseError", "IdentityNotSetException",
+    }
+
+
 def run(entries, only_facet=None):
     from edgar import find
     results = []
@@ -200,7 +226,8 @@ def run(entries, only_facet=None):
         try:
             bucket, value, reason, ctx = fn(find(e["accession"]))
         except Exception as ex:  # noqa: BLE001 — the harness must survive any filing
-            bucket, value, reason = "error", None, f"{type(ex).__name__}: {ex}"
+            bucket = "unavailable" if _is_transport_failure(ex) else "error"
+            value, reason = None, f"{type(ex).__name__}: {ex}"
 
         # Anchor ground-truth check (overrides bucket -> bad on mismatch).
         # Frontier entries are known coverage gaps: a None value is the documented
@@ -240,13 +267,20 @@ def summarize(results, include_frontier=False):
     extractor) are excluded by default so the ratchet measures regressions on the
     *supported* scope only — newly-added gap cases must not drag the floor down.
     Pass include_frontier=True to summarize the frontier set on its own.
+
+    ``n`` counts entries that were actually measured. Entries SEC would not serve
+    are tallied under ``unavailable`` and left out of ``n``, so a run degraded by
+    the network reports a smaller sample rather than a worse extractor. Callers
+    are expected to check ``unavailable`` themselves — a sample small enough to
+    flatter the rates is a failed measurement, not a pass.
     """
     by_facet = defaultdict(lambda: defaultdict(int))
     for r in results:
         if bool(r.get("frontier")) != include_frontier:
             continue
         by_facet[r["facet"]][r["bucket"]] += 1
-        by_facet[r["facet"]]["n"] += 1
+        if r["bucket"] != "unavailable":
+            by_facet[r["facet"]]["n"] += 1
     return by_facet
 
 
@@ -254,11 +288,13 @@ def print_dashboard(results):
     by_facet = summarize(results)
     print("\n=== Offerings Extraction Eval — Tier A + B ===\n")
     hdr = (f"{'facet':18}{'n':>4}{'ok':>5}{'susp':>6}{'null':>6}{'defer':>7}"
-           f"{'bad':>5}{'err':>5}{'coverage':>11}{'bad_rate':>10}{'verified':>10}")
+           f"{'bad':>5}{'err':>5}{'unavl':>7}{'coverage':>11}{'bad_rate':>10}{'verified':>10}")
     print(hdr)
     print("-" * len(hdr))
+    unavailable_total = 0
     for facet, c in sorted(by_facet.items()):
         n = c["n"]
+        unavailable_total += c["unavailable"]
         cov = (c["ok"] + c["deferred"]) / n if n else 0
         badr = (c["bad"] + c["error"] + c["suspect"]) / n if n else 0
         # verified = oracle-confirmed / oracle-judged (pass + fail), for this facet
@@ -266,7 +302,15 @@ def print_dashboard(results):
         passed = [r for r in judged if r["verified"]]
         vrate = f"{len(passed)}/{len(judged)}" if judged else "—"
         print(f"{facet:18}{n:>4}{c['ok']:>5}{c['suspect']:>6}{c['null']:>6}{c['deferred']:>7}"
-              f"{c['bad']:>5}{c['error']:>5}{cov:>10.0%}{badr:>10.0%}{vrate:>10}")
+              f"{c['bad']:>5}{c['error']:>5}{c['unavailable']:>7}{cov:>10.0%}{badr:>10.0%}{vrate:>10}")
+
+    if unavailable_total:
+        # Rates above are computed over what was measured, so an unremarked
+        # unavailable count would make a half-finished run read as a clean one.
+        print(f"\n!! {unavailable_total} entr{'y' if unavailable_total == 1 else 'ies'} "
+              f"could not be fetched and are excluded from every rate above. "
+              f"These are network failures, not extraction results — rerun before "
+              f"reading anything into the numbers.")
 
     bad = [r for r in results if r["bucket"] in ("bad", "error", "suspect")
            and not r.get("frontier")]

@@ -12,7 +12,6 @@ from typing import List, Optional, Union
 
 import numpy as np
 import pandas as pd
-from bs4 import BeautifulSoup, Tag
 
 from edgar.ownership.core import safe_numeric
 from edgar.ownership.html_render import ownership_to_html
@@ -34,7 +33,8 @@ from edgar.ownership.tables import (
 )
 from edgar.ownership.text_render import ownership_to_context
 from edgar.richtools import repr_rich
-from edgar.xmltools import child_text
+from edgar.xmltools import child_text, find_all_elements, find_element, local_name
+from edgar.xmltools import parse_xml as parse_document
 
 __all__ = [
     'Ownership',
@@ -352,10 +352,10 @@ class Ownership:
     @classmethod
     def parse_xml(cls,
                   content: str):
-        soup = BeautifulSoup(content, "xml")
-
-        root = soup.find("ownershipDocument")
-        if not isinstance(root, Tag):
+        # <ownershipDocument> is the document element of a Form 3/4/5, so the
+        # parsed root is already it (edgartools-07lk.11.3).
+        root = parse_document(content)
+        if local_name(root) != "ownershipDocument":
             raise ValueError("Could not find ownershipDocument in XML")
 
         # Period of report
@@ -370,8 +370,8 @@ class Ownership:
         footnotes = Footnotes.extract(root)
 
         # Issuer
-        issuer_tag = root.find("issuer")
-        if not isinstance(issuer_tag, Tag):
+        issuer_tag = find_element(root, "issuer")
+        if issuer_tag is None:
             raise ValueError("Could not find issuer in XML")
         issuer = Issuer(
             cik=child_text(issuer_tag, "issuerCik") or "",
@@ -383,20 +383,21 @@ class Ownership:
         ownership_signatures = OwnerSignatures([OwnerSignature(
             signature=(child_text(el, "signatureName") or "").strip(),
             date=child_text(el, "signatureDate") or ""
-        ) for el in root.find_all("ownerSignature") if isinstance(el, Tag)]
+        ) for el in find_all_elements(root, "ownerSignature")]
         )
 
         # Reporting Owner
-        reporting_owner = ReportingOwners.from_reporting_owner_tags(root.find_all("reportingOwner"), remarks=remarks)
+        reporting_owner = ReportingOwners.from_reporting_owner_tags(find_all_elements(root, "reportingOwner"),
+                                                                   remarks=remarks)
 
         form = child_text(root, "documentType") or ""
         # Non derivatives
-        non_derivative_table_tag = root.find("nonDerivativeTable")
-        non_derivative_table = NonDerivativeTable.extract(non_derivative_table_tag, form=form) if isinstance(non_derivative_table_tag, Tag) else NonDerivativeTable(holdings=NonDerivativeHoldings(), transactions=NonDerivativeTransactions(), form=form)
+        non_derivative_table_tag = find_element(root, "nonDerivativeTable")
+        non_derivative_table = NonDerivativeTable.extract(non_derivative_table_tag, form=form) if non_derivative_table_tag is not None else NonDerivativeTable(holdings=NonDerivativeHoldings(), transactions=NonDerivativeTransactions(), form=form)
 
         # Derivatives
-        derivative_table_tag = root.find("derivativeTable")
-        derivative_table = DerivativeTable.extract(derivative_table_tag, form=form) if isinstance(derivative_table_tag, Tag) else DerivativeTable(holdings=DerivativeHoldings(), transactions=DerivativeTransactions(), form=form)
+        derivative_table_tag = find_element(root, "derivativeTable")
+        derivative_table = DerivativeTable.extract(derivative_table_tag, form=form) if derivative_table_tag is not None else DerivativeTable(holdings=DerivativeHoldings(), transactions=DerivativeTransactions(), form=form)
 
         ownership_document = {
             'form': form,

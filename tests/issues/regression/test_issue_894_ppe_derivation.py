@@ -24,6 +24,8 @@ only as prior-year-end comparatives in later 10-Qs, tagged Q1-Q3 of the
 comparable net (Gross - AccumulatedDepreciation); GE additionally folds an
 operating-lease ROU asset into its extension line, but that asset renders on its
 own standardized row (``OperatingLeaseRightOfUseAsset``).
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/894
 """
 from datetime import date
 

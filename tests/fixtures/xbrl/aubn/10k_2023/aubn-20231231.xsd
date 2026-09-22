@@ -1,0 +1,799 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:aubn="http://www.auburnbank.com/20231231" xmlns:dtr-types="http://www.xbrl.org/dtr/type/2022-03-31" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:xl="http://www.xbrl.org/2003/XLink" xmlns:negated="http://www.xbrl.org/2009/role/negated" xmlns:us-gaap="http://fasb.org/us-gaap/2023" xmlns:dei="http://xbrl.sec.gov/dei/2023" targetNamespace="http://www.auburnbank.com/20231231" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo>
+      <link:roleType id="ELRID_DocumentAndEntityInformation" roleURI="http://www.auburnbank.com/role/DocumentAndEntityInformation">
+        <link:definition>000100 - Document - Document and Entity Information</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ConsolidatedStatementsOfEarnings" roleURI="http://www.auburnbank.com/role/StatementConsolidatedStatementsOfEarnings">
+        <link:definition>000300 - Statement - Consolidated Statements of Earnings</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ConsolidatedBalanceSheets" roleURI="http://www.auburnbank.com/role/StatementConsolidatedBalanceSheets">
+        <link:definition>000200 - Statement - Consolidated Balance Sheets</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ConsolidatedBalanceSheetsParentheticals" roleURI="http://www.auburnbank.com/role/ConsolidatedBalanceSheetsParentheticals">
+        <link:definition>000210 - Statement - Consolidated Balance Sheets (Parentheticals)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ConsolidatedStatementsOfCashFlows" roleURI="http://www.auburnbank.com/role/ConsolidatedStatementsOfCashFlows">
+        <link:definition>000600 - Statement - Consolidated Statements of Cash Flows</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ConsolidatedStatementsOfStockholdersEquity" roleURI="http://www.auburnbank.com/role/StatementConsolidatedStatementsOfStockholdersEquity">
+        <link:definition>000500 - Statement - Consolidated Statements of Stockholders' Equity</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ConsolidatedStatementsOfStockholdersEquityParentheticals" roleURI="http://www.auburnbank.com/role/ConsolidatedStatementsOfStockholdersEquityParentheticals">
+        <link:definition>000510 - Statement - Consolidated Statements of Stockholders' Equity (Parentheticals)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_BasicAndDilutedEarningsPerShare" roleURI="http://www.auburnbank.com/role/BasicAndDilutedEarningsPerShare">
+        <link:definition>001200 - Disclosure - Basic and Diluted Earnings Per Share</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_Securities" roleURI="http://www.auburnbank.com/role/Securities">
+        <link:definition>001500 - Disclosure - Securities</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_LoanAndAllowanceForLoanLosses" roleURI="http://www.auburnbank.com/role/LoanAndAllowanceForLoanLosses">
+        <link:definition>001600 - Disclosure - Loan and Allowance for Loan Losses</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_FairValueDisclosures" roleURI="http://www.auburnbank.com/role/FairValueDisclosures">
+        <link:definition>002600 - Disclosure - Fair Value Disclosures</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ConsolidatedStatementsOfComprehensiveIncome" roleURI="http://www.auburnbank.com/role/StatementConsolidatedStatementsOfComprehensiveIncome">
+        <link:definition>000400 - Statement - Consolidated Statements of Comprehensive Income</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_SummaryOfSignificantAccountingPoliciesPolicies" roleURI="http://www.auburnbank.com/role/DisclosureSummaryOfSignificantAccountingPoliciesPolicies">
+        <link:definition>011100 - Disclosure - Summary of Significant Accounting Policies (Policies)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_BasicAndDilutedEarningsPerShareTables" roleURI="http://www.auburnbank.com/role/BasicAndDilutedEarningsPerShareTables">
+        <link:definition>012000 - Disclosure - Basic and Diluted Earnings Per Share (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_SecuritiesTables" roleURI="http://www.auburnbank.com/role/SecuritiesTables">
+        <link:definition>015000 - Disclosure - Securities (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_LoanAndAllowanceForLoanLossesTables" roleURI="http://www.auburnbank.com/role/LoanAndAllowanceForLoanLossesTables">
+        <link:definition>016000 - Disclosure - Loan and Allowance for Loan Losses (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_MortgageServicingRightsNetTables" roleURI="http://www.auburnbank.com/role/MortgageServicingRightsNetTables">
+        <link:definition>018000 - Disclosure - Mortgage Servicing Rights, Net (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_FairValueTables" roleURI="http://www.auburnbank.com/role/FairValueTables">
+        <link:definition>026000 - Disclosure - Fair Value (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_BasicAndDilutedEarningsPerShareDetails" roleURI="http://www.auburnbank.com/role/BasicAndDilutedEarningsPerShareDetails">
+        <link:definition>120000 - Disclosure - Basic and Diluted Earnings Per Share (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_SecuritiesCreditImpairedDebtSecuritiesDetails" roleURI="http://www.auburnbank.com/role/DisclosureSecuritiesCreditImpairedDebtSecuritiesDetails">
+        <link:definition>153000 - Disclosure - Securities Credit Impaired Debt Securities (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_SecuritiesOTTIDetails" roleURI="http://www.auburnbank.com/role/SecuritiesOTTIDetails">
+        <link:definition>154000 - Disclosure - Securities OTTI (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_SecuritiesGrossRealizedGainLossDetails" roleURI="http://www.auburnbank.com/role/DisclosureSecuritiesGrossRealizedGainLossDetails">
+        <link:definition>155000 - Disclosure - Securities Gross Realized Gain Loss (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_LoansDetails" roleURI="http://www.auburnbank.com/role/LoansDetails">
+        <link:definition>161000 - Disclosure - Loans (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_LoansPastDueAnalysisDetails" roleURI="http://www.auburnbank.com/role/LoansPastDueAnalysisDetails">
+        <link:definition>162000 - Disclosure - Loans Past Due Analysis (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_AllowanceForCreditLossDetails" roleURI="http://www.auburnbank.com/role/AllowanceForCreditLossDetails">
+        <link:definition>163000 - Disclosure - Allowance for Credit Loss (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_AllowanceForCreditLossAdditionalInformationDetails" roleURI="http://www.auburnbank.com/role/AllowanceForCreditLossAdditionalInformationDetails">
+        <link:definition>164000 - Disclosure - Allowance For Credit Loss Additional Information (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_LoanCreditQualityAnalysisDetails" roleURI="http://www.auburnbank.com/role/LoanCreditQualityAnalysisDetails">
+        <link:definition>162100 - Disclosure - Loan Credit Quality Analysis (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ImpairedLoansDetails" roleURI="http://www.auburnbank.com/role/DisclosureImpairedLoansDetails">
+        <link:definition>166000 - Disclosure - Impaired Loans (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_MortgageServicingRightsNetDetails" roleURI="http://www.auburnbank.com/role/MortgageServicingRightsNetDetails">
+        <link:definition>180000 - Disclosure - Mortgage Servicing Rights, Net (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_SecuritiesTextualsDetails" roleURI="http://www.auburnbank.com/role/SecuritiesTextualsDetails">
+        <link:definition>156000 - Disclosure - Securities Textuals (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_LoansTextualsDetails" roleURI="http://www.auburnbank.com/role/DisclosureLoansTextualsDetails">
+        <link:definition>168000 - Disclosure - Loans Textuals (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_FairValueDetails" roleURI="http://www.auburnbank.com/role/DisclosureFairValueDetails">
+        <link:definition>260000 - Disclosure - Fair Value (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_FairValueLevel3RecurringDetails" roleURI="http://www.auburnbank.com/role/DisclosureFairValueLevel3RecurringDetails">
+        <link:definition>261000 - Disclosure - Fair Value Level 3 Recurring (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_FairValueFinancialInstrumentsDetails" roleURI="http://www.auburnbank.com/role/DisclosureFairValueFinancialInstrumentsDetails">
+        <link:definition>263000 - Disclosure - Fair Value Financial Instruments (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_SecurityTypesDetails" roleURI="http://www.auburnbank.com/role/DisclosureSecurityTypesDetails">
+        <link:definition>150000 - Disclosure - Security Types (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_FairValueUnobservableInputsDetails" roleURI="http://www.auburnbank.com/role/FairValueUnobservableInputsDetails">
+        <link:definition>262000 - Disclosure - Fair Value Unobservable Inputs (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_RestrictedCashBalances" roleURI="http://www.auburnbank.com/role/RestrictedCashBalances">
+        <link:definition>001400 - Disclosure - Restricted Cash Balances</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_PremisesAndEquipment" roleURI="http://www.auburnbank.com/role/PremisesAndEquipment">
+        <link:definition>001700 - Disclosure - Premises and Equipment</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_Deposits" roleURI="http://www.auburnbank.com/role/Deposits">
+        <link:definition>001900 - Disclosure - Deposits</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ShorttermBorrowings" roleURI="http://www.auburnbank.com/role/ShorttermBorrowings">
+        <link:definition>002000 - Disclosure - Short-term Borrowings</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_IncomeTaxes" roleURI="http://www.auburnbank.com/role/IncomeTaxes">
+        <link:definition>002200 - Disclosure - Income Taxes</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_EmployeeBenefits" roleURI="http://www.auburnbank.com/role/EmployeeBenefits">
+        <link:definition>002300 - Disclosure - Employee Benefits</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_CommitmentsAndContigentLiabilities" roleURI="http://www.auburnbank.com/role/CommitmentsAndContigentLiabilities">
+        <link:definition>002500 - Disclosure - Commitments and Contigent Liabilities</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_RelatedPartyTransactions" roleURI="http://www.auburnbank.com/role/RelatedPartyTransactions">
+        <link:definition>002700 - Disclosure - Related Party Transactions</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_RegulatoryRestrictionsAndCapitalRatios" roleURI="http://www.auburnbank.com/role/RegulatoryRestrictionsAndCapitalRatios">
+        <link:definition>002800 - Disclosure - Regulatory Restrictions and Capital Ratios</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_AuburnNationalBancorporationParentCompanyFinancials" roleURI="http://www.auburnbank.com/role/AuburnNationalBancorporationParentCompanyFinancials">
+        <link:definition>002900 - Disclosure - Auburn National Bancorporation - Parent Company Financials</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_PremisesAndEquipmentTables" roleURI="http://www.auburnbank.com/role/PremisesAndEquipmentTables">
+        <link:definition>017000 - Disclosure - Premises and Equipment (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_PremisesAndEquipmentDetails" roleURI="http://www.auburnbank.com/role/DisclosurePremisesAndEquipmentDetails">
+        <link:definition>170000 - Disclosure - Premises and Equipment (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_DepositsTables" roleURI="http://www.auburnbank.com/role/DepositsTables">
+        <link:definition>019000 - Disclosure - Deposits (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ShortTermBorrowingsTables" roleURI="http://www.auburnbank.com/role/ShortTermBorrowingsTables">
+        <link:definition>020000 - Disclosure - Short Term Borrowings (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_IncomeTaxesTables" roleURI="http://www.auburnbank.com/role/IncomeTaxesTables">
+        <link:definition>022000 - Disclosure - Income Taxes (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_CommitmentAndContigentLiabilitiesTables" roleURI="http://www.auburnbank.com/role/CommitmentAndContigentLiabilitiesTables">
+        <link:definition>025000 - Disclosure - Commitment and Contigent Liabilities (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_RelatedPartyTransactionsTables" roleURI="http://www.auburnbank.com/role/DisclosureRelatedPartyTransactionsTables">
+        <link:definition>027000 - Disclosure - Related Party Transactions (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_RegulatoryRestrictionsAndCapitalRatiosTables" roleURI="http://www.auburnbank.com/role/RegulatoryRestrictionsAndCapitalRatiosTables">
+        <link:definition>028000 - Disclosure - Regulatory Restrictions and Capital Ratios (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_AuburnNationalBancorporationParentCompanyTables" roleURI="http://www.auburnbank.com/role/DisclosureAuburnNationalBancorporationParentCompanyTables">
+        <link:definition>029000 - Disclosure - Auburn National Bancorporation - Parent Company (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_MortgageServicingRightsNetDataAndAssumptionsForFairValueCalculationDetails" roleURI="http://www.auburnbank.com/role/DisclosureMortgageServicingRightsNetDataAndAssumptionsForFairValueCalculationDetails">
+        <link:definition>181000 - Disclosure - Mortgage Servicing Rights, net Data and Assumptions for Fair Value Calculation (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_MortgageServicingRightsNetEstimatedAmortizationExpenseForFuturePeriodsDetails" roleURI="http://www.auburnbank.com/role/DisclosureMortgageServicingRightsNetEstimatedAmortizationExpenseForFuturePeriodsDetails">
+        <link:definition>182000 - Disclosure - Mortgage Servicing Rights, net Estimated Amortization Expense For Future Periods (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_DepositsTimeDepositMaturitiesDetails" roleURI="http://www.auburnbank.com/role/DisclosureDepositsTimeDepositMaturitiesDetails">
+        <link:definition>190000 - Disclosure - Deposits Time Deposit Maturities (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_DepositsTextualsDetails" roleURI="http://www.auburnbank.com/role/DepositsTextualsDetails">
+        <link:definition>191000 - Disclosure - Deposits Textuals (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ShorttermBorrowingsDetails" roleURI="http://www.auburnbank.com/role/ShorttermBorrowingsDetails">
+        <link:definition>200000 - Disclosure - Short-term Borrowings (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ShorttermBorrowingsTextualsDetails" roleURI="http://www.auburnbank.com/role/ShorttermBorrowingsTextualsDetails">
+        <link:definition>201000 - Disclosure - Short-term Borrowings Textuals (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_IncomeTaxesDetails" roleURI="http://www.auburnbank.com/role/IncomeTaxesDetails">
+        <link:definition>220000 - Disclosure - Income Taxes (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_IncomeTaxExpenseReconciliationDetails" roleURI="http://www.auburnbank.com/role/DisclosureIncomeTaxExpenseReconciliationDetails">
+        <link:definition>221000 - Disclosure - Income Tax Expense Reconciliation (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_IncomeTaxComponentsOfDeferredTaxAssetAndLiabilityDetails" roleURI="http://www.auburnbank.com/role/DisclosureIncomeTaxComponentsOfDeferredTaxAssetAndLiabilityDetails">
+        <link:definition>222000 - Disclosure - Income Tax, Components of Deferred Tax Asset and Liability (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ChangeInNetDeferredTaxAssetDetails" roleURI="http://www.auburnbank.com/role/ChangeInNetDeferredTaxAssetDetails">
+        <link:definition>223000 - Disclosure - Change in Net Deferred Tax Asset (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_AuburnNationalBancorporationParentOnlyBalanceSheetDetails" roleURI="http://www.auburnbank.com/role/AuburnNationalBancorporationParentOnlyBalanceSheetDetails">
+        <link:definition>290000 - Disclosure - Auburn National Bancorporation - Parent Only, Balance Sheet (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_AuburnNationalBancorporationParentOnlyStatementOfEarningsDetails" roleURI="http://www.auburnbank.com/role/DisclosureAuburnNationalBancorporationParentOnlyStatementOfEarningsDetails">
+        <link:definition>291000 - Disclosure - Auburn National Bancorporation - Parent Only, Statement of Earnings (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_AuburnNationalBancorporationParentOnlyStatementOfCashFlowsDetails" roleURI="http://www.auburnbank.com/role/DisclosureAuburnNationalBancorporationParentOnlyStatementOfCashFlowsDetails">
+        <link:definition>293000 - Disclosure - Auburn National Bancorporation - Parent Only, Statement of Cash Flows (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_CommitmentAndContingenciesDetails" roleURI="http://www.auburnbank.com/role/DisclosureCommitmentAndContingenciesDetails">
+        <link:definition>250000 - Disclosure - Commitment and Contingencies (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_RelatedPartyTransactionsDetails" roleURI="http://www.auburnbank.com/role/RelatedPartyTransactionsDetails">
+        <link:definition>270000 - Disclosure - Related Party Transactions (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_RegulatoryCapitalDetails" roleURI="http://www.auburnbank.com/role/DisclosureRegulatoryCapitalDetails">
+        <link:definition>280000 - Disclosure - Regulatory Capital (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_OtherComprehensiveIncomeDetails" roleURI="http://www.auburnbank.com/role/DisclosureOtherComprehensiveIncomeDetails">
+        <link:definition>215000 - Disclosure - Other Comprehensive Income (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_OtherComprehensiveIncome" roleURI="http://www.auburnbank.com/role/OtherComprehensiveIncome">
+        <link:definition>002150 - Disclosure - Other Comprehensive Income</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_OtherComprehensiveIncomeTables" roleURI="http://www.auburnbank.com/role/OtherComprehensiveIncomeTables">
+        <link:definition>021500 - Disclosure - Other Comprehensive Income (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_PropertyPlantEquipmentTextualsDetails" roleURI="http://www.auburnbank.com/role/DisclosurePropertyPlantEquipmentTextualsDetails">
+        <link:definition>171000 - Disclosure - Property, Plant Equipment Textuals (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_EmployeeBenefitsTextualsDetails" roleURI="http://www.auburnbank.com/role/EmployeeBenefitsTextualsDetails">
+        <link:definition>230000 - Disclosure - Employee Benefits Textuals (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_RegulatoryCapitalTextualsDetails" roleURI="http://www.auburnbank.com/role/RegulatoryCapitalTextualsDetails">
+        <link:definition>281000 - Disclosure - Regulatory Capital Textuals (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_CommitmentsAndContingenciesTextualsDetails" roleURI="http://www.auburnbank.com/role/CommitmentsAndContingenciesTextualsDetails">
+        <link:definition>251000 - Disclosure - Commitments and Contingencies Textuals (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_RelatedPartyTransactionsTextualsDetails" roleURI="http://www.auburnbank.com/role/RelatedPartyTransactionsTextualsDetails">
+        <link:definition>271000 - Disclosure - Related Party Transactions Textuals (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_MortgageServicingRightsTextualsDetails" roleURI="http://www.auburnbank.com/role/MortgageServicingRightsTextualsDetails">
+        <link:definition>183000 - Disclosure - Mortgage Servicing Rights Textuals (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_ImpairedLoansAveragesDetails" roleURI="http://www.auburnbank.com/role/ImpairedLoansAveragesDetails">
+        <link:definition>166010 - Disclosure - Impaired Loans Averages (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_SecuritiesContinuousUnrealizedLossDetails" roleURI="http://www.auburnbank.com/role/SecuritiesContinuousUnrealizedLossDetails">
+        <link:definition>151000 - Disclosure - Securities Continuous Unrealized Loss (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_SummaryOfSignificantAccountingPolicies" roleURI="http://www.auburnbank.com/role/SummaryOfSignificantAccountingPolicies">
+        <link:definition>001100 - Disclosure - Summary of Significant Accounting Policies</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_MortgageServicingRightsNet" roleURI="http://www.auburnbank.com/role/MortgageServicingRightsNet">
+        <link:definition>001800 - Disclosure - Mortgage Servicing Rights, Net</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_LeaseCommitment" roleURI="http://www.auburnbank.com/role/LeaseCommitment">
+        <link:definition>002010 - Disclosure - Lease Commitment</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_LeaseCommitmentsTables" roleURI="http://www.auburnbank.com/role/LeaseCommitmentsTables">
+        <link:definition>020010 - Disclosure - Lease Commitments (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_LeaseCommitmentDetails" roleURI="http://www.auburnbank.com/role/LeaseCommitmentDetails">
+        <link:definition>201010 - Disclosure - Lease Commitment (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_LeaseCommimentTextualsDetails" roleURI="http://www.auburnbank.com/role/LeaseCommimentTextualsDetails">
+        <link:definition>210020 - Disclosure - Lease Commiment Textuals (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_SummaryOfSignificantAccountingPoliciesTextualsDetails" roleURI="http://www.auburnbank.com/role/SummaryOfSignificantAccountingPoliciesTextualsDetails">
+        <link:definition>111000 - Disclosure - Summary of Significant Accounting Policies Textuals (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_VariableInterestEntity" roleURI="http://www.auburnbank.com/role/VariableInterestEntity">
+        <link:definition>001300 - Disclosure - Variable Interest Entity</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_VariableInterestEntityDetails" roleURI="http://www.auburnbank.com/role/VariableInterestEntityDetails">
+        <link:definition>130000 - Disclosure - Variable Interest Entity (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_VariableInterestEntityTables" roleURI="http://www.auburnbank.com/role/VariableInterestEntityTables">
+        <link:definition>013000 - Disclosure - Variable Interest Entity (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_SummaryOfSignificantAccountingPoliciesTables" roleURI="http://www.auburnbank.com/role/SummaryOfSignificantAccountingPoliciesTables">
+        <link:definition>011200 - Disclosure - Summary of Significant Accounting Policies (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_SummarySignificantAccountingPoliciesDetails" roleURI="http://www.auburnbank.com/role/SummarySignificantAccountingPoliciesDetails">
+        <link:definition>110000 - Disclosure - Summary Significant Accounting Policies (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_NonaccrualLoansDetails" roleURI="http://www.auburnbank.com/role/NonaccrualLoansDetails">
+        <link:definition>162200 - Disclosure - Nonaccrual Loans (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ELRID_CollateralDependentLoanIndividuallyEvaluatedDetails" roleURI="http://www.auburnbank.com/role/CollateralDependentLoanIndividuallyEvaluatedDetails">
+        <link:definition>162300 - Disclosure - Collateral Dependent Loan Individually Evaluated (Details)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+      </link:roleType>
+      <link:linkbaseRef xlink:type="simple" xlink:href="aubn-20231231_lab.xml" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:role="http://www.xbrl.org/2003/role/labelLinkbaseRef"></link:linkbaseRef>
+      <link:linkbaseRef xlink:type="simple" xlink:href="aubn-20231231_pre.xml" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:role="http://www.xbrl.org/2003/role/presentationLinkbaseRef"></link:linkbaseRef>
+      <link:linkbaseRef xlink:type="simple" xlink:href="aubn-20231231_cal.xml" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:role="http://www.xbrl.org/2003/role/calculationLinkbaseRef"></link:linkbaseRef>
+      <link:linkbaseRef xlink:type="simple" xlink:href="aubn-20231231_def.xml" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:role="http://www.xbrl.org/2003/role/definitionLinkbaseRef"></link:linkbaseRef>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:import namespace="http://www.xbrl.org/2003/instance" schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd"></xs:import>
+  <xs:import namespace="http://xbrl.org/2005/xbrldt" schemaLocation="http://www.xbrl.org/2005/xbrldt-2005.xsd"></xs:import>
+  <xs:import namespace="http://www.xbrl.org/2009/role/negated" schemaLocation="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd"></xs:import>
+  <xs:import namespace="http://www.xbrl.org/dtr/type/2022-03-31" schemaLocation="https://www.xbrl.org/dtr/type/2022-03-31/types.xsd"></xs:import>
+  <xs:import namespace="http://fasb.org/us-gaap/2023" schemaLocation="https://xbrl.fasb.org/us-gaap/2023/elts/us-gaap-2023.xsd"></xs:import>
+  <xs:import namespace="http://xbrl.sec.gov/dei/2023" schemaLocation="https://xbrl.sec.gov/dei/2023/dei-2023.xsd"></xs:import>
+  <xs:element id="aubn_FdicAndOtherRegulatoryAssessments" nillable="true" name="FdicAndOtherRegulatoryAssessments" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_NetLossGainOnOtherRealEstate" nillable="true" name="NetLossGainOnOtherRealEstate" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_LoansAndLeasesReceivableDisclosureTextBlock" nillable="true" name="LoansAndLeasesReceivableDisclosureTextBlock" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_StatementsOfComprehensiveIncomeAbstract" abstract="true" nillable="true" name="StatementsOfComprehensiveIncomeAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_AvailableForSaleSecuritiesContinuousUnrealizedLossPositionTableTextBlock" nillable="true" name="AvailableForSaleSecuritiesContinuousUnrealizedLossPositionTableTextBlock" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ScheduleOfAccountsNotesLoansAndFinancingReceivableTableTextBlock" nillable="true" name="ScheduleOfAccountsNotesLoansAndFinancingReceivableTableTextBlock" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_FinancingReceivableAllowanceForCreditLossAdditionalInformationTableTextBlock" nillable="true" name="FinancingReceivableAllowanceForCreditLossAdditionalInformationTableTextBlock" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ScheduleOfAverageImpairedFinancingReceivableTableTextBlock" nillable="true" name="ScheduleOfAverageImpairedFinancingReceivableTableTextBlock" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_FinancialInstrumentsTableTextBlock" nillable="true" name="FinancialInstrumentsTableTextBlock" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_OtherThanTemporaryImpairmentCreditLossesRecognizedInEarningsCreditLossesOnDebtSecuritiesHeldAdditionsAbstract" abstract="true" nillable="true" name="OtherThanTemporaryImpairmentCreditLossesRecognizedInEarningsCreditLossesOnDebtSecuritiesHeldAdditionsAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_OtherThanTemporaryImpairmentCreditLossesRecognizedInEarningsCreditLossesOnDebtSecuritiesHeldReductionsAbstract" abstract="true" nillable="true" name="OtherThanTemporaryImpairmentCreditLossesRecognizedInEarningsCreditLossesOnDebtSecuritiesHeldReductionsAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_AvailableForSaleSecuriitesOtherThanTemporaryImpairmentLossesIncludedInEarningsAbstract" abstract="true" nillable="true" name="AvailableForSaleSecuriitesOtherThanTemporaryImpairmentLossesIncludedInEarningsAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_DebtSecurtiesOtherThanTemporaryImpairmentChargesAbstract" abstract="true" nillable="true" name="DebtSecurtiesOtherThanTemporaryImpairmentChargesAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_OtherThanTemporaryImpairmentChargesIncludedInEarnings" nillable="true" name="OtherThanTemporaryImpairmentChargesIncludedInEarnings" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_OtherThanTemporaryImpairmentOnDebtSecuritiesAbstract" abstract="true" nillable="true" name="OtherThanTemporaryImpairmentOnDebtSecuritiesAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_RecordedAsPartOfGrossRealizedLossesAbstract" abstract="true" nillable="true" name="RecordedAsPartOfGrossRealizedLossesAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_CreditRelatedOtherThanTemporaryImpairementCharges" nillable="true" name="CreditRelatedOtherThanTemporaryImpairementCharges" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_RecordedAsPartOfOtherComprehensiveAbstract" abstract="true" nillable="true" name="RecordedAsPartOfOtherComprehensiveAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_NonCreditRelatedOtherThanTemporaryImpairmentCharges" nillable="true" name="NonCreditRelatedOtherThanTemporaryImpairmentCharges" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_OtherThanTemporaryImpairmentChargesOnDebtSecurities" nillable="true" name="OtherThanTemporaryImpairmentChargesOnDebtSecurities" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_FinancingReceivableRecordedInvestmentTotalStillAccruing" nillable="true" name="FinancingReceivableRecordedInvestmentTotalStillAccruing" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_CommercialAndIndustrialLoansMember" abstract="true" nillable="true" name="CommercialAndIndustrialLoansMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ConstructionAndLandDevelopmentLoansMember" abstract="true" nillable="true" name="ConstructionAndLandDevelopmentLoansMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_CommercialRealEstateOwnerOccupiedLoansMember" abstract="true" nillable="true" name="CommercialRealEstateOwnerOccupiedLoansMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_CommercialRealEstateOtherLoansMember" abstract="true" nillable="true" name="CommercialRealEstateOtherLoansMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_CommercialRealEstateLoansTotalMember" abstract="true" nillable="true" name="CommercialRealEstateLoansTotalMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ResidentialRealEstateConsumerMortgageLoansMember" abstract="true" nillable="true" name="ResidentialRealEstateConsumerMortgageLoansMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ResidentialRealEstateInvestmentPropertyLoansMember" abstract="true" nillable="true" name="ResidentialRealEstateInvestmentPropertyLoansMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ResidentialRealEstateLoansTotalMember" abstract="true" nillable="true" name="ResidentialRealEstateLoansTotalMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ConsumerInstallmentAndRevolvingLoansMember" abstract="true" nillable="true" name="ConsumerInstallmentAndRevolvingLoansMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_FinancingReceivableAllowanceForCreditLossesNetChargeoffsRecoveries" nillable="true" name="FinancingReceivableAllowanceForCreditLossesNetChargeoffsRecoveries" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_FinancingReceivableAllowanceForCreditLossAdditionalInformationLineItems" abstract="true" nillable="true" name="FinancingReceivableAllowanceForCreditLossAdditionalInformationLineItems" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ImpairedFinancingReceivableWithNoRelatedAllowanceChargeOffAndPaymentsApplied" nillable="true" name="ImpairedFinancingReceivableWithNoRelatedAllowanceChargeOffAndPaymentsApplied" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_ImpairedFinancingReceivableWithRelatedAllowanceChargeOffAndPaymentsApplied" nillable="true" name="ImpairedFinancingReceivableWithRelatedAllowanceChargeOffAndPaymentsApplied" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_ServicingAssetAtAmortizedValueFairValueAbstract" abstract="true" nillable="true" name="ServicingAssetAtAmortizedValueFairValueAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ValuationAllowanceForImpairmentOfRecognizedServicingAssetsBalanceAbstract" abstract="true" nillable="true" name="ValuationAllowanceForImpairmentOfRecognizedServicingAssetsBalanceAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_SecuritiesTextualsAbstract" abstract="true" nillable="true" name="SecuritiesTextualsAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_LoanAndLeaseDisclosureTextualsAbstract" abstract="true" nillable="true" name="LoanAndLeaseDisclosureTextualsAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_PercentageOfLoansSecuredByRealEstate" nillable="true" name="PercentageOfLoansSecuredByRealEstate" substitutionGroup="xbrli:item" type="dtr-types:percentItemType" xbrli:periodType="instant"></xs:element>
+  <xs:element id="aubn_FinancingReceivablesTroubledDebtRestructuringChargeOffOfBNotes" nillable="true" name="FinancingReceivablesTroubledDebtRestructuringChargeOffOfBNotes" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_FairValueDisclosureSecuritiesAvailableForSaleAbstract" abstract="true" nillable="true" name="FairValueDisclosureSecuritiesAvailableForSaleAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_FairValueDisclosureAgencyObligations" nillable="true" name="FairValueDisclosureAgencyObligations" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_FairValueDisclosureAgencyRmbs" nillable="true" name="FairValueDisclosureAgencyRmbs" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_FairValueDisclosureStateAndPoliticalSubdivisions" nillable="true" name="FairValueDisclosureStateAndPoliticalSubdivisions" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_FairValueDisclosureSecuritiesAvailableForSaleTotal" nillable="true" name="FairValueDisclosureSecuritiesAvailableForSaleTotal" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_FairValueAssetsAndLiabilitiesMeasuredOnNonrecurringBasisAbstract" abstract="true" nillable="true" name="FairValueAssetsAndLiabilitiesMeasuredOnNonrecurringBasisAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_OtherRealEsateOwnedFairValueDisclosure" nillable="true" name="OtherRealEsateOwnedFairValueDisclosure" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_FairValueMeasurementsRecurringAndNonrecurringTable" abstract="true" nillable="true" name="FairValueMeasurementsRecurringAndNonrecurringTable" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_FairValueFinancialInstrumentsLineItems" abstract="true" nillable="true" name="FairValueFinancialInstrumentsLineItems" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_FairValueFinancialAssetsAbstract" abstract="true" nillable="true" name="FairValueFinancialAssetsAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_FairValueFinancialInstrumentsLoansNet" nillable="true" name="FairValueFinancialInstrumentsLoansNet" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_FairValueFinancialLiabilitiesAbstract" abstract="true" nillable="true" name="FairValueFinancialLiabilitiesAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_FairValueFinancialInstrumentsTimeDeposits" nillable="true" name="FairValueFinancialInstrumentsTimeDeposits" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_FairValueFinancialInstrumentsLongTermDebt" nillable="true" name="FairValueFinancialInstrumentsLongTermDebt" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_ImpairedLoansFairValueDisclosure" nillable="true" name="ImpairedLoansFairValueDisclosure" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_AvailableForSaleSecuritiesFairValue" nillable="true" name="AvailableForSaleSecuritiesFairValue" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_ScheduleOfFairValueSignificantUnobservableInputsUsedLineItems" abstract="true" nillable="true" name="ScheduleOfFairValueSignificantUnobservableInputsUsedLineItems" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_FairValueByMeasurementTypeAxis" abstract="true" nillable="true" name="FairValueByMeasurementTypeAxis" substitutionGroup="xbrldt:dimensionItem" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_FairValueMeasurementTypeDomain" abstract="true" nillable="true" name="FairValueMeasurementTypeDomain" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ImpairedLoansMember" abstract="true" nillable="true" name="ImpairedLoansMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_OtherRealEstateOwnedMember" abstract="true" nillable="true" name="OtherRealEstateOwnedMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_MortgageServicingRightsMember" abstract="true" nillable="true" name="MortgageServicingRightsMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_FairValueAssetsMeasuredNonrecurringBasisValuationTechniquesAxis" abstract="true" nillable="true" name="FairValueAssetsMeasuredNonrecurringBasisValuationTechniquesAxis" substitutionGroup="xbrldt:dimensionItem" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_AppraisalAppraisalDiscountMember" abstract="true" nillable="true" name="AppraisalAppraisalDiscountMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_DiscountedCashFlowPrepaymentSpeedMember" abstract="true" nillable="true" name="DiscountedCashFlowPrepaymentSpeedMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_DiscountedCashFlowDiscountRateMember" abstract="true" nillable="true" name="DiscountedCashFlowDiscountRateMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_UnobservableInputsWeightedAverageOfInputCreditSpreads" nillable="true" name="UnobservableInputsWeightedAverageOfInputCreditSpreads" substitutionGroup="xbrli:item" type="dtr-types:percentItemType" xbrli:periodType="instant"></xs:element>
+  <xs:element id="aubn_UnobservableInputWeightedAverageOfInputPercent" nillable="true" name="UnobservableInputWeightedAverageOfInputPercent" substitutionGroup="xbrli:item" type="dtr-types:percentItemType" xbrli:periodType="instant"></xs:element>
+  <xs:element id="aubn_UnallocatedToLoanTypeMember" abstract="true" nillable="true" name="UnallocatedToLoanTypeMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ImpairedFinancingReceivableWithRelatedAllowanceRelatedAllowance" nillable="true" name="ImpairedFinancingReceivableWithRelatedAllowanceRelatedAllowance" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_ImpairedFinancingReceivableChargeOffAndPaymentsApplied" nillable="true" name="ImpairedFinancingReceivableChargeOffAndPaymentsApplied" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_FurnitureFixturesAndEquipmentGross" nillable="true" name="FurnitureFixturesAndEquipmentGross" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_DataAndAssumptionsUsedInFairValueCalculationOfMSRsTableTextBlock" nillable="true" name="DataAndAssumptionsUsedInFairValueCalculationOfMSRsTableTextBlock" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_MaturitiesOfCertificatesOfDepositAndOtherTimeDepositsTextBlock" nillable="true" name="MaturitiesOfCertificatesOfDepositAndOtherTimeDepositsTextBlock" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ScheduleOfCommitmentsToExtendCreditTableTextBlock" nillable="true" name="ScheduleOfCommitmentsToExtendCreditTableTextBlock" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ServicingAssetsAndServicingLiabilitiesAtFairValueAssumptionsUsedToEstimateFairValueUnpaidPrincipalBalance" nillable="true" name="ServicingAssetsAndServicingLiabilitiesAtFairValueAssumptionsUsedToEstimateFairValueUnpaidPrincipalBalance" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_ServicingAssetsAndServicingLiabilitiesAtFairValueAssumptionsUsedToEstimateFairValueWeightedAverageCouponInterestRate" nillable="true" name="ServicingAssetsAndServicingLiabilitiesAtFairValueAssumptionsUsedToEstimateFairValueWeightedAverageCouponInterestRate" substitutionGroup="xbrli:item" type="dtr-types:percentItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ServicingAssetsAndServicingLiabilitiesAtFairValueAssumptionsUsedToEstimateFairValueWeightedAverageServicingFee" nillable="true" name="ServicingAssetsAndServicingLiabilitiesAtFairValueAssumptionsUsedToEstimateFairValueWeightedAverageServicingFee" substitutionGroup="xbrli:item" type="xbrli:pureItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_FiniteLivedIntangibleAssetsNetAmortizationExpenseFiscalYearMaturityAbstract" abstract="true" nillable="true" name="FiniteLivedIntangibleAssetsNetAmortizationExpenseFiscalYearMaturityAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_TimeDepositsFiscalYearMaturityAbstract" abstract="true" nillable="true" name="TimeDepositsFiscalYearMaturityAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_TimeDepositMaturitiesNextTwelveMonths" nillable="true" name="TimeDepositMaturitiesNextTwelveMonths" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_ShortTermDebtWeightedAverageInterestRateDuringYear" nillable="true" name="ShortTermDebtWeightedAverageInterestRateDuringYear" substitutionGroup="xbrli:item" type="dtr-types:percentItemType" xbrli:periodType="instant"></xs:element>
+  <xs:element id="aubn_EffectiveIncomeTaxRateReconciliationBankOwnedLifeInsurance" nillable="true" name="EffectiveIncomeTaxRateReconciliationBankOwnedLifeInsurance" substitutionGroup="xbrli:item" type="dtr-types:percentItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_IncomeTaxReconciliationBankOwnedLifeInsurance" nillable="true" name="IncomeTaxReconciliationBankOwnedLifeInsurance" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_DeferredTaxAssetAllowanceForLoanLoss" nillable="true" name="DeferredTaxAssetAllowanceForLoanLoss" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_DeferredTaxLiabilitiesUnrealizedGainsOnAvailableForSaleSecuritiesGross" nillable="true" name="DeferredTaxLiabilitiesUnrealizedGainsOnAvailableForSaleSecuritiesGross" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_DeferredTaxLiabilitiesOriginatedMortgageServicingRights" nillable="true" name="DeferredTaxLiabilitiesOriginatedMortgageServicingRights" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_ChangeInNetDeferredTaxAssetLiabilityRollforward" abstract="true" nillable="true" name="ChangeInNetDeferredTaxAssetLiabilityRollforward" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_DeferredTaxBenefitExpenseRelatedToContinuingOperations" nillable="true" name="DeferredTaxBenefitExpenseRelatedToContinuingOperations" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_DeferredTaxesStockholdersEquityForChangeInAccumulatedOtherComprehensiveIncomeLoss" nillable="true" name="DeferredTaxesStockholdersEquityForChangeInAccumulatedOtherComprehensiveIncomeLoss" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_DividendsReceivedFromBankSubsidiaries" nillable="true" name="DividendsReceivedFromBankSubsidiaries" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_EarningsBeforeIncomeTaxBenefitExpenseAndEquityInUndistributedEarningsOfBankSubsidary" nillable="true" name="EarningsBeforeIncomeTaxBenefitExpenseAndEquityInUndistributedEarningsOfBankSubsidary" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_EarningsBeforeEquityInUndistributedEarningsOfBankSubsidary" nillable="true" name="EarningsBeforeEquityInUndistributedEarningsOfBankSubsidary" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_EquityInUndistributedDistributedEarningsOfBankSubsidary" nillable="true" name="EquityInUndistributedDistributedEarningsOfBankSubsidary" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_EquityInDistributedUndistributedEarningsOfBankSubsidary" nillable="true" name="EquityInDistributedUndistributedEarningsOfBankSubsidary" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_CapitalContributionToBankSubsidary" nillable="true" name="CapitalContributionToBankSubsidary" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_LoansAndLeasesReceivableRelatedPartiesChangeInDirectorsAndExecutiveOfficers" nillable="true" name="LoansAndLeasesReceivableRelatedPartiesChangeInDirectorsAndExecutiveOfficers" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_AuburnNationalBancorporationMember" abstract="true" nillable="true" name="AuburnNationalBancorporationMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_AuburnBankMember" abstract="true" nillable="true" name="AuburnBankMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_OtherComprehensiveIncomeLossAbstract" abstract="true" nillable="true" name="OtherComprehensiveIncomeLossAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_OtherComprehensiveIncomeLossTextBlock" nillable="true" name="OtherComprehensiveIncomeLossTextBlock" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ScheduleOfOtherComprehensiveIncomeLossTableTextBlock" nillable="true" name="ScheduleOfOtherComprehensiveIncomeLossTableTextBlock" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ReclassificationAdjustmentForNetGainOnSecuritiesRecognizedInNetEarnings" nillable="true" name="ReclassificationAdjustmentForNetGainOnSecuritiesRecognizedInNetEarnings" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_ScheduleOfOtherComprehensiveIncomeTable" abstract="true" nillable="true" name="ScheduleOfOtherComprehensiveIncomeTable" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ScheduleOfOtherComprehensiveIncomeAxis" abstract="true" nillable="true" name="ScheduleOfOtherComprehensiveIncomeAxis" substitutionGroup="xbrldt:dimensionItem" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ScheduleOfOtherComprehensiveIncomeDomain" abstract="true" nillable="true" name="ScheduleOfOtherComprehensiveIncomeDomain" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_PreTaxAmountMember" abstract="true" nillable="true" name="PreTaxAmountMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_TaxBenefitExpenseMember" abstract="true" nillable="true" name="TaxBenefitExpenseMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_NetOfTaxAmountMember" abstract="true" nillable="true" name="NetOfTaxAmountMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_OtherComprehensiveIncomeLoss" nillable="true" name="OtherComprehensiveIncomeLoss" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_ScheduleOfOtherComprehesiveIncomeLineItems" abstract="true" nillable="true" name="ScheduleOfOtherComprehesiveIncomeLineItems" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_IncomeTaxReconciliationChangeInValuationAllowance" nillable="true" name="IncomeTaxReconciliationChangeInValuationAllowance" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_EffectiveIncomeTaxRateReconcilitionChangeInValuationAllowance" nillable="true" name="EffectiveIncomeTaxRateReconcilitionChangeInValuationAllowance" substitutionGroup="xbrli:item" type="dtr-types:percentItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_LiabiltyRecordedForStanbyLetterOfCreditAbstract" abstract="true" nillable="true" name="LiabiltyRecordedForStanbyLetterOfCreditAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_LiabilityRecordedForStandyLettersOfCredit" nillable="true" name="LiabilityRecordedForStandyLettersOfCredit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_FairValueDisclosureTrustPreferredSecurities" nillable="true" name="FairValueDisclosureTrustPreferredSecurities" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_RegulatoryCapitalDividendsWithoutApprovalOfRegulators" nillable="true" name="RegulatoryCapitalDividendsWithoutApprovalOfRegulators" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_RegulatoryCapitalRestrictedInvestmentFromDividends" nillable="true" name="RegulatoryCapitalRestrictedInvestmentFromDividends" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_RelatedPartyTransactionsConstructionContractPayments" nillable="true" name="RelatedPartyTransactionsConstructionContractPayments" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_RelatedPartyTransactionsHeatAndAirServicePayments" nillable="true" name="RelatedPartyTransactionsHeatAndAirServicePayments" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_DeferredTaxAssetsOtherThanTemporaryImpairment" nillable="true" name="DeferredTaxAssetsOtherThanTemporaryImpairment" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_WeightedAverageAmortizationInYears" nillable="true" name="WeightedAverageAmortizationInYears" substitutionGroup="xbrli:item" type="xbrli:pureItemType" xbrli:periodType="instant"></xs:element>
+  <xs:element id="aubn_UnrealizedNetHoldingLossOnOtherThanTemporarilyImpairedSecuritiesDueToFactorsOtherThanCredit" nillable="true" name="UnrealizedNetHoldingLossOnOtherThanTemporarilyImpairedSecuritiesDueToFactorsOtherThanCredit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_UnrealizedNetHoldingGainLossOnAllOtherSecuritiies" nillable="true" name="UnrealizedNetHoldingGainLossOnAllOtherSecuritiies" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_LossContingencyAmountOfCommitment" nillable="true" name="LossContingencyAmountOfCommitment" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_DeferredTaxAssetsOtherRealEstateOwnedWriteDowns" nillable="true" name="DeferredTaxAssetsOtherRealEstateOwnedWriteDowns" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_AvailableForSaleSecuritiesPledgedAsCollateralForSecuritiesSoldUnderAgreementsToRepurchase" nillable="true" name="AvailableForSaleSecuritiesPledgedAsCollateralForSecuritiesSoldUnderAgreementsToRepurchase" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_UnrealizedNetHoldingLossOnOtherThanTemporarilyImpairedSecuritiesDueToFactorsOtherThanCredit2" nillable="true" name="UnrealizedNetHoldingLossOnOtherThanTemporarilyImpairedSecuritiesDueToFactorsOtherThanCredit2" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_FairValueFinancialInstrumentsLoansHeldForSale" nillable="true" name="FairValueFinancialInstrumentsLoansHeldForSale" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_ScheduleOfDeferredTaxAssetLiabilityRollForwardTableTextBlock" nillable="true" name="ScheduleOfDeferredTaxAssetLiabilityRollForwardTableTextBlock" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_OtherThanTemporaryImpairmentCreditLossesRecognizedInEarningsReductionsSecuritiesDeemedWorthless" nillable="true" name="OtherThanTemporaryImpairmentCreditLossesRecognizedInEarningsReductionsSecuritiesDeemedWorthless" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_OtherThanTemporaryImpairmentChargesTrustPreferredSecurities" nillable="true" name="OtherThanTemporaryImpairmentChargesTrustPreferredSecurities" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_OtherThanTemporaryImpairmentChargesAgencyRMBS" nillable="true" name="OtherThanTemporaryImpairmentChargesAgencyRMBS" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_AvailableForSaleSecuritiesGrossUnrealizedGains2" nillable="true" name="AvailableForSaleSecuritiesGrossUnrealizedGains2" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_AvailableForSaleSecuritiesGrossUnrealizedLosses" nillable="true" name="AvailableForSaleSecuritiesGrossUnrealizedLosses" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_CommonEquityTierOneCaptialRequiredForCapitalAdequacyToRiskWeightedAssets" nillable="true" name="CommonEquityTierOneCaptialRequiredForCapitalAdequacyToRiskWeightedAssets" substitutionGroup="xbrli:item" type="xbrli:pureItemType" xbrli:periodType="instant"></xs:element>
+  <xs:element id="aubn_CommonEquityTierOneCaptialRequiredForWellCapitalizedToRiskWeightedAssets" nillable="true" name="CommonEquityTierOneCaptialRequiredForWellCapitalizedToRiskWeightedAssets" substitutionGroup="xbrli:item" type="xbrli:pureItemType" xbrli:periodType="instant"></xs:element>
+  <xs:element id="aubn_TimeDeposits250000OrMore" nillable="true" name="TimeDeposits250000OrMore" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_ServicingAssetsAtAmortizedValueAbstract" abstract="true" nillable="true" name="ServicingAssetsAtAmortizedValueAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_OtherThanTemporaryImpairmentSecuritiesWithIntentToSell" nillable="true" name="OtherThanTemporaryImpairmentSecuritiesWithIntentToSell" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_Otherthantemporaryimpairmentchargesdebtsecuritiestotal" nillable="true" name="Otherthantemporaryimpairmentchargesdebtsecuritiestotal" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_ImpairedFinancingReceivableAverageRecordedInvestmentLineItems" abstract="true" nillable="true" name="ImpairedFinancingReceivableAverageRecordedInvestmentLineItems" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_AvailableForSaleSecuritiesChangesInOtherThanTemporaryImpairmentLossesTableTextBlock" nillable="true" name="AvailableForSaleSecuritiesChangesInOtherThanTemporaryImpairmentLossesTableTextBlock" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_CommercialRealEstateMultifamilyMember" abstract="true" nillable="true" name="CommercialRealEstateMultifamilyMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_OtherRealEstateNet" nillable="true" name="OtherRealEstateNet" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_CashDividendsPaid" nillable="true" name="CashDividendsPaid" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_ServicingAssetAtAmortizedValueAmortization2" nillable="true" name="ServicingAssetAtAmortizedValueAmortization2" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_IncomeTaxReconciliationFederalTaxReformImpact" nillable="true" name="IncomeTaxReconciliationFederalTaxReformImpact" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_EffectiveIncomeTaxRateReconciliationFederalTaxReformImpact" nillable="true" name="EffectiveIncomeTaxRateReconciliationFederalTaxReformImpact" substitutionGroup="xbrli:item" type="dtr-types:percentItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_FairValueAssetsAndLiabilitiesMeasuredOnNonrecurringBasisTable" abstract="true" nillable="true" name="FairValueAssetsAndLiabilitiesMeasuredOnNonrecurringBasisTable" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_FairvalueassetsMeasuredOnNonrecurringBasisValuationTechniquesDomain" abstract="true" nillable="true" name="FairvalueassetsMeasuredOnNonrecurringBasisValuationTechniquesDomain" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ServicingAssetAtAmortizedValueValuationAllowance1" nillable="true" name="ServicingAssetAtAmortizedValueValuationAllowance1" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_AvailableForSaleSecuritiesContinuousUnrealizedLossPositionFairValueTable" abstract="true" nillable="true" name="AvailableForSaleSecuritiesContinuousUnrealizedLossPositionFairValueTable" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_AssetsFairValueDisclosureNonrecurring3" nillable="true" name="AssetsFairValueDisclosureNonrecurring3" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_GainFromLoanGuaranteeProgram" nillable="true" name="GainFromLoanGuaranteeProgram" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_DeferredTaxAssetRightOfUseLiability" nillable="true" name="DeferredTaxAssetRightOfUseLiability" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_DeferredTaxAssetBonus" nillable="true" name="DeferredTaxAssetBonus" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_DeferredTaxLiabilitiesRightOfUseAsset" nillable="true" name="DeferredTaxLiabilitiesRightOfUseAsset" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_RentExpenseExcludedFromRightOfUseAsset" nillable="true" name="RentExpenseExcludedFromRightOfUseAsset" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_RentExpenseIncludedInLeaseLiablilty" nillable="true" name="RentExpenseIncludedInLeaseLiablilty" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_DeferredTaxAssetsLiabilitiesNet1" nillable="true" name="DeferredTaxAssetsLiabilitiesNet1" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_CashPaidReceivedDuringPeriodForAbstract" abstract="true" nillable="true" name="CashPaidReceivedDuringPeriodForAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_InitialRecognitionOfOperatingLeaseRightOfUseAssets" nillable="true" name="InitialRecognitionOfOperatingLeaseRightOfUseAssets" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_InitialRecognitionOfOperatingLeaseLiabilities" nillable="true" name="InitialRecognitionOfOperatingLeaseLiabilities" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_NumberOfLoanOutstandingForLoanGuarantee" nillable="true" name="NumberOfLoanOutstandingForLoanGuarantee" substitutionGroup="xbrli:item" type="xbrli:integerItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_AmountOfLoanOutstandingForLoanGuarantee" nillable="true" name="AmountOfLoanOutstandingForLoanGuarantee" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_IncomeRecognizedFromDeathBenefitOfLifeInsurance" nillable="true" name="IncomeRecognizedFromDeathBenefitOfLifeInsurance" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_CommercialRealEstateHotelMotelMember" abstract="true" nillable="true" name="CommercialRealEstateHotelMotelMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_CommitmentsConstructionContract" nillable="true" name="CommitmentsConstructionContract" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_LoansPayrollProtectionProgramNumberOfLoans" nillable="true" name="LoansPayrollProtectionProgramNumberOfLoans" substitutionGroup="xbrli:item" type="xbrli:integerItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_PayrollProtectionProgramLoanBalance" nillable="true" name="PayrollProtectionProgramLoanBalance" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_NewMarketTaxCreditAsset" nillable="true" name="NewMarketTaxCreditAsset" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_VariableInterestEntitiesAxis" abstract="true" nillable="true" name="VariableInterestEntitiesAxis" substitutionGroup="xbrldt:dimensionItem" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_VariableInterestEntitiesDomain" abstract="true" nillable="true" name="VariableInterestEntitiesDomain" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_MaxiumlossexposurememberMember" abstract="true" nillable="true" name="MaxiumlossexposurememberMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_AssetRecognizedMemberMember" abstract="true" nillable="true" name="AssetRecognizedMemberMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_CommercialRealEstateOtherMember" abstract="true" nillable="true" name="CommercialRealEstateOtherMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_AccountsNotesLoansAndFinancingReceivableLineItems" abstract="true" nillable="true" name="AccountsNotesLoansAndFinancingReceivableLineItems" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_AssetsMoreThan30DaysPastDueMember" abstract="true" nillable="true" name="AssetsMoreThan30DaysPastDueMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_DeferredTaxLiabilitiesNewMarketTaxCredit" nillable="true" name="DeferredTaxLiabilitiesNewMarketTaxCredit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_PurchaseOfNewMarketsTaxCreditInvestment" nillable="true" name="PurchaseOfNewMarketsTaxCreditInvestment" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_CostMethodSecurtiesInvestmentCarryingAmount" nillable="true" name="CostMethodSecurtiesInvestmentCarryingAmount" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_PaymentsOnConstructionContract" nillable="true" name="PaymentsOnConstructionContract" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_BalanceOnConstructionContractIncludingRetainage" nillable="true" name="BalanceOnConstructionContractIncludingRetainage" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_EmployeeRetentionTaxCredit" nillable="true" name="EmployeeRetentionTaxCredit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_ReserveForUnfundedCommitments" nillable="true" name="ReserveForUnfundedCommitments" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_CumulativeEffectOfChangeInAccountingStandard" nillable="true" name="CumulativeEffectOfChangeInAccountingStandard" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_SummarySignificantAccountingPoliciesTableTextBlock" nillable="true" name="SummarySignificantAccountingPoliciesTableTextBlock" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ScheduleOfCollateralDependentLoansIndividuallyEvaluatedForAclTableTextBlock" nillable="true" name="ScheduleOfCollateralDependentLoansIndividuallyEvaluatedForAclTableTextBlock" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_SummaryOfProvisionForCreditLossesAbstract" abstract="true" nillable="true" name="SummaryOfProvisionForCreditLossesAbstract" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ProvisionForCreditLossForLoans" nillable="true" name="ProvisionForCreditLossForLoans" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_ProvisionForCreditLossReserveForUnfundedCommitments" nillable="true" name="ProvisionForCreditLossReserveForUnfundedCommitments" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_TotalProvisionForCreditLosses" nillable="true" name="TotalProvisionForCreditLosses" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="credit"></xs:element>
+  <xs:element id="aubn_FinancingReceivableNonaccruaLwithAllowance" nillable="true" name="FinancingReceivableNonaccruaLwithAllowance" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_NonaccrualMember" abstract="true" nillable="true" name="NonaccrualMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_CollateralDependentLoansLineItems" abstract="true" nillable="true" name="CollateralDependentLoansLineItems" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_FinancingReceivableIndividuallyEvaluatedCollateralDependentLoans" nillable="true" name="FinancingReceivableIndividuallyEvaluatedCollateralDependentLoans" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="instant" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_ScheduleOfCollateralDependentLoansTable" abstract="true" nillable="true" name="ScheduleOfCollateralDependentLoansTable" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_CollateralDependentLoansByCollateralAxis" abstract="true" nillable="true" name="CollateralDependentLoansByCollateralAxis" substitutionGroup="xbrldt:dimensionItem" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_CollateralDependentLoansByCollateralTypeDomain" abstract="true" nillable="true" name="CollateralDependentLoansByCollateralTypeDomain" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_CommercialRealEstateCollaterMember" abstract="true" nillable="true" name="CommercialRealEstateCollaterMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_BussinessAssetsCollateralMember" abstract="true" nillable="true" name="BussinessAssetsCollateralMember" substitutionGroup="xbrli:item" type="dtr-types:domainItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_AvailableForSaleSecuritiesDebtMaturitiesFairValueLineItems" abstract="true" nillable="true" name="AvailableForSaleSecuritiesDebtMaturitiesFairValueLineItems" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_AvailableForSaleDebtSecuritiesContinousUnrealizedLossPositionLineItems" abstract="true" nillable="true" name="AvailableForSaleDebtSecuritiesContinousUnrealizedLossPositionLineItems" substitutionGroup="xbrli:item" type="xbrli:stringItemType" xbrli:periodType="duration"></xs:element>
+  <xs:element id="aubn_ImpactOfAdoptionOfAsc326" nillable="true" name="ImpactOfAdoptionOfAsc326" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+  <xs:element id="aubn_ProceedsFromSurrenderOfBankOwnedLifeInsurance" nillable="true" name="ProceedsFromSurrenderOfBankOwnedLifeInsurance" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType" xbrli:periodType="duration" xbrli:balance="debit"></xs:element>
+</xs:schema>

@@ -23,8 +23,12 @@ XBRL parsing involves directly processing XBRL documents from SEC filings throug
 
 ### Issue #429 - Statement Regression
 - `issue_429_statement_regression.py` - Statement regression reproduction
-- `test_fix_429.py` - Fix verification for statement selection
-- `test_multiple_companies_429.py` - Multi-company regression test
+
+`test_fix_429.py` and `test_multiple_companies_429.py` were deleted (2026-08-09).
+Both were exploratory scripts that printed results and asserted nothing, so
+neither could fail. The coverage now lives in
+`tests/issues/regression/test_issue_429_period_selection.py` and
+`test_issue_429_statement_period_regression.py`, which assert period types.
 
 ### Legacy Issues (Historical Reference)
 - `304-avgostatements.py` through `434-solution_example.py` - Numbered reproduction files

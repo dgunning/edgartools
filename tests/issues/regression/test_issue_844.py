@@ -8,6 +8,8 @@ whose ``"<TEXT>" in html[:500]`` check raised
 
 The parser now decodes bytes before those string checks, so bytes and str inputs
 behave identically. No network access required.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/844
 """
 
 import pytest
@@ -35,6 +37,11 @@ class TestIssue844BytesExhibitContent:
         """HtmlDocument.get_root decodes bytes instead of raising at the crash site."""
         root = HtmlDocument.get_root(SEC_WRAPPED.encode("utf-8"))
         assert root is not None
+        # Not raising is only half of it. The crash site was the
+        # `"<TEXT>" in html[:500]` check that unwraps the SEC envelope, so the
+        # test has to show the envelope was actually stripped and the exhibit
+        # beneath it parsed -- `is not None` alone passes on an empty root.
+        assert root.get_text().strip() == "Exhibit 99.1 content"
 
     @pytest.mark.parametrize("encoding", ["cp1252", "latin-1"])
     def test_non_utf8_bytes_preserve_characters(self, encoding):
@@ -52,4 +59,13 @@ class TestIssue844BytesExhibitContent:
     def test_undecodable_bytes_do_not_crash(self):
         """A byte invalid in utf-8 and cp1252 still degrades via latin-1, never raises."""
         # 0x81 is undefined in cp1252 and an invalid utf-8 start byte
-        assert Document.parse(b"<html><body><p>\x81</p></body></html>") is not None
+        doc = Document.parse(b"<html><body><p>\x81</p></body></html>")
+        assert doc is not None
+        # latin-1 is the last fallback and maps every byte, so the document
+        # must come back with the paragraph intact and the byte carried
+        # through as U+0081 -- not dropped, and not replaced with U+FFFD.
+        # `is not None` was true of an empty document too.
+        assert len(doc.nodes) == 1, f"expected one node, got {len(doc.nodes)}"
+        text = doc.nodes[0].content
+        assert "�" not in text, "latin-1 fallback should not produce replacement characters"
+        assert "\x81" in text, f"the undecodable byte was dropped: {text!r}"

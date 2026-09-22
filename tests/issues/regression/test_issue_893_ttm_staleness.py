@@ -19,6 +19,8 @@ Fix (companion of GH #892's get_concept recency fix):
    warning) when the newest quarter lags the reference date (``as_of``, or today)
    by more than one reporting cycle, so genuinely stale data across *all*
    candidates is still detectable programmatically.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/893
 """
 import datetime
 from datetime import date
@@ -138,7 +140,7 @@ def test_ttm_explicit_past_as_of_is_not_stale():
 
 # --- End-to-end: the reported companies under VCR ----------------------------
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
 def test_nvda_ttm_revenue_not_stale_2020():
     """NVDA get_ttm_revenue() returns current revenue via ``Revenues``, not the
@@ -154,7 +156,7 @@ def test_nvda_ttm_revenue_not_stale_2020():
     assert len(set(ttm.periods)) == 4
 
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
 def test_goog_ttm_revenue_tracks_recent_window():
     """GOOG get_ttm_revenue() tracks the current window (was ~1 year behind on the
@@ -167,7 +169,7 @@ def test_goog_ttm_revenue_tracks_recent_window():
     assert ttm.is_stale is False
 
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
 def test_amzn_ttm_revenue_matches_reference():
     """AMZN was already correct in the report ($742.8B); the recency fix keeps it

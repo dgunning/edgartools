@@ -4,6 +4,8 @@ the source section index (DocSection.loc), not the score-sorted display rank.
 Previously BM25 path sorted by score so `panel title "0"` meant
 "highest-scoring section" while regex path (no score) showed "0" for the
 first match in document order — same query, different meaning per method.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/765
 """
 
 import pytest

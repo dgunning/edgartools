@@ -63,7 +63,7 @@ financials = company.get_financials()
 
 income = financials.income_statement()
 balance = financials.balance_sheet()
-cashflow = financials.cashflow_statement()
+cashflow = financials.cash_flow_statement()
 equity = financials.statement_of_equity()
 comprehensive = financials.comprehensive_income()
 ```
@@ -72,12 +72,12 @@ comprehensive = financials.comprehensive_income()
 |-----------|--------|
 | Income Statement | `income_statement()` |
 | Balance Sheet | `balance_sheet()` |
-| Cash Flow Statement | `cashflow_statement()` |
+| Cash Flow Statement | `cash_flow_statement()` |
 | Statement of Equity | `statement_of_equity()` |
 | Comprehensive Income | `comprehensive_income()` |
 
 !!! tip "Cash flow naming"
-    The method is `cashflow_statement()` (no underscore between "cash" and "flow"). The `Company` object also accepts `company.cash_flow()` as an alias, but on the `Financials` object always use `cashflow_statement()`.
+    The method is `cash_flow_statement()` (no underscore between "cash" and "flow"). The `Company` object also accepts `company.cash_flow()` as an alias, but on the `Financials` object always use `cash_flow_statement()`.
 
 ---
 
@@ -304,7 +304,7 @@ print(xbrl.reporting_periods)
 |--------|-------------|
 | `financials.income_statement()` | Income statement |
 | `financials.balance_sheet()` | Balance sheet |
-| `financials.cashflow_statement()` | Cash flow statement |
+| `financials.cash_flow_statement()` | Cash flow statement |
 | `financials.get_revenue()` | Revenue value |
 | `financials.get_net_income()` | Net income value |
 | `financials.get_total_assets()` | Total assets value |

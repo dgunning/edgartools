@@ -43,7 +43,7 @@ from pathlib import Path
 
 import pytest
 
-import edgar
+from tests._offline_filings import offline_filing
 
 # ---------------------------------------------------------------------------
 # VCR configuration — use a single module-level cassette for the Tesla fixture
@@ -78,23 +78,28 @@ _TESLA_2022_CASSETTE = "test_issue_880_tesla_2022.yaml"
 def tesla_2022_10k():
     """Tesla FY2022 10-K filed 2023-01-31 (accession 0000950170-23-001409).
 
-    The cassette records all HTTP calls needed to fetch and parse the filing.
-    If the cassette does not exist, regenerate it by temporarily switching
-    record_mode to "once" in _my_vcr above and running the test once with
-    network access, then restore record_mode to "none".
+    The cassette is empty, and the docstring that used to claim it "records all
+    HTTP calls needed to fetch and parse the filing" was never true: the only
+    thing it ever held was an 8 MB quarterly full-index, recorded because the
+    accession was resolved with get_by_accession_number. The document fetch
+    never reached vcr — this module is `network` for that reason, and the
+    Regression Tests workflow has always fetched it live. Resolving the
+    accession from tests/_offline_filings.py removed the one interaction that
+    was recorded, so what remains is a placeholder that keeps record_mode="none"
+    satisfied.
     """
-    if _HAS_VCR:
-        # record_mode="once" will record on first run and replay thereafter.
-        with _my_vcr.use_cassette(_TESLA_2022_CASSETTE):
-            return edgar.get_by_accession_number("0000950170-23-001409").obj()
-    else:
-        pytest.skip("vcrpy not installed — install it to run this test offline")
+    # record_mode="once" will record on first run and replay thereafter.
+    with _my_vcr.use_cassette(_TESLA_2022_CASSETTE):
+        return offline_filing("0000950170-23-001409").obj()
 
 
 # ---------------------------------------------------------------------------
 # Test cases
 # ---------------------------------------------------------------------------
 
+# See test_issue_879.py: skipif reports these as skipped at collection, where
+# the fixture's pytest.skip() reported them as passed.
+@pytest.mark.skipif(not _HAS_VCR, reason="vcrpy not installed")
 class TestTesla2022PartIII:
     """GH #880: Part III items must be independently extractable."""
 

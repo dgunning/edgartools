@@ -29,8 +29,11 @@ The SEC Facts API provides structured, pre-processed financial data accessed thr
 - `438-facts-api-verification.py` - Fix verification test
 - `test_fix_438.py` - Statement mapping fix test
 - `test_integration_438_fix.py` - Integration test for fix
-- `test_nvda_2020_duplicate_issue.py` - Duplicate detection test
 - `nvda-income.py` - Simple NVDA income statement test
+
+`test_nvda_2020_duplicate_issue.py` was deleted (2026-08-09): it printed a
+duplicate analysis and asserted nothing, so it could not fail. The deduplication
+invariants it was probing are now asserted in `test_integration_438_fix.py`.
 
 **Problem:** NVDA income statement showed "Total Revenue" only in FY 2020 column, missing in recent years. When fixed, created duplicate entries.
 

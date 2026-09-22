@@ -140,17 +140,20 @@ class TextExtractor:
                 if self.include_metadata and node.metadata:
                     text = self._annotate_with_metadata(text, node.metadata)
                 parts.append(text)
-            # Don't process children since we already got the paragraph text
+            # Don't process children since we already got the paragraph text.
+            # That skip is why images need handling here as well: SEC filers wrap
+            # them in a paragraph, so the ImageNode branch below is never reached
+            # for a real filing and the placeholder never appeared. (GH #886)
+            if self.include_images:
+                for descendant in node.walk():
+                    if isinstance(descendant, ImageNode):
+                        self._append_image_placeholder(descendant, parts)
             return
 
         elif isinstance(node, ImageNode):
-            # Images carry no text; emit an opt-in placeholder so graphical
-            # content isn't silently dropped (GH #886). Off by default to keep
-            # clean text image-free.
+            # Reached only for an image that is not inside a paragraph.
             if self.include_images:
-                label = (node.alt or '').strip() or (node.src or '').rsplit('/', 1)[-1]
-                if label:
-                    parts.append(f"[Image: {label}]")
+                self._append_image_placeholder(node, parts)
             return
 
         else:
@@ -187,6 +190,17 @@ class TextExtractor:
         # Process children
         for child in node.children:
             self._extract_from_node(child, parts, depth + 1)
+
+    def _append_image_placeholder(self, node: ImageNode, parts: List[str]):
+        """Emit ``[Image: <alt or filename>]`` for one image.
+
+        Falls back to the source file name because filers routinely leave ``alt``
+        empty on the images that matter most — a stock performance graph is
+        usually ``<img src="xyz_g2.jpg">`` and nothing else.
+        """
+        label = (node.alt or '').strip() or (node.src or '').rsplit('/', 1)[-1]
+        if label:
+            parts.append(f"[Image: {label}]")
 
     def _extract_heading(self, node: HeadingNode, parts: List[str], depth: int):
         """Extract heading with optional structure markers."""

@@ -9,12 +9,11 @@ from rich.padding import Padding
 from rich.panel import Panel
 from rich.tree import Tree
 
-from edgar.company_reports._base import CompanyReport
+from edgar.company_reports._base import CompanyReport, report_lookup_miss
 from edgar.company_reports._structures import FilingStructure
-from edgar.core import log
+from edgar.display.formatting import datefmt
 from edgar.documents import HTMLParser, ParserConfig
 from edgar.files.htmltools import ChunkedDocument
-from edgar.display.formatting import datefmt
 
 __all__ = ['TenQ']
 
@@ -250,7 +249,10 @@ class TenQ(CompanyReport):
         Returns items in the format "Part I, Item X" or "Part II, Item X"
         to distinguish between same-numbered items in different parts.
 
-        Falls back to old chunked_document if new parser returns no sections.
+        Returns an empty list when the new parser finds no items. The legacy
+        chunked_document fallback that used to sit here was removed after being
+        measured to change no result on any corpus filing (edgartools-07lk.23);
+        ``__getitem__`` and ``get_item_with_part`` still use it.
 
         Returns:
             List of part-qualified item titles (e.g., ['Part I, Item 1', 'Part II, Item 1'])
@@ -281,12 +283,13 @@ class TenQ(CompanyReport):
                             items.append(f"{part}, Item {item_num}")
                         else:
                             items.append(f"Item {item_num}")
-            return items if items else (self.chunked_document.list_items() if self.chunked_document else [])
+            if items:
+                return items
 
-        # Fallback to old parser for backward compatibility
-        if self.chunked_document:
-            return self.chunked_document.list_items()
-
+        # No legacy fallback here any more — see the note in TenK.items
+        # (edgartools-07lk.23). Measured 0 differences across the 115-fixture
+        # corpus. `__getitem__` and `get_item_with_part` below still fall back and
+        # still need to.
         return []
 
     def __getitem__(self, item_or_part: str) -> Optional[str]:
@@ -305,7 +308,6 @@ class TenQ(CompanyReport):
         - tenq['Part II, Item 1'] -> Legal Proceedings
         - tenq['Item 1'] -> Financial Statements (Part I, backward compat)
 
-        Falls back to old chunked_document for backward compatibility.
 
         Args:
             item_or_part: Section identifier in various formats
@@ -370,20 +372,7 @@ class TenQ(CompanyReport):
                     if section_key.lower() == f'item {normalized}' or section_key.lower() == f'item{normalized}':
                         return self.sections[section_key].text()
 
-        # Fallback to old chunked_document for backward compatibility
-        if self.chunked_document:
-            try:
-                # Log fallback usage for Phase 1 deprecation tracking
-                log.warning(
-                    f"TenQ falling back to legacy parser for '{item_or_part}' "
-                    f"(filing: {self._filing.accession_number}). "
-                    f"New parser sections available: {list(self.sections.keys()) if self.sections else 'none'}. "
-                    f"This fallback will be removed in v6.0."
-                )
-                return self.chunked_document[item_or_part]
-            except (KeyError, TypeError):
-                pass
-
+        report_lookup_miss(self, item_or_part)
         return None
 
     def get_item_with_part(self, part: str, item: str, markdown: bool = True) -> Optional[str]:
@@ -428,31 +417,13 @@ class TenQ(CompanyReport):
                     if key in self.sections:
                         return self.sections[key].text()
 
-        # Fallback to old implementations
-        if not part:
-            return self.id_parse_document(markdown).get(part.lower(), {}).get(item.lower())
-
-        # Try chunked_document
-        if self.chunked_document:
-            item_text = self.chunked_document.get_item_with_part(part, item, markdown=markdown)
-            if item_text and item_text.strip():
-                return item_text
-
-        # Final fallback to id_parse_document
-        return self.id_parse_document(markdown).get(part.lower(), {}).get(item.lower())
-
-    def id_parse_document(self, markdown: bool = True):
-        cache = getattr(self, '_id_parse_cache', {})
-        if markdown in cache:
-            return cache[markdown]
-        from edgar.files.html_documents_id_parser import ParsedHtml10Q
-        result = ParsedHtml10Q().extract_html(self._filing.html(), self.structure, markdown=markdown)
-        cache[markdown] = result
-        self._id_parse_cache = cache
-        return result
+        return None
 
     @cached_property
-    def chunked_document(self):
+    def _chunked_document(self):
+        # Construction only — the deprecation warning lives on the public
+        # `chunked_document` in CompanyReport. Overriding that one here is what
+        # previously cost TenQ users their warning entirely.
         return ChunkedDocument(self._filing.html(), prefix_src=self._filing.base_dir)
 
     def get_structure(self):

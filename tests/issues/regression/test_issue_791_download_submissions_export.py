@@ -13,6 +13,8 @@ The error message therefore pointed users at an import that always failed
 with ImportError.
 
 This test verifies that the import path advertised in error messages works.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/791
 """
 
 import pytest

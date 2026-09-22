@@ -5,6 +5,8 @@ XBRL TextBlock concepts (e.g., segment disclosure tables) contain HTML-encoded f
 The to_dataframe() path must sanitize these to plain text so DataFrame cells are usable.
 
 Uses the MSFT 10-K fixture which has disclosure tables with TextBlock concepts.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/762
 """
 
 import re
@@ -52,16 +54,24 @@ class TestDataFrameNoHtml:
     def msft_xbrl(self):
         from pathlib import Path
         from edgar.xbrl.xbrl import XBRL
-        fixture_dir = Path("tests/fixtures/xbrl/msft/10k_2024")
-        if not fixture_dir.exists() or not any(fixture_dir.iterdir()):
-            pytest.skip("MSFT 10-K fixture not available")
+        # Anchored on __file__, not the process working directory -- as a
+        # cwd-relative path this resolved only under a repo-root invocation and
+        # skipped itself anywhere else. The five fixture files are committed, so
+        # their absence is a broken checkout, not a reason to pass quietly.
+        fixture_dir = Path(__file__).parents[2] / "fixtures" / "xbrl" / "msft" / "10k_2024"
+        assert fixture_dir.exists() and any(fixture_dir.iterdir()), (
+            f"committed MSFT 10-K XBRL fixture is missing: {fixture_dir}"
+        )
         return XBRL.from_directory(fixture_dir)
 
     def test_segment_disclosure_dataframe_has_no_html(self, msft_xbrl):
         """The segment disclosure table DataFrame must not contain HTML."""
         stmt = msft_xbrl.statements.get('Role_DisclosureSEGMENTINFORMATIONANDGEOGRAPHICDATATables')
-        if stmt is None:
-            pytest.skip("Segment disclosure statement not found")
+        assert stmt is not None, (
+            "the committed MSFT fixture carries "
+            "Role_DisclosureSEGMENTINFORMATIONANDGEOGRAPHICDATATables; its "
+            "absence means role lookup broke, not that the data moved"
+        )
 
         df = stmt.to_dataframe()
         assert not df.empty
@@ -74,8 +84,11 @@ class TestDataFrameNoHtml:
     def test_segment_disclosure_has_readable_text(self, msft_xbrl):
         """Sanitized TextBlock values should contain readable financial content."""
         stmt = msft_xbrl.statements.get('Role_DisclosureSEGMENTINFORMATIONANDGEOGRAPHICDATATables')
-        if stmt is None:
-            pytest.skip("Segment disclosure statement not found")
+        assert stmt is not None, (
+            "the committed MSFT fixture carries "
+            "Role_DisclosureSEGMENTINFORMATIONANDGEOGRAPHICDATATables; its "
+            "absence means role lookup broke, not that the data moved"
+        )
 
         df = stmt.to_dataframe()
         text_cells = []

@@ -4,6 +4,8 @@ Regression test: prevent duplicated revenue rows from additional income statemen
 When revenue is promoted to the top-level income statement, some learned virtual trees also
 contain RevenuesAbstract as an additional root. That extra root must not re-introduce
 Revenues as a second row.
+
+GitHub PR: https://github.com/dgunning/edgartools/pull/790
 """
 
 from types import SimpleNamespace

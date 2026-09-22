@@ -1,9 +1,10 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+import lxml.html
 import orjson as json
 import pandas as pd
-from bs4 import BeautifulSoup, Comment, Tag
+from lxml.etree import ParserError
 from pydantic import BaseModel
 from rich import box
 from rich.console import Group
@@ -14,6 +15,7 @@ from rich.text import Text
 from edgar._party import Address, get_addresses_as_columns
 from edgar.config import SEC_BASE_URL
 from edgar.display.formatting import display_size
+from edgar.documents.utils.html_utils import create_lxml_parser
 from edgar.httprequests import download_file
 from edgar.reference import describe_form
 from edgar.richtools import repr_rich
@@ -256,15 +258,48 @@ class IndexHeaders(BaseModel):
         address_dict['state_or_country'] = address_dict.pop('state', '')
         return Address(**address_dict)
 
+    @staticmethod
+    def _first_comment_text(html_text: str) -> str:
+        """The SGML header, which SEC wraps in the first HTML comment of the page.
+
+        ``remove_comments=False`` is the whole point here and is NOT the house
+        default: everywhere else in the codebase comments are noise, and here the
+        comment IS the payload.
+
+        ``getroottree()`` rather than xpath off the parsed element, because a
+        comment can sit before ``<html>``. Today's files put it inside ``<head>``
+        after the title, but bs4 found it either way and this keeps that true.
+
+        ``ParserError`` is mapped to "no comments" so that empty or
+        whitespace-only input still raises ``IndexError`` below, which is what
+        BeautifulSoup did — it returned an empty soup and the caller indexed off
+        the end of it. Preserved so the parser swap is not also an exception-type
+        change for callers.
+        """
+        parser = create_lxml_parser(
+            remove_blank_text=False,
+            remove_comments=False,
+            recover=True,
+            encoding='utf-8',
+        )
+        try:
+            tree = lxml.html.fromstring(html_text, parser=parser)
+            comments = tree.getroottree().xpath('//comment()')
+        except (ParserError, ValueError):
+            comments = []
+
+        # Indexes unguarded, as it always has. A header file with no comment is
+        # not a filing this parser understands, and a bare IndexError here is
+        # ugly but load-bearing: see test_headers_characterization.py.
+        return (comments[0].text or '').strip()
+
     @classmethod
     def load(cls, header_text: str):
         """
         Load the IndexHeaders from the HTML file content.
         """
-        soup = BeautifulSoup(header_text, 'html.parser')
-
         # The SEC-HEADER tag contains the filing header information
-        header_text = soup.find_all(string=lambda text: isinstance(text, Comment))[0].strip()
+        header_text = cls._first_comment_text(header_text)
 
 
         lines = header_text.strip().split("\n")
@@ -472,26 +507,8 @@ class IndexHeaders(BaseModel):
             "issuer": issuer
         }
 
-        # The <PRE> block contains the HTML for the documents
-        #documents = IndexHeaders._extract_documents_from_pre(soup.find("pre"))
-
         # Initialize IndexHeaders with the parsed data
         return cls(**sec_header_data)
-
-    @staticmethod
-    def _extract_documents_from_pre(pre_tag:Tag):
-        soup = BeautifulSoup(pre_tag.text)
-        document_tags = soup.find_all("document")
-        for document_tag in document_tags:
-            document_tag.find("type")
-
-
-    @staticmethod
-    def _extract_comment_text(soup):
-        comments = soup.find_all(string=lambda text: isinstance(text, Comment))
-        if comments:
-            return comments[0].strip()
-        return None
 
     @staticmethod
     def _extract_accession_number(title: str):

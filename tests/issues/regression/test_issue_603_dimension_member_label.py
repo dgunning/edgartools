@@ -50,8 +50,11 @@ def test_issue_603_googl_dimension_member_label():
     # Filter to dimensional rows only
     dimensional_rows = df[df['dimension'] == True]
 
-    if len(dimensional_rows) == 0:
-        pytest.skip("No dimensional rows in GOOGL income statement")
+    assert len(dimensional_rows), (
+        "GOOGL 2023 10-K income statement should have dimensional rows "
+        "(33 at the time of writing); none means the dimensional data this "
+        "test inspects never arrived"
+    )
 
     # Check that dimension_member_label matches dimension_member's label portion
     # The bug was that dimension_member_label came from a different dimension than dimension_member
@@ -91,8 +94,10 @@ def test_issue_603_dimension_consistency():
         (df['dimension_member_label'].notna())
     ]
 
-    if len(dimensional_rows) == 0:
-        pytest.skip("No fully-populated dimensional rows")
+    assert len(dimensional_rows), (
+        "GOOGL 2023 10-K should have dimensional rows carrying axis, member and "
+        "member label together (33 at the time of writing)"
+    )
 
     # The dimension_member_label should NOT be "Google Services" for non-segment axes
     for _, row in dimensional_rows.iterrows():
@@ -129,8 +134,10 @@ def test_issue_603_query_by_dimension():
         # Try alternative revenue concept names
         revenue_by_product = xbrl.facts.query().by_concept("Revenues").by_dimension("ProductOrServiceAxis").to_dataframe()
 
-    if len(revenue_by_product) == 0:
-        pytest.skip("No Revenue facts with ProductOrServiceAxis dimension")
+    assert len(revenue_by_product), (
+        "GOOGL 2023 10-K should have Revenue facts on ProductOrServiceAxis "
+        "(15 at the time of writing, under the 'Revenue' concept)"
+    )
 
     print(f"Found {len(revenue_by_product)} revenue facts with ProductOrServiceAxis")
 

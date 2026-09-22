@@ -12,6 +12,8 @@ overwriting the FIRST occurrence which has the correct parent information.
 Fix: Use first occurrence of each concept to preserve parent info.
 
 Reporter: Nikolay Ivanov (@Velikolay)
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/542
 """
 import pytest
 from edgar import Company

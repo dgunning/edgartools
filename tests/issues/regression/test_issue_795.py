@@ -9,6 +9,8 @@ same reporting period.
 The fix uses exact=":" in concept so that:
 - Fully-qualified names (containing ':') get exact matching
 - Unqualified names (bare labels) retain fuzzy/label matching for discovery
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/795
 """
 
 from datetime import date

@@ -15,6 +15,7 @@ from edgar.ai.mcp.tools.base import (
     success,
     error,
     get_error_suggestions,
+    _cell_text,
 )
 
 logger = logging.getLogger(__name__)
@@ -131,19 +132,21 @@ async def edgar_screen(
 
         companies = []
         for _, row in df.iterrows():
+            # `row.get('name') or ...` let a NaN name through, because NaN is
+            # truthy, and a bare NaN reaches to_json as the literal `NaN`.
             company = {
                 "cik": str(row.get('cik', '')),
-                "name": row.get('name') or row.get('company', ''),
+                "name": _cell_text(row.get('name')) or _cell_text(row.get('company')) or "",
             }
-            ticker = row.get('ticker')
-            if ticker and str(ticker) != 'nan' and str(ticker) != 'None':
-                company["ticker"] = str(ticker)
-            ex = row.get('exchange')
-            if ex and str(ex) != 'nan' and str(ex) != 'None':
-                company["exchange"] = str(ex)
-            sic_desc = row.get('sic_description')
-            if sic_desc and str(sic_desc) != 'nan':
-                company["industry"] = str(sic_desc)
+            ticker = _cell_text(row.get('ticker'))
+            if ticker and ticker != 'None':
+                company["ticker"] = ticker
+            ex = _cell_text(row.get('exchange'))
+            if ex and ex != 'None':
+                company["exchange"] = ex
+            sic_desc = _cell_text(row.get('sic_description'))
+            if sic_desc:
+                company["industry"] = sic_desc
 
             companies.append(company)
 

@@ -8,15 +8,14 @@ import re
 from datetime import date
 from typing import TYPE_CHECKING, List, Optional
 
-from bs4 import BeautifulSoup
-
 if TYPE_CHECKING:
     from edgar._filings import Filing
 
 from edgar._party import Address
 from edgar.beneficial_ownership.models import IssuerInfo, ReportingPerson, Schedule13DItems, Schedule13GItems, SecurityInfo, Signature
 from edgar.core import get_bool
-from edgar.xmltools import child_text
+from edgar.xmltools import child_text, find_all_elements, find_element, local_name
+from edgar.xmltools import parse_xml as parse_xml_document
 
 __all__ = ['Schedule13D', 'Schedule13G']
 
@@ -216,19 +215,25 @@ class Schedule13D:
 
         Raises:
             ValueError: If XML structure is invalid
+            lxml.etree.XMLSyntaxError: If the argument carries no markup at all.
+                Malformed markup is recovered from, as bs4 did — SEC's own XML is
+                not always well-formed. An HTML error page recovers to an <html>
+                root and so raises the ValueError above, by name.
         """
-        soup = BeautifulSoup(xml, 'xml')
-        root = soup.find('edgarSubmission')
-
-        if not root:
+        # <edgarSubmission> is the document element, so this is a root check rather
+        # than a search: a Schedule 13D carries the default namespace
+        # http://www.sec.gov/edgar/schedule13D, which makes its tag read as
+        # `{...}edgarSubmission` (edgartools-07lk.11.3).
+        root = parse_xml_document(xml)
+        if local_name(root) != 'edgarSubmission':
             raise ValueError("Invalid XML: missing <edgarSubmission> root element")
 
         result = {}
-        form_data = root.find('formData')
+        form_data = find_element(root, 'formData')
 
         # Parse cover page header
-        cover = form_data.find('coverPageHeader')
-        if not cover:
+        cover = find_element(form_data, 'coverPageHeader')
+        if cover is None:
             raise ValueError("Invalid XML: missing <coverPageHeader>")
 
         # Security info
@@ -241,11 +246,14 @@ class Schedule13D:
         result['previously_filed'] = get_bool(child_text(cover, 'previouslyFiledFlag'))
 
         # Parse issuer info
-        issuer_el = cover.find('issuerInfo')
-        if issuer_el:
-            address_el = issuer_el.find('address')
+        issuer_el = find_element(cover, 'issuerInfo')
+        if issuer_el is not None:
+            # The address children are in the `com:` namespace while their parent is
+            # in the form's own, so this is one of the documents the helpers' local
+            # name fallback exists for. Never reach for a backend here.
+            address_el = find_element(issuer_el, 'address')
             issuer_address = None
-            if address_el:
+            if address_el is not None:
                 issuer_address = Address(
                     street1=child_text(address_el, 'street1'),
                     street2=child_text(address_el, 'street2'),
@@ -276,9 +284,9 @@ class Schedule13D:
 
         # Parse reporting persons (multiple)
         reporting_persons = []
-        reporting_persons_el = form_data.find('reportingPersons')
-        if reporting_persons_el:
-            for person_el in reporting_persons_el.find_all('reportingPersonInfo'):
+        reporting_persons_el = find_element(form_data, 'reportingPersons')
+        if reporting_persons_el is not None:
+            for person_el in find_all_elements(reporting_persons_el, 'reportingPersonInfo'):
                 reporting_persons.append(ReportingPerson(
                     cik=child_text(person_el, 'reportingPersonCIK') or '',
                     name=child_text(person_el, 'reportingPersonName') or '',
@@ -299,19 +307,19 @@ class Schedule13D:
         result['reporting_persons'] = reporting_persons
 
         # Parse Items 1-7
-        items_el = form_data.find('items1To7')
-        if items_el:
+        items_el = find_element(form_data, 'items1To7')
+        if items_el is not None:
             # Item 1: Security and Issuer
-            item1_el = items_el.find('item1')
+            item1_el = find_element(items_el, 'item1')
             item1_security_title = None
             item1_issuer_name = None
             item1_issuer_address = None
-            if item1_el:
+            if item1_el is not None:
                 item1_security_title = child_text(item1_el, 'securityTitle')
                 item1_issuer_name = child_text(item1_el, 'issuerName')
                 # Build address string
-                addr_el = item1_el.find('issuerPrincipalAddress')
-                if addr_el:
+                addr_el = find_element(item1_el, 'issuerPrincipalAddress')
+                if addr_el is not None:
                     addr_parts = [
                         child_text(addr_el, 'street1'),
                         child_text(addr_el, 'city'),
@@ -321,13 +329,13 @@ class Schedule13D:
                     item1_issuer_address = ', '.join(p for p in addr_parts if p)
 
             # Item 2: Identity and Background
-            item2_el = items_el.find('item2')
+            item2_el = find_element(items_el, 'item2')
             item2_filing_persons = None
             item2_business_address = None
             item2_principal_occupation = None
             item2_convictions = None
             item2_citizenship = None
-            if item2_el:
+            if item2_el is not None:
                 item2_filing_persons = child_text(item2_el, 'filingPersonName')
                 item2_business_address = child_text(item2_el, 'principalBusinessAddress')
                 item2_principal_occupation = child_text(item2_el, 'principalJob')
@@ -335,21 +343,21 @@ class Schedule13D:
                 item2_citizenship = child_text(item2_el, 'citizenship')
 
             # Item 3: Source and Amount of Funds
-            item3_el = items_el.find('item3')
-            item3_source = child_text(item3_el, 'fundsSource') if item3_el else None
+            item3_el = find_element(items_el, 'item3')
+            item3_source = child_text(item3_el, 'fundsSource') if item3_el is not None else None
 
             # Item 4: Purpose of Transaction (MOST IMPORTANT)
-            item4_el = items_el.find('item4')
-            item4_purpose = child_text(item4_el, 'transactionPurpose') if item4_el else None
+            item4_el = find_element(items_el, 'item4')
+            item4_purpose = child_text(item4_el, 'transactionPurpose') if item4_el is not None else None
 
             # Item 5: Interest in Securities
-            item5_el = items_el.find('item5')
+            item5_el = find_element(items_el, 'item5')
             item5_percentage = None
             item5_shares = None
             item5_transactions = None
             item5_shareholders = None
             item5_date = None
-            if item5_el:
+            if item5_el is not None:
                 item5_percentage = child_text(item5_el, 'percentageOfClassSecurities')
                 item5_shares = child_text(item5_el, 'numberOfShares')
                 item5_transactions = child_text(item5_el, 'transactionDesc')
@@ -357,12 +365,12 @@ class Schedule13D:
                 item5_date = child_text(item5_el, 'date5PercentOwnership')
 
             # Item 6: Contracts, Arrangements
-            item6_el = items_el.find('item6')
-            item6_contracts = child_text(item6_el, 'contractDescription') if item6_el else None
+            item6_el = find_element(items_el, 'item6')
+            item6_contracts = child_text(item6_el, 'contractDescription') if item6_el is not None else None
 
             # Item 7: Material to be Filed as Exhibits
-            item7_el = items_el.find('item7')
-            item7_exhibits = child_text(item7_el, 'filedExhibits') if item7_el else None
+            item7_el = find_element(items_el, 'item7')
+            item7_exhibits = child_text(item7_el, 'filedExhibits') if item7_el is not None else None
 
             result['items'] = Schedule13DItems(
                 item1_security_title=item1_security_title,
@@ -388,11 +396,11 @@ class Schedule13D:
 
         # Parse signatures
         signatures = []
-        signature_info_el = form_data.find('signatureInfo')
-        if signature_info_el:
-            for sig_person_el in signature_info_el.find_all('signaturePerson'):
-                sig_details_el = sig_person_el.find('signatureDetails')
-                if sig_details_el:
+        signature_info_el = find_element(form_data, 'signatureInfo')
+        if signature_info_el is not None:
+            for sig_person_el in find_all_elements(signature_info_el, 'signaturePerson'):
+                sig_details_el = find_element(sig_person_el, 'signatureDetails')
+                if sig_details_el is not None:
                     signatures.append(Signature(
                         reporting_person=child_text(sig_person_el, 'signatureReportingPerson') or '',
                         signature=child_text(sig_details_el, 'signature') or '',
@@ -692,19 +700,25 @@ class Schedule13G:
 
         Raises:
             ValueError: If XML structure is invalid
+            lxml.etree.XMLSyntaxError: If the argument carries no markup at all.
+                Malformed markup is recovered from, as bs4 did — SEC's own XML is
+                not always well-formed. An HTML error page recovers to an <html>
+                root and so raises the ValueError above, by name.
         """
-        soup = BeautifulSoup(xml, 'xml')
-        root = soup.find('edgarSubmission')
-
-        if not root:
+        # As in Schedule13D.parse_xml: <edgarSubmission> is the document element, and
+        # a Schedule 13G carries the default namespace
+        # http://www.sec.gov/edgar/schedule13g — note the lower-case `g`, where the
+        # 13D schema uses `D` (edgartools-07lk.11.3).
+        root = parse_xml_document(xml)
+        if local_name(root) != 'edgarSubmission':
             raise ValueError("Invalid XML: missing <edgarSubmission> root element")
 
         result = {}
-        form_data = root.find('formData')
+        form_data = find_element(root, 'formData')
 
         # Parse cover page header
-        cover = form_data.find('coverPageHeader')
-        if not cover:
+        cover = find_element(form_data, 'coverPageHeader')
+        if cover is None:
             raise ValueError("Invalid XML: missing <coverPageHeader>")
 
         # Security info
@@ -716,18 +730,19 @@ class Schedule13G:
         result['event_date'] = child_text(cover, 'eventDateRequiresFilingThisStatement') or ''
 
         # Rule designation (note: parent is plural "Rules", child is singular "Rule")
-        rules_parent_el = cover.find('designateRulesPursuantThisScheduleFiled')
-        if rules_parent_el:
+        rules_parent_el = find_element(cover, 'designateRulesPursuantThisScheduleFiled')
+        if rules_parent_el is not None:
             result['rule_designation'] = child_text(rules_parent_el, 'designateRulePursuantThisScheduleFiled')
         else:
             result['rule_designation'] = None
 
         # Parse issuer info
-        issuer_el = cover.find('issuerInfo')
-        if issuer_el:
-            address_el = issuer_el.find('issuerPrincipalExecutiveOfficeAddress')
+        issuer_el = find_element(cover, 'issuerInfo')
+        if issuer_el is not None:
+            # As in the 13D: the address children are `com:`-namespaced.
+            address_el = find_element(issuer_el, 'issuerPrincipalExecutiveOfficeAddress')
             issuer_address = None
-            if address_el:
+            if address_el is not None:
                 issuer_address = Address(
                     street1=child_text(address_el, 'street1'),
                     street2=child_text(address_el, 'street2'),
@@ -759,14 +774,14 @@ class Schedule13G:
         # Parse reporting persons (different structure than 13D!)
         # In 13G, they're in coverPageHeaderReportingPersonDetails
         reporting_persons = []
-        for person_el in form_data.find_all('coverPageHeaderReportingPersonDetails'):
+        for person_el in find_all_elements(form_data, 'coverPageHeaderReportingPersonDetails'):
             # Get shares info
-            shares_el = person_el.find('reportingPersonBeneficiallyOwnedNumberOfShares')
+            shares_el = find_element(person_el, 'reportingPersonBeneficiallyOwnedNumberOfShares')
             sole_voting = 0
             shared_voting = 0
             sole_disp = 0
             shared_disp = 0
-            if shares_el:
+            if shares_el is not None:
                 sole_voting = safe_int(child_text(shares_el, 'soleVotingPower'))
                 shared_voting = safe_int(child_text(shares_el, 'sharedVotingPower'))
                 sole_disp = safe_int(child_text(shares_el, 'soleDispositivePower'))
@@ -795,74 +810,74 @@ class Schedule13G:
         result['reporting_persons'] = reporting_persons
 
         # Parse Items 1-10
-        items_el = form_data.find('items')
-        if items_el:
+        items_el = find_element(form_data, 'items')
+        if items_el is not None:
             # Item 1: Issuer
-            item1_el = items_el.find('item1')
+            item1_el = find_element(items_el, 'item1')
             item1_issuer_name = None
             item1_issuer_address = None
-            if item1_el:
+            if item1_el is not None:
                 item1_issuer_name = child_text(item1_el, 'issuerName')
                 item1_issuer_address = child_text(item1_el, 'issuerPrincipalExecutiveOfficeAddress')
 
             # Item 2: Filer
-            item2_el = items_el.find('item2')
+            item2_el = find_element(items_el, 'item2')
             item2_filer_names = None
             item2_filer_addresses = None
             item2_citizenship = None
-            if item2_el:
+            if item2_el is not None:
                 item2_filer_names = child_text(item2_el, 'filingPersonName')
                 item2_filer_addresses = child_text(item2_el, 'principalBusinessOfficeOrResidenceAddress')
                 item2_citizenship = child_text(item2_el, 'citizenship')
 
             # Item 3
-            item3_el = items_el.find('item3')
-            item3_not_applicable = get_bool(child_text(item3_el, 'notApplicableFlag')) if item3_el else True
+            item3_el = find_element(items_el, 'item3')
+            item3_not_applicable = get_bool(child_text(item3_el, 'notApplicableFlag')) if item3_el is not None else True
 
             # Item 4: Ownership
-            item4_el = items_el.find('item4')
+            item4_el = find_element(items_el, 'item4')
             item4_amount = None
             item4_percent = None
             item4_sole_voting = None
             item4_shared_voting = None
             item4_sole_disp = None
             item4_shared_disp = None
-            if item4_el:
+            if item4_el is not None:
                 item4_amount = child_text(item4_el, 'amountBeneficiallyOwned')
                 item4_percent = child_text(item4_el, 'classPercent')
-                shares_el = item4_el.find('numberOfSharesPersonHas')
-                if shares_el:
+                shares_el = find_element(item4_el, 'numberOfSharesPersonHas')
+                if shares_el is not None:
                     item4_sole_voting = child_text(shares_el, 'solePowerOrDirectToVote')
                     item4_shared_voting = child_text(shares_el, 'sharedPowerOrDirectToVote')
                     item4_sole_disp = child_text(shares_el, 'solePowerOrDirectToDispose')
                     item4_shared_disp = child_text(shares_el, 'sharedPowerOrDirectToDispose')
 
             # Item 5
-            item5_el = items_el.find('item5')
+            item5_el = find_element(items_el, 'item5')
             item5_not_applicable = True
             item5_ownership = None
-            if item5_el:
+            if item5_el is not None:
                 item5_not_applicable = get_bool(child_text(item5_el, 'notApplicableFlag'))
                 item5_ownership = child_text(item5_el, 'classOwnership5PercentOrLess')
 
             # Items 6-9 (typically not applicable)
-            item6_el = items_el.find('item6')
-            item6_not_applicable = get_bool(child_text(item6_el, 'notApplicableFlag')) if item6_el else True
+            item6_el = find_element(items_el, 'item6')
+            item6_not_applicable = get_bool(child_text(item6_el, 'notApplicableFlag')) if item6_el is not None else True
 
-            item7_el = items_el.find('item7')
-            item7_not_applicable = get_bool(child_text(item7_el, 'notApplicableFlag')) if item7_el else True
+            item7_el = find_element(items_el, 'item7')
+            item7_not_applicable = get_bool(child_text(item7_el, 'notApplicableFlag')) if item7_el is not None else True
 
-            item8_el = items_el.find('item8')
-            item8_not_applicable = get_bool(child_text(item8_el, 'notApplicableFlag')) if item8_el else True
+            item8_el = find_element(items_el, 'item8')
+            item8_not_applicable = get_bool(child_text(item8_el, 'notApplicableFlag')) if item8_el is not None else True
 
-            item9_el = items_el.find('item9')
-            item9_not_applicable = get_bool(child_text(item9_el, 'notApplicableFlag')) if item9_el else True
+            item9_el = find_element(items_el, 'item9')
+            item9_not_applicable = get_bool(child_text(item9_el, 'notApplicableFlag')) if item9_el is not None else True
 
             # Item 10: Certification
-            item10_el = items_el.find('item10')
+            item10_el = find_element(items_el, 'item10')
             item10_not_applicable = False
             item10_cert = None
-            if item10_el:
+            if item10_el is not None:
                 item10_not_applicable = get_bool(child_text(item10_el, 'notApplicableFlag'))
                 item10_cert = child_text(item10_el, 'certifications')
 
@@ -892,9 +907,9 @@ class Schedule13G:
 
         # Parse signatures
         signatures = []
-        for sig_el in form_data.find_all('signatureInformation'):
-            sig_details_el = sig_el.find('signatureDetails')
-            if sig_details_el:
+        for sig_el in find_all_elements(form_data, 'signatureInformation'):
+            sig_details_el = find_element(sig_el, 'signatureDetails')
+            if sig_details_el is not None:
                 signatures.append(Signature(
                     reporting_person=child_text(sig_el, 'reportingPersonName') or '',
                     signature=child_text(sig_details_el, 'signature') or '',

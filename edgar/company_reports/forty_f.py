@@ -9,7 +9,7 @@ from rich.padding import Padding
 from rich.panel import Panel
 from rich.tree import Tree
 
-from edgar.company_reports._base import CompanyReport
+from edgar.company_reports._base import CompanyReport, report_lookup_miss
 from edgar.display.formatting import datefmt
 from edgar.richtools import repr_rich
 
@@ -414,6 +414,25 @@ def _extract_business_section(full_text: str) -> Optional[str]:
 # ---------------------------------------------------------------------------
 
 
+def _html_to_text(html: str) -> str:
+    """Plain text of a document, as ``BeautifulSoup(html).get_text()`` gave it.
+
+    ``get_text()`` with no arguments concatenates every descendant string with
+    nothing between them and strips nothing. This reader wants that variant --
+    its input is prose whose whitespace is already correct -- so it passes no
+    separator. The <script>/<style>/<template> exclusion bs4 applied, and the
+    reason it matters on filer-agent HTML, are documented on the shared helper
+    (edgartools-07lk.11.12).
+
+    The old code wrapped this in ``except ImportError`` with a regex fallback.
+    That branch was already unreachable, since bs4 was a hard dependency, and it
+    still is with lxml; it is left out rather than carried forward dead.
+    """
+    from edgar.documents.utils.html_utils import html_to_text
+
+    return html_to_text(html)
+
+
 class FortyF(CompanyReport):
     """Canadian MJDS annual report (Form 40-F).
 
@@ -513,13 +532,7 @@ class FortyF(CompanyReport):
         html = self.mda_html
         if not html:
             return None
-        try:
-            from bs4 import BeautifulSoup
-            soup = BeautifulSoup(html, 'html.parser')
-            return soup.get_text()
-        except ImportError:
-            text = re.sub(r'<[^>]+>', ' ', html)
-            return re.sub(r'\s+', ' ', text)
+        return _html_to_text(html)
 
     # -- Business section ----------------------------------------------------
 
@@ -532,14 +545,7 @@ class FortyF(CompanyReport):
         html = self.aif_html
         if not html:
             return None
-        try:
-            from bs4 import BeautifulSoup
-            soup = BeautifulSoup(html, 'html.parser')
-            return soup.get_text()
-        except ImportError:
-            # bs4 unavailable — strip tags with a rough regex
-            text = re.sub(r'<[^>]+>', ' ', html)
-            return re.sub(r'\s+', ' ', text)
+        return _html_to_text(html)
 
     @cached_property
     def business(self) -> Optional[str]:
@@ -616,6 +622,11 @@ class FortyF(CompanyReport):
         text = self.aif_text
         positions = self._section_positions
         if not text or not positions:
+            # No AIF text or no detected headers: the named section is absent
+            # just as surely as if it had been searched for and missed. The
+            # error's own suggestion covers this shape ("no items were detected
+            # in this filing at all").
+            report_lookup_miss(self, key)
             return None
 
         key_lower = key.lower().strip()
@@ -632,6 +643,7 @@ class FortyF(CompanyReport):
             if key_lower in name.lower():
                 return _extract_section_text(text, positions, idx)
 
+        report_lookup_miss(self, key)
         return None
 
     # -- LLM context ---------------------------------------------------------

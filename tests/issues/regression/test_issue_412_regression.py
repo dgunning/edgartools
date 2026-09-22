@@ -7,6 +7,8 @@ characters in a single line can be parsed correctly.
 Fixed: SGML header parser was splitting on all '>' characters instead of just the first one,
 causing "ValueError: too many values to unpack" when encountering XBRL inline tags like:
 <ix:nonNumeric id="F_000001" name="dei:AmendmentFlag" contextRef="C_0001318605_20190101_20191231">false</ix:nonNumeric>
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/412
 """
 
 import pytest
@@ -22,12 +24,15 @@ def test_sgml_parsing_with_multiple_angle_brackets():
     due to XBRL inline content with multiple '>' characters.
     """
     # Read the TSLA SGML file that was previously failing (minimal version for testing)
-    sgml_file = Path("data/sgml/0001564590-20-004475-minimal.txt")
-    
-    # Skip test if file doesn't exist (for CI environments without test data)
-    if not sgml_file.exists():
-        pytest.skip("SGML test data file not available")
-    
+    #
+    # Anchored on __file__, not the process working directory. As a cwd-relative
+    # path this resolved only when pytest was invoked from the repo root, and
+    # anywhere else the test skipped itself and reported success. The file is
+    # committed, so its absence is a broken checkout and belongs in the failure
+    # report rather than behind a skip (edgartools-07lk.24 finding 3).
+    sgml_file = Path(__file__).parents[3] / "data" / "sgml" / "0001564590-20-004475-minimal.txt"
+    assert sgml_file.exists(), f"committed SGML fixture is missing: {sgml_file}"
+
     content = sgml_file.read_text()
     
     # This should not raise "ValueError: too many values to unpack"

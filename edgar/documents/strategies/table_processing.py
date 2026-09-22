@@ -203,13 +203,19 @@ class TableProcessor:
         """Process table structure (thead, tbody, tfoot)."""
         # Process thead
         thead = self._own_section(element, 'thead')
-        thead_row_ids = set()
-        if thead is not None:
-            for tr in self._own_rows(thead):
-                thead_row_ids.add(id(tr))
-                cells = self._process_row(tr, is_header=True)
-                if cells:
-                    table.headers.append(cells)
+        # Identity, not id(). lxml materializes element proxies on demand and frees them
+        # when the last reference goes; CPython then reuses the freed address, so an id()
+        # taken from a dead thead proxy can be handed to a tbody row, which is skipped as
+        # "already processed" and silently vanishes from the table. Holding the rows in a
+        # list and comparing with `is` removes the hazard by construction rather than by
+        # keeping refs alive and hoping. theads are a handful of rows, so the linear scan
+        # costs nothing. The same trap is documented at
+        # edgar/documents/utils/toc_analyzer.py, above `seen_row_ids` (bead edgartools-gf6v).
+        thead_rows = list(self._own_rows(thead)) if thead is not None else []
+        for tr in thead_rows:
+            cells = self._process_row(tr, is_header=True)
+            if cells:
+                table.headers.append(cells)
 
         # Process tbody (or direct rows)
         tbody = self._own_section(element, 'tbody')
@@ -221,8 +227,8 @@ class TableProcessor:
         data_rows_started = False
 
         for tr in self._own_rows(rows_container):
-            # Skip if already processed in thead
-            if id(tr) in thead_row_ids:
+            # Skip if already processed in thead (identity, never id() - see above)
+            if any(tr is head_row for head_row in thead_rows):
                 continue
 
             # Check if this might be a header row
@@ -379,37 +385,69 @@ class TableProcessor:
 
         return text
 
+    # Elements that start a new line of text. Everything else (a, span, b, i,
+    # font, sup, ...) is inline and contributes no separator.
+    _BLOCK_TAGS = frozenset({
+        'address', 'article', 'aside', 'blockquote', 'br', 'caption', 'div',
+        'dd', 'dl', 'dt', 'fieldset', 'figcaption', 'figure', 'footer', 'form',
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hr', 'li', 'main', 'nav',
+        'ol', 'p', 'pre', 'section', 'table', 'td', 'th', 'tr', 'ul',
+    })
+
+    @classmethod
+    def _fragments_with_block_breaks(cls, elem: HtmlElement) -> List[str]:
+        """Text fragments, with a newline marker at every block boundary.
+
+        Downstream normalisation collapses runs of whitespace, so emitting a
+        marker on both entering and leaving a block is safe and keeps the rule
+        simple: separation comes from the document structure, never from
+        guessing at a fragment boundary.
+        """
+        parts: List[str] = []
+
+        def walk(node) -> None:
+            tag = node.tag
+            is_block = isinstance(tag, str) and tag.lower() in cls._BLOCK_TAGS
+            if is_block:
+                parts.append('\n')
+            if node.text:
+                parts.append(node.text)
+            for child in node:
+                walk(child)
+                if child.tail:
+                    parts.append(child.tail)
+            if is_block:
+                parts.append('\n')
+
+        walk(elem)
+        return [p for p in parts if p]
+
     def _extract_text(self, elem: HtmlElement) -> str:
         """Extract and clean text from element."""
-        # Use itertext() to get all text fragments
-        # This preserves spaces better than text_content()
-        text_parts = []
-        for text in elem.itertext():
-            if text:
-                text_parts.append(text)
+        # Fragments, with a marker wherever a BLOCK boundary separates them.
+        #
+        # The rule that matters is which boundaries imply whitespace. A block
+        # boundary does: <div>Exhibit</div><div>Number</div> is two words. An
+        # inline one does not: markup inside a run of text is invisible to the
+        # reader, so <a>10.1</a><a>0</a> is the single token 10.10 -- which is
+        # exactly how ABBV's exhibit index numbers its exhibits, each split
+        # across two <a> tags with no whitespace between them.
+        #
+        # This used to insert a space between ANY two adjacent fragments unless
+        # one already carried whitespace, which fabricated "10.1 0" and made
+        # every such exhibit number unfindable (edgartools-2vzk). Separating on
+        # block boundaries only fixes that without regressing the word-gluing
+        # this function was written to avoid -- the opposite failure, and the one
+        # a bare text_content() would reintroduce.
+        text_parts = self._fragments_with_block_breaks(elem)
 
-        # Join parts, ensuring we don't lose spaces
-        # If a part doesn't end with whitespace and the next doesn't start with whitespace,
-        # we need to add a space between them
         if not text_parts:
             return ''
 
-        result = []
-        for i, part in enumerate(text_parts):
-            if i == 0:
-                result.append(part)
-            else:
-                prev_part = text_parts[i-1]
-                # Check if we need to add a space between parts
-                # Don't add space if previous ends with space or current starts with space
-                if prev_part and part:
-                    if not prev_part[-1].isspace() and not part[0].isspace():
-                        # Check for punctuation that shouldn't have space before it
-                        if part[0] not in ',.;:!?%)]':
-                            result.append(' ')
-                result.append(part)
-
-        text = ''.join(result)
+        # Concatenated verbatim: the separators are already in text_parts, as
+        # newline markers at block boundaries. Nothing is inserted here, so an
+        # inline split cannot invent whitespace that the source did not have.
+        text = ''.join(text_parts)
 
         # Replace entities
         for entity, replacement in self.ENTITY_REPLACEMENTS.items():
@@ -470,6 +508,74 @@ class TableProcessor:
         pattern = '|'.join(f'(?:{p})' for p in patterns)
         return re.compile(pattern, re.IGNORECASE)
 
+    # A column header is a label, not a sentence. Genuine header cells in the
+    # fixture corpus sit well under this: median 24 characters, 75th percentile
+    # 54, and even a wide "Three Months Ended June 30, 2025 and 2024" is ~42.
+    # Prose cells are an order of magnitude longer, so the threshold sits in an
+    # empty band rather than near either population.
+    PROSE_CELL_CHARS = 100
+
+    @staticmethod
+    def _has_prose_cell(cells: List[HtmlElement]) -> bool:
+        """Does any cell hold a sentence rather than a label?
+
+        Used to veto ONE header signal: a bare date appearing anywhere in the
+        row. That signal exists to catch period columns like "Three Months Ended
+        June 30, 2025", but the pattern also matches a date buried in ordinary
+        prose — and SEC exhibit indexes are full of it ("...dated as of June 25,
+        2019, between AbbVie Inc. and ..."). Every row of ABBV's exhibit index
+        matched, so the whole table was classified as header rows, `rows` came
+        back nearly empty, and the markdown renderer combined 30 "header" rows
+        into a single line: the exhibit index vanished from the rendered output
+        (edgartools-2vzk).
+
+        Deliberately scoped to that one branch. A row with real ``<th>`` tags,
+        units notation, or genuine multi-year columns is still a header no matter
+        how long its cells are; length only breaks the tie when the sole evidence
+        was an incidental date.
+
+        Per-cell rather than per-row, because a wide table's header row is long
+        in total while each individual label stays short.
+        """
+        return any(
+            len(_text_content(cell).strip()) > TableProcessor.PROSE_CELL_CHARS
+            for cell in cells
+        )
+
+    # Everything a cell may hold alongside its digits and still be nothing but
+    # figures: currency and percent signs, thousands separators, decimal points,
+    # parenthesised negatives, the separators in a range ("25.5% - 30.7%", and
+    # the en/em dashes filings use in place of a hyphen), and whitespace.
+    _FIGURE_ORNAMENTS = str.maketrans('', '', '$%,.()-–— \t\n ')
+
+    @staticmethod
+    def _is_figure_cell(cell_text: str) -> bool:
+        """Does this cell hold figures and nothing else?
+
+        Used by the content-type ratio, the last-resort "mostly text means
+        header" branch. The ratio only works if a cell full of numbers is
+        counted as a number, and the original test -- strip ``$%,()``, then drop
+        ``.`` and ``-``, then ``isdigit()`` -- silently failed on any cell
+        holding a RANGE, because the space either side of the dash survived and
+        ``'255  307'.isdigit()`` is False.
+
+        UnitedHealth's stock-option assumptions table is made almost entirely of
+        ranges::
+
+            Expected volatility | 25.5% - 30.7% | 29.7% - 30.6% | 30.6% - 30.8%
+
+        so the row scored 4 text cells against 0 number cells and was classified
+        as a header. Three of the table's five rows went that way -- risk-free
+        rate, volatility and dividend yield -- while ``Forfeiture rate 5.0%``
+        survived, because a single value did pass ``isdigit()``. The rendered
+        filing kept the two rows nobody asks about and dropped the three that
+        carry the assumptions.
+
+        ``str.isdigit`` is False on the empty string, so a lone ``$`` or an
+        em-dash placeholder still counts as text, exactly as before.
+        """
+        return cell_text.translate(TableProcessor._FIGURE_ORNAMENTS).isdigit()
+
     def _is_header_row(self, tr: HtmlElement) -> bool:
         """Detect if row is likely a header row in SEC filings."""
         own_cells = self._own_cells(tr)
@@ -486,6 +592,11 @@ class TableProcessor:
         row_text = _text_content(tr)
         row_text_lower = row_text.lower()
 
+        # Every date- and year-derived signal below is evidence only when the row
+        # reads as labels. In prose those dates are incidental — see
+        # _has_prose_cell — so compute the veto once and apply it to each.
+        has_prose = self._has_prose_cell(cells)
+
         # Check for date ranges with financial data (Oracle Table 6 pattern)
         # Date ranges like "March 1, 2024—March 31, 2024" should be data rows, not headers
         date_range_pattern = r'(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2},\s*\d{4}\s*[—–-]\s*(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2},\s*\d{4}'
@@ -499,6 +610,26 @@ class TableProcessor:
         # If row has date range + financial data, it's definitely a data row
         if has_date_range and (has_currency or has_decimals or has_large_numbers):
             return False
+
+        # A row carrying actual figures is a data row however many years it names.
+        # Header rows label periods; they do not hold dollar amounts. This vetoes
+        # the year-derived signals below, in the same spirit as the date-range
+        # guard above and _has_prose_cell — the year evidence is only evidence
+        # when nothing stronger contradicts it.
+        #
+        # The case that needed it: UnitedHealth's long-term debt schedule is laid
+        # out two-up, two debt series per row, so every data row names two
+        # DIFFERENT maturity years -- "$750 3.5%, Feb 2024 | 750 | $850 5.8%,
+        # Mar 2036 | 838" reads as a 2024-vs-2036 comparison header. 35 of the
+        # table's 40 rows were classified as headers, `rows` came back with 3,
+        # and the schedule vanished from rendered output: 64 of 66 maturities and
+        # 50 of 66 coupon rates. _has_prose_cell cannot help, because these are
+        # short numeric cells, not sentences. (edgartools-v3ec)
+        #
+        # Currency and thousands-grouping only -- NOT bare decimals, which appear
+        # in legitimate header labels ("Item 7A.", a note reference) where a
+        # dollar amount never does.
+        carries_figures = has_currency or has_large_numbers
 
         # Check for year patterns (very common in financial headers)
         year_pattern = r'\b(19\d{2}|20\d{2})\b'
@@ -514,7 +645,8 @@ class TableProcessor:
                 # Not a multi-year comparison header
                 pass  # Don't return True
             # Multiple different years suggest multi-year comparison header
-            elif 'total' not in row_text_lower[:20]:  # Check first 20 chars
+            elif ('total' not in row_text_lower[:20] and not has_prose
+                    and not carries_figures):
                 return True
 
         # Enhanced year detection - check individual cells for year patterns
@@ -533,16 +665,35 @@ class TableProcessor:
 
         # If we have multiple year cells or year + date phrases, likely a header
         if year_cells >= 2 or (year_cells >= 1 and date_phrases >= 1):
-            if 'total' not in row_text_lower[:20]:
+            # Same veto as the multi-year branch above, and for the same reason:
+            # this is a year-derived signal, so a row holding dollar amounts
+            # outranks it. edgartools-v3ec fixed the sibling branch and left this
+            # one alone as unobserved; it is not unobservable — a schedule laid
+            # out "2024 | $1,000 | 2025 | $2,000" trips it, and did so on a
+            # synthetic row before this veto was added.
+            if ('total' not in row_text_lower[:20] and not has_prose
+                    and not carries_figures):
                 return True
 
         # Check for comprehensive financial period patterns (from old parser)
         period_pattern = self._get_period_header_pattern()
         if period_pattern.search(row_text_lower):
             # Additional validation: ensure it's not a data row with period text
-            # Check for absence of strong data indicators
-            data_pattern = r'(?:\$\s*\d|\d+(?:,\d{3})+|\d+\s*[+\-*/]\s*\d+|\(\s*\d+(?:,\d{3})*\s*\))'
-            if not re.search(data_pattern, row_text):
+            # Check for absence of strong data indicators.
+            #
+            # `\d+\.\d+` is here for the same reason it is in the two sibling
+            # data_patterns below: a plain decimal is a figure. This branch was
+            # the only one of the three that omitted it, and the omission cost
+            # UnitedHealth two thirds of its buyback table. Rows read
+            # "November 30, 2024 | 0.9 | 593.39 | 0.9 | 38.7" -- a single date
+            # matches the period pattern, and with no `$`, no thousands
+            # separator and no parenthesised negative, nothing here contradicted
+            # it. October survived only because its price cell carried a stray
+            # `$`; November and December were classified as headers and the
+            # renderer collapsed them.
+            data_pattern = (r'(?:\$\s*\d|\d+(?:,\d{3})+|\d+\.\d+'
+                            r'|\d+\s*[+\-*/]\s*\d+|\(\s*\d+(?:,\d{3})*\s*\))')
+            if not re.search(data_pattern, row_text) and not has_prose:
                 return True
 
         # Check for units notation (in millions, thousands, billions)
@@ -621,9 +772,7 @@ class TableProcessor:
         for cell in cells:
             cell_text = _text_content(cell).strip()
             if cell_text:
-                # Remove common symbols for analysis
-                clean_text = cell_text.replace('$', '').replace('%', '').replace(',', '').replace('(', '').replace(')', '')
-                if clean_text.replace('.', '').replace('-', '').strip().isdigit():
+                if self._is_figure_cell(cell_text):
                     number_cells += 1
                 else:
                     text_cells += 1

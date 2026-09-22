@@ -11,6 +11,8 @@ period_start=2025-01-01) collapsed onto rows that looked identical except
 for numeric_value.
 
 The fix surfaces period_start and a derived duration_days column.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/792
 """
 
 from datetime import date

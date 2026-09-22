@@ -7,6 +7,8 @@ This test ensures that the CurrentPeriodView correctly selects appropriate
 periods for different statement types:
 - Balance sheet: instant periods (point in time)
 - Income/Cash flow: duration periods (period of time)
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/429
 """
 
 import unittest

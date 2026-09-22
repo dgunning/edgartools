@@ -31,7 +31,6 @@ class TestIssue583EquityLabels:
         return filing.xbrl()
 
     @pytest.mark.network
-    @pytest.mark.xfail(reason="Beginning/ending balance label suffixes not yet implemented")
     def test_equity_labels_have_beginning_ending_suffix(self, aapl_10k_xbrl):
         """Test that labels have 'Beginning balance' / 'Ending balance' suffixes."""
         stmt = aapl_10k_xbrl.statements.statement_of_equity()
@@ -49,7 +48,6 @@ class TestIssue583EquityLabels:
             "Should have rows with 'Ending balance' in label"
 
     @pytest.mark.network
-    @pytest.mark.xfail(reason="Beginning/ending balance label suffixes not yet implemented")
     def test_stockholders_equity_has_distinct_beginning_ending_labels(self, aapl_10k_xbrl):
         """Test that StockholdersEquity rows have distinct beginning/ending labels."""
         stmt = aapl_10k_xbrl.statements.statement_of_equity()
@@ -85,8 +83,9 @@ class TestIssue583EquityLabels:
                      'standard_concept']
         value_cols = [c for c in df.columns if c not in meta_cols]
 
-        if not value_cols:
-            pytest.skip("No value columns found")
+        assert value_cols, (
+            f"statement_of_equity() should expose period columns; got {list(df.columns)}"
+        )
 
         # Get non-dimensional StockholdersEquity rows
         se_df = df[(df['concept'] == 'us-gaap_StockholdersEquity') & (df['dimension'] == False)]
@@ -95,8 +94,11 @@ class TestIssue583EquityLabels:
         ending_rows = se_df[se_df['label'].str.contains('Ending balance', na=False) &
                             ~se_df['label'].str.contains('Beginning', na=False)]
 
-        if len(beginning_rows) == 0 or len(ending_rows) == 0:
-            pytest.skip("Could not find both beginning and ending balance rows")
+        assert len(beginning_rows) and len(ending_rows), (
+            f"AAPL equity should carry both beginning and ending StockholdersEquity "
+            f"rows; got {len(beginning_rows)} beginning, {len(ending_rows)} ending "
+            f"from labels {se_df['label'].tolist()}"
+        )
 
         # Compare values in first value column
         value_col = value_cols[0]
@@ -108,7 +110,6 @@ class TestIssue583EquityLabels:
             f"Beginning ({begin_val}) and ending ({end_val}) values should differ"
 
     @pytest.mark.network
-    @pytest.mark.xfail(reason="Beginning/ending balance label suffixes not yet implemented")
     def test_dimensional_rows_have_beginning_ending_logic(self, aapl_10k_xbrl):
         """Test that dimensional rows also have beginning/ending balance distinction."""
         stmt = aapl_10k_xbrl.statements.statement_of_equity()
@@ -117,8 +118,10 @@ class TestIssue583EquityLabels:
         # Get dimensional StockholdersEquity rows
         se_df = df[(df['concept'] == 'us-gaap_StockholdersEquity') & (df['dimension'] == True)]
 
-        if len(se_df) == 0:
-            pytest.skip("No dimensional StockholdersEquity rows found")
+        assert len(se_df), (
+            "AAPL equity should carry dimensional StockholdersEquity rows "
+            "(equity components are the statement's columns)"
+        )
 
         # Group by base label (without Beginning/Ending suffix)
         # Each unique dimensional label should appear twice (beginning + ending)
@@ -145,8 +148,9 @@ class TestIssue583EquityLabels:
                      'standard_concept']
         value_cols = [c for c in df.columns if c not in meta_cols]
 
-        if not value_cols:
-            pytest.skip("No value columns found")
+        assert value_cols, (
+            f"statement_of_equity() should expose period columns; got {list(df.columns)}"
+        )
 
         # Find a dimensional concept that appears twice
         dim_df = df[(df['concept'] == 'us-gaap_StockholdersEquity') & (df['dimension'] == True)]
@@ -158,8 +162,11 @@ class TestIssue583EquityLabels:
                             dim_df['label'].str.contains('Ending balance', na=False) &
                             ~dim_df['label'].str.contains('Beginning', na=False)]
 
-        if len(beginning_dim) == 0 or len(ending_dim) == 0:
-            pytest.skip("Could not find both beginning and ending dimensional rows")
+        assert len(beginning_dim) and len(ending_dim), (
+            f"Common stock should have both beginning and ending dimensional rows; "
+            f"got {len(beginning_dim)} beginning, {len(ending_dim)} ending from "
+            f"labels {dim_df['label'].tolist()}"
+        )
 
         # Compare values
         value_col = value_cols[0]
@@ -253,8 +260,9 @@ class TestIssue583IsBreakdownFlag:
             (df['dimension_axis'].str.contains('StatementEquityComponentsAxis', na=False))
         ]
 
-        if len(equity_dims) == 0:
-            pytest.skip("No equity component dimensional rows found")
+        assert len(equity_dims), (
+            "AAPL equity should carry rows on StatementEquityComponentsAxis"
+        )
 
         # All equity component dimensions should have is_breakdown=False
         # because they are STRUCTURAL (define column headers), not BREAKDOWN (notes detail)

@@ -12,6 +12,8 @@ Fix Details:
 - Expanded duration period candidate pool from ~4 to 12 periods
 - Return max_periods * 3 candidates to let data quality filtering choose best ones
 - Mirrors successful Balance Sheet fix from v4.20.1
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/464
 """
 import pytest
 from edgar import Company

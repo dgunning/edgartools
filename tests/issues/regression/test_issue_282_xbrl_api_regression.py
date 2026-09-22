@@ -9,6 +9,8 @@ The test validates the key API patterns that users depend on:
 2. XBRL.from_filing() for parsing XBRL data
 3. facts.query().by_concept() for querying specific concepts
 4. Proper handling of period_start, period_end, and numeric_value fields
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/282
 """
 
 import pytest

@@ -4,38 +4,62 @@
 #   - Pull requests:  fast tests only, single Python version  (cheap, quick gate)
 #   - Push to main:   fast (full matrix) + network + slow      (real integration gate)
 #   - Nightly (cron): full suite                               (freshness vs SEC API)
-#   - concurrency:    cancel superseded runs on the same ref
-#   - paths-ignore:   skip docs/markdown-only changes
+#   - concurrency:    cancel superseded PR runs; main runs always complete
 #   - pip cache:      avoid reinstalling deps from scratch in every job
+#
+# There is deliberately NO paths-ignore. A docs-only change would then report no
+# checks at all, and a required status check that never reports blocks the pull
+# request forever. Since these checks are meant to become required, every PR has
+# to produce them — the few CI minutes a markdown-only run costs are cheaper than
+# a merge queue that deadlocks on documentation.
+#
+# REQUIRED CHECKS ARE PINNED TO JOB NAMES. `main` requires exactly two contexts:
+#
+#     Cassette safety gate
+#     test-fast (3.13)
+#
+# The second name is generated from the matrix below, which is event-dependent —
+# a pull request builds only 3.13, so the context is literally "test-fast (3.13)".
+# Renaming a job, or changing the pull-request leg of that matrix, retires the
+# context that branch protection is waiting for; it never reports, and every pull
+# request blocks forever with enforce_admins on. If you touch either, update the
+# protection contexts in the same commit:
+#
+#     gh api repos/dgunning/edgartools/branches/main/protection \
+#        --jq .required_status_checks.contexts
+#
+# test-strict-errors, test-network, test-slow and Combine Coverage are
+# deliberately NOT required: they carry `if: github.event_name != 'pull_request'`
+# and so report as skipped on every pull request. They run on push to main,
+# which is the integration gate.
+#
+# Because they cannot gate, they are REPORTED instead — see the `report` job at
+# the end of this file. Combine Coverage is where the 65% floor is enforced
+# (`coverage report --fail-under=65`), and until 2026-08-10 a failure there, or
+# in test-network or test-slow, appeared in the Actions tab and nowhere else.
+# That is the same hole #999 closed for the regression workflow after a red main
+# survived three merges unnoticed (bead edgartools-hwdp); this workflow was left
+# out of that fix even though it carries more.
 
 name: Build and Test Edgartools
 
 on:
   push:
     branches: [ "main" ]
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'mkdocs.yml'
-      - 'LICENSE'
-      - '.gitignore'
   pull_request:
     branches: [ "main" ]
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'mkdocs.yml'
-      - 'LICENSE'
-      - '.gitignore'
   schedule:
     # Nightly full suite at 07:00 UTC
     - cron: '0 7 * * *'
   workflow_dispatch:
 
-# Cancel an in-progress run when a newer commit lands on the same branch/PR.
+# Cancel an in-progress run when a newer commit lands on the same PR. Pushes to
+# main are never cancelled: PRs merge without being up to date with main, so the
+# post-merge run is the only check that the combination works, and back-to-back
+# merges used to cancel it before it finished.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name != 'push' }}
 
 jobs:
   # Must pass before any job that runs pytest. vcrpy loads cassettes with
@@ -78,10 +102,34 @@ jobs:
         python -m pip install -e ".[ai]"
         python -m pip install pytest pytest-cov pytest-env pytest-xdist pytest-asyncio pytest-retry pytest-mock pytest-vcr "vcrpy<8.2" freezegun==1.5.1 filelock tqdm responses
 
+    # A source scan, so it runs here rather than as its own job: this is the
+    # only context pull requests are required to report, and adding a second
+    # required one means updating branch protection in lockstep (see the header
+    # of this file). It is also why the check reads source instead of hooking
+    # pytest — half the regression tree is network-marked and runs post-merge,
+    # so a runtime hook would not see those tests on a pull request at all.
+    - name: Check no regression test skips itself
+      run: python scripts/check_regression_skips.py
+
+    # Same reasoning, different property: a regression test has to name the bug
+    # it guards, or nobody can answer "is this still reachable?" and the tree can
+    # never be pruned. Static like the check above, and for the same reason — it
+    # has to see the post-merge half of the tree on a pull request.
+    - name: Check every regression test names its bug
+      run: python scripts/check_regression_provenance.py
+
     - name: Run fast tests
       run: |
-        # Parallelize fast tests - safe, no SEC API calls
-        pytest -n auto --cov --cov-report=xml -m 'fast and not regression'
+        # Parallelize fast tests - safe, no SEC API calls.
+        #
+        # No `and not regression` here, unlike the network and slow jobs. The
+        # regression tree is 1,746 tests and every one of them used to be
+        # deselected on pull requests, so a PR could break any of them and merge
+        # green (bead edgartools-07lk.21). conftest.py now classifies each as
+        # fast or network by measurement, and the 934 offline ones gate here.
+        # The network half still runs only in the Regression Tests workflow —
+        # PRs must not hammer the SEC endpoint.
+        pytest -n auto --cov --cov-report=xml -m 'fast'
 
     - name: Upload coverage data
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -93,6 +141,57 @@ jobs:
           coverage.xml
         include-hidden-files: true
         retention-days: 1
+
+  test-strict-errors:
+    # Runs the offline suite the way 6.0 will behave, today.
+    #
+    # EDGARTOOLS_STRICT_ERRORS=1 turns on the error changes that are otherwise a
+    # 6.0 break (bead edgartools-07lk.10): the network boundary wraps httpx
+    # exceptions into TransportError, and — as PR3 lands them — the silent-None
+    # returns raise instead. The point is not to test users' code; it is to find
+    # OUR code that still relies on the old behaviour, while there is still a
+    # 5.x release to fix it in. Without this job, the first time all the 6.0
+    # error paths run together is 6.0 itself.
+    #
+    # The design for this bead planned it as continue-on-error, on the
+    # assumption it would arrive amber and go green as the flips landed. It
+    # arrives GREEN — the whole fast suite passes under the flag as of PR2 — so
+    # it is a hard failure from the start. An allowed-to-fail lane that is
+    # already passing teaches nobody anything, and this repository has already
+    # paid for the lesson that an unreported post-merge failure survives several
+    # merges (bead edgartools-hwdp, #999). It is in the `report` job's `needs`
+    # accordingly.
+    #
+    # Post-merge only, matching test-network. It cannot be a REQUIRED check
+    # while it skips pull requests — see the deadlock described at the top of
+    # this file — so it is reported rather than gating, and moves to the pull
+    # request leg when the 6.0 branch is cut and strict becomes the only path.
+    if: github.event_name != 'pull_request'
+    needs: cassette-gate
+    runs-on: ubuntu-latest
+    env:
+      EDGARTOOLS_STRICT_ERRORS: '1'
+
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Set up Python 3.13
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      with:
+        python-version: '3.13'
+        cache: 'pip'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -e ".[ai]"
+        python -m pip install pytest pytest-cov pytest-env pytest-xdist pytest-asyncio pytest-retry pytest-mock pytest-vcr "vcrpy<8.2" freezegun==1.5.1 filelock tqdm responses
+
+    - name: Run fast tests with 6.0 error behaviour
+      run: |
+        # Same selection as test-fast. Offline only: what this is looking for is
+        # internal code that mishandles the wrapped exception types, and that
+        # shows up in mocked and cassette-backed tests just as well as in live
+        # ones — without a second pass over the SEC endpoint.
+        pytest -n auto -m 'fast'
 
   test-network:
     # Network tests skip PRs — SEC API behavior doesn't change per-commit.
@@ -249,3 +348,94 @@ jobs:
         files: combined-coverage.xml
         fail_ci_if_error: false
         token: ${{ secrets.CODECOV_TOKEN }}
+
+  # A red `main` has to arrive somewhere a person looks.
+  #
+  # Ported from regression-tests.yml, which got this treatment in #999 after the
+  # post-merge regression lane went red on 2026-08-08 and three more pull
+  # requests merged through it before anyone noticed. THIS workflow never got
+  # one, and it is the lane that carries more: the 65% coverage floor
+  # (`coverage report --fail-under=65`), plus test-network, test-slow and
+  # test-strict-errors. All of them are post-merge only, none is a required check, and until now none of
+  # them could tell anybody they had failed.
+  #
+  # Note what this deliberately does NOT do: make Combine Coverage required.
+  # It cannot be. It `needs` test-network and test-slow, which are skipped on
+  # pull requests, so a required Combine Coverage would never report and would
+  # block every pull request forever — the deadlock described at the top of this
+  # file. Reporting is the right mechanism for a check that cannot gate.
+  #
+  # `needs` names every post-merge job on purpose — including test-strict-errors
+  # (bead edgartools-07lk.10), because a lane whose whole job is proving 6.0
+  # error behaviour still holds is worth nothing if it can go red in silence.
+  # A failure in test-network
+  # SKIPS Combine Coverage rather than failing it, so keying on the coverage
+  # result alone would stay silent for the failure that stops the threshold
+  # being evaluated at all.
+  #
+  # Its own label and title, separate from regression-tests.yml's `red-main`.
+  # Sharing one issue would have the two lanes fight over it — whichever went
+  # green last would close an issue the other still needed open.
+  report:
+    name: Report red main (build)
+    needs: [cassette-gate, test-fast, test-strict-errors, test-network, test-slow, coverage]
+    if: always() && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      SHA: ${{ github.sha }}
+      LABEL: red-main-build
+      TITLE: "Build and Test Edgartools is failing on main"
+      R_GATE: ${{ needs.cassette-gate.result }}
+      R_FAST: ${{ needs.test-fast.result }}
+      R_STRICT: ${{ needs.test-strict-errors.result }}
+      R_NETWORK: ${{ needs.test-network.result }}
+      R_SLOW: ${{ needs.test-slow.result }}
+      R_COVERAGE: ${{ needs.coverage.result }}
+    steps:
+    - name: Ensure the tracking label exists
+      run: |
+        gh label create "$LABEL" --repo "$REPO" --color b60205 \
+          --description "Post-merge build/coverage lane is red" 2>/dev/null || true
+
+    - name: Decide whether the lane is red
+      id: verdict
+      run: |
+        red=0
+        for r in "$R_GATE" "$R_FAST" "$R_STRICT" "$R_NETWORK" "$R_SLOW" "$R_COVERAGE"; do
+          [ "$r" = "failure" ] && red=1
+        done
+        echo "red=$red" >> "$GITHUB_OUTPUT"
+
+    - name: Open or update the tracking issue
+      if: steps.verdict.outputs.red == '1'
+      run: |
+        number=$(gh issue list --repo "$REPO" --label "$LABEL" --state all \
+                   --limit 1 --json number --jq '.[0].number // empty')
+        # Name the job that failed. This lane has five, and "the build is red"
+        # without saying which one sends the reader to the Actions tab to find
+        # out — which is the step nobody takes.
+        body=$(printf '%s\n\n- commit: %s\n- run: %s\n\n| job | result |\n| --- | --- |\n| Cassette safety gate | %s |\n| test-fast | %s |\n| test-strict-errors | %s |\n| test-network | %s |\n| test-slow | %s |\n| Combine Coverage (65%% floor) | %s |\n' \
+                 "The post-merge build lane failed on \`main\`." "$SHA" "$RUN_URL" \
+                 "$R_GATE" "$R_FAST" "$R_STRICT" "$R_NETWORK" "$R_SLOW" "$R_COVERAGE")
+        if [ -z "$number" ]; then
+          gh issue create --repo "$REPO" --label "$LABEL" \
+            --title "$TITLE" --body "$body"
+        else
+          gh issue reopen --repo "$REPO" "$number" 2>/dev/null || true
+          gh issue comment --repo "$REPO" "$number" --body "$body"
+        fi
+
+    - name: Close the tracking issue when main is green again
+      if: steps.verdict.outputs.red == '0'
+      run: |
+        number=$(gh issue list --repo "$REPO" --label "$LABEL" --state open \
+                   --limit 1 --json number --jq '.[0].number // empty')
+        if [ -n "$number" ]; then
+          gh issue close --repo "$REPO" "$number" \
+            --comment "Green again at $SHA — $RUN_URL"
+        fi

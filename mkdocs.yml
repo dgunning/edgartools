@@ -59,6 +59,7 @@ nav:
     - Complete Guide: complete-guide.md
     - Choosing the Right API: xbrl/getting-started/choosing-the-right-api.md
     - Common Pitfalls: common-pitfalls.md
+    - Handling Errors: guides/error-handling.md
     - Cheat Sheet: quick-guide.md
     - Key Concepts: concepts/sec-filings.md
 
@@ -178,5 +179,6 @@ nav:
     - SEC Compliance: resources/sec-compliance.md
     - Troubleshooting: resources/troubleshooting.md
     - Performance: resources/performance.md
+    - Upgrading to 6.0: upgrade/6.0.md
     - Contributing: contributing.md
     - About the Creator: about.md

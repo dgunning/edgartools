@@ -1,6 +1,0 @@
-Company: PROCTER & GAMBLE Co
-CIK: 80424
-Form: 10-K
-Filing Date: 2023-08-04
-Accession No: 0000080424-23-000073
-URL: https://www.sec.gov/Archives/edgar/data/80424/0000080424-23-000073-index.html

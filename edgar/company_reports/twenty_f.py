@@ -3,8 +3,8 @@ import re
 from functools import cached_property
 from typing import List
 
-from edgar.company_reports._base import CompanyReport
-from edgar.company_reports._structures import FilingStructure, extract_items_from_sections
+from edgar.company_reports._base import CompanyReport, report_lookup_miss
+from edgar.company_reports._structures import FilingStructure, item_sort_key
 from edgar.documents import HTMLParser, ParserConfig
 
 __all__ = ['TwentyF']
@@ -153,24 +153,51 @@ class TwentyF(CompanyReport):
     @property
     def items(self) -> List[str]:
         """
-        List of detected item names (consistent with sections property).
+        List of detected item names in standard "Item X" format.
 
-        Uses chunked_document for 20-F since the pattern-based extractor
-        doesn't handle the Table of Contents format well.
-        Falls back to new parser sections if chunked_document unavailable.
+        Uses the new parser's section detection, and nothing else. The legacy
+        ChunkedDocument fallback that used to back this up was removed once it
+        was measured to change no result on any filing in the corpus
+        (edgartools-07lk.23).
+
+        This class was the last one where legacy was PRIMARY. Its stated reason
+        was that "the pattern-based extractor doesn't handle the Table of
+        Contents format well", which the parity corpus does not support: on the
+        one 20-F where legacy clearly won, TOC detection returned no sections at
+        all, so the TOC path was not what was winning. The real cause was a
+        coverage gate in the pattern extractor (edgartools-dt1f Defect 1, fixed).
+
+        Item numbers come from ``Section.item`` rather than from the section key,
+        because the key is not stable across detection strategies: the TOC path
+        emits ``part_i_item_1`` and the pattern path emits ``item_1``, and
+        ``Section.item`` is ``'1'`` either way. Non-item sections (``part_i``,
+        ``signatures``) carry no item and are excluded.
 
         Returns:
-            List of item titles for backward compatibility (e.g., ['Item 5', 'Item 8'])
+            List of unique item titles in canonical SEC order
+            (e.g., ['Item 1', 'Item 2', 'Item 4A', 'Item 16A', 'Item 19']).
         """
-        # For 20-F, prefer chunked_document which handles TOC format better
-        if self.chunked_document:
-            return self.chunked_document.list_items()
+        def _canonical(raw_items):
+            """Deduplicate and sort into canonical SEC 20-F item order."""
+            return sorted(dict.fromkeys(raw_items), key=item_sort_key)
 
-        # Fallback to new parser sections
-        if self.sections and len(self.sections) > 0:
-            item_pattern = re.compile(r'(Item\s+\d+[A-Z]?)', re.IGNORECASE)
-            return extract_items_from_sections(self.sections, item_pattern)
+        # Try the new parser first.
+        sections = self.sections
+        if sections:
+            items = [f"Item {section.item}" for section in sections.values() if section.item]
+            if items:
+                return _canonical(items)
 
+        # The legacy fallback that used to sit here is gone (edgartools-07lk.23).
+        # It existed for exactly one filing — 0000928385-01-500187, a 2001 20-F
+        # whose only item legacy found and the new parser did not — and Strategy
+        # 5c in the pattern extractor now finds it directly (edgartools-3dp), so
+        # the fallback had stopped doing anything. Measured 0 differences across
+        # the 115-fixture corpus.
+        #
+        # `__getitem__` below is a different matter and keeps its fallback: on
+        # this corpus five 20-F item lookups return text only because of it
+        # (0001144204-10-017467 Items 5, 6, 11, 12, 15).
         return []
 
     def __getitem__(self, item_name: str):
@@ -182,8 +209,6 @@ class TwentyF(CompanyReport):
         - Item number: 'Item 5', '5'
         - Natural language: 'Item 5 - Operating and Financial Review'
         - Part lookups: 'Part I', 'Part II'
-
-        Falls back to old chunked_document for backward compatibility.
 
         Args:
             item_name: Section identifier in various formats
@@ -221,13 +246,7 @@ class TwentyF(CompanyReport):
                 if friendly_key in self.sections:
                     return self.sections[friendly_key].text()
 
-        # Fallback to old chunked_document for backward compatibility
-        if self.chunked_document:
-            try:
-                return self.chunked_document[item_name]
-            except (KeyError, TypeError):
-                pass
-
+        report_lookup_miss(self, item_name)
         return None
 
     def __str__(self):
@@ -304,17 +323,13 @@ class TwentyF(CompanyReport):
 
         # Sections
         try:
+            # .items deduplicates and orders canonically on both its paths, so
+            # the local dedup this used to do is no longer reachable.
             items = self.items
             if items:
-                seen = set()
-                unique_items = []
-                for item in items:
-                    if item not in seen:
-                        seen.add(item)
-                        unique_items.append(item)
                 lines.append("")
                 lines.append("SECTIONS:")
-                lines.append(f"  {', '.join(unique_items)}")
+                lines.append(f"  {', '.join(items)}")
         except Exception:
             pass
 

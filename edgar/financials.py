@@ -1,19 +1,28 @@
+import warnings
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 
 from edgar.core import log
+from edgar.exceptions import warn_will_raise
 from edgar.richtools import repr_rich
 from edgar.xbrl import XBRL, XBRLS, Statement
 from edgar.xbrl.presentation import ViewType
 from edgar.xbrl.statements import StitchedStatement
-from edgar.xbrl.xbrl import XBRLFilingWithNoXbrlData
+from edgar.xbrl.xbrl import no_xbrl_attachments
 
 # Columns produced by RenderedStatement.to_dataframe() that are metadata, not
 # period values.
+# Every column a rendered statement emits that is NOT a reporting period.
+# `standard_concept` appears whenever the statement was rendered with
+# standard=True (edgartools-t3zh). Missing entries here are currently rescued by
+# _order_period_columns, which pushes columns it cannot map to a period to the
+# end -- but that is a fallback, not the rule, and a metadata column left out of
+# this set is one positional pick away from being read as a value (GH #1244).
 _NON_PERIOD_COLUMNS = frozenset(
-    {'concept', 'label', 'level', 'abstract', 'dimension', 'is_breakdown', 'unit', 'point_in_time'}
+    {'concept', 'label', 'standard_concept', 'level', 'abstract', 'dimension',
+     'is_breakdown', 'unit', 'point_in_time'}
 )
 
 
@@ -117,16 +126,42 @@ def _order_period_columns(rendered, df_period_columns: List[str]) -> List[str]:
 class Financials:
     def __init__(self, xb: Optional[XBRL]):
         self.xb: XBRL = xb
+        # Set to a dict only for the duration of one get_financial_metrics() call;
+        # None the rest of the time. See _render_statement_frame().
+        self._statement_frame_memo: Optional[Dict[str, Any]] = None
 
     @classmethod
     def extract(cls, filing) -> Optional["Financials"]:
-        try:
-            xb = XBRL.from_filing(filing)
-            return Financials(xb)
-        except XBRLFilingWithNoXbrlData as e:
-            # Handle the case where the filing does not have XBRL data
-            log.warning(f"Filing {filing} does not contain XBRL data: {e}")
-            return None
+        """Build the financials for a filing.
+
+        A filing with no XBRL attachments still yields a `Financials` here —
+        one wrapping `xb=None`, whose every statement accessor answers `None`.
+        That object is why this was a silent failure: it is truthy, so the
+        documented `if financials is not None:` guard passes and the caller
+        then gets `None` from `income_statement()` with nothing explaining it.
+
+        The warning belongs here rather than in `XBRL.from_filing`, even though
+        that is the shared choke point. `filing.xbrl()` answering `None` for a
+        filing without XBRL is a documented true absence that stays quiet in
+        6.0 (docs/upgrade/6.0.md); warning at the choke point would have
+        reversed that. Asking for *financial statements* and silently getting an
+        object that has none is the actual failure, and this is where it happens.
+
+        The hollow object itself stays in 5.x: removing it is the behaviour
+        change, and the warning is the additive half that has to ship first
+        (edgartools-07lk.23). 6.0 raises and the object goes then.
+        """
+        xb = XBRL.from_filing(filing)
+        if xb is None:
+            # stacklevel=3: helper, this classmethod, the caller. The
+            # `get_financials()` chain sits two frames deeper, so the warning
+            # lands inside edgartools there rather than on the user's line —
+            # the message says what happened and does not depend on the line.
+            # There is deliberately no `except XBRLFilingWithNoXbrlData` around
+            # this: under strict, warn_will_raise raises and that error IS the
+            # 6.0 behaviour, so catching it would make strict a no-op here.
+            warn_will_raise(no_xbrl_attachments(filing), stacklevel=3)
+        return Financials(xb)
 
     def balance_sheet(self, include_dimensions: bool = None, view: ViewType = None):
         """
@@ -166,7 +201,7 @@ class Financials:
             return None
         return self.xb.statements.income_statement(include_dimensions=include_dimensions, view=view)
 
-    def cashflow_statement(self, include_dimensions: bool = None, view: ViewType = None):
+    def cash_flow_statement(self, include_dimensions: bool = None, view: ViewType = None):
         """
         Get the cash flow statement.
 
@@ -183,11 +218,18 @@ class Financials:
         """
         if self.xb is None:
             return None
-        return self.xb.statements.cashflow_statement(include_dimensions=include_dimensions, view=view)
+        return self.xb.statements.cash_flow_statement(include_dimensions=include_dimensions, view=view)
 
-    def cash_flow_statement(self, **kwargs):
-        """Alias for cashflow_statement()."""
-        return self.cashflow_statement(**kwargs)
+    def cashflow_statement(self, **kwargs):
+        """Deprecated: use :meth:`cash_flow_statement`."""
+        warnings.warn(
+            "cashflow_statement() is deprecated and will be removed in v6.0. "
+            "Use cash_flow_statement(), which matches income_statement() and "
+            "balance_sheet().",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.cash_flow_statement(**kwargs)
 
     def statement_of_equity(self, include_dimensions: bool = None, view: ViewType = None):
         """
@@ -242,6 +284,53 @@ class Financials:
     # These methods provide easy access to common financial metrics
     # using standardized labels across different companies
 
+    def _render_statement_frame(self, statement_type: str):
+        """Render one statement and convert it, reusing the pair within a metrics call.
+
+        Both lookup helpers need exactly this ``(rendered, df)`` pair and every
+        scalar getter goes through one of them, so a single
+        ``get_financial_metrics()`` re-rendered the same three statements 14 times
+        (18 for JPMorgan, 15 for Coca-Cola) over only THREE distinct
+        configurations.
+
+        The memo is scoped to one call: ``get_financial_metrics()`` installs it on
+        entry and discards it on exit. A statement's rendering depends on the view
+        and the periods in force, so a cache outliving the call would answer a
+        later question with an earlier call's configuration. Frames are handed out
+        as copies, because both callers filter and reshape what they receive.
+
+        Returns:
+            ``(rendered, df)``, or ``(None, None)`` when there is no such statement.
+        """
+        memo = self._statement_frame_memo
+        if memo is not None and statement_type in memo:
+            rendered, df = memo[statement_type]
+            return rendered, (None if df is None else df.copy())
+
+        if statement_type == 'income':
+            statement = self.income_statement()
+        elif statement_type == 'balance':
+            statement = self.balance_sheet()
+        elif statement_type == 'cashflow':
+            statement = self.cash_flow_statement()
+        else:
+            return None, None
+
+        if statement is None:
+            return None, None
+
+        rendered = statement.render(standard=True)
+        # presentation=False: these helpers look up a filed magnitude, not a
+        # displayed figure. get_free_cash_flow() subtracts capital expenditures,
+        # so a presented (negative) outflow here would add it instead
+        # (edgartools-5ztr).
+        df = rendered.to_dataframe(presentation=False)
+
+        if memo is not None:
+            memo[statement_type] = (rendered, df)
+            return rendered, (None if df is None else df.copy())
+        return rendered, df
+
     def _get_standardized_concept_by_xbrl(self, statement_type: str,
                                           standard_concept_names: List[str],
                                           period_offset: int = 0) -> Optional[Union[int, float]]:
@@ -269,22 +358,9 @@ class Financials:
             from edgar.xbrl.standardization import get_default_store
             standardizer = get_default_store()
 
-            # Get the appropriate statement
-            if statement_type == 'income':
-                statement = self.income_statement()
-            elif statement_type == 'balance':
-                statement = self.balance_sheet()
-            elif statement_type == 'cashflow':
-                statement = self.cashflow_statement()
-            else:
+            rendered, df = self._render_statement_frame(statement_type)
+            if df is None:
                 return None
-
-            if statement is None:
-                return None
-
-            # Render the statement
-            rendered = statement.render(standard=True)
-            df = rendered.to_dataframe()
 
             if df.empty or 'concept' not in df.columns:
                 return None
@@ -374,22 +450,9 @@ class Financials:
             return None
 
         try:
-            # Get the appropriate statement
-            if statement_type == 'income':
-                statement = self.income_statement()
-            elif statement_type == 'balance':
-                statement = self.balance_sheet()
-            elif statement_type == 'cashflow':
-                statement = self.cashflow_statement()
-            else:
+            rendered, df = self._render_statement_frame(statement_type)
+            if df is None:
                 return None
-
-            if statement is None:
-                return None
-
-            # Render with standardization enabled
-            rendered = statement.render(standard=True)
-            df = rendered.to_dataframe()
 
             if df.empty:
                 return None
@@ -450,11 +513,26 @@ class Financials:
             >>> revenue = financials.get_revenue()  # Most recent revenue
             >>> prev_revenue = financials.get_revenue(1)  # Previous period revenue
         """
-        # First try concept-based search using standardization mappings
-        # Try "Contract Revenue" first (more specific), then "Revenue" (more general)
+        # First try concept-based search using standardization mappings.
+        #
+        # The filed TOTAL comes first. A contract-revenue fact can be one
+        # component of us-gaap:Revenues rather than the top line: Cato reports
+        # both in the same face statement, and its calculation linkbase defines
+        # Revenues = RevenueFromContractWithCustomerIncludingAssessedTax +
+        # IncomeOther, so asking for the more specific concept first returned
+        # retail sales as total revenue and understated FY2023 by $7.7M
+        # (gh #1294). Statement.REVENUE_CONCEPTS already ordered it this way,
+        # and this list disagreeing with it is why the same object's
+        # get_revenue() and analyze_trends() reported different revenue.
+        #
+        # A filer whose only top line is contract revenue is unaffected:
+        # 'Revenue' matches nothing and the search falls through. Measured over
+        # the fixture corpus, both concepts resolve in no filing at different
+        # values, and 7 filings (Apple, Microsoft, Amazon, Tesla) resolve only
+        # the contract concept and are unchanged.
         result = self._get_standardized_concept_by_xbrl(
             'income',
-            ['Contract Revenue', 'Revenue'],
+            ['Revenue', 'Contract Revenue'],
             period_offset
         )
 
@@ -587,12 +665,29 @@ class Financials:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
 
         Returns:
-            Total liabilities value if found, None otherwise
+            Total liabilities value if found, None otherwise. A filing that
+            reports no liabilities total returns None rather than a substitute.
         """
+        # Identify the concept, not the filer's prose. The label path alone
+        # returned liabilities AND equity as liabilities (gh #1279): its
+        # r'Liabilities$' pattern matches "TOTAL LIABILITIES AND SHAREHOLDERS'
+        # EQUITY", which is what a balance sheet carries when it reports no
+        # standalone us-gaap:Liabilities total. NIKE's FY2026 10-K returned
+        # $38.410B — its total assets — so debt_to_assets came back as exactly
+        # 1.0 against an actual 0.613. AMZN, WMT, T, DIS, KO and ORCL did the
+        # same; JPMorgan did not, because it files the standalone total.
+        value = self._get_standardized_concept_by_xbrl(
+            'balance', ['Total Liabilities'], period_offset)
+        if value is not None:
+            return value
+
+        # Label fallback for a filer whose total is present but unmapped. Both
+        # patterns are anchored at BOTH ends: '^Total Liabilities' alone still
+        # matches the combined caption, so anchoring only the start would
+        # reintroduce the same defect one pattern later.
         patterns = [
-            r'Total Liabilities$',
-            r'^Total Liabilities',
-            r'Liabilities$'
+            r'^Total Liabilities$',
+            r'^Liabilities$',
         ]
         return self._get_standardized_concept_value('balance', patterns, period_offset)
 
@@ -617,7 +712,7 @@ class Financials:
 
     def get_operating_cash_flow(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
-        Get operating cash flow from the cash flow statement using standardized labels.
+        Get operating cash flow from the cash flow statement using standardized XBRL concepts.
 
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
@@ -625,6 +720,25 @@ class Financials:
         Returns:
             Operating cash flow value if found, None otherwise
         """
+        # Concept first, as get_revenue and get_capital_expenditures already do.
+        # The label patterns below are written against the STANDARDIZED
+        # vocabulary, so a filer whose own wording differs never reaches any of
+        # them: Apple writes "Cash generated by operating activities" and matched
+        # none of the five, so this returned None for Apple entirely (GH #1083).
+        # Which of those five a filer happens to hit is an accident of house
+        # style; the XBRL concept is the same for all of them.
+        result = self._get_standardized_concept_by_xbrl(
+            'cashflow',
+            ['Net Cash from Operating Activities'],
+            period_offset
+        )
+
+        if result is not None:
+            return result
+
+        # Fallback to label-based search, for statements where the concept is
+        # absent or unmapped — a custom extension tag, or an IFRS filer outside
+        # the mapping set.
         patterns = [
             r'^Net Cash from Operating',          # Most specific - matches "Net Cash from Operating Activities"
             r'^Net Cash Provided by Operating',   # Alternative phrasing
@@ -734,50 +848,55 @@ class Financials:
             return None
 
         try:
-            # Get the appropriate statement
-            if statement_type == 'income':
-                statement = self.income_statement()
-            elif statement_type == 'balance':
-                statement = self.balance_sheet()
-            elif statement_type == 'cashflow':
-                statement = self.cashflow_statement()
-            else:
+            rendered, df = self._render_statement_frame(statement_type)
+            if df is None:
                 return None
-
-            if statement is None:
-                return None
-
-            # Render with standardization enabled
-            rendered = statement.render(standard=True)
-            df = rendered.to_dataframe()
 
             if df.empty or 'concept' not in df.columns:
                 return None
 
+            # Drop abstract rows, as the two sibling helpers already do. An
+            # abstract row is a heading: it never carries a value, and it sorts
+            # ABOVE the row it introduces. A filing that presents
+            # WeightedAverageNumberOfSharesOutstandingBasicAbstract over
+            # WeightedAverageNumberOfSharesOutstandingBasic — Auburn National's
+            # 10-K does — otherwise matched the heading first and reported no
+            # shares at all (gh #1291).
+            if 'abstract' in df.columns:
+                df = df[~df['abstract']].copy()
+
+            # Get available period columns, ordered most-recent-first by period
+            # metadata (positional df order is not recency-sorted — GH #885).
+            # Invariant across patterns, so it is resolved once.
+            period_columns = [col for col in df.columns if col not in _NON_PERIOD_COLUMNS]
+            period_columns = _order_period_columns(rendered, period_columns)
+            if len(period_columns) <= period_offset:
+                return None
+            period_col = period_columns[period_offset]
+
             # Find the concept using pattern matching on concept column
             for pattern in concept_patterns:
                 matches = df[df['concept'].str.contains(pattern, case=False, na=False)]
-                if not matches.empty:
-                    # Get available period columns, ordered most-recent-first by
-                    # period metadata (positional df order is not recency-sorted
-                    # — GH #885).
-                    period_columns = [col for col in df.columns if col not in _NON_PERIOD_COLUMNS]
-                    period_columns = _order_period_columns(rendered, period_columns)
+                if matches.empty:
+                    continue
 
-                    if len(period_columns) > period_offset:
-                        period_col = period_columns[period_offset]
-                        value = matches.iloc[0][period_col]
+                # Try each matching ROW before moving to the next pattern.
+                # Reading only matches.iloc[0] and then falling through to the
+                # next pattern skipped the populated rows behind an empty first
+                # match, which is the other half of gh #1291 and how the two
+                # siblings already behave.
+                for idx in range(len(matches)):
+                    value = matches.iloc[idx][period_col]
 
-                        # Skip empty/NA values - try next pattern
-                        if pd.isna(value) or value == '':
-                            continue
+                    # Skip empty/NA values
+                    if pd.isna(value) or value == '':
+                        continue
 
-                        # Convert to numeric
-                        try:
-                            return float(value) if '.' in str(value) else int(value)
-                        except (ValueError, TypeError):
-                            # Non-numeric value, try next pattern
-                            continue
+                    # Convert to numeric
+                    try:
+                        return float(value) if '.' in str(value) else int(value)
+                    except (ValueError, TypeError):
+                        continue
 
             return None
 
@@ -864,6 +983,18 @@ class Financials:
             >>> metrics = financials.get_financial_metrics()
             >>> print(f"Revenue: ${metrics.get('revenue', 'N/A'):,}")
         """
+        # Every getter below funnels into _render_statement_frame(), which without
+        # this memo re-rendered and re-converted the same three statements once per
+        # getter. Installed here and discarded in the finally, so no rendering
+        # outlives the call that produced it.
+        self._statement_frame_memo = {}
+        try:
+            return self._collect_financial_metrics()
+        finally:
+            self._statement_frame_memo = None
+
+    def _collect_financial_metrics(self) -> Dict[str, Any]:
+        """The body of get_financial_metrics(), run with the per-call memo installed."""
         metrics = {}
 
         # Income Statement Metrics
@@ -987,7 +1118,7 @@ class Financials:
             "AVAILABLE STATEMENTS:",
             "  financials.income_statement()",
             "  financials.balance_sheet()",
-            "  financials.cashflow_statement()",
+            "  financials.cash_flow_statement()",
             "  financials.statement_of_equity()",
             "  financials.comprehensive_income()",
             "",
@@ -1033,12 +1164,19 @@ class MultiFinancials:
     def income_statement(self, view: ViewType = None) -> Optional[StitchedStatement]:
         return self.xbs.statements.income_statement(view=view)
 
-    def cashflow_statement(self, view: ViewType = None) -> Optional[StitchedStatement]:
-        return self.xbs.statements.cashflow_statement(view=view)
+    def cash_flow_statement(self, view: ViewType = None) -> Optional[StitchedStatement]:
+        return self.xbs.statements.cash_flow_statement(view=view)
 
-    def cash_flow_statement(self, **kwargs):
-        """Alias for cashflow_statement()."""
-        return self.cashflow_statement(**kwargs)
+    def cashflow_statement(self, **kwargs):
+        """Deprecated: use :meth:`cash_flow_statement`."""
+        warnings.warn(
+            "cashflow_statement() is deprecated and will be removed in v6.0. "
+            "Use cash_flow_statement(), which matches income_statement() and "
+            "balance_sheet().",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.cash_flow_statement(**kwargs)
 
     def __rich__(self):
         return self.xbs.__rich__()

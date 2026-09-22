@@ -2,28 +2,13 @@
 Custom exceptions for the HTML parser.
 """
 
-from typing import Any, Dict, Optional
-
-
-class ParsingError(Exception):
-    """Base exception for parsing errors."""
-
-    def __init__(self,
-                 message: str,
-                 context: Optional[Dict[str, Any]] = None,
-                 suggestions: Optional[list] = None):
-        super().__init__(message)
-        self.message = message
-        self.context = context or {}
-        self.suggestions = suggestions or []
-
-    def __str__(self):
-        result = self.message
-        if self.context:
-            result += f"\nContext: {self.context}"
-        if self.suggestions:
-            result += f"\nSuggestions: {', '.join(self.suggestions)}"
-        return result
+# ParsingError is one of the four branches of the tree in edgar.exceptions
+# (bead edgartools-07lk.10). Its message/context/suggestions shape moved up into
+# EdgarError, so the subclasses below re-base with no change to their
+# signatures. Imported rather than redefined: same object, so every existing
+# `except ParsingError:` and `from edgar.documents.exceptions import
+# ParsingError` keeps working.
+from edgar.exceptions import ParsingError
 
 
 class HTMLParsingError(ParsingError):
@@ -59,7 +44,6 @@ class DocumentTooLargeError(ParsingError):
             f"Document size ({size:,} bytes) exceeds maximum ({max_size:,} bytes)",
             context={'size': size, 'max_size': max_size},
             suggestions=[
-                "Use streaming parser for large documents",
                 "Increase max_document_size in configuration",
                 "Split document into smaller parts"
             ]

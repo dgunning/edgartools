@@ -1,0 +1,1120 @@
+{
+  "Filings.to_pandas()": {
+    "column_order": [
+      "form",
+      "company",
+      "cik",
+      "filing_date",
+      "accession_number"
+    ],
+    "columns": {
+      "form": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "company": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "cik": {
+        "dtype_family": "integer",
+        "dtype_exact": "int32",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "filing_date": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "accession_number": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      }
+    },
+    "row_count": 340032,
+    "index_dtype_family": "integer",
+    "label": "Filings.to_pandas()"
+  },
+  "FactsQuery.to_dataframe()": {
+    "column_order": [
+      "concept",
+      "label",
+      "balance",
+      "preferred_sign",
+      "weight",
+      "value",
+      "numeric_value",
+      "period_key",
+      "period_start",
+      "period_end",
+      "period_instant",
+      "is_dimensioned",
+      "decimals",
+      "statement_type",
+      "statement_name",
+      "fact_id",
+      "context_ref",
+      "unit_ref",
+      "currency",
+      "period_type",
+      "entity_identifier",
+      "entity_scheme",
+      "fiscal_period",
+      "fiscal_year"
+    ],
+    "columns": {
+      "concept": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "label": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "balance": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "preferred_sign": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "weight": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "value": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "numeric_value": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "period_key": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "period_start": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "period_end": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "period_instant": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "is_dimensioned": {
+        "dtype_family": "bool",
+        "dtype_exact": "bool",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "decimals": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "statement_type": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "statement_name": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "fact_id": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "context_ref": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "unit_ref": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "currency": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "period_type": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "entity_identifier": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "entity_scheme": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "fiscal_period": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "fiscal_year": {
+        "dtype_family": "integer",
+        "dtype_exact": "int64",
+        "null_tokens": [],
+        "all_null": false
+      }
+    },
+    "row_count": 1492,
+    "index_dtype_family": "integer",
+    "label": "FactsQuery.to_dataframe()"
+  },
+  "FactsQuery.to_dataframe() [IncomeStatement]": {
+    "column_order": [
+      "concept",
+      "label",
+      "balance",
+      "preferred_sign",
+      "weight",
+      "value",
+      "numeric_value",
+      "period_key",
+      "period_start",
+      "period_end",
+      "is_dimensioned",
+      "decimals",
+      "statement_type",
+      "statement_name",
+      "fact_id",
+      "context_ref",
+      "unit_ref",
+      "currency",
+      "period_type",
+      "entity_identifier",
+      "entity_scheme",
+      "fiscal_period",
+      "fiscal_year"
+    ],
+    "columns": {
+      "concept": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "label": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "balance": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "preferred_sign": {
+        "dtype_family": "integer",
+        "dtype_exact": "int64",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "weight": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "value": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "numeric_value": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "period_key": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "period_start": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "period_end": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "is_dimensioned": {
+        "dtype_family": "bool",
+        "dtype_exact": "bool",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "decimals": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "statement_type": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "statement_name": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "fact_id": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "context_ref": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "unit_ref": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "currency": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "period_type": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "entity_identifier": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "entity_scheme": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "fiscal_period": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "fiscal_year": {
+        "dtype_family": "integer",
+        "dtype_exact": "int64",
+        "null_tokens": [],
+        "all_null": false
+      }
+    },
+    "row_count": 141,
+    "index_dtype_family": "integer",
+    "label": "FactsQuery.to_dataframe() [IncomeStatement]"
+  },
+  "_source": {
+    "xbrl_entry": "footlocker_10k_fy2024",
+    "accession": "0001437749-25-009620"
+  },
+  "EntityFacts.to_dataframe()": {
+    "column_order": [
+      "concept",
+      "label",
+      "value",
+      "numeric_value",
+      "unit",
+      "period_type",
+      "period_start",
+      "period_end",
+      "fiscal_year",
+      "fiscal_period"
+    ],
+    "columns": {
+      "concept": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "label": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "value": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "numeric_value": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "unit": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "period_type": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "period_start": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "None"
+        ],
+        "all_null": false
+      },
+      "period_end": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "fiscal_year": {
+        "dtype_family": "integer",
+        "dtype_exact": "int64",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "fiscal_period": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      }
+    },
+    "row_count": 24131,
+    "index_dtype_family": "integer",
+    "label": "EntityFacts.to_dataframe()"
+  },
+  "EntityFacts.to_dataframe() [include_metadata]": {
+    "column_order": [
+      "concept",
+      "label",
+      "value",
+      "numeric_value",
+      "unit",
+      "period_type",
+      "period_start",
+      "period_end",
+      "fiscal_year",
+      "fiscal_period",
+      "accession",
+      "filing_date",
+      "form_type",
+      "statement_type",
+      "taxonomy",
+      "scale",
+      "data_quality",
+      "is_audited",
+      "confidence_score"
+    ],
+    "columns": {
+      "concept": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "label": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "value": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "numeric_value": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "unit": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "period_type": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "period_start": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "None"
+        ],
+        "all_null": false
+      },
+      "period_end": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "fiscal_year": {
+        "dtype_family": "integer",
+        "dtype_exact": "int64",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "fiscal_period": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "accession": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "filing_date": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "form_type": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "statement_type": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "taxonomy": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "scale": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "None"
+        ],
+        "all_null": true
+      },
+      "data_quality": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "is_audited": {
+        "dtype_family": "bool",
+        "dtype_exact": "bool",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "confidence_score": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [],
+        "all_null": false
+      }
+    },
+    "row_count": 24131,
+    "index_dtype_family": "integer",
+    "label": "EntityFacts.to_dataframe() [include_metadata]"
+  },
+  "entity.FactQuery.to_dataframe()": {
+    "column_order": [
+      "concept",
+      "label",
+      "value",
+      "numeric_value",
+      "unit",
+      "scale",
+      "period_start",
+      "period_end",
+      "period_type",
+      "fiscal_year",
+      "fiscal_period",
+      "filing_date",
+      "form_type",
+      "accession",
+      "data_quality",
+      "confidence_score",
+      "is_audited",
+      "is_estimated",
+      "statement_type"
+    ],
+    "columns": {
+      "concept": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "label": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "value": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "numeric_value": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "unit": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "scale": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "None"
+        ],
+        "all_null": true
+      },
+      "period_start": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "None"
+        ],
+        "all_null": false
+      },
+      "period_end": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "period_type": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "fiscal_year": {
+        "dtype_family": "integer",
+        "dtype_exact": "int64",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "fiscal_period": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "filing_date": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "form_type": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "accession": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "data_quality": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "confidence_score": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "is_audited": {
+        "dtype_family": "bool",
+        "dtype_exact": "bool",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "is_estimated": {
+        "dtype_family": "bool",
+        "dtype_exact": "bool",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "statement_type": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      }
+    },
+    "row_count": 24131,
+    "index_dtype_family": "integer",
+    "label": "entity.FactQuery.to_dataframe()"
+  },
+  "entity.FactQuery.to_dataframe() [Revenues]": {
+    "column_order": [
+      "concept",
+      "label",
+      "value",
+      "numeric_value",
+      "unit",
+      "scale",
+      "period_start",
+      "period_end",
+      "period_type",
+      "fiscal_year",
+      "fiscal_period",
+      "filing_date",
+      "form_type",
+      "accession",
+      "data_quality",
+      "confidence_score",
+      "is_audited",
+      "is_estimated",
+      "statement_type"
+    ],
+    "columns": {
+      "concept": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "label": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "value": {
+        "dtype_family": "integer",
+        "dtype_exact": "int64",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "numeric_value": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "unit": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "scale": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "None"
+        ],
+        "all_null": true
+      },
+      "period_start": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "period_end": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "period_type": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "fiscal_year": {
+        "dtype_family": "integer",
+        "dtype_exact": "int64",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "fiscal_period": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "filing_date": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "form_type": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "accession": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "data_quality": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "confidence_score": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "is_audited": {
+        "dtype_family": "bool",
+        "dtype_exact": "bool",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "is_estimated": {
+        "dtype_family": "bool",
+        "dtype_exact": "bool",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "statement_type": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      }
+    },
+    "row_count": 333,
+    "index_dtype_family": "integer",
+    "label": "entity.FactQuery.to_dataframe() [Revenues]"
+  },
+  "_entity_source": {
+    "key": "tesla",
+    "cik": 1318605
+  },
+  "StitchedFactQuery.to_dataframe()": {
+    "column_order": [
+      "concept",
+      "label",
+      "original_label",
+      "value",
+      "numeric_value",
+      "period_start",
+      "period_end",
+      "decimals",
+      "statement_type",
+      "fiscal_period",
+      "standard_concept",
+      "period_type",
+      "period_instant",
+      "period_label",
+      "level",
+      "is_abstract",
+      "is_total",
+      "filing_count",
+      "standardized",
+      "fiscal_year"
+    ],
+    "columns": {
+      "concept": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "label": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "original_label": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "value": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "numeric_value": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "period_start": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "period_end": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "decimals": {
+        "dtype_family": "integer",
+        "dtype_exact": "int64",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "statement_type": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "fiscal_period": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "standard_concept": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "period_type": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "period_instant": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "period_label": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "level": {
+        "dtype_family": "integer",
+        "dtype_exact": "int64",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "is_abstract": {
+        "dtype_family": "bool",
+        "dtype_exact": "bool",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "is_total": {
+        "dtype_family": "bool",
+        "dtype_exact": "bool",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "filing_count": {
+        "dtype_family": "integer",
+        "dtype_exact": "int64",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "standardized": {
+        "dtype_family": "bool",
+        "dtype_exact": "bool",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "fiscal_year": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      }
+    },
+    "row_count": 207,
+    "index_dtype_family": "integer",
+    "label": "StitchedFactQuery.to_dataframe()"
+  },
+  "_stitch_source": {
+    "keys": [
+      "footlocker_10k_fy2013",
+      "footlocker_10k_fy2024"
+    ]
+  },
+  "Document.to_dataframe()": {
+    "unavailable": "TypeError: Cannot cast array data from dtype('float64') to dtype('int64') according to the rule 'safe'"
+  }
+}

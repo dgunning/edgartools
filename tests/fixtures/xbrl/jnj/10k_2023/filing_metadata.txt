@@ -1,6 +1,0 @@
-Company: JOHNSON & JOHNSON
-CIK: 200406
-Form: 10-K
-Filing Date: 2023-02-16
-Accession No: 0000200406-23-000016
-URL: https://www.sec.gov/Archives/edgar/data/200406/0000200406-23-000016-index.html

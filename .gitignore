@@ -25,6 +25,80 @@ ratelimiter.sqlite*
 .pyscn/
 # Training output (generated, not tracked)
 training/output/
-# Oversized issue-868 S-1 underwriter cassettes (>100MB, kept local only)
-tests/cassettes/TestIssue868S1Underwriters.test_s1_lead_manager_is_real_underwriter.yaml
-tests/cassettes/TestIssue868S1Underwriters.test_s1a_lead_manager_is_real_underwriter.yaml
+# Private working material. These rules lived ONLY in .git/info/exclude, which
+# is per-clone and never shared, so a fresh clone tracked all of it with no
+# signal. This is a public repo and the working tree routinely carries 200+
+# untracked files, so a single `git add -A` was the whole distance between these
+# and GitHub. Moved here so the protection travels with the repo.
+#
+# Ignore rules never affect already-tracked files, so nothing currently tracked
+# changes. To commit something under these paths deliberately, `git add -f`.
+
+# Private design/planning notes. The public counterpart is engineering/, which
+# is tracked — anything a contributor should be able to read lives there, not
+# here. docs/ is user documentation only and is built into the docs site, so
+# nothing internal belongs under it.
+docs-internal/
+
+# Local knowledge wiki, maintained by an unattended agent that reads private
+# notes. Publishing it risks leaking them.
+wiki/
+
+# Correspondence drafts kept at the repo root (letters to external reporters and
+# researchers, often unsent).
+/reply-to-*.md
+
+# Local build, test, and session artifacts. Ignore rules never affect
+# already-tracked files (e.g. the tracked .claude/ agents and commands stay
+# tracked).
+.sesskey
+output/
+test_output/
+/training/
+tests/manual/
+edgar/**/.debug/
+ai_docs/
+agent_eval_results/
+.claude/settings.local.json
+.claude/
+.beads/issues.jsonl
+**/TEMP_*.md
+**/WIP_*.md
+**/LOCAL_*.md
+**/my_analysis_*.md
+**/scratch_*.md
+# Test fixtures at the repo root. Keep the leading slash: hatchling filters the
+# build through .gitignore, so a bare "data/" also matches edgar/reference/data/
+# and edgar/entity/data/ and drops them from the wheel — even though
+# pyproject.toml [tool.hatch.build] includes them explicitly. Those files are
+# needed at import time, so the result is a wheel that cannot `import edgar`.
+/data/
+
+# Widened text-boundary measurement corpus: filings downloaded by
+# scripts/text_boundary/build_wide_corpus.py. Deliberately NOT committed —
+# tests/fixtures/html already carries 278MB, and this corpus rebuilds exactly from the
+# accession numbers pinned in scripts/text_boundary/wide_corpus_manifest.json.
+/tests/fixtures/text_boundary_corpus/
+
+# CUSIP->ticker rebuild tooling. Deliberately NOT committed: it reaches into the
+# upstream edgar-storage dataset, and where that dataset lives is not repo
+# knowledge. The script itself takes the location from CT_PRIMARY_BUCKET /
+# CT_PRIMARY_KEY at run time and hardcodes nothing, so this is belt-and-braces
+# rather than the only thing standing between the repo and those details.
+#
+# What the script DOES is committed regardless — sanitize_cusip_tickers() lives in
+# edgar/reference/tickers.py with its tests, so the data-quality contract on the
+# shipped mapping survives in the repo even though the build tool does not. If you
+# need to regenerate ct.pq and this file is missing, that function is the part that
+# mattered; the rest is a merge and a write. See GH #978.
+/scripts/build_ct_pq.py
+
+# Backup this script writes before overwriting the shipped mapping. Anchored and
+# suffixed so it cannot match ct.pq itself — see the hatchling note above.
+/edgar/reference/data/*.bak
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
+.beads/proxieddb/

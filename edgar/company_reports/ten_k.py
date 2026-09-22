@@ -1,5 +1,6 @@
 """Form 10-K annual report class."""
 import re
+import warnings
 from functools import cached_property
 
 from rich import box
@@ -8,12 +9,13 @@ from rich.padding import Padding
 from rich.panel import Panel
 from rich.tree import Tree
 
-from edgar.company_reports._base import CompanyReport
-from edgar.company_reports._structures import FilingStructure
+from edgar.company_reports._base import CompanyReport, report_lookup_miss
+from edgar.company_reports._structures import FilingStructure, item_sort_key
 from edgar.core import log
-from edgar.documents import HTMLParser, ParserConfig
-from edgar.files.htmltools import ChunkedDocument
 from edgar.display.formatting import datefmt
+from edgar.documents import HTMLParser, ParserConfig, parse_html
+from edgar.exceptions import strict_errors_enabled
+from edgar.files.htmltools import ChunkedDocument
 
 __all__ = ['TenK']
 
@@ -46,6 +48,17 @@ _CROSS_REF_ITEM_MAP = {
 }
 
 
+# "Item 7", "ITEM 7", "item 7" are the same lookup. TenQ, TwentyF and
+# CurrentReport already treated them so; TenK matched only the "Item " spelling
+# and leaned on the legacy parser -- which lowercased -- for the rest. Deleting
+# that fallback (edgartools-3dp Group B) made the gap visible as a real miss on
+# `tenk['ITEM 7']` and `get_item_with_part('Part II', 'ITEM 7')`, GH #454.
+# `\s+` rather than the fixed `normalized[5:]` slice it replaces, so "Item  7"
+# works too. The required whitespace is also what keeps "Items 1 and 2" out:
+# after the literal "item" comes "s", not a space, so it does not match here and
+# is left to the combined-items branch below.
+_ITEM_PREFIX = re.compile(r'^item\s+(.+)$', re.IGNORECASE)
+
 # SEC 10-K item-to-part mapping. Each item number has exactly one valid Part
 # per SEC rules. Used to constrain section lookups so a missing Part I item
 # does not silently fall back to a wrong-Part section produced by a flaky
@@ -59,18 +72,10 @@ _ITEM_TO_PART_10K = {
 }
 
 
-def _item_sort_key(item: str) -> tuple:
-    """Sort key producing canonical SEC 10-K item order.
-
-    Sorts by numeric item value first, then by the full token so letter
-    suffixes order correctly within a number (e.g. ``Item 1`` < ``Item 1A``
-    < ``Item 1B``, and ``Item 7`` < ``Item 7A``). Yields the canonical
-    sequence: 1, 1A, 1B, 1C, 2, 3, 4, 5, 6, 7, 7A, 8, 9, 9A, 9B, 9C,
-    10, 11, 12, 13, 14, 15, 16.
-    """
-    token = item.split()[-1]  # "Item 1A" -> "1A"
-    num = int(''.join(c for c in token if c.isdigit()) or '0')
-    return (num, token)
+# The canonical whole-numbered item order (1, 1A, 1B, 2, ... 16). Shared with
+# TwentyF, whose items sort by the same rule; kept bound here because it is
+# imported under this name.
+_item_sort_key = item_sort_key
 
 
 class TenK(CompanyReport):
@@ -205,21 +210,47 @@ class TenK(CompanyReport):
 
         Returns:
             Document object from edgar.documents module with sections property,
-            or None if parsing fails (falls back to ChunkedDocument)
+            or None when the filing has no HTML document at all — a real
+            condition for older 10-Ks filed as plain text, and the only thing
+            None means here from 6.0 onwards.
+
+            Today None also comes back when the parser *failed*, with a
+            FutureWarning; in 6.0 that raises instead. Two very different facts
+            were arriving as the same value: "this filing has no HTML" and "this
+            filing has HTML we could not read". Every sibling report class
+            (TenQ, TwentyF, FortyF, CurrentReport) already lets a parse failure
+            propagate — this one was the outlier.
+
+            Set EDGARTOOLS_STRICT_ERRORS=1 for the 6.0 behaviour now.
         """
+        html = self._filing.html()
+        if not html:
+            return None
+        config = ParserConfig(form='10-K')
+        parser = HTMLParser(config)
         try:
-            html = self._filing.html()
-            if not html:
-                return None
-            config = ParserConfig(form='10-K')
-            parser = HTMLParser(config)
             return parser.parse(html)
         except Exception as e:
-            # If new parser fails, log and return None to fall back to old parser
-            import warnings
+            # Deliberately not warn_will_raise(): what 6.0 does here is let the
+            # parser's own ParsingError through, and a bare `raise` keeps its
+            # type, message and traceback. Building a fresh error to raise would
+            # replace a specific diagnosis with a generic one.
+            if strict_errors_enabled():
+                raise
+            # Which filing failed, and why, goes to the log: naming it in the
+            # warning would put the accession in the text Python dedups on, and
+            # a parser regression across a form-year would then warn once per
+            # filing. The warning dedups on the failure *mode* instead, which is
+            # a bounded set — see warn_will_raise in edgar/exceptions.py.
+            log.warning("HTMLParser failed for 10-K filing %s: %s",
+                        self._filing.accession_number, e)
             warnings.warn(
-                f"HTMLParser failed for 10-K filing (falling back to ChunkedDocument): {e}",
-                RuntimeWarning,
+                f"HTMLParser raised {type(e).__name__} on a 10-K "
+                f"(falling back to ChunkedDocument); the filing and the parser "
+                f"message are in the log.\n"
+                f"This returns None today and raises in edgartools 6.0. Set "
+                f"EDGARTOOLS_STRICT_ERRORS=1 to get the 6.0 behaviour now.",
+                FutureWarning,
                 stacklevel=2
             )
             return None
@@ -302,29 +333,50 @@ class TenK(CompanyReport):
                     items.append(key)
             if items:
                 return _canonical(items)
-            return _canonical(self.chunked_document.list_items()) if self.chunked_document else []
 
-        # Fallback to old parser for backward compatibility
-        if self.chunked_document:
-            return _canonical(self.chunked_document.list_items())
-
+        # No legacy fallback here any more (edgartools-07lk.23). Measured across
+        # the 115-fixture era-stratified corpus: removing it changes `.items` on
+        # ZERO filings, for every one of 10-K, 10-Q, 20-F and 8-K. Strategy 5c in
+        # the pattern extractor closed the last case that needed it — a 2001 10-K
+        # losing Item 7 (edgartools-3dp).
+        #
+        # This says nothing about `__getitem__` below, which still falls back and
+        # still has to: `.items` consulted legacy only when the new parser found
+        # NOTHING, while `__getitem__` consults it whenever THIS item is missing,
+        # so a partial detection miss reaches the second and never the first. That
+        # is not hypothetical — on the same corpus, 15 item lookups return real
+        # text only because of the fallback (e.g. 0000950153-99-001234 Item 14,
+        # 19KB). Deleting that one is a separate, unfinished piece of work.
         return []
 
+    # These four go through .get() rather than self[...] on purpose, and keep
+    # returning None when the section is absent — in 6.0 too.
+    #
+    # `report[item]` raises in 6.0 because the caller named a specific thing and
+    # `.get()` is there for the callers who would rather have None. A property
+    # has no `.get(default)` form, so flipping these would delete the `if
+    # tenk.risk_factors:` idiom with nowhere to move it to. They read as probes
+    # — "does this filing have an MD&A?" — and a probe answering None is the
+    # documented behaviour, not a silent failure.
     @property
     def business(self):
-        return self['Item 1']
+        """Item 1, or None if this filing has no Part I Item 1."""
+        return self.get('Item 1')
 
     @property
     def risk_factors(self):
-        return self['Item 1A']
+        """Item 1A, or None if this filing has no risk factors section."""
+        return self.get('Item 1A')
 
     @property
     def management_discussion(self):
-        return self['Item 7']
+        """Item 7 (MD&A), or None if this filing has no Part II Item 7."""
+        return self.get('Item 7')
 
     @property
     def directors_officers_and_governance(self):
-        return self['Item 10']
+        """Item 10, or None if this filing has no Part III Item 10."""
+        return self.get('Item 10')
 
     @cached_property
     def subsidiaries(self):
@@ -346,7 +398,10 @@ class TenK(CompanyReport):
         return None
 
     @cached_property
-    def chunked_document(self):
+    def _chunked_document(self):
+        # Construction only — the deprecation lives on the public
+        # `chunked_document` in CompanyReport. Overriding that one here is what
+        # previously cost TenK users their warning entirely.
         return ChunkedDocument(self._filing.html(), prefix_src=self._filing.base_dir)
 
     @cached_property
@@ -369,16 +424,6 @@ class TenK(CompanyReport):
         if index.has_index():
             return index
         return None
-
-    def id_parse_document(self, markdown:bool=False):
-        cache = getattr(self, '_id_parse_cache', {})
-        if markdown in cache:
-            return cache[markdown]
-        from edgar.files.html_documents_id_parser import ParsedHtml10K
-        result = ParsedHtml10K().extract_html(self._filing.html(), self.structure, markdown=markdown)
-        cache[markdown] = result
-        self._id_parse_cache = cache
-        return result
 
     def __str__(self):
         return f"""TenK('{self.company}')"""
@@ -568,9 +613,10 @@ class TenK(CompanyReport):
             # PRIORITY 1: Try part-based naming convention first (most reliable)
             # These have proper part context (e.g., "part_i_item_1", "part_ii_item_5")
             item_num = None
-            if normalized.startswith('Item '):
-                # Extract item number: "Item 1" -> "1", "Item 1A" -> "1a"
-                item_num = normalized[5:].strip().lower()
+            item_prefix = _ITEM_PREFIX.match(normalized)
+            if item_prefix:
+                # Extract item number: "Item 1" -> "1", "ITEM 1A" -> "1a"
+                item_num = item_prefix.group(1).strip().lower()
             elif re.match(r'^\d+[A-Z]?$', normalized, re.IGNORECASE):
                 # Short format: "1", "1A" -> "1", "1a"
                 item_num = normalized.lower()
@@ -578,6 +624,12 @@ class TenK(CompanyReport):
                 # Friendly name: "business" -> "Item 1" -> "1"
                 item_key = section_to_item[normalized]
                 item_num = item_key[5:].strip().lower()
+
+            # The spelling the two lookup maps are keyed by. They are written
+            # title-case ('Item 1', 'Item 1A'), so matching them against the
+            # caller's raw string only works when the caller happened to type it
+            # that way -- which is the other half of GH #454.
+            canonical_item = f'Item {item_num.upper()}' if item_num else None
 
             if item_num:
                 # Only check the SEC-canonical Part for this item — prevents
@@ -612,11 +664,15 @@ class TenK(CompanyReport):
                 if item_key in self.sections:
                     return self.sections[item_key].text()
 
-            # PRIORITY 4: Handle 'Item X' format -> try friendly name
-            if normalized in item_to_section:
-                friendly_name = item_to_section[normalized]
-                if friendly_name in self.sections:
-                    return self.sections[friendly_name].text()
+            # PRIORITY 4: Handle 'Item X' format -> try friendly name.
+            # Canonical spelling first so 'ITEM 1' and 'item 1' reach the same
+            # entry as 'Item 1'; the raw string stays as a second attempt so no
+            # spelling that resolved before stops resolving.
+            for candidate in (canonical_item, normalized):
+                if candidate and candidate in item_to_section:
+                    friendly_name = item_to_section[candidate]
+                    if friendly_name in self.sections:
+                        return self.sections[friendly_name].text()
 
             # PRIORITY 5: Handle short format '1', '1A', etc. -> convert to 'Item X'
             if re.match(r'^\d+[A-Z]?$', normalized, re.IGNORECASE):
@@ -633,8 +689,9 @@ class TenK(CompanyReport):
             # Legacy fallback: SEC-canonical Part lookup only.
             # Items have exactly one valid Part per SEC rules — see GH #821.
             legacy_item_num = None
-            if normalized.startswith('Item '):
-                legacy_item_num = normalized[5:].strip().lower()
+            legacy_prefix = _ITEM_PREFIX.match(normalized)
+            if legacy_prefix:
+                legacy_item_num = legacy_prefix.group(1).strip().lower()
             elif re.match(r'^\d+[a-z]?$', normalized, re.IGNORECASE):
                 legacy_item_num = normalized.lower()
 
@@ -652,34 +709,29 @@ class TenK(CompanyReport):
         if self._cross_reference_index is not None:
             item_id = _CROSS_REF_ITEM_MAP.get(item_or_part)
             if item_id:
-                # Extract content using Cross Reference Index parser
-                item_text = self._cross_reference_index.extract_item_content(item_id)
-                if item_text:
-                    # Successfully extracted via Cross Reference Index
-                    item_text = item_text.rstrip()
-                    last_line = item_text.split("\n")[-1]
-                    if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
-                        item_text = item_text.rstrip(last_line)
-                    return item_text
+                # Extract content using Cross Reference Index parser.
+                # extract_item_content() returns HTML by contract (it slices the
+                # source document by page range), while every other branch of
+                # this method returns text. Returning it unconverted handed
+                # callers raw markup — 1.7MB of <div>/<span> for Citigroup's
+                # Item 1, the "HTML leakage" half of GH #821. Convert before the
+                # PART-stripping below, which is written for text and silently
+                # did nothing on markup.
+                item_html = self._cross_reference_index.extract_item_content(item_id)
+                if item_html:
+                    item_text = parse_html(item_html).text()
+                    # An empty conversion falls through to the legacy fallback
+                    # rather than returning the markup — a caller that asked for
+                    # text is better served by the next strategy than by HTML.
+                    if item_text and item_text.strip():
+                        item_text = item_text.rstrip()
+                        last_line = item_text.split("\n")[-1]
+                        if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
+                            item_text = item_text.rstrip(last_line)
+                        return item_text
 
-        # Fall back to chunked document for backward compatibility
-        # Log fallback usage for Phase 1 deprecation tracking
-        log.warning(
-            f"TenK falling back to legacy parser for '{item_or_part}' "
-            f"(filing: {self._filing.accession_number}). "
-            f"New parser sections available: {list(self.sections.keys()) if self.sections else 'none'}. "
-            f"This fallback will be removed in v6.0."
-        )
-        item_text = self.chunked_document[item_or_part]
-
-        # Clean up the text if found
-        if item_text:
-            item_text = item_text.rstrip()
-            last_line = item_text.split("\n")[-1]
-            if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
-                item_text = item_text.rstrip(last_line)
-
-        return item_text
+        report_lookup_miss(self, item_or_part)
+        return None
 
     def get_item_with_part(self, part: str, item: str, markdown:bool=True):
         """
@@ -697,24 +749,17 @@ class TenK(CompanyReport):
         Returns:
             Item text content, or None if not found
         """
-        # Try new parser via __getitem__ (which handles various formats)
+        # .get() rather than self[item] because a miss must return None, not
+        # raise. It used to be a probe ahead of two edgar.files fallbacks; those
+        # are gone (edgartools-3dp Group B) and the modern parser now answers
+        # alone, but the non-raising contract is what callers were given.
         if self.sections:
             # Since 10-K items are unique, just use the item lookup
-            result = self[item]
+            result = self.get(item)
             if result:
                 return result
 
-        # Fallback to old implementations
-        if not part:
-            return self.id_parse_document(markdown).get(item.lower())
-
-        # Try chunked_document
-        item_text = self.chunked_document.get_item_with_part(part, item, markdown=markdown)
-        if item_text and item_text.strip():
-            return item_text
-
-        # Final fallback to id_parse_document
-        return self.id_parse_document(markdown).get(part.lower(), {}).get(item.lower())
+        return None
 
     def get_structure(self):
         # Create the main tree

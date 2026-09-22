@@ -7,6 +7,8 @@ part_i_items_1_and_2._business_and_properties, but TenK.__getitem__ builds
 the key part_i_item_1 and never checks the combined-items variant.
 
 Fix: Add combined-items key scan in __getitem__ after standard part lookups.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/710
 """
 
 import pytest
@@ -43,7 +45,11 @@ class TestCombinedItemsHeading:
         # Use patch.object on the instance to avoid polluting the class
         self._patches = [
             patch.object(type(tenk), 'document', new_callable=lambda: property(lambda self: fake_doc)),
-            patch.object(type(tenk), 'chunked_document', new_callable=lambda: property(lambda self: {})),
+            # `_chunked_document`, not the public name: the fallback path reads
+            # the private accessor, so patching the public property here would
+            # be a no-op that still passed — the patch has to sit where the code
+            # actually looks.
+            patch.object(type(tenk), '_chunked_document', new_callable=lambda: property(lambda self: {})),
         ]
         for p in self._patches:
             p.start()

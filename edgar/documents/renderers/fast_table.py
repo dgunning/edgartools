@@ -87,6 +87,16 @@ class TableStyle:
         )
 
 
+# Single characters SEC filers routinely put in a table cell of their own, split off
+# from the figure they belong to: the currency mark before an amount, and the percent
+# sign or closing parenthesis after one. They are neither data nor spacing -- they are
+# affixes, and they have to be merged back into the neighbouring figure.
+_AFFIX_CHARS = frozenset({'$', '%', ')', '('})
+
+# Affixes that follow their figure, and so merge into the column on their LEFT.
+_SUFFIX_AFFIXES = frozenset({'%', ')'})
+
+
 class FastTableRenderer:
     """
     High-performance table renderer optimized for speed.
@@ -276,6 +286,9 @@ class FastTableRenderer:
         for col_idx in range(max_cols):
             content_score = 0
             total_rows = 0
+            has_substantial = False
+            affix_cells = 0
+            non_empty_cells = 0
 
             # Score each column based on content quality
             for row in all_rows:
@@ -284,31 +297,57 @@ class FastTableRenderer:
                     cell_content = str(row[col_idx]).strip()
 
                     if cell_content:
+                        non_empty_cells += 1
+                        if cell_content in _AFFIX_CHARS:
+                            affix_cells += 1
                         # Higher score for longer, more substantial content
                         if len(cell_content) >= 3:  # Substantial content
                             content_score += 3
+                            has_substantial = True
                         elif len(cell_content) == 2 and cell_content.isalnum():
                             content_score += 2
                         elif len(cell_content) == 1 and (cell_content.isalnum() or cell_content == '$'):
                             content_score += 1
                         # Skip single spaces, dashes, or other likely spacing characters
 
+            # A column whose non-empty cells are ALL affixes -- the "$" a filer puts
+            # in its own cell, the "%" after a percentage, the ")" closing a negative
+            # number -- is not spacing and is not data either. It has to survive this
+            # filter so that _merge_related_columns can fold it into the figure it
+            # belongs to; dropping it here is why "(175,207)" used to render as
+            # "(175,207" and "93.55 %" as "93.55" (edgartools-3cis).
+            is_affix_column = non_empty_cells > 0 and affix_cells == non_empty_cells
+
             # Calculate average score per row for this column
             avg_score = content_score / max(total_rows, 1)
-            column_scores.append((col_idx, avg_score, content_score))
+            column_scores.append((col_idx, avg_score, content_score, has_substantial, is_affix_column))
 
         # Sort by score descending
         column_scores.sort(key=lambda x: x[1], reverse=True)
 
-        # Take columns with meaningful content (score >= 0.5 or among top columns)
+        # Take every column with meaningful content. The score threshold below is the
+        # only filter: there used to be a further `if len(meaningful_columns) >= 8:
+        # break` here, for readability. Because the loop walks the columns in
+        # DESCENDING score order, that cap did not drop the last columns of the table --
+        # it dropped the eight-best-scoring columns' losers wherever they sat, real data
+        # among them. A 21-column segment table kept 8 and silently lost the "Logistics
+        # and other solution services", "Corporate and unallocated" and "Total" headers;
+        # a 10-column voting table lost the "% Withheld" figure entirely, so 6.45 was in
+        # to_dataframe() but nowhere in text(). Width is already bounded per column by
+        # style.max_col_width, so readability does not need a column count as well.
+        #
+        # `has_substantial` is the third rule. Score alone reads SPARSENESS as
+        # spacing: a signature block's label column holds one real value in eight
+        # rows, which is 3 points over 8 rows -- an average of 0.375 and a total of
+        # 3, failing both thresholds. That column carried "Date: June 30, 2025" and
+        # was discarded, so the date vanished from text() while staying in
+        # to_dataframe() (edgartools-y0ri). A column containing any substantial cell
+        # is content, however rarely it is filled.
         meaningful_columns = []
-        for col_idx, avg_score, total_score in column_scores:
+        for col_idx, avg_score, total_score, has_substantial, is_affix_column in column_scores:
             # Include if it has good average score or significant total content
-            if avg_score >= 0.5 or total_score >= 5:
+            if avg_score >= 0.5 or total_score >= 5 or has_substantial or is_affix_column:
                 meaningful_columns.append(col_idx)
-            # Limit to reasonable number of columns for readability
-            if len(meaningful_columns) >= 8:
-                break
 
         # Sort by original column order
         meaningful_columns.sort()
@@ -380,6 +419,10 @@ class FastTableRenderer:
                     # Smart merging based on content
                     if left_cell == '$' and right_cell:
                         merged_cell = f"${right_cell}"
+                    elif right_cell in _SUFFIX_AFFIXES and left_cell:
+                        # No separator: "(175,207" + ")" is "(175,207)", not
+                        # "(175,207 )", and "93.55" + "%" is "93.55%".
+                        merged_cell = f"{left_cell}{right_cell}"
                     elif left_cell and right_cell:
                         merged_cell = f"{left_cell} {right_cell}"
                     else:
@@ -400,7 +443,9 @@ class FastTableRenderer:
         """
         # Check if left column is mostly currency symbols
         currency_count = 0
+        suffix_count = 0
         total_count = 0
+        populated_count = 0
 
         for row in rows:
             if left_idx < len(row) and right_idx < len(row):
@@ -408,12 +453,47 @@ class FastTableRenderer:
                 left_cell = str(row[left_idx]).strip()
                 right_cell = str(row[right_idx]).strip()
 
+                if left_cell or right_cell:
+                    populated_count += 1
+
                 # If left is '$' and right is a number, they should be merged
                 if left_cell == '$' and right_cell and (right_cell.replace(',', '').replace('.', '').isdigit()):
                     currency_count += 1
 
-        # If most rows have currency symbol + number pattern, merge them
-        if total_count > 0 and currency_count / total_count >= 0.5:
+                # If right is a trailing '%' or ')', it belongs to the figure on its left
+                if right_cell in _SUFFIX_AFFIXES and left_cell:
+                    suffix_count += 1
+
+        # If most rows have currency symbol + number pattern, merge them.
+        # The denominator counts only rows where the pair has something in it:
+        # a statement with many blank spacer rows used to dilute this ratio below
+        # 0.5 so the "$" column never merged and was rendered or dropped on its
+        # own (edgartools-3cis).
+        if populated_count > 0 and currency_count / populated_count >= 0.5:
+            return True
+
+        # Structural form of the same rule, for the same reason as the suffix case
+        # below: a column whose every non-empty cell is "$" is a currency marker
+        # column however few rows carry it.
+        left_cells = [str(row[left_idx]).strip() for row in rows
+                      if left_idx < len(row) and str(row[left_idx]).strip()]
+        if left_cells and all(cell == '$' for cell in left_cells):
+            return True
+
+        # A suffix column: "%" or the ")" closing a negative number, sitting to the
+        # RIGHT of the figure it belongs to. _merge_related_columns only ever knew
+        # the left-hand "$" pattern, so these had no way home even once they
+        # survived the meaningful-column filter.
+        #
+        # Deliberately NOT a ratio. A ")" column is sparse by its nature -- only the
+        # negative rows carry one, so on a statement with two negatives in fifteen
+        # rows any threshold-based test refuses the merge and the paren renders as
+        # its own column. What makes such a column mergeable is structural, not
+        # statistical: every non-empty cell in it is a suffix affix, which no column
+        # of real data ever is.
+        right_cells = [str(row[right_idx]).strip() for row in rows
+                       if right_idx < len(row) and str(row[right_idx]).strip()]
+        if right_cells and all(cell in _SUFFIX_AFFIXES for cell in right_cells):
             return True
 
         # Check for other merge patterns (e.g., empty left column with content right column)
@@ -522,12 +602,17 @@ class FastTableRenderer:
                 sep_line = self._create_separator_line(col_widths)
                 lines.append(sep_line)
 
-        # Data rows
+        # Data rows. Multi-line cells are expanded the same way header rows are:
+        # _format_row keeps only a cell's first line, which silently discards the
+        # rest. A headerless single-cell layout table -- how 1990s and 2000s
+        # filers wrap a whole document -- is then reduced to one line of itself.
+        # Autoliv's 2001 DEFR14A rendered 20,523 characters instead of 83,316,
+        # losing its "DEAR STOCKHOLDER" cover letter out of an 18,759-character
+        # cell. (edgartools-j8bs)
         for row in rows:
             # Only add rows with meaningful content
             if any(cell.strip() for cell in row):
-                row_line = self._format_row(row, col_widths, alignments)
-                lines.append(row_line)
+                lines.extend(self._format_multiline_row(row, col_widths, alignments))
 
         return '\n'.join(lines)
 
@@ -568,11 +653,15 @@ class FastTableRenderer:
             padded_cell = ' ' * self.style.padding + aligned_content + ' ' * self.style.padding
             cells.append(padded_cell)
 
-        # Join with borders
+        # Join with borders. Trailing run trimmed: padding the final column out
+        # to its width serves column alignment, and nothing follows it on the
+        # line, so those spaces are noise in text output. It matters more now
+        # that multi-line cells expand to one line each — a tall cell used to
+        # pay that cost once and now pays it per line.
         if border:
-            return border + border.join(cells) + border
+            return (border + border.join(cells) + border).rstrip()
         else:
-            return '  '.join(cells)
+            return '  '.join(cells).rstrip()
 
     def _format_multiline_row(self, row: List[str], col_widths: List[int],
                               alignments: List[Alignment]) -> List[str]:

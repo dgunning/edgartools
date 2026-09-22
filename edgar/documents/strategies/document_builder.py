@@ -103,6 +103,21 @@ class DocumentBuilder:
 
         return root
 
+    @staticmethod
+    def _collapse_edges(text: str) -> str:
+        """Collapse a text node's edge whitespace to a single space instead of deleting it.
+
+        lxml puts the whitespace that separates a word from an adjacent inline element on
+        the edge of element.text / element.tail. Stripping it destroys the word boundary
+        ('per <font>$1,000</font>' -> 'per$1,000') and nothing downstream can tell that
+        apart from a genuine mid-word split. Same rule the preprocessor follows: collapse,
+        never delete. Whitespace-only nodes still return '' — those carry no word.
+        """
+        stripped = text.strip()
+        if not stripped:
+            return ''
+        return (' ' if text[:1].isspace() else '') + stripped + (' ' if text[-1:].isspace() else '')
+
     def _process_element(self, element: HtmlElement, parent: Node) -> Optional[Node]:
         """
         Process HTML element into node.
@@ -124,7 +139,7 @@ class DocumentBuilder:
                     parent.add_child(text_node)
                 else:
                     if element.tail.strip():
-                        text_node = TextNode(content=element.tail.strip())
+                        text_node = TextNode(content=self._collapse_edges(element.tail))
                         parent.add_child(text_node)
             return None
 
@@ -172,7 +187,7 @@ class DocumentBuilder:
                                 node.add_child(text_node)
                         else:
                             if element.text.strip():
-                                text_node = TextNode(content=element.text.strip())
+                                text_node = TextNode(content=self._collapse_edges(element.text))
                                 node.add_child(text_node)
 
                     # Process child elements
@@ -186,7 +201,7 @@ class DocumentBuilder:
                             parent.add_child(text_node)
                         else:
                             if element.tail.strip():
-                                text_node = TextNode(content=element.tail.strip())
+                                text_node = TextNode(content=self._collapse_edges(element.tail))
                                 parent.add_child(text_node)
                             elif element.tail.isspace():
                                 # Even if tail is just whitespace, preserve the spacing info
@@ -201,7 +216,7 @@ class DocumentBuilder:
                             parent.add_child(text_node)
                         else:
                             if element.tail.strip():
-                                text_node = TextNode(content=element.tail.strip())
+                                text_node = TextNode(content=self._collapse_edges(element.tail))
                                 parent.add_child(text_node)
                             elif element.tail.isspace():
                                 # Even if tail is just whitespace, preserve the spacing info
@@ -219,7 +234,7 @@ class DocumentBuilder:
                         parent.add_child(text_node)
                     else:
                         if element.tail.strip():
-                            text_node = TextNode(content=element.tail.strip())
+                            text_node = TextNode(content=self._collapse_edges(element.tail))
                             parent.add_child(text_node)
 
             # Exit XBRL context
@@ -306,8 +321,14 @@ class DocumentBuilder:
             )
 
         elif tag == 'br':
-            # Line break - add as text node
-            return TextNode(content='\n')
+            # Line break - add as text node. Mark it, because its content is
+            # whitespace and the postprocessor prunes whitespace-only text nodes:
+            # unmarked, a <br> between two inline elements was dropped and the
+            # words either side glued together ("UNITED STATESSECURITIES AND
+            # EXCHANGE COMMISSION" on a 6-K cover page).
+            line_break = TextNode(content='\n')
+            line_break.set_metadata('is_line_break', True)
+            return line_break
 
         elif tag in ['section', 'article']:
             return SectionNode(style=style)
@@ -322,7 +343,17 @@ class DocumentBuilder:
                     text_node.set_metadata('original_tag', tag)
                     text_node.set_metadata('inline_via_css', True)
                     return text_node
-                # If no text but inline, still process children inline
+                # If no text but inline, still process children inline.
+                # _get_element_text() only descends into children for elements that
+                # are inline BY TAG, so a div whose content sits entirely in child
+                # <font>/<span> runs yields nothing here. Falling through to a bare
+                # ContainerNode then emits each run as its own block and shatters
+                # words across lines -- `<div style="display:inline"><font>H</font>
+                # <font>unger</font></div>` became "H\n\nunger". A ParagraphNode
+                # concatenates inline children, which is what the normal-block path
+                # below already does for this exact shape.
+                if self._is_inline_run_container(element):
+                    return ParagraphNode(style=style)
                 return ContainerNode(tag_name=tag, style=style)
 
             # Normal block behavior
@@ -598,6 +629,28 @@ class DocumentBuilder:
         if inline and len(text_parts) == 1:
             return text_parts[0]
         return ' '.join(text_parts)
+
+    def _is_inline_run_container(self, element: HtmlElement) -> bool:
+        """Check that every child is a genuine inline run and no block sits below.
+
+        Deliberately stricter than :meth:`_is_text_only_container`, which looks
+        only at DIRECT children and treats any unrecognised tag as inline. IXBRL
+        wrappers are the reason: ``ix:continuation`` and ``ix:nonNumeric`` are not
+        in BLOCK_ELEMENTS, so they pass that test while wrapping whole tables and
+        headings -- on the GS 10-Q fixture exactly two such divs did, and
+        flattening them collapsed rendered tables into run-on lines.
+        """
+        for child in element:
+            if not isinstance(child.tag, str):
+                continue  # comments and processing instructions
+            if child.tag.lower() not in self.INLINE_ELEMENTS:
+                return False
+        for descendant in element.iter():
+            if descendant is element or not isinstance(descendant.tag, str):
+                continue
+            if descendant.tag.lower() in self.BLOCK_ELEMENTS:
+                return False
+        return True
 
     def _is_text_only_container(self, element: HtmlElement) -> bool:
         """Check if element contains only text and inline elements."""

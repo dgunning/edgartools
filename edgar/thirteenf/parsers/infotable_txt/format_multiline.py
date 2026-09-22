@@ -11,19 +11,109 @@ Example raw data:
                                                323,943    7,994,634         X            4, 13, 17              7,994,634
 """
 
+import logging
 import re
+from typing import Optional
 
 import pandas as pd
 
 from edgar.reference import cusip_ticker_mapping
 
-__all__ = ['parse_multiline_format']
+log = logging.getLogger(__name__)
+
+__all__ = ['parse_multiline_format', 'extract_entry_total', 'reconcile_entry_total']
 
 # Minimum number of columns expected in a holdings table marker line
 _MIN_HOLDINGS_COLUMNS = 6
 
 # Regex for a valid cleaned CUSIP: exactly 9 alphanumeric chars with at least one digit
 _CUSIP_RE = re.compile(r'^[A-Za-z0-9]{9}$')
+
+# How far (in original-line character offsets) a recovered CUSIP window may sit
+# from the marker-line's expected column start. Wide enough to cover the
+# observed misalignments (GH #1072: slices starting 3 characters late), narrow
+# enough to keep windows rooted in the value/shares columns out.
+_MAX_START_DRIFT = 12
+
+
+def _cusip_checksum_valid(cusip: str) -> bool:
+    """Check a 9-character cleaned CUSIP against its Mod-10 check digit.
+
+    Standard CUSIP checksum: the first eight characters are valued 0-9 for
+    digits and 10-35 for letters, doubling every second value; the check digit
+    is the amount needed to round the digit-sum up to a multiple of ten.
+    Returns False for anything that is not 9 alphanumeric characters with at
+    least one digit, mirroring _clean_cusip's shape gate.
+
+    This is what makes hint-based recovery safe: a window that merely *looks*
+    like a CUSIP (a shifted slice of the real one, or a run of digits from the
+    neighbouring value/shares fields) fails the check digit with near
+    certainty -- across the GH #1072 corpus, only genuine CUSIPs validated.
+    """
+    if not _CUSIP_RE.match(cusip) or not any(c.isdigit() for c in cusip) \
+            or not cusip[8].isdigit():
+        return False
+    total = 0
+    for i, ch in enumerate(cusip[:8]):
+        value = int(ch) if ch.isdigit() else ord(ch.upper()) - ord('A') + 10
+        if i % 2 == 1:
+            value *= 2
+        total += value // 10 + value % 10
+    return (10 - total % 10) % 10 == int(cusip[8])
+
+
+def _expected_start_distance_ok(candidate_start: int, expected_start: int) -> bool:
+    """Whether a recovered window's start sits within tolerance of the spec."""
+    return abs(candidate_start - expected_start) <= _MAX_START_DRIFT
+
+
+def _recover_cusip_near(line: str, start: int, end):
+    """Find a checksum-valid CUSIP near the expected column position.
+
+    Treats the <S>/<C> marker-line span as a *hint* rather than a boundary.
+    Some filers' data lines do not honour the marker offsets: the issuer/class
+    block runs wider than the markers imply (so the slice starts past the true
+    CUSIP) and/or the CUSIP is written zero-padded to 12 digits so the slice
+    picks up trailing digits from the value column. Both defeat exact slicing,
+    but the true CUSIP still sits within a few characters of where the marker
+    says it should.
+
+    The line is collapsed (spaces/dashes removed) while remembering each kept
+    character's original offset; every 9-character window whose start lies
+    within _MAX_START_DRIFT of ``start`` is checked against the CUSIP
+    checksum. Collapsing makes neighbouring numeric fields throw off
+    checksum-valid windows of their own (a shifted window of the real CUSIP
+    can validate too), so candidates are ranked: one starting where a
+    whitespace-delimited *token* begins beats one starting mid-token -- these
+    filings print the CUSIP as its own space-delimited field -- then closer
+    to the expected offset wins, leftmost on ties. Returns None when no
+    window validates; callers fall back to their existing handling so
+    behaviour never gets worse than exact slicing.
+    """
+    kept_chars = []
+    kept_offsets = []
+    for offset, ch in enumerate(line):
+        if ch not in (' ', '-'):
+            kept_chars.append(ch)
+            kept_offsets.append(offset)
+
+    collapsed = ''.join(kept_chars)
+    token_starts = {m.start() for m in re.finditer(r'[^ ]+', line)}
+    best = None
+    best_key = None
+    for s in range(len(collapsed) - 8):
+        candidate = collapsed[s:s + 9]
+        if not _cusip_checksum_valid(candidate):
+            continue
+        candidate_start = kept_offsets[s]
+        if not _expected_start_distance_ok(candidate_start, start):
+            continue
+        key = (0 if candidate_start in token_starts else 1,
+               abs(candidate_start - start), candidate_start)
+        if best_key is None or key < best_key:
+            best_key = key
+            best = candidate
+    return best
 
 
 def _extract_column_specs(table_text: str):
@@ -230,6 +320,13 @@ def _parse_table_with_columns(table_text: str):
             break
 
         cusip = _clean_cusip(cusip_raw)
+        if cusip is None:
+            # Exact slice failed -- the filer's line does not honour the marker
+            # offsets (GH #1072). Recover a checksum-valid CUSIP from a window
+            # near the expected position; None means genuinely no candidate,
+            # which keeps today's behaviour for unrecognizable lines.
+            cusip = _recover_cusip_near(raw_line, colspecs[CUSIP_COL][0],
+                                        colspecs[CUSIP_COL][1])
         has_cusip = cusip is not None
         has_value = bool(value_raw and value_raw.replace(',', '').replace('$', '').replace('-', '').replace('.', '').strip().isdigit())
 
@@ -451,6 +548,47 @@ def _parse_text_regex_fallback(text: str):
     return parsed_rows
 
 
+def extract_entry_total(infotable_txt: str) -> Optional[int]:
+    """The filing's own cover-page "Information Table Entry Total", if stated.
+
+    Pre-2013 TXT filings print the number of entries the information table
+    should contain on the filing's cover section, e.g.::
+
+        Form 13F Information Table Entry Total:
+        192
+
+    (some filings put the value on the same line). This is ground truth for
+    whether a parse dropped rows -- see reconcile_entry_total.
+    """
+    match = re.search(
+        r'Form\s+13F\s+Information\s+Table\s+Entry\s+Total:?\s*\n?\s*(\d+)',
+        infotable_txt,
+        re.IGNORECASE)
+    return int(match.group(1)) if match else None
+
+
+def reconcile_entry_total(entry_total: Optional[int], parsed_rows: int) -> None:
+    """Warn when the parse recovered fewer rows than the filing declares.
+
+    The generic detector for silent row loss: it catches any future filer or
+    format variant without anyone enumerating formats in advance. A mismatch
+    is a warning, not an error -- amendments and genuinely odd filings exist,
+    and failing hard would trade one silent-wrongness mode for another.
+
+    Note the comparison is against *entries* in the information table. For
+    multi-manager filings this is ``infotable``'s disaggregated row count,
+    never ``holdings``' aggregated one -- comparing against ``holdings``
+    under-reports by design and would warn on every correct multi-manager
+    parse.
+    """
+    if entry_total is not None and parsed_rows < entry_total:
+        log.warning(
+            "13F information table may be incomplete: cover page declares "
+            "%d entries but %d rows were parsed. Some rows were likely "
+            "dropped to CUSIP/column misalignment (see GH issue 1072).",
+            entry_total, parsed_rows)
+
+
 def parse_multiline_format(infotable_txt: str) -> pd.DataFrame:
     """
     Parse multiline TXT format (Format 1) information table.
@@ -509,6 +647,10 @@ def parse_multiline_format(infotable_txt: str) -> pd.DataFrame:
 
     if not parsed_rows:
         return pd.DataFrame()
+
+    # The filing declares how many entries its information table holds; warn
+    # when we recovered fewer (silent row loss detector -- GH issue 1072).
+    reconcile_entry_total(extract_entry_total(infotable_txt), len(parsed_rows))
 
     table = pd.DataFrame(parsed_rows)
 

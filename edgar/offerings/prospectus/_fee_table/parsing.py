@@ -12,6 +12,10 @@ from __future__ import annotations
 import re
 from typing import List, Optional
 
+import lxml.html
+from lxml.etree import ParserError, strip_elements
+
+from edgar.documents.utils.html_utils import create_lxml_parser
 
 # A single numeric token: the first run of digits (with thousands commas and an
 # optional decimal). Matching only the first token stops trailing footnote
@@ -153,6 +157,72 @@ def _is_placeholder(text: str) -> bool:
     return False
 
 
+def _all_text(element) -> str:
+    """``element.get_text(separator=' ')`` -- bs4's separator form with NO strip.
+
+    Every string is joined with a space, whitespace-only ones included. This is
+    NOT ``text_content()``, which joins with nothing: a header typeset as
+    ``<font>Security</font><font>Type</font>`` would collapse to
+    "securitytype" and stop matching "security type", and that substring is the
+    only thing :func:`_find_fee_table` looks for.
+
+    ``itertext()`` yields the same strings bs4 called NavigableStrings, and
+    skips comment text exactly as ``get_text()`` did.
+    """
+    return ' '.join(element.itertext())
+
+
+def _cell_text(element) -> str:
+    """``element.get_text(separator=' ', strip=True)``.
+
+    Strip each string, drop the ones left empty, join the rest with a single
+    space. bs4's third text behaviour, and the one lxml has no equivalent for.
+    """
+    return ' '.join(chunk.strip() for chunk in element.itertext() if chunk.strip())
+
+
+def _parse_html(html: str):
+    """Parse a fee-table exhibit or registration statement into an lxml tree.
+
+    Replaces ``BeautifulSoup(html, 'lxml')``. Three details are load-bearing:
+
+    * **bytes, not str.** Inline-XBRL EX-107 exhibits open with
+      ``<?xml version='1.0' encoding='ASCII'?>`` and lxml refuses a ``str``
+      carrying an encoding declaration outright. Encoding here also makes the
+      parser's own utf-8 setting win over the document's declaration, so a
+      character the declared encoding cannot hold survives.
+    * **``remove_comments=False``.** Removing them merges the strings either
+      side into one node, which changes what the per-cell strip-and-join
+      produces for ``$10,000<!-- x -->,000``.
+    * **``strip_elements``.** bs4 classified the text inside ``<script>``,
+      ``<style>`` and ``<template>`` as Script/Stylesheet/TemplateString and
+      left all three out of ``get_text()``; lxml puts them in, which is enough
+      for a stylesheet to make the wrong table look like the fee table.
+      ``with_tail=False`` keeps the ordinary text that follows the closing tag.
+
+    Returns ``None`` for input lxml cannot root at all, which is where
+    BeautifulSoup returned an empty soup.
+    """
+    if isinstance(html, str):
+        html = html.encode('utf-8', errors='replace')
+    try:
+        root = lxml.html.fromstring(html, parser=create_lxml_parser(remove_comments=False))
+    except ParserError:
+        return None
+    strip_elements(root, 'script', 'style', 'template', with_tail=False)
+    return root
+
+
+def _tables(root) -> list:
+    """Every ``<table>``, in document order.
+
+    ``descendant-or-self``, not ``.//``: ``lxml.html.fromstring`` roots a
+    single-element fragment AT that element, and a bare ``<table>`` exhibit is
+    exactly that shape.
+    """
+    return [] if root is None else root.xpath('descendant-or-self::table')
+
+
 def _table_text(table) -> str:
     """Lowercased, whitespace-normalized text of a table for header matching.
 
@@ -160,18 +230,18 @@ def _table_text(table) -> str:
     (``<font>Security</font><font>Type</font>``) and non-breaking spaces don't
     collapse into ``securitytype`` and defeat substring matching.
     """
-    return re.sub(r'\s+', ' ', table.get_text(separator=' ').replace('\xa0', ' ')).strip().lower()
+    return re.sub(r'\s+', ' ', _all_text(table).replace('\xa0', ' ')).strip().lower()
 
 
-def _find_fee_table(soup) -> Optional:
+def _find_fee_table(root) -> Optional:
     """Find the main fee data table in the exhibit HTML."""
-    for table in soup.find_all('table'):
+    for table in _tables(root):
         header_text = _table_text(table)
         if ('security type' in header_text or 'security class' in header_text
                 or 'class of securities' in header_text):
             return table
     # Fallback: find table with 'registration fee' in header (legacy format)
-    for table in soup.find_all('table'):
+    for table in _tables(root):
         header_text = _table_text(table)
         if 'registration fee' in header_text and ('amount' in header_text or 'aggregate' in header_text):
             return table
@@ -183,13 +253,7 @@ def _parse_fee_table_html(html: str, exhibit_url: Optional[str] = None) -> dict:
 
     Returns a dict with keys matching RegistrationFeeTable fields.
     """
-    import warnings
-    from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
-        soup = BeautifulSoup(html, 'lxml')
-    fee_table = _find_fee_table(soup)
+    fee_table = _find_fee_table(_parse_html(html))
 
     result = {
         'total_offering_amount': None,
@@ -207,10 +271,11 @@ def _parse_fee_table_html(html: str, exhibit_url: Optional[str] = None) -> dict:
 
     in_carry_forward = False
 
-    for row in fee_table.find_all('tr'):
-        cells = row.find_all(['td', 'th'])
+    for row in fee_table.iter('tr'):
+        # ONE list in document order -- not the tds followed by the ths.
+        cells = list(row.iter('td', 'th'))
         # Extract text from each cell, normalizing whitespace
-        raw_texts = [re.sub(r'\s+', ' ', c.get_text(separator=' ', strip=True)) for c in cells]
+        raw_texts = [re.sub(r'\s+', ' ', _cell_text(c)) for c in cells]
         # Filter out whitespace-only cells but preserve order
         texts = [t for t in raw_texts if t.strip()]
 
@@ -447,9 +512,6 @@ def _parse_inline_fee_table(html: str, form: Optional[str] = None) -> dict:
     multi-class table with no "Total" row reports the largest single row, not
     the sum — such tables almost always carry an explicit Total.
     """
-    import warnings
-    from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
-
     result = {
         'total_offering_amount': None,
         'net_fee_due': None,
@@ -461,16 +523,14 @@ def _parse_inline_fee_table(html: str, form: Optional[str] = None) -> dict:
         'exhibit_url': None,
     }
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
-        soup = BeautifulSoup(html, 'lxml')
-    table = _find_fee_table(soup)
+    root = _parse_html(html)
+    table = _find_fee_table(root)
     if table is None:
         return result
 
     dollar_values = []
-    for row in table.find_all('tr'):
-        raw = [re.sub(r'\s+', ' ', c.get_text(' ', strip=True)) for c in row.find_all(['td', 'th'])]
+    for row in table.iter('tr'):
+        raw = [re.sub(r'\s+', ' ', _cell_text(c)) for c in row.iter('td', 'th')]
         cells = _join_dollar_cells([t for t in raw if t.strip()])
         for c in cells:
             if _DOLLAR_RE.match(c.strip()):
@@ -485,7 +545,7 @@ def _parse_inline_fee_table(html: str, form: Optional[str] = None) -> dict:
     else:
         # No concrete amount anywhere — an indeterminate Rule 457(r) shelf.
         base = (form or '').replace('/A', '')
-        doc_text = re.sub(r'\s+', ' ', soup.get_text(' ')).lower()
+        doc_text = re.sub(r'\s+', ' ', _all_text(root)).lower()
         if base.endswith('ASR') or any(m in doc_text for m in _DEFERRAL_MARKERS):
             result['fee_deferred'] = True
 

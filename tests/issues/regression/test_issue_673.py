@@ -5,6 +5,8 @@ income_statement() and comprehensive_income() must resolve to different statemen
 Root cause: IFRS concepts were not classified in Phase 1, and
 ifrs-full_StatementOfComprehensiveIncomeAbstract was ambiguously listed as an
 alternative_concept for both IncomeStatement and ComprehensiveIncome.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/673
 """
 import pytest
 from edgar import Company

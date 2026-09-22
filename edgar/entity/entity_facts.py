@@ -33,19 +33,25 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar.core import log
+from edgar.datatools import apply_declared_schema, empty_declared_frame
+from edgar.entity.dataframe_schema import NULL_DTYPES, PINNED, entity_facts_columns
 from edgar.entity.enhanced_statement import MultiPeriodStatement
+from edgar.entity.utils import is_consolidated_total_over
 from edgar.entity.models import FinancialFact
 from edgar.entity.utils import normalize_period_to_entity_facts
 from edgar.httprequests import download_json
 from edgar.storage import get_edgar_data_directory, is_using_local_storage
 
 
-class NoCompanyFactsFound(Exception):
-    """Exception raised when no company facts are found for a given CIK."""
+# NoCompanyFactsFound is now CompanyFactsNotFoundError in edgar.exceptions
+# (bead edgartools-07lk.10). Its __init__ called super().__init__() with no
+# arguments and set self.message instead, so str(exc) was '' and the message
+# never reached a traceback or a log. The canonical class builds the message
+# and passes it up. Old name kept as a deprecated alias below.
+from edgar._compat import deprecated_alias
+from edgar.exceptions import CompanyFactsNotFoundError, TransportError, ValidationError, http_status
 
-    def __init__(self, cik: int):
-        super().__init__()
-        self.message = f"""No Company facts found for cik {cik}"""
+__getattr__ = deprecated_alias(NoCompanyFactsFound=CompanyFactsNotFoundError)
 
 
 def download_company_facts_from_sec(cik: int) -> Dict[str, Any]:
@@ -56,10 +62,14 @@ def download_company_facts_from_sec(cik: int) -> Dict[str, Any]:
     company_facts_url = build_company_facts_url(cik)
     try:
         return download_json(company_facts_url)
-    except httpx.HTTPStatusError as err:
-        if err.response.status_code == 404:
+    except (httpx.HTTPStatusError, TransportError) as err:
+        # The model for domain translation across both error eras: a 404 is
+        # something this layer understands, so it becomes the domain's own
+        # NotFoundError. Everything else propagates as a transport failure,
+        # because nobody here knows better than "we could not get an answer".
+        if http_status(err) == 404:
             log.warning(f"No company facts found on url {company_facts_url}")
-            raise NoCompanyFactsFound(cik=cik) from None
+            raise CompanyFactsNotFoundError(cik=cik) from None
         else:
             raise
 
@@ -70,11 +80,11 @@ def load_company_facts_from_local(cik: int) -> Dict[str, Any]:
     """
     company_facts_dir = get_edgar_data_directory() / "companyfacts"
     if not company_facts_dir.exists():
-        raise NoCompanyFactsFound(cik=cik)
+        raise CompanyFactsNotFoundError(cik=cik)
     cik_int = int(cik) if isinstance(cik, str) else cik
     company_facts_file = company_facts_dir / f"CIK{cik_int:010}.json"
     if not company_facts_file.exists():
-        raise NoCompanyFactsFound(cik=cik)
+        raise CompanyFactsNotFoundError(cik=cik)
 
     return json.loads(company_facts_file.read_text())
 
@@ -105,7 +115,7 @@ def get_company_facts(cik: int):
         CompanyFacts: The company facts
 
     Raises:
-        NoCompanyFactsFound: If no facts are found for the given CIK
+        CompanyFactsNotFoundError: If no facts are found for the given CIK
     """
     cached = _company_facts_cache.get(cik)
     if cached is not None:
@@ -131,6 +141,35 @@ def get_company_facts(cik: int):
         while len(_company_facts_cache) > _COMPANY_FACTS_CACHE_MAXSIZE:
             _company_facts_cache.popitem(last=False)
     return result
+
+
+def _consolidated_total_fact(chosen, candidates):
+    """Swap ``chosen`` for the consolidated total it is a slice of, if present.
+
+    Ranking by recency answers *which year*; among concepts tagged for that same
+    year it falls back to the variant list's order, which is an order over
+    *names*, not over what those names measure. Insurers and banks report ASC-606
+    contract revenue beside a much larger consolidated ``Revenues`` for the same
+    period, and the contract tag is ranked first — so the getter returned a
+    sliver, a ~32x understatement, and the income statement showed less revenue
+    than operating income (edgartools-fdye).
+
+    Magnitude stays a cross-check on the ranked pick and never the ranking
+    itself: taking the largest outright would prefer ``IncludingAssessedTax``
+    over ``Excluding``, and gross over net.
+
+    Restricted to the chosen fact's own period, so a large figure from an older
+    year can never stand in for this year's total.
+    """
+    if chosen.numeric_value is None:
+        return chosen
+
+    larger = [f for f in candidates
+              if f.period_end == chosen.period_end
+              and is_consolidated_total_over(f.numeric_value, chosen.numeric_value)]
+    if not larger:
+        return chosen
+    return max(larger, key=lambda f: f.numeric_value)
 
 
 class EntityFacts:
@@ -195,6 +234,22 @@ class EntityFacts:
         for fact in self._facts:
             # Index by concept
             by_concept[fact.concept].append(fact)
+            # ...and by its LOCAL name, so a lookup can use the name without the
+            # taxonomy prefix. Facts are tagged 'us-gaap:StockholdersEquity', and
+            # only the qualified name and the lowercased label were ever keys, so
+            # get_annual_fact('StockholdersEquity') missed both and reported that
+            # the fact did not exist -- while get_annual_fact('Assets') worked,
+            # purely because us-gaap:Assets happens to be LABELLED 'Assets' and so
+            # matched the label key by coincidence. That is what made this look
+            # intermittent rather than systematic (GH #1202).
+            #
+            # The exact case is indexed, not a lowercased form: measured across
+            # AAPL/JPM/XOM/PFE/KO, 3 to 7 local names per company lowercase onto an
+            # existing label key, so a lowercased bare name would silently merge
+            # two different populations under one key.
+            local_name = fact.concept.rsplit(':', 1)[-1] if fact.concept else None
+            if local_name and local_name != fact.concept:
+                by_concept[local_name].append(fact)
             if fact.label:
                 by_concept[fact.label.lower()].append(fact)
 
@@ -283,6 +338,22 @@ class EntityFacts:
             >>> revenue = df[(df['concept'] == 'Revenues') & (df['filing_date'] <= as_of)]
             >>> latest = revenue.sort_values('filing_date').groupby('period_end').last()
         """
+        # The column set and dtypes follow this call's arguments, never the facts
+        # that came back — see engineering/decisions/facts-dataframe-schema.md
+        # (edgartools-7wtj).
+        declared = entity_facts_columns(pit_mode=pit_mode, include_metadata=include_metadata)
+        if columns is not None:
+            # df[columns] used to raise KeyError on a name this configuration does
+            # not emit. Reindexing would hand back an all-null column instead, so
+            # the caller's typo becomes missing data — keep the error.
+            unknown = [col for col in columns if col not in declared]
+            if unknown:
+                raise KeyError(
+                    f"to_dataframe() does not emit {unknown} with "
+                    f"include_metadata={include_metadata}, pit_mode={pit_mode}. "
+                    f"Available: {sorted(declared)}")
+        order = list(columns) if columns is not None else list(declared)
+
         # Build records from facts
         records = []
         for fact in self._facts:
@@ -321,11 +392,13 @@ class EntityFacts:
             records.append(record)
 
         # Create DataFrame
-        df = pd.DataFrame(records)
+        if not records:
+            # Zero rows, but the declared columns and their dtypes: a bare
+            # DataFrame() has no columns, so df['value'] raised KeyError on an
+            # entity with no facts, and a `columns` projection raised too.
+            return empty_declared_frame(declared, [c for c in order if c in declared])
 
-        # Filter to specific columns if requested
-        if columns is not None:
-            df = df[columns]
+        df = apply_declared_schema(pd.DataFrame(records), declared, order, PINNED, NULL_DTYPES)
 
         # Sort for consistency
         if not df.empty:
@@ -891,7 +964,14 @@ class EntityFacts:
             period=period,
             unit=unit,
             fallback_calculation=self._calculate_revenue_from_components,
-            annual=annual
+            annual=annual,
+            # Revenue's variants are alternative names for one consolidated
+            # total, so a same-period candidate many times larger is that total
+            # rather than a rival name for it. Off elsewhere: net income's
+            # variants are not slices of one another, and preferring the larger
+            # ProfitLoss over NetIncomeLoss would change whose earnings are
+            # reported (edgartools-fdye).
+            prefer_consolidated_total=True
         )
 
     def get_net_income(self, period: Optional[str] = None, unit: Optional[str] = None, annual: bool = True) -> Optional[float]:
@@ -1154,7 +1234,16 @@ class EntityFacts:
                 return value
             return {
                 'value': value,
-                'tag_used': tag,
+                # The fact's OWN qualified concept, not the lookup key that
+                # happened to match it. Since a concept is also indexed under its
+                # bare local name (GH #1202), the variant loop below can match on
+                # 'Revenue' before it reaches 'ifrs-full:Revenue' — the same fact
+                # either way, but reporting the bare key would drop the taxonomy
+                # from the provenance and leave a caller unable to tell an IFRS
+                # value from a us-gaap one (GH #637). `tag` is the key that
+                # resolved; it stays available as the last entry of
+                # 'synonyms_tried'.
+                'tag_used': fact.concept or tag,
                 # Resolved period of the fact actually returned — echoes the
                 # requested period, or the fact's own period when the caller
                 # passed period=None, so a stale pick is visible (GH #892).
@@ -1513,7 +1602,7 @@ class EntityFacts:
         from edgar.ttm.calculator import TTMCalculator
         from edgar.entity.enhanced_statement import (
             detect_fiscal_year_end,
-            validate_fiscal_year_period_end,
+            is_forward_looking_schedule,
         )
 
         # Filter out forward-looking schedule data before TTM derivation (Issues #781, #779).
@@ -1522,14 +1611,18 @@ class EntityFacts:
         # Must be filtered here, before the TTM calculator derives quarters from them.
         # Pass the company's FYE month so non-calendar-FYE companies (ADSK, WMT, MSFT)
         # don't have their forward-fiscal-year quarters incorrectly rejected.
+        #
+        # This asks specifically whether the PERIOD runs ahead of the LABEL. Asking the
+        # weaker question -- do they merely disagree -- also throws out every comparative
+        # re-filing, because the SEC tags those with the filing's fiscal year. On the
+        # Snowflake ledger that discarded 4,093 real facts to exclude 6 schedule ones,
+        # and the casualties included the six-month YTD that Q3 is derived from, so the
+        # quarterly cash-flow statement fell back to a 273-day YTD figure it labelled
+        # Q3 (GH #1180).
         fiscal_year_end_month = detect_fiscal_year_end(facts)
-        filtered_facts = []
-        for fact in facts:
-            if fact.period_end and fact.fiscal_year:
-                if not validate_fiscal_year_period_end(fact.fiscal_year, fact.period_end,
-                                                      fiscal_year_end_month):
-                    continue
-            filtered_facts.append(fact)
+        filtered_facts = [fact for fact in facts
+                          if not is_forward_looking_schedule(fact.fiscal_year, fact.period_end,
+                                                             fiscal_year_end_month)]
 
         concept_facts = defaultdict(list)
         for fact in filtered_facts:
@@ -1740,6 +1833,85 @@ class EntityFacts:
             ticker=self._ticker,
         )
 
+    # ------------------------------------------------------------------
+    # Period resolution
+    # ------------------------------------------------------------------
+    #
+    # Three parameters name the same thing. `period` is the supported spelling;
+    # `annual` and `period_length` are legacy and both go in 6.0.
+    #
+    # `period_length` was accepted, documented as "3=quarterly, 12=annual", and
+    # never read — it appeared nowhere in the body of either statement method
+    # (#1177). Honouring it is therefore a fix and not a behaviour change: a
+    # caller passing period_length=3 was already getting the annual statement
+    # they did not ask for, silently, which is the failure class 6.0 is closing.
+
+    _PERIOD_LENGTH_TO_PERIOD = {3: "quarterly", 12: "annual"}
+    _VALID_PERIODS = {"annual", "quarterly", "ttm"}
+
+    @classmethod
+    def _resolve_period(cls,
+                        period: Optional[str],
+                        annual: Optional[bool],
+                        period_length: Optional[int]) -> str:
+        """Collapse period/annual/period_length into one period name.
+
+        `period=None` means the caller did not say, which is what lets a
+        contradiction be told apart from the default. Raises ValidationError
+        when the caller asks for two different things at once.
+        """
+        if annual is not None:
+            explicit = "annual" if annual else "quarterly"
+        elif period is not None:
+            explicit = period.lower()
+        else:
+            explicit = None
+
+        if period_length is None:
+            resolved = explicit or "annual"
+        else:
+            implied = cls._PERIOD_LENGTH_TO_PERIOD.get(period_length)
+            if implied is None:
+                raise ValidationError(
+                    f"period_length={period_length!r} is not a period this statement can be "
+                    "built for.",
+                    parameter="period_length",
+                    invalid_value=period_length,
+                    suggestions=[
+                        "period_length=3 for quarterly, or period_length=12 for annual",
+                        "better, use period='quarterly' or period='annual' — "
+                        "period_length is removed in 6.0",
+                    ],
+                )
+            if explicit is not None and explicit != implied:
+                raise ValidationError(
+                    f"period_length={period_length!r} means {implied!r}, which contradicts "
+                    f"the {explicit!r} period also requested.",
+                    parameter="period_length",
+                    invalid_value=period_length,
+                    suggestions=[
+                        f"drop period_length and pass period={implied!r}",
+                        f"or drop the {explicit!r} request if you meant {implied!r}",
+                    ],
+                )
+            warnings.warn(
+                "period_length is deprecated and will be removed in v6.0. "
+                "Use period='quarterly' instead of period_length=3, and "
+                "period='annual' instead of period_length=12.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+            resolved = implied
+
+        if resolved not in cls._VALID_PERIODS:
+            # ValidationError IS-A ValueError, so this stays catchable as one.
+            raise ValidationError(
+                "period must be one of: 'annual', 'quarterly', 'ttm'",
+                parameter="period",
+                invalid_value=resolved,
+            )
+        return resolved
+
     def _build_enhanced_statement(self,
                                   facts: List[FinancialFact],
                                   statement_type: str,
@@ -1774,17 +1946,19 @@ class EntityFacts:
                          as_dataframe: bool = False,
                          annual: Optional[bool] = None,
                          concise_format: bool = False,
-                         period: str = 'annual') -> Union[pd.DataFrame, MultiPeriodStatement, 'TTMStatement']:
+                         period: Optional[str] = None) -> Union[pd.DataFrame, MultiPeriodStatement, 'TTMStatement']:
         """
         Get income statement facts for recent periods.
 
         Args:
             periods: Number of periods to retrieve
-            period_length: Optional filter for period length in months (3=quarterly, 12=annual)
+            period_length: Deprecated, removed in 6.0. Period length in months
+                (3=quarterly, 12=annual); prefer period='quarterly'/'annual'.
+                Raises ValidationError if it contradicts period or annual.
             as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
             annual: Legacy parameter - if provided, overrides period (True='annual', False='quarterly')
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
-            period: 'annual', 'quarterly', or 'ttm' (trailing twelve months)
+            period: 'annual' (the default), 'quarterly', or 'ttm' (trailing twelve months)
 
         Returns:
             MultiPeriodStatement or DataFrame with income statement data
@@ -1804,12 +1978,7 @@ class EntityFacts:
             stmt = facts.income_statement(periods=4)
             df = stmt.to_dataframe()
         """
-        if annual is not None:
-            period = 'annual' if annual else 'quarterly'
-
-        period = period.lower()
-        if period not in {'annual', 'quarterly', 'ttm'}:
-            raise ValueError("period must be one of: 'annual', 'quarterly', 'ttm'")
+        period = self._resolve_period(period, annual, period_length)
 
         if period == 'ttm':
             from edgar.ttm.statement import TTMStatementBuilder
@@ -1938,45 +2107,53 @@ class EntityFacts:
 
         return df
 
-    def cashflow_statement(self,
+    def cashflow_statement(self, **kwargs):
+        """Deprecated: use :meth:`cash_flow_statement`."""
+        warnings.warn(
+            "cashflow_statement() is deprecated and will be removed in v6.0. "
+            "Use cash_flow_statement(), which matches income_statement() and "
+            "balance_sheet().",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.cash_flow_statement(**kwargs)
+
+    def cash_flow_statement(self,
                            periods: int = 4,
                            period_length: Optional[int] = None,
                            as_dataframe: bool = False,
                            annual: Optional[bool] = None,
                            concise_format: bool = False,
-                           period: str = 'annual') -> Union[pd.DataFrame, MultiPeriodStatement, 'TTMStatement']:
+                           period: Optional[str] = None) -> Union[pd.DataFrame, MultiPeriodStatement, 'TTMStatement']:
         """
         Get cash flow statement facts.
 
         Args:
             periods: Number of periods to retrieve
-            period_length: Optional filter for period length in months (3=quarterly, 12=annual)
+            period_length: Deprecated, removed in 6.0. Period length in months
+                (3=quarterly, 12=annual); prefer period='quarterly'/'annual'.
+                Raises ValidationError if it contradicts period or annual.
             as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
             annual: Legacy parameter - if provided, overrides period
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
-            period: 'annual', 'quarterly', or 'ttm' (trailing twelve months)
+            period: 'annual' (the default), 'quarterly', or 'ttm' (trailing twelve months)
 
         Returns:
             MultiPeriodStatement or DataFrame with cash flow data
 
         Example:
             # Get hierarchical multi-period statement (default)
-            stmt = facts.cashflow_statement(periods=4, annual=True)
+            stmt = facts.cash_flow_statement(periods=4, annual=True)
             print(stmt)  # Rich display with hierarchy
 
             # Get DataFrame for analysis
-            df = facts.cashflow_statement(periods=4, as_dataframe=True)
+            df = facts.cash_flow_statement(periods=4, as_dataframe=True)
 
             # Convert statement to DataFrame later
-            stmt = facts.cashflow_statement(periods=4)
+            stmt = facts.cash_flow_statement(periods=4)
             df = stmt.to_dataframe()
         """
-        if annual is not None:
-            period = 'annual' if annual else 'quarterly'
-
-        period = period.lower()
-        if period not in {'annual', 'quarterly', 'ttm'}:
-            raise ValueError("period must be one of: 'annual', 'quarterly', 'ttm'")
+        period = self._resolve_period(period, annual, period_length)
 
         if period == 'ttm':
             from edgar.ttm.statement import TTMStatementBuilder
@@ -1998,15 +2175,15 @@ class EntityFacts:
         )
 
     def cash_flow(self, periods: int = 4, period_length: Optional[int] = None, as_dataframe: bool = False,
-                  annual: bool = True, concise_format: bool = False) -> Union[DataFrame, MultiPeriodStatement]:
-        """Deprecated: Use cashflow_statement() instead."""
+                  annual: Optional[bool] = None, concise_format: bool = False) -> Union[DataFrame, MultiPeriodStatement]:
+        """Deprecated: Use cash_flow_statement() instead."""
         warnings.warn(
             "cash_flow() is deprecated and will be removed in v6.0. "
-            "Use cashflow_statement() instead.",
+            "Use cash_flow_statement() instead.",
             DeprecationWarning,
             stacklevel=2
         )
-        return self.cashflow_statement(periods=periods, period_length=period_length,
+        return self.cash_flow_statement(periods=periods, period_length=period_length,
                                        as_dataframe=as_dataframe, annual=annual,
                                        concise_format=concise_format)
 
@@ -2307,7 +2484,8 @@ class EntityFacts:
                                       fallback_calculation: Optional[Callable] = None,
                                       return_detailed: bool = False,
                                       strict_unit_match: Optional[bool] = None,
-                                      annual: bool = True) -> Optional[float]:
+                                      annual: bool = True,
+                                      prefer_consolidated_total: bool = False) -> Optional[float]:
         """
         Core method for retrieving standardized concept values with enhanced unit handling.
 
@@ -2321,6 +2499,10 @@ class EntityFacts:
                               If None (default), uses strict matching when unit is explicitly provided.
             annual: If True and period is None, prefer annual (FY) facts. Falls back to most
                    recent if no annual facts available. Default: True
+            prefer_consolidated_total: If True, a candidate from the same period that
+                   dwarfs the ranked pick is treated as the consolidated total. Only for
+                   concepts whose variants are alternative names for one total (revenue).
+                   See _consolidated_total_fact.
 
         Returns:
             Numeric value or None if not found (or UnitResult if return_detailed=True)
@@ -2337,7 +2519,14 @@ class EntityFacts:
         # Suppress warnings from get_fact()/get_annual_fact() during synonym resolution
         self._suppress_warnings = True
         try:
-            # Try each concept variant in priority order
+            # Collect a matching fact from every concept variant/taxonomy
+            # prefix rather than returning at the first one that matches
+            # anything. A company that migrated its XBRL tag over time (e.g.
+            # NVIDIA: RevenueFromContractWithCustomerExcludingAssessedTax was
+            # used through FY2022, then dropped in favor of Revenues) can have
+            # real data under an earlier-priority tag that is years stale,
+            # which used to "win" purely by being tried first.
+            candidates = []
             for concept in concept_variants:
                 # Try with all known taxonomy prefixes
                 for concept_variant in [concept, f'us-gaap:{concept}', f'ifrs-full:{concept}']:
@@ -2350,25 +2539,44 @@ class EntityFacts:
                     else:
                         fact = self.get_fact(concept_variant, period)
                     if fact and fact.numeric_value is not None:
-                        # Use enhanced unit handling
-                        unit_result = UnitNormalizer.get_normalized_value(
-                            fact=fact,
-                            target_unit=target_unit,
-                            apply_scale=True,
-                            strict_unit_match=strict_unit_match
-                        )
+                        candidates.append(fact)
 
-                        if unit_result.success:
-                            if return_detailed:
-                                return unit_result  # type: ignore[return-value]
-                            return unit_result.value
+            # Prefer the most recent fact across all variants (ties broken
+            # toward non-dimensioned/consolidated facts), falling back to an
+            # older candidate only if unit normalization fails for it.
+            ranked = sorted(
+                candidates,
+                key=lambda f: (f.filing_date, f.period_end, not f.is_dimensioned),
+                reverse=True,
+            )
+            for fact in ranked:
+                if prefer_consolidated_total:
+                    # Recency settles which YEAR to answer from; it cannot
+                    # settle which of two concepts tagged for that same year is
+                    # the consolidated total. MetLife tags the ASC-606 slice
+                    # ($2.4B) and Revenues ($77.1B) for FY2025 alike, and the
+                    # variant list ranks the slice first (edgartools-fdye).
+                    fact = _consolidated_total_fact(fact, ranked)
+
+                # Use enhanced unit handling
+                unit_result = UnitNormalizer.get_normalized_value(
+                    fact=fact,
+                    target_unit=target_unit,
+                    apply_scale=True,
+                    strict_unit_match=strict_unit_match
+                )
+
+                if unit_result.success:
+                    if return_detailed:
+                        return unit_result  # type: ignore[return-value]
+                    return unit_result.value
         finally:
             self._suppress_warnings = False
 
         # Try fallback calculation if provided
         if fallback_calculation:
             try:
-                fallback_value = fallback_calculation(period, target_unit)
+                fallback_value = fallback_calculation(period, target_unit, strict_unit_match)
                 if fallback_value is not None:
                     if return_detailed:
                         return UnitResult(  # type: ignore[return-value]
@@ -2403,7 +2611,28 @@ class EntityFacts:
 
         return None
 
-    def _calculate_revenue_from_components(self, period: Optional[str] = None, unit: str = 'USD') -> Optional[float]:
+    @staticmethod
+    def _components_answer_unit(component_unit: Optional[str], target_unit: Optional[str],
+                                strict_unit_match: bool) -> bool:
+        """
+        Whether a figure derived from components in `component_unit` answers a
+        request for `target_unit`.
+
+        Same rule the direct path uses: an exact match always answers, and a
+        merely compatible unit answers only when the caller did not pin the unit
+        — where the direct path would return the value with a conversion
+        suggestion rather than refuse it.
+        """
+        from edgar.entity.unit_handling import UnitNormalizer
+
+        if not target_unit:
+            return True
+        if UnitNormalizer.normalize_unit(component_unit or '') == UnitNormalizer.normalize_unit(target_unit):
+            return True
+        return not strict_unit_match and UnitNormalizer.are_compatible(component_unit, target_unit)
+
+    def _calculate_revenue_from_components(self, period: Optional[str] = None, unit: str = 'USD',
+                                               strict_unit_match: bool = False) -> Optional[float]:
         """
         Calculate revenue from Gross Profit + Cost of Revenue when explicit revenue not available.
 
@@ -2430,14 +2659,24 @@ class EntityFacts:
             cost_of_revenue_fact.numeric_value is not None):
 
             # Use enhanced unit compatibility checking
-            gp_result = UnitNormalizer.get_normalized_value(gross_profit_fact, target_unit=unit, apply_scale=True, strict_unit_match=True)
-            cr_result = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, target_unit=unit, apply_scale=True, strict_unit_match=True)
+            gp_result = UnitNormalizer.get_normalized_value(gross_profit_fact, target_unit=unit, apply_scale=True,
+                                                            strict_unit_match=strict_unit_match)
+            cr_result = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, target_unit=unit, apply_scale=True,
+                                                            strict_unit_match=strict_unit_match)
 
             if gp_result.success and cr_result.success:
                 return gp_result.value + cr_result.value
 
-            # Try compatibility check if direct match failed
-            if UnitNormalizer.are_compatible(gross_profit_fact.unit, cost_of_revenue_fact.unit):
+            # Try compatibility check if direct match failed.
+            #
+            # Compatibility BETWEEN THE COMPONENTS says only that they can be
+            # combined with each other. The result still has to answer the unit
+            # the caller asked for, and normalising with no target at all did
+            # not check that: Apple's GrossProfit and CostOfGoodsAndServicesSold
+            # are both USD, so their sum was returned as the answer to
+            # unit='EUR' and to unit='shares' alike.
+            if (UnitNormalizer.are_compatible(gross_profit_fact.unit, cost_of_revenue_fact.unit)
+                    and self._components_answer_unit(gross_profit_fact.unit, unit, strict_unit_match)):
                 # Same unit type but different representations - try calculation anyway
                 gp_normalized = UnitNormalizer.get_normalized_value(gross_profit_fact, apply_scale=True, strict_unit_match=False)
                 cr_normalized = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, apply_scale=True, strict_unit_match=False)
@@ -2447,7 +2686,8 @@ class EntityFacts:
 
         return None
 
-    def _calculate_gross_profit_from_components(self, period: Optional[str] = None, unit: str = 'USD') -> Optional[float]:
+    def _calculate_gross_profit_from_components(self, period: Optional[str] = None, unit: str = 'USD',
+                                                    strict_unit_match: bool = False) -> Optional[float]:
         """
         Calculate gross profit from Revenue - Cost of Revenue when explicit gross profit not available.
         """
@@ -2478,14 +2718,24 @@ class EntityFacts:
             cost_of_revenue_fact.numeric_value is not None):
 
             # Use enhanced unit compatibility checking
-            rev_result = UnitNormalizer.get_normalized_value(revenue_fact, target_unit=unit, apply_scale=True)
-            cr_result = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, target_unit=unit, apply_scale=True)
+            rev_result = UnitNormalizer.get_normalized_value(revenue_fact, target_unit=unit, apply_scale=True,
+                                                             strict_unit_match=strict_unit_match)
+            cr_result = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, target_unit=unit, apply_scale=True,
+                                                            strict_unit_match=strict_unit_match)
 
             if rev_result.success and cr_result.success:
                 return rev_result.value - cr_result.value
 
-            # Try compatibility check if direct match failed
-            if UnitNormalizer.are_compatible(revenue_fact.unit, cost_of_revenue_fact.unit):
+            # Try compatibility check if direct match failed.
+            #
+            # Compatibility BETWEEN THE COMPONENTS says only that they can be
+            # combined with each other. The result still has to answer the unit
+            # the caller asked for, and normalising with no target at all did
+            # not check that: Apple's GrossProfit and CostOfGoodsAndServicesSold
+            # are both USD, so their sum was returned as the answer to
+            # unit='EUR' and to unit='shares' alike.
+            if (UnitNormalizer.are_compatible(revenue_fact.unit, cost_of_revenue_fact.unit)
+                    and self._components_answer_unit(revenue_fact.unit, unit, strict_unit_match)):
                 # Same unit type but different representations - try calculation anyway
                 rev_normalized = UnitNormalizer.get_normalized_value(revenue_fact, apply_scale=True)
                 cr_normalized = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, apply_scale=True)

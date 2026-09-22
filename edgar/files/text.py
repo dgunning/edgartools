@@ -3,7 +3,14 @@ from rich.highlighter import RegexHighlighter
 from rich.text import Text
 from rich.theme import Theme
 
+from edgar.files._deprecation import warn_legacy_html_usage
 from edgar.richtools import repr_rich
+
+_TEXT_DEPRECATION_MSG = (
+    "edgar.files.text belongs to the legacy document stack and is removed in "
+    "edgartools 6.0. Use edgar.documents for text and Filing.text() for the "
+    "rendered document."
+)
 
 __all__ = ['PlainDocument', 'XmlDocument', 'JsonDocument', 'print_xml']
 
@@ -12,6 +19,7 @@ __all__ = ['PlainDocument', 'XmlDocument', 'JsonDocument', 'print_xml']
 class PlainDocument:
 
     def __init__(self, content: str):
+        warn_legacy_html_usage(_TEXT_DEPRECATION_MSG)
         self.content = content
 
     def __repr__(self):
@@ -57,6 +65,7 @@ def print_xml(xml: str):
 class XmlDocument:
 
     def __init__(self, content: str):
+        warn_legacy_html_usage(_TEXT_DEPRECATION_MSG)
         self.content = content
 
     def __rich__(self):
@@ -73,6 +82,7 @@ class XmlDocument:
 class JsonDocument:
 
     def __init__(self, content: str):
+        warn_legacy_html_usage(_TEXT_DEPRECATION_MSG)
         self.content = content
 
     def __repr__(self):

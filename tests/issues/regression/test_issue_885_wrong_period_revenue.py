@@ -21,6 +21,8 @@ edgar/financials.py.
 
 Ground truth is the value reported in each filing's own Condensed Consolidated
 Statements of Operations.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/885
 """
 import pytest
 from edgar import get_by_accession_number

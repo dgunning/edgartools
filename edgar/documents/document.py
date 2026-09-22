@@ -761,6 +761,73 @@ class Sections(Dict[str, Section]):
         return super().__contains__(key)
 
 
+def _flatten_column_name(col) -> str:
+    """Render one column key as a single string.
+
+    A MultiIndex key arrives as a tuple of header-row texts, and the levels
+    repeat constantly — a header spanning two rows gives ``('Revenue',
+    'Revenue')`` and an unlabelled second row gives ``('Revenue', '')``. Blanks
+    are dropped and consecutive repeats collapsed, so both become ``'Revenue'``
+    rather than ``'Revenue Revenue'`` or ``'Revenue '``.
+    """
+    parts = col if isinstance(col, tuple) else (col,)
+    out = []
+    for part in parts:
+        text = '' if part is None else ' '.join(str(part).split())
+        if text and (not out or out[-1] != text):
+            out.append(text)
+    return ' '.join(out)
+
+
+def _flatten_table_frame(df: 'pd.DataFrame') -> 'pd.DataFrame':
+    """Give one table's frame flat, unique, string column names and a clean index.
+
+    Three things make per-table frames unstackable, and all three are handled
+    here rather than at the concat, where pandas can only report them as an
+    alignment failure deep inside its own internals.
+    """
+    import pandas as pd
+
+    df = df.copy()
+
+    # A table with row headers has its label column moved into the index by
+    # TableNode.to_dataframe. Concatenating with ignore_index=True would throw
+    # those labels away silently, so the column comes back as data.
+    #
+    # allow_duplicates because the label's name legitimately collides: a table
+    # captioned 'In millions of dollars' often carries that same text as a
+    # column header too, and Citigroup's and Morgan Stanley's 10-Ks both do.
+    # The rename pass below makes it unique; refusing the insert would lose the
+    # row labels entirely.
+    if not isinstance(df.index, pd.RangeIndex):
+        label = _flatten_column_name(df.index.name) or 'row_label'
+        # A multi-level row index yields tuples, which pandas cannot store as a
+        # single column ('Index data must be 1-dimensional' — Tesla's 10-K).
+        # Flatten them the same way column keys are flattened.
+        if df.index.nlevels > 1:
+            values = [_flatten_column_name(key) for key in df.index]
+        else:
+            values = list(df.index)
+        df.insert(0, label, values, allow_duplicates=True)
+    df = df.reset_index(drop=True)
+
+    # Flat, string, and unique. Duplicate header texts are ordinary in filings
+    # ('' repeated across spacer columns), and duplicate names would make the
+    # concatenated frame ambiguous to index into.
+    seen: Dict[str, int] = {}
+    names = []
+    for position, col in enumerate(df.columns):
+        name = _flatten_column_name(col) or f'column_{position}'
+        if name in seen:
+            seen[name] += 1
+            name = f'{name}.{seen[name]}'
+        else:
+            seen[name] = 0
+        names.append(name)
+    df.columns = pd.Index(names, dtype=object)
+    return df
+
+
 @dataclass
 class Document:
     """
@@ -782,6 +849,31 @@ class Document:
     _text_cache: Optional[str] = field(default=None, init=False, repr=False)
     _config: Optional[Any] = field(default=None, init=False, repr=False)  # ParserConfig reference
     _section_extractor: Optional[Any] = field(default=None, init=False, repr=False)  # cached SECSectionExtractor
+    _nav_patterns: Optional[frozenset] = field(default=None, init=False, repr=False)  # cached navigation patterns
+
+    def _get_navigation_patterns(self) -> frozenset:
+        """Navigation link texts to filter out of extracted text, resolved once.
+
+        Resolution is keyed by an md5 of the entire filing, so it costs an
+        encode plus a hash of every byte — 340ms per call on a 9.8MB 10-K. The
+        section extractor filters once per section, which re-derived that key
+        ~25 times per document to prove it had not changed; against a sections
+        stage that is now ~1.1s on the same filing, that was its single largest
+        remaining item (edgartools-llmp.9).
+
+        Cached on the document rather than inside the pattern cache because the
+        HTML is a plain ``str``, which supports neither weak references nor
+        attributes, so there is nowhere on the key itself to hang a memo. The
+        document owns the HTML and dies with it, which is the same lifetime and
+        the same invalidation story as the anchor index.
+        """
+        if self._nav_patterns is None:
+            from edgar.documents.utils.anchor_cache import resolve_navigation_patterns
+            html = getattr(self.metadata, 'original_html', None)
+            # frozenset() is falsy but not None, so a document that genuinely
+            # has no repeated navigation links is cached, not re-resolved.
+            self._nav_patterns = frozenset(resolve_navigation_patterns(html))
+        return self._nav_patterns
 
     def __getstate__(self) -> Dict[str, Any]:
         """Materialize lazy metadata before serializing a stable document state."""
@@ -796,8 +888,10 @@ class Document:
 
         Tries detection methods in order of reliability:
         1. TOC-based (0.95 confidence)
-        2. Heading-based (0.7-0.9 confidence)
-        3. Pattern-based (0.6 confidence)
+        2. Cross Reference Index (0.85 confidence) — 10-K filers who map items to
+           printed page ranges instead of labelling them in the body (Citigroup)
+        3. Heading-based (0.7-0.9 confidence)
+        4. Pattern-based (0.6 confidence)
 
         Returns a Sections dictionary wrapper that provides rich terminal display
         via __rich__() method. Each section includes confidence score and detection method.
@@ -871,7 +965,8 @@ class Document:
              include_tables: bool = True,
              include_metadata: bool = False,
              max_length: Optional[int] = None,
-             table_max_col_width: Optional[int] = None) -> str:
+             table_max_col_width: Optional[int] = None,
+             include_images: bool = False) -> str:
         """
         Extract text from document.
 
@@ -883,13 +978,17 @@ class Document:
             table_max_col_width: Maximum column width for table rendering (default: 200).
                                 Set higher (e.g., 500) to avoid truncating long table labels,
                                 or None for unlimited width. Useful for AI/LLM processing.
+            include_images: Emit an ``[Image: <alt or filename>]`` placeholder for
+                            each image (GH #886). Off by default so clean text stays
+                            image-free for sections, search and embedding.
 
         Returns:
             Extracted text
         """
         # Use cache if available and parameters match
         if (self._text_cache is not None and
-            clean and not include_tables and not include_metadata and max_length is None):
+            clean and not include_tables and not include_metadata
+                and max_length is None and not include_images):
             return self._text_cache
 
         # If whitespace was preserved during parsing and clean is default (True),
@@ -903,7 +1002,8 @@ class Document:
             include_tables=include_tables,
             include_metadata=include_metadata,
             max_length=max_length,
-            table_max_col_width=table_max_col_width
+            table_max_col_width=table_max_col_width,
+            include_images=include_images
         )
         text = extractor.extract(self)
 
@@ -911,17 +1011,17 @@ class Document:
         if clean:
             # Use cached/integrated navigation filtering (optimized approach)
             try:
-                from edgar.documents.utils.anchor_cache import filter_with_cached_patterns
+                from edgar.documents.utils.anchor_cache import filter_navigation_lines
                 # Use minimal cached approach (no memory overhead)
-                original_html = getattr(self.metadata, 'original_html', None)
-                text = filter_with_cached_patterns(text, html_content=original_html)
+                text = filter_navigation_lines(text, self._get_navigation_patterns())
             except Exception:
                 # Fallback to pattern-based filtering
                 from edgar.documents.utils.toc_filter import filter_toc_links
                 text = filter_toc_links(text)
 
         # Cache if using default parameters
-        if clean and not include_tables and not include_metadata and max_length is None:
+        if (clean and not include_tables and not include_metadata
+                and max_length is None and not include_images):
             self._text_cache = text
 
         return text
@@ -1134,28 +1234,45 @@ class Document:
 
     def to_dataframe(self) -> 'pd.DataFrame':
         """
-        Convert document tables to pandas DataFrame.
+        Convert document tables to a single DataFrame, one row per table row.
 
-        Returns a DataFrame with all tables concatenated.
+        Every table in the document is flattened to string column names and
+        stacked, with ``_table_index``, ``_table_type`` and ``_table_caption``
+        recording where each row came from. Columns that only some tables have
+        are null elsewhere, as in any concatenation of differently-shaped frames.
+
+        This is a *document*-level export and is deliberately lossier than
+        :meth:`TableNode.to_dataframe`, which keeps a table's real header
+        structure. A 10-K's tables do not share a schema — Meta's FY2024 10-K
+        has 71 tables whose column indexes are 1, 2, 3, 4, 10 and 17 levels deep
+        — and pandas cannot align a flat Index with a MultiIndex, or two
+        MultiIndexes of different depths. Concatenating them unflattened raised
+        from inside pandas/numpy (``cannot join with no overlapping index
+        names``, ``Cannot cast array data ... according to the rule 'safe'``,
+        ``Index data must be 1-dimensional``) on every real filing tried
+        (bead edgartools-y9it). Reach for ``document.tables[i].to_dataframe()``
+        when a single table's header structure matters.
         """
         import pandas as pd
 
         if not self.tables:
             return pd.DataFrame()
 
-        # Convert each table to DataFrame
         dfs = []
         for i, table in enumerate(self.tables):
-            df = table.to_dataframe()
-            # Add table index
+            df = _flatten_table_frame(table.to_dataframe())
             df['_table_index'] = i
             df['_table_type'] = table.table_type.name
-            if table.caption:
-                df['_table_caption'] = table.caption
+            df['_table_caption'] = table.caption if table.caption else None
             dfs.append(df)
 
-        # Concatenate all tables
-        return pd.concat(dfs, ignore_index=True)
+        # Frames with no rows carry no data but do contribute their columns, and
+        # a 0-row frame's dtypes are all object, which would coerce a real
+        # numeric column to object in the result.
+        non_empty = [df for df in dfs if len(df)]
+        if not non_empty:
+            return pd.DataFrame(columns=['_table_index', '_table_type', '_table_caption'])
+        return pd.concat(non_empty, ignore_index=True)
 
     def chunks(self, chunk_size: int = 512, overlap: int = 128) -> Iterator['DocumentChunk']:
         """
@@ -1210,7 +1327,23 @@ class Document:
         }
 
     def _extract_xbrl_facts(self) -> List[XBRLFact]:
-        """Extract XBRL facts from document."""
+        """
+        Extract XBRL facts from document.
+
+        The inline pre-process pass (HTMLParser._extract_xbrl_pre_process) runs
+        before preprocessing strips ix:hidden and stores its facts on
+        metadata.xbrl_data. That is the pass that resolves contexts, units,
+        continuations and transformations, so it is the source of truth here.
+
+        This used to scan the built node tree for ix_tag node metadata that the
+        inline pass never sets, so the two pipelines were unconnected: a filing
+        with thousands of extracted facts reported has_xbrl False, which reads
+        as an absent feature rather than a broken one. The node scan is kept as
+        a fallback for documents built without that pass.
+        """
+        if self.metadata.xbrl_data:
+            return list(self.metadata.xbrl_data)
+
         facts = []
 
         # Find all nodes with XBRL metadata

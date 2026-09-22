@@ -1,7 +1,26 @@
 """Filing structure definitions and validation utilities."""
-from typing import Dict, List, Optional, Pattern
+from typing import Dict, List, Optional, Pattern, Tuple
 
-__all__ = ['FilingStructure', 'ItemOnlyFilingStructure', 'is_valid_item_for_filing', 'extract_items_from_sections']
+__all__ = ['FilingStructure', 'ItemOnlyFilingStructure', 'is_valid_item_for_filing',
+           'extract_items_from_sections', 'item_sort_key']
+
+
+def item_sort_key(item: str) -> Tuple[int, str]:
+    """Sort key producing canonical SEC item order for whole-numbered forms.
+
+    Sorts by numeric item value first, then by the full token so letter suffixes
+    order correctly within a number: ``Item 1`` < ``Item 1A`` < ``Item 1B``,
+    ``Item 7`` < ``Item 7A``, ``Item 16`` < ``Item 16A``. Yields the canonical
+    10-K sequence (1, 1A, 1B, 1C, 2, ... 15, 16) and the canonical 20-F sequence
+    (1, 2, 3, 4, 4A, 5, ... 16, 16A ... 16H, 17, 18, 19).
+
+    8-K is deliberately not a caller: its items are dotted (``Item 5.02``) and
+    order by section then subsection, which is a different key —
+    ``current_report._item_sort_key``.
+    """
+    token = item.split()[-1]  # "Item 1A" -> "1A"
+    num = int(''.join(c for c in token if c.isdigit()) or '0')
+    return (num, token)
 
 
 class FilingStructure:

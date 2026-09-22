@@ -7,6 +7,8 @@ doesn't regress in future changes.
 Issue URL: https://github.com/dgunning/edgartools/issues/403
 """
 
+import inspect
+
 import pytest
 from unittest.mock import MagicMock
 from edgar.xbrl.statements import StitchedStatements
@@ -32,26 +34,30 @@ class TestIssue403Regression:
         statement_methods = [
             'income_statement',
             'balance_sheet', 
-            'cashflow_statement',
+            'cash_flow_statement',
             'statement_of_equity',
             'comprehensive_income'
         ]
         
-        # Test that each method accepts standard=True without raising TypeError
+        # Asserted against the SIGNATURE, not by calling and catching TypeError.
+        #
+        # The call-and-catch version ended in `except Exception: pass`, so any
+        # failure that was not a TypeError -- including one raised by the
+        # MagicMock standing in for XBRLS -- left the loop having proven
+        # nothing, and the test reported green. The signature is the claim
+        # anyway: "these methods accept a `standard` parameter" is a statement
+        # about the interface, and nothing a mock does can mask it.
         for method_name in statement_methods:
             method = getattr(self.statements, method_name)
-            
-            # This should not raise TypeError
-            try:
-                method(standard=True)
-                method(standard=False)
-            except TypeError as e:
-                if "unexpected keyword argument 'standard'" in str(e):
-                    pytest.fail(f"Method {method_name} does not accept 'standard' parameter: {e}")
-                # Other TypeErrors might be expected (e.g., from mocked dependencies)
-            except Exception:
-                # Other exceptions are fine - we're only testing parameter acceptance
-                pass
+            params = inspect.signature(method).parameters
+            assert 'standard' in params, (
+                f"{method_name}() no longer accepts a 'standard' parameter; "
+                f"its signature is ({', '.join(params)})"
+            )
+            assert params['standard'].kind is not inspect.Parameter.VAR_KEYWORD, (
+                f"{method_name}() only absorbs 'standard' via **kwargs, which is "
+                "not the same as supporting it"
+            )
                 
     def test_standard_parameter_works(self):
         """
@@ -102,7 +108,7 @@ class TestIssue403Regression:
         statement_methods = [
             'income_statement',
             'balance_sheet', 
-            'cashflow_statement',
+            'cash_flow_statement',
             'statement_of_equity',
             'comprehensive_income'
         ]
@@ -110,10 +116,42 @@ class TestIssue403Regression:
         for method_name in statement_methods:
             method = getattr(self.statements, method_name)
             sig = inspect.signature(method)
-            
+
             # Verify defaults
             assert sig.parameters['standard'].default == True, \
                 f"{method_name}: standard default should be True"
+
+    # Ported here on 2026-08-10 from
+    # tests/issues/reproductions/xbrl-parsing/test_issue_403_verification.py
+    # (bead edgartools-07lk.24, Tier 2), which was listed for deletion as a
+    # duplicate of this file and was not one. Everything above checks the other
+    # four methods by INTROSPECTION only -- signature and default -- and the two
+    # behavioural tests call income_statement alone. A method can carry a
+    # correct `standard` parameter in its signature and still drop it on the
+    # floor instead of forwarding it, which is issue #403 exactly, and for
+    # balance_sheet, cash_flow_statement, statement_of_equity and
+    # comprehensive_income nothing here would have caught that.
+    @pytest.mark.parametrize("method_name", [
+        'income_statement',
+        'balance_sheet',
+        'cash_flow_statement',
+        'statement_of_equity',
+        'comprehensive_income',
+    ])
+    @pytest.mark.parametrize("standard", [True, False])
+    def test_standard_is_forwarded_by_every_method(self, method_name, standard):
+        """Each statement method passes `standard` through to StitchedStatement."""
+        from unittest.mock import patch
+
+        with patch('edgar.xbrl.statements.StitchedStatement') as mock_stitched:
+            getattr(self.statements, method_name)(standard=standard)
+
+            mock_stitched.assert_called_once()
+            args = mock_stitched.call_args[0]
+            assert args[3] is standard, (
+                f"{method_name}(standard={standard}) forwarded {args[3]!r} as the "
+                "4th positional argument to StitchedStatement"
+            )
 
 
 def test_issue_403_does_not_regress():

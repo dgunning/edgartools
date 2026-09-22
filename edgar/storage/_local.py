@@ -10,14 +10,16 @@ if TYPE_CHECKING:
     from edgar.filesystem import EdgarPath
 
 import pandas as pd
-from bs4 import BeautifulSoup
 from httpx import AsyncClient, HTTPStatusError
 from tqdm.auto import tqdm
 
-from edgar.core import filing_date_to_year_quarters, get_edgar_data_directory, log, strtobool
-from edgar.dates import extract_dates
+from edgar.core import log, strtobool
+from edgar.dates import extract_dates, filing_date_to_year_quarters
+from edgar.exceptions import EdgarError, TransportError, http_status
 from edgar.httprequests import download_bulk_data, download_datafile, download_text
+from edgar.settings import get_edgar_data_directory
 from edgar.urls import build_company_tickers_exchange_url, build_company_tickers_url, build_mutual_fund_tickers_url, build_ticker_url
+
 
 def _run_coroutine(coroutine):
     """Run an async coroutine, handling the case where an event loop is already running (e.g. Jupyter)."""
@@ -59,7 +61,8 @@ __all__ = ['download_edgar_data',
            'parse_file_size',
            'latest_filing_date']
 
-class DirectoryBrowsingNotAllowed(Exception):
+
+class DirectoryBrowsingNotAllowed(EdgarError):
 
     def __init__(self, url: str, message: str = "Directory browsing is not allowed for this URL."):
         super().__init__(f"{message} \nurl: {url}")
@@ -594,17 +597,24 @@ def get_sec_file_listing(url:str) -> pd.DataFrame:
 
     Raises:
         ValueError: If URL is invalid or doesn't point to SEC EDGAR
-        ConnectionError: If unable to download the page
+        ConnectionError: If unable to download the page (pre-6.0; under
+            EDGARTOOLS_STRICT_ERRORS the TransportError propagates as itself)
         RuntimeError: If page structure is invalid or no table found
     """
     try:
         html = download_text(url)
-    except HTTPStatusError as e:
-        if e.response.status_code == 403:
+    except (HTTPStatusError, TransportError) as e:
+        status = http_status(e)
+        if status == 403:
             log.warning(f"There are no feed files for url {url}")
             return pd.DataFrame(columns=['Name', 'File', 'Size', 'Modified'])
-        elif e.response.status_code == 404:
+        elif status == 404:
             raise FileNotFoundError(f"Page not found: {url}") from None
+        if isinstance(e, TransportError):
+            # Already the right type under the strict wrap. Re-wrapping it as a
+            # builtin ConnectionError would demote a typed error back to the
+            # vocabulary the hierarchy exists to replace.
+            raise
         raise ConnectionError(f"Failed to download page: {str(e)}") from e
 
     if "Directory Browsing Not Allowed" in html:
@@ -614,23 +624,43 @@ def get_sec_file_listing(url:str) -> pd.DataFrame:
         This is unexpected and the SEC likely has changed their policy for viewing the bulk filing files.
         """)
 
-    soup = BeautifulSoup(html, 'html.parser')
-    table = soup.find('table')
+    import lxml.html
+    from lxml.etree import ParserError, strip_elements
 
-    if not table:
+    from edgar.documents.utils.html_utils import create_lxml_parser
+
+    if isinstance(html, str):
+        html = html.encode("utf-8", errors="replace")
+    try:
+        root = lxml.html.fromstring(html, parser=create_lxml_parser())
+    except ParserError:
+        # bs4 gave an empty soup here, and the no-table branch below raised
+        # RuntimeError. Keep that, rather than surfacing an lxml exception.
+        raise RuntimeError("No table found in the page") from None
+    # bs4's .text left the text inside these three tags out; text_content()
+    # does not. See the docstring on forty_f._html_to_text.
+    strip_elements(root, "script", "style", "template", with_tail=False)
+    # descendant-or-self: see the note in edgar/forms.py -- a listing trimmed
+    # to its table would otherwise parse to "no table found".
+    found = root.xpath('descendant-or-self::table')
+    table = found[0] if found else None
+
+    if table is None:
         raise RuntimeError("No table found in the page")
 
     records = []
 
     # Process table rows, skip header row
-    for row in table.find_all('tr')[1:]:
-        cells = row.find_all('td')
+    for row in table.xpath('.//tr')[1:]:
+        cells = row.xpath('.//td')
 
         # Skip if row structure is invalid
         if len(cells) != 3:
             continue
 
-        name = cells[0].text.strip()
+        # text_content(), not .text -- lxml's .text is the cell's own
+        # leading text only, where bs4's .text was every descendant's.
+        name = cells[0].text_content().strip()
 
         # Skip parent directory entry
         if name in ('.', '..'):
@@ -638,11 +668,11 @@ def get_sec_file_listing(url:str) -> pd.DataFrame:
         feed_file_url = f"{url}{name}"
 
         # Parse file size (convert "1.2K", "3.4M" etc. to bytes)
-        size_text = cells[1].text.strip()
+        size_text = cells[1].text_content().strip()
         size = parse_file_size(size_text)
 
         # Parse modification date
-        modified_text = cells[2].text.strip()
+        modified_text = cells[2].text_content().strip()
         try:
             modified = datetime.strptime(modified_text, '%m/%d/%Y %I:%M:%S %p')
         except ValueError:
@@ -668,7 +698,8 @@ def list_filing_feed_files(url: str) -> pd.DataFrame:
 
     Raises:
         ValueError: If URL is invalid or doesn't point to SEC EDGAR
-        ConnectionError: If unable to download the page
+        ConnectionError: If unable to download the page (pre-6.0; under
+            EDGARTOOLS_STRICT_ERRORS the TransportError propagates as itself)
         RuntimeError: If page structure is invalid or no table found
     """
     # Validate URL

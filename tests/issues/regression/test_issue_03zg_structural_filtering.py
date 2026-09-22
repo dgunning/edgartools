@@ -1,5 +1,5 @@
 """
-Regression test for Issue #03zg: Hide XBRL structural elements from to_dataframe() output.
+Regression test for edgartools-03zg: Hide XBRL structural elements from to_dataframe() output.
 
 XBRL filings contain structural elements like:
 - [Axis] - Dimensional axes

@@ -5,6 +5,8 @@ When the SEC returns an empty response for a filing's SGML content, the HTTP cac
 stores it forever (cache-forever rule for Archive data). The fix detects empty/truncated
 content immediately after fetch and retries with a direct HTTP request that bypasses
 the cache entirely.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/672
 """
 from unittest.mock import patch, call
 
@@ -30,6 +32,22 @@ VALID_SGML = (
 SEC_URL = "https://www.sec.gov/Archives/edgar/data/1045810/000104581021000064/0001045810-21-000064.txt"
 
 
+def _assert_parsed_the_retried_content(result):
+    """The retry has to yield a PARSED filing, not merely a truthy object.
+
+    Each of these tests used to end in ``assert result.header is not None``,
+    which a header object holding nothing at all satisfies. The values below
+    come from VALID_SGML above, so they fail if the retry returns the empty
+    cached body, or returns something that parses to an empty header.
+    """
+    assert result.header is not None, "from_source produced no header"
+    assert result.header.accession_number == "0001045810-21-000064", (
+        f"header carries accession {result.header.accession_number!r}; the "
+        "retried fetch did not reach the parser"
+    )
+    assert result.header.form == "10-K", f"header form is {result.header.form!r}"
+
+
 class TestEmptySGMLCacheBypass:
     """Test that empty/truncated cached responses trigger a direct-fetch retry."""
 
@@ -41,7 +59,7 @@ class TestEmptySGMLCacheBypass:
 
         mock_read.assert_called_once()
         mock_direct.assert_called_once_with(SEC_URL)
-        assert result.header is not None
+        _assert_parsed_the_retried_content(result)
 
     def test_from_source_retries_on_truncated_cached_response(self):
         """Short content (< 50 bytes stripped) also triggers retry."""
@@ -50,7 +68,7 @@ class TestEmptySGMLCacheBypass:
             result = FilingSGML.from_source(SEC_URL)
 
         mock_direct.assert_called_once_with(SEC_URL)
-        assert result.header is not None
+        _assert_parsed_the_retried_content(result)
 
     def test_from_source_does_not_retry_for_valid_content(self):
         """Valid SGML content should not trigger a retry."""
@@ -59,7 +77,7 @@ class TestEmptySGMLCacheBypass:
             result = FilingSGML.from_source(SEC_URL)
 
         mock_direct.assert_not_called()
-        assert result.header is not None
+        _assert_parsed_the_retried_content(result)
 
     def test_from_source_does_not_retry_for_local_files(self):
         """Cache bypass retry should only apply to URL sources, not local files."""

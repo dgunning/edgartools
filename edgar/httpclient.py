@@ -1,5 +1,6 @@
 import locale
 import os
+import re
 from contextlib import asynccontextmanager, contextmanager
 from typing import AsyncGenerator, Generator, Literal, Optional
 
@@ -17,46 +18,16 @@ except (locale.Error, ValueError):
     # This shouldn't happen on most systems, but better safe than sorry
     pass
 
-from typing import Any
-
+# We used to monkeypatch HttpxThrottleCache._get_httpx_transport_params below this
+# import, because it dropped the 'verify' parameter on the floor and users behind
+# SSL-inspecting corporate proxies could not turn verification off. httpxthrottlecache
+# now extracts 'verify' itself, so the patch was redundant — and worse than redundant,
+# since shadowing an upstream method silently reverts any future fix to it.
+# test_verify_reaches_the_transport_params pins the behaviour the patch protected.
 from httpxthrottlecache import HttpxThrottleCache
 
-
-# =============================================================================
-# WORKAROUND for httpxthrottlecache bug: SSL verify parameter not passed to transport
-#
-# Bug: httpxthrottlecache v0.2.1 (and possibly earlier versions) fails to pass the
-# 'verify' parameter to the HTTP transport, causing SSL verification to remain enabled
-# even when configure_http(verify_ssl=False) is called.
-#
-# Impact: Users behind corporate VPNs/proxies with SSL inspection cannot disable
-# SSL verification, making edgartools unusable in those environments.
-#
-# Upstream issue: https://github.com/paultiq/httpxthrottlecache/issues/XXX (TODO: create)
-#
-# TODO: Remove this monkey patch once httpxthrottlecache releases a fix (check for v0.3.0+)
-# =============================================================================
-def _patched_get_httpx_transport_params(self, params: dict[str, Any]) -> dict[str, Any]:
-    """
-    Patched version that includes the 'verify' parameter for SSL configuration.
-
-    This fixes a bug where httpxthrottlecache._get_httpx_transport_params() only
-    extracts 'http2' and 'proxy' parameters, ignoring 'verify'.
-    """
-    http2 = params.get("http2", False)
-    proxy = self.proxy
-    verify = params.get("verify", True)  # Extract verify parameter (defaults to True for security)
-
-    return {"http2": http2, "proxy": proxy, "verify": verify}
-
-
-# Apply the monkey patch at module import time
-HttpxThrottleCache._get_httpx_transport_params = _patched_get_httpx_transport_params
-# =============================================================================
-
-from edgar.core import get_identity, strtobool
-
-from .core import get_edgar_data_directory
+from edgar.core import log, strtobool
+from edgar.settings import get_edgar_data_directory, get_identity
 
 MAX_SUBMISSIONS_AGE_SECONDS = 30  # Check for submissions every 30 seconds (reduced from 10 min for Issue #471)
 MAX_INDEX_AGE_SECONDS = 30 * 60  # Check for updates to index (ie: daily-index) every 30 minutes
@@ -71,30 +42,75 @@ MAX_INDEX_AGE_SECONDS = 30 * 60  # Check for updates to index (ie: daily-index) 
 # Note that: revalidation consumes rate limit "hit", but will be served from cache if the data hasn't changed.
 
 
+def _host_key(url: str) -> str:
+    """Build a cache-rule key that matches exactly one host.
+
+    httpxthrottlecache keys its cache rules by a regex matched against
+    ``request.url.host`` (``controller.get_rules``), and returns the FIRST key
+    that matches. Two consequences shape this function:
+
+    * **The only regex we want here is equality.** An unanchored key leaks across
+      hosts: ``.*mirror\\.com`` also matches ``data.mirror.com``, so a base-host
+      rule set would answer for the data host and the data rules would never be
+      reached — the same shape as the bug this fixes, moved from sec.gov to
+      mirrors.
+    * **The host must come from the same parser that produces it at match time.**
+      ``httpx.URL(...).host`` lowercases, drops ``user@`` and the port, and
+      normalises IDNA; a hand-rolled ``https?://([^/]+)`` regex does none of
+      those, so ``EDGAR_DATA_URL=https://DATA.mirror.example.org`` (or a URL
+      carrying a port or credentials) yields a key no real request can match.
+
+    An unparseable URL yields a key that matches nothing: a misconfigured mirror
+    goes uncached, which is slow, rather than borrowing another host's rules,
+    which would be wrong.
+    """
+    host = httpx.URL(url).host
+    if not host:
+        log.warning("No host in %r; requests to it will not be cached.", url)
+        return r"(?!)"  # matches nothing
+    return f"{re.escape(host)}$"
+
+
 def _get_cache_rules() -> dict:
     """
-    Get cache rules based on configured SEC base URL.
+    Get cache rules based on configured SEC base and data URLs.
     This allows caching to work with custom SEC mirrors.
+
+    SEC serves two hosts: ``www.sec.gov`` (tickers, index, Archives) and
+    ``data.sec.gov`` (``/submissions``, ``/api/xbrl/companyfacts``).
+    httpxthrottlecache matches the request HOST against each top-level key
+    before it ever looks at the path, so a rule filed under the base-URL host
+    never applies to a request to the data host, whatever its path. Build one
+    key per host actually used by ``edgar.urls`` and file each rule under the
+    host that really serves it. A custom mirror pointing both at the same host
+    merges into a single key.
     """
-    import re
+    from edgar.config import SEC_BASE_URL, SEC_DATA_URL
 
-    from edgar.config import SEC_BASE_URL
+    base_domain = _host_key(SEC_BASE_URL)
+    data_domain = _host_key(SEC_DATA_URL)
 
-    # Extract domain pattern from base URL (e.g., "sec.gov" or "mysite.com")
-    domain_match = re.match(r'https?://([^/]+)', SEC_BASE_URL)
-    if domain_match:
-        domain = domain_match.group(1).replace('.', r'\.')
-    else:
-        domain = r'.*\.sec\.gov'  # Fallback to default
+    base_rules = {
+        r"/include/ticker\.txt.*": MAX_SUBMISSIONS_AGE_SECONDS,
+        r"/files/company_tickers\.json.*": MAX_SUBMISSIONS_AGE_SECONDS,
+        ".*index/.*": MAX_INDEX_AGE_SECONDS,
+        "/Archives/edgar/data": True,  # cache forever
+    }
+    data_rules = {
+        "/submissions.*": MAX_SUBMISSIONS_AGE_SECONDS,
+        # companyfacts is invalidated by the same event as /submissions (a new
+        # filing lands), so it takes the same freshness budget. Issue #471
+        # deliberately tuned that budget down to 30s because a longer TTL
+        # delayed visibility of same-day 8-Ks; a companyfacts-specific longer
+        # TTL would reintroduce that staleness for a sibling endpoint.
+        r"/api/xbrl/companyfacts/.*": MAX_SUBMISSIONS_AGE_SECONDS,
+    }
 
+    if base_domain == data_domain:
+        return {base_domain: {**base_rules, **data_rules}}
     return {
-        f".*{domain}": {
-            "/submissions.*": MAX_SUBMISSIONS_AGE_SECONDS,
-            r"/include/ticker\.txt.*": MAX_SUBMISSIONS_AGE_SECONDS,
-            r"/files/company_tickers\.json.*": MAX_SUBMISSIONS_AGE_SECONDS,
-            ".*index/.*": MAX_INDEX_AGE_SECONDS,
-            "/Archives/edgar/data": True,  # cache forever
-        }
+        base_domain: base_rules,
+        data_domain: data_rules,
     }
 
 # Cache rules evaluated at module load time
@@ -417,6 +433,86 @@ def get_http_config() -> dict:
 HTTP_MGR = get_http_mgr(request_per_sec_limit=get_edgar_rate_limit_per_sec())
 
 
+# One-time cache-clear migrations (#457, #672).
+#
+# Marker files are kept in <edgar-data-dir>/.migrations — OUTSIDE the cache
+# directory — so that clearing the cache for one migration can never delete
+# another migration's marker (Issue #1051: both markers used to live inside
+# _tcache, so each import wiped the cache twice, forever).
+#
+# Maps migration id (the marker filename in .migrations) to the legacy marker
+# filename that older versions kept inside the cache directory. A legacy marker
+# means the migration already ran under an older version, so it is recorded in
+# the new location without clearing again.
+_CACHE_CLEAR_MIGRATIONS = {
+    "locale_fix_457": ".locale_fix_457_applied",
+    "empty_response_fix_672": ".empty_response_fix_672_applied",
+}
+
+
+def _apply_cache_clear_migrations(migrations: dict) -> bool:
+    """
+    Clear the HTTP cache at most once for whichever of `migrations` are pending.
+
+    All pending/satisfied decisions are made up front, then the cache directory
+    is removed at most once, then every marker is written — so a single pass
+    over multiple migrations performs one clear, not one per migration.
+
+    Returns:
+        bool: True if the cache directory was cleared, False otherwise
+    """
+    import logging
+    import shutil
+    from pathlib import Path
+
+    try:
+        cache_dir = Path(get_cache_directory())
+        migrations_dir = cache_dir.parent / ".migrations"
+
+        # Decide what is pending BEFORE touching anything. A legacy marker
+        # inside the cache directory counts as already applied (#1051).
+        pending, already_applied = [], []
+        for migration, legacy_name in migrations.items():
+            marker_file = migrations_dir / migration
+            try:
+                if marker_file.exists():
+                    continue
+            except (PermissionError, OSError):
+                # If we can't check the marker file, assume we need to proceed
+                pass
+            if (cache_dir / legacy_name).exists():
+                already_applied.append(marker_file)
+            else:
+                pending.append(marker_file)
+
+        if not pending and not already_applied:
+            return False
+
+        migrations_dir.mkdir(parents=True, exist_ok=True)
+
+        cleared = False
+        if pending and cache_dir.exists():
+            shutil.rmtree(cache_dir)
+            cleared = True
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        for marker_file in pending + already_applied:
+            marker_file.touch()
+        return cleared
+
+    except Exception as e:
+        # Log error but don't fail - worst case user still has cache issues
+        logging.getLogger(__name__).warning(
+            "Failed to clear stale cache entries: %s. "
+            "You may need to manually delete ~/.edgar/_tcache directory.", e
+        )
+        return False
+
+
+def _run_import_time_cache_migrations() -> bool:
+    """Run all one-time cache-clear migrations as a single pass (at most one clear)."""
+    return _apply_cache_clear_migrations(_CACHE_CLEAR_MIGRATIONS)
+
+
 def clear_empty_cached_responses():
     """
     One-time cache clearing function to remove potentially stale empty responses (Issue #672).
@@ -432,38 +528,9 @@ def clear_empty_cached_responses():
     Returns:
         bool: True if cache was cleared, False if already cleared previously
     """
-    import logging
-    import shutil
-    from pathlib import Path
-
-    try:
-        cache_dir = Path(get_cache_directory())
-        marker_file = cache_dir / ".empty_response_fix_672_applied"
-
-        # If marker exists, cache was already cleared
-        try:
-            if marker_file.exists():
-                return False
-        except (PermissionError, OSError):
-            pass
-
-        # Clear the cache directory if it exists
-        if cache_dir.exists():
-            shutil.rmtree(cache_dir)
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            marker_file.touch()
-            return True
-        else:
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            marker_file.touch()
-            return False
-
-    except Exception as e:
-        logging.getLogger(__name__).warning(
-            f"Failed to clear stale cache entries (Issue #672): {e}. "
-            "You may need to manually delete ~/.edgar/_tcache directory."
-        )
-        return False
+    return _apply_cache_clear_migrations(
+        {"empty_response_fix_672": _CACHE_CLEAR_MIGRATIONS["empty_response_fix_672"]}
+    )
 
 
 def clear_locale_corrupted_cache():
@@ -475,50 +542,15 @@ def clear_locale_corrupted_cache():
     the locale fix was applied in v4.19.0.
 
     The function:
-    1. Checks for a marker file to avoid repeated clearing
-    2. Clears the HTTP cache directory if marker doesn't exist
-    3. Creates a marker file to prevent future clearing
+    1. Checks for a marker file (kept outside the cache directory) to avoid repeated clearing
+    2. Clears the HTTP cache directory if the migration is pending
+    3. Creates the marker file to prevent future clearing
 
     This is safe to call multiple times - it will only clear cache once per installation.
 
     Returns:
         bool: True if cache was cleared, False if already cleared previously
     """
-    import logging
-    import shutil
-    from pathlib import Path
-
-    try:
-        cache_dir = Path(get_cache_directory())
-        marker_file = cache_dir / ".locale_fix_457_applied"
-
-        # If marker exists, cache was already cleared
-        try:
-            if marker_file.exists():
-                return False
-        except (PermissionError, OSError):
-            # If we can't check marker file, assume we need to proceed
-            pass
-
-        # Clear the cache directory if it exists
-        if cache_dir.exists():
-            # Remove all cache files
-            shutil.rmtree(cache_dir)
-            # Recreate the directory
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            # Create marker file
-            marker_file.touch()
-            return True
-        else:
-            # No cache exists, just create marker
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            marker_file.touch()
-            return False
-
-    except Exception as e:
-        # Log error but don't fail - worst case user still has cache issues
-        logging.getLogger(__name__).warning(
-            f"Failed to clear locale-corrupted cache: {e}. "
-            "You may need to manually delete ~/.edgar/_tcache directory."
-        )
-        return False
+    return _apply_cache_clear_migrations(
+        {"locale_fix_457": _CACHE_CLEAR_MIGRATIONS["locale_fix_457"]}
+    )

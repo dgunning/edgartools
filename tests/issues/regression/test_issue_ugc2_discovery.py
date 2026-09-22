@@ -1,5 +1,5 @@
 """
-Regression tests for ugc2 (2.1): Concept and period discovery on EntityFacts.
+Regression tests for edgartools-ugc2 (2.1): Concept and period discovery on EntityFacts.
 
 Verifies search_concepts() and available_periods() on Apple (CIK 320193).
 """

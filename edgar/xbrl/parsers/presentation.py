@@ -182,6 +182,7 @@ class PresentationParser(BaseParser):
             role_uri=role,
             definition=self.presentation_roles[role]['definition'],
             root_element_id=root_elements[0],  # Use first sorted element
+            root_element_ids=root_elements,     # Every root, not just the first
             all_nodes={}
         )
 

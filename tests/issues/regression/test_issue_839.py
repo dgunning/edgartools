@@ -32,7 +32,9 @@ D&A node, so ``DepreciationAndAmortization`` is not a normalized target there an
 Cross-company survey (SEC XBRL frames, CY2022-CY2024): ~101 filers report
 ``OtherDepreciationAndAmortization`` with no canonical D&A total — including AMD,
 Workday, Open Text, Elevance, MetLife, Crown Holdings, plus MRVL.
-See docs/internal/analysis/issue-839-otherDA-survey.md.
+See engineering/analysis/issue-839-otherDA-survey.md.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/839
 """
 
 from datetime import date
@@ -231,7 +233,7 @@ class TestCashFlowFoldBuilder:
 # Ground-truth end-to-end on the reported filing — network + VCR
 # ---------------------------------------------------------------------------
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
 def test_mrvl_cashflow_canonical_da_present():
     """Marvell's standardized cash flow exposes the canonical D&A line.

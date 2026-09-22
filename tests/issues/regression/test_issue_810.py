@@ -17,6 +17,8 @@ ABT had no 2019 fact for that concept, so ``numeric_value`` returned ``34.0``
 The fix tracks ``primary_period`` on ``ConceptRow`` (populated from
 ``period_headers[0]`` by the parser) and resolves ``numeric_value`` against
 it explicitly, returning ``None`` when the primary period has no value.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/810
 """
 from __future__ import annotations
 

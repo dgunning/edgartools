@@ -1,3 +1,4 @@
+import warnings
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
@@ -8,6 +9,19 @@ import pyarrow.compute as pc
 from lxml import etree
 
 from edgar._party import Address
+from edgar.exceptions import ValidationError
+
+# Preserve private imports used by existing callers and regression tests.
+from edgar.thirteenf.units import (  # noqa: F401
+    _13F_VALUE_IN_THOUSANDS_CUTOFF,
+    Ambiguous13FValueUnitWarning,
+    ValueUnit,
+    ValueUnitResolution,
+    _detect_value_in_thousands,
+    _resolve_unit_fallback,
+    _schema_implies_dollars,
+    resolve_value_unit,
+)
 
 __all__ = [
     'FilingManager',
@@ -27,128 +41,6 @@ __all__ = [
 
 THIRTEENF_FORMS = ['13F-HR', "13F-HR/A", "13F-NT", "13F-NT/A", "13F-CTR", "13F-CTR/A"]
 
-# SEC Release 34-96734 switched Form 13F <value> reporting from *thousands* to *whole
-# dollars* for periods ending on/after 2022-12-31. However, the reporting unit is a
-# property of the individual filing (which schema/software the filer used), NOT of the
-# report period: during and after the transition, filings for the same report period
-# arrive in BOTH units (late/amended filings keep both alive in every period). A single
-# date threshold therefore mis-scales a meaningful, non-shrinking fraction of filings in
-# both directions (see issue edgartools-mun2). The unit is now detected per-filing from
-# the holdings themselves (see `_detect_value_in_thousands`); this date cutoff survives
-# only as a last-resort fallback when a filing has no priceable equity rows.
-_13F_VALUE_IN_THOUSANDS_CUTOFF = datetime(2022, 9, 30)
-
-# An implied equity price (Value / SharesPrnAmount under the "as-reported = dollars"
-# hypothesis) below this is dollar-implausible: real equities almost never trade under $1,
-# so such a holding is evidence the filing actually reports in thousands (the two unit
-# hypotheses sit exactly 1000x apart).
-_13F_IMPLIED_PRICE_THOUSANDS_THRESHOLD = 1.0
-
-# Fraction of priceable equity holdings whose implied price is sub-$1 at/above which the
-# filing is unambiguously in thousands. Empirically (sampled across the 2020-2024
-# transition) this fraction is sharply bimodal: genuine whole-dollar filings sit near 0.0
-# (almost no sub-$1 equities) and thousands filings near 1.0 (every normal stock looks
-# sub-$1 once divided by 1000). A high fraction can ONLY be a thousands filing, so it is
-# decided from price alone. A LOW fraction is NOT decisive the other way: a filing with no
-# sub-$1 holdings is genuinely ambiguous between normal whole-dollar pricing and a
-# thousands filing concentrated in >$1000 shares (BRK.A ~$680k, pre-split AMZN/GOOGL). Per
-# the field evidence in edgartools-mun2, magnitude must NEVER decide the high side (no upper
-# price cap); those filings defer to the schema-version / date prior instead.
-_13F_FRAC_THOUSANDS = 0.5   # >= this share of holdings sub-$1 => unambiguously thousands
-
-# Form 13F primary-document <schemaVersion> at/after which the SEC's whole-dollar value
-# convention shipped. Used only as a prior for ambiguous / unpriceable filings.
-_13F_DOLLARS_SCHEMA_VERSION = 'X0202'
-
-
-def _schema_implies_dollars(schema_version: Optional[str]) -> Optional[bool]:
-    """
-    Prior on the reporting unit from the primary-document ``<schemaVersion>``.
-
-    Returns True if the schema version indicates the whole-dollar era, False if it
-    indicates the older thousands era, or None when there is no usable version (caller
-    then falls back to the report-period date cutoff).
-
-    This is only a *prior*: real filers demonstrably submit the new schema while still
-    reporting in thousands (e.g. Bull Street, Abeille, GSA), so it is consulted only to
-    break ties in the ambiguous band and for filings with no priceable equity rows.
-    """
-    if not schema_version:
-        return None
-    return schema_version.strip().upper() >= _13F_DOLLARS_SCHEMA_VERSION
-
-
-def _resolve_unit_fallback(schema_version: Optional[str],
-                           report_period_dt: Optional[datetime]) -> bool:
-    """Schema-version prior, then the legacy report-period date cutoff. Returns
-    True if the filing should be treated as reporting in thousands."""
-    dollars = _schema_implies_dollars(schema_version)
-    if dollars is not None:
-        return not dollars
-    return report_period_dt is not None and report_period_dt <= _13F_VALUE_IN_THOUSANDS_CUTOFF
-
-
-def _detect_value_in_thousands(df,
-                               schema_version: Optional[str] = None,
-                               report_period_dt: Optional[datetime] = None) -> bool:
-    """
-    Determine whether a 13F information table reports ``<value>`` in thousands (vs. whole
-    dollars) per-filing, from the holdings themselves.
-
-    A single 13F reports *all* holdings in *one* unit. Under the "as-reported = dollars"
-    interpretation the implied price of an equity holding is ``Value / SharesPrnAmount``;
-    if the filing is actually in thousands, every implied price is ~1000x too low. The
-    decision is asymmetric:
-
-    - **High side (decisive):** if a large *fraction* of share holdings imply a sub-$1
-      price, the filing can only be in thousands (a real whole-dollar portfolio almost
-      never holds majority sub-$1 equities). This is decided from price alone, and it is
-      what lets a filing using the new whole-dollar schema yet still reporting in thousands
-      be caught (the real Bull Street / Abeille / GSA case).
-    - **Low side (NOT decisive):** few or no sub-$1 holdings is genuinely ambiguous —
-      it is either normal whole-dollar pricing or a thousands filing concentrated in
-      >$1000 shares (BRK.A ~$680k, pre-split AMZN/GOOGL). Price magnitude must never be
-      used to decide here (no upper cap); such filings defer to the schema-version prior,
-      then the report-period date cutoff. This is reliable because genuine whole-dollar
-      filings essentially always carry the new schema (the old-schema/pre-cutover era was
-      uniformly thousands).
-
-    Only ``Type == 'Shares'`` non-option rows are priced: bonds (``Principal``) trade near
-    par so the ratio hovers around 1.0 — useless for discrimination — and option ``Value``
-    is notional.
-
-    Args:
-        df: Raw, *unscaled* holdings DataFrame as produced by the infotable parsers.
-        schema_version: Primary-document ``<schemaVersion>`` (e.g. 'X0202'); the prior for
-            every non-thousands-confident filing.
-        report_period_dt: Report period end date, used as the final fallback.
-
-    Returns:
-        True if the filing's values are in thousands and must be multiplied by 1000.
-    """
-    import pandas as pd
-
-    try:
-        sh = df[(df['Type'] == 'Shares') & (df['SharesPrnAmount'] > 0)]
-        if 'PutCall' in sh.columns:
-            put_call = sh['PutCall'].fillna('')
-            sh = sh[put_call == '']
-        values = pd.to_numeric(sh['Value'], errors='coerce')
-        shares = pd.to_numeric(sh['SharesPrnAmount'], errors='coerce')
-        implied = (values / shares).replace([float('inf'), float('-inf')], pd.NA).dropna()
-        implied = implied[implied > 0]
-        if len(implied) > 0:
-            frac_sub_dollar = float((implied < _13F_IMPLIED_PRICE_THOUSANDS_THRESHOLD).mean())
-            if frac_sub_dollar >= _13F_FRAC_THOUSANDS:
-                return True  # decisive: majority sub-$1 can only be thousands
-            # Low side is ambiguous (normal dollars vs. thousands-of->$1000-shares). Never
-            # decide from magnitude; defer to the schema-version / date prior.
-            return _resolve_unit_fallback(schema_version, report_period_dt)
-    except (KeyError, TypeError, ValueError):
-        pass
-
-    # No priceable equity rows (e.g. bond-only or PRN-only filings).
-    return _resolve_unit_fallback(schema_version, report_period_dt)
 
 
 def format_date(date: Union[str, datetime]) -> str:
@@ -363,18 +255,35 @@ class ThirteenF:
         """
         cls._cache_provider = provider
 
-    def __init__(self, filing, use_latest_period_of_report=False):
+    def __init__(self, filing, use_latest_period_of_report=False, *, value_unit: Optional[ValueUnit] = None):
+        """Read a 13F filing, optionally overriding its reported monetary unit.
+
+        Args:
+            filing: The filing to parse.
+            use_latest_period_of_report: Select the latest related report filed
+                on the same day instead of the exact filing supplied.
+            value_unit: ``None`` detects units automatically. Use ``'dollars'``
+                or ``'thousands'`` only after verifying this filing's units.
+                The override applies to holdings and the SEC summary, and is
+                not inherited by previous reports. Diagnostics remain available
+                through ``value_unit_resolution``.
+        """
         from edgar.thirteenf.parsers.primary_xml import parse_primary_document_xml
 
+        if value_unit not in (None, 'dollars', 'thousands'):
+            raise ValidationError(
+                "value_unit must be None, 'dollars', or 'thousands'",
+                parameter='value_unit', invalid_value=value_unit,
+                suggestions=["Use None, 'dollars', or 'thousands'."],
+            )
+        self._value_unit_override = value_unit
+        self._value_unit_warning_emitted = False
         assert filing.form in THIRTEENF_FORMS, f"Form {filing.form} is not a valid 13F form"
         self._actual_filing = filing  # The filing passed in
         self.__related_filings = None  # Lazy-loaded: all related filings
         self.__same_day_filings = None  # Lazy-loaded: same-date + same-form subset
         self._previous_holding_report_cache = None  # Cached result for previous_holding_report()
         self._previous_holding_report_cached = False  # Separate flag since result can be None
-        # Per-filing thousands/dollars unit, detected lazily when the infotable is built.
-        # None = not yet determined. See `_detect_value_in_thousands`.
-        self._value_in_thousands_flag = None
 
         if use_latest_period_of_report:
             # Use the last related filing filed on the same date.
@@ -531,46 +440,66 @@ class ThirteenF:
             return attachments[0].download()
 
     @cached_property
-    def infotable(self):
-        """
-        Returns the information table as a pandas DataFrame (disaggregated by manager).
+    def raw_infotable(self):
+        """Disaggregated holdings with ``Value`` in the filing's original units.
 
-        For multi-manager filings, this returns separate rows for each manager combination's
-        holdings of the same security. Use the `holdings` property for an aggregated view.
-
-        Supports both XML format (2013+) and TXT format (2012 and earlier).
-
-        Returns:
-            pd.DataFrame: Holdings disaggregated by manager, with OtherManager column
-
-        See Also:
-            holdings: Aggregated view (recommended for most users)
+        No value scaling is applied. ``infotable`` and ``holdings`` expose dollars
+        using ``value_unit_resolution``; their conversion does not mutate this table.
         """
         from edgar.thirteenf.parsers.infotable_txt import parse_infotable_txt
         from edgar.thirteenf.parsers.infotable_xml import parse_infotable_xml
 
         if self.has_infotable():
-            # Try XML format first
             if self.infotable_xml:
-                df = parse_infotable_xml(self.infotable_xml)
-            # Fall back to TXT format
-            elif self.infotable_txt:
-                df = parse_infotable_txt(self.infotable_txt)
-            else:
-                return None
-            # Detect this filing's reporting unit from the raw holdings (per-filing, not a
-            # report-period date rule) and normalize thousands -> dollars. Detection must
-            # run on the unscaled values, so it happens here rather than reading back the
-            # already-scaled column. The result is cached for `total_value` to reuse.
-            if df is not None and len(df) > 0:
-                in_thousands = _detect_value_in_thousands(
-                    df, self._schema_version, self._report_period_dt
-                )
-                self._value_in_thousands_flag = in_thousands
-                if in_thousands:
-                    df['Value'] = df['Value'] * 1000
-            return df
+                return parse_infotable_xml(self.infotable_xml)
+            if self.infotable_txt:
+                return parse_infotable_txt(self.infotable_txt)
         return None
+
+    @cached_property
+    def value_unit_resolution(self) -> ValueUnitResolution:
+        """Selected raw unit, multiplier, evidence and ambiguity for this filing.
+
+        Inspecting this property or ``raw_infotable`` does not emit a warning.
+        An explicit ``value_unit`` applies only to this report, not other periods.
+        """
+        return resolve_value_unit(self.raw_infotable, self._schema_version,
+                                  self._report_period_dt, override=self._value_unit_override)
+
+    def _warn_if_ambiguous_value_unit(self):
+        if self._value_unit_override is not None:
+            return
+        resolution = self.value_unit_resolution
+        if (resolution.ambiguous and resolution.unit == 'thousands'
+                and resolution.priceable_rows and not self._value_unit_warning_emitted):
+            warnings.warn(
+                f"13F {self.accession_number}: ambiguous value units; applying a 1000x "
+                f"conversion based on {resolution.source}. Raw values may already be dollars. "
+                "Inspect value_unit_resolution and raw_infotable, verify the filing's units, "
+                "then construct ThirteenF(filing, value_unit='dollars') or "
+                "ThirteenF(filing, value_unit='thousands').",
+                Ambiguous13FValueUnitWarning,
+                stacklevel=3,
+            )
+            self._value_unit_warning_emitted = True
+
+    @cached_property
+    def infotable(self):
+        """Disaggregated holdings with ``Value`` normalized to dollars.
+
+        Use ``holdings`` for aggregation across managers and ``raw_infotable``
+        for original reported values. Ambiguous thousands conversions warn once
+        per report; inspect ``value_unit_resolution`` before trusting the result.
+        Supports both XML and legacy TXT information tables.
+        """
+        raw = self.raw_infotable
+        if raw is None:
+            return None
+        self._warn_if_ambiguous_value_unit()
+        df = raw.copy()
+        if len(df) and self.value_unit_resolution.multiplier != 1:
+            df['Value'] = df['Value'] * self.value_unit_resolution.multiplier
+        return df
 
     @cached_property
     def holdings(self):
@@ -599,8 +528,10 @@ class ThirteenF:
         """
         import pandas as pd
 
-        # Check external cache first (e.g., Redis) - avoids loading infotable (saves 1500ms + 15 MB)
-        if self.__class__._cache_provider is not None:
+        # Accession-only caches cannot distinguish an explicit unit override.
+        # Bypass them for overrides so cached automatic values cannot undo a correction.
+        # Otherwise preserve the existing cache-provider contract.
+        if self._value_unit_override is None and self.__class__._cache_provider is not None:
             try:
                 cached = self.__class__._cache_provider(self.accession_number)
                 if cached is not None:
@@ -697,10 +628,13 @@ class ThirteenF:
 
     @property
     def total_value(self):
-        """Total value of holdings in dollars"""
+        """SEC summary total in dollars (may differ from the sum of holdings)."""
         if self.primary_form_information:
             value = self.primary_form_information.summary_page.total_value
-            if value and self._value_in_thousands:
+            if not value:
+                return value
+            self._warn_if_ambiguous_value_unit()
+            if self._value_in_thousands:
                 return value * 1000
             return value
         # For TXT-only filings, calculate from infotable (already normalized)
@@ -776,20 +710,10 @@ class ThirteenF:
 
     @property
     def _value_in_thousands(self) -> bool:
-        """
-        True if this filing's values are in thousands and must be scaled to dollars.
-
-        Detected per-filing from the holdings themselves (see `_detect_value_in_thousands`),
-        not from the report period. Building the infotable runs and caches the detection;
-        if there is no infotable (e.g. 13F-NT), fall back to the schema-version prior and
-        then the report-period date cutoff.
-        """
-        if self._value_in_thousands_flag is None and self.has_infotable():
-            # Trigger infotable build, which performs and caches detection.
-            _ = self.infotable
-        if self._value_in_thousands_flag is not None:
-            return self._value_in_thousands_flag
-        return _resolve_unit_fallback(self._schema_version, self._report_period_dt)
+        """Whether this report's resolved values require scaling to dollars."""
+        if self._value_unit_override is not None:
+            return self._value_unit_override == 'thousands'
+        return self.value_unit_resolution.unit == 'thousands'
 
     @property
     def report_period(self):

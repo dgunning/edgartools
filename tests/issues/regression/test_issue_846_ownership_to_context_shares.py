@@ -15,6 +15,8 @@ parse a number.
 Despite the issue title saying "Form 4", every filing the reporter listed is a
 Form 3; the crash site is the Form 3 holdings line that was missed when the related
 Form 3 fix shipped in v5.35.1.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/846
 """
 import pytest
 

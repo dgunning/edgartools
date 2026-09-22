@@ -4,8 +4,9 @@ SEC BDC (Business Development Company) reference data.
 This module provides access to the SEC's authoritative list of Business Development Companies
 from the SEC BDC Report, published annually.
 
-Data source: https://www.sec.gov/about/opendatasetsshtmlbdc
+Data source: https://www.sec.gov/data-research/sec-markets-data/opendatasetsshtmlbdc
 """
+import logging
 import io
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
@@ -21,7 +22,9 @@ import httpx
 import pandas as pd
 
 from edgar.display.formatting import cik_text
-from edgar.httprequests import get_with_retry
+from edgar.httprequests import get_with_retry, is_unreachable
+
+log = logging.getLogger(__name__)
 
 __all__ = [
     'BDCEntity',
@@ -35,6 +38,10 @@ __all__ = [
 
 # Base URL for SEC BDC Report files
 BDC_REPORT_BASE_URL = "https://www.sec.gov/files/investment/data/other/business-development-company-report"
+
+# Used only when no year answers a probe. Every use is logged: an unconfirmed
+# year presented as confirmed is how a moved dataset reads as current data.
+_BDC_REPORT_FALLBACK_YEAR = 2024
 
 
 @dataclass
@@ -506,17 +513,48 @@ def get_latest_bdc_report_year() -> int:
         The latest year with an available BDC report.
     """
     current_year = datetime.now().year
+    unreachable = 0
+    probed = 0
 
     for year in range(current_year, 2015, -1):
         url = f"{BDC_REPORT_BASE_URL}/business-development-company-{year}.csv"
+        probed += 1
         try:
             response = get_with_retry(url, timeout=5)
             if response.status_code == 200:
                 return year
-        except Exception:
+        except Exception as e:
+            # A missing year is a 404, which returns a response rather than
+            # raising, so it never reaches here — reaching here means the probe
+            # did not get an answer at all. Counting those separates "SEC has no
+            # report for this year" from "we could not ask", which is the whole
+            # difference between the fallback below being a reasonable default
+            # and being a fabricated claim about what the latest year is.
+            if is_unreachable(e):
+                unreachable += 1
+            else:
+                log.warning(
+                    "Unexpected error probing the %s BDC report (%s: %s); skipping that year.",
+                    year, type(e).__name__, e,
+                )
             continue
 
-    return 2024  # Fallback to known good year
+    # Reaching here means no year answered 200. Say so rather than presenting a
+    # hardcoded year as though it had been confirmed: if SEC moves
+    # BDC_REPORT_BASE_URL the way it moved the fund dataset page, every probe
+    # misses and this silently reports 2024 as current forever.
+    if unreachable == probed:
+        log.warning(
+            "Could not reach SEC for any BDC report year (%s probes failed); "
+            "falling back to %s, which may be stale.", probed, _BDC_REPORT_FALLBACK_YEAR,
+        )
+    else:
+        log.warning(
+            "No BDC report found for any year from %s back to 2016; falling back to %s. "
+            "This usually means the report moved — check %s.",
+            current_year, _BDC_REPORT_FALLBACK_YEAR, BDC_REPORT_BASE_URL,
+        )
+    return _BDC_REPORT_FALLBACK_YEAR
 
 
 @lru_cache(maxsize=4)
@@ -587,26 +625,81 @@ def fetch_bdc_report(year: Optional[int] = None) -> pd.DataFrame:
     return df
 
 
+#: How many report years get_bdc_list() combines when no year is given.
+#: See _combined_bdc_report for why one year is not enough.
+BDC_REPORT_UNION_YEARS = 3
+
+
+def _combined_bdc_report(union_years: int = BDC_REPORT_UNION_YEARS) -> pd.DataFrame:
+    """Combine the most recent BDC reports into one registrant list.
+
+    Each yearly CSV is a snapshot taken while that year is still running, not a
+    complete register, and a registrant can be absent from it while remaining a
+    BDC. The 2026 report dropped 15 registrants that the 2025 one carried,
+    Ares Capital -- the largest publicly traded BDC -- among them, so reading
+    the newest year alone made ``is_bdc_cik(1287750)`` answer False and
+    ``find_bdc("ARCC")`` return nothing (GH #1146).
+
+    Note that a completeness check on the newest year would not have caught it:
+    the 2026 report has *more* rows than 2025 (212 against 196), because it
+    added 31 registrants while dropping those 15. Presence in any recent report
+    is the signal that survives, so the years are unioned and the most recent
+    row for a CIK wins.
+    """
+    latest = get_latest_bdc_report_year()
+
+    frames = []
+    for year in range(latest, latest - union_years, -1):
+        try:
+            frame = fetch_bdc_report(year).copy()
+        except Exception as e:
+            # A year the SEC has not published is a 404 and an ordinary miss;
+            # anything else is worth a line, but neither is fatal while some
+            # other year answered.
+            log.debug("No BDC report for %s (%s: %s)", year, type(e).__name__, e)
+            continue
+        frame['report_year'] = year
+        frames.append(frame)
+
+    if not frames:
+        # Every year failed. Let the newest year's failure speak rather than
+        # returning an empty register as though the SEC listed no BDCs.
+        return fetch_bdc_report(latest)
+
+    combined = pd.concat(frames, ignore_index=True)
+
+    # Keep one row per registrant, from the most recent report that carries it,
+    # so names and addresses stay current.
+    combined = combined.sort_values('report_year', ascending=False, kind='stable')
+    if 'cik' in combined.columns:
+        combined = combined[combined['cik'].notna()].drop_duplicates(subset='cik', keep='first')
+
+    return combined.drop(columns='report_year')
+
+
 def get_bdc_list(year: Optional[int] = None) -> BDCEntities:
     """
     Get all BDCs from the SEC BDC Report.
 
     Args:
-        year: The report year. If None, uses the latest available year.
+        year: A specific report year, returned exactly as the SEC published it.
+              If None, the most recent BDC_REPORT_UNION_YEARS reports are
+              combined, because a single year's snapshot can omit registrants
+              that are still BDCs (GH #1146).
 
     Returns:
         BDCEntities collection of all BDCs in the report.
 
     Example:
         >>> bdcs = get_bdc_list()
-        >>> len(bdcs)
-        196
+        >>> len(bdcs) > 200
+        True
         >>> bdcs[0]
         BDCEntity(...)
         >>> bdcs.filter(state='NY')
         BDCEntities with NY-based BDCs
     """
-    df = fetch_bdc_report(year)
+    df = fetch_bdc_report(year) if year is not None else _combined_bdc_report()
 
     bdcs = []
     for _, row in df.iterrows():

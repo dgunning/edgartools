@@ -7,20 +7,19 @@ accessing and manipulating fund data.
 import logging
 import re
 from functools import lru_cache
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
-if TYPE_CHECKING:
-    from bs4 import Tag
-
+import lxml.html
 import pandas as pd
 import pyarrow as pa
-from bs4 import BeautifulSoup
+from lxml.etree import ParserError
 
 from edgar._filings import Filings
 from edgar.datatools import drop_duplicates_pyarrow
+from edgar.documents.utils.html_utils import create_lxml_parser
 from edgar.entity.data import EntityData
 from edgar.funds.core import FundClass, FundCompany, FundSeries
-from edgar.httprequests import download_text
+from edgar.httprequests import TRANSPORT_ERRORS, download_text, is_unreachable
 
 log = logging.getLogger(__name__)
 
@@ -34,6 +33,153 @@ log = logging.getLogger(__name__)
 # URL constants for fund searches
 fund_class_or_series_search_url = "https://www.sec.gov/cgi-bin/browse-edgar?CIK={}"
 fund_series_direct_url = "https://www.sec.gov/cgi-bin/browse-edgar?CIK={}&scd=series"
+
+# ---------------------------------------------------------------------------
+# lxml helpers
+#
+# These replace BeautifulSoup for the two browse-edgar pages below
+# (edgartools-07lk.11.11). The trap that dominates this pair is `.text`: on a
+# bs4 Tag it is `get_text()`, every string in the subtree; on an lxml element it
+# is the text BEFORE THE FIRST CHILD and nothing else. It raises nothing when
+# mistranslated, it just returns a prefix.
+# ---------------------------------------------------------------------------
+
+# Tags whose direct text bs4 gave its own string class (Script, Stylesheet,
+# TemplateString, RubyTextString), which `get_text()` filtered out because it
+# matches the exact type `NavigableString`.
+_STRING_CONTAINER_TAGS = frozenset(("script", "style", "template", "rt", "rp"))
+
+
+def _parse_page(html: str):
+    """Parse a browse-edgar page, or None if lxml cannot root it at all.
+
+    Comments are KEPT, and so are <script>/<style>: both are excluded from the
+    text by `_strings` instead of being removed from the tree. Removing them is
+    the tempting spelling and it is wrong, because dropping an element in lxml
+    forces its tail onto the text before it. bs4 held those as two separate
+    strings, and `get_text(strip=True)` strips each and joins with NOTHING --
+    so `<td>No <style>...</style>Load Class</td>` is "NoLoad Class" to bs4 and
+    becomes "No Load Class" the moment the two strings are merged.
+    """
+    if isinstance(html, str):
+        html = html.encode("utf-8", errors="replace")
+    parser = create_lxml_parser(remove_blank_text=False, remove_comments=False,
+                                recover=True, encoding="utf-8")
+    try:
+        return lxml.html.fromstring(html, parser=parser)
+    except (ParserError, ValueError):
+        return None
+
+
+def _strings(el):
+    """The strings bs4's ``get_text()`` walked, in document order.
+
+    Kept separate rather than concatenated because ``get_text(strip=True)``
+    strips each one and drops the empties BEFORE joining: for
+    ``<td>No <b>Load</b> Class</td>`` bs4 answered "NoLoadClass", where
+    ``text_content().strip()`` answers "No Load Class".
+
+    Comment bodies are not text in either library; the text after a comment is.
+    Nor is anything inside <script>/<style>/<template>/<rt>/<rp>, and that
+    applies to the WHOLE SUBTREE, not just the strings directly inside the tag:
+    bs4 tracked these on a stack while parsing, so the "hidden" in
+    ``<template><b>hidden</b></template>`` is a TemplateString even though its
+    parent is the <b>. Hence the flag is inherited by every level below.
+
+    Iterative rather than recursive -- filers nest layout tables hundreds deep
+    (edgartools-xqvr).
+    """
+    container = el.tag in _STRING_CONTAINER_TAGS
+    if el.text and not container:
+        yield el.text
+    stack = [(iter(el), container, None)]
+    while stack:
+        children, container, tail = stack[-1]
+        node = next(children, None)
+        if node is None:
+            stack.pop()
+            if tail:
+                yield tail
+            continue
+        node_tag = node.tag
+        if isinstance(node_tag, str):
+            node_container = container or node_tag in _STRING_CONTAINER_TAGS
+            if node.text and not node_container:
+                yield node.text
+            stack.append((iter(node), node_container, None if container else node.tail))
+        elif node.tail and not container:
+            yield node.tail
+
+
+def _text(el) -> str:
+    """``Tag.text`` -- every string in the subtree, joined with nothing.
+
+    NOT ``text_content()``, which would splice a stylesheet into the answer.
+    """
+    return "".join(_strings(el))
+
+
+def _text_stripped(el) -> str:
+    """``Tag.get_text(strip=True)``.
+
+    Deliberately NOT ``html_utils.text_stripped``, which the other six copies of
+    this helper folded into (edgartools-07lk.11.12). That one reads through
+    ``itertext()``; this one reads through ``_strings()`` above, which applies
+    bs4's ``<script>``/``<style>``/``<template>`` exclusion at the element level
+    rather than leaving it to a strip at parse time. Swapping it in would splice
+    stylesheet source into a fund listing, silently.
+    """
+    return "".join(s for s in (t.strip() for t in _strings(el)) if s)
+
+
+def _find_all(el, tag):
+    """``Tag.find_all(tag)`` -- descendants, in document order.
+
+    ``descendant::``, not ``findall(tag)``, which is direct children only.
+    """
+    return el.xpath(f"descendant::{tag}")
+
+
+def _find_all_class(el, tag, css_class):
+    """``Tag.find_all(tag, class_=css_class)``.
+
+    bs4 matched against the multi-valued class LIST, so `class="big mailer"`
+    matched `class_="mailer"`. In lxml `@class` is one string, and testing
+    `@class='mailer'` would miss it.
+    """
+    return el.xpath(
+        f"descendant-or-self::{tag}"
+        f"[contains(concat(' ', normalize-space(@class), ' '), ' {css_class} ')]"
+    )
+
+
+def _find_class(el, tag, css_class):
+    """``Tag.find(tag, class_=css_class)`` -- the first one, or None."""
+    found = _find_all_class(el, tag, css_class)
+    return found[0] if found else None
+
+
+def _replace_br_with_newline(el) -> None:
+    """``for tag in el.find_all('br'): tag.replace_with('\n')``.
+
+    bs4 swapped the element for a NavigableString. lxml has no text nodes, so
+    the newline is spliced onto whatever precedes the <br> along with the <br>'s
+    own tail -- which `remove` would otherwise take with it. That merges two of
+    bs4's separate strings into one, and is safe here because both readers of
+    this tree (`identInfo` and the mailer divs) ask for text with NO separator.
+    """
+    for br in _find_all(el, 'br'):
+        parent = br.getparent()
+        if parent is None:
+            continue
+        spliced = "\n" + (br.tail or "")
+        previous = br.getprevious()
+        if previous is not None:
+            previous.tail = (previous.tail or "") + spliced
+        else:
+            parent.text = (parent.text or "") + spliced
+        parent.remove(br)
+
 
 class _FundDTO:
     """
@@ -168,12 +314,13 @@ class _FundCompanyInfo:
         return cik, cik_description
 
     @classmethod
-    def from_html(cls, company_info_html: Union[str, 'Tag']):
+    def from_html(cls, company_info_html: str):
 
-        soup = BeautifulSoup(company_info_html, features="html.parser")
+        root = _parse_page(company_info_html)
 
         # Parse the fund company info
-        content_div = soup.find("div", {"id": "contentDiv"})
+        content_div = None if root is None else next(
+            iter(root.xpath("descendant-or-self::div[@id='contentDiv']")), None)
 
         if content_div is None:
             # Should not reach here, but this is precautionary
@@ -181,28 +328,29 @@ class _FundCompanyInfo:
             return None
 
         ident_info_dict = {}
-        company_info_div = content_div.find("div", class_="companyInfo")
-        company_name_tag = company_info_div.find('span', class_='companyName')
-        company_name = company_name_tag.text.split('CIK')[0].strip()
+        company_info_div = _find_class(content_div, "div", "companyInfo")
+        company_name_tag = _find_class(company_info_div, 'span', 'companyName')
+        company_name = _text(company_name_tag).split('CIK')[0].strip()
 
-        cik = company_name_tag.a.text.split(' ')[0]
+        # `.a` was bs4 shorthand for find('a') -- the first <a> DESCENDANT, not
+        # a child, so a link wrapped in <b> still counted.
+        cik = _text(company_name_tag.find('.//a')).split(' ')[0]
 
         # Extract the identifying information
-        for tag in company_info_div.find_all('br'):
-            tag.replace_with('\n')
-        ident_info = company_info_div.find('p', class_='identInfo')
-        ident_line = ident_info.get_text().replace("|", "\n").strip()
+        _replace_br_with_newline(company_info_div)
+        ident_info = _find_class(company_info_div, 'p', 'identInfo')
+        ident_line = _text(ident_info).replace("|", "\n").strip()
         for line in ident_line.split("\n"):
             if ":" in line:
                 key, value = line.split(":")
                 ident_info_dict[key.strip()] = value.strip().replace("\xa0", " ")
 
         # Addresses
-        mailer_divs = content_div.find_all("div", class_="mailer")
-        addresses = [re.sub(r'\n\s+', '\n', mailer_div.text.strip())
+        mailer_divs = _find_all_class(content_div, "div", "mailer")
+        addresses = [re.sub(r'\n\s+', '\n', _text(mailer_div).strip())
                      for mailer_div in mailer_divs]
 
-        filing_index = cls._extract_filings(soup, company_name, cik)
+        filing_index = cls._extract_filings(root, company_name, cik)
         filings = Filings(filing_index=filing_index)
 
         return cls(name=company_name,
@@ -212,28 +360,28 @@ class _FundCompanyInfo:
                    addresses=addresses)
 
     @classmethod
-    def _extract_filings(cls, soup, company_name: str, cik: str):
+    def _extract_filings(cls, root, company_name: str, cik: str):
         from datetime import datetime
 
         import pyarrow as pa
 
-        filings_table = soup.find("table", class_="tableFile2")
-        rows = filings_table.find_all("tr")[1:]
+        filings_table = _find_class(root, "table", "tableFile2")
+        rows = _find_all(filings_table, "tr")[1:]
 
         forms, accession_nos, filing_dates = [], [], []
         for row in rows:
-            cells = row.find_all("td")
-            form = cells[0].text
+            cells = _find_all(row, "td")
+            form = _text(cells[0])
             forms.append(form)
 
             # Get the link href from cell[1]
-            link = cells[1].find("a")
-            href = link.attrs["href"]
+            link = cells[1].find(".//a")
+            href = link.attrib["href"]
             accession_no = href.split("/")[-1].replace("-index.htm", "")
             accession_nos.append(accession_no)
 
             # Get the filing_date
-            filing_date = datetime.strptime(cells[3].text, '%Y-%m-%d')
+            filing_date = datetime.strptime(_text(cells[3]), '%Y-%m-%d')
             filing_dates.append(filing_date)
 
         schema = pa.schema([
@@ -391,8 +539,9 @@ def direct_get_fund_with_filings(contract_or_series_id: str, filing_type: Option
             # Get the next page
             next_page = base_url + f"&start={start}&count={count}"
             fund_text = download_text(next_page)
-            soup = BeautifulSoup(fund_text, features="html.parser")
-            filing_index_on_page = _FundCompanyInfo._extract_filings(soup, company_info.name, company_info.cik)
+            page_root = _parse_page(fund_text)
+            filing_index_on_page = _FundCompanyInfo._extract_filings(
+                page_root, company_info.name, company_info.cik)
             if len(filing_index_on_page) == 0:
                 break
             filing_index = pa.concat_tables([filing_index, filing_index_on_page])
@@ -406,6 +555,17 @@ def direct_get_fund_with_filings(contract_or_series_id: str, filing_type: Option
             return _FundClass(company_info)
         else:
             return _FundSeries(company_info)
+    except TRANSPORT_ERRORS:
+        # "Could not reach SEC" is not "this fund does not exist". Returning None
+        # here made the two indistinguishable, and the caller in funds/core.py
+        # turns None into an EMPTY Filings with no fallback (GH #888 forbids
+        # falling back to the unfiltered trust) — so a network failure silently
+        # told the user the series had filed nothing.
+        #
+        # The genuine not-found signals stay None and are unaffected: an
+        # identifier that is not [CS]\d+, and a browse-edgar page containing
+        # "No matching". Those are answers. This is the absence of one.
+        raise
     except Exception as e:
         log.warning("Error retrieving fund information for %s: %s", contract_or_series_id, e)
         return None
@@ -425,15 +585,28 @@ def _resolve_company_cik(identifier: str) -> Optional[tuple]:
     )
     try:
         html = download_text(resolve_url)
-        soup = BeautifulSoup(html, "html.parser")
-        tag = soup.find('span', class_='companyName')
-        if not tag:
+        root = _parse_page(html)
+        if root is None:
             return None
-        company_name = tag.text.split('CIK')[0].strip()
-        cik_link = tag.find('a')
-        if not cik_link:
+        # bs4 matched `class_=` against the multi-valued class LIST, so a span
+        # carrying `class="big companyName"` matched too; in lxml `@class` is
+        # one string, and `@class='companyName'` would miss it.
+        spans = root.xpath(
+            "descendant-or-self::span"
+            "[contains(concat(' ', normalize-space(@class), ' '), ' companyName ')]"
+        )
+        if not spans:
             return None
-        cik = cik_link.text.split(' ')[0].strip()
+        tag = spans[0]
+        company_name = _text(tag).split('CIK')[0].strip()
+        # `.//a`, and `is None`: find() was recursive, and the original tested
+        # the Tag itself -- a bs4 Tag is truthy even with nothing in it, so only
+        # a missing link ever failed that test. An lxml element with no element
+        # children is falsy, which would reject a perfectly good <a>text</a>.
+        cik_link = tag.find('.//a')
+        if cik_link is None:
+            return None
+        cik = _text(cik_link).split(' ')[0].strip()
         return cik, company_name
     except Exception as e:
         log.warning("Error resolving fund identifier %s: %s", identifier, e)
@@ -448,13 +621,16 @@ def _parse_series_table(html: str) -> tuple:
         Tuple of (company_cik, company_name, series_list) where series_list is a list of dicts:
         [{'series_id': str, 'series_name': str, 'classes': [{'class_id': str, 'class_name': str, 'ticker': str}]}]
     """
-    soup = BeautifulSoup(html, "html.parser")
-    tables = soup.find_all("table")
+    root = _parse_page(html)
+    if root is None:
+        return None, None, []
+    # `descendant-or-self`: lxml roots a single-element fragment AT that element.
+    tables = root.xpath("descendant-or-self::table")
     if not tables:
         return None, None, []
 
     table = tables[0]
-    rows = table.find_all('tr')
+    rows = _find_all(table, 'tr')
 
     company_cik = None
     company_name = None
@@ -462,7 +638,7 @@ def _parse_series_table(html: str) -> tuple:
     current_series = None
 
     for row in rows:
-        cells = row.find_all('td')
+        cells = _find_all(row, 'td')
         num_cells = len(cells)
 
         # Skip header rows (0-2) and the large summary row (484+ cells)
@@ -471,19 +647,19 @@ def _parse_series_table(html: str) -> tuple:
 
         # Company row: 2 cells with CIK link + company name link
         if num_cells == 2:
-            links = [a.text.strip() for a in cells[0].find_all('a')]
+            links = [_text(a).strip() for a in _find_all(cells[0], 'a')]
             if links and re.match(r'^0\d{9}$', links[0]):
                 company_cik = links[0]
-                name_links = [a.text.strip() for a in cells[1].find_all('a')]
-                company_name = name_links[0] if name_links else cells[1].get_text(strip=True)
+                name_links = [_text(a).strip() for a in _find_all(cells[1], 'a')]
+                company_name = name_links[0] if name_links else _text_stripped(cells[1])
 
         # Series row: 3 cells — cell[1] has series ID, cell[2] has series name
         elif num_cells == 3:
-            links_1 = [a.text.strip() for a in cells[1].find_all('a')]
+            links_1 = [_text(a).strip() for a in _find_all(cells[1], 'a')]
             if links_1 and re.match(r'^S\d+$', links_1[0]):
                 series_id = links_1[0]
-                name_links = [a.text.strip() for a in cells[2].find_all('a')]
-                series_name = name_links[0] if name_links else cells[2].get_text(strip=True)
+                name_links = [_text(a).strip() for a in _find_all(cells[2], 'a')]
+                series_name = name_links[0] if name_links else _text_stripped(cells[2])
                 current_series = {
                     'series_id': series_id,
                     'series_name': series_name,
@@ -493,11 +669,11 @@ def _parse_series_table(html: str) -> tuple:
 
         # Class row: 4-5 cells — cell[2] has class ID, cell[3] has name, cell[4] has ticker
         elif num_cells in (4, 5) and current_series is not None:
-            links_2 = [a.text.strip() for a in cells[2].find_all('a')]
+            links_2 = [_text(a).strip() for a in _find_all(cells[2], 'a')]
             if links_2 and re.match(r'^C\d+$', links_2[0]):
                 class_id = links_2[0]
-                class_name = cells[3].get_text(strip=True)
-                ticker = cells[4].get_text(strip=True) if num_cells == 5 else ""
+                class_name = _text_stripped(cells[3])
+                ticker = _text_stripped(cells[4]) if num_cells == 5 else ""
                 current_series['classes'].append({
                     'class_id': class_id,
                     'class_name': class_name,
@@ -583,8 +759,28 @@ def _build_hierarchy_from_mf_tickers(cik: str, identifier_type: str, identifier:
     try:
         from edgar.funds.reference import get_fund_reference_data
         ref_data = get_fund_reference_data()
-    except Exception:
-        pass
+    except Exception as e:
+        # Falling through leaves every series_name/class_name below as its bare
+        # identifier — output that is well-formed, plausible, and wrong. Being
+        # offline is the one cause where that degradation is the right answer;
+        # everything else (SEC restructured the dataset page, the CSV changed
+        # shape, a bug in FundReferenceData) is a defect that must not be
+        # indistinguishable from "this class has no name".
+        #
+        # That distinction is not hypothetical. SEC turned the dataset page into
+        # a 301 with a relative Location, edgartools followed the header
+        # verbatim, and httpx raised UnsupportedProtocol — an error, not an
+        # outage. This except swallowed it, and find_fund("KINCX").name returned
+        # "C000013712" instead of "Advisor Class C" until two literal-value
+        # assertions in tests/test_funds.py happened to catch it.
+        #
+        # The sibling path at the top of this module draws the same line for the
+        # same reason; see the TRANSPORT_ERRORS comment in _get_fund_object.
+        if not is_unreachable(e):
+            log.warning(
+                "Fund reference data unavailable (%s: %s); series and class names "
+                "will fall back to their identifiers.", type(e).__name__, e,
+            )
 
     # Build hierarchy
     all_series = []
@@ -889,187 +1085,3 @@ def get_fund_information(header):
 
     # Return an empty container if everything else fails
     return FundSeriesAndContracts()
-
-
-def parse_series_and_classes_from_html(html_content: str, cik:str) -> List[Dict]:
-    """
-    Parse series and class information from the SEC series listing HTML page.
-
-    This parses HTML content from the URL https://www.sec.gov/cgi-bin/browse-edgar?CIK=XXXX&scd=series
-    which contains a structured listing of all series and classes for a fund company.
-
-    Args:
-        html_content: HTML content from the SEC webpage
-        fund: Fund entity to associate with the series/classes
-
-    Returns:
-        List of dictionaries containing series and class information
-    """
-    import re
-
-    from bs4 import BeautifulSoup
-
-    soup = BeautifulSoup(html_content, 'html.parser')
-    series_data = []
-
-    # Debug information
-    log.debug("Parsing series HTML content for fund %s", cik)
-
-    # The table structure in this specific page has series and classes
-    # organized in a specific way with indentation levels
-    try:
-        # Find the main table - in Kinetics HTML, it's the main table in the content area
-        tables = soup.find_all('table')
-
-        # Find the table that's likely to contain the series information
-        # In SEC pages, it's typically the one with class/contract and series information
-        table = None
-        for t in tables:
-            # Look for rows with series or class info
-            if t.find('tr') and re.search(r'Series|Class/Contract', str(t)):
-                table = t
-                break
-
-        if not table:
-            log.warning("No suitable table found in series HTML content")
-            return []
-
-        current_series = None
-        series_data = []
-
-        # Loop through all rows and process them
-        rows = table.find_all('tr')
-
-        # Debug information
-        log.debug("Found %d rows in the table", len(rows))
-
-        # Process all rows since the table structure might vary
-        for _row_idx, row in enumerate(rows):
-            cells = row.find_all('td')
-            if not cells or len(cells) < 3:
-                continue
-
-            # Check if this is a series row - marked by an S000 ID in a cell with a link
-            series_cell = None
-            series_id = None
-            series_name = None
-
-            # Series IDs are normally in the form S######
-            for cell in cells:
-                # Look for <a> tags with S IDs
-                links = cell.find_all('a', href=True)
-                for link in links:
-                    if re.search(r'S\d{6,}', link.text):
-                        series_id = re.search(r'S\d{6,}', link.text).group(0)
-                        series_cell = cell
-                        break
-                if series_cell:
-                    break
-
-            # If we found a series ID, extract its name and create a series entry
-            if series_id:
-                # Try to find the series name in the next cell or in the same row
-                series_name = None
-                for cell in cells:
-                    # Look for a cell with a link that's not the series ID
-                    if cell != series_cell and cell.find('a'):
-                        # Check if the link text doesn't match the series ID - it's likely the name
-                        link_text = cell.find('a').text.strip()
-                        if link_text and series_id not in link_text:
-                            series_name = link_text
-                            break
-
-                # If we couldn't find a name, use a default
-                if not series_name:
-                    series_name = f"Series {series_id}"
-
-                # Create a new series entry
-                current_series = {
-                    'series_id': series_id,
-                    'series_name': series_name,
-                    'classes': []
-                }
-                series_data.append(current_series)
-                log.debug("Found series: %s - %s", series_id, series_name)
-
-            # Check if this row contains a class - marked by a C000 ID
-            # Classes appear after a series and are indented
-            elif current_series:
-                class_id = None
-                class_name = None
-                class_ticker = ""
-
-                # Look for class IDs in the form C######
-                for cell in cells:
-                    # Search for C IDs in links
-                    links = cell.find_all('a', href=True)
-                    for link in links:
-                        if re.search(r'C\d{6,}', link.text):
-                            class_id = re.search(r'C\d{6,}', link.text).group(0)
-                            break
-                    if class_id:
-                        break
-
-                if class_id:
-                    # Find the class name - usually in a cell after the ID
-                    for cell_idx, cell in enumerate(cells):
-                        if class_id in str(cell) and cell_idx + 1 < len(cells):
-                            # Class name is often in the next cell
-                            class_name = cells[cell_idx + 1].text.strip()
-                            break
-
-                    parts = class_name.split("\n")
-                    class_name = parts[1]
-                    if len(parts) > 2:
-                        class_ticker = parts[2].strip()
-
-                    # If we couldn't find a name, use a default
-                    if not class_name:
-                        class_name = f"Class {class_id}"
-
-                    # Add this class to the current series
-                    current_series['classes'].append({
-                        'class_id': class_id,
-                        'class_name': class_name,
-                        'ticker': class_ticker
-                    })
-                    log.debug("Found class: %s - %s (%s)", class_id, class_name, class_ticker)
-
-        # Debug information
-        log.debug("Found %d series with classes", len(series_data))
-
-    except Exception as e:
-        log.warning("Error parsing series HTML: %s", e)
-        import traceback
-        log.debug(traceback.format_exc())
-
-    return series_data
-
-
-def get_series_and_classes_from_sec(cik: Union[str, int]) -> List[Dict]:
-    """
-    Directly fetch and parse series and class information from the SEC website.
-
-    This uses the SEC's series listing page which provides a comprehensive view
-    of all series and classes for a fund company.
-
-    Args:
-        cik: The CIK of the fund company
-
-    Returns:
-        List of dictionaries containing parsed series and class information
-    """
-
-    # Format CIK properly for URL
-    cik_str = str(cik).zfill(10)
-    url = fund_series_direct_url.format(cik_str)
-
-    # Download the HTML content
-    html_content = download_text(url)
-
-    # Check if we received valid content
-    if 'No matching' in html_content or 'series for cik' not in html_content.lower():
-        log.debug("No series information found for CIK %s", cik)
-        return []
-
-    return parse_series_and_classes_from_html(html_content, cik)

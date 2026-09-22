@@ -4,6 +4,7 @@ Rendering functions for XBRL data.
 This module provides functions for formatting and displaying XBRL data.
 """
 
+import math
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
@@ -23,6 +24,7 @@ from edgar.xbrl import standardization
 from edgar.xbrl.core import (
     PERIOD_END_LABEL,
     PERIOD_START_LABEL,
+    decimals_for_scaling,
     determine_dominant_scale,
     format_date,
     format_value,
@@ -313,6 +315,19 @@ class RenderedStatement:
                 return obj.isoformat()
             if isinstance(obj, ElementCatalog):
                 return {"name": obj.name, "labels": obj.labels}
+            if isinstance(obj, float) and not math.isfinite(obj):
+                # Infinity and NaN are not JSON. Python's encoder emits them as
+                # bare `Infinity`/`NaN` tokens by default, which no standards
+                # compliant reader accepts, and refuses outright under
+                # allow_nan=False -- so a method documented as returning a
+                # JSON-safe dict produced something that would not round-trip.
+                # The generated percentage change is what creates them:
+                # _calculate_comparison returns inf whenever the prior period
+                # is a filed zero, which is ordinary (Cato's basic EPS runs
+                # -1.17, 0, 1.65). null carries the same "no bounded
+                # comparison" meaning and survives serialization; the filed
+                # values in `cells` are untouched and remain finite (gh #1290).
+                return None
             return obj
 
         def _period_to_dict(p: PeriodData) -> Dict[str, Any]:
@@ -583,22 +598,31 @@ class RenderedStatement:
         from edgar.richtools import rich_to_text
         return rich_to_text(self.__rich__(), width=150)
 
-    def to_dataframe(self, include_unit: bool = False, include_point_in_time: bool = False) -> Any:
+    def to_dataframe(self, include_unit: bool = False, include_point_in_time: bool = False,
+                     presentation: bool = True) -> Any:
         """Convert to a pandas DataFrame
 
         Args:
             include_unit: If True, add a 'unit' column with unit information (e.g., 'usd', 'shares', 'usdPerShare')
             include_point_in_time: If True, add a 'point_in_time' boolean column (True for 'instant', False for 'duration')
+            presentation: If True (default), apply the presentation linkbase's
+                preferred sign so values match SEC display and agree with
+                ``Statement.to_dataframe()`` -- cash outflows negative, contra
+                accounts negative. If False, return raw XBRL instance values,
+                which is what this method returned before edgartools-5ztr.
 
         Returns:
             pd.DataFrame: DataFrame with statement data and optional unit/point-in-time columns
         """
         try:
-            from edgar.xbrl.core import get_unit_display_name
+            from edgar.xbrl.core import get_unit_display_name, row_metadata_value
             from edgar.xbrl.core import is_point_in_time as get_is_point_in_time
 
             # Create rows for the DataFrame
             df_rows = []
+
+            # Whether this statement was rendered with standardization on.
+            standardized = bool(self.metadata.get('standard'))
 
             # Create column map - use end_date from period data if available
             column_map = {}
@@ -620,37 +644,49 @@ class RenderedStatement:
                     'label': row.label
                 }
 
+                # Standardization deliberately preserves the filer's label
+                # ("fidelity to the filing") and reports the standard concept
+                # alongside it. That output reached Statement.to_dataframe() and
+                # stopped here, so render(standard=True).to_dataframe() returned
+                # no standardization at all and the flag was inert on this path
+                # (edgartools-t3zh).
+                #
+                # Keyed on the statement's CONFIGURATION, not on whether any row
+                # happened to resolve: the column is present for every
+                # standardized statement and absent otherwise, so a caller's
+                # column set cannot change with the data
+                # (engineering/decisions/facts-dataframe-schema.md, rsyt).
+                if standardized:
+                    df_row['standard_concept'] = row.metadata.get('standard_concept')
+
                 # Add unit column if requested
                 if include_unit:
-                    # Get units from row metadata
-                    units_dict = row.metadata.get('units', {})
-                    # Get the first non-None unit (all periods should have same unit for a given concept)
-                    unit_ref = None
-                    for period_key in self.header.period_keys:
-                        if period_key in units_dict and units_dict[period_key] is not None:
-                            unit_ref = units_dict[period_key]
-                            break
-                    # Convert to display name
+                    unit_ref = row_metadata_value(row.metadata.get('units'),
+                                                  self.header.period_keys)
                     df_row['unit'] = get_unit_display_name(unit_ref)
 
                 # Add point_in_time column if requested
                 if include_point_in_time:
-                    # Get period_types from row metadata
-                    period_types_dict = row.metadata.get('period_types', {})
-                    # Get the first non-None period_type (all periods should have same type structure)
-                    period_type = None
-                    for period_key in self.header.period_keys:
-                        if period_key in period_types_dict and period_types_dict[period_key] is not None:
-                            period_type = period_types_dict[period_key]
-                            break
-                    # Convert to boolean
+                    period_type = row_metadata_value(row.metadata.get('period_types'),
+                                                     self.header.period_keys)
                     df_row['point_in_time'] = get_is_point_in_time(period_type)
 
                 # Add cell values using date string column names where available
+                # The cell holds the filed value; the presentation sign lives in
+                # the formatter, so it has to be applied here too or this frame
+                # disagrees with the rendered statement (edgartools-5ztr).
+                preferred_signs = row.metadata.get('preferred_signs', {})
                 for i, cell in enumerate(row.cells):
                     if i < len(self.header.periods):
                         column_name = column_map[i]
-                        df_row[column_name] = cell.value
+                        value = cell.value
+                        if presentation:
+                            value = apply_presentation_sign(
+                                value, self.statement_type, preferred_signs,
+                                self.header.period_keys[i]
+                                if i < len(self.header.period_keys) else None
+                            )
+                        df_row[column_name] = value
 
                 df_row['level'] = row.level
                 df_row['abstract'] = row.is_abstract
@@ -704,7 +740,7 @@ class RenderedStatement:
                 lines.append("")
 
         # Column header row — right-align numeric columns
-        header = [""] + self.header.columns
+        header = [""] + [_md_cell(column) for column in self.header.columns]
         lines.append("| " + " | ".join(header) + " |")
 
         separator = ["---"] + ["---:" for _ in self.header.columns]
@@ -724,13 +760,14 @@ class RenderedStatement:
                     continue
 
             indent = (NBSP * 2) * row.level
+            row_label = _md_cell(row.label)
 
             if row.is_abstract:
-                label = f"**{indent}{row.label}**"
+                label = f"**{indent}{row_label}**"
             elif row.is_dimension:
-                label = f"*{indent}{row.label}*"
+                label = f"*{indent}{row_label}*"
             else:
-                label = f"{indent}{row.label}"
+                label = f"{indent}{row_label}"
 
             cell_values = []
             for cell in row.cells:
@@ -738,9 +775,9 @@ class RenderedStatement:
                 if cell_value is None or cell_value == "":
                     cell_values.append("")
                 elif isinstance(cell_value, Text):
-                    cell_values.append(str(cell_value))
+                    cell_values.append(_md_cell(str(cell_value)))
                 else:
-                    cell_values.append(cell_value)
+                    cell_values.append(_md_cell(cell_value))
 
             row_data = [label] + cell_values
             lines.append("| " + " | ".join(row_data) + " |")
@@ -757,6 +794,17 @@ class RenderedStatement:
             lines.append(" · ".join(footer_parts))
 
         return "\n".join(lines)
+
+
+def _md_cell(text: Any) -> str:
+    """Make a value safe to place inside a GitHub-Flavored Markdown table cell.
+
+    A filed XBRL label may contain a literal pipe ("... conversion of debt |
+    shares"), which a Markdown parser would read as another column delimiter.
+    Escape it, and fold any embedded newline, which would end the row.
+    """
+    cell = "" if text is None else str(text)
+    return cell.replace("|", r"\|").replace("\r\n", " ").replace("\n", " ").replace("\r", " ")
 
 
 def _format_comparison(pct_change: float, comparison_type: str) -> str:
@@ -1268,6 +1316,42 @@ def _create_units_note(
         return ""
 
 
+# The statements whose SEC-displayed sign differs from the filed sign.
+# Originally the Income Statement and Cash Flow Statement (Issue #463); extended
+# to the Balance Sheet for contra accounts such as Treasury Stock (Issue #568) --
+# APD, JPM and XOM negate Treasury Stock, JPM also Allowance for Loan Losses.
+PRESENTATION_SIGN_STATEMENTS = ('IncomeStatement', 'CashFlowStatement', 'BalanceSheet')
+
+
+def apply_presentation_sign(
+    value: Any,
+    statement_type: Optional[str],
+    preferred_signs: Optional[Dict[str, Any]],
+    period_key: Optional[str],
+) -> Any:
+    """
+    Turn a filed value into the value the SEC displays.
+
+    ``preferred_sign`` comes from the presentation linkbase's preferredLabel:
+    -1 negates for display (expenses, dividends, outflows, contra accounts),
+    1 shows the value as filed, and None means the linkbase said nothing.
+
+    This lives in one function because the display string and the DataFrame both
+    need it. They used to disagree: the sign was applied only while formatting,
+    so ``Statements.to_dataframe()`` -- which reads the cell values, not their
+    formatted strings -- returned a capex outflow positive where
+    ``Statement.to_dataframe()`` returned it negative (edgartools-5ztr).
+    """
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        return value
+    if not period_key or statement_type not in PRESENTATION_SIGN_STATEMENTS:
+        return value
+    preferred_sign = (preferred_signs or {}).get(period_key)
+    if preferred_sign is None or preferred_sign == 0:
+        return value
+    return value * preferred_sign
+
+
 def _format_value_for_display_as_string(
     value: Any,
     item: Dict[str, Any],
@@ -1323,33 +1407,19 @@ def _format_value_for_display_as_string(
         if any(keyword in label for keyword in ('ratio', 'percentage', 'per cent')):
             is_monetary = False
 
-    # Get decimals with a default value to avoid conditional logic later
+    # Get decimals with a default value to avoid conditional logic later.
+    # A statement stores the filed accuracy, which may be the sentinel 'INF'
+    # (GH #1229); scaling needs a number, and an exact value implies no scale.
     fact_decimals = 0
     if period_key:
         decimals_dict = item.get('decimals', {})
         if decimals_dict:
-            fact_decimals = decimals_dict.get(period_key, 0) or 0
+            fact_decimals = decimals_for_scaling(decimals_dict.get(period_key))
 
     # Apply presentation logic for display (Issue #463)
-    # Matches SEC HTML filing display - uses preferred_sign from presentation linkbase
-    if value_type in (int, float) and period_key:
-        # Get statement context
-        statement_type = item.get('statement_type')
-
-        # Apply preferred_sign from presentation linkbase for display
-        # preferred_sign comes from preferredLabel in presentation linkbase
-        # -1 = negate for display (e.g., expenses, dividends, outflows, contra accounts)
-        # 1 = show as-is
-        # None = no transformation specified
-        #
-        # Originally only applied to Income Statement and Cash Flow Statement (Issue #463)
-        # Extended to Balance Sheet for contra accounts like Treasury Stock (Issue #568)
-        # - APD, JPM, XOM use preferred_sign=-1 for Treasury Stock
-        # - JPM uses preferred_sign=-1 for Allowance for Loan Losses
-        if statement_type in ('IncomeStatement', 'CashFlowStatement', 'BalanceSheet'):
-            preferred_sign = item.get('preferred_signs', {}).get(period_key)
-            if preferred_sign is not None and preferred_sign != 0:
-                value = value * preferred_sign
+    value = apply_presentation_sign(
+        value, item.get('statement_type'), item.get('preferred_signs'), period_key
+    )
 
     # Format numeric values efficiently
     if value_type in (int, float):
@@ -1554,6 +1624,21 @@ def render_statement(
     if statement_type in ['CashFlowStatement', 'IncomeStatement', 'BalanceSheet']:
         periods_to_display = _filter_empty_string_periods(statement_data, periods_to_display)
 
+    # Tell every row which statement it belongs to.
+    #
+    # The cell formatter reads item['statement_type'] to decide whether the
+    # presentation sign applies, and this used to be stamped ONLY on the
+    # standardization fallback path -- so render(standard=False) handed the
+    # formatter rows with no statement type, the sign gate saw None, and a
+    # correctly hydrated preferred_sign of -1 was skipped. Apple's FY2023
+    # capital expenditures displayed as $10,959 under standard=False and
+    # $(10,959) under standard=True, from one statement whose own
+    # to_dataframe(presentation=True) returned the negative value either way
+    # (gh #1289). Whether a row is part of a cash flow statement has nothing
+    # to do with whether its label was standardized.
+    for item in statement_data:
+        item['statement_type'] = statement_type
+
     # Apply standardization if requested
     if standard:
         # Use XBRL instance's standardization cache if available (disable statement caching
@@ -1563,10 +1648,9 @@ def render_statement(
                 statement_data, statement_type, use_cache=False
             )
         else:
-            # Fall back to module-level singleton mapper
+            # Fall back to module-level singleton mapper. statement_type is
+            # already stamped on every item above.
             mapper = standardization.get_default_mapper()
-            for item in statement_data:
-                item['statement_type'] = statement_type
             statement_data = standardization.standardize_statement(statement_data, mapper)
 
         # Add standard_concept metadata to facts if XBRL instance is available
@@ -1611,10 +1695,17 @@ def render_statement(
     for item in statement_data:
         concept = item.get('concept', '')
         if concept in share_concepts:
-            # Check decimals attribute to determine proper scaling
+            # Check decimals attribute to determine proper scaling.
+            # A share count filed with decimals='INF' is exact, which is the
+            # same "do not scale" signal as 0 (GH #1229) -- reading the
+            # sentinel as "unknown" here scaled AEON's 38,818,536 dilutive
+            # securities down to 39.
             for period_key, _ in periods_to_display:
-                decimals = item.get('decimals', {}).get(period_key)
-                if isinstance(decimals, int) and decimals <= 0:
+                item_decimals = item.get('decimals', {})
+                if period_key not in item_decimals:
+                    continue
+                decimals = decimals_for_scaling(item_decimals[period_key])
+                if decimals <= 0:
                     # Use the decimals attribute to determine the scale
                     # For shares, decimals is typically negative
                     # -3 means thousands, -6 means millions, etc.
@@ -1883,7 +1974,10 @@ def render_statement(
                 'children': item.get('children', []),
                 'dimension_metadata': item.get('dimension_metadata', {}),
                 'units': item.get('units', {}),  # Pass through unit_ref for each period
-                'period_types': item.get('period_types', {})  # Pass through period_type for each period
+                'period_types': item.get('period_types', {}),  # Pass through period_type for each period
+                # Carried so to_dataframe() can reach the same presentation sign
+                # the display formatter applies (edgartools-5ztr)
+                'preferred_signs': item.get('preferred_signs', {})
             },
             is_abstract=item.get('is_abstract', False),
             is_dimension=is_dim,

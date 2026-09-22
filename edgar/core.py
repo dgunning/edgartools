@@ -1,28 +1,28 @@
 import asyncio
-import datetime
 import logging.config
 import os
 import random
 import re
 import sys
-import threading
-from _thread import interrupt_main
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-from datetime import date
-from functools import cached_property, lru_cache, partial, wraps
-from pathlib import Path
+from functools import lru_cache, partial, wraps
 from typing import Callable, Iterable, List, Optional, Tuple, TypeVar, Union
 
-import httpx
 import pandas as pd
 import pyarrow as pa
-from zoneinfo import ZoneInfo
-from pandas.tseries.offsets import BDay
 from rich.logging import RichHandler
-from rich.prompt import Prompt
 
 from edgar.datatools import PagingState
+
+# Re-exported for callers that still import them from here. The implementation
+# lives in edgar.dates; 6.0 drops this shim (edgartools-07lk.12.1 item 6).
+from edgar.dates import (  # noqa: F401
+    current_year_and_quarter,
+    filing_date_to_year_quarters,
+    is_start_of_quarter,
+    parse_acceptance_datetime,
+)
 
 log = logging.getLogger(__name__)
 
@@ -90,12 +90,38 @@ YYYY_MM_DD = "\\d{4}-\\d{2}-\\d{2}"
 DATE_PATTERN = re.compile(YYYY_MM_DD)
 DATE_RANGE_PATTERN = re.compile(f"^({YYYY_MM_DD}(:({YYYY_MM_DD})?)?|:({YYYY_MM_DD}))$")
 
-default_http_timeout: int = 12
-default_page_size = 50
-default_max_connections = 10
-default_retries = 3
-
-limits = httpx.Limits(max_connections=default_max_connections)
+# ---------------------------------------------------------------------------
+# Settings and identity now live in edgar/settings.py (edgartools-07lk.12.1).
+#
+# These are RE-EXPORTS, not aliases: the implementation moved to the canonical
+# name and this module imports it back, rather than the reverse. Aliasing onto
+# the deprecated name is the trap 07lk.23 names — it leaves the real code at the
+# path you intend to delete, so 6.0 cannot simply drop the shim.
+#
+# The whole block below goes away in 6.0. Every one of the 71 call sites is a
+# `from edgar.core import <name>` (measured: zero `import edgar.core`, zero
+# attribute access), so a re-export covers 100% of them.
+# ---------------------------------------------------------------------------
+from edgar.settings import (  # noqa: E402,F401  -- re-exports, intentionally unused here
+    CAUTION,
+    CRAWL,
+    NORMAL,
+    EdgarSettings,
+    ask_for_identity,
+    default_http_timeout,
+    default_max_connections,
+    default_page_size,
+    default_retries,
+    edgar_access_mode,
+    edgar_data_dir,
+    edgar_identity,
+    edgar_mode,
+    get_edgar_data_directory,
+    get_identity,
+    identity_prompt,
+    limits,
+    set_identity,
+)
 
 
 def strtobool (val:str):
@@ -117,132 +143,6 @@ def strtobool (val:str):
         #raise ValueError("invalid truth value %r" % (val,))
 
 
-@dataclass
-class EdgarSettings:
-    http_timeout: int
-    max_connections: int
-    retries: int = 3
-
-    @cached_property
-    def limits(self):
-        return httpx.Limits(max_connections=default_max_connections)
-
-    def __eq__(self, othr):
-        return (isinstance(othr, type(self))
-                and (self.http_timeout, self.max_connections, self.retries) ==
-                (othr.http_timeout, othr.max_connections, othr.retries))
-
-    def __hash__(self):
-        return hash((self.http_timeout, self.max_connections, self.retries))
-
-
-# Modes of accessing edgar
-
-# The normal mode of accessing edgar
-NORMAL = EdgarSettings(http_timeout=15, max_connections=10)
-
-# A bit more cautious mode of accessing edgar
-CAUTION = EdgarSettings(http_timeout=20, max_connections=5)
-
-# Use this setting when you have long-running jobs and want to avoid breaching Edgar limits
-CRAWL = EdgarSettings(http_timeout=25, max_connections=2, retries=2)
-
-edgar_access_mode = os.getenv('EDGAR_ACCESS_MODE', 'NORMAL')
-if edgar_access_mode == 'CAUTION':
-    # A bit more cautious mode of accessing edgar
-    edgar_mode = CAUTION
-elif edgar_access_mode == 'CRAWL':
-    # Use this setting when you have long-running jobs and want to avoid breaching Edgar limits
-    edgar_mode = CRAWL
-else:
-    # The normal mode of accessing edgar
-    edgar_mode = NORMAL
-
-edgar_identity = 'EDGAR_IDENTITY'
-
-# Local storage directory - use centralized path configuration
-from edgar.paths import get_data_directory as _get_data_directory
-
-edgar_data_dir = str(_get_data_directory(create=False))
-
-
-def set_identity(user_identity: str):
-    """
-    This function sets the environment variable EDGAR_IDENTITY to the identity you will use to call Edgar
-
-    This user identity looks like
-
-        "Sample Company Name AdminContact@<sample company domain>.com"
-
-    See https://www.sec.gov/os/accessing-edgar-data
-
-    :param user_identity:
-    """
-    os.environ[edgar_identity] = user_identity
-    log.info("Identity of the Edgar REST client set to [%s]", user_identity)
-
-    from edgar.httpclient import close_clients
-    close_clients() # close any httpx clients, to reset the identity.
-
-
-identity_prompt = """
-[bold turquoise4]Identify your client to SEC Edgar[/bold turquoise4]
-------------------------------------------------------------------------------
-
-Before running [bold]edgartools[/bold] it needs to know the UserAgent string to send to Edgar.
-See https://www.sec.gov/os/accessing-edgar-data
-
-This can be set in the environment variable [bold green]EDGAR_IDENTITY[/bold green].
-
-1. Set an OS environment variable
-    [bold]EDGAR_IDENTITY=[green]Name email@domain.com[/green][/bold]
-2. Or a Python environment variable
-    import os
-    [bold]os.environ['EDGAR_IDENTITY']=[green]"Name email@domain.com"[/green][/bold]
-3. Or use [bold magenta]edgartools.set_identity[/bold magenta]
-    from edgar import set_identity
-    [bold]set_identity([green]'Name email@domain.com'[/green])[/bold]
-
-But since you are already using [bold]edgartools[/bold] you can set it here
-
-Enter your [bold green]EDGAR_IDENTITY[/bold green] e.g. [bold italic green]Name email@domain.com[/bold italic green]
-"""
-
-
-def ask_for_identity(user_prompt: str = identity_prompt,
-                     timeout: int = 60):
-    timer = threading.Timer(timeout, interrupt_main)
-    timer.start()
-
-    try:
-        # Prompt the user for input
-        input_str = Prompt.ask(user_prompt)
-
-        # Strip the newline character from the end of the input string
-        input_str = input_str.strip()
-    except KeyboardInterrupt:
-        # If the timeout is reached, raise a TimeoutError exception
-        message = "You did not enter your Edgar user identity. Try again .. or set environment variable EDGAR_IDENTITY"
-        log.warning(message)
-        raise TimeoutError(message) from None
-    finally:
-        # Cancel the timer to prevent it from interrupting the main thread
-        timer.cancel()
-
-    return input_str
-
-
-def get_identity() -> str:
-    """
-    Get the sec identity used to set the UserAgent string
-    :return:
-    """
-    identity = os.environ.get(edgar_identity)
-    if not identity:
-        identity = ask_for_identity()
-        os.environ[edgar_identity] = identity
-    return identity
-
 def decode_content(content: bytes):
     try:
         return content.decode('utf-8')
@@ -250,9 +150,13 @@ def decode_content(content: bytes):
         return content.decode('latin-1')
 
 
-text_extensions = (".txt", ".htm", ".html", ".xsd", ".xml", "XML", ".json", ".idx", ".paper")
-binary_extensions = (".pdf", ".jpg", ".jpeg", "png", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg", ".webp", ".avif",
-                     ".apng", ".xlsx", ".xls", ".zip", ".docx", ".pptx")
+# Extension tables. Entries MUST be lowercase and dot-prefixed: membership is tested against
+# a normalized extension (see Attachment.is_text/is_binary), so a bare or uppercase entry here
+# can never match. Two such entries ("png", "XML") silently classified nothing for years, which
+# is how a .PDF primary document reached a UTF-8 decode and raised (edgartools-dzwm).
+text_extensions = (".txt", ".htm", ".html", ".xsd", ".xml", ".json", ".idx", ".paper", ".css", ".js")
+binary_extensions = (".pdf", ".jpg", ".jpeg", ".png", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg", ".webp",
+                     ".avif", ".apng", ".xlsx", ".xls", ".zip", ".docx", ".pptx")
 
 
 def get_bool(value: Optional[str] = None) -> Optional[bool]:
@@ -261,9 +165,13 @@ def get_bool(value: Optional[str] = None) -> Optional[bool]:
 
 
 class Result:
-    """
-    This class represents the result of an operation which can succeed or fail.
-    It allows for handling the failures more gracefully that using error handling
+    """Deprecated, removed in 6.0. Nothing imports this.
+
+    It was scaffolding for a flagged-result pattern that never got adopted —
+    zero importers anywhere in the codebase. The pattern that *did* get adopted
+    is NonAccrualResult (edgar/bdc/nonaccrual.py): a frozen dataclass carrying
+    the value plus its provenance and warnings, so a caller can tell "genuinely
+    zero" from "we may have failed to parse". Use that shape instead.
     """
 
     def __init__(self,
@@ -311,93 +219,14 @@ def get_resource(file: str):
     return importlib.resources.as_file(importlib.resources.files(edgar).joinpath(file))
 
 
-def get_edgar_data_directory() -> Path:
-    """Get the edgar data directory.
-
-    The directory can be customized via the EDGAR_LOCAL_DATA_DIR environment
-    variable or by using edgar.paths.set_data_directory().
-
-    Returns:
-        Path to the Edgar data directory. Creates it if it doesn't exist.
-    """
-    from edgar.paths import get_data_directory
-    return get_data_directory(create=True)
+# TooManyRequestsException was a dead duplicate of
+# edgar.exceptions.TooManyRequestsError: never raised anywhere, different
+# suffix, same meaning. Kept as a deprecated alias (see the module __getattr__
+# at the end of this file); removed in 6.0.
 
 
-class TooManyRequestsException(Exception):
-
-    def __init__(self, message: str):
-        super().__init__(message)
 
 
-def filing_date_to_year_quarters(filing_date: str) -> List[Tuple[int, int]]:
-    if ":" in filing_date:
-        start_date, end_date = filing_date.split(":")
-
-        if not start_date:
-            # SEC's full-index goes back to 1993 Q1 - see available_quarters() in _filings.py
-            start_date = "1993-01-01"
-
-        if not end_date:
-            end_date = date.today().strftime("%Y-%m-%d")
-
-        start_year, start_month, _ = map(int, start_date.split("-"))
-        end_year, end_month, _ = map(int, end_date.split("-"))
-
-        start_quarter = (start_month - 1) // 3 + 1
-        end_quarter = (end_month - 1) // 3 + 1
-
-        result = []
-        for year in range(start_year, end_year + 1):
-            if year == start_year and year == end_year:
-                quarters = range(start_quarter, end_quarter + 1)
-            elif year == start_year:
-                quarters = range(start_quarter, 5)
-            elif year == end_year:
-                quarters = range(1, end_quarter + 1)
-            else:
-                quarters = range(1, 5)
-
-            for quarter in quarters:
-                result.append((year, quarter))
-
-        return result
-    else:
-        year, month, _ = map(int, filing_date.split("-"))
-        quarter = (month - 1) // 3 + 1
-        return [(year, quarter)]
-
-
-def current_year_and_quarter() -> Tuple[int, int]:
-    # Define the Eastern timezone
-    eastern = ZoneInfo('America/New_York')
-
-    # Get the current time in Eastern timezone
-    now_eastern = datetime.datetime.now(eastern)
-
-    # Calculate the current year and quarter
-    current_year, current_quarter = now_eastern.year, (now_eastern.month - 1) // 3 + 1
-
-    return current_year, current_quarter
-
-
-def filter_by_date(data: pa.Table,
-                   date: Union[str, datetime.datetime],
-                   date_col: str) -> pa.Table:
-    # If datetime convert to string
-    if isinstance(date, datetime.date) or isinstance(date, datetime.datetime):
-        date = date.strftime('%Y-%m-%d')
-
-def decode_content(content: bytes):
-    try:
-        return content.decode('utf-8')
-    except UnicodeDecodeError:
-        return content.decode('latin-1')
-
-
-text_extensions = (".txt", ".htm", ".html", ".xsd", ".xml", "XML", ".json", ".idx", ".paper")
-binary_extensions = (".pdf", ".jpg", ".jpeg", "png", ".gif", ".tif", ".tiff", ".bmp", ".ico", ".svg", ".webp", ".avif",
-                     ".apng", ".xlsx", ".xls", ".zip", ".docx", ".pptx")
 
 
 class DataPager:
@@ -464,8 +293,6 @@ class PagingState:
     page_start: int
     num_records: int
 
-def parse_acceptance_datetime(acceptance_datetime: str) -> datetime.datetime:
-    return datetime.datetime.fromisoformat(acceptance_datetime.replace('Z', '+00:00'))
 
 def sample_table(table, n=None, frac=None, replace=False, random_state=None):
     """Take a sample from a pyarrow Table"""
@@ -532,22 +359,6 @@ def listify(value):
         return [value]
 
 
-def is_start_of_quarter():
-    today = datetime.datetime.now().date()
-
-    # Check if it's the start of a quarter
-    if today.month in [1, 4, 7, 10] and today.day <= 5:
-        # Get the first day of the current quarter
-        first_day_of_quarter = datetime.datetime(today.year, today.month, 1).date()
-
-        # Calculate one business day after the start of the quarter
-        one_business_day_after = (first_day_of_quarter + BDay(1)).date()
-
-        # Check if we haven't passed one full business day yet
-        if today <= one_business_day_after:
-            return True
-
-    return False
 
 
 def cache_except_none(maxsize=128):
@@ -581,9 +392,11 @@ def is_probably_html(content: str) -> bool:
     if isinstance(content, bytes):
         content = content.decode('utf-8', errors='ignore')
 
-    # Check for common HTML tags
+    # Check for common HTML tags. Lowercase once: `content` can be hundreds of MB and
+    # doing it inside the generator allocated a fresh copy for every tag tried.
     html_tags = ['<html>', '<body>', '<head>', '<title>', '<div', '<span', '<p>']
-    return any(tag in content.lower() for tag in html_tags)
+    lowered = content.lower()
+    return any(tag in lowered for tag in html_tags)
 
 def has_html_content(content: str) -> bool:
     """
@@ -695,3 +508,12 @@ for _logger_name, _level in _NOISY_LOGGERS.items():
 # Turn on rich logging if the environment variable is set
 if os.getenv('EDGAR_USE_RICH_LOGGING', '0') == '1':
     initialize_rich_logging()
+
+
+# ---------------------------------------------------------------------------
+# Deprecated names (bead edgartools-07lk.10), removed in 6.0.
+# ---------------------------------------------------------------------------
+from edgar._compat import deprecated_alias  # noqa: E402
+from edgar.exceptions import TooManyRequestsError  # noqa: E402
+
+__getattr__ = deprecated_alias(TooManyRequestsException=TooManyRequestsError)

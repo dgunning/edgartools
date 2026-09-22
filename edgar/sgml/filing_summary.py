@@ -3,9 +3,10 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional, Set, Tuple, Union
 
+import lxml.html
 import pyarrow as pa
 import pyarrow.compute as pc
-from bs4 import BeautifulSoup
+from lxml.etree import ParserError
 from rich import box
 from rich.console import Group
 from rich.panel import Panel
@@ -14,10 +15,54 @@ from rich.text import Text
 
 from edgar.core import DataPager, PagingState, log, strtobool
 from edgar.documents import HTMLParser, ParserConfig
+from edgar.documents.utils.html_utils import (
+    create_lxml_parser,
+    text_joined,
+    text_skipping_tables,
+)
 from edgar.richtools import print_rich, repr_rich, rich_to_text
-from edgar.xmltools import child_text
+from edgar.xmltools import child_text, element_text, find_all_elements, find_element, local_name
+from edgar.xmltools import parse_xml as parse_xml_document
 
 __all__ = ['Report', 'Reports', 'File', 'FilingSummary']
+
+def _parse_report_html(content: str):
+    """Parse an R-file into an lxml tree, or None if there is nothing to parse.
+
+    bs4 built an empty soup for blank input where lxml raises ParserError; the
+    callers here already treat "no report table" as "render it the ordinary
+    way", so None joins that path rather than introducing a new failure mode.
+    """
+    if isinstance(content, str):
+        content = content.encode("utf-8", errors="replace")
+    # remove_blank_text stays off: a whitespace-only node between two tags is a
+    # word boundary and libxml2 deletes rather than collapses it.
+    parser = create_lxml_parser(remove_blank_text=False, remove_comments=True,
+                                recover=True, encoding="utf-8")
+    try:
+        return lxml.html.fromstring(content, parser=parser)
+    except ParserError:
+        return None
+
+
+def _by_class(element, tag: str, class_name: str) -> List:
+    """Elements of `tag` carrying `class_name` among its class tokens.
+
+    `class` is a space-separated list, so `@class="text"` would miss
+    ``class="text foo"`` that bs4's class_= matched, while a bare `contains`
+    would wrongly match ``class="textbox"``. Padding with spaces matches whole
+    tokens, which is what bs4 did.
+    """
+    return element.xpath(
+        f'.//{tag}[contains(concat(" ", normalize-space(@class), " "), " {class_name} ")]'
+    )
+
+
+def _first_by_class(element, tag: str, class_name: str):
+    """The first match, or None -- bs4's ``find`` semantics."""
+    found = _by_class(element, tag, class_name)
+    return found[0] if found else None
+
 
 class Reports:
 
@@ -69,6 +114,33 @@ class Reports:
         """Display the current page ... which is the default for this filings object"""
         return self
 
+    def _derived(self,
+                 data: pa.Table,
+                 original_state: Optional[PagingState] = None,
+                 title: Optional[str] = None) -> 'Reports':
+        """A new Reports over a subset of this one, carrying the context its Reports need.
+
+        ``Report.content`` reaches back through ``reports._filing_summary._filing_sgml``
+        to fetch the R-file, so a collection built without the filing summary yields
+        Reports with correct metadata and filenames whose ``.content`` raises
+        ``AttributeError: 'NoneType' object has no attribute '_filing_sgml'`` (GH #1191).
+
+        Every method returning a NEW collection derived from this one goes through here.
+        Three of the four such call sites had each dropped the filing summary
+        independently — ``filter()``, ``next()`` and ``previous()``, the last of which
+        was not in the bug report and was found only by grepping for the constructor.
+        That is the argument for a single derivation point rather than three fixed call
+        sites: the next method to return a subset gets it right by default.
+
+        ``Reports(...)`` is still constructed directly in one place, where the filing
+        summary genuinely does not exist yet — ``FilingSummary.from_xml`` builds the
+        root collection and ``FilingSummary.__init__`` back-wires itself onto it.
+        """
+        return Reports(data,
+                       filing_summary=self._filing_summary,
+                       original_state=original_state,
+                       title=self.title if title is None else title)
+
     def next(self):
         """Show the next page"""
         data_page = self.data_pager.next()
@@ -77,7 +149,7 @@ class Reports:
             return None
         start_index, _ = self.data_pager._current_range
         paging_state = PagingState(page_start=start_index, num_records=len(self))
-        return Reports(data_page, original_state=paging_state)
+        return self._derived(data_page, original_state=paging_state)
 
     def previous(self):
         """
@@ -90,7 +162,7 @@ class Reports:
             return None
         start_index, _ = self.data_pager._current_range
         paging_state = PagingState(page_start=start_index, num_records=len(self))
-        return Reports(data_page, original_state=paging_state)
+        return self._derived(data_page, original_state=paging_state)
 
     def to_pandas(self):
         return self.data.to_pandas()
@@ -130,7 +202,7 @@ class Reports:
         Get a single report by category
         """
         data = self.data.filter(pc.equal(self.data['MenuCategory'], category))
-        return Reports(data, filing_summary=self._filing_summary, title=category)
+        return self._derived(data, title=category)
 
     @property
     def statements(self) -> Optional['Statements']:
@@ -174,7 +246,7 @@ class Reports:
         # Return a single Report or new Reports instance
         if len(data) == 1:
             return self.create_from_record(data)
-        return Reports(data)
+        return self._derived(data)
 
     def __rich__(self):
         table = Table(
@@ -270,10 +342,10 @@ class Report:
         return self._cached_report_table
 
     @staticmethod
-    def _has_embedded_tables(report_soup) -> bool:
+    def _has_embedded_tables(report) -> bool:
         """True if any TextBlock cell wraps a full HTML table (see issue #755)."""
-        return any(td.find('table') is not None
-                   for td in report_soup.find_all('td', class_='text'))
+        return any(td.find('.//table') is not None
+                   for td in _by_class(report, 'td', 'text'))
 
     def _build_renderable(self, width: int = 500):
         """
@@ -292,8 +364,8 @@ class Report:
         if not content:
             return None
 
-        soup = BeautifulSoup(content, 'html.parser')
-        report = soup.find('table', class_='report')
+        root = _parse_report_html(content)
+        report = _first_by_class(root, 'table', 'report') if root is not None else None
         if report is None or not self._has_embedded_tables(report):
             table = self._get_report_table()
             return table.render(width) if table else None
@@ -304,26 +376,26 @@ class Report:
         if title:
             renderables.append(Text(title, style="bold"))
 
-        for tr in report.find_all('tr'):
-            text_td = tr.find('td', class_='text')
-            if not (text_td and text_td.find('table')):
+        for tr in report.xpath('.//tr'):
+            text_td = _first_by_class(tr, 'td', 'text')
+            if text_td is None or text_td.find('.//table') is None:
                 continue
 
-            label_td = tr.find('td', class_='pl')
-            label = label_td.get_text(' ', strip=True) if label_td else None
+            label_td = _first_by_class(tr, 'td', 'pl')
+            label = text_joined(label_td) if label_td is not None else None
             if label:
                 renderables.append(Text(label, style="bold cyan"))
 
             # Narrative lead-in: everything in the cell that is not inside a table
-            narrative_soup = BeautifulSoup(str(text_td), 'html.parser')
-            for nested in narrative_soup.find_all('table'):
-                nested.decompose()
-            narrative = narrative_soup.get_text(' ', strip=True)
+            narrative = text_skipping_tables(text_td)
             if narrative:
                 renderables.append(Text(narrative))
 
-            # Render the embedded table(s) as proper tables
-            cell_doc = parser.parse('<html><body>' + str(text_td) + '</body></html>')
+            # Render the embedded table(s) as proper tables. with_tail=False
+            # because lxml's tostring appends the text that FOLLOWS the cell,
+            # which belongs to the next cell, not this one.
+            cell_html = lxml.html.tostring(text_td, encoding='unicode', with_tail=False)
+            cell_doc = parser.parse('<html><body>' + cell_html + '</body></html>')
             for embedded in cell_doc.tables:
                 renderables.append(embedded.render(width))
 
@@ -421,8 +493,12 @@ class FilingSummary:
 
     @classmethod
     def parse(cls, xml_text:str):
-        soup = BeautifulSoup(xml_text, 'xml')
-        root = soup.find('FilingSummary')
+        # <FilingSummary> is the document element, so the parsed root is already
+        # it. The R-file HTML this module also reads is parsed separately, by
+        # _parse_report_html; both sides are off BeautifulSoup as of 07lk.11.6.
+        root = parse_xml_document(xml_text)
+        if local_name(root) != 'FilingSummary':
+            raise ValueError(f"Expected a FilingSummary document, got <{local_name(root)}>")
 
         # Main fields
         report_format = child_text(root, 'ReportFormat')
@@ -440,7 +516,7 @@ class FilingSummary:
         short_name_map: Dict[str, Report] = {}
         category_map: Dict[str, List[Report]] = {}
         report_records = []
-        for report_tag in root.find_all("Report"):
+        for report_tag in find_all_elements(root, "Report"):
             record = {
                 'instance': report_tag.get('instance'),
                 'IsDefault': strtobool(child_text(report_tag, 'IsDefault')),
@@ -477,12 +553,12 @@ class FilingSummary:
         # Reports Data
         reports_obj = Reports(data=pa.Table.from_pylist(report_records))
         # Input Files
-        input_files_tag = root.find('InputFiles')
+        input_files_tag = find_element(root, 'InputFiles')
         input_files = []
-        if input_files_tag:
-            for file_tag in input_files_tag.find_all('File'):
+        if input_files_tag is not None:
+            for file_tag in find_all_elements(input_files_tag, 'File'):
                 file = File(
-                        file_name = file_tag.text,
+                        file_name = element_text(file_tag),
                         doc_type = file_tag.get('doctype'),
                         is_definitely_fs = strtobool(file_tag.get('isDefinitelyFs')),
                         is_usgaap = strtobool(file_tag.get('isUsgaap')),
@@ -491,12 +567,12 @@ class FilingSummary:
                 input_files.append(file)
 
         # Supplemental Files
-        supplemental_files_tag = root.find('SupplementalFiles')
+        supplemental_files_tag = find_element(root, 'SupplementalFiles')
         supplemental_files = []
-        if supplemental_files_tag:
-            for file_tag in supplemental_files_tag.find_all('File'):
+        if supplemental_files_tag is not None:
+            for file_tag in find_all_elements(supplemental_files_tag, 'File'):
                 file = File(
-                        file_name = file_tag.text,
+                        file_name = element_text(file_tag),
                         doc_type = file_tag.get('doctype'),
                         is_definitely_fs = strtobool(file_tag.get('isDefinitelyFs')),
                         is_usgaap = strtobool(file_tag.get('isUsgaap')),

@@ -2,6 +2,8 @@
 
 find_ticker() returned 'EP' (Empire Petroleum) for CIK 1506307 (Kinder Morgan)
 because the heuristic stripped 'EP-PC' to 'EP' and picked it over 'KMI' by length.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/745
 """
 from edgar.reference.tickers import find_ticker
 

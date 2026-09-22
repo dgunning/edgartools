@@ -15,6 +15,8 @@ dict-keyed mapping then collides, with the wrong window winning.
 
 The fix: derive the label fiscal_year from period_end + FYE month rather than
 trusting `as_of_fact.fiscal_year`.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/793
 """
 
 from datetime import date

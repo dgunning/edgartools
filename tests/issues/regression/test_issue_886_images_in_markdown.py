@@ -19,6 +19,8 @@ Fix:
 
 These tests use a small synthetic document (no network) plus a live NVDA 10-K
 ground-truth check.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/886
 """
 import pytest
 

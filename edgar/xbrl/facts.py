@@ -12,7 +12,7 @@ import re
 from decimal import Decimal
 
 from textwrap import dedent
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import pandas as pd
 from rich import box
@@ -22,9 +22,111 @@ from rich.panel import Panel
 from rich.table import Column, Table
 from rich.text import Text
 
+from edgar.exceptions import ValidationError
+
+from edgar.datatools import STR_DTYPE, null_column as _null_column
 from edgar.richtools import repr_rich
-from edgar.xbrl.core import STANDARD_LABEL, parse_date
-from edgar.xbrl.models import select_display_label
+from edgar.xbrl.core import STANDARD_LABEL, iso4217_code, parse_date, unit_currency
+from edgar.xbrl.models import is_negated_label_role, select_display_label
+
+
+# Probed once in edgar.datatools, where the entity path's declared schema reads it
+# too — the string dtype's pandas-3.0 change is one rule, so it gets one definition.
+_STR_DTYPE = STR_DTYPE
+
+# Columns FactQuery.to_dataframe() declares, in the order it emits them.
+#
+# The rule (see engineering/decisions/facts-dataframe-schema.md, edgartools-rsyt):
+# the column set is a function of the query's *configuration*, never of the rows
+# that came back. Narrowing a query chooses fewer rows, not a different table
+# shape, so a column no returned row happened to populate is materialized as null
+# rather than silently vanishing.
+#
+# Dtypes here are applied ONLY to columns that had to be materialized. Pinning the
+# dtype of a populated column moves a null sentinel, which is a breaking change
+# held for the 6.0 window (edgartools-rsyt.2) — until then `preferred_sign` and
+# `fiscal_year` keep the float64 they take today whenever a null is present.
+_CORE_COLUMNS: Dict[str, Any] = {
+    'concept': _STR_DTYPE,
+    'label': _STR_DTYPE,
+    'balance': _STR_DTYPE,
+    'preferred_sign': 'float64',
+    'weight': 'float64',
+    'value': _STR_DTYPE,
+    'numeric_value': 'float64',
+    'period_key': _STR_DTYPE,  # emitted for time series analysis (Issue #464)
+    'period_start': _STR_DTYPE,
+    'period_end': _STR_DTYPE,
+    'period_instant': _STR_DTYPE,
+    # Nullable, though _build_facts always populates it: an empty *numpy* bool
+    # column materializes as True, and fabricating "this fact is dimensioned"
+    # is exactly the kind of silent wrong answer this schema exists to prevent.
+    'is_dimensioned': 'boolean',
+    'decimals': _STR_DTYPE,
+    'statement_type': _STR_DTYPE,
+    'statement_name': _STR_DTYPE,
+    'fact_id': _STR_DTYPE,
+    'context_ref': _STR_DTYPE,
+    'unit_ref': _STR_DTYPE,
+    'currency': _STR_DTYPE,
+    'period_type': _STR_DTYPE,
+    'entity_identifier': _STR_DTYPE,
+    'entity_scheme': _STR_DTYPE,
+    'fiscal_period': _STR_DTYPE,
+    'fiscal_year': 'float64',
+}
+
+# Dropped by include_contexts=False.
+_CONTEXT_COLUMNS = frozenset(
+    {'context_ref', 'entity_identifier', 'entity_scheme', 'period_type'})
+
+# Added by include_dimensions=True. The per-axis `dim_<axis>` columns are NOT
+# declared: their names depend on which axes the filer used, so two filings
+# legitimately differ and a diff across them carries no information.
+_DIMENSION_COLUMNS: Dict[str, Any] = {
+    'dimension': _STR_DTYPE,
+    'member': _STR_DTYPE,
+    'dimension_label': _STR_DTYPE,
+    'dimension_member_label': _STR_DTYPE,
+    'full_dimension_label': _STR_DTYPE,
+}
+
+# Never emitted, whatever the configuration.
+# Present on the enriched fact dicts, deliberately not columns of the frame.
+# statement_types/statement_roles carry a fact's full statement membership for
+# by_statement_type() to test against (gh #1242); they are list-valued, and the
+# frame's schema is declared rather than inferred (edgartools-rsyt), so they
+# stay off it rather than widening the contract with two list cells.
+_SKIP_COLUMNS = frozenset({'fact_key', 'original_label',
+                           'statement_types', 'statement_roles'})
+
+
+# The fact identity used for de-duplication, in one place: `_deduplicate_facts`
+# applies it, and `to_dataframe()`'s early projection has to keep these columns
+# in the frame long enough for it to run (gh #1181). Two spellings of one rule is
+# the bug this file has produced most often, so both read these names.
+_DEDUP_REQUIRED = ('concept', 'context_ref', 'value', 'decimals')
+_DEDUP_OPTIONAL = ('unit_ref',)
+
+
+def _source_column_presence(results: List[Dict[str, Any]], names) -> set:
+    """Which of `names` at least one source row actually carries.
+
+    Stops as soon as every name has been seen, so the common case costs one row.
+    Presence is read from the source dicts rather than from a constructed frame
+    because `pd.DataFrame(rows, columns=[...])` fabricates a null column for a
+    name no row has, which would make an absent column look present.
+    """
+    remaining = set(names)
+    present = set()
+    for row in results:
+        if not remaining:
+            break
+        hit = remaining.intersection(row.keys())
+        if hit:
+            present |= hit
+            remaining -= hit
+    return present
 
 
 def _deduplicate_facts(df: pd.DataFrame) -> pd.DataFrame:
@@ -33,44 +135,119 @@ def _deduplicate_facts(df: pd.DataFrame) -> pd.DataFrame:
 
     SEC XBRL instance documents often contain the same fact tagged multiple times
     (e.g. in the financial statements and again in the notes). This drops rows that
-    are identical on concept, context_ref, value, and decimals — keeping the first
-    occurrence. Rows that share concept+context but differ in value or decimals are
-    preserved, as they represent genuinely different taggings (e.g. precise vs rounded).
+    are identical on concept, context_ref, value, decimals and unit — keeping the
+    first occurrence. Rows that share concept+context but differ in value or decimals
+    are preserved, as they represent genuinely different taggings (e.g. precise vs
+    rounded).
+
+    The unit is part of that identity because XBRL 2.1 §4.10 requires unit equality
+    before two numeric items can be called duplicates. Without it, equal numbers were
+    enough: Aebi Schmidt reports a CHF 10,000,000 and a EUR 10,000,000 shareholder
+    loan in one context, and the EUR fact — a separate economic observation, with its
+    own translated amount in the filing — was deleted as a duplicate of the CHF one
+    (gh #1282). `execute()` returned all four facts; only the frame lost two.
+
+    Deduplicating on `unit_ref` rather than on the resolved measure is deliberate:
+    it is the identity the row actually carries, and it cannot merge two currencies.
+    Its one cost is under-deduplication if a filing declares the same measure under
+    two unit IDs, which keeps a redundant row rather than deleting a real one — the
+    safe direction, and not observed across the fixture corpus.
     """
-    dedup_cols = ['concept', 'context_ref', 'value', 'decimals']
+    dedup_cols = list(_DEDUP_REQUIRED)
     if all(col in df.columns for col in dedup_cols):
+        # Repeated tags of one fact still collapse (gh #769): they share a unit.
+        dedup_cols.extend(col for col in _DEDUP_OPTIONAL if col in df.columns)
         df = df.drop_duplicates(subset=dedup_cols, keep='first')
     return df
 
 
-def _iso4217_code(measure: Optional[str]) -> Optional[str]:
-    """Return the ISO 4217 code of an ``iso4217:`` unit measure, else ``None``."""
-    if measure and measure.startswith('iso4217:'):
-        return measure[len('iso4217:'):]
-    return None
+# The unit-currency rule lives in edgar.xbrl.core, where every consumer can
+# reach it. These names are kept as the module-local spelling used throughout
+# this file and by existing tests.
+_iso4217_code = iso4217_code
+_unit_currency = unit_currency
 
 
-def _unit_currency(unit_info: Optional[Dict[str, Any]]) -> Optional[str]:
-    """Resolve a parsed XBRL unit to its ISO 4217 currency code, or ``None``.
+def _concept_spellings(concept: str) -> tuple:
+    """The ways a caller may legitimately write a concept.
 
-    Currency facts use a simple ``iso4217:`` measure (e.g. ``iso4217:HKD`` ->
-    ``HKD``). Per-share monetary facts use a ``divide`` unit whose numerator is
-    the currency (e.g. ``iso4217:USD`` per ``xbrli:shares``), so the numerator
-    currency is returned. Non-monetary units (shares, pure, ...) return ``None``.
-    The opaque ``unit_ref`` id itself (e.g. ``UNIT_STANDARD_HKD_...``) is never
-    parsed -- only the resolved measure is used (see issue #850).
+    The QName as parsed ('us-gaap:Revenues') and its element-id form
+    ('us-gaap_Revenues'), which is how the same concept is spelled in element ids
+    and in most SEC tooling. Only the NAMESPACE separator differs between them; a
+    local name keeps whatever underscores the filer declared.
     """
-    if not unit_info:
-        return None
-    unit_type = unit_info.get('type')
-    if unit_type == 'simple':
-        return _iso4217_code(unit_info.get('measure'))
-    if unit_type == 'divide':
-        for measure in unit_info.get('numerator', []):
-            code = _iso4217_code(measure)
-            if code:
-                return code
-    return None
+    if ':' in concept:
+        return (concept, concept.replace(':', '_', 1))
+    return (concept,)
+
+
+def _sort_key(value: Any) -> tuple:
+    """A total order for a fact column, which is neither dense nor single-typed.
+
+    Facts come from a filing rather than a schema, so one column routinely holds
+    numbers, strings and ``None`` at once -- a 10-K measured at 1,733 numeric and
+    111 non-numeric facts. Comparing those directly raised
+    ``TypeError: '<' not supported between instances of 'NoneType' and 'float'``,
+    so ``sort_by('numeric_value')`` failed on most real filings.
+
+    The leading rank keeps ``<`` from ever seeing two different types: numbers
+    sort before strings, and missing values sort last on an ascending sort.
+    """
+    if value is None:
+        return (2, 0.0, '')
+    if isinstance(value, bool):
+        return (0, float(value), '')
+    if isinstance(value, (int, float, Decimal)):
+        return (0, float(value), '')
+    return (1, 0.0, str(value))
+
+
+def _apply_transformations(results: List[Dict[str, Any]],
+                           transformations: List[Callable[[Any], Any]]) -> List[Dict[str, Any]]:
+    """Apply a transform chain to each fact, on the field that actually holds its value.
+
+    A parsed fact carries the filed string in ``value`` and the parsed float in
+    ``numeric_value``, and ``numeric_value is None`` is what marks a fact as
+    non-numeric (a TextBlock, a string). Measured over a 1,131-fact AAPL 10-K:
+    ``value`` is a ``str`` on every single fact, and ``numeric_value`` is a float
+    on 976 of them and ``None`` on the other 155.
+
+    Transforms used to be handed ``value`` for every fact. Numeric transforms
+    therefore did nothing at all: ``scale()``'s ``value / scale_factor`` hit its
+    own ``isinstance(value, (int, float, Decimal))`` guard, fell through to
+    ``return value``, and handed back the untouched string — while
+    ``numeric_value``, which is what every consumer actually reads, was never
+    transformed on any path (GH #1187).
+
+    So a numeric fact is transformed on its NUMERIC value, and both fields are
+    written back together so they cannot disagree. ``numeric_value`` is the
+    authoritative one; ``value`` is its string rendering, which keeps the
+    all-strings contract that ``value`` has always had.
+
+    A non-numeric fact is still transformed on ``value``, because ``transform()``
+    is a general-purpose hook and text transforms were always able to use it.
+    ``scale()`` leaves those facts alone on its own, via the same isinstance
+    guard — now doing the job it was written for instead of swallowing
+    everything.
+    """
+    if not transformations:
+        return results
+
+    transformed = []
+    for fact in results:
+        numeric = fact.get('numeric_value')
+        if numeric is not None:
+            fact = dict(fact)
+            for transform_fn in transformations:
+                numeric = transform_fn(numeric)
+            fact['numeric_value'] = numeric
+            fact['value'] = str(numeric) if isinstance(numeric, (int, float, Decimal)) else numeric
+        elif fact.get('value') is not None:
+            fact = dict(fact)
+            for transform_fn in transformations:
+                fact['value'] = transform_fn(fact['value'])
+        transformed.append(fact)
+    return transformed
 
 
 class FactQuery:
@@ -112,12 +289,18 @@ class FactQuery:
         Returns:
             Self for method chaining
         """
-        pattern = pattern.replace('_', ':')  # Normalize underscores to colons for concept names
+        # The pattern is matched against the concept written both ways rather than
+        # being rewritten itself. Rewriting every '_' to ':' let 'us-gaap_Revenues'
+        # find 'us-gaap:Revenues', but a local name may contain a literal underscore
+        # -- YUM files yum:YUM_LesseeOperatingLeaseLeaseNotYetCommenced... -- and
+        # rewriting that produced a second colon, so the concept could not be matched
+        # in either spelling, exact or regex.
         if exact:
-            self._filters.append(lambda f: f['concept'] == pattern)
+            self._filters.append(lambda f: pattern in _concept_spellings(f['concept']))
         else:
             regex = re.compile(pattern, re.IGNORECASE)
-            self._filters.append(lambda f: bool(regex.search(f['concept'])))
+            self._filters.append(
+                lambda f: any(regex.search(s) for s in _concept_spellings(f['concept'])))
         return self
 
     def by_label(self, pattern: str, exact: bool = False) -> FactQuery:
@@ -570,7 +753,16 @@ class FactQuery:
         Returns:
             Self for method chaining
         """
-        self._filters.append(lambda f: 'statement_type' in f and f['statement_type'] == statement_type)
+        # Membership, not equality: a concept presented in several statements
+        # carries all of them in 'statement_types'. Filtering on the scalar
+        # returned zero rows for a fact that is demonstrably in the requested
+        # statement, just not first in presentation order (gh #1242). The
+        # scalar is still honoured so a fact enriched by an older path, or one
+        # that carries no list, filters as before.
+        self._filters.append(
+            lambda f: statement_type in f.get('statement_types', [])
+            or f.get('statement_type') == statement_type
+        )
         return self
 
     def by_fiscal_period(self, fiscal_period: str) -> FactQuery:
@@ -809,11 +1001,11 @@ class FactQuery:
         for filter_func in self._filters:
             results = [f for f in results if filter_func(f)]
 
-        # Apply transformations
-        for transform_fn in self._transformations:
-            for fact in results:
-                if 'value' in fact and fact['value'] is not None:
-                    fact['value'] = transform_fn(fact['value'])
+        # Apply transformations.  _apply_transformations copies each row before
+        # writing to it: get_facts() hands back the rows from FactsView's shared
+        # cache, so transforming in place would scale the cache itself and
+        # compound on the next query.
+        results = _apply_transformations(results, self._transformations)
 
         # Apply aggregations
         if self._aggregations:
@@ -826,10 +1018,15 @@ class FactQuery:
                 groups = {}
                 for fact in results:
                     dim_value = fact.get(f'dim_{dimension}')
-                    if dim_value and 'value' in fact and fact['value'] is not None:
+                    # Aggregate the parsed number, not fact['value'] -- that is the
+                    # lexical string as filed ('298085000000'), and summing it raised
+                    # TypeError on any ordinary numeric fact. A fact with no
+                    # numeric_value is not a number and cannot be aggregated.
+                    numeric_value = fact.get('numeric_value')
+                    if dim_value and numeric_value is not None:
                         if dim_value not in groups:
                             groups[dim_value] = []
-                        groups[dim_value].append(fact['value'])
+                        groups[dim_value].append(numeric_value)
 
                 # Apply aggregation function
                 for dim_value, values in groups.items():
@@ -845,16 +1042,129 @@ class FactQuery:
 
             results = list(aggregated_results.values())
 
-        # Apply sorting if specified
-        if results and self._sort_by and self._sort_by in results[0]:
-            results.sort(key=lambda f: f.get(self._sort_by, ''),
-                         reverse=not self._sort_ascending)
+        # Apply sorting if specified.
+        #
+        # sorted() rather than results.sort(): with no filter and no transform the
+        # list here is still FactsView's cached list by reference, and sorting in
+        # place reordered the cache itself, so a later unrelated query returned
+        # different facts.
+        #
+        # The key is decided over every row, not results[0]: one fact being an
+        # instant (no period_end) used to skip the sort for the whole result set.
+        if results and self._sort_by and any(self._sort_by in f for f in results):
+            results = sorted(results, key=lambda f: _sort_key(f.get(self._sort_by)),
+                             reverse=not self._sort_ascending)
 
         # Apply limit if specified
         if self._limit is not None:
             results = results[:self._limit]
 
         return results
+
+    def _declared_columns(self) -> Dict[str, Any]:
+        """The column -> dtype mapping this query's *configuration* declares.
+
+        A function of the include_* flags only, so two queries configured the
+        same way describe the same table however few rows either returns.
+        """
+        declared = {name: dtype for name, dtype in _CORE_COLUMNS.items()
+                    if self._include_contexts or name not in _CONTEXT_COLUMNS}
+        if self._include_dimensions:
+            declared.update(_DIMENSION_COLUMNS)
+        return declared
+
+    def _df_cache_key(self, columns: tuple) -> tuple:
+        """Cache key for to_dataframe(), covering the query configuration and not just
+        the column projection.
+
+        FactQuery is a documented fluent MUTABLE builder: every filter method
+        appends to ``self`` and returns ``self``, so one object describes one
+        population at a time and describes a different one after each call. The
+        key used to be the ``columns`` tuple alone, so the first ``to_dataframe()``
+        answered every later one — narrowing a query left ``execute()`` seeing 2
+        rows while ``to_dataframe()`` still returned the original 1,075, with no
+        warning that the two disagreed (GH #1186).
+
+        The three chains are only ever appended to — there is no pop, clear,
+        reassignment or clone anywhere in this class — so their LENGTHS identify
+        the configuration exactly and cost nothing to compute. The flags go in by
+        value, since those can be set either way.
+        """
+        return (
+            columns,
+            len(self._filters),
+            len(self._transformations),
+            len(self._aggregations),
+            self._include_dimensions,
+            self._include_contexts,
+            self._include_element_info,
+            # getattr, not attribute access: StitchedFactQuery does not call
+            # super().__init__() — it re-initialises the base attributes by hand
+            # and misses this one, so a plain read raises AttributeError there.
+            getattr(self, '_requested_dimension', None),
+        )
+
+    def _projection_source_columns(self, columns: tuple, results: List[Dict[str, Any]]):
+        """The source keys a projected `to_dataframe(*columns)` actually needs.
+
+        Returns None to mean "build the full frame", which is the old behaviour.
+
+        Asking for two columns used to cost the same as asking for all of them:
+        the full-width frame was built first and the caller's projection applied
+        only at the end, so a 2-column call on the JPM fixture allocated the same
+        7.6 MiB as a 103-column one (gh #1181). The columns are chosen here so the
+        steps between construction and projection still see everything they read:
+
+        - the de-duplication identity, so the row set does not change. `unit_ref`
+          is part of that identity and is easy to forget: without it two facts
+          that differ only by currency collapse into one (gh #1282).
+        - `statement_role`, which is what `statement_name` is derived from.
+
+        The include_* flags only ever DROP columns, and they run after
+        de-duplication, so they need nothing held open. The requested-dimension
+        rewrite is the one step whose reads cannot be predicted from `columns`,
+        so its presence falls back to the full frame rather than guessing.
+        """
+        if not columns:
+            return None
+        if getattr(self, '_requested_dimension', None) and self._include_dimensions:
+            return None
+
+        declared = self._declared_columns()
+        # A name no row carries must not be added: pandas would fabricate a null
+        # column for it, and an undeclared name that is absent is supposed to be
+        # dropped, not returned full of nulls.
+        undeclared_requested = [col for col in columns if col not in declared]
+        present = _source_column_presence(
+            results, set(_DEDUP_REQUIRED) | set(_DEDUP_OPTIONAL) | set(undeclared_requested))
+
+        needed = [col for col in (*_DEDUP_REQUIRED, *_DEDUP_OPTIONAL) if col in present]
+        if 'statement_name' in columns:
+            needed.append('statement_role')
+        for col in columns:
+            if col in declared or col in present:
+                needed.append(col)
+        return list(dict.fromkeys(needed))
+
+    def _build_deduplicated_frame(self, results: List[Dict[str, Any]],
+                                  columns: tuple) -> pd.DataFrame:
+        """The source rows as a frame, de-duplicated, no wider than this call needs.
+
+        Splitting this out of `to_dataframe()` keeps the projection decision in
+        one place and off that method's branch count.
+        """
+        frame_columns = self._projection_source_columns(columns, results)
+        if frame_columns is None:
+            return _deduplicate_facts(pd.DataFrame(results))
+
+        df = pd.DataFrame(results, columns=frame_columns)
+        # Only de-duplicate when the full-width frame would have. Constructing with
+        # an explicit column list fabricates any missing name as nulls, which would
+        # otherwise switch de-duplication ON for a source that is missing one of
+        # the identity columns.
+        if all(col in frame_columns for col in _DEDUP_REQUIRED):
+            df = _deduplicate_facts(df)
+        return df
 
     def to_dataframe(self, *columns) -> pd.DataFrame:
         """
@@ -863,18 +1173,35 @@ class FactQuery:
 
         Returns:
             pandas DataFrame with query results
+
+        The column set is determined by this query's configuration — the
+        ``include_*`` flags and any ``columns`` given here — and never by which
+        rows the query matched. Narrowing a query returns fewer rows, not a
+        different set of columns: a column no matching row populated comes back
+        null rather than disappearing, and an empty result still carries the
+        full set of columns so ``df['decimals']`` works on it.
+
+        The exception is the per-axis ``dim_<axis>`` columns added by
+        ``include_dimensions``, whose names depend on which axes the filer used.
+
+        See engineering/decisions/facts-dataframe-schema.md.
         """
-        cache_key = columns
+        cache_key = self._df_cache_key(columns)
         cache = getattr(self, '_df_cache', {})
         if cache_key in cache:
             return cache[cache_key]
         results = self.execute()
 
         if not results:
-            return pd.DataFrame()
+            # Zero rows, but the declared columns and their dtypes. A bare
+            # DataFrame() has no columns at all, so df['decimals'] raised
+            # KeyError on an empty result instead of yielding an empty column.
+            declared = self._declared_columns()
+            names = [c for c in columns if c in declared] if columns else list(declared)
+            return pd.DataFrame({name: _null_column(declared[name], pd.RangeIndex(0))
+                                 for name in names})
 
-        df = pd.DataFrame(results)
-        df = _deduplicate_facts(df)
+        df = self._build_deduplicated_frame(results, columns)
 
         # GH-607: When a specific dimension was requested via by_dimension(),
         # update dimension fields to reflect that dimension's member info
@@ -891,25 +1218,12 @@ class FactQuery:
                             or col == 'is_dimensioned']]
 
         if not self._include_contexts:
-            context_cols = ['context_ref', 'entity_identifier', 'entity_scheme',
-                            'period_type']
-            df = df.loc[:, [col for col in df.columns if col not in context_cols]]
+            df = df.loc[:, [col for col in df.columns if col not in _CONTEXT_COLUMNS]]
 
         if not self._include_element_info:
             element_cols = ['element_id', 'element_name', 'element_type', 'element_period_type',
                             'element_balance', 'element_label']
             df = df.loc[:, [col for col in df.columns if col not in element_cols]]
-
-        # Drop empty columns
-        df = df.dropna(axis=1, how='all')
-
-        # Filter columns if specified
-        if columns:
-            columns = [col for col in columns if col in df.columns]
-            df = df[list(columns)]
-        # skip these columns
-        # Note: period_key is now included for time series analysis (Issue #464)
-        skip_columns = ['fact_key', 'original_label']
 
         if 'statement_role' in df.columns:
             # Change the statement_role to statement name
@@ -918,17 +1232,33 @@ class FactQuery:
             if 'statement_role' in df.columns:
                 df = df.drop(columns=['statement_role'])
 
-        # order columns
-        first_columns = [col for col in
-                         ['concept', 'label', 'balance', 'preferred_sign', 'weight', 'value', 'numeric_value',
-                          'period_key', 'period_start', 'period_end', 'period_instant',
-                          'is_dimensioned', 'decimals', 'statement_type', 'statement_name']
-                         if col in df.columns]
-        columns = first_columns + [col for col in df.columns
-                                   if col not in first_columns
-                                   and col not in skip_columns]
+        declared = self._declared_columns()
 
-        result = df[columns]
+        # Whatever is present but undeclared is the per-axis dim_<axis> tail.
+        # Sorted, because its order otherwise follows whichever returned row
+        # first introduced each axis.
+        extra = sorted(col for col in df.columns
+                       if col not in declared and col not in _SKIP_COLUMNS)
+        ordered = list(declared) + extra
+        if columns:
+            # A caller projection keeps the caller's order, and may name a
+            # declared column no row populated; unknown names are dropped as before.
+            ordered = [col for col in columns if col in declared or col in df.columns]
+
+        # reindex materializes the declared columns this query's rows left empty,
+        # so the shape stops depending on which rows happened to match.
+        result = df.reindex(columns=ordered)
+
+        # A declared column with no data in it gets its declared dtype. Inference
+        # has nothing to work with there and lands somewhere arbitrary — an
+        # all-None `decimals` infers as object/None rather than string/pd.NA — and
+        # before this change dropna() hid that by deleting the column outright.
+        # Populated columns keep their inferred dtype until edgartools-rsyt.2
+        # pins them, since changing those moves a sentinel callers may rely on.
+        for col in ordered:
+            if col in declared and result[col].isna().all():
+                result[col] = _null_column(declared[col], result.index)
+
         cache[cache_key] = result
         self._df_cache = cache
         return result
@@ -957,8 +1287,11 @@ class FactQuery:
 
         display_columns = [col for col in ['concept','label', 'value', 'period_start', 'period_end']
                            if col in columns]
-        # What is the maximum width of the concept column?
-        max_width = df.concept.apply(len).max() if 'concept' in df.columns else 20
+        # What is the maximum width of the concept column? An empty result carries
+        # the declared columns, so `concept` is present with no rows to measure and
+        # .max() returns NaN — which rich accepts as a width and then fails to
+        # render ("can't multiply sequence by non-int of type 'float'").
+        max_width = df.concept.apply(len).max() if 'concept' in df.columns and not df.empty else 20
         rich_columns = [Column('concept', width=max_width)] + display_columns[1:]
         df = df[display_columns]
         table = Table(*rich_columns, show_header=True, header_style="bold", box=box.SIMPLE)
@@ -1020,6 +1353,25 @@ class FactsView:
         for stmt in statements:
             if stmt['role'] and stmt['type']:
                 role_to_statement_type[stmt['role']] = (stmt['type'], stmt['role'])
+
+        # Statement membership is a SET: us-gaap:NetIncomeLoss is presented in
+        # the income statement AND the cash flow statement, and often more.
+        # This used to be read per-fact from whichever presentation role the
+        # iteration happened to reach first and stored as a single scalar, so
+        # get_statement_facts('CashFlowStatement') returned zero rows for a
+        # concept by_concept() retrieves without trouble (gh #1242).
+        #
+        # Building the index once here is also strictly less work than the
+        # per-fact tree scan it replaces.
+        element_to_statements: Dict[str, List[Tuple[str, str]]] = {}
+        for role, tree in self.xbrl.presentation_trees.items():
+            entry = role_to_statement_type.get(role)
+            if entry is None:
+                continue
+            for node_id in tree.all_nodes:
+                memberships = element_to_statements.setdefault(node_id, [])
+                if entry not in memberships:
+                    memberships.append(entry)
 
         # Prepare a mapping of period keys to fiscal info for faster lookup
         period_to_fiscal_info = {}
@@ -1191,23 +1543,21 @@ class FactsView:
             if element_id in self.xbrl.element_catalog:
                 element = self.xbrl.element_catalog[element_id]
 
-                # Combined: Find preferred_label AND statement_type in one tree scan
-                # Previously these were two separate loops over presentation_trees
+                # preferred_label comes from the first presentation tree that
+                # carries one; statement membership comes from the index built
+                # above, which holds every role the element appears in rather
+                # than only the first one reached.
                 preferred_label = None
-                statement_type_found = None
-                statement_role_found = None
-                for role, tree in self.xbrl.presentation_trees.items():
+                for tree in self.xbrl.presentation_trees.values():
                     if element_id in tree.all_nodes:
                         pres_node = tree.all_nodes[element_id]
-                        # Grab preferred_label from first tree that has it
-                        if preferred_label is None and pres_node.preferred_label:
+                        if pres_node.preferred_label:
                             preferred_label = pres_node.preferred_label
-                        # Grab statement_type from first matching role
-                        if statement_type_found is None and role in role_to_statement_type:
-                            statement_type_found, statement_role_found = role_to_statement_type[role]
-                        # Break early if we have both
-                        if preferred_label is not None and statement_type_found is not None:
                             break
+
+                memberships = element_to_statements.get(element_id, [])
+                statement_type_found = memberships[0][0] if memberships else None
+                statement_role_found = memberships[0][1] if memberships else None
 
                 # Add label using the same selection logic as display_label
                 # but including the preferred_label we found above
@@ -1245,25 +1595,33 @@ class FactsView:
                 # Convert preferredLabel to a numeric sign multiplier for display
                 # -1 means "negate for display", 1 means "use as-is", None means "not specified"
                 if preferred_label:
-                    # Common preferredLabel values that indicate negation
-                    negation_labels = [
-                        'negatedLabel',
-                        'http://www.xbrl.org/2003/role/negatedLabel',
-                        'negatedTerseLabel',
-                        'http://www.xbrl.org/2003/role/negatedTerseLabel',
-                        'negatedPeriodStartLabel',
-                        'http://www.xbrl.org/2003/role/negatedPeriodStartLabel',
-                        'negatedPeriodEndLabel',
-                        'http://www.xbrl.org/2003/role/negatedPeriodEndLabel'
-                    ]
-                    fact_dict['preferred_sign'] = -1 if preferred_label in negation_labels else 1
+                    # This used to be an exact-match whitelist of eight strings,
+                    # which missed the legacy xbrl.us roles entirely and the 2009
+                    # namespace's negatedTotalLabel/negatedNetLabel besides — so
+                    # the Facts API and the statement path disagreed about the
+                    # sign of the same fact. Both now read one matcher.
+                    fact_dict['preferred_sign'] = -1 if is_negated_label_role(preferred_label) else 1
                 else:
                     fact_dict['preferred_sign'] = None
 
-                # Use statement_type from the combined tree scan above
+                # The scalars keep their meaning - the primary statement, used
+                # for weight lookup and display - and the lists carry the full
+                # membership that by_statement_type() tests against.
                 if statement_type_found is not None:
                     fact_dict['statement_type'] = statement_type_found
                     fact_dict['statement_role'] = statement_role_found
+                    # Each list is distinct in its own right and the two are NOT
+                    # positionally paired: one statement type can be presented
+                    # through several roles (a filing carries a SegmentDisclosure
+                    # role per segment), so there are usually more roles than
+                    # types. Both preserve presentation order, so element [0] of
+                    # each is the primary that the scalars above report.
+                    seen_types = set()
+                    fact_dict['statement_types'] = [
+                        t for t, _ in memberships
+                        if not (t in seen_types or seen_types.add(t))
+                    ]
+                    fact_dict['statement_roles'] = [r for _, r in memberships]
 
             # Add weight from calculation tree (Issue #463, GH-712)
             # Weight indicates calculation role (1.0 = add, -1.0 = subtract)
@@ -1350,7 +1708,13 @@ class FactsView:
         Returns:
             pandas DataFrame with dimensionally-qualified facts
         """
-        return self.query().by_custom(
+        # include_dimensions is required, not optional, because the predicate
+        # selects rows BY their dim_* keys and to_dataframe()'s projection
+        # drops every dim_* column when it is falsy. Selection and projection
+        # are independent stages, and without this they contradicted each
+        # other: the caller got the right rows with the very information that
+        # made them the right rows removed, and nothing warned (gh #1243).
+        return self.query().with_dimensions().by_custom(
             lambda f: any(key.startswith('dim_') for key in f.keys())
         ).to_dataframe()
 
@@ -1528,6 +1892,71 @@ class FactsView:
 
         return period_views
 
+    def _raise_if_no_such_axis(self, dimension: str) -> None:
+        """Raise if no fact in the document carries the named dimension."""
+        probe = self.query().with_dimensions()
+        all_facts = probe.to_dataframe()
+        available = sorted({c[4:] for c in all_facts.columns if c.startswith('dim_')})
+        if not any(probe._dimension_key_matches(f"dim_{axis}", dimension) for axis in available):
+            raise ValidationError(
+                f"Cannot pivot by dimension {dimension!r}: no fact in this "
+                f"document carries that axis.",
+                parameter='dimension',
+                invalid_value=dimension,
+                suggestions=available,
+            )
+
+    def _pivot_without_losing_collisions(self, df: pd.DataFrame, columns: str,
+                                         what: str) -> pd.DataFrame:
+        """
+        Pivot concepts against ``columns``, keeping colliding rows apart.
+
+        ``pivot_table(aggfunc='first')`` resolves two facts landing in the same
+        cell by keeping one and discarding the other, with nothing to say it
+        happened. When the discarded rows differ only by a column that is not
+        in the index - a concept filed once per currency collides on
+        (concept, label) - the survivor also loses the field that identified
+        it, so it reads as an unqualified number.
+
+        The unit is added to the index when it is what distinguishes the
+        colliding rows, and any collision that still remains is logged with its
+        count rather than silently resolved.
+        """
+        from edgar.core import log
+
+        index = [c for c in ('concept', 'label') if c in df.columns]
+        if not index:
+            return df
+
+        def collisions(keys: List[str]) -> int:
+            return int(df.duplicated(subset=keys + [columns], keep=False).sum())
+
+        remaining = collisions(index)
+        # Only widen on a fully-populated unit column: pivot_table groups on the
+        # index and drops rows whose key is null, so adding a column with gaps
+        # would lose facts rather than separate them.
+        unit_is_usable = 'unit_ref' in df.columns and not df['unit_ref'].isna().any()
+        if remaining and unit_is_usable:
+            widened = index + ['unit_ref']
+            if collisions(widened) < remaining:
+                index = widened
+                remaining = collisions(index)
+
+        if remaining:
+            log.warning(
+                "pivot by %s: %d facts share a cell and only one of each is kept. "
+                "Query the facts directly if you need all of them.",
+                what, remaining
+            )
+
+        pivot = df.pivot_table(
+            values='numeric_value',
+            index=index,
+            columns=columns,
+            aggfunc='first'
+        )
+        return pivot.reset_index()
+
     def pivot_by_period(self, concept_pattern: Optional[str] = None,
                         statement_type: Optional[str] = None) -> pd.DataFrame:
         """
@@ -1555,17 +1984,9 @@ class FactsView:
 
         # Create concept-period pivot
         if 'period_key' in df.columns and 'concept' in df.columns and 'numeric_value' in df.columns:
-            pivot = df.pivot_table(
-                values='numeric_value',
-                index=['concept', 'label'],
-                columns='period_key',
-                aggfunc='first'  # Take first occurrence for each concept-period combo
+            return self._pivot_without_losing_collisions(
+                df, columns='period_key', what='period'
             )
-
-            # Reset index to make 'concept' and 'label' regular columns
-            pivot = pivot.reset_index()
-
-            return pivot
 
         return df  # Return original DataFrame if pivoting isn't possible
 
@@ -1598,25 +2019,42 @@ class FactsView:
         df = query.to_dataframe()
 
         if df.empty:
+            # An axis nobody filed and an axis the caller misspelled both filter
+            # to zero rows, and returning an empty frame for the second reads as
+            # "no data" rather than "no such axis". Distinguish them.
+            self._raise_if_no_such_axis(dimension)
             return pd.DataFrame()
 
-        dim_col = f"dim_{dimension}"
+        # The projected column is always the normalised spelling
+        # (dim_us-gaap_AwardTypeAxis), while callers naturally pass the QName
+        # ("us-gaap:AwardTypeAxis"). Building the name with an f-string off the
+        # raw argument missed, and the method then fell through to `return df`
+        # - the plain unpivoted frame, of plausible shape and not a pivot, with
+        # no warning (gh #1223). by_dimension() above already accepts either
+        # spelling, so the lookup has to as well.
+        dim_col = None
+        for col in df.columns:
+            if col.startswith('dim_') and query._dimension_key_matches(col, dimension):
+                dim_col = col
+                break
 
-        # Create concept-dimension pivot
-        if dim_col in df.columns and 'concept' in df.columns and 'numeric_value' in df.columns:
-            pivot = df.pivot_table(
-                values='numeric_value',
-                index=['concept', 'label'],
-                columns=dim_col,
-                aggfunc='first'  # Take first occurrence for each concept-dimension combo
+        if dim_col is None:
+            raise ValidationError(
+                f"Cannot pivot by dimension {dimension!r}: no such axis in the "
+                f"selected facts.",
+                parameter='dimension',
+                invalid_value=dimension,
+                suggestions=sorted(c[4:] for c in df.columns if c.startswith('dim_')),
+            )
+        if 'concept' not in df.columns or 'numeric_value' not in df.columns:
+            raise ValidationError(
+                "Cannot pivot: the selected facts have no 'concept' or "
+                "'numeric_value' column."
             )
 
-            # Reset index to make 'concept' and 'label' regular columns
-            pivot = pivot.reset_index()
-
-            return pivot
-
-        return df  # Return original DataFrame if pivoting isn't possible
+        return self._pivot_without_losing_collisions(
+            df, columns=dim_col, what=f"dimension {dimension!r}"
+        )
 
     def time_series(self, concept: str, exact: bool = True) -> pd.DataFrame:
         """
@@ -1678,10 +2116,38 @@ class FactsView:
         Returns:
             pandas DataFrame with time series data
         """
-        df = self.query().by_concept(concept, True).to_dataframe()
+        # include_dimensions has to reach the QUERY, not just the branch below.
+        # The query defaults to excluding dimensions, so it projected every dim_*
+        # column away; the 'if include_dimensions:' branch then looked for those
+        # columns in the projected frame, found none, and silently fell through to
+        # the undimensioned series. Sibling of #1243, fixed in
+        # get_facts_with_dimensions() only.
+        query = self.query().by_concept(concept, True)
+        if include_dimensions:
+            query = query.with_dimensions()
+        df = query.to_dataframe()
 
         if df.empty:
             return pd.DataFrame()
+
+        # A fact carries EITHER period_end (a duration) or period_instant, never both,
+        # so the 'period_end' default dropped every row of an instant concept -- which
+        # is every balance-sheet item -- and returned an empty frame. Fall back to the
+        # date column the facts actually populate instead of returning nothing.
+        date_columns = ('period_end', 'period_instant')
+        if date_col in date_columns and (date_col not in df.columns or df[date_col].isna().all()):
+            for alternative in date_columns:
+                if alternative in df.columns and not df[alternative].isna().all():
+                    date_col = alternative
+                    break
+
+        if date_col not in df.columns:
+            raise ValidationError(
+                f"date_col={date_col!r} is not a date column of this fact frame.",
+                parameter='date_col', invalid_value=date_col,
+                suggestions=["period_end -- for duration facts (revenue, cash flow)",
+                             "period_instant -- for instant facts (balance-sheet items)"],
+            )
 
         # Filter to only rows with the date column
         df = df.dropna(subset=[date_col])
@@ -1697,10 +2163,16 @@ class FactsView:
             if dimension_cols:
                 # Create a combined dimension key
                 if len(dimension_cols) > 0:
-                    df['dimension_key'] = df.apply(
-                        lambda row: '-'.join(str(row.get(col, '')) for col in dimension_cols),
-                        axis=1
-                    )
+                    def _dimension_key(row):
+                        # A concept is normally filed both undimensioned (the
+                        # consolidated total) and broken down. The undimensioned row
+                        # has NaN in every dim_* column, which str() renders as the
+                        # column label 'nan'; name it for what it is.
+                        members = [str(row[col]) for col in dimension_cols
+                                   if pd.notna(row.get(col))]
+                        return '-'.join(members) if members else 'No dimensions'
+
+                    df['dimension_key'] = df.apply(_dimension_key, axis=1)
                 else:
                     df['dimension_key'] = 'No dimensions'
 

@@ -9,6 +9,8 @@ that category, so the income statement was silently dropped.
 The fix in edgar/xbrl/viewer.py adds a MetaLinks.json fallback: any report
 whose groupType='statement' is also surfaced as a financial statement, even
 if FilingSummary.xml miscategorizes it.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/797
 """
 import pytest
 

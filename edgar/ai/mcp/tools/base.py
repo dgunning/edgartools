@@ -10,13 +10,81 @@ from __future__ import annotations
 import json
 import logging
 from dataclasses import dataclass, field, asdict
+from decimal import Decimal
 from functools import wraps
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union
+
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
 # Global tool registry
 TOOLS: dict[str, dict[str, Any]] = {}
+
+
+# =============================================================================
+# DATAFRAME CELLS
+# =============================================================================
+#
+# Several tools serialise a pandas frame by hand, and every one of them that
+# grew its own coercion rules got the same two things wrong. A missing cell is
+# not falsy — `bool(float("nan"))` is True — so `if issuer:` admits it and
+# `str()` renders it as the literal "nan"; and a cell that survives as a bare
+# NaN reaches `ToolResponse.to_json`, which writes it as the literal `NaN`, not
+# JSON a strict parser reads back. These live here so a tool does not have to
+# rediscover that.
+
+
+def _cell_missing(value: Any) -> bool:
+    """True for every shape an absent DataFrame cell arrives in.
+
+    ``None``, ``float("nan")``, ``NaT`` and ``pd.NA`` all mean "nothing here",
+    and only ``pd.isna`` recognises all four: ``value != value`` raises on
+    ``pd.NA``, and ``bool(float("nan"))`` is ``True``.
+    """
+    try:
+        return bool(pd.isna(value))
+    except (TypeError, ValueError):  # arrays, and objects pandas won't judge
+        return False
+
+
+def _cell_text(value: Any) -> Optional[str]:
+    """Coerce a cell to a non-empty string, or ``None``.
+
+    A missing name in a text column arrives as NaN, which is truthy and which
+    ``str()`` renders as the literal ``"nan"`` — that is how ``{"company":
+    "nan", "cusip": "nan"}`` reached a response.
+    """
+    if _cell_missing(value):
+        return None
+    text = str(value).strip()
+    return text or None
+
+
+def _cell_number(value: Any, as_int: bool = False) -> Optional[Union[int, float]]:
+    """Coerce a cell to a JSON-serialisable number, or ``None``.
+
+    Pandas hands back numpy scalars and NPORT columns hand back ``Decimal``,
+    neither of which ``json.dumps`` accepts. One missing cell also makes its
+    whole column float64, so a share count or a dollar value renders as
+    ``65950296923.0`` in one tool and ``65950296923`` in another: pass
+    ``as_int=True`` for the whole-number columns and they agree. The default
+    leaves the number alone, because silently flooring a column that turns out
+    to be fractional is the more expensive mistake.
+    """
+    if _cell_missing(value):
+        return None
+    item = getattr(value, "item", None)
+    if callable(item):
+        value = item()
+    if isinstance(value, Decimal):
+        value = float(value)
+    if not as_int:
+        return value
+    try:
+        return int(value)
+    except (TypeError, ValueError):  # not a number after all — hand it back
+        return value
 
 
 # =============================================================================
@@ -475,8 +543,8 @@ def classify_error(exc: Exception) -> dict[str, Any]:
         pass
 
     try:
-        from edgar.httprequests import IdentityNotSetException
-        if isinstance(exc, IdentityNotSetException):
+        from edgar.exceptions import IdentityNotSetError
+        if isinstance(exc, IdentityNotSetError):
             return {
                 "error_code": "IDENTITY_NOT_SET",
                 "message": "SEC identity not configured. Set the EDGAR_IDENTITY environment variable.",
@@ -508,8 +576,8 @@ def classify_error(exc: Exception) -> dict[str, Any]:
         pass
 
     try:
-        from edgar.entity.entity_facts import NoCompanyFactsFound
-        if isinstance(exc, NoCompanyFactsFound):
+        from edgar.exceptions import CompanyFactsNotFoundError
+        if isinstance(exc, CompanyFactsNotFoundError):
             return {
                 "error_code": "NO_FACTS_DATA",
                 "message": getattr(exc, 'message', str(exc)),
@@ -530,8 +598,8 @@ def classify_error(exc: Exception) -> dict[str, Any]:
         pass
 
     try:
-        from edgar.sgml.sgml_parser import SECFilingNotFoundError
-        if isinstance(exc, SECFilingNotFoundError):
+        from edgar.exceptions import FilingNotFoundError
+        if isinstance(exc, FilingNotFoundError):
             return {
                 "error_code": "FILING_NOT_FOUND",
                 "message": f"SEC filing not found: {exc}",
@@ -585,6 +653,44 @@ def classify_error(exc: Exception) -> dict[str, Any]:
                     "message": f"HTTP error {status}: {exc}",
                     "suggestions": ERROR_SUGGESTIONS["HTTPStatusError"],
                 }
+    except ImportError:
+        pass
+
+    # --- The same failures, in the wrapped era ---
+    # Under EDGARTOOLS_STRICT_ERRORS (and unconditionally in 6.0) the network
+    # boundary raises TransportError instead of the httpx types above, so this
+    # block has to answer the same questions the httpx blocks just did. It sits
+    # last among the transport checks because TooManyRequestsError,
+    # SSLVerificationError and IdentityNotSetError are all TransportError
+    # subclasses and each has its own, better answer earlier in this function.
+    try:
+        from edgar.exceptions import TransportError
+        if isinstance(exc, TransportError):
+            status = exc.status_code
+            if status == 404:
+                return {
+                    "error_code": "FILING_NOT_FOUND",
+                    "message": f"Resource not found (HTTP 404): {exc.url}",
+                    "suggestions": ["Check the URL or accession number", "The filing may have been removed"],
+                }
+            elif status is not None and status >= 500:
+                return {
+                    "error_code": "NETWORK_CONNECTION",
+                    "message": f"SEC server error (HTTP {status})",
+                    "suggestions": ["SEC EDGAR is experiencing server issues", "Try again in a few minutes"],
+                }
+            elif status is not None:
+                return {
+                    "error_code": "INTERNAL_ERROR",
+                    "message": f"HTTP error {status}: {exc}",
+                    "suggestions": ERROR_SUGGESTIONS["HTTPStatusError"],
+                }
+            # No status means we never got an answer — connect failure or timeout.
+            return {
+                "error_code": "NETWORK_CONNECTION",
+                "message": f"Could not reach SEC EDGAR: {exc}",
+                "suggestions": ERROR_SUGGESTIONS["ConnectError"],
+            }
     except ImportError:
         pass
 

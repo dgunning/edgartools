@@ -17,6 +17,7 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar.entity.core import Entity
+from edgar.httprequests import TRANSPORT_ERRORS
 from edgar.richtools import repr_rich
 
 if TYPE_CHECKING:
@@ -47,6 +48,83 @@ def _year_quarter_to_filing_date(year, quarter) -> Optional[str]:
         start, end = bounds[quarter]
         return f"{year}-{start}:{year}-{end}"
     return None
+
+
+def _year_quarter_ranges(year, quarter) -> Optional[List[str]]:
+    """Every ``filing_date`` range covering ``year``/``quarter``, or None.
+
+    ``Entity.get_filings`` accepts a list for either, but ``Filings.filter``
+    takes one ``filing_date`` range, so a list becomes several ranges that the
+    caller unions. Returns None when the pair cannot be expressed as ranges at
+    all, so the caller can refuse rather than answer with everything.
+    """
+    if isinstance(year, int):
+        years = [year]
+    elif isinstance(year, (list, tuple)) and year and all(isinstance(y, int) for y in year):
+        years = list(year)
+    else:
+        return None
+
+    if quarter is None:
+        quarters = [None]
+    elif isinstance(quarter, int):
+        quarters = [quarter]
+    elif isinstance(quarter, (list, tuple)) and quarter:
+        quarters = list(quarter)
+    else:
+        return None
+
+    ranges = []
+    for y in years:
+        for q in quarters:
+            date_range = _year_quarter_to_filing_date(y, q)
+            if date_range is None:
+                return None
+            ranges.append(date_range)
+    return ranges
+
+
+def _apply_series_filters(filings: 'Filings', kwargs: dict) -> 'Filings':
+    """Apply the caller's filters to a series' filings.
+
+    ``_series_filter_kwargs`` translates a scalar ``year``/``quarter``. A list
+    of either is applied here as a union over one range each. Before this, an
+    untranslatable pair was dropped and the caller received the series' entire
+    unfiltered history -- a wrong answer wearing the shape of a filtered one.
+    """
+    from edgar._filings import Filings
+
+    filter_kwargs = _series_filter_kwargs(kwargs)
+    year, quarter = kwargs.get('year'), kwargs.get('quarter')
+    needs_ranges = (year is not None
+                    and not {'filing_date', 'date'} & filter_kwargs.keys())
+    ranges = _year_quarter_ranges(year, quarter) if needs_ranges else None
+
+    if needs_ranges and not ranges:
+        raise ValueError(
+            f"Cannot filter a fund series by year={year!r}, quarter={quarter!r}. "
+            "Use an int year, or a list of int years, optionally with an int or "
+            "list of ints for quarter -- or filter the returned Filings on "
+            "filing_date yourself."
+        )
+
+    if len(filings) == 0 or (not filter_kwargs and not ranges):
+        return filings
+
+    if not ranges:
+        return filings.filter(**filter_kwargs)
+
+    import pyarrow as pa
+
+    from edgar.datatools import drop_duplicates_pyarrow
+    matched = [filings.filter(**filter_kwargs, filing_date=date_range)
+               for date_range in ranges]
+    tables = [m.data for m in matched if m is not None and len(m) > 0]
+    if not tables:
+        return Filings([])
+    combined = pa.concat_tables(tables, mode="default")
+    return Filings(filing_index=drop_duplicates_pyarrow(combined,
+                                                        column_name='accession_number'))
 
 
 def _series_filter_kwargs(kwargs: dict) -> dict:
@@ -83,6 +161,72 @@ def _series_filter_kwargs(kwargs: dict) -> dict:
         log.debug("series_only path does not apply these filters: %s", unsupported)
 
     return filter_kwargs
+
+
+def _series_filings(series_id: str, **kwargs) -> Optional['Filings']:
+    """Return only ``series_id``'s filings via SEC browse-edgar, or None.
+
+    Uses the browse-edgar endpoint with the series ID as the CIK parameter,
+    which SEC resolves to exactly that fund series' filing list (unlike EFTS
+    full-text search, which does not index series IDs). When a form filter is
+    given it is pushed to browse-edgar (``&type=``) per requested form so the
+    query returns only those filings — a large fund otherwise pages through
+    its entire history, which SEC 503s on deep pages and would drop the whole
+    result to empty (GH #888). Returns None when the series cannot be
+    resolved so the caller can surface an empty result rather than the
+    unfiltered trust; ``kwargs`` are mapped onto ``Filings.filter``.
+    """
+    form = kwargs.get('form')
+    if isinstance(form, str):
+        form_types = [form]
+    elif isinstance(form, (list, tuple)) and form:
+        form_types = [str(f) for f in form]
+    else:
+        form_types = [None]  # no form filter — one unrestricted lookup
+
+    try:
+        from edgar.funds.data import direct_get_fund_with_filings
+        resolved = False
+        filing_tables = []
+        for filing_type in form_types:
+            series = direct_get_fund_with_filings(series_id, filing_type=filing_type)
+            if series is None:
+                continue
+            resolved = True
+            series_filings = getattr(series, 'filings', None)
+            if series_filings is not None and len(series_filings) > 0:
+                filing_tables.append(series_filings.data)
+    except TRANSPORT_ERRORS:
+        # Let the caller see the outage. The `return None` below means "this
+        # series resolved to nothing", and get_filings turns it into an empty
+        # Filings — correct for a series with no matching filings, a lie for
+        # a failed fetch. There is deliberately no fallback on this path
+        # (GH #888: returning the unfiltered trust would hand back a sibling
+        # series' data), so nothing downstream can notice the difference and
+        # the user is simply told there are no filings.
+        raise
+    except Exception as e:  # parse failure — do not fall back to the trust
+        log.debug("Series filing lookup failed for %s: %s", series_id, e)
+        return None
+
+    if not resolved:
+        # Could not resolve the series at all — signal the caller to return
+        # empty, never the unfiltered trust.
+        return None
+
+    from edgar._filings import Filings
+    if filing_tables:
+        import pyarrow as pa
+
+        from edgar.datatools import drop_duplicates_pyarrow
+        combined = pa.concat_tables(filing_tables, mode="default")
+        combined = drop_duplicates_pyarrow(combined, column_name='accession_number')
+        filings = Filings(filing_index=combined)
+    else:
+        # Series resolved but has no filings of the requested form(s).
+        return Filings([])
+
+    return _apply_series_filters(filings, kwargs)
 
 
 class FundCompany(Entity):
@@ -225,14 +369,37 @@ class FundSeries:
 
     def get_filings(self, **kwargs) -> 'Filings':
         """
-        Get filings for this fund series.
+        Get this fund series' filings.
+
+        Resolved through SEC browse-edgar with the series ID in the CIK slot,
+        which returns exactly this series' filing list. Delegating to the fund
+        company instead returns the whole umbrella trust's filings, and a trust
+        files one NPORT-P per series per quarter: the newest belongs to
+        whichever sibling series filed last, so `series.get_filings(
+        form="NPORT-P")[0]` handed back another fund's portfolio (GH #888 is the
+        same trap on `Fund.get_filings`).
+
+        A series that cannot be resolved yields no filings rather than the
+        trust's, for the same reason: an empty answer is a correct answer for a
+        series with nothing on file, while a sibling's data is never correct.
 
         Args:
-            **kwargs: Filtering parameters passed to get_filings
+            **kwargs: Filtering parameters (form, year, quarter, filing_date,
+                      date, amendments, ...) applied to the results.
 
         Returns:
             Filings object with filtered filings
         """
+        from edgar._filings import Filings
+
+        # An ETF's synthetic series stands for the whole registrant, so there is
+        # no sibling series to be confused with and nothing to resolve.
+        if self.series_id and not str(self.series_id).startswith("ETF_"):
+            filings = _series_filings(self.series_id, **kwargs)
+            return filings if filings is not None else Filings([])
+
+        if self.fund_company is None:
+            return Filings([])
         return self.fund_company.get_filings(**kwargs)
 
     def __str__(self):
@@ -546,12 +713,20 @@ class Fund:
             from edgar._filings import Filings
             return series_filings if series_filings is not None else Filings([])
 
-        # Default path: delegate to entity
+        # Default path: the whole umbrella trust, as documented above —
+        # `series_only=True` is the series-aware ask, and it is the one that
+        # pays for a browse-edgar lookup per requested form. `FundSeries` now
+        # answers for its own series when asked directly, so a series entity is
+        # routed to its fund company here rather than through it, which leaves
+        # this default exactly as it was.
         filings = None
-        if hasattr(self._entity, 'get_filings'):
-            filings = self._entity.get_filings(**kwargs)
-        elif self._series and hasattr(self._series, 'get_filings'):
-            filings = self._series.get_filings(**kwargs)
+        entity = self._entity
+        if isinstance(entity, FundSeries):
+            entity = entity.fund_company
+        if entity is not None and hasattr(entity, 'get_filings'):
+            filings = entity.get_filings(**kwargs)
+        elif self._series is not None and self._series.fund_company is not None:
+            filings = self._series.fund_company.get_filings(**kwargs)
         elif self._company and hasattr(self._company, 'get_filings'):
             filings = self._company.get_filings(**kwargs)
 
@@ -564,61 +739,11 @@ class Fund:
     def _get_series_filings(self, series_id: str, **kwargs) -> Optional['Filings']:
         """Return only ``series_id``'s filings via SEC browse-edgar, or None.
 
-        Uses the browse-edgar endpoint with the series ID as the CIK parameter,
-        which SEC resolves to exactly that fund series' filing list (unlike EFTS
-        full-text search, which does not index series IDs). When a form filter is
-        given it is pushed to browse-edgar (``&type=``) per requested form so the
-        query returns only those filings — a large fund otherwise pages through
-        its entire history, which SEC 503s on deep pages and would drop the whole
-        result to empty (GH #888). Returns None when the series cannot be
-        resolved so the caller can surface an empty result rather than the
-        unfiltered trust; ``kwargs`` are mapped onto ``Filings.filter``.
+        Thin wrapper over the module-level :func:`_series_filings`, which
+        ``FundSeries.get_filings`` uses as well so that both ways of asking a
+        series for its filings answer the same thing.
         """
-        form = kwargs.get('form')
-        if isinstance(form, str):
-            form_types = [form]
-        elif isinstance(form, (list, tuple)) and form:
-            form_types = [str(f) for f in form]
-        else:
-            form_types = [None]  # no form filter — one unrestricted lookup
-
-        try:
-            from edgar.funds.data import direct_get_fund_with_filings
-            resolved = False
-            filing_tables = []
-            for filing_type in form_types:
-                series = direct_get_fund_with_filings(series_id, filing_type=filing_type)
-                if series is None:
-                    continue
-                resolved = True
-                series_filings = getattr(series, 'filings', None)
-                if series_filings is not None and len(series_filings) > 0:
-                    filing_tables.append(series_filings.data)
-        except Exception as e:  # network / parse failure — do not fall back to the trust
-            log.debug("Series filing lookup failed for %s: %s", series_id, e)
-            return None
-
-        if not resolved:
-            # Could not resolve the series at all — signal the caller to return
-            # empty, never the unfiltered trust.
-            return None
-
-        from edgar._filings import Filings
-        if filing_tables:
-            import pyarrow as pa
-
-            from edgar.datatools import drop_duplicates_pyarrow
-            combined = pa.concat_tables(filing_tables, mode="default")
-            combined = drop_duplicates_pyarrow(combined, column_name='accession_number')
-            filings = Filings(filing_index=combined)
-        else:
-            # Series resolved but has no filings of the requested form(s).
-            return Filings([])
-
-        filter_kwargs = _series_filter_kwargs(kwargs)
-        if filter_kwargs and len(filings) > 0:
-            filings = filings.filter(**filter_kwargs)
-        return filings
+        return _series_filings(series_id, **kwargs)
 
     def get_series(self) -> Optional[FundSeries]:
         """
@@ -723,7 +848,11 @@ class Fund:
             form: SEC form type (default 'NPORT-P'). Common values:
                   'NPORT-P', 'N-MFP3', 'N-CEN', 'N-CSR', 'N-CSRS'
         """
-        filings = self.get_filings(form=form)
+        # series_only when this Fund names a series: "the latest report" means
+        # this fund's, and the trust's newest report belongs to whichever
+        # sibling series filed last (GH #1143). The trust-wide default belongs
+        # to get_filings(), not here.
+        filings = self.get_filings(form=form, series_only=bool(self._target_series_id))
         if filings and len(filings) > 0:
             return filings[0].obj()
         return None

@@ -37,7 +37,11 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Information Analysis",
 ]
 dependencies = [
-  "httpx>=0.25.0",
+  # Upper cap is deliberate: httpx upstream is dormant (last release 0.28.1,
+  # Dec 2024; issues and discussions closed Feb 2026). Any future release would
+  # be unexpected — do not auto-adopt it. The migration path is httpx2
+  # (edgartools-q2iz); lift or retarget this cap there, not here.
+  "httpx>=0.25.0,<0.29",
   "pandas>=2.0.0",
   "tabulate>=0.9.0",
   "pyarrow>=17.0.0",
@@ -56,10 +60,16 @@ dependencies = [
   "nest-asyncio>=1.5.1",
   "jinja2>=3.1.0",
   "pyrate-limiter>=3.0.0",
-  # Cap below 0.5.0: that release migrated from httpx to the httpx2 fork, which
-  # breaks edgartools (we import plain httpx throughout httprequests.py and our
-  # tests mock httpx). 0.3.5 is the latest version still on plain httpx.
-  "httpxthrottlecache>=0.3.0,<0.5.0",
+  # The [httpx] extra is required, not decorative: from 0.6.0 httpxthrottlecache
+  # declares httpx and httpx2 as optional extras and installs neither by default.
+  # 0.5.0 briefly hard-required the httpx2 fork — which is why this was capped
+  # below it — and 0.6.0 reversed that, so the cap is no longer needed to stay on
+  # plain httpx. Migrating to httpx2 is tracked separately (edgartools-q2iz).
+  # The 0.6.1 floor is load-bearing: caching data.sec.gov reaches an age check
+  # that raised uncaught on a machine whose clock trails the origin's Date header
+  # (paultiq/httpxthrottlecache#43), taking down the whole get_facts() call.
+  # 0.6.1 clamps it.
+  "httpxthrottlecache[httpx]>=0.6.1",
   "truststore>=0.9.0",
 ]
 dynamic = ["version"]
@@ -135,6 +145,10 @@ path = "edgar/__about__.py"
 [tool.hatch.build]
 include = [
   "edgar/**/*.py",
+  # PEP 561 marker. This list is an allowlist and no other pattern here would
+  # match an extensionless file, so dropping this line ships an untyped wheel
+  # while the repo still looks correct — which is what 5.47.0 did.
+  "edgar/py.typed",
   "edgar/**/templates/*.html",
   "edgar/**/docs/*.md",
   "edgar/ai/skills/**/*.yaml",
@@ -144,6 +158,23 @@ include = [
   "edgar/entity/data/*",
   "edgar/xbrl/standardization/*",
   "LICENSE.txt"
+]
+# Development tooling that lives under edgar/ but is not the library. The
+# `edgar/**/*.py` line above is an unrestricted glob, so without these every
+# user pip-installing edgartools was also downloading ~8,900 lines of eval
+# harnesses, training scripts and demos (bead edgartools-07lk.12.1).
+#
+# Nothing shipped imports any of these — tests/issues/regression/
+# test_07lk121_wheel_excludes.py holds that invariant, which is the thing that
+# makes the exclusion safe rather than the exclusion itself.
+#
+# edgar/ai/exporters/ deliberately STAYS: export_skill is public API, imported
+# by edgar/ai/__init__.py.
+exclude = [
+  "edgar/ai/evaluation/**",
+  "edgar/ai/examples/**",
+  "edgar/entity/training/**",
+  "edgar/thirteenf/demo_comparison.py",
 ]
 artifacts = [
   "LICENSE.txt"  # And this line
@@ -191,11 +222,35 @@ smoke-filings = "python scripts/batch/batch_filings.py {args}"
 # PyYAML's unsafe loader, so a contributed cassette executes code on your
 # machine the moment a test touches it. CI gates on this too.
 check-cassettes = "python scripts/check_cassettes.py {args}"
+check-regression-skips = "python scripts/check_regression_skips.py {args}"
+check-regression-provenance = "python scripts/check_regression_provenance.py {args}"
 # Test categorization commands (sequential execution)
 test-fast = "pytest -m 'fast' {args}"
 test-slow = "pytest -m 'slow' {args}"
 test-network = "pytest -m 'network' {args}"
 test-core = "pytest -m 'not (slow or network or performance or batch)' --ignore=tests/perf {args}"
+
+# Measure which tests actually need the SEC, rather than guessing from filenames.
+# Blocks outbound sockets and clears edgar's caches between tests, so the answer
+# does not depend on ordering. Takes a path: `hatch run test-offline-audit
+# tests/issues/regression/`. Anything that fails here must be re-run WITHOUT the
+# plugin before being marked `network` — failing offline and being broken are
+# different facts. See tests/_offline_harness.py.
+# Two flags that both cost more than they look.
+#
+# `python -m pytest`, not `pytest`: -p imports the plugin before collection puts
+# the rootdir on sys.path, and the console script never adds cwd, so the bare
+# form cannot find tests._offline_harness at all.
+#
+# `-p no:pytest-retry` because the suite retries twice with a 4s delay, and a
+# blocked socket never succeeds on the second attempt — it just multiplies the
+# cost of exactly the failures the audit is looking for. On one 16-test file
+# that is 24.9s against 0.35s. The plugin registers as `pytest-retry`, not
+# `retry`, and `-p no:retry` is accepted and silently does nothing; `--retries 0`
+# does not disable it either, since the ini value still reads as set. Disabling
+# it orphans its ini keys, so the run warns `Unknown config option:
+# cumulative_timing` — expected here, and not a sign of a broken config.
+test-offline-audit = "python -m pytest -p tests._offline_harness -p no:pytest-retry {args}"
 
 # Parallel test commands (selective parallelization for SEC rate limit safety)
 # - Fast tests: Full parallelization (no network calls)
@@ -205,23 +260,44 @@ test-fast-parallel = "pytest -n auto -m 'fast' {args}"
 test-core-parallel = "pytest -n 2 -m 'not (slow or network or performance or batch)' --ignore=tests/perf {args}"
 test-parallel-safe = "pytest -n auto -m 'fast' {args}"
 
-# Parallel CI test strategy (skip regression tests for faster feedback)
+# Parallel CI test strategy
 #
 # SELECTIVE PARALLELIZATION STRATEGY:
-# 1. Marker-based: -m 'not regression' excludes tests marked as regression
+# 1. Marker-based: 'not regression' keeps the network/slow regression tests out
+#    of the PR jobs — they run in the Regression Tests workflow, which is the
+#    only place allowed to hammer the SEC endpoint.
 # 2. Path-based: --ignore=tests/issues/regression excludes entire folder
 # 3. Auto-marking: conftest.py automatically marks tests as fast/network based on filename
 # 4. Selective parallel: Only parallelize tests safe from SEC rate limits
 # 5. Combined coverage: CI combines coverage from fast/network/slow groups for 65% threshold
 #
+# test-ci-fast deliberately does NOT exclude regression. conftest.py classifies
+# every regression test as fast or network by measurement, and the offline ones
+# belong in the pull-request gate — before this they ran only after merge
+# (bead edgartools-07lk.21).
+#
 # Note: "core" group removed from CI - auto-marking leaves 0 tests without markers
 
-test-ci-fast = "pytest -n auto --cov --cov-report=xml -m 'fast and not regression' {args}"
+test-ci-fast = "pytest -n auto --cov --cov-report=xml -m 'fast' {args}"
 test-ci-network = "pytest --cov --cov-report=xml -m 'network and not slow and not regression' {args}"
 test-ci-slow = "pytest --cov --cov-report=xml -m 'slow and not regression' {args}"
 test-ci-all = "pytest --cov --cov-report=xml -m 'not regression' --ignore=tests/perf --ignore=tests/issues/regression {args}"
 
 # Regression tests (run separately/on-demand for comprehensive bug prevention)
+#
+# No `--ignore=tests/issues/reproductions` here, deliberately, even though that
+# tree feeding this selection is what bead edgartools-07lk.24 Tier 2 set out to
+# stop. `-m regression` selects on the marker rather than the path, so a marked
+# test in reproductions/ ran in this lane while sitting outside the provenance,
+# no-skip and fast/network gates that apply to tests/issues/regression/ — 32
+# tests across 6 files were in that state on 2026-08-10.
+#
+# The fix is a collection hook in tests/issues/reproductions/conftest.py that
+# fails on the marker outright, which makes the boundary hold by construction
+# rather than by whoever last edited this line. Adding a path exclusion here
+# would be worse than redundant: pytest would stop loading that conftest on
+# exactly the run the check is meant to police, so the guard would be off in
+# the one lane that needs it.
 test-regression = "pytest --cov --cov-report=xml -m regression {args}"
 
 # Other test categories  
@@ -231,11 +307,30 @@ test-reproduction = "pytest tests/issues/reproductions/ -m 'reproduction' {args}
 test-full = "pytest --ignore=tests/perf {args}"
 
 [tool.hatch.envs.test]
+# Keep this list in step with what CI installs (see the pip install lines in
+# .github/workflows/python-hatch-workflow.yml) and with the default env's pins.
+# A plugin missing here does not fail — it changes what the tests mean. Without
+# pytest-vcr and vcrpy, `@pytest.mark.vcr` is an unregistered marker, no cassette
+# is opened, and the request goes to the network or the local HTTP cache while
+# the run still reports passed. That is the "a cassette existing is not replay"
+# failure one level further down: the cassette can be right and the runner still
+# never open it.
 dependencies = [
   "pytest",
   "pytest-cov",
   "pytest-env",
-  "pytest-asyncio"
+  "pytest-xdist",
+  "pytest-asyncio",
+  "pytest-retry",
+  "pytest-mock",
+  "pytest-vcr",
+  # Pin <8.2 for the same reason as the default env: vcrpy 8.2.0's httpx stub
+  # crashes deserializing a cassette with a null reason phrase.
+  "vcrpy<8.2",
+  "filelock",
+  "tqdm",
+  "responses",
+  "freezegun==1.5.1"
 ]
 
 [[tool.hatch.envs.test.matrix]]
@@ -258,7 +353,6 @@ omit = [
   "edgar/entity/training/*",
   # Migration utilities (one-time migration helpers)
   "edgar/documents/migration.py",
-  "edgar/documents/migration_example.py",
   # CLI entry points (tested via integration, not unit tests)
   "edgar/**/__main__.py",
   # MCP server (optional external integration, requires MCP runtime)
@@ -327,6 +421,21 @@ retries = 2
 retry_delay = 4
 cumulative_timing = false
 retry_outcome = "rerun"
+
+# An xfail that passes is a failure, not a quiet success.
+#
+# Without this, xfail-pass and xfail-fail are BOTH green, so an xfail-marked
+# test has no outcome that can fail and stops being a test. Three in
+# test_issue_583_equity_labels.py sat that way for months reporting XPASS in
+# every CI run: they were marked "not yet implemented" and the feature had
+# shipped, which the file's own docstring recorded (edgartools-07lk.24
+# finding 2). Strict mode turns the next one of those into a failure the day
+# the behaviour changes, which is the only moment the information is useful.
+#
+# The four remaining xfails are genuinely still failing and stay xfail --
+# strict does not touch those. If you mark a test xfail, it must actually fail;
+# when it starts passing, delete the marker rather than widen this setting.
+xfail_strict = true
 
 # Pytest markers for test categorization
 markers = [

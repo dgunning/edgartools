@@ -22,6 +22,8 @@ the same way the generic parser does.
 
 The unit tests exercise ``_parse_item_from_text`` directly (no network). The
 Allstate end-to-end assertion is VCR-backed and pinned to the reported filing.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/837
 """
 
 import pytest
@@ -116,7 +118,7 @@ class TestRbsxNamedSectionAndRowFallback:
         assert result.get("part_iv_signatures") == "a265"
 
 
-@pytest.mark.network
+@pytest.mark.fast
 @pytest.mark.vcr
 def test_allstate_2026_10k_item_1_present():
     """End-to-end on the reported filing: Allstate FY2025 10-K (Workiva agent).

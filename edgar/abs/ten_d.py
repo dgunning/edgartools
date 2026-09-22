@@ -21,13 +21,15 @@ from enum import Enum
 from functools import cached_property
 from typing import List, Optional
 
-from bs4 import BeautifulSoup
+import lxml.html
+from lxml.etree import ParserError, strip_elements
 from rich import box
 from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from edgar.documents.utils.html_utils import create_lxml_parser
 from edgar.richtools import repr_rich
 
 __all__ = ['TenD', 'ABSType', 'ABSEntity', 'DistributionPeriod']
@@ -37,14 +39,6 @@ __all__ = ['TenD', 'ABSType', 'ABSEntity', 'DistributionPeriod']
 def _get_cmbs_parser():
     from edgar.abs.cmbs import CMBSAssetData
     return CMBSAssetData
-
-
-# NOTE: Distribution report parsing deferred due to HTML format variability
-# Validation showed only ~42% extraction accuracy across ABS types.
-# See scripts/validate_distribution_report.py for details.
-# def _get_distribution_report():
-#     from edgar.abs.distribution import DistributionReport
-#     return DistributionReport
 
 
 class ABSType(Enum):
@@ -115,7 +109,6 @@ class TenD:
         if filing.form not in ('10-D', '10-D/A'):
             raise ValueError(f"Expected 10-D filing, got {filing.form}")
         self._filing = filing
-        self._soup = None
         self._header_parsed = False
         self._issuing_entity: Optional[ABSEntity] = None
         self._depositor: Optional[ABSEntity] = None
@@ -149,37 +142,66 @@ class TenD:
         return self._filing.accession_number
 
     @cached_property
-    def _parsed_html(self) -> BeautifulSoup:
-        """Parse the main HTML document."""
+    def _parsed_html(self):
+        """Parse the main HTML document into an lxml tree.
+
+        Replaces ``BeautifulSoup(html, 'html.parser')``. Three details matter:
+
+        * **bytes, not str.** lxml refuses a ``str`` carrying an encoding
+          declaration, and encoding here also makes the parser's own utf-8 win
+          over whatever the document declares.
+        * **``remove_comments=False``.** Removing a comment merges the strings
+          either side into one node, which changes what the per-cell
+          strip-and-join produces for ``Class <!-- x --> C-1``.
+        * **``strip_elements``.** bs4 classified the text inside ``<script>``,
+          ``<style>`` and ``<template>`` as Script/Stylesheet/TemplateString
+          and left all three out of ``get_text()``; lxml puts them in. A cover
+          page's inline stylesheet comes FIRST, so an entity name written into
+          CSS would be the one the header regexes matched.
+
+        Returns ``None`` for input lxml cannot root at all, where BeautifulSoup
+        returned an empty soup.
+        """
         html = self._filing.html()
-        return BeautifulSoup(html, 'html.parser')
+        if isinstance(html, str):
+            html = html.encode('utf-8', errors='replace')
+        try:
+            root = lxml.html.fromstring(html, parser=create_lxml_parser(remove_comments=False))
+        except ParserError:
+            return None
+        strip_elements(root, 'script', 'style', 'template', with_tail=False)
+        return root
 
     def _ensure_header_parsed(self):
         """Parse the header section of the 10-D to extract entity info."""
         if self._header_parsed:
             return
 
-        soup = self._parsed_html
-        text = soup.get_text(separator='\n')
+        root = self._parsed_html
+        # ``get_text(separator='\n')`` -- bs4's separator form with NO strip.
+        # Every entity regex below runs against this string and several depend
+        # on the newlines being there; ``text_content()`` joins with nothing,
+        # which glues each label to the value that follows it.
+        text = '' if root is None else '\n'.join(root.itertext())
 
         # Extract issuing entity
-        self._issuing_entity = self._extract_issuing_entity(text, soup)
+        self._issuing_entity = self._extract_issuing_entity(text)
 
         # Extract depositor
-        self._depositor = self._extract_depositor(text, soup)
+        self._depositor = self._extract_depositor(text)
 
         # Extract sponsors
-        self._sponsors = self._extract_sponsors(text, soup)
+        self._sponsors = self._extract_sponsors(text)
 
         # Extract distribution period
         self._distribution_period = self._extract_distribution_period(text)
 
         # Extract security classes
-        self._security_classes = self._extract_security_classes(soup)
+        self._security_classes = self._extract_security_classes(root)
 
         self._header_parsed = True
 
-    def _extract_issuing_entity(self, text: str, soup: BeautifulSoup) -> Optional[ABSEntity]:
+    def _extract_issuing_entity(self, text: str) -> Optional[ABSEntity]:
         """Extract issuing entity information from the filing header."""
         name = None
         cik = None
@@ -218,7 +240,7 @@ class TenD:
             return ABSEntity(name=name, cik=cik, file_number=file_number)
         return None
 
-    def _extract_depositor(self, text: str, soup: BeautifulSoup) -> Optional[ABSEntity]:
+    def _extract_depositor(self, text: str) -> Optional[ABSEntity]:
         """Extract depositor information from the filing header."""
         name = None
         cik = None
@@ -256,7 +278,7 @@ class TenD:
             return ABSEntity(name=name, cik=cik, file_number=file_number)
         return None
 
-    def _extract_sponsors(self, text: str, soup: BeautifulSoup) -> List[ABSEntity]:
+    def _extract_sponsors(self, text: str) -> List[ABSEntity]:
         """Extract sponsor information from the filing header."""
         sponsors = []
 
@@ -318,23 +340,37 @@ class TenD:
 
         return None
 
-    def _extract_security_classes(self, soup: BeautifulSoup) -> List[str]:
+    def _extract_security_classes(self, root) -> List[str]:
         """Extract registered security classes from the filing."""
         classes = []
 
-        # Look for the security class table
-        tables = soup.find_all('table')
+        if root is None:
+            return classes
+
+        # Look for the security class table. ``descendant-or-self``, not
+        # ``.//``: lxml roots a single-element fragment AT that element, so a
+        # document that IS the table has no descendant tables.
+        tables = root.xpath('descendant-or-self::table')
         for table in tables:
-            header_row = table.find('tr')
-            if header_row:
-                header_text = header_row.get_text(separator=' ').lower()
+            # bs4's find() was the first <tr> ANYWHERE in the table, not the
+            # first child, so a header inside a <thead> still counts -- and an
+            # `if header_row` truth test would be wrong here, since an lxml
+            # element with no element children is falsy.
+            header_row = next(table.iter('tr'), None)
+            if header_row is not None:
+                header_text = ' '.join(header_row.itertext()).lower()
                 if 'title of class' in header_text:
-                    # Found the security class table
-                    rows = table.find_all('tr')[1:]  # Skip header
+                    # Found the security class table. find_all was recursive,
+                    # so an inner table's rows are this table's rows too.
+                    rows = list(table.iter('tr'))[1:]  # Skip header
                     for row in rows:
-                        cells = row.find_all('td')
+                        cells = list(row.iter('td'))
                         if cells:
-                            class_name = cells[0].get_text(strip=True)
+                            # get_text(strip=True): strip each string, drop the
+                            # empties, join with NOTHING.
+                            class_name = ''.join(
+                                chunk.strip() for chunk in cells[0].itertext() if chunk.strip()
+                            )
                             if class_name and class_name not in classes:
                                 classes.append(class_name)
                     break

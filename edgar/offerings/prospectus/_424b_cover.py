@@ -159,14 +159,25 @@ def extract_cover_page_fields(filing: 'Filing', document=None) -> dict:
 # next content. A firm name in a cover grid often wraps ("Ladenburg\nThalmann");
 # whether to stitch those lines is decided in extract_underwriting_from_text.
 _CELL = r'([^\n]+(?:\n[^\n]+){0,2})'
+# Each label must START a line. These are cover-grid labels sitting in their own
+# cell, so on a rendered cover they always do — "Placement\nAgent\n\nLadenburg".
+# Unanchored, they also match the same words mid-sentence, and the capture then
+# takes whatever wrapped onto the next line as a firm name. Calidi's offering
+# table has a footnote reading "...the exercise of any of the Common Warrants, or
+# any of the Placement Agent\n Warrants.", which yielded a placement agent named
+# "Warrants." That footnote used to be truncated to its first line by the table
+# renderer and only became visible when that truncation was fixed
+# (edgartools-j8bs) — the construct was always in the filing, just unrendered.
+_LINE_START = r'(?m)^[ \t]*'
+
 _COVER_ROLE_PATTERNS = [
-    (r'Sole\s+Book[-\s]Running\s+Manager\s*\n+' + _CELL, 'sole_book_runner'),
-    (r'Joint\s+Book[-\s]Running\s+Managers?\s*\n+' + _CELL, 'joint_book_runners'),
-    (r'Sole\s+Placement\s+Agent\s*\n+' + _CELL, 'sole_placement_agent'),
-    (r'Placement\s+Agent\s*\n+' + _CELL, 'placement_agent'),
-    (r'Sole\s+(?:Lead\s+)?Manager\s*\n+' + _CELL, 'sole_manager'),
-    (r'(?:Sole\s+)?Underwriter\s*\n+' + _CELL, 'underwriter'),
-    (r'Sales\s+Agent\s*\n+' + _CELL, 'sales_agent'),
+    (_LINE_START + r'Sole\s+Book[-\s]Running\s+Manager\s*\n+' + _CELL, 'sole_book_runner'),
+    (_LINE_START + r'Joint\s+Book[-\s]Running\s+Managers?\s*\n+' + _CELL, 'joint_book_runners'),
+    (_LINE_START + r'Sole\s+Placement\s+Agent\s*\n+' + _CELL, 'sole_placement_agent'),
+    (_LINE_START + r'Placement\s+Agent\s*\n+' + _CELL, 'placement_agent'),
+    (_LINE_START + r'Sole\s+(?:Lead\s+)?Manager\s*\n+' + _CELL, 'sole_manager'),
+    (_LINE_START + r'(?:Sole\s+)?Underwriter\s*\n+' + _CELL, 'underwriter'),
+    (_LINE_START + r'Sales\s+Agent\s*\n+' + _CELL, 'sales_agent'),
 ]
 
 # ATM sales agreement text patterns

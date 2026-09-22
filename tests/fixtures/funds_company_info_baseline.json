@@ -1,0 +1,3667 @@
+{
+  "EDGE-br-and-pipes-together": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "000123456725000001",
+        "cik": 1083387,
+        "company": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "Fiscal Year End": "1231",
+      "SIC": "0000",
+      "State location": "NY"
+    },
+    "name": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)"
+  },
+  "EDGE-br-inside-ident-info": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "000123456725000001",
+        "cik": 1083387,
+        "company": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "SIC": "0000",
+      "State location": "NY",
+      "State of Inc.": "MD"
+    },
+    "name": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)"
+  },
+  "EDGE-cik-link-nested-inside-bold": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "000123456725000001",
+        "cik": 1083387,
+        "company": "KINETICS 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "Fiscal Year End": "1231",
+      "SIC": "0000",
+      "State location": "NY",
+      "State of Inc.": "MD"
+    },
+    "name": "KINETICS 0001083387 (see all company filings)"
+  },
+  "EDGE-cik-link-text-split-across-tags": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "000123456725000001",
+        "cik": 1083387,
+        "company": "KINETICS 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "Fiscal Year End": "1231",
+      "SIC": "0000",
+      "State location": "NY",
+      "State of Inc.": "MD"
+    },
+    "name": "KINETICS 0001083387 (see all company filings)"
+  },
+  "EDGE-classes-among-several": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "000123456725000001",
+        "cik": 1083387,
+        "company": "KINETICS 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "State location": "NY"
+    },
+    "name": "KINETICS 0001083387 (see all company filings)"
+  },
+  "EDGE-comment-inside-ident-info": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "000123456725000001",
+        "cik": 1083387,
+        "company": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "State location": "NY"
+    },
+    "name": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)"
+  },
+  "EDGE-company-name-split-across-tags": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "000123456725000001",
+        "cik": 1083387,
+        "company": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "Fiscal Year End": "1231",
+      "SIC": "0000",
+      "State location": "NY",
+      "State of Inc.": "MD"
+    },
+    "name": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)"
+  },
+  "EDGE-documents-link-nested": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "0001",
+        "cik": 1083387,
+        "company": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "Fiscal Year End": "1231",
+      "SIC": "0000",
+      "State location": "NY",
+      "State of Inc.": "MD"
+    },
+    "name": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)"
+  },
+  "EDGE-filing-date-not-a-date": "ValueError: time data 'not a date' does not match format '%Y-%m-%d'",
+  "EDGE-filing-date-split-across-tags": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "0001",
+        "cik": 1083387,
+        "company": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "Fiscal Year End": "1231",
+      "SIC": "0000",
+      "State location": "NY",
+      "State of Inc.": "MD"
+    },
+    "name": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)"
+  },
+  "EDGE-filing-link-without-an-href": "KeyError: 'href'",
+  "EDGE-form-name-split-across-tags": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "0001",
+        "cik": 1083387,
+        "company": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "Fiscal Year End": "1231",
+      "SIC": "0000",
+      "State location": "NY",
+      "State of Inc.": "MD"
+    },
+    "name": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)"
+  },
+  "EDGE-ident-info-split-across-tags": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "000123456725000001",
+        "cik": 1083387,
+        "company": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "State location": "NY"
+    },
+    "name": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)"
+  },
+  "EDGE-ident-line-without-a-colon": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "000123456725000001",
+        "cik": 1083387,
+        "company": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "State location": "NY"
+    },
+    "name": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)"
+  },
+  "EDGE-ident-value-with-nbsp": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "000123456725000001",
+        "cik": 1083387,
+        "company": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "SIC": "0000",
+      "State location": "NY"
+    },
+    "name": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)"
+  },
+  "EDGE-mailer-divs": {
+    "addresses": [
+      "Mailing Address\n615 EAST MICHIGAN ST\nMILWAUKEE WI 53202",
+      "Business Address\n615 EAST MICHIGAN ST\nMILWAUKEE WI 53202\n414-765-4124"
+    ],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "000123456725000001",
+        "cik": 1083387,
+        "company": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "Fiscal Year End": "1231",
+      "SIC": "0000",
+      "State location": "NY",
+      "State of Inc.": "MD"
+    },
+    "name": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)"
+  },
+  "EDGE-mailer-with-br-tags": {
+    "addresses": [
+      "Mailing Address615 EAST MICHIGAN STMILWAUKEE WI 53202"
+    ],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "000123456725000001",
+        "cik": 1083387,
+        "company": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "Fiscal Year End": "1231",
+      "SIC": "0000",
+      "State location": "NY",
+      "State of Inc.": "MD"
+    },
+    "name": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)"
+  },
+  "EDGE-minimal-complete-page": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "000123456725000001",
+        "cik": 1083387,
+        "company": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "Fiscal Year End": "1231",
+      "SIC": "0000",
+      "State location": "NY",
+      "State of Inc.": "MD"
+    },
+    "name": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)"
+  },
+  "EDGE-missing-companyInfo": "AttributeError: 'NoneType' object has no attribute 'find'",
+  "EDGE-missing-contentDiv": null,
+  "EDGE-missing-filings-table": "AttributeError: 'NoneType' object has no attribute 'find_all'",
+  "EDGE-nested-table-in-a-filing-row": "ValueError: time data 'x' does not match format '%Y-%m-%d'",
+  "EDGE-no-filings-rows": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [],
+    "ident_info": {
+      "Fiscal Year End": "1231",
+      "SIC": "0000",
+      "State location": "NY",
+      "State of Inc.": "MD"
+    },
+    "name": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)"
+  },
+  "EDGE-no-mailer-divs": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "000123456725000001",
+        "cik": 1083387,
+        "company": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "Fiscal Year End": "1231",
+      "SIC": "0000",
+      "State location": "NY",
+      "State of Inc.": "MD"
+    },
+    "name": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)"
+  },
+  "EDGE-page-is-a-bare-contentDiv-fragment": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "000123456725000001",
+        "cik": 1083387,
+        "company": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "Fiscal Year End": "1231",
+      "SIC": "0000",
+      "State location": "NY",
+      "State of Inc.": "MD"
+    },
+    "name": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)"
+  },
+  "EDGE-script-inside-the-company-name": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "000123456725000001",
+        "cik": 1083387,
+        "company": "KINETICS FUNDS 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "Fiscal Year End": "1231",
+      "SIC": "0000",
+      "State location": "NY",
+      "State of Inc.": "MD"
+    },
+    "name": "KINETICS FUNDS 0001083387 (see all company filings)"
+  },
+  "EDGE-two-companyName-spans": {
+    "addresses": [],
+    "cik": "0001111111",
+    "filings": [
+      {
+        "accession_number": "000123456725000001",
+        "cik": 1111111,
+        "company": "FIRST FUND 0001111111 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "Fiscal Year End": "1231",
+      "SIC": "0000",
+      "State location": "NY",
+      "State of Inc.": "MD"
+    },
+    "name": "FIRST FUND 0001111111 (see all company filings)"
+  },
+  "EDGE-two-filing-rows": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "000123456725000001",
+        "cik": 1083387,
+        "company": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      },
+      {
+        "accession_number": "000123456725000001",
+        "cik": 1083387,
+        "company": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)",
+        "filing_date": "2024-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "Fiscal Year End": "1231",
+      "SIC": "0000",
+      "State location": "NY",
+      "State of Inc.": "MD"
+    },
+    "name": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)"
+  },
+  "EDGE-two-filings-tables": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "000123456725000001",
+        "cik": 1083387,
+        "company": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "Fiscal Year End": "1231",
+      "SIC": "0000",
+      "State location": "NY",
+      "State of Inc.": "MD"
+    },
+    "name": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)"
+  },
+  "EDGE-two-identInfo-paragraphs": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "000123456725000001",
+        "cik": 1083387,
+        "company": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSR"
+      }
+    ],
+    "ident_info": {
+      "State location": "NY"
+    },
+    "name": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)"
+  },
+  "EDGE-unclosed-tags": {
+    "addresses": [],
+    "cik": "0001083387",
+    "filings": [
+      {
+        "accession_number": "0001",
+        "cik": 1083387,
+        "company": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)",
+        "filing_date": "2025-03-01",
+        "form": "N-CSRDocumentsx2025-03-01"
+      }
+    ],
+    "ident_info": {
+      "Fiscal Year End": "1231",
+      "SIC": "0000",
+      "State location": "NY",
+      "State of Inc.": "MD"
+    },
+    "name": "KINETICS MUTUAL FUNDS INC 0001083387 (see all company filings)"
+  },
+  "company-C000007021-start0": {
+    "addresses": [
+      "Mailing Address\n50606 AMERIPRISE FINANCIAL CENTER\nH27/5228\nMINNEAPOLIS MN 55474",
+      "Business Address\n50606 AMERIPRISE FINANCIAL CENTER\nH27/5228\nMINNEAPOLIS MN 55474         \n612-671-4321"
+    ],
+    "cik": "0001142702",
+    "filings": [
+      {
+        "accession_number": "0000950123-10-080700",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2010-08-25",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0000950123-09-065926",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-11-25",
+        "form": "24F-2NT"
+      },
+      {
+        "accession_number": "0001142702-09-000004",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-09-25",
+        "form": "NSAR-B"
+      },
+      {
+        "accession_number": "0000950123-09-039162",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-08-28",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0000950123-09-038133",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-08-26",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-09-003744",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-08-25",
+        "form": "N-Q"
+      },
+      {
+        "accession_number": "0000950123-09-016182",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-06-23",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001145443-09-001490",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-06-09",
+        "form": "N-CSRS"
+      },
+      {
+        "accession_number": "0000950123-09-010974",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-06-03",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001142702-09-000002",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-05-29",
+        "form": "NSAR-A"
+      },
+      {
+        "accession_number": "0001193125-09-115517",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-05-20",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-09-115413",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-05-20",
+        "form": "497"
+      },
+      {
+        "accession_number": "0000950137-09-003669",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-05-06",
+        "form": "DEFA14A"
+      },
+      {
+        "accession_number": "0000950137-09-003074",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-04-17",
+        "form": "DEFA14A"
+      },
+      {
+        "accession_number": "0001169232-09-001933",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-04-03",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-09-001688",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-03-25",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-09-001571",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-03-16",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-09-001288",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-03-03",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-09-001181",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-02-27",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-09-001233",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-02-27",
+        "form": "N-Q"
+      },
+      {
+        "accession_number": "0001193125-09-018859",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-02-04",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-09-013211",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-01-28",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-09-013211",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-01-28",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001169232-09-000284",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-01-14",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-09-000250",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2009-01-13",
+        "form": "497"
+      },
+      {
+        "accession_number": "0000881466-08-000005",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-12-30",
+        "form": "24F-2NT"
+      },
+      {
+        "accession_number": "0001145443-08-003345",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-12-10",
+        "form": "N-CSR"
+      },
+      {
+        "accession_number": "0001193125-08-245884",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-12-01",
+        "form": "485APOS"
+      },
+      {
+        "accession_number": "0001193125-08-245884",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-12-01",
+        "form": "485APOS"
+      },
+      {
+        "accession_number": "0001142702-08-000002",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-11-26",
+        "form": "NSAR-B"
+      },
+      {
+        "accession_number": "0001169232-08-004442",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-11-26",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-08-004107",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-11-12",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-08-004019",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-11-07",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-08-003887",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-11-04",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-08-003449",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-09-25",
+        "form": "DEFA14A"
+      },
+      {
+        "accession_number": "0001169232-08-003369",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-09-15",
+        "form": "DEFA14A"
+      },
+      {
+        "accession_number": "0001169232-08-003371",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-09-15",
+        "form": "DEFA14A"
+      },
+      {
+        "accession_number": "0001169232-08-003235",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-08-27",
+        "form": "N-Q"
+      },
+      {
+        "accession_number": "0001193125-08-185513",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-08-27",
+        "form": "DEF 14A"
+      },
+      {
+        "accession_number": "0001169232-08-003162",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-08-20",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0001193125-08-175924",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-08-13",
+        "form": "PRER14A"
+      },
+      {
+        "accession_number": "0001193125-08-172123",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-08-08",
+        "form": "PRE 14A"
+      },
+      {
+        "accession_number": "0001169232-08-002764",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-07-29",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001145443-08-001846",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-06-04",
+        "form": "N-CSRS"
+      },
+      {
+        "accession_number": "0001142702-08-000001",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-05-28",
+        "form": "NSAR-A"
+      },
+      {
+        "accession_number": "0001169232-08-002103",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-05-15",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-08-001544",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-04-01",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-08-001545",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-04-01",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-08-001395",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-03-20",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-08-001123",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-02-28",
+        "form": "N-Q"
+      },
+      {
+        "accession_number": "0001193125-08-016980",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-01-31",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-08-013494",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-01-28",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-08-013494",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-01-28",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001169232-08-000260",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-01-18",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-08-000246",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2008-01-17",
+        "form": "497"
+      },
+      {
+        "accession_number": "0000100802-07-000003",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2007-12-21",
+        "form": "24F-2NT"
+      },
+      {
+        "accession_number": "0001145443-07-003829",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2007-12-07",
+        "form": "N-CSR"
+      },
+      {
+        "accession_number": "0001142702-07-000006",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2007-11-29",
+        "form": "NSAR-B"
+      },
+      {
+        "accession_number": "0001169232-07-004365",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2007-11-16",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-07-003849",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2007-10-05",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-07-003507",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2007-08-27",
+        "form": "N-Q"
+      },
+      {
+        "accession_number": "0001169232-07-003449",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2007-08-21",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0001169232-07-002940",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2007-07-19",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001145443-07-001669",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2007-06-04",
+        "form": "N-CSRS"
+      },
+      {
+        "accession_number": "0001142702-07-000003",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2007-05-29",
+        "form": "NSAR-A"
+      },
+      {
+        "accession_number": "0001169232-07-001839",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2007-04-09",
+        "form": "497"
+      },
+      {
+        "accession_number": "0000936329-07-000022",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2007-02-27",
+        "form": "N-Q"
+      },
+      {
+        "accession_number": "0001193125-07-020180",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2007-02-05",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-07-015402",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2007-01-29",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-07-015402",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2007-01-29",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0000100786-06-000011",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2006-12-28",
+        "form": "24F-2NT"
+      },
+      {
+        "accession_number": "0001145443-06-003628",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2006-12-08",
+        "form": "N-CSR"
+      },
+      {
+        "accession_number": "0001193125-06-244511",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2006-11-30",
+        "form": "485APOS"
+      },
+      {
+        "accession_number": "0001193125-06-244511",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2006-11-30",
+        "form": "485APOS"
+      },
+      {
+        "accession_number": "0001142702-06-000006",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2006-11-30",
+        "form": "NSAR-B"
+      },
+      {
+        "accession_number": "0001169232-06-004584",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2006-11-17",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-06-003949",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2006-10-02",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-06-003890",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2006-09-27",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-06-003831",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2006-09-21",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-06-003649",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2006-08-29",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0000936329-06-000101",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2006-08-28",
+        "form": "N-Q"
+      },
+      {
+        "accession_number": "0001169232-06-003126",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2006-07-21",
+        "form": "497"
+      },
+      {
+        "accession_number": "0000930413-06-004758",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2006-06-21",
+        "form": "N-CSR/A"
+      },
+      {
+        "accession_number": "0001145443-06-001909",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2006-06-06",
+        "form": "N-CSRS"
+      },
+      {
+        "accession_number": "0001142702-06-000002",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2006-05-26",
+        "form": "NSAR-A"
+      },
+      {
+        "accession_number": "0001169232-06-002455",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2006-05-16",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-06-002423",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2006-05-15",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-06-001867",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2006-04-07",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001169232-06-001591",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2006-03-17",
+        "form": "497"
+      },
+      {
+        "accession_number": "0000936329-06-000015",
+        "cik": 1142702,
+        "company": "SELIGMAN CORE FIXED INCOME FUND, INC",
+        "filing_date": "2006-03-02",
+        "form": "N-Q"
+      }
+    ],
+    "ident_info": {
+      "Class/Contract": "C000007021 Seligman Core Fixed Income Fund, Class B",
+      "Fiscal Year End": "0930",
+      "State location": "MN",
+      "Ticker Symbol": "SIVBX",
+      "formerly": "SELIGMAN INVESTMENT GRADE FIXED INCOME FUND INC (filings through 2006-11-17)"
+    },
+    "name": "SELIGMAN CORE FIXED INCOME FUND, INC"
+  },
+  "company-C000032628-start0": {
+    "addresses": [
+      "Mailing Address\n535 MADISON AVENUE\n37TH FL.\nNEW YORK NY 10022",
+      "Business Address\n535 MADISON AVENUE\n37TH FL.\nNEW YORK NY 10022         \n646-572-3390"
+    ],
+    "cik": "0001040587",
+    "filings": [
+      {
+        "accession_number": "0000894189-09-002762",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2009-08-28",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0001325358-08-000654",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2008-12-29",
+        "form": "NSAR-A"
+      },
+      {
+        "accession_number": "0000894189-08-002992",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2008-09-10",
+        "form": "N-Q"
+      },
+      {
+        "accession_number": "0000894189-08-002932",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2008-09-04",
+        "form": "497"
+      },
+      {
+        "accession_number": "0000894189-08-002912",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2008-09-02",
+        "form": "497"
+      },
+      {
+        "accession_number": "0000894189-08-002803",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2008-08-28",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0000894189-08-002803",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2008-08-28",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0000894189-08-002423",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2008-08-08",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0000894189-08-002228",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2008-07-28",
+        "form": "497"
+      },
+      {
+        "accession_number": "0000894189-08-002205",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2008-07-28",
+        "form": "24F-2NT"
+      },
+      {
+        "accession_number": "0001325358-08-000291",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2008-06-27",
+        "form": "NSAR-B"
+      },
+      {
+        "accession_number": "0000894189-08-001857",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2008-06-13",
+        "form": "497"
+      },
+      {
+        "accession_number": "9999999995-08-001835",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2008-06-09",
+        "form": "EFFECT"
+      },
+      {
+        "accession_number": "0000894189-08-001836",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2008-06-09",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0000894189-08-001836",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2008-06-09",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0000894189-08-001551",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2008-05-20",
+        "form": "485APOS"
+      },
+      {
+        "accession_number": "0000894189-08-001551",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2008-05-20",
+        "form": "485APOS"
+      },
+      {
+        "accession_number": "0000894189-08-001079",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2008-03-21",
+        "form": "485APOS"
+      },
+      {
+        "accession_number": "0000894189-08-001079",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2008-03-21",
+        "form": "485APOS"
+      },
+      {
+        "accession_number": "0000894189-08-000982",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2008-03-12",
+        "form": "N-Q"
+      },
+      {
+        "accession_number": "0000894189-08-000017",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2008-01-02",
+        "form": "497"
+      },
+      {
+        "accession_number": "0000894189-07-003779",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2007-12-28",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0000894189-07-003779",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2007-12-28",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001325358-07-000531",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2007-12-26",
+        "form": "NSAR-A"
+      },
+      {
+        "accession_number": "0000894189-07-002899",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2007-09-28",
+        "form": "N-Q"
+      },
+      {
+        "accession_number": "0000894189-07-002634",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2007-08-31",
+        "form": "497"
+      },
+      {
+        "accession_number": "0000894189-07-002616",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2007-08-31",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0000894189-07-002515",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2007-08-28",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0000894189-07-002515",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2007-08-28",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0000894189-07-002126",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2007-07-30",
+        "form": "24F-2NT"
+      },
+      {
+        "accession_number": "0000894189-07-001822",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2007-06-29",
+        "form": "NSAR-B"
+      },
+      {
+        "accession_number": "0000894189-07-001536",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2007-05-29",
+        "form": "497"
+      },
+      {
+        "accession_number": "0000894189-07-000957",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2007-03-29",
+        "form": "N-Q"
+      },
+      {
+        "accession_number": "0000894189-07-000047",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2007-01-08",
+        "form": "497"
+      },
+      {
+        "accession_number": "0000894189-07-000008",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2007-01-03",
+        "form": "497J"
+      },
+      {
+        "accession_number": "0000894189-06-003245",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2006-12-29",
+        "form": "NSAR-A"
+      },
+      {
+        "accession_number": "0000894189-06-003240",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2006-12-29",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0000894189-06-003240",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2006-12-29",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0000894189-06-002481",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2006-09-29",
+        "form": "497"
+      },
+      {
+        "accession_number": "0000894189-06-002446",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2006-09-27",
+        "form": "N-Q"
+      },
+      {
+        "accession_number": "0001144204-06-035805",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2006-08-25",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0000894189-06-001146",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2006-05-11",
+        "form": "497"
+      },
+      {
+        "accession_number": "0000950137-06-005610",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2006-05-09",
+        "form": "N-CSRS"
+      },
+      {
+        "accession_number": "0000894189-06-001128",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2006-05-05",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001144204-06-017581",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2006-05-01",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001144204-06-017581",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2006-05-01",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0000894189-06-000991",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2006-04-28",
+        "form": "NSAR-A"
+      },
+      {
+        "accession_number": "0001144204-06-006996",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2006-02-17",
+        "form": "485APOS"
+      },
+      {
+        "accession_number": "0001144204-06-006996",
+        "cik": 1040587,
+        "company": "DIREXION FUNDS",
+        "filing_date": "2006-02-17",
+        "form": "485APOS"
+      }
+    ],
+    "ident_info": {
+      "Class/Contract": "C000032628 Investor Class",
+      "Fiscal Year End": "0831",
+      "State location": "NY",
+      "State of Inc.": "MA",
+      "formerly": "POTOMAC FUNDS (filings through 2006-05-01)"
+    },
+    "name": "DIREXION FUNDS"
+  },
+  "company-C000032628-start101": {
+    "addresses": [
+      "Mailing Address\n535 MADISON AVENUE\n37TH FL.\nNEW YORK NY 10022",
+      "Business Address\n535 MADISON AVENUE\n37TH FL.\nNEW YORK NY 10022         \n646-572-3390"
+    ],
+    "cik": "0001040587",
+    "filings": [],
+    "ident_info": {
+      "Class/Contract": "C000032628 Investor Class",
+      "Fiscal Year End": "0831",
+      "State location": "NY",
+      "State of Inc.": "MA",
+      "formerly": "POTOMAC FUNDS (filings through 2006-05-01)"
+    },
+    "name": "DIREXION FUNDS"
+  },
+  "company-S000004310-start0": {
+    "addresses": [
+      "Mailing Address\n400 HOWARD STREET\nSAN FRANCISCO CA 94105",
+      "Business Address\n400 HOWARD STREET\nSAN FRANCISCO CA 94105         \n(415) 670-2000"
+    ],
+    "cik": "0001100663",
+    "filings": [
+      {
+        "accession_number": "0001193125-26-327281",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2026-07-31",
+        "form": "497J"
+      },
+      {
+        "accession_number": "0001193125-26-327930",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2026-07-31",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-26-318131",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2026-07-27",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-26-318131",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2026-07-27",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0002071691-26-015790",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2026-07-13",
+        "form": "NPORT-P/A"
+      },
+      {
+        "accession_number": "0001193125-26-293181",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2026-07-02",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-26-294655",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2026-07-02",
+        "form": "497"
+      },
+      {
+        "accession_number": "0000940400-26-023471",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2026-06-16",
+        "form": "24F-2NT"
+      },
+      {
+        "accession_number": "0001004726-26-004646",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2026-06-15",
+        "form": "N-CEN"
+      },
+      {
+        "accession_number": "0001100663-26-000037",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2026-06-04",
+        "form": "N-CSR"
+      },
+      {
+        "accession_number": "0002071691-26-012459",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2026-05-28",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-26-114192",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2026-03-18",
+        "form": "497"
+      },
+      {
+        "accession_number": "0002071691-26-004238",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2026-02-25",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001100663-25-000038",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-12-03",
+        "form": "N-CSRS"
+      },
+      {
+        "accession_number": "0002071691-25-007634",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-11-26",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-25-297711",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-11-26",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-25-283231",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-11-14",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001438934-25-002330",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-08-28",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0001752724-25-210389",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-08-28",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-25-171077",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-08-01",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-25-171585",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-08-01",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-25-171103",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-08-01",
+        "form": "497J"
+      },
+      {
+        "accession_number": "0001193125-25-162603",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-07-22",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-25-162603",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-07-22",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-25-152656",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-06-30",
+        "form": "497"
+      },
+      {
+        "accession_number": "0000940400-25-000269",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-06-23",
+        "form": "24F-2NT"
+      },
+      {
+        "accession_number": "0001752724-25-137724",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-06-13",
+        "form": "N-CEN"
+      },
+      {
+        "accession_number": "0001968732-25-000049",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-06-05",
+        "form": "N-CSR"
+      },
+      {
+        "accession_number": "0001193125-25-130716",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-05-29",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001752724-25-119791",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-05-27",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-25-121682",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-05-16",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-25-069071",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-04-01",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-25-068983",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-04-01",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001752724-25-043800",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-02-27",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-25-011478",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2025-01-23",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-24-283370",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2024-12-23",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001398344-24-022640",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2024-12-03",
+        "form": "N-CSRS"
+      },
+      {
+        "accession_number": "0001752724-24-269943",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2024-11-26",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001752724-24-194289",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2024-08-27",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001021408-24-004992",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2024-08-27",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0001193125-24-191290",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2024-08-01",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-24-190969",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2024-08-01",
+        "form": "497J"
+      },
+      {
+        "accession_number": "0001193125-24-181119",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2024-07-19",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-24-181119",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2024-07-19",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0000940400-24-000270",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2024-06-21",
+        "form": "24F-2NT"
+      },
+      {
+        "accession_number": "0001752724-24-133117",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2024-06-14",
+        "form": "N-CEN"
+      },
+      {
+        "accession_number": "0001968732-24-000035",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2024-06-04",
+        "form": "N-CSR"
+      },
+      {
+        "accession_number": "0001752724-24-123331",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2024-05-28",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-24-146248",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2024-05-24",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-24-125249",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2024-04-30",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001752724-24-043113",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2024-02-27",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-24-032898",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2024-02-13",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-23-296850",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2023-12-18",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001968732-23-000020",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2023-12-01",
+        "form": "N-CSRS"
+      },
+      {
+        "accession_number": "0001752724-23-264277",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2023-11-22",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-23-256133",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2023-10-13",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-23-221344",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2023-08-25",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0001752724-23-191503",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2023-08-25",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-23-200071",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2023-08-01",
+        "form": "497J"
+      },
+      {
+        "accession_number": "0001193125-23-200233",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2023-08-01",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-23-190469",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2023-07-20",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-23-190469",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2023-07-20",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0000940400-23-000233",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2023-06-26",
+        "form": "24F-2NT"
+      },
+      {
+        "accession_number": "0001752724-23-131557",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2023-06-14",
+        "form": "N-CEN"
+      },
+      {
+        "accession_number": "0001193125-23-161754",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2023-06-06",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001727644-23-000040",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2023-06-01",
+        "form": "N-CSR"
+      },
+      {
+        "accession_number": "0001727644-23-000045",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2023-06-01",
+        "form": "N-CSR"
+      },
+      {
+        "accession_number": "0001752724-23-123220",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2023-05-26",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001752724-23-039243",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2023-02-24",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-23-041126",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2023-02-16",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-23-027222",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2023-02-08",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-23-017511",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2023-01-27",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-22-310050",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-12-21",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001727644-22-000113",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-12-02",
+        "form": "N-CSRS"
+      },
+      {
+        "accession_number": "0001752724-22-268673",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-11-28",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-22-256690",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-10-03",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-22-229742",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-08-25",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0001752724-22-193652",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-08-25",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-22-208715",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-08-01",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-22-206905",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-08-01",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-22-208312",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-08-01",
+        "form": "497J"
+      },
+      {
+        "accession_number": "0001193125-22-202133",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-07-26",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-22-202133",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-07-26",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-22-195169",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-07-18",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-22-195022",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-07-15",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001752724-22-145930",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-06-24",
+        "form": "24F-2NT"
+      },
+      {
+        "accession_number": "0001752724-22-133062",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-06-13",
+        "form": "N-CEN"
+      },
+      {
+        "accession_number": "0001193125-22-166889",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-06-03",
+        "form": "N-CSR"
+      },
+      {
+        "accession_number": "0001752724-22-122805",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-05-26",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-22-084182",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-03-25",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-22-085180",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-03-25",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-22-079581",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-03-18",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-22-066392",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-03-07",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001752724-22-046281",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-02-25",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-22-018312",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-01-26",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-22-008734",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-01-13",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-21-370773",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-01-03",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-21-370759",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2022-01-03",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-21-363649",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2021-12-21",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-21-347575",
+        "cik": 1100663,
+        "company": "iSHARES TRUST",
+        "filing_date": "2021-12-03",
+        "form": "N-CSRS"
+      }
+    ],
+    "ident_info": {
+      "Fiscal Year End": "1231",
+      "Series": "S000004310 iShares Core S&P 500 ETF",
+      "State location": "CA",
+      "State of Inc.": "DE",
+      "formerly": "iSHARES TRUST (filings through 2026-08-21)"
+    },
+    "name": "iSHARES TRUST"
+  },
+  "company-S000009184-start0": {
+    "addresses": [
+      "Mailing Address\n290 CONGRESS STREET\nBOSTON MA 02210",
+      "Business Address\n290 CONGRESS STREET\nBOSTON MA 02210         \n8003456611"
+    ],
+    "cik": "0000002110",
+    "filings": [
+      {
+        "accession_number": "0001193125-26-362313",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2026-08-24",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-26-355137",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2026-08-18",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0001193125-26-315399",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2026-07-24",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-26-306824",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2026-07-17",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-26-289593",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2026-06-30",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-26-289587",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2026-06-30",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-26-282085",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2026-06-25",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001410368-26-055089",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2026-05-28",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-26-236581",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2026-05-22",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-26-199628",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2026-05-01",
+        "form": "497J"
+      },
+      {
+        "accession_number": "0001193125-26-172336",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2026-04-23",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-26-172113",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2026-04-23",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-26-172113",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2026-04-23",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0000002110-26-000003",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2026-03-16",
+        "form": "24F-2NT"
+      },
+      {
+        "accession_number": "0001410368-26-022553",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2026-03-10",
+        "form": "N-CEN"
+      },
+      {
+        "accession_number": "0001193125-26-096296",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2026-03-06",
+        "form": "N-CSR"
+      },
+      {
+        "accession_number": "0001410368-26-018885",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2026-02-26",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-26-020438",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2026-01-23",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-26-013668",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2026-01-15",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-25-303236",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-12-01",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-25-298446",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-11-26",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-25-198390",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-09-08",
+        "form": "497"
+      },
+      {
+        "accession_number": "0000002110-25-000019",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-09-04",
+        "form": "N-CSRS"
+      },
+      {
+        "accession_number": "0001193125-25-195585",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-09-04",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-25-195569",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-09-04",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001145549-25-052540",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-08-22",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001021408-25-002642",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-08-21",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0001193125-25-154483",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-07-02",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-25-154506",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-07-02",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-25-154488",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-07-02",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001145549-25-031624",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-05-27",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-25-109206",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-05-01",
+        "form": "497J"
+      },
+      {
+        "accession_number": "0001193125-25-095519",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-04-25",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-25-095335",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-04-25",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-25-095335",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-04-25",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001683863-25-002046",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-03-14",
+        "form": "24F-2NT"
+      },
+      {
+        "accession_number": "0001145549-25-017533",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-03-12",
+        "form": "N-CEN"
+      },
+      {
+        "accession_number": "0001145549-25-016346",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-03-05",
+        "form": "N-CSR"
+      },
+      {
+        "accession_number": "0001193125-25-043838",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-03-03",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-25-043830",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-03-03",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-25-043827",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-03-03",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001145549-25-013924",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-02-28",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-25-005221",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2025-01-13",
+        "form": "DEF 14A"
+      },
+      {
+        "accession_number": "0001145549-24-072689",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-11-25",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-24-263920",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-11-22",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-24-229641",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-10-01",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-24-227475",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-09-27",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-24-227462",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-09-27",
+        "form": "497"
+      },
+      {
+        "accession_number": "0000898430-24-000510",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-09-05",
+        "form": "N-CSRS"
+      },
+      {
+        "accession_number": "0001021408-24-007161",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-09-03",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0001145549-24-051138",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-08-27",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-24-170222",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-06-27",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-24-170150",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-06-27",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001145549-24-030526",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-05-28",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-24-131675",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-05-06",
+        "form": "497J"
+      },
+      {
+        "accession_number": "0001193125-24-114293",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-04-25",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-24-104368",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-04-22",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-24-104368",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-04-22",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-24-104368",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-04-22",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-24-104368",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-04-22",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001145549-24-015981",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-03-13",
+        "form": "N-CEN"
+      },
+      {
+        "accession_number": "0001683863-24-001186",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-03-06",
+        "form": "24F-2NT"
+      },
+      {
+        "accession_number": "0001683863-24-001070",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-03-01",
+        "form": "N-CSR"
+      },
+      {
+        "accession_number": "0001193125-24-053382",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-02-29",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-24-053358",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-02-29",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001145549-24-008267",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-02-26",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-24-000308",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2024-01-02",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-23-284039",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2023-11-28",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001145549-23-071020",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2023-11-27",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-23-247604",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2023-10-02",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001683863-23-006161",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2023-09-01",
+        "form": "N-CSRS"
+      },
+      {
+        "accession_number": "0001145549-23-049635",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2023-08-24",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-23-219676",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2023-08-24",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0001145549-23-031097",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2023-05-25",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-23-133507",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2023-05-03",
+        "form": "497J"
+      },
+      {
+        "accession_number": "0001193125-23-121340",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2023-04-27",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-23-121556",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2023-04-27",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-23-121340",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2023-04-27",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001683863-23-002229",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2023-03-16",
+        "form": "24F-2NT"
+      },
+      {
+        "accession_number": "0001145549-23-016578",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2023-03-15",
+        "form": "N-CEN"
+      },
+      {
+        "accession_number": "0001683863-23-001770",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2023-03-06",
+        "form": "N-CSR"
+      },
+      {
+        "accession_number": "0001145549-23-009130",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2023-02-24",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-23-038415",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2023-02-14",
+        "form": "497J"
+      },
+      {
+        "accession_number": "0001193125-23-035190",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2023-02-13",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-23-029627",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2023-02-09",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-23-029602",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2023-02-09",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001145549-22-070030",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2022-11-25",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001683863-22-005737",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2022-08-31",
+        "form": "N-CSRS"
+      },
+      {
+        "accession_number": "0001145549-22-049320",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2022-08-24",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-22-223814",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2022-08-18",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0001145549-22-030043",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2022-05-25",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-22-143482",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2022-05-06",
+        "form": "497J"
+      },
+      {
+        "accession_number": "0001193125-22-126760",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2022-04-28",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-22-126944",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2022-04-28",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-22-126760",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2022-04-28",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001683863-22-002371",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2022-03-22",
+        "form": "24F-2NT"
+      },
+      {
+        "accession_number": "0001145549-22-016136",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2022-03-15",
+        "form": "N-CEN"
+      },
+      {
+        "accession_number": "0001683863-22-001389",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2022-03-03",
+        "form": "N-CSR"
+      },
+      {
+        "accession_number": "0001145549-22-008351",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2022-02-24",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001145549-21-067051",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2021-11-23",
+        "form": "NPORT-P"
+      }
+    ],
+    "ident_info": {
+      "Fiscal Year End": "1231",
+      "Series": "S000009184 Columbia Acorn Fund",
+      "State location": "MA",
+      "State of Inc.": "MA",
+      "formerly": "LIBERTY ACORN TRUST (filings through 2003-10-20)"
+    },
+    "name": "COLUMBIA ACORN TRUST"
+  },
+  "company-S000009184-start101": {
+    "addresses": [
+      "Mailing Address\n290 CONGRESS STREET\nBOSTON MA 02210",
+      "Business Address\n290 CONGRESS STREET\nBOSTON MA 02210         \n8003456611"
+    ],
+    "cik": "0000002110",
+    "filings": [
+      {
+        "accession_number": "0001683863-21-004762",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2021-08-31",
+        "form": "N-CSRS"
+      },
+      {
+        "accession_number": "0001145549-21-048608",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2021-08-25",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-21-254817",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2021-08-24",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0001145549-21-028954",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2021-05-25",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001145549-21-029460",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2021-05-25",
+        "form": "NPORT-P/A"
+      },
+      {
+        "accession_number": "0001193125-21-152693",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2021-05-06",
+        "form": "497J"
+      },
+      {
+        "accession_number": "0001193125-21-136063",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2021-04-28",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-21-136063",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2021-04-28",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-21-136151",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2021-04-28",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-21-117333",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2021-04-15",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-21-117337",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2021-04-15",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001145549-21-015940",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2021-03-12",
+        "form": "N-CEN"
+      },
+      {
+        "accession_number": "0001193125-21-079149",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2021-03-12",
+        "form": "24F-2NT"
+      },
+      {
+        "accession_number": "0001683863-21-001250",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2021-03-02",
+        "form": "N-CSR"
+      },
+      {
+        "accession_number": "0001145549-21-009012",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2021-02-24",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-21-053852",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2021-02-24",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-21-053892",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2021-02-24",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-21-028761",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2021-02-04",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-21-009827",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2021-01-15",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001145549-20-068111",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2020-11-24",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001683863-20-013049",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2020-09-03",
+        "form": "N-CSRS"
+      },
+      {
+        "accession_number": "0001145549-20-049905",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2020-08-26",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-20-226837",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2020-08-21",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0001193125-20-214577",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2020-08-10",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-20-191586",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2020-07-13",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-20-183579",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2020-06-30",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001145549-20-028897",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2020-05-28",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-20-143782",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2020-05-15",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-20-143782",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2020-05-15",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-20-134583",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2020-05-06",
+        "form": "497J"
+      },
+      {
+        "accession_number": "0001193125-20-125474",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2020-04-29",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-20-125365",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2020-04-29",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-20-125365",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2020-04-29",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001683863-20-005270",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2020-04-24",
+        "form": "497J"
+      },
+      {
+        "accession_number": "0001193125-20-110877",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2020-04-20",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001145549-20-015073",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2020-03-13",
+        "form": "N-CEN"
+      },
+      {
+        "accession_number": "0001193125-20-064263",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2020-03-06",
+        "form": "24F-2NT"
+      },
+      {
+        "accession_number": "0001193125-20-056375",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2020-02-28",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001145549-20-007977",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2020-02-25",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001683863-20-000340",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2020-02-25",
+        "form": "N-CSR"
+      },
+      {
+        "accession_number": "0001193125-19-303859",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2019-12-02",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001145549-19-046255",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2019-11-26",
+        "form": "NPORT-P"
+      },
+      {
+        "accession_number": "0001193125-19-237378",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2019-09-04",
+        "form": "N-CSRS"
+      },
+      {
+        "accession_number": "0001193125-19-226493",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2019-08-22",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0001193125-19-186716",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2019-07-01",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-19-158043",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2019-05-28",
+        "form": "NPORT-EX"
+      },
+      {
+        "accession_number": "0001193125-19-146443",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2019-05-14",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-19-146443",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2019-05-14",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-19-138200",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2019-05-06",
+        "form": "497J"
+      },
+      {
+        "accession_number": "0001193125-19-129052",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2019-04-30",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-19-129052",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2019-04-30",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-19-129106",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2019-04-30",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-19-093754",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2019-04-01",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-19-076019",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2019-03-15",
+        "form": "24F-2NT"
+      },
+      {
+        "accession_number": "0001145549-19-007793",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2019-03-15",
+        "form": "N-CEN"
+      },
+      {
+        "accession_number": "0001193125-19-066618",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2019-03-07",
+        "form": "N-CSR"
+      },
+      {
+        "accession_number": "0001193125-19-060844",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2019-03-01",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-19-060845",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2019-03-01",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-19-060865",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2019-03-01",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-18-334722",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2018-11-27",
+        "form": "N-Q"
+      },
+      {
+        "accession_number": "0001193125-18-315072",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2018-11-01",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-18-264654",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2018-08-31",
+        "form": "N-CSRS"
+      },
+      {
+        "accession_number": "0001193125-18-253836",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2018-08-21",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0001193125-18-181399",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2018-06-01",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-18-176294",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2018-05-29",
+        "form": "N-Q"
+      },
+      {
+        "accession_number": "0001193125-18-166338",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2018-05-17",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-18-166338",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2018-05-17",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-18-163796",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2018-05-15",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-18-154280",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2018-05-07",
+        "form": "497J"
+      },
+      {
+        "accession_number": "0001193125-18-142806",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2018-04-30",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-18-142806",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2018-04-30",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-18-143032",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2018-04-30",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-18-093823",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2018-03-23",
+        "form": "24F-2NT"
+      },
+      {
+        "accession_number": "0001193125-18-084048",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2018-03-15",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-18-084062",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2018-03-15",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-18-068638",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2018-03-02",
+        "form": "N-CSR"
+      },
+      {
+        "accession_number": "0001193125-18-060082",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2018-02-27",
+        "form": "NSAR-B"
+      },
+      {
+        "accession_number": "0001193125-17-374907",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-12-20",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-17-353374",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-11-28",
+        "form": "N-Q"
+      },
+      {
+        "accession_number": "0001193125-17-349009",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-11-21",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-17-348125",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-11-20",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-17-328436",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-11-01",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-17-328465",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-11-01",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-17-274236",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-08-31",
+        "form": "N-CSRS"
+      },
+      {
+        "accession_number": "0001193125-17-270152",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-08-28",
+        "form": "NSAR-A"
+      },
+      {
+        "accession_number": "0001193125-17-266665",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-08-24",
+        "form": "N-PX"
+      },
+      {
+        "accession_number": "0001193125-17-224100",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-07-07",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-17-199959",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-06-09",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-17-184744",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-05-26",
+        "form": "N-Q"
+      },
+      {
+        "accession_number": "0001193125-17-174859",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-05-18",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-17-174859",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-05-18",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-17-157810",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-05-04",
+        "form": "497J"
+      },
+      {
+        "accession_number": "0001193125-17-146987",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-04-28",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-17-146987",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-04-28",
+        "form": "485BPOS"
+      },
+      {
+        "accession_number": "0001193125-17-147030",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-04-28",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-17-103946",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-03-30",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-17-094767",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-03-24",
+        "form": "24F-2NT"
+      },
+      {
+        "accession_number": "0001193125-17-080280",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-03-13",
+        "form": "497"
+      },
+      {
+        "accession_number": "0001193125-17-080287",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-03-13",
+        "form": "497K"
+      },
+      {
+        "accession_number": "0001193125-17-078301",
+        "cik": 2110,
+        "company": "COLUMBIA ACORN TRUST",
+        "filing_date": "2017-03-10",
+        "form": "497"
+      }
+    ],
+    "ident_info": {
+      "Fiscal Year End": "1231",
+      "Series": "S000009184 Columbia Acorn Fund",
+      "State location": "MA",
+      "State of Inc.": "MA",
+      "formerly": "LIBERTY ACORN TRUST (filings through 2003-10-20)"
+    },
+    "name": "COLUMBIA ACORN TRUST"
+  }
+}

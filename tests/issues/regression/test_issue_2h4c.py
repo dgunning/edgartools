@@ -19,9 +19,8 @@ Garbage examples verified against real 424B2/424B5 filings (2025 Q1).
 """
 import pytest
 
-from edgar import find
 from edgar.offerings._424b_tables import is_plausible_underwriter_name as ok
-
+from tests._offline_filings import offline_filing
 
 REAL_UNDERWRITER_NAMES = [
     "Barclays",
@@ -121,7 +120,7 @@ class TestCoverAgentExtraction:
 
     def _lead(self, accession):
         from edgar.offerings.prospectus import Prospectus424B
-        uw = Prospectus424B.from_filing(find(accession)).underwriting
+        uw = Prospectus424B.from_filing(offline_filing(accession)).underwriting
         return uw.lead_manager if uw else None
 
     @pytest.mark.vcr
@@ -163,7 +162,7 @@ class TestAgencyDealAgentExtraction:
 
     def _lead(self, accession):
         from edgar.offerings.prospectus import Prospectus424B
-        uw = Prospectus424B.from_filing(find(accession)).underwriting
+        uw = Prospectus424B.from_filing(offline_filing(accession)).underwriting
         return uw.lead_manager if uw else None
 
     @pytest.mark.vcr

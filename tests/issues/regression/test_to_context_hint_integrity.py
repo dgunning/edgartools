@@ -25,6 +25,8 @@ Two independent checks:
    resolve to a real attribute (class descriptor, dataclass field, ``__init__``
    parameter, or annotation), and the call shape must match (methods shown with
    ``()``, properties/attributes shown without).
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/841
 """
 from __future__ import annotations
 

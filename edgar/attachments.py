@@ -6,6 +6,7 @@ import signal
 import socketserver
 import tempfile
 import time
+import warnings
 import webbrowser
 import zipfile
 
@@ -19,7 +20,8 @@ if TYPE_CHECKING:
 
 import textwrap
 
-from bs4 import BeautifulSoup
+import lxml.html
+from lxml.etree import ParserError
 from pydantic import BaseModel
 from rich import box
 from rich.columns import Columns
@@ -29,7 +31,10 @@ from rich.table import Column, Table
 from rich.text import Text
 
 from edgar.config import SEC_BASE_URL
+from edgar.documents.utils.html_utils import create_lxml_parser
+from edgar.exceptions import AttachmentNotFoundError
 from edgar.core import binary_extensions, has_html_content, text_extensions
+from edgar.files._deprecation import PAGE_BREAK_DEPRECATION
 from edgar.files.html_documents import get_clean_html
 from edgar.files.markdown import to_markdown
 from edgar.httpclient import async_http_client
@@ -236,6 +241,95 @@ def get_file_icon(file_type: str, sequence: Optional[str] = None, filename: Opti
     return icon
 
 
+# The role SEC appends to a filer's name on the filing index page. It renders
+# plain for an ordinary filer -- "Apple Inc. (Filer)" -- but as a LINK for the
+# roles a Form 4 carries: "UFP TECHNOLOGIES INC (<a ...>Issuer</a>)". Both come
+# out of .text the same way, so the old `.replace("(Filer)", "")` stripped one
+# and left the others, and company_name was inconsistent depending on form type.
+# Anchored to the end and limited to known roles so a company whose real name
+# contains parentheses keeps them.
+_FILER_ROLE_SUFFIX = re.compile(
+    r"\s*\((?:Filer|Issuer|Reporting|Subject|Filed by)\)\s*$", re.IGNORECASE
+)
+
+
+def parse_homepage_html(html: Union[str, bytes]) -> lxml.html.HtmlElement:
+    """Parse a filing index page into an lxml tree.
+
+    Bytes rather than str is the safe input: ``lxml.html.fromstring`` raises
+    ValueError on a str that opens with an encoding declaration, which SEC
+    markup carries routinely, and the parser is told the encoding anyway.
+
+    Empty and whitespace-only input raise ParserError in lxml where bs4 built an
+    empty soup. That is not a distinction any caller here wants -- a truncated
+    or blank response should yield a homepage with no attachments and no filers,
+    the way it always has -- so it is mapped back to an empty document.
+    """
+    if isinstance(html, str):
+        html = html.encode("utf-8", errors="replace")
+    # remove_blank_text stays off: a whitespace-only node between two tags is a
+    # word boundary, and libxml2 deletes rather than collapses it. See
+    # create_lxml_parser's docstring and the vfwp bug family.
+    parser = create_lxml_parser(remove_blank_text=False, remove_comments=True,
+                                recover=True, encoding="utf-8")
+    try:
+        tree = lxml.html.fromstring(html, parser=parser)
+    except ParserError:
+        # "Document is empty" -- bs4 returned an empty soup for this input.
+        return lxml.html.fromstring(b"<html><body></body></html>", parser=parser)
+    if tree.tag != "html":
+        # fromstring can root a fragment at the fragment itself; every selector
+        # below is a descendant search, so give them a document to search.
+        wrapper = lxml.html.Element("html")
+        body = lxml.html.Element("body")
+        body.append(tree)
+        wrapper.append(body)
+        tree = wrapper
+    return tree
+
+
+def _by_class(element, tag: str, class_name: str) -> List:
+    """Elements of `tag` carrying `class_name` among their classes.
+
+    `class` is a space-separated list, so a plain ``@class='mailer'`` test would
+    miss ``class="mailer foo"`` that bs4's class_= matched, and a `contains`
+    test on the raw string would wrongly match ``class="mailerFoo"``. Padding
+    both sides with spaces matches whole tokens only.
+    """
+    return element.xpath(
+        f'.//{tag}[contains(concat(" ", normalize-space(@class), " "), " {class_name} ")]'
+    )
+
+
+def _first_by_class(element, tag: str, class_name: str):
+    """The first matching element, or None -- bs4's ``find`` semantics."""
+    found = _by_class(element, tag, class_name)
+    return found[0] if found else None
+
+
+def _as_lxml_root(root, api: str):
+    """Accept the BeautifulSoup this API used to take, for one more major version.
+
+    `Attachments` and `FilingHomepage` are both exported from `edgar`, so the
+    tree they are handed is part of a public signature; it was a BeautifulSoup
+    until this release. Duck-typed on ``xpath`` rather than isinstance, so that
+    checking does not re-import the bs4 this module no longer depends on.
+
+    ``callable``, not ``hasattr``: a BeautifulSoup answers any unknown attribute
+    with the first child tag of that name, or None -- so ``hasattr(soup,
+    "xpath")`` is True, and the soup would sail past the check and fail later
+    inside a selector with "'NoneType' object is not callable".
+    """
+    if root is None or callable(getattr(root, "xpath", None)):
+        return root
+    warnings.warn(
+        f"Passing a BeautifulSoup to {api} is deprecated and will be removed in v6.0; "
+        f"it is re-parsed with lxml, which costs a second parse. Pass "
+        f"edgar.attachments.parse_homepage_html(html) instead.",
+        DeprecationWarning, stacklevel=3)
+    return parse_homepage_html(str(root))
+
+
 class FilerInfo(BaseModel):
     company_name: str
     cik:str
@@ -350,19 +444,29 @@ class Attachment:
             raise ValueError('sequence_number must be digits or an empty string')
         return v
 
+    @property
+    def normalized_extension(self) -> str:
+        """The extension lowercased, for classification.
+
+        EDGAR filenames carry the filer's own casing, so the same document type arrives as
+        ".pdf", ".PDF" or ".Pdf" depending on who filed it. Every predicate below classifies
+        on this rather than on ``extension`` so that casing cannot decide the answer.
+        """
+        return self.extension.lower()
+
     def is_text(self) -> bool:
         """Is this a text document"""
-        return self.extension in text_extensions
+        return self.normalized_extension in text_extensions
 
     def is_xml(self):
-        return self.extension.lower() in [".xsd", ".xml", ".xbrl"]
+        return self.normalized_extension in [".xsd", ".xml", ".xbrl"]
 
     def is_html(self):
-        return self.extension.lower() in [".htm", ".html"]
+        return self.normalized_extension in [".htm", ".html"]
 
     def is_binary(self) -> bool:
         """Is this a binary document"""
-        return self.extension in binary_extensions
+        return self.normalized_extension in binary_extensions
 
     @property
     def empty(self):
@@ -440,9 +544,17 @@ class Attachment:
         """
         Convert the attachment to markdown format if it's HTML content.
 
+        Rendered by ``edgar.documents``, the same pipeline as ``Filing.markdown()``,
+        so images survive (GH #886) with their ``src`` resolved against this
+        attachment's URL.
+
         Args:
-            include_page_breaks: If True, include page break delimiters in the markdown
-            start_page_number: Starting page number for page break markers (default: 0)
+            include_page_breaks: If True, include ``{N}----`` page break
+                delimiters in the markdown. **Deprecated** — routes the document
+                through the legacy ``edgar.files`` renderer and forfeits images.
+                Removed in 6.0.
+            start_page_number: Starting page number for page break markers
+                (default: 0). Only meaningful with ``include_page_breaks=True``.
 
         Returns:
             None if the attachment is not HTML or cannot be converted.
@@ -458,12 +570,25 @@ class Attachment:
         if not has_html_content(content):
             return None
 
-        # Use the same approach as Filing.markdown() but with page break support
-        clean_html = get_clean_html(content)
-        if clean_html:
-            return to_markdown(clean_html, include_page_breaks=include_page_breaks, start_page_number=start_page_number)
+        if include_page_breaks:
+            warnings.warn(PAGE_BREAK_DEPRECATION.format(cls="Attachment"),
+                          DeprecationWarning, stacklevel=2)
+            clean_html = get_clean_html(content)
+            if clean_html:
+                return to_markdown(clean_html, include_page_breaks=True,
+                                   start_page_number=start_page_number)
+            return None
 
-        return None
+        from edgar.documents import HTMLParser, ParserConfig
+        from edgar.documents.exceptions import ParsingError
+        try:
+            document = HTMLParser(ParserConfig()).parse(content)
+        except ParsingError:
+            return None
+        # Base for resolving relative image src. self.url ends in the document
+        # file name, so urljoin() resolves siblings in the same archive folder.
+        document.metadata.url = self.url
+        return document.to_markdown() or None
 
     def __rich__(self):
         icon = get_file_icon(self.document_type, self.sequence_number, self.document)
@@ -637,7 +762,7 @@ class Attachments:
             for doc in self._attachments:
                 if doc.document == item:
                     return doc
-        raise KeyError(f"Document not found: {item}")
+        raise AttachmentNotFoundError(f"Document not found: {item}")
 
     def get_by_sequence(self, sequence: Union[str, int]):
         """
@@ -647,7 +772,7 @@ class Attachments:
         for doc in self._attachments:
             if doc.sequence_number == str(sequence):
                 return doc
-        raise KeyError(f"Document not found: {sequence}")
+        raise AttachmentNotFoundError(f"Document not found: {sequence}")
 
     def get_by_index(self, index: int):
         """
@@ -845,7 +970,9 @@ class Attachments:
         Convert all HTML attachments to markdown format.
 
         Args:
-            include_page_breaks: If True, include page break delimiters in the markdown
+            include_page_breaks: If True, include page break delimiters in the
+                markdown. **Deprecated** — see :meth:`Attachment.markdown`.
+                Removed in 6.0.
             start_page_number: Starting page number for page break markers (default: 0)
 
         Returns:
@@ -912,11 +1039,12 @@ class Attachments:
         return repr_rich(self.__rich__())
 
     @classmethod
-    def load(cls, soup: BeautifulSoup):
+    def load(cls, root: lxml.html.HtmlElement):
         """
         Load the attachments from the SEC filing home page
         """
-        tables = soup.find_all('table', class_='tableFile')
+        root = _as_lxml_root(root, "Attachments.load")
+        tables = _by_class(root, 'table', 'tableFile')
 
         def parse_table(table, documents: bool):
             min_seq = None
@@ -924,20 +1052,22 @@ class Attachments:
             # Plus additional document with the same sequence number
             primary_documents: List[Attachment] = []
 
-            rows = table.find_all('tr')[1:]  # Skip header row
+            rows = table.xpath('.//tr')[1:]  # Skip header row
             attachments = []
             for _index, row in enumerate(rows):
-                cols = row.find_all('td')
-                sequence_number = cols[0].text.strip().replace('\xa0', '-')
+                cols = row.xpath('.//td')
+                # text_content(), not .text: lxml's .text is only the node's own
+                # leading text, where bs4's .text was every descendant's.
+                sequence_number = cols[0].text_content().strip().replace('\xa0', '-')
 
-                description = cols[1].text.strip()
+                description = cols[1].text_content().strip()
                 # The document text is the text of the document link.
-                document_text = cols[2].text.strip()
+                document_text = cols[2].text_content().strip()
                 document = document_text.split(' ')[0].strip()
                 iXbrl = 'iXBRL' in document_text
-                path = cols[2].a['href'].strip()
-                document_type = cols[3].text.strip()
-                size = cols[4].text.strip()
+                path = cols[2].find('.//a').get('href').strip()
+                document_type = cols[3].text_content().strip()
+                size = cols[4].text_content().strip()
 
                 try:
                     size = int(size)
@@ -1034,11 +1164,23 @@ class FilingHomepage:
 
     def __init__(self,
                  url: str,
-                 soup: BeautifulSoup,
-                 attachments: Attachments):
+                 root: lxml.html.HtmlElement = None,
+                 attachments: Attachments = None,
+                 *,
+                 soup=None):
+        # The second argument was named `soup` and typed BeautifulSoup until
+        # this release. Both halves of the old call keep working -- the keyword
+        # spelling here, the old type in _as_lxml_root -- and both warn; both go
+        # in 6.0.
+        if soup is not None:
+            warnings.warn(
+                "FilingHomepage(soup=...) is deprecated and will be removed in v6.0. "
+                "Pass the tree as `root`.",
+                DeprecationWarning, stacklevel=2)
+            root = soup
         self.attachments = attachments
         self.url = url
-        self._soup = soup
+        self._root = _as_lxml_root(root, "FilingHomepage")
 
     def open(self):
         webbrowser.open(self.url)
@@ -1082,42 +1224,55 @@ class FilingHomepage:
     def get_filers(self):
         if hasattr(self, '_cached_filers'):
             return self._cached_filers
-        filer_divs = self._soup.find_all("div", id="filerDiv")
+        filer_divs = _by_class(self._root, "div", "filerDiv")
         filer_infos = []
         for filer_div in filer_divs:
 
             # Get the company name
-            company_info_div = filer_div.find("div", class_="companyInfo")
+            company_info_div = _first_by_class(filer_div, "div", "companyInfo")
 
-            company_name_span = company_info_div.find("span", class_="companyName")
+            company_name_span = _first_by_class(company_info_div, "span", "companyName")
 
-            if company_name_span:
-                full_text = company_name_span.text.strip()
+            # `is not None`, not truthiness: an lxml element with no children is
+            # falsy, and a companyName span holding only text has none.
+            if company_name_span is not None:
+                full_text = company_name_span.text_content().strip()
                 # Split the text into company name and CIK
                 parts = full_text.split('CIK: ')
                 company_name = parts[0].strip()
                 cik = parts[1].split()[0] if len(parts) > 1 else ""
 
                 # Clean up the company name
-                company_name = re.sub("\n", "", company_name).replace("(Filer)", "").strip()
+                company_name = _FILER_ROLE_SUFFIX.sub("", re.sub("\n", "", company_name)).strip()
             else:
                 company_name = ""
                 cik = ""
 
             # Get the identification information
-            ident_info_div = company_info_div.find("p", class_="identInfo")
+            ident_info_div = _first_by_class(company_info_div, "p", "identInfo")
 
-            # Replace <br> with newlines
-            for br in ident_info_div.find_all("br"):
-                br.replace_with("\n")
+            # Replace <br> with newlines. lxml has no replace_with, and dropping
+            # an element DELETES its tail -- the text between this <br> and the
+            # next -- so the tail is spliced onto whatever precedes the <br>
+            # first, with the newline in front of it. Losing it would glue the
+            # identification lines together, which is the hxtd/2h2s bug family.
+            for br in ident_info_div.xpath(".//br"):
+                parent = br.getparent()
+                text = "\n" + (br.tail or "")
+                previous = br.getprevious()
+                if previous is not None:
+                    previous.tail = (previous.tail or "") + text
+                else:
+                    parent.text = (parent.text or "") + text
+                parent.remove(br)
 
-            identification = ident_info_div.text
+            identification = ident_info_div.text_content()
 
             # Get the mailing information
-            mailer_divs = filer_div.find_all("div", class_="mailer")
-            # For each mailed_div.text remove multiple spaces after a newline
+            mailer_divs = _by_class(filer_div, "div", "mailer")
+            # For each mailer div's text remove multiple spaces after a newline
 
-            addresses = [re.sub(r'\n\s+', '\n', mailer_div.text.strip())
+            addresses = [re.sub(r'\n\s+', '\n', mailer_div.text_content().strip())
                          for mailer_div in mailer_divs]
 
             # Create the filer info
@@ -1138,7 +1293,7 @@ class FilingHomepage:
         if hasattr(self, '_cached_filing_dates'):
             return self._cached_filing_dates
         # Find the form grouping divs
-        grouping_divs = self._soup.find_all("div", class_="formGrouping")
+        grouping_divs = _by_class(self._root, "div", "formGrouping")
         if len(grouping_divs) == 0:
             return None
 
@@ -1150,16 +1305,18 @@ class FilingHomepage:
         # period of report, which then crashes downstream isoformat parsers.
         label_to_value: Dict[str, str] = {}
         for grouping in grouping_divs:
-            children = [c for c in grouping.find_all("div", recursive=False)
-                        if c.get("class")]
+            children = [c for c in grouping.xpath("./div") if c.get("class")]
             current_label: Optional[str] = None
             for child in children:
-                classes = child.get("class") or []
+                # bs4 returned class as a list of tokens; lxml returns the raw
+                # string, so split it -- an `in` test against the string would
+                # match "infoHeadline" as well as "infoHead".
+                classes = (child.get("class") or "").split()
                 if "infoHead" in classes:
-                    current_label = child.text.strip().lower()
+                    current_label = child.text_content().strip().lower()
                 elif "info" in classes and current_label is not None:
                     # Only keep the first value for each label.
-                    label_to_value.setdefault(current_label, child.text.strip())
+                    label_to_value.setdefault(current_label, child.text_content().strip())
                     current_label = None
 
         filing_date = label_to_value.get("filing date")
@@ -1169,11 +1326,11 @@ class FilingHomepage:
         # Fall back to the legacy positional layout if the label-based lookup
         # missed either of the always-present date fields.
         if filing_date is None or accepted_date is None:
-            info_divs = grouping_divs[0].find_all("div", class_="info")
+            info_divs = _by_class(grouping_divs[0], "div", "info")
             if filing_date is None and len(info_divs) >= 1:
-                filing_date = info_divs[0].text.strip()
+                filing_date = info_divs[0].text_content().strip()
             if accepted_date is None and len(info_divs) >= 2:
-                accepted_date = info_divs[1].text.strip()
+                accepted_date = info_divs[1].text_content().strip()
 
         result = filing_date, accepted_date, period
         self._cached_filing_dates = result
@@ -1182,9 +1339,9 @@ class FilingHomepage:
     @classmethod
     def load(cls, url: str):
         response = get_with_retry(url)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        attachments = Attachments.load(soup)
-        return cls(url, soup, attachments)
+        root = parse_homepage_html(response.content)
+        attachments = Attachments.load(root)
+        return cls(url, root, attachments)
 
     def __repr__(self):
         return repr_rich(self.__rich__())

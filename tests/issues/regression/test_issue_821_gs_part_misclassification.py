@@ -12,6 +12,8 @@ in its SEC-canonical Part. Item 1 is only checked in Part I; Item 7 is only
 checked in Part II; etc. If the canonical-Part key is missing, the lookup
 falls through to the legacy chunked_document parser rather than silently
 returning content from a wrong Part.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/821
 """
 
 from unittest.mock import MagicMock
@@ -31,8 +33,11 @@ def make_tenk(monkeypatch):
 
     def _factory(sections_data: dict) -> TenK:
         tenk = TenK.__new__(TenK)
-        tenk.chunked_document = MagicMock()
-        tenk.chunked_document.__getitem__ = MagicMock(return_value=None)
+        # The private accessor, because that is what TenK's own fallback path
+        # reads. Mocking the public `chunked_document` would leave the real one
+        # in play here and quietly stop mocking anything.
+        tenk._chunked_document = MagicMock()
+        tenk._chunked_document.__getitem__ = MagicMock(return_value=None)
         tenk._cross_reference_index = None
         tenk._filing = MagicMock()
         tenk._filing.accession_number = "0000000000-00-000000"
@@ -77,7 +82,9 @@ class TestNoCrossPartFallback:
         wrong_content = "Management's Discussion and Analysis\n" + "x" * 1000
         tenk = make_tenk({'part_ii_item_1': wrong_content})
 
-        result = tenk['Item 1']
+        # .get(), not tenk['Item 1'] — what this asserts is ABSENCE, and from
+        # 6.0 the subscript raises on a miss (bead edgartools-07lk.10).
+        result = tenk.get('Item 1')
         assert result is None, (
             "Item 1 must not return Part II content even when part_ii_item_1 exists. "
             "Got %d chars starting with %r" % (len(result) if result else 0,
@@ -108,7 +115,7 @@ class TestNoCrossPartFallback:
         wrong_content = "Business overview (Part I content tagged as item 7)"
         tenk = make_tenk({'part_i_item_7': wrong_content})
 
-        result = tenk['Item 7']
+        result = tenk.get('Item 7')
         assert result is None
 
     def test_item_10_does_not_return_part_i_or_ii(self, make_tenk):
@@ -117,7 +124,7 @@ class TestNoCrossPartFallback:
             'part_i_item_10': "wrong part I content",
             'part_ii_item_10': "wrong part II content",
         })
-        result = tenk['Item 10']
+        result = tenk.get('Item 10')
         assert result is None
 
     def test_item_15_lives_in_part_iv(self, make_tenk):
@@ -131,7 +138,7 @@ class TestNoCrossPartFallback:
     def test_short_format_item_1_no_cross_part_fallback(self, make_tenk):
         """tenk['1'] (short format) also respects SEC structure."""
         tenk = make_tenk({'part_ii_item_1': "WRONG"})
-        assert tenk['1'] is None
+        assert tenk.get('1') is None
 
     def test_friendly_name_business_no_cross_part_fallback(self, make_tenk):
         """tenk.business (which calls tenk['Item 1']) must not silently return Part II."""

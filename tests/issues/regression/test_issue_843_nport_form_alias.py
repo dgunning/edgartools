@@ -8,6 +8,8 @@ carry the literal form "N-PORT" -- the portfolio-holdings report is filed as
 The fix adds a small form-alias map so "N-PORT"/"NPORT" expand to the real
 "NPORT-P" before filtering, applied centrally in filter_by_form() so both
 edgar.get_filings() and company.get_filings() benefit.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/843
 """
 import pyarrow as pa
 import pytest

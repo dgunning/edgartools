@@ -13,7 +13,6 @@ from edgar.documents.utils.html_utils import (
     remove_xml_declaration,
     terminate_unclosed_comments,
 )
-from edgar.documents.utils.streaming import StreamingParser
 from edgar.documents.utils.table_matrix import ColumnAnalyzer, MatrixCell, TableMatrix
 
 # Note: table_utils not exported to avoid circular imports
@@ -29,7 +28,6 @@ __all__ = [
     'CacheStats',
     'find_anchor_targets',
     'is_anchor_match',
-    'StreamingParser',
     'TableMatrix',
     'ColumnAnalyzer',
     'MatrixCell',

@@ -258,19 +258,24 @@ class EntityFactsParser:
         if not date_str:
             return None
 
+        # ISO-8601 first: SEC facts dates are ISO, so this hits on the first
+        # attempt. fromisoformat is a C fast path, while strptime goes through
+        # _strptime and takes a locale lock on every call (~23-38x slower per
+        # call). On CPython 3.11+ this also covers the bare '%Y%m%d' form.
         try:
-            # Try common date formats
-            for fmt in ['%Y-%m-%d', '%Y%m%d', '%m/%d/%Y']:
-                try:
-                    return datetime.strptime(date_str, fmt).date()
-                except ValueError:
-                    continue
-
-            # If all formats fail, try to parse as ISO format
             return datetime.fromisoformat(date_str).date()
+        except (ValueError, TypeError):
+            pass
 
-        except Exception:
-            return None
+        # Fall back to the explicit formats for anything non-ISO ('%m/%d/%Y'),
+        # and for '%Y%m%d' on CPython 3.10 where fromisoformat is stricter.
+        for fmt in ['%Y-%m-%d', '%Y%m%d', '%m/%d/%Y']:
+            try:
+                return datetime.strptime(date_str, fmt).date()
+            except (ValueError, TypeError):
+                continue
+
+        return None
 
     @staticmethod
     def _parse_fiscal_year(fy_value: Any) -> int:

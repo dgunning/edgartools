@@ -1,0 +1,870 @@
+{
+  "edgar_version": "5.45.1",
+  "python": "3.11.6",
+  "reps": 3,
+  "import_edgar": {
+    "median_ms": 788.7,
+    "min_ms": 775.3,
+    "reps": 5
+  },
+  "documents": {
+    "fanniemae_abs15g_2018": {
+      "accession": "0000310522-18-000010",
+      "form": "ABS-15G",
+      "html_mb": 25.17,
+      "parse": {
+        "median_ms": 14229.86,
+        "p95_ms": 14239.47,
+        "min_ms": 13976.74,
+        "reps": 3
+      },
+      "sections": {
+        "median_ms": 14255.43,
+        "p95_ms": 14290.18,
+        "min_ms": 14135.18,
+        "reps": 3,
+        "net_of_parse_ms": 25.57
+      },
+      "tables": {
+        "median_ms": 14328.61,
+        "p95_ms": 14355.35,
+        "min_ms": 14194.59,
+        "reps": 3,
+        "net_of_parse_ms": 98.75
+      },
+      "text": {
+        "median_ms": 18558.89,
+        "p95_ms": 18852.64,
+        "min_ms": 18525.87,
+        "reps": 3,
+        "net_of_parse_ms": 4329.03
+      },
+      "markdown": {
+        "median_ms": 14430.31,
+        "p95_ms": 14456.9,
+        "min_ms": 14108.69,
+        "reps": 3,
+        "net_of_parse_ms": 200.45
+      },
+      "headings": {
+        "median_ms": 14065.48,
+        "p95_ms": 14246.63,
+        "min_ms": 13769.37,
+        "reps": 3,
+        "net_of_parse_ms": -164.38
+      },
+      "memory": {
+        "peak_mb": 258.0
+      },
+      "outputs": {
+        "sections": 0,
+        "tables": 1,
+        "headings": 1,
+        "text_chars": 5979661,
+        "markdown_chars": 7316125
+      }
+    },
+    "footlocker_10k_fy2024": {
+      "accession": "0001437749-25-009620",
+      "form": "10-K",
+      "html_mb": 3.05,
+      "parse": {
+        "median_ms": 571.15,
+        "p95_ms": 573.27,
+        "min_ms": 569.65,
+        "reps": 3
+      },
+      "sections": {
+        "median_ms": 1767.79,
+        "p95_ms": 1770.88,
+        "min_ms": 1755.16,
+        "reps": 3,
+        "net_of_parse_ms": 1196.64
+      },
+      "tables": {
+        "median_ms": 583.14,
+        "p95_ms": 583.59,
+        "min_ms": 578.26,
+        "reps": 3,
+        "net_of_parse_ms": 11.99
+      },
+      "text": {
+        "median_ms": 646.0,
+        "p95_ms": 649.84,
+        "min_ms": 635.51,
+        "reps": 3,
+        "net_of_parse_ms": 74.85
+      },
+      "markdown": {
+        "median_ms": 585.38,
+        "p95_ms": 587.77,
+        "min_ms": 578.42,
+        "reps": 3,
+        "net_of_parse_ms": 14.23
+      },
+      "headings": {
+        "median_ms": 576.16,
+        "p95_ms": 576.78,
+        "min_ms": 574.91,
+        "reps": 3,
+        "net_of_parse_ms": 5.01
+      },
+      "memory": {
+        "peak_mb": 27.3
+      },
+      "outputs": {
+        "sections": 24,
+        "tables": 179,
+        "headings": 195,
+        "text_chars": 400157,
+        "markdown_chars": 323841
+      }
+    },
+    "footlocker_10k_fy2013": {
+      "accession": "0001144204-14-019510",
+      "form": "10-K",
+      "html_mb": 2.34,
+      "parse": {
+        "median_ms": 469.21,
+        "p95_ms": 498.38,
+        "min_ms": 463.09,
+        "reps": 3
+      },
+      "sections": {
+        "median_ms": 1192.48,
+        "p95_ms": 1835.92,
+        "min_ms": 1190.85,
+        "reps": 3,
+        "net_of_parse_ms": 723.27
+      },
+      "tables": {
+        "median_ms": 465.91,
+        "p95_ms": 509.39,
+        "min_ms": 461.52,
+        "reps": 3,
+        "net_of_parse_ms": -3.3
+      },
+      "text": {
+        "median_ms": 524.83,
+        "p95_ms": 559.21,
+        "min_ms": 521.75,
+        "reps": 3,
+        "net_of_parse_ms": 55.62
+      },
+      "markdown": {
+        "median_ms": 474.7,
+        "p95_ms": 478.12,
+        "min_ms": 471.34,
+        "reps": 3,
+        "net_of_parse_ms": 5.49
+      },
+      "headings": {
+        "median_ms": 465.5,
+        "p95_ms": 500.5,
+        "min_ms": 461.74,
+        "reps": 3,
+        "net_of_parse_ms": -3.71
+      },
+      "memory": {
+        "peak_mb": 21.0
+      },
+      "outputs": {
+        "sections": 20,
+        "tables": 177,
+        "headings": 258,
+        "text_chars": 361903,
+        "markdown_chars": 288300
+      }
+    },
+    "ambac_10k_fy2022": {
+      "accession": "0000874501-23-000040",
+      "form": "10-K",
+      "html_mb": 7.71,
+      "parse": {
+        "median_ms": 1395.72,
+        "p95_ms": 1412.22,
+        "min_ms": 1369.42,
+        "reps": 3
+      },
+      "sections": {
+        "median_ms": 4866.89,
+        "p95_ms": 4906.24,
+        "min_ms": 4862.75,
+        "reps": 3,
+        "net_of_parse_ms": 3471.17
+      },
+      "tables": {
+        "median_ms": 1409.76,
+        "p95_ms": 1430.1,
+        "min_ms": 1368.37,
+        "reps": 3,
+        "net_of_parse_ms": 14.04
+      },
+      "text": {
+        "median_ms": 1562.4,
+        "p95_ms": 1566.52,
+        "min_ms": 1559.16,
+        "reps": 3,
+        "net_of_parse_ms": 166.68
+      },
+      "markdown": {
+        "median_ms": 1421.08,
+        "p95_ms": 1436.54,
+        "min_ms": 1390.92,
+        "reps": 3,
+        "net_of_parse_ms": 25.36
+      },
+      "headings": {
+        "median_ms": 1408.58,
+        "p95_ms": 1409.16,
+        "min_ms": 1379.94,
+        "reps": 3,
+        "net_of_parse_ms": 12.86
+      },
+      "memory": {
+        "peak_mb": 46.9
+      },
+      "outputs": {
+        "sections": 21,
+        "tables": 149,
+        "headings": 229,
+        "text_chars": 917299,
+        "markdown_chars": 785032
+      }
+    },
+    "regions_10k_fy2021": {
+      "accession": "0001281761-22-000016",
+      "form": "10-K",
+      "html_mb": 9.53,
+      "parse": {
+        "median_ms": 1697.27,
+        "p95_ms": 1697.53,
+        "min_ms": 1659.03,
+        "reps": 3
+      },
+      "sections": {
+        "median_ms": 5454.42,
+        "p95_ms": 5541.77,
+        "min_ms": 5442.66,
+        "reps": 3,
+        "net_of_parse_ms": 3757.15
+      },
+      "tables": {
+        "median_ms": 1752.58,
+        "p95_ms": 1783.33,
+        "min_ms": 1698.13,
+        "reps": 3,
+        "net_of_parse_ms": 55.31
+      },
+      "text": {
+        "median_ms": 1916.57,
+        "p95_ms": 1923.62,
+        "min_ms": 1913.67,
+        "reps": 3,
+        "net_of_parse_ms": 219.3
+      },
+      "markdown": {
+        "median_ms": 1749.52,
+        "p95_ms": 1772.19,
+        "min_ms": 1741.22,
+        "reps": 3,
+        "net_of_parse_ms": 52.25
+      },
+      "headings": {
+        "median_ms": 1736.51,
+        "p95_ms": 1746.77,
+        "min_ms": 1697.92,
+        "reps": 3,
+        "net_of_parse_ms": 39.24
+      },
+      "memory": {
+        "peak_mb": 56.4
+      },
+      "outputs": {
+        "sections": 22,
+        "tables": 168,
+        "headings": 173,
+        "text_chars": 971498,
+        "markdown_chars": 760470
+      }
+    },
+    "citigroup_10k_fy2024": {
+      "accession": "0000831001-25-000067",
+      "form": "10-K",
+      "html_mb": 16.69,
+      "parse": {
+        "median_ms": 3085.81,
+        "p95_ms": 3139.55,
+        "min_ms": 3073.48,
+        "reps": 3
+      },
+      "sections": {
+        "median_ms": 8246.16,
+        "p95_ms": 8428.66,
+        "min_ms": 8227.31,
+        "reps": 3,
+        "net_of_parse_ms": 5160.35
+      },
+      "tables": {
+        "median_ms": 3484.33,
+        "p95_ms": 3845.52,
+        "min_ms": 3094.75,
+        "reps": 3,
+        "net_of_parse_ms": 398.52
+      },
+      "text": {
+        "median_ms": 3613.82,
+        "p95_ms": 3688.94,
+        "min_ms": 3495.77,
+        "reps": 3,
+        "net_of_parse_ms": 528.01
+      },
+      "markdown": {
+        "median_ms": 3217.49,
+        "p95_ms": 3273.21,
+        "min_ms": 3214.72,
+        "reps": 3,
+        "net_of_parse_ms": 131.68
+      },
+      "headings": {
+        "median_ms": 3136.47,
+        "p95_ms": 3148.54,
+        "min_ms": 3119.93,
+        "reps": 3,
+        "net_of_parse_ms": 50.66
+      },
+      "memory": {
+        "peak_mb": 99.1
+      },
+      "outputs": {
+        "sections": 4,
+        "tables": 341,
+        "headings": 727,
+        "text_chars": 1809836,
+        "markdown_chars": 1399206
+      }
+    },
+    "morganstanley_10k_fy2024": {
+      "accession": "0000895421-25-000304",
+      "form": "10-K",
+      "html_mb": 9.79,
+      "parse": {
+        "median_ms": 1932.32,
+        "p95_ms": 1949.5,
+        "min_ms": 1920.94,
+        "reps": 3
+      },
+      "sections": {
+        "median_ms": 8520.69,
+        "p95_ms": 8541.53,
+        "min_ms": 8468.76,
+        "reps": 3,
+        "net_of_parse_ms": 6588.37
+      },
+      "tables": {
+        "median_ms": 1915.86,
+        "p95_ms": 1932.41,
+        "min_ms": 1872.66,
+        "reps": 3,
+        "net_of_parse_ms": -16.46
+      },
+      "text": {
+        "median_ms": 2152.52,
+        "p95_ms": 2161.45,
+        "min_ms": 2145.8,
+        "reps": 3,
+        "net_of_parse_ms": 220.2
+      },
+      "markdown": {
+        "median_ms": 1947.49,
+        "p95_ms": 1949.12,
+        "min_ms": 1936.23,
+        "reps": 3,
+        "net_of_parse_ms": 15.17
+      },
+      "headings": {
+        "median_ms": 1934.92,
+        "p95_ms": 1956.46,
+        "min_ms": 1898.83,
+        "reps": 3,
+        "net_of_parse_ms": 2.6
+      },
+      "memory": {
+        "peak_mb": 59.1
+      },
+      "outputs": {
+        "sections": 20,
+        "tables": 635,
+        "headings": 73,
+        "text_chars": 1185651,
+        "markdown_chars": 863445
+      }
+    },
+    "odp_10k_fy2025": {
+      "accession": "0000950170-25-027569",
+      "form": "10-K",
+      "html_mb": 5.6,
+      "parse": {
+        "median_ms": 974.36,
+        "p95_ms": 1033.67,
+        "min_ms": 972.8,
+        "reps": 3
+      },
+      "sections": {
+        "median_ms": 2206.78,
+        "p95_ms": 2262.25,
+        "min_ms": 2179.75,
+        "reps": 3,
+        "net_of_parse_ms": 1232.42
+      },
+      "tables": {
+        "median_ms": 947.54,
+        "p95_ms": 1006.56,
+        "min_ms": 946.24,
+        "reps": 3,
+        "net_of_parse_ms": -26.82
+      },
+      "text": {
+        "median_ms": 1039.38,
+        "p95_ms": 1072.84,
+        "min_ms": 1032.29,
+        "reps": 3,
+        "net_of_parse_ms": 65.02
+      },
+      "markdown": {
+        "median_ms": 979.2,
+        "p95_ms": 1023.94,
+        "min_ms": 972.47,
+        "reps": 3,
+        "net_of_parse_ms": 4.84
+      },
+      "headings": {
+        "median_ms": 955.96,
+        "p95_ms": 1013.68,
+        "min_ms": 943.92,
+        "reps": 3,
+        "net_of_parse_ms": -18.4
+      },
+      "memory": {
+        "peak_mb": 31.0
+      },
+      "outputs": {
+        "sections": 10,
+        "tables": 92,
+        "headings": 122,
+        "text_chars": 446101,
+        "markdown_chars": 427180
+      }
+    },
+    "tesla_10k_fy2023": {
+      "accession": "0001628280-24-002390",
+      "form": "10-K",
+      "html_mb": 2.67,
+      "parse": {
+        "median_ms": 563.0,
+        "p95_ms": 598.42,
+        "min_ms": 559.9,
+        "reps": 3
+      },
+      "sections": {
+        "median_ms": 2116.99,
+        "p95_ms": 2156.93,
+        "min_ms": 2100.63,
+        "reps": 3,
+        "net_of_parse_ms": 1553.99
+      },
+      "tables": {
+        "median_ms": 563.47,
+        "p95_ms": 604.37,
+        "min_ms": 553.37,
+        "reps": 3,
+        "net_of_parse_ms": 0.47
+      },
+      "text": {
+        "median_ms": 660.1,
+        "p95_ms": 706.98,
+        "min_ms": 642.67,
+        "reps": 3,
+        "net_of_parse_ms": 97.1
+      },
+      "markdown": {
+        "median_ms": 575.58,
+        "p95_ms": 608.77,
+        "min_ms": 567.25,
+        "reps": 3,
+        "net_of_parse_ms": 12.58
+      },
+      "headings": {
+        "median_ms": 580.42,
+        "p95_ms": 601.47,
+        "min_ms": 565.94,
+        "reps": 3,
+        "net_of_parse_ms": 17.42
+      },
+      "memory": {
+        "peak_mb": 19.2
+      },
+      "outputs": {
+        "sections": 24,
+        "tables": 88,
+        "headings": 125,
+        "text_chars": 508843,
+        "markdown_chars": 417766
+      }
+    },
+    "meta_10k_fy2024": {
+      "accession": "0001326801-25-000017",
+      "form": "10-K",
+      "html_mb": 2.37,
+      "parse": {
+        "median_ms": 522.87,
+        "p95_ms": 564.35,
+        "min_ms": 513.65,
+        "reps": 3
+      },
+      "sections": {
+        "median_ms": 1648.76,
+        "p95_ms": 1698.37,
+        "min_ms": 1646.75,
+        "reps": 3,
+        "net_of_parse_ms": 1125.89
+      },
+      "tables": {
+        "median_ms": 531.51,
+        "p95_ms": 578.61,
+        "min_ms": 528.03,
+        "reps": 3,
+        "net_of_parse_ms": 8.64
+      },
+      "text": {
+        "median_ms": 601.67,
+        "p95_ms": 641.2,
+        "min_ms": 598.25,
+        "reps": 3,
+        "net_of_parse_ms": 78.8
+      },
+      "markdown": {
+        "median_ms": 529.77,
+        "p95_ms": 566.67,
+        "min_ms": 526.91,
+        "reps": 3,
+        "net_of_parse_ms": 6.9
+      },
+      "headings": {
+        "median_ms": 517.9,
+        "p95_ms": 550.94,
+        "min_ms": 516.8,
+        "reps": 3,
+        "net_of_parse_ms": -4.97
+      },
+      "memory": {
+        "peak_mb": 17.6
+      },
+      "outputs": {
+        "sections": 24,
+        "tables": 71,
+        "headings": 115,
+        "text_chars": 588497,
+        "markdown_chars": 518284
+      }
+    },
+    "jackhenry_10q_fy2025": {
+      "accession": "0000779152-25-000092",
+      "form": "10-Q",
+      "html_mb": 0.79,
+      "parse": {
+        "median_ms": 160.88,
+        "p95_ms": 161.88,
+        "min_ms": 160.34,
+        "reps": 3
+      },
+      "sections": {
+        "median_ms": 337.75,
+        "p95_ms": 357.38,
+        "min_ms": 337.12,
+        "reps": 3,
+        "net_of_parse_ms": 176.87
+      },
+      "tables": {
+        "median_ms": 165.74,
+        "p95_ms": 216.51,
+        "min_ms": 164.9,
+        "reps": 3,
+        "net_of_parse_ms": 4.86
+      },
+      "text": {
+        "median_ms": 189.77,
+        "p95_ms": 192.8,
+        "min_ms": 188.96,
+        "reps": 3,
+        "net_of_parse_ms": 28.89
+      },
+      "markdown": {
+        "median_ms": 166.87,
+        "p95_ms": 167.05,
+        "min_ms": 166.56,
+        "reps": 3,
+        "net_of_parse_ms": 5.99
+      },
+      "headings": {
+        "median_ms": 168.19,
+        "p95_ms": 202.79,
+        "min_ms": 165.98,
+        "reps": 3,
+        "net_of_parse_ms": 7.31
+      },
+      "memory": {
+        "peak_mb": 5.2
+      },
+      "outputs": {
+        "sections": 8,
+        "tables": 39,
+        "headings": 36,
+        "text_chars": 126073,
+        "markdown_chars": 98406
+      }
+    }
+  },
+  "xbrl": {
+    "footlocker_10k_fy2024": {
+      "accession": "0001437749-25-009620",
+      "parse": {
+        "median_ms": 100.55,
+        "p95_ms": 137.55,
+        "min_ms": 98.81,
+        "reps": 3
+      },
+      "facts_query_df": {
+        "median_ms": 15.27,
+        "p95_ms": 41.78,
+        "min_ms": 14.88,
+        "reps": 3
+      },
+      "income_statement_render": {
+        "median_ms": 2.46,
+        "p95_ms": 99.54,
+        "min_ms": 2.13,
+        "reps": 3
+      },
+      "memory": {
+        "peak_mb": 17.8
+      }
+    },
+    "footlocker_10k_fy2013": {
+      "accession": "0001144204-14-019510",
+      "parse": {
+        "median_ms": 99.86,
+        "p95_ms": 129.28,
+        "min_ms": 93.8,
+        "reps": 3
+      },
+      "facts_query_df": {
+        "median_ms": 13.82,
+        "p95_ms": 35.64,
+        "min_ms": 13.19,
+        "reps": 3
+      },
+      "income_statement_render": {
+        "median_ms": 1.24,
+        "p95_ms": 26.61,
+        "min_ms": 1.17,
+        "reps": 3
+      },
+      "memory": {
+        "peak_mb": 15.8
+      }
+    },
+    "ambac_10k_fy2022": {
+      "accession": "0000874501-23-000040",
+      "parse": {
+        "median_ms": 252.24,
+        "p95_ms": 256.4,
+        "min_ms": 221.54,
+        "reps": 3
+      },
+      "facts_query_df": {
+        "median_ms": 36.37,
+        "p95_ms": 89.24,
+        "min_ms": 35.46,
+        "reps": 3
+      },
+      "income_statement_render": {
+        "median_ms": 3.41,
+        "p95_ms": 57.9,
+        "min_ms": 3.36,
+        "reps": 3
+      },
+      "memory": {
+        "peak_mb": 42.9
+      }
+    },
+    "regions_10k_fy2021": {
+      "accession": "0001281761-22-000016",
+      "parse": {
+        "median_ms": 277.45,
+        "p95_ms": 290.91,
+        "min_ms": 249.89,
+        "reps": 3
+      },
+      "facts_query_df": {
+        "median_ms": 49.66,
+        "p95_ms": 109.93,
+        "min_ms": 46.32,
+        "reps": 3
+      },
+      "income_statement_render": {
+        "median_ms": 37.11,
+        "p95_ms": 41.54,
+        "min_ms": 2.6,
+        "reps": 3
+      },
+      "memory": {
+        "peak_mb": 53.3
+      }
+    },
+    "citigroup_10k_fy2024": {
+      "accession": "0000831001-25-000067",
+      "parse": {
+        "median_ms": 435.07,
+        "p95_ms": 449.37,
+        "min_ms": 430.43,
+        "reps": 3
+      },
+      "facts_query_df": {
+        "median_ms": 114.49,
+        "p95_ms": 325.51,
+        "min_ms": 111.58,
+        "reps": 3
+      },
+      "income_statement_render": {
+        "median_ms": 5.87,
+        "p95_ms": 96.73,
+        "min_ms": 5.79,
+        "reps": 3
+      },
+      "memory": {
+        "peak_mb": 99.4
+      }
+    },
+    "morganstanley_10k_fy2024": {
+      "accession": "0000895421-25-000304",
+      "parse": {
+        "median_ms": 277.64,
+        "p95_ms": 297.69,
+        "min_ms": 243.58,
+        "reps": 3
+      },
+      "facts_query_df": {
+        "median_ms": 80.82,
+        "p95_ms": 206.17,
+        "min_ms": 73.5,
+        "reps": 3
+      },
+      "income_statement_render": {
+        "median_ms": 4.32,
+        "p95_ms": 74.59,
+        "min_ms": 3.86,
+        "reps": 3
+      },
+      "memory": {
+        "peak_mb": 61.7
+      }
+    },
+    "odp_10k_fy2025": {
+      "accession": "0000950170-25-027569",
+      "parse": {
+        "median_ms": 178.71,
+        "p95_ms": 228.28,
+        "min_ms": 172.17,
+        "reps": 3
+      },
+      "facts_query_df": {
+        "median_ms": 18.03,
+        "p95_ms": 44.91,
+        "min_ms": 17.26,
+        "reps": 3
+      },
+      "income_statement_render": {
+        "median_ms": 2.6,
+        "p95_ms": 49.19,
+        "min_ms": 2.25,
+        "reps": 3
+      },
+      "memory": {
+        "peak_mb": 33.9
+      }
+    },
+    "tesla_10k_fy2023": {
+      "accession": "0001628280-24-002390",
+      "parse": {
+        "median_ms": 85.65,
+        "p95_ms": 114.86,
+        "min_ms": 83.83,
+        "reps": 3
+      },
+      "facts_query_df": {
+        "median_ms": 14.88,
+        "p95_ms": 35.57,
+        "min_ms": 14.25,
+        "reps": 3
+      },
+      "income_statement_render": {
+        "median_ms": 1.81,
+        "p95_ms": 28.47,
+        "min_ms": 1.8,
+        "reps": 3
+      },
+      "memory": {
+        "peak_mb": 15.7
+      }
+    },
+    "meta_10k_fy2024": {
+      "accession": "0001326801-25-000017",
+      "parse": {
+        "median_ms": 59.39,
+        "p95_ms": 61.53,
+        "min_ms": 57.62,
+        "reps": 3
+      },
+      "facts_query_df": {
+        "median_ms": 11.65,
+        "p95_ms": 22.54,
+        "min_ms": 11.56,
+        "reps": 3
+      },
+      "income_statement_render": {
+        "median_ms": 1.32,
+        "p95_ms": 16.76,
+        "min_ms": 1.28,
+        "reps": 3
+      },
+      "memory": {
+        "peak_mb": 11.5
+      }
+    },
+    "jackhenry_10q_fy2025": {
+      "accession": "0000779152-25-000092",
+      "parse": {
+        "median_ms": 32.39,
+        "p95_ms": 32.47,
+        "min_ms": 30.46,
+        "reps": 3
+      },
+      "facts_query_df": {
+        "median_ms": 6.4,
+        "p95_ms": 10.96,
+        "min_ms": 6.28,
+        "reps": 3
+      },
+      "income_statement_render": {
+        "median_ms": 1.19,
+        "p95_ms": 11.1,
+        "min_ms": 1.14,
+        "reps": 3
+      },
+      "memory": {
+        "peak_mb": 4.9
+      }
+    }
+  }
+}

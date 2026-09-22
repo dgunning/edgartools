@@ -19,8 +19,10 @@ from __future__ import annotations
 
 import logging
 import random
+import re
 import time
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import List, Optional, Union
 
 logger = logging.getLogger(__name__)
@@ -633,3 +635,109 @@ def _format_accession(adsh: str) -> str:
     if len(adsh) == 18:
         return f"{adsh[:10]}-{adsh[10:12]}-{adsh[12:]}"
     return adsh
+
+
+# ---------------------------------------------------------------------------
+# Accession lookup
+# ---------------------------------------------------------------------------
+
+# "Airbnb, Inc.  (ABNB)  (CIK 0001559720)" -> "Airbnb, Inc."
+#
+# EFTS decorates the filer name with a ticker and CIK, each separated by two
+# spaces. The quarterly index carries the bare name, and callers compare against
+# it, so the decoration is stripped. Anchoring on the double space matters:
+# single-spaced parentheses are part of company names ("BANK OF AMERICA CORP
+# /DE/" is fine, but plenty of filers are "... (DELAWARE)").
+_EFTS_NAME_DECORATION = re.compile(r"\s{2,}\([^)]*\)")
+
+
+def _clean_display_name(display_name: str) -> str:
+    return _EFTS_NAME_DECORATION.sub("", display_name).strip()
+
+
+def resolve_accession(accession_number: str) -> Optional[dict]:
+    """Look up a filing's index fields from EDGAR full-text search.
+
+    Resolving an accession to a ``Filing`` needs four fields the accession does
+    not carry — cik, company, form and filing date — and the CIK is not optional:
+    every document URL is ``/Archives/edgar/data/{cik}/{accession}/...``. The
+    quarterly full-index answers this, but costs 4.1 MB gzipped per quarter
+    probed, expanding to 41 MB to parse. This answers the same question in
+    roughly 2 KB (bead edgartools-vx29).
+
+    Returns a dict of ``cik``, ``company``, ``form``, ``filing_date`` and
+    ``related_entities``, or ``None`` when EFTS has no filing under this
+    accession — which is expected and not an error: the full-text index starts
+    in 2001, so anything earlier must fall back to the quarterly index.
+
+    Hits are filtered on ``adsh``. EFTS is a *text* search, so a filing that
+    merely quotes another filing's accession number matches the query too, and
+    taking the first hit would occasionally resolve the wrong filing.
+
+    Multi-filer filings resolve to their first filer, with the rest in
+    ``related_entities``. EDGAR serves the documents under every filer's CIK, so
+    any of them fetches; the order can differ from the quarterly index's.
+    """
+    import orjson
+
+    from edgar.httprequests import TRANSPORT_ERRORS, get_with_retry
+
+    normalized = accession_number.replace("-", "")
+
+    try:
+        response = get_with_retry(EFTS_BASE_URL, params={"q": f'"{accession_number}"'})
+        hits = orjson.loads(response.content).get("hits", {}).get("hits", [])
+    except TRANSPORT_ERRORS:
+        # Let the caller see the outage (bead edgartools-07lk.10, closing the
+        # tg7y follow-up). The `return None` below means "EFTS has no filing at
+        # this accession", which for a pre-2001 accession is the expected answer
+        # and sends the caller to the quarterly index. Collapsing an outage into
+        # that same None tells the caller to go looking somewhere else for a
+        # filing that was there all along, and the only trace is a DEBUG line
+        # nobody has enabled.
+        raise
+    except Exception as exc:  # schema drift, malformed JSON
+        logger.debug("EFTS accession lookup failed for %s: %s", accession_number, exc)
+        return None
+
+    for hit in hits:
+        source = hit.get("_source", {})
+        if source.get("adsh", "").replace("-", "") != normalized:
+            continue
+
+        ciks = source.get("ciks") or []
+        names = source.get("display_names") or []
+        if not ciks or not source.get("form") or not source.get("file_date"):
+            # A hit that cannot furnish the four fields is no better than a miss;
+            # let the caller fall back rather than build a half-filled Filing.
+            return None
+
+        # Indexed off ciks rather than zipped with names: the two lists are
+        # parallel in every response seen, but a zip would silently drop a filer
+        # if they ever diverge, and a filer is the one field that must not go
+        # missing — it is what the document URL is built from.
+        # EFTS dates are ISO strings; the quarterly index yields datetime.date.
+        # Callers compare against date objects (tests/test_filing.py:721 asserts
+        # == datetime.date(2023, 3, 6)), so the string has to be parsed here or
+        # this route silently changes Filing.filing_date's type.
+        try:
+            filing_date = datetime.strptime(source["file_date"], "%Y-%m-%d").date()
+        except (TypeError, ValueError):
+            return None
+
+        entities = [
+            {"cik": int(cik),
+             "company": _clean_display_name(names[i]) if i < len(names) else "",
+             "form": source["form"],
+             "filing_date": filing_date}
+            for i, cik in enumerate(ciks)
+        ]
+        return {
+            "cik": int(ciks[0]),
+            "company": _clean_display_name(names[0]) if names else "",
+            "form": source["form"],
+            "filing_date": filing_date,
+            "related_entities": entities[1:],
+        }
+
+    return None

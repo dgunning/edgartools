@@ -10,6 +10,8 @@ rendered into ``sixk.text()`` output — the ``.zip`` as raw binary mojibake.
 
 Adding the archive/office extensions to ``binary_extensions`` makes
 ``is_binary()`` skip them, so they no longer pollute the rendered text.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/844
 """
 import pytest
 

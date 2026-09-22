@@ -3,7 +3,7 @@ from typing import Optional
 
 from edgar._filings import Attachment, Attachments
 from edgar._markdown import MarkdownContent
-from edgar.files.html_documents import HtmlDocument
+from edgar.documents import parse_html
 from edgar.richtools import repr_rich
 
 __all__ = ['PressRelease', 'PressReleases']
@@ -68,7 +68,7 @@ class PressRelease:
     def text(self) -> Optional[str]:
         html = self.html()
         if html:
-            return HtmlDocument.from_html(html, extract_data=False).text
+            return parse_html(html).text()
         return None
 
     def open(self):
@@ -78,9 +78,15 @@ class PressRelease:
         return self.to_markdown().view()
 
     def to_markdown(self):
-        html = self.html()
-        markdown_content = MarkdownContent.from_html(html, title="8-K Press Release")
-        return markdown_content
+        """Render the press release as markdown, wrapped for rich display.
+
+        Delegates to ``Attachment.markdown()`` so the press release renders
+        through ``edgar.documents`` -- the supported renderer -- rather than the
+        legacy ``edgar.files`` stack, and so relative image ``src`` values
+        resolve against the attachment's archive folder.
+        """
+        return MarkdownContent(self.attachment.markdown() or "",
+                               title="8-K Press Release")
 
     def __rich__(self):
         return self.to_markdown()

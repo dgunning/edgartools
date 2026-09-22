@@ -1,4 +1,7 @@
-"""Regression test for #824 — 13F-HR holdings merged Put/Call rows into equity."""
+"""Regression test for #824 — 13F-HR holdings merged Put/Call rows into equity.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/824
+"""
 
 import pytest
 

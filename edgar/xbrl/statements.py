@@ -8,7 +8,7 @@ import re
 import warnings
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 import pandas as pd
 from rich import box
@@ -16,8 +16,27 @@ from rich.table import Table
 
 from edgar.richtools import repr_rich
 from edgar.xbrl.dimensions import is_breakdown_dimension
-from edgar.xbrl.exceptions import StatementNotFound
+from edgar.exceptions import ParsingError, StatementNotFoundError
 from edgar.xbrl.presentation import StatementView, ViewType, normalize_view
+
+# Concept candidates for the ratio/trend helpers. Ordered: the first candidate
+# present in a statement wins. GH #1241 — the previous single-name lookups
+# ('us-gaap_CurrentAssets', 'us-gaap_CurrentLiabilities', 'us-gaap_Inventory')
+# had their words reversed and match no us-gaap concept at all, so
+# current_ratio and quick_ratio were never computed for any filing.
+CURRENT_ASSETS_CONCEPTS = ('us-gaap_AssetsCurrent',)
+CURRENT_LIABILITIES_CONCEPTS = ('us-gaap_LiabilitiesCurrent',)
+INVENTORY_CONCEPTS = ('us-gaap_InventoryNet', 'us-gaap_InventoryGross')
+# us-gaap:Revenues leads: where a filer reports both, it is the grand total and
+# the contract-revenue tag is one component of it (an insurer files contract
+# revenue beside investment income). Filers that report no Revenues total —
+# Apple, Microsoft — fall through to the ASC 606 tag, which is their top line.
+REVENUE_CONCEPTS = (
+    'us-gaap_Revenues',
+    'us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax',
+    'us-gaap_RevenueFromContractWithCustomerIncludingAssessedTax',
+    'us-gaap_SalesRevenueNet',
+)
 
 # XBRL structural element patterns (Issue #03zg)
 # These are XBRL metadata, not financial data, and should be filtered from user-facing output
@@ -61,6 +80,15 @@ def is_xbrl_structural_element(item: Dict[str, Any]) -> bool:
         return True
 
     return False
+
+
+def _period_kinds(item: Dict[str, Any]) -> set:
+    """The kinds of period an item reports values for: {'instant'}, {'duration'} or both.
+
+    Period keys are built as ``instant_<date>`` / ``duration_<start>_<end>``, so
+    the prefix is the kind.
+    """
+    return {str(key).split('_', 1)[0] for key in (item.get('values') or {})}
 
 
 def _merge_complementary_rows(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -107,6 +135,25 @@ def _merge_complementary_rows(data: List[Dict[str, Any]]) -> List[Dict[str, Any]
             if a_item.get('level') != b_item.get('level'):
                 continue
             if a_item.get('is_dimension') != b_item.get('is_dimension'):
+                continue
+            # A DIMENSIONAL row's label is the MEMBER's label ("Cerner
+            # Corporation"), which every concept broken down by that member
+            # shares -- so for those rows the label says nothing about which
+            # line item this is, and matching on it merged unrelated concepts.
+            # Measured across the fixture corpus before this guard: 213 of the
+            # 215 merges combined two DIFFERENT concepts and every one of them
+            # was a dimensional row, including a dollar amount merged with a
+            # term in years (CommercialPaper with DebtInstrumentTerm).
+            # The concept-rename case this function exists for is a face line
+            # item, not a member row, so requiring identity here costs it
+            # nothing (edgartools-j7iz).
+            if a_item.get('is_dimension') and a_item.get('concept') != b_item.get('concept'):
+                continue
+            # An instant and a duration are not two observations of one series,
+            # whatever their labels say. This is what made the ORCL row merge:
+            # a duration fact and an instant fact can never collide, so the
+            # complementarity test below is satisfied trivially.
+            if _period_kinds(a_item) != _period_kinds(b_item):
                 continue
             # Check value complementarity
             a_vals = a_item.get('values', {})
@@ -344,7 +391,9 @@ statement_to_concepts = {
 }
 
 
-class StatementValidationError(Exception):
+
+
+class StatementValidationError(ParsingError):
     """Raised when statement validation fails."""
     pass
 
@@ -413,6 +462,38 @@ class Statement:
         self._report = None  # Set by notes.py when built from FilingSummary
 
     @property
+    def classified_type(self) -> Optional[str]:
+        """What kind of statement this is, for rules that key on the kind.
+
+        ``canonical_type`` answers this only when the caller happened to select
+        the statement by name. Selecting the SAME statement by its role URI
+        leaves it None, because no issuer writes "CashFlowStatement" into
+        ``http://www.apple.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS`` -- so
+        the presentation-sign gate, which keys on the type, silently skipped a
+        correctly hydrated ``preferred_sign`` of -1 and exported Apple's
+        FY2023 capital expenditures as +10,959,000,000 where the by-name
+        accessor gave -10,959,000,000 (gh #1285).
+
+        The resolver has already classified every role; this reads that
+        classification back rather than guessing from the string.
+
+        Deliberately SEPARATE from ``canonical_type``: that attribute also
+        decides WHICH role ``render()`` renders, so populating it for a
+        role-selected statement makes "render this role" mean "render the
+        canonical statement of this kind" -- a different role. Measured on
+        Boeing, that silently dropped a filed FY2020 asset-impairment charge
+        of $24,000,000 from its cash flow statement. Classification and
+        selection are different questions and must stay different fields.
+        """
+        if self.canonical_type:
+            return self.canonical_type
+        for stmt in getattr(self.xbrl, 'get_all_statements', list)() or []:
+            if stmt.get('role') == self.role_or_type:
+                statement_type = stmt.get('type')
+                return statement_type if statement_type in statement_to_concepts else None
+        return None
+
+    @property
     def report(self):
         """The FilingSummary Report backing this statement, if available.
 
@@ -467,12 +548,12 @@ class Statement:
         from edgar.xbrl.core import STANDARD_TAXONOMIES, STANDARD_LABEL, split_element_id
 
         # Resolve to the statement's role URI using the same path render() uses.
-        # find_statement() raises StatementNotFound for unresolvable inputs;
+        # find_statement() raises StatementNotFoundError for unresolvable inputs;
         # this method should fail silent and return [] instead.
         lookup_key = self.canonical_type if self.canonical_type else self.role_or_type
         try:
             _, role_uri, _ = self.xbrl.find_statement(lookup_key)
-        except StatementNotFound:
+        except StatementNotFoundError:
             return []
         if not role_uri:
             return []
@@ -1175,7 +1256,8 @@ class Statement:
             view: StatementView controlling which dimensional data to include.
                   Used for STANDARD vs DETAILED filtering logic.
         """
-        from edgar.xbrl.core import PERIOD_END_LABEL, PERIOD_START_LABEL, get_unit_display_name
+        from edgar.xbrl.core import (PERIOD_END_LABEL, PERIOD_START_LABEL,
+                                     get_unit_display_name, row_metadata_value)
         from edgar.xbrl.core import is_point_in_time as get_is_point_in_time
         from edgar.xbrl.periods import determine_periods_to_display
         from edgar.xbrl.rendering import _is_html, html_to_text
@@ -1436,24 +1518,14 @@ class Statement:
 
             # Add unit if requested
             if include_unit:
-                units_dict = item.get('units', {})
-                # Get first available unit (should be same for all periods)
-                unit_ref = None
-                for period_key, _ in periods_to_display:
-                    if period_key in units_dict and units_dict[period_key] is not None:
-                        unit_ref = units_dict[period_key]
-                        break
+                unit_ref = row_metadata_value(item.get('units'),
+                                              (key for key, _ in periods_to_display))
                 row['unit'] = get_unit_display_name(unit_ref)
 
             # Add point_in_time if requested
             if include_point_in_time:
-                period_types_dict = item.get('period_types', {})
-                # Get first available period type
-                period_type = None
-                for period_key, _ in periods_to_display:
-                    if period_key in period_types_dict and period_types_dict[period_key] is not None:
-                        period_type = period_types_dict[period_key]
-                        break
+                period_type = row_metadata_value(item.get('period_types'),
+                                                 (key for key, _ in periods_to_display))
                 row['point_in_time'] = get_is_point_in_time(period_type)
 
             # Add structural columns
@@ -1684,7 +1756,7 @@ class Statement:
         period_cols = [col for col in df.columns if col not in metadata_cols]
 
         # Get statement type
-        statement_type = self.canonical_type if self.canonical_type else self.role_or_type
+        statement_type = self.classified_type
 
         # For Income Statement, Cash Flow Statement, and Balance Sheet: Use preferred_sign
         # Balance Sheet included for contra accounts like Treasury Stock (preferred_sign=-1)
@@ -1734,7 +1806,11 @@ class Statement:
             'concept', 'label', 'level', 'abstract', 'dimension', 'is_breakdown',
             'dimension_axis', 'dimension_member', 'dimension_member_label',
             'dimension_label', 'balance', 'weight', 'preferred_sign',
-            'parent_concept', 'parent_abstract_concept', 'unit', 'point_in_time'
+            'parent_concept', 'parent_abstract_concept', 'unit', 'point_in_time',
+            # GH #1244: standard_concept is emitted by _build_dataframe_from_raw_data
+            # immediately after 'label', so omitting it here made it the first
+            # entry in period_cols and every matrix cell read from it -> all null.
+            'standard_concept'
         }
         period_cols = [col for col in df.columns if col not in metadata_cols]
 
@@ -1906,13 +1982,34 @@ class Statement:
 
         return validate_statement(self, self.canonical_type, level=validation_level)
 
-    def calculate_ratios(self) -> Dict[str, float]:
-        """Calculate common financial ratios for this statement."""
+    def calculate_ratios(self, period: Optional[str] = None) -> Dict[str, float]:
+        """Calculate common financial ratios for this statement.
+
+        Args:
+            period: Period key every operand must come from. Defaults to the
+                statement's own most recent period.
+
+        A ratio is only meaningful when its operands describe the same period,
+        and nothing used to enforce that: the data was fetched unfiltered and
+        each operand independently took the first value in ITS OWN dictionary,
+        whose order is insertion order rather than recency. Netflix's Q3 2024
+        net margin came out as 0.2767 -- Q3 2024 net income over Q3 2023
+        revenue -- where the correct figure is 0.2406, and the result matched
+        neither quarter (gh #1280). Filtering to one period first means the
+        operands cannot disagree.
+
+        An operand missing for the chosen period leaves its ratio out of the
+        result, rather than borrowing another period's value.
+        """
         ratios = {}
-        data = self.get_raw_data()
 
         # Use canonical type if available, otherwise use role_or_type
         statement_type = self.canonical_type if self.canonical_type else self.role_or_type
+
+        period = period or self._default_ratio_period(statement_type)
+        if period is None:
+            return ratios
+        data = self.get_raw_data(period_filter=period)
 
         if statement_type == 'BalanceSheet':
             # Calculate balance sheet ratios
@@ -1923,18 +2020,40 @@ class Statement:
 
         return ratios
 
+    def _available_trend_periods(self, statement_type: str) -> List[tuple]:
+        """The periods this statement can show, newest first."""
+        try:
+            from edgar.xbrl.periods import determine_periods_to_display
+            return determine_periods_to_display(self.xbrl, statement_type) or []
+        except Exception:  # noqa: BLE001 - selection is best-effort here
+            return []
+
+    def _default_ratio_period(self, statement_type: str) -> Optional[str]:
+        """The period a ratio uses when the caller names none.
+
+        The statement's own most recent period, taken from the same selector
+        that decides what the statement displays, so a ratio describes the
+        column a reader is looking at.
+        """
+        try:
+            from edgar.xbrl.periods import determine_periods_to_display
+            periods = determine_periods_to_display(self.xbrl, statement_type)
+        except Exception:  # noqa: BLE001 - selection is best-effort here
+            return None
+        return periods[0][0] if periods else None
+
     def _calculate_balance_sheet_ratios(self, data: List[Dict[str, Any]]) -> Dict[str, float]:
         """Calculate balance sheet specific ratios."""
         ratios = {}
 
         # Current ratio
-        current_assets = self._get_concept_value(data, 'us-gaap_CurrentAssets')
-        current_liabilities = self._get_concept_value(data, 'us-gaap_CurrentLiabilities')
+        current_assets = self._get_concept_value(data, CURRENT_ASSETS_CONCEPTS)
+        current_liabilities = self._get_concept_value(data, CURRENT_LIABILITIES_CONCEPTS)
         if current_assets and current_liabilities:
             ratios['current_ratio'] = current_assets / current_liabilities
 
         # Quick ratio
-        inventory = self._get_concept_value(data, 'us-gaap_Inventory')
+        inventory = self._get_concept_value(data, INVENTORY_CONCEPTS)
         if current_assets and current_liabilities and inventory:
             ratios['quick_ratio'] = (current_assets - inventory) / current_liabilities
 
@@ -1945,7 +2064,7 @@ class Statement:
         ratios = {}
 
         # Gross margin
-        revenue = self._get_concept_value(data, 'us-gaap_Revenues')
+        revenue = self._get_concept_value(data, REVENUE_CONCEPTS)
         gross_profit = self._get_concept_value(data, 'us-gaap_GrossProfit')
         if revenue and gross_profit:
             ratios['gross_margin'] = gross_profit / revenue
@@ -1957,13 +2076,24 @@ class Statement:
 
         return ratios
 
-    def _get_concept_value(self, data: List[Dict[str, Any]], concept: str) -> Optional[float]:
-        """Get the value for a specific concept from statement data."""
-        for item in data:
-            if concept in item.get('all_names', []):
-                values = item.get('values', {})
-                if values:
-                    return float(next(iter(values.values())))
+    def _get_concept_value(self, data: List[Dict[str, Any]],
+                           concept: Union[str, Sequence[str]]) -> Optional[float]:
+        """Get the value for a concept from statement data.
+
+        Accepts either a single concept name or an ordered sequence of
+        candidates; the first candidate present in the statement wins. Filers
+        tag the same economic line item with different us-gaap concepts (Apple
+        reports revenue as RevenueFromContractWithCustomerExcludingAssessedTax,
+        Coca-Cola as Revenues), so a single hardcoded name answers for only a
+        fraction of filings.
+        """
+        candidates = [concept] if isinstance(concept, str) else list(concept)
+        for candidate in candidates:
+            for item in data:
+                if candidate in item.get('all_names', []):
+                    values = item.get('values', {})
+                    if values:
+                        return float(next(iter(values.values())))
         return None
 
     def analyze_trends(self, periods: int = 4) -> Dict[str, List[float]]:
@@ -1975,10 +2105,24 @@ class Statement:
 
         # Get data for multiple periods
         period_views = self.xbrl.get_period_views(statement_type)
-        if not period_views:
-            return trends
 
-        periods_to_analyze = period_views[0].get('periods', [])[:periods]
+        if period_views:
+            # GH #1240: generate_period_view() (edgar/xbrl/periods.py) emits
+            # 'period_keys'. Reading 'periods' was a dead lookup, so the loop below
+            # never ran and analyze_trends() returned {} for every filing.
+            period_keys = period_views[0].get('period_keys') or period_views[0].get('periods', [])
+        else:
+            # A named view is a convenience, not a precondition. The
+            # IncomeStatement views require three normal durations, so a 10-K
+            # presenting exactly two annual periods had none, and a request for
+            # two periods returned {} even though both were present and
+            # reachable -- Auburn National reports 603,000 and 598,000 of
+            # contract revenue and got an empty result (gh #1292). Fall back to
+            # the periods the statement itself would display.
+            period_keys = [key for key, _label in
+                           self._available_trend_periods(statement_type)]
+
+        periods_to_analyze = period_keys[:periods]
 
         for period in periods_to_analyze:
             data = self.get_raw_data(period)
@@ -2012,7 +2156,7 @@ class Statement:
                                         period: str) -> None:
         """Analyze income statement trends."""
         metrics = {
-            'revenue': 'us-gaap_Revenues',
+            'revenue': REVENUE_CONCEPTS,
             'gross_profit': 'us-gaap_GrossProfit',
             'net_income': 'us-gaap_NetIncomeLoss'
         }
@@ -2435,7 +2579,7 @@ class Statements:
         """
         from edgar.core import log
 
-        if isinstance(e, StatementNotFound):
+        if isinstance(e, StatementNotFoundError):
             # Custom exception already has detailed context
             log.warning(str(e))
         else:
@@ -2470,14 +2614,23 @@ class Statements:
         concept_info = statement_to_concepts[statement_type]
         concept = concept_info.concept
 
-        # Find all statements of the requested type
-        matching_statements = self.statement_by_type.get(statement_type, [])
+        # Find all statements of the requested type.
+        # GH #1221: a parenthetical role is indexed under its own statement type
+        # ("BalanceSheetParenthetical"), so a parenthetical request has to look
+        # in that bucket — searching the plain one and then filtering for a
+        # parenthetical role inside it can only ever come up empty.
+        matching_statements = list(self.statement_by_type.get(statement_type, []))
+        if is_parenthetical:
+            matching_statements += self.statement_by_type.get(
+                f"{statement_type}Parenthetical", [])
 
         if not matching_statements:
             return None
 
-        # Parenthetical check is only relevant for BalanceSheet
-        check_parenthetical = statement_type == 'BalanceSheet'
+        # GH #1221: the flag used to be honoured for BalanceSheet alone, so an
+        # income-statement or equity-statement parenthetical request was not even
+        # considered. Filings label these roles the same way for every statement.
+        check_parenthetical = True
 
         # Try to find a statement containing the specific concept
         for stmt in matching_statements:
@@ -2512,6 +2665,12 @@ class Statements:
 
                 if is_parenthetical == is_role_parenthetical:
                     return role
+
+        # GH #1221: returning the first statement here answered a parenthetical
+        # request with the ordinary statement — the caller got a correct-looking
+        # statement and no indication that the flag was dropped. Report the miss.
+        if is_parenthetical:
+            return None
 
         # If still no match, return the first statement
         return matching_statements[0]['role']
@@ -2549,8 +2708,21 @@ class Statements:
             if item in self.statement_by_type and self.statement_by_type[item]:
                 return Statement(self.xbrl, item, canonical_type=item)
 
-            # Otherwise, try to use it directly as a role or statement name
-            # Try to determine canonical type from the name
+            # A known ROLE is never typed by sniffing its name. The resolver has
+            # already classified every role, and `canonical_type` is not a
+            # classification: it also decides WHICH role render() renders, so
+            # inferring it from the role's spelling made "render this role" mean
+            # "render the canonical statement of this kind". Asking for Apple's
+            # .../CONSOLIDATEDBALANCESHEETSParenthetical by its own URI returned
+            # the primary balance sheet, and its share counts and par values were
+            # unreachable. Statement.classified_type answers the classification
+            # question -- which is what the presentation-sign gate reads --
+            # without selecting a role.
+            if any(stmt.get('role') == item for stmt in self.statements):
+                return Statement(self.xbrl, item)
+
+            # Not a role: a bare statement name, where the name is all there is
+            # to go on.
             canonical_type = None
             for std_type in statement_to_concepts.keys():
                 if std_type.lower() in item.lower():
@@ -2606,7 +2778,7 @@ class Statements:
         type_accessors = {
             'IncomeStatement': '.income_statement()',
             'BalanceSheet': '.balance_sheet()',
-            'CashFlowStatement': '.cashflow_statement()',
+            'CashFlowStatement': '.cash_flow_statement()',
             'StatementOfEquity': '.statement_of_equity()',
             'ComprehensiveIncome': '.comprehensive_income()',
             'CoverPage': '.cover_page()',
@@ -2745,12 +2917,12 @@ class Statements:
             type_accessors = {
                 'IncomeStatement': '.income_statement()',
                 'BalanceSheet': '.balance_sheet()',
-                'CashFlowStatement': '.cashflow_statement()',
+                'CashFlowStatement': '.cash_flow_statement()',
                 'StatementOfEquity': '.statement_of_equity()',
                 'ComprehensiveIncome': '.comprehensive_income()',
                 'IncomeStatementParenthetical': '.income_statement(parenthetical=True)',
                 'BalanceSheetParenthetical': '.balance_sheet(parenthetical=True)',
-                'CashFlowStatementParenthetical': '.cashflow_statement(parenthetical=True)',
+                'CashFlowStatementParenthetical': '.cash_flow_statement(parenthetical=True)',
                 'StatementOfEquityParenthetical': '.statement_of_equity(parenthetical=True)',
                 'ComprehensiveIncomeParenthetical': '.comprehensive_income(parenthetical=True)',
                 'CoverPage': '.cover_page()',
@@ -2914,7 +3086,7 @@ class Statements:
         except Exception as e:
             return self._handle_statement_error(e, "IncomeStatement")
 
-    def cashflow_statement(self, parenthetical: bool = False,
+    def cash_flow_statement(self, parenthetical: bool = False,
                            view: ViewType = None,
                            include_dimensions: Optional[bool] = None) -> Optional[Statement]:
         """
@@ -2947,9 +3119,16 @@ class Statements:
         except Exception as e:
             return self._handle_statement_error(e, "CashFlowStatement")
 
-    def cash_flow_statement(self, **kwargs):
-        """Alias for cashflow_statement()."""
-        return self.cashflow_statement(**kwargs)
+    def cashflow_statement(self, **kwargs):
+        """Deprecated: use :meth:`cash_flow_statement`."""
+        warnings.warn(
+            "cashflow_statement() is deprecated and will be removed in v6.0. "
+            "Use cash_flow_statement(), which matches income_statement() and "
+            "balance_sheet().",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.cash_flow_statement(**kwargs)
 
     def statement_of_equity(self, parenthetical: bool = False,
                             view: ViewType = None,
@@ -3214,7 +3393,8 @@ class Statements:
                      statement_type: str,
                      period_view: Optional[str] = None,
                      standard: bool = True,
-                     include_dimensions: bool = False) -> Optional[pd.DataFrame]:
+                     include_dimensions: bool = False,
+                     presentation: bool = True) -> Optional[pd.DataFrame]:
         """
         Convert a statement to a pandas DataFrame.
 
@@ -3223,12 +3403,16 @@ class Statements:
             period_view: Optional period view name
             standard: Whether to use standardized concept labels (default: True)
             include_dimensions: Whether to include dimensional segment data (default: False)
+            presentation: Whether to apply the presentation sign so values match
+                SEC display (default: True), matching ``Statement.to_dataframe()``
 
         Returns:
             pandas DataFrame containing the statement data
         """
         statement = self[statement_type]
-        return statement.render(period_view=period_view, standard=standard, include_dimensions=include_dimensions).to_dataframe()
+        return statement.render(
+            period_view=period_view, standard=standard, include_dimensions=include_dimensions
+        ).to_dataframe(presentation=presentation)
 
 
 class StitchedStatement:
@@ -3310,17 +3494,24 @@ class StitchedStatement:
             )
         return self._statement_data
 
-    def render(self, show_date_range: bool = False) -> Table:
+    def render(self, show_date_range: Optional[bool] = None) -> Table:
         """
         Render the stitched statement as a formatted table.
 
         Args:
-            show_date_range: Whether to show full date ranges for duration periods
+            show_date_range: Whether to show full date ranges for duration periods.
+                             Defaults to the value the accessor stored on this
+                             statement, so an option passed to
+                             ``statements.income_statement(show_date_range=True)``
+                             also reaches ordinary Rich/``repr`` rendering.
 
         Returns:
             Rich Table containing the rendered statement
         """
         from edgar.xbrl.stitching import render_stitched_statement
+
+        if show_date_range is None:
+            show_date_range = self.show_date_range
 
         # Update the render_stitched_statement function call to pass the show_date_range parameter
         return render_stitched_statement(
@@ -3428,7 +3619,7 @@ class StitchedStatements:
             statement.show_date_range = show_date_range
         return statement
 
-    def cashflow_statement(self, max_periods: int = 8, standard: bool = True,
+    def cash_flow_statement(self, max_periods: int = 8, standard: bool = True,
                            use_optimal_periods: bool = True, show_date_range: bool = False,
                            include_dimensions: bool = False, view: ViewType = None,
                            discrete_quarters: bool = False,
@@ -3462,9 +3653,16 @@ class StitchedStatements:
             statement.show_date_range = show_date_range
         return statement
 
-    def cash_flow_statement(self, **kwargs):
-        """Alias for cashflow_statement()."""
-        return self.cashflow_statement(**kwargs)
+    def cashflow_statement(self, **kwargs):
+        """Deprecated: use :meth:`cash_flow_statement`."""
+        warnings.warn(
+            "cashflow_statement() is deprecated and will be removed in v6.0. "
+            "Use cash_flow_statement(), which matches income_statement() and "
+            "balance_sheet().",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.cash_flow_statement(**kwargs)
 
     def statement_of_equity(self, max_periods: int = 8, standard: bool = True,
                             use_optimal_periods: bool = True, show_date_range: bool = False,

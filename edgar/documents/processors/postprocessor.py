@@ -87,6 +87,14 @@ class DocumentPostprocessor:
         if node.type == NodeType.IMAGE:
             return False
 
+        # Never remove an explicit line break. Its content is a newline, so every
+        # text check below reads it as empty, but a <br> is content the filer
+        # wrote -- dropping it glues the words either side together. The generic
+        # metadata rule below would also spare it; this is stated separately so
+        # the reason survives any future tightening of that rule.
+        if node.metadata.get('is_line_break'):
+            return False
+
         # Never remove nodes with metadata
         if node.metadata:
             return False
@@ -276,8 +284,11 @@ class DocumentPostprocessor:
         issues = []
 
         # Check for orphaned nodes
+        # `is not`, not `!=`: Node is a @dataclass, so `!=` runs a generated
+        # field-by-field comparison on every node in the document to answer a
+        # question about object identity (edgartools-llmp.6.10).
         for node in document.root.walk():
-            if node != document.root and node.parent is None:
+            if node is not document.root and node.parent is None:
                 issues.append(f"Orphaned node: {node.type}")
                 # Fix by adding to root
                 document.root.add_child(node)

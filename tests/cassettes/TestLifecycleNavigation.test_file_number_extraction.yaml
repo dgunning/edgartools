@@ -1,0 +1,80 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, br, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/749647/000149315225029712/0001493152-25-029712-index-headers.html
+  response:
+    body:
+      string: "<HTML><HEAD><TITLE>SEC EDGAR Submission 0001493152-25-029712</TITLE>\n<!--\n<SEC-HEADER>0001493152-25-029712.hdr.sgml
+        : 20251231\n<ACCEPTANCE-DATETIME>20251231081519\n<ACCESSION-NUMBER>0001493152-25-029712\n<TYPE>424B5\n<PUBLIC-DOCUMENT-COUNT>2\n<FILING-DATE>20251231\n<DATE-OF-FILING-DATE-CHANGE>20251231\n<FILER>\n<COMPANY-DATA>\n<CONFORMED-NAME>Imunon,
+        Inc.\n<CIK>0000749647\n<ASSIGNED-SIC>2834\n<ORGANIZATION-NAME>03 Life Sciences\n<IRS-NUMBER>521256615\n<STATE-OF-INCORPORATION>DE\n<FISCAL-YEAR-END>1231\n</COMPANY-DATA>\n<FILING-VALUES>\n<FORM-TYPE>424B5\n<ACT>33\n<FILE-NUMBER>333-279425\n<FILM-NUMBER>251615754\n</FILING-VALUES>\n<BUSINESS-ADDRESS>\n<STREET1>997
+        LENOX DRIVE\n<STREET2>SUITE 100\n<CITY>LAWRENCEVILLE\n<STATE>NJ\n<ZIP>08648\n<PHONE>(609)
+        896-9100\n</BUSINESS-ADDRESS>\n<MAIL-ADDRESS>\n<STREET1>997 LENOX DRIVE\n<STREET2>SUITE
+        100\n<CITY>LAWRENCEVILLE\n<STATE>NJ\n<ZIP>08648\n</MAIL-ADDRESS>\n<FORMER-COMPANY>\n<FORMER-CONFORMED-NAME>Celsion
+        CORP\n<DATE-CHANGED>20071121\n</FORMER-COMPANY>\n<FORMER-COMPANY>\n<FORMER-CONFORMED-NAME>CELSION
+        CORP\n<DATE-CHANGED>19980515\n</FORMER-COMPANY>\n<FORMER-COMPANY>\n<FORMER-CONFORMED-NAME>CHEUNG
+        LABORATORIES INC\n<DATE-CHANGED>19920703\n</FORMER-COMPANY>\n</FILER>\n</SEC-HEADER>\n-->\n</HEAD><BODY>\n<PRE>&lt;SEC-DOCUMENT&gt;0001493152-25-029712-index.html
+        : 20251231\n&lt;SEC-HEADER&gt;0001493152-25-029712.hdr.sgml : 20251231\n&lt;ACCEPTANCE-DATETIME&gt;20251231081519\nACCESSION
+        NUMBER:\t\t0001493152-25-029712\nCONFORMED SUBMISSION TYPE:\t424B5\nPUBLIC
+        DOCUMENT COUNT:\t\t2\nFILED AS OF DATE:\t\t20251231\nDATE AS OF CHANGE:\t\t20251231\n\nFILER:\n\n\tCOMPANY
+        DATA:\t\n\t\tCOMPANY CONFORMED NAME:\t\t\tImunon, Inc.\n\t\tCENTRAL INDEX
+        KEY:\t\t\t0000749647\n\t\tSTANDARD INDUSTRIAL CLASSIFICATION:\tPHARMACEUTICAL
+        PREPARATIONS [2834]\n\t\tORGANIZATION NAME:           \t03 Life Sciences\n\t\tEIN:\t\t\t\t521256615\n\t\tSTATE
+        OF INCORPORATION:\t\t\tDE\n\t\tFISCAL YEAR END:\t\t\t1231\n\n\tFILING VALUES:\n\t\tFORM
+        TYPE:\t\t424B5\n\t\tSEC ACT:\t\t1933 Act\n\t\tSEC FILE NUMBER:\t333-279425\n\t\tFILM
+        NUMBER:\t\t251615754\n\n\tBUSINESS ADDRESS:\t\n\t\tSTREET 1:\t\t997 LENOX
+        DRIVE\n\t\tSTREET 2:\t\tSUITE 100\n\t\tCITY:\t\t\tLAWRENCEVILLE\n\t\tSTATE:\t\t\tNJ\n\t\tZIP:\t\t\t08648\n\t\tBUSINESS
+        PHONE:\t\t(609) 896-9100\n\n\tMAIL ADDRESS:\t\n\t\tSTREET 1:\t\t997 LENOX
+        DRIVE\n\t\tSTREET 2:\t\tSUITE 100\n\t\tCITY:\t\t\tLAWRENCEVILLE\n\t\tSTATE:\t\t\tNJ\n\t\tZIP:\t\t\t08648\n\n\tFORMER
+        COMPANY:\t\n\t\tFORMER CONFORMED NAME:\tCelsion CORP\n\t\tDATE OF NAME CHANGE:\t20071121\n\n\tFORMER
+        COMPANY:\t\n\t\tFORMER CONFORMED NAME:\tCELSION CORP\n\t\tDATE OF NAME CHANGE:\t19980515\n\n\tFORMER
+        COMPANY:\t\n\t\tFORMER CONFORMED NAME:\tCHEUNG LABORATORIES INC\n\t\tDATE
+        OF NAME CHANGE:\t19920703\n&lt;/SEC-HEADER&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;424B5\n&lt;SEQUENCE&gt;1\n&lt;FILENAME&gt;form424b5.htm\n&lt;DESCRIPTION&gt;424B5\n&lt;TEXT&gt;\n<a
+        href=\"form424b5.htm\">Document 1 - file: form424b5.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;GRAPHIC\n&lt;SEQUENCE&gt;2\n&lt;FILENAME&gt;form424b5_001.jpg\n&lt;DESCRIPTION&gt;GRAPHIC\n&lt;TEXT&gt;\n<a
+        href=\"form424b5_001.jpg\">Document 2 - file: form424b5_001.jpg</a><br>\n&lt;/DOCUMENT&gt;\n&lt;/SEC-DOCUMENT&gt;</PRE></BODY></HTML>\n"
+    headers:
+      accept-ranges:
+      - bytes
+      content-length:
+      - '2993'
+      content-type:
+      - text/html
+      date:
+      - Mon, 09 Mar 2026 17:19:23 GMT
+      last-modified:
+      - Wed, 31 Dec 2025 13:15:42 GMT
+      strict-transport-security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      vary:
+      - Accept-Encoding
+      x-amz-id-2:
+      - 86YGnVA37tGN3RekN/EkTDRfDpRZ+7cpha3Qy1TKhLqwHbQeb4oBd/ixRv/pYY7jBoQSmQhyih2scbnfHU7IdQ==
+      x-amz-meta-mode:
+      - '33188'
+      x-amz-replication-status:
+      - COMPLETED
+      x-amz-request-id:
+      - WTKKW2MA38826014
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - Ftedj_PNZ4fX5B2VaHStFUSxU58NvcYK
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: null
+version: 1

@@ -65,7 +65,7 @@ company = Company("AAPL")
 # Direct convenience methods (recommended for beginners)
 income = company.income_statement(periods=4, annual=True)
 balance = company.balance_sheet(periods=4, annual=True)
-cash = company.cashflow_statement(periods=4, annual=True)
+cash = company.cash_flow_statement(periods=4, annual=True)
 
 # These return MultiPeriodStatement objects with rich display
 print(income)  # Beautiful table output
@@ -94,7 +94,7 @@ xbrl = filing.xbrl()
 # Recommended: Use the statements property for common statements
 income = xbrl.statements.income_statement()
 balance = xbrl.statements.balance_sheet()
-cash_flow = xbrl.statements.cashflow_statement()
+cash_flow = xbrl.statements.cash_flow_statement()
 
 # For analytical statements, use get_statement() with PascalCase string names
 segments = xbrl.get_statement("SegmentDisclosure")
@@ -188,7 +188,7 @@ from edgar.enums import (
 # Use the statements property for primary financial statements
 income = xbrl.statements.income_statement()
 balance = xbrl.statements.balance_sheet()
-cash_flow = xbrl.statements.cashflow_statement()
+cash_flow = xbrl.statements.cash_flow_statement()
 
 # For analytical statements, use get_statement() with PascalCase names
 segments = xbrl.get_statement("SegmentDisclosure")
@@ -210,7 +210,7 @@ def comprehensive_financial_analysis(ticker: str) -> dict:
     return {
         "income": xbrl.statements.income_statement(),
         "balance": xbrl.statements.balance_sheet(),
-        "cash_flow": xbrl.statements.cashflow_statement(),
+        "cash_flow": xbrl.statements.cash_flow_statement(),
         "equity": xbrl.statements.statement_of_equity(),
     }
 
@@ -229,7 +229,7 @@ def trend_analysis(ticker: str, periods: int = 5) -> dict:
     return {
         "income": company.income_statement(periods=periods, annual=True),
         "balance": company.balance_sheet(periods=periods, annual=True),
-        "cash_flow": company.cashflow_statement(periods=periods, annual=True)
+        "cash_flow": company.cash_flow_statement(periods=periods, annual=True)
     }
 
 # Usage - returns MultiPeriodStatement objects
@@ -328,7 +328,7 @@ income = company.income_statement(periods=4)
 xbrl = company.get_filings(form="10-K").latest().xbrl()
 income = xbrl.statements.income_statement()
 balance = xbrl.statements.balance_sheet()
-cash_flow = xbrl.statements.cashflow_statement()
+cash_flow = xbrl.statements.cash_flow_statement()
 ```
 
 ### 2. Access Analytical Statements

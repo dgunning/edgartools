@@ -9,7 +9,7 @@ import logging
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from rich import box
 from rich.columns import Columns
@@ -492,6 +492,18 @@ class StatementBuilder:
 
         return filtered
 
+    @staticmethod
+    def _recency_key(fact: FinancialFact) -> Tuple[date, date]:
+        """Rank a fact by filing recency, then by how recent the period itself is.
+
+        A 10-K tags fp="FY" and fy=<year> on EVERY instant it reports, the
+        prior-year comparatives included, and the whole filing shares one
+        filing_date — so filing_date alone cannot separate the comparative from
+        the figure the filing is actually reporting. period_end can, and it is
+        the tiebreak get_annual_fact() already uses.
+        """
+        return (fact.filing_date or date.min, fact.period_end or date.min)
+
     def _create_fact_map(self, facts: List[FinancialFact]) -> Dict[str, FinancialFact]:
         """Create a map of concept to fact."""
         fact_map = {}
@@ -502,18 +514,29 @@ class StatementBuilder:
             if ':' in concept:
                 concept = concept.split(':', 1)[1]
 
-            # Use most recent fact for duplicates
-            if concept not in fact_map or fact.filing_date > fact_map[concept].filing_date:
+            # Use the most recent fact for duplicates.
+            # edgartools-i24a: this compared filing_date ONLY. Apple's FY2023
+            # 10-K reports Assets twice under fy=2023 fp=FY -- 352,755,000,000 at
+            # 2022-09-24 and 352,583,000,000 at 2023-09-30 -- from one accession,
+            # so the dates tie, `>` is False, and whichever the list happened to
+            # yield first won. The comparative did, and the wrong figure is within
+            # 0.05% of the right one, so nothing looked amiss.
+            if concept not in fact_map or self._recency_key(fact) > self._recency_key(fact_map[concept]):
                 fact_map[concept] = fact
 
         return fact_map
 
     def _get_period_end(self, facts: List[FinancialFact]) -> Optional[date]:
-        """Get the period end date from facts."""
-        for fact in facts:
-            if fact.period_end:
-                return fact.period_end
-        return None
+        """Get the period end date from facts.
+
+        edgartools-i24a: this returned the FIRST period_end it saw, which for a
+        10-K is as likely to be the prior-year comparative as the period the
+        statement covers -- and it is what the statement reports as its own
+        period. The facts here are already filtered to one fiscal year and
+        period, so the latest end date is the period being reported.
+        """
+        period_ends = [fact.period_end for fact in facts if fact.period_end]
+        return max(period_ends) if period_ends else None
 
     def _build_with_canonical(self, fact_map: Dict[str, FinancialFact],
                              virtual_tree: Dict[str, Any],

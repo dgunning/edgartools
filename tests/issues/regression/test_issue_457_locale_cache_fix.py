@@ -19,6 +19,8 @@ Implement a one-time cache clearing function that:
 
 This ensures users upgrading from pre-4.19.0 have their old locale-corrupted cache files removed
 automatically on first import.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/457
 """
 
 import locale
@@ -70,8 +72,8 @@ class TestLocaleCacheFix:
         assert not (test_cache_dir / "cache_file_1").exists()
         assert not (test_cache_dir / "cache_file_2").exists()
 
-        # Marker file should exist
-        marker_file = test_cache_dir / ".locale_fix_457_applied"
+        # Marker file should exist, OUTSIDE the cache directory (#1051)
+        marker_file = tmp_path / ".migrations" / "locale_fix_457"
         assert marker_file.exists()
 
     def test_clear_locale_corrupted_cache_subsequent_run(self, tmp_path):
@@ -79,7 +81,8 @@ class TestLocaleCacheFix:
         # Create a temporary cache directory with marker file
         test_cache_dir = tmp_path / "_tcache"
         test_cache_dir.mkdir()
-        marker_file = test_cache_dir / ".locale_fix_457_applied"
+        marker_file = tmp_path / ".migrations" / "locale_fix_457"
+        marker_file.parent.mkdir()
         marker_file.touch()
 
         # Create some cache files (should NOT be deleted)
@@ -113,8 +116,8 @@ class TestLocaleCacheFix:
         # Cache directory should now exist (created by function)
         assert test_cache_dir.exists()
 
-        # Marker file should exist
-        marker_file = test_cache_dir / ".locale_fix_457_applied"
+        # Marker file should exist, OUTSIDE the cache directory (#1051)
+        marker_file = tmp_path / ".migrations" / "locale_fix_457"
         assert marker_file.exists()
 
     def test_clear_locale_corrupted_cache_error_handling(self, tmp_path):
@@ -248,8 +251,8 @@ class TestIssuereproduction:
         assert cleared is True
         assert not (test_cache_dir / "old_cache_file").exists()
 
-        # Marker should exist
-        marker_file = test_cache_dir / ".locale_fix_457_applied"
+        # Marker should exist, OUTSIDE the cache directory (#1051)
+        marker_file = tmp_path / ".migrations" / "locale_fix_457"
         assert marker_file.exists()
 
         # Subsequent imports should not clear cache again

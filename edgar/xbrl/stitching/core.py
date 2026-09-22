@@ -10,8 +10,8 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-from edgar.xbrl.core import format_date, parse_date
-from edgar.xbrl.exceptions import StatementNotFound
+from edgar.xbrl.core import decimals_for_scaling, format_date, parse_date
+from edgar.exceptions import StatementNotFoundError
 from edgar.xbrl.standardization import standardize_statement
 from edgar.xbrl.stitching.ordering import StatementOrderingManager
 from edgar.xbrl.stitching.periods import determine_optimal_periods
@@ -90,6 +90,7 @@ class StatementStitcher:
         # Initialize data structures
         self.periods = []  # Ordered list of period identifiers
         self.period_dates = {}  # Maps period ID to display dates
+        self.period_sources = {}  # Maps period ID to the index of the filing it came from
         self.data = defaultdict(dict)  # {concept: {period: value}}
         self.concept_metadata = {}  # Metadata for each concept (level, etc.)
         self.ordering_manager = None  # Will be initialized during stitching
@@ -121,6 +122,7 @@ class StatementStitcher:
         # Reset state
         self.periods = []
         self.period_dates = {}
+        self.period_sources = {}  # Maps period ID to the index of the filing it came from
         self.data = defaultdict(dict)
         self.concept_metadata = {}
         self.original_statement_order = []
@@ -259,6 +261,14 @@ class StatementStitcher:
                 except (ValueError, TypeError, IndexError):
                     # Skip periods with invalid dates
                     continue
+
+        # Retain which filing each surviving period came from. The rule that picks
+        # it lives here -- lower index wins, above -- and the query layer needs the
+        # same answer to attribute a stitched fact to its source filing. Recomputing
+        # it there would be a second copy of this rule, free to drift from it
+        # (bead edgartools-qbm7).
+        self.period_sources = {period_id: statement_index
+                               for period_id, _, statement_index in unique_periods.values()}
 
         # Extract and sort the unique periods
         all_periods = [(period_id, end_date) for period_id, end_date, _ in unique_periods.values()]
@@ -500,7 +510,10 @@ class StatementStitcher:
                     if value is not None:
                         self.data[concept_key][period_id] = {
                             'value': value,
-                            'decimals': item.get('decimals', {}).get(period_id, 0)
+                            # Stitched entries feed arithmetic (discrete-quarter
+                            # subtraction) and an integer-typed facts frame, so
+                            # the 'INF' sentinel is coerced here (GH #1229).
+                            'decimals': decimals_for_scaling(item.get('decimals', {}).get(period_id))
                         }
 
     @staticmethod
@@ -836,18 +849,26 @@ class StatementStitcher:
             if longer_entry is None:
                 continue
 
-            if shorter_entry is None:
-                # No shorter period data for this concept — keep the longer value as-is.
-                continue
-
             longer_val = longer_entry.get('value')
-            shorter_val = shorter_entry.get('value')
+            shorter_val = shorter_entry.get('value') if shorter_entry is not None else None
 
-            if longer_val is None or shorter_val is None:
-                continue
-
-            # Skip non-numeric values
-            if not isinstance(longer_val, (int, float)) or not isinstance(shorter_val, (int, float)):
+            # Nothing to subtract: the concept is absent from the shorter period, or
+            # either side is missing or non-numeric. Keeping the longer value would
+            # leave a CUMULATIVE figure sitting under a discrete-quarter label, because
+            # the period is relabelled below whether or not this concept was converted.
+            # Meta's FY2024 "Deferred income taxes" is the case: the 10-K tags it
+            # DeferredIncomeTaxesAndTaxCredits while the Q3 10-Q uses
+            # DeferredIncomeTaxExpenseBenefit, so the 9-month operand is filed under a
+            # different concept and the unchanged 12-month $(4.738)B was presented as
+            # Q4 (GH #1179). A quarter that cannot be derived is dropped, so the cell
+            # reads empty instead of wrong.
+            derivable = (
+                shorter_entry is not None
+                and isinstance(longer_val, (int, float))
+                and isinstance(shorter_val, (int, float))
+            )
+            if not derivable:
+                del self.data[concept_key][longer_pid]
                 continue
 
             discrete_val = longer_val - shorter_val
@@ -895,6 +916,8 @@ class StatementStitcher:
         # Build the output structure
         result = {
             'periods': [(pid, self.period_dates.get(pid, pid)) for pid in self.periods],
+            'period_sources': {pid: self.period_sources[pid]
+                               for pid in self.periods if pid in self.period_sources},
             'statement_data': []
         }
 
@@ -1015,7 +1038,7 @@ def stitch_statements(
             # cash flow presentation role).  Issue #683.
             try:
                 statement = xbrl.get_statement_by_type(statement_type, include_dimensions=include_dimensions)
-            except StatementNotFound:
+            except StatementNotFoundError:
                 continue
             if statement:
                 # Only include the specific period from this statement
@@ -1071,8 +1094,18 @@ def stitch_statements(
     # Traditional approach without using entity info
     else:
         for xbrl in xbrl_list:
-            # Get statement data for the specified type
-            statement = xbrl.find_statement(statement_type)
+            # Get statement data for the specified type.  This must be
+            # get_statement_by_type() and not find_statement(): the latter
+            # returns a (statements, role, statement_type) tuple of index
+            # entries, which carries neither 'periods' nor 'data' and which
+            # StatementStitcher cannot read.  Skip filings that lack this
+            # statement type, matching the optimal-periods path above.
+            try:
+                statement = xbrl.get_statement_by_type(
+                    statement_type, include_dimensions=include_dimensions
+                )
+            except StatementNotFoundError:
+                continue
             if statement:
                 statements.append(statement)
 

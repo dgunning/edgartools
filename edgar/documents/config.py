@@ -34,7 +34,10 @@ class ParserConfig:
 
     Attributes:
         max_document_size: Maximum document size in bytes
-        streaming_threshold: Document size threshold for streaming mode
+        streaming_threshold: Deprecated and ignored. All documents now go through
+            the single lxml pipeline; the former StreamingParser produced
+            divergent (and lossy) text and was removed. Kept so existing
+            ParserConfig(...) call sites keep constructing.
         cache_size: Maximum number of cached items
         enable_parallel: Enable parallel processing for tables
         strict_mode: Fail on parsing errors vs. best effort
@@ -48,7 +51,7 @@ class ParserConfig:
 
     # Performance settings
     max_document_size: int = 160 * 1024 * 1024  # 160MB (handles large filings like NPORT-P)
-    streaming_threshold: int = 10 * 1024 * 1024  # 10MB
+    streaming_threshold: int = 10 * 1024 * 1024  # Deprecated, ignored (see docstring)
     cache_size: int = 1000
     enable_parallel: bool = True
     max_workers: Optional[int] = None  # None = use CPU count

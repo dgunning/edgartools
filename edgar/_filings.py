@@ -2,6 +2,7 @@ import itertools
 import json
 import pickle
 import re
+import warnings
 import webbrowser
 from contextlib import nullcontext
 from dataclasses import dataclass
@@ -41,34 +42,33 @@ from edgar.core import (
     YearAndQuarters,
     Years,
     cache_except_none,
-    current_year_and_quarter,
-    filing_date_to_year_quarters,
     is_probably_html,
-    is_start_of_quarter,
     listify,
     log,
     parallel_thread_map,
     quarters_in_year,
 )
-from edgar.dates import InvalidDateException
+from edgar.dates import InvalidDateError, current_year_and_quarter, filing_date_to_year_quarters, is_start_of_quarter
 from edgar.display.formatting import accession_number_text, display_size
 from edgar.display.styles import print_info, print_warning
 from edgar.documents import HTMLParser, ParserConfig
+from edgar.documents.exceptions import ParsingError
+from edgar.documents.extractors.chunk_extractor import chunk_html
+from edgar.exceptions import TransportError, http_status
+from edgar.files._deprecation import PAGE_BREAK_DEPRECATION as _PAGE_BREAK_DEPRECATION
 from edgar.files.html_documents import get_clean_html
-from edgar.files.htmltools import html_sections
 from edgar.files.markdown import to_markdown
 from edgar.filesystem import EdgarPath
-from edgar.filtering import filter_by_accession_number, filter_by_cik, filter_by_date, filter_by_exchange, \
-    filter_by_form, filter_by_ticker
+from edgar.filtering import filter_by_accession_number, filter_by_cik, filter_by_date, filter_by_exchange, filter_by_form, filter_by_ticker
 from edgar.headers import FilingDirectory, IndexHeaders
-from edgar.httprequests import download_file, download_text, download_text_between_tags
+from edgar.httprequests import UNREACHABLE_ERRORS, download_file, download_text, download_text_between_tags, is_unreachable
 from edgar.reference import describe_form
 from edgar.reference.tickers import Exchange, find_ticker, find_ticker_safe
-from edgar.richtools import Docs, print_rich, repr_rich, rich_to_text
+from edgar.richtools import Docs, print_rich, repr_rich
 from edgar.search import BM25Search, RegexSearch
 from edgar.sgml import FilingHeader, FilingSGML, Reports, Statements
 from edgar.storage import is_using_local_storage, local_filing_path, resolve_local_filing_path
-from edgar.xbrl import XBRL, XBRLFilingWithNoXbrlData
+from edgar.xbrl import XBRL
 
 """ Contain functionality for working with SEC filing indexes and filings
 
@@ -453,8 +453,10 @@ def fetch_filing_index(year_and_quarter: YearAndQuarter,
     try:
         index_table = fetch_filing_index_at_url(url, index)
         return (year, quarter), index_table
-    except httpx.HTTPStatusError as e:
-        if is_start_of_quarter() and e.response.status_code == 403:
+    except (httpx.HTTPStatusError, TransportError) as e:
+        # Dual-era: httpx raises the status error today, TransportError under the
+        # strict wrap and in 6.0. http_status() reads either.
+        if is_start_of_quarter() and http_status(e) == 403:
             # Return an empty filing index
             return (year, quarter), _empty_filing_index()
         else:
@@ -717,7 +719,7 @@ class Filings:
                     latest_date = self.date_range[1]
                     if latest_date is not None and _get_data_staleness_days(latest_date) >= 1:
                         _warn_use_current_filings("", latest_date)
-            except InvalidDateException as e:
+            except InvalidDateError as e:
                 log.error(e)
                 return Filings(_empty_filing_index())
 
@@ -1570,9 +1572,10 @@ class Filing:
             # Skip when local storage is enabled to avoid unexpected network access
             try:
                 period = self.homepage.period_of_report
-            except (httpx.TimeoutException, httpx.ConnectError, httpx.ReadTimeout,
-                    httpcore.TimeoutException, httpcore.ConnectError, httpcore.NetworkError):
-                pass  # Offline or network unavailable — return None
+            except (*UNREACHABLE_ERRORS, TransportError) as e:
+                if not is_unreachable(e):
+                    raise  # SEC answered, or SSL/identity — not something to fall back from
+                # Offline or network unavailable — leave it as None
         return period
 
     @cached_property
@@ -1603,10 +1606,12 @@ class Filing:
         sgml = self.sgml()
         html = sgml.html()
         if not html:
+            # primary_html_document is Optional: it is None when the homepage
+            # lists no primary documents at all (edgartools-vwwl).
             document: Attachment = self.homepage.primary_html_document
-            if document.empty or document.is_binary():
+            if document is None or document.empty or document.is_binary():
                 return None
-            return self.homepage.primary_html_document.download()
+            return document.download()
         if html.endswith("</PDF>"):
             return None
         if html.startswith("<?xml"):
@@ -1626,7 +1631,10 @@ class Filing:
                         rendered = xml_obj.to_html()
                         if rendered:
                             return rendered
-                html = self.homepage.primary_html_document.download()
+                document = self.homepage.primary_html_document
+                if document is None:
+                    return None
+                html = document.download()
         if isinstance(html, bytes):
             try:
                 return html.decode("utf-8")
@@ -1649,14 +1657,23 @@ class Filing:
                 document = self.homepage.primary_xml_document
                 if document and not document.is_binary() and not document.empty:
                     return document.content
-            except (httpx.TimeoutException, httpx.ConnectError, httpx.ReadTimeout,
-                    httpcore.TimeoutException, httpcore.ConnectError, httpcore.NetworkError):
-                pass  # Offline or network unavailable — return None
+            except (*UNREACHABLE_ERRORS, TransportError) as e:
+                if not is_unreachable(e):
+                    raise  # SEC answered, or SSL/identity — not something to fall back from
+                # Offline or network unavailable — leave it as None
         return xml_content
 
     @lru_cache(maxsize=4)
-    def text(self) -> str:
-        """Convert the html of the main filing document to text"""
+    def text(self, include_images: bool = False) -> str:
+        """Convert the html of the main filing document to text
+
+        Args:
+            include_images: Emit an ``[Image: <alt or filename>]`` placeholder
+                wherever the filing has an image (GH #886). Charts that carry
+                content — a 10-K's stock performance graph, say — otherwise
+                vanish with nothing to mark the gap. Off by default so the text
+                that feeds sections, search and embeddings stays image-free.
+        """
         # Offline shortcut for historic pre-HTML filings: when the primary document has no
         # <FILENAME> (so html()/_download_filing_text would otherwise re-fetch it over the
         # network) and it is plain text, return that document's text straight from the
@@ -1676,7 +1693,12 @@ class Filing:
             if document.is_empty:
                 return ""
 
-            return rich_to_text(document, width=500)  # Wide enough for tables without truncation
+            # Straight to the extractor. Going via rich_to_text() rendered the
+            # document through Document.__repr__, which hardcodes
+            # table_max_col_width=200 — so the 500 below never reached the table
+            # renderer and long cells were cut at 200 with no ellipsis.
+            return document.text(table_max_col_width=500,  # Wide enough for tables without truncation
+                                 include_images=include_images)
         else:
             text_extract_attachments = self.attachments.query("document_type == 'TEXT-EXTRACT'")
             if len(text_extract_attachments) > 0 and text_extract_attachments.get_by_index(0) is not None:
@@ -1747,16 +1769,42 @@ class Filing:
         """
         Return the markdown version of this filing html
 
+        Rendered by ``edgar.documents``, so images survive into the markdown
+        (GH #886) and tables render through the same pipeline as ``text()``,
+        ``view()`` and the section extractors. Relative image ``src`` values are
+        resolved against the filing's SEC archive directory, so the markdown is
+        a self-contained document with working image links.
+
         Args:
-            include_page_breaks: If True, include page break delimiters in the markdown
-            start_page_number: Starting page number for page break markers (default: 0)
+            include_page_breaks: If True, include ``{N}----`` page break
+                delimiters in the markdown. **Deprecated.** Page breaks exist
+                only in the legacy ``edgar.files`` renderer, so passing True
+                routes the whole document through it and forfeits images and
+                the newer table rendering. Removed in 6.0.
+            start_page_number: Starting page number for page break markers
+                (default: 0). Only meaningful with ``include_page_breaks=True``.
         """
         html = self.html()
         if html:
-            clean_html = get_clean_html(html)
-            if clean_html:
-                markdown_result = to_markdown(clean_html, include_page_breaks=include_page_breaks,
-                                              start_page_number=start_page_number)
+            if include_page_breaks:
+                warnings.warn(_PAGE_BREAK_DEPRECATION.format(cls="Filing"),
+                              DeprecationWarning, stacklevel=2)
+                clean_html = get_clean_html(html)
+                if clean_html:
+                    markdown_result = to_markdown(clean_html, include_page_breaks=True,
+                                                  start_page_number=start_page_number)
+                    if markdown_result:
+                        return markdown_result
+            else:
+                try:
+                    document = HTMLParser(ParserConfig(form=self.form)).parse(html)
+                    # Base for resolving relative image src. Trailing slash matters:
+                    # urljoin() drops the last path segment without it. base_dir is a
+                    # pure string property, so this costs no request.
+                    document.metadata.url = f"{self.base_dir}/"
+                    markdown_result = document.to_markdown()
+                except ParsingError:
+                    markdown_result = None
                 if markdown_result:
                     return markdown_result
         text_content = self.text()
@@ -1812,16 +1860,20 @@ class Filing:
     def xbrl(self) -> Optional[XBRL]:
         """
         Get the XBRL document for the filing, parsed and as a FilingXbrl object
-        :return: Get the XBRL document for the filing, parsed and as a FilingXbrl object, or None
+
+        :return: The parsed XBRL, or `None` when the filing carries no XBRL
+            attachments — a property of the filing, not a failure to read it,
+            and one this keeps answering quietly in 6.0 (docs/upgrade/6.0.md).
         """
+        # The `except XBRLFilingWithNoXbrlData` that used to sit here was dead:
+        # nothing in the library raised that error, and `from_filing` signals
+        # the no-XBRL case by returning None. Removed rather than left as
+        # decoration, so this function's None has one visible source.
         try:
             return XBRL.from_filing(self)
-        except XBRLFilingWithNoXbrlData:
-            return None
-        except (httpx.TimeoutException, httpx.ConnectError, httpx.ReadTimeout,
-                httpcore.TimeoutException, httpcore.ConnectError, httpcore.NetworkError) as e:
+        except (*UNREACHABLE_ERRORS, TransportError) as e:
             # Provide helpful message when local storage is enabled but filing content is missing
-            if is_using_local_storage():
+            if is_unreachable(e) and is_using_local_storage():
                 log.error(
                     f"Network error accessing filing content for {self.accession_no}. "
                     f"You have local storage enabled, but filing documents are not downloaded.\n\n"
@@ -1933,7 +1985,7 @@ class Filing:
                 self._sgml = FilingSGML.from_source(local_path)
 
         if self._sgml is None:
-            from edgar.storage.datamule import is_using_datamule_storage, get_datamule_filing
+            from edgar.storage.datamule import get_datamule_filing, is_using_datamule_storage
             if is_using_datamule_storage():
                 self._sgml = get_datamule_filing(self.accession_no)
 
@@ -1952,10 +2004,11 @@ class Filing:
             try:
                 self._sgml = FilingSGML.from_filing(self)
             except (ValueError, Exception) as e:
-                from edgar.sgml.sgml_parser import SECIdentityError, SECFilingNotFoundError, SECHTMLResponseError
-                from edgar.httprequests import IdentityNotSetException
+                from edgar.exceptions import FilingNotFoundError, IdentityNotSetError
+                from edgar.httprequests import IdentityNotSetError
+                from edgar.sgml.sgml_parser import SECIdentityError
                 # Don't fall back on permanent errors — propagate them
-                if isinstance(e, (SECIdentityError, SECFilingNotFoundError, IdentityNotSetException)):
+                if isinstance(e, (SECIdentityError, FilingNotFoundError, IdentityNotSetError)):
                     raise
                 # Don't fall back on network errors — propagate them so callers
                 # (e.g. xbrl()) can show local-storage-aware error messages
@@ -2084,9 +2137,18 @@ class Filing:
 
     @lru_cache(maxsize=1)
     def sections(self) -> List[str]:
+        """The filing split into passages — what ``search()`` indexes.
+
+        Chunked structurally by ``edgar.documents``: cut at headings, each table
+        its own chunk. This replaced ``edgar.files.htmltools.html_sections``,
+        whose backend 6.0 deletes (bead edgartools-07lk.3). Measured across 41
+        era-stratified fixtures the two index the same words to within 0.04%,
+        and the remaining difference is legacy's own glued words
+        ("jurisdictionof"), which the new parser separates correctly.
+        """
         html = self.html()
         if html is not None:
-            return html_sections(html)
+            return chunk_html(html, form=self.form)
         # Old text-only filings (pre-2002) — chunk on <PAGE> markers.
         text = self.text()
         if not text:
@@ -2308,7 +2370,7 @@ class Filing:
         Returns:
             CorrespondenceThread or None if no correspondence found.
         """
-        from edgar.correspondence import Correspondence, CorrespondenceThread, CorrespondenceType, CORRESPONDENCE_FORMS
+        from edgar.correspondence import CORRESPONDENCE_FORMS, Correspondence, CorrespondenceThread, CorrespondenceType
 
         # If this is already a correspondence filing, parse and get its thread
         if self.form in CORRESPONDENCE_FORMS:
@@ -2640,10 +2702,42 @@ def summarize_files(data: pd.DataFrame) -> pd.DataFrame:
             )
 
 
+def _filing_from_efts(accession_number: str):
+    """Resolve an accession through EDGAR full-text search, or None.
+
+    An accession carries no CIK, and every document URL needs one, so opening a
+    filing from an accession alone always costs a lookup. This is the cheap way
+    to pay it: ~2 KB against 4.1 MB gzipped per quarter probed, which expands to
+    41 MB to parse (bead edgartools-vx29).
+
+    None means "ask the quarterly index" — EFTS indexes 2001 onward, so older
+    filings legitimately miss here, and a network failure is deliberately also a
+    miss rather than an error. The index route stays correct for everything;
+    this only makes the common case cheap.
+    """
+    from edgar.search.efts import resolve_accession
+
+    fields = resolve_accession(accession_number)
+    if not fields:
+        return None
+    return Filing(
+        cik=fields["cik"],
+        company=fields["company"],
+        form=fields["form"],
+        filing_date=fields["filing_date"],
+        accession_no=accession_number,
+        related_entities=fields["related_entities"],
+    )
+
+
 @cache_except_none(maxsize=16)
 def get_filing_by_accession(accession_number: str, year: int):
     """Cache-friendly version that takes year as parameter instead of using datetime.now()"""
     assert re.match(r"\d{10}-\d{2}-\d{6}", accession_number)
+
+    filing = _filing_from_efts(accession_number)
+    if filing is not None:
+        return filing
 
     # Only search quarters that exist - for current year, limit to current quarter
     current_year, current_quarter = current_year_and_quarter()
@@ -2660,6 +2754,12 @@ def get_filing_by_accession(accession_number: str, year: int):
 def get_by_accession_number_enriched(accession_number: str):
     """Get filing with all related entities populated using PyArrow"""
     year = int("19" + accession_number[11:13]) if accession_number[11] == '9' else int("20" + accession_number[11:13])
+
+    # EFTS returns every filer on the filing in one ~2 KB response, which is the
+    # same thing the quarter scan below reconstructs from a 41 MB index.
+    filing = _filing_from_efts(accession_number)
+    if filing is not None:
+        return filing
 
     # Only search quarters that exist - for current year, limit to current quarter
     current_year, current_quarter = current_year_and_quarter()

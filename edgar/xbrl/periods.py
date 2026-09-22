@@ -58,6 +58,31 @@ STATEMENT_TYPE_CONFIG = {
             }
         ]
     },
+    # A cash flow statement selects the same duration periods an income
+    # statement does (determine_periods_to_display handles the two together),
+    # but it had no entry here, so get_period_views() returned [] for it and
+    # the named views were unreachable through to_dataframe(period_view=...)
+    # (GH #1253).
+    'CashFlowStatement': {
+        'period_type': 'duration',
+        'max_periods': 3,
+        'allow_annual_comparison': True,
+        'views': [
+            {
+                'name': 'Three Recent Periods',
+                'description': 'Shows three most recent reporting periods',
+                'max_periods': 3,
+                'requires_min_periods': 3
+            },
+            {
+                'name': 'YTD and Quarterly Breakdown',
+                'description': 'Shows YTD figures and quarterly breakdown',
+                'max_periods': 5,
+                'requires_min_periods': 2,
+                'mixed_view': True
+            }
+        ]
+    },
     'StatementOfEquity': {
         'period_type': 'duration',
         'max_periods': 3,
@@ -218,6 +243,33 @@ def generate_mixed_view(view_config: Dict[str, Any], ytd_periods: List[Dict],
     return None
 
 
+def _filter_instant_periods_with_facts(xbrl_instance, periods: List[Dict[str, Any]],
+                                       statement_type: str) -> List[Dict[str, Any]]:
+    """Drop instant periods that carry no facts for this statement (GH #1246).
+
+    Delegates to the same statement-aware sufficiency filter the default period
+    selection path uses, so a named view and the default view agree about which
+    periods are real. If the filter would leave nothing — a filing whose facts
+    are not typed for this statement at all — the unfiltered list is kept, since
+    offering no view is worse than offering a sparse one.
+    """
+    if not periods:
+        return periods
+
+    from edgar.xbrl.period_selector import _filter_periods_with_sufficient_data
+
+    candidates = [(p['key'], p['label']) for p in periods]
+    try:
+        kept = {key for key, _ in
+                _filter_periods_with_sufficient_data(xbrl_instance, candidates, statement_type)}
+    except Exception:
+        return periods
+
+    if not kept:
+        return periods
+    return [p for p in periods if p['key'] in kept]
+
+
 def get_period_views(xbrl_instance, statement_type: str) -> List[Dict[str, Any]]:
     """
     Get available period views for a statement type.
@@ -256,6 +308,19 @@ def get_period_views(xbrl_instance, statement_type: str) -> List[Dict[str, Any]]
     if period_type == 'duration':
         standard_durations = {'Quarterly', 'Semi-Annual', 'Nine Months', 'Annual'}
         periods = [p for p in periods if p.get('period_type') in standard_durations]
+    else:
+        # GH #1246: instants had no equivalent of the duration filter above, so an
+        # incidental instant context — one the filing declares but reports no
+        # balance-sheet facts against — sorted into a view and took a column slot,
+        # pushing out the populated prior fiscal year. Microsoft's FY2024 10-K
+        # rendered "Current vs. Previous Period" as 2024-06-30 beside an empty
+        # 2023-12-31, with the real 2023-06-30 comparative excluded.
+        #
+        # The default (unnamed-view) path already filters for statement-aware
+        # fact sufficiency, which is exactly why it disagreed with the named
+        # views. Reuse that filter rather than writing a second one: the
+        # divergence between the two paths is the underlying problem.
+        periods = _filter_instant_periods_with_facts(xbrl_instance, periods, statement_type)
     periods = sort_periods(periods, period_type)
 
     # If this statement type allows annual comparison and this is an annual report,
@@ -578,6 +643,12 @@ def determine_periods_to_display(
 
                 # Categorize all duration periods by their length
                 # ENHANCED: More strict duration checking to avoid misclassification
+                # The bucket bounds below count the endpoints exclusively, which
+                # is what they were calibrated against - a 53-week fiscal year
+                # sits exactly on the 370 bound. `days` is therefore local to
+                # the bucketing and is deliberately NOT written back over
+                # period['days'], which the parser fills in with the inclusive
+                # count the XBRL spec defines (issue #1247).
                 for period in duration_periods:
                     try:
                         start_date = datetime.strptime(period['start_date'], '%Y-%m-%d').date()
@@ -591,20 +662,16 @@ def determine_periods_to_display(
                         # Categorize by duration with stricter checks
                         if 80 <= days <= 100:  # Quarterly period (~90 days), slightly wider range
                             period['period_type'] = 'quarterly'
-                            period['days'] = days
                             quarterly_periods.append(period)
                         elif 170 <= days <= 190:  # Semi-annual/YTD for Q2 (~180 days)
                             period['period_type'] = 'semi-annual'
-                            period['days'] = days
                             ytd_periods.append(period)
                         elif 260 <= days <= 280:  # YTD for Q3 (~270 days)
                             period['period_type'] = 'three-quarters'
-                            period['days'] = days
                             ytd_periods.append(period)
                         elif 300 < days <= 370:  # Annual period for comparisons (strict check)
                             # Issue #513: Filter out multi-year periods
                             period['period_type'] = 'annual'
-                            period['days'] = days
                             annual_periods.append(period)
                     except (ValueError, TypeError):
                         continue
