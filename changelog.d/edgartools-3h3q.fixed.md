@@ -1,0 +1,1 @@
+**A member filed on two different axes lost one of its rows.** JPMorgan's 2012 10-K reports VIE loans on both `dei:LegalEntityAxis` and a classification axis; the member hierarchy keyed rows by member alone, so the LegalEntity row — carrying the more precise $82.723B against the other's $82.7B — was dropped. A member on two axes is no longer reordered.
