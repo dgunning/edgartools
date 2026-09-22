@@ -76,7 +76,7 @@ def test_html_returns_none_when_the_homepage_has_no_primary_document(filing, mon
     assert filing.html() is None
 
 
-def test_html_returns_none_for_an_xml_primary_document_with_no_homepage_fallback(filing, monkeypatch):
+def test_html_returns_none_for_xml_with_no_homepage_fallback(filing, monkeypatch):
     """The same unguarded access one branch below, on the XML path: an `<?xml`
     primary document that is not an ownership or XML-native form falls through to
     the same homepage download."""
