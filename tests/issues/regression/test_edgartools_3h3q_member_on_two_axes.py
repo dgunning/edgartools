@@ -27,7 +27,6 @@ import pytest
 
 from edgar.xbrl import XBRL
 from edgar.xbrl.presentation import StatementView
-from edgar.xbrl.xbrl import XBRL as XBRLClass
 
 JPM = Path("tests/fixtures/xbrl/jpm/10k_2013")
 ROLE = (
@@ -90,7 +89,7 @@ def test_the_hierarchy_never_drops_a_row_on_this_filing(jpm_xbrl):
     """`_apply_member_hierarchy` reorders in place; it must be a permutation of
     its input, never lossy. A corpus sweep is how this bug was found, so assert
     the property directly rather than trusting a row count."""
-    original = XBRLClass._apply_member_hierarchy
+    original = XBRL._apply_member_hierarchy
     losses = []
 
     def probe(self, dim_items):
@@ -100,7 +99,7 @@ def test_the_hierarchy_never_drops_a_row_on_this_filing(jpm_xbrl):
             losses.append([i.get("full_dimension_label") for i in before
                            if not any(x is i for x in dim_items)])
 
-    XBRLClass._apply_member_hierarchy = probe
+    XBRL._apply_member_hierarchy = probe
     try:
         for stmt in jpm_xbrl.get_all_statements():
             for view in (None, StatementView.DETAILED):
@@ -109,7 +108,7 @@ def test_the_hierarchy_never_drops_a_row_on_this_filing(jpm_xbrl):
                 except Exception:  # noqa: S110 - render failures are not this test's subject
                     pass
     finally:
-        XBRLClass._apply_member_hierarchy = original
+        XBRL._apply_member_hierarchy = original
 
     assert losses == [], f"rows dropped by the member hierarchy: {losses}"
 
@@ -131,7 +130,7 @@ def test_a_member_on_two_axes_leaves_both_rows_in_place():
         parser=SimpleNamespace(domains={"m_parent": SimpleNamespace(members=["m_child"])})
     )
 
-    XBRLClass._apply_member_hierarchy(dummy, items)
+    XBRL._apply_member_hierarchy(dummy, items)
 
     labels = [item["label"] for item in items]
     assert sorted(labels) == sorted([
