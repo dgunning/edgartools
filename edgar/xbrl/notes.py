@@ -453,30 +453,70 @@ class Notes:
 
     @classmethod
     def _build_from_xbrl_only(cls, xbrl, all_stmts, entity_name, form, period) -> 'Notes':
-        """Fallback: build flat notes list from XBRL classification only."""
+        """Fallback: build notes from XBRL classification only.
+
+        Without a FilingSummary there is no ParentRole, so a note is any
+        note- or disclosure-category role that is a family stem by name, and
+        its Tables, Policies and Details members hang from it by name too,
+        whichever way the filing spells them (issue #1218).  The stem alone
+        carries only a TextBlock; the members are where the data concepts
+        live, so the concept index is empty without them.  Disclosure-category
+        roles count because a role that hangs from a `*DisclosureAbstract`
+        is classified `disclosure` even when it is a note (issue #1207).
+        """
         from edgar.xbrl.statements import Statement, Statements
+        from edgar.xbrl.xbrl import (
+            _ROLE_FAMILY_SUFFIX_RE,
+            _role_family_key,
+            _role_family_members,
+            _role_family_stem,
+        )
+
+        def name_of(stmt) -> str:
+            # A role without a string definition has no family name, as in
+            # the pre-scan of `get_all_statements`.
+            definition = stmt.get('definition', '')
+            return definition if isinstance(definition, str) else ''
+
+        members = _role_family_members(name_of(s) for s in all_stmts)
+        stems = [s for s in all_stmts
+                 if name_of(s) not in members
+                 and Statements.classify_statement(s) in ('note', 'disclosure')]
+        stem_role_by_key = {}
+        for stmt in stems:
+            stem_role_by_key.setdefault(_role_family_key(name_of(stmt)), stmt['role'])
+
+        # Members grouped under their stem's role, by kind.
+        children: Dict[str, Dict[str, list]] = {}
+        for stmt in all_stmts:
+            definition = name_of(stmt)
+            if definition not in members:
+                continue
+            stem_key = _role_family_stem(_role_family_key(definition), stem_role_by_key)
+            if stem_key is None:
+                continue
+            suffix = _ROLE_FAMILY_SUFFIX_RE.search(definition.lower()).group(0)
+            kind = 'tables' if 'table' in suffix else 'policies' if 'polic' in suffix else 'details'
+            buckets = children.setdefault(stem_role_by_key[stem_key], {'tables': [], 'policies': [], 'details': []})
+            buckets[kind].append(Statement(xbrl, stmt['role']))
 
         notes = []
-        idx = 1
-        for stmt in all_stmts:
-            category = Statements.classify_statement(stmt)
-            if category == 'note' and stmt.get('type') == 'Notes':
-                # Only top-level notes (not Tables/Policies)
-                statement = Statement(xbrl, stmt['role'])
-                definition = stmt.get('definition', '')
-                # Try to extract a clean name from definition
-                short_name = _extract_short_name(definition)
-                note = Note(
-                    number=idx,
-                    title=short_name,
-                    short_name=short_name,
-                    role=stmt['role'],
-                    statement=statement,
-                    menu_category='Notes',
-                    xbrl=xbrl,
-                )
-                notes.append(note)
-                idx += 1
+        for idx, stmt in enumerate(stems, start=1):
+            # Try to extract a clean name from definition
+            short_name = _extract_short_name(name_of(stmt))
+            family = children.get(stmt['role'], {})
+            notes.append(Note(
+                number=idx,
+                title=short_name,
+                short_name=short_name,
+                role=stmt['role'],
+                statement=Statement(xbrl, stmt['role']),
+                tables=family.get('tables', []),
+                policies=family.get('policies', []),
+                details=family.get('details', []),
+                menu_category='Notes',
+                xbrl=xbrl,
+            ))
 
         return cls(notes, entity_name=entity_name, form=form, period=period)
 
