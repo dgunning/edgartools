@@ -2138,15 +2138,28 @@ class XBRL:
         distinct combinations share; keying the map on ``meta[0]`` last-wins
         those rows away as soon as any same-axis parent/child pair activates
         the reorder (GH #1331).
+
+        A member filed on two different axes at once does not participate
+        either. ``member_to_item`` is keyed on the member alone, so the two
+        rows would collide and the earlier one would be dropped; the domain
+        hierarchy cannot say which axis's row it nests, so neither is
+        reordered and both pass through (edgartools-3h3q).
         """
         member_to_item = {}
+        ambiguous = set()
         for item in dim_items:
             meta = item.get('dimension_metadata') or []
             if len(meta) != 1:
                 continue
             member_id = meta[0].get('member')
-            if member_id:
-                member_to_item[member_id] = item
+            if not member_id:
+                continue
+            if member_id in member_to_item:
+                ambiguous.add(member_id)
+                continue
+            member_to_item[member_id] = item
+        for member_id in ambiguous:
+            member_to_item.pop(member_id, None)
 
         if len(member_to_item) <= 1:
             return
