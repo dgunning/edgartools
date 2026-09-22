@@ -20,8 +20,10 @@ from unittest.mock import Mock
 
 import pytest
 
+from edgar.exceptions import DataObjectError
 from edgar.tender_offers.schedule14d9 import (
     Schedule14D9,
+    _find_real_item_starts,
     _recommendation_window,
     classify_recommendation,
     extract_item_section,
@@ -112,26 +114,42 @@ def test_schedule14d9_missing_item4_raises_not_silent():
     """Silence check: a document with no Item 4 must fail loudly, not return a
     Schedule14D9 with a quietly-wrong `recommendation`."""
     filing = _mock_filing(html="<html><body>Not a real filing document.</body></html>")
-    with pytest.raises(ValueError, match="Could not locate Item 4"):
+    with pytest.raises(DataObjectError, match="Could not locate Item 4"):
         Schedule14D9.from_filing(filing)
 
 
 @pytest.mark.fast
 def test_schedule14d9_no_html_raises():
     filing = _mock_filing(html=None)
-    with pytest.raises(ValueError, match="No HTML document"):
+    with pytest.raises(DataObjectError, match="No HTML document"):
         Schedule14D9.from_filing(filing)
 
 
 @pytest.mark.fast
 def test_recommendation_text_truncated_flag():
+    """A window ended by a section heading is complete, however much of Item 4
+    follows it. Lisata's Item 4 is 125,815 characters and the window is 1,066 —
+    a flag that measured Item 4's length would call that truncated, and would
+    do so for nearly every real filing, since Item 4 carries the whole
+    background narrative."""
     html = LISATA_SC14D9_PATH.read_text()
     schedule = Schedule14D9.from_filing(_mock_filing(html=html))
-    # Lisata's Item 4 runs to background/reasons narrative well past the
-    # recommendation statement itself, so recommendation_text is a cut, not
-    # the whole section.
-    assert schedule.recommendation_text_truncated is True
+
+    assert schedule.recommendation_text_truncated is False
     assert len(schedule.recommendation_text) < len(schedule.item4_text)
+
+
+@pytest.mark.fast
+def test_recommendation_text_truncated_when_the_cap_makes_the_cut():
+    """The case the flag is actually for: no boundary heading anywhere, so the
+    window ends at ``_RECOMMENDATION_WINDOW_CHARS`` and the statement may
+    genuinely continue past it."""
+    schedule = Schedule14D9(
+        filing=_mock_filing(),
+        item4_text="The Board recommends that holders accept the Offer. " + ("filler text " * 400),
+    )
+
+    assert schedule.recommendation_text_truncated is True
 
 
 @pytest.mark.fast
@@ -216,3 +234,68 @@ def test_extract_item_section_ignores_quoted_cross_references():
 @pytest.mark.fast
 def test_extract_item_section_returns_none_when_absent():
     assert extract_item_section("nothing relevant here", 4, 5) is None
+
+
+@pytest.mark.fast
+@pytest.mark.parametrize("heading", [
+    "ITEM 4. THE SOLICITATION OR RECOMMENDATION",
+    "ITEM 4.THE SOLICITATION OR RECOMMENDATION",
+    "Item 4. The Solicitation or Recommendation",
+    "item 4. the solicitation or recommendation",
+])
+def test_item_headings_are_found_whatever_their_case(heading):
+    """Filers set this heading in caps at least as often as in title case, and
+    a case-sensitive match found no candidate at all in those documents — the
+    only "Item 4" left was a quoted cross-reference, which the quote filter
+    then discarded, so the whole filing raised.
+
+    Real examples of the uppercase spelling: Tourmaline Bio
+    (0001104659-25-094103), IGM Biosciences (0001193125-25-159860) and Allakos
+    (0001140361-25-013949), all SC 14D9 originals filed in 2025. Measured over
+    25 such filings, 9 failed to parse before the match was made
+    case-insensitive and 1 after.
+    """
+    text = (
+        f"{heading}\n"
+        "The Board unanimously recommends that holders of Shares accept the Offer.\n"
+        "Background of the Offer\n"
+        "Narrative that must not be classified.\n"
+        "ITEM 5. PERSON/ASSETS, RETAINED, EMPLOYED, COMPENSATED OR USED\n"
+    )
+
+    section = extract_item_section(text, 4, 5)
+
+    assert section is not None, f"heading not found: {heading!r}"
+    assert "accept the Offer" in section
+    assert "ITEM 5." not in section
+    assert classify_recommendation(section) == "accept"
+
+
+@pytest.mark.fast
+def test_an_item_heading_at_the_very_start_is_not_read_as_quoted():
+    """`"" in _QUOTE_CHARS` is True — the empty string is a substring of every
+    string — so the quote filter used to discard a heading at offset 0, which
+    has no preceding character at all. Text extracted from a document fragment
+    or an already-sliced section starts exactly there."""
+    text = "Item 4. The Solicitation or Recommendation\nThe Board recommends that holders accept the Offer.\nItem 5. Person/Assets\n"
+
+    section = extract_item_section(text, 4, 5)
+
+    assert section is not None, "a heading at offset 0 was discarded as quoted"
+    assert classify_recommendation(section) == "accept"
+
+
+@pytest.mark.fast
+def test_a_genuinely_quoted_cross_reference_is_still_skipped():
+    """The filter must keep doing its job: the guard above widens it by exactly
+    one position and must not let a real cross-reference through."""
+    text = (
+        "Item 4. The Solicitation or Recommendation\n"
+        "The Board recommends that holders accept the Offer.\n"
+        "See the section captioned “Item 4. The Solicitation or Recommendation — Opinion”.\n"
+        "Item 5. Person/Assets\n"
+    )
+
+    starts = _find_real_item_starts(text, 4)
+
+    assert starts == [0], f"expected only the real heading, got {starts}"

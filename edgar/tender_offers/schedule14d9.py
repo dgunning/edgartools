@@ -14,6 +14,8 @@ from typing import TYPE_CHECKING, List, Optional
 
 from lxml import html as lxml_html
 
+from edgar.exceptions import DataObjectError
+
 if TYPE_CHECKING:
     from edgar._filings import Filing
 
@@ -78,12 +80,20 @@ _NEUTRAL_PATTERNS = [
 
 def _find_real_item_starts(text: str, item_number: int) -> List[int]:
     """Positions of ``Item N.`` headings, excluding quoted cross-references."""
-    pattern = re.compile(rf"Item\s*{item_number}\s*[.\-—]")
+    # Case-insensitive: a large share of filers set the heading in caps
+    # ("ITEM 4. THE SOLICITATION OR RECOMMENDATION"). Matching only the
+    # title-case spelling left those documents with no candidate at all except
+    # a quoted cross-reference, which the quote filter below then discarded,
+    # so the whole filing raised. Measured over 25 SC 14D9 originals filed in
+    # 2025: 9 failed to parse before this flag, 1 after.
+    pattern = re.compile(rf"Item\s*{item_number}\s*[.\-—]", re.IGNORECASE)
     starts = []
     for match in pattern.finditer(text):
         start = match.start()
         prev_char = text[start - 1] if start > 0 else ""
-        if prev_char in _QUOTE_CHARS:
+        # `prev_char and ...` because "" is a substring of every string, so a
+        # heading at offset 0 would otherwise be discarded as quoted.
+        if prev_char and prev_char in _QUOTE_CHARS:
             continue
         starts.append(start)
     return starts
@@ -226,17 +236,25 @@ class Schedule14D9:
 
         Raises:
             AssertionError: If filing is not a Schedule 14D-9 form
-            ValueError: If Item 4 (The Solicitation or Recommendation) cannot
-                be located in the document. This means the document failed to
-                parse structurally, and is distinct from ``recommendation``
-                being ``None``, which means Item 4 was found but its language
-                did not clearly support accept/reject/neutral.
+            DataObjectError: If the document has no HTML, or if Item 4 (The
+                Solicitation or Recommendation) cannot be located in it. Both
+                mean the document failed to parse structurally, and are
+                distinct from ``recommendation`` being ``None``, which means
+                Item 4 was found but its language did not clearly support
+                accept/reject/neutral.
+
+                An amendment (``SC 14D9/A``) routinely restates only the items
+                it changes, so a filing with no Item 4 is a normal document
+                rather than a malformed one — this still raises for it today.
         """
         assert filing.form in SC_14D9_FORMS, f"Expected SC 14D9 form, got {filing.form}"
 
         html = filing.html()
         if not html:
-            raise ValueError(f"No HTML document found for SC 14D9 filing {filing.accession_no}")
+            raise DataObjectError(
+                f"No HTML document found for SC 14D9 filing {filing.accession_no}",
+                form=filing.form, accession_no=filing.accession_no,
+            )
 
         tree = lxml_html.fromstring(html)
         text = tree.text_content()
@@ -244,7 +262,11 @@ class Schedule14D9:
 
         item4_text = extract_item_section(text, 4, 5)
         if not item4_text:
-            raise ValueError(f"Could not locate Item 4 (The Solicitation or Recommendation) in SC 14D9 filing {filing.accession_no}")
+            raise DataObjectError(
+                "Could not locate Item 4 (The Solicitation or Recommendation) in SC 14D9 "
+                f"filing {filing.accession_no}",
+                form=filing.form, accession_no=filing.accession_no,
+            )
 
         return cls(filing=filing, item4_text=item4_text)
 
@@ -283,12 +305,28 @@ class Schedule14D9:
     @property
     def recommendation_text_truncated(self) -> bool:
         """
-        True if ``recommendation_text`` was cut off before the end of Item 4,
-        i.e. the recommendation statement itself may run longer than the
-        calibrated window. Check this before treating ``recommendation_text``
-        as a complete statement.
+        True if ``recommendation_text`` was cut by the character cap rather
+        than by a section heading, i.e. the statement may actually continue and
+        what you have is an arbitrary slice. Check this before treating
+        ``recommendation_text`` as a complete statement.
+
+        False when a "Background of the..." / "Reasons for the Recommendation"
+        heading ended the window, however much of Item 4 follows it: the
+        statement finished where the filing said it did.
+
+        Measuring the length of Item 4 instead would answer a different
+        question and answer it uselessly — Item 4 routinely runs past 100,000
+        characters, so it exceeds any sane cap in nearly every real filing. On
+        Lisata Therapeutics' filing the window ends cleanly at the heading after
+        1,066 characters, and a length-based flag still called it truncated.
         """
-        return len(re.sub(r"\s+", " ", self.item4_text).strip()) > _RECOMMENDATION_WINDOW_CHARS
+        normalized = re.sub(r"\s+", " ", self.item4_text).strip()
+        lowered = normalized.lower()
+        hits = [match.start() for match in
+                (re.search(marker, lowered) for marker in _SECTION_BOUNDARY_MARKERS)
+                if match]
+        boundary = min(hits) if hits else len(normalized)
+        return boundary > _RECOMMENDATION_WINDOW_CHARS
 
     def __rich__(self):
         """Rich console rendering."""
