@@ -118,6 +118,38 @@ jobs:
     - name: Check every regression test names its bug
       run: python scripts/check_regression_provenance.py
 
+    # The one check here that has to RUN the tests rather than read them: no
+    # source scan can tell whether a test reaches the SEC, because the answer
+    # depends on what the restored HTTP cache happens to be holding. Sockets
+    # are blocked instead, which gives the same answer twice.
+    #
+    # Scoped to the branch's own test files on a pull request (seconds) and run
+    # over the whole lane on push (~7 min), because a test can only become
+    # network-dependent in a file the branch touched, and main is where a
+    # source-side cause — a deleted cassette, say — gets caught. Not its own
+    # job, for the branch-protection reason above.
+    - name: Check no new test needs the SEC while marked fast
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          # The API, not `git diff`: this checkout is shallow, so no merge base
+          # with the target branch exists to diff against.
+          CHANGED=$(gh api --paginate \
+            "repos/${{ github.repository }}/pulls/${{ github.event.number }}/files" \
+            --jq '.[] | select(.status != "removed") | .filename' \
+            | grep -E '^tests/.*\.py$' | tr '\n' ' ' || true)
+          if [ -z "$CHANGED" ]; then
+            echo "No test files changed; nothing to audit."
+            exit 0
+          fi
+          echo "Auditing changed test files: $CHANGED"
+          python scripts/check_offline_audit.py $CHANGED
+        else
+          python scripts/check_offline_audit.py
+        fi
+
     - name: Run fast tests
       run: |
         # Parallelize fast tests - safe, no SEC API calls.
