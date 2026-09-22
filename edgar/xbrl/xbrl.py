@@ -157,6 +157,42 @@ def _is_family_stem_of(stem_key: Tuple[str, ...], family_key: Tuple[str, ...]) -
             and all(_segments_match(a, b) for a, b in zip(stem_key, family_key)))
 
 
+# A role name may lead with the section it sits in.  UNP spells most of one
+# family "DisclosureDebtDetails1" and two members of it "DebtDetails6", and
+# names the Leases stem "Leases" but its Tables "DisclosureLeasesTables", so the
+# marker is not part of the family name (edgartools-uqp2).
+_SECTION_MARKER_SEGMENTS = frozenset({'disclosure', 'disclosures', 'statement', 'statements'})
+
+
+def _without_section_marker(key: Tuple[str, ...]) -> Tuple[str, ...]:
+    """`key` without a leading section-marker segment, else `key` unchanged."""
+    return key[1:] if key and key[0] in _SECTION_MARKER_SEGMENTS else key
+
+
+def _leads_family(stem_key: Tuple[str, ...], family_key: Tuple[str, ...]) -> bool:
+    """`_is_family_stem_of`, retried with a leading section marker ignored on
+    either side.
+
+    The marker is dropped only as a fallback, never from the key itself: a
+    filing that names both a `Debt` family and a separate `DisclosureDebt`
+    family must keep them apart, and erasing the marker outright would merge
+    them.  Ignoring it only when nothing aligns without doing so leaves the
+    unambiguous case untouched, and `_role_family_stem` still ranks a stem that
+    aligns strictly above one that needs the fallback.
+    """
+    if _is_family_stem_of(stem_key, family_key):
+        return True
+    bare_stem = _without_section_marker(stem_key)
+    bare_family = _without_section_marker(family_key)
+    if bare_stem == stem_key and bare_family == family_key:
+        return False
+    if not bare_stem:
+        # A stem named only for its section ("Disclosure") says nothing about a
+        # family, and an empty key leads every other one.
+        return False
+    return _is_family_stem_of(bare_stem, bare_family)
+
+
 def _role_family_members(definitions: Iterable[str]) -> Set[str]:
     """The role definitions that are Tables, Policies or Details members of a
     family: each carries a member suffix and extends the name of another role
@@ -171,7 +207,7 @@ def _role_family_members(definitions: Iterable[str]) -> Set[str]:
     keys = {definition: _role_family_key(definition) for definition in definitions}
     return {definition for definition, key in keys.items()
             if _ROLE_FAMILY_SUFFIX_RE.search(definition.lower())
-            and any(other and _is_family_stem_of(other, key) for other in keys.values())}
+            and any(other and _leads_family(other, key) for other in keys.values())}
 
 
 def _role_family_stem(family_key: Tuple[str, ...],
@@ -189,9 +225,13 @@ def _role_family_stem(family_key: Tuple[str, ...],
     best_rank = None
     best = None
     for stem_key in stem_keys:
-        if not stem_key or not _is_family_stem_of(stem_key, family_key):
+        if not stem_key or not _leads_family(stem_key, family_key):
             continue
-        rank = (len(stem_key), sum(a == b for a, b in zip(stem_key, family_key)))
+        # A stem that aligns without ignoring a section marker outranks one that
+        # needs the fallback, so `DebtDetails` prefers a `Debt` stem over a
+        # `DisclosureDebt` stem when the filing names both.
+        strict = _is_family_stem_of(stem_key, family_key)
+        rank = (strict, len(stem_key), sum(a == b for a, b in zip(stem_key, family_key)))
         if best_rank is None or rank > best_rank:
             best_rank, best = rank, stem_key
     return best
