@@ -1989,15 +1989,21 @@ class XBRL:
         The definition linkbase defines member-to-member relationships (e.g.,
         AutomotiveRevenuesMember → AutomotiveSalesMember). This method uses
         those relationships to set proper nesting depth for dimensional items.
+
+        Only single-axis rows participate. A two-axis fact's first member is
+        often a shared qualifier (``OperatingSegmentsMember``) that several
+        distinct combinations share; keying the map on ``meta[0]`` last-wins
+        those rows away as soon as any same-axis parent/child pair activates
+        the reorder (GH #1331).
         """
-        # Collect member IDs from dimensional items
         member_to_item = {}
         for item in dim_items:
-            meta = item.get('dimension_metadata')
-            if meta and len(meta) >= 1:
-                member_id = meta[0].get('member')
-                if member_id:
-                    member_to_item[member_id] = item
+            meta = item.get('dimension_metadata') or []
+            if len(meta) != 1:
+                continue
+            member_id = meta[0].get('member')
+            if member_id:
+                member_to_item[member_id] = item
 
         if len(member_to_item) <= 1:
             return
@@ -2034,8 +2040,10 @@ class XBRL:
         for member_id, item in member_to_item.items():
             item['level'] += depth_offset[member_id]
 
-        # Reorder: parents before children
-        ordered = []
+        # Reorder single-axis parents before their children; leave every other
+        # row (including multi-axis combinations) at its original position.
+        child_members = {child for children in member_children.values() for child in children}
+        ordered: List[Dict[str, Any]] = []
         processed = set()
 
         def add_with_children(member_id):
@@ -2046,16 +2054,25 @@ class XBRL:
             for child_id in member_children.get(member_id, []):
                 add_with_children(child_id)
 
-        # First add items that are top-level (depth 0)
-        for member_id in member_to_item:
-            if depth_offset[member_id] == 0:
+        for item in dim_items:
+            meta = item.get('dimension_metadata') or []
+            if len(meta) != 1:
+                ordered.append(item)
+                continue
+            member_id = meta[0].get('member')
+            if member_id in processed:
+                continue
+            if member_id in child_members:
+                continue
+            if member_id in member_to_item:
                 add_with_children(member_id)
-        # Then any remaining
+            else:
+                ordered.append(item)
+
         for member_id in member_to_item:
             if member_id not in processed:
                 add_with_children(member_id)
 
-        # Replace items in-place
         dim_items[:] = ordered
 
     @staticmethod
