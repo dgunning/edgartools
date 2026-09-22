@@ -106,7 +106,7 @@ def test_the_hierarchy_never_drops_a_row_on_this_filing(jpm_xbrl):
             for view in (None, StatementView.DETAILED):
                 try:
                     jpm_xbrl.statements[stmt["role"]].get_raw_data(view=view)
-                except Exception:  # noqa: S110 - unrelated render failures are not this test's subject
+                except Exception:  # noqa: S110 - render failures are not this test's subject
                     pass
     finally:
         XBRLClass._apply_member_hierarchy = original
