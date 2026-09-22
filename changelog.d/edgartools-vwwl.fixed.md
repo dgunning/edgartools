@@ -1,0 +1,1 @@
+**`Filing.html()` raised `AttributeError` instead of returning None when a filing's homepage listed no primary document.** The homepage property is optional and comes back None for some filings, but two call sites used it unguarded, so the scheduled build went red on a PDF-primary APP NTC filing. Both are guarded now.

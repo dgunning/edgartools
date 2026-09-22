@@ -1606,10 +1606,12 @@ class Filing:
         sgml = self.sgml()
         html = sgml.html()
         if not html:
+            # primary_html_document is Optional: it is None when the homepage
+            # lists no primary documents at all (edgartools-vwwl).
             document: Attachment = self.homepage.primary_html_document
-            if document.empty or document.is_binary():
+            if document is None or document.empty or document.is_binary():
                 return None
-            return self.homepage.primary_html_document.download()
+            return document.download()
         if html.endswith("</PDF>"):
             return None
         if html.startswith("<?xml"):
@@ -1629,7 +1631,10 @@ class Filing:
                         rendered = xml_obj.to_html()
                         if rendered:
                             return rendered
-                html = self.homepage.primary_html_document.download()
+                document = self.homepage.primary_html_document
+                if document is None:
+                    return None
+                html = document.download()
         if isinstance(html, bytes):
             try:
                 return html.decode("utf-8")
