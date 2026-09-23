@@ -346,10 +346,25 @@ def _get_investment_member_candidates(xbrl) -> tuple[str, ...]:
     return tuple(candidates)
 
 
+@lru_cache(maxsize=None)
+def _compiled(pattern: str, flags: int = 0) -> re.Pattern:
+    """Cache compiled patterns built at call time from this module's own
+    INVESTMENT_TYPES vocabulary (181 entries) or a handful of fixed templates
+    -- never from filing text, so the key is bounded and cannot grow without
+    limit. re.match/search/sub/finditer already run every pattern through
+    re's own 512-entry cache, but a single piped identifier touches roughly
+    930 per-call patterns here (six sites, several looping over
+    INVESTMENT_TYPES), which evicts entries other call sites still need, so
+    almost every one recompiles on almost every call. Measured 2026-09-15:
+    674 identifiers, 38.95s -> 1.58s with this cache (edgar skill, gap
+    ledger, issue #50)."""
+    return re.compile(pattern, flags)
+
+
 def _known_investment_type_matches(identifier: str) -> list[re.Match]:
     matches = []
     for investment_type in INVESTMENT_TYPES:
-        for match in re.finditer(re.escape(investment_type), identifier, re.IGNORECASE):
+        for match in _compiled(re.escape(investment_type), re.IGNORECASE).finditer(identifier):
             starts_at_boundary = match.start() == 0 or not identifier[match.start() - 1].isalnum()
             follows_member_code = bool(re.search(r'\b[A-Z]\d{1,3}$', identifier[:match.start()]))
             ends_at_boundary = match.end() == len(identifier) or not identifier[match.end()].isalnum()
@@ -477,12 +492,11 @@ def _portfolio_company_fields(
         re.IGNORECASE,
     )
     company_and_detail = company_and_fields[:field_match.start() if field_match else None].strip()
-    repeated_type = re.match(
+    repeated_type = _compiled(
         rf'^(?P<company>.+?)\s+(?:[-\u2013\u2014]\s+)?'
         rf'(?P<detail>{re.escape(investment_type)}\s*[-\u2013\u2014]\s*.+)$',
-        company_and_detail,
         re.IGNORECASE,
-    )
+    ).match(company_and_detail)
     if repeated_type:
         company_name = repeated_type.group('company').strip()
         detail = repeated_type.group('detail').strip()
@@ -1167,13 +1181,12 @@ def _parse_investment_identifier(
 
     if ' | ' in identifier:
         for inv_type in sorted(INVESTMENT_TYPES, key=len, reverse=True):
-            pipe_investment = re.fullmatch(
+            pipe_investment = _compiled(
                 rf'(?P<company>.+?)\s+\|\s+(?P<type>{re.escape(inv_type)})'
                 r'(?P<facility>\s+\([^)]*\))?'
                 r'(?P<detail>\s+-\s+.+?)?(?:\s+\d+(?:\.\d+)*)?',
-                identifier,
                 re.IGNORECASE,
-            )
+            ).fullmatch(identifier)
             if pipe_investment:
                 investment_type = pipe_investment.group('type')
                 facility = pipe_investment.group('facility')
@@ -1190,12 +1203,11 @@ def _parse_investment_identifier(
 
     # Prefer an explicit trailing delimiter over taxonomy-derived company spans.
     for inv_type in INVESTMENT_TYPES:
-        trailing_type = re.fullmatch(
+        trailing_type = _compiled(
             rf'(?P<company>.+),\s*(?P<type>{re.escape(inv_type)})'
             r'(?:\s+\d+(?:\.\d+)*)?',
-            identifier,
             re.IGNORECASE,
-        )
+        ).fullmatch(identifier)
         if trailing_type:
             company_name = trailing_type.group('company').strip()
             company_name = re.sub(
@@ -1230,11 +1242,10 @@ def _parse_investment_identifier(
             # Strip numeric suffix for matching (e.g., "Software & Services 1" → "Software & Services")
             right_base = re.sub(r'\s*\d+\s*$', '', right_side)
             right_is_instrument = any(
-                re.fullmatch(
+                _compiled(
                     rf'{re.escape(inv_type)}(?:\s*\([^)]*\)|\s*[\d.]*)?',
-                    right_base,
                     re.IGNORECASE,
-                )
+                ).fullmatch(right_base)
                 for inv_type in INVESTMENT_TYPES
             )
             if right_is_instrument:
@@ -1247,7 +1258,7 @@ def _parse_investment_identifier(
                 left_side = pipe_parts[0]
                 for inv_type in INVESTMENT_TYPES:
                     pattern = rf',\s*{re.escape(inv_type)}(\s*[\d.]*)?$'
-                    match = re.search(pattern, left_side, re.IGNORECASE)
+                    match = _compiled(pattern, re.IGNORECASE).search(left_side)
                     if match:
                         company_name = left_side[:match.start()].strip()
                         investment_type = left_side[match.start() + 1:].strip()
