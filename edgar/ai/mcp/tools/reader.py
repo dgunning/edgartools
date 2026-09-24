@@ -10,6 +10,9 @@ from __future__ import annotations
 
 import logging
 from typing import Any, Optional
+
+import pandas as pd
+
 from edgar import find
 from edgar.ai.mcp.tools.base import (
     tool,
@@ -473,23 +476,27 @@ def _extract_13f_section(obj, section: str) -> Optional[str]:
     """Extract sections from a 13F-HR (ThirteenF) object."""
     if section == "holdings":
         try:
-            if hasattr(obj, 'holdings') and obj.holdings:
+            # ``ThirteenF.holdings`` is a DataFrame: its truth value raises and
+            # iterating it yields column names, so walk its rows (as #1136 did
+            # for ``_get_fund_holdings`` in ownership.py).
+            holdings = getattr(obj, 'holdings', None)
+            if holdings is not None and not holdings.empty:
                 parts = []
-                for h in obj.holdings[:30]:  # Limit to top 30
-                    name = getattr(h, 'name', None) or getattr(h, 'issuer', 'Unknown')
-                    shares = getattr(h, 'shares', None)
-                    value = getattr(h, 'value', None)
-                    line = f"  {name}"
-                    if shares:
-                        line += f" | {shares:,} shares"
-                    if value:
-                        line += f" | ${value:,}"
+                for _, row in holdings.head(30).iterrows():  # Limit to top 30
+                    name = row.get('Issuer')
+                    shares = row.get('SharesPrnAmount')
+                    value = row.get('Value')
+                    line = f"  {name if pd.notna(name) else 'Unknown'}"
+                    if pd.notna(shares) and shares:
+                        line += f" | {int(shares):,} shares"
+                    if pd.notna(value) and value:
+                        line += f" | ${int(value):,}"
                     parts.append(line)
-                total = len(obj.holdings)
+                total = len(holdings)
                 header = f"Top holdings ({min(30, total)} of {total}):"
                 return header + "\n" + "\n".join(parts)
         except Exception as e:
-            logger.debug(f"Could not extract 13F holdings: {e}")
+            logger.warning(f"Could not extract 13F holdings: {e}")
         return None
 
     elif section == "summary":

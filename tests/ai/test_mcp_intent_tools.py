@@ -412,6 +412,45 @@ class TestEdgarReadTool:
         assert result.success is False
 
 
+class TestExtract13FHoldings:
+    """13F holdings section reads rows from the ThirteenF.holdings DataFrame (#1337)."""
+
+    @staticmethod
+    def _fake_13f(holdings):
+        class FakeThirteenF:
+            pass
+
+        obj = FakeThirteenF()
+        obj.holdings = holdings
+        return obj
+
+    def test_holdings_section_lists_rows(self):
+        import pandas as pd
+        from edgar.ai.mcp.tools.reader import _extract_13f_section
+
+        holdings = pd.DataFrame(
+            [
+                dict(Issuer=f"ISSUER {i}", Class="COM", Cusip=f"C{i:08d}", Ticker=f"T{i}",
+                     SharesPrnAmount=1000 + i, Value=float(100000 - i))
+                for i in range(211)
+            ]
+        )
+        result = _extract_13f_section(self._fake_13f(holdings), "holdings")
+
+        lines = result.splitlines()
+        assert lines[0] == "Top holdings (30 of 211):"
+        assert lines[1] == "  ISSUER 0 | 1,000 shares | $100,000"
+        assert lines[30] == "  ISSUER 29 | 1,029 shares | $99,971"
+        assert len(lines) == 31
+
+    def test_holdings_section_empty_or_missing_returns_none(self):
+        import pandas as pd
+        from edgar.ai.mcp.tools.reader import _extract_13f_section
+
+        assert _extract_13f_section(self._fake_13f(pd.DataFrame()), "holdings") is None
+        assert _extract_13f_section(self._fake_13f(None), "holdings") is None
+
+
 # =============================================================================
 # edgar_compare Tool Tests (network required)
 # =============================================================================
