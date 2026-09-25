@@ -106,3 +106,23 @@ def test_label_and_title_in_one_cell(row, expected):
 ])
 def test_existing_shapes_unchanged(row, expected):
     assert _label(row) == expected
+
+
+_XOM_10Q = (Path(__file__).resolve().parents[2]
+            / "fixtures" / "html" / "xom" / "10q" / "xom-10-q-2025-08-04.html")
+
+
+def test_last_toc_item_stops_at_signatures():
+    """ExxonMobil's 10-Q TOC has the same label-and-title cells, so the fix moves
+    it from the pattern extractor onto the TOC path. There the last item had no
+    end anchor and ran into the signature block ("SIGNATURE ... Len M. Fox");
+    it now stops at the bare SIGNATURE line, as the pattern path always did."""
+    doc = HTMLParser(ParserConfig(form="10-Q")).parse(
+        _XOM_10Q.read_text(encoding="utf-8", errors="replace"))
+    item6 = doc.sections["part_ii_item_6"]
+
+    assert item6.detection_method == "toc"
+    text = item6.text()
+    assert text.startswith("ITEM 6. EXHIBITS")
+    assert text.rstrip().endswith("** Furnished herewith.")
+    assert "Len M. Fox" not in text
