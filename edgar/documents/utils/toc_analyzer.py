@@ -1126,7 +1126,7 @@ class TOCAnalyzer:
 
         Returns ``None`` unless the whole text is such a label.
         """
-        text = (text or '').replace('​', '').replace('‌', '').replace('‍', '').strip()
+        text = (text or '').replace('\u200b', '').replace('\u200c', '').replace('\u200d', '').strip()
         match = cls._COMBINED_PART_ITEM.match(text)
         if not match:
             return None

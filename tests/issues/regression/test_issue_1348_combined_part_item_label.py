@@ -71,6 +71,7 @@ def tenq():
     ("PART II - ITEM 1A", ("Part II", "Item 1A")),
     ("Part I — Item 3.", ("Part I", "Item 3")),
     ("Part I, Item\xa01", ("Part I", "Item 1")),        # Workiva's non-breaking space
+    ("Part I,​ Item 2", ("Part I", "Item 2")),     # zero-width space inside the label
     ("  part iv, item 15  ", ("Part IV", "Item 15")),
 ])
 def test_combined_label_names_part_and_item(text, expected):
