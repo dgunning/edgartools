@@ -10,6 +10,7 @@ from freezegun import freeze_time
 from rich.table import Table
 
 import edgar
+import edgar.settings
 from edgar.core import Result, decode_content, get_bool, has_html_content, parallel_thread_map
 from edgar.dates import InvalidDateError, extract_dates, is_start_of_quarter
 from edgar.display.formatting import display_size, reverse_name, split_camel_case
@@ -339,13 +340,29 @@ def test_dataframe_pager():
 
 @pytest.mark.fast
 def test_settings():
-    assert edgar.edgar_mode.max_connections == 10
+    # Assigning `edgar.edgar_mode` installs a real module global that shadows the
+    # package __getattr__ for the rest of the session, so it has to be put back.
+    # Left set, this silently suppressed the access-mode DeprecationWarning for
+    # every test that ran afterwards (GH #1326).
+    #
+    # The first assertion also has to name the mode it means. `edgar.edgar_mode`
+    # is whichever mode EDGAR_ACCESS_MODE selected at import, so reading it and
+    # expecting 10 is only true when the variable is unset; under CRAWL it is 2.
+    had_override = 'edgar_mode' in vars(edgar)
+    original = vars(edgar).get('edgar_mode')
+    try:
+        assert edgar.settings.NORMAL.max_connections == 10
 
-    edgar.edgar_mode = CAUTION
-    assert edgar.edgar_mode.max_connections == 5
+        edgar.edgar_mode = CAUTION
+        assert edgar.edgar_mode.max_connections == 5
 
-    edgar.edgar_mode = CRAWL
-    assert edgar.edgar_mode.max_connections == 2
+        edgar.edgar_mode = CRAWL
+        assert edgar.edgar_mode.max_connections == 2
+    finally:
+        if had_override:
+            edgar.edgar_mode = original
+        else:
+            vars(edgar).pop('edgar_mode', None)
 
 @pytest.mark.fast
 def test_reverse_name():
