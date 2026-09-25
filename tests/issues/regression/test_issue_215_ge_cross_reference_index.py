@@ -112,6 +112,11 @@ class TestIssue215GECrossReferenceIndex:
             # Just verify we got HTML content
             assert '<' in content and '>' in content, "Should return HTML content"
 
+            # The slice must open on the item's own page, not a neighbouring one
+            # (GH #1346: page-break index vs printed page number).
+            assert 'RISK FACTORS' in content[:5000], \
+                "Risk Factors content should open with its own heading"
+
     def test_ge_page_break_detection(self, ge_html):
         """Test that page breaks can be detected in GE filing."""
         index = CrossReferenceIndex(ge_html)
