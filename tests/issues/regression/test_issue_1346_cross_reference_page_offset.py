@@ -14,7 +14,7 @@ is Item 1 content.
 Fix: the offset between page-break index and printed page number is calibrated
 once per document from the page numbers printed in the footers, and applied to
 every range. It is 0 when the footers do not agree on one, so aligned filings
-(Citigroup FY2025, GE) extract byte-for-byte what they did before.
+(Citigroup FY2024, GE) extract byte-for-byte what they did before.
 
 Offline: tracked fixtures under tests/fixtures/html/, and TenK is driven through
 a minimal filing stub (the pattern of test_issue_821_citi_html_leak.py).
@@ -31,7 +31,7 @@ from edgar.documents import CrossReferenceIndex
 
 FIXTURES = Path(__file__).parents[2] / "fixtures" / "html"
 CITI_FY2022 = FIXTURES / "c" / "10k" / "c-10-k-2023-02-27.html"
-CITI_FY2025 = FIXTURES / "c" / "10k" / "c-10-k-2026-02-20.html"
+CITI_FY2024 = FIXTURES / "c" / "10k" / "c-10-k-2025-02-21.html"
 GE_FY2025 = FIXTURES / "ge" / "10k" / "ge-10-k-2026-01-29.html"
 
 
@@ -70,8 +70,8 @@ def citi_2022(citi_2022_html):
 
 
 @pytest.fixture(scope="module")
-def citi_2025():
-    return CrossReferenceIndex(CITI_FY2025.read_text(encoding="utf-8"))
+def citi_2024():
+    return CrossReferenceIndex(CITI_FY2024.read_text(encoding="utf-8"))
 
 
 @pytest.fixture(scope="module")
@@ -85,8 +85,8 @@ class TestPageOffsetCalibration:
         """Three unnumbered front-matter pages: printed page N follows break N+3."""
         assert citi_2022._detect_page_offset() == 3
 
-    def test_citi_fy2025_offset_is_zero(self, citi_2025):
-        assert citi_2025._detect_page_offset() == 0
+    def test_citi_fy2024_offset_is_zero(self, citi_2024):
+        assert citi_2024._detect_page_offset() == 0
 
     def test_ge_offset_is_zero(self, ge_2025):
         """GE prints the number on only every other footer ("4 2025 FORM 10-K"
@@ -133,10 +133,12 @@ class TestAlignedFilingsUnchanged:
     Hashes were taken from main before the fix (a229a01b) on these fixtures.
     """
 
-    def test_citi_fy2025_item_7a(self, citi_2025):
-        content = citi_2025.extract_item_content("7A")
-        assert _text(content).startswith("MANAGING GLOBAL RISK Overview For Citi")
-        assert _sha1(content) == "6e856327ea351dc2bda5b9aa72eb3356e973fd9d"
+    def test_citi_fy2024_item_7a(self, citi_2024):
+        """Printed page 70, the first page Citi's FY2024 index cites for 7A."""
+        content = citi_2024.extract_item_content("7A")
+        assert _text(content).startswith(
+            "Third Line of Defense: Internal Audit Internal Audit is independent of")
+        assert _sha1(content) == "9c9b57e8d449406ba81acaf5c4ed892307209950"
 
     @pytest.mark.parametrize("item,sha1", [
         ("1A", "21bd4549a2d05e2cab08301bac12751dcbbed937"),
