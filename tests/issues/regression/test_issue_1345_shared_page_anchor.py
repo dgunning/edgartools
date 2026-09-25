@@ -170,3 +170,93 @@ def test_20f_page_anchor_collision_groups_are_resolved(page_anchor_20f):
     assert len(set(texts.values())) == len(texts)
     assert texts["part_ii_item_16e"].startswith("ITEM 16E.")
     assert "ITEM 18." not in texts["part_ii_item_17"]
+
+
+def test_ondas_risk_factors_friendly_name_still_resolves(ondas):
+    """The TOC now keys Item 1A as part_i_item_1a; the pattern extractor used
+    to supply it as ``risk_factors``. Both spellings must reach one section."""
+    by_name = ondas["risk_factors"].text()
+    assert len(by_name) == 122_212
+    assert ondas["Item 1A"].text() == by_name
+    assert ondas.get_item("1A").text() == by_name
+    assert ondas.get("risk_factors").text() == by_name
+    assert "risk_factors" in ondas
+
+
+# --- markdown()/HTML honour the heading bound when the heading is nested -----
+
+_NESTED_TOC_ROWS = "".join(
+    f'<tr><td><a href="#{anchor}">Item {num}. {title}</a></td></tr>'
+    for num, title, anchor in [
+        ("1", "Business", "p1"), ("1A", "Risk Factors", "p2"), ("2", "Properties", "p3"),
+        ("3", "Legal Proceedings", "p4"), ("5", "Market for Common Equity", "p5"),
+        ("7", "Management's Discussion and Analysis", "p6"),
+        ("7A", "Quantitative and Qualitative Disclosures", "p7"),
+        ("8", "Financial Statements", "p8"),
+        ("9", "Changes in and Disagreements with Accountants", "p50"),
+        ("9A", "Controls and Procedures", "p50"),
+        ("9B", "Other Information", "p50"),
+        ("10", "Directors and Executive Officers", "p51"),
+    ])
+
+
+def _body_item(anchor, num, title, filler):
+    return (f'<div id="{anchor}"></div><p style="font-weight:bold">Item {num}. {title}</p>'
+            f'<p>{filler}</p>')
+
+
+_NESTED_HTML = (
+    "<html><body><table>" + _NESTED_TOC_ROWS + "</table>"
+    + _body_item("p1", "1", "Business", "We make widgets. " * 40)
+    + _body_item("p2", "1A", "Risk Factors", "Widgets may fail. " * 40)
+    + _body_item("p3", "2", "Properties", "We lease a plant. " * 10)
+    + _body_item("p4", "3", "Legal Proceedings", "None pending. " * 5)
+    + _body_item("p5", "5", "Market for Common Equity", "Listed on NYSE. " * 10)
+    + _body_item("p6", "7", "Management's Discussion and Analysis", "Sales rose. " * 60)
+    + _body_item("p7", "7A", "Quantitative and Qualitative Disclosures", "Rates matter. " * 10)
+    + _body_item("p8", "8", "Financial Statements", "See the statements. " * 40)
+    + '<div id="p50"></div>'
+    + '<p style="font-weight:bold">Item 9. Changes in and Disagreements with Accountants</p>'
+    + "<p>" + "No disagreements occurred. " * 5 + "</p>"
+    # 9A's heading and body sit inside a wrapper div: the wrapper starts inside
+    # Item 9's range, so a naive HTML slice would serialize all of it.
+    + '<div><p style="font-weight:bold">Item 9A. Controls and Procedures</p>'
+    + "<p>" + "Controls were effective. " * 10 + "</p></div>"
+    + '<p style="font-weight:bold">Item 9B. Other Information</p>'
+    + "<p>" + "Nothing further to report. " * 3 + "</p>"
+    + _body_item("p51", "10", "Directors and Executive Officers", "See the proxy. " * 5)
+    + "</body></html>"
+)
+
+
+def test_nested_heading_bound_holds_in_markdown():
+    sections = HTMLParser(ParserConfig(form="10-K", detect_sections=True)).parse(_NESTED_HTML).sections
+    item9 = sections["part_ii_item_9"]
+    item9a = sections["part_ii_item_9a"]
+    assert item9.text().startswith("Item 9. Changes in and Disagreements")
+    assert "Item 9A" not in item9.text()
+    assert item9a.text().startswith("Item 9A. Controls and Procedures")
+    # The end heading is nested in a <div> Item 9's walk entered; markdown
+    # used to serialize that whole div, 9A and all.
+    md9 = item9.markdown()
+    assert "No disagreements occurred" in md9
+    assert "Item 9A" not in md9
+    assert "Controls were effective" not in md9
+
+
+# --- gh-878 hard end now also bounds markdown()/tables() ---------------------
+
+def test_prospectus_trailing_section_markdown_stops_at_financial_statements():
+    """Honouring SectionBoundary.end_element in the HTML slicer (added for the
+    heading bounds above) also applies the existing gh-878 financial-statements
+    bound to markdown()/tables(). text() already stopped there; markdown used
+    to run on through the F-pages (242,142 chars, 74 tables)."""
+    html = (_FIXTURES / "html/abnb/424b4/abnb-424b4-2020-12-09.html").read_text()
+    sections = HTMLParser(ParserConfig(form="424B4", detect_sections=True)).parse(html).sections
+    section = sections["where_you_can_find_more_information"]
+    assert len(section.text()) == 1910
+    md = section.markdown()
+    assert len(md) == 1934
+    assert "Index to Consolidated Financial Statements".upper() not in md.upper()
+    # The section has no table of its own; the F-pages index no longer leaks in.
+    assert section.tables() == []

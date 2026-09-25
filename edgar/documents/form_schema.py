@@ -373,6 +373,37 @@ _ITEM_SEP = r'(?:\s*\([A-Za-z]\))?\s*[.:;\-–—]?\s*[-–—.]?\s*'
 # knowledge, edgartools-llmp.2 / D2). Item-based forms key on "Item N" headers;
 # 424B keys on prospectus titles. The extractor exposes a back-compat projection
 # of these; a golden parity test guards against drift.
+# Friendly 10-K section name -> the SEC item it names. The pattern extractor
+# keys a section it finds by these names (``risk_factors``); the TOC path keys
+# the same section ``part_i_item_1a``. Both ``TenK`` lookups and
+# ``Sections[...]`` resolve a friendly name through this one table, so a name
+# keeps working whichever detector produced the section (GH #1345).
+TEN_K_FRIENDLY_ITEMS = {
+    'business': '1',
+    'risk_factors': '1A',
+    'unresolved_staff_comments': '1B',
+    'cybersecurity': '1C',
+    'properties': '2',
+    'legal_proceedings': '3',
+    'mine_safety': '4',
+    'market_equity': '5',
+    'selected_financial_data': '6',
+    'mda': '7',
+    'market_risk': '7A',
+    'financial_statements': '8',
+    'controls_procedures': '9',
+    'controls_procedures_9a': '9A',
+    'other_information': '9B',
+    'foreign_jurisdictions': '9C',
+    'directors_officers': '10',
+    'executive_compensation': '11',
+    'security_ownership': '12',
+    'relationships_transactions': '13',
+    'accounting_fees': '14',
+    'exhibits': '15',
+    'summary': '16',
+}
+
 _TEN_K_SECTION_PATTERNS = {
     'business': (
         (f'^(Item|ITEM)\\s+1{_ITEM_SEP}Business', 'Item 1 - Business'),

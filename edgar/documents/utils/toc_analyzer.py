@@ -393,9 +393,21 @@ class TOCAnalyzer:
         a missing heading means its extent is unknown. Records bounds in
         ``self.heading_bounds`` and returns the anchors whose groups were split.
         """
+        claimed_pos = sorted({positions[a] for a in result.values() if a in positions})
+
+        def span_of(anchor: str) -> Optional[Tuple[int, float]]:
+            shared_pos = positions.get(anchor)
+            if shared_pos is None:
+                return None
+            span_end = next((p for p in claimed_pos if p > shared_pos), None)
+            return shared_pos, (span_end if span_end is not None else float('inf'))
+
+        # Only the shared spans are read: the positional split never looks
+        # outside them, and a full second scan cost ~15% of parse time.
+        windows = [w for w in (span_of(a) for a, _o, _u in leftovers) if w]
         headings = self._scan_body_item_headings(
             html_content, tree=tree, allow_abutted_title=True,
-            ignore_whitespace_in_bold=True)
+            ignore_whitespace_in_bold=True, windows=windows)
         if not headings:
             return set()
         link_targets = sorted(
@@ -405,15 +417,13 @@ class TOCAnalyzer:
         target_ids = {}
         for anchor_id, pos in positions.items():
             target_ids.setdefault(pos, anchor_id)
-        claimed_pos = sorted({positions[a] for a in result.values() if a in positions})
 
         split: Set[str] = set()
         for anchor, owner, unresolved in leftovers:
-            shared_pos = positions.get(anchor)
-            if shared_pos is None:
+            span = span_of(anchor)
+            if span is None:
                 continue
-            span_end = next((p for p in claimed_pos if p > shared_pos), None)
-            limit = span_end if span_end is not None else float('inf')
+            shared_pos, limit = span
 
             # First heading per item number inside the shared span. Item number,
             # not full key: the body's Part context can disagree with the TOC's.
@@ -1043,7 +1053,8 @@ class TOCAnalyzer:
 
     def _scan_body_item_headings(self, html_content: str, tree=None,
                                  allow_abutted_title: bool = False,
-                                 ignore_whitespace_in_bold: bool = False
+                                 ignore_whitespace_in_bold: bool = False,
+                                 windows: Optional[List[Tuple[int, float]]] = None
                                  ) -> List[Tuple[int, object, str, str]]:
         """Every bold body item heading, in document order.
 
@@ -1054,6 +1065,10 @@ class TOCAnalyzer:
         :meth:`_analyze_body_item_headers` builds its anchor map from this, and
         the collision resolver uses the heading *elements* when the anchors
         alone cannot separate two items (GH #1345).
+
+        ``windows`` limits matching to ``[lo, hi)`` document-index ranges. Part
+        context is not tracked outside them, so keys from a windowed scan may
+        carry the wrong part; the collision split matches by item number only.
         """
         try:
             tree = self._ensure_tree(html_content, tree)
@@ -1074,6 +1089,8 @@ class TOCAnalyzer:
             eid = el.get('id')
             if eid:
                 last_anchor_id = eid
+            if windows is not None and not any(lo <= idx < hi for lo, hi in windows):
+                continue
 
             text = (el.text_content() or '').strip()
             # A heading is short; an over-long text means we're looking at an
