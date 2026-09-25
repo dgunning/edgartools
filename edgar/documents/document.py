@@ -416,7 +416,9 @@ class Section:
                     html_source = re.sub(r'<\?xml[^>]*\?>', '', html_source, count=1)
                 tree = lxml_html.fromstring(html_source)
 
-            return extract_section_html(tree, boundary.anchor_id, boundary.end_element_id)
+            return extract_section_html(tree, boundary.anchor_id, boundary.end_element_id,
+                                        start_element=getattr(boundary, 'start_element', None),
+                                        end_element=getattr(boundary, 'end_element', None))
 
         except (LxmlError, XMLSyntaxError, ValueError) as e:
             logger.debug(f"HTML extraction failed for section '{self.name}': {e}")

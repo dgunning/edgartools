@@ -78,13 +78,20 @@ _TABLE_INTERNAL_TAGS = {
 }
 
 
-def collect_range_elements(tree, start_anchor: str, end_anchor: Optional[str]) -> List:
+def collect_range_elements(tree, start_anchor: str, end_anchor: Optional[str],
+                           start_element=None, end_element=None) -> List:
     """Collect elements in document order between the start and end anchors.
 
     Collection turns on *after* the start anchor element and off *at* the
     end anchor element (the end anchor's content is excluded). Returns the
     raw list of every element seen while in range — callers typically reduce
     this to top-level elements via :func:`top_level_elements`.
+
+    ``start_element`` / ``end_element`` are optional hard bounds for items that
+    share one anchor and are told apart by their heading elements (GH #1345):
+    collection starts *at* ``start_element`` (included) instead of after the
+    anchor, and stops at ``end_element`` or the end anchor, whichever comes
+    first.
     """
     if not start_anchor:
         return []
@@ -97,9 +104,14 @@ def collect_range_elements(tree, start_anchor: str, end_anchor: Optional[str]) -
     for _event, el in etree.iterwalk(tree, events=('start',)):
         if not hasattr(el, 'get'):
             continue
-        if is_anchor_match(el, start_anchor):
+        if start_element is not None:
+            if el is start_element:
+                in_range = True
+        elif is_anchor_match(el, start_anchor):
             in_range = True
             continue
+        if in_range and end_element is not None and el is end_element:
+            break
         if end_anchor and is_anchor_match(el, end_anchor):
             break
         if in_range:
@@ -168,7 +180,8 @@ def _clone(el):
     return copy.deepcopy(el)
 
 
-def build_section_subtree(tree, start_anchor: str, end_anchor: Optional[str]):
+def build_section_subtree(tree, start_anchor: str, end_anchor: Optional[str],
+                          start_element=None, end_element=None):
     """Build a single ``<div>`` element holding the section's content.
 
     The returned element is detached from the source tree (its children are
@@ -179,7 +192,8 @@ def build_section_subtree(tree, start_anchor: str, end_anchor: Optional[str]):
     if not start_elements:
         return None
 
-    collected = collect_range_elements(tree, start_anchor, end_anchor)
+    collected = collect_range_elements(tree, start_anchor, end_anchor,
+                                       start_element=start_element, end_element=end_element)
     if not collected:
         return None
 
@@ -201,14 +215,16 @@ def build_section_subtree(tree, start_anchor: str, end_anchor: Optional[str]):
     return container
 
 
-def extract_section_html(tree, start_anchor: str, end_anchor: Optional[str]) -> str:
+def extract_section_html(tree, start_anchor: str, end_anchor: Optional[str],
+                         start_element=None, end_element=None) -> str:
     """Return the section's HTML as a single well-formed ``<div>`` string.
 
     This is the hardened replacement for the inline slicing that lived in
     ``Section._extract_section_html``. Returns ``""`` when the section can't
     be resolved.
     """
-    container = build_section_subtree(tree, start_anchor, end_anchor)
+    container = build_section_subtree(tree, start_anchor, end_anchor,
+                                      start_element=start_element, end_element=end_element)
     if container is None:
         return ""
     return lxml_html.tostring(container, encoding='unicode')
