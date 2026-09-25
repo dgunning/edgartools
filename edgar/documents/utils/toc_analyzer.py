@@ -391,6 +391,16 @@ class TOCAnalyzer:
                 if inferred_part:
                     current_part = inferred_part
 
+                # A link that reads "Part I, Item 2" in full carries its own
+                # part; it outranks any header inferred from earlier rows
+                # (GH #1348). _normalize_section_name reads the item from it.
+                # It governs this link only: this scan walks every link in the
+                # document, and a body cross-reference reading "Part I, Item 1"
+                # must not move the running context for the links after it
+                # (Adobe's 10-K grew a phantom part_i_item_8 that way).
+                part_item = self._combined_part_item_label(text)
+                link_part = part_item[0] if part_item else current_part
+
                 # Check if this looks like a section reference (check text, anchor ID, and context)
                 if self._is_section_link(text, anchor_id, preceding_item):
                     # Verify target exists
@@ -406,7 +416,7 @@ class TOCAnalyzer:
                             normalized_name=normalized_name,
                             section_type=section_type,
                             order=order,
-                            part=current_part  # Assign current part context
+                            part=link_part  # This link's own part, else the running context
                         )
                         toc_sections.append(toc_section)
 
@@ -1094,6 +1104,35 @@ class TOCAnalyzer:
 
         return None
 
+    # A TOC label that names both the part and the item — "Part I, Item 2",
+    # "PART II - ITEM 1A", "Part II Item 5." — and nothing else. Anchored at
+    # both ends: cross-reference prose ("see Part II, Item 7 of our Annual
+    # Report") mentions a part and an item too, and must never claim a key
+    # (GH #905/#918).
+    _COMBINED_PART_ITEM = re.compile(
+        r'^part\s+([ivx]+)\s*[,.:;\-–—]?\s*item\s+(\d+)([a-z])?\s*\.?$',
+        re.IGNORECASE)
+
+    @classmethod
+    def _combined_part_item_label(cls, text: str) -> Optional[Tuple[str, str]]:
+        """Split a combined "Part X, Item N" TOC label into ``("Part X", "Item N")``.
+
+        Edison International's 10-Q TOC names each item only in a third link
+        per row — ``[title, page, "Part I, Item 2"]`` — and has no part-header
+        rows at all, so this label is the row's only part *and* item evidence.
+        Read as an item label it fails (the text does not open with "Item"),
+        and read as a part label it discards the item, so every row was dropped
+        (GH #1348).
+
+        Returns ``None`` unless the whole text is such a label.
+        """
+        text = (text or '').replace('\u200b', '').replace('\u200c', '').replace('\u200d', '').strip()
+        match = cls._COMBINED_PART_ITEM.match(text)
+        if not match:
+            return None
+        part, num, letter = match.groups()
+        return f"Part {part.upper()}", f"Item {num}{(letter or '').upper()}"
+
     @staticmethod
     def _item_label_from_text(text: str) -> Optional[str]:
         """Normalize a leading ``Item N`` label, ignoring a title glued onto it.
@@ -1262,6 +1301,50 @@ class TOCAnalyzer:
             return toc_table
         # Heading table was absent or too small — try link-based detection
         return self._find_toc_table_by_links(tree)
+
+    def _toc_continuation_tables(self, tree, toc_table) -> List[object]:
+        """The TOC table plus the tables it continues into, in document order.
+
+        A long TOC breaks across pages, and each page is its own ``<table>``.
+        Edison International's 10-Q puts Part I Items 2, 3 and 1 in the first
+        half and Item 4 onward in the second; parsing only the half with more
+        item links lost the other three items (GH #1348).
+
+        A neighbouring table joins only when it has the shape of a TOC page:
+        at least one combined "Part X, Item N" label and most of its non-empty
+        rows linking to an internal anchor. Growth stops at the first table
+        that fails, so body tables further away are never reached. The
+        combined-label requirement keeps this to the TOC shape the fix is for.
+        """
+        tables = tree.xpath('//table')
+        try:
+            index = next(i for i, t in enumerate(tables) if t is toc_table)
+        except StopIteration:
+            return [toc_table]
+
+        def is_continuation(table) -> bool:
+            linked = total = 0
+            labelled = False
+            for row in table.xpath('.//tr'):
+                if not (row.text_content() or '').strip():
+                    continue
+                total += 1
+                links = [a for a in row.xpath('.//a[@href]')
+                         if (a.get('href') or '').strip().startswith('#')]
+                if links:
+                    linked += 1
+                    labelled = labelled or any(
+                        self._combined_part_item_label(a.text_content() or '')
+                        for a in links)
+            return labelled and linked >= 3 and linked * 2 > total
+
+        start = index
+        while start > 0 and is_continuation(tables[start - 1]):
+            start -= 1
+        end = index
+        while end + 1 < len(tables) and is_continuation(tables[end + 1]):
+            end += 1
+        return tables[start:end + 1]
 
     @staticmethod
     def _part_rank(label: Optional[str]) -> Optional[int]:
@@ -1521,7 +1604,8 @@ class TOCAnalyzer:
 
             mapping = {}
             current_part = self.schema.seed_part
-            rows = toc_table.xpath('.//tr')
+            rows = [row for table in self._toc_continuation_tables(tree, toc_table)
+                    for row in table.xpath('.//tr')]
 
             for row in rows:
                 row_text = (row.text_content() or '').strip()
@@ -1566,6 +1650,16 @@ class TOCAnalyzer:
                     # Filter out page numbers from multi-text groups
                     non_page_texts = [t for t in texts if not re.match(r'^\d{1,3}$', t)]
                     combined = ' '.join(non_page_texts)
+
+                    # A link whose whole text is "Part I, Item 2" names both the
+                    # part and the item (GH #1348). The row carries its own part,
+                    # so adopt it before any key is built for this row.
+                    part_item = next((pi for pi in map(self._combined_part_item_label,
+                                                       non_page_texts) if pi), None)
+                    if part_item:
+                        current_part, parsed = part_item
+                        candidates.append((anchor_id, parsed))
+                        continue
 
                     # Try to parse an item/part name from the combined text
                     parsed = self._parse_item_from_text(combined)
@@ -2282,6 +2376,12 @@ class TOCAnalyzer:
         item_label = self._item_label_from_text(text)
         if item_label:
             return item_label
+
+        # "Part I, Item 2" names the item too; the Part pattern below would
+        # keep only "Part I", which the mapping then drops (GH #1348).
+        part_item = self._combined_part_item_label(text)
+        if part_item:
+            return part_item[1]
 
         # Handle Part patterns
         part_match = re.match(r'part\s+([ivx]+)', text, re.IGNORECASE)
