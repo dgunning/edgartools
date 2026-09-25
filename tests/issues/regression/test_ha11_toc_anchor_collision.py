@@ -99,7 +99,7 @@ def test_items_5_and_6_are_different_sections(pg_sections):
     item_6 = pg_sections["part_ii_item_6"].text()
 
     assert item_5 != item_6
-    assert len(item_5) == 306
+    assert len(item_5) == 308  # table cells no longer fused (edgartools-wzgu)
     assert len(item_6) == 2320
     # Content, not just length — each key must hold ITS item.
     assert item_5.startswith("Item\xa05.Other Information")
@@ -117,7 +117,7 @@ def test_the_collision_is_visible_through_the_report_object():
 
     assert item_5 is not None and item_6 is not None
     assert item_5 != item_6
-    assert len(item_5) == 306
+    assert len(item_5) == 308  # table cells no longer fused (edgartools-wzgu)
 
 
 def test_body_header_scan_reads_headers_whose_title_abuts_the_period():

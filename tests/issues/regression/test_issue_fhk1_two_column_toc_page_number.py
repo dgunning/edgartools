@@ -178,5 +178,5 @@ def test_ambac_item_7_includes_its_non_gaap_subsection():
     )
 
     item_7 = sections["part_ii_item_7"].text()
-    assert len(item_7) == 158_411, f"Item 7 is {len(item_7):,} chars (was 149,459)"
+    assert len(item_7) == 159_709, f"Item 7 is {len(item_7):,} chars (was 149,459)"
     assert "NON-GAAP FINANCIAL MEASURES" in item_7

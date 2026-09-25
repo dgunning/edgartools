@@ -213,7 +213,7 @@ def test_a_modern_filing_keeps_the_modern_meanings():
 
     assert len(doc.sections["part_iii_item_14"].text()) == 262
     assert "PRINCIPAL ACCOUNTANT FEES" in doc.sections["part_iii_item_14"].text()
-    assert len(doc.sections["part_iv_item_15"].text()) == 153840
+    assert len(doc.sections["part_iv_item_15"].text()) == 150265  # tables rendered cell by cell (edgartools-wzgu)
 
     # And the 1999 filing, whose exhibits are Item 14, gains no Item 15 from the
     # 'Exhibits?' pattern that already sat under part_iv_item_15.

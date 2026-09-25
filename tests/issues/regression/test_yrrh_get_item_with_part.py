@@ -172,7 +172,7 @@ def test_the_two_item_ones_are_different_sections():
     part_ii = report.get_item_with_part("Part II", "Item 1")
 
     assert part_i != part_ii
-    assert len(part_i) == 41077
+    assert len(part_i) == 42138  # table cells no longer fused (edgartools-wzgu)
     assert len(part_ii) == 975
     assert "Legal Proceedings" in part_ii or "legal proceedings" in part_ii.lower()
 

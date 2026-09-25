@@ -46,6 +46,11 @@ _ITEM_TITLE_PATTERNS = {
 }
 
 
+# Column-alignment padding in a rendered table, and a rule line under its header.
+_TABLE_PADDING = re.compile(r' {3,}')
+_TABLE_RULE_LINE = re.compile(r'^[\s─-╿]*$')
+
+
 @dataclass
 class SectionBoundary:
     """Represents the boundaries of a document section."""
@@ -820,18 +825,40 @@ class SECSectionExtractor:
         # and worst for the last items in a filing (edgartools-llmp.8). The element
         # is already resolved above, so starting there costs nothing extra.
         #
-        # The loop body below is unchanged: iterwalk_from yields the identical
-        # event/element sequence the root walk would have produced from this point
-        # on, ancestor 'end' events included.
+        # iterwalk_from yields the identical event/element sequence the root walk
+        # would have produced from this point on, ancestor 'end' events included.
+        #
+        # A table whose subtree is being rendered whole: its inner events are
+        # skipped until its own 'end' event.
+        rendered_table = None
+
         for event, el in iterwalk_from(start_elements[0]):
             # Skip non-element nodes (comments, etc.)
             if not hasattr(el, 'get'):
                 continue
 
+            if rendered_table is not None:
+                if el is not rendered_table:
+                    continue
+                rendered_table = None  # its 'end' event: handled below
+
             el_id = el.get('id', '')
             tag_name = el.tag.lower() if isinstance(el.tag, str) else ''
 
             if event == 'start':
+                # Render a table the way doc.text() does, rather than
+                # concatenating its cells' raw text, which fused adjacent cells
+                # ("November 1-30, 2021" + "7,294,800" -> "20217,294,800").
+                # A table holding a boundary keeps the element-wise walk so the
+                # section still stops inside it.
+                if (in_range and tag_name == 'table'
+                        and not self._table_holds_boundary(el, boundary, include_subsections)):
+                    table_text = self._render_table(el, clean)
+                    if table_text is not None:
+                        all_text.append(table_text)
+                        rendered_table = el
+                        continue
+
                 # Check if we've reached the start anchor
                 if is_anchor_match(el, boundary.anchor_id):
                     in_range = True
@@ -873,6 +900,62 @@ class SECSectionExtractor:
             combined_text = self._clean_section_text(combined_text)
 
         return combined_text
+
+    def _table_holds_boundary(self, table, boundary: SectionBoundary,
+                              include_subsections: bool) -> bool:
+        """True when ``table`` (or anything inside it) is where the walk must stop."""
+        end_id = boundary.end_element_id
+        for el in table.iter():
+            if not isinstance(el.tag, str):
+                continue
+            if end_id and is_anchor_match(el, end_id):
+                return True
+            if boundary.end_element is not None and el is boundary.end_element:
+                return True
+            if not include_subsections and self._is_sibling_section(el.get('id', ''), boundary.name):
+                return True
+        return False
+
+    def _render_table(self, table, clean: bool) -> Optional[str]:
+        """Render an lxml ``<table>`` with the rule ``doc.text()`` uses.
+
+        Builds the TableNode with the parser's own TableProcessor (as
+        ``Section.tables()`` does for TOC sections) and renders it through
+        ``TextExtractor.render_table`` — one implementation, not a copy of it.
+        So which cells a row has, their order, and how "$" and ")" join their
+        figures are exactly what ``doc.text()`` shows.
+
+        Two deliberate differences, both about layout rather than content:
+
+        * Column width is unbounded (``doc.text(table_max_col_width=...)``'s own
+          knob). At the default, cells over 500 characters are cut to "...", and
+          filers put whole paragraphs in layout-table cells: 161 such cuts across
+          the fixture corpus would have been new losses in section text.
+        * Alignment padding collapses to two spaces and header rule lines are
+          dropped. Section text is a flat stream, not a grid, and the padding
+          alone made table-heavy sections 1.5-2.6x longer (XOM 10-K Item 8:
+          166,291 -> 437,219 chars) — which pushed nine correctly-bounded
+          sections past the size guardrail's bands, calibrated on this text.
+
+        Returns None if the table cannot be processed, so the caller falls back
+        to the element-wise walk.
+        """
+        from edgar.documents.config import ParserConfig
+        from edgar.documents.extractors.text_extractor import TextExtractor
+        from edgar.documents.strategies.table_processing import TableProcessor
+
+        config = getattr(self.document, '_config', None) or ParserConfig()
+        try:
+            node = TableProcessor(config).process(table)
+            rendered = TextExtractor(clean=clean, table_max_col_width=10**6).render_table(node)
+        except Exception as e:  # malformed filing HTML: keep the old walk
+            logger.debug("TOC section table render failed: %s", e)
+            return None
+        lines = (_TABLE_PADDING.sub('  ', line).strip() for line in rendered.splitlines())
+        text = '\n'.join(line for line in lines if not _TABLE_RULE_LINE.match(line))
+        if not text and any(ch.isalnum() for ch in table.text_content()):
+            return None  # the renderer kept nothing of a table that has content
+        return text
 
     def _is_sibling_section(self, element_id: str, current_section: str) -> bool:
         """Check if element ID represents a sibling section."""

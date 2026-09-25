@@ -310,6 +310,14 @@ class FastTableRenderer:
                             content_score += 1
                         # Skip single spaces, dashes, or other likely spacing characters
 
+                        # A letter or digit is content however short the cell is.
+                        # Scored only on length, a column of one- and two-character
+                        # values read as spacing: Regions' loan table lost its
+                        # "$85" and "$76" figures and Morgan Stanley's segment
+                        # table its "WM" header (edgartools-wzgu).
+                        if not has_substantial and any(ch.isalnum() for ch in cell_content):
+                            has_substantial = True
+
             # A column whose non-empty cells are ALL affixes -- the "$" a filer puts
             # in its own cell, the "%" after a percentage, the ")" closing a negative
             # number -- is not spacing and is not data either. It has to survive this
