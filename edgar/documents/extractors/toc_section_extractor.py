@@ -6,6 +6,7 @@ This system uses TOC structure to extract specific sections like "Item 1",
 all SEC filings regardless of whether they use semantic anchors or generated IDs.
 """
 import bisect
+import dataclasses
 import logging
 import re
 from dataclasses import dataclass
@@ -69,6 +70,10 @@ class SectionBoundary:
     # prospectus financial-statements F-pages — gh-878). Takes effect alongside
     # end_element_id; whichever boundary is hit first in document order wins.
     end_element: Optional[object] = None
+    # Optional hard start: begin extraction AT this lxml element (its own text
+    # included) instead of just after the start anchor. Used when several items
+    # share one anchor and are told apart by their heading elements (GH #1345).
+    start_element: Optional[object] = None
 
 
 class SECSectionExtractor:
@@ -225,6 +230,18 @@ class SECSectionExtractor:
             )
 
         self.section_map = {name: data['canonical_name'] for name, data in sec_sections.items()}
+
+        # Items that share one anchor but were told apart by their heading
+        # elements (GH #1345): start each displaced item at its own heading and
+        # bound it on the right, instead of slicing every key to one span.
+        for name, (start_el, end_el) in getattr(self.toc_analyzer, 'heading_bounds', {}).items():
+            boundary = self.section_boundaries.get(name)
+            if boundary is None:
+                continue
+            if start_el is not None:
+                boundary.start_element = start_el
+            if end_el is not None:
+                boundary.end_element = end_el
 
         # Re-resolve section boundaries whose span is anomalous for their rescue
         # key (edgartools-llmp.1 / D3).
@@ -562,10 +579,9 @@ class SECSectionExtractor:
                 continue
             end_pos = positions.get(boundary.end_element_id) if boundary.end_element_id else total
             if end_pos is None or end_pos > clamp_pos:
-                self.section_boundaries[key] = SectionBoundary(
-                    name=boundary.name, anchor_id=boundary.anchor_id, end_element_id=clamp_anchor,
-                    confidence=boundary.confidence, detection_method=boundary.detection_method,
-                )
+                # replace() keeps any heading-element bounds (GH #1345).
+                self.section_boundaries[key] = dataclasses.replace(
+                    boundary, end_element_id=clamp_anchor)
 
         logger.info("Re-attributed incorporated-by-reference financials: claimed %s",
                     sorted(deferred) + (['part_ii_item_7 (gap-fill)'] if 'part_ii_item_7' not in deferred else []))
@@ -804,10 +820,16 @@ class SECSectionExtractor:
         # pattern extractor build boundaries by other routes: if one of those
         # ever inverts a pair, silence is still the answer we want over text
         # that runs to the end of the filing at confidence 0.95.
+        # A heading-element start (GH #1345) replaces the anchor as the point
+        # the walk begins at; the anchor only has to exist.
+        start_el = boundary.start_element if boundary.start_element is not None else start_elements[0]
+
         if boundary.end_element_id:
             end_elements = find_anchor_targets(tree, boundary.end_element_id)
-            if end_elements and precedes(end_elements[0], start_elements[0]):
+            if end_elements and precedes(end_elements[0], start_el):
                 return ""
+        if boundary.end_element is not None and precedes(boundary.end_element, start_el):
+            return ""
 
         # Use document-order traversal (iterwalk) to collect all text between anchors
         # This correctly handles multi-container sections where start and end anchors
@@ -832,7 +854,7 @@ class SECSectionExtractor:
         # skipped until its own 'end' event.
         rendered_table = None
 
-        for event, el in iterwalk_from(start_elements[0]):
+        for event, el in iterwalk_from(start_el):
             # Skip non-element nodes (comments, etc.)
             if not hasattr(el, 'get'):
                 continue
@@ -859,8 +881,12 @@ class SECSectionExtractor:
                         rendered_table = el
                         continue
 
-                # Check if we've reached the start anchor
-                if is_anchor_match(el, boundary.anchor_id):
+                # Check if we've reached the start: the heading element itself
+                # (its text belongs to the section), else the start anchor.
+                if boundary.start_element is not None:
+                    if el is boundary.start_element:
+                        in_range = True
+                elif is_anchor_match(el, boundary.anchor_id):
                     in_range = True
                     continue
 
