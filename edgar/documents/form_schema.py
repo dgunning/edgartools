@@ -276,21 +276,30 @@ class FormSchema:
 # wins). The "item" exclusion on the first four prevents double-mapping text
 # that already contains an explicit "Item N" (which a higher-priority regex
 # handles first).
+#
+# "summary" and "index" exclude sub-heading rows that merely mention an item's
+# title. A "Summary of Risk Factors" row (often inside a cautionary-note title)
+# and an "Index to (Combined Notes to) Financial Statements" row sit in the TOC
+# ahead of, or instead of, the real item row; matched by keyword, they claimed
+# Item 1A / Item 8 at the summary's anchor, so the item returned the summary and
+# the preceding item swallowed the real one (GH #1344).
 _TEN_K_RULES: Tuple[TextItemRule, ...] = (
     TextItemRule("Item 1",  ("business",), ("item",)),
-    TextItemRule("Item 1A", ("risk factors",), ("item",)),
+    TextItemRule("Item 1A", ("risk factors",), ("item", "summary")),
     TextItemRule("Item 2",  ("properties",), ("item",)),
     TextItemRule("Item 3",  ("legal proceedings",), ("item",)),
     TextItemRule("Item 7",  ("management", "discussion")),
-    TextItemRule("Item 8",  ("financial statements",)),
+    TextItemRule("Item 8",  ("financial statements",), ("index",)),
     TextItemRule("Item 15", ("exhibits",)),
 )
 
 # 10-Q keeps only the safe overlap with 10-K: Risk Factors is Part II Item 1A on
 # both. Every other 10-K mapping is wrong on a 10-Q, so unmatched text is skipped
-# rather than emitted (see skip_unmatched_text).
+# rather than emitted (see skip_unmatched_text). The "summary" exclusion mirrors
+# the 10-K rule: a 10-Q cautionary note can carry the same "Summary of Risk
+# Factors" sub-heading row (GH #1344).
 _TEN_Q_RULES: Tuple[TextItemRule, ...] = (
-    TextItemRule("Item 1A", ("risk factors",), ("item",)),
+    TextItemRule("Item 1A", ("risk factors",), ("item", "summary")),
 )
 
 # Canonical 10-K item→part layout (items are unique across parts):
