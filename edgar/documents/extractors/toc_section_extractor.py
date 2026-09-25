@@ -242,6 +242,61 @@ class SECSectionExtractor:
         # key (edgartools-llmp.1 / D3).
         self._rescue_boundaries()
 
+        self._bound_open_sections_at_signatures(tree)
+
+    def _bound_open_sections_at_signatures(self, tree) -> None:
+        """End a section with no end boundary at the next bare SIGNATURES line.
+
+        The last TOC item has no next anchor, so it ran to the end of the
+        document and swallowed the signature block whenever the TOC carried no
+        SIGNATURES row of its own. The pattern extractor has always stopped the
+        last item there (edgartools-dt1f.1); this applies the same test,
+        `_SIGNATURES_HEADER`, to the TOC path. ExxonMobil's 10-Q became
+        TOC-detected with GH #1347, and its Item 6 took in "SIGNATURE ... Len M.
+        Fox" until this bound was added.
+
+        10-Q only, the scope Strategy 3b gives SIGNATURES on the pattern path. A
+        10-K routinely files its financial statements after the signature page,
+        so the same bound cut a modern 10-K's Item 15 from 153,840 chars to 1,051.
+        """
+        from edgar.documents.extractors.pattern_section_extractor import _SIGNATURES_HEADER
+
+        if self._base_form() != '10-Q':
+            return
+
+        open_ended = [b for b in self.section_boundaries.values()
+                      if not b.end_element_id and b.end_element is None]
+        if not open_ended:
+            return
+
+        # The outermost element whose whole text is the bare header, found from
+        # the few text nodes that mention the word rather than a full walk.
+        headers = []
+        for text in tree.xpath('//text()[contains(translate(., "signature", "SIGNATURE"), "SIGNATURE")]'):
+            owner = text.getparent()
+            if owner is not None and text.is_tail:
+                owner = owner.getparent()
+            if owner is None or not _SIGNATURES_HEADER.match(owner.text_content()):
+                continue
+            parent = owner.getparent()
+            while (parent is not None and parent.tag not in ('body', 'html')
+                   and _SIGNATURES_HEADER.match(parent.text_content())):
+                owner, parent = parent, parent.getparent()
+            if not any(owner is h for h in headers):
+                headers.append(owner)
+        if not headers:
+            return
+        headers.sort(key=document_order_path)
+
+        for boundary in open_ended:
+            start_el = boundary.start_element
+            if start_el is None:
+                targets = find_anchor_targets(tree, boundary.anchor_id)
+                if not targets:
+                    continue
+                start_el = targets[0]
+            boundary.end_element = next((h for h in headers if precedes(start_el, h)), None)
+
     # --- Boundary rescue (edgartools-llmp.1 / D3) -------------------------------
     #
     # A "rescue key" is an item that filers commonly defer or merge, so its

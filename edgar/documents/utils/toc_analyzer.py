@@ -2325,6 +2325,19 @@ class TOCAnalyzer:
                         if bare_part_match:
                             return f"Part {bare_part_match.group(1)}"
 
+                        # Label and title in one cell, only the page number
+                        # linked: <td>Item 1. Business</td><td><a>1</a></td>.
+                        # FirstEnergy's FY2025 10-K lays out its whole TOC this
+                        # way; every end-anchored pattern above misses it, so
+                        # the TOC parse kept 3 unrelated rows and returned
+                        # Item 8's text for Item 7 (GH #1347). Leading-anchored,
+                        # and it demands a separator plus more text, so a bare
+                        # page number or a label-only cell never reaches it.
+                        titled_item_match = re.match(r'Item\s+(\d+)([A-Z]?)\s*[.:]\s*\S',
+                                                     prev_text, re.IGNORECASE)
+                        if titled_item_match:
+                            return f"Item {titled_item_match.group(1)}{titled_item_match.group(2).upper()}"
+
                     prev_sibling = prev_sibling.getprevious()
 
             # Also check immediate parent's text for inline patterns (div/span structures)
