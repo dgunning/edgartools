@@ -144,7 +144,10 @@ class TestCitiSectionsAreCanonical:
         # Previously: mda / risk_factors / financial_statements / controls_procedures.
         assert "part_ii_item_7" in citi_sections
         assert "part_ii_item_8" in citi_sections
-        assert "mda" not in citi_sections
+        # Keys, not membership: `in` also resolves the friendly alias `mda`
+        # to part_ii_item_7 on a 10-K (GH #1345), which is not a stored key.
+        assert "mda" not in citi_sections.keys()
+        assert "mda" in citi_sections
 
     def test_sections_carry_part_and_item_metadata(self, citi_sections):
         section = citi_sections["part_ii_item_7"]
