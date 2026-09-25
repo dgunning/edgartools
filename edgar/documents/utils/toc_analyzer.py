@@ -59,6 +59,9 @@ class TOCAnalyzer:
         # not just vocabulary matches) so detected sections don't absorb the
         # gap to the next *recognised* section. None = run to document end.
         self._title_next_anchor: Dict[str, Optional[str]] = {}
+        # key -> (start heading element or None, end element or None); see
+        # analyze_toc_structure and _split_collisions_by_heading (GH #1345).
+        self.heading_bounds: Dict[str, Tuple[Optional[object], Optional[object]]] = {}
         # SEC section patterns for normalization
         self.section_patterns = [
             (r'(?:item|part)\s+\d+[a-z]?', 'item'),
@@ -92,6 +95,12 @@ class TOCAnalyzer:
             Dict mapping normalized section names to anchor IDs
         """
         result: Dict[str, str] = {}
+        # Heading-element bounds for item keys that share an anchor and were
+        # separated by position instead (GH #1345); read by the section
+        # extractor. Elements belong to ``tree``, so this is only populated when
+        # the caller passed its own tree.
+        self.heading_bounds = {}
+        provisional: Set[str] = set()
 
         # Title-based forms (424B prospectuses) key their TOC by section title, not
         # "Item N" labels. A dedicated parser handles them; the entire Item-based
@@ -160,6 +169,20 @@ class TOCAnalyzer:
                             "body-header item(s): %s",
                             sorted(missing), len(recovered), sorted(recovered))
                 result.update(recovered)
+            # A missing core item whose body heading resolves to an anchor the
+            # TOC already gave its predecessor (Ondas's Item 1A sits inside the
+            # page Item 1 starts on) can still be separated by the *position* of
+            # its heading. Admit it provisionally: the collision repair below
+            # keeps it only if it bounds the item by its heading, and drops it
+            # otherwise, so it can never become a second key on one span
+            # (GH #1345).
+            for k, v in (body or {}).items():
+                if k in result or v not in toc_anchors:
+                    continue
+                m = re.match(r'^(?:part_[ivxlcdm]+_)?item_(\d+[a-z]?)$', k, re.IGNORECASE)
+                if m and m.group(1).upper() in missing:
+                    result[k] = v
+                    provisional.add(k)
 
         # Anchor-collision repair (GH #920): two distinct item keys sharing
         # one anchor slice to the identical span downstream — Regions Financial's
@@ -169,6 +192,12 @@ class TOCAnalyzer:
         # item's own heading with its own preceding anchor; when the body scan
         # resolves a displaced item to a distinct, well-placed anchor, adopt it.
         result = self._resolve_anchor_collisions(result, html_content, tree, body)
+        for k in provisional:
+            if k not in self.heading_bounds:
+                logger.info("Body-header item %s shares an anchor the TOC already "
+                            "claimed and could not be bounded by its heading; "
+                            "not merged", k)
+                result.pop(k, None)
         return result
 
     @staticmethod
@@ -267,19 +296,12 @@ class TOCAnalyzer:
         # the colliding items' own anchors, and on the filings this repair is for
         # the strict read is exactly what comes back empty (edgartools-ha11).
         body = self._analyze_body_item_headers(
-            html_content, tree=tree, allow_abutted_title=True) or body
-        if not body:
-            # Nothing to re-resolve against — surface the un-separated collision
-            # so a filing that duplicates a section stays diagnosable rather than
-            # silently returning a neighbour's text.
-            logger.warning("TOC anchor collision(s) %s left unchanged — no "
-                           "body-header anchors to separate them with; every "
-                           "listed key returns the same span",
-                           {a: sorted(keys) for a, keys in collisions.items()})
-            return result
+            html_content, tree=tree, allow_abutted_title=True) or body or {}
 
         positions = self._doc_positions(tree)
         claimed = set(result.values())
+        # (anchor, owner, {displaced key: why the anchor could not separate it})
+        leftovers: List[Tuple[str, str, Dict[str, str]]] = []
 
         for anchor, keys in collisions.items():
             keys_sorted = sorted(keys, key=lambda k: self._get_section_type_and_order(k)[1])
@@ -293,7 +315,8 @@ class TOCAnalyzer:
                     continue
                 new_anchor = body.get(key)
                 if not new_anchor:
-                    unresolved[key] = "no body header for this item"
+                    unresolved[key] = ("no body header for this item" if body
+                                       else "no body-header anchors")
                     continue
                 if new_anchor == anchor:
                     unresolved[key] = "body header shares the same anchor"
@@ -316,15 +339,135 @@ class TOCAnalyzer:
                 claimed.add(new_anchor)
                 logger.info("Separated colliding item %s from %s: re-pointed to "
                             "body-header anchor %s", key, owner, new_anchor)
+            if unresolved:
+                leftovers.append((anchor, owner, unresolved))
+
+        # What anchors cannot separate, heading positions may (GH #1345).
+        split = (self._split_collisions_by_heading(result, html_content, tree,
+                                                   positions, leftovers)
+                 if leftovers else set())
+        for anchor, owner, unresolved in leftovers:
+            if anchor in split:
+                continue
             # Say what was *done*, not only what was seen: a key left here still
             # slices to the owner's span, so the duplicate must be nameable.
-            if unresolved:
-                logger.warning("TOC anchor collision on %s: %s keeps the anchor; "
-                               "%s still resolve(s) to the same span (%s)",
-                               anchor, owner, sorted(unresolved),
-                               "; ".join(f"{k}: {why}" for k, why in sorted(unresolved.items())))
+            logger.warning("TOC anchor collision on %s: %s keeps the anchor; "
+                           "%s still resolve(s) to the same span (%s)",
+                           anchor, owner, sorted(unresolved),
+                           "; ".join(f"{k}: {why}" for k, why in sorted(unresolved.items())))
 
         return result
+
+    @staticmethod
+    def _item_number(key: str) -> Optional[str]:
+        m = re.search(r'item_(\d+[a-z]?)$', key, re.IGNORECASE)
+        return m.group(1).upper() if m else None
+
+    def _split_collisions_by_heading(self, result: Dict[str, str], html_content: str,
+                                     tree, positions: Dict[str, int],
+                                     leftovers: List[Tuple[str, str, Dict[str, str]]]
+                                     ) -> Set[str]:
+        """Separate item keys that share one anchor by their headings' positions.
+
+        When a TOC links page numbers and several items begin on one page, the
+        body headings usually sit behind that same page anchor too (Southern
+        Co's Items 7 and 7A, Eversource's 9/9A/9B), so no anchor can tell them
+        apart and every key slices to the identical span. The heading
+        *elements* still can. For a group whose every displaced key has its
+        own heading inside the shared span, in logical order:
+
+        * a displaced item starts at its heading and ends at the first of: the
+          next item heading, the next navigable anchor (an id some internal link
+          targets, i.e. where the filer's next page block starts), or the end of
+          the shared span. The anchor bound matters: Southern's Item 7A is a
+          four-line cross-reference set inside Item 7's first page, and the MD&A
+          body resumes on the next page with no item heading, so ending 7A at
+          the next *heading* would hand it all of MD&A.
+        * the owner keeps the shared anchor and is cut at the first displaced
+          heading only when the displaced items tile the rest of the span
+          (Eversource). When they don't (Southern), the owner's span is left
+          as it was: it still contains the short displaced text, but no longer
+          duplicates the displaced key.
+
+        A group with any key lacking a heading in the span is left unchanged —
+        a missing heading means its extent is unknown. Records bounds in
+        ``self.heading_bounds`` and returns the anchors whose groups were split.
+        """
+        headings = self._scan_body_item_headings(
+            html_content, tree=tree, allow_abutted_title=True,
+            ignore_whitespace_in_bold=True)
+        if not headings:
+            return set()
+        link_targets = sorted(
+            positions[h[1:]] for h in {(a.get('href') or '').strip()
+                                       for a in tree.xpath('//a[@href]')}
+            if h.startswith('#') and h[1:] in positions)
+        target_ids = {}
+        for anchor_id, pos in positions.items():
+            target_ids.setdefault(pos, anchor_id)
+        claimed_pos = sorted({positions[a] for a in result.values() if a in positions})
+
+        split: Set[str] = set()
+        for anchor, owner, unresolved in leftovers:
+            shared_pos = positions.get(anchor)
+            if shared_pos is None:
+                continue
+            span_end = next((p for p in claimed_pos if p > shared_pos), None)
+            limit = span_end if span_end is not None else float('inf')
+
+            # First heading per item number inside the shared span. Item number,
+            # not full key: the body's Part context can disagree with the TOC's.
+            in_span = [(i, el, self._item_number(k)) for i, el, k, _a in headings
+                       if shared_pos <= i < limit]
+            first: Dict[str, Tuple[int, object]] = {}
+            for i, el, num in in_span:
+                if num and num not in first:
+                    first[num] = (i, el)
+
+            displaced = sorted(unresolved, key=lambda k: self._get_section_type_and_order(k)[1])
+            found = [first.get(self._item_number(k)) for k in displaced]
+            if any(f is None for f in found):
+                continue
+            order = [f[0] for f in found]
+            owner_head = first.get(self._item_number(owner))
+            if owner_head is not None:
+                order = [owner_head[0]] + order
+            if any(b <= a for a, b in zip(order, order[1:])):
+                continue  # headings out of logical order: don't guess
+
+            bounds: Dict[str, Tuple[object, Optional[object]]] = {}
+            # The owner is cut at the first displaced heading only if no
+            # displaced item had to be closed at a page-block anchor: such a
+            # cut means the owner's own text resumes after it (Southern 7A).
+            tiles = True
+            for key, (h_pos, h_el) in zip(displaced, found):
+                num = self._item_number(key)
+                # An anchor inside the heading's own subtree is the heading's,
+                # not the start of the next page block.
+                h_last = h_pos + sum(1 for _ in h_el.iter()) - 1
+                next_head = next(((i, el) for i, el, n in in_span
+                                  if i > h_last and n != num), None)
+                next_target = next((p for p in link_targets if p > h_last), None)
+                end_pos, end_el = limit, None
+                if next_head is not None and next_head[0] < end_pos:
+                    end_pos, end_el = next_head
+                if next_target is not None and next_target < end_pos:
+                    targets = find_anchor_targets(tree, target_ids[next_target])
+                    end_pos, end_el = next_target, (targets[0] if targets else None)
+                    if end_el is None:
+                        break
+                    tiles = False
+                bounds[key] = (h_el, end_el)
+            else:
+                if tiles:
+                    bounds[owner] = (None, found[0][1])
+                self.heading_bounds.update(bounds)
+                split.add(anchor)
+                logger.info("Separated items sharing anchor %s by heading position: "
+                            "%s%s", anchor, sorted(unresolved),
+                            f"; {owner} ends at the first of them" if tiles
+                            else f"; {owner} keeps its span")
+        return split
 
     def _analyze_generic_toc(self, html_content: str, tree=None) -> Dict[str, str]:
         """
@@ -391,6 +534,16 @@ class TOCAnalyzer:
                 if inferred_part:
                     current_part = inferred_part
 
+                # A link that reads "Part I, Item 2" in full carries its own
+                # part; it outranks any header inferred from earlier rows
+                # (GH #1348). _normalize_section_name reads the item from it.
+                # It governs this link only: this scan walks every link in the
+                # document, and a body cross-reference reading "Part I, Item 1"
+                # must not move the running context for the links after it
+                # (Adobe's 10-K grew a phantom part_i_item_8 that way).
+                part_item = self._combined_part_item_label(text)
+                link_part = part_item[0] if part_item else current_part
+
                 # Check if this looks like a section reference (check text, anchor ID, and context)
                 if self._is_section_link(text, anchor_id, preceding_item):
                     # Verify target exists
@@ -406,7 +559,7 @@ class TOCAnalyzer:
                             normalized_name=normalized_name,
                             section_type=section_type,
                             order=order,
-                            part=current_part  # Assign current part context
+                            part=link_part  # This link's own part, else the running context
                         )
                         toc_sections.append(toc_section)
 
@@ -863,17 +1016,56 @@ class TOCAnalyzer:
         spans under different keys — which is a change ha11 has no reason to
         make (edgartools-ha11).
         """
+        mapping: Dict[str, str] = {}
+        for _idx, _el, key, anchor_id in self._scan_body_item_headings(
+                html_content, tree=tree, allow_abutted_title=allow_abutted_title):
+            # First occurrence in document order wins (the body heading; a
+            # link-less TOC has no competing "Item N. Title" span).
+            mapping.setdefault(key, anchor_id)
+
+        # The whole contract rests on each header having its own preceding
+        # anchor. Filers that don't emit per-item anchor divs (Nathan's Famous)
+        # leave runs of consecutive items inheriting one stale id, and every
+        # item in a run then collapses onto the same span downstream. When the
+        # anchors aren't (mostly) distinct the premise failed for this
+        # document — return nothing so both consumers (wholesale replacement
+        # and union-merge) fall back exactly as if the scan found no headers
+        # (GH #891 regression on the #904 fix).
+        if mapping:
+            distinct = len(set(mapping.values()))
+            if distinct < self._MIN_DISTINCT_ANCHOR_SHARE * len(mapping):
+                logger.info(
+                    "Body-header scan found %d item(s) but only %d distinct "
+                    "anchor(s); rejecting the map as stale-anchor collapse",
+                    len(mapping), distinct)
+                return {}
+        return mapping
+
+    def _scan_body_item_headings(self, html_content: str, tree=None,
+                                 allow_abutted_title: bool = False,
+                                 ignore_whitespace_in_bold: bool = False
+                                 ) -> List[Tuple[int, object, str, str]]:
+        """Every bold body item heading, in document order.
+
+        Returns ``(doc_index, element, section_key, anchor_id)`` for each match,
+        where ``doc_index`` is the element's position in ``tree.iter()`` (the
+        same index :meth:`_doc_positions` assigns) and ``anchor_id`` the anchor
+        the heading resolves to. Repeated keys are all returned; callers pick.
+        :meth:`_analyze_body_item_headers` builds its anchor map from this, and
+        the collision resolver uses the heading *elements* when the anchors
+        alone cannot separate two items (GH #1345).
+        """
         try:
             tree = self._ensure_tree(html_content, tree)
         except Exception:
             logger.debug("Body-header scan: tree parse failed", exc_info=True)
-            return {}
+            return []
 
-        mapping: Dict[str, str] = {}
+        headings: List[Tuple[int, object, str, str]] = []
         current_part: Optional[str] = None
         last_anchor_id: Optional[str] = None
 
-        for el in tree.iter():
+        for idx, el in enumerate(tree.iter()):
             tag = el.tag
             if not isinstance(tag, str):
                 continue
@@ -889,7 +1081,7 @@ class TOCAnalyzer:
             # and let the inner heading element match.
             if not text or len(text) > 200:
                 continue
-            bold = self._is_bold_header(el, tag)
+            bold = self._is_bold_header(el, tag, ignore_whitespace_in_bold)
 
             # Part context first: a divider counts when it is bold, and also
             # when the whole text is divider-shaped, which is the only way an
@@ -916,28 +1108,9 @@ class TOCAnalyzer:
                 continue
             item_name = f"Item {item_m.group(1)}{item_m.group(2).upper()}"
             key = self._make_section_key(item_name, current_part)
-            # First occurrence in document order wins (the body heading; a
-            # link-less TOC has no competing "Item N. Title" span).
             if key:
-                mapping.setdefault(key, anchor_id)
-
-        # The whole contract rests on each header having its own preceding
-        # anchor. Filers that don't emit per-item anchor divs (Nathan's Famous)
-        # leave runs of consecutive items inheriting one stale id, and every
-        # item in a run then collapses onto the same span downstream. When the
-        # anchors aren't (mostly) distinct the premise failed for this
-        # document — return nothing so both consumers (wholesale replacement
-        # and union-merge) fall back exactly as if the scan found no headers
-        # (GH #891 regression on the #904 fix).
-        if mapping:
-            distinct = len(set(mapping.values()))
-            if distinct < self._MIN_DISTINCT_ANCHOR_SHARE * len(mapping):
-                logger.info(
-                    "Body-header scan found %d item(s) but only %d distinct "
-                    "anchor(s); rejecting the map as stale-anchor collapse",
-                    len(mapping), distinct)
-                return {}
-        return mapping
+                headings.append((idx, el, key, anchor_id))
+        return headings
 
     @staticmethod
     def _own_anchor_id(el) -> Optional[str]:
@@ -993,8 +1166,13 @@ class TOCAnalyzer:
     # sits far below one half.
     _BOLD_CHILD_MIN_SHARE = 0.5
 
+    @staticmethod
+    def _text_len(text: Optional[str], ignore_whitespace: bool) -> int:
+        text = text or ''
+        return len(re.sub(r'\s+', '', text)) if ignore_whitespace else len(text.strip())
+
     @classmethod
-    def _bold_text_len(cls, el) -> int:
+    def _bold_text_len(cls, el, ignore_whitespace: bool = False) -> int:
         """Total text length carried by bold descendants of ``el``.
 
         A bold element contributes its whole subtree text (no double counting
@@ -1005,13 +1183,13 @@ class TOCAnalyzer:
             if not isinstance(child.tag, str):
                 continue
             if child.tag in ('b', 'strong') or cls._style_is_bold(child.get('style')):
-                total += len((child.text_content() or '').strip())
+                total += cls._text_len(child.text_content(), ignore_whitespace)
             else:
-                total += cls._bold_text_len(child)
+                total += cls._bold_text_len(child, ignore_whitespace)
         return total
 
     @classmethod
-    def _is_bold_header(cls, el, tag: str) -> bool:
+    def _is_bold_header(cls, el, tag: str, ignore_whitespace: bool = False) -> bool:
         """Heuristic: is this element styled as a heading?
 
         True for semantic heading tags and for elements whose own inline style
@@ -1025,15 +1203,22 @@ class TOCAnalyzer:
         at 700). The element's own style check sees weight nowhere and the scan
         matches zero headers on such filings (GH #904). Callers pre-filter to
         short texts (<= 200 chars), so the child walk is cheap.
+
+        ``ignore_whitespace`` measures that share over non-whitespace characters.
+        A heading laid out as a two-cell table row ("ITEM 17." | "FINANCIAL
+        STATEMENTS", both bold) carries its source indentation between the
+        cells, which alone drags the share under one half. Only the positional
+        collision split asks for it (GH #1345).
         """
         if tag in ('h1', 'h2', 'h3', 'h4', 'h5', 'h6'):
             return True
         if cls._style_is_bold(el.get('style')):
             return True
-        text_len = len((el.text_content() or '').strip())
+        text_len = cls._text_len(el.text_content(), ignore_whitespace)
         if not text_len:
             return False
-        return cls._bold_text_len(el) / text_len >= cls._BOLD_CHILD_MIN_SHARE
+        return (cls._bold_text_len(el, ignore_whitespace) / text_len
+                >= cls._BOLD_CHILD_MIN_SHARE)
 
     # ---- Agent-specific TOC parsers ----
 
@@ -1093,6 +1278,35 @@ class TOCAnalyzer:
                         current = parent
 
         return None
+
+    # A TOC label that names both the part and the item — "Part I, Item 2",
+    # "PART II - ITEM 1A", "Part II Item 5." — and nothing else. Anchored at
+    # both ends: cross-reference prose ("see Part II, Item 7 of our Annual
+    # Report") mentions a part and an item too, and must never claim a key
+    # (GH #905/#918).
+    _COMBINED_PART_ITEM = re.compile(
+        r'^part\s+([ivx]+)\s*[,.:;\-–—]?\s*item\s+(\d+)([a-z])?\s*\.?$',
+        re.IGNORECASE)
+
+    @classmethod
+    def _combined_part_item_label(cls, text: str) -> Optional[Tuple[str, str]]:
+        """Split a combined "Part X, Item N" TOC label into ``("Part X", "Item N")``.
+
+        Edison International's 10-Q TOC names each item only in a third link
+        per row — ``[title, page, "Part I, Item 2"]`` — and has no part-header
+        rows at all, so this label is the row's only part *and* item evidence.
+        Read as an item label it fails (the text does not open with "Item"),
+        and read as a part label it discards the item, so every row was dropped
+        (GH #1348).
+
+        Returns ``None`` unless the whole text is such a label.
+        """
+        text = (text or '').replace('\u200b', '').replace('\u200c', '').replace('\u200d', '').strip()
+        match = cls._COMBINED_PART_ITEM.match(text)
+        if not match:
+            return None
+        part, num, letter = match.groups()
+        return f"Part {part.upper()}", f"Item {num}{(letter or '').upper()}"
 
     @staticmethod
     def _item_label_from_text(text: str) -> Optional[str]:
@@ -1262,6 +1476,50 @@ class TOCAnalyzer:
             return toc_table
         # Heading table was absent or too small — try link-based detection
         return self._find_toc_table_by_links(tree)
+
+    def _toc_continuation_tables(self, tree, toc_table) -> List[object]:
+        """The TOC table plus the tables it continues into, in document order.
+
+        A long TOC breaks across pages, and each page is its own ``<table>``.
+        Edison International's 10-Q puts Part I Items 2, 3 and 1 in the first
+        half and Item 4 onward in the second; parsing only the half with more
+        item links lost the other three items (GH #1348).
+
+        A neighbouring table joins only when it has the shape of a TOC page:
+        at least one combined "Part X, Item N" label and most of its non-empty
+        rows linking to an internal anchor. Growth stops at the first table
+        that fails, so body tables further away are never reached. The
+        combined-label requirement keeps this to the TOC shape the fix is for.
+        """
+        tables = tree.xpath('//table')
+        try:
+            index = next(i for i, t in enumerate(tables) if t is toc_table)
+        except StopIteration:
+            return [toc_table]
+
+        def is_continuation(table) -> bool:
+            linked = total = 0
+            labelled = False
+            for row in table.xpath('.//tr'):
+                if not (row.text_content() or '').strip():
+                    continue
+                total += 1
+                links = [a for a in row.xpath('.//a[@href]')
+                         if (a.get('href') or '').strip().startswith('#')]
+                if links:
+                    linked += 1
+                    labelled = labelled or any(
+                        self._combined_part_item_label(a.text_content() or '')
+                        for a in links)
+            return labelled and linked >= 3 and linked * 2 > total
+
+        start = index
+        while start > 0 and is_continuation(tables[start - 1]):
+            start -= 1
+        end = index
+        while end + 1 < len(tables) and is_continuation(tables[end + 1]):
+            end += 1
+        return tables[start:end + 1]
 
     @staticmethod
     def _part_rank(label: Optional[str]) -> Optional[int]:
@@ -1521,7 +1779,8 @@ class TOCAnalyzer:
 
             mapping = {}
             current_part = self.schema.seed_part
-            rows = toc_table.xpath('.//tr')
+            rows = [row for table in self._toc_continuation_tables(tree, toc_table)
+                    for row in table.xpath('.//tr')]
 
             for row in rows:
                 row_text = (row.text_content() or '').strip()
@@ -1566,6 +1825,16 @@ class TOCAnalyzer:
                     # Filter out page numbers from multi-text groups
                     non_page_texts = [t for t in texts if not re.match(r'^\d{1,3}$', t)]
                     combined = ' '.join(non_page_texts)
+
+                    # A link whose whole text is "Part I, Item 2" names both the
+                    # part and the item (GH #1348). The row carries its own part,
+                    # so adopt it before any key is built for this row.
+                    part_item = next((pi for pi in map(self._combined_part_item_label,
+                                                       non_page_texts) if pi), None)
+                    if part_item:
+                        current_part, parsed = part_item
+                        candidates.append((anchor_id, parsed))
+                        continue
 
                     # Try to parse an item/part name from the combined text
                     parsed = self._parse_item_from_text(combined)
@@ -2295,6 +2564,12 @@ class TOCAnalyzer:
         item_label = self._item_label_from_text(text)
         if item_label:
             return item_label
+
+        # "Part I, Item 2" names the item too; the Part pattern below would
+        # keep only "Part I", which the mapping then drops (GH #1348).
+        part_item = self._combined_part_item_label(text)
+        if part_item:
+            return part_item[1]
 
         # Handle Part patterns
         part_match = re.match(r'part\s+([ivx]+)', text, re.IGNORECASE)
