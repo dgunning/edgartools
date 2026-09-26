@@ -426,6 +426,7 @@ class TestExtract13FHoldings:
 
     def test_holdings_section_lists_rows(self):
         import pandas as pd
+
         from edgar.ai.mcp.tools.reader import _extract_13f_section
 
         holdings = pd.DataFrame(
@@ -443,8 +444,28 @@ class TestExtract13FHoldings:
         assert lines[30] == "  ISSUER 29 | 1,029 shares | $99,971"
         assert len(lines) == 31
 
+    def test_holdings_section_skips_missing_cells(self):
+        import pandas as pd
+
+        from edgar.ai.mcp.tools.reader import _extract_13f_section
+
+        holdings = pd.DataFrame(
+            [
+                dict(Issuer="APPLE INC", Cusip="037833100", SharesPrnAmount=10.0, Value=float("nan")),
+                dict(Issuer=float("nan"), Cusip="594918104", SharesPrnAmount=float("nan"), Value=500.0),
+            ]
+        )
+        result = _extract_13f_section(self._fake_13f(holdings), "holdings")
+
+        assert result.splitlines() == [
+            "Top holdings (2 of 2):",
+            "  APPLE INC | 10 shares",
+            "  Unknown | $500",
+        ]
+
     def test_holdings_section_empty_or_missing_returns_none(self):
         import pandas as pd
+
         from edgar.ai.mcp.tools.reader import _extract_13f_section
 
         assert _extract_13f_section(self._fake_13f(pd.DataFrame()), "holdings") is None

@@ -87,6 +87,36 @@ def _cell_number(value: Any, as_int: bool = False) -> Optional[Union[int, float]
         return value
 
 
+def _holding_rows(holdings_table: Any, limit: int) -> list[dict[str, Any]]:
+    """Read the first ``limit`` rows of a ``ThirteenF.holdings`` frame.
+
+    Iterating a DataFrame yields its column names, not its rows, so every tool
+    that walked the table directly came back empty. Each row becomes a dict
+    with ``company``, ``cusip``, ``shares`` and ``value``, each key present
+    only when its cell holds something: an explicit ``"value": None`` reads as
+    a value to a caller testing ``"value" in holding``. Rows with no usable
+    cell are skipped.
+    """
+    rows = []
+    for _, row in holdings_table.head(limit).iterrows():
+        holding: dict[str, Any] = {}
+        issuer = _cell_text(row.get("Issuer"))
+        if issuer:
+            holding["company"] = issuer
+        cusip = _cell_text(row.get("Cusip"))
+        if cusip:
+            holding["cusip"] = cusip
+        shares = _cell_number(row.get("SharesPrnAmount"), as_int=True)
+        if shares is not None:
+            holding["shares"] = shares
+        value = _cell_number(row.get("Value"), as_int=True)
+        if value is not None:
+            holding["value"] = value
+        if holding:
+            rows.append(holding)
+    return rows
+
+
 # =============================================================================
 # RESPONSE TYPES
 # =============================================================================

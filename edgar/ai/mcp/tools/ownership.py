@@ -17,6 +17,7 @@ from edgar.ai.mcp.tools.base import (
     get_error_suggestions,
     _cell_number,
     _cell_text,
+    _holding_rows,
 )
 
 logger = logging.getLogger(__name__)
@@ -228,31 +229,7 @@ async def _get_fund_holdings(identifier: str, limit: int) -> Any:
             holdings_table = getattr(obj, 'holdings', None)
 
             if holdings_table is not None:
-                # ``ThirteenF.holdings`` is a DataFrame, and iterating one yields
-                # its column names rather than its rows: every attribute probe
-                # missed and the list came back empty for every fund. Walk it the
-                # way ``_get_portfolio_diff`` below already walks its comparison.
-                holdings = []
-                for _, row in holdings_table.head(limit).iterrows():
-                    holding = {}
-                    issuer = _cell_text(row.get("Issuer"))
-                    if issuer:
-                        holding["company"] = issuer
-                    cusip = _cell_text(row.get("Cusip"))
-                    if cusip:
-                        holding["cusip"] = cusip
-                    # Independently, the way company and cusip are: writing the
-                    # pair together put an explicit `"value": null` in the
-                    # response for a row whose value did not parse, and a caller
-                    # testing `"value" in holding` reads that as a value.
-                    shares = _cell_number(row.get("SharesPrnAmount"), as_int=True)
-                    if shares is not None:
-                        holding["shares"] = shares
-                    value = _cell_number(row.get("Value"), as_int=True)
-                    if value is not None:
-                        holding["value"] = value
-                    if holding:
-                        holdings.append(holding)
+                holdings = _holding_rows(holdings_table, limit)
 
                 result["holdings_count"] = len(holdings_table)
                 result["holdings"] = holdings

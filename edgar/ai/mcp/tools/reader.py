@@ -10,9 +10,6 @@ from __future__ import annotations
 
 import logging
 from typing import Any, Optional
-
-import pandas as pd
-
 from edgar import find
 from edgar.ai.mcp.tools.base import (
     tool,
@@ -22,6 +19,7 @@ from edgar.ai.mcp.tools.base import (
     format_filing_summary,
     get_error_suggestions,
     truncate_text,
+    _holding_rows,
 )
 
 logger = logging.getLogger(__name__)
@@ -477,20 +475,17 @@ def _extract_13f_section(obj, section: str) -> Optional[str]:
     if section == "holdings":
         try:
             # ``ThirteenF.holdings`` is a DataFrame: its truth value raises and
-            # iterating it yields column names, so walk its rows (as #1136 did
-            # for ``_get_fund_holdings`` in ownership.py).
+            # iterating it yields column names, so read its rows the way
+            # ``_get_fund_holdings`` in ownership.py does.
             holdings = getattr(obj, 'holdings', None)
             if holdings is not None and not holdings.empty:
                 parts = []
-                for _, row in holdings.head(30).iterrows():  # Limit to top 30
-                    name = row.get('Issuer')
-                    shares = row.get('SharesPrnAmount')
-                    value = row.get('Value')
-                    line = f"  {name if pd.notna(name) else 'Unknown'}"
-                    if pd.notna(shares) and shares:
-                        line += f" | {int(shares):,} shares"
-                    if pd.notna(value) and value:
-                        line += f" | ${int(value):,}"
+                for h in _holding_rows(holdings, 30):  # Limit to top 30
+                    line = f"  {h.get('company', 'Unknown')}"
+                    if "shares" in h:
+                        line += f" | {h['shares']:,} shares"
+                    if "value" in h:
+                        line += f" | ${h['value']:,}"
                     parts.append(line)
                 total = len(holdings)
                 header = f"Top holdings ({min(30, total)} of {total}):"
