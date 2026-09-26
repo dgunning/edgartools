@@ -227,8 +227,15 @@ def test_signatures_bounds_the_last_item_on_other_filings_too():
     )
     item_6 = doc.sections["part_ii_item_6"].text()
 
-    assert len(item_6) == 1221
+    # Pinned by its bounds, not its length. This was `len(item_6) == 1221` while
+    # the pattern extractor served the filing; GH #1347 made its TOC readable,
+    # and the TOC path renders the exhibit table without grid padding (896
+    # chars) for the same words between the same two bounds.
+    assert item_6.startswith("ITEM 6. EXHIBITS")
+    assert "Cover Page Interactive Data File" in item_6
     assert item_6.rstrip().endswith("** Furnished herewith.")
+    assert "SIGNATURE" not in item_6.upper()
+    assert "Len M. Fox" not in item_6
 
 
 def test_the_gate_stays_narrow():
