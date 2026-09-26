@@ -1,1 +1,0 @@
-**A gate that catches a test which needs the SEC while claiming to be offline.** Detection used to depend on the restored HTTP cache, so such a test passed until its cache entry was evicted and then failed on an unrelated branch. `scripts/check_offline_audit.py` blocks sockets instead and ratchets against a baseline of the 89 that exist today; new ones fail the pull request.
