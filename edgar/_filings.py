@@ -1976,7 +1976,7 @@ class Filing:
         homepage index page. The fallback provides document attachments with valid
         URLs but without in-memory content or SGML header metadata.
 
-        Network and server errors propagate so a later call can retry the download.
+        Network and HTTP errors propagate without caching a fallback result.
         """
         if self._sgml:
             return self._sgml
@@ -2011,9 +2011,9 @@ class Filing:
                 # Don't fall back on permanent errors — propagate them
                 if isinstance(e, (SECIdentityError, FilingNotFoundError, IdentityNotSetError)):
                     raise
-                # Propagate network/server failures in both error modes. Caching
+                # Propagate network/HTTP failures in both error modes. Caching
                 # a homepage-only SGML here would prevent a later download retry.
-                if is_unreachable(e) or (http_status(e) or 0) >= 500:
+                if is_unreachable(e) or http_status(e) is not None:
                     raise
                 # Transient content errors (empty response, HTML error page) — fall back to homepage
                 log.warning(
