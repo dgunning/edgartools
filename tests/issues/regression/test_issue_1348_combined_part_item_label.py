@@ -172,6 +172,6 @@ def test_item_4_is_controls_and_stops_before_part_ii(tenq):
 def test_item_2_no_longer_swallows_the_financial_statements(tenq):
     """The pattern-extracted Item 2 was 346,454 chars and ran into Item 1's statements."""
     item2 = tenq["PART I, Item 2"]
-    assert len(item2) == 89_652
+    assert len(item2) == 90_410  # tables rendered cell by cell (edgartools-wzgu)
     assert item2.rstrip().endswith('Summary of Significant Accounting Policies—New Accounting Guidance."')
     assert "QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK" not in item2

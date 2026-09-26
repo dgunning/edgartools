@@ -61,7 +61,7 @@ def test_item7_is_mdna_not_item8(sections):
     item7 = sections["part_ii_item_7"].text()
     assert item7.startswith("ITEM 7. MANAGEMENT’S DISCUSSION AND ANALYSIS")
     assert "ITEM 8." not in item7[:200]
-    assert len(item7) == 244_957
+    assert len(item7) == 247_046  # tables rendered cell by cell (edgartools-wzgu)
 
 
 def test_item8_opens_with_its_own_heading(sections):

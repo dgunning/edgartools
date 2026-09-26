@@ -121,7 +121,7 @@ def test_hertz_item_1a_is_the_real_risk_factors(hertz_sections):
 def test_hertz_item_1_stops_at_item_1a(hertz_sections):
     item1 = hertz_sections["part_i_item_1"].text()
     # Before: 159,382 chars with "ITEM 1A. RISK FACTORS" at offset 59,307.
-    assert len(item1) == 59_214
+    assert len(item1) == 59_210  # tables rendered cell by cell (edgartools-wzgu)
     assert item1.startswith("ITEM\xa01. BUSINESS")
     assert "ITEM\xa01A. RISK FACTORS" not in item1
 
@@ -139,6 +139,6 @@ def test_ppl_item_7a_stops_at_item_8(ppl_sections):
 def test_ppl_item_8_opens_on_its_heading(ppl_sections):
     item8 = ppl_sections["part_ii_item_8"].text()
     # Before: 297,733 chars opening on "COMBINED NOTES TO FINANCIAL STATEMENTS".
-    assert len(item8) == 329_162
+    assert len(item8) == 334_890  # tables rendered cell by cell (edgartools-wzgu)
     assert "ITEM 8.\xa0\xa0FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA" in item8[:100]
     assert "CONSOLIDATED STATEMENTS OF INCOME" in item8[:200]

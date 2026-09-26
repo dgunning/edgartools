@@ -43,16 +43,18 @@ pytestmark = pytest.mark.slow
 # Factors is enormous at ~188k). These filings are byte-stable across the whole
 # section refactor, so exact assertions are both safe and maximally sensitive.
 # If an intended parser change moves one, update the number in the same commit.
+# edgartools-wzgu re-pinned every table-bearing item: TOC sections now render
+# tables cell by cell; every letter and digit of the old text is still present.
 GROUND_TRUTH = {
-    ("aapl", "10-K"): {"1": 15767, "1A": 68887, "7": 15563, "8": 59877},
-    ("ko",   "10-K"): {"1": 54971, "1A": 90883, "7": 115072, "8": 234730},
-    ("msft", "10-K"): {"1": 48674, "1A": 68824, "7": 49534, "8": 128086},
-    ("meta", "10-K"): {"1": 40273, "1A": 188466, "7": 61502, "8": 124532},
-    ("cat",  "10-K"): {"1": 39269, "1A": 53487, "7": 102423, "8": 181100},
-    ("unp",  "10-K"): {"1": 27521, "1A": 32791, "7": 57241, "8": 95314},
-    ("aapl", "10-Q"): {"1": 25844, "2": 19723},
-    ("nvda", "10-Q"): {"1": 53892, "2": 32711},
-    ("ko",   "10-Q"): {"1": 103213, "2": 77413},
+    ("aapl", "10-K"): {"1": 15767, "1A": 68887, "7": 15563, "8": 61021},
+    ("ko",   "10-K"): {"1": 54971, "1A": 90883, "7": 115072, "8": 237859},
+    ("msft", "10-K"): {"1": 48674, "1A": 68824, "7": 48069, "8": 102166},
+    ("meta", "10-K"): {"1": 40273, "1A": 188466, "7": 61502, "8": 125841},
+    ("cat",  "10-K"): {"1": 39269, "1A": 53487, "7": 104445, "8": 185361},
+    ("unp",  "10-K"): {"1": 27521, "1A": 32791, "7": 57241, "8": 97022},
+    ("aapl", "10-Q"): {"1": 25844, "2": 20053},
+    ("nvda", "10-Q"): {"1": 53892, "2": 32956},
+    ("ko",   "10-Q"): {"1": 103213, "2": 77610},
 }
 
 # Filings whose detected sections size-anomalously today (oversize >300k, or an

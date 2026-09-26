@@ -184,7 +184,7 @@ def test_gs_10q_resolves_its_part_ii_sections():
     #   - the first and last 80 characters are byte-identical, so no boundary moved;
     #   - part_ii_item_1 and part_ii_item_6 are byte-identical, as prose should be.
     assert len(sections["part_i_item_1"].text()) == 627581  # +137: table cells no longer fused (edgartools-wzgu)
-    assert len(sections["part_i_item_2"].text()) == 397582
+    assert len(sections["part_i_item_2"].text()) == 398100  # tables rendered cell by cell (edgartools-wzgu)
 
     assert sections["part_ii_item_1"].text().startswith("Item 1. Legal Proceedings")
     assert sections["part_ii_item_6"].text().startswith("Item 6. Exhibits")

@@ -140,12 +140,12 @@ def test_allstate_2026_10k_item_1_present():
     business = secs.get_item("1")
     assert business is not None
     assert business.part == "I"
-    assert len(business.text()) == 59_282
+    assert len(business.text()) == 59_145  # tables rendered cell by cell (edgartools-wzgu)
 
     # The high-level accessor now resolves via the new parser, not the legacy
     # fallback.
     assert obj.business is not None
-    assert len(obj.business) == 59_282
+    assert len(obj.business) == 59_145  # tables rendered cell by cell (edgartools-wzgu)
 
     # edgartools-rbsx: the Workiva agent TOC parser is now a strict superset of
     # the generic parser. It previously dropped Item 9C (whose "Item 9C." label
