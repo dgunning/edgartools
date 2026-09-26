@@ -132,7 +132,7 @@ def test_20f_wrapped_headers_resolve_without_the_legacy_parser():
     report = _without_legacy(TwentyF)(filing)
 
     # 'Item 6. Directors, Senior Management and\nEmployees'
-    assert len(report["Item 6"]) == 42307
+    assert len(report["Item 6"]) == 42395  # table cells no longer fused (edgartools-wzgu)
     assert report["Item 6"].split("\n", 1)[0].startswith("Item 6.")
 
     # 'Item 11. Quantitative and Qualitative Disclosures\nAbout Market Risk.'
@@ -140,7 +140,7 @@ def test_20f_wrapped_headers_resolve_without_the_legacy_parser():
     assert report["Item 11"].split("\n", 1)[0].startswith("Item 11.")
 
     # And the same answers on the real class, legacy fallback and all.
-    assert len(TwentyF(filing)["Item 6"]) == 42307
+    assert len(TwentyF(filing)["Item 6"]) == 42395  # table cells no longer fused (edgartools-wzgu)
     assert len(TwentyF(filing)["Item 11"]) == 268
 
 

@@ -79,7 +79,7 @@ def test_southern_item7_keeps_its_mda(southern):
     item7 = southern["part_ii_item_7"].text()
     # Owner's span is unchanged: the displaced 7A text sits inside Item 7's
     # first page and the MD&A resumes after it.
-    assert len(item7) == 282_239
+    assert len(item7) == 283_225  # tables rendered cell by cell (edgartools-wzgu)
     assert "COMBINED MANAGEMENT'S DISCUSSION AND ANALYSIS" in item7
     assert "Southern Company is a holding company that owns all of the common stock" in item7
 
@@ -95,7 +95,7 @@ def test_southern_other_shared_pages_are_separated(southern):
     assert "Item 6." not in item5
     # 9B continues onto the next page (the trading-arrangement table) and
     # still stops at Item 9C.
-    assert (len(item9a), len(item9b)) == (2189, 2142)  # both were 4,333
+    assert (len(item9a), len(item9b)) == (2183, 2171)  # both were 4,333; wzgu re-pin
     assert item9a.startswith("Item 9A.CONTROLS AND PROCEDURES")
     assert item9b.startswith("Item 9B.OTHER INFORMATION")
     assert "Item 9B." not in item9a
@@ -137,28 +137,30 @@ def test_eversource_items_do_not_overlap(eversource):
 def test_ondas_item1_ends_at_item1a(ondas):
     item1 = ondas["part_i_item_1"].text()
     item1a = ondas["part_i_item_1a"].text()
-    assert len(item1) == 68_092  # was 190,306 — Business plus all Risk Factors
+    assert len(item1) == 67_948  # was 190,306 — Business plus all Risk Factors (wzgu re-pin)
     assert "Item 1A. Risk Factors" not in item1
-    assert len(item1a) == 122_212
+    assert len(item1a) == 122_171  # tables rendered cell by cell (edgartools-wzgu)
     assert item1a.startswith("Item 1A. Risk Factors\n\nInvesting in our common")
 
 
 # --- 20-F with page-number-only TOC links (bead edgartools-rc46, shape A) ----
 
+# Re-pinned for edgartools-wzgu: tables now render cell by cell, which drops the
+# blank lines the old walk emitted per cell; no letter or digit changed.
 _20F_EXPECTED = {
     # page_6
-    "part_i_item_1": 3016, "part_i_item_2": 124, "part_i_item_3": 66728,
+    "part_i_item_1": 2988, "part_i_item_2": 124, "part_i_item_3": 65447,
     # page_29
-    "part_i_item_4a": 1105, "part_i_item_5": 10431,
+    "part_i_item_4a": 1077, "part_i_item_5": 10291,
     # page_59
-    "part_i_item_12": 1544, "part_ii_item_13": 94, "part_ii_item_14": 123,
+    "part_i_item_12": 1413, "part_ii_item_13": 94, "part_ii_item_14": 123,
     "part_ii_item_15": 4888,
     # page_61
-    "part_ii_item_16a": 2890, "part_ii_item_16b": 428, "part_ii_item_16c": 474,
+    "part_ii_item_16a": 2615, "part_ii_item_16b": 428, "part_ii_item_16c": 474,
     # page_62
-    "part_ii_item_16d": 1865, "part_ii_item_16e": 118, "part_ii_item_16f": 671,
+    "part_ii_item_16d": 1564, "part_ii_item_16e": 118, "part_ii_item_16f": 671,
     # page_63
-    "part_ii_item_17": 2506, "part_ii_item_18": 181349,
+    "part_ii_item_17": 2478, "part_ii_item_18": 151598,
 }
 
 
@@ -176,7 +178,7 @@ def test_ondas_risk_factors_friendly_name_still_resolves(ondas):
     """The TOC now keys Item 1A as part_i_item_1a; the pattern extractor used
     to supply it as ``risk_factors``. Both spellings must reach one section."""
     by_name = ondas["risk_factors"].text()
-    assert len(by_name) == 122_212
+    assert len(by_name) == 122_171  # tables rendered cell by cell (edgartools-wzgu)
     assert ondas["Item 1A"].text() == by_name
     assert ondas.get_item("1A").text() == by_name
     assert ondas.get("risk_factors").text() == by_name

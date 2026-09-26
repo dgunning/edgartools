@@ -124,7 +124,7 @@ def test_unh_2026_10k_no_spurious_part_iv_item_1():
     business = secs.get_item("1")
     assert business is not None
     assert business.part == "I"
-    assert len(business.text()) == 46_852
+    assert len(business.text()) == 46_875  # tables rendered cell by cell (edgartools-wzgu)
 
     # The high-level accessor is unchanged (the #821 fix).
-    assert len(obj.business) == 46_852
+    assert len(obj.business) == 46_875  # tables rendered cell by cell (edgartools-wzgu)

@@ -47,6 +47,10 @@ pytestmark = pytest.mark.fast
 
 REPO = REPO_ROOT
 RFILES = REPO / "tests" / "fixtures" / "attachments" / "aapl" / "20250329"
+# R8, R13 and R14 were re-captured for edgartools-wzgu: each has a cell whose own
+# text ("Summary of Significant Accounting Policies", "Debt", "Shareholders'
+# Equity") precedes its <div>s, and TableProcessor used to keep only the divs'
+# text. Letters and digits are only gained; the rest of every render is unchanged.
 BASELINE = REPO / "tests" / "fixtures" / "filing_summary" / "report_render_baseline.json"
 
 

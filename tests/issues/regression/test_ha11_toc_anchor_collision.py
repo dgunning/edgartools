@@ -99,12 +99,13 @@ def test_items_5_and_6_are_different_sections(pg_sections):
     item_6 = pg_sections["part_ii_item_6"].text()
 
     assert item_5 != item_6
-    assert len(item_5) == 306
-    assert len(item_6) == 2320
+    assert len(item_5) == 308  # table cells no longer fused (edgartools-wzgu)
+    assert len(item_6) == 2309  # tables rendered cell by cell (edgartools-wzgu)
     # Content, not just length — each key must hold ITS item.
-    assert item_5.startswith("Item\xa05.Other Information")
+    # The heading is a two-cell table row; its cells are no longer fused (edgartools-wzgu).
+    assert item_5.startswith("Item 5.  Other Information")
     assert "Rule 10b5-1 trading arrangement" in item_5
-    assert "Item\xa06.Exhibits" in item_6
+    assert "Item 6.  Exhibits" in item_6
     assert "Amended Articles of Incorporation" in item_6
 
 
@@ -117,7 +118,7 @@ def test_the_collision_is_visible_through_the_report_object():
 
     assert item_5 is not None and item_6 is not None
     assert item_5 != item_6
-    assert len(item_5) == 306
+    assert len(item_5) == 308  # table cells no longer fused (edgartools-wzgu)
 
 
 def test_body_header_scan_reads_headers_whose_title_abuts_the_period():

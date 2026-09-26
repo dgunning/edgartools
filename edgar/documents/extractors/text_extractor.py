@@ -218,6 +218,17 @@ class TextExtractor:
 
         parts.append(text)
 
+    def render_table(self, table: TableNode) -> str:
+        """Render one table exactly as :meth:`extract` renders it in ``doc.text()``.
+
+        Exposed so text built outside the node tree (TOC-resolved sections walk
+        the raw lxml tree) renders tables by this rule instead of a copy of it
+        (edgartools-wzgu).
+        """
+        parts: List[str] = []
+        self._extract_table(table, parts)
+        return '\n\n'.join(filter(None, parts))
+
     def _extract_table(self, table: TableNode, parts: List[str]):
         """Extract table content - preserve original formatting like old parser."""
         if self.preserve_structure:
