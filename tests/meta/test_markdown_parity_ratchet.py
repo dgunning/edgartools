@@ -106,7 +106,14 @@ BASELINE_NUMBER_LOSS = {
     ("10-K", "axp/10k"): 18,
     ("10-K", "ba/10k"): 14,
     ("10-K", "bac/10k"): 5,
-    ("10-K", "c/10k"): 2,
+    # Was ("10-K", "c/10k"). Relabelled 2026-09-25 when tests/fixtures/html/c/10k
+    # gained a second fixture; same filing (Citi FY2024), same value — measured 2
+    # both at a229a01b (before the second fixture) and on main 7c25da28.
+    ("10-K", "c/10k/c-10-k-2025-02-21"): 2,
+    # Added 2026-09-25: Citi FY2022, a new tracked filing from GH #1346 (PR
+    # #1352), pinned at its first measured value (10.15, 216, 218, 257, 275, 324).
+    # Not a regression — it had never been measured under its own key.
+    ("10-K", "c/10k/c-10-k-2023-02-27"): 6,
     ("10-K", "cat/10k"): 17,
     ("10-K", "crm/10k"): 26,
     ("10-K", "cvx/10k"): 4,

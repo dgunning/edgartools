@@ -212,6 +212,27 @@ def normalise_legacy(item_name: str, form: str) -> Optional[str]:
 # Corpus
 # ---------------------------------------------------------------------------
 
+def modern_label(path: Path) -> str:
+    """The ratchet key for one fixture under ``tests/fixtures/html``.
+
+    A directory holding a single fixture is labelled by the directory alone —
+    ``c/10k`` — which is what every baseline was keyed on before a directory
+    ever held two. A directory holding more than one labels each file by its
+    stem as well — ``c/10k/c-10-k-2025-02-21`` — so every file is measured.
+
+    The label used to be the directory in every case, and ``build_corpus``
+    keeps the first file per label. When GH #1346 added an FY2022 Citi 10-K
+    beside the FY2024 one, the new file sorted first and every ratchet keyed
+    ``c/10k`` silently switched to measuring a different filing, with the
+    FY2024 one dropped from the corpus altogether.
+    """
+    directory = path.parent
+    base = f"{directory.parent.name}/{directory.name}"
+    if len(list(directory.glob("*.html"))) > 1:
+        return f"{base}/{path.stem}"
+    return base
+
+
 def build_corpus(forms: List[str]) -> List[dict]:
     """Every *available* fixture for the requested forms, with provenance.
 
@@ -244,7 +265,7 @@ def build_corpus(forms: List[str]) -> List[dict]:
         subdir = dir_for_form.get(form)
         if subdir:
             for path in sorted(HTML_CORPUS.glob(f"*/{subdir}/*.html")):
-                add(form, path, "modern", f"{path.parent.parent.name}/{subdir}")
+                add(form, path, "modern", modern_label(path))
         # Tracked gate-form slice first, so it wins the de-duplication and CI
         # and local runs measure the same file for these six.
         for path in sorted(GATE_CORPUS.glob(f"{form}/*.html")):
