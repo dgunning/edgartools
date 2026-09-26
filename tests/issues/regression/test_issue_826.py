@@ -63,7 +63,7 @@ def test_section_tables_no_duplication_aapl_10k():
     assert len({id(t) for t in tables}) == len(tables)
 
     # The fix only removes redundant serialization — it must not drop content.
-    assert len(section.text()) == 60874
+    assert len(section.text()) == 62223  # tables rendered cell by cell (edgartools-wzgu); same letters and digits
 
 
 @pytest.mark.network

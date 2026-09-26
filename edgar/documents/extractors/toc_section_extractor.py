@@ -435,6 +435,22 @@ class SECSectionExtractor:
     # re-attributed body heading, plus the page number that often trails it.
     _NAV_TEXT_RE = re.compile(r'^(?:table of contents|financial table of contents)$', re.IGNORECASE)
     _NAV_NUM_RE = re.compile(r'^\d{1,4}$')
+    # A rendered table row separates its cells with two or more spaces, so a
+    # breadcrumb laid out as a one-row table arrives as a single line.
+    _TABLE_CELL_SEP_RE = re.compile(r'\s{2,}')
+
+    def _is_nav_line(self, stripped: str) -> bool:
+        """True for a breadcrumb line: navigation labels, optionally with page numbers.
+
+        ExxonMobil's page header is a one-row table, "Table of Contents | Financial
+        Table of Contents". Once tables rendered cell by cell (edgartools-wzgu) it
+        arrived as one line, which the one-label-per-line match missed, so the
+        breadcrumb opened Item 7 again. At least one cell must be a label, so a
+        row of bare numbers is never mistaken for navigation.
+        """
+        cells = self._TABLE_CELL_SEP_RE.split(stripped)
+        return (any(self._NAV_TEXT_RE.match(c) for c in cells)
+                and all(self._NAV_TEXT_RE.match(c) or self._NAV_NUM_RE.match(c) for c in cells))
 
     def _strip_leading_nav(self, text: Optional[str]) -> Optional[str]:
         """Drop leading blank / navigation-breadcrumb lines from a section's text.
@@ -457,7 +473,7 @@ class SECSectionExtractor:
             if not stripped:
                 i += 1
                 continue  # blank lines don't reset breadcrumb adjacency
-            if self._NAV_TEXT_RE.match(stripped):
+            if self._is_nav_line(stripped):
                 prev_was_breadcrumb = True
                 i += 1
                 continue
