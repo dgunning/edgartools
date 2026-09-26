@@ -13,6 +13,15 @@ _13F_VALUE_IN_THOUSANDS_CUTOFF = datetime(2022, 9, 30)
 _13F_IMPLIED_PRICE_THOUSANDS_THRESHOLD = 1.0
 _13F_FRAC_THOUSANDS = 0.5
 _13F_DOLLARS_SCHEMA_VERSION = 'X0202'
+# A sub-dollar fraction inside this band is a coin flip, not evidence: two
+# priceable rows with one warrant land on exactly 0.5 (GH #1336). Metadata decides.
+_13F_FRAC_DEAD_BAND = (0.35, 0.65)
+# Fewer priceable rows than this still decide by price, but are flagged ambiguous
+# so a 1000x conversion warns. Measured over the SEC 13F data sets for Dec 2025 -
+# Aug 2026: of 151 small filings with a sub-dollar fraction >= 0.35, 99 genuinely
+# report thousands and 52 dollars, so letting metadata decide them (it says
+# dollars under X0202) would silently mis-scale the 99.
+_13F_MIN_PRICEABLE_ROWS = 10
 
 
 class Ambiguous13FValueUnitWarning(UserWarning):
@@ -61,7 +70,9 @@ def resolve_value_unit(df, schema_version: Optional[str] = None,
                        *, override: Optional[ValueUnit] = None) -> ValueUnitResolution:
     """Retain the existing unit heuristic while exposing its limitations.
 
-    A majority of sub-dollar implied prices remains evidence for thousands.
+    A majority of sub-dollar implied prices remains evidence for thousands, unless
+    the fraction falls in ``_13F_FRAC_DEAD_BAND``; from fewer than
+    ``_13F_MIN_PRICEABLE_ROWS`` rows it is flagged ambiguous (GH #1336).
     Otherwise metadata decides: raw prices alone cannot distinguish ordinary
     dollar holdings from thousands-denominated holdings of expensive securities.
     In particular, old filings can already contain dollars (Kahn Brothers,
@@ -99,8 +110,10 @@ def resolve_value_unit(df, schema_version: Optional[str] = None,
 
     if override is not None:
         unit, source, ambiguous = override, 'override', False
-    elif fraction is not None and fraction >= _13F_FRAC_THOUSANDS:
-        unit, source, ambiguous = 'thousands', 'implied_prices', False
+    elif (fraction is not None and fraction >= _13F_FRAC_THOUSANDS
+          and not _13F_FRAC_DEAD_BAND[0] < fraction < _13F_FRAC_DEAD_BAND[1]):
+        unit, source = 'thousands', 'implied_prices'
+        ambiguous = count < _13F_MIN_PRICEABLE_ROWS
     else:
         unit = 'thousands' if _resolve_unit_fallback(schema_version, report_period_dt) else 'dollars'
         source = ('schema' if _schema_implies_dollars(schema_version) is not None else
