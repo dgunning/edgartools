@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.59.1] - 2026-09-26
+
+### Fixed
+
+- **`edgar_read` returned no holdings section for any 13F-HR.** A filing whose summary reported `Total Holdings: 211` came back with `holdings` set to `None`, because the section tested a DataFrame for truth and then looped over its column names. It now lists the top 30 rows by value (issuer, shares, value), and an extraction failure logs at warning level. (GH #1337)
+- **ExxonMobil's 10-K Item 7 opened on a "Table of Contents" breadcrumb again in 5.59.0.** Its page header is a one-row table, and once section tables rendered cell by cell the two labels arrived on one line, which the breadcrumb stripper did not recognise. A line whose cells are all navigation labels or page numbers is now stripped; Item 7 opens on its MD&A heading. (bead edgartools-wzgu)
+
 ## [5.59.0] - 2026-09-26
 
 ### Changed
