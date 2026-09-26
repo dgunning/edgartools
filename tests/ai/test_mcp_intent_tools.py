@@ -412,6 +412,7 @@ class TestEdgarReadTool:
         assert result.success is False
 
 
+@pytest.mark.fast
 class TestExtract13FHoldings:
     """13F holdings section reads rows from the ThirteenF.holdings DataFrame (#1337)."""
 
