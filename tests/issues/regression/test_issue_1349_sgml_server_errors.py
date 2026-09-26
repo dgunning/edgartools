@@ -1,6 +1,7 @@
 """A failed SGML download must not cache a homepage-only header.
 
 GitHub Issue: https://github.com/dgunning/edgartools/issues/1349
+GitHub Issue: https://github.com/dgunning/edgartools/issues/1351
 """
 
 from datetime import datetime
@@ -13,7 +14,7 @@ import pytest
 
 from edgar import Filing
 from edgar.attachments import Attachments, FilingHomepage
-from edgar.exceptions import TransportError, http_status
+from edgar.exceptions import TooManyRequestsError, TransportError, http_status
 from edgar.httprequests import wrap_transport_errors
 from edgar.sgml import sgml_common
 
@@ -55,8 +56,8 @@ def homepage(monkeypatch):
 
 
 @pytest.mark.parametrize("accessor", ["sgml", "header"])
-@pytest.mark.parametrize("status", [500, 502, 503, 504])
-def test_server_error_leaves_filing_retryable(
+@pytest.mark.parametrize("status", [403, 404, 429, 500, 502, 503, 504])
+def test_http_error_leaves_filing_retryable(
     filing,
     homepage,
     submission_text,
@@ -66,11 +67,17 @@ def test_server_error_leaves_filing_retryable(
     status,
 ):
     request = httpx.Request("GET", filing.text_url)
-    error = httpx.HTTPStatusError(
-        "SEC server failure",
-        request=request,
-        response=httpx.Response(status, request=request),
-    )
+    if status == 429:
+        # The streaming boundary raises this domain error in both modes.
+        error = TooManyRequestsError(filing.text_url, retry_after=120)
+        expected_error = TooManyRequestsError
+    else:
+        error = httpx.HTTPStatusError(
+            "SEC HTTP failure",
+            request=request,
+            response=httpx.Response(status, request=request),
+        )
+        expected_error = TransportError if strict_errors else httpx.HTTPStatusError
     read = Mock(side_effect=[error, submission_text])
 
     @wrap_transport_errors
@@ -79,22 +86,25 @@ def test_server_error_leaves_filing_retryable(
 
     monkeypatch.setattr(sgml_common, "read_content_as_string", download)
 
-    with pytest.raises(TransportError if strict_errors else httpx.HTTPStatusError) as caught:
+    with pytest.raises(expected_error) as caught:
         if accessor == "header":
             _ = filing.header
         else:
             filing.sgml()
 
     assert http_status(caught.value) == status
-    if strict_errors:
+    if strict_errors and status != 429:
         assert caught.value.__cause__ is error
     else:
         assert caught.value is error
+    if status == 429:
+        assert caught.value.retry_after == 120
     assert filing._sgml is None
     assert "header" not in filing.__dict__
+    assert read.call_count == 1
     homepage.assert_not_called()
 
-    # Retry the same object through its public header accessor, then reuse the cache.
+    # Simulate a later caller retry after resolving the refusal or waiting out the limit.
     header = filing.header
     assert header.accession_number == "0000320193-24-000123"
     assert header.acceptance_datetime == datetime(2024, 11, 1, 6, 1, 36)
