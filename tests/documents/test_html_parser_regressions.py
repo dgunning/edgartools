@@ -156,6 +156,37 @@ class TestTextNodeEdgeWordGluing:
         assert 'RegulationS-T(the rule)' in text
 
 
+class TestHardWrappedTextNode:
+    """gh-1370: whitespace runs INSIDE a text node collapse to one space.
+
+    Older EDGAR HTML is hard-wrapped at ~150 columns inside <P>. Google's FY2004
+    10-K (0001193125-05-065298) yielded ~500 mid-sentence newlines in Item 7.
+    """
+
+    def test_newline_inside_a_paragraph_collapses(self):
+        html = ('<html><body><p>Our stock has been quoted since August 19,\n2004. '
+                'Prior to that time there was no market.</p></body></html>')
+        text = parse_html(html, ParserConfig(detect_sections=False)).text()
+        assert text.strip() == ('Our stock has been quoted since August 19, 2004. '
+                                'Prior to that time there was no market.')
+
+    def test_newline_inside_an_inline_font_collapses(self):
+        html = ('<html><body><p><font>net revenues\n   increased by 118%</font> '
+                'in 2004.</p></body></html>')
+        text = parse_html(html).text()
+        assert 'net revenues increased by 118% in 2004.' in text
+
+    def test_br_is_still_a_line_break(self):
+        html = '<html><body><p>Mountain View,<br>California</p></body></html>'
+        text = parse_html(html).text()
+        assert 'Mountain View,\nCalifornia' in text
+
+    def test_pre_keeps_its_newlines(self):
+        html = '<html><body><pre>Line one\nLine two</pre></body></html>'
+        text = parse_html(html).text()
+        assert 'Line one\nLine two' in text
+
+
 class TestSpacerElementWordGluing:
     """A third copy of the same bug: whitespace-only spacer elements.
 
