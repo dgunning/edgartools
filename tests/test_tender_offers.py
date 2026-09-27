@@ -111,11 +111,56 @@ def test_schedule14d9_wrong_form_raises():
 
 @pytest.mark.fast
 def test_schedule14d9_missing_item4_raises_not_silent():
-    """Silence check: a document with no Item 4 must fail loudly, not return a
-    Schedule14D9 with a quietly-wrong `recommendation`."""
-    filing = _mock_filing(html="<html><body>Not a real filing document.</body></html>")
+    """Silence check for an *original* SC 14D9: no Item 4 is a genuine parse
+    failure there (unlike an amendment, see the tests below), so it must fail
+    loudly rather than return a Schedule14D9 with a quietly-wrong
+    `recommendation`."""
+    filing = _mock_filing(form="SC 14D9", html="<html><body>Not a real filing document.</body></html>")
     with pytest.raises(DataObjectError, match="Could not locate Item 4"):
         Schedule14D9.from_filing(filing)
+
+
+@pytest.mark.fast
+def test_schedule14d9_amendment_missing_item4_does_not_raise():
+    """Of 229 SC 14D9 filings in 2025, 174 were amendments, and amendments
+    routinely restate only the items they changed -- so a missing Item 4 there
+    is the normal case, not a parse failure, and must not raise."""
+    filing = _mock_filing(form="SC 14D9/A", html="<html><body>Amends only Item 6.</body></html>")
+
+    schedule = Schedule14D9.from_filing(filing)
+
+    assert schedule.is_amendment is True
+    assert schedule.item4_text is None
+    assert schedule.recommendation is None
+    assert schedule.recommendation_text is None
+    assert schedule.recommendation_text_truncated is None
+
+
+@pytest.mark.fast
+def test_schedule14d9_amendment_with_item4_still_classifies():
+    """An amendment that *does* restate Item 4 (e.g. to revise the
+    recommendation itself) is classified exactly like an original."""
+    filing = _mock_filing(
+        form="SC 14D9/A",
+        html=LISATA_SC14D9_PATH.read_text(),
+    )
+
+    schedule = Schedule14D9.from_filing(filing)
+
+    assert schedule.is_amendment is True
+    assert schedule.recommendation == "accept"
+
+
+@pytest.mark.fast
+def test_schedule14d9_amendment_missing_item4_renders_without_crashing():
+    """The rich rendering path must handle item4_text=None -- a real caller
+    reaches this via repr()/print(), not just direct attribute access."""
+    filing = _mock_filing(form="SC 14D9/A", html="<html><body>Amends only Item 6.</body></html>")
+    schedule = Schedule14D9.from_filing(filing)
+
+    rendered = repr(schedule)
+
+    assert "Not restated" in rendered
 
 
 @pytest.mark.fast
@@ -237,12 +282,15 @@ def test_extract_item_section_returns_none_when_absent():
 
 
 @pytest.mark.fast
-@pytest.mark.parametrize("heading", [
-    "ITEM 4. THE SOLICITATION OR RECOMMENDATION",
-    "ITEM 4.THE SOLICITATION OR RECOMMENDATION",
-    "Item 4. The Solicitation or Recommendation",
-    "item 4. the solicitation or recommendation",
-])
+@pytest.mark.parametrize(
+    "heading",
+    [
+        "ITEM 4. THE SOLICITATION OR RECOMMENDATION",
+        "ITEM 4.THE SOLICITATION OR RECOMMENDATION",
+        "Item 4. The Solicitation or Recommendation",
+        "item 4. the solicitation or recommendation",
+    ],
+)
 def test_item_headings_are_found_whatever_their_case(heading):
     """Filers set this heading in caps at least as often as in title case, and
     a case-sensitive match found no candidate at all in those documents — the

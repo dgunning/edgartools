@@ -47,12 +47,22 @@ def render_schedule14d9(schedule: "Schedule14D9") -> Panel:
     style, label = _RECOMMENDATION_STYLE[schedule.recommendation]
     header.add_row("Recommendation:", f"[{style}]{label}[/{style}]")
 
-    recommendation_text = schedule.recommendation_text
-    if schedule.recommendation_text_truncated:
-        recommendation_text += " [dim italic](truncated -- see item4_text for the full section)[/dim italic]"
+    if schedule.item4_text is None:
+        # Amendment that didn't restate Item 4 -- the normal case for SC 14D9/A,
+        # not a parsing failure. See Schedule14D9's class docstring.
+        recommendation_body = Text(
+            "Not restated in this amendment.",
+            style="dim italic",
+        )
+    elif schedule.recommendation_text_truncated:
+        recommendation_body = Text.from_markup(
+            schedule.recommendation_text + " [dim italic](truncated -- see item4_text for the full section)[/dim italic]"
+        )
+    else:
+        recommendation_body = Text(schedule.recommendation_text, style="italic")
 
     recommendation_panel = Panel(
-        Text.from_markup(recommendation_text) if schedule.recommendation_text_truncated else Text(recommendation_text, style="italic"),
+        recommendation_body,
         title="[bold yellow]Recommendation Statement (Item 4)[/bold yellow]",
         border_style="yellow",
         padding=(1, 2),

@@ -160,7 +160,7 @@ def _recommendation_window(item4_text: str) -> str:
     return normalized[:boundary].strip()
 
 
-def classify_recommendation(item4_text: str) -> Optional[str]:
+def classify_recommendation(item4_text: Optional[str]) -> Optional[str]:
     """
     Classify the board's recommendation from Item 4 narrative text.
 
@@ -215,12 +215,19 @@ class Schedule14D9:
         schedule = Schedule14D9.from_filing(filing)
         schedule.recommendation        # "accept" / "reject" / "neutral" / None
         schedule.recommendation_text   # the raw Item 4 recommendation text
+
+    An amendment (``SC 14D9/A``) that does not restate Item 4 -- the majority
+    case, since amendments restate only the items they changed -- constructs
+    successfully with ``item4_text``, ``recommendation``, ``recommendation_text``
+    and ``recommendation_text_truncated`` all ``None``. Check ``is_amendment``
+    to tell "not restated in this amendment" apart from "this filing has no
+    opinion" before treating a ``None`` as meaningful.
     """
 
     def __init__(
         self,
         filing: "Filing",
-        item4_text: str,
+        item4_text: Optional[str],
     ):
         self._filing = filing
         self.item4_text = item4_text
@@ -237,23 +244,30 @@ class Schedule14D9:
         Raises:
             AssertionError: If filing is not a Schedule 14D-9 form
             DataObjectError: If the document has no HTML, or if Item 4 (The
-                Solicitation or Recommendation) cannot be located in it. Both
-                mean the document failed to parse structurally, and are
-                distinct from ``recommendation`` being ``None``, which means
-                Item 4 was found but its language did not clearly support
-                accept/reject/neutral.
+                Solicitation or Recommendation) cannot be located in an
+                *original* SC 14D9. Both mean the document failed to parse
+                structurally, and are distinct from ``recommendation`` being
+                ``None``, which means Item 4 was found but its language did
+                not clearly support accept/reject/neutral.
 
-                An amendment (``SC 14D9/A``) routinely restates only the items
-                it changes, so a filing with no Item 4 is a normal document
-                rather than a malformed one — this still raises for it today.
+                An amendment (``SC 14D9/A``) does NOT raise for a missing
+                Item 4: of 229 SC 14D9 filings in 2025, 174 were amendments,
+                and amendments routinely restate only the items they changed,
+                so no Item 4 is the normal case there, not a parse failure.
+                ``item4_text`` and ``recommendation`` are both ``None`` in
+                that case; check ``is_amendment`` to tell "not restated here"
+                apart from "this filing has no opinion".
         """
         assert filing.form in SC_14D9_FORMS, f"Expected SC 14D9 form, got {filing.form}"
+
+        is_amendment = "/A" in filing.form
 
         html = filing.html()
         if not html:
             raise DataObjectError(
                 f"No HTML document found for SC 14D9 filing {filing.accession_no}",
-                form=filing.form, accession_no=filing.accession_no,
+                form=filing.form,
+                accession_no=filing.accession_no,
             )
 
         tree = lxml_html.fromstring(html)
@@ -262,11 +276,17 @@ class Schedule14D9:
 
         item4_text = extract_item_section(text, 4, 5)
         if not item4_text:
-            raise DataObjectError(
-                "Could not locate Item 4 (The Solicitation or Recommendation) in SC 14D9 "
-                f"filing {filing.accession_no}",
-                form=filing.form, accession_no=filing.accession_no,
-            )
+            if is_amendment:
+                # Normal for an amendment: it restates only the items it
+                # changed, and Item 4 (the recommendation) is often not one
+                # of them. Not a parse failure -- see the Raises: note above.
+                item4_text = None
+            else:
+                raise DataObjectError(
+                    f"Could not locate Item 4 (The Solicitation or Recommendation) in SC 14D9 filing {filing.accession_no}",
+                    form=filing.form,
+                    accession_no=filing.accession_no,
+                )
 
         return cls(filing=filing, item4_text=item4_text)
 
@@ -291,19 +311,27 @@ class Schedule14D9:
         return self._filing.filing_date
 
     @property
-    def recommendation_text(self) -> str:
+    def recommendation_text(self) -> Optional[str]:
         """
         The board's recommendation statement: the same bounded, whitespace-
         normalized window of Item 4 that ``recommendation`` is classified from
         (see ``_RECOMMENDATION_WINDOW_CHARS``), not an arbitrary truncation.
 
+        ``None`` when ``item4_text`` is ``None`` (an amendment that doesn't
+        restate Item 4) -- not an empty string, matching how ``recommendation``
+        is also ``None`` there rather than a guess. Mirrors ``Schedule13D``'s
+        ``total_shares``/``total_percent``, which return ``None`` rather than
+        ``0`` when the underlying data is genuinely unavailable.
+
         Use ``item4_text`` for the full Item 4 section (background, reasons,
         fairness opinion summary, etc.), which can be very large.
         """
+        if self.item4_text is None:
+            return None
         return _recommendation_window(self.item4_text)
 
     @property
-    def recommendation_text_truncated(self) -> bool:
+    def recommendation_text_truncated(self) -> Optional[bool]:
         """
         True if ``recommendation_text`` was cut by the character cap rather
         than by a section heading, i.e. the statement may actually continue and
@@ -314,17 +342,21 @@ class Schedule14D9:
         heading ended the window, however much of Item 4 follows it: the
         statement finished where the filing said it did.
 
+        ``None`` when ``item4_text`` is ``None`` -- there is no window to have
+        been truncated, which is a different thing from a window that ended
+        cleanly.
+
         Measuring the length of Item 4 instead would answer a different
         question and answer it uselessly — Item 4 routinely runs past 100,000
         characters, so it exceeds any sane cap in nearly every real filing. On
         Lisata Therapeutics' filing the window ends cleanly at the heading after
         1,066 characters, and a length-based flag still called it truncated.
         """
+        if self.item4_text is None:
+            return None
         normalized = re.sub(r"\s+", " ", self.item4_text).strip()
         lowered = normalized.lower()
-        hits = [match.start() for match in
-                (re.search(marker, lowered) for marker in _SECTION_BOUNDARY_MARKERS)
-                if match]
+        hits = [match.start() for match in (re.search(marker, lowered) for marker in _SECTION_BOUNDARY_MARKERS) if match]
         boundary = min(hits) if hits else len(normalized)
         return boundary > _RECOMMENDATION_WINDOW_CHARS
 
