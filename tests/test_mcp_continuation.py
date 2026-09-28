@@ -146,12 +146,73 @@ def test_encode_cursor_keys_sorted_and_compact():
 
 @pytest.mark.fast
 def test_decode_cursor_oversize_raises_invalid_cursor():
+    # encode_cursor itself now refuses to produce an oversize cursor (see the
+    # encode_cursor tests below), so decode_cursor's own size check is
+    # exercised here against a cursor built by hand, bypassing that guard.
     huge_query = {"x": "y" * (MAX_CURSOR_CHARS * 2)}
-    cursor = encode_cursor(tool="edgar_read", accession="acc", offset=0, fp="f" * 12, query=huge_query)
+    payload = {
+        "v": CURSOR_VERSION, "tool": "edgar_read", "acc": "acc",
+        "doc": None, "q": huge_query, "off": 0, "fp": "f" * 12,
+    }
+    raw = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    cursor = base64.urlsafe_b64encode(raw.encode("utf-8")).decode("ascii").rstrip("=")
     assert len(cursor) > MAX_CURSOR_CHARS
     with pytest.raises(CursorError) as exc_info:
         decode_cursor(cursor, tool="edgar_read", accession="acc", query=huge_query)
     assert exc_info.value.error_code == "INVALID_CURSOR"
+
+
+@pytest.mark.fast
+def test_encode_cursor_over_cap_raises_invalid_cursor():
+    huge_query = {"x": "y" * (MAX_CURSOR_CHARS * 2)}
+    with pytest.raises(CursorError) as exc_info:
+        encode_cursor(tool="edgar_notes", accession="acc", offset=0, fp="f" * 12, query=huge_query)
+    assert exc_info.value.error_code == "INVALID_CURSOR"
+    assert "2,048" in exc_info.value.message or "2048" in exc_info.value.message
+
+
+@pytest.mark.fast
+def test_encode_cursor_at_or_below_cap_round_trips():
+    # Build a query whose encoded cursor lands exactly at MAX_CURSOR_CHARS,
+    # then one character below it, and confirm both still round-trip through
+    # decode_cursor rather than being rejected by the new cap check.
+    #
+    # Measures length by replicating encode_cursor's own encoding (sorted,
+    # compact JSON -> urlsafe base64, padding stripped) without its cap
+    # check, since encode_cursor itself now raises above the cap and cannot
+    # be used to probe for where the cap lands.
+    def cursor_len(pad_len: int) -> int:
+        payload = {
+            "v": CURSOR_VERSION, "tool": "edgar_notes", "acc": "acc",
+            "doc": None, "q": {"x": "y" * pad_len}, "off": 0, "fp": "f" * 12,
+        }
+        raw = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+        return len(base64.urlsafe_b64encode(raw.encode("utf-8")).decode("ascii").rstrip("="))
+
+    # Binary search for the pad length that lands the cursor exactly at the cap.
+    lo, hi = 0, MAX_CURSOR_CHARS
+    while cursor_len(hi) < MAX_CURSOR_CHARS:
+        hi *= 2
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if cursor_len(mid) < MAX_CURSOR_CHARS:
+            lo = mid + 1
+        else:
+            hi = mid
+    at_cap_pad = lo
+    assert cursor_len(at_cap_pad) == MAX_CURSOR_CHARS
+
+    query_at_cap = {"x": "y" * at_cap_pad}
+    cursor_at_cap = encode_cursor(tool="edgar_notes", accession="acc", offset=0, fp="f" * 12, query=query_at_cap)
+    assert len(cursor_at_cap) == MAX_CURSOR_CHARS
+    payload = decode_cursor(cursor_at_cap, tool="edgar_notes", accession="acc", query=query_at_cap)
+    assert payload["q"] == query_at_cap
+
+    query_below_cap = {"x": "y" * (at_cap_pad - 1)}
+    cursor_below_cap = encode_cursor(tool="edgar_notes", accession="acc", offset=0, fp="f" * 12, query=query_below_cap)
+    assert len(cursor_below_cap) < MAX_CURSOR_CHARS
+    payload = decode_cursor(cursor_below_cap, tool="edgar_notes", accession="acc", query=query_below_cap)
+    assert payload["q"] == query_below_cap
 
 
 @pytest.mark.fast

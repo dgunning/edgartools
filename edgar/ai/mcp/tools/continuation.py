@@ -132,6 +132,11 @@ def encode_cursor(
     to distinguish "key missing" from "key present but null" — both just mean
     "not given". Keys are JSON-sorted with compact separators so the same
     logical cursor always encodes to the same bytes.
+
+    Raises ``CursorError(INVALID_CURSOR)`` rather than returning a cursor
+    longer than ``MAX_CURSOR_CHARS`` — ``decode_cursor`` would reject it
+    anyway, so a caller with a large ``query`` gets a useful error now
+    instead of a cursor that is already dead on arrival.
     """
     payload = {
         "v": CURSOR_VERSION,
@@ -143,7 +148,14 @@ def encode_cursor(
         "fp": fp,
     }
     raw = json.dumps(payload, sort_keys=True, separators=(",", ":"))
-    return base64.urlsafe_b64encode(raw.encode("utf-8")).decode("ascii").rstrip("=")
+    cursor = base64.urlsafe_b64encode(raw.encode("utf-8")).decode("ascii").rstrip("=")
+    if len(cursor) > MAX_CURSOR_CHARS:
+        raise _cursor_error(
+            "INVALID_CURSOR",
+            f"Continuation cursor would exceed {MAX_CURSOR_CHARS} characters; "
+            "narrow the query (e.g. a shorter filter) and retry.",
+        )
+    return cursor
 
 
 def decode_cursor(
