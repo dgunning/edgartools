@@ -119,6 +119,7 @@ def test_portfolio_investments_from_filing_small_bdc_ground_truth():
     set_identity("Test User test@test.com")
     filing = find(PRINCETON_10Q_ACCESSION)
     assert filing.cik == PRINCETON_CIK
+    assert filing.accession_number == PRINCETON_10Q_ACCESSION
 
     investments = portfolio_investments_from_filing(filing)
 
