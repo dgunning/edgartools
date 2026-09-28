@@ -10,9 +10,9 @@ parsing its 703 identifiers once each took 40.8 s; with the patterns cached,
 1.1 s, every parsed field identical.
 
 The identifier below is one of BXSL's own rows, in that 10-Q and in its FY2025
-10-K (0001736035-26-000004). Counted at `re._compiler.compile`, which every
-compilation passes through; the public `re.compile` count misses the ones the
-module-level `re.search`/`re.match` make. Offline: `member_candidates=()`
+10-K (0001736035-26-000004). Counted at `re._compiler.compile` (`sre_compile.compile`
+on 3.10), which every compilation passes through; the public `re.compile` count
+misses the ones the module-level `re.search`/`re.match` make. Offline: `member_candidates=()`
 needs no filing.
 """
 
@@ -28,13 +28,17 @@ SNOOPY = 'Snoopy Bidco, Inc. | Non-Affiliated Issuer'
 @pytest.fixture
 def compilations(monkeypatch):
     counted = []
-    real = re._compiler.compile
+    # `re._compiler` is 3.11+; on 3.10 `re` calls `sre_compile.compile` through the module.
+    compiler = getattr(re, '_compiler', None)
+    if compiler is None:
+        import sre_compile as compiler
+    real = compiler.compile
 
     def counting(*args, **kwargs):
         counted.append(args[0])
         return real(*args, **kwargs)
 
-    monkeypatch.setattr(re._compiler, 'compile', counting)
+    monkeypatch.setattr(compiler, 'compile', counting)
     return counted
 
 
