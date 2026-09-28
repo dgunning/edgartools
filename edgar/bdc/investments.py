@@ -688,6 +688,20 @@ def _match_company_candidate(window: str, member_candidates: tuple[str, ...]) ->
         if not prefixes:
             return cleaned_window.strip() if removed_prefix else None
         prefix = max(prefixes, key=len)
+        # A candidate that fills the whole first pipe segment is the company the
+        # filer tagged, not a grouping in front of it: PSEC's "First Tower Finance
+        # Company LLC | Consumer Finance | First Lien Term Loan ..." lost the
+        # company here and kept "First Lien" (GH #1373). SLRC also tags its
+        # headings ("Senior Secured Loans"), so a segment holding an instrument
+        # or a portfolio category is still a prefix.
+        first_segment = cleaned_window.split(' | ', 1)[0].strip()
+        if (
+            first_segment != cleaned_window.strip()
+            and _normalize_member_text(first_segment) == prefix
+            and not _PORTFOLIO_CATEGORY_RE.match(prefix)
+            and not _known_investment_type_matches(first_segment)
+        ):
+            return first_segment
         if prefix == last_prefix:
             return cleaned_window.strip()
         prefix_tokens = len(prefix.split())
