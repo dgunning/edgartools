@@ -1017,6 +1017,105 @@ def _parse_structured_identifier(
     return company_name, investment_type
 
 
+# Category-led identifiers (GH #1372) open with schedule headings, not the
+# company: CGBD writes "Investment | Non-Affiliated Issuer | First Lien Debt |
+# Auctane, Inc. | Transportation: Cargo", SLRC "Common Equity/Equity
+# Interests/Warrants | KBH Topco LLC (Kingsbridge) | Multi-Sector Holdings",
+# PFX "Controlled Investments - ECC Capital Corp. - Real Estate - Equity".
+# A heading is a segment made only of these words; a company always carries
+# at least one word outside them (a name, a legal form).
+_HEADING_WORDS = frozenset({
+    'investment', 'investments', 'issuer', 'issuers', 'portfolio', 'non',
+    'affiliate', 'affiliated', 'control', 'controlled', 'credit', 'fund', 'funds',
+    'debt', 'loan', 'loans', 'bank', 'first', 'second', 'lien', 'senior', 'junior',
+    'secured', 'unsecured', 'subordinated', 'mezzanine', 'structured', 'note', 'notes',
+    'bond', 'bonds', 'equity', 'equities', 'interest', 'interests', 'common', 'preferred',
+    'stock', 'warrant', 'warrants', 'securities', 'other', 'and',
+    # SLRC names its lending lines: "First Lien Life Science Senior Secured Loans",
+    # "Second Lien Asset-Based Senior Secured Loans".
+    'life', 'science', 'asset', 'based',
+})
+
+_RELATIONSHIP_LED_RE = re.compile(
+    r'^(?:Non-Controlled/Non-Affiliated|Non-Controlled/Affiliated|Controlled|Affiliated|'
+    r'Control|Affiliate) Investments?\s+-\s+(?P<body>.+)$',
+    re.IGNORECASE,
+)
+
+
+_DUPLICATE_COUNTER_RE = re.compile(
+    r'(\b(?:LLC|LP|L\.P\.|Inc\.?|Ltd\.?|Limited|Corp\.?|Corporation|Company|S\.A\.R\.L\.))'
+    r'\s+(?:\d{1,2}|\(\d{1,2}\))$',
+    re.IGNORECASE,
+)
+
+
+def _is_schedule_heading(segment: str) -> bool:
+    words = re.findall(r'[A-Za-z]+', segment.lower())
+    return bool(words) and all(word in _HEADING_WORDS for word in words)
+
+
+def _split_trailing_instrument(segment: str) -> tuple[str, Optional[str]]:
+    """Split the instrument off the end of a company segment: SLRC's "CardioFocus,
+    Inc. Warrants" and "Venus Concept Ltd. Warrants (f/k/a Restoration Robotics)",
+    CGBD's "Middle Market Credit Fund, LLC, Subordinated Loan and Member's Interest"."""
+    for match in _known_investment_type_matches(segment):
+        before = segment[:match.start()]
+        if re.search(r'\S,\s+$', before):
+            return before.rstrip(' ,'), segment[match.start():].strip()
+        if (match.start() > 0 and before.endswith(' ')
+                and re.fullmatch(r'\s*(?:\([^)]*\))?', segment[match.end():])):
+            return before.strip(), match.group().strip()
+    trailing = re.search(r'\s+(?P<type>Class [A-Z](?:-\d+)?)$', segment)
+    if trailing:
+        return segment[:trailing.start()].rstrip(' ,'), trailing.group('type')
+    return segment, None
+
+
+def _starts_with_instrument(text: str) -> bool:
+    return any(match.start() == 0 for match in _known_investment_type_matches(text))
+
+
+def _category_led_fields(identifier: str) -> Optional[tuple[str, str]]:
+    """Company and investment type from an identifier that leads with schedule
+    headings, or None when the identifier leads with anything else."""
+    relationship_led = _RELATIONSHIP_LED_RE.match(identifier)
+    if relationship_led and '|' not in identifier:
+        # <Relationship> Investments - <Company>[ - <Industry>] - <Instrument>[ - <detail>]
+        parts = [part.strip() for part in re.split(r'\s+-\s+', relationship_led.group('body'))]
+        company_name, rest = parts[0], parts[1:]
+        while rest and rest[0] == company_name:  # "NVTN LLC - NVTN LLC - Hotel, ..."
+            rest = rest[1:]
+        start = next((index for index, part in enumerate(rest) if _starts_with_instrument(part)), None)
+        if start is None and any(_known_investment_type_matches(part) for part in rest[1:]):
+            start = 1  # the instrument follows the industry
+        if start is None:
+            # No instrument: PFX's subtotal members ("... Investments - PHH Mortgage
+            # Corp.", $3.9M, the sum of the rows under it). Naming them after the
+            # company would count it twice in any grouping by company_name.
+            return None
+        return company_name, ' - '.join(rest[start:])
+
+    # CGBD once omits the space: "Credit Fund | First Lien Debt |Vensure Employer ..."
+    segments = [segment.strip() for segment in re.split(r'\s*\|\s*', identifier)]
+    if len(segments) < 2 or not _is_schedule_heading(segments[0]):
+        return None
+    for position, segment in enumerate(segments):
+        if _is_schedule_heading(segment):
+            continue
+        # The filer's duplicate counter after the legal form: "SCHP Purchaser, INC 2",
+        # "Atlas US Finco, Inc. (1)".
+        segment = _DUPLICATE_COUNTER_RE.sub(r'\1', segment)
+        company_name, trailing_type = _split_trailing_instrument(segment)
+        instruments = [
+            heading for heading in segments[:position]
+            if _known_investment_type_matches(heading)
+        ]
+        investment_type = trailing_type or (instruments[-1] if instruments else 'Unclassified')
+        return company_name, investment_type
+    return None
+
+
 def _parse_investment_identifier(
     dimension_label: str,
     member_candidates: tuple[str, ...] = (),
@@ -1038,12 +1137,13 @@ def _parse_investment_identifier(
     Returns:
         Tuple of (identifier, company_name, investment_type)
     """
-    # Strip the axis prefix
-    identifier = dimension_label
-    if ':' in dimension_label:
-        parts = dimension_label.split(': ', 1)
-        if len(parts) > 1:
-            identifier = parts[1].strip()
+    # Strip the axis prefix, and only the axis prefix: SLRC ends its identifiers
+    # with "Sector: Sub-sector" ("... | Auctane, Inc. | Transportation: Cargo"),
+    # and cutting at any ": " returned "Cargo" as the company (GH #1372).
+    identifier = dimension_label.strip()
+    axis_prefix = re.match(r'\S+Axis:\s+', identifier)
+    if axis_prefix:
+        identifier = identifier[axis_prefix.end():].strip()
 
     # Check for category rollup pattern (e.g., "Debt Investments Software (52.80%)")
     # These should be excluded as they're not individual investments
@@ -1144,6 +1244,10 @@ def _parse_investment_identifier(
             if not company_name:
                 company_name = body
         return identifier, company_name, investment_type
+
+    category_led = _category_led_fields(identifier)
+    if category_led:
+        return identifier, *category_led
 
     relationship_investment = None
     if not _STRUCTURED_FIELD_RE.search(identifier):
