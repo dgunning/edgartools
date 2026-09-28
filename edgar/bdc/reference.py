@@ -142,62 +142,102 @@ class BDCEntity:
             return company.get_filings(form=form)
         return company.get_filings()
 
-    def schedule_of_investments(self, form: str = "10-K"):
+    def _resolve_filing(self, form: str, filing):
         """
-        Get the Schedule of Investments from the latest filing.
+        Resolve the filing to use for investment/SOI extraction.
 
-        Fetches the latest 10-K (or specified form) for this BDC and
-        extracts the Schedule of Investments statement from the XBRL data.
+        If `filing` is given, validate that it belongs to this BDC and use it
+        as-is (this is how a caller pins an exact filing, e.g. by accession
+        number or period, instead of always getting the latest one). Otherwise
+        fall back to the latest non-amendment filing of `form`.
+
+        Raises:
+            ValueError: If `filing` is given but belongs to a different CIK.
+        """
+        if filing is not None:
+            if filing.cik != self.cik:
+                raise ValueError(
+                    f"Filing belongs to CIK {filing.cik}, not this BDC's CIK {self.cik}."
+                )
+            return filing
+
+        company = self.get_company()
+        # Exclude amendments to get full XBRL data
+        filings = company.get_filings(form=form, amendments=False)
+        if len(filings) == 0:
+            return None
+        return filings[0]
+
+    def schedule_of_investments(self, form: str = "10-K", filing=None):
+        """
+        Get the Schedule of Investments from a filing.
+
+        By default, fetches the latest 10-K (or specified form) for this BDC
+        and extracts the Schedule of Investments statement from the XBRL data.
+        Pass `filing` to use a specific, already-selected filing instead (it
+        must belong to this BDC's CIK).
 
         Args:
             form: The form type to use ('10-K' or '10-Q'). Defaults to '10-K'.
+                Ignored when `filing` is given.
+            filing: Optional Filing to use instead of looking up the latest one.
 
         Returns:
             Statement object containing the Schedule of Investments,
             or None if not available.
+
+        Raises:
+            ValueError: If `filing` is given but belongs to a different CIK.
 
         Example:
             >>> arcc = get_bdc_list()[0]
             >>> soi = arcc.schedule_of_investments()
             >>> soi.to_dataframe()
         """
-        company = self.get_company()
-        # Exclude amendments to get full XBRL data
-        filings = company.get_filings(form=form, amendments=False)
-        if len(filings) == 0:
+        target_filing = self._resolve_filing(form, filing)
+        if target_filing is None:
             return None
 
-        latest_filing = filings[0]
-        xbrl = latest_filing.xbrl()
-
+        xbrl = target_filing.xbrl()
         if xbrl is None:
             return None
 
         return xbrl.statements.schedule_of_investments()
 
-    def portfolio_investments(self, form: str = "10-K", include_untyped: bool = False):
+    def portfolio_investments(self, form: str = "10-K", include_untyped: bool = False, filing=None):
         """
-        Get individual portfolio investments from the latest filing.
+        Get individual portfolio investments from a filing.
 
         Parses the Schedule of Investments XBRL data to extract individual
         investment holdings with fair value, cost, interest rate, etc.
 
         This method tries two extraction approaches:
-        1. Statement-based: Uses the XBRL presentation hierarchy
-        2. Facts-based: Extracts directly from XBRL facts with dimensions
+        1. Facts-based: Extracts directly from XBRL facts with dimensions
+        2. Statement-based: Uses the XBRL presentation hierarchy
 
         Some BDCs (like Blue Owl) have dimensional investment data in facts
         but not in the Statement presentation hierarchy, so both approaches
         are attempted.
 
+        By default, uses the latest 10-K (or specified form) for this BDC.
+        Pass `filing` to use a specific, already-selected filing instead (it
+        must belong to this BDC's CIK) — useful when a caller has pinned an
+        exact filing by accession number or period rather than wanting the
+        latest one.
+
         Args:
             form: The form type to use ('10-K' or '10-Q'). Defaults to '10-K'.
+                Ignored when `filing` is given.
             include_untyped: If False (default), excludes investments with "Unknown"
                 type. These are typically company-level rollup entries that would
                 inflate totals. Set to True to include all entries.
+            filing: Optional Filing to use instead of looking up the latest one.
 
         Returns:
             PortfolioInvestments collection, or None if not available.
+
+        Raises:
+            ValueError: If `filing` is given but belongs to a different CIK.
 
         Example:
             >>> arcc = get_bdc_list()[0]
@@ -209,29 +249,13 @@ class BDCEntity:
             >>> investments.filter(investment_type='First lien')
             PortfolioInvestments with first lien loans
         """
-        from edgar.bdc.investments import PortfolioInvestments
+        from edgar.bdc.investments import portfolio_investments_from_filing
 
-        # Get XBRL for the filing
-        company = self.get_company()
-        filings = company.get_filings(form=form, amendments=False)
-        if len(filings) == 0:
+        target_filing = self._resolve_filing(form, filing)
+        if target_filing is None:
             return None
 
-        xbrl = filings[0].xbrl()
-        if xbrl is None:
-            return None
-
-        # Try facts-based extraction first (works for more BDCs)
-        investments = PortfolioInvestments.from_xbrl(xbrl, include_untyped=include_untyped)
-        if len(investments) > 0:
-            return investments
-
-        # Fall back to statement-based extraction
-        soi = xbrl.statements.schedule_of_investments()
-        if soi is None:
-            return None
-
-        return PortfolioInvestments.from_statement(soi, include_untyped=include_untyped)
+        return portfolio_investments_from_filing(target_filing, include_untyped=include_untyped)
 
     def has_detailed_investments(self, form: str = "10-K") -> bool:
         """

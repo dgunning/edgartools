@@ -24,6 +24,7 @@ __all__ = [
     'DataQuality',
     'PortfolioInvestment',
     'PortfolioInvestments',
+    'portfolio_investments_from_filing',
 ]
 
 # XBRL concepts for investment data
@@ -1412,6 +1413,8 @@ class PortfolioInvestments:
     Attributes:
         period: The date of the data (e.g., '2024-12-31')
         data_quality: Coverage metrics for data completeness
+        extraction_method: Which extraction path produced this collection
+            ('xbrl_facts', 'statement', or None when constructed directly)
     """
 
     def __init__(
@@ -1419,10 +1422,12 @@ class PortfolioInvestments:
         investments: list[PortfolioInvestment],
         period: Optional[str] = None,
         nonaccrual_fair_value: Optional[Decimal] = None,
+        extraction_method: Optional[str] = None,
     ):
         self._investments = investments
         self._period = period
         self._nonaccrual_fair_value = nonaccrual_fair_value
+        self._extraction_method = extraction_method
 
     def __len__(self) -> int:
         return len(self._investments)
@@ -1437,6 +1442,16 @@ class PortfolioInvestments:
     def period(self) -> Optional[str]:
         """The period date for this data (e.g., '2024-12-31')."""
         return self._period
+
+    @property
+    def extraction_method(self) -> Optional[str]:
+        """Which extraction path produced this collection.
+
+        'xbrl_facts' when built via from_xbrl(), 'statement' when built via
+        from_statement(), or None when constructed directly without going
+        through either classmethod.
+        """
+        return self._extraction_method
 
     @property
     def data_quality(self) -> DataQuality:
@@ -1592,7 +1607,8 @@ class PortfolioInvestments:
             ]
 
         return PortfolioInvestments(investments, period=self._period,
-                                    nonaccrual_fair_value=self._nonaccrual_fair_value)
+                                    nonaccrual_fair_value=self._nonaccrual_fair_value,
+                                    extraction_method=self._extraction_method)
 
     def to_context(self, detail: str = 'standard') -> str:
         """
@@ -1795,7 +1811,7 @@ class PortfolioInvestments:
                 if re.match(r'\d{4}-\d{2}-\d{2}', str(col))
             ]
             if not date_cols:
-                return cls([], period=None)
+                return cls([], period=None, extraction_method='statement')
             # Use the latest (first) date column
             period = date_cols[0]
 
@@ -1808,7 +1824,7 @@ class PortfolioInvestments:
         data = df[mask].copy()
 
         if data.empty:
-            return cls([], period=period)
+            return cls([], period=period, extraction_method='statement')
 
         # Group by dimension_label and pivot concepts
         investments = {}
@@ -1870,7 +1886,7 @@ class PortfolioInvestments:
             reverse=True
         )
 
-        return cls(portfolio, period=period)
+        return cls(portfolio, period=period, extraction_method='statement')
 
     @classmethod
     def from_xbrl(
@@ -1905,12 +1921,12 @@ class PortfolioInvestments:
                 and f.get('period_type') == 'instant'
             ]
             if not fv_facts:
-                return cls([], period=None)
+                return cls([], period=None, extraction_method='xbrl_facts')
 
             # Get unique periods and use the latest
             periods = set(f.get('period_instant') for f in fv_facts if f.get('period_instant'))
             if not periods:
-                return cls([], period=None)
+                return cls([], period=None, extraction_method='xbrl_facts')
             period = max(periods)
 
         # The dimension key for investment identifier
@@ -2021,4 +2037,51 @@ class PortfolioInvestments:
             reverse=True
         )
 
-        return cls(portfolio, period=period, nonaccrual_fair_value=nonaccrual_fv)
+        return cls(portfolio, period=period, nonaccrual_fair_value=nonaccrual_fv, extraction_method='xbrl_facts')
+
+
+def portfolio_investments_from_filing(
+    filing,
+    include_untyped: bool = False,
+) -> Optional[PortfolioInvestments]:
+    """
+    Extract portfolio investments from a specific filing.
+
+    This is the extraction logic `BDCEntity.portfolio_investments()` uses
+    internally: facts-based extraction is tried first (works for more BDCs),
+    falling back to statement-based extraction via the Schedule of
+    Investments presentation hierarchy when facts yield nothing. Call this
+    directly when the caller has already selected a specific filing (e.g. by
+    accession number or period) rather than always wanting the BDC's latest
+    filing.
+
+    Args:
+        filing: A Filing object, e.g. from `company.get_filings()` or `find()`.
+        include_untyped: If False (default), excludes investments with "Unknown"
+            type. These are typically company-level rollup entries that would
+            inflate totals.
+
+    Returns:
+        PortfolioInvestments collection, or None if the filing has no XBRL data.
+
+    Example:
+        >>> filing = find("0001628280-26-050307")
+        >>> investments = portfolio_investments_from_filing(filing)
+        >>> investments.extraction_method
+        'xbrl_facts'
+    """
+    xbrl = filing.xbrl()
+    if xbrl is None:
+        return None
+
+    # Try facts-based extraction first (works for more BDCs)
+    investments = PortfolioInvestments.from_xbrl(xbrl, include_untyped=include_untyped)
+    if len(investments) > 0:
+        return investments
+
+    # Fall back to statement-based extraction
+    soi = xbrl.statements.schedule_of_investments()
+    if soi is None:
+        return None
+
+    return PortfolioInvestments.from_statement(soi, include_untyped=include_untyped)

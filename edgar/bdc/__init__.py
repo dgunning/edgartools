@@ -55,6 +55,7 @@ from edgar.bdc.investments import (
     DataQuality,
     PortfolioInvestment,
     PortfolioInvestments,
+    portfolio_investments_from_filing,
 )
 from edgar.bdc.nonaccrual import (
     NonAccrualInvestment,
@@ -97,6 +98,7 @@ __all__ = [
     'DataQuality',
     'PortfolioInvestment',
     'PortfolioInvestments',
+    'portfolio_investments_from_filing',
     # Non-accrual extraction
     'NonAccrualInvestment',
     'NonAccrualResult',
