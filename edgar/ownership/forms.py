@@ -339,9 +339,23 @@ class Ownership:
 
     @cached_property
     def shares_traded(self):
+        """Total shares in the non-derivative open-market (P/S) trades.
+
+        ``0`` means this filing reported no such trades. It does not mean the
+        filing is empty: a derivative-only Form 4 reports its activity through
+        ``derivative_table`` and still has nothing to count here (GH #1359).
+        """
+        trades = self.market_trades
+        # `market_trades` is None when the non-derivative table has no
+        # transactions at all, and empty when none of them is coded P or S.
+        # Every other caller of it guards both states; this one read `.Shares`
+        # straight off it and raised AttributeError on a derivative-only
+        # filing, which parses fine and reports its transaction elsewhere.
+        if trades is None or trades.empty:
+            return 0
         # Sum the Shares if Shares is all numeric
-        if pd.api.types.is_numeric_dtype(self.market_trades.Shares.dtype):
-            return self.market_trades.Shares.sum()
+        if pd.api.types.is_numeric_dtype(trades.Shares.dtype):
+            return trades.Shares.sum()
 
     @classmethod
     def from_xml(cls,
