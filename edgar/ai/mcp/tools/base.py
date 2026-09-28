@@ -327,14 +327,56 @@ def truncate_text(text: str, max_chars: int = 8000) -> str:
 
 
 def format_filing_summary(filing) -> dict:
-    """Format a filing object as a summary dict."""
+    """Format a filing object as a summary dict.
+
+    Used for filing *listings* (edgar_search, edgar_company), so this reads
+    only ``report_date`` — the submissions-JSON field get_filings() already
+    loaded — and never ``period_of_report``. That property calls
+    ``filing.sgml()``, downloading the entire filing submission just to read
+    one date; doing that per row of a listing would turn one call into N full
+    downloads.
+    """
+    report_date = getattr(filing, 'report_date', None) or None
     return {
         "accession_number": filing.accession_number,
         "form": filing.form,
         "filed": str(filing.filing_date),
         "company": getattr(filing, 'company', None),
         "cik": str(filing.cik) if hasattr(filing, 'cik') else None,
+        "period_of_report": str(report_date) if report_date else None,
     }
+
+
+def format_source(filing, selected_by: Optional[str] = None) -> dict:
+    """Build the provenance ``source`` block for a filing.
+
+    Every response that returns filing evidence includes this block, so a
+    caller can always see exactly which filing an answer came from — and,
+    when the filing was chosen by ``resolve_report_filing``, how it was
+    chosen (``selected_by``).
+    """
+    form = filing.form
+    # Prefer report_date — already loaded, no extra request. Fall back to
+    # the period_of_report property only when report_date is missing/empty,
+    # which happens for filings that don't carry it at all (e.g. a bare
+    # Filing from edgar.find() rather than an entity's EntityFiling); this
+    # function is called once per response, on one already-chosen filing, so
+    # that fallback's download cost is a single request, not N.
+    report_date = getattr(filing, 'report_date', None) or None
+    period = report_date if report_date else getattr(filing, 'period_of_report', None)
+    source = {
+        "cik": int(filing.cik),
+        "entity": filing.company,
+        "form": form,
+        "accession_number": filing.accession_number,
+        "period_of_report": str(period) if period else None,
+        "filed": str(filing.filing_date),
+        "url": filing.homepage_url,
+        "is_amendment": form.endswith("/A"),
+    }
+    if selected_by is not None:
+        source["selected_by"] = selected_by
+    return source
 
 
 def format_company_profile(company) -> dict:
