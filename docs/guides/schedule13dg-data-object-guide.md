@@ -306,13 +306,18 @@ amendment = Schedule13D.from_filing(amended_filing)
 
 comparison = OwnershipComparison(current=amendment, previous=original)
 
-print(f"Shares changed: {comparison.shares_change:+,}")
-print(f"Percent changed: {comparison.percent_change:+.1f}%")
+if comparison.shares_change is None:
+    print("Change unknown: a filing has no reporting-person data")
+else:
+    print(f"Shares changed: {comparison.shares_change:+,}")
+    print(f"Percent changed: {comparison.percent_change:+.1f} points")
 print(f"Accumulating: {comparison.is_accumulating}")
 print(f"Liquidating: {comparison.is_liquidating}")
 ```
 
-The change is measured between the two filings' `total_shares` and `total_percent`, so joint filers are not counted once per reporting person. When either filing is a pre-2025 header-only filing (`has_structured_data` is `False`), `shares_change` and `percent_change` are `None` and `is_accumulating`, `is_liquidating` and `is_unchanged` are all `False`.
+`shares_change` and `percent_change` are `None` when either filing has no reporting-person data: a pre-2025 header-only filing (`has_structured_data` is `False`), or a filing with no reporting-person rows. `is_accumulating`, `is_liquidating` and `is_unchanged` are then all `False`. A reported zero stays `0`.
+
+The comparison still adds up the rows of every reporting person in each filing. It does not use `total_shares`, and it does not work out whether joint filers report the same shares, so for a joint filing whose rows overlap the change can be overstated. Check the rows in `reporting_persons` before relying on the change for a joint filing.
 
 ---
 

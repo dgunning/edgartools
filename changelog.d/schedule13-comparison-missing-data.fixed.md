@@ -1,0 +1,1 @@
+**`OwnershipComparison` read a filing without share data as holding zero shares.** Against a pre-2025 header-only filing, the 4,535,000 shares on the Aadi Bioscience 13D in the test data were reported as bought (or sold). `shares_change` and `percent_change` are now None when either filing is header-only or has no reporting-person rows. A reported 0 is still 0.

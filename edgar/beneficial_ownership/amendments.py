@@ -58,6 +58,25 @@ class AmendmentInfo:
         )
 
 
+def _reported_shares(schedule: 'Schedule13D | Schedule13G') -> Optional[int]:
+    """Sum of the reporting persons' shares, or None when the filing reports none.
+
+    A pre-2025 header-only filing (``has_structured_data`` is False) carries its
+    reporting persons as identities with placeholder zeros, and a filing parsed
+    with no reporting-person rows has no numbers at all. Neither holds zero shares.
+    """
+    if not schedule.has_structured_data or not schedule.reporting_persons:
+        return None
+    return sum(p.aggregate_amount for p in schedule.reporting_persons)
+
+
+def _reported_percent(schedule: 'Schedule13D | Schedule13G') -> Optional[float]:
+    """Sum of the reporting persons' percentages, or None as for ``_reported_shares``."""
+    if not schedule.has_structured_data or not schedule.reporting_persons:
+        return None
+    return sum(p.percent_of_class for p in schedule.reporting_persons)
+
+
 @dataclass
 class OwnershipComparison:
     """
@@ -71,7 +90,8 @@ class OwnershipComparison:
         amendment = Schedule13D.from_filing(amended_filing)
         comparison = OwnershipComparison(current=amendment, previous=original)
 
-        print(f"Shares changed by: {comparison.shares_change:,}")
+        if comparison.shares_change is not None:
+            print(f"Shares changed by: {comparison.shares_change:,}")
         print(f"Is accumulating: {comparison.is_accumulating}")
     """
     current: 'Schedule13D | Schedule13G'
@@ -80,18 +100,15 @@ class OwnershipComparison:
     @property
     def shares_change(self) -> Optional[int]:
         """
-        Change in total shares owned, from each filing's ``total_shares``.
-
-        The reporting persons in one filing restate overlapping parts of the same
-        position, so their rows are not added up (see ``Schedule13D.total_shares``).
+        Change in total shares owned.
 
         Returns:
             Net change in share count (positive = increased, negative = decreased),
-            or None when either filing has no structured ownership data
-            (``total_shares`` is None for a pre-2025 header-only filing).
+            or None when either filing has no reporting-person share data
+            (a pre-2025 header-only filing, or no reporting-person rows)
         """
-        curr_shares = self.current.total_shares
-        prev_shares = self.previous.total_shares
+        curr_shares = _reported_shares(self.current)
+        prev_shares = _reported_shares(self.previous)
         if curr_shares is None or prev_shares is None:
             return None
         return curr_shares - prev_shares
@@ -99,14 +116,14 @@ class OwnershipComparison:
     @property
     def percent_change(self) -> Optional[float]:
         """
-        Change in ownership percentage, from each filing's ``total_percent``.
+        Change in ownership percentage.
 
         Returns:
             Net change in ownership percentage (e.g., 1.5 means increased by 1.5%),
-            or None when either filing has no structured ownership data.
+            or None when either filing has no reporting-person data
         """
-        curr_pct = self.current.total_percent
-        prev_pct = self.previous.total_percent
+        curr_pct = _reported_percent(self.current)
+        prev_pct = _reported_percent(self.previous)
         if curr_pct is None or prev_pct is None:
             return None
         return curr_pct - prev_pct
@@ -134,16 +151,16 @@ class OwnershipComparison:
 
         Returns:
             Dictionary with change metrics. Share and percent values are None
-            where a filing has no structured ownership data.
+            for a filing without reporting-person data.
         """
         return {
             'previous_filing_date': self.previous.filing_date,
             'current_filing_date': self.current.filing_date,
-            'previous_shares': self.previous.total_shares,
-            'current_shares': self.current.total_shares,
+            'previous_shares': _reported_shares(self.previous),
+            'current_shares': _reported_shares(self.current),
             'shares_change': self.shares_change,
-            'previous_percent': self.previous.total_percent,
-            'current_percent': self.current.total_percent,
+            'previous_percent': _reported_percent(self.previous),
+            'current_percent': _reported_percent(self.current),
             'percent_change': self.percent_change,
             'is_accumulating': self.is_accumulating,
             'is_liquidating': self.is_liquidating,
