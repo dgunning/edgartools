@@ -312,6 +312,8 @@ print(f"Accumulating: {comparison.is_accumulating}")
 print(f"Liquidating: {comparison.is_liquidating}")
 ```
 
+The change is measured between the two filings' `total_shares` and `total_percent`, so joint filers are not counted once per reporting person. When either filing is a pre-2025 header-only filing (`has_structured_data` is `False`), `shares_change` and `percent_change` are `None` and `is_accumulating`, `is_liquidating` and `is_unchanged` are all `False`.
+
 ---
 
 ## Key Differences: Visual Comparison

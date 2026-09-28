@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?><edgarSubmission xmlns="http://www.sec.gov/edgar/schedule13D" xmlns:com="http://www.sec.gov/edgar/common">
+  <schemaVersion>X0202</schemaVersion>
+<headerData>
+    <submissionType>SCHEDULE 13D/A</submissionType>
+    <previousAccessionNumber>0001539497-26-001145</previousAccessionNumber>
+    <filerInfo>
+      <filer>
+        <filerCredentials>
+          <!-- Field: Pseudo-Tag; ID: Name; Data: ICAHN CARL C -->
+          <cik>0000921669</cik>
+          <ccc>XXXXXXXX</ccc>
+        </filerCredentials>
+      </filer>
+      <liveTestFlag>LIVE</liveTestFlag>
+
+
+
+    </filerInfo>
+  </headerData>
+  <formData>
+    <coverPageHeader>
+      <amendmentNo>85</amendmentNo>
+      <securitiesClassTitle>Depositary Units Representing Limited Partner Interests</securitiesClassTitle>
+      <dateOfEvent>06/25/2026</dateOfEvent>
+      <previouslyFiledFlag>false</previouslyFiledFlag>
+      <issuerInfo>
+        <issuerCIK>0000813762</issuerCIK>
+        <issuerCusips>
+          <issuerCusipNumber>451100101</issuerCusipNumber>
+        </issuerCusips>
+        <issuerName>Icahn Enterprises L.P.</issuerName>
+        <address>
+          <com:street1>16690 COLLINS AVE,</com:street1>
+          <com:street2>PH-1</com:street2>
+          <com:city>SUNNY ISLES BEACH</com:city>
+          <com:stateOrCountry>FL</com:stateOrCountry>
+          <com:zipCode>33160</com:zipCode>
+        </address>
+      </issuerInfo>
+      <authorizedPersons>
+        <notificationInfo>
+          <personName>Jesse Lynn, Esq.</personName>
+          <personPhoneNum>(305) 422-4100</personPhoneNum>
+          <personAddress>
+            <com:street1>16690 Collins Avenue, Suite PH-1</com:street1>
+            <com:city>Sunny Isles Beach</com:city>
+            <com:stateOrCountry>FL</com:stateOrCountry>
+            <com:zipCode>33160</com:zipCode>
+          </personAddress>
+        </notificationInfo>
+      </authorizedPersons>
+    </coverPageHeader>
+    <reportingPersons>
+      <reportingPersonInfo>
+        <reportingPersonCIK>0001327741</reportingPersonCIK>
+        <reportingPersonNoCIK>N</reportingPersonNoCIK>
+        <reportingPersonName>CCI Onshore LLC</reportingPersonName>
+        <memberOfGroup>a</memberOfGroup>
+        <fundType>OO</fundType>
+        <legalProceedings>N</legalProceedings>
+        <citizenshipOrOrganization>DE</citizenshipOrOrganization>
+        <soleVotingPower>132123972.00</soleVotingPower>
+        <sharedVotingPower>0.00</sharedVotingPower>
+        <soleDispositivePower>132123972.00</soleDispositivePower>
+        <sharedDispositivePower>0.00</sharedDispositivePower>
+        <aggregateAmountOwned>132123972.00</aggregateAmountOwned>
+        <isAggregateExcludeShares>N</isAggregateExcludeShares>
+        <percentOfClass>18.65</percentOfClass>
+        <typeOfReportingPerson>OO</typeOfReportingPerson>
+      </reportingPersonInfo>
+      <reportingPersonInfo>
+        <reportingPersonCIK>0001315356</reportingPersonCIK>
+        <reportingPersonNoCIK>N</reportingPersonNoCIK>
+        <reportingPersonName>Gascon Partners</reportingPersonName>
+        <memberOfGroup>a</memberOfGroup>
+        <fundType>OO</fundType>
+        <legalProceedings>N</legalProceedings>
+        <citizenshipOrOrganization>NY</citizenshipOrOrganization>
+        <soleVotingPower>85004265.00</soleVotingPower>
+        <sharedVotingPower>0.00</sharedVotingPower>
+        <soleDispositivePower>85004265.00</soleDispositivePower>
+        <sharedDispositivePower>0.00</sharedDispositivePower>
+        <aggregateAmountOwned>85004265.00</aggregateAmountOwned>
+        <isAggregateExcludeShares>N</isAggregateExcludeShares>
+        <percentOfClass>12.00</percentOfClass>
+        <typeOfReportingPerson>PN</typeOfReportingPerson>
+      </reportingPersonInfo>
+      <reportingPersonInfo>
+        <reportingPersonCIK>0000945612</reportingPersonCIK>
+        <reportingPersonNoCIK>N</reportingPersonNoCIK>
+        <reportingPersonName>High Coast Limited Partnership</reportingPersonName>
+        <memberOfGroup>a</memberOfGroup>
+        <fundType>OO</fundType>
+        <legalProceedings>N</legalProceedings>
+        <citizenshipOrOrganization>DE</citizenshipOrOrganization>
+        <soleVotingPower>309873208.00</soleVotingPower>
+        <sharedVotingPower>132123972.00</sharedVotingPower>
+        <soleDispositivePower>309873208.00</soleDispositivePower>
+        <sharedDispositivePower>132123972.00</sharedDispositivePower>
+        <aggregateAmountOwned>441997180.00</aggregateAmountOwned>
+        <isAggregateExcludeShares>N</isAggregateExcludeShares>
+        <percentOfClass>62.38</percentOfClass>
+        <typeOfReportingPerson>PN</typeOfReportingPerson>
+      </reportingPersonInfo>
+      <reportingPersonInfo>
+        <reportingPersonCIK>0000928475</reportingPersonCIK>
+        <reportingPersonNoCIK>N</reportingPersonNoCIK>
+        <reportingPersonName>Highcrest Investors LLC</reportingPersonName>
+        <memberOfGroup>a</memberOfGroup>
+        <fundType>OO</fundType>
+        <legalProceedings>N</legalProceedings>
+        <citizenshipOrOrganization>DE</citizenshipOrOrganization>
+        <soleVotingPower>68307958.00</soleVotingPower>
+        <sharedVotingPower>0.00</sharedVotingPower>
+        <soleDispositivePower>68307958.00</soleDispositivePower>
+        <sharedDispositivePower>0.00</sharedDispositivePower>
+        <aggregateAmountOwned>68307958.00</aggregateAmountOwned>
+        <isAggregateExcludeShares>N</isAggregateExcludeShares>
+        <percentOfClass>9.64</percentOfClass>
+        <typeOfReportingPerson>OO</typeOfReportingPerson>
+      </reportingPersonInfo>
+      <reportingPersonInfo>
+        <reportingPersonCIK>0001257325</reportingPersonCIK>
+        <reportingPersonNoCIK>N</reportingPersonNoCIK>
+        <reportingPersonName>Thornwood Associates Limited Partnership</reportingPersonName>
+        <memberOfGroup>a</memberOfGroup>
+        <fundType>OO</fundType>
+        <legalProceedings>N</legalProceedings>
+        <citizenshipOrOrganization>DE</citizenshipOrOrganization>
+        <soleVotingPower>23083940.00</soleVotingPower>
+        <sharedVotingPower>0.00</sharedVotingPower>
+        <soleDispositivePower>23083940.00</soleDispositivePower>
+        <sharedDispositivePower>0.00</sharedDispositivePower>
+        <aggregateAmountOwned>23083940.00</aggregateAmountOwned>
+        <isAggregateExcludeShares>N</isAggregateExcludeShares>
+        <percentOfClass>3.26</percentOfClass>
+        <typeOfReportingPerson>PN</typeOfReportingPerson>
+      </reportingPersonInfo>
+      <reportingPersonInfo>
+        <reportingPersonCIK>0000860851</reportingPersonCIK>
+        <reportingPersonNoCIK>N</reportingPersonNoCIK>
+        <reportingPersonName>Barberry Corp.</reportingPersonName>
+        <memberOfGroup>a</memberOfGroup>
+        <fundType>OO</fundType>
+        <legalProceedings>N</legalProceedings>
+        <citizenshipOrOrganization>DE</citizenshipOrOrganization>
+        <soleVotingPower>0.00</soleVotingPower>
+        <sharedVotingPower>23083940.00</sharedVotingPower>
+        <soleDispositivePower>0.00</soleDispositivePower>
+        <sharedDispositivePower>23083940.00</sharedDispositivePower>
+        <aggregateAmountOwned>23083940.00</aggregateAmountOwned>
+        <isAggregateExcludeShares>N</isAggregateExcludeShares>
+        <percentOfClass>3.26</percentOfClass>
+        <typeOfReportingPerson>CO</typeOfReportingPerson>
+      </reportingPersonInfo>
+      <reportingPersonInfo>
+        <reportingPersonCIK>0001008814</reportingPersonCIK>
+        <reportingPersonNoCIK>N</reportingPersonNoCIK>
+        <reportingPersonName>Starfire Holding Corporation</reportingPersonName>
+        <memberOfGroup>a</memberOfGroup>
+        <fundType>OO</fundType>
+        <legalProceedings>N</legalProceedings>
+        <citizenshipOrOrganization>DE</citizenshipOrOrganization>
+        <soleVotingPower>0.00</soleVotingPower>
+        <sharedVotingPower>68307958.00</sharedVotingPower>
+        <soleDispositivePower>0.00</soleDispositivePower>
+        <sharedDispositivePower>68307958.00</sharedDispositivePower>
+        <aggregateAmountOwned>68307958.00</aggregateAmountOwned>
+        <isAggregateExcludeShares>N</isAggregateExcludeShares>
+        <percentOfClass>9.64</percentOfClass>
+        <typeOfReportingPerson>CO</typeOfReportingPerson>
+      </reportingPersonInfo>
+      <reportingPersonInfo>
+        <reportingPersonCIK>0001044968</reportingPersonCIK>
+        <reportingPersonNoCIK>N</reportingPersonNoCIK>
+        <reportingPersonName>Little Meadow Corp.</reportingPersonName>
+        <memberOfGroup>a</memberOfGroup>
+        <fundType>OO</fundType>
+        <legalProceedings>N</legalProceedings>
+        <citizenshipOrOrganization>DE</citizenshipOrOrganization>
+        <soleVotingPower>0.00</soleVotingPower>
+        <sharedVotingPower>527001445.00</sharedVotingPower>
+        <soleDispositivePower>0.00</soleDispositivePower>
+        <sharedDispositivePower>527001445.00</sharedDispositivePower>
+        <aggregateAmountOwned>527001445.00</aggregateAmountOwned>
+        <isAggregateExcludeShares>N</isAggregateExcludeShares>
+        <percentOfClass>74.38</percentOfClass>
+        <typeOfReportingPerson>CO</typeOfReportingPerson>
+      </reportingPersonInfo>
+      <reportingPersonInfo>
+        <reportingPersonCIK>0000921669</reportingPersonCIK>
+        <reportingPersonNoCIK>N</reportingPersonNoCIK>
+        <reportingPersonName>Carl C. Icahn</reportingPersonName>
+        <memberOfGroup>a</memberOfGroup>
+        <fundType>OO</fundType>
+        <legalProceedings>N</legalProceedings>
+        <citizenshipOrOrganization>X1</citizenshipOrOrganization>
+        <soleVotingPower>0.00</soleVotingPower>
+        <sharedVotingPower>618393343.00</sharedVotingPower>
+        <soleDispositivePower>0.00</soleDispositivePower>
+        <sharedDispositivePower>618393343.00</sharedDispositivePower>
+        <aggregateAmountOwned>618393343.00</aggregateAmountOwned>
+        <isAggregateExcludeShares>N</isAggregateExcludeShares>
+        <percentOfClass>87.28</percentOfClass>
+        <typeOfReportingPerson>IN</typeOfReportingPerson>
+      </reportingPersonInfo>
+    </reportingPersons>
+    <items1To7>
+      <item1>
+        <securityTitle>Depositary Units Representing Limited Partner Interests</securityTitle>
+        <issuerName>Icahn Enterprises L.P.</issuerName>
+        <issuerPrincipalAddress>
+          <com:street1>16690 COLLINS AVE,</com:street1>
+          <com:street2>PH-1</com:street2>
+          <com:city>SUNNY ISLES BEACH</com:city>
+          <com:stateOrCountry>FL</com:stateOrCountry>
+          <com:zipCode>33160</com:zipCode>
+        </issuerPrincipalAddress>
+        <commentText>The Schedule 13D filed with the U.S. Securities and Exchange Commission ("SEC") on September 24, 1990, as previously amended (the "Initial 13D"), is hereby further amended to furnish the additional information set forth in this Amendment No. 85 to the Initial 13D. All capitalized terms contained herein but not otherwise defined shall have the meanings ascribed to such terms in the Initial 13D.</commentText>
+      </item1>
+      <item5>
+        <percentageOfClassSecurities>The Reporting Persons may be deemed to beneficially own, in the aggregate, 618,393,343 Depositary Units, representing approximately 87.28% of the Issuer's outstanding Depositary Units (based upon (i) the 672,050,553 Depositary Units stated to be outstanding as of May 6, 2026, by the Issuer in its Form 10-Q filed with the Securities and Exchange Commission on May 6, 2026, plus (ii) the 36,456,030 Depositary Units issued to the Reporting Persons by the Issuer on June 25, 2026, in connection with a regular quarterly distribution of Depositary Units by the Issuer).</percentageOfClassSecurities>
+        <numberOfShares>CCI Onshore has sole voting power and sole dispositive power with respect to 132,123,972 Depositary Units. Pursuant to Rule 13d-3(a) under the Exchange Act, each of High Coast, Little Meadow and Mr. Icahn (by virtue of their relationships to CCI Onshore) may be deemed to indirectly beneficially own the Depositary Units which CCI Onshore owns. Each of High Coast, Little Meadow and Mr. Icahn disclaims beneficial ownership of the Depositary Units for all other purposes.
+
+Gascon has sole voting power and sole dispositive power with respect to 85,004,265 Depositary Units. Pursuant to Rule 13d-3(a) under the Exchange Act, each of Little Meadow and Mr. Icahn (by virtue of their relationships to Gascon) may be deemed to indirectly beneficially own the Depositary Units which Gascon owns. Each of Little Meadow and Mr. Icahn disclaims beneficial ownership of the Depositary Units for all other purposes.
+
+High Coast has sole voting power and sole dispositive power with respect to 309,873,208 Depositary Units. Pursuant to Rule 13d-3(a) under the Exchange Act, each of Little Meadow and Mr. Icahn (by virtue of their relationships to High Coast) may be deemed to indirectly beneficially own the Depositary Units which High Coast owns. Each of Little Meadow and Mr. Icahn disclaims beneficial ownership of the Depositary Units for all other purposes.
+
+Highcrest has sole voting power and sole dispositive power with respect to 68,307,958 Depositary Units. Pursuant to Rule 13d-3(a) under the Exchange Act, each of Starfire and Mr. Icahn (by virtue of their relationships to Highcrest) may be deemed to indirectly beneficially own the Depositary Units which Highcrest owns. Each of Starfire and Mr. Icahn disclaims beneficial ownership of the Depositary Units for all other purposes.
+
+Thornwood has sole voting power and sole dispositive power with respect to 23,083,940 Depositary Units. Pursuant to Rule 13d-3(a) under the Exchange Act, each of Barberry and Mr. Icahn (by virtue of their relationships to Thornwood) may be deemed to indirectly beneficially own the Depositary Units which Thornwood owns. Each of Barberry and Mr. Icahn disclaims beneficial ownership of the Depositary Units for all other purposes.</numberOfShares>
+        <transactionDesc>Except for the acquisition of Depositary Units from the Issuer in connection with a quarterly dividend, none of the Reporting Persons effected any transactions in the Issuer's securities during the past sixty (60) days. On June 25, 2026, in connection with the quarterly dividend, CCI Onshore received 7,789,081 Depositary Units, Gascon received 5,011,241 Depositary Units, High Coast received 18,267,900 Depositary Units, Highcrest received 4,026,945 Depositary Units, and Thornwood received 1,360,863 Depositary Units.</transactionDesc>
+      </item5>
+    </items1To7>
+    <signatureInfo>
+      <signaturePerson>
+        <signatureReportingPerson>CCI Onshore LLC</signatureReportingPerson>
+        <signatureDetails>
+          <signature>/s/ Rowella Asuncion-Gumabong</signature>
+          <title>Rowella Asuncion-Gumabong / Vice President</title>
+          <date>06/29/2026</date>
+        </signatureDetails>
+      </signaturePerson>
+      <signaturePerson>
+        <signatureReportingPerson>Gascon Partners</signatureReportingPerson>
+        <signatureDetails>
+          <signature>/s/ Rowella Asuncion-Gumabong</signature>
+          <title>Rowella Asuncion-Gumabong / Vice President</title>
+          <date>06/29/2026</date>
+        </signatureDetails>
+      </signaturePerson>
+      <signaturePerson>
+        <signatureReportingPerson>High Coast Limited Partnership</signatureReportingPerson>
+        <signatureDetails>
+          <signature>/s/ Rowella Asuncion-Gumabong</signature>
+          <title>Rowella Asuncion-Gumabong / Vice President</title>
+          <date>06/29/2026</date>
+        </signatureDetails>
+      </signaturePerson>
+      <signaturePerson>
+        <signatureReportingPerson>Highcrest Investors LLC</signatureReportingPerson>
+        <signatureDetails>
+          <signature>/s/ Rowella Asuncion-Gumabong</signature>
+          <title>Rowella Asuncion-Gumabong / Vice President</title>
+          <date>06/29/2026</date>
+        </signatureDetails>
+      </signaturePerson>
+      <signaturePerson>
+        <signatureReportingPerson>Thornwood Associates Limited Partnership</signatureReportingPerson>
+        <signatureDetails>
+          <signature>/s/ Rowella Asuncion-Gumabong</signature>
+          <title>Rowella Asuncion-Gumabong / Vice President</title>
+          <date>06/29/2026</date>
+        </signatureDetails>
+      </signaturePerson>
+      <signaturePerson>
+        <signatureReportingPerson>Barberry Corp.</signatureReportingPerson>
+        <signatureDetails>
+          <signature>/s/ Rowella Asuncion-Gumabong</signature>
+          <title>Rowella Asuncion-Gumabong / Vice President</title>
+          <date>06/29/2026</date>
+        </signatureDetails>
+      </signaturePerson>
+      <signaturePerson>
+        <signatureReportingPerson>Starfire Holding Corporation</signatureReportingPerson>
+        <signatureDetails>
+          <signature>/s/ Rowella Asuncion-Gumabong</signature>
+          <title>Rowella Asuncion-Gumabong / Vice President</title>
+          <date>06/29/2026</date>
+        </signatureDetails>
+      </signaturePerson>
+      <signaturePerson>
+        <signatureReportingPerson>Little Meadow Corp.</signatureReportingPerson>
+        <signatureDetails>
+          <signature>/s/ Rowella Asuncion-Gumabong</signature>
+          <title>Rowella Asuncion-Gumabong / Vice President</title>
+          <date>06/29/2026</date>
+        </signatureDetails>
+      </signaturePerson>
+      <signaturePerson>
+        <signatureReportingPerson>Carl C. Icahn</signatureReportingPerson>
+        <signatureDetails>
+          <signature>/s/ Carl C. Icahn</signature>
+          <title>CARL C. ICAHN</title>
+          <date>06/29/2026</date>
+        </signatureDetails>
+      </signaturePerson>
+    </signatureInfo>
+  </formData>
+</edgarSubmission>

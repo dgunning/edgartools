@@ -78,42 +78,54 @@ class OwnershipComparison:
     previous: 'Schedule13D | Schedule13G'
 
     @property
-    def shares_change(self) -> int:
+    def shares_change(self) -> Optional[int]:
         """
-        Change in total shares owned.
+        Change in total shares owned, from each filing's ``total_shares``.
+
+        The reporting persons in one filing restate overlapping parts of the same
+        position, so their rows are not added up (see ``Schedule13D.total_shares``).
 
         Returns:
-            Net change in share count (positive = increased, negative = decreased)
+            Net change in share count (positive = increased, negative = decreased),
+            or None when either filing has no structured ownership data
+            (``total_shares`` is None for a pre-2025 header-only filing).
         """
-        curr_shares = sum(p.aggregate_amount for p in self.current.reporting_persons)
-        prev_shares = sum(p.aggregate_amount for p in self.previous.reporting_persons)
+        curr_shares = self.current.total_shares
+        prev_shares = self.previous.total_shares
+        if curr_shares is None or prev_shares is None:
+            return None
         return curr_shares - prev_shares
 
     @property
-    def percent_change(self) -> float:
+    def percent_change(self) -> Optional[float]:
         """
-        Change in ownership percentage.
+        Change in ownership percentage, from each filing's ``total_percent``.
 
         Returns:
-            Net change in ownership percentage (e.g., 1.5 means increased by 1.5%)
+            Net change in ownership percentage (e.g., 1.5 means increased by 1.5%),
+            or None when either filing has no structured ownership data.
         """
-        curr_pct = sum(p.percent_of_class for p in self.current.reporting_persons)
-        prev_pct = sum(p.percent_of_class for p in self.previous.reporting_persons)
+        curr_pct = self.current.total_percent
+        prev_pct = self.previous.total_percent
+        if curr_pct is None or prev_pct is None:
+            return None
         return curr_pct - prev_pct
 
     @property
     def is_accumulating(self) -> bool:
-        """Check if shares increased"""
-        return self.shares_change > 0
+        """Check if shares increased (False when the change is unknown)"""
+        change = self.shares_change
+        return change is not None and change > 0
 
     @property
     def is_liquidating(self) -> bool:
-        """Check if shares decreased"""
-        return self.shares_change < 0
+        """Check if shares decreased (False when the change is unknown)"""
+        change = self.shares_change
+        return change is not None and change < 0
 
     @property
     def is_unchanged(self) -> bool:
-        """Check if shareholding is unchanged"""
+        """Check if shareholding is unchanged (False when the change is unknown)"""
         return self.shares_change == 0
 
     def get_summary(self) -> dict:
@@ -121,16 +133,17 @@ class OwnershipComparison:
         Get summary of changes.
 
         Returns:
-            Dictionary with change metrics
+            Dictionary with change metrics. Share and percent values are None
+            where a filing has no structured ownership data.
         """
         return {
             'previous_filing_date': self.previous.filing_date,
             'current_filing_date': self.current.filing_date,
-            'previous_shares': sum(p.aggregate_amount for p in self.previous.reporting_persons),
-            'current_shares': sum(p.aggregate_amount for p in self.current.reporting_persons),
+            'previous_shares': self.previous.total_shares,
+            'current_shares': self.current.total_shares,
             'shares_change': self.shares_change,
-            'previous_percent': sum(p.percent_of_class for p in self.previous.reporting_persons),
-            'current_percent': sum(p.percent_of_class for p in self.current.reporting_persons),
+            'previous_percent': self.previous.total_percent,
+            'current_percent': self.current.total_percent,
             'percent_change': self.percent_change,
             'is_accumulating': self.is_accumulating,
             'is_liquidating': self.is_liquidating,

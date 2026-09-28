@@ -377,6 +377,176 @@ def test_ownership_comparison():
     assert summary['is_unchanged'] is True
 
 
+# Consecutive amendments by the Icahn group on Icahn Enterprises L.P., saved
+# verbatim from SEC. The later filing names the earlier one as its
+# <previousAccessionNumber>. Every reporting person is a link in one control
+# chain ending in Carl C. Icahn, so each row restates part of the same block.
+ICAHN_13DA_PREVIOUS_PATH = TEST_DATA_DIR / 'schedule13d_icahn_enterprises_0001539497-26-001890.xml'
+ICAHN_13DA_CURRENT_PATH = TEST_DATA_DIR / 'schedule13d_icahn_enterprises_0001539497-26-002605.xml'
+
+
+def _schedule13d_from_xml(path, form, filing_date):
+    filing = Mock()
+    filing.form = form
+    filing.filing_date = filing_date
+    filing.xml = Mock(return_value=path.read_text())
+    return Schedule13D.from_filing(filing)
+
+
+def _joint_person(name, shares, percent, exclude=False):
+    return ReportingPerson(
+        cik='', name=name, citizenship='DE',
+        sole_voting_power=0, shared_voting_power=shares,
+        sole_dispositive_power=0, shared_dispositive_power=shares,
+        aggregate_amount=shares, percent_of_class=percent,
+        type_of_reporting_person='PN', member_of_group='a',
+        is_aggregate_exclude_shares=exclude,
+    )
+
+
+def _schedule13d_with_persons(persons, filing_date):
+    filing = Mock()
+    filing.form = 'SCHEDULE 13D/A'
+    filing.filing_date = filing_date
+    return Schedule13D(
+        filing=filing,
+        issuer_info=IssuerInfo(cik='0000000001', name='Issuer', cusip='000000000'),
+        security_info=SecurityInfo(title='Common Stock', cusip='000000000'),
+        reporting_persons=persons,
+        items=None,
+        signatures=[],
+        date_of_event='',
+    )
+
+
+@pytest.mark.fast
+def test_ownership_comparison_uses_group_total_not_sum_of_rows():
+    """A joint filing's rows overlap, so the change is total_shares minus total_shares.
+
+    Icahn Enterprises 13D/A 0001539497-26-001890 (2026-06-29) has 9 reporting
+    persons; 0001539497-26-002605 (2026-09-25) has 10 after adding MODAL LLC.
+    Carl C. Icahn's row is the group's position: 618,393,343 units (87.28%),
+    then 658,924,537 (87.69%). Adding up the rows reported 1,987,304,001 units
+    (280.49% of the class), then 2,190,342,396 (291.49%).
+    """
+    previous = _schedule13d_from_xml(ICAHN_13DA_PREVIOUS_PATH, 'SCHEDULE 13D/A', date(2026, 6, 29))
+    current = _schedule13d_from_xml(ICAHN_13DA_CURRENT_PATH, 'SCHEDULE 13D/A', date(2026, 9, 25))
+    assert len(previous.reporting_persons) == 9
+    assert len(current.reporting_persons) == 10
+    assert previous.total_shares == 618_393_343
+    assert current.total_shares == 658_924_537
+
+    comparison = OwnershipComparison(current=current, previous=previous)
+
+    assert comparison.shares_change == 40_531_194  # not 203,038,395
+    assert comparison.percent_change == pytest.approx(0.41)  # not 11.00
+    assert comparison.is_accumulating is True
+
+    summary = comparison.get_summary()
+    assert summary['previous_shares'] == 618_393_343
+    assert summary['current_shares'] == 658_924_537
+    assert summary['previous_percent'] == pytest.approx(87.28)
+    assert summary['current_percent'] == pytest.approx(87.69)
+    assert summary['shares_change'] == 40_531_194
+    assert summary['percent_change'] == pytest.approx(0.41)
+
+
+@pytest.mark.fast
+def test_ownership_comparison_direction_survives_a_person_leaving_the_group():
+    """Dropping one joint filer must not turn a purchase into a sale.
+
+    Three joint filers each report the group's 1,000,000 shares (5.0%); in the
+    amendment one entity has left and the remaining two report 1,200,000 (6.0%).
+    The group bought 200,000 shares. Adding up the rows gave -600,000 and a
+    liquidation.
+    """
+    previous = _schedule13d_with_persons([
+        _joint_person('Fund LP', 1_000_000, 5.0),
+        _joint_person('Feeder LP', 1_000_000, 5.0),
+        _joint_person('Manager LLC', 1_000_000, 5.0),
+    ], date(2026, 1, 5))
+    current = _schedule13d_with_persons([
+        _joint_person('Fund LP', 1_200_000, 6.0),
+        _joint_person('Manager LLC', 1_200_000, 6.0),
+    ], date(2026, 3, 5))
+
+    comparison = OwnershipComparison(current=current, previous=previous)
+
+    assert comparison.shares_change == 200_000
+    assert comparison.percent_change == pytest.approx(1.0)
+    assert comparison.is_accumulating is True
+    assert comparison.is_liquidating is False
+
+
+@pytest.mark.fast
+def test_ownership_comparison_ignores_rows_excluded_from_the_aggregate():
+    """Rows flagged isAggregateExcludeShares stay out of the change, as in total_shares."""
+    previous = _schedule13d_with_persons([
+        _joint_person('Fund LP', 1_000_000, 5.0),
+        _joint_person('Affiliate disclaiming', 400_000, 2.0, exclude=True),
+    ], date(2026, 1, 5))
+    current = _schedule13d_with_persons([
+        _joint_person('Fund LP', 1_000_000, 5.0),
+    ], date(2026, 3, 5))
+
+    comparison = OwnershipComparison(current=current, previous=previous)
+
+    assert previous.total_shares == 1_000_000
+    assert comparison.shares_change == 0
+    assert comparison.is_unchanged is True
+
+
+@pytest.mark.fast
+def test_ownership_comparison_single_person_filings_unchanged_behaviour():
+    """Control: with one reporting person per filing the sum and the total agree."""
+    previous = _schedule13d_with_persons([_joint_person('Solo LP', 2_000_000, 8.0)], date(2026, 1, 5))
+    current = _schedule13d_with_persons([_joint_person('Solo LP', 1_500_000, 6.0)], date(2026, 3, 5))
+
+    comparison = OwnershipComparison(current=current, previous=previous)
+
+    assert comparison.shares_change == -500_000
+    assert comparison.percent_change == pytest.approx(-2.0)
+    assert comparison.is_liquidating is True
+    assert comparison.is_accumulating is False
+    assert comparison.is_unchanged is False
+
+
+@pytest.mark.fast
+def test_ownership_comparison_against_header_only_filing_is_unknown():
+    """A pre-2025 header-only filing has no ownership numerics, so there is no change to report.
+
+    Its reporting persons carry placeholder zeros and its total_shares is None.
+    Comparing a structured amendment against it used to report the amendment's
+    whole position as newly accumulated.
+    """
+    previous = Schedule13D(
+        filing=Mock(form='SCHEDULE 13D', filing_date=date(2021, 3, 1)),
+        issuer_info=IssuerInfo(cik='', name='Icahn Enterprises L.P.', cusip=''),
+        security_info=SecurityInfo(title='', cusip=''),
+        reporting_persons=[_joint_person('ICAHN CARL C', 0, 0.0)],
+        items=None,
+        signatures=[],
+        date_of_event='',
+        has_structured_data=False,
+    )
+    current = _schedule13d_from_xml(ICAHN_13DA_CURRENT_PATH, 'SCHEDULE 13D/A', date(2026, 9, 25))
+    assert previous.total_shares is None
+
+    for comparison in (OwnershipComparison(current=current, previous=previous),
+                       OwnershipComparison(current=previous, previous=current)):
+        assert comparison.shares_change is None
+        assert comparison.percent_change is None
+        assert comparison.is_accumulating is False
+        assert comparison.is_liquidating is False
+        assert comparison.is_unchanged is False
+
+    summary = OwnershipComparison(current=current, previous=previous).get_summary()
+    assert summary['previous_shares'] is None
+    assert summary['previous_percent'] is None
+    assert summary['current_shares'] == 658_924_537
+    assert summary['shares_change'] is None
+
+
 @pytest.mark.fast
 def test_reporting_person_properties():
     """Test ReportingPerson computed properties"""
