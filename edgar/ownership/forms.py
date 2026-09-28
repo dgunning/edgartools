@@ -10,7 +10,6 @@ import itertools
 from functools import cached_property
 from typing import List, Optional, Union
 
-import numpy as np
 import pandas as pd
 
 from edgar.ownership.core import safe_numeric
@@ -341,7 +340,7 @@ class Ownership:
     @cached_property
     def shares_traded(self):
         # Sum the Shares if Shares is all numeric
-        if np.issubdtype(self.market_trades.Shares.dtype, np.number):
+        if pd.api.types.is_numeric_dtype(self.market_trades.Shares.dtype):
             return self.market_trades.Shares.sum()
 
     @classmethod

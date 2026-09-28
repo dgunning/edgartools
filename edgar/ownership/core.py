@@ -97,7 +97,7 @@ def get_footnotes(tag: XmlNode) -> str:
 
 
 def is_numeric(series: pd.Series) -> bool:
-    if np.issubdtype(series.dtype, np.number):  # type: ignore[arg-type]
+    if pd.api.types.is_numeric_dtype(series.dtype):
         return True
     try:
         series.astype(float)
