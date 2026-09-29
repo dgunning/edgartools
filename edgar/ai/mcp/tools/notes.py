@@ -17,13 +17,15 @@ carries a ``source`` provenance block (``format_source``).
 A matched note's table rows and narrative ``context`` text are both capped
 per page (record rows: ``limit``, default 20; text: ``TEXT_PAGE_CHARS``).
 When more remains, the table/context carries a ``next_cursor``; passing that
-cursor back (with nothing else required — the cursor alone identifies the
-note, table/context, and query it continues) returns only that one
-continued item. A note's table pages under cursor tool
-``"edgar_notes:table"``; its context text under ``"edgar_notes:context"``.
-A response can emit cursors of both kinds at once (multiple matched notes,
-multiple tables), so continuing has to read the *kind* out of the cursor
-itself before it can validate the rest — see ``_continue_notes``.
+cursor back — with the SAME ``topic`` (and, for a note's context, the same
+``detail``) the original call used — returns only that one continued item.
+A note's table pages under cursor tool ``"edgar_notes:table"``; its context
+text under ``"edgar_notes:context"``. A response can emit cursors of both
+kinds at once (multiple matched notes, multiple tables), so continuing has
+to read the *kind* out of the cursor before it can validate the rest, but
+the ``topic``/``detail`` it validates against always come from the current
+call, not the cursor — otherwise a cursor minted under one topic would
+silently replay against another. See ``_continue_notes``.
 """
 
 from __future__ import annotations
@@ -243,16 +245,34 @@ def _continue_context(note, query: dict, payload: dict, accession: str):
     return "context", page_text, page_block
 
 
-def _continue_notes(cursor: str, notes, filing, selected_by: str, accession: str, limit: int) -> Any:
+def _continue_notes(
+    cursor: str,
+    notes,
+    filing,
+    selected_by: str,
+    accession: str,
+    limit: int,
+    topic: Optional[str],
+    detail: str,
+) -> Any:
     """Resolve `cursor` to exactly the note/table or note/context it continues.
 
-    The cursor's `tool` and `q` are peeked out first (see `peek_cursor`'s
-    docstring for why): this response can emit a table cursor or a context
-    cursor, so which one a given cursor is has to be read out of it before
-    it can be validated. `try_decode_cursor` is then given that peeked
-    tool/query as the expected identity, so the checks that matter --
-    accession, and (inside `_continue_table`/`_continue_context`) the
-    fingerprint -- still run for real.
+    The cursor's `tool` is peeked out first (see `peek_cursor`'s docstring
+    for why): this response can emit a table cursor or a context cursor, so
+    which one a given cursor is has to be read out of it before it can be
+    validated. The cursor's own `q.note` and (for a table cursor) `q.table`
+    are also read from the peek -- those are positional, identifying WHICH
+    note/table a cursor points at, and the call has no other way to supply
+    them.
+
+    `topic` and `detail`, however, come from the CURRENT call, not from the
+    peek. Building the *expected* query this way -- rather than peeking it
+    wholesale and checking it against itself -- is what makes `topic`/
+    `detail` a real check: a cursor minted under a different topic (or, for
+    a context cursor, a different detail level) now fails `decode_cursor`'s
+    query comparison with `CURSOR_MISMATCH`, instead of silently matching
+    because the "expected" value was read from the same cursor being
+    checked.
     """
     try:
         raw = peek_cursor(cursor)
@@ -260,8 +280,8 @@ def _continue_notes(cursor: str, notes, filing, selected_by: str, accession: str
         return exc.to_response()
 
     tool_name = raw.get("tool")
-    query = raw.get("q") or {}
-    note_number = query.get("note") if isinstance(query, dict) else None
+    raw_query = raw.get("q") if isinstance(raw.get("q"), dict) else {}
+    note_number = raw_query.get("note")
     note = notes[note_number] if isinstance(note_number, int) else None
 
     if note is None or tool_name not in (_TABLE_TOOL, _CONTEXT_TOOL):
@@ -269,14 +289,19 @@ def _continue_notes(cursor: str, notes, filing, selected_by: str, accession: str
             "Cursor refers to a note that is not in this filing.", error_code="CURSOR_MISMATCH"
         ).to_response()
 
-    payload, err = try_decode_cursor(cursor, tool=tool_name, accession=accession, query=query)
+    if tool_name == _TABLE_TOOL:
+        expected_query = {"topic": topic, "note": note_number, "table": raw_query.get("table")}
+    else:
+        expected_query = {"topic": topic, "note": note_number, "detail": detail}
+
+    payload, err = try_decode_cursor(cursor, tool=tool_name, accession=accession, query=expected_query)
     if err is not None:
         return err
 
     if tool_name == _TABLE_TOOL:
-        page_result = _continue_table(note, query, payload, accession, limit)
+        page_result = _continue_table(note, expected_query, payload, accession, limit)
     else:
-        page_result = _continue_context(note, query, payload, accession)
+        page_result = _continue_context(note, expected_query, payload, accession)
 
     if isinstance(page_result, ToolResponse):
         return page_result
@@ -338,7 +363,7 @@ Examples:
         },
         "cursor": {
             "type": "string",
-            "description": "Continuation cursor from a previous response's table/context next_cursor, to fetch the next page of that one item."
+            "description": "Continuation cursor from a previous response's table/context next_cursor, to fetch the next page of that one item. Must be passed together with the SAME topic (and, for a note's context, the same detail) the original call used, or it is rejected as CURSOR_MISMATCH."
         },
         "limit": {
             "type": "integer",
@@ -412,7 +437,7 @@ async def edgar_notes(
         )
 
     if cursor:
-        return _continue_notes(cursor, notes, filing, selected_by, accession, limit)
+        return _continue_notes(cursor, notes, filing, selected_by, accession, limit, topic, detail)
 
     result: dict[str, Any] = {
         "company": filing.company,

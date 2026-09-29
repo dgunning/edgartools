@@ -173,7 +173,7 @@ class TestNotesTablePaging:
         while cursor:
             assert cursor not in seen_cursors, "cursor repeated -- would loop forever"
             seen_cursors.add(cursor)
-            page = await edgar_notes(identifier="PFX", cursor=cursor, limit=2)
+            page = await edgar_notes(identifier="PFX", topic="debt", cursor=cursor, limit=2)
             assert page.success is True, page.error
             assert page.data["note"] == {"number": 1, "title": "Debt"}
             collected.extend(row["principal"] for row in page.data["table"])
@@ -208,9 +208,34 @@ class TestNotesTablePaging:
         filing2 = _FakeNotesFiling(_FakeReportObj(_FakeNotes([other_note])), accession_number=filing.accession_number)
         _patch_notes_selection(monkeypatch, filing2)
 
-        result = await edgar_notes(identifier="PFX", cursor=cursor)
+        result = await edgar_notes(identifier="PFX", topic="debt", cursor=cursor)
         assert result.success is False
         assert result.error_code == "CURSOR_MISMATCH"
+
+    async def test_cursor_minted_under_one_topic_rejected_when_replayed_under_another(self, monkeypatch):
+        """A table cursor is validated against the CURRENT call's topic, not
+        the topic baked into the cursor itself -- so a client that changes
+        topic between calls gets CURSOR_MISMATCH, not the other topic's next
+        page."""
+        df = pd.DataFrame({"principal": [1, 2, 3, 4, 5]})
+        table = _FakeTable("Schedule of Debt", df)
+        note = _FakeNote(1, "Debt", tables=[table])
+        filing = _FakeNotesFiling(_FakeReportObj(_FakeNotes([note])))
+        _patch_notes_selection(monkeypatch, filing)
+
+        first = await edgar_notes(identifier="PFX", topic="debt", detail="full", limit=2)
+        cursor = first.data["notes"][0]["tables"][0]["next_cursor"]
+        assert cursor is not None
+
+        wrong_topic = await edgar_notes(identifier="PFX", topic="revenue", cursor=cursor, limit=2)
+        assert wrong_topic.success is False
+        assert wrong_topic.error_code == "CURSOR_MISMATCH"
+
+        # The same cursor, replayed with the topic it was actually minted
+        # under, still continues correctly.
+        right_topic = await edgar_notes(identifier="PFX", topic="debt", cursor=cursor, limit=2)
+        assert right_topic.success is True, right_topic.error
+        assert [row["principal"] for row in right_topic.data["table"]] == [3, 4]
 
 
 # =============================================================================
@@ -241,7 +266,7 @@ class TestNotesContextPaging:
         while cursor:
             assert cursor not in seen_cursors
             seen_cursors.add(cursor)
-            page = await edgar_notes(identifier="PFX", cursor=cursor)
+            page = await edgar_notes(identifier="PFX", topic="revenue", detail="standard", cursor=cursor)
             assert page.success is True, page.error
             collected += page.data["context"]
             cursor = page.data["page"]["next_cursor"]
@@ -257,6 +282,30 @@ class TestNotesContextPaging:
         note_data = result.data["notes"][0]
         assert note_data["context"] == "short text"
         assert note_data["context_page"]["next_cursor"] is None
+
+    async def test_cursor_minted_under_one_detail_rejected_when_replayed_under_another(self, monkeypatch):
+        """A context cursor is validated against the CURRENT call's detail
+        level, not the detail baked into the cursor itself -- so a client
+        that changes detail between calls gets CURSOR_MISMATCH, not the
+        other detail level's next page."""
+        big_text = ("A" * 6500) + "\n\n" + ("B" * 3500)
+        note = _FakeNote(2, "Revenue Recognition", context_text=big_text)
+        filing = _FakeNotesFiling(_FakeReportObj(_FakeNotes([note])))
+        _patch_notes_selection(monkeypatch, filing)
+
+        first = await edgar_notes(identifier="PFX", topic="revenue", detail="standard")
+        cursor = first.data["notes"][0]["context_page"]["next_cursor"]
+        assert cursor is not None
+
+        wrong_detail = await edgar_notes(identifier="PFX", topic="revenue", detail="full", cursor=cursor)
+        assert wrong_detail.success is False
+        assert wrong_detail.error_code == "CURSOR_MISMATCH"
+
+        # The same cursor, replayed with the detail it was actually minted
+        # under, still continues correctly.
+        right_detail = await edgar_notes(identifier="PFX", topic="revenue", detail="standard", cursor=cursor)
+        assert right_detail.success is True, right_detail.error
+        assert first.data["notes"][0]["context"] + right_detail.data["context"] == big_text
 
 
 # =============================================================================
@@ -281,6 +330,18 @@ class TestNotesArgumentsAndSource:
         source = result.data["source"]
         assert source["accession_number"] == "0001213900-26-090000"
         assert source["selected_by"] == "latest"
+
+    async def test_garbage_cursor_is_invalid_cursor(self, monkeypatch):
+        """Silence check: a cursor that isn't decodable at all fails
+        peek_cursor before any note lookup, as INVALID_CURSOR -- not a
+        crash, not a silent None."""
+        note = _FakeNote(1, "Debt")
+        filing = _FakeNotesFiling(_FakeReportObj(_FakeNotes([note])))
+        _patch_notes_selection(monkeypatch, filing)
+
+        result = await edgar_notes(identifier="PFX", topic="debt", cursor="not-a-real-cursor!!")
+        assert result.success is False
+        assert result.error_code == "INVALID_CURSOR"
 
 
 # =============================================================================
