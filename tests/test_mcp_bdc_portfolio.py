@@ -24,9 +24,12 @@ import pandas as pd
 import pytest
 
 from edgar import set_identity
-from edgar.ai.mcp.tools import continuation, fund
+from edgar.ai.mcp.tools import continuation
+from edgar.ai.mcp.tools.bdc import identity as bdc_identity
+from edgar.ai.mcp.tools.bdc import portfolio as bdc_portfolio_mod
 from edgar.ai.mcp.tools.continuation import ResultCache
-from edgar.ai.mcp.tools.fund import _BdcLookup, edgar_fund
+from edgar.ai.mcp.tools.bdc.identity import BdcLookup
+from edgar.ai.mcp.tools.fund import edgar_fund
 from edgar.ai.mcp.tools.selection import FilingSelection, FilingSelectionError
 from edgar.bdc.investments import PortfolioInvestment, PortfolioInvestments
 
@@ -44,7 +47,7 @@ class _FakeCompany:
 
 
 class _FakeBDC:
-    """Just enough of a BDCEntity for _bdc_portfolio's happy path."""
+    """Just enough of a BDCEntity for bdc_portfolio's happy path."""
 
     def __init__(self, cik=1287750, name="ARES CAPITAL CORP", state="MD", is_active=True, report_year=None):
         self.cik = cik
@@ -85,9 +88,9 @@ class _FakeXBRLWithSOI:
 
 
 class _FakeFiling:
-    """Just enough of a Filing for format_source/paging in _bdc_portfolio.
+    """Just enough of a Filing for format_source/paging in bdc_portfolio.
 
-    ``_load_extraction`` (fund.py) always parses XBRL itself on a cache
+    ``_load_extraction`` (edgar/ai/mcp/tools/bdc/portfolio.py) always parses XBRL itself on a cache
     miss -- threading it into ``portfolio_investments_from_filing`` and,
     if needed, the no-structured-data fallback -- so ``xbrl()`` is called
     on essentially every test here, not just the no-structured-data ones.
@@ -139,25 +142,42 @@ def _make_investment(
     )
 
 
-def _patch_selection(monkeypatch, filing: _FakeFiling, selected_by: str = "latest"):
-    monkeypatch.setattr(
-        "edgar.ai.mcp.tools.selection.resolve_report_filing",
-        lambda **kwargs: FilingSelection(filing=filing, selected_by=selected_by),
-    )
+def _patch_selection(monkeypatch, filing: _FakeFiling, selected_by: str = "latest") -> list:
+    """Patch filing selection; returns the list of recorded call kwargs."""
+    calls = []
+
+    def _resolve(**kwargs):
+        calls.append(kwargs)
+        return FilingSelection(filing=filing, selected_by=selected_by)
+
+    monkeypatch.setattr("edgar.ai.mcp.tools.selection.resolve_report_filing", _resolve)
+    return calls
 
 
-def _patch_extraction(monkeypatch, investments: Optional[PortfolioInvestments]):
-    monkeypatch.setattr(
-        "edgar.bdc.investments.portfolio_investments_from_filing",
-        lambda filing, include_untyped=False, xbrl=None: investments,
-    )
+def _patch_extraction(monkeypatch, investments: Optional[PortfolioInvestments]) -> list:
+    """Patch holdings extraction; returns the list of filings it was called with."""
+    calls = []
+
+    def _extract(filing, include_untyped=False, xbrl=None):
+        calls.append(filing)
+        return investments
+
+    monkeypatch.setattr("edgar.bdc.investments.portfolio_investments_from_filing", _extract)
+    return calls
 
 
-def _patch_bdc(monkeypatch, bdc: _FakeBDC = None):
-    monkeypatch.setattr(
-        "edgar.ai.mcp.tools.fund._find_bdc",
-        lambda identifier: _BdcLookup(bdc=bdc or _FakeBDC()),
-    )
+def _patch_bdc(monkeypatch, bdc: _FakeBDC = None) -> list:
+    """Patch BDC identifier resolution where it is looked up
+    (`edgar.ai.mcp.tools.bdc.identity.resolve_bdc`); returns the identifiers
+    it was called with, so a test can prove the patch took effect."""
+    calls = []
+
+    def _resolve_bdc(identifier):
+        calls.append(identifier)
+        return BdcLookup(bdc=bdc or _FakeBDC())
+
+    monkeypatch.setattr("edgar.ai.mcp.tools.bdc.identity.resolve_bdc", _resolve_bdc)
+    return calls
 
 
 @pytest.fixture(autouse=True)
@@ -757,7 +777,7 @@ class TestGetLatestBdcReportYearCaching:
 
 @pytest.mark.fast
 class TestFindBdcResolution:
-    """`edgar.ai.mcp.tools.fund._find_bdc`: ticker/CIK go through
+    """`edgar.ai.mcp.tools.bdc.identity.resolve_bdc`: ticker/CIK go through
     `lookup_bdc`; a ticker absent from every report falls back to
     `resolve_company`; a name goes through fuzzy search, which must be
     unambiguous."""
@@ -770,7 +790,7 @@ class TestFindBdcResolution:
             ),
         )
 
-        lookup = fund._find_bdc("845385")
+        lookup = bdc_identity.resolve_bdc("845385")
 
         assert lookup.bdc is not None
         assert lookup.bdc.cik == 845385
@@ -788,9 +808,9 @@ class TestFindBdcResolution:
             return _FakeBDC(cik=1287750, name="ARES CAPITAL CORP")
 
         monkeypatch.setattr("edgar.bdc.reference.lookup_bdc", _fake_lookup_bdc)
-        monkeypatch.setattr(fund, "resolve_company", lambda identifier: _FakeCompany(cik=1287750))
+        monkeypatch.setattr(bdc_identity, "resolve_company", lambda identifier: _FakeCompany(cik=1287750))
 
-        lookup = fund._find_bdc("ARCC")
+        lookup = bdc_identity.resolve_bdc("ARCC")
 
         assert lookup.bdc is not None
         assert lookup.bdc.cik == 1287750
@@ -821,10 +841,10 @@ class TestFindBdcResolution:
                 _FakeBDC(cik=cik, name="GOLUB CAPITAL BDC, Inc.") if cik == 1476765 else None
             ),
         )
-        monkeypatch.setattr(fund, "resolve_company", lambda identifier: (_ for _ in ()).throw(ValueError("nope")))
+        monkeypatch.setattr(bdc_identity, "resolve_company", lambda identifier: (_ for _ in ()).throw(ValueError("nope")))
         monkeypatch.setattr("edgar.bdc.search.find_bdc", _fake_search)
 
-        lookup = fund._find_bdc("Golub")
+        lookup = bdc_identity.resolve_bdc("Golub")
 
         assert searched == ["Golub"]
         assert lookup.bdc is not None
@@ -835,7 +855,7 @@ class TestFindBdcResolution:
         """Silence check: ticker miss, company miss and no search hit is a
         plain not-found (both fields None), not a guess."""
         monkeypatch.setattr("edgar.bdc.reference.lookup_bdc", lambda **kwargs: None)
-        monkeypatch.setattr(fund, "resolve_company", lambda identifier: (_ for _ in ()).throw(ValueError("nope")))
+        monkeypatch.setattr(bdc_identity, "resolve_company", lambda identifier: (_ for _ in ()).throw(ValueError("nope")))
 
         class _Empty:
             empty = True
@@ -843,7 +863,7 @@ class TestFindBdcResolution:
 
         monkeypatch.setattr("edgar.bdc.search.find_bdc", lambda identifier, top_n=10, **kwargs: _Empty())
 
-        lookup = fund._find_bdc("ZZZZZ")
+        lookup = bdc_identity.resolve_bdc("ZZZZZ")
 
         assert lookup.bdc is None
         assert lookup.ambiguous is None
@@ -858,7 +878,7 @@ class TestFindBdcResolution:
 
         monkeypatch.setattr("edgar.bdc.search.find_bdc", lambda identifier, top_n=10, **kwargs: _FakeSearchResults())
 
-        lookup = fund._find_bdc("Alpha Investment Group")
+        lookup = bdc_identity.resolve_bdc("Alpha Investment Group")
 
         assert lookup.bdc is None
         assert lookup.ambiguous is not None
@@ -878,7 +898,7 @@ class TestFindBdcResolution:
             lambda cik=None, ticker=None, lookback_years=2: _FakeBDC(cik=cik, name="ARES CAPITAL CORP"),
         )
 
-        lookup = fund._find_bdc("Ares Capital Corporation")
+        lookup = bdc_identity.resolve_bdc("Ares Capital Corporation")
 
         assert lookup.bdc is not None
         assert lookup.bdc.cik == 1287750
@@ -905,6 +925,62 @@ class TestAmbiguousBdcEndToEnd:
         assert len(result.suggestions) == 2
         assert any("Alpha BDC" in s for s in result.suggestions)
         assert any("Alpha Capital BDC" in s for s in result.suggestions)
+
+
+# =============================================================================
+# Fast: patch seams are live (Q2 fix round 1). The BDC code moved from fund.py
+# into edgar/ai/mcp/tools/bdc/; these tests patch names where they are looked
+# up now. A stale patch target would make the tests above run against real
+# code and pass vacuously, so each key seam is asserted to be called.
+# =============================================================================
+
+
+@pytest.mark.fast
+@pytest.mark.asyncio
+class TestPatchSeamsAreLive:
+    async def test_portfolio_uses_patched_resolution_selection_and_extraction(self, monkeypatch):
+        bdc_calls = _patch_bdc(monkeypatch)
+        selection_calls = _patch_selection(monkeypatch, _FakeFiling())
+        extraction_calls = _patch_extraction(monkeypatch, _make_investment_batch(2))
+
+        result = await edgar_fund(action="bdc_portfolio", identifier="ARCC")
+
+        assert result.success is True
+        assert bdc_calls == ["ARCC"]
+        assert len(selection_calls) == 1
+        assert selection_calls[0]["company"].cik == 1287750
+        assert len(extraction_calls) == 1
+
+    async def test_resolve_company_patch_is_live(self, monkeypatch):
+        calls = []
+
+        def _resolve(identifier):
+            calls.append(identifier)
+            return _FakeCompany(cik=320193)
+
+        monkeypatch.setattr("edgar.bdc.reference.lookup_bdc", lambda **kwargs: None)
+        monkeypatch.setattr(bdc_identity, "resolve_company", _resolve)
+
+        result = await edgar_fund(action="bdc_portfolio", identifier="320193")
+
+        assert result.error_code == "NOT_A_BDC"
+        assert calls == ["320193"]
+
+    async def test_lookup_bdc_patch_is_live_on_the_accession_path(self, monkeypatch):
+        calls = []
+
+        def _lookup(cik=None, ticker=None, lookback_years=2):
+            calls.append(cik)
+            return _FakeBDC(cik=cik)
+
+        _patch_selection(monkeypatch, _FakeFiling(), selected_by="accession")
+        _patch_extraction(monkeypatch, _make_investment_batch(1))
+        monkeypatch.setattr("edgar.bdc.reference.lookup_bdc", _lookup)
+
+        result = await edgar_fund(action="bdc_portfolio", accession_number="0001628280-26-050307")
+
+        assert result.success is True
+        assert calls == [1287750]
 
 
 # =============================================================================
@@ -1029,8 +1105,8 @@ class TestSoiTextContinuation:
         assert filing.xbrl_call_count == 2
 
     @pytest.mark.parametrize("xbrl_factory,reason", [
-        (lambda: _FakeXBRLNoSOI(), fund._NO_SOI_STATEMENT_REASON),
-        (lambda: _FakeXBRLWithSOI("Schedule of Investments\nShort.\n"), fund._NO_STRUCTURED_FIELDS_REASON),
+        (lambda: _FakeXBRLNoSOI(), bdc_portfolio_mod.NO_SOI_STATEMENT_REASON),
+        (lambda: _FakeXBRLWithSOI("Schedule of Investments\nShort.\n"), bdc_portfolio_mod.NO_STRUCTURED_FIELDS_REASON),
     ])
     async def test_no_structured_holdings_outcome_is_cached(self, monkeypatch, xbrl_factory, reason):
         """P1-H1 secondary: a `None` extraction (no structured holdings) is
@@ -1144,8 +1220,8 @@ class TestCursorOnlyContinuation:
         self._setup(monkeypatch)
         first = await edgar_fund(action="bdc_portfolio", identifier="ARCC", limit=2)
         monkeypatch.setattr(
-            "edgar.ai.mcp.tools.fund._find_bdc",
-            lambda identifier: _BdcLookup(bdc=_FakeBDC(cik=MAIN_CIK, name="MAIN STREET CAPITAL CORP")),
+            "edgar.ai.mcp.tools.bdc.identity.resolve_bdc",
+            lambda identifier: BdcLookup(bdc=_FakeBDC(cik=MAIN_CIK, name="MAIN STREET CAPITAL CORP")),
         )
 
         nxt = await edgar_fund(action="bdc_portfolio", identifier="MAIN", cursor=first.data["page"]["next_cursor"])
@@ -1394,7 +1470,7 @@ class TestNameSearchResolutionRules:
             _hit(1000002, "Ares Core Infrastructure Fund", 99.2),
         ])
 
-        lookup = fund._find_bdc_by_search("ares  capital CORP")
+        lookup = bdc_identity.resolve_bdc_by_search("ares  capital CORP")
 
         assert lookup.bdc.cik == 1287750
         assert lookup.resolved_by == "search"
@@ -1402,7 +1478,7 @@ class TestNameSearchResolutionRules:
     def test_clear_high_scoring_winner_resolves(self, monkeypatch):
         self._search(monkeypatch, [_hit(1396440, "MAIN STREET CAPITAL CORP", 97), _hit(2, "Other", 70.6)])
 
-        assert fund._find_bdc_by_search("Main Street Capital").bdc.cik == 1396440
+        assert bdc_identity.resolve_bdc_by_search("Main Street Capital").bdc.cik == 1396440
 
     @pytest.mark.parametrize("rows", [
         [_hit(1, "Alpha One Fund", 99), _hit(2, "Alpha Two Fund", 98)],   # two >= 95
@@ -1412,7 +1488,7 @@ class TestNameSearchResolutionRules:
     def test_unclear_results_are_ambiguous(self, monkeypatch, rows):
         self._search(monkeypatch, rows)
 
-        lookup = fund._find_bdc_by_search("Alpha")
+        lookup = bdc_identity.resolve_bdc_by_search("Alpha")
 
         assert lookup.bdc is None
         assert [c["cik"] for c in lookup.ambiguous] == [r["cik"] for r in rows]
@@ -1420,7 +1496,7 @@ class TestNameSearchResolutionRules:
     def test_ambiguous_lists_at_most_five_candidates(self, monkeypatch):
         self._search(monkeypatch, [_hit(i, f"Ares Fund {i}", 99 - i / 10) for i in range(1, 9)])
 
-        lookup = fund._find_bdc_by_search("Ares")
+        lookup = bdc_identity.resolve_bdc_by_search("Ares")
 
         assert [c["cik"] for c in lookup.ambiguous] == [1, 2, 3, 4, 5]
 
@@ -1428,7 +1504,7 @@ class TestNameSearchResolutionRules:
         captured = []
         self._search(monkeypatch, [_hit(1287750, "ARES CAPITAL CORP", 100)], captured)
 
-        fund._find_bdc_by_search("Ares Capital Corp")
+        bdc_identity.resolve_bdc_by_search("Ares Capital Corp")
 
         assert captured == [{"identifier": "Ares Capital Corp", "top_n": 10, "lookback_years": 2}]
 
@@ -1442,10 +1518,14 @@ class TestNameSearchResolutionRules:
             "edgar.bdc.reference.lookup_bdc",
             lambda cik=None, ticker=None, lookback_years=2: None,
         )
-        monkeypatch.setattr(fund, "resolve_company", lambda identifier: _FakeCompany(cik=1176948))
+        resolved = []
+        monkeypatch.setattr(
+            bdc_identity, "resolve_company", lambda identifier: resolved.append(identifier) or _FakeCompany(cik=1176948)
+        )
 
-        lookup = fund._find_bdc("Ares")
+        lookup = bdc_identity.resolve_bdc("Ares")
 
+        assert resolved == ["Ares"]  # the patch is live: Ares Management was resolved, then searched
         assert lookup.bdc is None
         assert [c["cik"] for c in lookup.ambiguous] == [1287750, 1000001]
 
@@ -1458,17 +1538,21 @@ class TestNumericIdentifierNotABdc:
 
     async def test_real_non_bdc_cik_is_not_a_bdc(self, monkeypatch):
         monkeypatch.setattr("edgar.bdc.reference.lookup_bdc", lambda **kwargs: None)
-        monkeypatch.setattr(fund, "resolve_company", lambda identifier: _FakeCompany(cik=320193))
+        resolved = []
+        monkeypatch.setattr(
+            bdc_identity, "resolve_company", lambda identifier: resolved.append(identifier) or _FakeCompany(cik=320193)
+        )
 
         result = await edgar_fund(action="bdc_portfolio", identifier="320193")
 
+        assert resolved == ["320193"]
         assert result.success is False
         assert result.error_code == "NOT_A_BDC"
         assert "320193" in result.error
 
     async def test_unknown_cik_is_company_not_found(self, monkeypatch):
         monkeypatch.setattr("edgar.bdc.reference.lookup_bdc", lambda **kwargs: None)
-        monkeypatch.setattr(fund, "resolve_company", lambda identifier: (_ for _ in ()).throw(ValueError("nope")))
+        monkeypatch.setattr(bdc_identity, "resolve_company", lambda identifier: (_ for _ in ()).throw(ValueError("nope")))
 
         result = await edgar_fund(action="bdc_portfolio", identifier="99999999")
 
@@ -1482,7 +1566,7 @@ class TestNumericIdentifierNotABdc:
         placeholder = _FakeCompany(cik=99999999)
         placeholder.not_found = True
         monkeypatch.setattr("edgar.bdc.reference.lookup_bdc", lambda **kwargs: None)
-        monkeypatch.setattr(fund, "resolve_company", lambda identifier: placeholder)
+        monkeypatch.setattr(bdc_identity, "resolve_company", lambda identifier: placeholder)
 
         result = await edgar_fund(action="bdc_portfolio", identifier="99999999")
 
@@ -1598,7 +1682,7 @@ class TestBdcSearchIndexAcrossYears:
         assert entity.report_year == 2025
 
     def test_fund_resolves_the_registrant_name_to_arcc(self):
-        lookup = fund._find_bdc("Ares Capital Corp")
+        lookup = bdc_identity.resolve_bdc("Ares Capital Corp")
 
         assert lookup.ambiguous is None
         assert lookup.bdc.cik == 1287750
@@ -1801,7 +1885,7 @@ class TestBdcNameSearchLive:
     def test_arcc_registrant_name_resolves_to_cik_1287750(self):
         set_identity("Test User test@test.com")
 
-        lookup = fund._find_bdc("Ares Capital Corp")
+        lookup = bdc_identity.resolve_bdc("Ares Capital Corp")
 
         assert lookup.ambiguous is None
         assert lookup.bdc is not None

@@ -26,7 +26,8 @@ from typing import Optional
 import pytest
 
 from edgar import set_identity
-from edgar.ai.mcp.tools import continuation, fund
+from edgar.ai.mcp.tools import continuation
+from edgar.ai.mcp.tools.bdc.identity import BdcLookup
 from edgar.ai.mcp.tools.continuation import ResultCache
 from edgar.ai.mcp.tools.fund import edgar_fund
 from edgar.ai.mcp.tools.selection import FilingSelection
@@ -87,11 +88,16 @@ def _make_result(
     )
 
 
-def _patch_extraction(monkeypatch, result: Optional[NonAccrualResult]):
-    monkeypatch.setattr(
-        "edgar.bdc.nonaccrual.extract_nonaccrual",
-        lambda filing: result,
-    )
+def _patch_extraction(monkeypatch, result: Optional[NonAccrualResult]) -> list:
+    """Patch non-accrual extraction; returns the list of filings it was called with."""
+    calls = []
+
+    def _extract(filing):
+        calls.append(filing)
+        return result
+
+    monkeypatch.setattr("edgar.bdc.nonaccrual.extract_nonaccrual", _extract)
+    return calls
 
 
 @pytest.fixture(autouse=True)
@@ -467,6 +473,27 @@ class TestCursorErrors:
 
 @pytest.mark.fast
 @pytest.mark.asyncio
+class TestPatchSeamsAreLive:
+    """Q2 fix round 1: the non-accrual code moved into
+    edgar/ai/mcp/tools/bdc/nonaccrual.py. Prove the patched resolution,
+    selection and extraction seams are the ones actually called."""
+
+    async def test_nonaccrual_uses_patched_resolution_selection_and_extraction(self, monkeypatch):
+        bdc_calls = _patch_bdc(monkeypatch)
+        selection_calls = _patch_selection(monkeypatch, _FakeFiling())
+        extraction_calls = _patch_extraction(monkeypatch, _make_result(investments=_make_investment_batch(2)))
+
+        response = await edgar_fund(action="bdc_nonaccrual", identifier="ARCC")
+
+        assert response.success is True
+        assert bdc_calls == ["ARCC"]
+        assert len(selection_calls) == 1
+        assert len(extraction_calls) == 1
+        assert response.data["num_nonaccrual"] == 2
+
+
+@pytest.mark.fast
+@pytest.mark.asyncio
 class TestUnknownCountIsNull:
     @pytest.mark.parametrize("method,kwargs", [
         ("aggregate_concept", {"aggregate_concept_value": Decimal("250000000"),
@@ -551,8 +578,8 @@ class TestCursorOnlyContinuation:
         self._setup(monkeypatch)
         first = await edgar_fund(action="bdc_nonaccrual", identifier="ARCC", limit=2)
         monkeypatch.setattr(
-            "edgar.ai.mcp.tools.fund._find_bdc",
-            lambda identifier: fund._BdcLookup(bdc=_FakeBDC(cik=1396440, name="MAIN STREET CAPITAL CORP")),
+            "edgar.ai.mcp.tools.bdc.identity.resolve_bdc",
+            lambda identifier: BdcLookup(bdc=_FakeBDC(cik=1396440, name="MAIN STREET CAPITAL CORP")),
         )
 
         nxt = await edgar_fund(action="bdc_nonaccrual", identifier="MAIN", cursor=first.data["page"]["next_cursor"])
