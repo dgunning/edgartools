@@ -287,6 +287,44 @@ def test_amendment_omitting_ownership_figures_marks_them_unreported(schedule_cla
 
 
 @pytest.mark.fast
+@pytest.mark.parametrize('schedule_class,xml_path,form,shares_tag,expected_rows', [
+    (Schedule13D, SCHEDULE_13D_XML_PATH, 'SCHEDULE 13D/A', 'aggregateAmountOwned', {
+        'BML Investment Partners, L.P.': ['unavailable', '8.50%', 'unavailable', '2,100,000'],
+        'Leonard Braden Michael': ['2,435,000', '9.90%', '2,435,000', '2,435,000'],
+    }),
+    (Schedule13G, SCHEDULE_13G_XML_PATH, 'SCHEDULE 13G/A', 'reportingPersonBeneficiallyOwnedAggregateNumberOfShares', {
+        'Marex Securities Products Inc.': ['unavailable', '5.10%', 'unavailable', '10,000,000'],
+        'Marex Group plc': ['10,000,000', '5.10%', '10,000,000', '10,000,000'],
+    }),
+])
+def test_rich_persons_table_shows_unreported_figures_as_unavailable(schedule_class, xml_path, form,
+                                                                    shares_tag, expected_rows):
+    """Each cell of the persons table stands for one person's figure, reported or not.
+
+    The first person leaves out its shares and its shared voting power. Its Shares
+    and Voting Power cells say "unavailable" rather than the placeholder 0 (or the
+    sole voting power alone), while its reported percent and dispositive power, and
+    every figure of the second person, still print as numbers.
+    """
+    xml_content = xml_path.read_text()
+    for tag in (shares_tag, 'sharedVotingPower'):
+        xml_content = re.sub(rf'<{tag}>[^<]*</{tag}>', '', xml_content, count=1)
+    filing = Mock(form=form, filing_date=date(2025, 12, 31), xml=Mock(return_value=xml_content))
+    schedule = schedule_class.from_filing(filing)
+    first = schedule.reporting_persons[0]
+    assert first.unreported_fields == {'aggregate_amount', 'shared_voting_power'}
+
+    from rich.console import Console
+    console = Console(record=True, width=200)
+    console.print(schedule)
+    lines = console.export_text().splitlines()
+    for name, cells in expected_rows.items():
+        row = next(line for line in lines if re.match(rf'│\s+{re.escape(name)}\s', line))
+        # Shares, Percent, Voting Power and Dispositive Power are the last four cells.
+        assert row.strip('│ ').split()[-4:] == cells
+
+
+@pytest.mark.fast
 def test_reported_figures_are_not_marked():
     """Control: the original filings report every figure, including a reported 0."""
     schedule_13d = _schedule13d_from_xml(SCHEDULE_13D_XML_PATH.read_text(), form='SCHEDULE 13D')

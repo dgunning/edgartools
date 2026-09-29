@@ -6,7 +6,7 @@ and Schedule 13G filings using XML-based parsing.
 """
 import re
 from datetime import date
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List, Optional, overload
 
 if TYPE_CHECKING:
     from edgar._filings import Filing
@@ -29,7 +29,15 @@ from edgar.xmltools import parse_xml as parse_xml_document
 __all__ = ['Schedule13D', 'Schedule13G']
 
 
-def safe_int(value: Optional[str], default: int = 0) -> int:
+@overload
+def safe_int(value: Optional[str], default: int = 0) -> int: ...
+
+
+@overload
+def safe_int(value: Optional[str], default: None) -> Optional[int]: ...
+
+
+def safe_int(value: Optional[str], default: Optional[int] = 0) -> Optional[int]:
     """
     Safely convert a string value to an integer.
 
@@ -52,7 +60,15 @@ def safe_int(value: Optional[str], default: int = 0) -> int:
         return default
 
 
-def safe_float(value: Optional[str], default: float = 0.0) -> float:
+@overload
+def safe_float(value: Optional[str], default: float = 0.0) -> float: ...
+
+
+@overload
+def safe_float(value: Optional[str], default: None) -> Optional[float]: ...
+
+
+def safe_float(value: Optional[str], default: Optional[float] = 0.0) -> Optional[float]:
     """
     Safely convert a string value to a float.
 
