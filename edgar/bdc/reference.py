@@ -32,6 +32,7 @@ __all__ = [
     'get_bdc_list',
     'get_active_bdc_ciks',
     'is_bdc_cik',
+    'lookup_bdc',
     'fetch_bdc_report',
     'get_latest_bdc_report_year',
 ]
@@ -727,3 +728,65 @@ def is_bdc_cik(cik: int) -> bool:
     """
     bdcs = get_bdc_list()
     return any(bdc.cik == cik for bdc in bdcs)
+
+
+def lookup_bdc(
+    cik: Optional[int] = None,
+    ticker: Optional[str] = None,
+    lookback_years: int = 2,
+) -> Optional[BDCEntity]:
+    """
+    Look up a BDC by CIK or ticker, falling back to prior report years.
+
+    The SEC's annual BDC Report can omit an active BDC from a given year's
+    snapshot even though the company is still an active, filing BDC:
+    measured 2026-09-28, Ares Capital Corp (CIK 1287750) is present in the
+    2024 and 2025 reports but missing from the 2026 one. `is_bdc_cik()` and
+    a bare `get_bdc_list().get_by_cik()`/`get_by_ticker()` only ever consult
+    the latest report, so both silently say "not a BDC" for an entity like
+    that. This checks the latest report first, then up to `lookback_years`
+    prior years, returning the first match -- so "dropped from the latest
+    snapshot" is not treated the same as "not a BDC".
+
+    Args:
+        cik: SEC CIK number to look up.
+        ticker: Ticker symbol to look up (case-insensitive). `BDCEntities.
+            get_by_ticker()` resolves the ticker against SEC's current
+            ticker-to-CIK mapping (not year-versioned) before checking that
+            CIK against the given report year, so an older year's report is
+            still checked against today's correct ticker mapping.
+        lookback_years: How many prior report years to check if the latest
+            report has no match (default 2).
+
+    Returns:
+        The first matching BDCEntity, or None if not found in the latest
+        report or any of the lookback years.
+
+    Raises:
+        ValueError: If neither `cik` nor `ticker` is given.
+    """
+    if cik is None and ticker is None:
+        raise ValueError("lookup_bdc requires cik or ticker")
+
+    latest_year = get_latest_bdc_report_year()
+    for year in range(latest_year, latest_year - lookback_years - 1, -1):
+        try:
+            bdcs = get_bdc_list(year)
+        except Exception as e:
+            log.warning(
+                "Could not fetch the %d BDC report while looking up a BDC (%s: %s); skipping.",
+                year, type(e).__name__, e,
+            )
+            continue
+
+        if cik is not None:
+            match = bdcs.get_by_cik(cik)
+            if match is not None:
+                return match
+
+        if ticker is not None:
+            match = bdcs.get_by_ticker(ticker)
+            if match is not None:
+                return match
+
+    return None

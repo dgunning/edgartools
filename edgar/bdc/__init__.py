@@ -71,6 +71,7 @@ from edgar.bdc.reference import (
     get_bdc_list,
     get_latest_bdc_report_year,
     is_bdc_cik,
+    lookup_bdc,
 )
 from edgar.bdc.search import (
     BDCSearchIndex,
@@ -94,6 +95,7 @@ __all__ = [
     'get_bdc_list',
     'get_latest_bdc_report_year',
     'is_bdc_cik',
+    'lookup_bdc',
     # Investments
     'DataQuality',
     'PortfolioInvestment',

@@ -2043,6 +2043,7 @@ class PortfolioInvestments:
 def portfolio_investments_from_filing(
     filing,
     include_untyped: bool = False,
+    xbrl=None,
 ) -> Optional[PortfolioInvestments]:
     """
     Extract portfolio investments from a specific filing.
@@ -2060,6 +2061,12 @@ def portfolio_investments_from_filing(
         include_untyped: If False (default), excludes investments with "Unknown"
             type. These are typically company-level rollup entries that would
             inflate totals.
+        xbrl: An already-parsed `XBRL` for this filing, if the caller has one
+            (e.g. it also needs the XBRL for a fallback if this returns
+            nothing). `filing.xbrl()` is not memoized -- it re-parses the
+            filing's full submission on every call -- so passing this avoids
+            a caller and this function each parsing the same filing. When
+            omitted, this calls `filing.xbrl()` itself, unchanged.
 
     Returns:
         PortfolioInvestments collection, or None if the filing has no XBRL data.
@@ -2070,7 +2077,8 @@ def portfolio_investments_from_filing(
         >>> investments.extraction_method
         'xbrl_facts'
     """
-    xbrl = filing.xbrl()
+    if xbrl is None:
+        xbrl = filing.xbrl()
     if xbrl is None:
         return None
 
