@@ -39,6 +39,16 @@ def _warnings(caplog, logger):
 
 class TestLatestReportYear:
 
+    @pytest.fixture(autouse=True)
+    def _clear_cache(self):
+        """get_latest_bdc_report_year is lru_cached (Q1 fix wave); without
+        this each test after the first would just replay the first test's
+        cached result instead of probing again."""
+        from edgar.bdc.reference import get_latest_bdc_report_year
+        get_latest_bdc_report_year.cache_clear()
+        yield
+        get_latest_bdc_report_year.cache_clear()
+
     def test_unreachable_says_so_and_does_not_claim_a_year(self, monkeypatch, caplog):
         from edgar.bdc import reference
 

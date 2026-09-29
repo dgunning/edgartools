@@ -17,6 +17,7 @@ or listing formatting.
 
 import pytest
 
+from edgar._filings import Filing as _Filing
 from edgar.ai.mcp.tools import selection
 from edgar.ai.mcp.tools.base import format_filing_summary, format_source
 from edgar.ai.mcp.tools.selection import (
@@ -30,7 +31,7 @@ from edgar.ai.mcp.tools.selection import (
 # =============================================================================
 
 
-class FakeFiling:
+class FakeFiling(_Filing):
     """Just enough of a Filing to exercise selection and provenance.
 
     ``report_date`` is the field selection actually matches periods against
@@ -38,6 +39,13 @@ class FakeFiling:
     ``period_of_report`` is kept as a plain, cheap attribute here only so
     format_source's fallback path (used when report_date is missing) can be
     exercised without a real Filing.
+
+    Subclasses the real ``edgar._filings.Filing`` (Task Q1, P1-M3) purely so
+    ``isinstance(filing, edgar._filings.Filing)`` in ``_resolve_by_accession``
+    accepts it. ``Filing.__init__`` only assigns plain attributes -- no
+    network access -- so calling it here is safe. ``accession_number`` is not
+    set directly: it is inherited as a read-only property that reads
+    ``accession_no``.
     """
 
     def __init__(
@@ -52,21 +60,22 @@ class FakeFiling:
         company="Test Co",
         homepage_url=None,
     ):
-        self.accession_no = accession_no
-        self.accession_number = accession_no
-        self.form = form
-        self.cik = cik
+        super().__init__(
+            cik=cik, company=company, form=form, filing_date=filing_date, accession_no=accession_no
+        )
         self.report_date = report_date
         self._period_of_report = period_of_report
-        self.filing_date = filing_date
-        self.company = company
-        self.homepage_url = homepage_url or (
+        self._homepage_url = homepage_url or (
             f"https://www.sec.gov/Archives/edgar/data/{cik}/{accession_no}-index.html"
         )
 
     @property
     def period_of_report(self):
         return self._period_of_report
+
+    @property
+    def homepage_url(self):
+        return self._homepage_url
 
 
 class DownloadTrapFiling(FakeFiling):
@@ -103,8 +112,10 @@ class FakeCompany:
         self._filings = filings or []
         self._extra_filings = extra_filings or []
         self.full_load_calls = 0
+        self.calls = []  # every trigger_full_load value passed, in call order
 
     def get_filings(self, form=None, amendments=True, trigger_full_load=True):
+        self.calls.append(trigger_full_load)
         pool = list(self._filings)
         if trigger_full_load:
             self.full_load_calls += 1
@@ -278,6 +289,41 @@ class TestResolveReportFilingLatestExcludesAmendments:
 
         assert company.full_load_calls == 0
 
+    def test_empty_recent_page_retries_with_full_load(self):
+        """P1-M1: an empty recent page is not the final word -- mirrors
+        _resolve_by_period and Entity.latest(). A form like 10-K405 whose only
+        filings are old enough to sit outside the recent page must still be
+        found via exactly one full-history retry."""
+        older = FakeFiling(accession_no="A0", form="10-K405", filing_date="2001-12-21")
+        company = FakeCompany(cik=1, filings=[], extra_filings=[older])
+
+        result = resolve_report_filing(form="10-K405", company=company)
+
+        assert result.filing is older
+        assert result.selected_by == "latest"
+        assert company.calls == [False, True]
+
+    def test_still_not_found_after_full_load_retry(self):
+        """A genuinely empty history still raises FILING_NOT_FOUND, after
+        exactly one retry -- not an infinite/duplicate retry loop."""
+        company = FakeCompany(cik=1, filings=[], extra_filings=[])
+
+        with pytest.raises(FilingSelectionError) as exc_info:
+            resolve_report_filing(form="10-K405", company=company)
+
+        assert exc_info.value.error_code == "FILING_NOT_FOUND"
+        assert company.calls == [False, True]
+
+    def test_recent_page_hit_never_retries(self):
+        """A match on the first page never pays for the full-history load."""
+        recent = FakeFiling(accession_no="A1", form="10-K", filing_date="2026-01-01")
+        company = FakeCompany(cik=1, filings=[recent])
+
+        result = resolve_report_filing(form="10-K", company=company)
+
+        assert result.filing is recent
+        assert company.calls == [False]
+
 
 @pytest.mark.fast
 class TestResolveReportFilingMismatch:
@@ -309,6 +355,122 @@ class TestResolveReportFilingMismatch:
             resolve_report_filing(accession_number="0000000000-26-999999")
 
         assert exc_info.value.error_code == "FILING_NOT_FOUND"
+
+
+@pytest.mark.fast
+class TestResolveByAccessionShapeValidation:
+    """P1-M3: a malformed accession_number must never reach edgar.find() as
+    if it might be one -- edgar.find() dispatches on shape and can return a
+    Company/Entity or CompanySearchResults for a CIK, name, or oddly-shaped
+    string, which downstream code would then use as if it were a filing.
+    """
+
+    def test_a_cik_is_invalid_arguments_and_never_calls_find(self, monkeypatch):
+        def _unexpected_find(**kwargs):
+            raise AssertionError("find() must not be called for a malformed accession")
+
+        monkeypatch.setattr("edgar.find", _unexpected_find)
+
+        with pytest.raises(FilingSelectionError) as exc_info:
+            resolve_report_filing(accession_number="1287750")
+
+        assert exc_info.value.error_code == "INVALID_ARGUMENTS"
+
+    def test_a_company_name_is_invalid_arguments(self, monkeypatch):
+        def _unexpected_find(**kwargs):
+            raise AssertionError("find() must not be called for a malformed accession")
+
+        monkeypatch.setattr("edgar.find", _unexpected_find)
+
+        with pytest.raises(FilingSelectionError) as exc_info:
+            resolve_report_filing(accession_number="Apple Inc")
+
+        assert exc_info.value.error_code == "INVALID_ARGUMENTS"
+
+    def test_leading_and_trailing_space_is_stripped_and_still_resolves(self, monkeypatch):
+        fake_filing = FakeFiling(cik=1234, form="10-K", accession_no="0000000000-26-000099")
+        seen = {}
+
+        def _find(**kwargs):
+            seen.update(kwargs)
+            return fake_filing
+
+        monkeypatch.setattr("edgar.find", _find)
+
+        result = resolve_report_filing(accession_number="  0000000000-26-000099 ")
+
+        assert result.filing is fake_filing
+        assert seen["search_id"] == "0000000000-26-000099"
+
+    def test_18_digit_form_is_normalized_to_dashed_and_still_resolves(self, monkeypatch):
+        fake_filing = FakeFiling(cik=1234, form="10-K", accession_no="0000000000-26-000099")
+        seen = {}
+
+        def _find(**kwargs):
+            seen.update(kwargs)
+            return fake_filing
+
+        monkeypatch.setattr("edgar.find", _find)
+
+        result = resolve_report_filing(accession_number="000000000026000099")
+
+        assert result.filing is fake_filing
+        assert seen["search_id"] == "0000000000-26-000099"
+
+    def test_non_filing_result_is_filing_not_found_not_internal_error(self, monkeypatch):
+        """A well-formed accession whose find() result isn't a Filing (e.g.
+        edgar.find() dispatches to an Entity/CompanySearchResults for some
+        other reason) must come back as FILING_NOT_FOUND, not be used as a
+        filing and crash downstream with an AttributeError."""
+        class _NotAFiling:
+            cik = 1287750
+
+        monkeypatch.setattr("edgar.find", lambda **kwargs: _NotAFiling())
+
+        with pytest.raises(FilingSelectionError) as exc_info:
+            resolve_report_filing(accession_number="0000000000-26-000099")
+
+        assert exc_info.value.error_code == "FILING_NOT_FOUND"
+
+
+@pytest.mark.fast
+class TestNonAccessionAmendmentFormRejected:
+    """P1-L2: an explicit amendment form on the period or latest path used to
+    be silently rewritten to the original form (edgar/filtering.py strips
+    '/A' when amendments=False). Reject it instead, and point the caller at
+    accession_number, where amendments are reachable."""
+
+    def test_period_path_with_amendment_form_is_invalid_arguments(self):
+        company = FakeCompany(cik=1, filings=[])
+
+        with pytest.raises(FilingSelectionError) as exc_info:
+            resolve_report_filing(form="10-Q/A", period="2026-06-30", company=company)
+
+        err = exc_info.value
+        assert err.error_code == "INVALID_ARGUMENTS"
+        assert any("accession_number" in s for s in err.suggestions)
+
+    def test_latest_path_with_amendment_form_is_invalid_arguments(self):
+        company = FakeCompany(cik=1, filings=[])
+
+        with pytest.raises(FilingSelectionError) as exc_info:
+            resolve_report_filing(form="10-K/A", company=company)
+
+        err = exc_info.value
+        assert err.error_code == "INVALID_ARGUMENTS"
+        assert any("accession_number" in s for s in err.suggestions)
+
+    def test_accession_path_with_amendment_form_is_unaffected(self, monkeypatch):
+        """The accession path is the one place an amendment form is valid --
+        the /A rejection must not reach it."""
+        fake_filing = FakeFiling(cik=1234, form="10-K/A")
+        monkeypatch.setattr("edgar.find", lambda **kwargs: fake_filing)
+
+        result = resolve_report_filing(
+            form="10-K/A", accession_number="0000000000-26-000099", company=FakeCompany(cik=1234)
+        )
+
+        assert result.filing is fake_filing
 
 
 @pytest.mark.fast

@@ -34,6 +34,16 @@ logger = logging.getLogger(__name__)
 # as a malformed value ("2026-02-30").
 _PERIOD_SHAPE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
+# NNNNNNNNNN-NN-NNNNNN, or the same 18 digits with no dashes. edgar.find()
+# dispatches on the *shape* of the string it is given: a bare CIK or a
+# ticker returns a Company/Entity, a name (or an accession with stray
+# whitespace) returns CompanySearchResults, and only None means "not
+# found" -- so an accession_number that isn't actually shaped like one must
+# never reach find() at all, or whatever it dispatches to gets used as if
+# it were a filing (P1-M3).
+_ACCESSION_SHAPE = re.compile(r"^\d{10}-\d{2}-\d{6}$")
+_ACCESSION_SHAPE_NO_DASHES = re.compile(r"^\d{18}$")
+
 
 class FilingSelectionError(Exception):
     """Raised when ``resolve_report_filing`` cannot resolve a filing.
@@ -98,6 +108,22 @@ def resolve_report_filing(
     if accession_number:
         return _resolve_by_accession(accession_number, identifier, company)
 
+    # Amendments are reachable only by accession number (module docstring,
+    # constraints rule F1). The period and latest paths both filter to
+    # amendments=False, which edgar/filtering.py implements by silently
+    # rewriting "10-K/A" to "10-K" -- so before this check, an explicit
+    # amendment form here returned the *original* filing with no warning
+    # (P1-L2). Reject it instead of guessing what the caller meant.
+    if form.endswith("/A"):
+        raise FilingSelectionError(
+            f"Form '{form}' is an amendment; amendments are only reachable by accession_number.",
+            error_code="INVALID_ARGUMENTS",
+            suggestions=[
+                "Pass the amendment's accession_number directly",
+                f"Or drop the '/A' to select the original {form[:-2]} filing",
+            ],
+        )
+
     resolved_company = _resolve_company(identifier, company)
 
     if period:
@@ -125,9 +151,26 @@ def _resolve_company(identifier: Optional[str], company) -> Any:
 
 def _resolve_by_accession(accession_number: str, identifier: Optional[str], company) -> FilingSelection:
     from edgar import find
+    from edgar._filings import Filing
 
-    filing = find(search_id=accession_number)
-    if filing is None:
+    cleaned = accession_number.strip()
+    if _ACCESSION_SHAPE_NO_DASHES.match(cleaned):
+        cleaned = f"{cleaned[:10]}-{cleaned[10:12]}-{cleaned[12:]}"
+    if not _ACCESSION_SHAPE.match(cleaned):
+        raise FilingSelectionError(
+            f"Invalid accession number '{accession_number}'. Expected NNNNNNNNNN-NN-NNNNNN.",
+            error_code="INVALID_ARGUMENTS",
+            suggestions=["Use the format NNNNNNNNNN-NN-NNNNNN, e.g. 0001628280-26-050307"],
+        )
+
+    filing = find(search_id=cleaned)
+    # edgar.find() dispatches on the shape of the string it is given: only
+    # None unambiguously means "not found". A well-formed-looking accession
+    # can still come back as something other than a Filing (e.g. a
+    # Company/Entity or CompanySearchResults) -- treat that the same as not
+    # found rather than letting a non-Filing object flow downstream as if it
+    # were one (P1-M3).
+    if filing is None or not isinstance(filing, Filing):
         raise FilingSelectionError(
             f"No filing found for accession number '{accession_number}'.",
             error_code="FILING_NOT_FOUND",
@@ -198,10 +241,16 @@ def _resolve_by_period(company, form: str, period: str) -> FilingSelection:
 
 
 def _resolve_latest(company, form: str) -> FilingSelection:
-    # No period to search for, so there is nothing that would ever justify
-    # paying for the full historical load here — the most recent page is
-    # exactly where "latest" lives.
+    # The recent page is exactly where "latest" usually lives, so try it
+    # first without paying for the full historical load. But an empty recent
+    # page is not the final word (P1-M1): a form whose only filings are old
+    # enough to sit outside that page (e.g. a 10-K405, an old S-1/S-3) would
+    # otherwise come back FILING_NOT_FOUND despite the company having filed
+    # it -- mirrors _resolve_by_period's retry and Entity.latest()
+    # (edgar/entity/core.py).
     filings = list(company.get_filings(form=form, amendments=False, trigger_full_load=False))
+    if not filings:
+        filings = list(company.get_filings(form=form, amendments=False, trigger_full_load=True))
     if not filings:
         raise FilingSelectionError(
             f"No {form} filings found for this company.",

@@ -22,6 +22,7 @@ import httpx
 import pandas as pd
 
 from edgar.display.formatting import cik_text
+from edgar.exceptions import ValidationError
 from edgar.httprequests import get_with_retry, is_unreachable
 
 log = logging.getLogger(__name__)
@@ -62,6 +63,7 @@ class BDCEntity:
     zip_code: Optional[str] = None
     last_filing_date: Optional[date] = None
     last_filing_type: Optional[str] = None
+    report_year: Optional[int] = None  # set by lookup_bdc(); None from get_bdc_list()
 
     @property
     def is_active(self) -> bool:
@@ -157,8 +159,11 @@ class BDCEntity:
         """
         if filing is not None:
             if filing.cik != self.cik:
-                raise ValueError(
-                    f"Filing belongs to CIK {filing.cik}, not this BDC's CIK {self.cik}."
+                raise ValidationError(
+                    f"Filing belongs to CIK {filing.cik}, not this BDC's CIK {self.cik}.",
+                    parameter="filing",
+                    invalid_value=filing.cik,
+                    suggestions=[f"Pass a filing that belongs to CIK {self.cik}"],
                 )
             return filing
 
@@ -528,11 +533,18 @@ def _excel_serial_to_date(serial: float) -> Optional[date]:
         return None
 
 
+@lru_cache(maxsize=1)
 def get_latest_bdc_report_year() -> int:
     """
     Determine the latest available year for the SEC BDC Report.
 
     Checks backwards from the current year to find available reports.
+    Cached for the life of the process (``lru_cache``): every probe hits SEC,
+    so an uncached call here meant `lookup_bdc` (and anything else that calls
+    this directly rather than through `fetch_bdc_report`'s own cache) issued
+    a fresh round of HTTP probes on every call. Tests that need a fresh probe
+    per call must clear the cache themselves (``get_latest_bdc_report_year.
+    cache_clear()``).
 
     Returns:
         The latest year with an available BDC report.
@@ -760,18 +772,28 @@ def lookup_bdc(
 
     Returns:
         The first matching BDCEntity, or None if not found in the latest
-        report or any of the lookback years.
+        report or any of the lookback years. The match carries an additive
+        `report_year` attribute set to the report year it was found in, so a
+        caller (e.g. `is_active`, Task Q2) can tell a latest-year hit from a
+        lookback hit.
 
     Raises:
-        ValueError: If neither `cik` nor `ticker` is given.
+        ValidationError: If neither `cik` nor `ticker` is given.
     """
     if cik is None and ticker is None:
-        raise ValueError("lookup_bdc requires cik or ticker")
+        raise ValidationError(
+            "lookup_bdc requires cik or ticker",
+            suggestions=["Pass cik=<SEC CIK> or ticker=<symbol>"],
+        )
 
     latest_year = get_latest_bdc_report_year()
     for year in range(latest_year, latest_year - lookback_years - 1, -1):
         try:
-            bdcs = get_bdc_list(year)
+            # The latest year uses the bare get_bdc_list() (year=None) so it
+            # shares fetch_bdc_report's lru_cache entry with every other bare
+            # caller (is_bdc_cik, get_active_bdc_ciks, ...) instead of
+            # fetching the identical CSV again under a second cache key.
+            bdcs = get_bdc_list(None if year == latest_year else year)
         except Exception as e:
             log.warning(
                 "Could not fetch the %d BDC report while looking up a BDC (%s: %s); skipping.",
@@ -782,11 +804,13 @@ def lookup_bdc(
         if cik is not None:
             match = bdcs.get_by_cik(cik)
             if match is not None:
+                match.report_year = year
                 return match
 
         if ticker is not None:
             match = bdcs.get_by_ticker(ticker)
             if match is not None:
+                match.report_year = year
                 return match
 
     return None

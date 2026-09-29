@@ -38,6 +38,7 @@ from collections import OrderedDict
 from typing import Any, Iterable, Optional, Sequence
 
 from edgar.ai.mcp.tools.base import error
+from edgar.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -206,6 +207,27 @@ def peek_cursor(cursor: str) -> dict:
     return payload
 
 
+def peek_cursor_accession(cursor: str) -> str:
+    """The accession a cursor was issued for, without validating anything else.
+
+    A thin wrapper over ``peek_cursor`` for the cursor-only continuation rule
+    (constraints rule 7b): when a caller sends a bare ``cursor`` and no
+    ``accession_number``/``identifier``, the filing to re-select is the
+    cursor's own accession -- not "the latest" (a different filing) and not
+    an error demanding the caller re-supply what the cursor already encodes.
+    Tools call this first to learn which filing to load, then call
+    ``decode_cursor`` (or ``try_decode_cursor``) with that filing's real
+    identity so the tool/accession/document/query and fingerprint checks
+    still run exactly as they do today.
+
+    Raises ``CursorError(INVALID_CURSOR)`` for anything ``peek_cursor``
+    itself rejects (empty, oversized, undecodable, wrong shape/version, bad
+    offset) -- the same failure mode as a cursor that was never valid to
+    begin with.
+    """
+    return peek_cursor(cursor)["acc"]
+
+
 def decode_cursor(
     cursor: str,
     *,
@@ -298,8 +320,22 @@ def paginate(items: Sequence, *, offset: int, limit: int) -> tuple[list, dict]:
 
     An offset at or beyond ``len(items)`` is not an error — it is simply an
     empty page with ``remaining: 0``, the same as reading past the end of a
-    file.
+    file. A negative ``offset``/``limit`` is a different thing: it is never
+    what a caller meant, and left unguarded it produces self-contradictory
+    metadata (``remaining > total``) rather than a page (deferred minor,
+    QA fix wave).
+
+    Raises:
+        ValidationError: If ``offset`` or ``limit`` is negative.
     """
+    if offset < 0:
+        raise ValidationError(
+            f"paginate offset must be >= 0, got {offset}.", parameter="offset", invalid_value=offset,
+        )
+    if limit < 0:
+        raise ValidationError(
+            f"paginate limit must be >= 0, got {limit}.", parameter="limit", invalid_value=limit,
+        )
     total = len(items)
     page = list(items[offset:offset + limit])
     returned = len(page)
@@ -349,7 +385,17 @@ def paginate_text(text: str, *, offset: int, budget: int = TEXT_PAGE_CHARS) -> t
     every page in order (following each page's ``next_offset`` until it is
     ``None``) reproduces ``text`` exactly, regardless of which break rule
     fired.
+
+    Raises:
+        ValidationError: If ``budget`` is not positive — a non-positive
+            budget would otherwise return ``next_offset == offset``, which
+            loops forever in a caller that walks pages to ``None`` (deferred
+            minor, QA fix wave).
     """
+    if budget <= 0:
+        raise ValidationError(
+            f"paginate_text budget must be > 0, got {budget}.", parameter="budget", invalid_value=budget,
+        )
     total_chars = len(text)
 
     if offset >= total_chars:
@@ -460,19 +506,25 @@ def _env_int(name: str, default: int) -> int:
     Any value that isn't a positive integer (missing, non-numeric, zero,
     negative) falls back silently to the caller except for a logged
     warning — a bad env value should degrade to the default cache size, not
-    crash import of this module.
+    crash import of this module. The positivity check is a plain comparison,
+    not a raise-to-trigger-the-except-block: nothing here needs an exception
+    to reach its own fallback.
     """
     raw = os.environ.get(name)
     if raw is None:
         return default
     try:
         value = int(raw)
-        if value <= 0:
-            raise ValueError(f"must be positive, got {value}")
-        return value
     except ValueError as exc:
         logger.warning("Invalid value for %s=%r (%s); using default %d", name, raw, exc, default)
         return default
+    if value <= 0:
+        logger.warning(
+            "Invalid value for %s=%r (must be positive, got %d); using default %d",
+            name, raw, value, default,
+        )
+        return default
+    return value
 
 
 # Module singletons. `results_cache` holds small structured page results

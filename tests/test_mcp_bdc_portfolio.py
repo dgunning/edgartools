@@ -624,6 +624,10 @@ class TestLookupBdcLookback:
         assert result.cik == 1287750
 
     def test_latest_report_hit_never_checks_prior_years(self, monkeypatch):
+        """The latest-year iteration calls get_bdc_list(None) -- the same
+        call a bare get_bdc_list() makes -- so it shares fetch_bdc_report's
+        cache entry instead of fetching the identical CSV again under an
+        explicit-year key (QA fix wave, P1-L1)."""
         from edgar.bdc import reference
 
         years_checked = []
@@ -638,7 +642,38 @@ class TestLookupBdcLookback:
         result = reference.lookup_bdc(cik=1287750, lookback_years=2)
 
         assert result is not None
-        assert years_checked == [2026]
+        assert years_checked == [None]
+
+    def test_latest_match_carries_the_matched_report_year(self, monkeypatch):
+        """P1-M5 (library part): the match exposes which report year it came
+        from via an additive `report_year` attribute, even though the call
+        into get_bdc_list() for that year used None."""
+        from edgar.bdc import reference
+
+        monkeypatch.setattr(reference, "get_latest_bdc_report_year", lambda: 2026)
+        monkeypatch.setattr(
+            reference, "get_bdc_list",
+            lambda year=None: self._FakeBdcEntities(ciks={1287750}),
+        )
+
+        result = reference.lookup_bdc(cik=1287750, lookback_years=2)
+
+        assert result.report_year == 2026
+
+    def test_lookback_match_carries_the_matched_report_year(self, monkeypatch):
+        from edgar.bdc import reference
+
+        def _fake_get_bdc_list(year=None):
+            if year == 2025:
+                return self._FakeBdcEntities(ciks={1287750})
+            return self._FakeBdcEntities(ciks=())
+
+        monkeypatch.setattr(reference, "get_latest_bdc_report_year", lambda: 2026)
+        monkeypatch.setattr(reference, "get_bdc_list", _fake_get_bdc_list)
+
+        result = reference.lookup_bdc(cik=1287750, lookback_years=2)
+
+        assert result.report_year == 2025
 
     def test_ticker_lookback_hit(self, monkeypatch):
         from edgar.bdc import reference
@@ -667,8 +702,51 @@ class TestLookupBdcLookback:
     def test_requires_cik_or_ticker(self):
         from edgar.bdc.reference import lookup_bdc
 
+        # Still a ValueError (ValidationError IS-A ValueError) -- ratchet fix,
+        # QA fix wave item 1 -- so existing `except ValueError:` callers are
+        # unaffected.
         with pytest.raises(ValueError):
             lookup_bdc()
+
+    def test_requires_cik_or_ticker_is_a_validation_error(self):
+        from edgar.bdc.reference import lookup_bdc
+        from edgar.exceptions import ValidationError
+
+        with pytest.raises(ValidationError):
+            lookup_bdc()
+
+
+@pytest.mark.fast
+class TestGetLatestBdcReportYearCaching:
+    """P1-L1: get_latest_bdc_report_year() is lru_cached, so a second call in
+    the same process does not re-probe SEC."""
+
+    @pytest.fixture(autouse=True)
+    def _clear_cache(self):
+        from edgar.bdc.reference import get_latest_bdc_report_year
+        get_latest_bdc_report_year.cache_clear()
+        yield
+        get_latest_bdc_report_year.cache_clear()
+
+    def test_second_call_makes_no_further_requests(self, monkeypatch):
+        from edgar.bdc import reference
+
+        calls = []
+
+        class _Response:
+            status_code = 200
+
+        def _spy(url, timeout=5):
+            calls.append(url)
+            return _Response()
+
+        monkeypatch.setattr(reference, "get_with_retry", _spy)
+
+        first = reference.get_latest_bdc_report_year()
+        second = reference.get_latest_bdc_report_year()
+
+        assert first == second
+        assert len(calls) == 1
 
 
 @pytest.mark.fast

@@ -33,6 +33,7 @@ from edgar.ai.mcp.tools.continuation import (
     fingerprint,
     paginate,
     paginate_text,
+    peek_cursor_accession,
 )
 
 
@@ -138,6 +139,42 @@ def test_encode_cursor_keys_sorted_and_compact():
     assert " " not in raw  # compact separators
     # sorted keys: acc, doc, fp, off, q, tool, v
     assert list(json.loads(raw).keys()) == sorted(json.loads(raw).keys())
+
+
+# =============================================================================
+# peek_cursor_accession -- cursor-only continuation (constraints rule 7b)
+# =============================================================================
+
+@pytest.mark.fast
+def test_peek_cursor_accession_returns_the_accession_only():
+    cursor = encode_cursor(
+        tool="edgar_notes", accession="0001628280-26-050307", offset=20, fp="f" * 12,
+        document="ex10", query={"topic": "debt"},
+    )
+    assert peek_cursor_accession(cursor) == "0001628280-26-050307"
+
+
+@pytest.mark.fast
+def test_peek_cursor_accession_does_not_check_tool_document_or_query():
+    """peek_cursor_accession only needs to answer 'which filing' -- the
+    tool/document/query identity checks are decode_cursor's job, run
+    separately once the caller knows what to compare against."""
+    cursor = encode_cursor(tool="edgar_fund:bdc_portfolio", accession="acc-1", offset=0, fp="f" * 12)
+    assert peek_cursor_accession(cursor) == "acc-1"
+
+
+@pytest.mark.fast
+def test_peek_cursor_accession_undecodable_raises_invalid_cursor():
+    with pytest.raises(CursorError) as exc_info:
+        peek_cursor_accession("!!!not-base64-or-json!!!")
+    assert exc_info.value.error_code == "INVALID_CURSOR"
+
+
+@pytest.mark.fast
+def test_peek_cursor_accession_empty_raises_invalid_cursor():
+    with pytest.raises(CursorError) as exc_info:
+        peek_cursor_accession("")
+    assert exc_info.value.error_code == "INVALID_CURSOR"
 
 
 # =============================================================================
@@ -386,6 +423,24 @@ def test_paginate_empty_items():
     assert meta == {"offset": 0, "returned": 0, "total": 0, "remaining": 0}
 
 
+@pytest.mark.fast
+def test_paginate_negative_offset_raises_validation_error():
+    """QA fix wave, deferred minor: a negative offset used to produce
+    inconsistent metadata (remaining > total) instead of a useful error."""
+    from edgar.exceptions import ValidationError
+
+    with pytest.raises(ValidationError):
+        paginate([1, 2, 3], offset=-1, limit=2)
+
+
+@pytest.mark.fast
+def test_paginate_negative_limit_raises_validation_error():
+    from edgar.exceptions import ValidationError
+
+    with pytest.raises(ValidationError):
+        paginate([1, 2, 3], offset=0, limit=-1)
+
+
 # =============================================================================
 # paginate_text
 # =============================================================================
@@ -496,6 +551,25 @@ def test_paginate_text_offset_past_end_is_not_an_error():
         "remaining_chars": 0,
         "next_offset": None,
     }
+
+
+@pytest.mark.fast
+def test_paginate_text_budget_zero_raises_validation_error():
+    """QA fix wave, deferred minor: budget <= 0 used to return
+    next_offset == offset, which loops forever in a caller that walks pages
+    until next_offset is None."""
+    from edgar.exceptions import ValidationError
+
+    with pytest.raises(ValidationError):
+        paginate_text("abc", offset=0, budget=0)
+
+
+@pytest.mark.fast
+def test_paginate_text_negative_budget_raises_validation_error():
+    from edgar.exceptions import ValidationError
+
+    with pytest.raises(ValidationError):
+        paginate_text("abc", offset=0, budget=-100)
 
 
 @pytest.mark.fast
