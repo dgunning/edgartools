@@ -99,11 +99,13 @@ def test_the_warning_names_the_part(part, expected):
 # ---------------------------------------------------------------------------
 
 # (fixture, Part II Item 1 length, Part II Item 2 length) — hand-checked against
-# the filings: each is a complete, correctly-extracted section.
+# the filings: each is a complete, correctly-extracted section. Item 2 lengths
+# re-pinned for edgartools-wzgu (tables rendered cell by cell; no letter or
+# digit changed).
 TEN_Q_GROUND_TRUTH = [
-    ("aapl/10q/aapl-10-q-2025-08-01.html", 5_534, 1_475),   # real litigation prose
-    ("ibm/10q/ibm-10-q-2025-07-24.html", 80, 1_302),        # a one-line pointer
-    ("ko/10q/ko-10-q-2025-07-24.html", 12_718, 1_652),      # the corpus maximum
+    ("aapl/10q/aapl-10-q-2025-08-01.html", 5_534, 1_491),   # real litigation prose
+    ("ibm/10q/ibm-10-q-2025-07-24.html", 80, 1_324),        # a one-line pointer
+    ("ko/10q/ko-10-q-2025-07-24.html", 12_718, 1_671),      # the corpus maximum
     ("tsla/10q/tsla-10-q-2025-07-24.html", 237, 74),        # the corpus minimum
 ]
 
@@ -119,11 +121,12 @@ def test_ten_q_part_ii_items_are_not_judged_by_part_i_bands(rel, len_item_1, len
         assert section.confidence == 0.95, f"{key} confidence reduced to {section.confidence}"
 
 
+# Re-pinned for edgartools-wzgu (tables rendered cell by cell).
 @pytest.mark.parametrize("rel,expected", [
-    ("aapl/10q/aapl-10-q-2025-08-01.html", 24_903),
-    ("ibm/10q/ibm-10-q-2025-07-24.html", 115_487),
-    ("ko/10q/ko-10-q-2025-07-24.html", 100_831),
-    ("tsla/10q/tsla-10-q-2025-07-24.html", 63_949),
+    ("aapl/10q/aapl-10-q-2025-08-01.html", 25_844),
+    ("ibm/10q/ibm-10-q-2025-07-24.html", 118_852),
+    ("ko/10q/ko-10-q-2025-07-24.html", 103_213),
+    ("tsla/10q/tsla-10-q-2025-07-24.html", 65_475),
 ])
 def test_part_i_item_1_is_still_enforced(rel, expected):
     """The guardrail still guards: these are healthy and in-band, and a Part I

@@ -1047,17 +1047,24 @@ class EntityFacts:
                    Falls back to most recent if no annual facts available.
 
         Returns:
-            Total liabilities value as float, or None if not found
+            Total liabilities value as float, or None if not found. A company
+            that files no standalone liabilities total returns None rather than
+            a substitute.
 
         Example:
             >>> liabilities = facts.get_total_liabilities()  # Returns annual (default)
             >>> liabilities = facts.get_total_liabilities(annual=False)  # Returns most recent
         """
+        # No LiabilitiesAndStockholdersEquity fallback. That concept is the
+        # balance sheet's right-hand total, equal to total assets, and filers
+        # without a standalone us-gaap:Liabilities line only have that one:
+        # NIKE's FY2026 figure came back as $38.41B, its total assets, against
+        # $23.545B of actual liabilities. Financials.get_total_liabilities() and
+        # get_concept('total_liabilities') already return None here (GH #1279).
         return self._get_standardized_concept_value(
             concept_variants=[
                 'Liabilities',
                 'TotalLiabilities',
-                'LiabilitiesAndStockholdersEquity'  # Some companies structure it this way
             ],
             period=period,
             unit=unit,

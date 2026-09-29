@@ -120,7 +120,15 @@ def _text(el) -> str:
 
 
 def _text_stripped(el) -> str:
-    """``Tag.get_text(strip=True)``."""
+    """``Tag.get_text(strip=True)``.
+
+    Deliberately NOT ``html_utils.text_stripped``, which the other six copies of
+    this helper folded into (edgartools-07lk.11.12). That one reads through
+    ``itertext()``; this one reads through ``_strings()`` above, which applies
+    bs4's ``<script>``/``<style>``/``<template>`` exclusion at the element level
+    rather than leaving it to a strip at parse time. Swapping it in would splice
+    stylesheet source into a fund listing, silently.
+    """
     return "".join(s for s in (t.strip() for t in _strings(el)) if s)
 
 

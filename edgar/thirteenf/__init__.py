@@ -27,9 +27,12 @@ from edgar.thirteenf.parsers import (
     parse_infotable_xml,
     parse_primary_document_xml,
 )
+from edgar.thirteenf.units import Ambiguous13FValueUnitWarning, ValueUnitResolution
 
 __all__ = [
     'ThirteenF',
+    'ValueUnitResolution',
+    'Ambiguous13FValueUnitWarning',
     'THIRTEENF_FORMS',
     'FilingManager',
     'OtherManager',

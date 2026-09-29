@@ -41,19 +41,16 @@ Fully handled here:
   (6) table-row-bounded anchors losing ``<table>``/``<tbody>`` wrappers
       → step 4 reconstructs the wrappers.
   (7) nested-table re-serialization → step 3 (top-level-only).
+  (1) next-section heading leak via nested anchors, (2) shared-wrapper
+      LCA, (5) last-section-in-wrapper leak → when the end anchor (or hard
+      end element) sits inside an element already collected, that element
+      is replaced by a copy truncated at the end (``_truncate_at``), so the
+      HTML stops where ``text()`` stops. Before this, the container was
+      serialized whole and the next section's heading and body leaked into
+      ``markdown()`` (GH #1345).
 
 Mitigated (no worse than ``text()``, the prior behaviour):
-  (1) next-section heading leak via nested anchors,
-  (2) shared-wrapper LCA,
-  (4) inline anchor wrappers,
-  (5) last-section-in-wrapper leak.
-These all stem from the end anchor being reached *after* some adjacent-
-section content has already been collected (the anchor is nested deeper
-than the section content's container). The clean structural fix is
-renderer-aware boundaries (design sprint, Tension 4) and is out of scope
-for this primitive — but because we only ever serialize content that
-``text()`` would also have collected, ``markdown()`` is never *worse*
-than ``text()``, only better (structure preserved).
+  (4) inline anchor wrappers.
 
 Not applicable:
   (3) same-anchor boundaries (start == end) → callers must not pass an end
@@ -78,13 +75,20 @@ _TABLE_INTERNAL_TAGS = {
 }
 
 
-def collect_range_elements(tree, start_anchor: str, end_anchor: Optional[str]) -> List:
+def collect_range_elements(tree, start_anchor: str, end_anchor: Optional[str],
+                           start_element=None, end_element=None) -> List:
     """Collect elements in document order between the start and end anchors.
 
     Collection turns on *after* the start anchor element and off *at* the
     end anchor element (the end anchor's content is excluded). Returns the
     raw list of every element seen while in range — callers typically reduce
     this to top-level elements via :func:`top_level_elements`.
+
+    ``start_element`` / ``end_element`` are optional hard bounds for items that
+    share one anchor and are told apart by their heading elements (GH #1345):
+    collection starts *at* ``start_element`` (included) instead of after the
+    anchor, and stops at ``end_element`` or the end anchor, whichever comes
+    first.
     """
     if not start_anchor:
         return []
@@ -97,14 +101,60 @@ def collect_range_elements(tree, start_anchor: str, end_anchor: Optional[str]) -
     for _event, el in etree.iterwalk(tree, events=('start',)):
         if not hasattr(el, 'get'):
             continue
-        if is_anchor_match(el, start_anchor):
+        if start_element is not None:
+            if el is start_element:
+                in_range = True
+        elif is_anchor_match(el, start_anchor):
             in_range = True
             continue
-        if end_anchor and is_anchor_match(el, end_anchor):
+        if ((in_range and end_element is not None and el is end_element)
+                or (end_anchor and is_anchor_match(el, end_anchor))):
+            collected = _truncate_at(collected, el)
             break
         if in_range:
             collected.append(el)
     return collected
+
+
+def _truncated_clone(el, stop, stop_path: List):
+    """Copy of ``el`` holding only what precedes ``stop`` in document order.
+
+    ``stop_path`` is ``stop``'s ancestor chain. Children before the one that
+    leads to ``stop`` are deep-copied whole (tails included); that one is
+    truncated recursively, and nothing after it is kept.
+    """
+    clone = etree.Element(el.tag, attrib=dict(el.attrib))
+    clone.text = el.text
+    for child in el:
+        if child is stop:
+            break
+        if any(child is a for a in stop_path):
+            clone.append(_truncated_clone(child, stop, stop_path))
+            break
+        clone.append(_clone(child))
+    return clone
+
+
+def _truncate_at(collected: List, stop) -> List:
+    """Cut the collected range at ``stop`` when a collected element contains it.
+
+    Collection stops at ``stop``, but an element that *contains* it was
+    collected when its start was seen, and :func:`top_level_elements` would
+    then serialize it whole: ``stop`` and everything after it leak into the
+    section's HTML (the next item's heading in ``markdown()``). Replace the
+    outermost such container with a copy truncated at ``stop`` and drop its
+    collected descendants, which the copy already holds (GH #1345).
+    """
+    stop_path = list(stop.iterancestors())
+    # Outermost ancestor first: the first one found in the range is the
+    # container to cut. ``in`` on lxml elements compares identity.
+    outer_idx = next((collected.index(a) for a in reversed(stop_path) if a in collected), None)
+    if outer_idx is None:
+        return collected
+    # Everything collected after the container started lies inside it (the
+    # walk stopped at ``stop``, which is still inside it), so the truncated
+    # copy replaces that whole tail of the list.
+    return collected[:outer_idx] + [_truncated_clone(collected[outer_idx], stop, stop_path)]
 
 
 def top_level_elements(collected: List) -> List:
@@ -168,7 +218,8 @@ def _clone(el):
     return copy.deepcopy(el)
 
 
-def build_section_subtree(tree, start_anchor: str, end_anchor: Optional[str]):
+def build_section_subtree(tree, start_anchor: str, end_anchor: Optional[str],
+                          start_element=None, end_element=None):
     """Build a single ``<div>`` element holding the section's content.
 
     The returned element is detached from the source tree (its children are
@@ -179,7 +230,8 @@ def build_section_subtree(tree, start_anchor: str, end_anchor: Optional[str]):
     if not start_elements:
         return None
 
-    collected = collect_range_elements(tree, start_anchor, end_anchor)
+    collected = collect_range_elements(tree, start_anchor, end_anchor,
+                                       start_element=start_element, end_element=end_element)
     if not collected:
         return None
 
@@ -201,14 +253,16 @@ def build_section_subtree(tree, start_anchor: str, end_anchor: Optional[str]):
     return container
 
 
-def extract_section_html(tree, start_anchor: str, end_anchor: Optional[str]) -> str:
+def extract_section_html(tree, start_anchor: str, end_anchor: Optional[str],
+                         start_element=None, end_element=None) -> str:
     """Return the section's HTML as a single well-formed ``<div>`` string.
 
     This is the hardened replacement for the inline slicing that lived in
     ``Section._extract_section_html``. Returns ``""`` when the section can't
     be resolved.
     """
-    container = build_section_subtree(tree, start_anchor, end_anchor)
+    container = build_section_subtree(tree, start_anchor, end_anchor,
+                                      start_element=start_element, end_element=end_element)
     if container is None:
         return ""
     return lxml_html.tostring(container, encoding='unicode')

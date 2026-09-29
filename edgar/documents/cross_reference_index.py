@@ -12,6 +12,7 @@ This module provides functionality to:
 
 import html as html_lib
 import re
+from collections import Counter
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
@@ -43,6 +44,21 @@ _CONTINUATION_MAX_GAP_TEXT = 200
 # (one page break); the cap stops a malformed document from walking the whole
 # filing table by table.
 _MAX_INDEX_TABLES = 6
+
+# Page-number calibration (issue #1346). The index cites *printed* page numbers,
+# but pages are located by counting page breaks, and a filer's unnumbered front
+# matter adds breaks: Citigroup's FY2022 10-K has 3, so printed page 60 is the
+# 63rd page break. The footer printed just before each break is read to measure
+# that offset; this many characters of markup before a break hold the footer.
+_FOOTER_WINDOW = 3_000
+_TAG_RE = re.compile(r'<[^>]+>')
+# A footer page number is the last visible token before the break: "60" or
+# "Page 60". The leading guard rejects table values like "14,545" or "8.33".
+_TRAILING_PAGE_NUMBER_RE = re.compile(r'(?:^|(?<=[\s>]))(\d{1,4})\s*$')
+# An offset is trusted only when this many footers agree on it, and they are
+# at least this share of the footers that could be read. Otherwise it is 0.
+_MIN_OFFSET_SUPPORT = 10
+_MIN_OFFSET_SHARE = 0.6
 
 
 def _cell_texts(row_html: str) -> List[str]:
@@ -167,6 +183,8 @@ class CrossReferenceIndex:
         """
         self.html = html
         self._entries: Optional[Dict[str, IndexEntry]] = None
+        self._page_breaks: Optional[List[int]] = None
+        self._page_offset: Optional[int] = None
 
     def _heading_position(self) -> Optional[int]:
         """Position of the index heading, or None if the filing has no such heading.
@@ -415,6 +433,9 @@ class CrossReferenceIndex:
             - <hr style="page-break-after:always"/>
             - <div style="page-break-after:always"/>
         """
+        if self._page_breaks is not None:
+            return list(self._page_breaks)
+
         breaks = [0]  # Start of document is page 1
 
         # Find all page break elements
@@ -430,7 +451,52 @@ class CrossReferenceIndex:
         # Sort and deduplicate
         breaks = sorted(set(breaks))
 
-        return breaks
+        self._page_breaks = breaks
+        return list(breaks)
+
+    def _printed_page_before(self, start: int, end: int) -> Optional[int]:
+        """Printed page number in the footer that closes the page ending at ``end``.
+
+        Reads the visible text just before a page break and returns its trailing
+        integer ("60", "Page 60"). Anything else - roman numerals in front matter,
+        a footer that puts the number before a running title, a table value
+        such as "14,545" - is unreadable and returns None.
+        """
+        window = self.html[max(start, end - _FOOTER_WINDOW):end]
+        text = html_lib.unescape(_TAG_RE.sub(' ', window))
+        match = _TRAILING_PAGE_NUMBER_RE.search(text)
+        return int(match.group(1)) if match else None
+
+    def _detect_page_offset(self) -> int:
+        """Offset between page-break index and printed page number.
+
+        The index cites printed page numbers, but page breaks are counted from
+        the top of the HTML. When the filer puts unnumbered front matter (cover,
+        index, contents) on extra pages, printed page N sits after page break
+        N + offset rather than N. The offset is calibrated once from the page
+        numbers printed in the footers: the dominant ``break_index - printed_page``
+        wins if it is backed by a clear majority of enough readable footers,
+        otherwise the offset is 0 and page N maps to page break N as before.
+        """
+        if self._page_offset is not None:
+            return self._page_offset
+
+        breaks = self.find_page_breaks()
+        votes: Counter = Counter()
+        for i in range(1, len(breaks)):
+            printed = self._printed_page_before(breaks[i - 1], breaks[i])
+            if printed is not None:
+                votes[i - printed] += 1
+
+        offset = 0
+        readable = sum(votes.values())
+        if votes:
+            candidate, support = votes.most_common(1)[0]
+            if support >= _MIN_OFFSET_SUPPORT and support >= readable * _MIN_OFFSET_SHARE:
+                offset = candidate
+
+        self._page_offset = offset
+        return offset
 
     def extract_content_by_page_range(
         self,
@@ -447,24 +513,32 @@ class CrossReferenceIndex:
 
         Note:
             This is a best-effort extraction. HTML doesn't have explicit
-            page numbers, so we rely on page-break indicators.
+            page numbers, so we rely on page-break indicators. Printed page N
+            is taken to be the page after break N - 1 + offset, where the offset
+            accounts for unnumbered front-matter pages (see _detect_page_offset).
         """
         page_breaks = self.find_page_breaks()
+        offset = self._detect_page_offset()
 
-        if len(page_breaks) < page_range.end:
+        # Page numbers are 1-indexed, list is 0-indexed: printed page N runs
+        # from break N-1 to break N, shifted by the front-matter offset.
+        first_break = page_range.start - 1 + offset
+        last_break = page_range.end + offset
+
+        if len(page_breaks) < last_break or first_break >= len(page_breaks):
             # Not enough page breaks found
             return None
 
-        # Extract content between page breaks
-        # Page numbers are 1-indexed, list is 0-indexed
-        start_idx = page_breaks[page_range.start - 1]
+        start_idx = page_breaks[max(first_break, 0)]
 
         # If this is the last page, go to end of document
-        if page_range.end >= len(page_breaks):
+        if last_break >= len(page_breaks):
             end_idx = len(self.html)
         else:
-            end_idx = page_breaks[page_range.end]
+            end_idx = page_breaks[max(last_break, 0)]
 
+        if end_idx <= start_idx:
+            return None
         return self.html[start_idx:end_idx]
 
     def extract_item_content(self, item_id: str) -> Optional[str]:

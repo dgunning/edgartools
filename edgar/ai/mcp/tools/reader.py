@@ -33,6 +33,7 @@ from edgar.ai.mcp.tools.base import (
     success,
     tool,
     truncate_text,
+    _holding_rows,
 )
 from edgar.ai.mcp.tools.continuation import (
     CursorError,
@@ -652,23 +653,24 @@ def _extract_13f_section(obj, section: str) -> Optional[str]:
     """Extract sections from a 13F-HR (ThirteenF) object."""
     if section == "holdings":
         try:
-            if hasattr(obj, 'holdings') and obj.holdings:
+            # ``ThirteenF.holdings`` is a DataFrame: its truth value raises and
+            # iterating it yields column names, so read its rows the way
+            # ``_get_fund_holdings`` in ownership.py does.
+            holdings = getattr(obj, 'holdings', None)
+            if holdings is not None and not holdings.empty:
                 parts = []
-                for h in obj.holdings[:30]:  # Limit to top 30
-                    name = getattr(h, 'name', None) or getattr(h, 'issuer', 'Unknown')
-                    shares = getattr(h, 'shares', None)
-                    value = getattr(h, 'value', None)
-                    line = f"  {name}"
-                    if shares:
-                        line += f" | {shares:,} shares"
-                    if value:
-                        line += f" | ${value:,}"
+                for h in _holding_rows(holdings, 30):  # Limit to top 30
+                    line = f"  {h.get('company', 'Unknown')}"
+                    if "shares" in h:
+                        line += f" | {h['shares']:,} shares"
+                    if "value" in h:
+                        line += f" | ${h['value']:,}"
                     parts.append(line)
-                total = len(obj.holdings)
+                total = len(holdings)
                 header = f"Top holdings ({min(30, total)} of {total}):"
                 return header + "\n" + "\n".join(parts)
         except Exception as e:
-            logger.debug(f"Could not extract 13F holdings: {e}")
+            logger.warning(f"Could not extract 13F holdings: {e}")
         return None
 
     elif section == "summary":

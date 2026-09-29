@@ -276,21 +276,30 @@ class FormSchema:
 # wins). The "item" exclusion on the first four prevents double-mapping text
 # that already contains an explicit "Item N" (which a higher-priority regex
 # handles first).
+#
+# "summary" and "index" exclude sub-heading rows that merely mention an item's
+# title. A "Summary of Risk Factors" row (often inside a cautionary-note title)
+# and an "Index to (Combined Notes to) Financial Statements" row sit in the TOC
+# ahead of, or instead of, the real item row; matched by keyword, they claimed
+# Item 1A / Item 8 at the summary's anchor, so the item returned the summary and
+# the preceding item swallowed the real one (GH #1344).
 _TEN_K_RULES: Tuple[TextItemRule, ...] = (
     TextItemRule("Item 1",  ("business",), ("item",)),
-    TextItemRule("Item 1A", ("risk factors",), ("item",)),
+    TextItemRule("Item 1A", ("risk factors",), ("item", "summary")),
     TextItemRule("Item 2",  ("properties",), ("item",)),
     TextItemRule("Item 3",  ("legal proceedings",), ("item",)),
     TextItemRule("Item 7",  ("management", "discussion")),
-    TextItemRule("Item 8",  ("financial statements",)),
+    TextItemRule("Item 8",  ("financial statements",), ("index",)),
     TextItemRule("Item 15", ("exhibits",)),
 )
 
 # 10-Q keeps only the safe overlap with 10-K: Risk Factors is Part II Item 1A on
 # both. Every other 10-K mapping is wrong on a 10-Q, so unmatched text is skipped
-# rather than emitted (see skip_unmatched_text).
+# rather than emitted (see skip_unmatched_text). The "summary" exclusion mirrors
+# the 10-K rule: a 10-Q cautionary note can carry the same "Summary of Risk
+# Factors" sub-heading row (GH #1344).
 _TEN_Q_RULES: Tuple[TextItemRule, ...] = (
-    TextItemRule("Item 1A", ("risk factors",), ("item",)),
+    TextItemRule("Item 1A", ("risk factors",), ("item", "summary")),
 )
 
 # Canonical 10-K item→part layout (items are unique across parts):
@@ -364,6 +373,37 @@ _ITEM_SEP = r'(?:\s*\([A-Za-z]\))?\s*[.:;\-–—]?\s*[-–—.]?\s*'
 # knowledge, edgartools-llmp.2 / D2). Item-based forms key on "Item N" headers;
 # 424B keys on prospectus titles. The extractor exposes a back-compat projection
 # of these; a golden parity test guards against drift.
+# Friendly 10-K section name -> the SEC item it names. The pattern extractor
+# keys a section it finds by these names (``risk_factors``); the TOC path keys
+# the same section ``part_i_item_1a``. Both ``TenK`` lookups and
+# ``Sections[...]`` resolve a friendly name through this one table, so a name
+# keeps working whichever detector produced the section (GH #1345).
+TEN_K_FRIENDLY_ITEMS = {
+    'business': '1',
+    'risk_factors': '1A',
+    'unresolved_staff_comments': '1B',
+    'cybersecurity': '1C',
+    'properties': '2',
+    'legal_proceedings': '3',
+    'mine_safety': '4',
+    'market_equity': '5',
+    'selected_financial_data': '6',
+    'mda': '7',
+    'market_risk': '7A',
+    'financial_statements': '8',
+    'controls_procedures': '9',
+    'controls_procedures_9a': '9A',
+    'other_information': '9B',
+    'foreign_jurisdictions': '9C',
+    'directors_officers': '10',
+    'executive_compensation': '11',
+    'security_ownership': '12',
+    'relationships_transactions': '13',
+    'accounting_fees': '14',
+    'exhibits': '15',
+    'summary': '16',
+}
+
 _TEN_K_SECTION_PATTERNS = {
     'business': (
         (f'^(Item|ITEM)\\s+1{_ITEM_SEP}Business', 'Item 1 - Business'),

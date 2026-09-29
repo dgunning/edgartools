@@ -1,0 +1,99 @@
+# Tests that need the SEC while marked `fast`, as measured by
+# `python scripts/check_offline_audit.py`. See that script for why this
+# list exists and why marking these `network` is not the fix.
+#
+# This list may shrink and may not grow. Pay an entry down by giving the
+# test a cassette or building its Filings from tests/_offline_filings.py.
+# NOT a network debt: this one fails WITH the network too — it asserts
+# "company_response" in the repr and the repr says type=company_letter.
+# It is listed only so the ratchet has a true picture of the run. Fixing
+# the assertion removes it from here.
+tests/core/test_correspondence.py::TestCorrespondenceDisplay::test_correspondence_str
+tests/core/test_filing.py::test_filing_url
+tests/core/test_filing.py::test_filing_url_for_ixbrl_filing
+tests/core/test_headers.py::test_filing_directory_index_headers
+tests/core/test_headers.py::test_load_filing_directory
+tests/documents/test_markdown.py::test_markdown_text_has_correct_spaces
+tests/documents/test_markdown.py::test_obscure_filing_to_markdown
+tests/entity/test_bug_408_annual_periods.py::test_annual_periods_exclude_quarterly_data
+tests/entity/test_bug_408_annual_periods.py::test_annual_vs_quarterly_revenue_magnitude
+tests/entity/test_bug_408_annual_periods.py::test_multiple_companies_annual_consistency[AAPL]
+tests/entity/test_bug_408_annual_periods.py::test_multiple_companies_annual_consistency[GOOGL]
+tests/entity/test_bug_408_annual_periods.py::test_multiple_companies_annual_consistency[MSFT]
+tests/entity/test_entity_core.py::TestEntityCreation::test_company_data_validation
+tests/entity/test_entity_core.py::TestEntityCreation::test_entity_data_validation
+tests/entity/test_entity_core.py::TestEntityHierarchy::test_entity_vs_company_capabilities
+tests/entity/test_filer_type_fallback.py::TestFilerTypeFallback::test_20f_takes_priority_over_10k
+tests/entity/test_filer_type_fallback.py::TestFilerTypeFallback::test_filer_type_domestic_from_state
+tests/entity/test_filer_type_fallback.py::TestFilerTypeFallback::test_filer_type_fallback_10q_means_domestic
+tests/entity/test_filer_type_fallback.py::TestFilerTypeFallback::test_filer_type_fallback_6k_means_foreign
+tests/entity/test_filer_type_fallback.py::TestFilerTypeFallback::test_filer_type_fallback_amended_forms
+tests/entity/test_filer_type_fallback.py::TestFilerTypeFallback::test_filer_type_fallback_nport_means_domestic
+tests/entity/test_filer_type_fallback.py::TestFilerTypeFallback::test_filer_type_fallback_returns_none_when_no_forms
+tests/entity/test_filer_type_fallback.py::TestFilerTypeFallback::test_filer_type_fallback_to_10k
+tests/entity/test_filer_type_fallback.py::TestFilerTypeFallback::test_filer_type_fallback_to_20f
+tests/entity/test_filer_type_fallback.py::TestFilerTypeFallback::test_filer_type_fallback_to_40f
+tests/entity/test_filer_type_fallback.py::TestFilerTypeFallback::test_filer_type_foreign_from_state
+tests/entity/test_filer_type_fallback.py::TestFilerTypeFallback::test_is_foreign_domestic_company
+tests/entity/test_filer_type_fallback.py::TestFilerTypeFallback::test_is_foreign_fallback_with_10k
+tests/entity/test_filer_type_fallback.py::TestFilerTypeFallback::test_is_foreign_fallback_with_20f
+tests/entity/test_filer_type_fallback.py::TestFilerTypeFallback::test_is_foreign_foreign_company
+tests/funds/test_funds_data_unit.py::TestIsFundTicker::test_fund_ticker_lowercase
+tests/funds/test_funds_data_unit.py::TestIsFundTicker::test_valid_fund_ticker
+tests/funds/test_funds_data_unit.py::TestIsFundTicker::test_valid_fund_ticker_2
+tests/reference/test_company_subsets_metadata.py::test_get_all_companies_standard_mode
+tests/reference/test_filter_filings.py::test_filter_by_cik
+tests/reference/test_filter_filings.py::test_filter_by_exchange
+tests/reference/test_filter_filings.py::test_filter_by_filing_date
+tests/reference/test_filter_filings.py::test_filter_by_form
+tests/reference/test_filter_filings.py::test_filter_by_multiple_exchanges
+tests/reference/test_filter_filings.py::test_filter_empty_table_does_not_raise
+tests/reference/test_reference.py::test_company_ticker_name_exchange
+tests/reference/test_reference.py::test_find_cik
+tests/reference/test_reference.py::test_get_companies_by_exchange
+tests/reference/test_tickers.py::test_get_icon_hyphenated_ticker
+tests/reference/test_tickers.py::test_get_icon_hyphenated_ticker_no_icon
+tests/reference/test_tickers.py::test_get_icon_invalid_ticker
+tests/reference/test_tickers.py::test_get_icon_valid_ticker
+tests/search/test_textsearch.py::test_search_results_as_json
+tests/search/test_textsearch.py::test_search_sections
+tests/search/test_textsearch.py::test_search_works_in_fwp_prospectus
+tests/test_documents.py::test_document_get_markdown
+tests/test_documents.py::test_document_get_text
+tests/test_documents.py::test_eightk_item_parsing_after_dollar_sign
+tests/test_documents.py::test_filing_text_for_file_with_fil_extension
+tests/test_documents.py::test_get_clean_html_from_unusual_filing
+tests/test_documents.py::test_get_html_wrapped_in_document_tag
+tests/test_documents.py::test_get_table_containing_text
+tests/test_documents.py::test_get_text_for_paper_filing
+tests/test_documents.py::test_get_text_from_prospectus
+tests/test_documents.py::test_parse_html_document_with_issue_decomposing_page_numbers
+tests/test_documents.py::test_parse_html_with_funny_character
+tests/test_html.py::test_document_from_filing_with_plain_text_filing_document
+tests/test_html.py::test_get_html_problem_filing
+tests/test_html.py::test_get_text_from_filing_with_no_body_tag
+tests/test_html.py::test_html_from_old_filings_is_none
+tests/test_htmltools.py::test_chunk_document_for_10k_amendment
+tests/test_htmltools.py::test_filing_with_pdf_primary_document
+tests/test_htmltools.py::test_html_sections_from_html_with_table_with_no_tbody
+tests/test_htmltools.py::test_html_sections_includes_all_tables
+tests/test_htmltools.py::test_html_text_works_with_no_failures
+tests/test_htmltools.py::test_list_items_in_tenk
+tests/test_tables.py::test_actual_filing
+tests/xbrl/test_xbrl_facts.py::test_by_date_range_exact
+tests/xbrl/test_xbrl_facts.py::test_facts_to_dataframe_has_correct_columns
+tests/xbrl/test_xbrl_facts.py::test_flexible_dimension_matching
+tests/xbrl/test_xbrl_facts.py::test_get_all_facts
+tests/xbrl/test_xbrl_facts.py::test_get_facts_by_concept
+tests/xbrl/test_xbrl_facts.py::test_get_facts_by_label
+tests/xbrl/test_xbrl_facts.py::test_get_facts_by_statement_type
+tests/xbrl/test_xbrl_facts.py::test_integration_standardization_and_facts_query
+tests/xbrl/test_xbrl_facts.py::test_numeric_sign_for_cashflow_values
+tests/xbrl/test_xbrl_facts.py::test_query_by_dimension
+tests/xbrl/test_xbrl_facts.py::test_query_by_dimension_none
+tests/xbrl/test_xbrl_facts.py::test_xbrl_facts_repr
+tests/xbrl/test_xbrl_facts.py::test_xbrl_query
+tests/xbrl/test_xbrl_statements.py::test_cashflow_statement_totals
+tests/xbrl/test_xbrl_statements.py::test_get_balance_sheet_with_few_concepts
+tests/xbrl/test_xbrl_statements.py::test_get_statement_by_name_returns_correct_statement
+tests/xbrl/test_xbrl_statements.py::test_quarterly_statements

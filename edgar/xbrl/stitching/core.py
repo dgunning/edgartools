@@ -10,7 +10,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-from edgar.xbrl.core import format_date, parse_date
+from edgar.xbrl.core import decimals_for_scaling, format_date, parse_date
 from edgar.exceptions import StatementNotFoundError
 from edgar.xbrl.standardization import standardize_statement
 from edgar.xbrl.stitching.ordering import StatementOrderingManager
@@ -510,7 +510,10 @@ class StatementStitcher:
                     if value is not None:
                         self.data[concept_key][period_id] = {
                             'value': value,
-                            'decimals': item.get('decimals', {}).get(period_id, 0)
+                            # Stitched entries feed arithmetic (discrete-quarter
+                            # subtraction) and an integer-typed facts frame, so
+                            # the 'INF' sentinel is coerced here (GH #1229).
+                            'decimals': decimals_for_scaling(item.get('decimals', {}).get(period_id))
                         }
 
     @staticmethod

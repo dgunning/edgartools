@@ -13,8 +13,8 @@ import pandas as pd
 from httpx import AsyncClient, HTTPStatusError
 from tqdm.auto import tqdm
 
-from edgar.core import filing_date_to_year_quarters, log, strtobool
-from edgar.dates import extract_dates
+from edgar.core import log, strtobool
+from edgar.dates import extract_dates, filing_date_to_year_quarters
 from edgar.exceptions import EdgarError, TransportError, http_status
 from edgar.httprequests import download_bulk_data, download_datafile, download_text
 from edgar.settings import get_edgar_data_directory

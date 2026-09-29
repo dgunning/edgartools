@@ -368,13 +368,14 @@ class TableProcessor:
         # Check for nested structure
         divs = elem.findall('.//div')
         if divs and len(divs) > 1:
-            # Multiple divs - likely multi-line content
-            lines = []
-            for div in divs:
-                text = self._extract_text(div)
-                if text:
-                    lines.append(text)
-            return '\n'.join(lines)
+            # Multiple divs - likely multi-line content, one line per block.
+            # Taken from the whole cell, not div by div: collecting only the
+            # divs' text dropped whatever sat outside them -- Netflix's
+            # "<td><span>Derivatives not designated as hedging instruments:</span>
+            # <div></div><div></div></td>" rendered as an empty label -- and
+            # doubled the text of nested divs (edgartools-wzgu).
+            text = self._extract_text(elem)
+            return '\n'.join(line for line in text.split('\n') if line)
 
         # Handle line breaks
         for br in elem.findall('.//br'):

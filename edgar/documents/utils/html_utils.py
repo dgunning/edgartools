@@ -5,9 +5,10 @@ This module consolidates common HTML processing utilities used across
 the parser, preprocessor, and simple parser implementations.
 """
 
-from typing import Optional
+from typing import List, Optional
 
 import lxml.html
+from lxml.etree import ParserError, strip_elements
 
 
 def remove_xml_declaration(html: str) -> str:
@@ -171,3 +172,129 @@ def create_lxml_parser(
         kwargs['encoding'] = encoding
 
     return lxml.html.HTMLParser(**kwargs)
+
+
+# ---------------------------------------------------------------------------
+# Text extraction -- bs4's three get_text behaviours, on lxml.
+#
+# The bs4 -> lxml migration (edgartools-07lk.11) grew one private copy of these
+# per ported file, because each PR was kept small and self-contained. They are
+# folded here now that the semantics are settled (edgartools-07lk.11.12).
+#
+# The distinction the copies exist to preserve: `text_content()` is only ONE of
+# bs4's three behaviours, and reaching for it where bs4 used another is the
+# word-gluing bug family this codebase keeps rediscovering -- "Note 5Inventories"
+# for a label typeset across two cells.
+#
+#   bs4 call                          here
+#   get_text()                        text_content(el)
+#   get_text(strip=True)              text_stripped(el)
+#   get_text(' ', strip=True)         text_joined(el, ' ')
+#
+# NONE of these excludes <script>, <style> or <template>, and bs4 excluded all
+# three from ALL of its variants -- it classified their contents as Script,
+# Stylesheet and TemplateString rather than as text. An element-level helper
+# cannot strip them without mutating the caller's tree, so the caller strips
+# once at parse time; `html_to_text` below, which owns its tree, does it itself.
+# ---------------------------------------------------------------------------
+
+
+def text_content(element) -> str:
+    """All descendant text, concatenated with nothing between -- bs4 ``get_text()``.
+
+    Strips nothing, which is the one variant lxml has natively. Use it only where
+    the source is prose whose whitespace is already correct; for anything laid out
+    in table cells, adjacent strings need a separator or their words run together.
+    """
+    return element.text_content()
+
+
+def text_stripped(element) -> str:
+    """Each string stripped, joined with NOTHING -- bs4 ``get_text(strip=True)``.
+
+    The empty separator is the point rather than an oversight: bs4 strips every
+    string and concatenates, so ``<span> 1,234 </span><span> </span>`` gives
+    ``"1,234"`` where :func:`text_content` keeps the padding and gives
+    ``" 1,234  "``. Comments contribute no text, in either library.
+    """
+    return ''.join(chunk.strip() for chunk in element.itertext())
+
+
+def text_joined(element, separator: str = ' ') -> str:
+    """Each string stripped, empties dropped, the rest joined by ``separator``.
+
+    bs4's ``get_text(separator, strip=True)``, which lxml has no equivalent for.
+    This is the variant to reach for on anything laid out in cells: it is what
+    keeps a label typeset as ``<td>Note 5</td><td>Inventories</td>`` from reading
+    as ``"Note 5Inventories"``.
+    """
+    return separator.join(chunk.strip() for chunk in element.itertext() if chunk.strip())
+
+
+def text_skipping_tables(element, separator: str = ' ') -> str:
+    """:func:`text_joined` over everything outside a nested ``<table>``.
+
+    The narrative lead-in of a cell that also carries a table. bs4 did this by
+    copying the element, calling ``decompose()`` on each nested table and taking
+    ``get_text(' ', strip=True)`` of the rest.
+
+    Two traps, which is why this walks rather than removes. Removing an element in
+    lxml deletes its tail; splicing that tail onto the previous sibling to save it
+    MERGES two of bs4's separate strings into one text node, and a single node is
+    separated from nothing, so ``"Lead-in.<table/>Trailing."`` comes back as
+    ``"Lead-in.Trailing."``. Both mistakes produce the same symptom -- run-together
+    words -- which is the edgartools-vfwp/hxtd/2h2s family again, reached here from
+    the opposite direction, while fixing tail loss.
+
+    So walk, and keep each of bs4's strings its own chunk. Document order is an
+    element's own text, then each child's text and tail in turn, which is exactly
+    the order bs4 yielded them in. A non-``str`` tag is a comment or PI, whose body
+    bs4's ``get_text`` skipped -- but whose tail is ordinary text either way.
+    """
+    chunks: List[str] = []
+
+    def walk(el):
+        if el.text and el.text.strip():
+            chunks.append(el.text.strip())
+        for child in el.iterchildren():
+            tag = child.tag
+            if isinstance(tag, str) and tag.lower() != 'table':
+                walk(child)
+            if child.tail and child.tail.strip():
+                chunks.append(child.tail.strip())
+
+    walk(element)
+    return separator.join(chunks)
+
+
+def html_to_text(html, *, separator: Optional[str] = None,
+                 remove_comments: bool = True) -> str:
+    """Plain text of a whole HTML document, as ``BeautifulSoup(html).get_text()`` gave it.
+
+    The parse-and-extract wrapper. ``separator`` selects the variant, spelled the
+    way bs4 spelled it: ``None`` for ``get_text()`` (:func:`text_content`), a string
+    for ``get_text(separator, strip=True)`` (:func:`text_joined`).
+
+    Owning its own tree, this is the one place that can strip ``<script>``,
+    ``<style>`` and ``<template>`` itself, and it must -- an exhibit carrying an
+    inline stylesheet, which filer-agent HTML routinely does, would otherwise open
+    with a block of CSS source, and a stylesheet that happens to mention a form
+    name gets read as the cover page. ``with_tail=False`` keeps the ordinary text
+    that FOLLOWS the closing tag, which bs4 kept.
+
+    ``remove_comments=False`` where a caller needs bs4's node boundaries preserved:
+    dropping a comment at parse time merges the text either side of it into a
+    single node, and a single node is stripped once rather than twice, so
+    ``A <!--c--> B`` comes back as ``"A   B"`` where bs4 gave ``"A B"``.
+
+    An unparseable document returns ``""`` -- bs4's ``get_text()`` on an empty soup.
+    """
+    if isinstance(html, str):
+        html = html.encode('utf-8', errors='replace')
+    try:
+        root = lxml.html.fromstring(
+            html, parser=create_lxml_parser(remove_comments=remove_comments))
+    except ParserError:
+        return ''
+    strip_elements(root, 'script', 'style', 'template', with_tail=False)
+    return text_content(root) if separator is None else text_joined(root, separator)

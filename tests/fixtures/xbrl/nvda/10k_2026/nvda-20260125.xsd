@@ -1,0 +1,665 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--XBRL Document Created with the Workiva Platform-->
+<!--Copyright 2026 Workiva-->
+<!--r:4162ec64-83cd-4200-bc68-3c2e5d770d07,g:cfc6aa43-ff61-421e-a103-d35a92414428-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:nvda="http://www.nvidia.com/20260125" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:dtr-types="http://www.xbrl.org/dtr/type/2024-01-31" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.nvidia.com/20260125">
+  <xs:import namespace="http://fasb.org/srt/2025" schemaLocation="https://xbrl.fasb.org/srt/2025/elts/srt-2025.xsd"/>
+  <xs:import namespace="http://fasb.org/us-gaap/2025" schemaLocation="https://xbrl.fasb.org/us-gaap/2025/elts/us-gaap-2025.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/2003/instance" schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/2003/linkbase" schemaLocation="http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/dtr/type/2024-01-31" schemaLocation="https://www.xbrl.org/dtr/type/2024-01-31/types.xsd"/>
+  <xs:import namespace="http://xbrl.org/2005/xbrldt" schemaLocation="http://www.xbrl.org/2005/xbrldt-2005.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/country/2025" schemaLocation="https://xbrl.sec.gov/country/2025/country-2025.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/cyd-af-sub/2025" schemaLocation="https://xbrl.sec.gov/cyd/2025/cyd-af-sub-2025.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/dei/2025" schemaLocation="https://xbrl.sec.gov/dei/2025/dei-2025.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/ecd/2025" schemaLocation="https://xbrl.sec.gov/ecd/2025/ecd-2025.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/stpr/2025" schemaLocation="https://xbrl.sec.gov/stpr/2025/stpr-2025.xsd"/>
+  <xs:annotation>
+    <xs:appinfo>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="nvda-20260125_pre.xml" xlink:role="http://www.xbrl.org/2003/role/presentationLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="nvda-20260125_def.xml" xlink:role="http://www.xbrl.org/2003/role/definitionLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="nvda-20260125_lab.xml" xlink:role="http://www.xbrl.org/2003/role/labelLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="nvda-20260125_cal.xml" xlink:role="http://www.xbrl.org/2003/role/calculationLinkbaseRef" xlink:type="simple"/>
+      <link:roleType id="CoverPage" roleURI="http://www.nvidia.com/role/CoverPage">
+        <link:definition>0000001 - Document - Cover Page</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="AuditInformation" roleURI="http://www.nvidia.com/role/AuditInformation">
+        <link:definition>0000002 - Document - Audit Information</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedStatementsofIncome" roleURI="http://www.nvidia.com/role/ConsolidatedStatementsofIncome">
+        <link:definition>9952151 - Statement - Consolidated Statements of Income</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedStatementsofComprehensiveIncome" roleURI="http://www.nvidia.com/role/ConsolidatedStatementsofComprehensiveIncome">
+        <link:definition>9952152 - Statement - Consolidated Statements of Comprehensive Income</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedBalanceSheets" roleURI="http://www.nvidia.com/role/ConsolidatedBalanceSheets">
+        <link:definition>9952153 - Statement - Consolidated Balance Sheets</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedBalanceSheetsParenthetical" roleURI="http://www.nvidia.com/role/ConsolidatedBalanceSheetsParenthetical">
+        <link:definition>9952154 - Statement - Consolidated Balance Sheets (Parenthetical)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedStatementsofShareholdersEquity" roleURI="http://www.nvidia.com/role/ConsolidatedStatementsofShareholdersEquity">
+        <link:definition>9952155 - Statement - Consolidated Statements of Shareholders' Equity</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedStatementsofShareholdersEquityParenthetical" roleURI="http://www.nvidia.com/role/ConsolidatedStatementsofShareholdersEquityParenthetical">
+        <link:definition>9952156 - Statement - Consolidated Statements of Shareholders' Equity (Parenthetical)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedStatementsofCashFlows" roleURI="http://www.nvidia.com/role/ConsolidatedStatementsofCashFlows">
+        <link:definition>9952157 - Statement - Consolidated Statements of Cash Flows</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="OrganizationandSummaryofSignificantAccountingPolicies" roleURI="http://www.nvidia.com/role/OrganizationandSummaryofSignificantAccountingPolicies">
+        <link:definition>9952158 - Disclosure - Organization and Summary of Significant Accounting Policies</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Groq" roleURI="http://www.nvidia.com/role/Groq">
+        <link:definition>9952159 - Disclosure - Groq</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockBasedCompensation" roleURI="http://www.nvidia.com/role/StockBasedCompensation">
+        <link:definition>9952160 - Disclosure - Stock-Based Compensation</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NetIncomePerShare" roleURI="http://www.nvidia.com/role/NetIncomePerShare">
+        <link:definition>9952161 - Disclosure - Net Income Per Share</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Goodwill" roleURI="http://www.nvidia.com/role/Goodwill">
+        <link:definition>9952162 - Disclosure - Goodwill</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="AmortizableIntangibleAssets" roleURI="http://www.nvidia.com/role/AmortizableIntangibleAssets">
+        <link:definition>9952163 - Disclosure - Amortizable Intangible Assets</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CashEquivalentsandMarketableSecurities" roleURI="http://www.nvidia.com/role/CashEquivalentsandMarketableSecurities">
+        <link:definition>9952164 - Disclosure - Cash Equivalents and Marketable Securities</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NonmarketableEquitySecurities" roleURI="http://www.nvidia.com/role/NonmarketableEquitySecurities">
+        <link:definition>9952165 - Disclosure - Non-marketable Equity Securities</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BalanceSheetComponents" roleURI="http://www.nvidia.com/role/BalanceSheetComponents">
+        <link:definition>9952166 - Disclosure - Balance Sheet Components</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DerivativeFinancialInstruments" roleURI="http://www.nvidia.com/role/DerivativeFinancialInstruments">
+        <link:definition>9952167 - Disclosure - Derivative Financial Instruments</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Debt" roleURI="http://www.nvidia.com/role/Debt">
+        <link:definition>9952168 - Disclosure - Debt</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CommitmentsandContingencies" roleURI="http://www.nvidia.com/role/CommitmentsandContingencies">
+        <link:definition>9952169 - Disclosure - Commitments and Contingencies</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxes" roleURI="http://www.nvidia.com/role/IncomeTaxes">
+        <link:definition>9952170 - Disclosure - Income Taxes</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ShareholdersEquity" roleURI="http://www.nvidia.com/role/ShareholdersEquity">
+        <link:definition>9952171 - Disclosure - Shareholders&#8217; Equity</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EmployeeRetirementPlans" roleURI="http://www.nvidia.com/role/EmployeeRetirementPlans">
+        <link:definition>9952172 - Disclosure - Employee Retirement Plans</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SegmentInformation" roleURI="http://www.nvidia.com/role/SegmentInformation">
+        <link:definition>9952173 - Disclosure - Segment Information</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Leases" roleURI="http://www.nvidia.com/role/Leases">
+        <link:definition>9952174 - Disclosure - Leases</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ScheduleIIValuationandQualifyingAccounts" roleURI="http://www.nvidia.com/role/ScheduleIIValuationandQualifyingAccounts">
+        <link:definition>9952175 - Disclosure - Schedule II - Valuation and Qualifying Accounts</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="OrganizationandSummaryofSignificantAccountingPoliciesPolicies" roleURI="http://www.nvidia.com/role/OrganizationandSummaryofSignificantAccountingPoliciesPolicies">
+        <link:definition>9955511 - Disclosure - Organization and Summary of Significant Accounting Policies (Policies)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockBasedCompensationTables" roleURI="http://www.nvidia.com/role/StockBasedCompensationTables">
+        <link:definition>9955512 - Disclosure - Stock-Based Compensation (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NetIncomePerShareTables" roleURI="http://www.nvidia.com/role/NetIncomePerShareTables">
+        <link:definition>9955513 - Disclosure - Net Income Per Share (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="AmortizableIntangibleAssetsTables" roleURI="http://www.nvidia.com/role/AmortizableIntangibleAssetsTables">
+        <link:definition>9955514 - Disclosure - Amortizable Intangible Assets (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CashEquivalentsandMarketableSecuritiesTables" roleURI="http://www.nvidia.com/role/CashEquivalentsandMarketableSecuritiesTables">
+        <link:definition>9955515 - Disclosure - Cash Equivalents and Marketable Securities (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NonmarketableEquitySecuritiesTables" roleURI="http://www.nvidia.com/role/NonmarketableEquitySecuritiesTables">
+        <link:definition>9955516 - Disclosure - Non-marketable Equity Securities (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BalanceSheetComponentsTables" roleURI="http://www.nvidia.com/role/BalanceSheetComponentsTables">
+        <link:definition>9955517 - Disclosure - Balance Sheet Components (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DerivativeFinancialInstrumentsTables" roleURI="http://www.nvidia.com/role/DerivativeFinancialInstrumentsTables">
+        <link:definition>9955518 - Disclosure - Derivative Financial Instruments (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DebtTables" roleURI="http://www.nvidia.com/role/DebtTables">
+        <link:definition>9955519 - Disclosure - Debt (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CommitmentsandContingenciesTables" roleURI="http://www.nvidia.com/role/CommitmentsandContingenciesTables">
+        <link:definition>9955520 - Disclosure - Commitments and Contingencies (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesTables" roleURI="http://www.nvidia.com/role/IncomeTaxesTables">
+        <link:definition>9955521 - Disclosure - Income Taxes (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SegmentInformationTables" roleURI="http://www.nvidia.com/role/SegmentInformationTables">
+        <link:definition>9955522 - Disclosure - Segment Information (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesTables" roleURI="http://www.nvidia.com/role/LeasesTables">
+        <link:definition>9955523 - Disclosure - Leases (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="OrganizationandSummaryofSignificantAccountingPoliciesDetails" roleURI="http://www.nvidia.com/role/OrganizationandSummaryofSignificantAccountingPoliciesDetails">
+        <link:definition>9955524 - Disclosure - Organization and Summary of Significant Accounting Policies (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="GroqNarrativeDetails" roleURI="http://www.nvidia.com/role/GroqNarrativeDetails">
+        <link:definition>9955525 - Disclosure - Groq - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockBasedCompensationScheduleofStockBasedCompensationExpenseDetails" roleURI="http://www.nvidia.com/role/StockBasedCompensationScheduleofStockBasedCompensationExpenseDetails">
+        <link:definition>9955526 - Disclosure - Stock-Based Compensation - Schedule of Stock-Based Compensation Expense (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockBasedCompensationSummaryofEquityAwardsDetails" roleURI="http://www.nvidia.com/role/StockBasedCompensationSummaryofEquityAwardsDetails">
+        <link:definition>9955527 - Disclosure - Stock-Based Compensation - Summary of Equity Awards (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockBasedCompensationNarrativeDetails" roleURI="http://www.nvidia.com/role/StockBasedCompensationNarrativeDetails">
+        <link:definition>9955528 - Disclosure - Stock-Based Compensation - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockBasedCompensationEquityIncentivePlansDetails" roleURI="http://www.nvidia.com/role/StockBasedCompensationEquityIncentivePlansDetails">
+        <link:definition>9955529 - Disclosure - Stock-Based Compensation - Equity Incentive Plans (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NetIncomePerShareDetails" roleURI="http://www.nvidia.com/role/NetIncomePerShareDetails">
+        <link:definition>9955530 - Disclosure - Net Income Per Share (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="GoodwillDetails" roleURI="http://www.nvidia.com/role/GoodwillDetails">
+        <link:definition>9955531 - Disclosure - Goodwill (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="AmortizableIntangibleAssetsDetails" roleURI="http://www.nvidia.com/role/AmortizableIntangibleAssetsDetails">
+        <link:definition>9955532 - Disclosure - Amortizable Intangible Assets (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="AmortizableIntangibleAssetsDetails_1" roleURI="http://www.nvidia.com/role/AmortizableIntangibleAssetsDetails_1">
+        <link:definition>9955532 - Disclosure - Amortizable Intangible Assets (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CashEquivalentsandMarketableSecuritiesCashEquivalentsandMarketableSecuritiesDetails" roleURI="http://www.nvidia.com/role/CashEquivalentsandMarketableSecuritiesCashEquivalentsandMarketableSecuritiesDetails">
+        <link:definition>9955533 - Disclosure - Cash Equivalents and Marketable Securities - Cash Equivalents and Marketable Securities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CashEquivalentsandMarketableSecuritiesCashEquivalentsandMarketableSecuritiesDetails_1" roleURI="http://www.nvidia.com/role/CashEquivalentsandMarketableSecuritiesCashEquivalentsandMarketableSecuritiesDetails_1">
+        <link:definition>9955533 - Disclosure - Cash Equivalents and Marketable Securities - Cash Equivalents and Marketable Securities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CashEquivalentsandMarketableSecuritiesNarrativeDetails" roleURI="http://www.nvidia.com/role/CashEquivalentsandMarketableSecuritiesNarrativeDetails">
+        <link:definition>9955534 - Disclosure - Cash Equivalents and Marketable Securities - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CashEquivalentsandMarketableSecuritiesUnrealizedLossesAggregatedbyInvestmentCategoryDetails" roleURI="http://www.nvidia.com/role/CashEquivalentsandMarketableSecuritiesUnrealizedLossesAggregatedbyInvestmentCategoryDetails">
+        <link:definition>9955535 - Disclosure - Cash Equivalents and Marketable Securities - Unrealized Losses Aggregated by Investment Category (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CashEquivalentsandMarketableSecuritiesEstimatedFairValueofCashEquivalentsandMarketableSecuritiesDetails" roleURI="http://www.nvidia.com/role/CashEquivalentsandMarketableSecuritiesEstimatedFairValueofCashEquivalentsandMarketableSecuritiesDetails">
+        <link:definition>9955536 - Disclosure - Cash Equivalents and Marketable Securities - Estimated Fair Value of Cash Equivalents and Marketable Securities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NonmarketableEquitySecuritiesCarryingValueofNonmarketableEquitySecuritiesDetails" roleURI="http://www.nvidia.com/role/NonmarketableEquitySecuritiesCarryingValueofNonmarketableEquitySecuritiesDetails">
+        <link:definition>9955537 - Disclosure - Non-marketable Equity Securities - Carrying Value of Non-marketable Equity Securities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NonmarketableEquitySecuritiesNarrativeDetails" roleURI="http://www.nvidia.com/role/NonmarketableEquitySecuritiesNarrativeDetails">
+        <link:definition>9955538 - Disclosure - Non-marketable Equity Securities - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BalanceSheetComponentsNarrativeDetails" roleURI="http://www.nvidia.com/role/BalanceSheetComponentsNarrativeDetails">
+        <link:definition>9955539 - Disclosure - Balance Sheet Components - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BalanceSheetComponentsNarrativeDetails_1" roleURI="http://www.nvidia.com/role/BalanceSheetComponentsNarrativeDetails_1">
+        <link:definition>9955539 - Disclosure - Balance Sheet Components - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BalanceSheetComponentsInventoriesDetails" roleURI="http://www.nvidia.com/role/BalanceSheetComponentsInventoriesDetails">
+        <link:definition>9955540 - Disclosure - Balance Sheet Components - Inventories (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BalanceSheetComponentsPropertyandEquipmentDetails" roleURI="http://www.nvidia.com/role/BalanceSheetComponentsPropertyandEquipmentDetails">
+        <link:definition>9955541 - Disclosure - Balance Sheet Components - Property and Equipment (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BalanceSheetComponentsAccruedandOtherCurrentLiabilitiesDetails" roleURI="http://www.nvidia.com/role/BalanceSheetComponentsAccruedandOtherCurrentLiabilitiesDetails">
+        <link:definition>9955542 - Disclosure - Balance Sheet Components - Accrued and Other Current Liabilities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BalanceSheetComponentsOtherLongTermLiabilitiesDetails" roleURI="http://www.nvidia.com/role/BalanceSheetComponentsOtherLongTermLiabilitiesDetails">
+        <link:definition>9955543 - Disclosure - Balance Sheet Components - Other Long-Term Liabilities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BalanceSheetComponentsDeferredRevenueDetails" roleURI="http://www.nvidia.com/role/BalanceSheetComponentsDeferredRevenueDetails">
+        <link:definition>9955544 - Disclosure - Balance Sheet Components - Deferred Revenue (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BalanceSheetComponentsRevenueRemainingPerformanceObligationDetails" roleURI="http://www.nvidia.com/role/BalanceSheetComponentsRevenueRemainingPerformanceObligationDetails">
+        <link:definition>9955545 - Disclosure - Balance Sheet Components - Revenue Remaining Performance Obligation (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BalanceSheetComponentsRevenueRemainingPerformanceObligationDetails_1" roleURI="http://www.nvidia.com/role/BalanceSheetComponentsRevenueRemainingPerformanceObligationDetails_1">
+        <link:definition>9955545 - Disclosure - Balance Sheet Components - Revenue Remaining Performance Obligation (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DerivativeFinancialInstrumentsNotionalValueofOurForeignCurrencyForwardContractsOutstandingDetails" roleURI="http://www.nvidia.com/role/DerivativeFinancialInstrumentsNotionalValueofOurForeignCurrencyForwardContractsOutstandingDetails">
+        <link:definition>9955546 - Disclosure - Derivative Financial Instruments - Notional Value of Our Foreign Currency Forward Contracts Outstanding (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DerivativeFinancialInstrumentsNarrativeDetails" roleURI="http://www.nvidia.com/role/DerivativeFinancialInstrumentsNarrativeDetails">
+        <link:definition>9955547 - Disclosure - Derivative Financial Instruments - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DebtScheduleofDebtDetails" roleURI="http://www.nvidia.com/role/DebtScheduleofDebtDetails">
+        <link:definition>9955548 - Disclosure - Debt - Schedule of Debt (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DebtScheduleofDebtDetails_1" roleURI="http://www.nvidia.com/role/DebtScheduleofDebtDetails_1">
+        <link:definition>9955548 - Disclosure - Debt - Schedule of Debt (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DebtNarrativeDetails" roleURI="http://www.nvidia.com/role/DebtNarrativeDetails">
+        <link:definition>9955549 - Disclosure - Debt - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CommitmentsandContingenciesNarrativeDetails" roleURI="http://www.nvidia.com/role/CommitmentsandContingenciesNarrativeDetails">
+        <link:definition>9955550 - Disclosure - Commitments and Contingencies - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CommitmentsandContingenciesScheduleofProductWarrantyLiabilitiesDetails" roleURI="http://www.nvidia.com/role/CommitmentsandContingenciesScheduleofProductWarrantyLiabilitiesDetails">
+        <link:definition>9955551 - Disclosure - Commitments and Contingencies - Schedule of Product Warranty Liabilities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesComponentsofIncomeTaxExpenseDetails" roleURI="http://www.nvidia.com/role/IncomeTaxesComponentsofIncomeTaxExpenseDetails">
+        <link:definition>9955552 - Disclosure - Income Taxes - Components of Income Tax Expense (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesIncomeTaxReconciliationDetails" roleURI="http://www.nvidia.com/role/IncomeTaxesIncomeTaxReconciliationDetails">
+        <link:definition>9955553 - Disclosure - Income Taxes - Income Tax Reconciliation (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesIncomeTaxExpenseBenefitDetails" roleURI="http://www.nvidia.com/role/IncomeTaxesIncomeTaxExpenseBenefitDetails">
+        <link:definition>9955554 - Disclosure - Income Taxes - Income Tax Expense (Benefit) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesIncomeTaxPaidDetails" roleURI="http://www.nvidia.com/role/IncomeTaxesIncomeTaxPaidDetails">
+        <link:definition>9955555 - Disclosure - Income Taxes - Income Tax Paid (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesDeferredTaxesDetails" roleURI="http://www.nvidia.com/role/IncomeTaxesDeferredTaxesDetails">
+        <link:definition>9955556 - Disclosure - Income Taxes - Deferred Taxes (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesNarrativeDetails" roleURI="http://www.nvidia.com/role/IncomeTaxesNarrativeDetails">
+        <link:definition>9955557 - Disclosure - Income Taxes - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesUnrecognizedTaxBenefitsDetails" roleURI="http://www.nvidia.com/role/IncomeTaxesUnrecognizedTaxBenefitsDetails">
+        <link:definition>9955558 - Disclosure - Income Taxes - Unrecognized Tax Benefits (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ShareholdersEquityDetails" roleURI="http://www.nvidia.com/role/ShareholdersEquityDetails">
+        <link:definition>9955559 - Disclosure - Shareholders' Equity (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="EmployeeRetirementPlansDetails" roleURI="http://www.nvidia.com/role/EmployeeRetirementPlansDetails">
+        <link:definition>9955560 - Disclosure - Employee Retirement Plans (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SegmentInformationNarrativeDetails" roleURI="http://www.nvidia.com/role/SegmentInformationNarrativeDetails">
+        <link:definition>9955561 - Disclosure - Segment Information - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SegmentInformationReportableSegmentsDetails" roleURI="http://www.nvidia.com/role/SegmentInformationReportableSegmentsDetails">
+        <link:definition>9955562 - Disclosure - Segment Information - Reportable Segments (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SegmentInformationReconcilingItemsDetails" roleURI="http://www.nvidia.com/role/SegmentInformationReconcilingItemsDetails">
+        <link:definition>9955563 - Disclosure - Segment Information - Reconciling Items (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SegmentInformationRevenueandLonglivedAssetsbyRegionDetails" roleURI="http://www.nvidia.com/role/SegmentInformationRevenueandLonglivedAssetsbyRegionDetails">
+        <link:definition>9955564 - Disclosure - Segment Information - Revenue and Long-lived Assets by Region (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SegmentInformationScheduleofRevenuebyMarketDetails" roleURI="http://www.nvidia.com/role/SegmentInformationScheduleofRevenuebyMarketDetails">
+        <link:definition>9955565 - Disclosure - Segment Information - Schedule of Revenue by Market (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesScheduleofFutureMinimumLeasePaymentsDetails" roleURI="http://www.nvidia.com/role/LeasesScheduleofFutureMinimumLeasePaymentsDetails">
+        <link:definition>9955566 - Disclosure - Leases - Schedule of Future Minimum Lease Payments (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesScheduleofFutureMinimumLeasePaymentsDetails_1" roleURI="http://www.nvidia.com/role/LeasesScheduleofFutureMinimumLeasePaymentsDetails_1">
+        <link:definition>9955566 - Disclosure - Leases - Schedule of Future Minimum Lease Payments (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesNarrativeDetails" roleURI="http://www.nvidia.com/role/LeasesNarrativeDetails">
+        <link:definition>9955567 - Disclosure - Leases - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesScheduleofotherleaseinformationDetails" roleURI="http://www.nvidia.com/role/LeasesScheduleofotherleaseinformationDetails">
+        <link:definition>9955568 - Disclosure - Leases - Schedule of other lease information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ScheduleIIValuationandQualifyingAccountsDetails" roleURI="http://www.nvidia.com/role/ScheduleIIValuationandQualifyingAccountsDetails">
+        <link:definition>9955569 - Disclosure - Schedule II - Valuation and Qualifying Accounts (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element id="nvda_AuditInformationAbstract" abstract="true" name="AuditInformationAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="nvda_MarketableSecuritiesAndEquitySecuritiesFVNI" abstract="false" name="MarketableSecuritiesAndEquitySecuritiesFVNI" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_AdjustmentsToAdditionalPaidInCapitalAcquisitionFairValueOfEquityAwardsAssumed" abstract="false" name="AdjustmentsToAdditionalPaidInCapitalAcquisitionFairValueOfEquityAwardsAssumed" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_PaymentsForFinancedPropertyPlantAndEquipmentAndIntangibleAssetsFinancingActivities" abstract="false" name="PaymentsForFinancedPropertyPlantAndEquipmentAndIntangibleAssetsFinancingActivities" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_NatureOfOperationsPolicyTextBlock" abstract="false" name="NatureOfOperationsPolicyTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="nvda_LesseeOperatingLeasesOtherInformationRelatedToLeasesTableTextBlock" abstract="false" name="LesseeOperatingLeasesOtherInformationRelatedToLeasesTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="nvda_WarrantyLiabilityTermOfWarranties" abstract="false" name="WarrantyLiabilityTermOfWarranties" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="nvda_GroqInc.NonExclusiveLicenseAgreementMember" abstract="true" name="GroqInc.NonExclusiveLicenseAgreementMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_ComputeAndNetworkingSegmentMember" abstract="true" name="ComputeAndNetworkingSegmentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_RSUsPSUsandMarketbasedPSUsMember" abstract="true" name="RSUsPSUsandMarketbasedPSUsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_ShareBasedCompensationArrangementByShareBasedPaymentAwardGrantsInPeriodGrantDateTotalFairValue" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardGrantsInPeriodGrantDateTotalFairValue" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_SummaryofunearnedSBCexpenseAbstract" abstract="true" name="SummaryofunearnedSBCexpenseAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="nvda_MarketbasedPerformanceShareUnitsMember" abstract="true" name="MarketbasedPerformanceShareUnitsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_NumberOfSharesMayBeIssuedUnderRestated2007Plan" abstract="false" name="NumberOfSharesMayBeIssuedUnderRestated2007Plan" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="nvda_EmployeeStockPurchasePlanOfferingPeriodDuration" abstract="false" name="EmployeeStockPurchasePlanOfferingPeriodDuration" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="nvda_EmployeeStockPurchasePlanNumberOfPurchasePeriodsInOfferingPeriod" abstract="false" name="EmployeeStockPurchasePlanNumberOfPurchasePeriodsInOfferingPeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:integerItemType"/>
+  <xs:element id="nvda_EmployeeStockPurchasePlanPurchasePeriodDuration" abstract="false" name="EmployeeStockPurchasePlanPurchasePeriodDuration" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="nvda_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsVestedAndExpectedToVest" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsVestedAndExpectedToVest" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="nvda_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsVestedAndExpectedToVestOutstandingWeightedAverageExercisePrice" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsVestedAndExpectedToVestOutstandingWeightedAverageExercisePrice" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="dtr-types:perShareItemType"/>
+  <xs:element id="nvda_NumeratorAbstract" abstract="true" name="NumeratorAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="nvda_DenominatorAbstract" abstract="true" name="DenominatorAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="nvda_NetIncomeLossPerShareAbstract" abstract="true" name="NetIncomeLossPerShareAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="nvda_GraphicsSegmentMember" abstract="true" name="GraphicsSegmentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_IntangibleAssetsArisingFromBusinessCombinationMember" abstract="true" name="IntangibleAssetsArisingFromBusinessCombinationMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_PatentsAndLicensedTechnologyMember" abstract="true" name="PatentsAndLicensedTechnologyMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_MarketableSecuritiesMember" abstract="true" name="MarketableSecuritiesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_PubliclyHeldEquitySecuritiesMember" abstract="true" name="PubliclyHeldEquitySecuritiesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_DebtSecuritiesAvailableForSaleAmortizedCostAndEquitySecuritiesFV" abstract="false" name="DebtSecuritiesAvailableForSaleAmortizedCostAndEquitySecuritiesFV" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_DebtSecuritiesAvailableForSaleAndEquitySecuritiesFVNI" abstract="false" name="DebtSecuritiesAvailableForSaleAndEquitySecuritiesFVNI" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_OtherAssetsAndEquitySecuritiesFVNI" abstract="false" name="OtherAssetsAndEquitySecuritiesFVNI" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_NumberOfInvestmentsReclassified" abstract="false" name="NumberOfInvestmentsReclassified" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:integerItemType"/>
+  <xs:element id="nvda_EquitySecuritiesWithoutReadilyDeterminableFairValueNetAdditionsDisposals" abstract="false" name="EquitySecuritiesWithoutReadilyDeterminableFairValueNetAdditionsDisposals" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_EquitySecuritiesWithoutReadilyDeterminableFairValueReclassificationInOutAmount" abstract="false" name="EquitySecuritiesWithoutReadilyDeterminableFairValueReclassificationInOutAmount" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_EquitySecuritiesWithoutReadilyDeterminableFairValueImpairmentLossAndDownwardPriceAdjustmentAnnualAmount" abstract="false" name="EquitySecuritiesWithoutReadilyDeterminableFairValueImpairmentLossAndDownwardPriceAdjustmentAnnualAmount" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_EquitySecuritiesWithoutReadilyDeterminableFairValueImpairmentLossAndDownwardPriceAdjustmentCumulativeAmount" abstract="false" name="EquitySecuritiesWithoutReadilyDeterminableFairValueImpairmentLossAndDownwardPriceAdjustmentCumulativeAmount" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_CustomerOneMember" abstract="true" name="CustomerOneMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_CustomerTwoMember" abstract="true" name="CustomerTwoMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_CustomerThreeMember" abstract="true" name="CustomerThreeMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_BuildingsLeaseholdImprovementsAndFurnitureMember" abstract="true" name="BuildingsLeaseholdImprovementsAndFurnitureMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_EquipmentComputeHardwareAndSoftwareMember" abstract="true" name="EquipmentComputeHardwareAndSoftwareMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_AccrualsTable" abstract="true" name="AccrualsTable" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType"/>
+  <xs:element id="nvda_InventoryPurchaseObligationsInExcessOfProjectionsMember" abstract="true" name="InventoryPurchaseObligationsInExcessOfProjectionsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_NatureOfExpenseCustomerAdvancesAndDeferralsMember" abstract="true" name="NatureOfExpenseCustomerAdvancesAndDeferralsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_AccrualsLineItems" abstract="true" name="AccrualsLineItems" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="nvda_AccruedCustomerProgramsCurrent" abstract="false" name="AccruedCustomerProgramsCurrent" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_BusinessCombinationConsiderationPayable" abstract="false" name="BusinessCombinationConsiderationPayable" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_ExcessInventoryPurchaseObligationsCurrent" abstract="false" name="ExcessInventoryPurchaseObligationsCurrent" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_ContractWithCustomerLiabilityAdditions" abstract="false" name="ContractWithCustomerLiabilityAdditions" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_ContractWithCustomerLiabilityRevenueRecognizedOpeningBalanceAndCurrentPeriodAdditions" abstract="false" name="ContractWithCustomerLiabilityRevenueRecognizedOpeningBalanceAndCurrentPeriodAdditions" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_ContractWithCustomerLiabilityAdditionsCustomerAdvances" abstract="false" name="ContractWithCustomerLiabilityAdditionsCustomerAdvances" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_ContractWithCustomerLiabilityRevenueRecognizedFromCustomerAdvances" abstract="false" name="ContractWithCustomerLiabilityRevenueRecognizedFromCustomerAdvances" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_RevenueRemainingPerformanceObligationContractWithCustomerLiabilityAmount" abstract="false" name="RevenueRemainingPerformanceObligationContractWithCustomerLiabilityAmount" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_FacilityLeaseGuaranteesMember" abstract="true" name="FacilityLeaseGuaranteesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_GuarantorObligationsCollateralHeldDirectlyOrByThirdPartiesAmount" abstract="false" name="GuarantorObligationsCollateralHeldDirectlyOrByThirdPartiesAmount" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_A2026NotesMember" abstract="true" name="A2026NotesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_A2028NotesMember" abstract="true" name="A2028NotesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_A2030NotesMember" abstract="true" name="A2030NotesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_A2031NotesMember" abstract="true" name="A2031NotesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_A2040NotesMember" abstract="true" name="A2040NotesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_A2050NotesMember" abstract="true" name="A2050NotesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_A2060NotesMember" abstract="true" name="A2060NotesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_CommercialPaperProgramMember" abstract="true" name="CommercialPaperProgramMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_ManufacturingProductionAndLongTermSupplyAndCapacityAgreementCommitmentsMember" abstract="true" name="ManufacturingProductionAndLongTermSupplyAndCapacityAgreementCommitmentsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_MultiYearCloudServiceAgreementCommitmentsMember" abstract="true" name="MultiYearCloudServiceAgreementCommitmentsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_InvestmentCommitmentsMember" abstract="true" name="InvestmentCommitmentsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_OtherCommitmentsMember" abstract="true" name="OtherCommitmentsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_DeferredTaxAssetsTaxDeferredExpenseCapitalizedResearchAndDevelopmentCosts" abstract="false" name="DeferredTaxAssetsTaxDeferredExpenseCapitalizedResearchAndDevelopmentCosts" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_DeferredTaxAssetsGlobalIntangibleLowTaxedIncome" abstract="false" name="DeferredTaxAssetsGlobalIntangibleLowTaxedIncome" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_DeferredTaxAssetsLeaseLiability" abstract="false" name="DeferredTaxAssetsLeaseLiability" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_DeferredTaxLiabilitiesRightOfUseAssets" abstract="false" name="DeferredTaxLiabilitiesRightOfUseAssets" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_OtherStatesMember" abstract="true" name="OtherStatesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_StockRepurchaseProgramAdditionalNumberOfSharesAuthorizedForRepurchase" abstract="false" name="StockRepurchaseProgramAdditionalNumberOfSharesAuthorizedForRepurchase" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_UnallocatedCorporateOperatingExpendituresAndOtherExpenses" abstract="false" name="UnallocatedCorporateOperatingExpendituresAndOtherExpenses" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_AcquisitionRelatedAndOtherCosts" abstract="false" name="AcquisitionRelatedAndOtherCosts" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="nvda_ChinaIncludingHongKongMember" abstract="true" name="ChinaIncludingHongKongMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_OtherCountriesMember" abstract="true" name="OtherCountriesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_UnitedStatesAndEuropeBasedEndCustomersMember" abstract="true" name="UnitedStatesAndEuropeBasedEndCustomersMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_DataCenterMember" abstract="true" name="DataCenterMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_ComputeMember" abstract="true" name="ComputeMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_NetworkingMember" abstract="true" name="NetworkingMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_GamingMember" abstract="true" name="GamingMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_ProfessionalVisualizationMember" abstract="true" name="ProfessionalVisualizationMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_AutomotiveMember" abstract="true" name="AutomotiveMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_OEMAndOtherMember" abstract="true" name="OEMAndOtherMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_SECSchedule1209AllowanceSalesReturnsMember" abstract="true" name="SECSchedule1209AllowanceSalesReturnsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_JohnO.DabiriMember" abstract="true" name="JohnO.DabiriMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="nvda_ColetteM.KressMember" abstract="true" name="ColetteM.KressMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+</xs:schema>

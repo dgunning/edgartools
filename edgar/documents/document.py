@@ -416,7 +416,9 @@ class Section:
                     html_source = re.sub(r'<\?xml[^>]*\?>', '', html_source, count=1)
                 tree = lxml_html.fromstring(html_source)
 
-            return extract_section_html(tree, boundary.anchor_id, boundary.end_element_id)
+            return extract_section_html(tree, boundary.anchor_id, boundary.end_element_id,
+                                        start_element=getattr(boundary, 'start_element', None),
+                                        end_element=getattr(boundary, 'end_element', None))
 
         except (LxmlError, XMLSyntaxError, ValueError) as e:
             logger.debug(f"HTML extraction failed for section '{self.name}': {e}")
@@ -507,6 +509,15 @@ class Sections(Dict[str, Section]):
     Behaves like a normal dict but provides beautiful terminal display
     via __rich__() method when printed in rich-enabled environments.
     """
+
+    # Friendly name -> item number for this document's form (10-K only), so
+    # ``sections['risk_factors']`` resolves whether the section was keyed by
+    # the pattern extractor (``risk_factors``) or the TOC (``part_i_item_1a``).
+    _friendly_items: Dict[str, str] = {}
+
+    def _get_friendly(self, key: str) -> Optional[Section]:
+        item = self._friendly_items.get(key)
+        return self.get_item(item) if item else None
 
     def __rich__(self):
         """Return rich representation for display."""
@@ -702,6 +713,10 @@ class Sections(Dict[str, Section]):
             if result is not None:
                 return result
 
+            result = self._get_friendly(key)
+            if result is not None:
+                return result
+
         # Try as (part, item) tuple
         elif isinstance(key, tuple) and len(key) == 2:
             part, item = key
@@ -728,7 +743,7 @@ class Sections(Dict[str, Section]):
                 return super().__getitem__(key)
             except KeyError:
                 # Try as item number
-                result = self.get_item(key)
+                result = self.get_item(key) or self._get_friendly(key)
                 if result is not None:
                     return result
 
@@ -754,7 +769,7 @@ class Sections(Dict[str, Section]):
         if isinstance(key, str):
             if super().__contains__(key):
                 return True
-            return self.get_item(key) is not None
+            return (self.get_item(key) or self._get_friendly(key)) is not None
         if isinstance(key, tuple) and len(key) == 2:
             part, item = key
             return self.get_item(item, part) is not None
@@ -935,6 +950,9 @@ class Document:
 
             # Wrap detected sections in Sections class for rich display
             self._sections = Sections(detected_sections)
+            if base_form == '10-K':
+                from edgar.documents.form_schema import TEN_K_FRIENDLY_ITEMS
+                self._sections._friendly_items = TEN_K_FRIENDLY_ITEMS
 
         return self._sections
 

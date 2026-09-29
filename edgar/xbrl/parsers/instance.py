@@ -12,7 +12,14 @@ from typing import Any, Dict, List, Union, Optional
 from lxml import etree as ET
 
 from edgar.core import log
-from edgar.xbrl.core import NAMESPACES, classify_duration, duration_days
+from edgar.xbrl.core import (
+    NAMESPACES,
+    classify_duration,
+    duration_days,
+    is_amendment_document_type,
+    is_annual_document_type,
+    is_quarterly_document_type,
+)
 from edgar.xbrl.models import Context, Fact, XBRLProcessingError
 
 from .base import BaseParser
@@ -838,11 +845,13 @@ class InstanceParser(BaseParser):
                 except Exception:
                     pass
 
-            # Flags based on document_type
+            # Flags based on document_type. An amended annual report is still
+            # an annual report, so the suffix is stripped before classifying
+            # rather than compared away (GH #1226).
             dt_val = self.entity_info['document_type'] or ''
-            self.entity_info['annual_report']    = (dt_val == '10-K')
-            self.entity_info['quarterly_report'] = (dt_val == '10-Q')
-            self.entity_info['amendment']        = ('/A' in dt_val)
+            self.entity_info['annual_report']    = is_annual_document_type(dt_val)
+            self.entity_info['quarterly_report'] = is_quarterly_document_type(dt_val)
+            self.entity_info['amendment']        = is_amendment_document_type(dt_val)
 
             log.debug(f"Entity info: {self.entity_info}")
         except Exception as e:

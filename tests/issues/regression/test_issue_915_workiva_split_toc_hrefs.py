@@ -146,7 +146,7 @@ def test_tesla_2023_10k_item_3_does_not_overflow():
     # wrong content; Item 8 in turn was truncated to 2.5K chars).
     assert len(secs["part_i_item_1"].text()) == 45_669
     assert len(secs["part_i_item_1a"].text()) == 79_150
-    assert len(secs["part_ii_item_8"].text()) == 161_466
+    assert len(secs["part_ii_item_8"].text()) == 163_208  # table cells no longer fused (edgartools-wzgu)
 
     # Every section resolves cleanly — no over-capture / truncation warnings.
     for name, section in secs.items():

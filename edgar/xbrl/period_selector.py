@@ -14,7 +14,7 @@ import logging
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional, Tuple
 
-from edgar.xbrl.core import duration_days
+from edgar.xbrl.core import duration_days, is_annual_document_type
 
 logger = logging.getLogger(__name__)
 
@@ -257,15 +257,12 @@ def _select_duration_periods(periods: List[Dict], entity_info: Dict[str, Any], m
     # Some filings (like GE 2015 10-K) report fiscal_period='Q4' even for annual reports
     is_annual_report = entity_info.get('annual_report', False)
     document_type = entity_info.get('document_type', '')
-    annual_form_types = (
-        '10-K', '10-K/A', '10-KT', '10-KT/A',  # Standard and transition annual reports
-        '10-KSB', '10-KSB/A',                   # Small business (legacy)
-        '20-F', '20-F/A',                       # Foreign private issuers
-        '40-F', '40-F/A',                       # Canadian issuers
-    )
 
-    # Consider it annual if: fiscal_period == 'FY' OR it's flagged as annual OR it's an annual form type
-    is_annual = fiscal_period == 'FY' or is_annual_report or document_type in annual_form_types
+    # Consider it annual if: fiscal_period == 'FY' OR it's flagged as annual OR it's an annual form type.
+    # The form list used to live here as its own tuple, which is the same rule
+    # entity_info's annual_report flag is derived from (GH #1226).
+    is_annual = (fiscal_period == 'FY' or is_annual_report
+                 or is_annual_document_type(document_type))
 
     # Filter for annual periods if this is an annual report
     if is_annual:

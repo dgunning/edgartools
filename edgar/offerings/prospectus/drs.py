@@ -64,39 +64,20 @@ _AMENDMENT_RE = re.compile(
 def _html_to_text(html: str) -> str:
     """``BeautifulSoup(html, 'lxml').get_text(separator=' ', strip=True)``.
 
-    The third of bs4's three text behaviours, and the one lxml has no
-    equivalent for: strip each string, drop the ones left empty, join the rest
-    with a single space. ``text_content()`` is NOT this -- it joins with
-    nothing, so a cover page that typesets "FORM" and "S-1" in adjacent cells
-    reads as "FORMS-1" and the detector below finds nothing.
+    The variant lxml has no equivalent for: strip each string, drop the ones left
+    empty, join the rest with a single space. ``text_content()`` is NOT this -- it
+    joins with nothing, so a cover page that typesets "FORM" and "S-1" in adjacent
+    cells reads as "FORMS-1" and the detector below finds nothing.
 
-    Two details that are not cosmetic:
-
-    ``remove_comments=False``. Dropping a comment at parse time merges the
-    text either side of it into a single node, and a single node is stripped
-    once rather than twice -- ``A <!--c--> B`` would come back as ``"A   B"``
-    where bs4 gave ``"A B"``.
-
-    The ``strip_elements`` call. bs4 classified the text inside ``<script>``,
-    ``<style>`` and ``<template>`` as ``Script``, ``Stylesheet`` and
-    ``TemplateString`` and left all three out of ``get_text()``; lxml includes
-    them. A stylesheet that happens to mention a form name would otherwise be
-    read as the cover page, and it comes first in the document.
-    ``with_tail=False`` keeps the ordinary text that follows the closing tag.
+    ``remove_comments=False`` because a comment can fall inside a form name, and
+    dropping one at parse time merges the text either side of it into a single
+    node -- stripped once rather than twice. Both details, and the
+    <script>/<style>/<template> exclusion, are documented on the shared helper
+    (edgartools-07lk.11.12).
     """
-    import lxml.html
-    from lxml.etree import ParserError, strip_elements
+    from edgar.documents.utils.html_utils import html_to_text
 
-    from edgar.documents.utils.html_utils import create_lxml_parser
-
-    if isinstance(html, str):
-        html = html.encode('utf-8', errors='replace')
-    try:
-        root = lxml.html.fromstring(html, parser=create_lxml_parser(remove_comments=False))
-    except ParserError:
-        return ''      # bs4's get_text() on an empty soup
-    strip_elements(root, 'script', 'style', 'template', with_tail=False)
-    return ' '.join(chunk.strip() for chunk in root.itertext() if chunk.strip())
+    return html_to_text(html, separator=' ', remove_comments=False)
 
 
 def _detect_underlying_form(html: str) -> tuple[str, Optional[int]]:

@@ -74,3 +74,6 @@ class TestIssue251CitigroupCrossReference:
         risk = tenk['Item 1A']
         assert risk is not None, "Item 1A (Risk Factors) should not be None"
         assert len(risk) > 10000, f"Risk Factors too short: {len(risk)} chars"
+        # Content, not just size: a page-offset error (GH #1346) returns a
+        # neighbouring section of similar length.
+        assert risk.startswith("RISK FACTORS"), f"Item 1A opens with {risk[:80]!r}"

@@ -16,7 +16,7 @@ import itertools
 import re
 from pathlib import Path
 from textwrap import dedent
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 if TYPE_CHECKING:
     from edgar.xbrl.facts import FactQuery
@@ -31,7 +31,13 @@ from edgar.attachments import Attachments
 from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
 from edgar.richtools import repr_rich
-from edgar.xbrl.core import STANDARD_LABEL, STANDARD_TAXONOMIES, split_element_id, unit_currency_measure
+from edgar.xbrl.core import (
+    STANDARD_LABEL,
+    STANDARD_TAXONOMIES,
+    normalize_decimals,
+    split_element_id,
+    unit_currency_measure,
+)
 from edgar.xbrl.models import Axis, Domain, PresentationNode, is_negated_label_role
 from edgar.xbrl.parsers import XBRLParser
 from edgar.xbrl.period_selector import select_periods
@@ -92,6 +98,162 @@ def _names_notes_section(role_def: str) -> bool:
         role_def: Role definition, lowercased.
     """
     return bool(_NOTES_SECTION_RE.search(role_def))
+
+
+# A role family is a stem and its members, spelled either way a filing names
+# its roles: the schema definition "Debt", "Debt (Tables)", "Debt - Summary
+# (Details)", or the bare role name "ConvertiblePromissoryNotesPayable",
+# "...Tables", "...ScheduleOf...Details", "...Details1Parentheticals".  Only
+# the stem hangs from the disclosure concept, so in a filing that falls back
+# to role names the members cannot declare themselves and are classified with
+# their stem instead (issue #1218).
+#
+# The bare spelling is only read as a member suffix when it is glued to the
+# name: Apple's "Consolidated Financial Statement Details" is a note, and its
+# members say so with the parenthesised form.
+_ROLE_FAMILY_SUFFIX_RE = re.compile(
+    r"(?:\((?:tables?|details?|policies|textuals?)(?:\s+textuals?)?\)(?:[\s-]*\(?parentheticals?\)?)?"
+    r"|(?<![\s(])(?:tables?|details?|policies|textuals?|parentheticals?)\d*(?:parentheticals?)?)$"
+)
+
+# CamelCase segments of a role name: "ConvertiblePromissoryNotesPayable" ->
+# Convertible, Promissory, Notes, Payable.  An all-caps run is one segment.
+_CAMEL_SEGMENT_RE = re.compile(r"[A-Z]+(?![a-z])|[A-Z]?[a-z]+|\d+")
+
+# The sort index a schema definition leads with: "0000017 - Disclosure - Debt".
+# It differs between a stem and its members, so it is no part of the family.
+_ROLE_INDEX_RE = re.compile(r"^\s*\d+\s*-\s*")
+
+
+def _role_family_key(definition: str) -> Tuple[str, ...]:
+    """The role definition as lowercased CamelCase segments, so that a stem
+    is compared with a member segment by segment and `Debt` never claims
+    `DebtorNotesDetails`.
+
+    Args:
+        definition: Role definition as written, so that CamelCase boundaries
+            are still visible.
+    """
+    definition = _ROLE_INDEX_RE.sub('', definition)
+    return tuple(segment.lower() for segment in _CAMEL_SEGMENT_RE.findall(definition))
+
+
+def _segments_match(a: str, b: str) -> bool:
+    """Two segments name the same word when they differ at most by a plural
+    marker.  gahc names its stem "ConvertiblePromissoryNotesPayable" and two
+    members "ConvertiblePromissoryNotePayableScheduleOf...".
+
+    Only a trailing "s" is tolerated, deliberately: "Inventory" against
+    "InventoriesDetails" or "Liability" against "LiabilitiesDetails" does not
+    match, so a member spelled with an "-ies" plural stays classified on its
+    own.  No committed fixture exhibits that shape; widen this when one does.
+    """
+    return a == b or a + 's' == b or b + 's' == a
+
+
+def _is_family_stem_of(stem_key: Tuple[str, ...], family_key: Tuple[str, ...]) -> bool:
+    """Whether `stem_key` is a proper, segment-aligned prefix of `family_key`."""
+    return (len(stem_key) < len(family_key)
+            and all(_segments_match(a, b) for a, b in zip(stem_key, family_key)))
+
+
+# A role name may lead with the section it sits in.  UNP spells most of one
+# family "DisclosureDebtDetails1" and two members of it "DebtDetails6", and
+# names the Leases stem "Leases" but its Tables "DisclosureLeasesTables", so the
+# marker is not part of the family name (edgartools-uqp2).
+_SECTION_MARKER_SEGMENTS = frozenset({'disclosure', 'disclosures', 'statement', 'statements'})
+
+
+def _without_section_marker(key: Tuple[str, ...]) -> Tuple[str, ...]:
+    """`key` without a leading section-marker segment, else `key` unchanged."""
+    return key[1:] if key and key[0] in _SECTION_MARKER_SEGMENTS else key
+
+
+def _leads_family(stem_key: Tuple[str, ...], family_key: Tuple[str, ...]) -> bool:
+    """`_is_family_stem_of`, retried with a leading section marker ignored on
+    either side.
+
+    The marker is dropped only as a fallback, never from the key itself: a
+    filing that names both a `Debt` family and a separate `DisclosureDebt`
+    family must keep them apart, and erasing the marker outright would merge
+    them.  Ignoring it only when nothing aligns without doing so leaves the
+    unambiguous case untouched, and `_role_family_stem` still ranks a stem that
+    aligns strictly above one that needs the fallback.
+    """
+    if _is_family_stem_of(stem_key, family_key):
+        return True
+    bare_stem = _without_section_marker(stem_key)
+    bare_family = _without_section_marker(family_key)
+    if bare_stem == stem_key and bare_family == family_key:
+        return False
+    if not bare_stem:
+        # A stem named only for its section ("Disclosure") says nothing about a
+        # family, and an empty key leads every other one.
+        return False
+    return _is_family_stem_of(bare_stem, bare_family)
+
+
+def _role_family_members(definitions: Iterable[str]) -> Set[str]:
+    """The role definitions that are Tables, Policies or Details members of a
+    family: each carries a member suffix and extends the name of another role
+    in the filing.  A role that only carries the suffix is a stem - Apple's
+    "Consolidated Financial Statement Details", gahc's
+    "SummaryOfSignificantAccountingPolicies" - and so is a member whose stem
+    the filing does not name, since nothing else stands for it.
+
+    Args:
+        definitions: Every role definition in the filing.
+    """
+    keys = {definition: _role_family_key(definition) for definition in definitions}
+    return {definition for definition, key in keys.items()
+            if _ROLE_FAMILY_SUFFIX_RE.search(definition.lower())
+            and any(other and _leads_family(other, key) for other in keys.values())}
+
+
+def _role_family_stem(family_key: Tuple[str, ...],
+                      stem_keys: Iterable[Tuple[str, ...]]) -> Optional[Tuple[str, ...]]:
+    """The stem a family member belongs to: the longest stem whose segments
+    lead the member's, so `NotesPayableRelatedPartyDetails` belongs to
+    `NotesPayableRelatedParty` rather than the shorter `NotesPayable`.  Two
+    stems of one length are told apart by how many segments match exactly
+    rather than by plural.  None when no stem leads the member.
+
+    Args:
+        family_key: The member's `_role_family_key`.
+        stem_keys: Family key of every stem role in the filing.
+    """
+    best_rank = None
+    best = None
+    for stem_key in stem_keys:
+        if not stem_key or not _leads_family(stem_key, family_key):
+            continue
+        # A stem that aligns without ignoring a section marker outranks one that
+        # needs the fallback, so `DebtDetails` prefers a `Debt` stem over a
+        # `DisclosureDebt` stem when the filing names both.
+        strict = _is_family_stem_of(stem_key, family_key)
+        rank = (strict, len(stem_key), sum(a == b for a, b in zip(stem_key, family_key)))
+        if best_rank is None or rank > best_rank:
+            best_rank, best = rank, stem_key
+    return best
+
+
+def _follows_disclosure_family(role_def: str, family_key: Tuple[str, ...],
+                               stem_declares_disclosure: Dict[Tuple[str, ...], bool]) -> bool:
+    """Whether a role that does not declare itself is a Tables or Details
+    member of a family whose stem does.  A member stays with its own family
+    when its stem does not declare a disclosure, whatever a shorter stem says.
+
+    Args:
+        role_def: Role definition, lowercased.
+        family_key: The role's `_role_family_key`.
+        stem_declares_disclosure: Family key of every role in the filing
+            that is not itself a Tables or Details role, mapped to whether
+            it declares a disclosure.
+    """
+    if not _ROLE_FAMILY_SUFFIX_RE.search(role_def):
+        return False
+    stem_key = _role_family_stem(family_key, stem_declares_disclosure)
+    return stem_key is not None and stem_declares_disclosure[stem_key]
 
 
 def _capture_sgml_period_of_report(xbrl: "XBRL", filing) -> None:
@@ -1091,6 +1253,32 @@ class XBRL:
         self._statement_by_role_uri = {}
         self._statement_by_role_name = {}
 
+        # Family key of every stem role and whether it declares itself a
+        # disclosure, so that a Tables or Details role can follow its nearest
+        # stem below (issue #1218).  Every stem is recorded, not only the
+        # declaring ones, so that `NotesPayableRelatedPartyDetails` resolves to
+        # `NotesPayableRelatedParty` and not past it to `NotesPayable`.  Roles
+        # that are themselves Tables or Details are not stems: gahc's
+        # `...DetailsParenthetical` must reach the family stem, not the
+        # `...Details` it extends.  A definition with no segments at all is
+        # a prefix of every other and is left out.
+        definitions = [tree.definition for tree in self.presentation_trees.values()
+                       if isinstance(tree.definition, str)]
+        members = _role_family_members(definitions)
+        stem_declares_disclosure: Dict[Tuple[str, ...], bool] = {}
+        for tree in self.presentation_trees.values():
+            if not isinstance(tree.definition, str) or tree.definition in members:
+                continue
+            key = _role_family_key(tree.definition)
+            if not key:
+                continue
+            role_def = tree.definition.lower()
+            declares = (_declares_disclosure(role_def, next(iter(tree.all_nodes)))
+                        and not _names_notes_section(role_def))
+            # Two trees spell one definition only when a filing repeats a
+            # role; the family is the same either way.
+            stem_declares_disclosure[key] = stem_declares_disclosure.get(key, False) or declares
+
         for role, tree in self.presentation_trees.items():
             # Check if this role appears to be a financial statement
             role_def = tree.definition.lower()
@@ -1155,23 +1343,24 @@ class XBRL:
                     # is taken at its word unless the definition names the notes
                     # section itself (issue #1207).
                     #
-                    # Known limitation (issue #1218): this decides one role at a
-                    # time, and in a filing that falls back to role names the
-                    # members of one family do not all carry the same evidence.
-                    # gahc's `ConvertiblePromissoryNotesPayable` hangs from
-                    # us-gaap_DebtDisclosureAbstract and moves; its `Tables` and
-                    # `ScheduleOf...` children hang from a debt-balance abstract
-                    # and their names do not lead with the marker, so they stay
-                    # notes and the family splits across the two accessors. A
-                    # role with a real schema definition - the case in #1207 -
-                    # carries ` - Disclosure - ` on every member, so those move
-                    # together.
-                    if _names_notes_section(role_def) or not _declares_disclosure(role_def, primary_concept):
+                    # In a filing that falls back to role names only the family
+                    # stem carries that evidence: gahc's
+                    # `ConvertiblePromissoryNotesPayable` hangs from
+                    # us-gaap_DebtDisclosureAbstract, while its `Tables` and
+                    # `ScheduleOf...Details` children hang from a debt-balance
+                    # abstract.  Those follow their stem so the family stays
+                    # together across notes() and disclosures() (issue #1218).
+                    if _names_notes_section(role_def):
                         statement_type = "Notes"
                         statement_category = "note"
-                    else:
+                    elif (_declares_disclosure(role_def, primary_concept)
+                          or _follows_disclosure_family(role_def, _role_family_key(tree.definition),
+                                                        stem_declares_disclosure)):
                         statement_type = "Disclosures"
                         statement_category = "disclosure"
+                    else:
+                        statement_type = "Notes"
+                        statement_category = "note"
                 elif 'us-gaap_DisclosuresAbstract' in primary_concept or 'disclosure' in role_def:
                     statement_type = "Disclosures"
                     statement_category = "disclosure"
@@ -1686,15 +1875,10 @@ class XBRL:
                     # Store the selected fact's value
                     values[period_key] = fact.numeric_value if fact.numeric_value is not None else fact.value
 
-                    # Store the decimals info for proper scaling
-                    if fact.decimals is not None:
-                        try:
-                            if fact.decimals == 'INF':
-                                decimals[period_key] = 0  # Infinite precision, no scaling
-                            else:
-                                decimals[period_key] = int(fact.decimals)
-                        except (ValueError, TypeError):
-                            decimals[period_key] = 0  # Default
+                    # Store the decimals info for scaling and for accuracy
+                    fact_decimals = normalize_decimals(fact.decimals)
+                    if fact_decimals is not None:
+                        decimals[period_key] = fact_decimals
 
                     # Store unit_ref for this period
                     units[period_key] = fact.unit_ref
@@ -1735,14 +1919,9 @@ class XBRL:
                         fact = synthetic['fact']
                         context_id = synthetic['context_id']
 
-                        if fact.decimals is not None:
-                            try:
-                                if fact.decimals == 'INF':
-                                    decimals[period_key] = 0
-                                else:
-                                    decimals[period_key] = int(fact.decimals)
-                            except (ValueError, TypeError):
-                                decimals[period_key] = 0
+                        fact_decimals = normalize_decimals(fact.decimals)
+                        if fact_decimals is not None:
+                            decimals[period_key] = fact_decimals
 
                         units[period_key] = fact.unit_ref
 
@@ -1772,15 +1951,10 @@ class XBRL:
 
                     values[period_key] = fact.numeric_value if fact.numeric_value is not None else fact.value
 
-                    # Store the decimals info for proper scaling
-                    if fact.decimals is not None:
-                        try:
-                            if fact.decimals == 'INF':
-                                decimals[period_key] = 0
-                            else:
-                                decimals[period_key] = int(fact.decimals)
-                        except (ValueError, TypeError):
-                            decimals[period_key] = 0
+                    # Store the decimals info for scaling and for accuracy
+                    fact_decimals = normalize_decimals(fact.decimals)
+                    if fact_decimals is not None:
+                        decimals[period_key] = fact_decimals
 
                     units[period_key] = fact.unit_ref
 
@@ -1802,14 +1976,9 @@ class XBRL:
                         fact = synthetic['fact']
                         context_id = synthetic['context_id']
 
-                        if fact.decimals is not None:
-                            try:
-                                if fact.decimals == 'INF':
-                                    decimals[period_key] = 0
-                                else:
-                                    decimals[period_key] = int(fact.decimals)
-                            except (ValueError, TypeError):
-                                decimals[period_key] = 0
+                        fact_decimals = normalize_decimals(fact.decimals)
+                        if fact_decimals is not None:
+                            decimals[period_key] = fact_decimals
 
                         units[period_key] = fact.unit_ref
 
@@ -1916,14 +2085,9 @@ class XBRL:
                             continue
 
                     # Store decimals
-                    if fact.decimals is not None:
-                        try:
-                            if fact.decimals == 'INF':
-                                dim_decimals[period_key] = 0
-                            else:
-                                dim_decimals[period_key] = int(fact.decimals)
-                        except (ValueError, TypeError):
-                            dim_decimals[period_key] = 0
+                    fact_decimals = normalize_decimals(fact.decimals)
+                    if fact_decimals is not None:
+                        dim_decimals[period_key] = fact_decimals
 
                     # Store unit_ref for this period
                     dim_units[period_key] = fact.unit_ref
@@ -2008,15 +2172,34 @@ class XBRL:
         The definition linkbase defines member-to-member relationships (e.g.,
         AutomotiveRevenuesMember → AutomotiveSalesMember). This method uses
         those relationships to set proper nesting depth for dimensional items.
+
+        Only single-axis rows participate. A two-axis fact's first member is
+        often a shared qualifier (``OperatingSegmentsMember``) that several
+        distinct combinations share; keying the map on ``meta[0]`` last-wins
+        those rows away as soon as any same-axis parent/child pair activates
+        the reorder (GH #1331).
+
+        A member filed on two different axes at once does not participate
+        either. ``member_to_item`` is keyed on the member alone, so the two
+        rows would collide and the earlier one would be dropped; the domain
+        hierarchy cannot say which axis's row it nests, so neither is
+        reordered and both pass through (edgartools-3h3q).
         """
-        # Collect member IDs from dimensional items
         member_to_item = {}
+        ambiguous = set()
         for item in dim_items:
-            meta = item.get('dimension_metadata')
-            if meta and len(meta) >= 1:
-                member_id = meta[0].get('member')
-                if member_id:
-                    member_to_item[member_id] = item
+            meta = item.get('dimension_metadata') or []
+            if len(meta) != 1:
+                continue
+            member_id = meta[0].get('member')
+            if not member_id:
+                continue
+            if member_id in member_to_item:
+                ambiguous.add(member_id)
+                continue
+            member_to_item[member_id] = item
+        for member_id in ambiguous:
+            member_to_item.pop(member_id, None)
 
         if len(member_to_item) <= 1:
             return
@@ -2053,8 +2236,10 @@ class XBRL:
         for member_id, item in member_to_item.items():
             item['level'] += depth_offset[member_id]
 
-        # Reorder: parents before children
-        ordered = []
+        # Reorder single-axis parents before their children; leave every other
+        # row (including multi-axis combinations) at its original position.
+        child_members = {child for children in member_children.values() for child in children}
+        ordered: List[Dict[str, Any]] = []
         processed = set()
 
         def add_with_children(member_id):
@@ -2065,16 +2250,25 @@ class XBRL:
             for child_id in member_children.get(member_id, []):
                 add_with_children(child_id)
 
-        # First add items that are top-level (depth 0)
-        for member_id in member_to_item:
-            if depth_offset[member_id] == 0:
+        for item in dim_items:
+            meta = item.get('dimension_metadata') or []
+            if len(meta) != 1:
+                ordered.append(item)
+                continue
+            member_id = meta[0].get('member')
+            if member_id in processed:
+                continue
+            if member_id in child_members:
+                continue
+            if member_id in member_to_item:
                 add_with_children(member_id)
-        # Then any remaining
+            else:
+                ordered.append(item)
+
         for member_id in member_to_item:
             if member_id not in processed:
                 add_with_children(member_id)
 
-        # Replace items in-place
         dim_items[:] = ordered
 
     @staticmethod

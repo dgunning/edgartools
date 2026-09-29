@@ -13,9 +13,9 @@ import pyarrow.compute as pc
 
 from edgar.core import listify, log
 from edgar.dates import InvalidDateError
+from edgar.display.formatting import reverse_name
 from edgar.entity.filings import EntityFilings, empty_company_filings
 from edgar.filtering import filter_by_date, filter_by_form, filter_by_year_quarter
-from edgar.display.formatting import reverse_name
 
 # Module-level import cache for lazy imports
 _IMPORT_CACHE = {}
@@ -70,7 +70,7 @@ def extract_company_filings_table(filings_json: Dict[str, Any]) -> pa.Table:
         A PyArrow Table containing the filings data
     """
     # Import this here to avoid circular imports
-    from edgar.core import parse_acceptance_datetime
+    from edgar.dates import parse_acceptance_datetime
 
     # Handle case of no data
     if not filings_json.get('accessionNumber'):
@@ -487,7 +487,7 @@ class EntityData:
         (insider issuer flag, tickers, entity type) take precedence over
         weaker ones (name keywords, owner flag).
         """
-        from edgar.entity.constants import _classify_is_individual, COMPANY_FORMS
+        from edgar.entity.constants import _classify_is_individual
 
         # Extract forms from filing history for the company-forms check
         forms = None

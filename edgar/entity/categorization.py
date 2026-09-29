@@ -30,6 +30,7 @@ __all__ = [
     'SIC_CODES_REIT',
     'SIC_CODES_SPAC',
     'SIC_CODES_BANK',
+    'SIC_CODES_CREDIT_AGENCY',
     'SIC_CODES_INSURANCE',
     'SIC_CODES_INVESTMENT_MANAGER',
     'SIC_CODES_HOLDING_COMPANY',
@@ -56,6 +57,7 @@ class BusinessCategory(str, Enum):
     REIT = "REIT"
     INVESTMENT_MANAGER = "Investment Manager"
     BANK = "Bank"
+    CREDIT_AGENCY = "Credit Agency"
     INSURANCE_COMPANY = "Insurance Company"
     SPAC = "SPAC"
     HOLDING_COMPANY = "Holding Company"
@@ -79,6 +81,27 @@ SIC_CODES_BANK: Set[int] = {
     6029,  # Commercial Banks NEC
     6035,  # Savings Institutions, Federally Chartered
     6036,  # Savings Institutions, Not Federally Chartered
+    6120,  # Savings & Loan Associations — a depository, like 6035/6036
+}
+
+# Non-depository credit institutions: they lend, guarantee or securitize
+# without taking deposits, so no bank SIC covers them and they used to fall
+# through every branch to "Operating Company" -- Fannie Mae, Freddie Mac and
+# Farmer Mac among them (GH #1120).
+#
+# 6189 (Asset-Backed Securities) is deliberately absent: those filers are
+# securitization trusts holding a static pool, not credit institutions, and the
+# code is used by thousands of them.
+SIC_CODES_CREDIT_AGENCY: Set[int] = {
+    6099,  # Functions Related to Depository Banking, NEC
+    6111,  # Federal & Federally-Sponsored Credit Agencies
+    6141,  # Personal Credit Institutions
+    6153,  # Short-Term Business Credit Institutions
+    6159,  # Federal & Federally-Sponsored Credit Agencies
+    6162,  # Mortgage Bankers & Loan Correspondents
+    6163,  # Loan Brokers
+    6172,  # Finance Lessors
+    6199,  # Finance Services
 }
 
 # Insurance Companies
@@ -275,7 +298,14 @@ def classify_business_category(
         if ('TRUST' in name_upper or 'FUND' in name_upper) and 'ROYALTY' not in name_upper:
             return BusinessCategory.ETF.value
 
-    # Step 9: Default to operating company
+    # Step 9: Non-depository credit institutions.
+    # Placed last among the positive branches on purpose: it only catches what
+    # would otherwise be called an Operating Company, so no entity that already
+    # matched a category above can change (GH #1120).
+    if sic_int is not None and sic_int in SIC_CODES_CREDIT_AGENCY:
+        return BusinessCategory.CREDIT_AGENCY.value
+
+    # Step 10: Default to operating company
     # If we have a SIC code and nothing above matched, the entity is an
     # operating company regardless of entity_type. This handles foreign/Canadian
     # filers (entity_type='other') that have clear SIC codes.
@@ -286,7 +316,7 @@ def classify_business_category(
     if entity_type in ('operating', '', None):
         return BusinessCategory.OPERATING_COMPANY.value
 
-    # Step 10: Unknown (no SIC and non-operating entity_type)
+    # Step 11: Unknown (no SIC and non-operating entity_type)
     return BusinessCategory.UNKNOWN.value
 
 

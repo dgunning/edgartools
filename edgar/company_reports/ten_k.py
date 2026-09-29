@@ -14,6 +14,7 @@ from edgar.company_reports._structures import FilingStructure, item_sort_key
 from edgar.core import log
 from edgar.display.formatting import datefmt
 from edgar.documents import HTMLParser, ParserConfig, parse_html
+from edgar.documents.form_schema import TEN_K_FRIENDLY_ITEMS
 from edgar.exceptions import strict_errors_enabled
 from edgar.files.htmltools import ChunkedDocument
 
@@ -288,31 +289,7 @@ class TenK(CompanyReport):
             (e.g., ['Item 1', 'Item 1A', 'Item 1B', 'Item 2', ...]).
         """
         # Mapping from friendly section names to Item numbers
-        section_to_item = {
-            'business': 'Item 1',
-            'risk_factors': 'Item 1A',
-            'unresolved_staff_comments': 'Item 1B',
-            'cybersecurity': 'Item 1C',
-            'properties': 'Item 2',
-            'legal_proceedings': 'Item 3',
-            'mine_safety': 'Item 4',
-            'market_equity': 'Item 5',
-            'selected_financial_data': 'Item 6',
-            'mda': 'Item 7',
-            'market_risk': 'Item 7A',
-            'financial_statements': 'Item 8',
-            'controls_procedures': 'Item 9',
-            'controls_procedures_9a': 'Item 9A',
-            'other_information': 'Item 9B',
-            'foreign_jurisdictions': 'Item 9C',
-            'directors_officers': 'Item 10',
-            'executive_compensation': 'Item 11',
-            'security_ownership': 'Item 12',
-            'relationships_transactions': 'Item 13',
-            'accounting_fees': 'Item 14',
-            'exhibits': 'Item 15',
-            'summary': 'Item 16'
-        }
+        section_to_item = {name: f'Item {item}' for name, item in TEN_K_FRIENDLY_ITEMS.items()}
 
         def _canonical(raw_items):
             """Deduplicate and sort into canonical SEC 10-K item order."""
@@ -575,31 +552,7 @@ class TenK(CompanyReport):
             Section text content as string, or None if not found
         """
         # Mapping from Item numbers to friendly section names
-        item_to_section = {
-            'Item 1': 'business',
-            'Item 1A': 'risk_factors',
-            'Item 1B': 'unresolved_staff_comments',
-            'Item 1C': 'cybersecurity',
-            'Item 2': 'properties',
-            'Item 3': 'legal_proceedings',
-            'Item 4': 'mine_safety',
-            'Item 5': 'market_equity',
-            'Item 6': 'selected_financial_data',
-            'Item 7': 'mda',
-            'Item 7A': 'market_risk',
-            'Item 8': 'financial_statements',
-            'Item 9': 'controls_procedures',
-            'Item 9A': 'controls_procedures_9a',
-            'Item 9B': 'other_information',
-            'Item 9C': 'foreign_jurisdictions',
-            'Item 10': 'directors_officers',
-            'Item 11': 'executive_compensation',
-            'Item 12': 'security_ownership',
-            'Item 13': 'relationships_transactions',
-            'Item 14': 'accounting_fees',
-            'Item 15': 'exhibits',
-            'Item 16': 'summary'
-        }
+        item_to_section = {f'Item {item}': name for name, item in TEN_K_FRIENDLY_ITEMS.items()}
 
         # Reverse mapping: friendly names to Item numbers
         # (TOC-based detection uses "Item X" keys, so we need to map friendly names back)

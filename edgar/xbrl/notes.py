@@ -27,6 +27,7 @@ from rich.table import Table as RichTable
 from rich.text import Text
 
 from edgar.core import log
+from edgar.documents.utils.html_utils import text_skipping_tables, text_stripped
 from edgar.richtools import repr_rich
 
 if TYPE_CHECKING:
@@ -452,30 +453,70 @@ class Notes:
 
     @classmethod
     def _build_from_xbrl_only(cls, xbrl, all_stmts, entity_name, form, period) -> 'Notes':
-        """Fallback: build flat notes list from XBRL classification only."""
+        """Fallback: build notes from XBRL classification only.
+
+        Without a FilingSummary there is no ParentRole, so a note is any
+        note- or disclosure-category role that is a family stem by name, and
+        its Tables, Policies and Details members hang from it by name too,
+        whichever way the filing spells them (issue #1218).  The stem alone
+        carries only a TextBlock; the members are where the data concepts
+        live, so the concept index is empty without them.  Disclosure-category
+        roles count because a role that hangs from a `*DisclosureAbstract`
+        is classified `disclosure` even when it is a note (issue #1207).
+        """
         from edgar.xbrl.statements import Statement, Statements
+        from edgar.xbrl.xbrl import (
+            _ROLE_FAMILY_SUFFIX_RE,
+            _role_family_key,
+            _role_family_members,
+            _role_family_stem,
+        )
+
+        def name_of(stmt) -> str:
+            # A role without a string definition has no family name, as in
+            # the pre-scan of `get_all_statements`.
+            definition = stmt.get('definition', '')
+            return definition if isinstance(definition, str) else ''
+
+        members = _role_family_members(name_of(s) for s in all_stmts)
+        stems = [s for s in all_stmts
+                 if name_of(s) not in members
+                 and Statements.classify_statement(s) in ('note', 'disclosure')]
+        stem_role_by_key = {}
+        for stmt in stems:
+            stem_role_by_key.setdefault(_role_family_key(name_of(stmt)), stmt['role'])
+
+        # Members grouped under their stem's role, by kind.
+        children: Dict[str, Dict[str, list]] = {}
+        for stmt in all_stmts:
+            definition = name_of(stmt)
+            if definition not in members:
+                continue
+            stem_key = _role_family_stem(_role_family_key(definition), stem_role_by_key)
+            if stem_key is None:
+                continue
+            suffix = _ROLE_FAMILY_SUFFIX_RE.search(definition.lower()).group(0)
+            kind = 'tables' if 'table' in suffix else 'policies' if 'polic' in suffix else 'details'
+            buckets = children.setdefault(stem_role_by_key[stem_key], {'tables': [], 'policies': [], 'details': []})
+            buckets[kind].append(Statement(xbrl, stmt['role']))
 
         notes = []
-        idx = 1
-        for stmt in all_stmts:
-            category = Statements.classify_statement(stmt)
-            if category == 'note' and stmt.get('type') == 'Notes':
-                # Only top-level notes (not Tables/Policies)
-                statement = Statement(xbrl, stmt['role'])
-                definition = stmt.get('definition', '')
-                # Try to extract a clean name from definition
-                short_name = _extract_short_name(definition)
-                note = Note(
-                    number=idx,
-                    title=short_name,
-                    short_name=short_name,
-                    role=stmt['role'],
-                    statement=statement,
-                    menu_category='Notes',
-                    xbrl=xbrl,
-                )
-                notes.append(note)
-                idx += 1
+        for idx, stmt in enumerate(stems, start=1):
+            # Try to extract a clean name from definition
+            short_name = _extract_short_name(name_of(stmt))
+            family = children.get(stmt['role'], {})
+            notes.append(Note(
+                number=idx,
+                title=short_name,
+                short_name=short_name,
+                role=stmt['role'],
+                statement=Statement(xbrl, stmt['role']),
+                tables=family.get('tables', []),
+                policies=family.get('policies', []),
+                details=family.get('details', []),
+                menu_category='Notes',
+                xbrl=xbrl,
+            ))
 
         return cls(notes, entity_name=entity_name, form=form, period=period)
 
@@ -826,44 +867,6 @@ def _inner_html(root) -> str:
     return ''.join(parts)
 
 
-def _text_skipping_tables(element) -> str:
-    """``get_text(separator=' ', strip=True)`` over everything outside a table.
-
-    Two traps in one function. First, this is NOT ``text_content()``: that
-    concatenates descendants with no separator, gluing the last word of one node
-    to the first of the next. Second, it walks rather than removing the tables:
-    dropping an element in lxml deletes its tail, and splicing the tail back
-    onto the previous sibling to save it MERGES two of bs4's separate strings
-    into one, so the separator is then never inserted between them. Both
-    mistakes produce the same symptom -- run-together words -- which is the
-    edgartools-vfwp family this codepath already has a history of.
-    """
-    chunks: List[str] = []
-
-    def walk(el):
-        if el.text and el.text.strip():
-            chunks.append(el.text.strip())
-        for child in el.iterchildren():
-            tag = child.tag
-            if isinstance(tag, str) and tag.lower() != 'table':
-                walk(child)
-            if child.tail and child.tail.strip():
-                chunks.append(child.tail.strip())
-
-    walk(element)
-    return ' '.join(chunks)
-
-
-def _joined_cell_text(element) -> str:
-    """``get_text(strip=True)`` -- each string stripped, joined with NOTHING.
-
-    The empty separator is the point: bs4 strips every string and concatenates,
-    so "<span> 1,234 </span><span> </span>" gives "1,234", where
-    ``text_content()`` would keep the inner padding and give " 1,234  ".
-    """
-    return ''.join(chunk.strip() for chunk in element.itertext())
-
-
 def _without_tables(root):
     """A copy of the tree with every <table> removed, tails preserved.
 
@@ -983,7 +986,7 @@ def _html_table_to_plain_text(table_tag) -> Optional[str]:
     matrix = []
     for row in rows:
         cells = row.xpath('.//td | .//th')
-        row_text = [_joined_cell_text(c) for c in cells]
+        row_text = [text_stripped(c) for c in cells]
         if any(row_text):  # Skip fully empty rows
             matrix.append(row_text)
 
@@ -1037,7 +1040,7 @@ def _extract_narrative_markdown(html: str, optimize_for_llm: bool) -> Optional[s
             # rather than taking the text of `stripped`: removing the tables
             # merged text nodes that bs4 kept separate, and get_text's separator
             # only goes between separate strings.
-            text = _text_skipping_tables(root)
+            text = text_skipping_tables(root)
             # Fix missing spaces between adjacent spans (e.g., "hadno" → "had no")
             text = re.sub(r'([a-z])([A-Z$])', r'\1 \2', text)
             text = re.sub(r'(\w)([$])', r'\1 \2', text)

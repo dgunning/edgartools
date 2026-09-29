@@ -58,6 +58,31 @@ STATEMENT_TYPE_CONFIG = {
             }
         ]
     },
+    # A cash flow statement selects the same duration periods an income
+    # statement does (determine_periods_to_display handles the two together),
+    # but it had no entry here, so get_period_views() returned [] for it and
+    # the named views were unreachable through to_dataframe(period_view=...)
+    # (GH #1253).
+    'CashFlowStatement': {
+        'period_type': 'duration',
+        'max_periods': 3,
+        'allow_annual_comparison': True,
+        'views': [
+            {
+                'name': 'Three Recent Periods',
+                'description': 'Shows three most recent reporting periods',
+                'max_periods': 3,
+                'requires_min_periods': 3
+            },
+            {
+                'name': 'YTD and Quarterly Breakdown',
+                'description': 'Shows YTD figures and quarterly breakdown',
+                'max_periods': 5,
+                'requires_min_periods': 2,
+                'mixed_view': True
+            }
+        ]
+    },
     'StatementOfEquity': {
         'period_type': 'duration',
         'max_periods': 3,

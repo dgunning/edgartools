@@ -6,6 +6,7 @@ This system uses TOC structure to extract specific sections like "Item 1",
 all SEC filings regardless of whether they use semantic anchors or generated IDs.
 """
 import bisect
+import dataclasses
 import logging
 import re
 from dataclasses import dataclass
@@ -46,6 +47,11 @@ _ITEM_TITLE_PATTERNS = {
 }
 
 
+# Column-alignment padding in a rendered table, and a rule line under its header.
+_TABLE_PADDING = re.compile(r' {3,}')
+_TABLE_RULE_LINE = re.compile(r'^[\s─-╿]*$')
+
+
 @dataclass
 class SectionBoundary:
     """Represents the boundaries of a document section."""
@@ -64,6 +70,10 @@ class SectionBoundary:
     # prospectus financial-statements F-pages — gh-878). Takes effect alongside
     # end_element_id; whichever boundary is hit first in document order wins.
     end_element: Optional[object] = None
+    # Optional hard start: begin extraction AT this lxml element (its own text
+    # included) instead of just after the start anchor. Used when several items
+    # share one anchor and are told apart by their heading elements (GH #1345).
+    start_element: Optional[object] = None
 
 
 class SECSectionExtractor:
@@ -221,9 +231,76 @@ class SECSectionExtractor:
 
         self.section_map = {name: data['canonical_name'] for name, data in sec_sections.items()}
 
+        # Items that share one anchor but were told apart by their heading
+        # elements (GH #1345): start each displaced item at its own heading and
+        # bound it on the right, instead of slicing every key to one span.
+        for name, (start_el, end_el) in getattr(self.toc_analyzer, 'heading_bounds', {}).items():
+            boundary = self.section_boundaries.get(name)
+            if boundary is None:
+                continue
+            if start_el is not None:
+                boundary.start_element = start_el
+            if end_el is not None:
+                boundary.end_element = end_el
+
         # Re-resolve section boundaries whose span is anomalous for their rescue
         # key (edgartools-llmp.1 / D3).
         self._rescue_boundaries()
+
+        self._bound_open_sections_at_signatures(tree)
+
+    def _bound_open_sections_at_signatures(self, tree) -> None:
+        """End a section with no end boundary at the next bare SIGNATURES line.
+
+        The last TOC item has no next anchor, so it ran to the end of the
+        document and swallowed the signature block whenever the TOC carried no
+        SIGNATURES row of its own. The pattern extractor has always stopped the
+        last item there (edgartools-dt1f.1); this applies the same test,
+        `_SIGNATURES_HEADER`, to the TOC path. ExxonMobil's 10-Q became
+        TOC-detected with GH #1347, and its Item 6 took in "SIGNATURE ... Len M.
+        Fox" until this bound was added.
+
+        10-Q only, the scope Strategy 3b gives SIGNATURES on the pattern path. A
+        10-K routinely files its financial statements after the signature page,
+        so the same bound cut a modern 10-K's Item 15 from 153,840 chars to 1,051.
+        """
+        from edgar.documents.extractors.pattern_section_extractor import _SIGNATURES_HEADER
+
+        if self._base_form() != '10-Q':
+            return
+
+        open_ended = [b for b in self.section_boundaries.values()
+                      if not b.end_element_id and b.end_element is None]
+        if not open_ended:
+            return
+
+        # The outermost element whose whole text is the bare header, found from
+        # the few text nodes that mention the word rather than a full walk.
+        headers = []
+        for text in tree.xpath('//text()[contains(translate(., "signature", "SIGNATURE"), "SIGNATURE")]'):
+            owner = text.getparent()
+            if owner is not None and text.is_tail:
+                owner = owner.getparent()
+            if owner is None or not _SIGNATURES_HEADER.match(owner.text_content()):
+                continue
+            parent = owner.getparent()
+            while (parent is not None and parent.tag not in ('body', 'html')
+                   and _SIGNATURES_HEADER.match(parent.text_content())):
+                owner, parent = parent, parent.getparent()
+            if not any(owner is h for h in headers):
+                headers.append(owner)
+        if not headers:
+            return
+        headers.sort(key=document_order_path)
+
+        for boundary in open_ended:
+            start_el = boundary.start_element
+            if start_el is None:
+                targets = find_anchor_targets(tree, boundary.anchor_id)
+                if not targets:
+                    continue
+                start_el = targets[0]
+            boundary.end_element = next((h for h in headers if precedes(start_el, h)), None)
 
     # --- Boundary rescue (edgartools-llmp.1 / D3) -------------------------------
     #
@@ -358,6 +435,22 @@ class SECSectionExtractor:
     # re-attributed body heading, plus the page number that often trails it.
     _NAV_TEXT_RE = re.compile(r'^(?:table of contents|financial table of contents)$', re.IGNORECASE)
     _NAV_NUM_RE = re.compile(r'^\d{1,4}$')
+    # A rendered table row separates its cells with two or more spaces, so a
+    # breadcrumb laid out as a one-row table arrives as a single line.
+    _TABLE_CELL_SEP_RE = re.compile(r'\s{2,}')
+
+    def _is_nav_line(self, stripped: str) -> bool:
+        """True for a breadcrumb line: navigation labels, optionally with page numbers.
+
+        ExxonMobil's page header is a one-row table, "Table of Contents | Financial
+        Table of Contents". Once tables rendered cell by cell (edgartools-wzgu) it
+        arrived as one line, which the one-label-per-line match missed, so the
+        breadcrumb opened Item 7 again. At least one cell must be a label, so a
+        row of bare numbers is never mistaken for navigation.
+        """
+        cells = self._TABLE_CELL_SEP_RE.split(stripped)
+        return (any(self._NAV_TEXT_RE.match(c) for c in cells)
+                and all(self._NAV_TEXT_RE.match(c) or self._NAV_NUM_RE.match(c) for c in cells))
 
     def _strip_leading_nav(self, text: Optional[str]) -> Optional[str]:
         """Drop leading blank / navigation-breadcrumb lines from a section's text.
@@ -380,7 +473,7 @@ class SECSectionExtractor:
             if not stripped:
                 i += 1
                 continue  # blank lines don't reset breadcrumb adjacency
-            if self._NAV_TEXT_RE.match(stripped):
+            if self._is_nav_line(stripped):
                 prev_was_breadcrumb = True
                 i += 1
                 continue
@@ -557,10 +650,9 @@ class SECSectionExtractor:
                 continue
             end_pos = positions.get(boundary.end_element_id) if boundary.end_element_id else total
             if end_pos is None or end_pos > clamp_pos:
-                self.section_boundaries[key] = SectionBoundary(
-                    name=boundary.name, anchor_id=boundary.anchor_id, end_element_id=clamp_anchor,
-                    confidence=boundary.confidence, detection_method=boundary.detection_method,
-                )
+                # replace() keeps any heading-element bounds (GH #1345).
+                self.section_boundaries[key] = dataclasses.replace(
+                    boundary, end_element_id=clamp_anchor)
 
         logger.info("Re-attributed incorporated-by-reference financials: claimed %s",
                     sorted(deferred) + (['part_ii_item_7 (gap-fill)'] if 'part_ii_item_7' not in deferred else []))
@@ -799,10 +891,16 @@ class SECSectionExtractor:
         # pattern extractor build boundaries by other routes: if one of those
         # ever inverts a pair, silence is still the answer we want over text
         # that runs to the end of the filing at confidence 0.95.
+        # A heading-element start (GH #1345) replaces the anchor as the point
+        # the walk begins at; the anchor only has to exist.
+        start_el = boundary.start_element if boundary.start_element is not None else start_elements[0]
+
         if boundary.end_element_id:
             end_elements = find_anchor_targets(tree, boundary.end_element_id)
-            if end_elements and precedes(end_elements[0], start_elements[0]):
+            if end_elements and precedes(end_elements[0], start_el):
                 return ""
+        if boundary.end_element is not None and precedes(boundary.end_element, start_el):
+            return ""
 
         # Use document-order traversal (iterwalk) to collect all text between anchors
         # This correctly handles multi-container sections where start and end anchors
@@ -820,20 +918,46 @@ class SECSectionExtractor:
         # and worst for the last items in a filing (edgartools-llmp.8). The element
         # is already resolved above, so starting there costs nothing extra.
         #
-        # The loop body below is unchanged: iterwalk_from yields the identical
-        # event/element sequence the root walk would have produced from this point
-        # on, ancestor 'end' events included.
-        for event, el in iterwalk_from(start_elements[0]):
+        # iterwalk_from yields the identical event/element sequence the root walk
+        # would have produced from this point on, ancestor 'end' events included.
+        #
+        # A table whose subtree is being rendered whole: its inner events are
+        # skipped until its own 'end' event.
+        rendered_table = None
+
+        for event, el in iterwalk_from(start_el):
             # Skip non-element nodes (comments, etc.)
             if not hasattr(el, 'get'):
                 continue
+
+            if rendered_table is not None:
+                if el is not rendered_table:
+                    continue
+                rendered_table = None  # its 'end' event: handled below
 
             el_id = el.get('id', '')
             tag_name = el.tag.lower() if isinstance(el.tag, str) else ''
 
             if event == 'start':
-                # Check if we've reached the start anchor
-                if is_anchor_match(el, boundary.anchor_id):
+                # Render a table the way doc.text() does, rather than
+                # concatenating its cells' raw text, which fused adjacent cells
+                # ("November 1-30, 2021" + "7,294,800" -> "20217,294,800").
+                # A table holding a boundary keeps the element-wise walk so the
+                # section still stops inside it.
+                if (in_range and tag_name == 'table'
+                        and not self._table_holds_boundary(el, boundary, include_subsections)):
+                    table_text = self._render_table(el, clean)
+                    if table_text is not None:
+                        all_text.append(table_text)
+                        rendered_table = el
+                        continue
+
+                # Check if we've reached the start: the heading element itself
+                # (its text belongs to the section), else the start anchor.
+                if boundary.start_element is not None:
+                    if el is boundary.start_element:
+                        in_range = True
+                elif is_anchor_match(el, boundary.anchor_id):
                     in_range = True
                     continue
 
@@ -873,6 +997,62 @@ class SECSectionExtractor:
             combined_text = self._clean_section_text(combined_text)
 
         return combined_text
+
+    def _table_holds_boundary(self, table, boundary: SectionBoundary,
+                              include_subsections: bool) -> bool:
+        """True when ``table`` (or anything inside it) is where the walk must stop."""
+        end_id = boundary.end_element_id
+        for el in table.iter():
+            if not isinstance(el.tag, str):
+                continue
+            if end_id and is_anchor_match(el, end_id):
+                return True
+            if boundary.end_element is not None and el is boundary.end_element:
+                return True
+            if not include_subsections and self._is_sibling_section(el.get('id', ''), boundary.name):
+                return True
+        return False
+
+    def _render_table(self, table, clean: bool) -> Optional[str]:
+        """Render an lxml ``<table>`` with the rule ``doc.text()`` uses.
+
+        Builds the TableNode with the parser's own TableProcessor (as
+        ``Section.tables()`` does for TOC sections) and renders it through
+        ``TextExtractor.render_table`` — one implementation, not a copy of it.
+        So which cells a row has, their order, and how "$" and ")" join their
+        figures are exactly what ``doc.text()`` shows.
+
+        Two deliberate differences, both about layout rather than content:
+
+        * Column width is unbounded (``doc.text(table_max_col_width=...)``'s own
+          knob). At the default, cells over 500 characters are cut to "...", and
+          filers put whole paragraphs in layout-table cells: 161 such cuts across
+          the fixture corpus would have been new losses in section text.
+        * Alignment padding collapses to two spaces and header rule lines are
+          dropped. Section text is a flat stream, not a grid, and the padding
+          alone made table-heavy sections 1.5-2.6x longer (XOM 10-K Item 8:
+          166,291 -> 437,219 chars) — which pushed nine correctly-bounded
+          sections past the size guardrail's bands, calibrated on this text.
+
+        Returns None if the table cannot be processed, so the caller falls back
+        to the element-wise walk.
+        """
+        from edgar.documents.config import ParserConfig
+        from edgar.documents.extractors.text_extractor import TextExtractor
+        from edgar.documents.strategies.table_processing import TableProcessor
+
+        config = getattr(self.document, '_config', None) or ParserConfig()
+        try:
+            node = TableProcessor(config).process(table)
+            rendered = TextExtractor(clean=clean, table_max_col_width=10**6).render_table(node)
+        except Exception as e:  # malformed filing HTML: keep the old walk
+            logger.debug("TOC section table render failed: %s", e)
+            return None
+        lines = (_TABLE_PADDING.sub('  ', line).strip() for line in rendered.splitlines())
+        text = '\n'.join(line for line in lines if not _TABLE_RULE_LINE.match(line))
+        if not text and any(ch.isalnum() for ch in table.text_content()):
+            return None  # the renderer kept nothing of a table that has content
+        return text
 
     def _is_sibling_section(self, element_id: str, current_section: str) -> bool:
         """Check if element ID represents a sibling section."""

@@ -31,16 +31,17 @@ Example usage:
     >>> dataset.soi          # Schedule of Investments
     >>>
     >>> # Bulk analysis
-    >>> soi_df = dataset.soi
+    >>> dataset.summary_by_industry()
+    >>> soi_df = dataset.schedule_of_investments.to_dataframe(clean=True)
     >>> soi_df.groupby('industry')['fair_value'].sum()
 """
 import io
-import zipfile
-from dataclasses import dataclass
 import logging
+import zipfile
+from dataclasses import dataclass, field
 from datetime import date
 from functools import lru_cache
-from typing import Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, Union
 
 if TYPE_CHECKING:
     from edgar.bdc.reference import BDCEntity
@@ -50,6 +51,9 @@ from rich import box
 from rich.panel import Panel
 from rich.table import Table
 
+from edgar.bdc.industry import clean_industry_label, issuer_key, normalize_sector
+from edgar.bdc.investments import grouping_industries, identifier_industry, issuer_from_identifier
+from edgar.exceptions import ValidationError
 from edgar.httprequests import get_with_retry, is_unreachable
 from edgar.richtools import repr_rich
 
@@ -70,7 +74,6 @@ BDC_DATASET_BASE_URL = "https://www.sec.gov/files/datastandardsinnovation/data/b
 # Column name mappings for cleaner output
 _COLUMN_RENAMES = {
     # Axis columns - remove "Axis" suffix and simplify
-    'Industry Sector Axis': 'industry',
     'Investment, Identifier Axis': 'investment_id',
     'Investment, Issuer Affiliation Axis': 'affiliation',
     'Investment Type Axis': 'investment_type',
@@ -88,11 +91,7 @@ _COLUMN_RENAMES = {
     'Investment Interest Rate': 'interest_rate',
     'Investment, Basis Spread, Variable Rate': 'spread',
     'Investment Maturity Date': 'maturity_date',
-    'Investment Owned, Balance, Principal Amount': 'principal',
-    'Investment Owned, Cost': 'cost',
-    'Investment Owned, Fair Value': 'fair_value',
     'Investment Owned, Net Assets, Percentage': 'pct_net_assets',
-    'Investment Owned, Balance, Shares': 'shares',
     'Investment, Interest Rate, Paid in Kind': 'pik_rate',
     'Investment, Acquisition Date': 'acquisition_date',
     # Metadata
@@ -100,17 +99,263 @@ _COLUMN_RENAMES = {
     'inlineurl': 'filing_url',
 }
 
+# The SOI extract's column headers are XBRL labels, not tags, and DERA takes
+# each label from one filer's label linkbase. When the data sets moved to their
+# 2026 location the headers for fair value, cost and shares switched from the
+# us-gaap standard labels to one filer's custom labels, while the standard-label
+# columns stayed in the file with every cell empty. The zip's tag.tsv does not
+# carry the custom labels, so the aliases have to live here. Within a field the
+# first populated source wins for a row; for industry the choice is made per
+# filing (see _resolve_industry) because a filer that tags subtotals on the
+# axis and line items on the enumeration would otherwise be counted twice.
+_SOI_FIELD_SOURCES: dict[str, tuple[str, ...]] = {
+    'fair_value': (
+        'Investment Owned, Fair Value',        # us-gaap:InvestmentOwnedAtFairValue, standard label
+        'Initial fair value of Investment',    # the same concept under the relocated files' header
+        'Investments, Fair Value Disclosure',  # us-gaap:InvestmentsFairValueDisclosure
+        'Investments',                         # us-gaap:Investments, tagged per position by a few filers
+    ),
+    'cost': (
+        'Investment Owned, Cost',
+        'Adjusted cost basis',
+    ),
+    'shares': (
+        'Investment Owned, Balance, Shares',
+        'Investment shares',
+    ),
+    'principal': (
+        'Investment Owned, Balance, Principal Amount',
+    ),
+    'industry': (
+        'Industry Sector Axis',
+        'Investment, Industry Sector [Extensible Enumeration]',
+        'InvestmentsClassificationByIndustry',
+        'TypeOfIndustry',
+    ),
+}
+# 'Entity Sector Industry Classifications, Sector Axis' is deliberately absent:
+# the one filer using it puts asset classes there ("Debt Investments"), and its
+# rows already carry Industry Sector Axis.
+
+_IDENTIFIER_COLUMN = 'Investment, Identifier Axis'
+_ISSUER_COLUMNS = ('Investment, Issuer Name Axis', 'company')
+
+# Words that identify a look-alike column when a field cannot be resolved, so
+# the warning can point at the header DERA switched to.
+_SOI_FIELD_HINTS = {
+    'fair_value': 'fair value',
+    'cost': 'cost',
+    'shares': 'shares',
+    'principal': 'principal',
+    'industry': 'industry',
+}
+
+# The label clean-up lives in edgar.bdc.industry so the per-filing path reads
+# the same labels; the name is kept for callers of the data set module.
+_clean_industry_label = clean_industry_label
+
+
+def _soi_sources_present(df: pd.DataFrame, field: str) -> list[str]:
+    """The source columns for a field that exist in this frame, in priority order."""
+    sources = [col for col in _SOI_FIELD_SOURCES[field] if col in df.columns]
+    if field in df.columns:
+        # An already-cleaned frame carries the canonical column itself.
+        sources.insert(0, field)
+    return sources
+
+
+def _warn_unresolved(df: pd.DataFrame, field: str) -> None:
+    hint = _SOI_FIELD_HINTS[field]
+    lookalikes = [col for col in df.columns if hint in str(col).lower()]
+    log.warning(
+        "No %s column could be resolved in the SOI data. Expected one of %s. "
+        "Columns mentioning '%s': %s. If DERA has renamed the column again, add the "
+        "new header to _SOI_FIELD_SOURCES in edgar/bdc/datasets.py.",
+        field, list(_SOI_FIELD_SOURCES[field]), hint, lookalikes,
+    )
+
+
+def _resolve_industry(df: pd.DataFrame, sources: list[str]) -> pd.DataFrame:
+    """
+    One industry per row with its provenance, chosen per filing.
+
+    A filing is served by the first tagged source it populates at all; later
+    sources only fill rows of filings the earlier ones never touched. Without
+    the per-filing rule a filer that tags industry subtotals on the axis and
+    line items on the enumeration contributes its portfolio twice.
+
+    Filings that tag no industry anywhere fall back to the Investment
+    Identifier text (``industry_source`` 'identifier'), and their rows still
+    without one take the industry another filer in the same data set tagged
+    for the same issuer ('peer'). Both fallbacks stay out of filings the axis
+    or enumeration served: a peer-filled row there could sit above the tagged
+    rows in the dimension hierarchy and be counted as a subtotal. Returns a
+    frame with ``industry`` and ``industry_source`` columns aligned to
+    ``df.index``; both are NA together.
+    """
+    industry = pd.Series(pd.NA, index=df.index, dtype=object)
+    source = pd.Series(pd.NA, index=df.index, dtype=object)
+    served_filings: set = set()
+    for col in sources:
+        if col in ('industry', 'industry_source'):
+            continue
+        present = df[col].notna()
+        if not present.any():
+            continue
+        if 'adsh' in df.columns:
+            take = present & ~df['adsh'].isin(served_filings)
+            served_filings.update(df.loc[take, 'adsh'].unique())
+        else:
+            take = present & industry.isna()
+        industry[take] = df.loc[take, col].map(clean_industry_label)
+        source[take] = 'enumeration' if 'Extensible Enumeration' in col else 'axis'
+
+    if _IDENTIFIER_COLUMN in df.columns and 'adsh' in df.columns:
+        untagged = ~df['adsh'].isin(served_filings) & df[_IDENTIFIER_COLUMN].notna()
+        for _, rows in df[untagged].groupby('adsh'):
+            identifiers = rows[_IDENTIFIER_COLUMN]
+            groupings = grouping_industries(identifiers.unique())
+            found = {
+                identifier: identifier_industry(identifier, candidates=groupings)
+                for identifier in identifiers.unique()
+            }
+            hits = identifiers.map(found)
+            take = hits.notna()
+            industry[hits.index[take]] = hits[take]
+            source[hits.index[take]] = 'identifier'
+
+    issuers = _issuer_keys(df)
+    if issuers is not None:
+        tagged = industry.notna() & issuers.notna()
+        by_issuer = (
+            pd.DataFrame({'issuer': issuers[tagged], 'industry': industry[tagged]})
+            .groupby('issuer')['industry']
+            .agg(lambda values: values.value_counts().index[0])
+        )
+        take = industry.isna() & issuers.isin(by_issuer.index)
+        if 'adsh' in df.columns:
+            take &= ~df['adsh'].isin(served_filings)
+        industry[take] = issuers[take].map(by_issuer)
+        source[take] = 'peer'
+
+    return pd.DataFrame({'industry': industry, 'industry_source': source})
+
+
+def _issuer_keys(df: pd.DataFrame) -> Optional[pd.Series]:
+    """The issuer key per row: the issuer-name axis where tagged, else read from the identifier."""
+    keys = pd.Series(pd.NA, index=df.index, dtype=object)
+    for col in _ISSUER_COLUMNS:
+        if col in df.columns:
+            keys = keys.combine_first(df[col].map(issuer_key))
+    if _IDENTIFIER_COLUMN in df.columns:
+        identifiers = df[_IDENTIFIER_COLUMN]
+        need = keys.isna() & identifiers.notna()
+        if need.any():
+            unique = identifiers[need].unique()
+            derived = {identifier: issuer_from_identifier(identifier) for identifier in unique}
+            keys[need] = identifiers[need].map(derived)
+    if keys.isna().all():
+        return None
+    return keys
+
+
+def _soi_field(df: pd.DataFrame, field: str, warn: bool = True) -> Optional[pd.Series]:
+    """
+    Resolve one canonical SOI field to a Series aligned to ``df.index``.
+
+    Numeric fields coalesce their sources row by row in priority order and
+    come back as floats. ``industry`` is chosen per filing (see
+    _resolve_industry). Returns None, and logs which headers were looked for
+    and which look-alikes exist, when no source column carries a value.
+    """
+    sources = [col for col in _soi_sources_present(df, field) if df[col].notna().any()]
+    if field == 'industry':
+        resolved = _soi_industry(df)
+        if resolved['industry'].notna().any():
+            return resolved['industry']
+        if warn:
+            _warn_unresolved(df, field)
+        return None
+    if not sources:
+        if warn:
+            _warn_unresolved(df, field)
+        return None
+    resolved = pd.to_numeric(df[sources[0]], errors='coerce')
+    for col in sources[1:]:
+        resolved = resolved.combine_first(pd.to_numeric(df[col], errors='coerce'))
+    return resolved.rename(field)
+
+
+def _soi_industry(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    ``industry``, ``industry_source`` and ``sector`` per row, aligned to ``df.index``.
+
+    A frame that already carries ``industry`` and ``industry_source`` (one
+    cleaned by :func:`_clean_soi_dataframe`) is read back as is.
+    """
+    if 'industry' in df.columns and 'industry_source' in df.columns:
+        resolved = df[['industry', 'industry_source']].copy()
+    else:
+        sources = [col for col in _SOI_FIELD_SOURCES['industry'] if col in df.columns]
+        resolved = _resolve_industry(df, sources)
+    resolved['sector'] = resolved['industry'].map(normalize_sector)
+    return resolved
+
+
+def _soi_dimension_depth(df: pd.DataFrame) -> pd.Series:
+    """
+    Number of XBRL dimensions on each SOI row.
+
+    Each row is one XBRL context; the axis-like columns it populates are its
+    dimensions. An industry subtotal sits at depth 1, a line item tagged with
+    industry, issuer and investment type at depth 3.
+    """
+    axis_cols = [
+        col for col in df.columns
+        if str(col).endswith(' Axis')
+        or str(col).endswith('[Extensible Enumeration]')
+        or col in _SOI_FIELD_SOURCES['industry']
+    ]
+    if not axis_cols:
+        return pd.Series(0, index=df.index)
+    return df[axis_cols].notna().sum(axis=1)
+
 
 def _clean_soi_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     """
     Clean up SOI DataFrame column names and values.
 
-    - Renames columns to simpler names
+    - Coalesces every header DERA has used for fair value, cost, shares,
+      principal and industry into one canonical column each; ``industry`` is
+      followed by ``industry_source`` (axis, enumeration, identifier or peer)
+      and the normalized ``sector``
+    - Renames the remaining known columns to simpler names
     - Removes "[Member]" suffix from axis values
     - Removes " Axis" suffix from any unmapped axis columns
     """
     if df.empty:
         return df
+
+    # Fold the as-filed headers into canonical columns, in place of the first source
+    for field in _SOI_FIELD_SOURCES:
+        sources = [col for col in _SOI_FIELD_SOURCES[field] if col in df.columns]
+        if field == 'industry':
+            resolved = _soi_industry(df)
+            if not resolved['industry'].notna().any():
+                df = df.drop(columns=sources)
+                continue
+            position = df.columns.get_loc(sources[0]) if sources else len(df.columns)
+            df = df.drop(columns=sources + [col for col in resolved.columns if col in df.columns])
+            for offset, col in enumerate(resolved.columns):
+                df.insert(min(position + offset, len(df.columns)), col, resolved[col])
+            continue
+        if not sources:
+            continue
+        resolved = _soi_field(df, field, warn=False)
+        position = df.columns.get_loc(sources[0])
+        df = df.drop(columns=sources + ([field] if field in df.columns else []))
+        if resolved is not None:
+            df.insert(min(position, len(df.columns)), field, resolved)
 
     # Rename known columns
     df = df.rename(columns=_COLUMN_RENAMES)
@@ -273,12 +518,9 @@ class ScheduleOfInvestmentsData:
                 return col
         return None
 
-    def _get_fair_value_column(self) -> Optional[str]:
-        """Find the column containing fair value."""
-        for col in ['fair_value', 'Investment Owned, Fair Value']:
-            if col in self._data.columns:
-                return col
-        return None
+    def _fair_values(self) -> Optional[pd.Series]:
+        """Fair value per row under whichever header DERA used, or None with a warning."""
+        return _soi_field(self._data, 'fair_value')
 
     def search(self, query: str, top_n: int = 20) -> pd.DataFrame:
         """
@@ -321,10 +563,10 @@ class ScheduleOfInvestmentsData:
             return pd.DataFrame()
 
         # Build result DataFrame
-        fair_value_col = self._get_fair_value_column()
+        fair_values = self._fair_values()
 
         result_data = []
-        for _, row in matches.iterrows():
+        for idx, row in matches.iterrows():
             company_name = row[company_col]
             # Clean up [Member] suffix
             if isinstance(company_name, str) and '[Member]' in company_name:
@@ -336,8 +578,8 @@ class ScheduleOfInvestmentsData:
                 'bdc_cik': row.get('cik', 0),
                 'form': row.get('form', ''),
             }
-            if fair_value_col:
-                entry['fair_value'] = row.get(fair_value_col, 0)
+            if fair_values is not None:
+                entry['fair_value'] = fair_values.loc[idx]
 
             result_data.append(entry)
 
@@ -381,7 +623,7 @@ class ScheduleOfInvestmentsData:
         if company_col is None:
             return pd.DataFrame()
 
-        fair_value_col = self._get_fair_value_column()
+        fair_values = self._fair_values()
 
         # Group by company
         grouped_data = []
@@ -403,8 +645,8 @@ class ScheduleOfInvestmentsData:
                 'bdc_names': ', '.join(sorted(bdc_names)[:3]) + ('...' if len(bdc_names) > 3 else ''),
             }
 
-            if fair_value_col and fair_value_col in group.columns:
-                entry['total_fair_value'] = group[fair_value_col].sum()
+            if fair_values is not None:
+                entry['total_fair_value'] = fair_values.loc[group.index].sum()
 
             grouped_data.append(entry)
 
@@ -468,6 +710,8 @@ class BDCDataset:
     numbers: pd.DataFrame
     presentation: pd.DataFrame
     soi: pd.DataFrame
+    # (soi frame, resolved industry frame); holding the frame keeps the identity check sound
+    _industry_resolution: tuple = field(default=(None, None), init=False, repr=False, compare=False)
 
     @property
     def period(self) -> str:
@@ -585,70 +829,196 @@ class BDCDataset:
 
     def summary_by_company(self) -> pd.DataFrame:
         """
-        Get a summary of SOI data aggregated by company.
+        Get a summary of SOI data aggregated by BDC.
+
+        Counts each filing's line items at its own period end, the way
+        :meth:`summary_by_industry` does: only rows dated at the filing's
+        period are counted, and the line items are the rows that carry an
+        Investment Identifier at the dimension depth where the filing has most
+        of them (its subtotals and concentration tables sit at other depths).
+        ``num_investments`` is the number of distinct identifiers among them.
+
+        ``total_fair_value`` is the filer's own undimensioned
+        ``InvestmentOwnedAtFairValue`` at the period end from ``numbers`` when
+        the filing reports one (149 of 160 in 2025Q2); otherwise it is the
+        fair value summed over the same line items, read from whichever header
+        DERA used. The SOI extract carries foreign-currency positions in their
+        own currency, so the summed fallback can sit a few percent under the
+        filed total.
 
         Returns:
-            DataFrame with columns: cik, name, form, filed, num_investments
+            DataFrame with columns cik, name, form, filed, num_investments and
+            total_fair_value, sorted by total_fair_value descending.
+            total_fair_value is absent when neither source is available; a
+            warning names the headers looked for.
         """
         if self.soi.empty:
             return pd.DataFrame()
 
-        # SOI data already contains cik, name, form, filed columns
         required_cols = ['cik', 'name', 'form', 'filed', 'adsh']
         if not all(col in self.soi.columns for col in required_cols):
             return pd.DataFrame()
 
-        # Aggregate by company
-        summary = self.soi.groupby(['cik', 'name']).agg({
-            'form': 'first',
-            'filed': 'max',
-            'adsh': 'count',  # Count of SOI entries
-        }).reset_index()
+        frame = self.soi[required_cols].copy()
+        if {'ddate', 'period'} <= set(self.soi.columns):
+            frame = frame[self.soi['ddate'] == self.soi['period']]
+        if _IDENTIFIER_COLUMN in self.soi.columns:
+            frame['identifier'] = self.soi.loc[frame.index, _IDENTIFIER_COLUMN]
+            # A filing that names its positions on the issuer axis alone keeps every row
+            has_identifiers = frame.groupby('adsh')['identifier'].transform(lambda s: s.notna().any())
+            frame.loc[~has_identifiers, 'identifier'] = frame.index[~has_identifiers].astype(str)
+            frame = frame[frame['identifier'].notna()]
+        else:
+            frame['identifier'] = frame.index.astype(str)
+        frame['depth'] = _soi_dimension_depth(self.soi).loc[frame.index]
+        rows_per_depth = frame.groupby(['adsh', 'depth'])['identifier'].transform('size')
+        line_items = frame[rows_per_depth == rows_per_depth.groupby(frame['adsh']).transform('max')]
 
-        summary.columns = ['cik', 'name', 'form', 'filed', 'num_investments']
-        return summary.sort_values('num_investments', ascending=False)
+        fair_value = _soi_field(self.soi, 'fair_value')
+        aggregations = {
+            'form': ('form', 'first'),
+            'filed': ('filed', 'max'),
+            'num_investments': ('identifier', 'nunique'),
+        }
+        if fair_value is not None:
+            line_items = line_items.assign(fair_value=fair_value.loc[line_items.index])
+            aggregations['total_fair_value'] = ('fair_value', 'sum')
+        summary = line_items.groupby(['cik', 'name', 'adsh']).agg(**aggregations).reset_index()
 
-    def summary_by_industry(self) -> pd.DataFrame:
+        filed_totals = self._filed_investment_totals()
+        if filed_totals is not None:
+            reported = summary['adsh'].map(filed_totals)
+            if 'total_fair_value' in summary.columns:
+                summary['total_fair_value'] = reported.combine_first(summary['total_fair_value'])
+            else:
+                summary['total_fair_value'] = reported
+        summary = summary.drop(columns='adsh')
+        sort_by = 'total_fair_value' if 'total_fair_value' in summary.columns else 'num_investments'
+        return summary.sort_values(sort_by, ascending=False).reset_index(drop=True)
+
+    def _filed_investment_totals(self) -> Optional[pd.Series]:
+        """Each filing's undimensioned InvestmentOwnedAtFairValue at its period end, keyed by adsh."""
+        num = self.numbers
+        needed = {'adsh', 'tag', 'ddate', 'value'}
+        if num is None or num.empty or not needed <= set(num.columns) or 'period' not in self.soi.columns:
+            return None
+        totals = num[num['tag'] == 'InvestmentOwnedAtFairValue']
+        if 'dimn' in totals.columns:
+            totals = totals[totals['dimn'].fillna(0) == 0]
+        elif 'segments' in totals.columns:
+            totals = totals[totals['segments'].isna()]
+        if 'qtrs' in totals.columns:
+            totals = totals[totals['qtrs'].fillna(0) == 0]
+        periods = self.soi.groupby('adsh')['period'].first().astype(str).str.replace('-', '', regex=False)
+        at_period = totals[totals['ddate'].astype(str) == totals['adsh'].map(periods)]
+        if at_period.empty:
+            return None
+        return pd.to_numeric(at_period.groupby('adsh')['value'].first(), errors='coerce')
+
+    def _resolved_industry(self) -> pd.DataFrame:
+        """
+        ``industry``, ``industry_source`` and ``sector`` per SOI row, resolved once per ``soi`` frame.
+
+        Resolution parses every untagged identifier and takes seconds on a full
+        quarter, so it is kept on the instance and redone only when ``soi`` is
+        replaced by a different frame.
+        """
+        frame, resolved = self._industry_resolution
+        if frame is not self.soi:
+            resolved = _soi_industry(self.soi)
+            self._industry_resolution = (self.soi, resolved)
+        return resolved
+
+    def summary_by_industry(self, by: str = 'industry') -> pd.DataFrame:
         """
         Get a summary of SOI data aggregated by industry.
 
+        Fair value is read from whichever header DERA used for
+        ``InvestmentOwnedAtFairValue`` in this data set, and industry from the
+        Industry Sector axis, the industry extensible enumeration, or a filer's
+        custom industry axis, chosen per filing in that order. A filing that
+        tags none of them is read from its Investment Identifier text ("Debt
+        Investments Automotive Truck-Lite Co., LLC ..."), and an issuer that is
+        still untagged takes the industry another BDC in the data set tagged
+        for it; ``to_dataframe(clean=True)`` shows the source per row.
+
+        Args:
+            by: ``'industry'`` (default) keeps the labels as filed, so "Software
+                Sector" and "Software & Services" are separate rows;
+                ``'sector'`` folds them into one normalized row.
+
+        Only rows dated at the filing's own period end are counted, so a 10-K's
+        prior-year comparatives do not inflate the totals. Within one filing and
+        industry the rows with the fewest XBRL dimensions carry the dollars:
+        that is the industry subtotal when the filer tags one, and the line
+        items otherwise. A filer that also tags an industry concentration table
+        on the same axis is still counted twice; the DERA extract does not say
+        which table a row came from. An industry read from the identifier or a
+        peer is never on a subtotal, so for those rows every identifier is a
+        line item and carries its own dollars, whatever its depth.
+
         Returns:
-            DataFrame with industry-level aggregations
+            DataFrame with columns industry (or sector), total_fair_value,
+            num_bdcs and num_investments, sorted by total_fair_value descending.
+            num_investments counts the finest-grained rows per filing and
+            industry, so a BDC that tags industry only on subtotals contributes
+            one per industry. total_fair_value is absent when no fair value
+            column could be resolved; a warning names the headers looked for.
         """
+        if by not in ('industry', 'sector'):
+            raise ValidationError(
+                f"by must be 'industry' or 'sector', got {by!r}",
+                parameter='by', invalid_value=by, suggestions=['industry', 'sector'],
+            )
         if self.soi.empty:
             return pd.DataFrame()
 
-        # Find the industry column (may be named differently)
-        industry_col = None
-        for col in ['industry', 'Industry Sector Axis']:
-            if col in self.soi.columns:
-                industry_col = col
-                break
-
-        if industry_col is None:
+        resolved = self._resolved_industry()
+        if not resolved['industry'].notna().any():
+            _warn_unresolved(self.soi, 'industry')
             return pd.DataFrame()
 
-        # Find the fair value column
-        fair_value_col = None
-        for col in ['fair_value', 'Investment Owned, Fair Value']:
-            if col in self.soi.columns:
-                fair_value_col = col
-                break
+        frame = pd.DataFrame({
+            'adsh': self.soi['adsh'],
+            'industry': resolved[by],
+            'filed_label': resolved['industry'],
+            'tagged': resolved['industry_source'].isin(['axis', 'enumeration']),
+        })
+        frame = frame[frame['industry'].notna()]
+        if _IDENTIFIER_COLUMN in self.soi.columns:
+            # A recovered industry sits on positions only; an issuer-level row
+            # would repeat the position's dollars
+            frame = frame[frame['tagged'] | self.soi.loc[frame.index, _IDENTIFIER_COLUMN].notna()]
+        if {'ddate', 'period'} <= set(self.soi.columns):
+            current = self.soi['ddate'] == self.soi['period']
+            frame = frame[current.loc[frame.index]]
 
-        if fair_value_col:
-            result = self.soi.groupby(industry_col).agg({
-                'adsh': 'count',
-                fair_value_col: 'sum'
-            }).reset_index().rename(columns={
-                industry_col: 'industry',
-                'adsh': 'num_investments',
-                fair_value_col: 'total_fair_value'
-            }).sort_values('total_fair_value', ascending=False)
-            return result
-        else:
-            result = self.soi.groupby(industry_col).size().reset_index(name='num_investments')
-            result = result.rename(columns={industry_col: 'industry'})
-            return result
+        fair_value = _soi_field(self.soi, 'fair_value')
+        if fair_value is None:
+            result = frame.groupby('industry').agg(
+                num_bdcs=('adsh', 'nunique'),
+                num_investments=('adsh', 'size'),
+            ).reset_index()
+            return result.sort_values('num_investments', ascending=False).reset_index(drop=True)
+
+        frame['fair_value'] = fair_value.loc[frame.index]
+        frame['depth'] = _soi_dimension_depth(self.soi).loc[frame.index]
+        frame = frame[frame['fair_value'].notna()]
+        if frame.empty:
+            return pd.DataFrame(columns=[by, 'total_fair_value', 'num_bdcs', 'num_investments'])
+
+        # Depth is chosen per filed label: two spellings a filing uses can fold
+        # into one sector while only one of them carries a subtotal
+        per_filing_industry = frame.groupby(['adsh', 'filed_label'])['depth']
+        subtotals = frame[~frame['tagged'] | (frame['depth'] == per_filing_industry.transform('min'))]
+        line_items = frame[~frame['tagged'] | (frame['depth'] == per_filing_industry.transform('max'))]
+
+        result = pd.DataFrame({
+            'total_fair_value': subtotals.groupby('industry')['fair_value'].sum(),
+            'num_bdcs': frame.groupby('industry')['adsh'].nunique(),
+            'num_investments': line_items.groupby('industry').size(),
+        }).reset_index().rename(columns={'industry': by})
+        return result.sort_values('total_fair_value', ascending=False).reset_index(drop=True)
 
     def __rich__(self):
         """Rich display for the dataset."""
@@ -750,7 +1120,8 @@ def fetch_bdc_dataset(year: int, quarter: int) -> BDCDataset:
         Found 45 submissions
         >>>
         >>> # Analyze SOI data
-        >>> soi = dataset.soi
+        >>> print(dataset.summary_by_industry().head())
+        >>> soi = dataset.schedule_of_investments.to_dataframe(clean=True)
         >>> print(soi.groupby('industry')['fair_value'].sum().head())
     """
     if quarter not in (1, 2, 3, 4):

@@ -138,7 +138,7 @@ def test_fmcc_phantom_items_are_prevented():
     mda = sections["part_i_item_2"]
     assert mda.confidence == 0.95
     mda_text = mda.text()
-    assert len(mda_text) == 51_860
+    assert len(mda_text) == 53_205  # tables rendered cell by cell (edgartools-wzgu)
     assert mda_text.lstrip().startswith("Management's Discussion and Analysis")
     assert not mda_text.lstrip().startswith("Table")
 

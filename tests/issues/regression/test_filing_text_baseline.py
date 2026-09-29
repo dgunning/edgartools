@@ -187,7 +187,11 @@ BASELINE = {
         # The "$" character count RISES 392 -> 400 (none lost; the standalone ones
         # merged into their figures), and every number in the old text is still
         # present IN ORDER, with 5 added.
-        "e3209b778ecea2eb25debbeec095f9662f478a25125d069c96b28341d7dc10e5",
+        # Re-captured for edgartools-wzgu: a column whose values are all one or two
+        # characters is no longer read as spacing. Apple's text gains "11", "30" and
+        # two "—" cells, two rule lines widen with the regained column, and no
+        # token is lost -- 2,966 numbers become 2,968, the old ones in order.
+        "e53e59fcb2f320c00b27153a3d5369735083b264f424f31fdaadac9bf9c19104",
     ),
     # Plain HTML 10-K
     "0001193125-20-052640": (
@@ -204,7 +208,10 @@ BASELINE = {
         # "(31,251" / "(112,485" / "(18,762" render as "(31,251)" / "(112,485)" /
         # "(18,762)". "$" rises 606 -> 612, and every pre-existing number is still
         # present in order, with 10 added.
-        "6c84a4404ec72ffbef863c7c92b227be500de7d4fa74beb0de5e7cb8d9eaf862",
+        # Re-captured for edgartools-wzgu (short columns kept): a numbered list laid
+        # out as a table regains its "1." .. "9." markers and seven rule lines
+        # resize; no token is lost -- 3,803 numbers become 3,812, the old in order.
+        "4174954dcdec09bd337c289a74d72cbeeff222d7897f2a80d4a90e8fa27142df",
     ),
     # CORRESP — the shape where the two paths already agreed before the fix
     "0000065873-05-000060": (
