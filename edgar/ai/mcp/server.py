@@ -130,6 +130,7 @@ Common workflows:
 2. Filing analysis: edgar_filing (by accession/URL) → edgar_read (extract sections)
 3. Event monitoring: edgar_monitor → edgar_filing (examine new filings)
 4. Peer comparison: edgar_screen (find peers) → edgar_compare (compare metrics)
+5. Credit evidence (BDC loans): edgar_fund (action="bdc_search") to find the BDC → edgar_search or edgar_company to list its 10-K/10-Q filings with periods → edgar_fund (action="bdc_portfolio", with period + borrower) for Schedule of Investments holdings → edgar_fund (action="bdc_nonaccrual") for non-accrual evidence → edgar_notes/edgar_read with the SAME period for narrative context behind the numbers. Pass a response's page.next_cursor (or section/table next_cursor) back as cursor to page through the rest. Comparing periods (e.g. quarter-over-quarter non-accrual growth) is the caller's job — call once per period and diff the results yourself.
 
 Pre-built analysis prompts are available via prompts/list: due_diligence, earnings_analysis, industry_overview, insider_monitor, fund_analysis, filing_comparison, activist_tracking."""
 

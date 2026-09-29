@@ -56,6 +56,21 @@ patterns:
       dataset = fetch_bdc_dataset(2024, 3)
       dataset.soi                                # Schedule of investments data
 
+  - name: BDC Portfolio From a Chosen Filing
+    when: Need holdings from a SPECIFIC 10-K/10-Q (a chosen quarter, not just the latest)
+    code: |
+      from edgar import find
+      from edgar.bdc import get_bdc_list, portfolio_investments_from_filing
+
+      filing = find("0001628280-26-050307")     # or company.get_filings(form="10-Q")...
+      investments = portfolio_investments_from_filing(filing)
+      investments.extraction_method              # 'xbrl_facts' or 'statement'
+
+      # Same filing via the BDC entity, once resolved
+      arcc = get_bdc_list().get_by_ticker("ARCC")
+      arcc.portfolio_investments(filing=filing)
+      arcc.schedule_of_investments(filing=filing)
+
   - name: Report Backlinks
     when: Navigate from report to filing
     code: |

@@ -191,16 +191,21 @@ Available sections vary by form type:
 
 | Parameter | Description |
 |-----------|-------------|
-| `accession_number` | Filing accession number |
-| `identifier` | Company ticker/CIK (alternative -- gets most recent filing) |
-| `form` | Form type (used with `identifier`) |
-| `sections` | Sections to extract. Use `summary` for metadata, `all` for everything. |
+| `accession_number` | Filing accession number. Takes precedence over `period`. |
+| `identifier` | Company ticker/CIK (alternative -- selects the latest ORIGINAL filing; amendments (`/A`) are only reachable by `accession_number`) |
+| `form` | Form type. Required whenever `identifier` is given. |
+| `period` | Reporting period (`YYYY-MM-DD`) that must exactly match the chosen filing's `period_of_report`. Requires `identifier` and `form`. |
+| `sections` | Sections to extract. Use `summary` for metadata, `all` for everything. With a `cursor`, must be exactly the one section being continued. |
+| `cursor` | Continuation cursor from a previous response's `section_pages.<section>.next_cursor`, to fetch the next page of that one section. |
 
 **Try asking Claude:**
 
 - "Show me the risk factors from Apple's latest 10-K"
 - "Get the MD&A section from Tesla's most recent annual report"
 - "Read the CEO compensation from Microsoft's proxy statement"
+- "Read ARCC's MD&A for the quarter ended 2026-06-30" -- `identifier="ARCC", form="10-Q", period="2026-06-30", sections=["mda"]`
+
+Each requested section is capped at one page of text; a truncated section's `section_pages.<section>` block carries a `next_cursor` -- pass it back as `cursor` with `sections` set to that SAME single section name to read the rest.
 
 ### edgar_notes
 
@@ -208,15 +213,20 @@ Drill into the notes and disclosures behind financial statement numbers. Use thi
 
 | Parameter | Description |
 |-----------|-------------|
-| `identifier` | Ticker, CIK, or name (required) |
+| `identifier` | Ticker, CIK, or name. Optional when `accession_number` is given. |
 | `topic` | Note topic: `debt`, `revenue`, `leases`, `contingencies`, etc. Omit for table of contents. |
 | `form` | Filing form type (default: `10-K`). Use `10-Q` for quarterly notes. |
 | `detail` | `minimal` (titles only), `standard` (context + tables), or `full` (includes DataFrame data) |
+| `accession_number` | Exact accession number pinning a specific filing. Takes precedence over `period`. |
+| `period` | Reporting period (`YYYY-MM-DD`) that must exactly match the chosen filing's `period_of_report`. |
+| `cursor` | Continuation cursor from a previous response's table/context `next_cursor`. Must be passed together with the SAME `topic` (and, for a note's context, the same `detail`) the original call used, or it is rejected as `CURSOR_MISMATCH`. |
+| `limit` | Max table rows per page (default 20, max 50). |
 
 **Try asking Claude:**
 
 - "What does Apple's debt note say?"
 - "Show me Tesla's revenue recognition policy"
+- "What does ARCC's debt note say for the quarter ended 2026-06-30?" -- `topic="debt", identifier="ARCC", form="10-Q", period="2026-06-30"`
 
 ??? example "Example response"
 
@@ -235,6 +245,8 @@ Drill into the notes and disclosures behind financial statement numbers. Use thi
       }]
     }
     ```
+
+A matched note's table rows and narrative `context` text are each capped per page; when more remains, that block carries a `next_cursor` to continue reading that one table or context.
 
 ---
 
@@ -328,20 +340,83 @@ Insider transactions (Form 4) or institutional portfolios (13F).
 
 ### edgar_fund
 
-Mutual funds, ETFs, BDCs, and money market funds -- lookup, search, portfolio holdings, and yields.
+Mutual funds, ETFs, BDCs, and money market funds -- lookup, search, portfolio holdings, yields, and (for BDCs) filing-scoped Schedule of Investments and non-accrual evidence.
 
 | Parameter | Description |
 |-----------|-------------|
-| `action` | `lookup`, `search`, `portfolio`, `money_market`, `bdc_search`, or `bdc_portfolio` (required) |
-| `identifier` | Fund ticker, series ID, or CIK |
+| `action` | `lookup`, `search`, `portfolio`, `money_market`, `bdc_search`, `bdc_portfolio`, or `bdc_nonaccrual` (required) |
+| `identifier` | Fund ticker, series ID, or CIK. BDC actions only: optional when `accession_number` is given. |
 | `query` | Search text for fund or BDC name |
-| `limit` | Max results (default: 20) |
+| `limit` | Max results per page (default 20, max 50) |
+| `accession_number` | BDC actions only. Exact SEC accession number pinning a specific filing. Takes precedence over `period`. |
+| `form` | BDC actions only. `10-K` (default) or `10-Q`. |
+| `period` | BDC actions only. Reporting period (`YYYY-MM-DD`) that must exactly match the chosen filing's `period_of_report`. |
+| `borrower` | BDC actions only. Case-insensitive substring filter on the portfolio company/borrower name (or raw investment identifier). |
+| `cursor` | Continuation cursor from a previous `bdc_portfolio`/`bdc_nonaccrual` response's `page.next_cursor`, to fetch the next page. |
+| `include_untyped` | BDC actions only. Include investments with an unrecognized classification (default false). |
 
 **Try asking Claude:**
 
 - "Look up the Vanguard 500 Index Fund"
 - "Show me SPY's portfolio holdings"
 - "What money market funds does Fidelity offer?"
+- "Show me ARCC's loan portfolio for the quarter ended 2026-06-30"
+- "Which of ARCC's investments are on non-accrual?"
+
+#### Credit evidence (BDC loans)
+
+`bdc_portfolio` and `bdc_nonaccrual` return evidence from exactly ONE chosen filing's Schedule of Investments. Pick the filing with `accession_number`, or `identifier` + `form` + `period`; with neither `accession_number` nor `period`, the latest original (non-amendment) filing of `form` is used.
+
+```
+# Latest 10-K, all extracted holdings
+action="bdc_portfolio", identifier="ARCC"
+
+# A specific quarter
+action="bdc_portfolio", identifier="ARCC", form="10-Q", period="2026-06-30"
+
+# A specific filing, no identifier needed
+action="bdc_portfolio", accession_number="0001628280-26-050307"
+
+# Filter to one borrower
+action="bdc_portfolio", identifier="ARCC", borrower="Ivy Hill"
+
+# Next page (limit clamps to 50 rows/page)
+action="bdc_portfolio", identifier="ARCC", cursor="<page.next_cursor from the previous call>"
+
+# Non-accrual evidence for the same filing
+action="bdc_nonaccrual", identifier="ARCC", form="10-Q", period="2026-06-30"
+```
+
+`bdc_portfolio` response blocks:
+
+- `source` -- provenance: `cik`, `entity`, `form`, `accession_number`, `period_of_report`, `filed`, `url`, `is_amendment`, `selected_by` (`"accession"`, `"period"`, or `"latest"`)
+- `page` -- `offset`, `returned`, `total_matching`, `total_extracted`, `remaining`, `next_cursor`
+- `extraction` -- `method`, `field_coverage` (fraction of holdings with each field populated), `rate_convention: "decimal_fraction"`, and the extraction's own stated `limitation`
+- `filtered_totals` -- present only when `borrower` is given: `count`/`fair_value`/`cost` for the matching subset, kept separate from the filing-wide `total_investments`/`total_fair_value`/`total_cost`
+
+`bdc_nonaccrual` additionally returns `evidence_level` (`"investment"` when individual non-accrual investments were resolved, `"aggregate"` when only a portfolio-level rate/value was disclosed, or `"none"`), `warnings`, and `interpretation_limits` -- read `interpretation_limits` before treating the result as a default list: non-accrual is an accounting status (interest income no longer recognized), not a legal default determination, and absence from the list does not establish that a loan is performing.
+
+Measured 2026-09-28: ARCC's 10-Q for the quarter ended 2026-06-30 (accession `0001628280-26-050307`) has 1,481 extracted holdings, all reachable page by page via `cursor`, and 32 investments identified as non-accrual from its footnote disclosure.
+
+Comparing periods (e.g. did non-accrual grow quarter over quarter) is the caller's job -- call `bdc_portfolio`/`bdc_nonaccrual` once per period and diff the results yourself.
+
+#### BDC and filing-selection error codes
+
+| Code | Meaning |
+|------|---------|
+| `PERIOD_NOT_FOUND` | No original filing of the requested `form` matches `period` exactly. `suggestions` lists available periods, most recent first. |
+| `SELECTION_MISMATCH` | `accession_number` was given together with an `identifier` whose CIK differs from the accession's filer. |
+| `FILING_NOT_FOUND` | No filing could be resolved for the given selector. |
+| `COMPANY_NOT_FOUND` | `identifier` did not resolve to a company or BDC. |
+| `AMBIGUOUS_BDC` | `identifier` (a name) matched more than one BDC; `suggestions` lists the candidates by name/ticker/CIK. |
+| `NOT_A_BDC` | The resolved company/CIK is not a Business Development Company. |
+| `NO_XBRL` | The chosen filing has no XBRL data at all. |
+| `INVALID_ARGUMENTS` | A required parameter is missing, e.g. neither `identifier` nor `accession_number`. |
+| `CURSOR_MISMATCH` | The cursor's tool/accession/document/query don't match the current call. |
+| `CURSOR_STALE` | The cursor is well-formed but the underlying result changed since it was issued. |
+| `INVALID_CURSOR` | The cursor could not be decoded, or exceeds the 2,048-character cap. |
+
+The filing-selection codes (`PERIOD_NOT_FOUND`, `SELECTION_MISMATCH`, `FILING_NOT_FOUND`, `COMPANY_NOT_FOUND`) and the cursor codes (`CURSOR_MISMATCH`, `CURSOR_STALE`, `INVALID_CURSOR`) apply identically to `edgar_notes` and `edgar_read`.
 
 ### edgar_proxy
 
@@ -388,5 +463,8 @@ These patterns chain tools together for complete analyses:
 
 **Peer comparison:**
 `edgar_screen` (find peers) → `edgar_compare` (compare metrics)
+
+**Credit evidence (BDC loans):**
+`edgar_fund` (`bdc_search`) → `edgar_search`/`edgar_company` (list 10-K/10-Q filings with periods) → `edgar_fund` (`bdc_portfolio`, with `period` + `borrower`) → `edgar_fund` (`bdc_nonaccrual`) → `edgar_notes`/`edgar_read` (same `period`, for narrative context). Continue any of these with the `cursor` from a `next_cursor` field; comparing periods is the caller's job.
 
 For pre-built multi-step analysis workflows, see [Workflows](mcp-workflows.md).

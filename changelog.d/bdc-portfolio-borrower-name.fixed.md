@@ -1,0 +1,1 @@
+**`edgar_fund` `bdc_portfolio` omitted the borrower name from every returned investment.** Each record checked a `name` attribute that doesn't exist on `PortfolioInvestment`; the field is `company_name`. Every holding's `company_name` now serializes correctly instead of always being `null`.

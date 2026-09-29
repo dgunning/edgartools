@@ -77,6 +77,7 @@ Claude walks through:
 1. **Fund lookup** -- `edgar_fund` gets fund hierarchy (company, series, share classes, tickers)
 2. **Portfolio holdings** -- `edgar_fund` retrieves current holdings, top positions, sector concentration
 3. **Money market check** -- if applicable, gets yield data, WAM/WAL, and share class details
+3a. **BDC check** -- if this is a Business Development Company, `edgar_fund` (`bdc_portfolio`/`bdc_nonaccrual`) for filing-scoped Schedule of Investments holdings and non-accrual evidence, with `form`/`period`/`borrower`/`cursor` to pin a filing, filter, and page through it
 4. **Top holdings analysis** -- `edgar_company` for the top 3-5 portfolio holdings
 5. **Related funds** -- `edgar_fund` searches for other funds in the same family
 6. **Synthesis** -- overview, composition, concentration, key metrics, related funds

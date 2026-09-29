@@ -244,6 +244,8 @@ def _render_fund_analysis(identifier: str) -> GetPromptResult:
 
 3. **Money Market Check**: If this is a money market fund, use edgar_fund with action="money_market" to get yield data, WAM/WAL, and share class details instead of portfolio.
 
+3a. **BDC Check**: If this is a Business Development Company, use edgar_fund with action="bdc_portfolio" (optionally with form/period to pin a specific filing, and borrower to filter) for Schedule of Investments holdings, and action="bdc_nonaccrual" for non-accrual evidence, instead of portfolio. Page through either with the cursor returned in page.next_cursor.
+
 4. **Top Holdings Analysis**: For the top 3-5 portfolio holdings, use edgar_company to get brief profiles and recent financial performance.
 
 5. **Related Funds**: Use edgar_fund with action="search" to find other funds from the same fund family or with similar names.
