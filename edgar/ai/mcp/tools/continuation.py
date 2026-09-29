@@ -158,29 +158,24 @@ def encode_cursor(
     return cursor
 
 
-def decode_cursor(
-    cursor: str,
-    *,
-    tool: str,
-    accession: str,
-    document: Optional[str] = None,
-    query: Optional[dict] = None,
-) -> dict:
-    """Decode and validate ``cursor`` against the current call's identity.
+def peek_cursor(cursor: str) -> dict:
+    """Decode ``cursor`` far enough to read it, without validating identity.
 
     Validates, in order: size, decodability, shape (a JSON object), version,
     and the offset's type/sign — any failure there is ``INVALID_CURSOR``,
     because none of those are "you asked for something else", they are "this
-    is not a cursor this function issued". Then it compares ``tool``,
-    ``accession``, ``document`` and ``query`` against the current call —
-    ``document``/``query`` missing from the cursor and ``None`` on the
-    current call are treated as equal, since ``encode_cursor`` always writes
-    both keys as ``null`` rather than omitting them. Any difference there is
-    ``CURSOR_MISMATCH``: the cursor is well-formed, just not for this call.
+    is not a cursor this function issued". Returns the raw payload
+    (``v, tool, acc, doc, q, off, fp``) without comparing ``tool``,
+    ``accession``, ``document`` or ``query`` against anything.
 
-    Does not check the fingerprint — that requires the caller to have
-    recomputed the current result first, so it is a separate call to
-    ``check_fingerprint``.
+    Most callers want ``decode_cursor``, which does that comparison against
+    the current call's identity. This exists for the rarer case where a
+    single response can emit more than one kind of cursor (e.g. one per
+    table and one per note context) and the tool does not know which kind
+    it was handed until it has looked inside — it peeks first to recover
+    the ``tool``/``document``/``query`` the cursor carries, then calls
+    ``decode_cursor`` with those as the expected identity so the real
+    checks (accession, and later the fingerprint) still run.
     """
     if not isinstance(cursor, str) or not cursor:
         raise _cursor_error("INVALID_CURSOR", "Cursor is empty or not a string.")
@@ -208,6 +203,33 @@ def decode_cursor(
     if not isinstance(off, int) or isinstance(off, bool) or off < 0:
         raise _cursor_error("INVALID_CURSOR", f"Invalid cursor offset: {off!r}.")
 
+    return payload
+
+
+def decode_cursor(
+    cursor: str,
+    *,
+    tool: str,
+    accession: str,
+    document: Optional[str] = None,
+    query: Optional[dict] = None,
+) -> dict:
+    """Decode and validate ``cursor`` against the current call's identity.
+
+    Runs ``peek_cursor`` first (size, decodability, shape, version, offset —
+    any failure there is ``INVALID_CURSOR``), then compares ``tool``,
+    ``accession``, ``document`` and ``query`` against the current call —
+    ``document``/``query`` missing from the cursor and ``None`` on the
+    current call are treated as equal, since ``encode_cursor`` always writes
+    both keys as ``null`` rather than omitting them. Any difference there is
+    ``CURSOR_MISMATCH``: the cursor is well-formed, just not for this call.
+
+    Does not check the fingerprint — that requires the caller to have
+    recomputed the current result first, so it is a separate call to
+    ``check_fingerprint``.
+    """
+    payload = peek_cursor(cursor)
+
     if payload.get("tool") != tool or payload.get("acc") != accession:
         raise _cursor_error(
             "CURSOR_MISMATCH",
@@ -225,6 +247,46 @@ def decode_cursor(
         )
 
     return payload
+
+
+def try_decode_cursor(
+    cursor: Optional[str],
+    *,
+    tool: str,
+    accession: str,
+    document: Optional[str] = None,
+    query: Optional[dict] = None,
+):
+    """``decode_cursor``, returning ``(payload_or_None, error_response_or_None)``.
+
+    ``cursor`` falsy means "nothing to continue from": returns ``(None,
+    None)`` rather than raising. Shared by edgar_fund, edgar_notes and
+    edgar_read so each tool does not re-implement the same try/except.
+    """
+    if not cursor:
+        return None, None
+    try:
+        return decode_cursor(cursor, tool=tool, accession=accession, document=document, query=query), None
+    except CursorError as exc:
+        return None, exc.to_response()
+
+
+def try_encode_cursor(
+    *,
+    tool: str,
+    accession: str,
+    offset: int,
+    fp: str,
+    document: Optional[str] = None,
+    query: Optional[dict] = None,
+):
+    """``encode_cursor``, returning ``(cursor_or_None, error_response_or_None)``."""
+    try:
+        return encode_cursor(
+            tool=tool, accession=accession, offset=offset, fp=fp, document=document, query=query
+        ), None
+    except CursorError as exc:
+        return None, exc.to_response()
 
 
 # =============================================================================

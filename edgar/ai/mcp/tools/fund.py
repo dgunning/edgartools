@@ -769,25 +769,25 @@ def _resolve_bdc_and_filing(
 
 
 def _decode_page_cursor(cursor: Optional[str], *, tool: str, accession: str, query: dict):
-    """Decode a page cursor, if given. Returns `(payload_or_None, error_response_or_None)`."""
-    from edgar.ai.mcp.tools.continuation import CursorError, decode_cursor
+    """Decode a page cursor, if given. Returns `(payload_or_None, error_response_or_None)`.
 
-    if not cursor:
-        return None, None
-    try:
-        return decode_cursor(cursor, tool=tool, accession=accession, query=query), None
-    except CursorError as exc:
-        return None, exc.to_response()
+    Thin wrapper over `continuation.try_decode_cursor` (shared with
+    edgar_notes/edgar_read) so this module's call sites don't change.
+    """
+    from edgar.ai.mcp.tools.continuation import try_decode_cursor
+
+    return try_decode_cursor(cursor, tool=tool, accession=accession, query=query)
 
 
 def _build_next_cursor(tool: str, accession: str, offset: int, fp: str, query: Optional[dict]):
-    """Encode a page cursor. Returns `(cursor_or_None, error_response_or_None)`."""
-    from edgar.ai.mcp.tools.continuation import CursorError, encode_cursor
+    """Encode a page cursor. Returns `(cursor_or_None, error_response_or_None)`.
 
-    try:
-        return encode_cursor(tool=tool, accession=accession, offset=offset, fp=fp, query=query), None
-    except CursorError as exc:
-        return None, exc.to_response()
+    Thin wrapper over `continuation.try_encode_cursor` (shared with
+    edgar_notes/edgar_read) so this module's call sites don't change.
+    """
+    from edgar.ai.mcp.tools.continuation import try_encode_cursor
+
+    return try_encode_cursor(tool=tool, accession=accession, offset=offset, fp=fp, query=query)
 
 
 def _load_extraction(filing, include_untyped: bool):

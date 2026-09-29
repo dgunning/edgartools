@@ -4,24 +4,48 @@ Section Reader Tool (edgar_read)
 Read text content from specific sections of SEC filings. Extracts narrative
 content like risk factors, MD&A, business descriptions, items, and financial
 tables from 10-K, 10-Q, 8-K, proxy statements, 13D/G, 13F, and other forms.
+
+Filing selection goes through the shared resolver
+(``edgar.ai.mcp.tools.selection.resolve_report_filing``): ``accession_number``
+takes precedence, then ``period`` (must exactly match an original filing's
+``period_of_report``), then the latest original filing for ``identifier`` +
+``form``. That last path now excludes amendments (``form`` + ``identifier``
+alone used to return whatever ``get_filings()`` had first, amendment or not).
+Every response carries a ``source`` provenance block.
+
+Each extracted section is capped at one ``TEXT_PAGE_CHARS`` page; the full
+section text is cached (``text_cache``, keyed by accession + section) so a
+``cursor`` from a section's ``next_cursor`` can page through the rest without
+re-extracting. A cursor call must name exactly the one section it continues.
 """
 
 from __future__ import annotations
 
 import logging
 from typing import Any, Optional
-from edgar import find
+
 from edgar.ai.mcp.tools.base import (
-    tool,
-    success,
+    ToolResponse,
     error,
-    resolve_company,
     format_filing_summary,
+    format_source,
     get_error_suggestions,
+    success,
+    tool,
     truncate_text,
+)
+from edgar.ai.mcp.tools.continuation import (
+    CursorError,
+    check_fingerprint,
+    fingerprint,
+    paginate_text,
+    try_decode_cursor,
+    try_encode_cursor,
 )
 
 logger = logging.getLogger(__name__)
+
+_SECTION_TOOL = "edgar_read:section"
 
 # Section mapping for different form types.
 # For 10-K: maps MCP section names to the friendly-name keys accepted by TenK.__getitem__
@@ -83,11 +107,13 @@ Available sections by form type:
 Examples:
 - Read risk factors: identifier="AAPL", form="10-K", sections=["risk_factors"]
 - Read 8-K event: identifier="AAPL", form="8-K", sections=["items"]
-- Read CEO pay: identifier="AAPL", form="DEF 14A", sections=["compensation"]""",
+- Read CEO pay: identifier="AAPL", form="DEF 14A", sections=["compensation"]
+- Read from a chosen period: identifier="ARCC", form="10-Q", period="2026-06-30", sections=["mda"]
+- Continue a truncated section: sections=["mda"], cursor="<next_cursor from a previous call>\"""",
     params={
         "accession_number": {
             "type": "string",
-            "description": "Filing accession number (e.g., 0000320193-23-000077)"
+            "description": "Filing accession number (e.g., 0000320193-23-000077). Takes precedence over period."
         },
         "identifier": {
             "type": "string",
@@ -95,7 +121,13 @@ Examples:
         },
         "form": {
             "type": "string",
-            "description": "Form type (used with identifier to get most recent)"
+            "description": "Form type (used with identifier to get most recent, or with period to select "
+                           "the exact filing). Required whenever identifier is given."
+        },
+        "period": {
+            "type": "string",
+            "description": "Reporting period (YYYY-MM-DD) that must exactly match the chosen filing's "
+                           "period_of_report. Requires identifier and form."
         },
         "sections": {
             "type": "array",
@@ -103,8 +135,14 @@ Examples:
                 "type": "string",
             },
             "description": "Sections to extract. Use 'summary' for metadata only, 'all' for everything. "
-                           "Available sections depend on form type.",
+                           "Available sections depend on form type. With a cursor, must contain exactly "
+                           "the one section being continued.",
             "default": ["summary"]
+        },
+        "cursor": {
+            "type": "string",
+            "description": "Continuation cursor from a previous response's section_pages.<section>.next_cursor, "
+                           "to fetch the next page of that one section."
         }
     },
     required=[]
@@ -113,41 +151,52 @@ async def edgar_read(
     accession_number: Optional[str] = None,
     identifier: Optional[str] = None,
     form: Optional[str] = None,
-    sections: Optional[list[str]] = None
+    sections: Optional[list[str]] = None,
+    period: Optional[str] = None,
+    cursor: Optional[str] = None,
 ) -> Any:
     """
     Read SEC filing content.
 
-    Can retrieve by accession number or find the most recent filing
-    of a given type for a company.
+    Can retrieve by accession number, or by identifier + form (latest
+    original filing, or an exact period).
     """
     sections = sections or ["summary"]
 
     try:
-        # Get the filing
-        filing = await _get_filing(accession_number, identifier, form)
-        if filing is None:
+        if cursor and (len(sections) != 1 or sections[0] in ("summary", "all")):
             return error(
-                "Could not find filing",
-                suggestions=[
-                    "Provide accession_number for a specific filing",
-                    "Or provide identifier + form for most recent"
-                ]
+                "With a cursor, sections must contain exactly one specific section name.",
+                suggestions=["Pass sections=['mda'] (or the single section this cursor continues)"],
+                error_code="INVALID_ARGUMENTS",
             )
 
-        # Build response with metadata
-        result = {
+        selected = _select_filing(accession_number, identifier, form, period)
+        if isinstance(selected, ToolResponse):
+            return selected
+        filing = selected.filing
+        selected_by = selected.selected_by
+
+        result: dict[str, Any] = {
             "filing": format_filing_summary(filing),
             "form_type": filing.form,
+            "source": format_source(filing, selected_by),
+            "available_sections": _get_section_list(filing.form),
         }
 
-        # Determine available sections based on form type
-        result["available_sections"] = _get_section_list(filing.form)
+        if cursor:
+            page_result = _continue_section(filing, sections[0], cursor)
+            if isinstance(page_result, ToolResponse):
+                return page_result
+            result["sections"], result["section_pages"] = page_result
+            return success(result, next_steps=["Omit the cursor to read other sections"])
 
         # Extract requested sections
         if "summary" not in sections or len(sections) > 1:
-            extracted = await _extract_sections(filing, sections)
+            extracted, pages = await _extract_sections(filing, sections)
             result["sections"] = extracted
+            if pages:
+                result["section_pages"] = pages
 
         # Next steps
         next_steps = []
@@ -162,34 +211,103 @@ async def edgar_read(
         return error(str(e), suggestions=get_error_suggestions(e))
 
 
-async def _get_filing(
+def _select_filing(
     accession_number: Optional[str],
     identifier: Optional[str],
-    form: Optional[str]
+    form: Optional[str],
+    period: Optional[str],
 ):
-    """Get filing by accession number or company+form."""
-    from edgar import Filing
+    """Resolve exactly one filing. Returns a `FilingSelection`, or a `ToolResponse`
+    the caller should return as-is.
 
-    if accession_number:
-        # Direct lookup by accession number
-        try:
-            return find(search_id=accession_number)
-        except Exception as e:
-            logger.debug(f"Direct accession lookup failed for '{accession_number}': {e}")
+    `accession_number` wins over everything (per `resolve_report_filing`'s
+    precedence); it needs neither `identifier` nor `form`. Without it, both
+    `identifier` and `form` are required — the latest-original and
+    exact-period paths both need a form to select within, and `form` was
+    already required alongside `identifier` before this task; `period` does
+    not relax that.
+    """
+    if not accession_number and not identifier:
+        return error(
+            "Could not find filing",
+            suggestions=[
+                "Provide accession_number for a specific filing",
+                "Or provide identifier + form for most recent",
+            ],
+            error_code="INVALID_ARGUMENTS",
+        )
+    if not accession_number and not form:
+        return error(
+            "form is required when identifier is used",
+            suggestions=["Provide form (e.g. '10-K' or '10-Q') together with identifier"],
+            error_code="INVALID_ARGUMENTS",
+        )
 
-    if identifier and form:
-        # Get most recent filing of this type for company
-        company = resolve_company(identifier)
-        filings = company.get_filings(form=form)
-        if filings and len(filings) > 0:
-            return filings[0]
+    # Imported locally (not at module import time) so tests can monkeypatch
+    # edgar.ai.mcp.tools.selection.resolve_report_filing and have it take
+    # effect here -- same convention fund.py uses for filing selection.
+    from edgar.ai.mcp.tools.selection import FilingSelectionError, resolve_report_filing
 
-    return None
+    try:
+        return resolve_report_filing(
+            identifier=identifier, form=form or "10-K", accession_number=accession_number, period=period
+        )
+    except FilingSelectionError as exc:
+        return exc.to_response()
 
 
-async def _extract_sections(filing, sections: list[str]) -> dict[str, Any]:
-    """Extract requested sections from filing."""
-    extracted = {}
+def _get_section_text_cached(obj, filing, section: str) -> Optional[str]:
+    """Full (untruncated) section text, cached by (accession, section).
+
+    `_extract_section` is the potentially expensive step (it can parse the
+    filing's structured object's fields); a page past the first would
+    otherwise re-run it just to re-slice text it already computed.
+
+    Imports `text_cache` locally (not at module import time) so tests can
+    monkeypatch `continuation.text_cache` and have it take effect here --
+    same convention `fund.py` uses for its own caches.
+    """
+    from edgar.ai.mcp.tools.continuation import text_cache
+
+    cache_key = ("edgar_read", filing.accession_number, section)
+    cached = text_cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    content = _extract_section(obj, filing.form, section)
+    text = str(content) if content else None
+    if text is not None:
+        text_cache.put(cache_key, text, size_bytes=len(text.encode("utf-8")))
+    return text
+
+
+def _build_page_block(meta: dict, fp: str, accession: str, section: str):
+    """`{offset, total_chars, remaining_chars, next_cursor}`, or a `ToolResponse` error.
+
+    Built from documented keys only -- `paginate_text`'s own metadata dict
+    also carries an internal `next_offset`, which does not belong in a
+    response.
+    """
+    next_cursor = None
+    if meta["next_offset"] is not None:
+        next_cursor, err = try_encode_cursor(
+            tool=_SECTION_TOOL, accession=accession, offset=meta["next_offset"], fp=fp, document=section
+        )
+        if err is not None:
+            return err
+    return {
+        "offset": meta["offset"],
+        "total_chars": meta["total_chars"],
+        "remaining_chars": meta["remaining_chars"],
+        "next_cursor": next_cursor,
+    }
+
+
+async def _extract_sections(filing, sections: list[str]) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Extract requested sections from filing. Returns `(extracted, section_pages)`."""
+    extracted: dict[str, Any] = {}
+    pages: dict[str, Any] = {}
+    accession = filing.accession_number
 
     try:
         # Get the typed object (TenK, TenQ, EightK, etc.)
@@ -197,7 +315,7 @@ async def _extract_sections(filing, sections: list[str]) -> dict[str, Any]:
 
         if obj is None:
             extracted["error"] = f"Could not parse {filing.form} filing into a structured object"
-            return extracted
+            return extracted, pages
 
         if "all" in sections:
             # Extract all available sections
@@ -206,11 +324,23 @@ async def _extract_sections(filing, sections: list[str]) -> dict[str, Any]:
             sections_to_extract = [s for s in sections if s != "summary"]
 
         for section in sections_to_extract:
-            content = _extract_section(obj, filing.form, section)
-            if content:
-                extracted[section] = truncate_text(str(content), max_chars=6000)
-            else:
+            text = _get_section_text_cached(obj, filing, section)
+            if text is None:
                 extracted[section] = None
+                continue
+
+            fp = fingerprint([text])
+            page_text, meta = paginate_text(text, offset=0)
+            page_block = _build_page_block(meta, fp, accession, section)
+            if isinstance(page_block, ToolResponse):
+                # Cursor construction failed (e.g. an oversized query) --
+                # still return the page text, just without a way to continue.
+                logger.warning("Could not build section cursor for %s: %s", section, page_block)
+                extracted[section] = page_text
+                continue
+
+            extracted[section] = page_text
+            pages[section] = page_block
 
     except Exception as e:
         logger.warning(f"Could not extract sections: {e}")
@@ -220,10 +350,48 @@ async def _extract_sections(filing, sections: list[str]) -> dict[str, Any]:
         try:
             if hasattr(filing, 'text'):
                 extracted["raw_text_preview"] = truncate_text(filing.text(), max_chars=4000)
-        except Exception as e:
-            logger.debug(f"Could not get raw text fallback: {e}")
+                extracted["fallback_used"] = True
+                extracted["fallback_reason"] = str(e)
+        except Exception as inner:
+            logger.debug(f"Could not get raw text fallback: {inner}")
 
-    return extracted
+    return extracted, pages
+
+
+def _continue_section(filing, section: str, cursor: str):
+    """Continue one section's cursor. Returns `(extracted, section_pages)` for just
+    that section, or a `ToolResponse` error."""
+    accession = filing.accession_number
+
+    try:
+        obj = filing.obj()
+    except Exception as e:
+        return error(f"Could not parse {filing.form} filing: {e}", error_code="INTERNAL_ERROR")
+
+    text = _get_section_text_cached(obj, filing, section)
+    if text is None:
+        return error(
+            f"Section '{section}' has no extractable content for this filing.",
+            suggestions=["Call edgar_read without a cursor first to fetch this section"],
+            error_code="INVALID_ARGUMENTS",
+        )
+
+    fp = fingerprint([text])
+    payload, err = try_decode_cursor(cursor, tool=_SECTION_TOOL, accession=accession, document=section)
+    if err is not None:
+        return err
+    try:
+        check_fingerprint(payload, fp)
+    except CursorError as exc:
+        return exc.to_response()
+
+    offset = payload["off"]
+    page_text, meta = paginate_text(text, offset=offset)
+    page_block = _build_page_block(meta, fp, accession, section)
+    if isinstance(page_block, ToolResponse):
+        return page_block
+
+    return {section: page_text}, {section: page_block}
 
 
 def _get_section_list(form_type: str) -> list[str]:
