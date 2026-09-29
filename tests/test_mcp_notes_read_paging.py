@@ -28,7 +28,8 @@ from typing import Optional
 import pandas as pd
 import pytest
 
-from edgar.ai.mcp.tools import reader as reader_module
+from edgar.ai.mcp.tools import continuation, reader as reader_module
+from edgar.ai.mcp.tools.continuation import ResultCache
 from edgar.ai.mcp.tools.notes import edgar_notes
 from edgar.ai.mcp.tools.reader import edgar_read
 from edgar.ai.mcp.tools.selection import FilingSelection
@@ -131,8 +132,10 @@ class _FakeNotesFiling:
         self.filing_date = "2026-08-01"
         self.homepage_url = "https://www.sec.gov/cgi-bin/browse-edgar"
         self.report_date = "2026-06-30"
+        self.obj_call_count = 0
 
     def obj(self):
+        self.obj_call_count += 1
         return self._obj
 
 
@@ -143,6 +146,11 @@ def _patch_notes_selection(monkeypatch, filing):
     )
 
 
+@pytest.fixture(autouse=True)
+def _isolated_results_cache(monkeypatch):
+    monkeypatch.setattr(continuation, "results_cache", ResultCache(max_entries=8))
+
+
 # =============================================================================
 # edgar_notes: table row paging
 # =============================================================================
@@ -150,6 +158,37 @@ def _patch_notes_selection(monkeypatch, filing):
 @pytest.mark.fast
 @pytest.mark.asyncio
 class TestNotesTablePaging:
+    async def test_continuation_reuses_parsed_notes_across_fresh_filings(self, monkeypatch):
+        table = _FakeTable("Schedule of Debt", pd.DataFrame({"principal": [1, 2, 3, 4]}))
+        note = _FakeNote(1, "Debt", tables=[table])
+        first_filing = _FakeNotesFiling(_FakeReportObj(_FakeNotes([note])))
+        second_filing = _FakeNotesFiling(_FakeReportObj(_FakeNotes([note])))
+        second_filing.company = "Current selection entity"
+        selections = iter([
+            FilingSelection(filing=first_filing, selected_by="latest"),
+            FilingSelection(filing=second_filing, selected_by="accession"),
+        ])
+        monkeypatch.setattr(
+            "edgar.ai.mcp.tools.selection.resolve_report_filing", lambda **kwargs: next(selections)
+        )
+
+        first = await edgar_notes(identifier="PFX", topic="debt", detail="full", limit=2)
+        assert first.success is True
+        table_info = first.data["notes"][0]["tables"][0]
+        assert table_info["data"] == [{"principal": 1}, {"principal": 2}]
+        cursor = table_info["next_cursor"]
+
+        second = await edgar_notes(
+            accession_number=first_filing.accession_number, topic="debt", cursor=cursor, limit=2
+        )
+        assert second.success is True
+        assert second.data["table"] == [{"principal": 3}, {"principal": 4}]
+        assert second.data["page"]["next_cursor"] is None
+        assert second.data["source"]["entity"] == "Current selection entity"
+        assert second.data["source"]["selected_by"] == "accession"
+        assert first_filing.obj_call_count == 1
+        assert second_filing.obj_call_count == 0
+
     async def test_walks_all_rows_exactly_once(self, monkeypatch):
         df = pd.DataFrame({"principal": [1, 2, 3, 4, 5]})
         table = _FakeTable("Schedule of Debt", df)
@@ -207,6 +246,8 @@ class TestNotesTablePaging:
         other_note = _FakeNote(2, "Revenue")
         filing2 = _FakeNotesFiling(_FakeReportObj(_FakeNotes([other_note])), accession_number=filing.accession_number)
         _patch_notes_selection(monkeypatch, filing2)
+        # Re-extract after eviction so this test still covers a missing note.
+        monkeypatch.setattr(continuation, "results_cache", ResultCache(max_entries=8))
 
         result = await edgar_notes(identifier="PFX", topic="debt", cursor=cursor)
         assert result.success is False

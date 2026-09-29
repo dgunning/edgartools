@@ -6,6 +6,7 @@ Get fund, ETF, BDC, and money market fund data from SEC filings.
 
 from __future__ import annotations
 
+import json
 import logging
 from dataclasses import dataclass
 from decimal import Decimal
@@ -68,9 +69,19 @@ Examples:
 - BDC portfolio (latest 10-K): action="bdc_portfolio", identifier="ARCC"
 - BDC portfolio (chosen period): action="bdc_portfolio", identifier="ARCC", form="10-Q", period="2026-06-30"
 - BDC portfolio (chosen filing by accession): action="bdc_portfolio", accession_number="0001628280-26-050307"
-- BDC portfolio (borrower filter): action="bdc_portfolio", identifier="ARCC", borrower="Ivy Hill"
-- BDC portfolio (next page): action="bdc_portfolio", identifier="ARCC", cursor="<page.next_cursor from the previous call>"
-- BDC non-accrual evidence: action="bdc_nonaccrual", identifier="ARCC", form="10-Q", period="2026-06-30\"""",
+- BDC portfolio (borrower filter): action="bdc_portfolio", identifier="ARCC", form="10-Q", period="2026-06-30", borrower="Ivy Hill"
+- BDC portfolio (next page): action="bdc_portfolio", identifier="ARCC", form="10-Q", period="2026-06-30", borrower="Ivy Hill", cursor="<page.next_cursor from the previous call>"
+- BDC non-accrual evidence: action="bdc_nonaccrual", identifier="ARCC", form="10-Q", period="2026-06-30"
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_fund","arguments":{"action":"bdc_portfolio","identifier":"ARCC","form":"10-Q","period":"2026-06-30","borrower":"Ivy Hill","limit":20}}
+```
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_fund","arguments":{"action":"bdc_portfolio","identifier":"ARCC","form":"10-Q","period":"2026-06-30","borrower":"Ivy Hill","limit":20,"cursor":"<page.next_cursor>"}}
+```""",
     params={
         "action": {
             "type": "string",
@@ -958,7 +969,7 @@ def _bdc_portfolio_with_holdings(
     from edgar.ai.mcp.tools.continuation import fingerprint
 
     full_list = list(investments)
-    fp = fingerprint(inv.identifier for inv in full_list)
+    fp = fingerprint(json.dumps(_investment_record(inv), sort_keys=True) for inv in full_list)
 
     offset, err = _resolve_cursor_offset(cursor_payload, fp)
     if err is not None:
@@ -1367,7 +1378,7 @@ async def _bdc_nonaccrual(
         )
 
     full_list = list(result.investments)
-    fp = fingerprint(inv.identifier for inv in full_list)
+    fp = fingerprint(json.dumps(_nonaccrual_investment_record(inv), sort_keys=True) for inv in full_list)
 
     offset, err = _resolve_cursor_offset(cursor_payload, fp)
     if err is not None:

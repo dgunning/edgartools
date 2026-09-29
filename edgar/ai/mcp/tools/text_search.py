@@ -7,6 +7,7 @@ Thin MCP wrapper around edgar.search.efts.search_filings().
 
 from __future__ import annotations
 
+import json
 import logging
 from typing import Any, Optional
 
@@ -28,6 +29,11 @@ Examples:
 - Topic search: query="artificial intelligence"
 - 8-K events: query="cybersecurity incident", forms=["8-K"]
 - Date range: query="supply chain disruption", start_date="2024-01-01"
+- For a returned filing, use edgar_document to search an attachment and read around its document-bound locator.
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_text_search","arguments":{"query":"loan agreement","forms":["10-Q"],"identifier":"ARCC","limit":20}}
+```
 - Company-specific: query="tariff impact", forms=["10-K"], identifier="AAPL\"""",
     params={
         "query": {
@@ -102,12 +108,17 @@ async def edgar_text_search(
 
         # Serialize to MCP response
         results = []
+        result_next_steps = []
         for r in search_result:
             filing_result = {
                 "accession_number": r.accession_number,
                 "form": r.form,
                 "filed": r.filed,
             }
+            for field in ("file_type", "file_description", "document_id"):
+                value = getattr(r, field, None)
+                if value:
+                    filing_result[field] = value
             if r.company:
                 filing_result["company"] = r.company
             if r.cik:
@@ -115,6 +126,23 @@ async def edgar_text_search(
             if r.period:
                 filing_result["period"] = r.period
             results.append(filing_result)
+
+            if r.document_id:
+                route_args = json.dumps({
+                    "action": "read",
+                    "accession_number": r.accession_number,
+                    "document": r.document_id,
+                })
+                result_next_steps.append(
+                    f"For {r.accession_number}, use edgar_document with {route_args} "
+                    "to inspect the matching document."
+                )
+            else:
+                route_args = json.dumps({"input": r.accession_number})
+                result_next_steps.append(
+                    f"For {r.accession_number}, use edgar_filing with {route_args} "
+                    "to examine the filing."
+                )
 
         result = {
             "query": query,
@@ -131,7 +159,7 @@ async def edgar_text_search(
         if search_result.total > len(results):
             result["note"] = f"Showing {len(results)} of {search_result.total} matches. Increase limit for more."
 
-        next_steps = [
+        next_steps = result_next_steps + [
             "Use edgar_filing with an accession_number to examine the filing, then edgar_read to extract sections",
             "Use edgar_company with a CIK to get company details",
         ]

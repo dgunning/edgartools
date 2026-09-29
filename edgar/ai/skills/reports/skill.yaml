@@ -223,6 +223,31 @@ patterns:
       item.title                        # "Risk Factors"
       len(item.text)                    # Character count
 
+  - name: Private Credit Exhibits
+    when: Identify and inspect a filed agreement or exhibit as recovery evidence
+    code: |
+      # Resolve the BDC filing first and retain its exact accession.
+      edgar_fund(action="bdc_portfolio", identifier="ARCC", form="10-Q", period="2026-06-30")
+      edgar_document(action="list", accession_number="<source.accession_number>")
+
+      # Choose one candidate's exact sequence or filename. If a type selector
+      # returns multiple candidates, use a candidate identity before searching.
+      edgar_document(action="search", accession_number="<source.accession_number>",
+                     document="<exact-sequence-or-filename>", query="loan agreement")
+
+      # Preserve both locator fields and the filing/document selectors.
+      locator = {"document": "<exact filename from search>", "char_offset": 1200}
+      # Replace 1200 with the integer char_offset returned by search.
+      edgar_document(action="read", accession_number="<source.accession_number>",
+                     document=locator["document"], around=locator)
+    note: |
+      Keep the accession and exact document identity through every call. A document
+      URL under SEC Archives identifies its accession and filename; it is not fetched
+      as an arbitrary URL. An incorporated-by-reference exhibit may require opening
+      an earlier filing. BDC-filed evidence may describe a borrower without including
+      that borrower's agreement; report the evidence and its source without asserting
+      a legal conclusion.
+
 avoid:
   - pattern: "filing.document().text"
     when: Need specific section

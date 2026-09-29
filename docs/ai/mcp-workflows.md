@@ -82,6 +82,53 @@ Claude walks through:
 5. **Related funds** -- `edgar_fund` searches for other funds in the same family
 6. **Synthesis** -- overview, composition, concentration, key metrics, related funds
 
+## Recovery-document Workflow
+
+For private-credit research, move from the BDC's filed evidence to an exact
+attachment and preserve that document identity while searching and reading:
+
+1. Use `edgar_fund` with `bdc_search` to identify the BDC.
+2. Select the exact 10-K or 10-Q with `bdc_portfolio` using `identifier` plus
+   `form` and `period`, or pin it with `accession_number`. The response's
+   `source` block identifies the filing selected.
+3. Call `edgar_document` with that accession and `action="list"`. Choose an
+   attachment by sequence or exact filename. An exhibit-type selector may
+   return several candidates; choose one candidate's exact identity.
+4. Search the selected document for relevant language. Pass the returned
+   `{document, char_offset}` locator to `edgar_document` `action="read"` as
+   `around` to inspect surrounding text. Reads are bounded; use `cursor` with
+   the same accession and exact document selector to continue.
+5. If the filing refers to an exhibit incorporated by reference, inspect the
+   referenced earlier filing because the current attachment list may not
+   contain it.
+
+BDC-filed materials are evidence reported by the BDC and may not include a
+portfolio borrower's own agreement. The tools return filing content and
+provenance; they do not make legal conclusions.
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_fund","arguments":{"action":"bdc_portfolio","identifier":"ARCC","form":"10-Q","period":"2026-06-30","borrower":"Ivy Hill","limit":20}}
+```
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_document","arguments":{"action":"list","accession_number":"0001628280-26-050307"}}
+```
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_document","arguments":{"action":"search","accession_number":"0001628280-26-050307","document":"[sequence-or-filename-from-list]","query":"loan agreement","limit":20}}
+```
+
+The `char_offset: 1200` value below is illustrative. Use the exact integer
+returned in the search match's locator rather than copying or estimating it.
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_document","arguments":{"action":"read","accession_number":"0001628280-26-050307","document":"[filename-from-locator]","around":{"document":"[filename-from-locator]","char_offset":1200}}}
+```
+
 ## Filing Comparison
 
 *"Compare Apple's 10-K filings year over year"*

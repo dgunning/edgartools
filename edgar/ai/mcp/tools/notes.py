@@ -332,7 +332,17 @@ Examples:
 - All notes overview: identifier="TSLA" (no topic = table of contents)
 - Notes from a chosen period: topic="debt", identifier="ARCC", form="10-Q", period="2026-06-30"
 - Notes from a chosen filing by accession: topic="debt", accession_number="0001628280-26-050307"
-- Continue a table or note context: cursor="<next_cursor from a previous call>\"""",
+- Continue a table or note context: topic="debt", identifier="ARCC", form="10-Q", period="2026-06-30", detail="standard", cursor="<table-or-context.next_cursor>"
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_notes","arguments":{"topic":"debt","identifier":"ARCC","form":"10-Q","period":"2026-06-30","detail":"standard","limit":20}}
+```
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_notes","arguments":{"topic":"debt","identifier":"ARCC","form":"10-Q","period":"2026-06-30","detail":"standard","limit":20,"cursor":"<table-or-context.next_cursor>"}}
+```""",
     params={
         "identifier": {
             "type": "string",
@@ -412,23 +422,35 @@ async def edgar_notes(
     selected_by = resolved.selected_by
     accession = filing.accession_number
 
-    try:
-        obj = filing.obj()
-    except Exception as e:
-        return error(
-            f"Could not parse {filing.form} filing: {e}",
-            suggestions=["The filing may not have XBRL data", "Try a different filing"],
-            error_code="INTERNAL_ERROR",
-        )
+    from edgar import __version__ as edgar_version
+    from edgar.ai.mcp.tools.continuation import results_cache
 
-    if not hasattr(obj, "notes"):
-        return error(
-            f"{type(obj).__name__} does not support notes",
-            suggestions=["Notes are available for 10-K and 10-Q filings"],
-            error_code="INVALID_ARGUMENTS",
-        )
+    cache_key = ("notes", accession, edgar_version)
+    cached = results_cache.get(cache_key)
+    if cached is None:
+        try:
+            obj = filing.obj()
+        except Exception as e:
+            return error(
+                f"Could not parse {filing.form} filing: {e}",
+                suggestions=["The filing may not have XBRL data", "Try a different filing"],
+                error_code="INTERNAL_ERROR",
+            )
 
-    notes = obj.notes
+        if not hasattr(obj, "notes"):
+            return error(
+                f"{type(obj).__name__} does not support notes",
+                suggestions=["Notes are available for 10-K and 10-Q filings"],
+                error_code="INVALID_ARGUMENTS",
+            )
+
+        notes = obj.notes
+        report_period = getattr(obj, "period_of_report", None)
+        if notes and len(notes) > 0:
+            # Cache parsed evidence only; provenance comes from this call's selection.
+            results_cache.put(cache_key, (notes, report_period))
+    else:
+        notes, report_period = cached
     if not notes or len(notes) == 0:
         return error(
             f"No notes found in {filing.form} filing for {filing.company}",
@@ -443,7 +465,7 @@ async def edgar_notes(
         "company": filing.company,
         "form": filing.form,
         "filed": str(filing.filing_date),
-        "period": getattr(obj, "period_of_report", None),
+        "period": report_period,
         "total_notes": len(notes),
         "source": format_source(filing, selected_by),
     }

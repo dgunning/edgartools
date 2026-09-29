@@ -19,6 +19,7 @@ Network tests pin behaviour against real filings (constraints rule 7a):
 """
 from __future__ import annotations
 
+from dataclasses import replace
 from decimal import Decimal
 from typing import Optional
 
@@ -410,6 +411,35 @@ class TestCursorErrors:
 
         second = await edgar_fund(action="bdc_nonaccrual", identifier="ARCC", limit=2, cursor=cursor)
 
+        assert second.success is False
+        assert second.error_code == "CURSOR_STALE"
+
+    @pytest.mark.parametrize("field,value", [
+        ("fair_value", Decimal("1234567")),
+        ("fair_value", None),
+        ("cost", Decimal("7654321")),
+        ("investment_type", "Preferred equity"),
+        ("footnote_text", "Interest payments were suspended."),
+    ])
+    async def test_cursor_stale_when_evidence_changes_with_stable_identifiers(self, monkeypatch, field, value):
+        investments = _make_investment_batch(2)
+        result = _make_result(investments=investments, extraction_method="footnote")
+        _patch_selection(monkeypatch, _FakeFiling())
+        _patch_extraction(monkeypatch, result)
+        _patch_bdc(monkeypatch)
+
+        first = await edgar_fund(action="bdc_nonaccrual", identifier="ARCC", limit=1)
+        assert first.data["investments"][0]["fair_value"] == 1000000
+        cursor = first.data["page"]["next_cursor"]
+        assert cursor is not None
+
+        identifiers = [inv.identifier for inv in investments]
+        changed = [replace(investments[0], **{field: value}), investments[1]]
+        assert [inv.identifier for inv in changed] == identifiers
+        monkeypatch.setattr(continuation, "results_cache", ResultCache(max_entries=8))
+        _patch_extraction(monkeypatch, _make_result(investments=changed, extraction_method="footnote"))
+
+        second = await edgar_fund(action="bdc_nonaccrual", identifier="ARCC", limit=1, cursor=cursor)
         assert second.success is False
         assert second.error_code == "CURSOR_STALE"
 

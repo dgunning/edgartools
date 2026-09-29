@@ -24,6 +24,8 @@ Tools:
 - edgar_screen: Company discovery by industry, exchange, state
 - edgar_fund: Fund, ETF, BDC, money market data
 - edgar_proxy: Executive compensation and governance (DEF 14A)
+- edgar_notes: Drill into notes and disclosures
+- edgar_document: List, search and read exact filing attachments
 
 Usage:
     python -m edgar.ai            # Via module
@@ -100,11 +102,12 @@ def _import_tools():
     from edgar.ai.mcp.tools import fund  # noqa: F401
     from edgar.ai.mcp.tools import proxy  # noqa: F401
     from edgar.ai.mcp.tools import notes  # noqa: F401
+    from edgar.ai.mcp.tools import document  # noqa: F401
 
 
 # Server instructions — sent to the LLM on first connection, before any tool call.
 # This is the system prompt for the tool suite.
-SERVER_INSTRUCTIONS = """EdgarTools provides access to all SEC EDGAR filing data. 13 tools organized by intent:
+SERVER_INSTRUCTIONS = """EdgarTools provides access to all SEC EDGAR filing data. 14 tools organized by intent:
 
 DISCOVER companies and filings:
 - edgar_company: Start here for any company question (profile, financials, filings)
@@ -115,7 +118,8 @@ DISCOVER companies and filings:
 
 EXAMINE specific filings:
 - edgar_filing: Get structured context for a filing (by company+form or accession number/URL)
-- edgar_read: Extract specific sections (risk factors, MD&A, business description, items)
+- edgar_read: Extract report sections (risk factors, MD&A, business description, items)
+- edgar_document: List, search and read exact attachments and exhibits by sequence, filename, or type
 - edgar_notes: Drill into notes and disclosures — the detail behind financial statement numbers
 
 ANALYZE financial data:
@@ -130,7 +134,8 @@ Common workflows:
 2. Filing analysis: edgar_filing (by accession/URL) → edgar_read (extract sections)
 3. Event monitoring: edgar_monitor → edgar_filing (examine new filings)
 4. Peer comparison: edgar_screen (find peers) → edgar_compare (compare metrics)
-5. Credit evidence (BDC loans): edgar_fund (action="bdc_search") to find the BDC → edgar_search or edgar_company to list its 10-K/10-Q filings with periods → edgar_fund (action="bdc_portfolio", with period + borrower) for Schedule of Investments holdings → edgar_fund (action="bdc_nonaccrual") for non-accrual evidence → edgar_notes/edgar_read with the SAME period for narrative context behind the numbers. Pass a response's page.next_cursor (or section/table next_cursor) back as cursor to page through the rest. Comparing periods (e.g. quarter-over-quarter non-accrual growth) is the caller's job — call once per period and diff the results yourself.
+5. Credit evidence (BDC loans): edgar_fund (action="bdc_search") to find the BDC → edgar_search or edgar_company to list its 10-K/10-Q filings with periods → edgar_fund (action="bdc_portfolio", with period + borrower) for Schedule of Investments holdings → edgar_fund (action="bdc_nonaccrual") for non-accrual evidence → edgar_notes/edgar_read with the SAME period for narrative context behind the numbers. To continue, repeat the same action and filing selector with the original borrower, topic/detail, or single-section filters and pass back that response's cursor. Comparing periods (e.g. quarter-over-quarter non-accrual growth) is the caller's job — call once per period and diff the results yourself.
+6. Recovery-document path: use edgar_filing with an accession/URL to identify a filing, then edgar_document action="list" to enumerate its exact attachments. Select by sequence or filename; an exhibit type can return ambiguous candidates. Search a specific document for agreement language, then pass its locator {document, char_offset} to edgar_document action="read" with around. Read pages with the same accession and exact document selector. If the filing says a document is incorporated by reference, look for it in the referenced earlier filing; it may not be attached here. BDC-filed materials are evidence reported by the BDC and may not include a portfolio borrower's own agreement. These tools provide filing evidence and do not make legal determinations.
 
 Pre-built analysis prompts are available via prompts/list: due_diligence, earnings_analysis, industry_overview, insider_monitor, fund_analysis, filing_comparison, activist_tracking."""
 

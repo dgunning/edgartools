@@ -16,6 +16,7 @@ Network tests pin behaviour against real filings (constraints rule 7a):
 """
 from __future__ import annotations
 
+from dataclasses import replace
 from decimal import Decimal
 from typing import Optional
 
@@ -331,6 +332,37 @@ class TestCursorErrors:
 
         second = await edgar_fund(action="bdc_portfolio", identifier="ARCC", limit=2, cursor=cursor)
 
+        assert second.success is False
+        assert second.error_code == "CURSOR_STALE"
+
+    @pytest.mark.parametrize("field,value", [
+        ("fair_value", Decimal("1234567")),
+        ("fair_value", None),
+        ("cost", Decimal("7654321")),
+        ("investment_type", "Preferred equity"),
+    ])
+    async def test_cursor_stale_when_evidence_changes_with_stable_identifiers(self, monkeypatch, field, value):
+        holdings = list(_make_investment_batch(2))
+        holdings[0] = replace(holdings[0], fair_value=Decimal("1000000"))
+        investments = PortfolioInvestments(holdings, period="2026-06-30", extraction_method="xbrl_facts")
+        _patch_selection(monkeypatch, _FakeFiling())
+        _patch_extraction(monkeypatch, investments)
+        _patch_bdc(monkeypatch)
+
+        first = await edgar_fund(action="bdc_portfolio", identifier="ARCC", limit=1)
+        assert first.data["investments"][0]["fair_value"] == 1000000
+        cursor = first.data["page"]["next_cursor"]
+        assert cursor is not None
+
+        identifiers = [inv.identifier for inv in holdings]
+        holdings[0] = replace(holdings[0], **{field: value})
+        assert [inv.identifier for inv in holdings] == identifiers
+        monkeypatch.setattr(continuation, "results_cache", ResultCache(max_entries=8))
+        _patch_extraction(monkeypatch, PortfolioInvestments(
+            holdings, period="2026-06-30", extraction_method="xbrl_facts"
+        ))
+
+        second = await edgar_fund(action="bdc_portfolio", identifier="ARCC", limit=1, cursor=cursor)
         assert second.success is False
         assert second.error_code == "CURSOR_STALE"
 

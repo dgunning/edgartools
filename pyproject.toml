@@ -85,6 +85,7 @@ ai = [
     "tiktoken>=0.10.0",     # Token counting for OpenAI models
     "starlette>=0.36.0",    # ASGI framework for HTTP transport
     "uvicorn>=0.27.0",      # ASGI server for HTTP transport
+    "regex>=2024.11.6",     # Timeout-capable engine for bounded MCP document searches
 ]
 
 ai-dev = [

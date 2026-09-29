@@ -2178,7 +2178,17 @@ class Filing:
             return self.__get_regex_search_index.search(query)
         return self.__get_bm25_search_index.search(query)
 
-    def grep(self, pattern: str, *, regex: bool = False, document: Optional[str] = None) -> 'GrepResult':
+    def grep(
+        self,
+        pattern: str,
+        *,
+        regex: bool = False,
+        document: Optional[str] = None,
+        render_markdown: bool = False,
+        max_matches: Optional[int] = None,
+        max_match_chars: Optional[int] = None,
+        regex_timeout: Optional[float] = None,
+    ) -> 'GrepResult':
         """
         Grep for exact text matches across all filing documents.
 
@@ -2191,6 +2201,18 @@ class Filing:
             regex: If True, treat pattern as a regular expression
             document: Narrow search to a specific document. Use "primary" for
                      the main filing document, or a document type like "EX-10.1"
+            render_markdown: If True, search the same rendered markdown used by
+                     Attachment.markdown(), falling back to Attachment.text().
+                     This mode is intended for source offsets that will be used
+                     to read from that rendered document.
+            max_matches: Optional per-filing match limit. Bounded searches stop
+                     after one internal overflow sentinel and set ``overflowed``
+                     on the returned GrepResult.
+            max_match_chars: Optional maximum source span for one match. Longer
+                     matches stop bounded searches before their text is materialized.
+            regex_timeout: Optional total timeout in seconds for regex matching.
+                     When set, uses a timeout-capable engine. Without it,
+                     ``Filing.grep()`` keeps the standard-library regex behavior.
 
         Returns:
             GrepResult containing GrepMatch objects with location and context
@@ -2199,16 +2221,27 @@ class Filing:
             >>> filing.grep("going concern")
             >>> filing.grep("Level 3", document="primary")
             >>> filing.grep(r"Level\\s+3", regex=True)
+            >>> filing.grep("going concern", document="exhibit.htm", render_markdown=True)
         """
         from edgar.search.grep import GrepResult, _grep_text
 
         all_matches = []
         found_any_text = False
+        overflowed = False
+        bounded = max_matches is not None or max_match_chars is not None
 
         try:
             attachments = self.attachments
         except Exception:
             attachments = []
+
+        # Resolve an exact filename globally before the legacy type/filename
+        # substring matcher runs. Otherwise a filename selector can also match
+        # another attachment's document type.
+        if document:
+            attachment_list = list(attachments)
+            exact_matches = [a for a in attachment_list if a.document == document]
+            attachments = exact_matches or attachment_list
 
         for attachment in attachments:
             if document and not self._attachment_matches(attachment, document):
@@ -2216,28 +2249,78 @@ class Filing:
             if attachment.empty or attachment.is_binary():
                 continue
 
-            try:
-                text = attachment.text()
-            except Exception as e:
-                log.debug(f"grep: could not extract text from {attachment.document}: {e}")
-                continue
+            if render_markdown:
+                try:
+                    text = attachment.markdown()
+                except Exception as e:
+                    log.debug(f"grep: could not render markdown from {attachment.document}: {e}")
+                    text = None
+                if not text:
+                    try:
+                        text = attachment.text()
+                    except Exception as e:
+                        log.debug(f"grep: could not extract text from {attachment.document}: {e}")
+                        continue
+            else:
+                try:
+                    text = attachment.text()
+                except Exception as e:
+                    log.debug(f"grep: could not extract text from {attachment.document}: {e}")
+                    continue
 
             if not text:
                 continue
 
             found_any_text = True
             location = self._attachment_location(attachment)
-            all_matches.extend(_grep_text(text, pattern, location, regex=regex))
+            remaining = None if max_matches is None else max(0, max_matches - len(all_matches))
+            document_matches = _grep_text(
+                text,
+                pattern,
+                location,
+                regex=regex,
+                max_matches=remaining,
+                max_match_chars=max_match_chars,
+                regex_timeout=regex_timeout,
+            )
+            if not bounded:
+                all_matches.extend(document_matches)
+            else:
+                for match in document_matches:
+                    if match.overflowed:
+                        overflowed = True
+                        break
+                    all_matches.append(match)
+                if overflowed:
+                    break
 
         # Old text filings: SGML returns empty attachment shells, fall back to filing.text().
         if not found_any_text and (document is None or document.lower() == "primary"):
-            all_matches.extend(self._grep_filing_text(pattern, regex))
+            filing_matches = self._grep_filing_text(
+                pattern,
+                regex,
+                max_matches=max_matches,
+                max_match_chars=max_match_chars,
+                regex_timeout=regex_timeout,
+            )
+            if not bounded:
+                all_matches.extend(filing_matches)
+            else:
+                for match in filing_matches:
+                    if match.overflowed:
+                        overflowed = True
+                        break
+                    all_matches.append(match)
 
-        return GrepResult(pattern, all_matches)
+        return GrepResult(pattern, all_matches, overflowed=overflowed)
 
     @staticmethod
     def _attachment_matches(attachment, document: str) -> bool:
         """Whether `attachment` satisfies grep()'s `document` filter."""
+        # A document-bound locator passes the SEC filename back here. Resolve
+        # that identity before the exhibit-type substring fallback below.
+        if attachment.document == document:
+            return True
         if document.lower() == "primary":
             return attachment.sequence_number == "1"
         doc_type = (attachment.document_type or "").upper()
@@ -2254,7 +2337,15 @@ class Filing:
             return attachment.document_type
         return attachment.document or f"doc-{attachment.sequence_number}"
 
-    def _grep_filing_text(self, pattern: str, regex: bool) -> list:
+    def _grep_filing_text(
+        self,
+        pattern: str,
+        regex: bool,
+        *,
+        max_matches: Optional[int] = None,
+        max_match_chars: Optional[int] = None,
+        regex_timeout: Optional[float] = None,
+    ) -> list:
         """Grep the combined filing text as a 'primary' document.
 
         Used by grep() when no attachment yields usable text — covers older
@@ -2266,7 +2357,19 @@ class Filing:
         except Exception as e:
             log.debug(f"grep: could not extract filing text: {e}")
             return []
-        return _grep_text(text, pattern, "primary", regex=regex) if text else []
+        return (
+            _grep_text(
+                text,
+                pattern,
+                "primary",
+                regex=regex,
+                max_matches=max_matches,
+                max_match_chars=max_match_chars,
+                regex_timeout=regex_timeout,
+            )
+            if text
+            else []
+        )
 
     @property
     def filing_url(self) -> str:

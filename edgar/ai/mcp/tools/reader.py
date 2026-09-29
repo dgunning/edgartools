@@ -95,6 +95,7 @@ FORM_EXTRACTORS = {"10-K", "10-Q", "8-K", "DEF 14A", "SC 13D", "SC 13G", "SC 13D
     description="""Use this to read the text content of specific sections from a filing. Extracts narrative content like risk factors, MD&A, business descriptions, financial tables, and event items.
 
 Use edgar_filing first to identify a filing, then edgar_read to extract its content.
+Use edgar_document for exact attachments and exhibits; edgar_read sections are report sections, not attachments.
 
 Available sections by form type:
 - 10-K/10-Q: business, risk_factors, mda, financials, controls, legal
@@ -109,7 +110,17 @@ Examples:
 - Read 8-K event: identifier="AAPL", form="8-K", sections=["items"]
 - Read CEO pay: identifier="AAPL", form="DEF 14A", sections=["compensation"]
 - Read from a chosen period: identifier="ARCC", form="10-Q", period="2026-06-30", sections=["mda"]
-- Continue a truncated section: sections=["mda"], cursor="<next_cursor from a previous call>\"""",
+- Continue a truncated section: identifier="ARCC", form="10-Q", period="2026-06-30", sections=["mda"], cursor="<section_pages.mda.next_cursor>"
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_read","arguments":{"identifier":"ARCC","form":"10-Q","period":"2026-06-30","sections":["mda"]}}
+```
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_read","arguments":{"identifier":"ARCC","form":"10-Q","period":"2026-06-30","sections":["mda"],"cursor":"<section_pages.mda.next_cursor>"}}
+```""",
     params={
         "accession_number": {
             "type": "string",

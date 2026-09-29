@@ -1,6 +1,6 @@
 # MCP Tools Reference
 
-The EdgarTools MCP server provides 13 tools organized by intent -- what you actually want to do, not how APIs are structured.
+The EdgarTools MCP server provides 14 tools organized by intent -- what you actually want to do, not how APIs are structured.
 
 | Tool | What it does |
 |------|-------------|
@@ -10,7 +10,8 @@ The EdgarTools MCP server provides 13 tools organized by intent -- what you actu
 | [edgar_text_search](#edgar_text_search) | Full-text search across filing content |
 | [edgar_monitor](#edgar_monitor) | Live SEC filing feed |
 | [edgar_filing](#edgar_filing) | Parse any filing into structured data |
-| [edgar_read](#edgar_read) | Extract specific sections from a filing |
+| [edgar_read](#edgar_read) | Extract report sections from a filing |
+| [edgar_document](#edgar_document) | List, search and read exact filing attachments |
 | [edgar_notes](#edgar_notes) | Drill into notes and disclosures |
 | [edgar_trends](#edgar_trends) | Financial time series with growth rates |
 | [edgar_compare](#edgar_compare) | Side-by-side company comparison |
@@ -103,6 +104,11 @@ Full-text search across SEC filing content via the SEC's EFTS (full-text search)
 | `start_date` | Start date filter |
 | `end_date` | End date filter |
 
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_text_search","arguments":{"query":"loan agreement","forms":["10-Q"],"identifier":"ARCC","limit":20}}
+```
+
 **Try asking Claude:**
 
 - "Search for filings mentioning artificial intelligence"
@@ -148,6 +154,16 @@ Two ways to specify the filing:
 
 1. **By company + form**: `identifier="AAPL"`, `form="10-K"` (gets the latest)
 2. **By accession number or URL**: `input="0000320193-23-000077"`
+
+`edgar_filing` identifies the filing and returns structured context. Use
+`edgar_read` for report sections such as MD&A or risk factors. Use
+`edgar_document` for exact attachments and exhibits; it preserves the selected
+filename and returns document-bound search locators.
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_filing","arguments":{"input":"0000320193-23-000077","detail":"standard"}}
+```
 
 | Parameter | Description |
 |-----------|-------------|
@@ -205,7 +221,71 @@ Available sections vary by form type:
 - "Read the CEO compensation from Microsoft's proxy statement"
 - "Read ARCC's MD&A for the quarter ended 2026-06-30" -- `identifier="ARCC", form="10-Q", period="2026-06-30", sections=["mda"]`
 
-Each requested section is capped at one page of text; a truncated section's `section_pages.<section>` block carries a `next_cursor` -- pass it back as `cursor` with `sections` set to that SAME single section name to read the rest.
+Each requested section is capped at one page of text; a truncated section's `section_pages.<section>` block carries a `next_cursor`. Continue by repeating the same filing selector and single `sections` value, then pass it back as `cursor`.
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_read","arguments":{"identifier":"ARCC","form":"10-Q","period":"2026-06-30","sections":["mda"]}}
+```
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_read","arguments":{"identifier":"ARCC","form":"10-Q","period":"2026-06-30","sections":["mda"],"cursor":"<section_pages.mda.next_cursor>"}}
+```
+
+### edgar_document
+
+Use `edgar_document` for filing exhibits and other exact attachments. Choose a
+document by its sequence number, exact filename or exhibit type. If a type
+matches multiple attachments, use a returned candidate's sequence or filename.
+An HTTPS `www.sec.gov/Archives/` document URL binds the accession and filename;
+the tool validates its identity and does not fetch the supplied URL directly.
+
+Actions are `list`, `search` and `read`. Search returns a locator containing
+`document` and `char_offset`; pass that exact locator to `read` as `around` to
+inspect nearby text. Reads are bounded to 6,000 characters per page. Searches
+stop after 1,000 candidates per filing, reject match spans over 2,048
+characters and cap regex matching at 50 ms per document. Narrow an over-broad
+query or regex and retry.
+
+Some exhibits are incorporated by reference from earlier filings and will not
+appear in the current filing's attachment list. Find the referenced filing and
+inspect its attachments. For a BDC, its filing may report a portfolio loan or
+borrower without including that borrower's own agreement. These outputs are
+filing evidence and pointers, not legal conclusions.
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_document","arguments":{"action":"list","accession_number":"0001628280-26-050307"}}
+```
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_document","arguments":{"action":"search","accession_number":"0001628280-26-050307","document":"[sequence-or-filename-from-list]","query":"loan agreement","limit":20}}
+```
+
+The `char_offset: 1200` value below is illustrative. Use the exact integer
+returned in the search match's locator rather than copying or estimating it.
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_document","arguments":{"action":"read","accession_number":"0001628280-26-050307","document":"[filename-from-search-locator]","around":{"document":"[filename-from-search-locator]","char_offset":1200}}}
+```
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_document","arguments":{"action":"read","accession_number":"0001628280-26-050307","document":"[exact-filename-from-list]"}}
+```
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_document","arguments":{"action":"read","accession_number":"0001628280-26-050307","document":"[exact-filename-from-list]","cursor":"<page.next_cursor>"}}
+```
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_document","arguments":{"action":"read","url":"https://www.sec.gov/Archives/edgar/data/320193/000032019325000073/a10-qexhibit32103292025.htm"}}
+```
 
 ### edgar_notes
 
@@ -219,7 +299,7 @@ Drill into the notes and disclosures behind financial statement numbers. Use thi
 | `detail` | `minimal` (titles only), `standard` (context + tables), or `full` (includes DataFrame data) |
 | `accession_number` | Exact accession number pinning a specific filing. Takes precedence over `period`. |
 | `period` | Reporting period (`YYYY-MM-DD`) that must exactly match the chosen filing's `period_of_report`. |
-| `cursor` | Continuation cursor from a previous response's table/context `next_cursor`. Must be passed together with the SAME `topic` (and, for a note's context, the same `detail`) the original call used, or it is rejected as `CURSOR_MISMATCH`. |
+| `cursor` | Continuation cursor from a previous response's table/context `next_cursor`. Repeat the same filing selector, `topic`, and (for note context) `detail`; mismatches are rejected as `CURSOR_MISMATCH`. |
 | `limit` | Max table rows per page (default 20, max 50). |
 
 **Try asking Claude:**
@@ -227,6 +307,7 @@ Drill into the notes and disclosures behind financial statement numbers. Use thi
 - "What does Apple's debt note say?"
 - "Show me Tesla's revenue recognition policy"
 - "What does ARCC's debt note say for the quarter ended 2026-06-30?" -- `topic="debt", identifier="ARCC", form="10-Q", period="2026-06-30"`
+- Continue that note: `topic="debt", identifier="ARCC", form="10-Q", period="2026-06-30", detail="standard", cursor="<table-or-context.next_cursor>"`
 
 ??? example "Example response"
 
@@ -247,6 +328,16 @@ Drill into the notes and disclosures behind financial statement numbers. Use thi
     ```
 
 A matched note's table rows and narrative `context` text are each capped per page; when more remains, that block carries a `next_cursor` to continue reading that one table or context.
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_notes","arguments":{"topic":"debt","identifier":"ARCC","form":"10-Q","period":"2026-06-30","detail":"standard","limit":20}}
+```
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_notes","arguments":{"topic":"debt","identifier":"ARCC","form":"10-Q","period":"2026-06-30","detail":"standard","limit":20,"cursor":"<table-or-context.next_cursor>"}}
+```
 
 ---
 
@@ -352,7 +443,7 @@ Mutual funds, ETFs, BDCs, and money market funds -- lookup, search, portfolio ho
 | `form` | BDC actions only. `10-K` (default) or `10-Q`. |
 | `period` | BDC actions only. Reporting period (`YYYY-MM-DD`) that must exactly match the chosen filing's `period_of_report`. |
 | `borrower` | BDC actions only. Case-insensitive substring filter on the portfolio company/borrower name (or raw investment identifier). |
-| `cursor` | Continuation cursor from a previous `bdc_portfolio`/`bdc_nonaccrual` response's `page.next_cursor`, to fetch the next page. |
+| `cursor` | BDC portfolio/non-accrual continuation. Repeat the same action, filing selector, form, period, and borrower filter. |
 | `include_untyped` | BDC actions only. Include investments with an unrecognized classification (default false). |
 
 **Try asking Claude:**
@@ -378,13 +469,23 @@ action="bdc_portfolio", identifier="ARCC", form="10-Q", period="2026-06-30"
 action="bdc_portfolio", accession_number="0001628280-26-050307"
 
 # Filter to one borrower
-action="bdc_portfolio", identifier="ARCC", borrower="Ivy Hill"
+action="bdc_portfolio", identifier="ARCC", form="10-Q", period="2026-06-30", borrower="Ivy Hill"
 
 # Next page (limit clamps to 50 rows/page)
-action="bdc_portfolio", identifier="ARCC", cursor="<page.next_cursor from the previous call>"
+action="bdc_portfolio", identifier="ARCC", form="10-Q", period="2026-06-30", borrower="Ivy Hill", cursor="<page.next_cursor from the previous call>"
 
 # Non-accrual evidence for the same filing
 action="bdc_nonaccrual", identifier="ARCC", form="10-Q", period="2026-06-30"
+```
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_fund","arguments":{"action":"bdc_portfolio","identifier":"ARCC","form":"10-Q","period":"2026-06-30","borrower":"Ivy Hill","limit":20}}
+```
+
+<!-- MCP_TOOL_CALL_EXAMPLE -->
+```json
+{"tool":"edgar_fund","arguments":{"action":"bdc_portfolio","identifier":"ARCC","form":"10-Q","period":"2026-06-30","borrower":"Ivy Hill","limit":20,"cursor":"<page.next_cursor>"}}
 ```
 
 `bdc_portfolio` response blocks:
@@ -465,6 +566,6 @@ These patterns chain tools together for complete analyses:
 `edgar_screen` (find peers) → `edgar_compare` (compare metrics)
 
 **Credit evidence (BDC loans):**
-`edgar_fund` (`bdc_search`) → `edgar_search`/`edgar_company` (list 10-K/10-Q filings with periods) → `edgar_fund` (`bdc_portfolio`, with `period` + `borrower`) → `edgar_fund` (`bdc_nonaccrual`) → `edgar_notes`/`edgar_read` (same `period`, for narrative context). Continue any of these with the `cursor` from a `next_cursor` field; comparing periods is the caller's job.
+`edgar_fund` (`bdc_search`) → `edgar_search`/`edgar_company` (list 10-K/10-Q filings with periods) → `edgar_fund` (`bdc_portfolio`, with `period` + `borrower`) → `edgar_fund` (`bdc_nonaccrual`) → `edgar_notes`/`edgar_read` (same `period`, for narrative context). To continue, repeat the same action and filing selector with the original borrower filter, note topic/detail or single report section, then pass its `next_cursor`; comparing periods is the caller's job.
 
 For pre-built multi-step analysis workflows, see [Workflows](mcp-workflows.md).
