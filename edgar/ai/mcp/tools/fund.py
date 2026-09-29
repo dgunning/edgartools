@@ -7,6 +7,7 @@ Get fund, ETF, BDC, and money market fund data from SEC filings.
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 from decimal import Decimal
 from typing import Any, Optional
 
@@ -18,8 +19,10 @@ from edgar.ai.mcp.tools.base import (
     error,
     get_error_suggestions,
     classify_error,
+    resolve_company,
     _cell_missing,
     _cell_number,
+    ToolResponse,
 )
 
 logger = logging.getLogger(__name__)
@@ -552,30 +555,91 @@ async def _bdc_search(query: str, limit: int) -> Any:
         return error(str(e), suggestions=get_error_suggestions(e))
 
 
-def _find_bdc(identifier: str):
-    """Resolve a ticker, CIK, or name to a BDCEntity, or None if not found."""
-    from edgar.bdc.reference import get_bdc_list
+@dataclass(frozen=True)
+class _BdcLookup:
+    """Result of resolving an identifier to a BDC.
+
+    Exactly one of `bdc`/`ambiguous` is set on a hit; both `None` means
+    "not found". `resolved_by` is set to `"search"` when a fuzzy name
+    search (rather than a direct ticker/CIK hit) produced `bdc`.
+    """
+    bdc: Optional[Any] = None
+    ambiguous: Optional[list[dict]] = None
+    resolved_by: Optional[str] = None
+
+
+def _find_bdc(identifier: str) -> _BdcLookup:
+    """Resolve a ticker, CIK, or name to a BDC.
+
+    A purely numeric string resolves as a CIK; a short alphanumeric string
+    (1-5 characters) resolves as a ticker. Both go through `lookup_bdc`,
+    which checks the latest SEC BDC Report and falls back to prior years --
+    the 2026 report is missing at least one active, large BDC (see
+    `lookup_bdc`'s docstring), so "not in the latest report" is never
+    treated as "not a BDC" here. A ticker not found in any report's ticker
+    column falls back to resolving the company directly and checking its
+    CIK, rather than assuming it isn't a BDC. Anything else (a name) goes
+    through a fuzzy search (`_find_bdc_by_search`), which must resolve to
+    exactly one candidate or comes back ambiguous rather than silently
+    guessed -- the SEC BDC Report's own name-similarity search can match a
+    completely different BDC (e.g. "Ares Capital" fuzzy-matching "Ares
+    Strategic Income Fund").
+    """
+    from edgar.bdc.reference import lookup_bdc
+
+    cleaned = identifier.strip()
+
+    if cleaned.isdigit():
+        return _BdcLookup(bdc=lookup_bdc(cik=int(cleaned)))
+
+    if cleaned.isalnum() and 1 <= len(cleaned) <= 5:
+        bdc = lookup_bdc(ticker=cleaned.upper())
+        if bdc is not None:
+            return _BdcLookup(bdc=bdc)
+        try:
+            company = resolve_company(cleaned)
+        except Exception:
+            return _BdcLookup()
+        return _BdcLookup(bdc=lookup_bdc(cik=int(company.cik)))
+
+    return _find_bdc_by_search(cleaned)
+
+
+def _find_bdc_by_search(identifier: str) -> _BdcLookup:
+    """Fuzzy BDC name search: exactly one hit is used, more than one is ambiguous."""
+    from edgar.bdc.reference import lookup_bdc
     from edgar.bdc.search import find_bdc
 
-    bdcs = get_bdc_list()
+    results = find_bdc(identifier, top_n=6)
+    if results.empty:
+        return _BdcLookup()
 
-    # Try ticker first
-    bdc = bdcs.get_by_ticker(identifier.upper())
+    rows = results.results
+    if len(rows) == 1:
+        cik = int(rows.iloc[0]["cik"])
+        return _BdcLookup(bdc=lookup_bdc(cik=cik), resolved_by="search")
 
-    # Try CIK
-    if bdc is None:
-        try:
-            bdc = bdcs.get_by_cik(int(identifier))
-        except (ValueError, TypeError):
-            pass
+    candidates = [
+        {
+            "name": str(row["name"]),
+            "cik": int(row["cik"]),
+            "ticker": row["ticker"] if row["ticker"] else None,
+        }
+        for _, row in rows.head(5).iterrows()
+    ]
+    return _BdcLookup(ambiguous=candidates)
 
-    # Try search as fallback
-    if bdc is None:
-        search_results = find_bdc(identifier, top_n=1)
-        if not search_results.empty:
-            bdc = search_results[0]
 
-    return bdc
+def _ambiguous_bdc_response(identifier: str, candidates: list[dict]) -> Any:
+    def _describe(c: dict) -> str:
+        ticker_part = f", ticker {c['ticker']}" if c.get("ticker") else ""
+        return f"{c['name']} (CIK {c['cik']}{ticker_part})"
+
+    return error(
+        f"'{identifier}' matches multiple BDCs; pick one by ticker, CIK, or accession_number.",
+        suggestions=[_describe(c) for c in candidates],
+        error_code="AMBIGUOUS_BDC",
+    )
 
 
 def _investment_record(inv) -> dict[str, Any]:
@@ -598,6 +662,311 @@ def _investment_record(inv) -> dict[str, Any]:
     }
 
 
+def _bdc_identity_fields(bdc, filing, resolved_by: Optional[str] = None) -> dict[str, Any]:
+    """Shared `name`/`cik`/`is_active`/`state`/`resolved_by` block.
+
+    Used by both the structured-holdings response and the no-structured-
+    data fallback, so the two response shapes stay in sync (previously
+    duplicated between them).
+    """
+    fields: dict[str, Any] = {
+        "name": bdc.name if bdc is not None else filing.company,
+        "cik": bdc.cik if bdc is not None else int(filing.cik),
+        "is_active": bdc.is_active if bdc is not None else None,
+    }
+    if bdc is not None and bdc.state:
+        fields["state"] = bdc.state
+    if resolved_by:
+        fields["resolved_by"] = resolved_by
+    return fields
+
+
+@dataclass(frozen=True)
+class _BdcResolution:
+    """A resolved BDC (if any) plus the chosen filing."""
+    bdc: Any
+    selection: Any
+    resolved_by: Optional[str] = None
+
+
+def _resolve_bdc_and_filing(
+    identifier: Optional[str],
+    accession_number: Optional[str],
+    form: str,
+    period: Optional[str],
+):
+    """Resolve the BDC (if `identifier` given) and the chosen filing.
+
+    Returns a `_BdcResolution` on success, or a `ToolResponse` the caller
+    should return as-is: `COMPANY_NOT_FOUND`/`AMBIGUOUS_BDC` for an
+    unresolved identifier, `NOT_A_BDC` when an accession's CIK isn't a BDC
+    in any checked report year, or a filing-selection failure's own
+    response.
+    """
+    from edgar.ai.mcp.tools.selection import FilingSelectionError, resolve_report_filing
+    from edgar.bdc.reference import lookup_bdc
+
+    try:
+        if identifier:
+            lookup = _find_bdc(identifier)
+            if lookup.ambiguous is not None:
+                return _ambiguous_bdc_response(identifier, lookup.ambiguous)
+            if lookup.bdc is None:
+                return error(
+                    f"Could not find BDC: '{identifier}'",
+                    suggestions=[
+                        "Use action='bdc_search' to find BDCs by name",
+                        "Try a ticker (ARCC, MAIN) or CIK number",
+                    ],
+                    error_code="COMPANY_NOT_FOUND",
+                )
+            selection = resolve_report_filing(
+                form=form,
+                accession_number=accession_number,
+                period=period,
+                company=lookup.bdc.get_company(),
+            )
+            return _BdcResolution(bdc=lookup.bdc, selection=selection, resolved_by=lookup.resolved_by)
+
+        selection = resolve_report_filing(accession_number=accession_number)
+        bdc = lookup_bdc(cik=int(selection.filing.cik))
+        if bdc is None:
+            return error(
+                f"CIK {selection.filing.cik} is not a Business Development Company.",
+                suggestions=[
+                    "Use action='bdc_search' to find BDCs by name or ticker",
+                    "Provide a BDC identifier instead of accession_number alone",
+                ],
+                error_code="NOT_A_BDC",
+            )
+        return _BdcResolution(bdc=bdc, selection=selection)
+    except FilingSelectionError as exc:
+        return exc.to_response()
+
+
+def _decode_page_cursor(cursor: Optional[str], *, tool: str, accession: str, query: dict):
+    """Decode a page cursor, if given. Returns `(payload_or_None, error_response_or_None)`."""
+    from edgar.ai.mcp.tools.continuation import CursorError, decode_cursor
+
+    if not cursor:
+        return None, None
+    try:
+        return decode_cursor(cursor, tool=tool, accession=accession, query=query), None
+    except CursorError as exc:
+        return None, exc.to_response()
+
+
+def _build_next_cursor(tool: str, accession: str, offset: int, fp: str, query: Optional[dict]):
+    """Encode a page cursor. Returns `(cursor_or_None, error_response_or_None)`."""
+    from edgar.ai.mcp.tools.continuation import CursorError, encode_cursor
+
+    try:
+        return encode_cursor(tool=tool, accession=accession, offset=offset, fp=fp, query=query), None
+    except CursorError as exc:
+        return None, exc.to_response()
+
+
+def _load_extraction(filing, include_untyped: bool):
+    """Cached extraction, threading the parsed XBRL through on a cache miss.
+
+    `filing.xbrl()` is not memoized -- it re-parses the filing's full
+    submission on every call -- so this parses it at most once per call and
+    hands the same object back so the no-structured-data fallback (if
+    needed) never parses the same filing a second time.
+
+    Returns `(investments_or_None, xbrl_or_None)`. `xbrl` is `None` on a
+    cache hit: nothing needed parsing this call.
+    """
+    from edgar import __version__ as edgar_version
+    from edgar.ai.mcp.tools.continuation import results_cache
+    from edgar.bdc.investments import portfolio_investments_from_filing
+
+    cache_key = ("bdc_portfolio", filing.accession_number, bool(include_untyped), edgar_version)
+    investments = results_cache.get(cache_key)
+    if investments is not None:
+        return investments, None
+
+    xbrl = filing.xbrl()
+    investments = portfolio_investments_from_filing(filing, include_untyped=include_untyped, xbrl=xbrl)
+    if investments is not None:
+        results_cache.put(cache_key, investments)
+    return investments, xbrl
+
+
+def _filter_and_paginate(full_list: list, normalized_borrower: Optional[str], offset: int, limit: int):
+    """Apply the borrower filter (if any), then slice a page. Returns `(matching, page_items, page_meta)`."""
+    from edgar.ai.mcp.tools.continuation import paginate
+
+    if normalized_borrower:
+        matching = [
+            inv for inv in full_list
+            if normalized_borrower in (inv.company_name or "").lower()
+            or normalized_borrower in (inv.identifier or "").lower()
+        ]
+    else:
+        matching = full_list
+
+    page_items, page_meta = paginate(matching, offset=offset, limit=limit)
+    return matching, page_items, page_meta
+
+
+def _build_extraction_block(investments, include_untyped: bool) -> dict[str, Any]:
+    dq = investments.data_quality
+    return {
+        "method": investments.extraction_method,
+        "include_untyped": bool(include_untyped),
+        "period": investments.period,
+        "field_coverage": {
+            "fair_value": round(dq.fair_value_coverage, 3),
+            "cost": round(dq.cost_coverage, 3),
+            "principal": round(dq.principal_coverage, 3),
+            "interest_rate": round(dq.interest_rate_coverage, 3),
+            "pik_rate": round(dq.pik_rate_coverage, 3),
+            "spread": round(dq.spread_coverage, 3),
+        },
+        "rate_convention": "decimal_fraction",
+        "limitation": (
+            "Holdings are those the parser extracted from XBRL; holdings present "
+            "in the filing may be missing. A null field means not extracted or "
+            "not disclosed, never zero."
+        ),
+    }
+
+
+def _filtered_totals(matching: list) -> dict[str, Any]:
+    fair_value = sum((inv.fair_value for inv in matching if inv.fair_value is not None), Decimal(0))
+    cost = sum((inv.cost for inv in matching if inv.cost is not None), Decimal(0))
+    return {"count": len(matching), "fair_value": float(fair_value), "cost": float(cost)}
+
+
+def _build_bdc_portfolio_response(
+    *,
+    bdc,
+    filing,
+    selected_by: str,
+    resolved_by: Optional[str],
+    investments,
+    full_list: list,
+    page_items: list,
+    page_meta: dict,
+    matching: list,
+    next_cursor: Optional[str],
+    normalized_borrower: Optional[str],
+    include_untyped: bool,
+) -> dict[str, Any]:
+    from edgar.ai.mcp.tools.base import format_source
+
+    result: dict[str, Any] = {
+        "analysis": "bdc_portfolio",
+        **_bdc_identity_fields(bdc, filing, resolved_by),
+        "source": format_source(filing, selected_by),
+        "total_investments": len(full_list),
+        "total_fair_value": float(investments.total_fair_value),
+        "total_cost": float(investments.total_cost),
+        "investments": [_investment_record(inv) for inv in page_items],
+        "page": {
+            "offset": page_meta["offset"],
+            "returned": page_meta["returned"],
+            "total_matching": len(matching),
+            "total_extracted": len(full_list),
+            "remaining": page_meta["remaining"],
+            "next_cursor": next_cursor,
+        },
+        "extraction": _build_extraction_block(investments, include_untyped),
+    }
+
+    if normalized_borrower:
+        result["filtered_totals"] = _filtered_totals(matching)
+
+    if page_meta["remaining"] > 0:
+        result["note"] = (
+            f"{page_meta['remaining']} more matching investment(s) remain. "
+            "Pass the returned cursor to action='bdc_portfolio' to continue."
+        )
+
+    return result
+
+
+def _bdc_portfolio_next_steps(next_cursor: Optional[str]) -> list[str]:
+    steps = [
+        "Use action='bdc_search' to find other BDCs",
+        "Use edgar_company with this CIK for full company analysis",
+    ]
+    steps.append(
+        "Pass the returned cursor to continue paging through investments"
+        if next_cursor else
+        "Use edgar_read to read the BDC's filing sections"
+    )
+    return steps
+
+
+def _resolve_cursor_offset(cursor_payload: Optional[dict], fp: str):
+    """The page offset a decoded cursor points at. Returns `(offset, error_response)`;
+    `offset` is `0` with no cursor. Checks the fingerprint -- the one part of
+    cursor validation that needs the just-computed extraction fingerprint,
+    so it can't happen inside `_decode_page_cursor` (which runs before
+    extraction)."""
+    from edgar.ai.mcp.tools.continuation import CursorError, check_fingerprint
+
+    if cursor_payload is None:
+        return 0, None
+    try:
+        check_fingerprint(cursor_payload, fp)
+    except CursorError as exc:
+        return None, exc.to_response()
+    return cursor_payload["off"], None
+
+
+def _bdc_portfolio_with_holdings(
+    *,
+    resolution: _BdcResolution,
+    filing,
+    selected_by: str,
+    accession: str,
+    investments,
+    cursor_payload: Optional[dict],
+    normalized_borrower: Optional[str],
+    query: dict,
+    limit: int,
+    include_untyped: bool,
+) -> Any:
+    """Build the paged response once the filing has structured holdings."""
+    from edgar.ai.mcp.tools.continuation import fingerprint
+
+    full_list = list(investments)
+    fp = fingerprint(inv.identifier for inv in full_list)
+
+    offset, err = _resolve_cursor_offset(cursor_payload, fp)
+    if err is not None:
+        return err
+
+    matching, page_items, page_meta = _filter_and_paginate(full_list, normalized_borrower, offset, limit)
+
+    next_cursor = None
+    if page_meta["remaining"] > 0:
+        next_cursor, err = _build_next_cursor(
+            "edgar_fund:bdc_portfolio", accession, offset + page_meta["returned"], fp, query
+        )
+        if err is not None:
+            return err
+
+    result = _build_bdc_portfolio_response(
+        bdc=resolution.bdc,
+        filing=filing,
+        selected_by=selected_by,
+        resolved_by=resolution.resolved_by,
+        investments=investments,
+        full_list=full_list,
+        page_items=page_items,
+        page_meta=page_meta,
+        matching=matching,
+        next_cursor=next_cursor,
+        normalized_borrower=normalized_borrower,
+        include_untyped=include_untyped,
+    )
+    return success(result, next_steps=_bdc_portfolio_next_steps(next_cursor))
+
+
 async def _bdc_portfolio(
     identifier: Optional[str],
     accession_number: Optional[str],
@@ -614,209 +983,82 @@ async def _bdc_portfolio(
     accession number, period, or the BDC's latest 10-K/10-Q — then extracts
     holdings via `portfolio_investments_from_filing` (cached: extraction
     costs roughly 11s for a large BDC like ARCC) and pages/filters the
-    result. Falls back to the raw Schedule of Investments text (also paged)
-    when the filing's XBRL has no per-investment structured data, and errors
-    with NO_XBRL when the filing has no XBRL at all.
+    result. Falls back to the raw Schedule of Investments text when the
+    filing's XBRL has no per-investment structured data, and errors with
+    NO_XBRL when the filing has no XBRL at all.
     """
-    from edgar import __version__ as edgar_version
-    from edgar.ai.mcp.tools.base import format_source
-    from edgar.ai.mcp.tools.continuation import (
-        CursorError,
-        check_fingerprint,
-        decode_cursor,
-        encode_cursor,
-        fingerprint,
-        paginate,
-        results_cache,
-    )
-    from edgar.ai.mcp.tools.selection import FilingSelectionError, resolve_report_filing
-    from edgar.bdc.investments import portfolio_investments_from_filing
-    from edgar.bdc.reference import get_bdc_list, is_bdc_cik
+    resolution = _resolve_bdc_and_filing(identifier, accession_number, form, period)
+    if isinstance(resolution, ToolResponse):
+        return resolution
 
-    bdc = None
-    try:
-        if identifier:
-            bdc = _find_bdc(identifier)
-            if bdc is None:
-                return error(
-                    f"Could not find BDC: '{identifier}'",
-                    suggestions=[
-                        "Use action='bdc_search' to find BDCs by name",
-                        "Try a ticker (ARCC, MAIN) or CIK number",
-                    ],
-                    error_code="COMPANY_NOT_FOUND",
-                )
-            selection = resolve_report_filing(
-                form=form,
-                accession_number=accession_number,
-                period=period,
-                company=bdc.get_company(),
-            )
-        else:
-            selection = resolve_report_filing(accession_number=accession_number)
-            if not is_bdc_cik(int(selection.filing.cik)):
-                return error(
-                    f"CIK {selection.filing.cik} is not a Business Development Company.",
-                    suggestions=[
-                        "Use action='bdc_search' to find BDCs by name or ticker",
-                        "Provide a BDC identifier instead of accession_number alone",
-                    ],
-                    error_code="NOT_A_BDC",
-                )
-            bdc = get_bdc_list().get_by_cik(int(selection.filing.cik))
-    except FilingSelectionError as exc:
-        return exc.to_response()
-
-    filing = selection.filing
-    selected_by = selection.selected_by
+    filing = resolution.selection.filing
+    selected_by = resolution.selection.selected_by
     accession = filing.accession_number
 
     normalized_borrower = borrower.strip().lower() if borrower else None
     query = {"borrower": normalized_borrower, "include_untyped": bool(include_untyped)}
 
-    cursor_payload = None
-    if cursor:
-        try:
-            cursor_payload = decode_cursor(
-                cursor,
-                tool="edgar_fund:bdc_portfolio",
-                accession=accession,
-                query=query,
-            )
-        except CursorError as exc:
-            return exc.to_response()
+    cursor_payload, err = _decode_page_cursor(
+        cursor, tool="edgar_fund:bdc_portfolio", accession=accession, query=query
+    )
+    if err is not None:
+        return err
 
-    cache_key = ("bdc_portfolio", accession, bool(include_untyped), edgar_version)
-    investments = results_cache.get(cache_key)
-    if investments is None:
-        investments = portfolio_investments_from_filing(filing, include_untyped=include_untyped)
-        if investments is not None:
-            results_cache.put(cache_key, investments)
+    investments, xbrl = _load_extraction(filing, include_untyped)
 
     if investments is None or len(investments) == 0:
         return _bdc_portfolio_no_structured_data(
             filing=filing,
             selected_by=selected_by,
-            bdc=bdc,
+            bdc=resolution.bdc,
             cursor=cursor,
+            xbrl=xbrl,
+            resolved_by=resolution.resolved_by,
         )
 
-    full_list = list(investments)
-    fp = fingerprint(inv.identifier for inv in full_list)
-
-    offset = 0
-    if cursor_payload is not None:
-        try:
-            check_fingerprint(cursor_payload, fp)
-        except CursorError as exc:
-            return exc.to_response()
-        offset = cursor_payload["off"]
-
-    if normalized_borrower:
-        matching = [
-            inv for inv in full_list
-            if normalized_borrower in (inv.company_name or "").lower()
-            or normalized_borrower in (inv.identifier or "").lower()
-        ]
-    else:
-        matching = full_list
-
-    page_items, page_meta = paginate(matching, offset=offset, limit=limit)
-
-    next_cursor = None
-    if page_meta["remaining"] > 0:
-        try:
-            next_cursor = encode_cursor(
-                tool="edgar_fund:bdc_portfolio",
-                accession=accession,
-                offset=offset + page_meta["returned"],
-                fp=fp,
-                query=query,
-            )
-        except CursorError as exc:
-            return exc.to_response()
-
-    dq = investments.data_quality
-    result: dict[str, Any] = {
-        "analysis": "bdc_portfolio",
-        "name": bdc.name if bdc is not None else filing.company,
-        "cik": bdc.cik if bdc is not None else int(filing.cik),
-        "is_active": bdc.is_active if bdc is not None else None,
-        "source": format_source(filing, selected_by),
-        "total_investments": len(full_list),
-        "total_fair_value": float(investments.total_fair_value),
-        "total_cost": float(investments.total_cost),
-        "investments": [_investment_record(inv) for inv in page_items],
-        "page": {
-            "offset": page_meta["offset"],
-            "returned": page_meta["returned"],
-            "total_matching": len(matching),
-            "total_extracted": len(full_list),
-            "remaining": page_meta["remaining"],
-            "next_cursor": next_cursor,
-        },
-        "extraction": {
-            "method": investments.extraction_method,
-            "include_untyped": bool(include_untyped),
-            "period": investments.period,
-            "field_coverage": {
-                "fair_value": round(dq.fair_value_coverage, 3),
-                "cost": round(dq.cost_coverage, 3),
-                "principal": round(dq.principal_coverage, 3),
-                "interest_rate": round(dq.interest_rate_coverage, 3),
-                "pik_rate": round(dq.pik_rate_coverage, 3),
-                "spread": round(dq.spread_coverage, 3),
-            },
-            "rate_convention": "decimal_fraction",
-            "limitation": (
-                "Holdings are those the parser extracted from XBRL; holdings present "
-                "in the filing may be missing. A null field means not extracted or "
-                "not disclosed, never zero."
-            ),
-        },
-    }
-
-    if bdc is not None and bdc.state:
-        result["state"] = bdc.state
-
-    if normalized_borrower:
-        filtered_fv = sum(
-            (inv.fair_value for inv in matching if inv.fair_value is not None), Decimal(0)
-        )
-        filtered_cost = sum(
-            (inv.cost for inv in matching if inv.cost is not None), Decimal(0)
-        )
-        result["filtered_totals"] = {
-            "count": len(matching),
-            "fair_value": float(filtered_fv),
-            "cost": float(filtered_cost),
-        }
-
-    if page_meta["remaining"] > 0:
-        result["note"] = (
-            f"{page_meta['remaining']} more matching investment(s) remain. "
-            "Pass the returned cursor to action='bdc_portfolio' to continue."
-        )
-
-    next_steps = [
-        "Use action='bdc_search' to find other BDCs",
-        "Use edgar_company with this CIK for full company analysis",
-    ]
-    if next_cursor:
-        next_steps.append("Pass the returned cursor to continue paging through investments")
-    else:
-        next_steps.append("Use edgar_read to read the BDC's filing sections")
-
-    return success(result, next_steps=next_steps)
+    return _bdc_portfolio_with_holdings(
+        resolution=resolution,
+        filing=filing,
+        selected_by=selected_by,
+        accession=accession,
+        investments=investments,
+        cursor_payload=cursor_payload,
+        normalized_borrower=normalized_borrower,
+        query=query,
+        limit=limit,
+        include_untyped=include_untyped,
+    )
 
 
-def _bdc_portfolio_no_structured_data(filing, selected_by: str, bdc, cursor: Optional[str]) -> Any:
-    """Fallback when the filing's XBRL has no per-investment structured data.
+_NO_SOI_STATEMENT_REASON = (
+    "This filing's XBRL has no Schedule of Investments statement and no "
+    "dimensional investment facts were found."
+)
+_NO_STRUCTURED_FIELDS_REASON = (
+    "Structured per-investment fields could not be extracted from this "
+    "filing's XBRL; showing the raw Schedule of Investments text instead."
+)
 
-    Returns the raw Schedule of Investments text, paged, or a NO_XBRL error
-    when the filing carries no XBRL at all.
-    """
-    from edgar.ai.mcp.tools.base import format_source
+
+def _soi_text_and_reason(filing, xbrl) -> tuple[str, str]:
+    """The filing's raw Schedule of Investments text (cached), plus why
+    structured per-investment extraction didn't work."""
+    from edgar.ai.mcp.tools.continuation import text_cache
+
+    cache_key = ("bdc_soi_text", filing.accession_number)
+    cached = text_cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    soi = xbrl.statements.schedule_of_investments()
+    text = str(soi) if soi is not None else ""
+    reason = _NO_SOI_STATEMENT_REASON if soi is None else _NO_STRUCTURED_FIELDS_REASON
+    text_cache.put(cache_key, (text, reason), size_bytes=len(text.encode("utf-8")))
+    return text, reason
+
+
+def _paginate_soi_text(text: str, cursor: Optional[str], accession: str):
+    """Page the SOI fallback text. Returns `(page_text, text_meta, error_response)`."""
     from edgar.ai.mcp.tools.continuation import (
         CursorError,
         check_fingerprint,
@@ -824,28 +1066,7 @@ def _bdc_portfolio_no_structured_data(filing, selected_by: str, bdc, cursor: Opt
         encode_cursor,
         fingerprint,
         paginate_text,
-        text_cache,
     )
-
-    accession = filing.accession_number
-    xbrl = filing.xbrl()
-    if xbrl is None:
-        return error(
-            f"No XBRL data found for filing {accession}.",
-            suggestions=[
-                "Use edgar_read to read this filing as raw text instead",
-                "Try a different filing from this BDC",
-            ],
-            error_code="NO_XBRL",
-        )
-
-    soi = xbrl.statements.schedule_of_investments()
-
-    text_cache_key = ("bdc_soi_text", accession)
-    text = text_cache.get(text_cache_key)
-    if text is None:
-        text = str(soi) if soi is not None else ""
-        text_cache.put(text_cache_key, text, size_bytes=len(text.encode("utf-8")))
 
     fp = fingerprint([text])
 
@@ -855,7 +1076,7 @@ def _bdc_portfolio_no_structured_data(filing, selected_by: str, bdc, cursor: Opt
             payload = decode_cursor(cursor, tool="edgar_fund:bdc_soi_text", accession=accession, query=None)
             check_fingerprint(payload, fp)
         except CursorError as exc:
-            return exc.to_response()
+            return None, None, exc.to_response()
         offset = payload["off"]
 
     page_text, text_meta = paginate_text(text, offset=offset)
@@ -871,21 +1092,51 @@ def _bdc_portfolio_no_structured_data(filing, selected_by: str, bdc, cursor: Opt
                 query=None,
             )
         except CursorError as exc:
-            return exc.to_response()
+            return None, None, exc.to_response()
 
-    reason = (
-        "This filing's XBRL has no Schedule of Investments statement and no "
-        "dimensional investment facts were found."
-        if soi is None else
-        "Structured per-investment fields could not be extracted from this "
-        "filing's XBRL; showing the raw Schedule of Investments text instead."
-    )
+    text_meta = dict(text_meta)
+    text_meta["next_cursor"] = next_cursor
+    return page_text, text_meta, None
+
+
+def _bdc_portfolio_no_structured_data(
+    filing,
+    selected_by: str,
+    bdc,
+    cursor: Optional[str],
+    xbrl=None,
+    resolved_by: Optional[str] = None,
+) -> Any:
+    """Fallback when the filing's XBRL has no per-investment structured data.
+
+    Returns the raw Schedule of Investments text, paged, or a NO_XBRL error
+    when the filing carries no XBRL at all. `xbrl`, if given, is the
+    already-parsed XBRL from the caller's own extraction attempt, reused
+    here instead of parsing the filing's full submission a second time.
+    """
+    from edgar.ai.mcp.tools.base import format_source
+
+    accession = filing.accession_number
+    if xbrl is None:
+        xbrl = filing.xbrl()
+    if xbrl is None:
+        return error(
+            f"No XBRL data found for filing {accession}.",
+            suggestions=[
+                "Use edgar_read to read this filing as raw text instead",
+                "Try a different filing from this BDC",
+            ],
+            error_code="NO_XBRL",
+        )
+
+    text, reason = _soi_text_and_reason(filing, xbrl)
+    page_text, text_meta, err = _paginate_soi_text(text, cursor, accession)
+    if err is not None:
+        return err
 
     result: dict[str, Any] = {
         "analysis": "bdc_portfolio",
-        "name": bdc.name if bdc is not None else filing.company,
-        "cik": bdc.cik if bdc is not None else int(filing.cik),
-        "is_active": bdc.is_active if bdc is not None else None,
+        **_bdc_identity_fields(bdc, filing, resolved_by),
         "source": format_source(filing, selected_by),
         "total_investments": 0,
         "total_fair_value": None,
@@ -893,17 +1144,8 @@ def _bdc_portfolio_no_structured_data(filing, selected_by: str, bdc, cursor: Opt
         "investments": [],
         "schedule_of_investments": page_text,
         "structured_data_unavailable": {"reason": reason},
-        "text_page": {
-            "offset": text_meta["offset"],
-            "returned_chars": text_meta["returned_chars"],
-            "total_chars": text_meta["total_chars"],
-            "remaining_chars": text_meta["remaining_chars"],
-            "next_cursor": next_cursor,
-        },
+        "text_page": text_meta,
     }
-
-    if bdc is not None and bdc.state:
-        result["state"] = bdc.state
 
     if text_meta["remaining_chars"] > 0:
         result["note"] = (

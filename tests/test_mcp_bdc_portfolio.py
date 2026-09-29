@@ -19,12 +19,13 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Optional
 
+import pandas as pd
 import pytest
 
 from edgar import set_identity
-from edgar.ai.mcp.tools import continuation
+from edgar.ai.mcp.tools import continuation, fund
 from edgar.ai.mcp.tools.continuation import ResultCache
-from edgar.ai.mcp.tools.fund import edgar_fund
+from edgar.ai.mcp.tools.fund import _BdcLookup, edgar_fund
 from edgar.ai.mcp.tools.selection import FilingSelection, FilingSelectionError
 from edgar.bdc.investments import PortfolioInvestment, PortfolioInvestments
 
@@ -32,6 +33,8 @@ from edgar.bdc.investments import PortfolioInvestment, PortfolioInvestments
 # =============================================================================
 # Fakes
 # =============================================================================
+
+_UNSET = object()  # sentinel: "use the default", distinct from an explicit None
 
 
 class _FakeCompany:
@@ -79,10 +82,14 @@ class _FakeXBRLWithSOI:
 class _FakeFiling:
     """Just enough of a Filing for format_source/paging in _bdc_portfolio.
 
-    ``xbrl()`` raises by default — proving the structured-data (happy) path
-    never calls it, since portfolio_investments_from_filing is monkeypatched
-    directly. Tests that exercise the no-structured-data fallback pass
-    ``xbrl_result`` explicitly.
+    ``_load_extraction`` (fund.py) always parses XBRL itself on a cache
+    miss -- threading it into ``portfolio_investments_from_filing`` and,
+    if needed, the no-structured-data fallback -- so ``xbrl()`` is called
+    on essentially every test here, not just the no-structured-data ones.
+    It defaults to a benign ``_FakeXBRLNoSOI()`` (harmless when extraction
+    itself is monkeypatched to ignore its ``xbrl`` argument) and counts
+    calls via ``xbrl_call_count``, which the no-double-parse regression
+    test asserts is exactly 1.
     """
 
     def __init__(
@@ -94,7 +101,7 @@ class _FakeFiling:
         report_date="2026-06-30",
         filing_date="2026-08-01",
         company="ARES CAPITAL CORP",
-        xbrl_result="__raise__",
+        xbrl_result=_UNSET,
     ):
         self.accession_number = accession_number
         self.cik = cik
@@ -105,15 +112,11 @@ class _FakeFiling:
         self.homepage_url = (
             f"https://www.sec.gov/Archives/edgar/data/{cik}/{accession_number}-index.html"
         )
-        self._xbrl_result = xbrl_result
+        self._xbrl_result = _FakeXBRLNoSOI() if xbrl_result is _UNSET else xbrl_result
+        self.xbrl_call_count = 0
 
     def xbrl(self):
-        if self._xbrl_result == "__raise__":
-            raise AssertionError(
-                "filing.xbrl() was called on the structured-data path — "
-                "portfolio_investments_from_filing is monkeypatched and should "
-                "make this unnecessary"
-            )
+        self.xbrl_call_count += 1
         return self._xbrl_result
 
 
@@ -141,14 +144,14 @@ def _patch_selection(monkeypatch, filing: _FakeFiling, selected_by: str = "lates
 def _patch_extraction(monkeypatch, investments: Optional[PortfolioInvestments]):
     monkeypatch.setattr(
         "edgar.bdc.investments.portfolio_investments_from_filing",
-        lambda filing, include_untyped=False: investments,
+        lambda filing, include_untyped=False, xbrl=None: investments,
     )
 
 
 def _patch_bdc(monkeypatch, bdc: _FakeBDC = None):
     monkeypatch.setattr(
         "edgar.ai.mcp.tools.fund._find_bdc",
-        lambda identifier: bdc or _FakeBDC(),
+        lambda identifier: _BdcLookup(bdc=bdc or _FakeBDC()),
     )
 
 
@@ -454,9 +457,13 @@ class TestArgumentAndSelectionErrors:
         assert result.suggestions == ["try another period"]
 
     async def test_accession_only_non_bdc_cik_is_not_a_bdc(self, monkeypatch):
+        """The accession-only path now checks `lookup_bdc` (which itself
+        checks multiple report years), not the old latest-report-only
+        `is_bdc_cik`; a CIK absent from every checked year is still
+        NOT_A_BDC."""
         filing = _FakeFiling(cik=320193, accession_number="0000320193-24-000001")
         _patch_selection(monkeypatch, filing)
-        monkeypatch.setattr("edgar.bdc.reference.is_bdc_cik", lambda cik: False)
+        monkeypatch.setattr("edgar.bdc.reference.lookup_bdc", lambda **kwargs: None)
 
         result = await edgar_fund(action="bdc_portfolio", accession_number="0000320193-24-000001")
 
@@ -506,6 +513,249 @@ class TestNoStructuredData:
 
 
 # =============================================================================
+# Fast: no double-parse on the no-structured-data fallback (fix round 1,
+# finding 1)
+# =============================================================================
+
+
+@pytest.mark.fast
+@pytest.mark.asyncio
+class TestNoDoubleParseOnFallback:
+    async def test_fallback_path_calls_filing_xbrl_exactly_once(self, monkeypatch):
+        """Regression: `_bdc_portfolio_no_structured_data` used to call
+        `filing.xbrl()` itself even though `portfolio_investments_from_filing`
+        (called just before it) had already parsed the same filing's XBRL --
+        a second parse of the filing's full submission. `_load_extraction`
+        now parses once and threads the result through both places.
+        """
+        fake_xbrl = _FakeXBRLNoSOI()
+        filing = _FakeFiling(xbrl_result=fake_xbrl)
+        _patch_selection(monkeypatch, filing)
+        _patch_bdc(monkeypatch)
+
+        def _extraction_uses_given_xbrl(filing_arg, include_untyped=False, xbrl=None):
+            assert xbrl is fake_xbrl, "extraction must receive the already-parsed xbrl, not re-parse it"
+            return None  # no structured holdings -> triggers the fallback
+
+        monkeypatch.setattr(
+            "edgar.bdc.investments.portfolio_investments_from_filing",
+            _extraction_uses_given_xbrl,
+        )
+
+        result = await edgar_fund(action="bdc_portfolio", identifier="ARCC")
+
+        assert result.success is True  # falls back to the (empty) SOI text, not an error
+        assert filing.xbrl_call_count == 1
+
+
+# =============================================================================
+# Fast: BDC resolution (fix round 1, finding 3) -- lookback across report
+# years, ticker->CIK fallback, and ambiguous fuzzy-search results
+# =============================================================================
+
+
+@pytest.mark.fast
+class TestLookupBdcLookback:
+    """`edgar.bdc.reference.lookup_bdc`: checks the latest SEC BDC Report
+    first, then falls back to prior years -- the real-world motivation is
+    that the 2026 report is missing Ares Capital Corp, present in 2024 and
+    2025 (see the fix-round-1 report)."""
+
+    class _FakeBdcEntities:
+        def __init__(self, ciks=(), tickers=None):
+            self._ciks = set(ciks)
+            self._tickers = tickers or {}
+
+        def get_by_cik(self, cik):
+            return _FakeBDC(cik=cik, name="Some BDC") if cik in self._ciks else None
+
+        def get_by_ticker(self, ticker):
+            cik = self._tickers.get(ticker)
+            return _FakeBDC(cik=cik, name="Some BDC") if cik is not None else None
+
+    def test_latest_report_miss_falls_back_to_prior_year(self, monkeypatch):
+        from edgar.bdc import reference
+
+        def _fake_get_bdc_list(year=None):
+            if year == 2026:
+                return self._FakeBdcEntities(ciks=())
+            if year == 2025:
+                return self._FakeBdcEntities(ciks={1287750})
+            return self._FakeBdcEntities(ciks=())
+
+        monkeypatch.setattr(reference, "get_latest_bdc_report_year", lambda: 2026)
+        monkeypatch.setattr(reference, "get_bdc_list", _fake_get_bdc_list)
+
+        result = reference.lookup_bdc(cik=1287750, lookback_years=2)
+
+        assert result is not None
+        assert result.cik == 1287750
+
+    def test_latest_report_hit_never_checks_prior_years(self, monkeypatch):
+        from edgar.bdc import reference
+
+        years_checked = []
+
+        def _fake_get_bdc_list(year=None):
+            years_checked.append(year)
+            return self._FakeBdcEntities(ciks={1287750})
+
+        monkeypatch.setattr(reference, "get_latest_bdc_report_year", lambda: 2026)
+        monkeypatch.setattr(reference, "get_bdc_list", _fake_get_bdc_list)
+
+        result = reference.lookup_bdc(cik=1287750, lookback_years=2)
+
+        assert result is not None
+        assert years_checked == [2026]
+
+    def test_ticker_lookback_hit(self, monkeypatch):
+        from edgar.bdc import reference
+
+        def _fake_get_bdc_list(year=None):
+            if year == 2025:
+                return self._FakeBdcEntities(tickers={"ARCC": 1287750})
+            return self._FakeBdcEntities()
+
+        monkeypatch.setattr(reference, "get_latest_bdc_report_year", lambda: 2026)
+        monkeypatch.setattr(reference, "get_bdc_list", _fake_get_bdc_list)
+
+        result = reference.lookup_bdc(ticker="ARCC", lookback_years=2)
+
+        assert result is not None
+        assert result.cik == 1287750
+
+    def test_no_match_in_any_lookback_year_returns_none(self, monkeypatch):
+        from edgar.bdc import reference
+
+        monkeypatch.setattr(reference, "get_latest_bdc_report_year", lambda: 2026)
+        monkeypatch.setattr(reference, "get_bdc_list", lambda year=None: self._FakeBdcEntities())
+
+        assert reference.lookup_bdc(cik=999999, lookback_years=2) is None
+
+    def test_requires_cik_or_ticker(self):
+        from edgar.bdc.reference import lookup_bdc
+
+        with pytest.raises(ValueError):
+            lookup_bdc()
+
+
+@pytest.mark.fast
+class TestFindBdcResolution:
+    """`edgar.ai.mcp.tools.fund._find_bdc`: ticker/CIK go through
+    `lookup_bdc`; a ticker absent from every report falls back to
+    `resolve_company`; a name goes through fuzzy search, which must be
+    unambiguous."""
+
+    def test_numeric_identifier_resolves_as_cik(self, monkeypatch):
+        monkeypatch.setattr(
+            "edgar.bdc.reference.lookup_bdc",
+            lambda cik=None, ticker=None, lookback_years=2: (
+                _FakeBDC(cik=cik) if cik == 845385 else None
+            ),
+        )
+
+        lookup = fund._find_bdc("845385")
+
+        assert lookup.bdc is not None
+        assert lookup.bdc.cik == 845385
+        assert lookup.ambiguous is None
+
+    def test_ticker_not_in_any_report_falls_back_to_resolve_company(self, monkeypatch):
+        """A ticker absent from every checked report year's ticker column
+        (the real-world ARCC gap) still resolves, via resolve_company()'s
+        CIK -- proving `_find_bdc` doesn't stop at "not a known ticker"."""
+
+        def _fake_lookup_bdc(cik=None, ticker=None, lookback_years=2):
+            if ticker is not None:
+                return None  # not in any report's ticker column
+            assert cik == 1287750
+            return _FakeBDC(cik=1287750, name="ARES CAPITAL CORP")
+
+        monkeypatch.setattr("edgar.bdc.reference.lookup_bdc", _fake_lookup_bdc)
+        monkeypatch.setattr(fund, "resolve_company", lambda identifier: _FakeCompany(cik=1287750))
+
+        lookup = fund._find_bdc("ARCC")
+
+        assert lookup.bdc is not None
+        assert lookup.bdc.cik == 1287750
+        assert lookup.ambiguous is None
+
+    def test_ticker_like_identifier_never_reaches_fuzzy_search(self, monkeypatch):
+        """A short alphanumeric identifier is a ticker attempt, never a name
+        search, even when both `lookup_bdc` and `resolve_company` miss."""
+
+        def _fail_search(*args, **kwargs):
+            raise AssertionError("fuzzy search must not run for a ticker-like identifier")
+
+        monkeypatch.setattr("edgar.bdc.reference.lookup_bdc", lambda **kwargs: None)
+        monkeypatch.setattr(fund, "resolve_company", lambda identifier: (_ for _ in ()).throw(ValueError("nope")))
+        monkeypatch.setattr("edgar.bdc.search.find_bdc", _fail_search)
+
+        lookup = fund._find_bdc("ZZZZZ")
+
+        assert lookup.bdc is None
+        assert lookup.ambiguous is None
+
+    def test_ambiguous_name_search_reports_multiple_candidates(self, monkeypatch):
+        class _FakeSearchResults:
+            empty = False
+            results = pd.DataFrame([
+                {"cik": 1, "ticker": "AAA", "name": "Alpha BDC", "state": "NY", "is_active": True, "score": 90},
+                {"cik": 2, "ticker": None, "name": "Alpha Capital BDC", "state": "CA", "is_active": True, "score": 85},
+            ])
+
+        monkeypatch.setattr("edgar.bdc.search.find_bdc", lambda identifier, top_n=6: _FakeSearchResults())
+
+        lookup = fund._find_bdc("Alpha Investment Group")
+
+        assert lookup.bdc is None
+        assert lookup.ambiguous is not None
+        assert len(lookup.ambiguous) == 2
+        assert {c["cik"] for c in lookup.ambiguous} == {1, 2}
+
+    def test_unambiguous_name_search_resolves_by_cik(self, monkeypatch):
+        class _FakeSearchResults:
+            empty = False
+            results = pd.DataFrame([
+                {"cik": 1287750, "ticker": "ARCC", "name": "ARES CAPITAL CORP", "state": "MD", "is_active": True, "score": 95},
+            ])
+
+        monkeypatch.setattr("edgar.bdc.search.find_bdc", lambda identifier, top_n=6: _FakeSearchResults())
+        monkeypatch.setattr(
+            "edgar.bdc.reference.lookup_bdc",
+            lambda cik=None, ticker=None, lookback_years=2: _FakeBDC(cik=cik, name="ARES CAPITAL CORP"),
+        )
+
+        lookup = fund._find_bdc("Ares Capital Corporation")
+
+        assert lookup.bdc is not None
+        assert lookup.bdc.cik == 1287750
+        assert lookup.resolved_by == "search"
+
+
+@pytest.mark.fast
+@pytest.mark.asyncio
+class TestAmbiguousBdcEndToEnd:
+    async def test_edgar_fund_returns_ambiguous_bdc_with_candidate_suggestions(self, monkeypatch):
+        class _FakeSearchResults:
+            empty = False
+            results = pd.DataFrame([
+                {"cik": 1, "ticker": "AAA", "name": "Alpha BDC", "state": "NY", "is_active": True, "score": 90},
+                {"cik": 2, "ticker": None, "name": "Alpha Capital BDC", "state": "CA", "is_active": True, "score": 85},
+            ])
+
+        monkeypatch.setattr("edgar.bdc.search.find_bdc", lambda identifier, top_n=6: _FakeSearchResults())
+
+        result = await edgar_fund(action="bdc_portfolio", identifier="Alpha Investment Group")
+
+        assert result.success is False
+        assert result.error_code == "AMBIGUOUS_BDC"
+        assert len(result.suggestions) == 2
+        assert any("Alpha BDC" in s for s in result.suggestions)
+        assert any("Alpha Capital BDC" in s for s in result.suggestions)
+
+
+# =============================================================================
 # Network + live (ARCC — no VCR, constraints rule 7a) and VCR (Princeton)
 # =============================================================================
 
@@ -518,24 +768,6 @@ PRINCETON_10Q_ACCESSION = "0001213900-26-090000"
 PRINCETON_10Q_HOLDING_COUNT = 23
 
 
-def _patch_find_bdc_for_arcc(monkeypatch):
-    """Work around a discovered, pre-existing SEC-dataset gap (see task report):
-    the SEC's 2026 BDC Report CSV (the one `get_bdc_list()`/`is_bdc_cik()`
-    consult) omits Ares Capital Corp (CIK 1287750) entirely, though it is
-    present in the 2024 and 2025 reports. That means `identifier='ARCC'`
-    cannot resolve via the unchanged `_find_bdc` lookup chain in the current
-    live environment -- not a regression from this task (the lookup chain is
-    a straight extraction of the pre-existing logic) and not something this
-    task's brief asks it to fix. This patches only BDC-name/ticker
-    resolution with the same hand-built BDCEntity Task 3's own tests use for
-    ARCC; filing selection, extraction, and paging below all still run live.
-    """
-    from edgar.bdc.reference import BDCEntity
-
-    arcc = BDCEntity(file_number="814-00663", cik=ARCC_CIK, name="ARES CAPITAL CORP")
-    monkeypatch.setattr("edgar.ai.mcp.tools.fund._find_bdc", lambda identifier: arcc)
-
-
 @pytest.mark.network
 @pytest.mark.asyncio
 class TestBdcPortfolioARCCLive:
@@ -544,14 +776,14 @@ class TestBdcPortfolioARCCLive:
     this class pays the ~11-13s XBRL-parse cost; later tests in the same run
     reuse the cached PortfolioInvestments for this accession.
 
-    `_find_bdc` is patched for ARCC specifically (see `_patch_find_bdc_for_arcc`)
-    to work around a discovered SEC-dataset gap unrelated to this task; filing
-    selection, extraction, and paging are exercised live and unmocked.
+    `identifier="ARCC"` resolves for real here (no `_find_bdc` patch): fix
+    round 1 added `lookup_bdc`'s report-year lookback specifically so this
+    works despite the SEC's 2026 BDC Report omitting Ares Capital Corp
+    (present in 2024 and 2025) -- see the fix-round-1 report.
     """
 
-    async def test_period_selects_ground_truth_filing_and_full_count(self, monkeypatch):
+    async def test_period_selects_ground_truth_filing_and_full_count(self):
         set_identity("Test User test@test.com")
-        _patch_find_bdc_for_arcc(monkeypatch)
 
         result = await edgar_fund(
             action="bdc_portfolio", identifier="ARCC", form="10-Q", period="2026-06-30"
@@ -562,9 +794,8 @@ class TestBdcPortfolioARCCLive:
         assert result.data["source"]["accession_number"] == ARCC_10Q_ACCESSION
         assert result.data["source"]["selected_by"] == "period"
 
-    async def test_borrower_filter_finds_ivy_hill_despite_wrong_company_name(self, monkeypatch):
+    async def test_borrower_filter_finds_ivy_hill_despite_wrong_company_name(self):
         set_identity("Test User test@test.com")
-        _patch_find_bdc_for_arcc(monkeypatch)
 
         result = await edgar_fund(
             action="bdc_portfolio",
@@ -581,9 +812,8 @@ class TestBdcPortfolioARCCLive:
         ]
         assert len(matches) >= 1
 
-    async def test_walking_all_pages_returns_full_count_with_no_duplicates(self, monkeypatch):
+    async def test_walking_all_pages_returns_full_count_with_no_duplicates(self):
         set_identity("Test User test@test.com")
-        _patch_find_bdc_for_arcc(monkeypatch)
 
         seen = set()
         cursor = None
@@ -610,9 +840,8 @@ class TestBdcPortfolioARCCLive:
         assert total_returned == ARCC_10Q_HOLDING_COUNT
         assert len(seen) == ARCC_10Q_HOLDING_COUNT
 
-    async def test_period_off_by_one_day_is_period_not_found(self, monkeypatch):
+    async def test_period_off_by_one_day_is_period_not_found(self):
         set_identity("Test User test@test.com")
-        _patch_find_bdc_for_arcc(monkeypatch)
 
         result = await edgar_fund(
             action="bdc_portfolio", identifier="ARCC", form="10-Q", period="2026-06-29"
@@ -620,6 +849,20 @@ class TestBdcPortfolioARCCLive:
 
         assert result.success is False
         assert result.error_code == "PERIOD_NOT_FOUND"
+
+    async def test_accession_only_path_resolves_arcc_as_a_bdc(self):
+        """Fix round 1, finding 3c: the accession-only path now checks
+        `lookup_bdc` (with lookback), not the latest-report-only
+        `is_bdc_cik`. ARCC's own 10-Q accession, given with no identifier,
+        must not come back NOT_A_BDC."""
+        set_identity("Test User test@test.com")
+
+        result = await edgar_fund(action="bdc_portfolio", accession_number=ARCC_10Q_ACCESSION)
+
+        assert result.success is True
+        assert result.data["cik"] == ARCC_CIK
+        assert result.data["source"]["selected_by"] == "accession"
+        assert result.data["total_investments"] == ARCC_10Q_HOLDING_COUNT
 
 
 @pytest.mark.network
