@@ -55,9 +55,9 @@ def _df_to_records(df: pd.DataFrame, limit: int, columns: Optional[list[str]] = 
 
 @tool(
     name="edgar_fund",
-    description="""Use this for mutual fund, ETF, BDC, and money market fund analysis. Supports fund lookup, portfolio holdings, money market yields, and BDC investments.
+    description="""Use this for mutual fund, ETF, BDC, and money market fund analysis. Supports fund lookup, portfolio holdings, money market yields, BDC investments, and BDC non-accrual evidence.
 
-Actions: lookup (find fund by ticker/CIK), search (by name), portfolio (NPORT holdings), money_market (yields/NAV), bdc_search, bdc_portfolio.
+Actions: lookup (find fund by ticker/CIK), search (by name), portfolio (NPORT holdings), money_market (yields/NAV), bdc_search, bdc_portfolio, bdc_nonaccrual.
 
 Examples:
 - Fund lookup: action="lookup", identifier="VFINX"
@@ -69,12 +69,13 @@ Examples:
 - BDC portfolio (chosen period): action="bdc_portfolio", identifier="ARCC", form="10-Q", period="2026-06-30"
 - BDC portfolio (chosen filing by accession): action="bdc_portfolio", accession_number="0001628280-26-050307"
 - BDC portfolio (borrower filter): action="bdc_portfolio", identifier="ARCC", borrower="Ivy Hill"
-- BDC portfolio (next page): action="bdc_portfolio", identifier="ARCC", cursor="<page.next_cursor from the previous call>\"""",
+- BDC portfolio (next page): action="bdc_portfolio", identifier="ARCC", cursor="<page.next_cursor from the previous call>"
+- BDC non-accrual evidence: action="bdc_nonaccrual", identifier="ARCC", form="10-Q", period="2026-06-30\"""",
     params={
         "action": {
             "type": "string",
             "enum": ["lookup", "search", "portfolio", "money_market",
-                     "bdc_search", "bdc_portfolio"],
+                     "bdc_search", "bdc_portfolio", "bdc_nonaccrual"],
             "description": "The action to perform"
         },
         "identifier": {
@@ -114,8 +115,9 @@ Examples:
         },
         "cursor": {
             "type": "string",
-            "description": "Continuation cursor from a previous bdc_portfolio response's "
-                            "page.next_cursor (or the text fallback's next_cursor), to fetch the next page."
+            "description": "Continuation cursor from a previous bdc_portfolio or bdc_nonaccrual "
+                            "response's page.next_cursor (or the text fallback's next_cursor), to "
+                            "fetch the next page."
         },
         "include_untyped": {
             "type": "boolean",
@@ -209,10 +211,32 @@ async def edgar_fund(
                 include_untyped=include_untyped,
             )
 
+        elif action == "bdc_nonaccrual":
+            if not identifier and not accession_number:
+                return error(
+                    "identifier or accession_number is required for action='bdc_nonaccrual'",
+                    suggestions=[
+                        "Provide a BDC ticker (ARCC) or CIK as identifier",
+                        "Or provide accession_number to pin an exact filing",
+                    ],
+                    error_code="INVALID_ARGUMENTS"
+                )
+            return await _bdc_nonaccrual(
+                identifier=identifier,
+                accession_number=accession_number,
+                form=form or "10-K",
+                period=period,
+                cursor=cursor,
+                limit=limit,
+            )
+
         else:
             return error(
                 f"Unknown action: {action}",
-                suggestions=["Use 'lookup', 'search', 'portfolio', 'money_market', 'bdc_search', or 'bdc_portfolio'"]
+                suggestions=[
+                    "Use 'lookup', 'search', 'portfolio', 'money_market', "
+                    "'bdc_search', 'bdc_portfolio', or 'bdc_nonaccrual'"
+                ]
             )
 
     except Exception as e:
@@ -1159,3 +1183,215 @@ def _bdc_portfolio_no_structured_data(
     ]
 
     return success(result, next_steps=next_steps)
+
+
+# =============================================================================
+# bdc_nonaccrual
+# =============================================================================
+
+_NONACCRUAL_INTERPRETATION_LIMITS = (
+    "Non-accrual is an accounting status (interest income no longer recognized), "
+    "not a legal default determination. Absence from this list does not establish "
+    "that a loan is performing. Aggregate evidence is not attributed to individual "
+    "borrowers."
+)
+
+
+def _nonaccrual_evidence_level(result) -> str:
+    """Map a NonAccrualResult to the response's `evidence_level`.
+
+    Mapping (per Task 5 brief):
+    - "investment": per-investment detail was resolved. `has_investment_detail`
+      is the authoritative check (equivalent to `extraction_method == 'footnote'`,
+      the only layer that resolves individual investments).
+    - "aggregate": no investment detail, but a custom or standard XBRL concept
+      gave a portfolio-level rate/value (`extraction_method` is
+      'custom_concept' or 'aggregate_concept').
+    - "none": no non-accrual signal was extracted at all
+      (`extraction_method == 'none'`).
+    """
+    if result.has_investment_detail:
+        return "investment"
+    if result.extraction_method in ("custom_concept", "aggregate_concept"):
+        return "aggregate"
+    return "none"
+
+
+def _nonaccrual_investment_record(inv) -> dict[str, Any]:
+    """Serialize one NonAccrualInvestment. Missing numeric fields stay `None`, never `0`."""
+    return {
+        "identifier": inv.identifier or None,
+        "company_name": inv.company_name or None,
+        "investment_type": inv.investment_type or None,
+        "fair_value": _cell_number(inv.fair_value),
+        "cost": _cell_number(inv.cost),
+        "footnote_text": inv.footnote_text or None,
+    }
+
+
+def _load_nonaccrual_result(filing):
+    """Cached `extract_nonaccrual(filing)`.
+
+    Cache key per the Task 5 brief: `("bdc_nonaccrual", accession, edgar.__version__)`
+    -- deliberately not shared with `_load_extraction`'s `bdc_portfolio` cache,
+    since this wraps a different extraction function with no `include_untyped`
+    parameter. A `None` result (no XBRL at all) is never cached -- the caller
+    turns that into a NO_XBRL error every time, which costs nothing to redo.
+    """
+    from edgar import __version__ as edgar_version
+    from edgar.ai.mcp.tools.continuation import results_cache
+    from edgar.bdc.nonaccrual import extract_nonaccrual
+
+    cache_key = ("bdc_nonaccrual", filing.accession_number, edgar_version)
+    result = results_cache.get(cache_key)
+    if result is not None:
+        return result
+
+    result = extract_nonaccrual(filing)
+    if result is not None:
+        results_cache.put(cache_key, result)
+    return result
+
+
+def _build_bdc_nonaccrual_response(
+    *,
+    bdc,
+    filing,
+    selected_by: str,
+    resolved_by: Optional[str],
+    result,
+    page_items: list,
+    page_meta: dict,
+    next_cursor: Optional[str],
+) -> dict[str, Any]:
+    from edgar.ai.mcp.tools.base import format_source
+
+    evidence_level = _nonaccrual_evidence_level(result)
+
+    response: dict[str, Any] = {
+        "analysis": "bdc_nonaccrual",
+        **_bdc_identity_fields(bdc, filing, resolved_by),
+        "source": format_source(filing, selected_by),
+        "period": result.period,
+        "evidence_level": evidence_level,
+        "extraction_method": result.extraction_method,
+        "num_nonaccrual": result.num_nonaccrual,
+        "nonaccrual_fair_value": _cell_number(result.nonaccrual_fair_value),
+        "total_portfolio_fair_value": _cell_number(result.total_portfolio_fair_value),
+        "nonaccrual_rate": result.nonaccrual_rate,
+        "rate_convention": "decimal_fraction",
+        "custom_concept_rate": result.custom_concept_rate,
+        "aggregate_concept_value": _cell_number(result.aggregate_concept_value),
+        "warnings": list(result.warnings),
+        "unique_footnote_texts": list(result.unique_footnote_texts),
+        "investments": [_nonaccrual_investment_record(inv) for inv in page_items],
+        "page": {
+            "offset": page_meta["offset"],
+            "returned": page_meta["returned"],
+            "total_matching": page_meta["total"],
+            "total_extracted": page_meta["total"],
+            "remaining": page_meta["remaining"],
+            "next_cursor": next_cursor,
+        },
+        "interpretation_limits": _NONACCRUAL_INTERPRETATION_LIMITS,
+    }
+
+    if evidence_level == "aggregate":
+        response["note"] = (
+            "This filing discloses only a portfolio-level non-accrual value; "
+            "individual investments are not identified."
+        )
+    elif page_meta["remaining"] > 0:
+        response["note"] = (
+            f"{page_meta['remaining']} more non-accrual investment(s) remain. "
+            "Pass the returned cursor to action='bdc_nonaccrual' to continue."
+        )
+
+    return response
+
+
+def _bdc_nonaccrual_next_steps(next_cursor: Optional[str]) -> list[str]:
+    steps = [
+        "Use action='bdc_portfolio' to see the full Schedule of Investments",
+        "Use edgar_notes to read the non-accrual footnote disclosure in context",
+    ]
+    steps.append(
+        "Pass the returned cursor to continue paging through non-accrual investments"
+        if next_cursor else
+        "Use edgar_company with this CIK for full company analysis"
+    )
+    return steps
+
+
+async def _bdc_nonaccrual(
+    identifier: Optional[str],
+    accession_number: Optional[str],
+    form: str,
+    period: Optional[str],
+    cursor: Optional[str],
+    limit: int,
+) -> Any:
+    """Get BDC non-accrual evidence from a chosen filing.
+
+    Resolves exactly one filing via the shared selection resolver (same as
+    `bdc_portfolio`), then extracts non-accrual investments/values via
+    `extract_nonaccrual` (cached; see `_load_nonaccrual_result`) and pages the
+    per-investment detail when it exists. Errors NO_XBRL when the filing has
+    no XBRL at all -- the only case `extract_nonaccrual` returns `None`.
+    """
+    from edgar.ai.mcp.tools.continuation import fingerprint, paginate
+
+    resolution = _resolve_bdc_and_filing(identifier, accession_number, form, period)
+    if isinstance(resolution, ToolResponse):
+        return resolution
+
+    filing = resolution.selection.filing
+    selected_by = resolution.selection.selected_by
+    accession = filing.accession_number
+
+    cursor_payload, err = _decode_page_cursor(
+        cursor, tool="edgar_fund:bdc_nonaccrual", accession=accession, query=None
+    )
+    if err is not None:
+        return err
+
+    result = _load_nonaccrual_result(filing)
+    if result is None:
+        return error(
+            f"No XBRL data found for filing {accession}.",
+            suggestions=[
+                "Use edgar_read to read this filing as raw text instead",
+                "Try a different filing from this BDC",
+            ],
+            error_code="NO_XBRL",
+        )
+
+    full_list = list(result.investments)
+    fp = fingerprint(inv.identifier for inv in full_list)
+
+    offset, err = _resolve_cursor_offset(cursor_payload, fp)
+    if err is not None:
+        return err
+
+    page_items, page_meta = paginate(full_list, offset=offset, limit=limit)
+
+    next_cursor = None
+    if page_meta["remaining"] > 0:
+        next_cursor, err = _build_next_cursor(
+            "edgar_fund:bdc_nonaccrual", accession, offset + page_meta["returned"], fp, None
+        )
+        if err is not None:
+            return err
+
+    response = _build_bdc_nonaccrual_response(
+        bdc=resolution.bdc,
+        filing=filing,
+        selected_by=selected_by,
+        resolved_by=resolution.resolved_by,
+        result=result,
+        page_items=page_items,
+        page_meta=page_meta,
+        next_cursor=next_cursor,
+    )
+
+    return success(response, next_steps=_bdc_nonaccrual_next_steps(next_cursor))

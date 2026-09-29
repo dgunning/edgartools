@@ -338,6 +338,7 @@ Get fund, ETF, BDC, and money market fund data.
 {"action": "money_market", "identifier": "VMFXX"}
 {"action": "bdc_search", "query": "Ares"}
 {"action": "bdc_portfolio", "identifier": "ARCC"}
+{"action": "bdc_nonaccrual", "identifier": "ARCC", "form": "10-Q", "period": "2026-06-30"}
 ```
 
 ### edgar_proxy
