@@ -45,6 +45,22 @@ BDC_REPORT_BASE_URL = "https://www.sec.gov/files/investment/data/other/business-
 # year presented as confirmed is how a moved dataset reads as current data.
 _BDC_REPORT_FALLBACK_YEAR = 2024
 
+# A BDC counts as actively filing when its latest filing falls within this
+# many months of today (`BDCEntity.is_active`, `filed_within_active_window`).
+ACTIVE_FILING_WINDOW_MONTHS = 18
+
+
+def filed_within_active_window(filing_date: date) -> bool:
+    """True if `filing_date` is within `ACTIVE_FILING_WINDOW_MONTHS` of today.
+
+    The rule behind `BDCEntity.is_active`, exposed so a caller holding a
+    filing date from somewhere other than the BDC Report row (e.g. the
+    company's own submissions, when the row is from a stale report year) can
+    apply the same test.
+    """
+    cutoff = date.today() - relativedelta(months=ACTIVE_FILING_WINDOW_MONTHS)
+    return filing_date >= cutoff
+
 
 @dataclass
 class BDCEntity:
@@ -79,8 +95,7 @@ class BDCEntity:
         """
         if not self.last_filing_date:
             return False
-        cutoff = date.today() - relativedelta(months=18)
-        return self.last_filing_date >= cutoff
+        return filed_within_active_window(self.last_filing_date)
 
     def __rich__(self):
 

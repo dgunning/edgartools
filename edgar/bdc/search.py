@@ -3,6 +3,7 @@ Search functionality for BDC (Business Development Company) entities.
 
 Provides fuzzy search across BDC names with ticker enrichment from SEC data.
 """
+import logging
 from functools import lru_cache
 from typing import Any, Dict, List, Optional
 
@@ -13,6 +14,8 @@ from rich.table import Column, Table
 
 from edgar.richtools import repr_rich
 from edgar.search.datasearch import FastSearch
+
+log = logging.getLogger(__name__)
 
 __all__ = [
     'find_bdc',
@@ -123,10 +126,13 @@ class BDCSearchResults:
     def __getitem__(self, item):
         """Get BDCEntity by index."""
         if 0 <= item < len(self):
-            from edgar.bdc.reference import get_bdc_list
+            from edgar.bdc.reference import get_bdc_list, lookup_bdc
             row = self.results.iloc[item]
             cik = int(row['cik'])
-            return get_bdc_list().get_by_cik(cik)
+            # A row from a lookback-year index (find_bdc(..., lookback_years=N))
+            # is absent from the latest report; resolve it the way the index
+            # found it rather than returning None.
+            return get_bdc_list().get_by_cik(cik) or lookup_bdc(cik=cik)
         raise IndexError(f"Index {item} out of range")
 
     def __iter__(self):
@@ -173,11 +179,21 @@ class BDCSearchIndex(FastSearch):
     Indexes BDC names and enriches with ticker symbols from SEC data.
     """
 
-    def __init__(self):
-        from edgar.bdc.reference import get_bdc_list
+    def __init__(self, lookback_years: int = 0):
+        """
+        Build the index.
 
-        # Get BDC list and enrich with tickers
-        bdcs = get_bdc_list()
+        Args:
+            lookback_years: Also index this many report years before the
+                latest one (default 0: the latest report only). The SEC's
+                annual BDC Report can drop an active BDC from one year's
+                snapshot (Ares Capital Corp is in 2024 and 2025 but not 2026),
+                so a name search that should agree with `lookup_bdc` must
+                cover the same years. One row per CIK; the latest year's row
+                wins.
+        """
+        # Get BDC list (across report years) and enrich with tickers
+        bdcs = _bdcs_across_report_years(lookback_years)
         ticker_map = self._get_ticker_map()
 
         # Build records with ticker enrichment
@@ -243,14 +259,47 @@ class BDCSearchIndex(FastSearch):
         return len(self.data)
 
 
-@lru_cache(maxsize=1)
-def _get_bdc_search_index() -> BDCSearchIndex:
-    """Get cached BDC search index."""
-    return BDCSearchIndex()
+def _bdcs_across_report_years(lookback_years: int = 0) -> list:
+    """BDCs from the latest report plus `lookback_years` prior years, one per CIK.
+
+    Walks the same years, in the same order, as `lookup_bdc` (latest first,
+    the latest via the bare `get_bdc_list()` so it shares that call's cache
+    entry), keeping the first -- i.e. the most recent -- row seen for each
+    CIK. A prior year that cannot be fetched is skipped with a warning, as
+    `lookup_bdc` does; the latest year is required.
+    """
+    from edgar.bdc.reference import get_bdc_list, get_latest_bdc_report_year
+
+    bdcs = list(get_bdc_list())
+    if lookback_years <= 0:
+        return bdcs
+
+    seen = {bdc.cik for bdc in bdcs}
+    latest_year = get_latest_bdc_report_year()
+    for year in range(latest_year - 1, latest_year - lookback_years - 1, -1):
+        try:
+            prior = get_bdc_list(year)
+        except Exception as e:
+            log.warning(
+                "Could not fetch the %d BDC report for the search index (%s: %s); skipping.",
+                year, type(e).__name__, e,
+            )
+            continue
+        for bdc in prior:
+            if bdc.cik not in seen:
+                seen.add(bdc.cik)
+                bdcs.append(bdc)
+    return bdcs
+
+
+@lru_cache(maxsize=4)
+def _get_bdc_search_index(lookback_years: int = 0) -> BDCSearchIndex:
+    """Get cached BDC search index (one per `lookback_years`)."""
+    return BDCSearchIndex(lookback_years=lookback_years)
 
 
 @lru_cache(maxsize=16)
-def find_bdc(query: str, top_n: int = 10) -> BDCSearchResults:
+def find_bdc(query: str, top_n: int = 10, lookback_years: int = 0) -> BDCSearchResults:
     """
     Search for a BDC by name or ticker.
 
@@ -259,6 +308,10 @@ def find_bdc(query: str, top_n: int = 10) -> BDCSearchResults:
     Args:
         query: The BDC name or ticker to search for
         top_n: Maximum number of results to return
+        lookback_years: Also search this many report years before the latest
+            (default 0: latest report only). Use the same value as
+            `lookup_bdc`'s `lookback_years` to find BDCs the latest SEC BDC
+            Report omits; each CIK appears once, from its most recent year.
 
     Returns:
         BDCSearchResults with matching BDCs
@@ -273,4 +326,4 @@ def find_bdc(query: str, top_n: int = 10) -> BDCSearchResults:
         >>> results[0].name
         'ARES CAPITAL CORP'
     """
-    return _get_bdc_search_index().search(query, top_n=top_n)
+    return _get_bdc_search_index(lookback_years).search(query, top_n=top_n)

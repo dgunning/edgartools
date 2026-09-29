@@ -460,6 +460,132 @@ class TestCursorErrors:
 
 
 # =============================================================================
+# Fast: QA fix wave Q2 -- unknown-is-null (P1-M4) and cursor-only
+# continuation (P1-H2 / rule 7b)
+# =============================================================================
+
+
+@pytest.mark.fast
+@pytest.mark.asyncio
+class TestUnknownCountIsNull:
+    @pytest.mark.parametrize("method,kwargs", [
+        ("aggregate_concept", {"aggregate_concept_value": Decimal("250000000"),
+                               "nonaccrual_fair_value": Decimal("250000000")}),
+        ("custom_concept", {"custom_concept_rate": 0.0173, "nonaccrual_fair_value": Decimal("17300000")}),
+        ("none", {}),
+    ])
+    async def test_count_and_page_totals_null_without_investment_evidence(self, monkeypatch, method, kwargs):
+        _patch_selection(monkeypatch, _FakeFiling())
+        _patch_extraction(monkeypatch, _make_result(investments=[], extraction_method=method, **kwargs))
+        _patch_bdc(monkeypatch)
+
+        response = await edgar_fund(action="bdc_nonaccrual", identifier="ARCC")
+
+        assert response.success is True
+        assert response.data["evidence_level"] in ("aggregate", "none")
+        assert response.data["num_nonaccrual"] is None
+        assert response.data["page"]["total_matching"] is None
+        assert response.data["page"]["total_extracted"] is None
+        assert response.data["page"]["returned"] == 0
+        assert response.data["investments"] == []
+
+    async def test_aggregate_value_is_kept_alongside_the_null_count(self, monkeypatch):
+        _patch_selection(monkeypatch, _FakeFiling())
+        _patch_extraction(monkeypatch, _make_result(
+            investments=[], extraction_method="aggregate_concept",
+            aggregate_concept_value=Decimal("250000000"), nonaccrual_fair_value=Decimal("250000000"),
+        ))
+        _patch_bdc(monkeypatch)
+
+        response = await edgar_fund(action="bdc_nonaccrual", identifier="ARCC")
+
+        assert response.data["num_nonaccrual"] is None
+        assert response.data["nonaccrual_fair_value"] == 250000000.0
+
+    async def test_investment_evidence_keeps_the_count(self, monkeypatch):
+        investments = _make_investment_batch(3)
+        _patch_selection(monkeypatch, _FakeFiling())
+        _patch_extraction(monkeypatch, _make_result(investments=investments, extraction_method="footnote"))
+        _patch_bdc(monkeypatch)
+
+        response = await edgar_fund(action="bdc_nonaccrual", identifier="ARCC")
+
+        assert response.data["num_nonaccrual"] == 3
+        assert response.data["page"]["total_matching"] == 3
+        assert response.data["page"]["total_extracted"] == 3
+
+
+@pytest.mark.fast
+@pytest.mark.asyncio
+class TestCursorOnlyContinuation:
+    @staticmethod
+    def _setup(monkeypatch, n=7):
+        from tests.test_mcp_bdc_portfolio import _patch_lookup_bdc_by_cik, _patch_selection_by_accession
+
+        calls = _patch_selection_by_accession(monkeypatch, [_FakeFiling()])
+        _patch_extraction(monkeypatch, _make_result(investments=_make_investment_batch(n), extraction_method="footnote"))
+        _patch_bdc(monkeypatch)
+        _patch_lookup_bdc_by_cik(monkeypatch)
+        return calls
+
+    async def test_cursor_alone_walks_all_records(self, monkeypatch):
+        calls = self._setup(monkeypatch, n=45)
+
+        first = await edgar_fund(action="bdc_nonaccrual", identifier="ARCC", form="10-Q", period="2026-06-30", limit=5)
+        seen = [rec["identifier"] for rec in first.data["investments"]]
+        cursor = first.data["page"]["next_cursor"]
+        pages = 1
+        while cursor is not None:
+            nxt = await edgar_fund(action="bdc_nonaccrual", cursor=cursor)
+            assert nxt.success is True, (nxt.error_code, nxt.error)
+            seen.extend(rec["identifier"] for rec in nxt.data["investments"])
+            cursor = nxt.data["page"]["next_cursor"]
+            pages += 1
+            assert pages < 10
+
+        assert pages == 3  # 5 + 20 + 20
+        assert seen == [f"Company {i} - Term Loan" for i in range(45)]
+        assert all(c["accession_number"] == "0001628280-26-050307" for c in calls[1:])
+
+    async def test_identifier_for_a_different_bdc_is_selection_mismatch(self, monkeypatch):
+        self._setup(monkeypatch)
+        first = await edgar_fund(action="bdc_nonaccrual", identifier="ARCC", limit=2)
+        monkeypatch.setattr(
+            "edgar.ai.mcp.tools.fund._find_bdc",
+            lambda identifier: fund._BdcLookup(bdc=_FakeBDC(cik=1396440, name="MAIN STREET CAPITAL CORP")),
+        )
+
+        nxt = await edgar_fund(action="bdc_nonaccrual", identifier="MAIN", cursor=first.data["page"]["next_cursor"])
+
+        assert nxt.success is False
+        assert nxt.error_code == "SELECTION_MISMATCH"
+
+    async def test_a_portfolio_cursor_is_rejected_before_any_selection(self, monkeypatch):
+        calls = self._setup(monkeypatch)
+        portfolio_cursor = continuation.encode_cursor(
+            tool="edgar_fund:bdc_portfolio", accession="0001628280-26-050307", offset=20, fp="abc",
+            query={"borrower": None, "include_untyped": False},
+        )
+
+        response = await edgar_fund(action="bdc_nonaccrual", cursor=portfolio_cursor)
+
+        assert response.success is False
+        assert response.error_code == "CURSOR_MISMATCH"
+        assert calls == []
+
+    async def test_identity_block_carries_bdc_report_year(self, monkeypatch):
+        _patch_selection(monkeypatch, _FakeFiling())
+        _patch_extraction(monkeypatch, _make_result(investments=_make_investment_batch(1)))
+        _patch_bdc(monkeypatch, _FakeBDC(report_year=2026))
+        monkeypatch.setattr("edgar.bdc.reference.get_latest_bdc_report_year", lambda: 2026)
+
+        response = await edgar_fund(action="bdc_nonaccrual", identifier="ARCC")
+
+        assert response.data["bdc_report_year"] == 2026
+        assert response.data["is_active"] is True
+
+
+# =============================================================================
 # Network: ARCC (live, no VCR -- constraints rule 7a)
 # =============================================================================
 
@@ -492,6 +618,10 @@ class TestBdcNonaccrualARCCLive:
         assert response.data["warnings"] == []
         assert response.data["source"]["accession_number"] == ARCC_10Q_ACCESSION
         assert response.data["cik"] == ARCC_CIK
+        # P1-M5: ARCC is only in the 2025 BDC Report (measured 2026-09-29);
+        # is_active comes from its own latest filing, not that stale row.
+        assert response.data["bdc_report_year"] == 2025
+        assert response.data["is_active"] is True
 
     async def test_hand_verified_investment_identifier_and_footnote(self):
         set_identity("Test User test@test.com")
@@ -577,7 +707,11 @@ class TestBdcNonaccrualPrincetonVCR:
         assert response.data["period"] == "2026-06-30"
         assert response.data["extraction_method"] == "none"
         assert response.data["evidence_level"] == "none"
-        assert response.data["num_nonaccrual"] == 0
+        # P1-M4: no investment-level evidence means the count is unknown
+        # (null), not "zero loans on non-accrual".
+        assert response.data["num_nonaccrual"] is None
+        assert response.data["page"]["total_matching"] is None
+        assert response.data["bdc_report_year"] == 2026
         assert response.data["investments"] == []
         assert response.data["nonaccrual_fair_value"] is None
         assert response.data["total_portfolio_fair_value"] == 24679396.0
