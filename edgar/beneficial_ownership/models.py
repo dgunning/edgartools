@@ -5,9 +5,10 @@ This module contains frozen dataclasses representing the structured data
 from Schedule 13D/G XML filings.
 """
 from dataclasses import dataclass
-from typing import Optional
+from typing import FrozenSet, Optional, Union
 
 from edgar._party import Address
+from edgar.exceptions import ValidationError
 
 __all__ = [
     'ReportingPerson',
@@ -18,6 +19,30 @@ __all__ = [
     'Signature'
 ]
 
+# The ownership figures on a reporting person's cover page. An amendment may
+# leave any of them out, and a pre-2025 filing read from its SGML header has none.
+_OWNERSHIP_FIGURES = (
+    'sole_voting_power',
+    'shared_voting_power',
+    'sole_dispositive_power',
+    'shared_dispositive_power',
+    'aggregate_amount',
+    'percent_of_class',
+)
+
+
+def _reported_total(persons, figure: str) -> Optional[Union[int, float]]:
+    """
+    A filing's total for an ownership figure, or None when a person it counts leaves the figure out.
+
+    The same max() over the persons not flagged ``is_aggregate_exclude_shares`` that
+    ``total_shares`` and ``total_percent`` take, which read an unreported figure as 0.
+    """
+    values = [p.reported(figure) for p in persons if not p.is_aggregate_exclude_shares]
+    if None in values:
+        return None
+    return max(values, default=0)
+
 
 @dataclass(frozen=True)
 class ReportingPerson:
@@ -26,6 +51,11 @@ class ReportingPerson:
 
     Represents a single reporting person from the SC 13D or SC 13G filing.
     Joint filers will have multiple ReportingPerson instances.
+
+    An ownership figure the filing does not report holds a placeholder 0 and is
+    named in ``unreported_fields``; ``reported()`` returns None for it instead.
+    A reported 0 stays 0 in both. edgartools 6.0 will make the fields themselves
+    None for an unreported figure.
     """
     cik: str
     name: str
@@ -42,6 +72,23 @@ class ReportingPerson:
     member_of_group: Optional[str] = None  # "a" = group member (joint filer), "b" = separate filer
     is_aggregate_exclude_shares: bool = False  # True if shares excluded from aggregate count
     no_cik: bool = False  # True if reporting person has no CIK assigned
+    unreported_fields: FrozenSet[str] = frozenset()  # ownership figures the filing leaves out (placeholder 0)
+
+    def reported(self, figure: str) -> Optional[Union[int, float]]:
+        """
+        An ownership figure as the filing reports it, or None when the filing leaves it out.
+
+        Args:
+            figure: One of ``sole_voting_power``, ``shared_voting_power``,
+                ``sole_dispositive_power``, ``shared_dispositive_power``,
+                ``aggregate_amount`` or ``percent_of_class``.
+        """
+        if figure not in _OWNERSHIP_FIGURES:
+            raise ValidationError(f"Not an ownership figure: {figure!r}. Use one of {', '.join(_OWNERSHIP_FIGURES)}",
+                                  parameter='figure', invalid_value=figure)
+        if figure in self.unreported_fields:
+            return None
+        return getattr(self, figure)
 
     @property
     def total_voting_power(self) -> int:

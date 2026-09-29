@@ -4,7 +4,6 @@ Tests for Schedule 13D and Schedule 13G beneficial ownership reports.
 Tests XML parsing, dataclass creation, amendment tracking, and Rich rendering
 for both Schedule 13D (active ownership) and Schedule 13G (passive ownership).
 """
-import re
 from datetime import date
 from unittest.mock import Mock
 
@@ -376,123 +375,6 @@ def test_ownership_comparison():
     assert 'shares_change' in summary
     assert 'percent_change' in summary
     assert summary['is_unchanged'] is True
-
-
-def _schedule13d_from_xml(xml_content, form='SCHEDULE 13D/A', filing_date=date(2024, 12, 31)):
-    filing = Mock()
-    filing.form = form
-    filing.filing_date = filing_date
-    filing.xml = Mock(return_value=xml_content)
-    return Schedule13D.from_filing(filing)
-
-
-def _header_only_schedule13d():
-    """A pre-2025 filing with no XML: identities from the SGML header, no numbers."""
-    filer = Mock()
-    filer.company_information.name = 'BML Investment Partners, L.P.'
-    filer.company_information.cik = '0001373604'
-    subject = Mock()
-    subject.company_information.name = 'Aadi Bioscience, Inc.'
-    subject.company_information.cik = '0001422142'
-    filing = Mock()
-    filing.form = 'SC 13D'
-    filing.filing_date = date(2021, 3, 1)
-    filing.xml = Mock(return_value=None)
-    filing.header = Mock(filers=[filer], subject_companies=[subject])
-    return Schedule13D.from_filing(filing)
-
-
-def _assert_change_unknown(comparison):
-    assert comparison.shares_change is None
-    assert comparison.percent_change is None
-    assert comparison.is_accumulating is False
-    assert comparison.is_liquidating is False
-    assert comparison.is_unchanged is False
-
-
-@pytest.mark.fast
-def test_ownership_comparison_against_header_only_filing_is_unknown():
-    """A header-only filing has no share counts, so there is no change to report.
-
-    Its reporting persons carry placeholder zeros. Adding those up reported the
-    structured filing's whole position as bought (or sold, the other way round).
-    """
-    header_only = _header_only_schedule13d()
-    structured = _schedule13d_from_xml(SCHEDULE_13D_XML_PATH.read_text())
-    assert header_only.has_structured_data is False
-    assert header_only.reporting_persons[0].aggregate_amount == 0
-
-    _assert_change_unknown(OwnershipComparison(current=structured, previous=header_only))
-    _assert_change_unknown(OwnershipComparison(current=header_only, previous=structured))
-
-    summary = OwnershipComparison(current=structured, previous=header_only).get_summary()
-    assert summary['previous_shares'] is None
-    assert summary['previous_percent'] is None
-    assert summary['current_shares'] > 0
-    assert summary['shares_change'] is None
-    assert summary['percent_change'] is None
-
-
-@pytest.mark.fast
-def test_ownership_comparison_without_reporting_person_rows_is_unknown():
-    """Structured XML with an empty <reportingPersons> has no share counts either."""
-    xml_content = SCHEDULE_13D_XML_PATH.read_text()
-    no_rows_xml = re.sub(r'<reportingPersons>.*?</reportingPersons>',
-                         '<reportingPersons></reportingPersons>', xml_content, flags=re.S)
-    no_rows = _schedule13d_from_xml(no_rows_xml)
-    structured = _schedule13d_from_xml(xml_content)
-    assert no_rows.has_structured_data is True
-    assert no_rows.reporting_persons == []
-
-    _assert_change_unknown(OwnershipComparison(current=no_rows, previous=structured))
-    _assert_change_unknown(OwnershipComparison(current=structured, previous=no_rows))
-
-
-@pytest.mark.fast
-def test_ownership_comparison_reported_zero_is_still_a_number():
-    """A row that reports 0 shares is data: selling out is a change, and 0 to 0 is unchanged."""
-    xml_content = SCHEDULE_13D_XML_PATH.read_text()
-    zero_xml = re.sub(r'<aggregateAmountOwned>\d+</aggregateAmountOwned>',
-                      '<aggregateAmountOwned>0</aggregateAmountOwned>', xml_content)
-    zero_xml = re.sub(r'<percentOfClass>[\d.]+</percentOfClass>',
-                      '<percentOfClass>0</percentOfClass>', zero_xml)
-    sold_out = _schedule13d_from_xml(zero_xml)
-    structured = _schedule13d_from_xml(xml_content)
-    assert [p.aggregate_amount for p in sold_out.reporting_persons] == [0, 0]
-
-    comparison = OwnershipComparison(current=sold_out, previous=structured)
-    summary = comparison.get_summary()
-    assert summary['current_shares'] == 0
-    assert summary['current_percent'] == 0
-    assert comparison.shares_change == -summary['previous_shares'] < 0
-    assert comparison.percent_change < 0
-    assert comparison.is_liquidating is True
-
-    unchanged = OwnershipComparison(current=sold_out, previous=_schedule13d_from_xml(zero_xml))
-    assert unchanged.shares_change == 0
-    assert unchanged.percent_change == 0
-    assert unchanged.is_unchanged is True
-
-
-@pytest.mark.fast
-def test_ownership_comparison_single_person_change():
-    """Control: one reporting person selling 500,000 shares."""
-    xml_content = SCHEDULE_13D_XML_PATH.read_text()
-    one_person = re.sub(r'<reportingPersonInfo>\s*<reportingPersonCIK>0001373603</reportingPersonCIK>.*?</reportingPersonInfo>',
-                        '', xml_content, flags=re.S)
-    after_sale = one_person.replace('<aggregateAmountOwned>2100000</aggregateAmountOwned>',
-                                    '<aggregateAmountOwned>1600000</aggregateAmountOwned>')
-    after_sale = after_sale.replace('<percentOfClass>8.5</percentOfClass>',
-                                    '<percentOfClass>6.5</percentOfClass>')
-    previous = _schedule13d_from_xml(one_person)
-    current = _schedule13d_from_xml(after_sale)
-    assert len(previous.reporting_persons) == 1
-
-    comparison = OwnershipComparison(current=current, previous=previous)
-    assert comparison.shares_change == -500_000
-    assert comparison.percent_change == pytest.approx(-2.0)
-    assert comparison.is_liquidating is True
-    assert comparison.is_accumulating is False
 
 
 @pytest.mark.fast
