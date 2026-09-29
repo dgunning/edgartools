@@ -102,3 +102,6 @@ agent_eval_results/
 *.db
 .beads-credential-key
 .beads/proxieddb/
+
+# Local agent planning and session artifacts
+/.agents-context/
