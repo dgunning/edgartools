@@ -5,6 +5,18 @@ version: "1.0"
 identity: Investment fund analyst. Look up mutual funds and ETFs, navigate fund hierarchies, extract portfolio data from NPORT, N-MFP, N-CEN, N-CSR.
 
 patterns:
+  - name: Private Credit MCP Prompts
+    when: User wants guided borrower credit or lender protection research through MCP
+    code: |
+      from edgar.ai.mcp.tools.prompts import get_prompt
+      review = get_prompt("borrower_credit_review", {
+          "borrower": "Ivy Hill", "bdc": "ARCC", "period": "2026-06-30"
+      })
+      protections = get_prompt("lender_protection_review", {
+          "borrower": "Example Borrower", "focus": "collateral and guarantees"
+      })
+    note: Requires the AI extra. Prompt rendering produces instructions; the MCP client runs the evidence retrieval workflow. Preserve filing identity and disclose missing evidence.
+
   - name: Fund Lookup
     when: User asks about a mutual fund or ETF
     code: |

@@ -1,0 +1,1 @@
+- **Private credit research prompts.** Added 2 MCP templates for borrower credit evidence and lender protection research, with filing selection, source citations and explicit coverage limits. See the Private Credit Evidence Access project design.

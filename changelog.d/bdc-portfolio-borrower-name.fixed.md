@@ -1,1 +1,0 @@
-**`edgar_fund` now includes the borrower name in BDC portfolio records.** Holdings serialize the existing `company_name` field; it is present on all 1,481 holdings in ARCC's June 30, 2026 10-Q. See the [Private Credit Evidence Access System Design](../.agents-context/TDDs/Private%20Credit%20Evidence%20Access%20-%20System%20Design%20-%2009.28.html).

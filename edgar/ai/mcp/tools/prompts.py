@@ -14,6 +14,25 @@ from mcp.types import GetPromptResult, Prompt, PromptArgument, PromptMessage, Te
 # =============================================================================
 
 PROMPTS = {
+    "borrower_credit_review": Prompt(
+        name="borrower_credit_review",
+        description="Investigate a borrower's disclosed loan valuations, payment terms and non-accrual evidence from selected BDC filings.",
+        arguments=[
+            PromptArgument(name="borrower", description="Borrower name as reported in the BDC's holdings", required=True),
+            PromptArgument(name="bdc", description="Reporting BDC ticker, CIK or name (e.g. ARCC)", required=True),
+            PromptArgument(name="period", description="Reporting period end YYYY-MM-DD; defaults to the latest available 10-K or 10-Q", required=False),
+            PromptArgument(name="comparison_period", description="Optional second reporting period end YYYY-MM-DD", required=False),
+        ],
+    ),
+    "lender_protection_review": Prompt(
+        name="lender_protection_review",
+        description="Find and review filed agreements covering a borrower's collateral, guarantees and repayment priority, with source passages and qualifications.",
+        arguments=[
+            PromptArgument(name="borrower", description="Borrower whose financing protections should be investigated", required=True),
+            PromptArgument(name="filing_or_url", description="Optional SEC accession number or HTTPS www.sec.gov filing/document URL", required=False),
+            PromptArgument(name="focus", description="Optional topics such as collateral, guarantees or release provisions", required=False),
+        ],
+    ),
     "due_diligence": Prompt(
         name="due_diligence",
         description="Comprehensive company due diligence — profile, financials, recent filings, insider activity, and risk factors.",
@@ -107,6 +126,68 @@ PROMPTS = {
 # =============================================================================
 # PROMPT RENDERERS
 # =============================================================================
+
+def _render_borrower_credit_review(
+    borrower: str, bdc: str, period: str = "", comparison_period: str = ""
+) -> GetPromptResult:
+    selection = (
+        f"Select the filing with reporting period end {period}."
+        if period else
+        "List available 10-K and 10-Q filings and select the latest reporting period available."
+    )
+    comparison = (
+        f"Repeat the evidence retrieval for reporting period end {comparison_period}. "
+        "Present each period's original records side by side. Explain uncertainty about whether records represent "
+        "the same facility; do not silently merge facilities or treat a valuation change as proof of deterioration."
+        if comparison_period else
+        "Review the selected period only; do not assume a comparison period."
+    )
+    return GetPromptResult(
+        description=f"Borrower credit evidence for {borrower} reported by {bdc}",
+        messages=[PromptMessage(role="user", content=TextContent(type="text", text=f"""Investigate repayment concerns for borrower {borrower} using public evidence reported by BDC {bdc}.
+
+1. **Select the evidence**: Resolve the BDC using edgar_fund action="bdc_search" if needed. Use edgar_search or edgar_company to list its 10-K and 10-Q filings. {selection} Distinguish reporting period from filing date and originals from amendments. Record the chosen form and accession number. If an explicit period is unavailable, explain the gap rather than substitute another filing.
+
+2. **Retrieve loan holdings**: Use edgar_fund action="bdc_portfolio" with the chosen accession_number and borrower="{borrower}". Follow continuation through all matching extracted holdings. Keep distinct facilities separate and preserve reported borrower names, investment descriptions, principal, cost, fair value, interest rate, spread and PIK rate where available, with units. Confirm borrower-name matches rather than assuming substring matches identify the same legal entity.
+
+3. **Retrieve non-accrual evidence**: Use edgar_fund action="bdc_nonaccrual" for the SAME accession number. This action returns filing-wide evidence; follow all investment evidence pages and identify any records relevant to the borrower from their reported names. Preserve supporting footnotes, evidence level, extraction method and warnings. Portfolio-level totals cannot establish an individual borrower's status. Non-accrual is an accounting status, not a legal default determination.
+
+4. **Read supporting disclosures**: Use edgar_notes and edgar_read with that same accession number for relevant valuation, liquidity, payment and restructuring disclosures. Discover available notes/sections before selecting them. Follow relevant text and table pages beyond previews. For every continuation call, repeat the original selector and filters with the returned cursor. If evidence changes and a cursor becomes stale, restart that retrieval and report the issue.
+
+5. **Period context**: {comparison}
+
+6. **Report**: Provide a loan evidence table, disclosures warranting investigation, unresolved questions and source citations. Include the reporting lender, form, accession, reporting period, filing date and URLs, with note/table/passage locators where available. Distinguish reported facts, your interpretation and evidence gaps.
+
+Explain PIK as interest added to debt rather than paid in cash; PIK alone does not establish distress. A BDC holding represents that lender's position, not the borrower's total debt. Distinguish reported zero, not disclosed, not extracted and retrieval failure. Absence from an extracted non-accrual list does not establish that a loan is performing. Report coverage limits and do not assign a risk score, predict default or estimate recoveries."""))],
+    )
+
+
+def _render_lender_protection_review(
+    borrower: str, filing_or_url: str = "", focus: str = ""
+) -> GetPromptResult:
+    starting_point = (
+        f"Start with this filing or document: {filing_or_url}. Use edgar_filing to establish filing context "
+        "and retain any document_hint from the URL."
+        if filing_or_url else
+        "Use edgar_search and edgar_text_search to discover candidate filings and agreements mentioning the borrower."
+    )
+    topics = focus or "collateral, guarantees, repayment priority, release provisions and enforcement restrictions"
+    return GetPromptResult(
+        description=f"Lender protection evidence for {borrower}",
+        messages=[PromptMessage(role="user", content=TextContent(type="text", text=f"""Investigate what contractual protections are disclosed for financing of borrower {borrower}. Research focus: {topics}.
+
+1. **Establish identity and financing**: {starting_point} Confirm the legal borrower, reporting filer, lender and relevant obligation from the retrieved evidence. If multiple entities or financings are plausible, present candidates and ask which to investigate before selecting one. A BDC's own borrowing agreements must not be mistaken for agreements covering a portfolio borrower.
+
+2. **Identify documents**: Use edgar_document action="list" with the selected accession_number to enumerate attachments. Identify relevant agreements, guarantees and amendments by their titles, descriptions and parties. Preserve exact filenames, document types, accession numbers, dates and source URLs. When an exhibit type is ambiguous, select from the returned candidates by exact filename or sequence. Follow references to earlier filings where discoverable and explain which documents remain unavailable; do not claim a complete amendment history.
+
+3. **Search each relevant document**: Use edgar_document action="search" with the accession_number and exact document filename, searching for the requested topics and related wording. For example, search for collateral, security interest, guarantor, subordination, intercreditor, release and remedies. Preserve each match's document-bound locator. A missing keyword match does not prove that a protection is absent.
+
+4. **Read provisions in context**: Use edgar_document action="read" with the SAME accession and document selector and around set to the returned locator. Read headings, defined terms, exceptions, schedules and referenced sections needed to understand the passage. Continue relevant long documents with next_cursor, repeating the exact document selector; do not combine around and cursor. Search and read amendments for changes to the relevant provisions. Report unreadable content and unavailable referenced documents explicitly.
+
+5. **Report the evidence**: Provide a document inventory and a table of topic, source passage, plain-language explanation, qualifications and citation. Cite exact documents and locators and identify the parties and obligations each passage covers. Include relevant financial notes using edgar_notes or edgar_read from the selected filing when useful.
+
+Separate explicit reported wording from interpretation and unresolved questions. Explain how missing agreements, amendments, schedules or unreadable content limit the review. Do not equate a valuation mark with realized recovery, determine legal enforceability or estimate recovery amounts. Close with specific documents and questions the analyst should pursue to assess the protections further."""))],
+    )
 
 def _render_due_diligence(identifier: str) -> GetPromptResult:
     return GetPromptResult(
@@ -349,6 +430,8 @@ def _render_activist_tracking(identifier: str) -> GetPromptResult:
 
 # Map prompt names to renderer functions
 PROMPT_RENDERERS = {
+    "borrower_credit_review": _render_borrower_credit_review,
+    "lender_protection_review": _render_lender_protection_review,
     "due_diligence": _render_due_diligence,
     "earnings_analysis": _render_earnings_analysis,
     "industry_overview": _render_industry_overview,

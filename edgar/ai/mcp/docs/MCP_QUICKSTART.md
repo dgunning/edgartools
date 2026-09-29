@@ -230,6 +230,37 @@ The server registers 14 tools. `edgar_read` extracts report sections such as
 MD&A or risk factors; `edgar_document` works with exact attachments and
 exhibits, keeping filename identity in search locators and continuation calls.
 
+### Private Credit Prompt Templates
+
+Select these templates through your MCP client's prompt menu. They guide the
+assistant through retrieving evidence with the existing tools.
+
+| Prompt | Required arguments | Optional arguments |
+|---|---|---|
+| `borrower_credit_review` | `borrower`, `bdc` | `period`, `comparison_period` (reporting period ends in YYYY-MM-DD format) |
+| `lender_protection_review` | `borrower` | `filing_or_url` (SEC accession or document URL), `focus` |
+
+For example, render a borrower review for a specific quarter:
+
+```python
+from edgar.ai.mcp.tools.prompts import get_prompt
+
+review = get_prompt("borrower_credit_review", {
+    "borrower": "Ivy Hill",
+    "bdc": "ARCC",
+    "period": "2026-06-30",
+    "comparison_period": "2025-06-30",
+})
+print(review.messages[0].content.text)
+```
+
+For agreement research, select `lender_protection_review` with the borrower name
+and optionally an SEC filing/document and a focus such as "guarantees and release
+provisions". The workflow checks the parties and obligations covered by each
+document, follows relevant passages and explains missing evidence. Prompt
+rendering creates instructions; the assistant executes the tool calls during the
+conversation. Neither template promises a risk score or a recovery estimate.
+
 #### 1. edgar_company
 Get company profile, financials, recent filings, and ownership in one call.
 

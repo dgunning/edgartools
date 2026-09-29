@@ -137,7 +137,7 @@ Common workflows:
 5. Credit evidence (BDC loans): edgar_fund (action="bdc_search") to find the BDC → edgar_search or edgar_company to list its 10-K/10-Q filings with periods → edgar_fund (action="bdc_portfolio", with period + borrower) for Schedule of Investments holdings → edgar_fund (action="bdc_nonaccrual") for non-accrual evidence → edgar_notes/edgar_read with the SAME period for narrative context behind the numbers. To continue, repeat the same action and filing selector with the original borrower, topic/detail, or single-section filters and pass back that response's cursor. Comparing periods (e.g. quarter-over-quarter non-accrual growth) is the caller's job — call once per period and diff the results yourself.
 6. Recovery-document path: use edgar_filing with an accession/URL to identify a filing, then edgar_document action="list" to enumerate its exact attachments. Select by sequence or filename; an exhibit type can return ambiguous candidates. Search a specific document for agreement language, then pass its locator {document, char_offset} to edgar_document action="read" with around. Read pages with the same accession and exact document selector. If the filing says a document is incorporated by reference, look for it in the referenced earlier filing; it may not be attached here. BDC-filed materials are evidence reported by the BDC and may not include a portfolio borrower's own agreement. These tools provide filing evidence and do not make legal determinations.
 
-Pre-built analysis prompts are available via prompts/list: due_diligence, earnings_analysis, industry_overview, insider_monitor, fund_analysis, filing_comparison, activist_tracking."""
+Pre-built analysis prompts are available via prompts/list: due_diligence, earnings_analysis, industry_overview, insider_monitor, fund_analysis, filing_comparison, activist_tracking, borrower_credit_review, lender_protection_review."""
 
 # Create the server
 app = Server("edgartools", instructions=SERVER_INSTRUCTIONS)
@@ -365,6 +365,8 @@ Pre-built analysis workflows:
 - **fund_analysis**: Mutual fund/ETF deep dive (hierarchy, holdings, performance)
 - **filing_comparison**: Compare filings across periods or companies
 - **activist_tracking**: SC 13D/G activist investor monitoring
+- **borrower_credit_review**: Borrower loan valuations, payment terms and non-accrual evidence from selected BDC filings
+- **lender_protection_review**: Filed agreements covering collateral, guarantees and repayment priority
 
 ## Tips
 

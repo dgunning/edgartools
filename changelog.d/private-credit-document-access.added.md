@@ -1,1 +1,0 @@
-**`edgar_document` supports exact filing-attachment research.** Search locators preserve document identity, reads return at most 6,000 characters per page and bounded search reports matches within the selected attachment. See the [Private Credit Evidence Access System Design](../.agents-context/TDDs/Private%20Credit%20Evidence%20Access%20-%20System%20Design%20-%2009.28.html).

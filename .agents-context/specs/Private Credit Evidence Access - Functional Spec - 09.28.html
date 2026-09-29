@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Private Credit Evidence Access — Functional Spec</title>
+<style>
+:root { color-scheme: light; --ink:#252830; --muted:#626772; --line:#dce0e5; --accent:#666580; --tint:#f3f3f7; --chosen:#edf5ef; }
+* { box-sizing:border-box; }
+body { margin:0; background:#fff; color:var(--ink); font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+main { max-width:1100px; margin:0 auto; padding:48px 36px 72px; }
+h1 { font:700 40px/1.15 Georgia,serif; margin:12px 0 20px; }
+h2 { font:700 27px/1.25 Georgia,serif; border-left:4px solid var(--accent); padding-left:14px; margin:40px 0 20px; }
+h3 { font-size:19px; margin:28px 0 10px; }
+p { margin:10px 0 16px; } li { margin:7px 0; }
+a { color:#454b82; overflow-wrap:anywhere; }
+table { width:100%; border-collapse:collapse; margin:18px 0 24px; table-layout:fixed; font-size:14px; }
+th,td { padding:12px; border:1px solid var(--line); text-align:left; vertical-align:top; overflow-wrap:anywhere; }
+th { background:var(--tint); } code { font:12px/1.5 ui-monospace,monospace; overflow-wrap:anywhere; }
+.meta,.support { font-size:13px; color:var(--muted); }
+.callout { background:var(--tint); padding:18px 22px; border-left:4px solid var(--accent); margin:22px 0; }
+.chosen { background:var(--chosen); } .label { font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.04em; }
+.flow { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin:22px 0; }
+.flow div { border:1px solid var(--line); border-top:4px solid var(--accent); padding:18px; }
+.flow strong { display:block; margin-bottom:8px; }
+@media(max-width:720px) { main { padding:24px 16px; } h1 { font-size:32px; } .flow { grid-template-columns:1fr; } th,td { padding:8px; } }
+@media print { @page { size:A4; margin:16mm; } main { max-width:none; padding:0; } body { font-size:10pt; } h1 { font-size:26pt; } h2 { font-size:18pt; } h3 { font-size:13pt; } table { font-size:9pt; } h2,h3 { break-after:avoid; } tr,.callout,.flow { break-inside:avoid; } thead { display:table-header-group; } }
+</style>
+</head>
+<body><main>
+<section>
+<h2>Title block</h2>
+<h1>Private Credit Evidence Access<br>Functional Spec</h1>
+<p class="meta">Date: September 28, 2026 · Status: user-confirmed scope and end-state · Surface: EdgarTools MCP</p>
+<p class="meta">Sources used: planning conversation and repository review; AGENTS.md; docs/verification-constitution.md; edgar/ai/mcp/server.py; relevant MCP tools; edgar/bdc investment, non-accrual, reference and dataset modules; edgar/_filings.py; tests/test_bdc_nonaccrual_classifier.py; docs/ai/mcp-tools.md; edgar/ai/skills/funds/skill.yaml. Specific citations appear below.</p>
+<div class="callout"><strong>Chosen direction:</strong> provide the right tools to retrieve credit evidence from the correct public documents. Analysts or their AI assistants compare periods and interpret lender protections. The MCP does not perform historical matching, score risk or estimate recoveries.</div>
+</section>
+<section>
+<h2>Goal</h2>
+<p>Enable private credit analysts to identify disclosed signs of borrower deterioration and investigate lender protections using complete, dated and traceable SEC evidence through EdgarTools MCP.</p>
+<h3>Purpose and private credit value</h3>
+<p>A private credit firm lends money to earn interest. A substantial loss on one loan can erase earnings from other loans. Its two central questions are whether repayment is becoming less likely and how much money could be lost if repayment fails. This spec improves the evidence available to answer those questions.</p>
+<table><thead><tr><th>Use case</th><th>Business value</th><th>Evidence contribution</th></tr></thead><tbody>
+<tr><td><strong>Investigate borrower deterioration</strong><br>“Is repayment becoming less likely?”</td><td>Earlier investigation can give a lender more time to seek information, negotiate protections or prepare for restructuring. Easier retrieval also reduces time spent assembling evidence.</td><td>Named BDC loan holdings, disclosed valuations, interest terms and non-accrual evidence from selected reporting periods.</td></tr>
+<tr><td><strong>Research potential losses</strong><br>“What protects us if repayment fails?”</td><td>Understanding collateral, guarantees and payment priority supports decisions about whether to lend, how much to lend and which protections to require.</td><td>Access to filed agreements, amendments, guarantees and relevant financial notes, with passages that analysts can inspect in context.</td></tr>
+</tbody></table>
+<p>For a Moody’s-type customer, the proposed value is reliable evidence that fits credit research workflows and reduces document collection effort. Public disclosures can complement confidential borrower reports by showing what other reporting lenders disclose. This is the business rationale agreed in the planning conversation, not a claim about Moody’s purchasing plans or a quantified savings forecast.</p>
+<h3>Success criteria</h3>
+<ul>
+<li>An analyst can identify a borrower and retrieve the available loan facts from a selected annual or quarterly filing, with the period and source unambiguous.</li>
+<li>All extracted holdings and relevant readable evidence are reachable through bounded responses with continuation, rather than inaccessible after a preview limit.</li>
+<li>Available non-accrual evidence identifies whether it relates to individual investments or a portfolio aggregate and preserves its supporting disclosure.</li>
+<li>An analyst can discover a relevant filed agreement, locate passages and read surrounding context without leaving MCP for manual document retrieval.</li>
+<li>Missing data, partial extraction and explicit reported zero values remain distinguishable.</li>
+<li>Tool descriptions and examples let an agent discover these workflows without reading repository source code.</li>
+</ul>
+<h3>Non-goals and hard constraints</h3>
+<p><strong>Non-goals:</strong> automatic loan matching across filings or lenders; computed historical changes; automated risk flags or monitoring services; credit ratings; calculated recovery estimates; standardized legal-term extraction; legal conclusions; a complete private-borrower financial database.</p>
+<p><strong>Constraints:</strong> public SEC evidence delivered through the existing EdgarTools MCP. Preserve the distinction between what a document reports and what an analyst infers. Disclosure and extraction limitations must be visible. This document specifies capabilities and behavior, not architecture or implementation tasks.</p>
+<p class="support">Project quality requirements are grounded in <code>AGENTS.md:85–98</code> and <code>docs/verification-constitution.md:13–55</code>: correctness, useful failure behavior and agent discoverability are part of the feature promise.</p>
+</section>
+<section>
+<h2>Context &amp; grounding</h2>
+<p>The source set was confirmed by the user before the focused review. The material question was whether the missing evidence required new analytical interpretation or could be surfaced from existing data and document access.</p>
+<table><thead><tr><th>Source set</th><th>Why it could change the spec</th><th>Disposition</th></tr></thead><tbody>
+<tr><td>Planning conversation and prior repository checks</td><td>Establishes business value, scope and who performs analysis.</td><td>Used. Both use cases confirmed; information access selected for both.</td></tr>
+<tr><td>AGENTS.md and Verification Constitution</td><td>Defines correctness and discoverability obligations.</td><td>Used. Missing evidence must not become reassuring zero values.</td></tr>
+<tr><td>MCP registration, fund, filing, reader, notes, search and monitor tools</td><td>Determines existing access and response limitations.</td><td>Used in the session review and focused rereads.</td></tr>
+<tr><td>BDC models, non-accrual extraction, datasets and attachment access</td><td>Separates existing evidence from unsupported interpretation.</td><td>Used. Several valuable fields and document-access capabilities already exist beneath MCP.</td></tr>
+<tr><td>Relevant verification files, MCP docs and funds skill</td><td>Shows existing promises and treatment of extraction gaps.</td><td>Used. No new live-SEC coverage claim was established.</td></tr>
+<tr><td>Unrelated modules and additional market research</td><td>Would not resolve the agreed information-access scope.</td><td>Skipped as agreed. No broad repository tour or new market sizing.</td></tr>
+</tbody></table>
+<h3>Current behavior and implications</h3>
+<table><thead><tr><th>Grounded finding</th><th>Implication</th><th>Repository citation</th></tr></thead><tbody>
+<tr><td>The BDC MCP action checks an investment’s <code>name</code>, while the model defines <code>company_name</code>. A local simulated response reproduced the missing borrower name.</td><td>Borrower identity must be preserved in the surfaced evidence.</td><td><code>edgar/ai/mcp/tools/fund.py:550–565</code><br><code>edgar/bdc/investments.py:1304–1321</code></td></tr>
+<tr><td>The model includes principal, PIK rate and spread; the MCP serializes only a subset. The action has a maximum of 50 results and no historical filing selector.</td><td>Expose available fields and make the complete extracted result reachable.</td><td><code>edgar/bdc/investments.py:1304–1321</code><br><code>edgar/ai/mcp/tools/fund.py:65–100,543–591</code></td></tr>
+<tr><td>The BDC helper defaults to the latest 10-K.</td><td>Explicit annual and quarterly filing selection is necessary for user-directed historical research.</td><td><code>edgar/bdc/reference.py:178–237</code></td></tr>
+<tr><td>Non-accrual extraction supports investment footnotes, aggregate fallbacks, source filing, period and diagnostic warnings.</td><td>Expose both evidence and extraction limitations; do not invent individual-loan status from an aggregate.</td><td><code>edgar/bdc/nonaccrual.py:135–173,314–357</code><br><code>tests/test_bdc_nonaccrual_classifier.py:85–133</code></td></tr>
+<tr><td>The separate BDC dataset mappings include maturity and lien category.</td><td>These are possible source-dependent evidence fields, not proof of uniform coverage in the individual investment model.</td><td><code>edgar/bdc/datasets.py:73–101</code></td></tr>
+<tr><td>Notes select the latest filing; explicit full-detail table output uses the first 10 rows. Section reading truncates to 6,000 characters.</td><td>Notes and narrative access need correct-document selection and continuation.</td><td><code>edgar/ai/mcp/tools/notes.py:27–65,104–127</code><br><code>edgar/ai/mcp/tools/reader.py:190–225</code></td></tr>
+<tr><td>A URL supplied to the filing tool is reduced to its accession number. The registered tool set has no dedicated exhibit reader. Python exposes attachments, exhibits and search across their text.</td><td>Document identity must survive navigation from a filing to an agreement or amendment.</td><td><code>edgar/ai/mcp/tools/filing.py:118–130</code><br><code>edgar/ai/mcp/server.py:82–102</code><br><code>edgar/_filings.py:1597–1605,2181–2241</code></td></tr>
+<tr><td>The monitor returns recent filing metadata; text search returns filing matches. Neither response provides historical loan comparisons.</td><td>Keep discovery separate from interpretation, consistent with the chosen boundary.</td><td><code>edgar/ai/mcp/tools/monitor.py:23–87</code><br><code>edgar/ai/mcp/tools/text_search.py:104–145</code></td></tr>
+</tbody></table>
+<p class="support">Existing user-facing context: <code>docs/ai/mcp-tools.md:205–239</code> describes debt-note exploration; <code>edgar/ai/skills/funds/skill.yaml:46–57</code> describes BDC portfolios and bulk data access. Source citations describe this reviewed checkout, not a guarantee that all filers disclose the same fields.</p>
+</section>
+<section>
+<h2>Decision tree / approaches</h2>
+<h3>1. Breadth of the functional scope</h3>
+<p><strong>At stake:</strong> whether the work delivers evidence access for both credit questions or expands into an analytical product.</p>
+<table><thead><tr><th>Candidate</th><th>Trade-off</th><th>Decision</th></tr></thead><tbody>
+<tr class="chosen"><td>Both use cases, focused on information access</td><td>Covers the agreed credit research needs while keeping judgment with the analyst or AI.</td><td><strong>Recommended and user-confirmed.</strong></td></tr>
+<tr><td>Early warning first; recovery in a separate spec</td><td>Narrower scope, but defers one of the two requested outcomes.</td><td>Not selected.</td></tr>
+<tr><td>Both, including analytical outputs</td><td>More convenience, with additional interpretation and matching obligations.</td><td>Not selected. User confirmed the information-access boundary.</td></tr>
+</tbody></table>
+<h3>2. Historical information access versus comparison</h3>
+<p><strong>At stake:</strong> whether the MCP is responsible for deciding that records in different filings represent the same loan.</p>
+<table><thead><tr><th>Candidate</th><th>Trade-off</th><th>Decision</th></tr></thead><tbody>
+<tr class="chosen"><td>Retrieve evidence from selected periods</td><td>Leaves comparison effort with the caller; preserves the original records without claiming a match.</td><td><strong>Recommended and selected.</strong> The user explicitly requested the right tools to retrieve information from the correct documents.</td></tr>
+<tr><td>Also match investments and calculate changes</td><td>Saves work but adds ambiguous identity matching and responsibility for change calculations.</td><td>Rejected for this scope.</td></tr>
+</tbody></table>
+<h3>3. Recovery document access versus legal-term extraction</h3>
+<p><strong>At stake:</strong> whether the MCP supplies evidence or interprets contractual protections across documents.</p>
+<table><thead><tr><th>Candidate</th><th>Trade-off</th><th>Decision</th></tr></thead><tbody>
+<tr class="chosen"><td>Discover, search and read documents with context</td><td>The caller interprets the agreement; source wording and qualifications remain available.</td><td><strong>Recommended and selected: option A.</strong></td></tr>
+<tr><td>Also extract standardized collateral, guarantor and priority fields</td><td>More immediately comparable results, but requires interpreting clauses, exceptions and amendments.</td><td>Rejected for this scope.</td></tr>
+</tbody></table>
+</section>
+<section>
+<h2>Chosen approach summary</h2>
+<table><thead><tr><th>Fork</th><th>Chosen approach</th><th>Why</th><th>Alternatives rejected</th><th>Goal served</th></tr></thead><tbody>
+<tr><td>Breadth</td><td>Both use cases through evidence access</td><td>Addresses repayment concerns and lender protections together.</td><td>Early warning only; analytical product</td><td>Both agreed private credit questions</td></tr>
+<tr><td>History</td><td>Retrieve selected filings and periods</td><td>Avoids asserting uncertain matches.</td><td>MCP matching and calculated changes</td><td>Correct-document, traceable research</td></tr>
+<tr><td>Recovery</td><td>Discover, search and read source documents</td><td>Preserves context and keeps legal interpretation with the caller.</td><td>Standardized legal-term extraction</td><td>Evidence-based investigation of protections</td></tr>
+</tbody></table>
+</section>
+<section>
+<h2>Desired end-state</h2>
+<div class="flow" aria-label="Evidence retrieval and interpretation boundary">
+<div><strong>1. Select the evidence</strong>Identify the reporting entity, filing, period and document.</div>
+<div><strong>2. Retrieve through MCP</strong>Get available loan facts, footnotes, tables and document passages with sources and coverage information.</div>
+<div><strong>3. Analyst or AI interprets</strong>Compare periods and assess repayment concerns or contractual protections outside the MCP’s retrieval responsibility.</div>
+</div>
+<h3>Functional requirements</h3>
+<table><thead><tr><th>Capability</th><th>Required observable behavior</th></tr></thead><tbody>
+<tr><td><strong>F1. Correct filing selection</strong></td><td>Discover and select specific annual or quarterly filings. Holdings and notes must be retrievable for that selected filing, rather than silently replaced with the latest annual report. Return reporting entity, form, accession, reporting period, filing date and source link. Distinguish original filings from amendments where applicable. A failed explicit selection produces a useful explanation rather than unrelated data.</td></tr>
+<tr><td><strong>F2. Borrower and loan evidence</strong></td><td>Preserve the reported borrower name, investment identifier and investment description. Surface available fair value, cost, principal, interest rate, spread and PIK rate with clear units and rate conventions. Preserve available source labels. Maturity or lien information can be retrieved from supporting documents or datasets where present; universal structured extraction is not promised. Do not collapse distinct facilities into one borrower record or imply a globally stable identifier.</td></tr>
+<tr><td><strong>F3. Complete access to extracted holdings</strong></td><td>Allow borrower filtering and continuation through the complete extracted result. Show returned scope, remaining results and extraction limitations. Distinguish totals for the full extracted portfolio from a filtered subset or response page. “All extracted holdings” must not imply that every holding in the original filing was successfully parsed.</td></tr>
+<tr><td><strong>F4. Non-accrual evidence</strong></td><td>Return available individual investment evidence, related footnote text and its source. If only portfolio-level data is available, label it as aggregate evidence. Preserve extraction method and meaningful warnings. Absence from an extracted list does not establish that a loan is performing. Do not convert non-accrual accounting status into a legal default determination.</td></tr>
+<tr><td><strong>F5. Notes and narrative access</strong></td><td>Retrieve relevant notes, table rows and filing passages from the selected document. Previews explicitly identify omitted content and provide a way to continue. Context around a passage remains accessible, including relevant headings and footnotes. Support research into debt, liquidity and related disclosures without promising an automated interpretation.</td></tr>
+<tr><td><strong>F6. Agreement discovery</strong></td><td>List filed documents and exhibits with available titles or descriptions, document type, filename or document identifier and source link. Search relevant filings and document text to locate agreements, amendments and guarantees. Distinguish the main filing from an exhibit. Preserve available references to documents filed elsewhere so the caller can pursue the referenced filing; do not claim an automatically reconstructed complete agreement history.</td></tr>
+<tr><td><strong>F7. Specific-document reading</strong></td><td>Read the chosen exhibit itself and search within it. Return matching passages, surrounding context and a locator tied to that document. Support continuation for long readable documents. An exhibit selection must not resolve silently to a parent-filing summary. If content cannot be read, return its identity, source link and the reason it is unavailable.</td></tr>
+<tr><td><strong>F8. Provenance and honest gaps</strong></td><td>Returned evidence must be traceable to its filing and, where relevant, its document, note, table or passage. Distinguish reporting period from publication date. Separate explicit reported zero, not disclosed, not extracted, unsupported content and retrieval failure where the evidence permits that distinction. When the cause is unknown, say so. Preserve the reporting lender versus underlying borrower distinction.</td></tr>
+<tr><td><strong>F9. Discoverable workflows</strong></td><td>Tool descriptions and examples guide agents from a borrower or BDC question to the correct filing and supporting evidence. Continuation, source selection and error recovery are discoverable. Exact tool names and parameter layouts are outside this functional spec.</td></tr>
+</tbody></table>
+<h3>Representative user outcomes</h3>
+<ul>
+<li><strong>Two-period research:</strong> an analyst retrieves a named borrower’s available holdings from two selected BDC filings. Each result retains its own dates, values and source. The MCP makes no claim that records match or that a value change proves deterioration.</li>
+<li><strong>Distress investigation:</strong> an analyst retrieves a disclosed non-accrual investment and its supporting footnote. If only a portfolio aggregate is available, the response does not assign that status to specific borrowers.</li>
+<li><strong>Recovery research:</strong> an analyst finds a filed agreement and amendment, searches for guarantees or collateral and reads the surrounding provisions. The analyst determines their meaning and whether further documents are needed.</li>
+<li><strong>Long or incomplete evidence:</strong> an analyst can continue beyond a holdings page or document excerpt. Unreadable content and extraction gaps remain visible rather than appearing as proof that no protection or risk exists.</li>
+</ul>
+<h3>Plain-language terms and interpretation limits</h3>
+<p><strong>BDC:</strong> a business development company that reports its investments, providing a public window into some private-company loans. <strong>PIK:</strong> payment-in-kind interest, added to debt rather than paid in cash; its presence alone does not establish distress. <strong>Non-accrual:</strong> an accounting treatment under which a lender stops recognizing interest income because collection is uncertain. <strong>Collateral:</strong> assets supporting a loan. <strong>Guarantee:</strong> another party’s contractual commitment to support an obligation. <strong>Repayment priority:</strong> the order in which creditors may be paid, subject to the governing documents and circumstances.</p>
+<p>A reported holding is the reporting lender’s position, not the borrower’s total debt. A valuation mark is not a realized recovery. A BDC’s own borrowing documents must not be mistaken for the loan agreements of its portfolio companies. Public evidence may not contain the entire agreement, all amendments or the borrower’s complete finances. These boundaries carry forward the user-confirmed end-state and the planning conversation’s rationale.</p>
+<h3>Explicit remainder outside scope</h3>
+<p>No historical comparison engine, entity-resolution service, calculated change feed, risk score, automatic alert, legal-term summary schema or recovery model. No confidential borrower data ingestion. No promise of complete market coverage, automatic reconstruction of all contract amendments or access to unfiled agreements.</p>
+</section>
+<section>
+<h2>Assumptions &amp; open questions</h2>
+<ul>
+<li><strong>No unresolved scope choice:</strong> the user confirmed both evidence-access use cases, the two interpretation boundaries and the desired end-state.</li>
+<li><strong>Coverage remains unmeasured:</strong> this review established code paths and a local simulated response, not live success rates across BDCs or document formats. No numeric coverage target is asserted.</li>
+<li><strong>Document formats:</strong> exhaustive OCR or scanned-PDF extraction was not agreed. Unreadable documents must remain discoverable with an explicit limitation; this spec does not promise new OCR capability.</li>
+<li><strong>Delivery constraints:</strong> no deadline, latency target or staffing budget was supplied. The confirmed constraints are public SEC data, the existing MCP surface and evidence retrieval without analytical interpretation.</li>
+<li><strong>Design details intentionally deferred:</strong> tool names, parameter schemas, continuation mechanics and exact citation representation remain design choices, provided the observable outcomes above are met.</li>
+</ul>
+</section>
+</main></body></html>

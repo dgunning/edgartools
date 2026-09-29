@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Private Credit Evidence Access – System Design</title>
+<style>
+  :root {
+    --ink: #2b2b2e;
+    --ink-soft: #55565c;
+    --rule: #d9d8d4;
+    --paper: #ffffff;
+    --panel: #f6f5f2;
+    --accent: #6b6f8e;
+    --ok-bg: #eaf4ec; --ok-ink: #2f6b3c; --ok-rule: #9cc7a6;
+    --no-bg: #fbeceb; --no-ink: #8d3a33; --no-rule: #e0a9a3;
+    --warn-bg: #fdf4e3; --warn-ink: #7a5412; --warn-rule: #e3c27f;
+    --new-bg: #e8ecf8; --new-ink: #33427a;
+    --serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
+    --sans: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.55 var(--sans); }
+  main { max-width: 1040px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1, h2, h3 { font-family: var(--serif); font-weight: 600; line-height: 1.25; }
+  h1 { font-size: 30px; margin: 0 0 6px; }
+  h2 { font-size: 22px; margin: 44px 0 12px; padding-left: 12px; border-left: 4px solid var(--accent); }
+  h3 { font-size: 17px; margin: 28px 0 8px; }
+  p { margin: 8px 0; }
+  .meta { font-family: var(--mono); font-size: 12.5px; color: var(--ink-soft); }
+  .meta div { margin: 2px 0; }
+  .lede { font-size: 16px; background: var(--panel); padding: 14px 16px; border-radius: 4px; margin-top: 18px; }
+  code, .mono { font-family: var(--mono); font-size: 12.5px; }
+  code { background: var(--panel); padding: 1px 4px; border-radius: 3px; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 13.5px; }
+  th, td { text-align: left; vertical-align: top; padding: 7px 9px; border-bottom: 1px solid var(--rule); }
+  th { font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-soft); background: var(--panel); }
+  td.rec, th.rec { background: var(--ok-bg); }
+  .tag { display: inline-block; font-family: var(--mono); font-size: 10.5px; padding: 1px 6px; border-radius: 3px; letter-spacing: .03em; white-space: nowrap; }
+  .tag.rec { background: var(--ok-bg); color: var(--ok-ink); border: 1px solid var(--ok-rule); }
+  .tag.rej { background: var(--no-bg); color: var(--no-ink); border: 1px solid var(--no-rule); }
+  .tag.warn { background: var(--warn-bg); color: var(--warn-ink); border: 1px solid var(--warn-rule); }
+  .tag.new { background: var(--new-bg); color: var(--new-ink); }
+  .tag.chg { background: var(--warn-bg); color: var(--warn-ink); }
+  .tag.reuse { background: var(--panel); color: var(--ink-soft); border: 1px solid var(--rule); }
+  .options { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 12px; margin: 12px 0; }
+  .opt { border: 1px solid var(--rule); border-radius: 5px; padding: 12px 14px; }
+  .opt.rec { background: var(--ok-bg); border-color: var(--ok-rule); }
+  .opt.rej { background: #fdf8f7; border-color: var(--no-rule); }
+  .opt h4 { margin: 0 0 6px; font-family: var(--serif); font-size: 15px; }
+  .opt ul { margin: 6px 0 0; padding-left: 18px; }
+  .opt li { margin: 3px 0; }
+  .stake { color: var(--ink-soft); }
+  .recommend { border-left: 4px solid var(--ok-rule); background: var(--ok-bg); padding: 10px 14px; margin: 12px 0; }
+  .callout { border-left: 4px solid var(--warn-rule); background: var(--warn-bg); padding: 10px 14px; margin: 12px 0; }
+  .note { border-left: 4px solid var(--rule); background: var(--panel); padding: 10px 14px; margin: 12px 0; }
+  .settled li { margin: 4px 0; }
+  /* component map */
+  .map { border: 1px solid var(--rule); border-radius: 6px; padding: 16px; background: #fcfcfb; }
+  .tier { display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: stretch; }
+  .tier-label { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-soft); padding-top: 10px; }
+  .boxes { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+  .box { border: 1px solid var(--rule); border-radius: 5px; background: var(--paper); padding: 8px 10px; font-size: 12.5px; }
+  .box b { font-family: var(--mono); font-size: 12px; display: block; margin-bottom: 2px; }
+  .box .where { font-family: var(--mono); font-size: 10.5px; color: var(--ink-soft); display: block; margin-top: 4px; }
+  .box.new { border-color: #9aa6d6; background: #f5f7fd; }
+  .box.chg { border-color: var(--warn-rule); background: #fffbf3; }
+  .arrow { text-align: center; font-family: var(--mono); color: var(--ink-soft); font-size: 12px; margin: 6px 0 6px 162px; }
+  .legend { margin-top: 10px; font-size: 12px; color: var(--ink-soft); }
+  ol.flow li { margin: 6px 0; }
+  .sev-h { color: var(--no-ink); font-weight: 600; }
+  .sev-m { color: var(--warn-ink); font-weight: 600; }
+  .sev-l { color: var(--ok-ink); font-weight: 600; }
+  .tbd { background: var(--warn-bg); color: var(--warn-ink); font-family: var(--mono); font-size: 11.5px; padding: 0 4px; border-radius: 3px; }
+  pre { font-family: var(--mono); font-size: 12px; background: var(--panel); padding: 10px 12px; border-radius: 4px; overflow-x: auto; white-space: pre-wrap; }
+  @media (max-width: 640px) {
+    .tier { grid-template-columns: 1fr; }
+    .arrow { margin-left: 0; }
+    table { display: block; overflow-x: auto; }
+  }
+  @media print {
+    main { padding: 0; max-width: none; }
+    h2 { break-after: avoid; }
+    .opt, .box, tr { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>Private Credit Evidence Access – System Design</h1>
+  <div class="meta">
+    <div>Date: September 28, 2026 · Status: draft for review · Surface: EdgarTools MCP (<code>edgar/ai/mcp/</code>)</div>
+    <div>Source spec: <code>.agents-context/specs/Private Credit Evidence Access - Functional Spec - 09.28.html</code> (F1–F9)</div>
+    <div>Tie-break priority: correctness and provenance first · Compatibility: additive only (no existing param or response key removed) · Page budget: current norms (~6,000 characters of text per page)</div>
+    <div>Scope: <b>Phase 1</b>: <code>edgar_fund</code> fixes, <code>bdc_nonaccrual</code>, filing resolver, continuation, <code>edgar_notes</code>/<code>edgar_read</code> paging · <b>Phase 2</b>: <code>edgar_document</code>, <code>edgar_text_search</code> and <code>edgar_filing</code> changes · Commits land on the current branch</div>
+    <div>Deferred to follow-ups: exhibit-reference parser, DERA maturity/lien enrichment, borrower-name parsing fix in <code>edgar.bdc</code></div>
+    <div>Reviewers: <span class="tbd">[TBD]</span></div>
+  </div>
+  <p class="lede">
+    The functional spec asks the MCP to hand analysts complete, dated and sourced evidence about BDC loans and lender protections, without interpreting it.
+    This design does that with <b>one new tool</b> for reading filed documents and exhibits, <b>extensions to five existing tools</b>,
+    and <b>two shared services</b>: one picks exactly the filing the caller asked for, and one lets any long result be continued page by page.
+    Most of the extraction logic already exists in the library; the work is mainly in the MCP layer.
+  </p>
+</header>
+
+<section>
+<h2>Grounding measurements</h2>
+<p>These figures were measured against the live SEC filing on September 28, 2026. Each one bears directly on a decision below.</p>
+<table>
+  <tr><th>Measurement</th><th>Value</th><th>Why it matters</th></tr>
+  <tr><td>ARCC 10-Q <code>0001628280-26-050307</code> (period 2026-06-30), extracted holdings</td><td>1,481</td><td>At 20 records per page, reaching every holding takes about 75 calls. Borrower filtering and continuation are both needed (F3).</td></tr>
+  <tr><td>XBRL parse + investment extraction, first call</td><td>8.2 s + 2.8 s</td><td>Stateless paging would pay about 11 s on <em>every</em> page (Problem 3).</td></tr>
+  <tr><td>Same extraction repeated with a new <code>Filing</code> object</td><td>11.7 s</td><td>The per-object <code>lru_cache</code> on <code>Filing</code> is not reused across MCP calls, because each call builds a fresh object.</td></tr>
+  <tr><td>Median serialized holding record</td><td>~390–410 chars</td><td>A 6–8k character page holds roughly 15–20 records.</td></tr>
+  <tr><td>Records whose <code>company_name</code> is shared with another record</td><td>1,248 of 1,481</td><td>Most borrowers have several facilities, so records must never be merged into one borrower (F2).</td></tr>
+  <tr><td>A parsed <code>company_name</code> that is wrong</td><td><code>'Subordinated'</code> for identifier <code>'Ivy Hill Asset Management, L.P. | Subordinated revolving loan'</code></td><td>The borrower filter has to match the raw identifier as well, and every record must return that identifier.</td></tr>
+  <tr><td>Field coverage: principal / PIK rate</td><td>99% / 13%</td><td>A missing PIK rate is not a zero PIK rate. Coverage has to appear in every response (F8).</td></tr>
+  <tr><td>Rate convention in the model</td><td>decimal fraction (<code>0.1173</code> = 11.73%)</td><td>Each response must state the convention (F2).</td></tr>
+  <tr><td>Non-accrual extraction on the same filing</td><td>7.6 s · method <code>footnote</code> · 32 investments · 0 warnings</td><td>Individual investments can be identified here; this is the ground-truth candidate for verification.</td></tr>
+</table>
+</section>
+
+<section>
+<h2>Design problems and approaches</h2>
+<p>
+  Three decisions are expensive to reverse once agents depend on them.
+  How provenance and gap fields are shaped was deliberately dropped as a cross-cutting decision during framing. Each tool specifies its own fields (see Components).
+</p>
+
+<div class="note">
+  <b>Settled without a real alternative</b> (no trade-off analysis needed):
+  <ul class="settled">
+    <li><b>Borrower-name bug:</b> <code>fund.py:550–565</code> tests <code>hasattr(inv, 'name')</code>, but the model field is <code>company_name</code>. The fix is to emit <code>company_name</code> and <code>identifier</code>.</li>
+    <li><b>Dropped fields:</b> serialize <code>principal_amount</code>, <code>pik_rate</code>, <code>spread</code>, <code>shares</code> and <code>percent_of_net_assets</code>, which the model has and the tool discards.</li>
+    <li><b>Totals:</b> full-extraction totals and filtered or page totals are reported under separate keys (F3).</li>
+    <li><b>Non-accrual:</b> the evidence is exposed through the existing <code>extract_nonaccrual(filing)</code>, which already returns <code>extraction_method</code> and <code>warnings</code> (F4).</li>
+    <li><b>Text search:</b> <code>edgar_text_search</code> surfaces <code>file_type</code>, <code>file_description</code> and <code>document_id</code>. <code>EFTSResult</code> already has these fields; the MCP drops them.</li>
+  </ul>
+</div>
+
+<!-- ================= Problem 1 ================= -->
+<h3>1. Tool surface: extend existing tools or add new ones</h3>
+<p class="stake"><b>At stake:</b> F7 says selecting an exhibit must never quietly return the parent filing instead, and F9 requires agents to find the workflow without help. Both depend on whether document-level work gets its own tool or is layered onto tools built around other ideas.</p>
+
+<div class="options">
+  <div class="opt rej">
+    <h4>A. Extend existing tools only <span class="tag rej">rejected</span></h4>
+    <p>New parameters on <code>edgar_fund</code>, <code>edgar_notes</code> and <code>edgar_filing</code>, plus a <code>document</code> parameter on <code>edgar_read</code> for exhibits. The tool count stays at 13.</p>
+    <ul>
+      <li>+ No new tool for agents to learn.</li>
+      <li>− <code>edgar_read</code> is organized by section. On failure it falls back to <code>raw_text_preview</code> of the whole filing (<code>reader.py:216–223</code>), which is exactly the silent fallback F7 forbids.</li>
+      <li>− Exhibit list, search and read would all overload one <code>sections</code> parameter.</li>
+    </ul>
+  </div>
+  <div class="opt rej">
+    <h4>B. New dedicated tools <span class="tag rej">rejected</span></h4>
+    <p>A new <code>edgar_bdc</code> (holdings, non-accrual) split out of <code>edgar_fund</code>, plus a new <code>edgar_document</code>. 15 tools.</p>
+    <ul>
+      <li>+ Cleanest parameter schemas.</li>
+      <li>− Duplicates the existing <code>bdc_search</code>/<code>bdc_portfolio</code> actions. Keeping them for compatibility means two paths to one result.</li>
+      <li>− More tools to choose between means more routing mistakes.</li>
+    </ul>
+  </div>
+  <div class="opt rec">
+    <h4>C. Hybrid <span class="tag rec">recommended</span></h4>
+    <p>Extend <code>edgar_fund</code> (new <code>bdc_nonaccrual</code> action and selection parameters), <code>edgar_notes</code>, <code>edgar_read</code>, <code>edgar_filing</code> and <code>edgar_text_search</code>. Add <b>one</b> tool, <code>edgar_document</code>, for listing, searching and reading a specific document or exhibit. 14 tools.</p>
+    <ul>
+      <li>+ BDC evidence stays where agents already find it.</li>
+      <li>+ Exhibits get a tool whose only job is document identity, so it cannot fall back to a filing summary.</li>
+      <li>− One more tool, and it partly overlaps <code>edgar_read</code>. The descriptions must say which to use.</li>
+    </ul>
+  </div>
+</div>
+
+<table>
+  <tr><th>Dimension</th><th>A. Extend only</th><th>B. New tools</th><th class="rec">C. Hybrid</th></tr>
+  <tr><td>F7 exhibit identity (correctness)</td><td>Weak: inherits the section tool's fallbacks</td><td>Strong</td><td class="rec">Strong</td></tr>
+  <tr><td>F9 discoverability</td><td>Medium: exhibit workflow is hidden in a parameter</td><td>Medium: BDC path is duplicated</td><td class="rec">High: one obvious tool per job</td></tr>
+  <tr><td>Additive-compatibility fit</td><td>High</td><td>Low: two BDC paths to keep</td><td class="rec">High</td></tr>
+  <tr><td>Build effort</td><td>Low</td><td>High</td><td class="rec">Medium</td></tr>
+</table>
+<div class="recommend"><b>Recommendation: C (hybrid).</b> Correctness is the tie-breaker. F7's rule that an exhibit must not resolve to the parent filing is easiest to guarantee in a tool that has no parent-filing mode at all. Everything else extends where agents already go, which satisfies the additive-only constraint.</div>
+
+<!-- ================= Problem 2 ================= -->
+<h3>2. Filing selection: how a caller names "the right document"</h3>
+<p class="stake"><b>At stake:</b> F1 requires holdings, notes and sections to come from the filing the caller asked for, and an impossible selection must fail rather than return a different filing. Today, <code>reference.py:178–237</code>, <code>notes.py:104–127</code> and <code>reader.py:165–180</code> each pick the latest filing on their own.</p>
+
+<div class="options">
+  <div class="opt rej">
+    <h4>A. Accession number only <span class="tag rej">rejected</span></h4>
+    <p>Historical access means passing an <code>accession_number</code>. When it's absent, tools keep the current "latest" behavior.</p>
+    <ul>
+      <li>+ Completely unambiguous and trivial to implement.</li>
+      <li>− Analysts think in periods ("Q3 2025"). Every request needs an extra discovery call.</li>
+    </ul>
+  </div>
+  <div class="opt rej">
+    <h4>B. Period selectors, resolved in each tool <span class="tag rej">rejected</span></h4>
+    <p>Each tool accepts <code>period</code> or <code>fiscal_year</code>/<code>quarter</code> and resolves it itself.</p>
+    <ul>
+      <li>+ Natural for analysts.</li>
+      <li>− Four separate implementations will drift apart. A "nearest match" shortcut in any one of them breaks F1 without anyone noticing.</li>
+      <li>− Fiscal quarters are ambiguous: Q4 has no 10-Q, and fiscal years don't all end in December.</li>
+    </ul>
+  </div>
+  <div class="opt rec">
+    <h4>C. Both, through one shared resolver <span class="tag rec">recommended</span></h4>
+    <p><code>resolve_report_filing(identifier, form, accession_number, period)</code> in the MCP layer. An accession number takes precedence. A <code>period</code> (YYYY-MM-DD) must <b>exactly</b> match <code>period_of_report</code> on an original filing, or the call fails with the available periods listed. With neither, the latest filing is used and the response says so.</p>
+    <ul>
+      <li>+ One implementation that is tested once, and every response states how the filing was selected.</li>
+      <li>− A new shared module, and every tool that selects a filing has to use it.</li>
+    </ul>
+  </div>
+</div>
+
+<table>
+  <tr><th>Dimension</th><th>A. Accession only</th><th>B. Per-tool periods</th><th class="rec">C. Shared resolver</th></tr>
+  <tr><td>F1: never silently the wrong filing</td><td>Strong</td><td>Weak: drift across four copies</td><td class="rec">Strong: exact match or error</td></tr>
+  <tr><td>Analyst ergonomics</td><td>Low</td><td>High</td><td class="rec">High</td></tr>
+  <tr><td>Verification cost</td><td>Low</td><td>High: four suites</td><td class="rec">Low: one suite plus a check that each tool uses it</td></tr>
+  <tr><td>Amendment handling</td><td>Explicit</td><td>Ad hoc</td><td class="rec">Explicit: by accession only, marked <code>is_amendment</code></td></tr>
+</table>
+<div class="recommend"><b>Recommendation: C (shared resolver, exact match, loud failure).</b> It turns F1 into a single unit that can be verified. Decided: amendments stay selectable only by accession number, so a period request never lands on a partial <code>/A</code> filing (current policy at <code>filing.py:104–106</code>). The BDC library also gains a way to extract from a specific filing (see Components), so the MCP doesn't bypass <code>BDCEntity</code>'s fallback logic.</div>
+
+<!-- ================= Problem 3 ================= -->
+<h3>3. Continuation: letting a caller reach everything, a page at a time</h3>
+<p class="stake"><b>At stake:</b> F3, F5 and F7 require every extracted holding and every readable passage to be reachable. The measured cost of about 11 s per extraction, with nothing reused across calls, decides whether paging is usable. Each page must also come from the same underlying result as the page before.</p>
+
+<div class="options">
+  <div class="opt rej">
+    <h4>A. Stateless offset/limit <span class="tag rej">rejected</span></h4>
+    <p>The caller passes <code>offset</code> and the server re-extracts on every call.</p>
+    <ul>
+      <li>+ Simplest; no state.</li>
+      <li>− About 11 s per page, so all ARCC holdings take over 10 minutes.</li>
+      <li>− No way to detect that the result changed between pages, for example after a library upgrade mid-session.</li>
+    </ul>
+  </div>
+  <div class="opt rej">
+    <h4>B. Server-side session results <span class="tag rej">rejected</span></h4>
+    <p>The cursor is only an ID for a result held in server memory.</p>
+    <ul>
+      <li>+ Fast.</li>
+      <li>− Breaks after a restart, and under <code>streamable-http</code> (<code>server.py:436</code>) it breaks whenever a different process handles the call.</li>
+      <li>− An expired ID leaves the caller stranded partway through.</li>
+    </ul>
+  </div>
+  <div class="opt rec">
+    <h4>C. Self-describing cursor + in-process cache <span class="tag rec">recommended</span></h4>
+    <p>The cursor carries everything needed to rebuild the page: tool, accession number, document, filter, offset and a fingerprint of the result. A bounded in-memory LRU cache makes later pages fast. On a cache miss the server re-extracts and checks the fingerprint.</p>
+    <ul>
+      <li>+ Pages after the first are fast whenever the cache hits.</li>
+      <li>+ Survives restarts and multiple processes, at the cost of one slower page.</li>
+      <li>+ A mismatched fingerprint returns an error instead of skipping or repeating records.</li>
+      <li>− Cursor encoding and validation, and cache memory that has to be bounded.</li>
+    </ul>
+  </div>
+</div>
+
+<table>
+  <tr><th>Dimension</th><th>A. Offset</th><th>B. Session ID</th><th class="rec">C. Cursor + cache</th></tr>
+  <tr><td>Consistency across pages (correctness)</td><td>Unverified</td><td>Strong while alive</td><td class="rec">Verified by fingerprint</td></tr>
+  <tr><td>Later-page latency (ARCC)</td><td>~11 s</td><td>ms</td><td class="rec">ms on hit; ~11 s on miss</td></tr>
+  <tr><td>Restart / multi-process</td><td>Works</td><td>Fails</td><td class="rec">Works</td></tr>
+  <tr><td>SEC request load</td><td>Re-fetches on disk-cache miss</td><td>None</td><td class="rec">None on hit</td></tr>
+  <tr><td>Complexity</td><td>Low</td><td>Medium</td><td class="rec">Medium</td></tr>
+</table>
+<div class="recommend"><b>Recommendation: C.</b> The cache only speeds things up; correctness comes from the cursor and fingerprint. The same mechanism handles holdings pages, notes and table rows, section text and exhibit text, so each tool doesn't invent its own paging.</div>
+<pre>cursor = base64url(json({
+  "v": 1, "tool": "edgar_fund:bdc_portfolio",
+  "acc": "0001628280-26-050307", "doc": null,
+  "q": {"borrower": "ivy hill"}, "off": 20,
+  "fp": "sha1(ordered identifiers | text)[:12]"
+}))</pre>
+</section>
+
+<section>
+<h2>Decision record</h2>
+<table>
+  <tr><th>Design problem</th><th>Chosen approach</th><th>Why</th><th>Rejected</th><th>Serves</th></tr>
+  <tr><td>Tool surface</td><td>Extend 5 existing tools; add <code>edgar_document</code></td><td>A dedicated document tool can't silently fall back to the parent filing; BDC evidence stays where agents already look</td><td>Extend-only; new <code>edgar_bdc</code> + document tools</td><td>F4, F6, F7, F9</td></tr>
+  <tr><td>Filing selection</td><td>Shared resolver: accession number or exact <code>period</code>, loud failure, selection method reported</td><td>F1 becomes one verified unit instead of four drifting copies</td><td>Accession only; per-tool period logic</td><td>F1, F8</td></tr>
+  <tr><td>Continuation</td><td>Self-describing, fingerprinted cursor + bounded in-process LRU</td><td>Pages stay consistent and fast; survives restarts and HTTP multi-process</td><td>Stateless offset; server session IDs</td><td>F3, F5, F7</td></tr>
+</table>
+</section>
+
+<section>
+<h2>System architecture</h2>
+<p>An agent asks a question and calls MCP tools. Those tools use two new shared services to choose the right filing and to page through long results. The services then call library code that already does the extraction. Tags show what's new, what changes and what's reused as-is.</p>
+
+<div class="map" role="img" aria-label="Module map: agent, MCP tools, shared services, library, SEC EDGAR">
+  <div class="tier">
+    <div class="tier-label">Caller</div>
+    <div class="boxes">
+      <div class="box"><b>Analyst's AI assistant</b>Picks tools, compares periods and interprets protections. None of that happens inside the MCP.</div>
+    </div>
+  </div>
+  <div class="arrow">▼ MCP (stdio or streamable-http) · <code>server.py</code> SERVER_INSTRUCTIONS gains a credit-research workflow</div>
+
+  <div class="tier">
+    <div class="tier-label">MCP tools<br><span class="mono">edgar/ai/mcp/tools/</span></div>
+    <div class="boxes">
+      <div class="box chg"><b>edgar_fund <span class="tag chg">changed</span></b>BDC holdings for a chosen filing: borrower filter, all fields, pages. New <code>bdc_nonaccrual</code> action.<span class="where">fund.py</span></div>
+      <div class="box chg"><b>edgar_notes <span class="tag chg">changed</span></b>Notes from a chosen filing; table rows and note text continue past the preview.<span class="where">notes.py</span></div>
+      <div class="box chg"><b>edgar_read <span class="tag chg">changed</span></b>Sections from a chosen period, continuing past 6,000 chars; any fallback is labelled.<span class="where">reader.py</span></div>
+      <div class="box new"><b>edgar_document <span class="tag new">new</span></b>Lists a filing's documents and exhibits, searches one, reads it with context and continuation.<span class="where">document.py</span></div>
+      <div class="box chg"><b>edgar_filing <span class="tag chg">changed</span></b>Keeps the document named in a URL; adds period and URL to the response.<span class="where">filing.py</span></div>
+      <div class="box chg"><b>edgar_text_search <span class="tag chg">changed</span></b>Says which exhibit matched (<code>file_type</code>, <code>document_id</code>).<span class="where">text_search.py</span></div>
+      <div class="box"><b>edgar_search / edgar_company <span class="tag reuse">reused</span></b>Find the entity and list filings; the listing gains <code>period_of_report</code>.<span class="where">base.py format_filing_summary</span></div>
+    </div>
+  </div>
+  <div class="arrow">▼ every tool that selects a filing or returns long output goes through these</div>
+
+  <div class="tier">
+    <div class="tier-label">Shared MCP services</div>
+    <div class="boxes">
+      <div class="box new"><b>Filing resolver <span class="tag new">new</span></b>Turns accession/period/latest into exactly one filing, or an error listing the available periods.<span class="where">tools/selection.py</span></div>
+      <div class="box new"><b>Continuation <span class="tag new">new</span></b>Encodes and checks cursors, slices pages, holds a bounded LRU of extracted results and text.<span class="where">tools/continuation.py</span></div>
+      <div class="box chg"><b>Response helpers <span class="tag chg">changed</span></b>Small <code>format_source(filing)</code> helper for the provenance block (a convenience, not a contract).<span class="where">tools/base.py</span></div>
+    </div>
+  </div>
+  <div class="arrow">▼ Python library (extraction already exists)</div>
+
+  <div class="tier">
+    <div class="tier-label">Library<br><span class="mono">edgar/</span></div>
+    <div class="boxes">
+      <div class="box chg"><b>edgar.bdc investments <span class="tag chg">changed</span></b>New helper extracts holdings from <i>any</i> filing, with the facts-then-statement fallback.<span class="where">bdc/reference.py, bdc/investments.py</span></div>
+      <div class="box"><b>edgar.bdc nonaccrual <span class="tag reuse">reused</span></b><code>extract_nonaccrual(filing)</code>: footnote, custom and aggregate evidence plus warnings.<span class="where">bdc/nonaccrual.py</span></div>
+      <div class="box"><b>edgar.xbrl notes <span class="tag reuse">reused</span></b>Note objects, tables and context text.<span class="where">xbrl/notes.py</span></div>
+      <div class="box chg"><b>Filing attachments + grep <span class="tag chg">changed</span></b>Attachment identity and text; <code>GrepMatch</code> gains a character offset for locators.<span class="where">_filings.py, attachments.py, search/grep.py</span></div>
+      <div class="box"><b>Exhibit-reference parser <span class="tag reuse">deferred</span></b>Follow-up, not in Phases 1–2. Pulls hyperlinks to exhibits "incorporated by reference" from the exhibit index.<span class="where">attachments.py (or new module)</span></div>
+      <div class="box"><b>EFTS client <span class="tag reuse">reused</span></b>Full-text search; results already carry the matched file's type and ID.<span class="where">search/efts.py</span></div>
+    </div>
+  </div>
+  <div class="arrow">▼ HTTP with SEC throttle and on-disk cache (<code>httpclient.py</code>)</div>
+
+  <div class="tier">
+    <div class="tier-label">External</div>
+    <div class="boxes">
+      <div class="box"><b>SEC EDGAR</b>Archives (filings, exhibits, XBRL), submissions API, EFTS full-text search, BDC report list.</div>
+    </div>
+  </div>
+  <div class="legend"><span class="tag new">new</span> new module or tool · <span class="tag chg">changed</span> additive change to existing code · <span class="tag reuse">reused</span> used as-is</div>
+</div>
+
+<p>Every data path is <b>tool → resolver → library → SEC</b>, and the continuation service sits between the tool and the library for anything longer than one page. No tool compares periods, links filings together or reads meaning into clauses. That line in the spec maps onto these module boundaries.</p>
+</section>
+
+<section>
+<h2>Components</h2>
+<table>
+  <tr><th>Component</th><th>Purpose</th><th>Key interface / behavior (additive)</th></tr>
+  <tr><td><code>edgar_fund</code> · <code>bdc_portfolio</code></td><td>Borrower-level loan evidence from a chosen filing (F1–F3, F8)</td><td>
+    New params: <code>accession_number</code>, <code>form</code> (<code>10-K</code>|<code>10-Q</code>), <code>period</code>, <code>borrower</code>, <code>cursor</code>. <code>limit</code> stays the page size (default 20, max 50).<br>
+    Records add <code>identifier</code>, <code>company_name</code>, <code>investment_type</code>, <code>principal_amount</code>, <code>pik_rate</code>, <code>spread</code>, <code>shares</code>, <code>percent_of_net_assets</code>. Existing keys (<code>type</code>, <code>fair_value</code>, <code>cost</code>, <code>interest_rate</code>) are kept.<br>
+    <code>borrower</code> is a case-insensitive substring match over <code>company_name</code> <i>and</i> <code>identifier</code>.<br>
+    New blocks: <code>source</code> (cik, entity, form, accession, period_of_report, filed, url, is_amendment, selected_by); <code>page</code> (offset, returned, total_matching, total_extracted, remaining, next_cursor); <code>extraction</code> (method, include_untyped, field_coverage, <code>rate_convention: "decimal fraction"</code>, limitation note that extraction may miss holdings). <code>total_fair_value</code>/<code>total_cost</code> remain full-extraction totals; <code>filtered_totals</code> is added only when a filter is set.<br>
+    When structured data is unavailable, the response includes <code>structured_data_unavailable</code> with a reason and points to <code>edgar_notes</code>/<code>edgar_document</code>. The existing 4,000-char SOI preview becomes pageable.
+  </td></tr>
+  <tr><td><code>edgar_fund</code> · <code>bdc_nonaccrual</code> <span class="tag new">new action</span></td><td>Non-accrual evidence with its level and limits (F4)</td><td>
+    Same selection params, plus <code>cursor</code>. Returns <code>source</code>; <code>evidence_level</code> (<code>investment</code>|<code>aggregate</code>|<code>none</code>) derived from <code>extraction_method</code> and <code>has_investment_detail</code>; investments (identifier, company_name, type, fair_value, cost, footnote_text); <code>unique_footnote_texts</code>; <code>nonaccrual_fair_value</code>, <code>total_portfolio_fair_value</code>, <code>aggregate_concept_value</code>, <code>custom_concept_rate</code>; <code>warnings</code>; and a fixed <code>interpretation_limits</code> text: absence from the list does not mean a loan is performing, and non-accrual is not a legal default.
+  </td></tr>
+  <tr><td><code>edgar_notes</code></td><td>Notes from the chosen filing, with nothing cut off unannounced (F5)</td><td>New params: <code>accession_number</code>, <code>period</code>, <code>cursor</code>. With <code>detail="full"</code>, table rows page through continuation instead of <code>head(10)</code> (<code>notes.py:59</code>). Long note context pages by character budget. Adds a <code>source</code> block.</td></tr>
+  <tr><td><code>edgar_read</code></td><td>Filing sections from the chosen period, readable to the end (F5)</td><td>New params: <code>period</code>, <code>cursor</code> (per section). Replaces the one-shot <code>truncate_text(6000)</code> with a 6,000-char page plus <code>next_cursor</code>. The existing <code>raw_text_preview</code> fallback stays but is flagged <code>fallback_used: true</code>. Adds a <code>source</code> block.</td></tr>
+  <tr><td><code>edgar_document</code> <span class="tag new">new tool</span></td><td>Find, search and read one specific filed document or exhibit (F6, F7)</td><td>
+    Actions <code>list</code> | <code>search</code> | <code>read</code>. Input: <code>accession_number</code> or <code>url</code>; <code>url</code> must be an <code>sec.gov/Archives</code> path, and its filename selects the document. <code>document</code> is a sequence number, filename or exhibit type; an ambiguous type returns an error listing the candidates, never the first match.<br>
+    <b>list:</b> sequence, document, document_type, description (<code>display_description</code>), size, is_primary, readable, url. XBRL/R-file noise is hidden unless <code>include_all</code>. Includes a fixed <code>incorporated_by_reference_note</code>: agreements may be filed in earlier filings and referenced from the exhibit index; read the index section or use <code>edgar_text_search</code> to locate them.<br>
+    <b>search:</b> <code>Filing.grep</code> over one document or all of them; each match returns location, context and a locator (<code>document</code>, <code>char_offset</code>).<br>
+    <b>read:</b> 6,000-char pages of <code>attachment.markdown()</code> falling back to <code>text()</code>, with an <code>around</code> option to start a page at a locator. Unreadable content (binary, PDF, paper, empty) returns identity, url and <code>unreadable_reason</code>.<br>
+    Every response includes <code>filer</code> (cik, name) and the note that a document filed by a BDC is not necessarily a portfolio borrower's agreement.
+  </td></tr>
+  <tr><td><code>edgar_filing</code></td><td>Keeps the document named in a URL (F6, F7)</td><td>When <code>input</code> is a document URL, returns a <code>document_hint</code> (filename, matched sequence) and suggests <code>edgar_document read</code> as the next step. Adds <code>period_of_report</code> and <code>url</code>. Still reduces the input to an accession number for context, as it does today.</td></tr>
+  <tr><td><code>edgar_text_search</code></td><td>Say which document matched (F6)</td><td>Each hit adds <code>file_type</code>, <code>file_description</code> and <code>document_id</code>, with a next step pointing to <code>edgar_document</code>.</td></tr>
+  <tr><td>Filing resolver <span class="tag new">new</span></td><td>Exactly one filing, or a useful error (F1)</td><td>
+    <code>resolve_report_filing(identifier, form, accession_number, period) → (Filing, selected_by) | ToolResponse</code>.
+    An accession number takes precedence; if an identifier is also given, the CIK must match or the call fails with <code>SELECTION_MISMATCH</code>. A period must exactly match <code>period_of_report</code> on an original filing; zero matches returns <code>PERIOD_NOT_FOUND</code> with the nearest available periods <i>listed</i>, never chosen. With no selector, the latest original filing is used and <code>selected_by: "latest"</code>. <code>format_filing_summary</code> adds <code>period_of_report</code> so filing listings can be used for discovery.
+  </td></tr>
+  <tr><td>Continuation service <span class="tag new">new</span></td><td>Consistent pages at acceptable latency (F3, F5, F7)</td><td>
+    <code>encode_cursor</code>/<code>decode_cursor</code> (versioned base64url JSON with a size cap, never pickle). <code>paginate(items, offset, limit)</code> and <code>paginate_text(text, offset, budget)</code>, which breaks at paragraph boundaries. <code>ResultCache</code> is a bounded LRU keyed by <code>(kind, accession, document, extractor_version)</code>. On decode it checks that the cursor's tool and filter match the call and that the fingerprint matches, returning <code>CURSOR_STALE</code> or <code>CURSOR_MISMATCH</code> otherwise.
+  </td></tr>
+  <tr><td>BDC filing-scoped extraction <span class="tag chg">changed</span></td><td>Holdings from any filing, not just the latest (F1)</td><td>Move the facts-then-statement fallback in <code>BDCEntity.portfolio_investments</code> (<code>reference.py:178–234</code>) into <code>portfolio_investments_from_filing(filing, include_untyped)</code>. Add an optional <code>filing=</code> argument to <code>BDCEntity.portfolio_investments</code> and <code>schedule_of_investments</code>. Python users benefit too.</td></tr>
+  <tr><td>Grep locator <span class="tag chg">changed</span></td><td>A precise place to read around a match (F7)</td><td><code>GrepMatch</code> gains <code>char_offset</code> (additive, default <code>None</code>) and <code>_grep_text</code> fills it in.</td></tr>
+  <tr><td>Exhibit-reference parser <span class="tag reuse">deferred</span></td><td>Keep references to agreements filed in earlier filings (F6)</td><td><b>Follow-up, out of Phases 1–2.</b> F6 is met in v1 by the note in <code>edgar_document list</code> plus exhibit-index reading and full-text search. Planned behavior: Reads hyperlinks in the primary document's exhibit index that point to <code>/Archives/edgar/data/</code> under a different accession number. Hyperlinks have been required for such exhibits since the SEC's 2017 exhibit-hyperlink rule; older filings may have none, and the response then says so.</td></tr>
+  <tr><td>Discoverability assets</td><td>Agents find the workflow on their own (F9)</td><td><code>SERVER_INSTRUCTIONS</code>: tool count goes to 14, plus a "Credit evidence" workflow. Tool descriptions with credit examples. <code>edgar/ai/skills/funds/skill.yaml</code> BDC entries. <code>docs/ai/mcp-tools.md</code>. Optionally a <code>credit_evidence</code> prompt in <code>prompts.py</code>.</td></tr>
+</table>
+</section>
+
+<section>
+<h2>Data flow</h2>
+<h3>Flow A: two-period borrower research (F1–F4, F8)</h3>
+<ol class="flow">
+  <li><b>edgar_fund bdc_search</b> finds the BDC and returns name, CIK and ticker.</li>
+  <li><b>edgar_search</b> or <b>edgar_company</b> lists the BDC's 10-K/10-Q filings with <code>period_of_report</code> (via the extended <code>format_filing_summary</code>).</li>
+  <li><b>edgar_fund bdc_portfolio</b> (<code>period="2026-06-30"</code>, <code>borrower="ivy hill"</code>) calls the <b>filing resolver</b>, which returns exactly one filing, or <code>PERIOD_NOT_FOUND</code> with the available periods listed.</li>
+  <li>The <b>continuation service</b> checks <code>ResultCache</code>. On a miss, <b>BDC filing-scoped extraction</b> parses the XBRL (about 11 s for ARCC) and the result is cached with its fingerprint.</li>
+  <li>The tool filters on <code>company_name</code> and <code>identifier</code>, slices one page and returns records, <code>source</code>, <code>page</code> and <code>extraction</code> (coverage, rate convention). Totals for the full portfolio and for the filtered subset are kept separate.</li>
+  <li>The caller follows <code>next_cursor</code>. The cursor is decoded and checked against the fingerprint, and the next page is served from cache.</li>
+  <li>The caller repeats steps 3–6 with a second <code>period</code>. <b>The comparison itself happens in the caller.</b> The MCP never asserts that two records are the same loan.</li>
+  <li><b>edgar_fund bdc_nonaccrual</b> (same period) calls the resolver, then <code>extract_nonaccrual(filing)</code>, and returns <code>evidence_level</code>, the investments with footnote text, warnings and <code>interpretation_limits</code>.</li>
+</ol>
+<h3>Flow B: recovery-document research (F6, F7, F8)</h3>
+<ol class="flow">
+  <li><b>edgar_text_search</b> (<code>query="guaranty" "collateral agreement"</code>, <code>identifier=…</code>) returns filings with the matching <code>document_id</code> and <code>file_type</code> (such as <code>EX-10.1</code>).</li>
+  <li><b>edgar_document list</b> (accession number) returns documents and exhibits, with a note that agreements may be incorporated from earlier filings. The caller can read the exhibit index section or use <b>edgar_text_search</b> to find the original filing.</li>
+  <li><b>edgar_document search</b> (<code>document="EX-10.1"</code>, <code>query="guarant"</code>) runs <code>Filing.grep</code> on that document only and returns matches with <code>char_offset</code> locators.</li>
+  <li><b>edgar_document read</b> (<code>around=&lt;locator&gt;</code>) returns a 6,000-char page centered on the provision, with <code>next_cursor</code>. The text is cached by accession number and document.</li>
+  <li>If an <code>external_reference</code> points to another accession number, the caller repeats steps 2–4 on that filing. The MCP doesn't claim to have rebuilt the full amendment history.</li>
+  <li>If the document is a PDF or image, <b>read</b> returns identity, url and <code>unreadable_reason</code>. It never returns an empty string that looks like "no protections".</li>
+</ol>
+</section>
+
+<section>
+<h2>Integration points</h2>
+<table>
+  <tr><th>System / API</th><th>Direction</th><th>Description</th></tr>
+  <tr><td>MCP clients (stdio, streamable-http)</td><td>Both</td><td>Agents call tools and receive JSON <code>ToolResponse</code> envelopes. Cursors go out in one response and come back in the next call.</td></tr>
+  <tr><td>SEC EDGAR Archives</td><td>In</td><td>Filing SGML, primary documents, exhibits and XBRL instances for extraction and reading.</td></tr>
+  <tr><td>SEC submissions API</td><td>In</td><td>Filing lists with <code>period_of_report</code>, used by the resolver for exact period matching.</td></tr>
+  <tr><td>SEC EFTS full-text search</td><td>In</td><td>Finds filings and specific exhibits that mention agreement terms.</td></tr>
+  <tr><td>SEC BDC report list</td><td>In</td><td>BDC identity, via <code>get_bdc_list()</code>, for <code>bdc_search</code> and identifier resolution.</td></tr>
+  <tr><td>SEC DERA BDC data sets</td><td>In (deferred)</td><td>A possible source of maturity and lien category (<code>datasets.py:73–101</code>). Deferred to a follow-up; not wired in Phases 1–2.</td></tr>
+  <tr><td>Local HTTP disk cache</td><td>Both</td><td>Existing <code>httpclient.py</code> cache cuts repeat SEC downloads. The new in-process cache sits above it and holds parsed results.</td></tr>
+</table>
+</section>
+
+<section>
+<h2>Dependencies</h2>
+<table>
+  <tr><th>Direction</th><th>Dependency</th><th>Note</th></tr>
+  <tr><td>Upstream</td><td><code>edgar.bdc</code> (investments, nonaccrual, reference)</td><td>Extraction quality sets the ceiling on evidence quality; the MCP reports it rather than fixing it.</td></tr>
+  <tr><td>Upstream</td><td><code>edgar.xbrl</code> (XBRL, notes)</td><td>XBRL parse cost is the main contributor to first-page latency.</td></tr>
+  <tr><td>Upstream</td><td><code>edgar._filings</code>, <code>edgar.attachments</code>, <code>edgar.search.grep</code>, <code>edgar.search.efts</code></td><td>Attachment identity and text, grep and full-text search.</td></tr>
+  <tr><td>Upstream</td><td><code>mcp</code> SDK, SEC throttle / identity (<code>EDGAR_IDENTITY</code>)</td><td>Unchanged.</td></tr>
+  <tr><td>Downstream</td><td>MCP clients and agents</td><td>Get new keys and parameters; no existing key is removed.</td></tr>
+  <tr><td>Downstream</td><td><code>prompts.py</code> (<code>fund_analysis</code>), <code>skills/funds/skill.yaml</code>, <code>docs/ai/mcp-tools.md</code></td><td>Must be updated for F9, and every documented example must be runnable (Verification Constitution).</td></tr>
+  <tr><td>Downstream</td><td><code>tests/test_mcp_intent_tools.py</code>, <code>tests/test_mcp_server.py</code>, <code>tests/cassettes/</code></td><td>Registry and schema tests; tool-count assertions; new VCR-backed checks against ground truth.</td></tr>
+</table>
+</section>
+
+<section>
+<h2>Non-functional requirements</h2>
+<table>
+  <tr><th>Area</th><th>Target (observable)</th></tr>
+  <tr><td>Correctness: selection</td><td>100% of period or accession requests return that exact filing or an error (verified by resolver tests covering exact, missing, mismatched-CIK and amendment cases).</td></tr>
+  <tr><td>Correctness: paging</td><td>Walking every page for ARCC <code>0001628280-26-050307</code> yields exactly 1,481 distinct records with no duplicates, whether the cache hits or misses. A fingerprint mismatch always returns <code>CURSOR_STALE</code>.</td></tr>
+  <tr><td>Ground truth</td><td>Assertions on specific values from the filing above: holding count 1,481, period 2026-06-30, 32 non-accrual investments via <code>footnote</code>, plus one hand-checked holding's fair value and rate. Also one non-ARCC BDC from a different manager.</td></tr>
+  <tr><td>Page size</td><td>Text pages ≤ 6,000 characters. Holdings pages default 20 and max 50 records, about 8k and 20k characters at the measured ~400 chars per record.</td></tr>
+  <tr><td>Latency</td><td>First page is bounded by extraction (about 11 s for a 1,500-holding BDC today). Pages served from cache: <span class="tbd">[TBD target, proposed &lt; 300 ms]</span>.</td></tr>
+  <tr><td>Memory</td><td>In-process cache bounded by entries and bytes: <span class="tbd">[TBD: proposed ≤ 8 extracted portfolios and ≤ 32 MB of document text]</span>, least recently used evicted first.</td></tr>
+  <tr><td>SEC load</td><td>Continuation served from cache makes zero SEC requests. All fetches go through the existing throttle.</td></tr>
+  <tr><td>Compatibility</td><td>Existing MCP tests pass unchanged except the tool-count and registry assertions. No existing response key is removed or renamed.</td></tr>
+  <tr><td>Security</td><td>Cursors are untrusted input: size cap, version check, JSON only. <code>edgar_document url</code> accepts only <code>https://www.sec.gov/Archives/</code> paths, to prevent requests to arbitrary hosts (SSRF).</td></tr>
+  <tr><td>Honest gaps</td><td>Every holdings, non-accrual and document response names its selection method, source, coverage or limitation. Silence checks verify that a bad period, ambiguous exhibit type, unreadable document and stale cursor each return an error code with suggestions.</td></tr>
+</table>
+</section>
+
+<section>
+<h2>Risks and mitigations</h2>
+<table>
+  <tr><th>Severity</th><th>Risk</th><th>Mitigation / open question</th></tr>
+  <tr><td class="sev-h">High</td><td><b>Borrower names are sometimes parsed wrongly.</b> Measured: <code>'Subordinated'</code> as <code>company_name</code> for an Ivy Hill facility. A name-only filter misses it.</td><td>Filter on <code>identifier</code> as well as <code>company_name</code>; always return <code>identifier</code> as the source label. The parsing defect is a separate follow-up issue with the Ivy Hill case as its regression test; this work doesn't change the extractor.</td></tr>
+  <tr><td class="sev-h">High</td><td><b>Weaker value for recovery research.</b> Agreements in BDC filings are mostly the BDC's <i>own</i> credit facilities. A private borrower's agreements are public only if that borrower files with the SEC.</td><td>Every <code>edgar_document</code> response names the filer; descriptions and docs say this plainly (spec interpretation limits). Stakeholders should set expectations: <span class="tbd">[TBD: confirm this is acceptable to the business owner]</span>.</td></tr>
+  <tr><td class="sev-m">Medium</td><td><b>Event loop blocked in HTTP mode.</b> About 11 s of synchronous extraction inside an <code>async</code> handler stalls other clients under <code>streamable-http</code>. Existing tools already do this.</td><td>Decided: not in Phases 1–2. Cache hits avoid the cost; moving extraction off the event loop is a later change covering all tools.</td></tr>
+  <tr><td class="sev-m">Medium</td><td><b>Routing confusion</b> between <code>edgar_read</code> (sections) and <code>edgar_document</code> (specific files).</td><td>Descriptions refer to each other ("for a specific exhibit use edgar_document"). <code>edgar_filing</code> and <code>edgar_text_search</code> next steps point to the right one. Add an agent solvability check to the verification suite.</td></tr>
+  <tr><td class="sev-m">Medium</td><td><b>Provenance fields drift between tools</b>, because a shared envelope contract was dropped at framing.</td><td>A shared <code>format_source(filing)</code> formatter keeps field names aligned without making it a contract. Review checklist item.</td></tr>
+  <tr><td class="sev-m">Medium</td><td><b>Agreements incorporated by reference are not listed</b> as attachments, because the exhibit-reference parser is deferred. An agent may conclude no agreement exists.</td><td><code>edgar_document list</code> always carries the incorporated-by-reference note, and the tool description names the exhibit-index and full-text-search route. Revisit the parser if solvability checks show agents missing agreements.</td></tr>
+  <tr><td class="sev-m">Medium</td><td><b>Low coverage misread as absence</b> (PIK coverage 13% at ARCC).</td><td><code>field_coverage</code> on every holdings page; null never becomes 0 in serialization (existing <code>_cell_number</code> behavior).</td></tr>
+  <tr><td class="sev-l">Low</td><td><b>Cache memory growth</b> in long sessions.</td><td>Bounded LRU by count and bytes; misses only cost latency, never correctness.</td></tr>
+  <tr><td class="sev-l">Low</td><td><b>Period semantics:</b> <code>period_of_report</code> can differ from the XBRL instant date for 52/53-week filers.</td><td>Exact match on <code>period_of_report</code>; the error lists available periods; <code>source</code> reports both.</td></tr>
+  <tr><td class="sev-l">Low</td><td><b>Fingerprint mismatch</b> after a library upgrade mid-walk.</td><td>By design this returns <code>CURSOR_STALE</code> with "restart from the first page".</td></tr>
+</table>
+</section>
+
+<section>
+<h2>Open technical questions</h2>
+<ol>
+  <li><span class="tbd">[TBD]</span> Cache bounds: are ≤ 8 portfolios and ≤ 32 MB text the right defaults, and should they be configurable by environment variable?</li>
+  <li><span class="tbd">[TBD]</span> Latency target for cached pages. Proposed &lt; 300 ms.</li>
+  <li><span class="tbd">[TBD]</span> Should <code>bdc_portfolio</code> expose <code>include_untyped</code> (company-level rollup rows), and how many rows does the default exclude?</li>
+  <li><span class="tbd">[TBD]</span> Tool name: is <code>edgar_document</code> acceptable, and is going from 13 to 14 tools acceptable for the published tool list?</li>
+  <li><span class="tbd">[TBD]</span> Which second BDC (different manager, different XBRL style) is the second ground-truth filing? Candidate: a BDC that needs the statement-based fallback.</li>
+  <li><span class="tbd">[TBD]</span> Reviewers and sign-off owner for this design.</li>
+</ol>
+</section>
+
+</main>
+</body>
+</html>
