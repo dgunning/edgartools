@@ -2,6 +2,7 @@
 Document builder that converts parsed HTML tree into document nodes.
 """
 
+import re
 from typing import Any, Dict, Optional
 
 from lxml.html import HtmlElement
@@ -23,6 +24,10 @@ from edgar.documents.nodes import (
 from edgar.documents.strategies.style_parser import StyleParser
 from edgar.documents.table_nodes import Cell, Row, TableNode
 from edgar.documents.types import ParseContext, SemanticType, Style
+
+# HTML's "ASCII whitespace". Deliberately excludes \xa0: a non-breaking space is content.
+_ASCII_WHITESPACE_RUN = re.compile(r'[ \t\n\r\f]+')
+_PRE_WHITE_SPACE = re.compile(r'white-space\s*:\s*(pre|break-spaces)', re.IGNORECASE)
 
 
 class DocumentBuilder:
@@ -104,7 +109,17 @@ class DocumentBuilder:
         return root
 
     @staticmethod
-    def _collapse_edges(text: str) -> str:
+    def _is_preformatted(element: Optional[HtmlElement]) -> bool:
+        """True when element sits in a <pre> or a white-space: pre* box, where newlines are content."""
+        while element is not None:
+            tag = element.tag
+            if isinstance(tag, str):
+                if tag.lower() == 'pre' or _PRE_WHITE_SPACE.search(element.get('style') or ''):
+                    return True
+            element = element.getparent()
+        return False
+
+    def _collapse_edges(self, text: str, context: Optional[HtmlElement] = None) -> str:
         """Collapse a text node's edge whitespace to a single space instead of deleting it.
 
         lxml puts the whitespace that separates a word from an adjacent inline element on
@@ -112,10 +127,16 @@ class DocumentBuilder:
         ('per <font>$1,000</font>' -> 'per$1,000') and nothing downstream can tell that
         apart from a genuine mid-word split. Same rule the preprocessor follows: collapse,
         never delete. Whitespace-only nodes still return '' — those carry no word.
+
+        Runs of whitespace inside the node collapse to one space too, as a browser renders
+        them: older filings hard-wrap <P> text at ~150 columns (gh-1370). `context` is the
+        element whose content the text is; inside <pre> the inner whitespace is kept.
         """
         stripped = text.strip()
         if not stripped:
             return ''
+        if not self._is_preformatted(context):
+            stripped = _ASCII_WHITESPACE_RUN.sub(' ', stripped)
         return (' ' if text[:1].isspace() else '') + stripped + (' ' if text[-1:].isspace() else '')
 
     def _process_element(self, element: HtmlElement, parent: Node) -> Optional[Node]:
@@ -139,7 +160,7 @@ class DocumentBuilder:
                     parent.add_child(text_node)
                 else:
                     if element.tail.strip():
-                        text_node = TextNode(content=self._collapse_edges(element.tail))
+                        text_node = TextNode(content=self._collapse_edges(element.tail, element.getparent()))
                         parent.add_child(text_node)
             return None
 
@@ -187,7 +208,7 @@ class DocumentBuilder:
                                 node.add_child(text_node)
                         else:
                             if element.text.strip():
-                                text_node = TextNode(content=self._collapse_edges(element.text))
+                                text_node = TextNode(content=self._collapse_edges(element.text, element))
                                 node.add_child(text_node)
 
                     # Process child elements
@@ -201,7 +222,7 @@ class DocumentBuilder:
                             parent.add_child(text_node)
                         else:
                             if element.tail.strip():
-                                text_node = TextNode(content=self._collapse_edges(element.tail))
+                                text_node = TextNode(content=self._collapse_edges(element.tail, element.getparent()))
                                 parent.add_child(text_node)
                             elif element.tail.isspace():
                                 # Even if tail is just whitespace, preserve the spacing info
@@ -216,7 +237,7 @@ class DocumentBuilder:
                             parent.add_child(text_node)
                         else:
                             if element.tail.strip():
-                                text_node = TextNode(content=self._collapse_edges(element.tail))
+                                text_node = TextNode(content=self._collapse_edges(element.tail, element.getparent()))
                                 parent.add_child(text_node)
                             elif element.tail.isspace():
                                 # Even if tail is just whitespace, preserve the spacing info
@@ -234,7 +255,7 @@ class DocumentBuilder:
                         parent.add_child(text_node)
                     else:
                         if element.tail.strip():
-                            text_node = TextNode(content=self._collapse_edges(element.tail))
+                            text_node = TextNode(content=self._collapse_edges(element.tail, element.getparent()))
                             parent.add_child(text_node)
 
             # Exit XBRL context
@@ -591,6 +612,7 @@ class DocumentBuilder:
         """Get text content from element."""
         inline = element.tag.lower() in self.INLINE_ELEMENTS
         text_parts = []
+        block_breaks: set = set()  # indexes of parts that separate block children
 
         # Get element's direct text
         if element.text:
@@ -619,9 +641,20 @@ class DocumentBuilder:
                 # their trailing text is still part of the document. (gh-898)
                 if child.tail:
                     if inline:
+                        if child.tail.isspace() and child.tag.lower() not in self.INLINE_ELEMENTS:
+                            # The line break between two block children of an inline
+                            # element (<font><p>..</p>\n<p>..</p></font>) is the only
+                            # thing separating their paragraphs; it is not a run to
+                            # collapse (Merck's 2005 CORRESP letter lost all 67 lines).
+                            block_breaks.add(len(text_parts))
                         text_parts.append(child.tail)
                     elif child.tail.strip():
                         text_parts.append(child.tail.strip())
+
+        # Collapse inner whitespace runs as a browser does; edges keep one space (gh-1370)
+        if not self.config.preserve_whitespace and not self._is_preformatted(element):
+            text_parts = [part if i in block_breaks else _ASCII_WHITESPACE_RUN.sub(' ', part)
+                          for i, part in enumerate(text_parts)]
 
         # A single preserved inline part is returned as-is; otherwise space-join
         # so word boundaries survive (the preprocessor strips whitespace adjacent

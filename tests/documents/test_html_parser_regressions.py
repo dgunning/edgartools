@@ -156,6 +156,68 @@ class TestTextNodeEdgeWordGluing:
         assert 'RegulationS-T(the rule)' in text
 
 
+class TestHardWrappedTextNode:
+    """gh-1370: whitespace runs INSIDE a text node collapse to one space.
+
+    Older EDGAR HTML is hard-wrapped at ~150 columns inside <P>. Google's FY2004
+    10-K (0001193125-05-065298) yielded ~500 mid-sentence newlines in Item 7.
+    """
+
+    def test_newline_inside_a_paragraph_collapses(self):
+        html = ('<html><body><p>Our stock has been quoted since August 19,\n2004. '
+                'Prior to that time there was no market.</p></body></html>')
+        text = parse_html(html, ParserConfig(detect_sections=False)).text()
+        assert text.strip() == ('Our stock has been quoted since August 19, 2004. '
+                                'Prior to that time there was no market.')
+
+    def test_newline_inside_an_inline_font_collapses(self):
+        html = ('<html><body><p><font>net revenues\n   increased by 118%</font> '
+                'in 2004.</p></body></html>')
+        text = parse_html(html).text()
+        assert 'net revenues increased by 118% in 2004.' in text
+
+    def test_br_is_still_a_line_break(self):
+        html = '<html><body><p>Mountain View,<br>California</p></body></html>'
+        text = parse_html(html).text()
+        assert 'Mountain View,\nCalifornia' in text
+
+    def test_pre_keeps_its_newlines(self):
+        html = '<html><body><pre>Line one\nLine two</pre></body></html>'
+        text = parse_html(html).text()
+        assert 'Line one\nLine two' in text
+
+    def test_wrapped_plain_text_document_keeps_its_lines(self):
+        """Filing.html() wraps a .txt primary document in <html><body><div>.
+
+        Its lines are its structure: GMAC's 2005 8-K (0000040729-05-000026) puts
+        "Item  8.01  Other Events" on its own line, and collapsing it into the
+        paragraph above lost the item.
+        """
+        html = ('<html><body><div>registered public accounting firm, Deloitte & Touche LLP.\n\n'
+                'Item  8.01  Other Events\n\nIn order to analyze</div></body></html>')
+        text = parse_html(html).text()
+        assert '\nItem 8.01 Other Events\n' in text  # the preprocessor squeezes spaces, as on main
+
+    def test_raw_plain_text_keeps_its_lines(self):
+        """A raw .txt document handed straight to the parser (Filing.parsed_items)."""
+        text = parse_html('ITEM 7. Financial Statements and Exhibits\n\n'
+                          'ITEM 8. Not applicable.').text()
+        assert 'Exhibits\n' in text and '\nITEM 8. Not applicable.' in text
+
+    def test_paragraphs_inside_an_inline_wrapper_stay_separate(self):
+        """<font> around block <p>s: the break between them is not a run to collapse.
+
+        Merck's 2005 CORRESP letter (0000065873-05-000060) wraps every paragraph
+        in one <font SIZE="2">, and collapsing joined all 67 lines into one.
+        """
+        html = ('<html><body><font SIZE="2"><p>ALLTEL CORPORATION</p>\n'
+                '<p>One Allied Drive, Little Rock,\nArkansas 72202</p>\n'
+                '<p>June 22, 2005</p></font></body></html>')
+        lines = [line.strip() for line in parse_html(html).text().splitlines() if line.strip()]
+        assert lines == ['ALLTEL CORPORATION', 'One Allied Drive, Little Rock, Arkansas 72202',
+                         'June 22, 2005']
+
+
 class TestSpacerElementWordGluing:
     """A third copy of the same bug: whitespace-only spacer elements.
 
