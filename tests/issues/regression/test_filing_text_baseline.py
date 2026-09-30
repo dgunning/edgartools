@@ -168,6 +168,46 @@ def sha256(text):
 # already ("nothing was repaired in the text itself"). The invariant is a
 # property of an individual re-capture, not of this file.
 
+# Re-captured against b022ad29ac3965248c473b5790cf8e124887eac6: gh-1370: whitespace runs inside a text node collapse to one space as a browser renders them, so hard-wrapped paragraph text rejoins. Block-level breaks inside inline wrappers and plain-text documents keep their lines.
+# 4 of 5 filings moved; 1 byte-identical.
+#   0001193125-20-052640: 5782 -> 3795 lines, ~2142 changed
+#       -(Exact
+#       -Name of Registrant as Specified in Its Charter)
+#       +(Exact Name of Registrant as Specified in Its Charter)
+#       -Indicate by check mark if the registrant is a well-known seasoned issuer, as defined in Rule 405 of the Securities
+#       -Act. Yes ☐ No ☒
+#       -
+#       -Indicate by check mark if the registrant is not required to
+#       -file reports pursuant to Section 13 or Section 15(d) of the Act. Yes ☐ No ☒
+#   0000065873-05-000060: 68 -> 42 lines, ~21 changed
+#       -One Allied Drive, Little Rock,
+#       -Arkansas 72202
+#       +One Allied Drive, Little Rock, Arkansas 72202
+#       -Re: ALLTEL
+#       -Corporation
+#       +Re: ALLTEL Corporation
+#       -The undersigned respectively requests
+#       -that the effective date of the above-referenced Registration Statement be
+#   0000950137-05-004969: 71 -> 62 lines, ~8 changed
+#       -Check the appropriate box below if the Form 8-K filing is intended to simultaneously satisfy the
+#       -filing obligation of the registrant under any of the following provisions:
+#       +Check the appropriate box below if the Form 8-K filing is intended to simultaneously satisfy the filing obligation of the registrant under any of the
+#       -Item 5.02. Departure of Directors or Principal Officers; Election of Directors; Appointment of
+#       -Principal Officers.
+#       +Item 5.02. Departure of Directors or Principal Officers; Election of Directors; Appointment of Principal Officers.
+#       -On April 26, 2005, the board of directors of Exelon Corporation elected Thomas J. Ridge to serve as
+#       -a Class I director, effective May 2, 2005. Mr. Ridge, age 59, served as Secretary of the United
+#   0001481057-23-010389: 1482 -> 696 lines, ~533 changed
+#       -The initial estimated value of the Notes as of the
+#       -
+#       -pricing date is expected to be between $907.80 and $957.80 per $1,000 in principal amount of Notes, which is less than the public offering
+#       -
+#       -price listed below. The actual value of your Notes at any time will reflect many factors and cannot be predicted with accuracy. See
+#       -
+#       -“Risk Factors” beginning on page PS-8 of this pricing supplement and “Structuring the Notes” on page PS-16 of
+#       -
+# Verified mechanically: every changed line differs by whitespace only.
+
 BASELINE = {
     # Modern iXBRL 10-K
     "0000320193-23-000106": (
@@ -211,13 +251,13 @@ BASELINE = {
         # Re-captured for edgartools-wzgu (short columns kept): a numbered list laid
         # out as a table regains its "1." .. "9." markers and seven rule lines
         # resize; no token is lost -- 3,803 numbers become 3,812, the old in order.
-        "4174954dcdec09bd337c289a74d72cbeeff222d7897f2a80d4a90e8fa27142df",
+        "857b48fd9e2cd67cd65a66aa01debab8a23600a10174782b98432b0890a86c6f",
     ),
     # CORRESP — the shape where the two paths already agreed before the fix
     "0000065873-05-000060": (
         dict(form="CORRESP", filing_date="2005-11-03", company="MERCK & CO INC",
              cik=65873, accession_no="0000065873-05-000060"),
-        "733944a9b6e911a63321cd3d37c3a1408ad3ac215e9a93e4ed04f549e5c42b6e",
+        "c195843d15e1aef88638c220a0f5714553e0cd2361252615ff137932a4efecbf",
     ),
     # 2005-era HTML 8-K
     "0000950137-05-004969": (
@@ -231,13 +271,13 @@ BASELINE = {
         # unchanged at 2,629 characters and
         # "".join(before.split()) == "".join(after.split()) holds, so nothing but
         # whitespace moved. This is the only filing of the five that changed.
-        "37211411d05d2120eece22347d8c7cbfde46680d516751fbcce17f060dcb7b5e",
+        "d97e03eeb34ae623257b4d6f63ccffb96ef7168edb2895b127ee5d80412d979b",
     ),
     # 424B2 structured note
     "0001481057-23-010389": (
         dict(form="424B2", filing_date="2023-12-13", company="BANK OF AMERICA CORP /DE/",
              cik=70858, accession_no="0001481057-23-010389"),
-        "32a49882a47542bf4e0d03af0dd389571a83c2d42452825b7cb138dedcb4b1c2",
+        "4ebe4fd0ceab8a79412156bd691542d1b13959897d8f028d3e2b4de481426ace",
     ),
 }
 

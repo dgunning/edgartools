@@ -3,6 +3,7 @@ Main HTML parser implementation.
 """
 
 import logging
+import re
 import time
 from typing import List, Optional, Union
 
@@ -10,6 +11,7 @@ import lxml.html
 from lxml import etree
 from lxml.html import HtmlElement
 
+from edgar.core import is_probably_html
 from edgar.documents.config import ParserConfig
 from edgar.documents.document import Document, DocumentMetadata
 from edgar.documents.exceptions import DocumentTooLargeError, HTMLParsingError, InvalidConfigurationError
@@ -26,6 +28,14 @@ from edgar.documents.utils.html_utils import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Filing.html() wraps a plain-text primary document in exactly this. Its line
+# breaks are the document's structure ("Item  8.01  Other Events" on its own
+# line), so it is parsed as preformatted text rather than collapsed as a browser
+# collapses HTML whitespace (gh-1370).
+_PLAIN_TEXT_WRAPPER = '<html><body><div>'
+_PREFORMATTED_WRAPPER = '<html><body><div style="white-space: pre-wrap">'
+_COMMENT = re.compile(r'<!--.*?-->', re.DOTALL)
 
 
 class HTMLParser:
@@ -132,6 +142,14 @@ class HTMLParser:
         try:
             # Store original HTML BEFORE preprocessing (needed for TOC analysis)
             original_html = html
+
+            if html.startswith(_PLAIN_TEXT_WRAPPER):
+                html = _PREFORMATTED_WRAPPER + html[len(_PLAIN_TEXT_WRAPPER):]
+            elif not is_probably_html(html) and _COMMENT.sub('', html).strip():
+                # A raw .txt primary document handed straight to the parser
+                # (Filing.parsed_items on a 1999 8-K) is plain text too. Input with
+                # nothing but comments is not a document; it still fails to parse.
+                html = f"{_PREFORMATTED_WRAPPER}{html}</div></body></html>"
 
             # Preprocessing (will remove ix:hidden for rendering)
             html = self.preprocessor.process(html)

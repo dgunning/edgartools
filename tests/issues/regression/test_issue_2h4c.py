@@ -113,6 +113,12 @@ def test_resolve_abbreviation_expands_defined_tag():
     assert _resolve_abbreviation("BofAS", text) == "BofA Securities, Inc."
     # Already a full name (not a defined tag) — unchanged.
     assert _resolve_abbreviation("Barclays Capital Inc.", text) == "Barclays Capital Inc."
+    # The capture must not open on the end of the previous sentence (gh-1370 joined
+    # "per Note.\nBofA ..." onto one line), but a name's own periods stay.
+    joined = 'The underwriting discount is $0.10 per Note. BofA Securities, Inc. (“BofAS”), an affiliate.'
+    assert _resolve_abbreviation("BofAS", joined) == "BofA Securities, Inc."
+    jpm = 'Agent: J.P. Morgan Securities LLC (“JPMS”), an affiliate.'
+    assert _resolve_abbreviation("JPMS", jpm) == "J.P. Morgan Securities LLC"
 
 
 class TestCoverAgentExtraction:

@@ -612,6 +612,7 @@ class DocumentBuilder:
         """Get text content from element."""
         inline = element.tag.lower() in self.INLINE_ELEMENTS
         text_parts = []
+        block_breaks: set = set()  # indexes of parts that separate block children
 
         # Get element's direct text
         if element.text:
@@ -640,21 +641,27 @@ class DocumentBuilder:
                 # their trailing text is still part of the document. (gh-898)
                 if child.tail:
                     if inline:
+                        if child.tail.isspace() and child.tag.lower() not in self.INLINE_ELEMENTS:
+                            # The line break between two block children of an inline
+                            # element (<font><p>..</p>\n<p>..</p></font>) is the only
+                            # thing separating their paragraphs; it is not a run to
+                            # collapse (Merck's 2005 CORRESP letter lost all 67 lines).
+                            block_breaks.add(len(text_parts))
                         text_parts.append(child.tail)
                     elif child.tail.strip():
                         text_parts.append(child.tail.strip())
+
+        # Collapse inner whitespace runs as a browser does; edges keep one space (gh-1370)
+        if not self.config.preserve_whitespace and not self._is_preformatted(element):
+            text_parts = [part if i in block_breaks else _ASCII_WHITESPACE_RUN.sub(' ', part)
+                          for i, part in enumerate(text_parts)]
 
         # A single preserved inline part is returned as-is; otherwise space-join
         # so word boundaries survive (the preprocessor strips whitespace adjacent
         # to tags, and this re-separates the parts).
         if inline and len(text_parts) == 1:
-            text = text_parts[0]
-        else:
-            text = ' '.join(text_parts)
-        # Collapse inner whitespace runs as a browser does; edges keep one space (gh-1370)
-        if not self.config.preserve_whitespace and not self._is_preformatted(element):
-            text = _ASCII_WHITESPACE_RUN.sub(' ', text)
-        return text
+            return text_parts[0]
+        return ' '.join(text_parts)
 
     def _is_inline_run_container(self, element: HtmlElement) -> bool:
         """Check that every child is a genuine inline run and no block sits below.

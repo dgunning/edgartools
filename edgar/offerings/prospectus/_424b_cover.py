@@ -244,6 +244,7 @@ _SELLING_AGENT_RE = re.compile(
 # Defined-abbreviation pattern: '<Full Name> ("ABBR")'.
 _ABBREV_DEF_RE = re.compile(
     r"([A-Z][A-Za-z0-9 ,.&'-]{3,45}?)\s*\(\s*[\"“]([A-Za-z&.']{2,10})[\"”]\s*\)")
+_SENTENCE_TAIL_RE = re.compile(r"[A-Z][a-z]+\.\s+(?=[A-Z])")
 
 
 def _resolve_abbreviation(name: str, text: str) -> str:
@@ -255,7 +256,14 @@ def _resolve_abbreviation(name: str, text: str) -> str:
     """
     for m in _ABBREV_DEF_RE.finditer(text):
         if m.group(2).strip() == name:
-            return m.group(1).strip()
+            full = m.group(1).strip()
+            # The capture starts at the leftmost capital, so it can open on the
+            # end of the previous sentence: "... per Note. BofA Securities, Inc."
+            # A single capitalised word and a full stop is that sentence's end;
+            # "J.P. Morgan" and "Goldman Sachs & Co. LLC" do not open that way.
+            while (lead := _SENTENCE_TAIL_RE.match(full)) is not None:
+                full = full[lead.end():]
+            return full
     return name
 
 

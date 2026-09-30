@@ -143,7 +143,7 @@ def test_both_era_sections_are_detected(doc_1999):
     # header cells sat in a column with one substantial entry per several rows,
     # which the scorer read as spacing. ZERO tokens are lost and the number
     # sequence is untouched -- the 547 added characters are those headers.
-    assert len(sections["part_iii_item_14"].text()) == 16610
+    assert len(sections["part_iii_item_14"].text()) == 16609  # -1: a whitespace run inside a text node collapses (gh-1370)
     assert sections["part_iii_item_14"].text().startswith("Item 14: Exhibits")
 
     # The neighbours are unchanged — this adds sections, it does not re-cut the
@@ -190,8 +190,8 @@ def test_the_lookups_resolve_without_the_legacy_parser():
     assert len(report["Item 4"]) == 177
     assert len(report["4"]) == 177  # the short spelling resolves too
     # Re-pinned for edgartools-y0ri; see the note in the test above.
-    assert len(report["Item 14"]) == 16610
-    assert len(report["14"]) == 16610
+    assert len(report["Item 14"]) == 16609  # -1: a whitespace run inside a text node collapses (gh-1370)
+    assert len(report["14"]) == 16609  # -1: a whitespace run inside a text node collapses (gh-1370)
 
     items = report.items
     assert "Item 4" in items
