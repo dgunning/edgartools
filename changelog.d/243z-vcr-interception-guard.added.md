@@ -1,0 +1,1 @@
+**A guard that fails when cassette replay stops reaching edgartools' HTTP stack.** A vcrpy/httpx upgrade that breaks interception used to make every cassette test fetch live and still pass. Three fast tests now replay a cassette for a dead address through `get_with_retry` (sync and async); with vcr's httpcore patch removed, all three fail.
