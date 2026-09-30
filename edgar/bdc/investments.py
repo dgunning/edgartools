@@ -2081,6 +2081,135 @@ class PortfolioInvestment:
         return repr_rich(self.__rich__())
 
 
+class ExcludedInvestment(NamedTuple):
+    """An identifier row left out of a portfolio because it restates others."""
+    investment: PortfolioInvestment
+    reason: str
+
+
+def _reported_total_fair_value(all_facts, period: Optional[str]):
+    """The filer's undimensioned total investments at fair value and its unit.
+
+    Filers tag the same total at several precisions (ARCC: decimals -6 and -5);
+    the most precise one is returned. ``(None, None)`` when there is none.
+    """
+    best = None
+    for fact in all_facts:
+        if (fact.get('concept') != 'us-gaap:InvestmentOwnedAtFairValue'
+                or fact.get('period_instant') != period
+                or any(key.startswith('dim_') and fact.get(key) for key in fact)):
+            continue
+        value = fact.get('numeric_value')
+        if value is None or pd.isna(value):
+            continue
+        decimals = fact.get('decimals')
+        precision = float('inf') if str(decimals).upper() == 'INF' else _as_float(decimals, -99)
+        if best is None or precision > best[0]:
+            best = (precision, Decimal(str(value)), fact.get('unit_ref'))
+    return (best[1], best[2]) if best else (None, None)
+
+
+def _as_float(value, default: float) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+# "Debt Investments Healthcare Services, Other and Total Marathon Health, LLC"
+_COMPANY_TOTAL_RE = re.compile(r'\bTotal\s+(.+)$')
+
+
+def _exclude_restated_rows(rows: list[PortfolioInvestment]):
+    """Split identifier rows into holdings and rows that restate holdings already counted.
+
+    ``InvestmentIdentifierAxis`` members carry no hierarchy, so a filer's
+    subtotals and second-schedule copies look like holdings. Measured against
+    each filer's own balance-sheet total, the rows summed high on every BDC
+    checked (FSK +48%, HTGC +21%, ARCC +16%, MAIN +14%). A row is excluded only
+    when the other rows account for its value exactly:
+
+    - a company total ("... and Total Marathon Health, LLC", HTGC) equal to the
+      sum of the rows naming that company;
+    - a parent equal to the sum of the rows whose identifier extends it
+      ("Bolder Panther Group, LLC | Secured Debt" = tranches "... 1.1", "1.2",
+      "1.3" on MAIN; "Ivy Hill Asset Management, L.P." = its instruments on ARCC);
+    - the same identifier spelled differently with the same fair value
+      ("ITA HOLDINGS GROUP, LLC" / "ITA Holdings Group, LLC", CSWC);
+    - a row with no cost whose fair value equals a costed row's: the affiliate
+      roll-forward restating a holding under its own member name
+      ("Blue Owl Credit SLF LLC(c)", OBDC; "Production Resource Group LLC 8", FSK).
+
+    Returns ``(kept, excluded)``.
+    """
+    excluded: list[ExcludedInvestment] = []
+    kept = list(rows)
+
+    def fv(inv) -> Decimal:
+        return inv.fair_value or Decimal(0)
+
+    def tolerance(n: int) -> Decimal:
+        # Each row is rounded to the filer's precision, typically thousands
+        return Decimal(1000) * max(n, 1)
+
+    def drop(inv, reason):
+        kept.remove(inv)
+        excluded.append(ExcludedInvestment(inv, reason))
+
+    # Company totals
+    for inv in list(kept):
+        match = _COMPANY_TOTAL_RE.search(inv.identifier)
+        if not match or not inv.fair_value:
+            continue
+        # Only rows under the same heading: HTGC's "Debt Investments ... Total X"
+        # covers X's debt rows, not X's warrants filed under another heading
+        name = match.group(1).strip()
+        heading = inv.identifier[:match.start()]
+        parts = [o for o in kept if o is not inv and o.identifier.startswith(heading)
+                 and name in o.identifier and not _COMPANY_TOTAL_RE.search(o.identifier)]
+        if parts and abs(sum(map(fv, parts)) - fv(inv)) <= tolerance(len(parts)):
+            drop(inv, f"company total of {len(parts)} holding(s)")
+
+    # Parents of their own tranches or instruments, deepest first
+    for inv in sorted(kept, key=lambda i: -len(i.identifier)):
+        if not inv.fair_value:
+            continue
+        ident = inv.identifier
+        parts = [o for o in kept if o is not inv and o.identifier.startswith(ident)
+                 and len(o.identifier) > len(ident) and not o.identifier[len(ident)].isalnum()]
+        if parts and abs(sum(map(fv, parts)) - fv(inv)) <= tolerance(len(parts)):
+            drop(inv, f"total of {len(parts)} row(s) that extend it")
+
+    # One identifier spelled two ways
+    seen: dict = {}
+    for inv in list(kept):
+        if not inv.fair_value:
+            continue
+        key = (re.sub(r'\W+', ' ', inv.identifier).strip().lower(), inv.fair_value)
+        other = seen.get(key)
+        if other is None:
+            seen[key] = inv
+            continue
+        # Keep the row that carries more of the schedule's fields
+        loser = inv if _field_count(inv) <= _field_count(other) else other
+        if loser is other:
+            seen[key] = inv
+        drop(loser, "same identifier and fair value as another row")
+
+    # Cost-less copies from another schedule
+    costed = {inv.fair_value for inv in kept if inv.cost is not None and inv.fair_value}
+    for inv in list(kept):
+        if inv.fair_value and inv.cost is None and inv.fair_value in costed:
+            drop(inv, "no cost, fair value equal to a costed row")
+
+    return kept, excluded
+
+
+def _field_count(inv: PortfolioInvestment) -> int:
+    return sum(value is not None for value in (
+        inv.fair_value, inv.cost, inv.principal_amount, inv.shares, inv.interest_rate))
+
+
 class PortfolioInvestments:
     """
     A collection of portfolio investments from a BDC's Schedule of Investments.
@@ -2097,10 +2226,14 @@ class PortfolioInvestments:
         investments: list[PortfolioInvestment],
         period: Optional[str] = None,
         nonaccrual_fair_value: Optional[Decimal] = None,
+        reported_total_fair_value: Optional[Decimal] = None,
+        excluded: Optional[list['ExcludedInvestment']] = None,
     ):
         self._investments = investments
         self._period = period
         self._nonaccrual_fair_value = nonaccrual_fair_value
+        self._reported_total_fair_value = reported_total_fair_value
+        self._excluded = excluded or []
 
     def __len__(self) -> int:
         return len(self._investments)
@@ -2168,6 +2301,39 @@ class PortfolioInvestments:
             (inv.fair_value for inv in self._investments if inv.fair_value is not None),
             Decimal(0)
         )
+
+    @property
+    def reported_total_fair_value(self) -> Optional[Decimal]:
+        """The total investments at fair value the filer reports on its balance sheet.
+
+        This is the filing's own figure (``us-gaap:InvestmentOwnedAtFairValue``
+        with no dimension), the ground truth ``total_fair_value`` should agree
+        with. None when the filing does not report it, or for a filtered subset.
+        """
+        return self._reported_total_fair_value
+
+    @property
+    def reconciliation_gap(self) -> Optional[float]:
+        """How far ``total_fair_value`` is from the filer's reported total, as a fraction.
+
+        ``0.02`` means the rows sum 2% above the balance sheet. Some filers tag
+        a holding in more than one schedule under different identifiers, and not
+        every restatement can be recognised, so check this before relying on a
+        total or a share of the portfolio. None when there is no reported total.
+        """
+        reported = self._reported_total_fair_value
+        if not reported:
+            return None
+        return float(self.total_fair_value / reported - 1)
+
+    @property
+    def excluded(self) -> list['ExcludedInvestment']:
+        """Identifier rows left out because they restate holdings already counted.
+
+        Each entry holds the ``investment`` and the ``reason``: a company or
+        tranche total, or a second schedule's copy of a row.
+        """
+        return list(self._excluded)
 
     @property
     def total_cost(self) -> Decimal:
@@ -2347,6 +2513,12 @@ class PortfolioInvestments:
             lines.append(f'Period: {self._period}')
         lines.append(f'Holdings: {len(self._investments)}')
         lines.append(f'Total Fair Value: ${self.total_fair_value:,.0f}')
+        if self._reported_total_fair_value is not None:
+            lines.append(f'Reported Total Fair Value: ${self._reported_total_fair_value:,.0f}')
+            gap = self.reconciliation_gap
+            if gap is not None and abs(gap) > 0.02:
+                lines.append(f'WARNING: holdings sum {gap:+.1%} from the reported total; '
+                             f'some may be counted twice')
         lines.append(f'Total Cost: ${self.total_cost:,.0f}')
 
         gain_loss = self.total_unrealized_gain_loss
@@ -2688,8 +2860,15 @@ class PortfolioInvestments:
             'us-gaap:InvestmentIndustrySectorExtensibleEnumeration': 'industry_enumeration',
         }
 
+        # The filer's own total, and the currency it reports in. A holding in a
+        # foreign currency is tagged twice, e.g. TSLX's Hippo XPA Bidco at
+        # U_USD 23,226,000 and U_SEK 214,115,000, and keeping whichever came last
+        # put SEK into a USD total (edgartools-6xxb).
+        reported_total, reporting_unit = _reported_total_fair_value(all_facts, period)
+
         # Group facts by investment identifier
         investments = {}
+        member_units: dict = {}
         member_candidates = _get_investment_member_candidates(xbrl)
         for fact in all_facts:
             # Check if this is a relevant concept
@@ -2744,6 +2923,14 @@ class PortfolioInvestments:
 
             try:
                 if field_name in ('fair_value', 'cost', 'principal_amount'):
+                    # A value in the reporting currency is never replaced by one in
+                    # another; a foreign-only value is kept when that is all there is.
+                    unit = fact.get('unit_ref')
+                    units = member_units.setdefault(inv_identifier, {})
+                    if (reporting_unit and field_name in units
+                            and units[field_name] == reporting_unit and unit != reporting_unit):
+                        continue
+                    units[field_name] = unit
                     investments[inv_identifier][field_name] = Decimal(str(value))
                 elif field_name == 'shares':
                     investments[inv_identifier][field_name] = int(float(value))
@@ -2782,6 +2969,11 @@ class PortfolioInvestments:
             for inv_data in investments.values()
         ]
 
+        # Drop members that restate holdings already counted: company totals,
+        # parents of their own tranches, and a second schedule's copy of a row.
+        # Before this every BDC measured summed 2-48% above its own balance sheet.
+        portfolio, excluded = _exclude_restated_rows(portfolio)
+
         # Filter out Unknown types unless include_untyped is True
         if not include_untyped:
             portfolio = [inv for inv in portfolio if inv.investment_type != "Unknown"]
@@ -2792,4 +2984,5 @@ class PortfolioInvestments:
             reverse=True
         )
 
-        return cls(portfolio, period=period, nonaccrual_fair_value=nonaccrual_fv)
+        return cls(portfolio, period=period, nonaccrual_fair_value=nonaccrual_fv,
+                   reported_total_fair_value=reported_total, excluded=excluded)

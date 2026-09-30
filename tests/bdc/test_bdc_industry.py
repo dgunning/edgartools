@@ -348,7 +348,10 @@ class TestFromXbrlSources:
         assert (alpha_second.industry, alpha_second.industry_source) == ('Software Sector', 'peer')
         gamma = by_company['Gamma Widgets Corp., First lien senior secured loan']
         assert gamma.industry is None and gamma.industry_source is None
-        assert by_company['Debt Investments Automotive'].industry is None
+        # The grouping subtotal restates Truck-Lite's row, so it is not a holding (edgartools-6xxb)
+        assert 'Debt Investments Automotive' not in by_company
+        assert [(e.investment.identifier, e.reason) for e in investments.excluded] == [
+            ('Debt Investments Automotive', 'total of 1 row(s) that extend it')]
 
         by_sector = investments.by_industry().set_index('sector')
         assert by_sector.loc['Software', 'num_investments'] == 2

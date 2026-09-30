@@ -583,6 +583,18 @@ async def _bdc_portfolio(identifier: str, limit: int) -> Any:
             result["total_investments"] = total_count
             if total_fair_value is not None:
                 result["total_fair_value"] = total_fair_value
+            # The filer's own balance-sheet figure, and a warning when the rows
+            # do not add up to it (a holding tagged in two schedules; edgartools-6xxb)
+            reported = getattr(investments, 'reported_total_fair_value', None)
+            if reported is not None:
+                result["reported_total_fair_value"] = float(reported)
+                gap = investments.reconciliation_gap
+                if gap is not None and abs(gap) > 0.02:
+                    result["warning"] = (
+                        f"Investment rows sum {gap:+.1%} away from the filer's reported total "
+                        f"({float(reported):,.0f}); some holdings may be counted twice. "
+                        f"Use reported_total_fair_value for the portfolio total."
+                    )
             if total_cost is not None:
                 result["total_cost"] = total_cost
             result["investments"] = inv_records
