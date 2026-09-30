@@ -150,6 +150,26 @@ jobs:
           python scripts/check_offline_audit.py
         fi
 
+    # A pull request that stages a 6.0 change (a deprecation, a will-raise
+    # warning, "removed in 6.0") has to touch docs/upgrade/6.0.md in the same PR.
+    # #1200/#1201 shipped 5.55.0 deprecations with no guide entry, and nothing
+    # mechanical noticed (bead edgartools-07lk.14). Pull requests only: the check
+    # reads the PR's diff, and main has no PR to read. Labels are read live
+    # rather than from the event payload, so after adding `no-upgrade-guide`,
+    # re-run this job instead of pushing an empty commit.
+    - name: Check a staged 6.0 change updates the upgrade guide
+      if: github.event_name == 'pull_request'
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        gh api --paginate \
+          "repos/${{ github.repository }}/pulls/${{ github.event.number }}/files" \
+          --jq '.[] | {filename, status, patch} | tojson' > "$RUNNER_TEMP/pr_files.jsonl"
+        PR_LABELS=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.number }}/labels" \
+          --jq '[.[].name] | join(",")') \
+          python scripts/check_upgrade_guide.py "$RUNNER_TEMP/pr_files.jsonl"
+
     - name: Run fast tests
       run: |
         # Parallelize fast tests - safe, no SEC API calls.
