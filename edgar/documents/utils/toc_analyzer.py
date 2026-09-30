@@ -1325,6 +1325,29 @@ class TOCAnalyzer:
         part, num, letter = match.groups()
         return f"Part {part.upper()}", f"Item {num}{(letter or '').upper()}"
 
+    # "Items 1 and 2. Business and Properties", "Items 1. and 2.", "Items\xa01. and 2.",
+    # "Items 7. and 7A." — two items a filer files under one heading (GH #710, #1382).
+    # `\s` matches the non-breaking space these TOCs use after "Items".
+    _COMBINED_ITEMS = re.compile(
+        r'items\s+(\d+)([A-Za-z])?\s*\.?\s*(?:and|&)\s*(\d+)([A-Za-z])?(?=\W|$|[A-Z][a-z])',
+        re.IGNORECASE)
+
+    @classmethod
+    def combined_item_numbers(cls, text: str) -> Optional[Tuple[str, str]]:
+        """The two item numbers of a combined "Items N and M" label, e.g. ``('7', '7A')``.
+
+        Returns ``None`` unless the text opens with such a label. A letter glued
+        to a following title word is not a suffix, as in :meth:`_item_label_from_text`.
+        """
+        match = cls._COMBINED_ITEMS.match((text or '').strip())
+        if not match:
+            return None
+        first_num, first_letter, second_num, second_letter = match.groups()
+        if second_letter and text.strip()[match.end():][:1].islower():
+            second_letter = None
+        return (f"{first_num}{(first_letter or '').upper()}",
+                f"{second_num}{(second_letter or '').upper()}")
+
     @staticmethod
     def _item_label_from_text(text: str) -> Optional[str]:
         """Normalize a leading ``Item N`` label, ignoring a title glued onto it.
@@ -1348,8 +1371,17 @@ class TOCAnalyzer:
         body-scan counter already allows for Caterpillar's Item 1D) — and it
         keeps a genuinely glued suffix working: "Item 1ARisk Factors" -> Item 1A.
 
+        A combined label ("Items 1 and 2. Business and Properties") names its
+        first item: the section is keyed as that item and records the second in
+        ``Section.covered_items``. Rejecting the plural dropped the whole row, so
+        Items 1 and 2 had no section at all on Viper, Devon, Freeport and
+        Cheniere (GH #1382).
+
         Returns ``None`` when the text does not open with an item label. (GH #923)
         """
+        combined = TOCAnalyzer.combined_item_numbers(text)
+        if combined:
+            return f"Item {combined[0]}"
         match = re.match(r'item\s+(\d+)([A-Za-z])?', text, re.IGNORECASE)
         if not match:
             return None

@@ -195,9 +195,17 @@ class HybridSectionDetector:
         # whose key string carries neither part nor item.
         canonical = {schema.resolve_section_key(key) for key in schema.section_patterns}
         canonical = {(part, item) for part, item in canonical if item}
-        found_items = {sec.item for sec in toc_sections.values() if sec.item}
+        # A section under a combined heading ("Items 1 and 2. Business and
+        # Properties") has found both items. Without this the gate saw Item 2
+        # as missing and admitted a bare "Properties" sub-heading from inside
+        # Item 1 as a second, fragmentary Item 2 (Talos, GH #1383).
+        found_items = {
+            item for sec in toc_sections.values()
+            for item in (sec.covered_items or (sec.item,)) if item
+        }
         found_part_items = {
-            (sec.part, sec.item) for sec in toc_sections.values() if sec.item
+            (sec.part, item) for sec in toc_sections.values()
+            for item in (sec.covered_items or (sec.item,)) if item
         }
         if not canonical or canonical <= found_part_items:
             return toc_sections  # The TOC named everything the form defines.
