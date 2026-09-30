@@ -12,6 +12,8 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from edgar.beneficial_ownership.models import ReportingPerson, _reported_total
+
 if TYPE_CHECKING:
     from edgar.beneficial_ownership.schedule13 import Schedule13D, Schedule13G
 
@@ -28,6 +30,19 @@ def _fmt_shares(value) -> str:
 def _fmt_percent(value) -> str:
     """Format a percentage, or a dim 'unavailable' marker when None."""
     return f"{value:.2f}%" if value is not None else _UNAVAILABLE
+
+
+def _schedule_total(schedule, figure: str):
+    """A schedule's total for a figure, or None when the filing does not report it."""
+    if not schedule.has_structured_data:
+        return None
+    return _reported_total(schedule.reporting_persons, figure)
+
+
+def _total_power(person: ReportingPerson, sole: str, shared: str):
+    """Sole + shared power, or None when the filing leaves either out."""
+    values = (person.reported(sole), person.reported(shared))
+    return None if None in values else sum(values)
 
 
 def _degraded_notice() -> Panel:
@@ -72,8 +87,8 @@ def render_schedule13d(schedule: 'Schedule13D') -> Panel:
         header.add_row("CUSIP:", schedule.security_info.cusip)
 
     # Aggregate ownership
-    header.add_row("Total Shares:", _fmt_shares(schedule.total_shares))
-    header.add_row("Total Percent:", _fmt_percent(schedule.total_percent))
+    header.add_row("Total Shares:", _fmt_shares(_schedule_total(schedule, 'aggregate_amount')))
+    header.add_row("Total Percent:", _fmt_percent(_schedule_total(schedule, 'percent_of_class')))
 
     elements = [header, Text()]
     if not schedule.has_structured_data:
@@ -94,15 +109,14 @@ def render_schedule13d(schedule: 'Schedule13D') -> Panel:
     persons_table.add_column("Voting Power", justify="right")
     persons_table.add_column("Dispositive Power", justify="right")
 
-    structured = schedule.has_structured_data
     for person in schedule.reporting_persons:
         persons_table.add_row(
             person.name,
             person.cik or 'N/A',
-            f"{person.aggregate_amount:,}" if structured else _UNAVAILABLE,
-            f"{person.percent_of_class:.2f}%" if structured else _UNAVAILABLE,
-            f"{person.total_voting_power:,}" if structured else _UNAVAILABLE,
-            f"{person.total_dispositive_power:,}" if structured else _UNAVAILABLE
+            _fmt_shares(person.reported('aggregate_amount')),
+            _fmt_percent(person.reported('percent_of_class')),
+            _fmt_shares(_total_power(person, 'sole_voting_power', 'shared_voting_power')),
+            _fmt_shares(_total_power(person, 'sole_dispositive_power', 'shared_dispositive_power'))
         )
 
     elements.append(persons_table)
@@ -190,8 +204,8 @@ def render_schedule13g(schedule: 'Schedule13G') -> Panel:
         header.add_row("Rule:", schedule.rule_designation)
 
     # Aggregate ownership
-    header.add_row("Total Shares:", _fmt_shares(schedule.total_shares))
-    header.add_row("Total Percent:", _fmt_percent(schedule.total_percent))
+    header.add_row("Total Shares:", _fmt_shares(_schedule_total(schedule, 'aggregate_amount')))
+    header.add_row("Total Percent:", _fmt_percent(_schedule_total(schedule, 'percent_of_class')))
     header.add_row("Type:", "Passive Institutional Investor")
 
     elements = [header, Text()]
@@ -213,15 +227,14 @@ def render_schedule13g(schedule: 'Schedule13G') -> Panel:
     persons_table.add_column("Voting Power", justify="right")
     persons_table.add_column("Dispositive Power", justify="right")
 
-    structured = schedule.has_structured_data
     for person in schedule.reporting_persons:
         persons_table.add_row(
             person.name,
             person.type_of_reporting_person or 'N/A',
-            f"{person.aggregate_amount:,}" if structured else _UNAVAILABLE,
-            f"{person.percent_of_class:.2f}%" if structured else _UNAVAILABLE,
-            f"{person.total_voting_power:,}" if structured else _UNAVAILABLE,
-            f"{person.total_dispositive_power:,}" if structured else _UNAVAILABLE
+            _fmt_shares(person.reported('aggregate_amount')),
+            _fmt_percent(person.reported('percent_of_class')),
+            _fmt_shares(_total_power(person, 'sole_voting_power', 'shared_voting_power')),
+            _fmt_shares(_total_power(person, 'sole_dispositive_power', 'shared_dispositive_power'))
         )
 
     elements.append(persons_table)
