@@ -81,9 +81,22 @@ def _placeholder_sum(schedule: 'Schedule13D | Schedule13G', figure: str):
 
 def _warn_unreported(name: str, replacement: str) -> None:
     # The text is fixed per property so Python's default filter shows it once per call site.
+    # stacklevel=3 skips this helper and the property, so the caller's line is reported.
     warnings.warn(
         f"OwnershipComparison.{name} is computed from figures a filing does not report, read as 0. "
         f"It will be None in edgartools 6.0. Use OwnershipComparison.{replacement}, which is None today.",
+        FutureWarning,
+        stacklevel=3,
+    )
+
+
+def _warn_unreported_summary() -> None:
+    # get_summary() warns for itself: reading self.shares_change would attribute the
+    # warning to this module, and the default filter would then show it once per process.
+    warnings.warn(
+        "OwnershipComparison.get_summary() computes 'shares_change' and 'percent_change' from figures "
+        "a filing does not report, read as 0. They will be None in edgartools 6.0. "
+        "Use the 'reported_shares_change' and 'reported_percent_change' keys, which are None today.",
         FutureWarning,
         stacklevel=3,
     )
@@ -203,17 +216,25 @@ class OwnershipComparison:
             emit the same ``FutureWarning``; ``reported_shares_change`` and
             ``reported_percent_change`` are None for them.
         """
+        reported_shares_change = self.reported_shares_change
+        reported_percent_change = self.reported_percent_change
+        if reported_shares_change is None or reported_percent_change is None:
+            _warn_unreported_summary()
+        previous_shares = _placeholder_sum(self.previous, 'aggregate_amount')
+        current_shares = _placeholder_sum(self.current, 'aggregate_amount')
+        previous_percent = _placeholder_sum(self.previous, 'percent_of_class')
+        current_percent = _placeholder_sum(self.current, 'percent_of_class')
         return {
             'previous_filing_date': self.previous.filing_date,
             'current_filing_date': self.current.filing_date,
-            'previous_shares': _placeholder_sum(self.previous, 'aggregate_amount'),
-            'current_shares': _placeholder_sum(self.current, 'aggregate_amount'),
-            'shares_change': self.shares_change,
-            'previous_percent': _placeholder_sum(self.previous, 'percent_of_class'),
-            'current_percent': _placeholder_sum(self.current, 'percent_of_class'),
-            'percent_change': self.percent_change,
-            'reported_shares_change': self.reported_shares_change,
-            'reported_percent_change': self.reported_percent_change,
+            'previous_shares': previous_shares,
+            'current_shares': current_shares,
+            'shares_change': current_shares - previous_shares,
+            'previous_percent': previous_percent,
+            'current_percent': current_percent,
+            'percent_change': current_percent - previous_percent,
+            'reported_shares_change': reported_shares_change,
+            'reported_percent_change': reported_percent_change,
             'is_accumulating': self.is_accumulating,
             'is_liquidating': self.is_liquidating,
             'is_unchanged': self.is_unchanged
