@@ -37,7 +37,11 @@ def _reported_total(persons, figure: str) -> Optional[Union[int, float]]:
 
     The same max() over the persons not flagged ``is_aggregate_exclude_shares`` that
     ``total_shares`` and ``total_percent`` take, which read an unreported figure as 0.
+    A filing with no reporting-person rows reports no figure either, matching
+    ``OwnershipComparison.reported_shares_change``.
     """
+    if not persons:
+        return None
     values = [p.reported(figure) for p in persons if not p.is_aggregate_exclude_shares]
     if None in values:
         return None

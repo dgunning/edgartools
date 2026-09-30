@@ -415,3 +415,41 @@ def test_ownership_comparison_13g_amendment_reporting_figures():
         assert comparison.percent_change == pytest.approx(-2.0)
         assert comparison.is_liquidating is True
         assert amendment.total_shares == 8_000_000
+
+
+@pytest.mark.fast
+def test_get_summary_warns_once_at_the_callers_line():
+    """get_summary() names the caller's line, not amendments.py.
+
+    It used to read self.shares_change and self.percent_change, so it emitted two
+    warnings attributed to amendments.py, and Python's default filter then showed
+    them once per process no matter where get_summary() was called from.
+    """
+    comparison = OwnershipComparison(current=_schedule13d_from_xml(SCHEDULE_13D_XML_PATH.read_text()),
+                                     previous=_header_only_schedule13d())
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter('always')
+        summary = comparison.get_summary()
+
+    future = [w for w in caught if issubclass(w.category, FutureWarning)]
+    assert len(future) == 1
+    assert future[0].filename == __file__
+    assert "'reported_shares_change'" in str(future[0].message)
+    # The 5.x values are unchanged.
+    assert summary['shares_change'] == 4_535_000
+    assert summary['current_shares'] == 4_535_000
+    assert summary['previous_shares'] == 0
+    assert summary['reported_shares_change'] is None
+
+
+@pytest.mark.fast
+def test_no_reporting_person_rows_display_ownership_as_not_reported():
+    """An empty <reportingPersons> displays as not reported, as the comparison treats it, not as 0."""
+    no_rows_xml = re.sub(r'<reportingPersons>.*?</reportingPersons>',
+                         '<reportingPersons></reportingPersons>',
+                         SCHEDULE_13D_XML_PATH.read_text(), flags=re.S)
+    no_rows = _schedule13d_from_xml(no_rows_xml)
+
+    context = no_rows.to_context()
+    assert 'Ownership: percent not reported (shares not reported)' in context
+    assert '0 shares' not in context
