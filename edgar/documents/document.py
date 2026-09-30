@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, cast
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, Tuple, cast
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -111,6 +111,9 @@ class Section:
         validated: Whether section has been cross-validated
         part: Optional part identifier for 10-Q filings ("I", "II", or None for 10-K)
         item: Optional item identifier (e.g., "1", "1A", "2")
+        covered_items: Every item this section holds when the filer combines items
+            under one heading ("Items 1 and 2. Business and Properties" gives
+            ``('1', '2')``); empty for an ordinary one-item section
         _text_extractor: Optional callback for lazy text extraction (for TOC-based sections)
         _html_source: Optional HTML source for TOC-based table extraction
         _section_extractor: Optional section extractor for TOC-based sections
@@ -129,6 +132,7 @@ class Section:
     _text_extractor: Optional[Any] = field(default=None, repr=False)  # Callback for lazy text extraction
     _html_source: Optional[str] = field(default=None, repr=False)  # HTML source for TOC table extraction
     _section_extractor: Optional[Any] = field(default=None, repr=False)  # Section extractor for TOC sections
+    covered_items: Tuple[str, ...] = ()  # All items under a combined heading, e.g. ('1', '2')
 
     @property
     def kind(self) -> str:

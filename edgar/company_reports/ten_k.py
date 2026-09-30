@@ -302,6 +302,8 @@ class TenK(CompanyReport):
                 # Check if section has an item attribute
                 if hasattr(section, 'item') and section.item:
                     items.append(f"Item {section.item}")
+                    # "Items 1 and 2" is one section holding both (GH #1382)
+                    items.extend(f"Item {item}" for item in getattr(section, 'covered_items', ()))
                 # Map friendly names to Item numbers
                 elif key in section_to_item:
                     items.append(section_to_item[key])
@@ -596,9 +598,20 @@ class TenK(CompanyReport):
                         if text and text.strip():
                             return text
 
-                # PRIORITY 1.5: Try combined-items keys (e.g., "Items 1 and 2. Business and Properties")
-                # Some filings (energy, MLP, REIT) combine items under a single heading.
-                # Match whether the item is the first or second number: items_1_and_2 or items_2_and_3
+                # PRIORITY 1.5: A section under a combined heading ("Items 1 and 2.
+                # Business and Properties") holds both items. Some filings (energy,
+                # MLP, REIT) combine items this way; the section is keyed as the
+                # first item and lists both in covered_items (GH #710, #1382).
+                if canonical_part:
+                    for section in self.sections.values():
+                        covered = [item.lower() for item in getattr(section, 'covered_items', ())]
+                        if item_num in covered and (section.part or '').lower() == canonical_part:
+                            text = section.text()
+                            if text and text.strip():
+                                return text
+
+                # Legacy combined-items keys (part_i_items_1_and_2_...) from releases
+                # that built them from the heading text.
                 inum = re.escape(item_num)
                 combined_pattern = re.compile(rf'part_[iv]+_items_(?:{inum}_and_\d+|\d+_and_{inum})')
                 for key in self.sections:

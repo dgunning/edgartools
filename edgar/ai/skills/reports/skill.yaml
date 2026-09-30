@@ -29,6 +29,11 @@ patterns:
 
       tenk.items                        # List: ['Item 1', 'Item 1A', 'Item 2', ...]
 
+      # Combined headings ("Items 1 and 2. Business and Properties") are ONE section,
+      # keyed as the first item; both items return it.
+      tenk['Item 2'] == tenk.business   # True when the filer combines Items 1 and 2
+      tenk.sections['part_i_item_1'].covered_items   # ('1', '2'); () for a one-item section
+
       tenk.auditor                      # AuditorInfo: .name .firm_id .location .icfr_attestation
       tenk.subsidiaries                 # SubsidiaryList from EX-21 (TenK only), .to_dataframe()
       tenk.reports                      # Reports from FilingSummary.xml (statements, notes, details)

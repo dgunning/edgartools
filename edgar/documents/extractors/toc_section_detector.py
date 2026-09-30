@@ -11,12 +11,43 @@ This detector wraps SECSectionExtractor which has proven implementations of:
 """
 
 import logging
-from typing import Dict, Optional
+import re
+from typing import Dict, Optional, Tuple
 
 from edgar.documents.document import Document, Section
 from edgar.documents.nodes import SectionNode
+from edgar.documents.utils.toc_analyzer import TOCAnalyzer
 
 logger = logging.getLogger(__name__)
+
+# The section's heading is near its start but not always first: Viper's TOC link
+# lands on a 2,681-character preamble paragraph ahead of its "ITEMS 1 and 2."
+# heading. A heading is a short line; prose that happens to open with "Items 1
+# and 2" is not.
+_HEADING_SCAN_CHARS = 5000
+_HEADING_MAX_LEN = 250  # Freeport's "Items 7. and 7A." heading is 170
+
+
+def _covered_items(item: Optional[str], section_text: Optional[str]) -> Tuple[str, ...]:
+    """Both items of a section that opens on a combined "Items N and M" heading.
+
+    The heading is the filer saying one span holds two items, so Item 2 of
+    "Items 1 and 2. Business and Properties" is this section, not something to
+    look for elsewhere (GH #1382, #1383). It is read from the section's own
+    opening lines, not the TOC row, because some TOCs split the label and the
+    link across cells (Talos) and the row's text never names both items.
+    Only a heading whose first item is this section's item counts.
+    """
+    if not item or not section_text:
+        return ()
+    for line in section_text[:_HEADING_SCAN_CHARS].splitlines():
+        line = re.sub(r'^[\s*#_>|]+', '', line).rstrip()
+        if not line or len(line) > _HEADING_MAX_LEN:
+            continue
+        combined = TOCAnalyzer.combined_item_numbers(line)
+        if combined and combined[0] == item.upper():
+            return combined
+    return ()
 
 
 class TOCSectionDetector:
@@ -122,6 +153,7 @@ class TOCSectionDetector:
 
                 # Create Section with TOC confidence
                 section = Section(
+                    covered_items=_covered_items(item, section_text),
                     name=section_name,
                     title=section_info.get('canonical_name', section_name),
                     node=section_node,
