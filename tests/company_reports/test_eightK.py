@@ -56,9 +56,16 @@ def test_eightk_with_no_signature_header():
                     accession_no='0001104659-23-034205')
     eightk = filing.obj()
     assert eightk.items == ['Item 8.01', 'Item 9.01']
-    assert "Cover Page" in eightk['Item 9.01']
-    # We did not include the signature in the item
-    assert 'Pursuant to the requirements of the Securities Exchange Act' not in eightk['Item 9.01']
+    item_901 = eightk['Item 9.01']
+    assert "Cover Page" in item_901
+    # The signature block is not part of the item. Compared on normalized
+    # whitespace: this assertion passed for months on raw text only because a
+    # hard line break split the phrase, while the block sat inside the item all
+    # along (exposed by gh-1370; fixed by Strategy 5c in the pattern extractor).
+    words = " ".join(item_901.split())
+    assert 'Pursuant to the requirements of the Securities Exchange Act' not in words
+    assert 'Michael D. Lynch' not in words
+    assert words.endswith("File (embedded within the Inline XBRL document).")
 
 def test_eightk_item502_parsed_correctly():
     filing = Filing(form='8-K', filing_date='2023-03-20', company='4Front Ventures Corp.', cik=1783875,

@@ -1,0 +1,1 @@
+**An 8-K with no SIGNATURES heading no longer folds its signature block into the last item.** When the block opens straight with "Pursuant to the requirements of the Securities Exchange Act of 1934 ... caused this report to be signed", that sentence now ends the item. In a 90-document 8-K sample this cleaned the last item of 3 filings and changed nothing else.
