@@ -8,6 +8,14 @@ of a company's securities.
 Schedule 13D: Active ownership with potential control intent (activist filings)
 Schedule 13G: Passive institutional investor ownership
 
+These are Section 13(d)/(g) filings. Which package holds the form you have:
+
+    Schedule 13D / 13G           edgar.beneficial_ownership  (this package)
+    Forms 3, 4, 5 and 144        edgar.ownership             Section 16: a company's own insiders
+    13F-HR                       edgar.thirteenf             Section 13(f): institutional managers
+
+Both classes are also importable from the top level: ``from edgar import Schedule13D``.
+
 Example usage:
     from edgar import Filing
     from edgar.beneficial_ownership import Schedule13D

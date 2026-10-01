@@ -241,6 +241,12 @@ __all__ = [
     "get_portfolio_holding_filings",
 
     # -- Form-specific data objects ------------------------------------------
+    # The ownership family splits across three packages along the statute that
+    # requires each form; see the docstrings of edgar.ownership (Section 16),
+    # edgar.beneficial_ownership (Section 13(d)/(g)) and edgar.thirteenf
+    # (Section 13(f)). Served lazily: see _LAZY_EXPORTS below.
+    "Form3", "Form4", "Form5", "Form144",
+    "Schedule13D", "Schedule13G",
     "ThirteenF", "NPX",
     "ProxyStatement", "ProxyContests", "proxy_contests",
     "Correspondence", "CorrespondenceThread", "CorrespondenceType",
@@ -689,7 +695,36 @@ def obj(sec_filing: Filing) -> Optional[object]:
 _DEPRECATED_TOP_LEVEL_NAMES = ("CAUTION", "CRAWL", "NORMAL", "edgar_mode")
 
 
+# ---------------------------------------------------------------------------
+# Top-level names served on first access (bead edgartools-07lk.12.1.1).
+#
+# Until 5.60 the only path to these classes was the subpackage, so
+# `from edgar.ownership import Form4` was load-bearing API and the package names
+# could never change. A top-level path makes them interchangeable. The value is
+# the subpackage's own object, so `edgar.Form4 is edgar.ownership.Form4` and
+# isinstance agrees across both spellings.
+#
+# Lazy because neither package is otherwise imported by `import edgar`: loading
+# them eagerly measured +19 ms on a 599 ms import (3.2%), for users who never
+# touch an ownership form.
+# ---------------------------------------------------------------------------
+_LAZY_EXPORTS = {
+    "Form3": "edgar.ownership",
+    "Form4": "edgar.ownership",
+    "Form5": "edgar.ownership",
+    "Form144": "edgar.ownership.form144",
+    "Schedule13D": "edgar.beneficial_ownership",
+    "Schedule13G": "edgar.beneficial_ownership",
+}
+
+
 def __getattr__(name: str):
+    if name in _LAZY_EXPORTS:
+        import importlib
+
+        value = getattr(importlib.import_module(_LAZY_EXPORTS[name]), name)
+        globals()[name] = value  # later lookups skip this hook
+        return value
     if name in _DEPRECATED_TOP_LEVEL_NAMES:
         from edgar import settings as _settings
 
@@ -699,4 +734,4 @@ def __getattr__(name: str):
 
 
 def __dir__():
-    return sorted(set(globals()) | set(_DEPRECATED_TOP_LEVEL_NAMES))
+    return sorted(set(globals()) | set(_DEPRECATED_TOP_LEVEL_NAMES) | set(_LAZY_EXPORTS))
