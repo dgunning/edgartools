@@ -496,6 +496,28 @@ async def _bdc_search(query: str, limit: int) -> Any:
         return error(str(e), suggestions=get_error_suggestions(e))
 
 
+def _bdc_investment_record(inv) -> dict[str, Any]:
+    """One PortfolioInvestment as a record. Every key is always present; a missing
+    value is None, never 0, so an absent figure cannot read as a zero position."""
+    def number(value):
+        return float(value) if isinstance(value, Decimal) else value
+
+    return {
+        "company_name": inv.company_name or None,
+        "identifier": inv.identifier or None,
+        "type": inv.investment_type or None,
+        "industry": inv.industry,
+        "principal_amount": number(inv.principal_amount),
+        "cost": number(inv.cost),
+        "fair_value": number(inv.fair_value),
+        "shares": inv.shares,
+        "interest_rate": number(inv.interest_rate),
+        "pik_rate": number(inv.pik_rate),
+        "spread": number(inv.spread),
+        "percent_of_net_assets": number(inv.percent_of_net_assets),
+    }
+
+
 async def _bdc_portfolio(identifier: str, limit: int) -> Any:
     """Get BDC portfolio investments from Schedule of Investments."""
     try:
@@ -551,19 +573,7 @@ async def _bdc_portfolio(identifier: str, limit: int) -> Any:
             # Extract investment data
             inv_records = []
             for inv in investments[:limit]:
-                inv_dict: dict[str, Any] = {}
-                if hasattr(inv, 'name'):
-                    inv_dict["name"] = inv.name
-                if hasattr(inv, 'investment_type'):
-                    inv_dict["type"] = str(inv.investment_type) if inv.investment_type else None
-                if hasattr(inv, 'fair_value') and inv.fair_value is not None:
-                    inv_dict["fair_value"] = float(inv.fair_value) if isinstance(inv.fair_value, Decimal) else inv.fair_value
-                if hasattr(inv, 'cost') and inv.cost is not None:
-                    inv_dict["cost"] = float(inv.cost) if isinstance(inv.cost, Decimal) else inv.cost
-                if hasattr(inv, 'interest_rate') and inv.interest_rate is not None:
-                    inv_dict["interest_rate"] = float(inv.interest_rate) if isinstance(inv.interest_rate, Decimal) else inv.interest_rate
-                if inv_dict:
-                    inv_records.append(inv_dict)
+                inv_records.append(_bdc_investment_record(inv))
 
             total_count = len(investments)
 

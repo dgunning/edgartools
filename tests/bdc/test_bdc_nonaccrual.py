@@ -91,6 +91,54 @@ class TestNonAccrualDataClasses:
         assert result.has_investment_detail is False
 
 
+def _result(method, investments=(), custom_rate=None, aggregate=None, nonaccrual_fv=None):
+    return NonAccrualResult(
+        cik=1,
+        entity_name="Test BDC",
+        period="2025-12-31",
+        source_filing="0001-00-000001",
+        investments=list(investments),
+        nonaccrual_fair_value=nonaccrual_fv,
+        total_portfolio_fair_value=Decimal("1000000"),
+        extraction_method=method,
+        custom_concept_rate=custom_rate,
+        aggregate_concept_value=aggregate,
+    )
+
+
+@pytest.mark.fast
+class TestEvidenceLevel:
+    """A count needs itemized evidence; anything less is None, not 0 (edgartools-vblr)."""
+
+    def test_footnote_evidence_is_counted(self):
+        inv = NonAccrualInvestment(
+            identifier="Company A, First lien", company_name="Company A", investment_type="First lien",
+            fair_value=Decimal("1000"), cost=Decimal("1100"), footnote_text="Non-accrual status.",
+        )
+        result = _result("footnote", investments=[inv, inv], nonaccrual_fv=Decimal("2000"))
+        assert result.evidence_level == "investment"
+        assert result.num_nonaccrual == 2
+
+    @pytest.mark.parametrize("method, kwargs", [
+        ("custom_concept", {"custom_rate": 0.0101}),
+        ("aggregate_concept", {"aggregate": Decimal("10561000")}),
+    ])
+    def test_an_aggregate_figure_does_not_count_as_zero(self, method, kwargs):
+        result = _result(method, nonaccrual_fv=Decimal("10561"), **kwargs)
+        assert result.evidence_level == "aggregate"
+        assert result.num_nonaccrual is None
+        context = result.to_context()
+        assert "Non-Accrual Investments: not itemized" in context
+        assert "Non-Accrual Investments: 0" not in context
+        assert "Evidence Level: aggregate" in context
+
+    def test_no_signal_is_unknown_not_zero(self):
+        result = _result("none")
+        assert result.evidence_level == "none"
+        assert result.num_nonaccrual is None
+        assert "Non-Accrual Investments: unknown" in result.to_context()
+
+
 class TestHelperFunctions:
     """Tests for internal helper functions."""
 
@@ -230,6 +278,33 @@ class TestExtractNonAccrualGBDC:
 
         assert result is not None
         assert result.aggregate_concept_value is not None
+
+
+class TestEvidenceLevelGroundTruth:
+    """Pinned filings, so a newer filing cannot move the answer (edgartools-vblr)."""
+
+    @pytest.mark.network
+    def test_whf_files_only_a_portfolio_level_amount(self):
+        """WhiteHorse Finance 10-K, 2025-12-31: whfcl:FinancingReceivablesRecordedInvestment-
+        NonAccrualStatusFairValueDisclosure = $10,561,000, with no per-investment footnote.
+        Non-accruals exist, so the count is unknown, not 0."""
+        from edgar import find
+        result = extract_nonaccrual(find("0001104659-26-024735"))
+
+        assert result.evidence_level == "aggregate"
+        assert result.extraction_method == "custom_concept"
+        assert result.num_nonaccrual is None
+        assert result.nonaccrual_fair_value == pytest.approx(Decimal("10561000"), abs=Decimal("1"))
+
+    @pytest.mark.network
+    def test_main_itemizes_its_nonaccrual_investments(self):
+        """Main Street 10-K, 2025-12-31: footnotes flag 33 investment rows across 16 companies."""
+        from edgar import find
+        result = extract_nonaccrual(find("0001396440-26-000016"))
+
+        assert result.evidence_level == "investment"
+        assert result.num_nonaccrual == 33
+        assert len({inv.company_name for inv in result.investments}) == 16
 
 
 class TestToContext:
