@@ -81,6 +81,7 @@ patterns:
     code: |
       filings = get_current_filings()                    # All recent filings (RSS feed)
       filings = get_current_filings().filter(form="8-K") # Filter by form
+      filings = get_current_filings(form="8-K", timeout=90)  # Slow SEC feed: longer timeout for the feed only
 
   - name: Fund Lookup
     when: Mutual fund or ETF lookup

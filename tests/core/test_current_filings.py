@@ -1,12 +1,16 @@
 
 import datetime
+import time
 
+import httpx
 import pytest
 
 from edgar import get_all_current_filings, Filings, iter_current_filings_pages
 from edgar import get_by_accession_number
 from edgar.current_filings import get_current_filings, CurrentFilings
 from edgar.current_filings import parse_title, parse_summary
+from edgar.exceptions import TransportError
+from edgar.httprequests import get_with_retry
 
 
 @pytest.mark.fast
@@ -419,3 +423,135 @@ def test_an_unparseable_response_yields_no_entries(_serve_feed, content):
     _serve_feed(content)
 
     assert get_current_entries_on_page(count=10, start=0) == []
+
+
+# ---------------------------------------------------------------------------
+# Per-call timeout (GH #1391, edgartools-7xtb)
+# ---------------------------------------------------------------------------
+
+def _atom_feed(n: int, first: int = 0) -> bytes:
+    entries = "".join(
+        f"""<entry>
+    <title>8-K - ACME CORP {i} (0000000{100 + i}) (Filer)</title>
+    <summary>&lt;b&gt;Filed:&lt;/b&gt; 2026-10-01 &lt;b&gt;AccNo:&lt;/b&gt; 0000000001-26-{i:06d} &lt;b&gt;Size:&lt;/b&gt; 5 KB</summary>
+    <updated>2026-10-01T14:09:29-04:00</updated>
+</entry>"""
+        for i in range(first, first + n)
+    )
+    return (f'<?xml version="1.0" encoding="ISO-8859-1" ?>'
+            f'<feed xmlns="http://www.w3.org/2005/Atom"><title>Latest Filings</title>{entries}</feed>').encode()
+
+
+@pytest.fixture
+def _record_gets(monkeypatch):
+    """Serve `pages` in order through the real get_with_retry stack and record each client.get call."""
+
+    def serve(*pages: bytes):
+        calls = []
+        remaining = list(pages)
+
+        def fake_get(self, url, **kwargs):
+            calls.append((url, kwargs))
+            return httpx.Response(200, content=remaining.pop(0) if remaining else _atom_feed(0))
+
+        monkeypatch.setattr(httpx.Client, "get", fake_get)
+        return calls
+    return serve
+
+
+@pytest.mark.fast
+def test_timeout_reaches_the_request_for_the_first_page_and_for_next(_record_gets):
+    calls = _record_gets(_atom_feed(10), _atom_feed(3, first=10))
+
+    page = get_current_filings(form="8-K", page_size=10, timeout=90)
+    assert page.timeout == 90
+    assert page.next() is page
+    assert page.data["accession_number"].to_pylist()[0] == "0000000001-26-000010"
+
+    assert len(calls) == 2
+    assert "start=10" in calls[1][0]
+    for _, kwargs in calls:
+        assert kwargs["timeout"] == httpx.Timeout(90.0, connect=10.0)
+
+
+@pytest.mark.fast
+def test_timeout_reaches_every_page_of_iter_and_get_all(_record_gets):
+    calls = _record_gets(_atom_feed(100), _atom_feed(4, first=100))
+    # next() moves the same CurrentFilings object along, so read each page as it comes
+    assert [len(p) for p in iter_current_filings_pages(form="8-K", timeout=75)] == [100, 4]
+    assert [kw["timeout"] for _, kw in calls] == [httpx.Timeout(75.0, connect=10.0)] * 2
+
+    calls = _record_gets(_atom_feed(100), _atom_feed(4, first=100))
+    filings = get_all_current_filings(form="8-K", timeout=75)
+    assert len(filings) == 104
+    assert [kw["timeout"] for _, kw in calls] == [httpx.Timeout(75.0, connect=10.0)] * 2
+
+
+@pytest.mark.fast
+def test_no_timeout_leaves_the_request_on_the_client_default(_record_gets):
+    calls = _record_gets(_atom_feed(10), _atom_feed(2, first=10))
+    page = get_current_filings(page_size=10)
+    page.next()
+    assert len(calls) == 2
+    assert all("timeout" not in kwargs for _, kwargs in calls)
+
+
+@pytest.mark.fast
+@pytest.mark.parametrize("bad", [0, -5, "90", True])
+def test_a_bad_timeout_is_rejected_before_any_request(_record_gets, bad):
+    calls = _record_gets()
+    with pytest.raises(ValueError, match="timeout must be a positive number"):
+        get_current_filings(timeout=bad)
+    with pytest.raises(ValueError, match="timeout must be a positive number"):
+        get_all_current_filings(timeout=bad)
+    assert calls == []
+
+
+@pytest.fixture
+def _slow_feed(monkeypatch):
+    """Each client.get that times out advances a fake clock by its read timeout,
+    so stamina's time budget sees the elapsed time without the test waiting for it."""
+
+    clock = [1000.0]
+    monkeypatch.setattr(time, "monotonic", lambda: clock[0])
+    monkeypatch.setattr(time, "sleep", lambda seconds: clock.__setitem__(0, clock[0] + seconds))
+
+    def serve(timeouts_before_success: int):
+        calls = []
+
+        def fake_get(self, url, **kwargs):
+            calls.append(kwargs)
+            if len(calls) <= timeouts_before_success:
+                clock[0] += kwargs["timeout"].read
+                raise httpx.ReadTimeout("The read operation timed out")
+            return httpx.Response(200, content=_atom_feed(3))
+
+        monkeypatch.setattr(httpx.Client, "get", fake_get)
+        return calls
+    return serve
+
+
+@pytest.mark.fast
+def test_a_long_timeout_keeps_its_retries(_slow_feed):
+    """Two 60s read timeouts are 120s, well past stamina's default 45s budget.
+    The feed still gets its third attempt, which answers."""
+    calls = _slow_feed(timeouts_before_success=2)
+
+    page = get_current_filings(page_size=10, timeout=60)
+
+    assert len(calls) == 3
+    assert page.data["accession_number"].to_pylist() == [
+        "0000000001-26-000000", "0000000001-26-000001", "0000000001-26-000002"]
+
+
+@pytest.mark.fast
+def test_get_with_retry_spends_its_45s_budget_on_one_long_timeout(_slow_feed):
+    """Why the feed does not use get_with_retry when given a timeout: one 60s read
+    timeout exhausts the budget and the request is never retried (edgartools-9r9w).
+    When 9r9w is fixed this test should be flipped, not deleted."""
+    calls = _slow_feed(timeouts_before_success=2)
+
+    with pytest.raises((httpx.ReadTimeout, TransportError)):
+        get_with_retry("https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent",
+                       timeout=httpx.Timeout(60.0, connect=10.0))
+    assert len(calls) == 1
