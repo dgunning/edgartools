@@ -86,13 +86,15 @@ Get a single page of current filings with filtering options.
 ```python
 def get_current_filings(form: str = '', 
                        owner: str = 'include', 
-                       page_size: int = 100) -> CurrentFilings:
+                       page_size: int = 100,
+                       timeout: float | None = None) -> CurrentFilings:
 ```
 
 **Parameters:**
 - `form` (str): Filter by form type (e.g., "8-K", "10-K", "4")
 - `owner` (str): Owner filter - "include", "exclude", or "only"
 - `page_size` (int): Filings per page (10, 20, 40, 80, or 100)
+- `timeout` (float, optional): Read timeout in seconds for each feed page, kept for `next()` and `previous()`. Defaults to the client's 30s. `iter_current_filings_pages()` and `get_all_current_filings()` take it too.
 
 **Returns:** `CurrentFilings` object with pagination capabilities
 
@@ -354,6 +356,19 @@ for i in range(100):
 - ✅ Building bulk analysis or reporting
 
 ## Error Handling
+
+### When the Feed Is Slow
+
+SEC sometimes takes longer than 30 seconds to answer a feed page, especially deep into the feed. Pass `timeout` to give the feed more time without changing the timeout for any other request:
+
+```python
+from edgar import iter_current_filings_pages
+
+for page in iter_current_filings_pages(form="8-K", timeout=90):
+    print(len(page))
+```
+
+A timed-out page is retried up to 5 times however long the timeout is. Use `configure_http(timeout=...)` only when every request should wait longer.
 
 ### Common Issues and Solutions
 

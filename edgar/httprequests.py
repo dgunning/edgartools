@@ -38,6 +38,7 @@ This module provides functions to handle HTTP requests with retry logic, throttl
 """
 __all__ = [
     "get_with_retry",
+    "get_with_retry_no_time_budget",
     "get_with_retry_async",
     "stream_with_retry",
     "post_with_retry",
@@ -828,13 +829,42 @@ def get_with_retry(url, identity=None, identity_callable=None, **kwargs):
             any other httpx failure that survived every retry, with the original
             as its ``__cause__``. Without the flag those propagate as httpx types.
     """
+    return _get(get_with_retry, url, identity=identity, identity_callable=identity_callable, **kwargs)
+
+
+@wrap_transport_errors
+@retry(
+    on=should_retry,
+    attempts=QUICK_RETRY_ATTEMPTS,
+    timeout=None,
+    wait_initial=RETRY_WAIT_INITIAL,
+    wait_max=QUICK_WAIT_MAX,
+    wait_jitter=0.5,
+    wait_exp_base=2
+)
+@with_identity
+def get_with_retry_no_time_budget(url, identity=None, identity_callable=None, **kwargs):
+    """
+    `get_with_retry` bounded by attempts alone, for callers that raise the read timeout.
+
+    `get_with_retry` also stops at stamina's default 45s total budget, so a request
+    whose read timeout is 45s or more gets a single attempt (edgartools-9r9w). Here
+    every one of the QUICK_RETRY_ATTEMPTS attempts runs, so the worst case is about
+    five read timeouts plus ~15s of backoff. Pass the timeout as a kwarg, e.g.
+    ``timeout=Timeout(90.0, connect=10.0)``.
+    """
+    return _get(get_with_retry_no_time_budget, url, identity=identity, identity_callable=identity_callable, **kwargs)
+
+
+def _get(retry_fn, url, identity=None, identity_callable=None, **kwargs):
+    """One GET attempt; a redirect is followed through `retry_fn` with the same kwargs."""
     try:
         with http_client() as client:
             response = client.get(url, **kwargs)
             if response.status_code == 429:
                 raise TooManyRequestsError(url, retry_after=_get_retry_after(response))
             elif is_redirect(response):
-                return get_with_retry(url=redirect_url(url, response), identity=identity, identity_callable=identity_callable, **kwargs)
+                return retry_fn(url=redirect_url(url, response), identity=identity, identity_callable=identity_callable, **kwargs)
             return response
     except ConnectError as e:
         if is_ssl_error(e):

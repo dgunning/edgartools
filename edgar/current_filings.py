@@ -4,6 +4,7 @@ from typing import Optional
 
 import pyarrow as pa
 import pyarrow.compute as pc
+from httpx import Timeout
 from lxml import etree
 from rich import box
 from rich.console import Group
@@ -15,7 +16,8 @@ from rich.text import Text
 from edgar._filings import Filings
 from edgar.core import IntString
 from edgar.display.formatting import accepted_time_text, accession_number_text
-from edgar.httprequests import get_with_retry
+from edgar.exceptions import ValidationError
+from edgar.httprequests import get_with_retry, get_with_retry_no_time_budget
 from edgar.reference.tickers import find_ticker
 from edgar.xmltools import child_text, find_all_elements
 
@@ -126,9 +128,32 @@ def _parse_feed(content: bytes):
     return etree.fromstring(content, parser=etree.XMLParser(recover=True))
 
 
-def get_current_entries_on_page(count: int, start: int, form: Optional[str] = None, owner: str = 'include'):
+def _check_timeout(timeout: Optional[float]) -> Optional[float]:
+    if timeout is None:
+        return None
+    if isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or timeout <= 0:
+        raise ValidationError(f"timeout must be a positive number of seconds or None, got {timeout!r}",
+                              parameter="timeout", invalid_value=timeout,
+                              suggestions=["timeout=90 gives each feed page 90 seconds",
+                                           "omit timeout to use the client default (30s)"])
+    return timeout
+
+
+def _get_feed_page(url: str, timeout: Optional[float]):
+    if timeout is None:
+        return get_with_retry(url)
+    # A raised read timeout must not cost the retries: get_with_retry's 45s total
+    # budget would leave a 90s timeout a single attempt (edgartools-9r9w).
+    return get_with_retry_no_time_budget(url, timeout=Timeout(timeout, connect=10.0))
+
+
+def get_current_entries_on_page(count: int,
+                                start: int,
+                                form: Optional[str] = None,
+                                owner: str = 'include',
+                                timeout: Optional[float] = None):
     url = get_current_url(count=count, start=start, form=form if form else '', owner=owner, atom=True)
-    response = get_with_retry(url)
+    response = _get_feed_page(url, _check_timeout(timeout))
 
     # SEC serves this feed as Atom, so every element carries the Atom default
     # namespace. find_all_elements matches on the local name, which is what bs4 did;
@@ -170,12 +195,15 @@ class CurrentFilings(Filings):
                  form: str = '',
                  start: int = 1,
                  page_size: int = 40,
-                 owner: str = 'include'):
+                 owner: str = 'include',
+                 timeout: Optional[float] = None):
         super().__init__(filing_index, original_state=None)
         self._start = start
         self._page_size = page_size
         self.owner = owner
         self.form = form
+        # Read timeout for next()/previous(); None uses the client default
+        self.timeout = timeout
 
     @property
     def current_page(self) -> int:
@@ -192,7 +220,8 @@ class CurrentFilings(Filings):
         if len(self.data) < self._page_size:
             return None
         start = self._start + len(self.data)
-        next_entries = get_current_entries_on_page(start=start-1, count=self._page_size, form=self.form, owner=self.owner)
+        next_entries = get_current_entries_on_page(start=start-1, count=self._page_size, form=self.form, owner=self.owner,
+                                                   timeout=self.timeout)
         if next_entries:
             # Copy the values to this Filings object and return it
             self.data = pa.Table.from_pylist(next_entries)
@@ -204,7 +233,8 @@ class CurrentFilings(Filings):
         if self._start == 1:
             return None
         start = max(1, self._start - self._page_size)
-        previous_entries = get_current_entries_on_page(start=start, count=self._page_size, form=self.form, owner=self.owner)
+        previous_entries = get_current_entries_on_page(start=start, count=self._page_size, form=self.form, owner=self.owner,
+                                                       timeout=self.timeout)
         if previous_entries:
             # Copy the values to this Filings object and return it
             self.data = pa.Table.from_pylist(previous_entries)
@@ -382,7 +412,8 @@ class CurrentFilings(Filings):
 
 def get_all_current_filings(form: str = '',
                             owner: str = 'include',
-                            page_size: int = 100) -> 'Filings':
+                            page_size: int = 100,
+                            timeout: Optional[float] = None) -> 'Filings':
     """
     Get ALL current filings by iterating through all pages.
 
@@ -390,6 +421,8 @@ def get_all_current_filings(form: str = '',
         form: Form type to filter by (e.g., "10-K", "8-K")
         owner: Owner filter ('include', 'exclude', 'only')
         page_size: Number of filings per page (10, 20, 40, 80, 100)
+        timeout: Read timeout in seconds for each feed page, for when SEC is slow to
+                 answer. Applies to these requests only; None uses the client default (30s).
 
     Returns:
         Filings: A regular Filings object containing all current filings
@@ -401,7 +434,7 @@ def get_all_current_filings(form: str = '',
     from edgar._filings import Filings
     all_entries = []
 
-    for page in iter_current_filings_pages(form=form, owner=owner, page_size=page_size):
+    for page in iter_current_filings_pages(form=form, owner=owner, page_size=page_size, timeout=timeout):
         # Convert PyArrow table to list and extend
         page_entries = page.data.to_pylist()
         all_entries.extend(page_entries)
@@ -423,7 +456,8 @@ def get_all_current_filings(form: str = '',
 
 def get_current_filings(form: str = '',
                         owner: str = 'include',
-                        page_size: Optional[int] = 40):
+                        page_size: Optional[int] = 40,
+                        timeout: Optional[float] = None):
     """
     Get real-time filings from the SEC (updated every few minutes).
 
@@ -447,29 +481,38 @@ def get_current_filings(form: str = '',
         >>> # Get first 100 current filings
         >>> current = get_current_filings(page_size=100)
 
+        >>> # Give a slow feed 90s per page; other requests keep the 30s default
+        >>> current = get_current_filings(form="8-K", page_size=100, timeout=90)
+
     :param form: Form type to filter by (e.g., "10-K", "8-K")
     :param owner: Owner filter ('include', 'exclude', 'only')
     :param page_size: Number of filings per page (10, 20, 40, 80, 100).
                       Use None to fetch ALL current filings (iterates through all pages).
+    :param timeout: Read timeout in seconds for each feed page, carried to next()/previous().
+                    Applies to these requests only; None uses the client default (30s).
     :return: CurrentFilings (single page) or Filings (all pages if page_size=None)
     """
     # If page_size is None, fetch all current filings
     if page_size is None:
-        return get_all_current_filings(form=form, owner=owner, page_size=100)
+        return get_all_current_filings(form=form, owner=owner, page_size=100, timeout=timeout)
 
     owner = owner if owner in ['include', 'exclude', 'only'] else 'include'
     page_size = page_size if page_size in [10, 20, 40, 80, 100] else 100
+    timeout = _check_timeout(timeout)
     start = 0
 
-    entries = get_current_entries_on_page(count=page_size, start=start, form=form, owner=owner)
+    entries = get_current_entries_on_page(count=page_size, start=start, form=form, owner=owner, timeout=timeout)
     if not entries:
-        return CurrentFilings(filing_index=_empty_filing_index(), owner=owner, form=form, page_size=page_size)
-    return CurrentFilings(filing_index=pa.Table.from_pylist(entries), owner=owner, form=form, page_size=page_size)
+        return CurrentFilings(filing_index=_empty_filing_index(), owner=owner, form=form, page_size=page_size,
+                              timeout=timeout)
+    return CurrentFilings(filing_index=pa.Table.from_pylist(entries), owner=owner, form=form, page_size=page_size,
+                          timeout=timeout)
 
 
 def iter_current_filings_pages(form: str = '',
                                owner: str = 'include',
-                               page_size: int = 100):
+                               page_size: int = 100,
+                               timeout: Optional[float] = None):
     """
     Iterator that yields CurrentFilings pages until exhausted.
 
@@ -477,6 +520,8 @@ def iter_current_filings_pages(form: str = '',
         form: Form type to filter by (e.g., "10-K", "8-K")
         owner: Owner filter ('include', 'exclude', 'only')
         page_size: Number of filings per page (10, 20, 40, 80, 100)
+        timeout: Read timeout in seconds for each feed page, for when SEC is slow to
+                 answer. Applies to these requests only; None uses the client default (30s).
 
     Yields:
         CurrentFilings: Each page of current filings until no more pages
@@ -486,7 +531,7 @@ def iter_current_filings_pages(form: str = '',
         ...     print(f"Processing {len(page)} filings")
         ...     # Process each page
     """
-    current_page = get_current_filings(form=form, owner=owner, page_size=page_size)
+    current_page = get_current_filings(form=form, owner=owner, page_size=page_size, timeout=timeout)
 
     while current_page is not None:
         yield current_page
