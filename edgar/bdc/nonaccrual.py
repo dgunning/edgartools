@@ -17,7 +17,8 @@ Usage::
     filing = Company("ARCC").get_filings(form="10-K").latest()
     result = extract_nonaccrual(filing)
     print(result.nonaccrual_rate)       # e.g. 0.012
-    print(result.num_nonaccrual)        # e.g. 20
+    print(result.num_nonaccrual)        # e.g. 20, or None when the filing gives only a total
+    print(result.evidence_level)        # 'investment' | 'aggregate' | 'none'
     for inv in result.investments:
         print(inv.company_name, inv.fair_value)
 """
@@ -184,7 +185,31 @@ class NonAccrualResult:
         return float(self.nonaccrual_fair_value / self.total_portfolio_fair_value)
 
     @property
-    def num_nonaccrual(self) -> int:
+    def evidence_level(self) -> str:
+        """What the filing gave as non-accrual evidence.
+
+        * ``'investment'`` — footnotes resolved individual investments, so they can be counted.
+        * ``'aggregate'`` — only a portfolio-level rate or amount (a custom or us-gaap
+          concept); nothing says which investments, or how many.
+        * ``'none'`` — no signal at all. That means unknown, not zero: a BDC can
+          disclose non-accruals only in prose.
+        """
+        if self.investments:
+            return 'investment'
+        if self.extraction_method in ('custom_concept', 'aggregate_concept'):
+            return 'aggregate'
+        return 'none'
+
+    @property
+    def num_nonaccrual(self) -> Optional[int]:
+        """Count of non-accrual investment rows, or None when the filing does not identify them.
+
+        Counts rows as the schedule lists them, so a company with two non-accrual
+        loans counts twice. None when ``evidence_level`` is ``'aggregate'`` or ``'none'``:
+        an aggregate rate proves non-accruals exist without saying how many.
+        """
+        if self.evidence_level != 'investment':
+            return None
         return len(self.investments)
 
     @property
@@ -228,11 +253,17 @@ class NonAccrualResult:
         lines.append(f'Period: {self.period}')
         lines.append(f'Filing: {self.source_filing}')
         lines.append(f'Non-Accrual Rate: {rate_pct}')
-        lines.append(f'Non-Accrual Investments: {self.num_nonaccrual}')
+        if self.num_nonaccrual is not None:
+            lines.append(f'Non-Accrual Investments: {self.num_nonaccrual}')
+        elif self.evidence_level == 'aggregate':
+            lines.append('Non-Accrual Investments: not itemized (the filing gives only a portfolio-level figure)')
+        else:
+            lines.append('Non-Accrual Investments: unknown (no non-accrual data in the XBRL)')
         if self.nonaccrual_fair_value is not None:
             lines.append(f'Non-Accrual Fair Value: ${self.nonaccrual_fair_value:,.0f}')
         if self.total_portfolio_fair_value is not None:
             lines.append(f'Total Portfolio Fair Value: ${self.total_portfolio_fair_value:,.0f}')
+        lines.append(f'Evidence Level: {self.evidence_level}')
         lines.append(f'Extraction Method: {self.extraction_method}')
 
         # Data-quality warnings — surfaced at all detail levels so an LLM never
@@ -280,7 +311,8 @@ class NonAccrualResult:
             lines.append('AVAILABLE ACTIONS:')
             lines.append('  .investments         List of NonAccrualInvestment objects')
             lines.append('  .nonaccrual_rate     Computed non-accrual rate at fair value')
-            lines.append('  .num_nonaccrual      Count of non-accrual investments')
+            lines.append('  .num_nonaccrual      Count of non-accrual investments (None unless itemized)')
+            lines.append('  .evidence_level      investment | aggregate | none')
             lines.append('  .nonaccrual_fair_value   Sum of non-accrual fair values')
             return '\n'.join(lines)
 
@@ -305,7 +337,8 @@ class NonAccrualResult:
         lines.append('AVAILABLE ACTIONS:')
         lines.append('  .investments         List of NonAccrualInvestment objects')
         lines.append('  .nonaccrual_rate     Computed non-accrual rate at fair value')
-        lines.append('  .num_nonaccrual      Count of non-accrual investments')
+        lines.append('  .num_nonaccrual      Count of non-accrual investments (None unless itemized)')
+        lines.append('  .evidence_level      investment | aggregate | none')
         lines.append('  .nonaccrual_fair_value   Sum of non-accrual fair values')
         lines.append('  .unique_footnote_texts   Distinct source footnote texts')
         return '\n'.join(lines)

@@ -78,6 +78,21 @@ patterns:
       which. An investment with no recoverable industry has industry, sector
       and industry_source all None, never an empty string.
 
+  - name: BDC Non-Accrual
+    when: Which BDC loans are on non-accrual, or the non-accrual rate
+    code: |
+      from edgar.bdc import extract_nonaccrual
+      result = extract_nonaccrual(filing)        # a BDC 10-K/10-Q Filing, or a BDCEntity
+      result.nonaccrual_rate                     # non-accrual FV / portfolio FV
+      result.evidence_level                      # 'investment' | 'aggregate' | 'none'
+      result.num_nonaccrual                      # int only when 'investment'; else None
+      result.investments                         # NonAccrualInvestment rows (company_name, fair_value, cost)
+    note: |
+      num_nonaccrual None means the filing does not itemize non-accruals: an
+      aggregate rate (evidence_level 'aggregate') proves some exist without a
+      count, and 'none' means no XBRL signal. Never read None as zero. The count
+      is of schedule rows, so one company with two loans counts twice.
+
   - name: Report Backlinks
     when: Navigate from report to filing
     code: |

@@ -428,6 +428,7 @@ print(f"Non-accrual count:   {result.num_nonaccrual}")
 print(f"Non-accrual FV:      ${result.nonaccrual_fair_value:,.0f}")
 print(f"Total portfolio FV:  ${result.total_portfolio_fair_value:,.0f}")
 print(f"Extraction method:   {result.extraction_method}")
+print(f"Evidence level:      {result.evidence_level}")
 ```
 
 **Output:**
@@ -437,6 +438,7 @@ Non-accrual count:   20
 Non-accrual FV:      $332,500,000
 Total portfolio FV:  $26,800,000,000
 Extraction method:   footnote
+Evidence level:      investment
 ```
 
 ### Inspect Individual Investments
@@ -514,12 +516,25 @@ elif result.nonaccrual_rate == 0.0:
     print("BDC reported zero non-accrual investments")
 ```
 
+### Counting Non-Accrual Investments
+
+`num_nonaccrual` is only a count when the filing itemizes its non-accrual investments, and `evidence_level` says whether it does:
+
+| `evidence_level` | What the filing gave | `num_nonaccrual` |
+|------------------|----------------------|------------------|
+| `'investment'` | Footnotes flagging individual investments | Count of flagged rows |
+| `'aggregate'` | Only a portfolio-level rate or amount | `None` |
+| `'none'` | No non-accrual data in the XBRL | `None` |
+
+An aggregate figure proves non-accruals exist without saying how many. WhiteHorse Finance's 10-K for 2025 reports $10.6 million of non-accrual investments at fair value and no per-investment footnotes, so its count is `None`, not 0. The count is of investment rows, so a company with two non-accrual loans counts twice.
+
 ### NonAccrualResult Reference
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `nonaccrual_rate` | `float \| None` | Non-accrual fair value / total portfolio FV |
-| `num_nonaccrual` | `int` | Count of non-accrual investments |
+| `num_nonaccrual` | `int \| None` | Count of non-accrual investment rows; `None` unless `evidence_level` is `'investment'` |
+| `evidence_level` | `str` | `'investment'`, `'aggregate'`, or `'none'` — see [Counting Non-Accrual Investments](#counting-non-accrual-investments) |
 | `nonaccrual_fair_value` | `Decimal \| None` | Sum of non-accrual investment fair values |
 | `total_portfolio_fair_value` | `Decimal \| None` | Sum of all portfolio investment fair values |
 | `investments` | `list[NonAccrualInvestment]` | Individual non-accrual positions (footnote method only) |
