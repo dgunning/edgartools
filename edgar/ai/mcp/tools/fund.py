@@ -7,6 +7,7 @@ Get fund, ETF, BDC, and money market fund data from SEC filings.
 from __future__ import annotations
 
 import logging
+import re
 from decimal import Decimal
 from typing import Any, Optional
 
@@ -496,6 +497,37 @@ async def _bdc_search(query: str, limit: int) -> Any:
         return error(str(e), suggestions=get_error_suggestions(e))
 
 
+_MAX_AMBIGUOUS_BDCS = 5
+_BDC_NAME_SUFFIXES = {"corp", "corporation", "inc", "incorporated", "co", "company", "llc", "lp", "l.p", "ltd"}
+
+
+def _bdc_name_key(name: str) -> str:
+    """A name without case, punctuation or a trailing corporate suffix: "ARES CAPITAL CORP" -> "ares capital"."""
+    words = re.sub(r"[^\w\s.]", " ", str(name).casefold()).split()
+    while len(words) > 1 and words[-1].rstrip(".") in _BDC_NAME_SUFFIXES:
+        words.pop()
+    return " ".join(words)
+
+
+def _pick_bdc_search_winner(query: str, rows: list[dict]) -> Optional[int]:
+    """The CIK a name search may resolve to without asking, from score-ordered rows, or None.
+
+    Every whole-word hit scores ~100 ("Golub" matches four Golub BDCs at 99.4-100),
+    so the top hit alone proves nothing. One name equal to the query, ignoring a
+    corporate suffix, wins ("Ares Capital" is ARES CAPITAL CORP, not its 99.3-scoring
+    sibling funds). Otherwise the top hit needs >= 95 with the runner-up under 90.
+    """
+    wanted = _bdc_name_key(query)
+    exact = [row for row in rows if _bdc_name_key(row["name"]) == wanted]
+    if len(exact) == 1:
+        return int(exact[0]["cik"])
+    top = float(rows[0]["score"])
+    runner_up = float(rows[1]["score"]) if len(rows) > 1 else None
+    if top >= 95 and (runner_up is None or runner_up < 90):
+        return int(rows[0]["cik"])
+    return None
+
+
 def _bdc_investment_record(inv) -> dict[str, Any]:
     """One PortfolioInvestment as a record. Every key is always present; a missing
     value is None, never 0, so an absent figure cannot read as a zero position."""
@@ -537,11 +569,21 @@ async def _bdc_portfolio(identifier: str, limit: int) -> Any:
             except (ValueError, TypeError):
                 pass
 
-        # Try search as fallback
+        # Try search as fallback; it must identify one BDC, never guess between several
         if bdc is None:
-            search_results = find_bdc(identifier, top_n=1)
-            if not search_results.empty:
-                bdc = search_results[0]
+            rows = find_bdc(identifier, top_n=6).results.to_dict("records")
+            if rows:
+                winner = _pick_bdc_search_winner(identifier, rows)
+                if winner is None:
+                    return error(
+                        f"'{identifier}' matches more than one BDC; pass a ticker or CIK",
+                        suggestions=[
+                            f"{row['name']}: identifier='{int(row['cik'])}'"
+                            for row in rows[:_MAX_AMBIGUOUS_BDCS]
+                        ],
+                        error_code="AMBIGUOUS_BDC",
+                    )
+                bdc = bdcs.get_by_cik(winner)
 
         if bdc is None:
             return error(
