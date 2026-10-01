@@ -126,9 +126,11 @@ CIK: 1287750
 File Number: 814-00663
 State: MD
 Active: True
-Last Filing: 2024-11-05
+Last Filing: 2025-05-29
 Last Form: 10-Q
 ```
+
+`last_filing_date` is as of the SEC BDC report the row came from, so it can be a year or more old. The SEC's newest report does not list every BDC (Ares Capital is in the 2025 report but not the 2026 one), so for a BDC missing from it whose report date is outside the 18-month window, `is_active` checks the company's own filings. That costs one request per such BDC per session. `in_latest_report` tells you which rows these are.
 
 ## Portfolio Investments
 

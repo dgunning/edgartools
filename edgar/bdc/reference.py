@@ -43,6 +43,24 @@ BDC_REPORT_BASE_URL = "https://www.sec.gov/files/investment/data/other/business-
 # year presented as confirmed is how a moved dataset reads as current data.
 _BDC_REPORT_FALLBACK_YEAR = 2024
 
+# A BDC counts as actively filing when it has filed within this many months.
+ACTIVE_FILING_WINDOW_MONTHS = 18
+
+
+def _within_active_window(filing_date: date) -> bool:
+    return filing_date >= date.today() - relativedelta(months=ACTIVE_FILING_WINDOW_MONTHS)
+
+
+@lru_cache(maxsize=None)
+def _latest_filing_date(cik: int) -> Optional[date]:
+    """The newest filing date in the company's own submissions, or None if it has none."""
+    from edgar.entity.submissions import download_entity_submissions_from_sec
+    submissions = download_entity_submissions_from_sec(cik)
+    if not submissions:
+        return None
+    dates = submissions.get('filings', {}).get('recent', {}).get('filingDate') or []
+    return max(date.fromisoformat(d) for d in dates) if dates else None
+
 
 @dataclass
 class BDCEntity:
@@ -59,8 +77,11 @@ class BDCEntity:
     city: Optional[str] = None
     state: Optional[str] = None
     zip_code: Optional[str] = None
-    last_filing_date: Optional[date] = None
+    last_filing_date: Optional[date] = None  # As of the report this row came from
     last_filing_type: Optional[str] = None
+    # False when the row comes from an older report than the newest one published,
+    # i.e. the SEC dropped this registrant from its latest snapshot (GH #1146)
+    in_latest_report: bool = True
 
     @property
     def is_active(self) -> bool:
@@ -71,13 +92,30 @@ class BDCEntity:
         BDCs that haven't filed recently may have been acquired, liquidated,
         or converted to a different structure.
 
+        ``last_filing_date`` is as of the SEC report the row came from. For a BDC
+        the newest report no longer lists, that date is a year or more behind
+        (Ares Capital's is 2025-05-29 though it files every quarter), so once it
+        leaves the window the company's own filings decide, with one request
+        per such BDC per session.
+
         Returns:
             True if the BDC has filed within the last 18 months.
         """
-        if not self.last_filing_date:
+        if self.last_filing_date and _within_active_window(self.last_filing_date):
+            return True
+        if self.in_latest_report:
             return False
-        cutoff = date.today() - relativedelta(months=18)
-        return self.last_filing_date >= cutoff
+        try:
+            latest = _latest_filing_date(self.cik)
+        except Exception as e:
+            if not is_unreachable(e):
+                raise
+            log.warning(
+                "Could not check %s's own filings (%s); is_active uses its report row from %s.",
+                self.name, type(e).__name__, self.last_filing_date,
+            )
+            return False
+        return latest is not None and _within_active_window(latest)
 
     def __rich__(self):
 
@@ -674,6 +712,7 @@ def _combined_bdc_report(union_years: int = BDC_REPORT_UNION_YEARS) -> pd.DataFr
     if 'cik' in combined.columns:
         combined = combined[combined['cik'].notna()].drop_duplicates(subset='cik', keep='first')
 
+    combined['in_latest_report'] = combined['report_year'] == latest
     return combined.drop(columns='report_year')
 
 
@@ -700,6 +739,8 @@ def get_bdc_list(year: Optional[int] = None) -> BDCEntities:
         BDCEntities with NY-based BDCs
     """
     df = fetch_bdc_report(year) if year is not None else _combined_bdc_report()
+    # A requested year is a snapshot of then: its rows are only current if it is the newest
+    in_latest = year is None or year >= get_latest_bdc_report_year()
 
     bdcs = []
     for _, row in df.iterrows():
@@ -716,6 +757,7 @@ def get_bdc_list(year: Optional[int] = None) -> BDCEntities:
             zip_code=str(row.get('zip_code', '')) if pd.notna(row.get('zip_code')) else None,
             last_filing_date=last_date,
             last_filing_type=str(row.get('last_filing_type', '')) if pd.notna(row.get('last_filing_type')) else None,
+            in_latest_report=bool(row.get('in_latest_report', True)) and in_latest,
         ))
 
     # Sort by name
