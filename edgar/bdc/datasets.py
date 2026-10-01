@@ -844,11 +844,16 @@ class BDCDataset:
         fair value summed over the same line items, read from whichever header
         DERA used. The SOI extract carries foreign-currency positions in their
         own currency, so the summed fallback can sit a few percent under the
-        filed total.
+        filed total. It can also sit well over it: DERA's line items include
+        subtotals and restated copies of holdings that sit at the same depth
+        (2025Q4 summed: FSK +46.7%, OBDC +14.2%, MAIN +8.5% against their filed
+        totals). ``total_source`` says which one each row is, ``'filed'`` or
+        ``'summed'``; for a reconciled per-holding view of one filing use
+        ``PortfolioInvestments`` from its XBRL instead.
 
         Returns:
-            DataFrame with columns cik, name, form, filed, num_investments and
-            total_fair_value, sorted by total_fair_value descending.
+            DataFrame with columns cik, name, form, filed, num_investments,
+            total_fair_value and total_source, sorted by total_fair_value descending.
             total_fair_value is absent when neither source is available; a
             warning names the headers looked for.
         """
@@ -886,12 +891,17 @@ class BDCDataset:
         summary = line_items.groupby(['cik', 'name', 'adsh']).agg(**aggregations).reset_index()
 
         filed_totals = self._filed_investment_totals()
-        if filed_totals is not None:
-            reported = summary['adsh'].map(filed_totals)
-            if 'total_fair_value' in summary.columns:
-                summary['total_fair_value'] = reported.combine_first(summary['total_fair_value'])
-            else:
-                summary['total_fair_value'] = reported
+        reported = summary['adsh'].map(filed_totals) if filed_totals is not None else None
+        if 'total_fair_value' in summary.columns or reported is not None:
+            summed = summary['total_fair_value'] if 'total_fair_value' in summary.columns else None
+            if reported is not None:
+                summary['total_fair_value'] = reported if summed is None else reported.combine_first(summed)
+            source = pd.Series(None, index=summary.index, dtype=object)
+            if summed is not None:
+                source[summed.notna()] = 'summed'
+            if reported is not None:
+                source[reported.notna()] = 'filed'
+            summary['total_source'] = source
         summary = summary.drop(columns='adsh')
         sort_by = 'total_fair_value' if 'total_fair_value' in summary.columns else 'num_investments'
         return summary.sort_values(sort_by, ascending=False).reset_index(drop=True)

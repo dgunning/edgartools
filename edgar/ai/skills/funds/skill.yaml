@@ -55,6 +55,7 @@ patterns:
       investments.by_industry()                  # sector | num_investments | total_fair_value | pct_of_portfolio
       investments.reported_total_fair_value      # The filer's balance-sheet total: use this for the portfolio size
       investments.reconciliation_gap             # Rows vs reported total, e.g. 0.003; check before trusting sums
+      investments.unfunded_commitments_fair_value  # Negative; FSK nets -1,448.1M out of its total, the gap allows for it
       investments.excluded                       # Subtotal / duplicate rows left out, each with .reason
       inv = investments[0]
       inv.industry / inv.sector / inv.industry_source   # as filed / normalized / axis|enumeration|identifier|peer|None
@@ -64,7 +65,7 @@ patterns:
       dataset.soi                                # Schedule of investments data
       dataset.summary_by_industry()              # industry | total_fair_value | num_bdcs | num_investments
       dataset.summary_by_industry(by='sector')   # spellings folded: "Software Sector" + "Software & Services" -> Software
-      dataset.summary_by_company()               # cik | name | form | filed | num_investments | total_fair_value
+      dataset.summary_by_company()               # cik | name | form | filed | num_investments | total_fair_value | total_source
       dataset.schedule_of_investments.search("Ivy Hill")   # Which BDCs hold a company
       dataset.schedule_of_investments.to_dataframe(clean=True)  # fair_value, cost, industry, industry_source, sector
     note: |

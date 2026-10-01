@@ -2109,6 +2109,39 @@ def _reported_total_fair_value(all_facts, period: Optional[str]):
     return (best[1], best[2]) if best else (None, None)
 
 
+# Investment-type members a filer uses to net unfunded commitments out of its
+# totals: fsk:UnfundedSeniorSecuredLoansFirstLienMember, ...NettingMember
+_NETTING_MEMBER_RE = re.compile(r'unfunded|netting|commitment', re.IGNORECASE)
+
+
+def _unfunded_commitments_fair_value(all_facts, period: Optional[str]) -> Optional[Decimal]:
+    """The fair value of unfunded commitments the filer nets out of its total, or None.
+
+    Some filers report each holding's funded fair value on the schedule and carry
+    unfunded commitments only as negative totals by investment type (FSK:
+    -1,338.4M of first lien, -98.9M of asset based finance), so the balance-sheet
+    total is net of an amount no row carries. Only facts dimensioned by
+    ``InvestmentTypeAxis`` alone count, one per member, the most precise.
+    """
+    best: dict = {}
+    for fact in all_facts:
+        if fact.get('concept') != 'us-gaap:InvestmentOwnedAtFairValue' or fact.get('period_instant') != period:
+            continue
+        dims = {key: fact.get(key) for key in fact if key.startswith('dim_') and fact.get(key)}
+        member = dims.get('dim_us-gaap_InvestmentTypeAxis')
+        if len(dims) != 1 or not member or not _NETTING_MEMBER_RE.search(str(member)):
+            continue
+        value = fact.get('numeric_value')
+        if value is None or pd.isna(value) or value >= 0:
+            continue
+        precision = _as_float(fact.get('decimals'), -99)
+        if member not in best or precision > best[member][0]:
+            best[member] = (precision, Decimal(str(value)))
+    if not best:
+        return None
+    return sum((value for _, value in best.values()), Decimal(0))
+
+
 def _as_float(value, default: float) -> float:
     try:
         return float(value)
@@ -2118,6 +2151,58 @@ def _as_float(value, default: float) -> float:
 
 # "Debt Investments Healthcare Services, Other and Total Marathon Health, LLC"
 _COMPANY_TOTAL_RE = re.compile(r'\bTotal\s+(.+)$')
+
+# A footnote marker on a member name: "AAM Series 2.1 Aviation Feeder, LLC(d)"
+_FOOTNOTE_MARK_RE = re.compile(r'(?:\s*\([a-z0-9]{1,2}\))+\s*$', re.IGNORECASE)
+_DBA_RE = re.compile(r'\(\s*(?:dba|d/b/a|fka|f/k/a)\s+([^)]+)\)', re.IGNORECASE)
+_NAME_SUFFIX_RE = re.compile(
+    r'(?:\s+(?:inc|incorporated|corp|corporation|co|company|llc|l l c|lp|l p|ltd|limited|plc|holdings?))+$')
+
+
+# Identifier facts with one of these dimensions too are not the filer's holdings.
+# BCSF and NMFC list their senior loan programs' portfolios on the identifier axis
+# under InvestmentCompanyNonconsolidatedSubsidiaryAxis (BCSF +90% above its
+# balance sheet with them, exact without); SAR lists a non-consolidated CLO's
+# under LegalEntityAxis; OBDC tags "investments ranging from $24.8M to $303.9M"
+# with srt:RangeAxis.
+_NON_HOLDING_AXES = (
+    'dim_us-gaap_InvestmentCompanyNonconsolidatedSubsidiaryAxis',
+    'dim_dei_LegalEntityAxis',
+    'dim_srt_RangeAxis',
+)
+
+
+def _strip_footnote_marks(identifier: str) -> str:
+    return _FOOTNOTE_MARK_RE.sub('', identifier)
+
+
+def _company_keys(inv: PortfolioInvestment) -> set:
+    """Names a row's company goes by: its own, without suffix, and any "(dba X)"."""
+    name = _strip_footnote_marks(inv.company_name or '')
+    keys = {_DBA_RE.sub('', match).strip() for match in _DBA_RE.findall(name)}
+    keys.add(_DBA_RE.sub('', name))
+    normalized = set()
+    for key in keys:
+        key = re.sub(r'[^a-z0-9]+', ' ', key.lower()).strip()
+        key = _NAME_SUFFIX_RE.sub('', key).strip()
+        if key:
+            normalized.add(key)
+    return normalized
+
+
+def _names_only_a_company(inv: PortfolioInvestment) -> bool:
+    """The row's identifier is a company name with no instrument: "New PLI Holdings, LLC (dba PLI)"."""
+    if inv.investment_type in (None, '', 'Unknown'):
+        return True
+    return _strip_footnote_marks(inv.identifier).strip() == _strip_footnote_marks(inv.company_name or '').strip()
+
+
+def _rounding_tolerance(value: Decimal) -> Decimal:
+    """Half the unit a value was rounded to: 24,100,000 was reported to $0.1M."""
+    unit = Decimal(1000)
+    while unit < Decimal(1_000_000) and value % (unit * 10) == 0:
+        unit *= 10
+    return unit / 2
 
 
 def _exclude_restated_rows(rows: list[PortfolioInvestment]):
@@ -2138,7 +2223,14 @@ def _exclude_restated_rows(rows: list[PortfolioInvestment]):
       ("ITA HOLDINGS GROUP, LLC" / "ITA Holdings Group, LLC", CSWC);
     - a row with no cost whose fair value equals a costed row's: the affiliate
       roll-forward restating a holding under its own member name
-      ("Blue Owl Credit SLF LLC(c)", OBDC; "Production Resource Group LLC 8", FSK).
+      ("Blue Owl Credit SLF LLC(c)", OBDC; "Production Resource Group LLC 8", FSK);
+    - a row with no cost equal to the sum of the rows for the same company, by
+      name without footnote marks or suffix, or by a shared "(dba X)": OBDC's
+      "New PLI Holdings, LLC (dba PLI)" = its units plus "Swipe Acquisition
+      Corporation (dba PLI)"'s loans;
+    - consecutive rows with no cost, naming companies listed nowhere else, that
+      add up to one costed row: a footnote's breakdown of a holding (OBDC's eight
+      "... Custom Windows" entities, $0.1M precision, = "Windows Entities | LLC Units").
 
     Returns ``(kept, excluded)``.
     """
@@ -2174,7 +2266,7 @@ def _exclude_restated_rows(rows: list[PortfolioInvestment]):
     for inv in sorted(kept, key=lambda i: -len(i.identifier)):
         if not inv.fair_value:
             continue
-        ident = inv.identifier
+        ident = _strip_footnote_marks(inv.identifier)
         parts = [o for o in kept if o is not inv and o.identifier.startswith(ident)
                  and len(o.identifier) > len(ident) and not o.identifier[len(ident)].isalnum()]
         if parts and abs(sum(map(fv, parts)) - fv(inv)) <= tolerance(len(parts)):
@@ -2202,6 +2294,53 @@ def _exclude_restated_rows(rows: list[PortfolioInvestment]):
         if inv.fair_value and inv.cost is None and inv.fair_value in costed:
             drop(inv, "no cost, fair value equal to a costed row")
 
+    # Cost-less company totals, matched by name rather than by identifier prefix.
+    # A total names a company and no instrument; without that condition a filer
+    # that tags no cost loses a first lien equal to its second.
+    for inv in list(kept):
+        if inv.cost is not None or not inv.fair_value or inv.fair_value <= 0 or not _names_only_a_company(inv):
+            continue
+        keys = _company_keys(inv)
+        parts = [o for o in kept if o is not inv and keys & _company_keys(o)]
+        if parts and abs(sum(map(fv, parts)) - fv(inv)) <= tolerance(len(parts)):
+            drop(inv, f"no cost, total of {len(parts)} row(s) for the same company")
+
+    # Cost-less breakdowns of one costed row, listed consecutively. Only orphans:
+    # a breakdown names entities the schedule lists nowhere else, and without
+    # that condition unrelated rows match by coincidence (GBDC's "G & H Wire",
+    # "IMPLUS Footcare" and "Reaction Biology" company rows summed to a fourth).
+    targets = sorted(inv.fair_value for inv in kept if inv.cost is not None and inv.fair_value)
+    key_counts: dict = {}
+    for inv in kept:
+        for key in _company_keys(inv):
+            key_counts[key] = key_counts.get(key, 0) + 1
+
+    def orphan(inv) -> bool:
+        return all(key_counts.get(key, 0) == 1 for key in _company_keys(inv))
+
+    run: list = []
+    runs = []
+    for inv in kept + [None]:
+        if (inv is not None and inv.cost is None and inv.fair_value and inv.fair_value > 0
+                and orphan(inv)):
+            run.append(inv)
+            continue
+        if len(run) >= 2:
+            runs.append(run)
+        run = []
+    for run in runs:
+        for start in range(len(run)):
+            total = Decimal(0)
+            slack = Decimal(0)
+            for end in range(start, len(run)):
+                total += run[end].fair_value
+                slack += _rounding_tolerance(run[end].fair_value)
+                if end > start and any(abs(total - t) <= slack for t in targets):
+                    for part in run[start:end + 1]:
+                        if part in kept:
+                            drop(part, f"no cost, one of {end - start + 1} rows that add up to a costed row")
+                    break
+
     return kept, excluded
 
 
@@ -2228,12 +2367,14 @@ class PortfolioInvestments:
         nonaccrual_fair_value: Optional[Decimal] = None,
         reported_total_fair_value: Optional[Decimal] = None,
         excluded: Optional[list['ExcludedInvestment']] = None,
+        unfunded_commitments_fair_value: Optional[Decimal] = None,
     ):
         self._investments = investments
         self._period = period
         self._nonaccrual_fair_value = nonaccrual_fair_value
         self._reported_total_fair_value = reported_total_fair_value
         self._excluded = excluded or []
+        self._unfunded_commitments_fair_value = unfunded_commitments_fair_value
 
     def __len__(self) -> int:
         return len(self._investments)
@@ -2324,7 +2465,27 @@ class PortfolioInvestments:
         reported = self._reported_total_fair_value
         if not reported:
             return None
-        return float(self.total_fair_value / reported - 1)
+        return float(self.total_fair_value / (reported - self._unitemized_netting()) - 1)
+
+    @property
+    def unfunded_commitments_fair_value(self) -> Optional[Decimal]:
+        """The negative fair value of unfunded commitments the filer nets out of its total.
+
+        FSK reports -1,448.1M this way for 2025: its schedule rows are funded
+        positions and its 13,008.6M balance-sheet total is net of this, so
+        ``reconciliation_gap`` adds back whatever no row carries. None when the
+        filer tags no such total, or for a filtered subset.
+        """
+        return self._unfunded_commitments_fair_value
+
+    def _unitemized_netting(self) -> Decimal:
+        """The part of the netting that no row carries (OBDC itemizes its -3.4M)."""
+        netting = self._unfunded_commitments_fair_value
+        if netting is None:
+            return Decimal(0)
+        itemized = sum((inv.fair_value for inv in self._investments
+                        if inv.fair_value is not None and inv.fair_value < 0), Decimal(0))
+        return min(Decimal(0), netting - itemized)
 
     @property
     def excluded(self) -> list['ExcludedInvestment']:
@@ -2865,6 +3026,7 @@ class PortfolioInvestments:
         # U_USD 23,226,000 and U_SEK 214,115,000, and keeping whichever came last
         # put SEK into a USD total (edgartools-6xxb).
         reported_total, reporting_unit = _reported_total_fair_value(all_facts, period)
+        unfunded = _unfunded_commitments_fair_value(all_facts, period)
 
         # Group facts by investment identifier
         investments = {}
@@ -2879,6 +3041,10 @@ class PortfolioInvestments:
             # Check for investment dimension
             inv_identifier = fact.get(dim_key)
             if not inv_identifier:
+                continue
+
+            # A joint venture's or CLO's own holdings, or a range, not this filer's position
+            if any(fact.get(axis) for axis in _NON_HOLDING_AXES):
                 continue
 
             # Check period matches
@@ -2985,4 +3151,5 @@ class PortfolioInvestments:
         )
 
         return cls(portfolio, period=period, nonaccrual_fair_value=nonaccrual_fv,
-                   reported_total_fair_value=reported_total, excluded=excluded)
+                   reported_total_fair_value=reported_total, excluded=excluded,
+                   unfunded_commitments_fair_value=unfunded)

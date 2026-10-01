@@ -278,6 +278,18 @@ else:
     print("This BDC only provides aggregate data")
 ```
 
+### Reconcile Against the Balance Sheet
+
+The investment rows come from the Schedule of Investments, which carries subtotals, restated copies and other schedules alongside the holdings. Rows that only restate others are left out (see `investments.excluded` and each entry's `reason`). Before relying on a sum, compare it with the filer's own total:
+
+```python
+investments.reported_total_fair_value        # the balance-sheet figure
+investments.reconciliation_gap               # 0.003 = rows sum 0.3% above it
+investments.unfunded_commitments_fair_value  # e.g. -1,448.1M for FSK, or None
+```
+
+Some filers report each holding's funded fair value but net unfunded commitments out of the balance-sheet total, tagged only as totals by investment type. FSK's 2025 rows sum to $14.5 billion against a reported $13.0 billion for that reason. `reconciliation_gap` adds the netting back, which puts FSK at +0.3%. Use `reported_total_fair_value` for the portfolio's size.
+
 ## Cross-BDC Analysis
 
 Use SEC DERA bulk datasets for analysis across all BDCs.
@@ -397,14 +409,18 @@ applies the same resolution and gives you `fair_value`, `cost`, `shares`,
 
 ```python
 dataset.summary_by_company()
-# cik | name | form | filed | num_investments | total_fair_value
+# cik | name | form | filed | num_investments | total_fair_value | total_source
 ```
 
 `num_investments` counts each filing's line items at its period end (the
 rows carrying an investment identifier, at the dimension depth where the
 filing has most of them). `total_fair_value` is the filer's own undimensioned
 `InvestmentOwnedAtFairValue` from `dataset.numbers` when the filing reports
-one, and the fair value summed over those line items otherwise.
+one, and the fair value summed over those line items otherwise; `total_source`
+says which (`'filed'` or `'summed'`). Treat a summed total with care: DERA's
+line items include subtotals and restated copies of holdings, so in the 2025Q4
+data the sums ran 8.5% (MAIN) to 46.7% (FSK) above the filed totals. For one
+filing, `PortfolioInvestments` reconciles its rows against the balance sheet.
 
 ## Non-Accrual Analysis
 

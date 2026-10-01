@@ -109,6 +109,14 @@ def test_a_costless_copy_of_a_costed_row_is_excluded():
     ]
     kept, excluded = _exclude_restated_rows(rows)
     assert identifiers(kept) == ['Blue Owl Credit SLF LLC | LLC Interest | Affiliated']
+    # Without its footnote mark "(c)" the copy is a prefix of the holding, so the
+    # parent rule takes it first (edgartools-3vad); FSK's copy is no prefix.
+    rows = [
+        holding('Production Resource Group LLC | First lien senior secured loan', 61_500_000, cost=60_000_000),
+        holding('Production Resource Group LLC 8', 61_500_000),
+    ]
+    kept, excluded = _exclude_restated_rows(rows)
+    assert identifiers(kept) == ['Production Resource Group LLC | First lien senior secured loan']
     assert excluded[0].reason == 'no cost, fair value equal to a costed row'
 
 

@@ -495,7 +495,9 @@ class TestSummaryByCompany:
 
     def test_filed_totals_and_line_item_counts(self, soi, numbers):
         summary = dataset(soi, numbers).summary_by_company()
-        assert list(summary.columns) == ['cik', 'name', 'form', 'filed', 'num_investments', 'total_fair_value']
+        assert list(summary.columns) == ['cik', 'name', 'form', 'filed', 'num_investments', 'total_fair_value',
+                                         'total_source']
+        assert set(summary['total_source']) == {'filed'}
         by_name = summary.set_index('name')
         assert by_name.loc['SIXTH STREET SPECIALTY LENDING, INC.', 'total_fair_value'] == SIXTH_STREET_TOTAL_INVESTMENTS
         assert by_name.loc['PENNANTPARK INVESTMENT CORP', 'total_fair_value'] == PENNANTPARK_TOTAL_INVESTMENTS
@@ -514,6 +516,7 @@ class TestSummaryByCompany:
         assert summary.loc['SIXTH STREET SPECIALTY LENDING, INC.', 'total_fair_value'] == \
             line_items['Initial fair value of Investment'].sum()
         assert summary.loc['SIXTH STREET SPECIALTY LENDING, INC.', 'num_investments'] == 16
+        assert summary.loc['SIXTH STREET SPECIALTY LENDING, INC.', 'total_source'] == 'summed'
 
     def test_empty_dataset(self):
         assert dataset(pd.DataFrame()).summary_by_company().empty
