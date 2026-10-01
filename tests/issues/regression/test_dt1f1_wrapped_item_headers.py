@@ -205,13 +205,21 @@ def test_2010_20f_resolves_all_eight_wrapped_items_without_the_legacy_parser():
     # was removed (edgartools-kq2q) -- they are the two that carry tables. The other
     # six are unchanged, which is the signal that the cap removal touches table
     # rendering only and moves no item boundary.
+    #
+    # Items 5, 6 and 11 then shrank in #1361 (render tables in TOC-path section
+    # text), which stopped printing passages twice: Item 5's two technology
+    # agreement paragraphs, Item 6's option-grant notes and compensation cells,
+    # Item 11's forward-contract paragraph. The counts below match the source's
+    # own item spans. This test skips in CI (the fixture is gitignored), so the
+    # pins went stale there; #1386 then took 3 whitespace characters off Item 5.
     expected = {
-        "Item 5": 107457,
+        "Item 5": 106093,
         # Item 6 moved twice: 57,841 -> 57,861 for kq2q, then -> 58,425 for
         # y0ri/3cis, which recovers "Headcount", "Bonus", "Shares" and "Common"
         # label cells and merges "24.8" + "%" into "24.8%". Numbers unchanged.
-        "Item 6": 58425,
-        "Item 11": 7504,
+        # Then -> 57,677 for #1361 (duplicates removed, above).
+        "Item 6": 57677,
+        "Item 11": 7081,
         "Item 12": 152,
         "Item 15": 14078,
         "Item 16D": 181,
@@ -219,6 +227,16 @@ def test_2010_20f_resolves_all_eight_wrapped_items_without_the_legacy_parser():
         "Item 16F": 157,
     }
     assert {item: len(report[item]) for item in expected} == expected
+
+    # Each passage as often as the source's own item span has it (#1361 stopped
+    # the TOC path printing table-adjacent passages twice)
+    def count(item, text):
+        return " ".join(report[item].split()).count(text)
+    assert count("Item 5", "In July 2009, we entered into a technology transfer agreement") == 1
+    assert count("Item 5", "In January 2010, we entered into a technology license agreement") == 1
+    assert count("Item 6", "247,900") == 1
+    assert count("Item 6", "100,000") == 4
+    assert count("Item 11", "notional amount of $1,695") == 1
 
     # The TOC row for Item 1 carries a page number and must lose to the body
     # header, which is a 146-character "not applicable" stub.
