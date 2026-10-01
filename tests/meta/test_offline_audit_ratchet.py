@@ -123,3 +123,16 @@ def test_every_baseline_entry_names_a_test_that_exists(audit):
     missing = sorted({node.split("::", 1)[0] for node in audit.read_baseline()
                       if not (ROOT / node.split("::", 1)[0]).exists()})
     assert missing == [], f"baseline names files that no longer exist: {missing}"
+
+
+@pytest.mark.parametrize("summary,expected", [
+    # Every test in the file is network-marked: the PR #1393 case.
+    ("21 deselected, 4 warnings in 0.04s", True),
+    ("3 passed, 18 deselected in 1.20s", False),
+    ("1 failed, 2 passed, 18 deselected in 1.20s", False),
+    # Deselection alongside a collection error is still a broken run.
+    ("1 error, 21 deselected in 0.30s", False),
+    ("no tests ran in 0.01s", False),
+])
+def test_an_all_network_file_is_nothing_to_audit_not_no_result(audit, summary, expected):
+    assert audit.nothing_to_audit(summary) is expected

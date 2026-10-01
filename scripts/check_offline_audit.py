@@ -86,6 +86,20 @@ def parse_report(text: str) -> set[str]:
             (SUMMARY_RE.match(line) for line in text.splitlines()) if m}
 
 
+def nothing_to_audit(text: str) -> bool:
+    """True when pytest selected no `fast` test at all, which is a clean result.
+
+    A changed file whose tests are all `network`-marked is deselected in full by
+    `-m fast`: pytest prints "N deselected" and no "passed", exactly like a run
+    that collected nothing for a worse reason. Telling them apart by the
+    summary line keeps the "produced no result" guard for collection errors
+    while letting such a PR through. The first PR to edit only a network test
+    file (#1393, test_eightK.py) failed the gate here with exit 2.
+    """
+    return (bool(re.search(r"\b\d+ deselected\b", text))
+            and not re.search(r"\b\d+ (?:passed|failed|errors?)\b", text))
+
+
 def read_baseline() -> set[str]:
     if not BASELINE_PATH.exists():
         return set()
@@ -124,6 +138,9 @@ def main() -> int:
 
     if not failing and not args.report:
         # A run that collected nothing also reports no failures. Tell them apart.
+        if nothing_to_audit(text):
+            print("OK: no `fast` tests in the audited paths; nothing to audit.")
+            return 0
         if "passed" not in text:
             print("Audit produced no result — pytest output was:\n" + text[-2000:], file=sys.stderr)
             return 2
