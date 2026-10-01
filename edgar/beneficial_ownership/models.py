@@ -36,9 +36,9 @@ def _reported_total(persons, figure: str) -> Optional[Union[int, float]]:
     A filing's total for an ownership figure, or None when a person it counts leaves the figure out.
 
     The same max() over the persons not flagged ``is_aggregate_exclude_shares`` that
-    ``total_shares`` and ``total_percent`` take, which read an unreported figure as 0.
-    A filing with no reporting-person rows reports no figure either, matching
-    ``OwnershipComparison.reported_shares_change``.
+    ``total_shares`` and ``total_percent`` take, which read an unreported figure as 0;
+    ``_aggregation_basis`` says whether that max is the group's total. A filing with
+    no reporting-person rows reports no figure either.
     """
     if not persons:
         return None
@@ -46,6 +46,46 @@ def _reported_total(persons, figure: str) -> Optional[Union[int, float]]:
     if None in values:
         return None
     return max(values, default=0)
+
+
+AGGREGATION_BASES = ('single', 'identical', 'parent_sums_children', 'ambiguous')
+
+
+def _aggregation_basis(persons) -> Optional[str]:
+    """Whether the largest reporting person's share count is the filing's group total.
+
+    The cover pages give each person's beneficial ownership and nothing says
+    which rows roll up into which, so max() is right only when the rows show it:
+
+    * ``'single'`` — one person counts.
+    * ``'identical'`` — every person reports the same shares: a control chain
+      (fund, general partner, manager, individual) restating one position.
+    * ``'parent_sums_children'`` — the largest row equals the sum of the distinct
+      smaller ones, a parent consolidating its funds (Blackstone: 4,782,781 =
+      2,989,238 + 1,793,543).
+    * ``'ambiguous'`` — anything else. Persons may hold separate positions, and
+      the group total can be well above max(): GAMCO's sub-advisers hold 1,322,950,
+      88,500 and 712,450 in separate accounts, 2,123,900 together per Item 5(a).
+
+    Persons flagged ``is_aggregate_exclude_shares`` and rows of 0 do not count.
+    None when there is no reporting-person row or a counted person leaves the
+    share count out.
+    """
+    if not persons:
+        return None
+    values = [p.reported('aggregate_amount') for p in persons if not p.is_aggregate_exclude_shares]
+    if None in values:
+        return None
+    positive = [v for v in values if v > 0]
+    if len(values) == 1:
+        return 'single'
+    distinct = set(positive)
+    if len(distinct) <= 1:
+        return 'identical'
+    largest = max(distinct)
+    if sum(distinct - {largest}) == largest:
+        return 'parent_sums_children'
+    return 'ambiguous'
 
 
 @dataclass(frozen=True)

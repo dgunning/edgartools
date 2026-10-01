@@ -107,8 +107,8 @@ def test_ownership_comparison_against_header_only_filing_is_unknown():
     structured = _schedule13d_from_xml(SCHEDULE_13D_XML_PATH.read_text())
     assert header_only.has_structured_data is False
 
-    _assert_change_unknown(OwnershipComparison(current=structured, previous=header_only), 4_535_000)
-    _assert_change_unknown(OwnershipComparison(current=header_only, previous=structured), -4_535_000)
+    _assert_change_unknown(OwnershipComparison(current=structured, previous=header_only), 2_435_000)
+    _assert_change_unknown(OwnershipComparison(current=header_only, previous=structured), -2_435_000)
 
     person = header_only.reporting_persons[0]
     assert person.unreported_fields == OWNERSHIP_FIGURES
@@ -132,8 +132,8 @@ def test_ownership_comparison_without_reporting_person_rows_is_unknown():
     assert no_rows.has_structured_data is True
     assert no_rows.reporting_persons == []
 
-    _assert_change_unknown(OwnershipComparison(current=no_rows, previous=structured), -4_535_000)
-    _assert_change_unknown(OwnershipComparison(current=structured, previous=no_rows), 4_535_000)
+    _assert_change_unknown(OwnershipComparison(current=no_rows, previous=structured), -2_435_000)
+    _assert_change_unknown(OwnershipComparison(current=structured, previous=no_rows), 2_435_000)
 
 
 @pytest.mark.fast
@@ -155,11 +155,11 @@ def test_unreported_figures_keep_their_5x_types():
     with warnings.catch_warnings():
         warnings.simplefilter('ignore', FutureWarning)
         comparison = OwnershipComparison(current=structured, previous=header_only)
-        assert f"{comparison.shares_change:+,}" == '+4,535,000'
-        assert f"{comparison.percent_change:+.1f}" == '+18.4'
+        assert f"{comparison.shares_change:+,}" == '+2,435,000'
+        assert f"{comparison.percent_change:+.1f}" == '+9.9'
         summary = comparison.get_summary()
     assert summary['previous_shares'] == 0
-    assert summary['current_shares'] == 4_535_000
+    assert summary['current_shares'] == 2_435_000
 
 
 @pytest.mark.fast
@@ -373,8 +373,8 @@ def test_ownership_comparison_13d_amendment_omitting_figures_is_unknown():
     assert amendment.has_structured_data is True
     assert len(amendment.reporting_persons) == 2
 
-    _assert_change_unknown(OwnershipComparison(current=amendment, previous=original), -4_535_000)
-    _assert_change_unknown(OwnershipComparison(current=original, previous=amendment), 4_535_000)
+    _assert_change_unknown(OwnershipComparison(current=amendment, previous=original), -2_435_000)
+    _assert_change_unknown(OwnershipComparison(current=original, previous=amendment), 2_435_000)
 
     with pytest.warns(FutureWarning):
         summary = OwnershipComparison(current=amendment, previous=original).get_summary()
@@ -385,15 +385,16 @@ def test_ownership_comparison_13d_amendment_omitting_figures_is_unknown():
 
 @pytest.mark.fast
 def test_ownership_comparison_13g_amendment_omitting_figures_is_unknown():
-    """The same for a 13G/A against the Jushi Holdings 13G (two 10,000,000-share rows)."""
+    """The same for a 13G/A against the Jushi Holdings 13G (two 10,000,000-share rows,
+    one position restated, so the filing's figure is 10,000,000, not 20,000,000; qsk4)."""
     original_xml = SCHEDULE_13G_XML_PATH.read_text()
     original = _schedule13g_from_xml(original_xml, form='SCHEDULE 13G', filing_date=date(2025, 11, 26))
     amendment = _schedule13g_from_xml(_amendment_without_figures(original_xml, 'SCHEDULE 13G', _13G_FIGURES))
     assert amendment.has_structured_data is True
     assert len(amendment.reporting_persons) == 2
 
-    _assert_change_unknown(OwnershipComparison(current=amendment, previous=original), -20_000_000)
-    _assert_change_unknown(OwnershipComparison(current=original, previous=amendment), 20_000_000)
+    _assert_change_unknown(OwnershipComparison(current=amendment, previous=original), -10_000_000)
+    _assert_change_unknown(OwnershipComparison(current=original, previous=amendment), 10_000_000)
 
 
 @pytest.mark.fast
@@ -411,10 +412,12 @@ def test_ownership_comparison_13g_amendment_reporting_figures():
     with warnings.catch_warnings():
         warnings.simplefilter('error', FutureWarning)
         comparison = OwnershipComparison(current=amendment, previous=original)
-        assert comparison.shares_change == -4_000_000
-        assert comparison.percent_change == pytest.approx(-2.0)
+        # Both persons report the one position, 10,000,000 -> 8,000,000 (qsk4)
+        assert comparison.shares_change == -2_000_000
+        assert comparison.percent_change == pytest.approx(-1.0)
         assert comparison.is_liquidating is True
         assert amendment.total_shares == 8_000_000
+        assert amendment.aggregation_basis == 'identical'
 
 
 @pytest.mark.fast
@@ -436,8 +439,8 @@ def test_get_summary_warns_once_at_the_callers_line():
     assert future[0].filename == __file__
     assert "'reported_shares_change'" in str(future[0].message)
     # The 5.x values are unchanged.
-    assert summary['shares_change'] == 4_535_000
-    assert summary['current_shares'] == 4_535_000
+    assert summary['shares_change'] == 2_435_000
+    assert summary['current_shares'] == 2_435_000
     assert summary['previous_shares'] == 0
     assert summary['reported_shares_change'] is None
 

@@ -20,6 +20,7 @@ from edgar.beneficial_ownership.models import (
     Schedule13GItems,
     SecurityInfo,
     Signature,
+    _aggregation_basis,
     _reported_total,
 )
 from edgar.core import get_bool
@@ -547,9 +548,11 @@ class Schedule13D:
         """
         Total beneficial ownership across all reporting persons.
 
-        Within a single 13D filing, reporting persons always report overlapping
-        beneficial ownership (group formations or control chains). Independent
-        filers file separate forms. The correct aggregate is always max().
+        The largest share count any counted reporting person reports. Usually the
+        persons restate one position (a fund, its general partner and its manager),
+        and then this is the group's holding. When they hold separate positions it
+        is less than the group's: check ``aggregation_basis`` before treating it as
+        the group total.
 
         Excludes shares flagged with is_aggregate_exclude_shares == True.
 
@@ -575,9 +578,11 @@ class Schedule13D:
         """
         Total ownership percentage across all reporting persons.
 
-        Within a single 13D filing, reporting persons always report overlapping
-        beneficial ownership (group formations or control chains). Independent
-        filers file separate forms. The correct aggregate is always max().
+        The largest share count any counted reporting person reports. Usually the
+        persons restate one position (a fund, its general partner and its manager),
+        and then this is the group's holding. When they hold separate positions it
+        is less than the group's: check ``aggregation_basis`` before treating it as
+        the group total.
 
         Excludes shares flagged with is_aggregate_exclude_shares == True.
 
@@ -597,6 +602,25 @@ class Schedule13D:
             return 0.0
 
         return max(p.percent_of_class for p in included_persons)
+
+    @property
+    def aggregation_basis(self) -> Optional[str]:
+        """
+        Whether ``total_shares`` is the group's total, from how the persons' rows relate.
+
+        * ``'single'`` — one reporting person counts.
+        * ``'identical'`` — every person reports the same shares (a control chain).
+        * ``'parent_sums_children'`` — the largest row is the sum of the others.
+        * ``'ambiguous'`` — the persons may hold separate positions, and the group's
+          total can exceed ``total_shares``: GAMCO's 13D on Nevro (0000807249-25-000053)
+          states 2,123,900 shares in Item 5(a), against a largest row of 1,322,950.
+
+        None when ``has_structured_data`` is False, there are no reporting persons,
+        or a counted person leaves its share count out.
+        """
+        if not self.has_structured_data:
+            return None
+        return _aggregation_basis(self.reporting_persons)
 
     def to_context(self, detail: str = 'standard') -> str:
         """
@@ -622,6 +646,9 @@ class Schedule13D:
             percent = _reported_total(self.reporting_persons, 'percent_of_class')
             shares = _reported_total(self.reporting_persons, 'aggregate_amount')
             lines.append(f"Ownership: {_describe_percent(percent)} ({_describe_shares(shares)})")
+            if self.aggregation_basis == 'ambiguous':
+                lines.append("  (largest single reporting person; persons may hold separate positions,"
+                             " see aggregation_basis)")
         else:
             lines.append("Ownership: unavailable (pre-2025 HTML filing)")
 
@@ -681,6 +708,7 @@ class Schedule13D:
         lines.append("  .items                      Narrative items 1-7")
         lines.append("  .total_shares               Aggregate beneficial ownership")
         lines.append("  .total_percent              Ownership percentage")
+        lines.append("  .aggregation_basis          Whether total_shares is the group total")
         lines.append("  .signatures                 Filing signatures")
 
         if detail == 'standard':
@@ -1054,9 +1082,11 @@ class Schedule13G:
         """
         Total beneficial ownership across all reporting persons.
 
-        Within a single 13G filing, reporting persons always report overlapping
-        beneficial ownership (group formations or control chains). Independent
-        filers file separate forms. The correct aggregate is always max().
+        The largest share count any counted reporting person reports. Usually the
+        persons restate one position (a fund, its general partner and its manager),
+        and then this is the group's holding. When they hold separate positions it
+        is less than the group's: check ``aggregation_basis`` before treating it as
+        the group total.
 
         Excludes shares flagged with is_aggregate_exclude_shares == True.
 
@@ -1082,9 +1112,11 @@ class Schedule13G:
         """
         Total ownership percentage across all reporting persons.
 
-        Within a single 13G filing, reporting persons always report overlapping
-        beneficial ownership (group formations or control chains). Independent
-        filers file separate forms. The correct aggregate is always max().
+        The largest share count any counted reporting person reports. Usually the
+        persons restate one position (a fund, its general partner and its manager),
+        and then this is the group's holding. When they hold separate positions it
+        is less than the group's: check ``aggregation_basis`` before treating it as
+        the group total.
 
         Excludes shares flagged with is_aggregate_exclude_shares == True.
 
@@ -1110,6 +1142,25 @@ class Schedule13G:
         """Check if this is a passive investor (13G are passive by definition)"""
         return True
 
+    @property
+    def aggregation_basis(self) -> Optional[str]:
+        """
+        Whether ``total_shares`` is the group's total, from how the persons' rows relate.
+
+        * ``'single'`` — one reporting person counts.
+        * ``'identical'`` — every person reports the same shares (a control chain).
+        * ``'parent_sums_children'`` — the largest row is the sum of the others.
+        * ``'ambiguous'`` — the persons may hold separate positions, and the group's
+          total can exceed ``total_shares``: GAMCO's 13D on Nevro (0000807249-25-000053)
+          states 2,123,900 shares in Item 5(a), against a largest row of 1,322,950.
+
+        None when ``has_structured_data`` is False, there are no reporting persons,
+        or a counted person leaves its share count out.
+        """
+        if not self.has_structured_data:
+            return None
+        return _aggregation_basis(self.reporting_persons)
+
     def to_context(self, detail: str = 'standard') -> str:
         """
         AI-optimized context string.
@@ -1134,6 +1185,9 @@ class Schedule13G:
             percent = _reported_total(self.reporting_persons, 'percent_of_class')
             shares = _reported_total(self.reporting_persons, 'aggregate_amount')
             lines.append(f"Ownership: {_describe_percent(percent)} ({_describe_shares(shares)})")
+            if self.aggregation_basis == 'ambiguous':
+                lines.append("  (largest single reporting person; persons may hold separate positions,"
+                             " see aggregation_basis)")
         else:
             lines.append("Ownership: unavailable (pre-2025 HTML filing)")
 
@@ -1188,6 +1242,7 @@ class Schedule13G:
         lines.append("  .items                      Structured items data")
         lines.append("  .total_shares               Aggregate beneficial ownership")
         lines.append("  .total_percent              Ownership percentage")
+        lines.append("  .aggregation_basis          Whether total_shares is the group total")
         lines.append("  .is_passive_investor        Always True for 13G")
 
         if detail == 'standard':

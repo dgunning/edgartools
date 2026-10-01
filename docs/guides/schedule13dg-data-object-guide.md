@@ -288,13 +288,23 @@ The class of securities subject to the filing.
 
 ## Joint vs. Separate Filers
 
-When multiple reporting persons appear on a filing, edgartools automatically determines whether they are filing **jointly** (reporting the same shares) or **separately** (each holding distinct shares):
+When several reporting persons file together, each reports its own beneficial ownership on its own cover page. Usually they restate one position: a fund, its general partner, its manager and the individual behind them all report the same shares. Sometimes they hold separate positions, as sub-advisers managing different accounts do. Nothing in the filing's structured data says which, so `total_shares` and `total_percent` take the largest figure any counted person reports (persons flagged `is_aggregate_exclude_shares` are left out), and `aggregation_basis` says what the rows show:
 
-- **Joint filers** (`member_of_group = "a"`): `total_shares` returns the shared amount, not a sum
-- **Hierarchical ownership** (parent-subsidiary chains): detected when percentages exceed 100%, takes the top-level amount
-- **Undeclared joint filers**: when all persons report identical share counts, treated as joint
+| `aggregation_basis` | What the rows show | Is `total_shares` the group's holding? |
+|---------------------|--------------------|----------------------------------------|
+| `'single'` | One reporting person | Yes |
+| `'identical'` | Every person reports the same shares | Yes |
+| `'parent_sums_children'` | The largest row is the sum of the others | Yes |
+| `'ambiguous'` | Anything else | Not necessarily: it can be lower |
 
-This means `total_shares` and `total_percent` always give you the correct aggregate, regardless of filing structure.
+```python
+schedule = filing.obj()
+if schedule.aggregation_basis == 'ambiguous':
+    for person in schedule.reporting_persons:
+        print(person.name, person.aggregate_amount)
+```
+
+GAMCO's 13D on Nevro (accession 0000807249-25-000053) is `'ambiguous'`. Its three sub-advisers report 1,322,950, 88,500 and 712,450 shares in separate accounts, so `total_shares` is 1,322,950, while Item 5(a) of the filing states the group's 2,123,900 shares (5.54%). Read Item 5(a) when an ambiguous total matters.
 
 ---
 
@@ -322,6 +332,8 @@ print(f"Liquidating: {comparison.is_liquidating}")
 ```
 
 `reported_shares_change` is `None` when either filing does not report its share counts: an amendment that leaves them out (the schema makes them optional on 13D/A and 13G/A), a pre-2025 header-only filing (`has_structured_data` is `False`), or a filing with no reporting-person rows. `is_accumulating`, `is_liquidating` and `is_unchanged` are then all `False`. `reported_percent_change` is `None` in the same way for percentages, and the two are checked separately, since a filing can report one and not the other. A reported zero stays `0`.
+
+Each filing's figure is its `total_shares` or `total_percent`, so a change between two `'ambiguous'` filings is a change in the largest reporting person's holding.
 
 `shares_change` and `percent_change` still return a number in 5.x, reading an unreported figure as `0`, and emit a `FutureWarning` when they do. In edgartools 6.0 they return `None` instead, as `reported_shares_change` and `reported_percent_change` do today.
 

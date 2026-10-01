@@ -58,6 +58,20 @@ patterns:
       # Form 5 - Annual summary (small/late transactions)
       annual = company.get_filings(form="5")[0].obj().get_ownership_summary()
 
+  - name: Schedule 13D/13G Stakes
+    when: 5%+ beneficial ownership, activist or passive stakes, joint filers
+    code: |
+      stake = filing.obj()                       # SCHEDULE 13D / 13G (XML, 2025+)
+      stake.total_shares, stake.total_percent    # largest counted reporting person
+      stake.aggregation_basis                    # single | identical | parent_sums_children | ambiguous
+      [(p.name, p.aggregate_amount) for p in stake.reporting_persons]
+    note: |
+      Joint filers usually restate one position (fund, GP, manager), so
+      total_shares is the max, never a sum. When aggregation_basis is
+      'ambiguous' the persons may hold separate positions and the group total
+      can be higher (GAMCO/Nevro: max 1,322,950, Item 5(a) 2,123,900); read the
+      rows or Item 5(a).
+
 avoid:
   - pattern: "form4.common_stock_sales.iterrows()"
     fix: "form4.get_ownership_summary().net_change"
