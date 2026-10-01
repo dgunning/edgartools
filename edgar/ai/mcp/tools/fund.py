@@ -640,11 +640,16 @@ async def _bdc_portfolio(identifier: str, limit: int) -> Any:
             reported = getattr(investments, 'reported_total_fair_value', None)
             if reported is not None:
                 result["reported_total_fair_value"] = float(reported)
+                # Rows are funded positions; a filer like FSK nets unfunded commitments
+                # out of its total, and the gap below already allows for that (3vad)
+                unfunded = getattr(investments, 'unfunded_commitments_fair_value', None)
+                if unfunded is not None:
+                    result["unfunded_commitments_fair_value"] = float(unfunded)
                 gap = investments.reconciliation_gap
                 if gap is not None and abs(gap) > 0.02:
                     result["warning"] = (
                         f"Investment rows sum {gap:+.1%} away from the filer's reported total "
-                        f"({float(reported):,.0f}); some holdings may be counted twice. "
+                        f"({float(reported):,.0f}); some holdings may be counted twice or missed. "
                         f"Use reported_total_fair_value for the portfolio total."
                     )
             if total_cost is not None:

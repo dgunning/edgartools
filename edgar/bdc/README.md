@@ -296,7 +296,7 @@ print(summary.head(10))
 # Returns DataFrame: industry | total_fair_value | num_bdcs | num_investments
 
 dataset.summary_by_industry(by='sector')   # sector | ... with the spellings folded together
-dataset.summary_by_company()               # cik | name | form | filed | num_investments | total_fair_value
+dataset.summary_by_company()               # cik | name | form | filed | num_investments | total_fair_value | total_source
 ```
 
 The DERA extract names its columns after XBRL labels, and the label the SEC
