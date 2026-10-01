@@ -33,6 +33,16 @@ _PART_HEADER = re.compile(r'^\s*PART\s+(I|II|III|IV|V)\b', re.IGNORECASE)
 # officers appear below" is prose, not a boundary. Same test Strategy 5b uses.
 _SIGNATURES_HEADER = re.compile(r'^\s*SIGNATURES?\s*$', re.IGNORECASE)
 
+# The sentence Form 8-K's General Instructions prescribe to open the signature
+# block, matched on whitespace-normalized paragraph text. Anchored at the start
+# and required to reach "caused this report to be signed", so a paragraph that
+# merely cites the Exchange Act is not a boundary. Strategy 5c.
+_SIGNATURE_STATEMENT = re.compile(
+    r'^Pursuant to the requirements of the Securities Exchange Act of 1934,?'
+    r'.{0,80}?caused this (?:report|amendment) to be signed',
+    re.IGNORECASE,
+)
+
 # An item's own SUB-header: an item number, one or more parenthesized
 # sub-designations, and nothing else — "Item 14(a)(1):", "Item 14 (a)(2):".
 # Filings that itemize under Regulation S-K's lettered sub-paragraphs write
@@ -974,7 +984,37 @@ class SectionExtractor:
                         continue
                     headers.append((node, stripped, position))
                     existing_positions.add(position)
+                    has_sig_header = True
                     break  # one SIGNATURES header is enough
+
+            # Strategy 5c: no SIGNATURES line at all. Some 8-Ks open the signature
+            # block straight with the statutory sentence ("Pursuant to the
+            # requirements of the Securities Exchange Act of 1934, the registrant
+            # has duly caused this report to be signed ..."), so without a
+            # boundary the block ran on into the last item. The paragraph itself
+            # becomes the terminal header, labelled SIGNATURES so every later
+            # stage treats it exactly like a real one. Only after the last Item
+            # header: the sentence is the signature block's and nothing else's,
+            # but the cover page carries a similar "Pursuant to Section 13 or
+            # 15(d)" line, and that must never end an item.
+            # AmeriServ's 2023-03-20 8-K (0001104659-23-034205) is the case;
+            # its test passed for months only because hard-wrapped text split
+            # the phrase it searched for (gh-1370 exposed it).
+            if not has_sig_header:
+                from edgar.documents.nodes import ParagraphNode
+                item_positions = [pos for _, text, pos in headers
+                                  if re.match(r'^\s*ITEM\s+\d', text, re.IGNORECASE)]
+                if item_positions:
+                    last_item = max(item_positions)
+                    for node in document.root.find(lambda n: isinstance(n, ParagraphNode)):
+                        text = ' '.join((node.text() or '').split())
+                        if not _SIGNATURE_STATEMENT.match(text):
+                            continue
+                        position = _node_position(node)
+                        if position <= last_item:
+                            continue
+                        headers.append((node, 'SIGNATURES', position))
+                        break
 
         # Collapse the source's line wrapping, once, after every strategy has
         # run. See _normalize_header_text for what it costs to skip this.
