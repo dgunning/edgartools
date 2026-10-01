@@ -189,8 +189,11 @@ m.context    # Surrounding text (~100 chars each side)
 # Only the primary filing document
 filing.grep("risk factor", document="primary")
 
-# Only a specific exhibit
+# Only a specific exhibit (EX-10.1 exactly, not EX-10.10)
 filing.grep("intellectual property", document="EX-10.1")
+
+# Every EX-10 exhibit: a value that matches no type exactly matches by substring
+filing.grep("intellectual property", document="EX-10")
 ```
 
 #### Regex Support
