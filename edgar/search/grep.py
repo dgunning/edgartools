@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Iterator, List, Optional
 from edgar.richtools import repr_rich
 
 
@@ -104,6 +104,13 @@ class GrepResult:
         return repr_rich(self.__rich__())
 
 
+def _overlapping(compiled: re.Pattern, text: str) -> Iterator[re.Match]:
+    pos = 0
+    while (m := compiled.search(text, pos)) is not None:
+        yield m
+        pos = m.start() + 1
+
+
 def _grep_text(text: str, pattern: str, location: str,
                regex: bool = False, context_chars: int = 100) -> List[GrepMatch]:
     """Core grep function: search text for pattern, return matches with context.
@@ -113,47 +120,31 @@ def _grep_text(text: str, pattern: str, location: str,
     if not text or not pattern:
         return []
 
-    matches = []
-
     if regex:
         try:
             compiled = re.compile(pattern, re.IGNORECASE)
         except re.error:
             return []
-        for m in compiled.finditer(text):
-            start = max(0, m.start() - context_chars)
-            end = min(len(text), m.end() + context_chars)
-            context = text[start:end].strip()
-            if start > 0:
-                context = "..." + context
-            if end < len(text):
-                context = context + "..."
-            matches.append(GrepMatch(
-                location=location,
-                match=m.group(),
-                context=context,
-            ))
+        found = compiled.finditer(text)
     else:
-        # Case-insensitive substring search
-        text_lower = text.lower()
-        pattern_lower = pattern.lower()
-        start_pos = 0
-        while True:
-            pos = text_lower.find(pattern_lower, start_pos)
-            if pos == -1:
-                break
-            ctx_start = max(0, pos - context_chars)
-            ctx_end = min(len(text), pos + len(pattern) + context_chars)
-            context = text[ctx_start:ctx_end].strip()
-            if ctx_start > 0:
-                context = "..." + context
-            if ctx_end < len(text):
-                context = context + "..."
-            matches.append(GrepMatch(
-                location=location,
-                match=text[pos:pos + len(pattern)],
-                context=context,
-            ))
-            start_pos = pos + 1
+        # Searched in the original text, not text.lower(): lowercasing can change
+        # length ("İ" becomes two characters) and shift every later position.
+        # Overlapping matches are kept, as the substring scan this replaced did.
+        found = _overlapping(re.compile(re.escape(pattern), re.IGNORECASE), text)
+
+    matches = []
+    for m in found:
+        start = max(0, m.start() - context_chars)
+        end = min(len(text), m.end() + context_chars)
+        context = text[start:end].strip()
+        if start > 0:
+            context = "..." + context
+        if end < len(text):
+            context = context + "..."
+        matches.append(GrepMatch(
+            location=location,
+            match=m.group(),
+            context=context,
+        ))
 
     return matches

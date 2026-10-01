@@ -2191,7 +2191,10 @@ class Filing:
             pattern: Text to search for (exact match, case-insensitive)
             regex: If True, treat pattern as a regular expression
             document: Narrow search to a specific document. Use "primary" for
-                     the main filing document, or a document type like "EX-10.1"
+                     the main filing document, a document type like "EX-10.1"
+                     (exactly that exhibit, not EX-10.10), or a filename. A value
+                     that matches no type or filename exactly, like "EX-10",
+                     selects every document whose type or filename contains it.
 
         Returns:
             GrepResult containing GrepMatch objects with location and context
@@ -2211,9 +2214,7 @@ class Filing:
         except Exception:
             attachments = []
 
-        for attachment in attachments:
-            if document and not self._attachment_matches(attachment, document):
-                continue
+        for attachment in self._select_attachments(attachments, document):
             if attachment.empty or attachment.is_binary():
                 continue
 
@@ -2237,14 +2238,26 @@ class Filing:
         return GrepResult(pattern, all_matches)
 
     @staticmethod
-    def _attachment_matches(attachment, document: str) -> bool:
-        """Whether `attachment` satisfies grep()'s `document` filter."""
-        if document.lower() == "primary":
-            return attachment.sequence_number == "1"
-        doc_type = (attachment.document_type or "").upper()
-        if document.upper() in doc_type:
-            return True
-        return document.lower() in (attachment.document or "").lower()
+    def _select_attachments(attachments, document: Optional[str]) -> list:
+        """The attachments grep()'s `document` filter selects.
+
+        An exact filename wins, then an exact document type, and only when
+        neither matches anything does a substring match apply, so "EX-10.1"
+        selects EX-10.1 and not EX-10.10 through EX-10.19, while "EX-10" still
+        selects every EX-10 exhibit.
+        """
+        attachments = list(attachments)
+        if not document:
+            return attachments
+        wanted = document.lower()
+        if wanted == "primary":
+            return [a for a in attachments if a.sequence_number == "1"]
+        for field in ("document", "document_type"):
+            exact = [a for a in attachments if (getattr(a, field) or "").lower() == wanted]
+            if exact:
+                return exact
+        return [a for a in attachments
+                if wanted in (a.document_type or "").lower() or wanted in (a.document or "").lower()]
 
     @staticmethod
     def _attachment_location(attachment) -> str:
