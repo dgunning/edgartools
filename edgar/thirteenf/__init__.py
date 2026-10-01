@@ -3,6 +3,15 @@
 
 Parses SEC Form 13F-HR (Quarterly Holdings Report) filings from institutional investment managers.
 Supports both XML format (2013+) and TXT format (2012 and earlier).
+
+These are Section 13(f) filings: managers with $100M or more in 13(f) securities
+report their whole portfolio each quarter. Which package holds the form you have:
+
+    13F-HR                       edgar.thirteenf             (this package)
+    Schedule 13D / 13G           edgar.beneficial_ownership  Section 13(d)/(g): anyone over 5%
+    Forms 3, 4, 5 and 144        edgar.ownership             Section 16: a company's own insiders
+
+``ThirteenF`` is also importable from the top level: ``from edgar import ThirteenF``.
 """
 
 from edgar.thirteenf.models import (

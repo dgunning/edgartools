@@ -244,10 +244,19 @@ Get form-specific structured object based on filing type.
 | 3 | Form3 | edgar.ownership |
 | 5 | Form5 | edgar.ownership |
 | DEF 14A | ProxyStatement | edgar.proxy |
-| 13F-HR | ThirteenF | edgar.holdings |
-| SC 13D/G | Schedule13 | edgar.ownership |
-| NPORT-P | NportFiling | edgar.nport |
-| 144 | Form144 | edgar.ownership |
+| 13F-HR | ThirteenF | edgar.thirteenf |
+| SC 13D | Schedule13D | edgar.beneficial_ownership |
+| SC 13G | Schedule13G | edgar.beneficial_ownership |
+| NPORT-P | FundReport | edgar.funds.reports |
+| 144 | Form144 | edgar.ownership.form144 |
+
+The ownership, proxy and fund classes can also be imported from the top level,
+e.g. `from edgar import Form4, Schedule13D, ThirteenF`, and it is the same class
+either way. The company report classes come from `edgar.company_reports`. The ownership forms span three packages because three
+different sections of the Exchange Act require them: Section 16 insiders
+(Forms 3/4/5, plus Form 144) in `edgar.ownership`, Section 13(d)/(g) 5%-and-over
+holders (Schedule 13D/G) in `edgar.beneficial_ownership`, and Section 13(f)
+institutional managers (13F-HR) in `edgar.thirteenf`.
 
 **Example:**
 ```python
