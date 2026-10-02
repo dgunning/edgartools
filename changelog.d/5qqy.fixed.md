@@ -1,1 +1,0 @@
-**`Filing.grep(document="EX-10.1")` also searched EX-10.10 through EX-10.19.** In SeeQC's S-1 it returned 378 matches for "agreement" where EX-10.1 holds 133. An exact filename or document type now wins, and a substring match applies only when nothing matches exactly, so `document="EX-10"` still selects every EX-10 exhibit. (bead edgartools-5qqy)
