@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- **`Section.markdown()` dropped a section's own heading on pre-2010 filings.** Older EDGAR HTML nests the TOC anchor inside the heading it marks, and the slicer started collecting after the anchor, so the heading's block was skipped. On Google's FY2004 10-K (0001193125-05-065298) 0 of 18 item sections began with their "ITEM N." heading; all 18 do now. Collection now starts at the outermost block that begins with the anchor. (GH #1369)
+
 ## [5.59.1] - 2026-09-26
 
 ### Fixed
