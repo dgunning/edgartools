@@ -74,6 +74,13 @@ _TABLE_INTERNAL_TAGS = {
     'tr', 'td', 'th', 'tbody', 'thead', 'tfoot', 'caption', 'col', 'colgroup',
 }
 
+# Tags that only style text. An anchor nested in these is still inside its
+# heading, so _start_block climbs through them to the block that holds it.
+_INLINE_TAGS = {
+    'a', 'b', 'big', 'em', 'font', 'i', 'small', 'span', 'strong',
+    'sub', 'sup', 'tt', 'u',
+}
+
 
 def collect_range_elements(tree, start_anchor: str, end_anchor: Optional[str],
                            start_element=None, end_element=None) -> List:
@@ -125,28 +132,35 @@ def collect_range_elements(tree, start_anchor: str, end_anchor: Optional[str],
 
 
 def _start_block(anchor):
-    """Outermost element that begins with ``anchor``, or ``None`` if there is none.
+    """The heading block a nested start anchor sits in, or ``None`` if there is none.
 
-    Collection normally turns on *after* the start anchor. Older EDGAR HTML
-    (roughly pre-2010) nests the anchor inside the heading it marks, as in
+    Collection normally turns on *after* the start anchor. Some filings nest
+    the anchor inside the heading it marks, as in
     ``<p><b><a name="item2"></a>ITEM 2. PROPERTIES</b></p>``. The heading's
     block has already started when the walk reaches the anchor, so it was
     never collected and the section came back without its own heading
     (GH #1369).
 
-    Climb from the anchor while it is the first content of each enclosing
-    element (no text and no element before it), stopping short of ``<body>``.
-    The outermost element reached is where collection should start. For an
-    anchor that already stands on its own the climb ends at once and this
-    returns ``None``, which leaves collection unchanged.
+    Only loose text is dropped that way, so return ``None`` unless there is
+    text directly inside the anchor or right after it. Otherwise climb while
+    the anchor is the first content of each enclosing element, through
+    inline wrappers only, and stop at the first block reached: that block is
+    where collection should start. An anchor that is itself a block, or that
+    has content before it, leaves collection unchanged.
     """
+
     anchor_path = list(anchor.iterancestors())
     el = anchor
     starting_block = None
+
+    if not ((anchor.text or '').strip() or (anchor.tail or '').strip()):
+        return None 
     for parent in anchor_path:
         if parent.tag in ('body', 'html'):
             break
         if (parent.text or '').strip() or el.getprevious() is not None:
+            break
+        if el.tag not in _INLINE_TAGS and el.tag not in _TABLE_INTERNAL_TAGS:
             break
         el = parent
         starting_block = parent
