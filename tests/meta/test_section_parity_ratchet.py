@@ -237,6 +237,12 @@ TRACKED_GAP_FIXTURES = (
         # item-separator fix was measured on (TenK.items == ['Item 8'] before
         # it), so it guards two fixes at once and must stay measurable.
         ("10-K", "0001376474-16-000635"),
+        # Copied into parity_gate on 2026-10-02 because regression tests assert
+        # on them (3dp, dt1f1 9A(T), dt1f1 wrapped headers) and, read from the
+        # era corpus, those tests skipped in CI; one went stale for five days.
+        ("10-K", "0000927356-01-000369"),
+        ("10-K", "0001193125-21-101193"),
+        ("20-F", "0001144204-10-017467"),
     }
 )
 

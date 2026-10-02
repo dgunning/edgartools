@@ -54,8 +54,8 @@ from edgar.documents.parser import HTMLParser
 
 FIXTURES = pathlib.Path(__file__).parent.parent.parent / "fixtures"
 GATE_10K = FIXTURES / "parity_gate" / "10-K" / "0001193125-10-073212.html"
-ABS_10K = (FIXTURES / "text_boundary_corpus" / "e5_2020_2026" / "10-K"
-           / "0001193125-21-101193.html")
+# Copied from the gitignored text_boundary_corpus on 2026-10-02 so this runs in CI
+ABS_10K = FIXTURES / "parity_gate" / "10-K" / "0001193125-21-101193.html"
 
 
 class FixtureFiling:
@@ -163,10 +163,6 @@ def test_the_designation_is_one_letter_and_optional():
     assert not re.fullmatch(_ITEM_SEP, "(T). Controls and Procedures")
 
 
-@pytest.mark.skipif(
-    not ABS_10K.exists(),
-    reason="text_boundary_corpus is gitignored; present on developer machines only",
-)
 def test_a_regulation_ab_sub_number_does_not_become_an_item():
     """The asset-backed issuer filing must not gain items from this change.
 

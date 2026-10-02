@@ -31,12 +31,11 @@ failure mode this area actually has. If one of these numbers moves, the
 extraction boundary moved: verify what the section now contains before updating
 it, rather than re-recording the new number.
 
-CORPUS NOTE. The 20-F and 10-K asserted unconditionally live in
-``tests/fixtures/parity_gate``, which is tracked, so this test runs in CI. The
-2010 20-F that carries five of the eight lookups is in
-``tests/fixtures/text_boundary_corpus``, which is gitignored — anchoring only on
-that one would pass locally and skip in CI, which is how parity evidence has
-been lost here before. It is checked opportunistically at the bottom.
+CORPUS NOTE. Every filing asserted here lives in ``tests/fixtures/parity_gate``,
+which is tracked, so this test runs in CI. The 2010 20-F that carries five of the
+eight lookups was copied there from the gitignored ``text_boundary_corpus`` on
+2026-10-02, after its test skipped in CI and went stale for five days (#1361
+changed three item lengths and only the CI-visible pins were updated).
 """
 import pathlib
 import re
@@ -50,8 +49,7 @@ from edgar.documents.extractors.pattern_section_extractor import SectionExtracto
 FIXTURES = pathlib.Path(__file__).parent.parent.parent / "fixtures"
 TRACKED_20F = FIXTURES / "parity_gate" / "20-F" / "0001062993-16-008650.html"
 TRACKED_10K = FIXTURES / "parity_gate" / "10-K" / "0000950153-99-001234.html"
-IGNORED_20F = (FIXTURES / "text_boundary_corpus" / "e3_2009_2014" / "20-F"
-               / "0001144204-10-017467.html")
+WRAPPED_20F = FIXTURES / "parity_gate" / "20-F" / "0001144204-10-017467.html"
 
 
 class FixtureFiling:
@@ -186,10 +184,6 @@ def test_a_bare_item_number_is_not_read_as_a_page_number():
     )
 
 
-@pytest.mark.skipif(
-    not IGNORED_20F.exists(),
-    reason="text_boundary_corpus is gitignored; present on developer machines only",
-)
 def test_2010_20f_resolves_all_eight_wrapped_items_without_the_legacy_parser():
     """The filing this defect was measured on.
 
@@ -198,7 +192,7 @@ def test_2010_20f_resolves_all_eight_wrapped_items_without_the_legacy_parser():
     line width. Five of these (5, 6, 11, 12, 15) are on the dt1f.1 work list;
     16D-16F came with them.
     """
-    filing = FixtureFiling(IGNORED_20F, "20-F")
+    filing = FixtureFiling(WRAPPED_20F, "20-F")
     report = _without_legacy(TwentyF)(filing)
 
     # Items 5 and 6 grew by 150 and 20 characters when the fast_table 8-column cap
