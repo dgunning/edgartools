@@ -18,11 +18,11 @@ This was the last thing keeping the legacy fallback load-bearing. Measured acros
 121 corpus fixtures, it was the only remaining behavioural difference between
 ``.items`` with the legacy path and without it.
 
-CORPUS NOTE. The 20-F asserted here lives in ``tests/fixtures/parity_gate``, which
-is tracked, so this test runs in CI. Its 10-K twin (``0000927356-01-000369``) is
-in ``tests/fixtures/text_boundary_corpus``, which is gitignored — asserting on
-that one alone would make this test skip in CI while passing locally, which is how
-parity evidence was lost before. It is checked opportunistically below.
+CORPUS NOTE. Both filings asserted here live in ``tests/fixtures/parity_gate``,
+which is tracked, so this test runs in CI. The 10-K twin (``0000927356-01-000369``)
+was copied there from the gitignored ``text_boundary_corpus`` on 2026-10-02: while
+it lived only there its test skipped in CI, and a sibling test on that corpus went
+stale for five days without anyone seeing it.
 """
 import pathlib
 
@@ -33,8 +33,7 @@ from edgar.company_reports.twenty_f import TwentyF
 
 FIXTURES = pathlib.Path(__file__).parent.parent.parent / "fixtures"
 TRACKED_20F = FIXTURES / "parity_gate" / "20-F" / "0000928385-01-500187.html"
-IGNORED_10K = (FIXTURES / "text_boundary_corpus" / "e1_1996_2001" / "10-K"
-               / "0000927356-01-000369.html")
+TRACKED_10K = FIXTURES / "parity_gate" / "10-K" / "0000927356-01-000369.html"
 
 
 class FixtureFiling:
@@ -100,12 +99,8 @@ def test_the_20f_document_really_has_no_block_structure():
     assert not [n for n in nodes if isinstance(n, ParagraphNode)]
 
 
-@pytest.mark.skipif(
-    not IGNORED_10K.exists(),
-    reason="text_boundary_corpus is gitignored; present on developer machines only",
-)
 def test_2001_10k_finds_item_7_without_the_legacy_parser():
-    filing = FixtureFiling(IGNORED_10K, "10-K")
+    filing = FixtureFiling(TRACKED_10K, "10-K")
 
     assert TenK(filing).items == ["Item 7"]
     assert _without_legacy(TenK)(filing).items == ["Item 7"]
