@@ -28,7 +28,7 @@ on:
   # The required contexts stay exactly the two named in python-hatch-workflow.yml.
   # Making this one required is the fastest way to deadlock the repository.
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "5.*.x" ]
     paths:
       - 'tests/issues/regression/**'
       - 'edgar/**'
@@ -59,7 +59,7 @@ on:
   # pyproject.toml carries the marker registry and pytest options
   # (xfail_strict among them), which change outcomes suite-wide.
   push:
-    branches: [ "main" ]
+    branches: [ "main", "5.*.x" ]
     paths:
       - 'tests/issues/regression/**'
       - 'edgar/**'
@@ -194,7 +194,9 @@ jobs:
   report:
     name: Report red main
     needs: [cassette-gate, regression]
-    if: always() && github.event_name != 'pull_request'
+    # main only: a green push to a 5.*.x maintenance branch must not close
+    # main's red-main issue (see python-hatch-workflow.yml's report job).
+    if: always() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       issues: write
