@@ -43,11 +43,15 @@
 
 name: Build and Test Edgartools
 
+# 5.*.x: the short-lived maintenance branch cut from the last 5.x tag during the
+# 6.0 freeze window (bead edgartools-07lk.22). Without it a backport PR into that
+# branch would report no checks at all. Branch protection is not configured on it,
+# so these checks inform but do not block.
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "5.*.x" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "5.*.x" ]
   schedule:
     # Nightly full suite at 07:00 UTC
     - cron: '0 7 * * *'
@@ -81,13 +85,17 @@ jobs:
       run: python scripts/check_cassettes.py
 
   test-fast:
-    # PRs: single version for a quick gate. Push/schedule: full matrix.
+    # PRs to main: single version for a quick gate. Push/schedule, and PRs to a
+    # 5.*.x maintenance branch: full matrix. 3.10 is the reason a 5.x hotfix
+    # exists at all once 6.0 drops it, so a backport must be tested there.
+    # The main-PR leg must stay exactly ["3.13"]: branch protection requires the
+    # context "test-fast (3.13)" (see the header of this file).
     needs: cassette-gate
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ${{ github.event_name == 'pull_request' && fromJSON('["3.13"]') || fromJSON('["3.10", "3.13"]') }}
+        python-version: ${{ (github.event_name == 'pull_request' && github.base_ref == 'main') && fromJSON('["3.13"]') || fromJSON('["3.10", "3.13"]') }}
 
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -431,7 +439,9 @@ jobs:
   report:
     name: Report red main (build)
     needs: [cassette-gate, test-fast, test-strict-errors, test-network, test-slow, coverage]
-    if: always() && github.event_name != 'pull_request'
+    # main only. A push to a 5.*.x maintenance branch also runs this workflow, and
+    # a green one would otherwise CLOSE main's open red-main issue.
+    if: always() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       issues: write
