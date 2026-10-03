@@ -14,7 +14,7 @@ from edgar.company_reports._base import CompanyReport, report_lookup_miss
 from edgar.company_reports._structures import ItemOnlyFilingStructure, extract_items_from_sections
 from edgar.documents import HTMLParser, ParserConfig
 from edgar.richtools import repr_rich, rich_to_text
-from edgar.sgml.text_extraction import html_to_text
+from edgar.sgml.text_extraction import attachment_html_to_text
 
 __all__ = ['CurrentReport', 'EightK']
 
@@ -792,7 +792,7 @@ class CurrentReport(CompanyReport):
             if html_content:
                 # The same rule Attachment.text() and Filing.text() apply, so an
                 # exhibit reads the same here as it does from the attachment.
-                return html_to_text(html_content)
+                return attachment_html_to_text(html_content)
 
     def _content_renderables(self):
         """Get the content of the exhibits as renderables"""

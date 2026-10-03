@@ -14,9 +14,11 @@ the original tests here exercised. Worse, they had already stopped guarding the
 reported path: ``SixK._get_exhibit_content`` had moved to
 ``parse_html(content).text()``, which decodes bytes as UTF-8 with replacement, so
 a cp1252 6-K exhibit was mojibaked again while these tests stayed green. The rule
-now lives once, in ``edgar.sgml.text_extraction.html_to_text`` (with
-``decode_html_bytes``), and every exhibit/attachment text path calls it. The
-tests below pin the rule and then each user-facing path that must reach it.
+now lives once, in ``edgar.sgml.text_extraction.attachment_html_to_text`` (with
+``decode_html_bytes``), and every exhibit/attachment text path calls it. It is
+kept out of the shared ``html_to_text`` so ``FilingSGML.text()`` is unchanged;
+the last test below pins that. The tests pin the rule and then each user-facing
+path that must reach it.
 No network access required.
 
 GitHub Issue: https://github.com/dgunning/edgartools/issues/844
@@ -27,7 +29,7 @@ import pytest
 from edgar.attachments import Attachment
 from edgar.company_reports.current_report import CurrentReport
 from edgar.company_reports.sixk import SixK
-from edgar.sgml.text_extraction import decode_html_bytes, html_to_text
+from edgar.sgml.text_extraction import attachment_html_to_text, decode_html_bytes, html_to_text
 
 pytestmark = pytest.mark.fast
 
@@ -40,13 +42,13 @@ class TestTheDecodingRule:
 
     @pytest.mark.parametrize("html", [INNER_HTML, SEC_WRAPPED], ids=["bare", "sgml-wrapped"])
     def test_bytes_and_str_render_the_same_text(self, html):
-        assert html_to_text(html.encode("utf-8")) == "Exhibit 99.1 content"
-        assert html_to_text(html) == "Exhibit 99.1 content"
+        assert attachment_html_to_text(html.encode("utf-8")) == "Exhibit 99.1 content"
+        assert attachment_html_to_text(html) == "Exhibit 99.1 content"
 
     @pytest.mark.parametrize("encoding", ["cp1252", "latin-1"])
     def test_non_utf8_bytes_preserve_characters(self, encoding):
         html_bytes = "<html><body><p>café résumé</p></body></html>".encode(encoding)
-        text = html_to_text(html_bytes)
+        text = attachment_html_to_text(html_bytes)
         assert text == "café résumé"
 
     def test_windows_1252_curly_quotes_survive(self):
@@ -55,7 +57,7 @@ class TestTheDecodingRule:
 
     def test_undecodable_bytes_do_not_crash(self):
         """0x81 is invalid in UTF-8 and undefined in cp1252; Latin-1 carries it."""
-        text = html_to_text(b"<html><body><p>\x81</p></body></html>")
+        text = attachment_html_to_text(b"<html><body><p>\x81</p></body></html>")
         assert text == "\x81"
 
 
@@ -85,3 +87,14 @@ def test_attachment_text_decodes_legacy_bytes():
                             document_type="EX-99.1", size=None)
     attachment.content = LEGACY_EXHIBIT.encode("cp1252")
     assert attachment.text() == "café résumé ’quoted’"
+
+
+def test_the_shared_rule_is_left_alone():
+    """``html_to_text`` (behind ``FilingSGML.text()``) does not unwrap envelopes.
+
+    The decoding and unwrapping are an attachment concern. Folding them into the
+    shared rule changed ``FilingSGML.text()``-path output on 11 of 313 fixture
+    documents saved with their SGML envelope, so they live in the wrapper only.
+    """
+    assert html_to_text(SEC_WRAPPED) != "Exhibit 99.1 content"
+    assert attachment_html_to_text(SEC_WRAPPED) == "Exhibit 99.1 content"

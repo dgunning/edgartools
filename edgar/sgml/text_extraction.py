@@ -57,6 +57,7 @@ __all__ = [
     'looks_like_ownership_xml',
     'ownership_xml_to_html',
     'decode_document_content',
+    'attachment_html_to_text',
     'decode_html_bytes',
     'html_to_text',
     'strip_html_tags',
@@ -254,7 +255,7 @@ def decode_html_bytes(content: Union[bytes, bytearray]) -> str:
     return bytes(content).decode("latin-1")
 
 
-def html_to_text(html: Union[str, bytes], form: Optional[str] = None) -> str:
+def html_to_text(html: str, form: Optional[str] = None) -> str:
     """Parse HTML and render it as plain text.
 
     Returns "" for a document with no renderable content. If the HTML is malformed
@@ -262,20 +263,11 @@ def html_to_text(html: Union[str, bytes], form: Optional[str] = None) -> str:
     with tags stripped - a degraded answer, but never raw markup, because callers of
     ``text()`` are asking for text.
 
-    Accepts bytes (decoded by :func:`decode_html_bytes`) and HTML still wrapped in
-    an SGML ``<DOCUMENT>``/``<TEXT>`` envelope, which is unwrapped first; without
-    that, the parser reads the envelope's ``<TYPE>`` line and drops the body.
-
     Only ``HTMLParsingError`` is absorbed. ``DocumentTooLargeError`` is a deliberate
     guard rather than a malformed document, so it still propagates.
     """
     from edgar.documents import HTMLParser, ParserConfig
     from edgar.documents.exceptions import HTMLParsingError
-
-    if isinstance(html, (bytes, bytearray)):
-        html = decode_html_bytes(html)
-    if "<TEXT>" in html[:500]:
-        html = extract_text_between_tags(html, "TEXT") or html
 
     try:
         document = HTMLParser(ParserConfig(form=form)).parse(html)
@@ -296,6 +288,29 @@ def html_to_text(html: Union[str, bytes], form: Optional[str] = None) -> str:
     # by test_filing_text_baseline.test_both_paths_agree, and fixing only
     # Filing.text() is what broke it.
     return document.text(table_max_col_width=500)
+
+
+def attachment_html_to_text(content: Union[str, bytes]) -> str:
+    """Plain text of one attachment's HTML, as an attachment arrives.
+
+    ``Attachment.text()`` and the 8-K/6-K exhibit text call this. It renders through
+    :func:`html_to_text` — the same rule as ``FilingSGML.text()`` — after the two
+    steps attachment content needs and primary-document content never does:
+
+    * bytes are decoded by :func:`decode_html_bytes` (``Attachment.download()`` is
+      typed ``str | bytes``, GH #844);
+    * HTML still wrapped in an SGML ``<DOCUMENT>``/``<TEXT>`` envelope is unwrapped,
+      since the parser otherwise reads the envelope's ``<TYPE>`` line and drops the
+      body.
+
+    Kept out of ``html_to_text`` on purpose, so ``FilingSGML.text()`` and every
+    other caller of the shared rule produce exactly what they did before.
+    """
+    if isinstance(content, (bytes, bytearray)):
+        content = decode_html_bytes(content)
+    if "<TEXT>" in content[:500]:
+        content = extract_text_between_tags(content, "TEXT") or content
+    return html_to_text(content)
 
 
 def strip_html_tags(html: str) -> str:

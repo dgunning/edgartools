@@ -534,8 +534,8 @@ class Attachment:
             if self.is_html() or has_html_content(content):
                 # The same rule FilingSGML.text() and Filing.text() apply to HTML,
                 # so an exhibit reads the same whichever object you reach it from.
-                from edgar.sgml.text_extraction import html_to_text
-                return html_to_text(content)
+                from edgar.sgml.text_extraction import attachment_html_to_text
+                return attachment_html_to_text(content)
             else:
                 return content
         return None
