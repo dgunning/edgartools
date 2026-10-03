@@ -110,7 +110,7 @@ jobs:
       fail-fast: false
       matrix:
         # Single version: regression tests verify data correctness against real
-        # filings, not Python compatibility (the fast job covers 3.10 + 3.13).
+        # filings, not Python compatibility (the fast job covers 3.11 + 3.13).
         python-version: ["3.12"]
 
     steps:

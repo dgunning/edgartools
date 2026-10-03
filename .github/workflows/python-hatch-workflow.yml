@@ -47,6 +47,12 @@ name: Build and Test Edgartools
 # 6.0 freeze window (bead edgartools-07lk.22). Without it a backport PR into that
 # branch would report no checks at all. Branch protection is not configured on it,
 # so these checks inform but do not block.
+#
+# Editing THIS copy does not change what such a branch runs. A push runs the
+# workflow file at the pushed commit, and a pull request runs it from the merge
+# commit of head into base, so a branch cut from a 5.x tag runs the copy in that
+# tag, which still tests Python 3.10. In main's copy the 5.*.x entries are
+# therefore inert; they stay because removing them buys nothing.
 on:
   push:
     branches: [ "main", "5.*.x" ]
@@ -85,9 +91,10 @@ jobs:
       run: python scripts/check_cassettes.py
 
   test-fast:
-    # PRs to main: single version for a quick gate. Push/schedule, and PRs to a
-    # 5.*.x maintenance branch: full matrix. 3.10 is the reason a 5.x hotfix
-    # exists at all once 6.0 drops it, so a backport must be tested there.
+    # PRs to main: single version for a quick gate. Push/schedule: the declared
+    # floor (requires-python >=3.11) plus 3.13, so the minimum is exercised rather
+    # than merely asserted. A 5.*.x maintenance branch tests 3.10 from its own
+    # copy of this file (see the note above `on:`), not from this one.
     # The main-PR leg must stay exactly ["3.13"]: branch protection requires the
     # context "test-fast (3.13)" (see the header of this file).
     needs: cassette-gate
@@ -95,7 +102,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ${{ (github.event_name == 'pull_request' && github.base_ref == 'main') && fromJSON('["3.13"]') || fromJSON('["3.10", "3.13"]') }}
+        python-version: ${{ (github.event_name == 'pull_request' && github.base_ref == 'main') && fromJSON('["3.13"]') || fromJSON('["3.11", "3.13"]') }}
 
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -109,6 +116,14 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install -e ".[ai]"
         python -m pip install pytest pytest-cov pytest-env pytest-xdist pytest-asyncio pytest-retry pytest-mock pytest-vcr "vcrpy>=8.3.0,<9" freezegun==1.5.1 filelock tqdm responses
+
+    # The floor leg also holds the pandas floor's major. We support pandas 2.x
+    # and 3.x, and until the Python floor rose pandas 2 was tested only by
+    # accident: pandas 3 requires Python 3.11, so the old 3.10 leg resolved to
+    # pandas 2.3.x while 3.13 got 3.x. Pinning here keeps both majors under test.
+    - name: Pin pandas 2.x on the floor leg
+      if: matrix.python-version == '3.11'
+      run: python -m pip install "pandas>=2.0.0,<3"
 
     # A source scan, so it runs here rather than as its own job: this is the
     # only context pull requests are required to report, and adding a second
