@@ -1,14 +1,16 @@
-import re
 from pathlib import Path
 from edgar.search.textsearch import numeric_shape, preprocess, convert_items_to_tokens, RegexSearch, BM25Search
 from rich import print
 from edgar import Filing
 from edgar.search import SearchResults
-from edgar.files.html_documents import html_to_markdown
+from edgar.documents.extractors.chunk_extractor import chunk_html
 import pytest
 
 blackrock_8k = Path('data/form8K.Blackrock.html').read_text()
-document_sections = re.split(r"\n\s*\n", html_to_markdown(blackrock_8k))
+# The passages Filing.sections() hands Filing.search(). Until 6.0 this fixture was
+# the legacy edgar.files markdown split on blank lines, which nothing in the
+# library searches any more.
+document_sections = chunk_html(blackrock_8k, form="8-K")
 
 
 @pytest.mark.fast
@@ -16,7 +18,9 @@ def test_create_bm25_search_index():
     bm25: BM25Search = BM25Search(document_sections)
     assert bm25
     search_results = bm25.search("financial")
-    assert len(search_results) == 3
+    # One hit per passage containing the word: 2 of the chunker's 14 passages.
+    # (The legacy blank-line split had it in 3 of 31.)
+    assert len(search_results) == 2
 
     # Search for item
     print()

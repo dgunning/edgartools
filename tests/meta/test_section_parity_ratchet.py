@@ -33,6 +33,14 @@ not fixed. Entries whose fixture is missing are partitioned out and reported, an
 ``test_the_tracked_corpus_is_present`` fails if the tracked half goes missing too
 — otherwise "measured nothing" would once again read as "nothing wrong".
 
+SINCE 6.0 THE LEGACY COLUMN IS FROZEN. ``edgar.files`` is deleted, so the legacy
+parser cannot be re-run; ``parity_benchmark.measure`` reads what it found from
+``parser_corpus/legacy_frozen/sections.json``, written from main immediately
+before the deletion. Re-measured through the frozen file, all 128 fixtures gave
+results identical to the live comparison. The ratchet therefore still means
+"the surviving parser has not fallen below what the deleted one found", and it
+is now the only thing that says so.
+
 Deliberately NOT asserted: the coverage percentages. They move with the corpus
 and read as precision the sample size does not support. The differential is the
 thing the deletion decision actually rests on.

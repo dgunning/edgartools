@@ -4,7 +4,6 @@ from rich import print
 from edgar import Filing
 from edgar.company_reports import TenK, TenQ, TwentyF, EightK
 from edgar.company_reports.ten_k import _item_sort_key
-from edgar.files.htmltools import ChunkedDocument
 import pytest
 
 pd.options.display.max_colwidth = 40
@@ -112,14 +111,16 @@ def test_is_valid_item_for_filing():
 @pytest.mark.fast
 @pytest.mark.vcr
 def test_chunk_items_for_company_reports():
+    # Asserted ChunkedDocument.show_items() until 6.0 removed the legacy parser;
+    # the same filing's items now come from TenK, which is what users read.
     filing = Filing(form='10-K', filing_date='2023-03-31', company='7GC & Co. Holdings Inc.',
 cik=1826011, accession_no='0001193125-23-086073')
-    html = filing.html()
-    chunked_document = ChunkedDocument(html)
-    print()
-    items = chunked_document.show_items("Item.str.contains('ITEM', case=False)", "Item")
-    assert not items.empty
-    print(items)
+    tenk = TenK(filing)
+    assert tenk.items == [
+        'Item 1', 'Item 1A', 'Item 1B', 'Item 2', 'Item 3', 'Item 4', 'Item 5', 'Item 6',
+        'Item 7', 'Item 7A', 'Item 8', 'Item 9', 'Item 9A', 'Item 9B', 'Item 9C', 'Item 10',
+        'Item 11', 'Item 12', 'Item 13', 'Item 14', 'Item 15', 'Item 16',
+    ]
 
 @pytest.mark.network
 def test_items_for_10k_filing():

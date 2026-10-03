@@ -2,70 +2,86 @@
 Regression test for Issue #844: SixK.text() raises TypeError on bytes exhibit content.
 
 ``Attachment.download()`` is typed ``str | bytes`` and returns bytes for some 6-K
-exhibits. That value flows into ``Document.parse`` -> ``HtmlDocument.get_root``,
-whose ``"<TEXT>" in html[:500]`` check raised
+exhibits. That value flowed into the legacy ``Document.parse`` ->
+``HtmlDocument.get_root``, whose ``"<TEXT>" in html[:500]`` check raised
 ``TypeError: a bytes-like object is required, not 'str'`` instead of parsing.
+The fix decoded bytes before those string checks, trying UTF-8, then
+Windows-1252, then Latin-1, so legacy single-byte exhibits kept their accented
+letters and curly quotes instead of turning into U+FFFD.
 
-The parser now decodes bytes before those string checks, so bytes and str inputs
-behave identically. No network access required.
+WHERE THE FIX LIVES NOW. 6.0 removed ``edgar.files``, and with it the function
+the original tests here exercised. Worse, they had already stopped guarding the
+reported path: ``SixK._get_exhibit_content`` had moved to
+``parse_html(content).text()``, which decodes bytes as UTF-8 with replacement, so
+a cp1252 6-K exhibit was mojibaked again while these tests stayed green. The rule
+now lives once, in ``edgar.sgml.text_extraction.html_to_text`` (with
+``decode_html_bytes``), and every exhibit/attachment text path calls it. The
+tests below pin the rule and then each user-facing path that must reach it.
+No network access required.
 
 GitHub Issue: https://github.com/dgunning/edgartools/issues/844
 """
 
 import pytest
 
-from edgar.files.html import Document
-from edgar.files.html_documents import HtmlDocument
+from edgar.attachments import Attachment
+from edgar.company_reports.current_report import CurrentReport
+from edgar.company_reports.sixk import SixK
+from edgar.sgml.text_extraction import decode_html_bytes, html_to_text
+
+pytestmark = pytest.mark.fast
 
 INNER_HTML = "<html><body><p>Exhibit 99.1 content</p></body></html>"
 SEC_WRAPPED = "<DOCUMENT>\n<TYPE>EX-99.1\n<TEXT>\n" + INNER_HTML + "\n</TEXT>\n</DOCUMENT>\n"
+LEGACY_EXHIBIT = "<html><body><p>café résumé ’quoted’</p></body></html>"
 
 
-class TestIssue844BytesExhibitContent:
-    """Parsing must accept bytes HTML, matching Attachment.download()'s str|bytes return."""
+class TestTheDecodingRule:
 
-    @pytest.mark.parametrize("html", [INNER_HTML, SEC_WRAPPED])
-    def test_document_parse_accepts_bytes(self, html):
-        """Document.parse must not raise TypeError on bytes input (GH #844)."""
-        doc_bytes = Document.parse(html.encode("utf-8"))
-        doc_str = Document.parse(html)
-        assert doc_bytes is not None
-        # bytes input parses equivalently to the already-decoded str input
-        assert len(doc_bytes.nodes) == len(doc_str.nodes)
-
-    def test_get_root_accepts_bytes(self):
-        """HtmlDocument.get_root decodes bytes instead of raising at the crash site."""
-        root = HtmlDocument.get_root(SEC_WRAPPED.encode("utf-8"))
-        assert root is not None
-        # Not raising is only half of it. The crash site was the
-        # `"<TEXT>" in html[:500]` check that unwraps the SEC envelope, so the
-        # test has to show the envelope was actually stripped and the exhibit
-        # beneath it parsed -- `is not None` alone passes on an empty root.
-        assert root.get_text().strip() == "Exhibit 99.1 content"
+    @pytest.mark.parametrize("html", [INNER_HTML, SEC_WRAPPED], ids=["bare", "sgml-wrapped"])
+    def test_bytes_and_str_render_the_same_text(self, html):
+        assert html_to_text(html.encode("utf-8")) == "Exhibit 99.1 content"
+        assert html_to_text(html) == "Exhibit 99.1 content"
 
     @pytest.mark.parametrize("encoding", ["cp1252", "latin-1"])
     def test_non_utf8_bytes_preserve_characters(self, encoding):
-        """cp1252/latin-1 exhibits must decode to the right characters, not U+FFFD.
-
-        utf-8 + errors="replace" silently mojibaked these legacy filings; the
-        cp1252 -> latin-1 fallback keeps the original text.
-        """
         html_bytes = "<html><body><p>café résumé</p></body></html>".encode(encoding)
-        parsed = HtmlDocument.get_root(html_bytes).get_text()
-        assert "café" in parsed and "résumé" in parsed
-        assert "�" not in parsed  # no replacement characters
-        assert Document.parse(html_bytes) is not None
+        text = html_to_text(html_bytes)
+        assert text == "café résumé"
+
+    def test_windows_1252_curly_quotes_survive(self):
+        """0x92 is a right single quote in cp1252 and a C1 control in Latin-1."""
+        assert decode_html_bytes(LEGACY_EXHIBIT.encode("cp1252")) == LEGACY_EXHIBIT
 
     def test_undecodable_bytes_do_not_crash(self):
-        """A byte invalid in utf-8 and cp1252 still degrades via latin-1, never raises."""
-        # 0x81 is undefined in cp1252 and an invalid utf-8 start byte
-        doc = Document.parse(b"<html><body><p>\x81</p></body></html>")
-        assert doc is not None
-        # latin-1 is the last fallback and maps every byte, so the document
-        # must come back with the paragraph intact and the byte carried
-        # through as U+0081 -- not dropped, and not replaced with U+FFFD.
-        # `is not None` was true of an empty document too.
-        assert len(doc.nodes) == 1, f"expected one node, got {len(doc.nodes)}"
-        text = doc.nodes[0].content
-        assert "�" not in text, "latin-1 fallback should not produce replacement characters"
-        assert "\x81" in text, f"the undecodable byte was dropped: {text!r}"
+        """0x81 is invalid in UTF-8 and undefined in cp1252; Latin-1 carries it."""
+        text = html_to_text(b"<html><body><p>\x81</p></body></html>")
+        assert text == "\x81"
+
+
+class _Exhibit:
+    """The surface the report classes read off an exhibit attachment."""
+
+    empty = False
+
+    def __init__(self, content: bytes):
+        self._content = content
+
+    def download(self):
+        return self._content
+
+
+@pytest.mark.parametrize("report_class", [SixK, CurrentReport], ids=["SixK", "CurrentReport"])
+def test_report_exhibit_text_decodes_legacy_bytes(report_class):
+    """The path the issue was filed against: a bytes exhibit inside report.text()."""
+    report = report_class.__new__(report_class)
+    content = report._get_exhibit_content(_Exhibit(LEGACY_EXHIBIT.encode("cp1252")))
+    assert content == "café résumé ’quoted’"
+
+
+def test_attachment_text_decodes_legacy_bytes():
+    attachment = Attachment(sequence_number="2", description="EX-99.1", document="ex99-1.htm",
+                            ixbrl=False, path="/Archives/edgar/data/1/000000000000000001/ex99-1.htm",
+                            document_type="EX-99.1", size=None)
+    attachment.content = LEGACY_EXHIBIT.encode("cp1252")
+    assert attachment.text() == "café résumé ’quoted’"

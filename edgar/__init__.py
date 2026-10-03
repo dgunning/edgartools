@@ -63,8 +63,6 @@ from edgar.entity import (
     get_ticker_to_cik_lookup,
 )
 from edgar.entity.entity_facts import clear_company_facts_cache
-from edgar.files import detect_page_breaks, mark_page_breaks
-from edgar.files.html import Document
 from edgar.filesystem import is_cloud_storage_enabled, sync_to_cloud, use_cloud_storage
 from edgar.financials import Financials, MultiFinancials
 from edgar.funds import Fund, FundClass, FundCompany, FundSeries, find_fund, find_funds
@@ -187,12 +185,7 @@ get_portfolio_holding_filings = partial(get_filings, form=THIRTEENF_FORMS)
 #   1. `List`, `Optional`, `Union`, `lru_cache`, `partial` — imported above for
 #      annotations and never API. `from edgar import Optional` works today and
 #      is an accident.
-#   2. `Document`, `detect_page_breaks`, `mark_page_breaks` — these come from
-#      `edgar.files`, which 6.0 removes (bead edgartools-07lk.3). `edgar.Document`
-#      is the LEGACY parser and a different class from `edgar.documents.Document`;
-#      no documentation teaches `from edgar import Document`, and the name
-#      collides with its own replacement.
-#   3. Filesystem/config plumbing (`edgar.paths`), the internal cache-clearing
+#   2. Filesystem/config plumbing (`edgar.paths`), the internal cache-clearing
 #      helpers behind `clear_cache`, and lower-level variants of supported entry
 #      points (`get_by_accession_number_enriched`, `get_entity_submissions`,
 #      `get_cik_lookup_data`, `get_ticker_to_cik_lookup`).
@@ -694,6 +687,27 @@ def obj(sec_filing: Filing) -> Optional[object]:
 # it. Reach it at edgar.settings.edgar_access_mode, where it has always lived.
 _DEPRECATED_TOP_LEVEL_NAMES = ("CAUTION", "CRAWL", "NORMAL", "edgar_mode")
 
+# Names 6.0 removed from the top level along with the legacy `edgar.files`
+# parser. They were never in `__all__`, but `from edgar import Document` worked
+# for years, so the AttributeError says where to go instead of only "no attribute".
+_REMOVED_IN_6_0 = {
+    "Document": (
+        "edgar.Document was the legacy HTML parser and was removed in edgartools 6.0. "
+        "Use filing.parse() or edgar.documents.parse_html(html), which return "
+        "edgar.documents.Document."
+    ),
+    "detect_page_breaks": (
+        "edgar.detect_page_breaks was removed in edgartools 6.0 with the legacy "
+        "edgar.files parser. It has no replacement: edgar.documents treats page "
+        "breaks as print layout and drops them."
+    ),
+    "mark_page_breaks": (
+        "edgar.mark_page_breaks was removed in edgartools 6.0 with the legacy "
+        "edgar.files parser. It has no replacement: edgar.documents treats page "
+        "breaks as print layout and drops them."
+    ),
+}
+
 
 # ---------------------------------------------------------------------------
 # Top-level names served on first access (bead edgartools-07lk.12.1.1).
@@ -730,6 +744,8 @@ def __getattr__(name: str):
 
         _settings.warn_access_mode_deprecated(name)
         return _settings.DEPRECATED_ACCESS_MODE_NAMES[name]
+    if name in _REMOVED_IN_6_0:
+        raise AttributeError(_REMOVED_IN_6_0[name])
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 

@@ -36,7 +36,6 @@ Complex use cases and advanced features:
 - **enterprise_config.py** - Configure custom SEC mirrors and rate limiting
 - **ranking_search_examples.py** - Search filings with BM25 ranking
 - **section_detection_demo.py** - Extract specific sections from filings
-- **start_page_number_example.py** - Work with filing page numbers
 
 ### 🤖 AI Integration (`scripts/ai/`)
 Integrate EdgarTools with AI/LLM workflows:

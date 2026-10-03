@@ -47,7 +47,9 @@ So the two paths still diverge on some shapes, knowingly:
 
 import logging
 import re
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
+
+from edgar.sgml.tools import extract_text_between_tags
 
 __all__ = [
     'OWNERSHIP_FORMS',
@@ -55,6 +57,7 @@ __all__ = [
     'looks_like_ownership_xml',
     'ownership_xml_to_html',
     'decode_document_content',
+    'decode_html_bytes',
     'html_to_text',
     'strip_html_tags',
     'primary_document_text',
@@ -234,7 +237,24 @@ def decode_document_content(content, is_binary: bool = False) -> Optional[str]:
         return None
 
 
-def html_to_text(html: str, form: Optional[str] = None) -> str:
+def decode_html_bytes(content: Union[bytes, bytearray]) -> str:
+    """Decode HTML bytes as UTF-8, then Windows-1252, then Latin-1.
+
+    ``Attachment.download()`` is typed ``str | bytes`` and some exhibits arrive as
+    bytes in a legacy single-byte encoding (GH #844). UTF-8 with
+    ``errors="replace"`` turns their accented letters and curly quotes into U+FFFD.
+    Windows-1252 is tried before Latin-1 because it is what those exhibits are
+    usually written in; Latin-1 maps every byte, so this never raises.
+    """
+    for encoding in ("utf-8", "cp1252"):
+        try:
+            return bytes(content).decode(encoding)
+        except UnicodeDecodeError:
+            continue
+    return bytes(content).decode("latin-1")
+
+
+def html_to_text(html: Union[str, bytes], form: Optional[str] = None) -> str:
     """Parse HTML and render it as plain text.
 
     Returns "" for a document with no renderable content. If the HTML is malformed
@@ -242,11 +262,20 @@ def html_to_text(html: str, form: Optional[str] = None) -> str:
     with tags stripped - a degraded answer, but never raw markup, because callers of
     ``text()`` are asking for text.
 
+    Accepts bytes (decoded by :func:`decode_html_bytes`) and HTML still wrapped in
+    an SGML ``<DOCUMENT>``/``<TEXT>`` envelope, which is unwrapped first; without
+    that, the parser reads the envelope's ``<TYPE>`` line and drops the body.
+
     Only ``HTMLParsingError`` is absorbed. ``DocumentTooLargeError`` is a deliberate
     guard rather than a malformed document, so it still propagates.
     """
     from edgar.documents import HTMLParser, ParserConfig
     from edgar.documents.exceptions import HTMLParsingError
+
+    if isinstance(html, (bytes, bytearray)):
+        html = decode_html_bytes(html)
+    if "<TEXT>" in html[:500]:
+        html = extract_text_between_tags(html, "TEXT") or html
 
     try:
         document = HTMLParser(ParserConfig(form=form)).parse(html)
