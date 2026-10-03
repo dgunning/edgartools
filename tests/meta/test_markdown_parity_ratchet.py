@@ -24,6 +24,13 @@ here. Briefly: characters cannot distinguish compaction from loss, word counts
 are dominated by legacy's repeated table headers, and numbers are the only
 signal a reformat cannot move.
 
+SINCE 6.0 THE LEGACY COLUMN IS FROZEN. The legacy renderer went with
+``edgar.files``; ``markdown_parity.measure_markdown`` reads its numbers, words and
+structure counts from ``parser_corpus/legacy_frozen/markdown.json.gz``, written
+from main immediately before the deletion, and renders only the new side.
+Re-measured through the frozen file, all 128 fixtures gave results identical to
+the live comparison.
+
 WHAT IS AND IS NOT MEASURED IN CI. Same split as the section ratchet.
 ``tests/fixtures/html`` and ``tests/fixtures/parity_gate`` are tracked (61 of the
 115 fixtures); ``tests/fixtures/text_boundary_corpus`` is gitignored, so the
@@ -302,11 +309,11 @@ class TestTheCorpusItselfIsIntact:
         assert not errors, f"renderer raised on: {errors}"
 
     def test_the_legacy_pipeline_still_produces_markdown(self, measured):
-        """No fixture may newly fall back to the ``<pre>`` escape hatch.
+        """No fixture is scored against the ``<pre>`` escape hatch.
 
-        Zero today. A filing joining this set is not a parity finding — it means
-        ``get_clean_html`` stopped rooting HTML it used to handle, which would
-        silently remove that filing from every rate above.
+        Zero when the legacy side was frozen. The flag now comes from the frozen
+        record, so a filing joining this set means the frozen file was edited,
+        which would silently remove that filing from every rate above.
         """
         results, _present = measured
         degraded = sorted(k for k, r in results.items() if r["legacy_degraded"])

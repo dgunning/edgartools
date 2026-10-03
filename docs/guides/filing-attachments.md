@@ -104,65 +104,19 @@ if attachment.is_html():
 
 The `markdown()` method returns `None` for non-HTML attachments, so you can safely call it on any attachment. Images are rendered as Markdown image links with absolute SEC archive URLs, resolved against the attachment's own URL.
 
-#### Page Break Delimiter Support
-
-!!! warning "Deprecated — removed in 6.0"
-
-    Page-break rendering exists only in the legacy renderer, so
-    `include_page_breaks=True` routes the whole document through it. That
-    renderer drops every image and formats tables differently from the default
-    path, which is why the flag is going away rather than being carried
-    forward. Prefer `attachment.markdown()`.
-
-The `markdown()` method supports optional page break delimiters to help you understand document structure:
-
-```python
-# Convert with page break delimiters
-attachment = filing.attachments[1]
-markdown_with_breaks = attachment.markdown(include_page_breaks=True)
-
-# Page breaks appear as: {1}------------------------------------------------
-# Where the number indicates the page number
-```
-
-When `include_page_breaks=True`, the markdown will include delimiters at page boundaries in the format:
-- `{0}------------------------------------------------` at the start of the document
-- `{1}------------------------------------------------` before the second page content
-- `{2}------------------------------------------------` before the third page content
-- And so on...
-
-##### Customizing Page Numbering
-
-You can control the starting page number for page break markers using the `start_page_number` parameter:
-
-```python
-# Start page numbering at 1 (instead of 0)
-attachment = filing.attachments[1]
-markdown_with_breaks = attachment.markdown(include_page_breaks=True, start_page_number=1)
-
-# This will produce: {1}------------------------------------------------, {2}------------------------------------------------, etc.
-
-# Start page numbering at 5
-markdown_with_breaks = attachment.markdown(include_page_breaks=True, start_page_number=5)
-
-# This will produce: {5}------------------------------------------------, {6}------------------------------------------------, etc.
-```
-
-This is particularly useful when you want to align page numbers with external document numbering or when processing documents that are part of a larger collection.
+Page-break markers are not rendered. The parser treats page-break rules and
+page-number footers as print layout and drops them; the `include_page_breaks`
+and `start_page_number` arguments were removed in 6.0 (see the
+[upgrade guide](../upgrade/6.0.md#page-breaks-are-not-rendered-any-more) for
+what to use instead).
 
 ### Batch markdown conversion
 
 You can convert all HTML attachments in a filing to markdown at once:
 
 ```python
-# Convert all HTML attachments (without page breaks)
+# Convert all HTML attachments
 markdown_dict = filing.attachments.markdown()
-
-# Convert all HTML attachments with page breaks
-markdown_dict = filing.attachments.markdown(include_page_breaks=True)
-
-# Convert all HTML attachments with page breaks starting at page 1
-markdown_dict = filing.attachments.markdown(include_page_breaks=True, start_page_number=1)
 
 # Result is a dictionary: {"filename.htm": "markdown content", ...}
 for filename, content in markdown_dict.items():

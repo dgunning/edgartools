@@ -1,28 +1,28 @@
-from edgar import *
-from edgar.files.html import Document, HtmlDocument
-from edgar.sgml.tools import extract_text_between_tags
-from edgar.core import is_probably_html
-from bs4 import BeautifulSoup
 from pathlib import Path
+
+from edgar import *
+from edgar.core import is_probably_html
+from edgar.documents import parse_html
+from edgar.sgml.tools import extract_text_between_tags
+
 
 def test_get_html_from_document_tags():
     # This file has html inside <DOCUMENT> tags
     content = Path('data/html/SC-13G-DOCUMENT.html').read_text()
     text = extract_text_between_tags(content, "TEXT")
     assert is_probably_html(text)
-    document = Document.parse(text)
-    assert document
-    print(document)
+    document = parse_html(text)
+    assert "SCHEDULE 13G" in document.text()
+    assert "LIVENT CORPORATION" in document.text()
+
 
 def test_get_plaintext_from_document_tags():
-    # This file has html inside <DOCUMENT> tags
+    # This file has plain text inside <DOCUMENT> tags
     content = Path('data/html/SG-13G-DOCUMENT-WITH-TEXT.html').read_text()
     text = extract_text_between_tags(content, "TEXT")
     assert not is_probably_html(text)
-
-
-    document = Document.parse(text)
-   # assert document is not None
+    document = parse_html(text)
+    assert "SCHEDULE 13G" in document.text()
 
 
 def test_get_html_inside_document_tags():
@@ -35,8 +35,9 @@ def test_get_html_inside_document_tags():
     html = filing.html()
     assert html
     # We can parse the HTML
-    document = Document.parse(html)
-    assert document
+    document = parse_html(html)
+    assert document.text()
+
 
 def test_get_html_from_filing_with_plain_text():
     filing = Filing(form='SC 13G/A', filing_date='2024-01-22', company='BlackRock Inc.', cik=1364742,

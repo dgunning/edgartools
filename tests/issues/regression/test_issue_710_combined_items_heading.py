@@ -39,17 +39,13 @@ class TestCombinedItemsHeading:
         tenk._filing.accession_number = "0002074176-26-000010"
         tenk._cross_reference_index = None
 
-        # Patch document and chunked_document on the instance using mock descriptors
+        # Patch document on the class using a mock descriptor (stopped in
+        # teardown). There used to be a second patch for the legacy
+        # `_chunked_document` fallback; 6.0 removed it along with edgar.files.
         fake_doc = MagicMock()
         fake_doc.sections = fake_sections
-        # Use patch.object on the instance to avoid polluting the class
         self._patches = [
             patch.object(type(tenk), 'document', new_callable=lambda: property(lambda self: fake_doc)),
-            # `_chunked_document`, not the public name: the fallback path reads
-            # the private accessor, so patching the public property here would
-            # be a no-op that still passed — the patch has to sit where the code
-            # actually looks.
-            patch.object(type(tenk), '_chunked_document', new_callable=lambda: property(lambda self: {})),
         ]
         for p in self._patches:
             p.start()

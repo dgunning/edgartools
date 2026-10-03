@@ -47,7 +47,9 @@ So the two paths still diverge on some shapes, knowingly:
 
 import logging
 import re
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
+
+from edgar.sgml.tools import extract_text_between_tags
 
 __all__ = [
     'OWNERSHIP_FORMS',
@@ -55,6 +57,8 @@ __all__ = [
     'looks_like_ownership_xml',
     'ownership_xml_to_html',
     'decode_document_content',
+    'attachment_html_to_text',
+    'decode_html_bytes',
     'html_to_text',
     'strip_html_tags',
     'primary_document_text',
@@ -234,6 +238,23 @@ def decode_document_content(content, is_binary: bool = False) -> Optional[str]:
         return None
 
 
+def decode_html_bytes(content: Union[bytes, bytearray]) -> str:
+    """Decode HTML bytes as UTF-8, then Windows-1252, then Latin-1.
+
+    ``Attachment.download()`` is typed ``str | bytes`` and some exhibits arrive as
+    bytes in a legacy single-byte encoding (GH #844). UTF-8 with
+    ``errors="replace"`` turns their accented letters and curly quotes into U+FFFD.
+    Windows-1252 is tried before Latin-1 because it is what those exhibits are
+    usually written in; Latin-1 maps every byte, so this never raises.
+    """
+    for encoding in ("utf-8", "cp1252"):
+        try:
+            return bytes(content).decode(encoding)
+        except UnicodeDecodeError:
+            continue
+    return bytes(content).decode("latin-1")
+
+
 def html_to_text(html: str, form: Optional[str] = None) -> str:
     """Parse HTML and render it as plain text.
 
@@ -267,6 +288,29 @@ def html_to_text(html: str, form: Optional[str] = None) -> str:
     # by test_filing_text_baseline.test_both_paths_agree, and fixing only
     # Filing.text() is what broke it.
     return document.text(table_max_col_width=500)
+
+
+def attachment_html_to_text(content: Union[str, bytes]) -> str:
+    """Plain text of one attachment's HTML, as an attachment arrives.
+
+    ``Attachment.text()`` and the 8-K/6-K exhibit text call this. It renders through
+    :func:`html_to_text` — the same rule as ``FilingSGML.text()`` — after the two
+    steps attachment content needs and primary-document content never does:
+
+    * bytes are decoded by :func:`decode_html_bytes` (``Attachment.download()`` is
+      typed ``str | bytes``, GH #844);
+    * HTML still wrapped in an SGML ``<DOCUMENT>``/``<TEXT>`` envelope is unwrapped,
+      since the parser otherwise reads the envelope's ``<TYPE>`` line and drops the
+      body.
+
+    Kept out of ``html_to_text`` on purpose, so ``FilingSGML.text()`` and every
+    other caller of the shared rule produce exactly what they did before.
+    """
+    if isinstance(content, (bytes, bytearray)):
+        content = decode_html_bytes(content)
+    if "<TEXT>" in content[:500]:
+        content = extract_text_between_tags(content, "TEXT") or content
+    return html_to_text(content)
 
 
 def strip_html_tags(html: str) -> str:

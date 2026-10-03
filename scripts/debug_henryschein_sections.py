@@ -41,17 +41,3 @@ for key in ['business', 'Item 1', '1', 'item_1']:
         print(f"Found '{key}': {len(text)} chars")
     else:
         print(f"NOT found: '{key}'")
-
-# Also check what chunked_document returns
-print("\n--- ChunkedDocument extraction ---")
-from edgar.files.htmltools import ChunkedDocument
-
-chunked = ChunkedDocument(html, prefix_src=filing.base_dir)
-items = chunked.list_items()
-print(f"ChunkedDocument items: {items}")
-
-if 'Item 1' in items:
-    item1_chunked = chunked['Item 1']
-    print(f"Item 1 from ChunkedDocument: {len(item1_chunked) if item1_chunked else 0} chars")
-    if item1_chunked:
-        print(f"  Content: {item1_chunked[:200]}")

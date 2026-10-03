@@ -25,7 +25,7 @@ class NotebookValidator:
 
     # Deprecated imports and their replacements
     DEPRECATED_IMPORTS = {
-        'from edgar.files.html import': 'from edgar import',  # Document moved
+        'from edgar.files.html import': 'from edgar.documents import',  # legacy parser removed in 6.0
         'get_entity': 'Company',  # get_entity deprecated in favor of Company
     }
 
