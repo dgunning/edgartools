@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from edgar.filesystem import EdgarPath
 
 import pandas as pd
-from httpx import AsyncClient, HTTPStatusError
+from httpx2 import AsyncClient, HTTPStatusError
 from tqdm.auto import tqdm
 
 from edgar.core import log, strtobool

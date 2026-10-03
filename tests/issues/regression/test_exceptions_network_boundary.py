@@ -1,4 +1,4 @@
-"""The network boundary: httpx failures become TransportError, once, at the edge.
+"""The network boundary: httpx2 failures become TransportError, once, at the edge.
 
 Bead: edgartools-07lk.10, PR2 of 3. Design §5.
 
@@ -34,7 +34,7 @@ WHAT THESE TESTS PROTECT, in order of how quietly each could break:
 """
 import asyncio
 
-import httpx
+import httpx2
 import pytest
 from stamina import retry
 
@@ -77,10 +77,10 @@ def lenient(monkeypatch):
     monkeypatch.delenv("EDGARTOOLS_STRICT_ERRORS", raising=False)
 
 
-def _status_error(status: int, url: str = URL) -> httpx.HTTPStatusError:
-    request = httpx.Request("GET", url)
-    return httpx.HTTPStatusError(
-        f"{status}", request=request, response=httpx.Response(status, request=request)
+def _status_error(status: int, url: str = URL) -> httpx2.HTTPStatusError:
+    request = httpx2.Request("GET", url)
+    return httpx2.HTTPStatusError(
+        f"{status}", request=request, response=httpx2.Response(status, request=request)
     )
 
 
@@ -126,7 +126,7 @@ def test_strict_flag_is_read_per_call_not_captured_at_import(monkeypatch):
 def test_connect_failure_becomes_a_transport_error_with_no_status(strict):
     @_retrying
     def boundary(url):
-        raise httpx.ConnectError("nodename nor servname provided")
+        raise httpx2.ConnectError("nodename nor servname provided")
 
     with pytest.raises(TransportError) as excinfo:
         boundary(URL)
@@ -134,7 +134,7 @@ def test_connect_failure_becomes_a_transport_error_with_no_status(strict):
     exc = excinfo.value
     assert exc.status_code is None, "no status means we never got an answer — the whole distinction"
     assert exc.url == URL
-    assert isinstance(exc.__cause__, httpx.ConnectError), "the original must stay reachable"
+    assert isinstance(exc.__cause__, httpx2.ConnectError), "the original must stay reachable"
 
 
 def test_status_error_becomes_a_transport_error_carrying_the_status(strict):
@@ -149,7 +149,7 @@ def test_status_error_becomes_a_transport_error_carrying_the_status(strict):
     assert exc.status_code == 503
     assert http_status(exc) == 503
     assert "HTTP 503" in str(exc)
-    assert isinstance(exc.__cause__, httpx.HTTPStatusError)
+    assert isinstance(exc.__cause__, httpx2.HTTPStatusError)
 
 
 def test_the_url_comes_from_the_exception_when_it_has_one(strict):
@@ -168,11 +168,11 @@ def test_the_url_comes_from_the_exception_when_it_has_one(strict):
 def test_async_boundary_wraps(strict):
     @_retrying
     async def boundary(client, url):
-        raise httpx.ReadTimeout("timed out")
+        raise httpx2.ReadTimeout("timed out")
 
     with pytest.raises(TransportError) as excinfo:
         asyncio.run(boundary(None, URL))
-    assert isinstance(excinfo.value.__cause__, httpx.ReadTimeout)
+    assert isinstance(excinfo.value.__cause__, httpx2.ReadTimeout)
     assert excinfo.value.url == URL
 
 
@@ -182,27 +182,27 @@ def test_generator_boundary_wraps(strict):
     @_retrying
     def boundary(url):
         yield b"first chunk"
-        raise httpx.ReadTimeout("connection dropped mid-stream")
+        raise httpx2.ReadTimeout("connection dropped mid-stream")
 
     with pytest.raises(TransportError) as excinfo:
         list(boundary(URL))
-    assert isinstance(excinfo.value.__cause__, httpx.ReadTimeout)
+    assert isinstance(excinfo.value.__cause__, httpx2.ReadTimeout)
 
 
 def test_inspect_response_wraps_raise_for_status(strict):
-    request = httpx.Request("GET", URL)
-    response = httpx.Response(500, request=request)
+    request = httpx2.Request("GET", URL)
+    response = httpx2.Response(500, request=request)
 
     with pytest.raises(TransportError) as excinfo:
         inspect_response(response)
     assert excinfo.value.status_code == 500
-    assert isinstance(excinfo.value.__cause__, httpx.HTTPStatusError)
+    assert isinstance(excinfo.value.__cause__, httpx2.HTTPStatusError)
 
 
 @pytest.mark.parametrize("status", [200, 304])
 def test_inspect_response_still_accepts_success_and_not_modified(strict, status):
-    request = httpx.Request("GET", URL)
-    assert inspect_response(httpx.Response(status, request=request)) is None
+    request = httpx2.Request("GET", URL)
+    assert inspect_response(httpx2.Response(status, request=request)) is None
 
 
 def test_our_own_transport_errors_pass_through_untouched(strict):
@@ -222,8 +222,8 @@ def test_our_own_transport_errors_pass_through_untouched(strict):
 # ---------------------------------------------------------------------------
 
 @pytest.mark.parametrize("original", [
-    httpx.ConnectError("no route"),
-    httpx.ReadTimeout("timed out"),
+    httpx2.ConnectError("no route"),
+    httpx2.ReadTimeout("timed out"),
     _status_error(404),
 ])
 def test_without_the_flag_httpx_propagates_verbatim(lenient, original):
@@ -237,9 +237,9 @@ def test_without_the_flag_httpx_propagates_verbatim(lenient, original):
 
 
 def test_without_the_flag_inspect_response_still_raises_httpx(lenient):
-    request = httpx.Request("GET", URL)
-    with pytest.raises(httpx.HTTPStatusError):
-        inspect_response(httpx.Response(500, request=request))
+    request = httpx2.Request("GET", URL)
+    with pytest.raises(httpx2.HTTPStatusError):
+        inspect_response(httpx2.Response(500, request=request))
 
 
 # ---------------------------------------------------------------------------
@@ -249,7 +249,7 @@ def test_without_the_flag_inspect_response_still_raises_httpx(lenient):
 def test_transport_error_is_not_retryable_which_is_why_order_matters():
     """The mechanism behind the bug the next two tests exist to catch."""
     assert not isinstance(TransportError("boom"), RETRYABLE_EXCEPTIONS)
-    assert should_retry(httpx.ReadTimeout("x")) is True
+    assert should_retry(httpx2.ReadTimeout("x")) is True
     assert should_retry(TransportError("x")) is False
 
 
@@ -267,9 +267,9 @@ def test_the_boundary_still_retries(monkeypatch, flag):
     @_retrying
     def boundary(url):
         attempts.append(1)
-        raise httpx.ReadTimeout("timed out")
+        raise httpx2.ReadTimeout("timed out")
 
-    with pytest.raises((TransportError, httpx.ReadTimeout)):
+    with pytest.raises((TransportError, httpx2.ReadTimeout)):
         boundary(URL)
     assert len(attempts) == 3, (
         "the boundary stopped retrying — wrap_transport_errors is almost "
@@ -283,7 +283,7 @@ def test_the_async_boundary_still_retries(strict):
     @_retrying
     async def boundary(client, url):
         attempts.append(1)
-        raise httpx.ReadTimeout("timed out")
+        raise httpx2.ReadTimeout("timed out")
 
     with pytest.raises(TransportError):
         asyncio.run(boundary(None, URL))
@@ -295,7 +295,7 @@ def test_the_async_boundary_still_retries(strict):
 # ---------------------------------------------------------------------------
 
 @pytest.mark.parametrize("exc_type", [
-    httpx.ConnectError, httpx.ReadTimeout, httpx.HTTPStatusError,
+    httpx2.ConnectError, httpx2.ReadTimeout, httpx2.HTTPStatusError,
     TransportError, TooManyRequestsError, SSLVerificationError, IdentityNotSetError,
 ])
 def test_transport_errors_catches_both_eras(exc_type):
@@ -310,9 +310,9 @@ def test_transport_errors_stays_narrow(not_transport):
 
 
 @pytest.mark.parametrize("exc,expected", [
-    (httpx.ConnectError("no route"), True),
-    (httpx.ReadTimeout("timed out"), True),
-    (httpx.TimeoutException("timed out"), True),
+    (httpx2.ConnectError("no route"), True),
+    (httpx2.ReadTimeout("timed out"), True),
+    (httpx2.TimeoutException("timed out"), True),
     (TransportError("could not reach"), True),
     (TransportError("SEC said no", status_code=404), False),
     (_status_error(500), False),
@@ -331,7 +331,7 @@ def test_ssl_failure_is_never_treated_as_unreachable():
     user-fixable, and the diagnostic message is the entire point of raising it —
     degrading it to "you seem to be offline" throws that away.
     """
-    ssl_error = SSLVerificationError(httpx.ConnectError("certificate verify failed"), URL)
+    ssl_error = SSLVerificationError(httpx2.ConnectError("certificate verify failed"), URL)
     assert ssl_error.status_code is None
     assert is_unreachable(ssl_error) is False
 
@@ -395,7 +395,7 @@ def test_submissions_404_returns_none_in_both_eras(monkeypatch, raised):
 
 
 @pytest.mark.parametrize("raised", [
-    httpx.ConnectError("no route"),
+    httpx2.ConnectError("no route"),
     TransportError("could not reach SEC"),
 ])
 def test_submissions_outage_is_not_reported_as_an_unknown_cik(monkeypatch, raised):
@@ -432,7 +432,7 @@ def test_the_submissions_tests_call_the_real_function():
 
 
 @pytest.mark.parametrize("raised", [
-    httpx.ConnectError("no route"),
+    httpx2.ConnectError("no route"),
     TransportError("could not reach SEC"),
 ])
 def test_efts_accession_lookup_surfaces_the_outage(monkeypatch, raised):
@@ -460,7 +460,7 @@ def test_efts_accession_lookup_still_swallows_schema_drift(monkeypatch):
     from edgar.search import efts
 
     def garbage(*_args, **_kwargs):
-        return httpx.Response(200, content=b"<html>not json</html>")
+        return httpx2.Response(200, content=b"<html>not json</html>")
 
     monkeypatch.setattr(httprequests, "get_with_retry", garbage)
     assert efts.resolve_accession("0000320193-23-000106") is None
@@ -475,7 +475,7 @@ def test_efts_accession_lookup_still_swallows_schema_drift(monkeypatch):
     (_status_error(403), 403),
     (TransportError("x", status_code=500), 500),
     (TransportError("x"), None),
-    (httpx.ConnectError("no route"), None),
+    (httpx2.ConnectError("no route"), None),
     (TooManyRequestsError(URL), 429),
     (ValueError("not a transport failure at all"), None),
 ])

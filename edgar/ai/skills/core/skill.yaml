@@ -194,8 +194,8 @@ errors: |
   except EdgarError:
       ...   # outer net
 
-  # NEVER catch httpx types (httpx.ReadTimeout, httpx.HTTPStatusError) around
-  # edgartools calls. TransportError is the supported type; the httpx original
+  # NEVER catch httpx or httpx2 types (httpx2.ReadTimeout, httpx2.HTTPStatusError) around
+  # edgartools calls. TransportError is the supported type; the httpx2 original
   # is on exc.__cause__ if you need it. exc.status_code is None means we never
   # got an HTTP answer at all, which is different from SEC answering with 404.
 
@@ -213,7 +213,7 @@ errors: |
 avoid:
   - pattern: "except httpx.ReadTimeout:"
     fix: "except TransportError:  # from edgar.exceptions"
-    why: httpx types reach you by accident, not by contract; 6.0 raises TransportError instead
+    why: edgartools 6.0 runs on httpx2, so an httpx except clause never fires; HTTP-library types reach you by accident, not by contract, and 6.0 raises TransportError instead
 
   - pattern: "if company.get_financials() is None: print('request failed')"
     fix: "None means this company filed no annual report; a failure raises"

@@ -6,7 +6,9 @@ kevin1024/vcrpy#1029 is released, so ``tests/_vcr_compat.py`` fills the phrase
 in. These tests replay through a real VCR, the way a cassette-backed test does,
 so they fail if that fix stops being applied.
 """
-import httpx
+import importlib
+import importlib.util
+
 import pytest
 import vcr
 
@@ -53,12 +55,21 @@ def replay_only(tmp_path, vcr_config):
     return vcr.VCR(**config)
 
 
+# httpx2 is what edgartools sends requests through. Plain httpx is not a
+# dependency, but edgartools[ai] installs it (the MCP SDK needs it) and vcrpy
+# routes both through the same stub, so it is checked wherever it is present.
+LIBRARIES = ["httpx2", pytest.param("httpx", marks=pytest.mark.skipif(
+    importlib.util.find_spec("httpx") is None, reason="plain httpx is not installed"))]
+
+
+@pytest.mark.parametrize("library", LIBRARIES)
 @pytest.mark.parametrize("name", list(CASES))
-def test_replay_supplies_the_reason_phrase(replay_only, name):
+def test_replay_supplies_the_reason_phrase(replay_only, name, library):
     code, _, expected_phrase = CASES[name]
+    http = importlib.import_module(library)
 
     with replay_only.use_cassette("phrases.yaml", allow_playback_repeats=True):
-        response = httpx.get(URL.format(name=name))
+        response = http.get(URL.format(name=name))
 
     assert response.status_code == code
     assert response.reason_phrase == expected_phrase

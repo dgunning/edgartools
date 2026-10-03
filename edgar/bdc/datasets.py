@@ -1122,7 +1122,7 @@ def fetch_bdc_dataset(year: int, quarter: int) -> BDCDataset:
 
     Raises:
         ValueError: If the quarter is invalid
-        httpx.HTTPError: If the download fails
+        httpx2.HTTPError: If the download fails
 
     Example:
         >>> dataset = fetch_bdc_dataset(2024, 3)
@@ -1277,7 +1277,7 @@ def fetch_bdc_dataset_monthly(year: int, month: int) -> BDCDataset:
 
     Raises:
         ValueError: If the month is invalid
-        httpx.HTTPError: If the download fails
+        httpx2.HTTPError: If the download fails
 
     Example:
         >>> dataset = fetch_bdc_dataset_monthly(2025, 11)

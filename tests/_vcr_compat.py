@@ -45,15 +45,39 @@ def _null_phrase_response() -> dict:
     }
 
 
-def _replays_null_phrase(deserialize) -> bool:
-    """True if ``deserialize`` turns a null-phrase cassette response into a 200 OK."""
-    import httpx
+def _http_modules() -> list:
+    """The HTTP libraries vcrpy's httpx stub may be handed, httpx2 first.
 
-    try:
-        response = deserialize(_null_phrase_response(), httpx)
-    except AttributeError:
+    vcrpy routes both httpx and httpx2 through the same deserializer, passing the
+    library module in. edgartools runs on httpx2, so that is the one that must
+    work; plain httpx is checked too when installed (edgartools[ai] pulls it in
+    through the MCP SDK), because a fix that only held for one would be a trap.
+    """
+    import importlib
+
+    modules = []
+    for name in ("httpx2", "httpx"):
+        try:
+            modules.append(importlib.import_module(name))
+        except ImportError:
+            pass
+    return modules
+
+
+def _replays_null_phrase(deserialize) -> bool:
+    """True if ``deserialize`` turns a null-phrase cassette response into a 200 OK
+    for every installed HTTP library."""
+    modules = _http_modules()
+    if not modules:
         return False
-    return response.status_code == 200 and response.reason_phrase == "OK"
+    for module in modules:
+        try:
+            response = deserialize(_null_phrase_response(), module)
+        except AttributeError:
+            return False
+        if not (response.status_code == 200 and response.reason_phrase == "OK"):
+            return False
+    return True
 
 
 def install_null_reason_phrase_fix() -> bool:
