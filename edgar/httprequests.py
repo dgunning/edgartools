@@ -7,6 +7,7 @@ import tarfile
 import tempfile
 import uuid
 import zipfile
+from contextlib import contextmanager
 from dataclasses import dataclass
 from enum import Enum
 from functools import wraps
@@ -759,44 +760,74 @@ def _get_retry_after(response: Response) -> Optional[int]:
     return None
 
 
+def _apply_identity(identity, identity_callable, kwargs) -> str:
+    """Resolve the identity and set it as the User-Agent in ``kwargs["headers"]``.
+
+    An explicit identity wins, then the callable, then EDGAR_IDENTITY. A headers
+    dict the caller passed is updated in place, as it always has been.
+    """
+    if identity is None:
+        if identity_callable is not None:
+            identity = identity_callable()
+        else:
+            identity = os.environ.get("EDGAR_IDENTITY")
+    if identity is None:
+        raise IdentityNotSetError()
+
+    headers = kwargs.get("headers", {})
+    headers["User-Agent"] = identity
+    kwargs["headers"] = headers
+    return identity
+
+
 def with_identity(func):
     @wraps(func)
     def wrapper(url, identity=None, identity_callable=None, *args, **kwargs):
-        if identity is None:
-            if identity_callable is not None:
-                identity = identity_callable()
-            else:
-                identity = os.environ.get("EDGAR_IDENTITY")
-        if identity is None:
-            raise IdentityNotSetError()
-
-        headers = kwargs.get("headers", {})
-        headers["User-Agent"] = identity
-        kwargs["headers"] = headers
-
+        identity = _apply_identity(identity, identity_callable, kwargs)
         return func(url, identity=identity, identity_callable=identity_callable, *args, **kwargs)
 
     return wrapper
 
 
 def async_with_identity(func):
+    # A plain function, not a coroutine function: a missing identity raises at
+    # call time, before the caller awaits, exactly as `with_identity` does.
     @wraps(func)
     def wrapper(client, url, identity=None, identity_callable=None, *args, **kwargs):
-        if identity is None:
-            if identity_callable is not None:
-                identity = identity_callable()
-            else:
-                identity = os.environ.get("EDGAR_IDENTITY")
-        if identity is None:
-            raise IdentityNotSetError()
-
-        headers = kwargs.get("headers", {})
-        headers["User-Agent"] = identity
-        kwargs["headers"] = headers
-
+        identity = _apply_identity(identity, identity_callable, kwargs)
         return func(client, url, identity=identity, identity_callable=identity_callable, *args, **kwargs)
 
     return wrapper
+
+
+def _redirect_or_raise(url, response) -> Optional[str]:
+    """Where a GET or POST response sends the request next.
+
+    Raises `TooManyRequestsError` on a 429, returns the resolved Location on a
+    301/302, and returns None when ``response`` is the final answer. Shared by
+    the sync and async get/post functions so the two sides cannot drift apart.
+    """
+    if response.status_code == 429:
+        raise TooManyRequestsError(url, retry_after=_get_retry_after(response))
+    if is_redirect(response):
+        return redirect_url(url, response)
+    return None
+
+
+@contextmanager
+def _ssl_errors_as_verification_error(url):
+    """Re-raise an SSL `ConnectError` as `SSLVerificationError`; any other passes through unchanged.
+
+    It only intercepts the exception, so it wraps sync and async bodies alike.
+    It runs inside `@retry`, as the try/except it replaced did; `should_retry`
+    declines SSL errors, so the translation sees the first attempt's failure.
+    """
+    try:
+        yield
+    except ConnectError as e:
+        if is_ssl_error(e):
+            raise SSLVerificationError(e, url) from e
+        raise
 
 
 @wrap_transport_errors
@@ -858,18 +889,13 @@ def get_with_retry_no_time_budget(url, identity=None, identity_callable=None, **
 
 def _get(retry_fn, url, identity=None, identity_callable=None, **kwargs):
     """One GET attempt; a redirect is followed through `retry_fn` with the same kwargs."""
-    try:
+    with _ssl_errors_as_verification_error(url):
         with http_client() as client:
             response = client.get(url, **kwargs)
-            if response.status_code == 429:
-                raise TooManyRequestsError(url, retry_after=_get_retry_after(response))
-            elif is_redirect(response):
-                return retry_fn(url=redirect_url(url, response), identity=identity, identity_callable=identity_callable, **kwargs)
+            next_url = _redirect_or_raise(url, response)
+            if next_url is not None:
+                return retry_fn(url=next_url, identity=identity, identity_callable=identity_callable, **kwargs)
             return response
-    except ConnectError as e:
-        if is_ssl_error(e):
-            raise SSLVerificationError(e, url) from e
-        raise
 
 
 @wrap_transport_errors
@@ -902,19 +928,14 @@ async def get_with_retry_async(client: AsyncClient, url, identity=None, identity
             any other httpx failure that survived every retry, with the original
             as its ``__cause__``. Without the flag those propagate as httpx types.
     """
-    try:
+    with _ssl_errors_as_verification_error(url):
         response = await client.get(url, **kwargs)
-        if response.status_code == 429:
-            raise TooManyRequestsError(url, retry_after=_get_retry_after(response))
-        elif is_redirect(response):
+        next_url = _redirect_or_raise(url, response)
+        if next_url is not None:
             return await get_with_retry_async(
-                client=client, url=redirect_url(url, response), identity=identity, identity_callable=identity_callable, **kwargs
+                client=client, url=next_url, identity=identity, identity_callable=identity_callable, **kwargs
             )
         return response
-    except ConnectError as e:
-        if is_ssl_error(e):
-            raise SSLVerificationError(e, url) from e
-        raise
 
 
 @wrap_transport_errors
@@ -997,20 +1018,15 @@ def post_with_retry(url, data=None, json=None, identity=None, identity_callable=
             any other httpx failure that survived every retry, with the original
             as its ``__cause__``. Without the flag those propagate as httpx types.
     """
-    try:
+    with _ssl_errors_as_verification_error(url):
         with http_client() as client:
             response = client.post(url, data=data, json=json, **kwargs)
-            if response.status_code == 429:
-                raise TooManyRequestsError(url, retry_after=_get_retry_after(response))
-            elif is_redirect(response):
+            next_url = _redirect_or_raise(url, response)
+            if next_url is not None:
                 return post_with_retry(
-                    redirect_url(url, response), data=data, json=json, identity=identity, identity_callable=identity_callable, **kwargs
+                    next_url, data=data, json=json, identity=identity, identity_callable=identity_callable, **kwargs
                 )
             return response
-    except ConnectError as e:
-        if is_ssl_error(e):
-            raise SSLVerificationError(e, url) from e
-        raise
 
 
 @wrap_transport_errors
@@ -1045,19 +1061,14 @@ async def post_with_retry_async(client: AsyncClient, url, data=None, json=None, 
             any other httpx failure that survived every retry, with the original
             as its ``__cause__``. Without the flag those propagate as httpx types.
     """
-    try:
+    with _ssl_errors_as_verification_error(url):
         response = await client.post(url, data=data, json=json, **kwargs)
-        if response.status_code == 429:
-            raise TooManyRequestsError(url, retry_after=_get_retry_after(response))
-        elif is_redirect(response):
+        next_url = _redirect_or_raise(url, response)
+        if next_url is not None:
             return await post_with_retry_async(
-                client, redirect_url(url, response), data=data, json=json, identity=identity, identity_callable=identity_callable, **kwargs
+                client, next_url, data=data, json=json, identity=identity, identity_callable=identity_callable, **kwargs
             )
         return response
-    except ConnectError as e:
-        if is_ssl_error(e):
-            raise SSLVerificationError(e, url) from e
-        raise
 
 
 def inspect_response(response: Response):
