@@ -26,7 +26,6 @@ import datetime
 from datetime import date
 
 import pytest
-from freezegun import freeze_time
 
 from edgar.entity.entity_facts import EntityFacts
 from edgar.entity.models import FinancialFact
@@ -141,14 +140,26 @@ def test_ttm_explicit_past_as_of_is_not_stale():
 
 # --- End-to-end: the reported companies under VCR ----------------------------
 # With no ``as_of``, staleness is measured against today, but the cassettes hold the
-# facts as of the day they were recorded. Pin the clock to that day, otherwise these
-# go stale on their own 185 days after the newest recorded quarter.
-_CASSETTES_RECORDED = "2026-07-09"
+# facts as of the day they were recorded. Pin the calculator's "today" to that day,
+# otherwise these go stale on their own 185 days after the newest recorded quarter.
+# Only the calculator's clock is pinned: freezing the process clock also freezes it
+# for the HTTP rate limiter, which these tests pass through on replay.
+_CASSETTES_RECORDED = date(2026, 7, 9)
+
+
+class _RecordingDay(date):
+    @classmethod
+    def today(cls):
+        return _CASSETTES_RECORDED
+
+
+@pytest.fixture
+def cassette_clock(monkeypatch):
+    monkeypatch.setattr("edgar.ttm.calculator.date", _RecordingDay)
 
 @pytest.mark.fast
 @pytest.mark.vcr
-@freeze_time(_CASSETTES_RECORDED)
-def test_nvda_ttm_revenue_not_stale_2020():
+def test_nvda_ttm_revenue_not_stale_2020(cassette_clock):
     """NVDA get_ttm_revenue() returns current revenue via ``Revenues``, not the
     $10.918B FY2020 figure summed from the abandoned Contract-with-Customer tag."""
     from edgar import Company
@@ -164,8 +175,7 @@ def test_nvda_ttm_revenue_not_stale_2020():
 
 @pytest.mark.fast
 @pytest.mark.vcr
-@freeze_time(_CASSETTES_RECORDED)
-def test_goog_ttm_revenue_tracks_recent_window():
+def test_goog_ttm_revenue_tracks_recent_window(cassette_clock):
     """GOOG get_ttm_revenue() tracks the current window (was ~1 year behind on the
     abandoned Contract-with-Customer tag)."""
     from edgar import Company
@@ -178,8 +188,7 @@ def test_goog_ttm_revenue_tracks_recent_window():
 
 @pytest.mark.fast
 @pytest.mark.vcr
-@freeze_time(_CASSETTES_RECORDED)
-def test_amzn_ttm_revenue_matches_reference():
+def test_amzn_ttm_revenue_matches_reference(cassette_clock):
     """AMZN was already correct in the report ($742.8B); the recency fix keeps it
     correct and, notably, exceeds the reporter's manual workaround ($685.1B)."""
     from edgar import Company
