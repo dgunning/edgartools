@@ -258,7 +258,10 @@ def test_prospectus_trailing_section_markdown_stops_at_financial_statements():
     section = sections["where_you_can_find_more_information"]
     assert len(section.text()) == 1910
     md = section.markdown()
-    assert len(md) == 1934
+    # GH #1369: markdown() now keeps the section's own heading,
+    # "**Where You Can Find Additional Information **" (48 characters with its blank line).
+    assert md.startswith("**Where You Can Find Additional Information **")
+    assert len(md) == 1982
     assert "Index to Consolidated Financial Statements".upper() not in md.upper()
     # The section has no table of its own; the F-pages index no longer leaks in.
     assert section.tables() == []

@@ -74,15 +74,25 @@ _TABLE_INTERNAL_TAGS = {
     'tr', 'td', 'th', 'tbody', 'thead', 'tfoot', 'caption', 'col', 'colgroup',
 }
 
+# Tags that only style text. An anchor nested in these is still inside its
+# heading, so _start_block climbs through them to the block that holds it.
+_INLINE_TAGS = {
+    'a', 'b', 'big', 'em', 'font', 'i', 'small', 'span', 'strong',
+    'sub', 'sup', 'tt', 'u',
+}
+
 
 def collect_range_elements(tree, start_anchor: str, end_anchor: Optional[str],
                            start_element=None, end_element=None) -> List:
     """Collect elements in document order between the start and end anchors.
 
     Collection turns on *after* the start anchor element and off *at* the
-    end anchor element (the end anchor's content is excluded). Returns the
-    raw list of every element seen while in range — callers typically reduce
-    this to top-level elements via :func:`top_level_elements`.
+    end anchor element (the end anchor's content is excluded). When the start
+    anchor is nested inside the heading it marks, collection turns on *at*
+    the enclosing block instead, so the section keeps its own heading
+    (:func:`_start_block`, GH #1369). Returns the raw list of every element
+    seen while in range — callers typically reduce this to top-level elements
+    via :func:`top_level_elements`.
 
     ``start_element`` / ``end_element`` are optional hard bounds for items that
     share one anchor and are told apart by their heading elements (GH #1345):
@@ -95,6 +105,11 @@ def collect_range_elements(tree, start_anchor: str, end_anchor: Optional[str],
     # Defensive: a same-anchor boundary would collect nothing meaningful.
     if end_anchor and end_anchor == start_anchor:
         end_anchor = None
+
+    if start_element is None:
+        targets = find_anchor_targets(tree, start_anchor)
+        if targets:
+            start_element = _start_block(targets[0])
 
     collected: List = []
     in_range = False
@@ -114,6 +129,42 @@ def collect_range_elements(tree, start_anchor: str, end_anchor: Optional[str],
         if in_range:
             collected.append(el)
     return collected
+
+
+def _start_block(anchor):
+    """The heading block a nested start anchor sits in, or ``None`` if there is none.
+
+    Collection normally turns on *after* the start anchor. Some filings nest
+    the anchor inside the heading it marks, as in
+    ``<p><b><a name="item2"></a>ITEM 2. PROPERTIES</b></p>``. The heading's
+    block has already started when the walk reaches the anchor, so it was
+    never collected and the section came back without its own heading
+    (GH #1369).
+
+    Only loose text is dropped that way, so return ``None`` unless there is
+    text directly inside the anchor or right after it. Otherwise climb while
+    the anchor is the first content of each enclosing element, through
+    inline wrappers only, and stop at the first block reached: that block is
+    where collection should start. An anchor that is itself a block, or that
+    has content before it, leaves collection unchanged.
+    """
+
+    anchor_path = list(anchor.iterancestors())
+    el = anchor
+    starting_block = None
+
+    if not ((anchor.text or '').strip() or (anchor.tail or '').strip()):
+        return None 
+    for parent in anchor_path:
+        if parent.tag in ('body', 'html'):
+            break
+        if (parent.text or '').strip() or el.getprevious() is not None:
+            break
+        if el.tag not in _INLINE_TAGS and el.tag not in _TABLE_INTERNAL_TAGS:
+            break
+        el = parent
+        starting_block = parent
+    return starting_block
 
 
 def _truncated_clone(el, stop, stop_path: List):
