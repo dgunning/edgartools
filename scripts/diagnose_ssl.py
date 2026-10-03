@@ -12,7 +12,7 @@ Usage:
 This script has NO dependencies on edgartools - you can run it even if
 edgartools imports are failing due to SSL issues.
 
-Requirements: Python 3.8+, httpx (pip install httpx)
+Requirements: Python 3.8+, httpx2 (pip install httpx2)
 """
 
 import os
@@ -22,12 +22,12 @@ import ssl
 import sys
 from typing import Optional, Tuple
 
-# Check for httpx
+# Check for httpx2
 try:
-    import httpx
-    HTTPX_VERSION = httpx.__version__
+    import httpx2
+    HTTPX_VERSION = httpx2.__version__
 except ImportError:
-    print("ERROR: httpx is required. Install with: pip install httpx")
+    print("ERROR: httpx2 is required. Install with: pip install httpx2")
     sys.exit(1)
 
 SEC_HOST = "www.sec.gov"
@@ -53,7 +53,7 @@ def get_environment_info():
     print_header("Environment Information")
     print(f"  Python:     {sys.version.split()[0]}")
     print(f"  Platform:   {platform.platform()}")
-    print(f"  httpx:      {HTTPX_VERSION}")
+    print(f"  httpx2:     {HTTPX_VERSION}")
 
     # Check for cryptography (optional but helpful)
     try:
@@ -247,7 +247,7 @@ def test_http_with_verify(verify: bool) -> Tuple[bool, Optional[int], Optional[s
     Test HTTP request with specified SSL verification setting.
     """
     try:
-        response = httpx.get(
+        response = httpx2.get(
             SEC_URL,
             timeout=15.0,
             follow_redirects=True,

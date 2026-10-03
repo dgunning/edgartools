@@ -19,7 +19,7 @@ distinguishes the two causes.
 import logging
 
 import pytest
-from httpx import ConnectError
+from httpx2 import ConnectError
 
 REFERENCE_LOGGER = "edgar.bdc.reference"
 DATASETS_LOGGER = "edgar.bdc.datasets"

@@ -6,13 +6,13 @@ and the identity decorators through one resolver. A shared helper is only proven
 if every caller is checked, so each branch here is asserted once per caller: breaking a
 helper, or unhooking one caller from it, fails the row for that caller.
 
-Offline: the httpx client methods are patched, so no request leaves the process.
+Offline: the httpx2 client methods are patched, so no request leaves the process.
 """
 
 import ssl
 from unittest.mock import AsyncMock, patch
 
-import httpx
+import httpx2
 import pytest
 
 from edgar.httprequests import (
@@ -34,8 +34,8 @@ RESOLVED = "https://www.sec.gov/data-research/investment-company"
 async def _call_async(fn, method, response=None, side_effect=None, **kwargs):
     # A bare AsyncClient rather than async_http_client(): building the managed client
     # asks get_identity() for a User-Agent, which prompts on stdin when none is set.
-    async with httpx.AsyncClient() as client:
-        with patch(f"httpx.AsyncClient.{method}", return_value=response, side_effect=side_effect):
+    async with httpx2.AsyncClient() as client:
+        with patch(f"httpx2.AsyncClient.{method}", return_value=response, side_effect=side_effect):
             return await fn(client, URL, **kwargs)
 
 
@@ -44,10 +44,10 @@ def _call(caller, response=None, side_effect=None, **kwargs):
     import asyncio
 
     if caller == "get":
-        with patch("httpx.Client.get", return_value=response, side_effect=side_effect):
+        with patch("httpx2.Client.get", return_value=response, side_effect=side_effect):
             return get_with_retry(URL, **kwargs)
     if caller == "post":
-        with patch("httpx.Client.post", return_value=response, side_effect=side_effect):
+        with patch("httpx2.Client.post", return_value=response, side_effect=side_effect):
             return post_with_retry(URL, data={"k": "v"}, **kwargs)
     if caller == "get_async":
         return asyncio.run(_call_async(get_with_retry_async, "get", response, side_effect, **kwargs))
@@ -61,7 +61,7 @@ CALLERS = ["get", "get_async", "post", "post_async"]
 
 @pytest.mark.parametrize("caller", CALLERS)
 def test_a_429_raises_too_many_requests_with_the_retry_after_header(caller):
-    response = httpx.Response(429, headers={"Retry-After": "7"})
+    response = httpx2.Response(429, headers={"Retry-After": "7"})
     with pytest.raises(TooManyRequestsError) as exc_info:
         _call(caller, response)
     message = str(exc_info.value)
@@ -71,7 +71,7 @@ def test_a_429_raises_too_many_requests_with_the_retry_after_header(caller):
 
 @pytest.mark.parametrize("caller", CALLERS)
 def test_a_final_response_is_returned_unchanged(caller):
-    response = httpx.Response(200, text="ok")
+    response = httpx2.Response(200, text="ok")
     assert _call(caller, response) is response
 
 
@@ -88,8 +88,8 @@ def test_a_final_response_is_returned_unchanged(caller):
 def test_a_redirect_is_followed_through_the_module_name_to_the_resolved_location(caller, module_name, status_code):
     # Patching the module attribute must intercept the follow-up request: tests across
     # the suite rely on the redirect recursing through the public name.
-    response = httpx.Response(status_code, headers={"Location": "/data-research/investment-company"})
-    followed = httpx.Response(200, text="followed")
+    response = httpx2.Response(status_code, headers={"Location": "/data-research/investment-company"})
+    followed = httpx2.Response(200, text="followed")
     target = f"edgar.httprequests.{module_name}"
     if caller.endswith("_async"):
         with patch(target, new_callable=AsyncMock, return_value=followed) as follow:
@@ -109,7 +109,7 @@ def test_a_redirect_is_followed_through_the_module_name_to_the_resolved_location
 
 @pytest.mark.parametrize("caller", CALLERS)
 def test_an_ssl_connect_error_becomes_ssl_verification_error(caller):
-    connect_error = httpx.ConnectError("SSL error")
+    connect_error = httpx2.ConnectError("SSL error")
     connect_error.__cause__ = ssl.SSLCertVerificationError("certificate verify failed")
     with pytest.raises(SSLVerificationError) as exc_info:
         _call(caller, side_effect=connect_error)
@@ -121,7 +121,7 @@ def test_an_ssl_connect_error_becomes_ssl_verification_error(caller):
 def test_a_missing_identity_raises_before_any_request(caller, monkeypatch):
     monkeypatch.delenv("EDGAR_IDENTITY", raising=False)
     with pytest.raises(IdentityNotSetError):
-        _call(caller, httpx.Response(200))
+        _call(caller, httpx2.Response(200))
 
 
 @pytest.mark.parametrize("caller,method", [("get_async", "get"), ("post_async", "post")])
@@ -129,8 +129,8 @@ def test_the_async_pair_sends_the_resolved_identity_as_user_agent(caller, method
     import asyncio
 
     async def go():
-        async with httpx.AsyncClient() as client:
-            with patch(f"httpx.AsyncClient.{method}", return_value=httpx.Response(200)) as sent:
+        async with httpx2.AsyncClient() as client:
+            with patch(f"httpx2.AsyncClient.{method}", return_value=httpx2.Response(200)) as sent:
                 fn = get_with_retry_async if method == "get" else post_with_retry_async
                 await fn(client, URL, identity_callable=lambda: "fx90 probe probe@example.com")
                 return sent

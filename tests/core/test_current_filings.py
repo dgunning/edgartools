@@ -2,7 +2,7 @@
 import datetime
 import time
 
-import httpx
+import httpx2
 import pytest
 
 from edgar import get_all_current_filings, Filings, iter_current_filings_pages
@@ -452,9 +452,9 @@ def _record_gets(monkeypatch):
 
         def fake_get(self, url, **kwargs):
             calls.append((url, kwargs))
-            return httpx.Response(200, content=remaining.pop(0) if remaining else _atom_feed(0))
+            return httpx2.Response(200, content=remaining.pop(0) if remaining else _atom_feed(0))
 
-        monkeypatch.setattr(httpx.Client, "get", fake_get)
+        monkeypatch.setattr(httpx2.Client, "get", fake_get)
         return calls
     return serve
 
@@ -471,7 +471,7 @@ def test_timeout_reaches_the_request_for_the_first_page_and_for_next(_record_get
     assert len(calls) == 2
     assert "start=10" in calls[1][0]
     for _, kwargs in calls:
-        assert kwargs["timeout"] == httpx.Timeout(90.0, connect=10.0)
+        assert kwargs["timeout"] == httpx2.Timeout(90.0, connect=10.0)
 
 
 @pytest.mark.fast
@@ -479,12 +479,12 @@ def test_timeout_reaches_every_page_of_iter_and_get_all(_record_gets):
     calls = _record_gets(_atom_feed(100), _atom_feed(4, first=100))
     # next() moves the same CurrentFilings object along, so read each page as it comes
     assert [len(p) for p in iter_current_filings_pages(form="8-K", timeout=75)] == [100, 4]
-    assert [kw["timeout"] for _, kw in calls] == [httpx.Timeout(75.0, connect=10.0)] * 2
+    assert [kw["timeout"] for _, kw in calls] == [httpx2.Timeout(75.0, connect=10.0)] * 2
 
     calls = _record_gets(_atom_feed(100), _atom_feed(4, first=100))
     filings = get_all_current_filings(form="8-K", timeout=75)
     assert len(filings) == 104
-    assert [kw["timeout"] for _, kw in calls] == [httpx.Timeout(75.0, connect=10.0)] * 2
+    assert [kw["timeout"] for _, kw in calls] == [httpx2.Timeout(75.0, connect=10.0)] * 2
 
 
 @pytest.mark.fast
@@ -523,10 +523,10 @@ def _slow_feed(monkeypatch):
             calls.append(kwargs)
             if len(calls) <= timeouts_before_success:
                 clock[0] += kwargs["timeout"].read
-                raise httpx.ReadTimeout("The read operation timed out")
-            return httpx.Response(200, content=_atom_feed(3))
+                raise httpx2.ReadTimeout("The read operation timed out")
+            return httpx2.Response(200, content=_atom_feed(3))
 
-        monkeypatch.setattr(httpx.Client, "get", fake_get)
+        monkeypatch.setattr(httpx2.Client, "get", fake_get)
         return calls
     return serve
 
@@ -551,7 +551,7 @@ def test_get_with_retry_spends_its_45s_budget_on_one_long_timeout(_slow_feed):
     When 9r9w is fixed this test should be flipped, not deleted."""
     calls = _slow_feed(timeouts_before_success=2)
 
-    with pytest.raises((httpx.ReadTimeout, TransportError)):
+    with pytest.raises((httpx2.ReadTimeout, TransportError)):
         get_with_retry("https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent",
-                       timeout=httpx.Timeout(60.0, connect=10.0))
+                       timeout=httpx2.Timeout(60.0, connect=10.0))
     assert len(calls) == 1

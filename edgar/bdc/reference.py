@@ -18,7 +18,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-import httpx
+import httpx2
 import pandas as pd
 
 from edgar.display.formatting import cik_text
@@ -608,7 +608,7 @@ def fetch_bdc_report(year: Optional[int] = None) -> pd.DataFrame:
         address_1, city, state, zip_code, last_filling_date, last_filling_type
 
     Raises:
-        httpx.HTTPError: If the request fails.
+        httpx2.HTTPError: If the request fails.
     """
     if year is None:
         year = get_latest_bdc_report_year()

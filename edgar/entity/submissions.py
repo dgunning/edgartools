@@ -4,7 +4,7 @@ Functions for retrieving entity submission data from the SEC.
 import json
 from typing import Any, Dict, Optional
 
-import httpx
+import httpx2
 
 from edgar.core import log
 from edgar.entity.data import parse_entity_submissions
@@ -130,7 +130,7 @@ def download_entity_submissions_from_sec(cik: int) -> Optional[Dict[str, Any]]:
     try:
         from edgar.urls import build_submissions_url
         submission_json = download_json(build_submissions_url(cik))
-    except (httpx.HTTPStatusError, TransportError) as e:
+    except (httpx2.HTTPStatusError, TransportError) as e:
         # Handle the case where the cik is invalid and not found on Edgar.
         # Only a 404 becomes None — an outage must not read as "no such CIK".
         if http_status(e) == 404:

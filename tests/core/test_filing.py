@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import List
 from unittest.mock import patch, MagicMock
 
-import httpx
+import httpx2
 import humanize
 import pandas as pd
 import pytest
@@ -213,7 +213,7 @@ def test_iterate_filings(filings_2021_q1_xbrl):
 @pytest.mark.vcr
 def test_filing_homepage_url(carbo_10k_filing):
     assert carbo_10k_filing.homepage_url == "https://www.sec.gov/Archives/edgar/data/1009672/0001564590-18-004771-index.html"
-    r = httpx.get(carbo_10k_filing.homepage_url, headers={'User-Agent': 'Mike Banton mb@yahoo.com'})
+    r = httpx2.get(carbo_10k_filing.homepage_url, headers={'User-Agent': 'Mike Banton mb@yahoo.com'})
     assert r.status_code == 200
 
 

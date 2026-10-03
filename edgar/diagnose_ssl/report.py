@@ -198,7 +198,7 @@ class DiagnosticResult:
         env_table.add_row("Python:", self.environment.python_version)
         env_table.add_row("Platform:", self.environment.platform)
         env_table.add_row("edgartools:", self.environment.edgartools_version)
-        env_table.add_row("httpx:", self.environment.httpx_version)
+        env_table.add_row("httpx2:", self.environment.httpx_version)
         if self.environment.certifi_version:
             env_table.add_row("certifi:", self.environment.certifi_version)
         crypto = self.environment.cryptography_version or "[yellow]Not installed[/yellow]"

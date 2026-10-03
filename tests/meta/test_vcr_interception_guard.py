@@ -1,14 +1,16 @@
 """Cassette replay has to reach edgartools' own HTTP stack, or every cassette test is decorative.
 
-vcrpy intercepts by patching httpcore's connection pools by name. When that
-patching stops matching the client (an httpx or vcrpy upgrade, or the planned
-httpx2 swap), nothing fails: a test with a cassette quietly fetches from the
-network instead, and passes as long as SEC answers. The q2iz spike measured
-exactly this on 2026-08-06 (vcrpy 8.1.1 + httpx2 recorded 0 interactions and
-still passed). Nothing in the suite would notice (bead edgartools-243z).
+vcrpy intercepts by patching the HTTP library's classes by name — for httpx2,
+which edgartools uses, its transports (vcrpy >= 8.3.0). When that patching stops
+matching the client (an httpx2 or vcrpy upgrade, or another client swap),
+nothing fails: a test with a cassette quietly fetches from the network instead,
+and passes as long as SEC answers. The q2iz spike measured exactly this on
+2026-08-06 (vcrpy 8.1.1 + httpx2 recorded 0 interactions and still passed), and
+on 2026-10-03 confirmed these tests fail 3/3 in that combination. Nothing else
+in the suite would notice (bead edgartools-243z).
 
 These tests replay a cassette for an address where nothing can answer, through
-``edgar.httprequests`` rather than bare httpx, so the throttle and cache layers
+``edgar.httprequests`` rather than bare httpx2, so the throttle and cache layers
 that sit above vcr are in the path, as they are for every real test. The
 response can only have come from vcr. If interception is lost, the request goes
 to the socket layer and fails: connection refused normally, NetworkBlockedError
@@ -18,7 +20,7 @@ The bead also asked for a RECORD guard against a local HTTP server. It is left
 out on purpose: the offline audit (scripts/check_offline_audit.py) runs changed
 test files with every socket blocked, loopback included, so a local server
 would fail the PR gate as "needs the network". Recording and replay go through
-the same httpcore patch, so losing one loses the other, and the second test
+the same patch, so losing one loses the other, and the second test
 below shows vcr also sits in the path of requests the cassette does NOT hold.
 
 ``127.0.0.1:9`` is the discard port, and nothing listens on it in CI. The

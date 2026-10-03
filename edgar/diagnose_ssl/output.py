@@ -79,7 +79,7 @@ class TerminalFormatter:
         lines.append(f"  Python version:     {result.environment.python_version}")
         lines.append(f"  Platform:           {result.environment.platform}")
         lines.append(f"  edgartools version: {result.environment.edgartools_version}")
-        lines.append(f"  httpx version:      {result.environment.httpx_version}")
+        lines.append(f"  httpx2 version:     {result.environment.httpx_version}")
         if result.environment.certifi_version:
             lines.append(f"  certifi version:    {result.environment.certifi_version}")
         if result.environment.cryptography_version:
@@ -278,7 +278,7 @@ class NotebookFormatter:
             ("Python version", result.environment.python_version),
             ("Platform", result.environment.platform),
             ("edgartools version", result.environment.edgartools_version),
-            ("httpx version", result.environment.httpx_version),
+            ("httpx2 version", result.environment.httpx_version),
         ]
         if result.environment.certifi_version:
             env_rows.append(("certifi version", result.environment.certifi_version))

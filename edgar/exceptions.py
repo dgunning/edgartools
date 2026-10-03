@@ -28,10 +28,10 @@ RULES FOR THIS MODULE:
   - stdlib imports only, at module level. Every other edgar module must be able
     to import this one, so this one may import none of them.
   - No third-party type (httpx above all) appears in a signature, base class or
-    annotation here. That is what makes a future httpx swap a non-event.
+    annotation here. That is what made the move from httpx to httpx2 a non-event.
   - A class whose construction needs edgar internals or a third-party object
     stays defined in its own module and subclasses a branch from here. Today
-    that means `SSLVerificationError` (it categorizes an httpx error to build
+    that means `SSLVerificationError` (it categorizes an httpx2 error to build
     its message) and the eight `edgar.documents` parser subclasses.
 """
 from __future__ import annotations
@@ -78,7 +78,7 @@ def strict_errors_enabled() -> bool:
     """True when `EDGARTOOLS_STRICT_ERRORS` asks for 6.0 error behaviour today.
 
     Under strict, the changes that would otherwise be a 6.0 break run now: the
-    network boundary wraps httpx errors into `TransportError`, and the silent
+    network boundary wraps httpx2 errors into `TransportError`, and the silent
     `None` returns raise instead. Two payoffs — a user can port before the break
     lands, and our own CI gets a job that runs the whole suite the 6.0 way,
     which is what flushes out internal code still relying on the old behaviour.
@@ -93,10 +93,10 @@ def strict_errors_enabled() -> bool:
 def http_status(exc: BaseException) -> Optional[int]:
     """The HTTP status behind a failure, whichever era raised it.
 
-    `TransportError` carries `.status_code`; an httpx `HTTPStatusError` carries
+    `TransportError` carries `.status_code`; an httpx2 `HTTPStatusError` carries
     `.response.status_code`. Every dual-era `except` needs to ask the same
     question of both, and asking it through `getattr` rather than an isinstance
-    check is what keeps this module free of any httpx import.
+    check is what keeps this module free of any httpx2 import.
 
     Returns None when we never got an answer at all — a connection failure, a
     timeout, or a client-side refusal such as a missing identity. That None is

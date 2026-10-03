@@ -13,7 +13,7 @@ from os import PathLike
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
-import httpx
+import httpx2
 import numpy as np
 import pandas as pd
 import pyarrow as pa
@@ -452,8 +452,8 @@ def fetch_filing_index(year_and_quarter: YearAndQuarter,
     try:
         index_table = fetch_filing_index_at_url(url, index)
         return (year, quarter), index_table
-    except (httpx.HTTPStatusError, TransportError) as e:
-        # Dual-era: httpx raises the status error today, TransportError under the
+    except (httpx2.HTTPStatusError, TransportError) as e:
+        # Dual-era: httpx2 raises the status error today, TransportError under the
         # strict wrap and in 6.0. http_status() reads either.
         if is_start_of_quarter() and http_status(e) == 403:
             # Return an empty filing index

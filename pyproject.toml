@@ -37,11 +37,11 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Information Analysis",
 ]
 dependencies = [
-  # Upper cap is deliberate: httpx upstream is dormant (last release 0.28.1,
-  # Dec 2024; issues and discussions closed Feb 2026). Any future release would
-  # be unexpected — do not auto-adopt it. The migration path is httpx2
-  # (edgartools-q2iz); lift or retarget this cap there, not here.
-  "httpx>=0.25.0,<0.29",
+  # httpx2 is Pydantic's maintained fork of httpx, under its own import name;
+  # plain httpx is dormant (last release 0.28.1, Dec 2024). The floor is the
+  # release this was verified against, not a researched minimum. The cap keeps a
+  # future 3.x, which may break the API, from arriving unannounced.
+  "httpx2>=2.13.1,<3",
   "pandas>=2.0.0",
   "tabulate>=0.9.0",
   "pyarrow>=17.0.0",
@@ -60,16 +60,15 @@ dependencies = [
   "nest-asyncio>=1.5.1",
   "jinja2>=3.1.0",
   "pyrate-limiter>=3.0.0",
-  # The [httpx] extra is required, not decorative: from 0.6.0 httpxthrottlecache
+  # The [httpx2] extra is required, not decorative: from 0.6.0 httpxthrottlecache
   # declares httpx and httpx2 as optional extras and installs neither by default.
-  # 0.5.0 briefly hard-required the httpx2 fork — which is why this was capped
-  # below it — and 0.6.0 reversed that, so the cap is no longer needed to stay on
-  # plain httpx. Migrating to httpx2 is tracked separately (edgartools-q2iz).
+  # It uses httpx2 whenever httpx2 is importable, and edgar/httpclient.py refuses
+  # to import if it ever picks anything else.
   # The 0.6.1 floor is load-bearing: caching data.sec.gov reaches an age check
   # that raised uncaught on a machine whose clock trails the origin's Date header
   # (paultiq/httpxthrottlecache#43), taking down the whole get_facts() call.
   # 0.6.1 clamps it.
-  "httpxthrottlecache[httpx]>=0.6.1",
+  "httpxthrottlecache[httpx2]>=0.6.1",
   "truststore>=0.9.0",
 ]
 dynamic = ["version"]
