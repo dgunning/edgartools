@@ -189,11 +189,11 @@ dependencies = [
   "pytest-asyncio",
   "pytest-retry",
   "pytest-vcr",
-  # Pin <8.2: vcrpy 8.2.0 reintroduced an httpx stub whose response
-  # deserializer crashes (`'NoneType' object has no attribute 'encode'`)
-  # on cassettes with a null reason phrase (e.g. SEC S3 404 responses).
-  # 8.1.1 intercepts httpx via httpcore_stubs.py and replays correctly.
-  "vcrpy<8.2",
+  # 8.3.0 is the first vcrpy that can intercept httpx2. Its httpx stub crashes
+  # (`'NoneType' object has no attribute 'encode'`) on a cassette with a null
+  # reason phrase, which 79 of ours have; tests/_vcr_compat.py carries the fix
+  # until kevin1024/vcrpy#1029 is released.
+  "vcrpy>=8.3.0,<9",
   "filelock",
   "pyinstrument",
   "pyright",
@@ -324,9 +324,9 @@ dependencies = [
   "pytest-retry",
   "pytest-mock",
   "pytest-vcr",
-  # Pin <8.2 for the same reason as the default env: vcrpy 8.2.0's httpx stub
-  # crashes deserializing a cassette with a null reason phrase.
-  "vcrpy<8.2",
+  # Same floor as the default env; tests/_vcr_compat.py carries the
+  # null-reason-phrase fix this version needs.
+  "vcrpy>=8.3.0,<9",
   "filelock",
   "tqdm",
   "responses",

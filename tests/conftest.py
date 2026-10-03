@@ -13,10 +13,15 @@ logger = logging.getLogger(__name__)
 # python/ tags — so a cassette on a branch you're reviewing executes as soon as
 # a test touches it. Raises rather than warning if it can't secure the loader
 # (beads edgartools-j1ui).
+from tests._vcr_compat import install_null_reason_phrase_fix  # noqa: E402
 from tests._vcr_safety import install_safe_yaml_deserializer  # noqa: E402
 from tests.paths import CASSETTES_DIR  # noqa: E402
 
 install_safe_yaml_deserializer()
+
+# vcrpy 8.2+ cannot replay a cassette with a null reason phrase until
+# kevin1024/vcrpy#1029 is released; 79 of ours have one.
+install_null_reason_phrase_fix()
 
 # VCR configuration for recording/replaying HTTP interactions.
 # CASSETTES_DIR comes from tests.paths so every reader of it agrees (edgartools-07lk.12.2).
@@ -149,7 +154,7 @@ def _require_vcr_plugin_if_cassettes_are_used(config, items):
         "Tests marked @pytest.mark.vcr were collected, but pytest-vcr is not "
         "installed in this environment, so no cassette would be replayed and the "
         "tests would reach the network while still reporting passed. Install "
-        "pytest-vcr and vcrpy<8.2 (see [tool.hatch.envs.test] in pyproject.toml), "
+        "pytest-vcr and vcrpy>=8.3.0 (see [tool.hatch.envs.test] in pyproject.toml), "
         "or deselect the cassette-backed tests."
     )
 
