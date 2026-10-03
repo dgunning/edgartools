@@ -4,7 +4,7 @@ Get up and running with EdgarTools in 5 minutes. By the end, you'll have a compa
 
 ## Prerequisites
 
-- Python 3.10 or higher
+- Python 3.11 or higher (Python 3.10 users get the last 5.x release)
 - Internet connection
 - Basic familiarity with Python
 
