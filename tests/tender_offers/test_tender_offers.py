@@ -15,7 +15,6 @@ Ground truth, all hand-verified against the primary document:
 """
 
 from datetime import date
-from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
@@ -28,8 +27,9 @@ from edgar.tender_offers.schedule14d9 import (
     classify_recommendation,
     extract_item_section,
 )
+from tests.paths import DATA_DIR
 
-TEST_DATA_DIR = Path(__file__).parent / "data" / "tender_offers"
+TEST_DATA_DIR = DATA_DIR / "tender_offers"
 LISATA_SC14D9_PATH = TEST_DATA_DIR / "sc14d9_lisata_therapeutics.htm"
 MOODY_REJECT_PATH = TEST_DATA_DIR / "sc14d9_moody_national_reit_ii_reject.htm"
 MOODY_NEUTRAL_PATH = TEST_DATA_DIR / "sc14d9_moody_national_reit_ii_neutral.htm"
