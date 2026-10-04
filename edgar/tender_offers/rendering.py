@@ -44,7 +44,12 @@ def render_schedule14d9(schedule: "Schedule14D9") -> Panel:
     header.add_row("Filing Date:", str(schedule.filing_date))
     header.add_row("Subject Company:", f"{schedule.company_name} ({schedule.cik})")
 
-    style, label = _RECOMMENDATION_STYLE[schedule.recommendation]
+    if schedule.item4_text is None:
+        # "UNCLEAR" would claim the board's language was read and found hedged;
+        # here there was no Item 4 to read.
+        style, label = ("dim italic", "NOT RESTATED")
+    else:
+        style, label = _RECOMMENDATION_STYLE[schedule.recommendation]
     header.add_row("Recommendation:", f"[{style}]{label}[/{style}]")
 
     if schedule.item4_text is None:

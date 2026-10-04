@@ -220,19 +220,141 @@ def test_schedule14d9_amendment_missing_item4_does_not_raise():
     assert schedule.recommendation_text_truncated is None
 
 
+BLUEBIRD_AMENDMENT_PATH = TEST_DATA_DIR / "sc14d9a_bluebird_bio_restates_accept.htm"
+REGIONAL_AMENDMENT_PATH = TEST_DATA_DIR / "sc14d9a_regional_health_restates_reject.htm"
+HILLEVAX_AMENDMENT_PATH = TEST_DATA_DIR / "sc14d9a_hillevax_not_restated.htm"
+
+
 @pytest.mark.fast
-def test_schedule14d9_amendment_with_item4_still_classifies():
-    """An amendment that *does* restate Item 4 (e.g. to revise the
-    recommendation itself) is classified exactly like an original."""
+def test_a_real_amendment_that_restates_the_recommendation_is_classified():
+    """bluebird bio (CIK 1293971), SC 14D9/A filed 2025-05-14, accession
+    0001193125-25-119441, restates Item 4 after the merger agreement was
+    amended: "...as amended by the Merger Agreement Amendment, recommended that
+    the Company's stockholders accept the Offer and tender their Shares"."""
     filing = _mock_filing(
         form="SC 14D9/A",
-        html=LISATA_SC14D9_PATH.read_text(),
+        html=BLUEBIRD_AMENDMENT_PATH.read_text(),
+        company="bluebird bio, Inc.",
+        cik="1293971",
+        accession_no="0001193125-25-119441",
+        filing_date=date(2025, 5, 14),
     )
 
     schedule = Schedule14D9.from_filing(filing)
 
     assert schedule.is_amendment is True
     assert schedule.recommendation == "accept"
+    assert "as amended by the Merger Agreement Amendment, recommended that the Company’s stockholders accept the Offer" in (
+        schedule.recommendation_text
+    )
+
+
+@pytest.mark.fast
+def test_a_real_amendment_that_adds_a_rejection_is_classified():
+    """Regional Health Properties (CIK 1004724), SC 14D9/A filed 2025-08-18,
+    accession 0001641172-25-024506. The original said only that the board's
+    recommendation "effectively was a rejection" (None, correctly); this
+    amendment supplements Item 4 with "to recommend that the Company's
+    shareholders REJECT the Offer"."""
+    filing = _mock_filing(
+        form="SC 14D9/A",
+        html=REGIONAL_AMENDMENT_PATH.read_text(),
+        company="Regional Health Properties, Inc",
+        cik="1004724",
+        accession_no="0001641172-25-024506",
+        filing_date=date(2025, 8, 18),
+    )
+
+    schedule = Schedule14D9.from_filing(filing)
+
+    assert schedule.recommendation == "reject"
+    assert "to recommend that the Company’s shareholders REJECT the Offer" in schedule.recommendation_text
+
+
+@pytest.mark.fast
+def test_a_real_amendment_that_does_not_restate_item4():
+    """HilleVax (CIK 1888012), SC 14D9/A filed 2025-09-17, accession
+    0001193125-25-205600, amends only Item 8 and Item 9 and never mentions
+    Item 4 -- the shape of 136 of the 174 SC 14D9/A filings made in 2025."""
+    filing = _mock_filing(
+        form="SC 14D9/A",
+        html=HILLEVAX_AMENDMENT_PATH.read_text(),
+        company="HilleVax, Inc.",
+        cik="1888012",
+        accession_no="0001193125-25-205600",
+        filing_date=date(2025, 9, 17),
+    )
+
+    schedule = Schedule14D9.from_filing(filing)
+
+    assert schedule.item4_text is None
+    assert schedule.recommendation is None
+    assert "NOT RESTATED" in repr(schedule)
+    assert "UNCLEAR" not in repr(schedule)
+
+
+_AMENDMENT_RESTATING_ITEM4 = (
+    "<html><body><p>{heading}</p>"
+    "<p>Item 4 of the Schedule 14D-9 is hereby amended and restated: the Board now unanimously "
+    "recommends that stockholders reject the Offer and not tender their Shares.</p>"
+    "<p>Item 8. Additional Information</p></body></html>"
+)
+
+
+@pytest.mark.fast
+@pytest.mark.parametrize(
+    "heading",
+    [
+        "Item 4 (The Solicitation or Recommendation)",
+        "Item 4 – The Solicitation or Recommendation",
+        "Item 4: The Solicitation or Recommendation",
+    ],
+)
+def test_an_amendment_heading_in_another_spelling_is_read(heading):
+    """Case (d) on an amendment: an Item 4 heading the parser could not read
+    used to be reported as "not restated", silently, because an amendment with
+    no Item 4 section is allowed to build. These spellings are now read. The
+    parenthesised form is how Merus N.V. sets the headings of its 2025
+    amendment (0001193125-25-312785)."""
+    filing = _mock_filing(form="SC 14D9/A", html=_AMENDMENT_RESTATING_ITEM4.format(heading=heading))
+
+    schedule = Schedule14D9.from_filing(filing)
+
+    assert schedule.item4_text is not None
+    assert schedule.recommendation == "reject"
+
+
+@pytest.mark.fast
+def test_an_amendment_with_an_unreadable_item4_heading_raises_rather_than_reporting_not_restated():
+    """A block that begins "Item 4" with no punctuation the heading match
+    accepts: the amendment restates Item 4, the parser cannot read it, and the
+    only honest answer is an error. Over the 174 SC 14D9/A filings of 2025 this
+    guard raises on none."""
+    html = _AMENDMENT_RESTATING_ITEM4.format(heading="ITEM 4 THE SOLICITATION OR RECOMMENDATION").replace("Item 4 of the Schedule", "The Schedule")
+    filing = _mock_filing(form="SC 14D9/A", html=html)
+
+    with pytest.raises(DataObjectError, match="has a block beginning 'Item 4'"):
+        Schedule14D9.from_filing(filing)
+
+
+@pytest.mark.fast
+def test_an_xml_encoding_declaration_does_not_escape_as_a_raw_valueerror():
+    """lxml refuses a str carrying an encoding declaration with a raw
+    ValueError, which would escape filing.obj() outside the edgar.exceptions
+    hierarchy."""
+    html = '<?xml version="1.0" encoding="utf-8"?>\n' + _AMENDMENT_RESTATING_ITEM4.format(heading="Item 4. The Solicitation or Recommendation")
+    filing = _mock_filing(form="SC 14D9", html=html)
+
+    schedule = Schedule14D9.from_filing(filing)
+
+    assert schedule.recommendation == "reject"
+
+
+@pytest.mark.fast
+def test_whitespace_only_html_raises_data_object_error():
+    filing = _mock_filing(html="   \n  ")
+    with pytest.raises(DataObjectError, match="No HTML document"):
+        Schedule14D9.from_filing(filing)
 
 
 @pytest.mark.fast

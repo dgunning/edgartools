@@ -12,6 +12,7 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, List, Optional
 
+from lxml import etree
 from lxml import html as lxml_html
 
 from edgar.exceptions import DataObjectError
@@ -97,6 +98,25 @@ _NEUTRAL_PATTERNS = [
 ]
 
 
+# An XML declaration ahead of the HTML (``<?xml version="1.0" encoding="utf-8"?>``).
+_XML_DECLARATION = re.compile(r"^\s*<\?xml[^>]*\?>")
+
+# An element whose text begins with "Item 4" -- the shape of a section heading,
+# as opposed to "Item 4" inside cross-reference prose. "Item 4.01" (a Form 8-K
+# item number) is excluded. Over the 136 SC 14D9/A filings of 2025 that build
+# with no Item 4 section, no element starts this way (none mentions "Item 4"
+# anywhere), so the guard below raises on none of them.
+_ITEM4_BLOCK_START = re.compile(r"\s*item\s*4\b(?!\.\d)", re.IGNORECASE)
+
+
+def _has_item4_heading_block(tree) -> bool:
+    """True if any element of the document begins with an "Item 4" heading."""
+    for element in tree.iter():
+        if isinstance(element.tag, str) and _ITEM4_BLOCK_START.match(element.text_content()):
+            return True
+    return False
+
+
 def _find_real_item_starts(text: str, item_number: int) -> List[int]:
     """Positions of ``Item N.`` headings, excluding quoted cross-references."""
     # Case-insensitive: a large share of filers set the heading in caps
@@ -105,7 +125,17 @@ def _find_real_item_starts(text: str, item_number: int) -> List[int]:
     # a quoted cross-reference, which the quote filter below then discarded,
     # so the whole filing raised. Measured over 25 SC 14D9 originals filed in
     # 2025: 9 failed to parse before this flag, 1 after.
-    pattern = re.compile(rf"Item\s*{item_number}\s*[.\-—]", re.IGNORECASE)
+    #
+    # The heading may be followed by a period, hyphen, em dash, en dash, colon,
+    # or a space and a parenthesised title ("Item 8 (Additional Information)" is
+    # how Merus N.V.'s 2025 amendment, 0001193125-25-312785, sets its headings).
+    # "Item 4(b)" -- no space, one-character label -- is a sub-section
+    # cross-reference and is excluded: admitting it let Playa Hotels' reference
+    # to "Item 4(b)" outspan the real section under the longest-span rule below.
+    # Widening the class this way changed no result over the 229 SC 14D9 and
+    # SC 14D9/A filings of 2025; it exists so an amendment with one of these
+    # spellings is read rather than reported as not restating Item 4.
+    pattern = re.compile(rf"Item\s*{item_number}\s*(?:[.\-—–:]|\s\((?!\w\)))", re.IGNORECASE)
     starts = []
     for match in pattern.finditer(text):
         start = match.start()
@@ -262,44 +292,66 @@ class Schedule14D9:
 
         Raises:
             AssertionError: If filing is not a Schedule 14D-9 form
-            DataObjectError: If the document has no HTML, or if Item 4 (The
-                Solicitation or Recommendation) cannot be located in an
-                *original* SC 14D9. Both mean the document failed to parse
-                structurally, and are distinct from ``recommendation`` being
-                ``None``, which means Item 4 was found but its language did
-                not clearly support accept/reject/neutral.
+            DataObjectError: If the document has no HTML or cannot be parsed
+                as HTML; if Item 4 (The Solicitation or Recommendation) cannot
+                be located in an *original* SC 14D9; or if an amendment
+                presents an Item 4 heading the parser could not read. Each
+                means the document failed to parse structurally, which is a
+                different thing from ``recommendation`` being ``None``.
 
-                An amendment (``SC 14D9/A``) does NOT raise for a missing
-                Item 4: of 229 SC 14D9 filings in 2025, 174 were amendments,
-                and amendments routinely restate only the items they changed,
-                so no Item 4 is the normal case there, not a parse failure.
-                ``item4_text`` and ``recommendation`` are both ``None`` in
-                that case; check ``is_amendment`` to tell "not restated here"
-                apart from "this filing has no opinion".
+                An amendment (``SC 14D9/A``) that does not mention Item 4 at
+                all does NOT raise. Amendments restate only the items they
+                change: of the 174 SC 14D9/A filings made in 2025, 136 never
+                mention Item 4, and every one of those builds with
+                ``item4_text`` and ``recommendation`` both ``None``. If an
+                amendment has a block that begins "Item 4" but no Item 4
+                section can be read from it, the filing raises instead, so
+                "not restated" is never reported for an amendment that did
+                restate Item 4 under a heading spelling the parser missed.
         """
         assert filing.form in SC_14D9_FORMS, f"Expected SC 14D9 form, got {filing.form}"
 
         is_amendment = "/A" in filing.form
 
         html = filing.html()
-        if not html:
+        if not html or not html.strip():
             raise DataObjectError(
                 f"No HTML document found for SC 14D9 filing {filing.accession_no}",
                 form=filing.form,
                 accession_no=filing.accession_no,
             )
 
-        tree = lxml_html.fromstring(html)
+        # lxml refuses a ``str`` that carries an XML encoding declaration
+        # ("Unicode strings with encoding declaration are not supported") with a
+        # raw ValueError. The text is already decoded, so the declaration says
+        # nothing useful; drop it rather than re-encode and risk the declared
+        # charset disagreeing with how the text was actually decoded.
+        html = _XML_DECLARATION.sub("", html, count=1)
+        try:
+            tree = lxml_html.fromstring(html)
+        except (ValueError, etree.LxmlError) as e:
+            raise DataObjectError(
+                f"Could not parse the HTML of SC 14D9 filing {filing.accession_no}: {e}",
+                form=filing.form,
+                accession_no=filing.accession_no,
+            ) from e
         text = tree.text_content()
         text = re.sub(r"[\xa0 ]+", " ", text)
 
         item4_text = extract_item_section(text, 4, 5)
         if not item4_text:
-            if is_amendment:
+            if is_amendment and not _has_item4_heading_block(tree):
                 # Normal for an amendment: it restates only the items it
                 # changed, and Item 4 (the recommendation) is often not one
                 # of them. Not a parse failure -- see the Raises: note above.
                 item4_text = None
+            elif is_amendment:
+                raise DataObjectError(
+                    f"SC 14D9/A filing {filing.accession_no} has a block beginning 'Item 4' "
+                    "but no Item 4 (The Solicitation or Recommendation) section could be read from it",
+                    form=filing.form,
+                    accession_no=filing.accession_no,
+                )
             else:
                 raise DataObjectError(
                     f"Could not locate Item 4 (The Solicitation or Recommendation) in SC 14D9 filing {filing.accession_no}",
