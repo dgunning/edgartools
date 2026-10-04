@@ -233,7 +233,8 @@ def classify_recommendation(item4_text: Optional[str]) -> Optional[str]:
     paragraph as the real recommendation with no heading between them, e.g.
     "...recommends accept. Previously the company had made no recommendation
     regarding the earlier proposal." -- there is no structural boundary to cut
-    on there. Not observed in any of the 5 real filings checked against; if it
+    on there. Not observed in the 55 SC 14D9 originals filed in 2025, whose
+    52 classifications were each checked against the decisive sentence; if it
     turns up in practice, it needs more than a window (e.g. anchoring the match
     to the sentence containing "the Board" as subject).
     """
@@ -265,12 +266,24 @@ class Schedule14D9:
         schedule.recommendation        # "accept" / "reject" / "neutral" / None
         schedule.recommendation_text   # the raw Item 4 recommendation text
 
-    An amendment (``SC 14D9/A``) that does not restate Item 4 -- the majority
-    case, since amendments restate only the items they changed -- constructs
-    successfully with ``item4_text``, ``recommendation``, ``recommendation_text``
-    and ``recommendation_text_truncated`` all ``None``. Check ``is_amendment``
-    to tell "not restated in this amendment" apart from "this filing has no
-    opinion" before treating a ``None`` as meaningful.
+    What ``recommendation`` being ``None`` means depends on ``item4_text``:
+
+    - ``item4_text`` is a string: Item 4 was read, and its opening statement
+      did not match an accept, reject or neutral pattern. The language is
+      hedged or indirect ("the Board's recommendation to proceed with the
+      Merger effectively was a rejection of the Offer"), or phrased in a way
+      the patterns do not recognise. On an amendment it also covers the
+      common case of Item 4 being supplemented (background, fairness opinion)
+      without the recommendation being restated. Read ``recommendation_text``.
+    - ``item4_text`` is ``None``: only possible on an amendment
+      (``is_amendment`` is ``True``) that does not restate Item 4 at all, the
+      majority case, since amendments restate only the items they change.
+      ``recommendation_text`` and ``recommendation_text_truncated`` are then
+      ``None`` too; the board's position is in the original SC 14D9 or an
+      earlier amendment.
+
+    An original SC 14D9 with no readable Item 4 raises ``DataObjectError``
+    rather than building with ``None`` -- see ``from_filing``.
     """
 
     def __init__(

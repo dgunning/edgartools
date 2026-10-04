@@ -553,3 +553,34 @@ def test_a_genuinely_quoted_cross_reference_is_still_skipped():
     starts = _find_real_item_starts(text, 4)
 
     assert starts == [0], f"expected only the real heading, got {starts}"
+
+
+@pytest.mark.fast
+def test_documented_example():
+    """Execute the Schedule 14D-9 example in docs/data-objects.md, unchanged,
+    against CIM Real Estate Finance Trust's filing (0001498547-25-000009) with
+    no SEC I/O: ``filing.obj()`` goes through the real ``edgar.obj`` dispatch."""
+    from edgar import obj
+    from tests.paths import REPO_ROOT
+
+    page = REPO_ROOT / "docs" / "data-objects.md"
+    section = page.read_text().split("## Tender Offer Recommendations (Schedule 14D-9)", 1)[1]
+    example = section.split("```python\n", 1)[1].split("```", 1)[0]
+
+    filing = _mock_filing(
+        html=CIM_REJECT_PATH.read_text(),
+        company="CIM Real Estate Finance Trust, Inc.",
+        cik="1498547",
+        accession_no="0001498547-25-000009",
+        filing_date=date(2025, 2, 3),
+    )
+    filing.obj = lambda: obj(filing)
+    namespace = {"filing": filing}
+
+    exec(compile(example, str(page), "exec"), namespace)  # noqa: S102
+
+    schedule = namespace["schedule"]
+    assert isinstance(schedule, Schedule14D9)
+    assert schedule.recommendation == "reject"
+    assert schedule.is_amendment is False
+    assert schedule.recommendation_text.startswith("Item 4. The Solicitation or Recommendation.(a) Recommendation.")
