@@ -59,17 +59,36 @@ _RECOMMENDATION_WINDOW_CHARS = 2500
 # ...tender your shares"), which is the majority case and could otherwise mask a
 # rarer reject/neutral statement if checked last. Bounding the window above is what
 # actually prevents cross-matching; this ordering is a second line of defense.
+#
+# ``recommend(?:s|ed)?`` rather than ``recommends?``: the board resolution is
+# routinely reported in the past tense ("(iv) recommended that the stockholders
+# accept the Offer and tender their Shares" -- Turnstone Biologics,
+# 0001193125-25-157832), and ``recommends?`` cannot match "recommended". Up to a
+# few words may sit between "the" and "offer" ("reject the West 4 Offer" -- CNL
+# Healthcare Properties, 0001193125-25-020527; "accept the Amended Offer" --
+# Beacon Roofing Supply, 0001213900-25-026560). Measured over all 55 SC 14D9
+# originals filed in 2025, these three changes moved exactly 11 results and
+# nothing else.
 _ACCEPT_PATTERNS = [
-    r"recommends?\s+that\s+.{0,80}?accept\s+the\s+offer",
-    r"recommends?\s+.{0,60}?tender\s+.{0,40}?shares?",
+    r"recommend(?:s|ed)?\s+that\s+.{0,80}?accept\s+the\s+(?:\w+\s+){0,3}?offer",
+    r"recommend(?:s|ed)?\s+.{0,60}?tender\s+.{0,40}?shares?",
+    # "...to recommend acceptance of the Offer by the shareholders" (CureVac,
+    # 0001104659-25-101286) -- the Dutch-law phrasing, with no "accept the".
+    r"recommend(?:s|ed)?\s+acceptance\s+of\s+the\s+offer",
 ]
 _REJECT_PATTERNS = [
-    r"recommends?\s+that\s+.{0,80}?reject\s+the\s+offer",
-    r"recommends?\s+.{0,60}?not\s+.{0,40}?tender",
+    # "...recommends that the stockholders reject the tender offer by Comrit to
+    # purchase their shares" (CIM Real Estate Finance Trust,
+    # 0001498547-25-000009). Requiring "reject the offer" exactly missed this,
+    # and the second accept pattern then matched "recommends ... tender offer
+    # ... shares" -- a rejection reported as "accept". Checking reject first is
+    # only a defence if the reject pattern can see the sentence.
+    r"recommend(?:s|ed)?\s+that\s+.{0,80}?reject\s+the\s+(?:\w+\s+){0,4}?offer",
+    r"recommend(?:s|ed)?\s+.{0,60}?not\s+.{0,40}?tender",
     # "...recommends that the Interestholders not accept the Offer" (Woodbridge
     # Liquidation Trust, accession 0001140361-20-000734) -- a real rejection that
     # never uses the word "reject" or "tender" at all.
-    r"recommends?\s+.{0,60}?not\s+.{0,20}?accept\s+the\s+offer",
+    r"recommend(?:s|ed)?\s+.{0,60}?not\s+.{0,20}?accept\s+the\s+offer",
 ]
 _NEUTRAL_PATTERNS = [
     r"express(?:es|ing)?\s+no\s+opinion",

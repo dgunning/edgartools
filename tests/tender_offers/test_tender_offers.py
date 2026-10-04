@@ -102,6 +102,90 @@ def test_schedule14d9_from_filing_ground_truth_neutral():
     assert "remain neutral" in schedule.recommendation_text.lower()
 
 
+CIM_REJECT_PATH = TEST_DATA_DIR / "sc14d9_cim_real_estate_finance_trust_reject.htm"
+TURNSTONE_ACCEPT_PATH = TEST_DATA_DIR / "sc14d9_turnstone_biologics_accept.htm"
+CNL_REJECT_PATH = TEST_DATA_DIR / "sc14d9_cnl_healthcare_properties_reject.htm"
+
+
+@pytest.mark.fast
+def test_reject_the_tender_offer_is_a_rejection_not_an_acceptance():
+    """CIM Real Estate Finance Trust (CIK 1498547), SC 14D9 filed 2025-02-03,
+    accession 0001498547-25-000009: "The Company's board of directors recommends
+    that the stockholders reject the tender offer by Comrit to purchase their
+    shares". The reject pattern required "reject the offer" exactly, and the
+    accept pattern "recommends ... tender ... shares" then matched the same
+    sentence, so a rejection came back as "accept"."""
+    filing = _mock_filing(
+        html=CIM_REJECT_PATH.read_text(),
+        company="CIM Real Estate Finance Trust, Inc.",
+        cik="1498547",
+        accession_no="0001498547-25-000009",
+        filing_date=date(2025, 2, 3),
+    )
+
+    schedule = Schedule14D9.from_filing(filing)
+
+    assert schedule.recommendation == "reject"
+    assert "recommends that the stockholders reject the tender offer by Comrit" in schedule.recommendation_text
+
+
+@pytest.mark.fast
+def test_past_tense_recommended_is_read_as_a_recommendation():
+    """Turnstone Biologics (CIK 1764974), SC 14D9 filed 2025-07-11, accession
+    0001193125-25-157832: "(iv) recommended that Turnstone Company's
+    stockholders accept the Offer and tender their Shares". ``recommends?``
+    cannot match "recommended", so this clear acceptance read as None. The
+    filing also sets its heading in capitals ("ITEM 4. THE SOLICITATION OR
+    RECOMMENDATION"), which is the real-document check on the case-insensitive
+    heading match."""
+    filing = _mock_filing(
+        html=TURNSTONE_ACCEPT_PATH.read_text(),
+        company="Turnstone Biologics Corp.",
+        cik="1764974",
+        accession_no="0001193125-25-157832",
+        filing_date=date(2025, 7, 11),
+    )
+
+    schedule = Schedule14D9.from_filing(filing)
+
+    assert schedule.recommendation_text.startswith("ITEM 4. THE SOLICITATION OR RECOMMENDATION")
+    assert schedule.recommendation == "accept"
+    assert "recommended that Turnstone Company’s stockholders accept the Offer" in schedule.recommendation_text
+
+
+@pytest.mark.fast
+def test_reject_the_named_offer_is_a_rejection():
+    """CNL Healthcare Properties (CIK 1496454), SC 14D9 filed 2025-02-05,
+    accession 0001193125-25-020527: "to recommend that the Company's
+    stockholders REJECT the West 4 Offer". The bidder's name between "the" and
+    "Offer" defeated "reject the offer", so this read as None."""
+    filing = _mock_filing(
+        html=CNL_REJECT_PATH.read_text(),
+        company="CNL Healthcare Properties, Inc.",
+        cik="1496454",
+        accession_no="0001193125-25-020527",
+        filing_date=date(2025, 2, 5),
+    )
+
+    schedule = Schedule14D9.from_filing(filing)
+
+    assert schedule.recommendation == "reject"
+    assert "REJECT the West 4 Offer" in schedule.recommendation_text
+
+
+@pytest.mark.fast
+def test_recommend_acceptance_of_the_offer_is_an_acceptance():
+    # The Dutch-law phrasing in CureVac (0001104659-25-101286), LAVA
+    # (0001104659-25-079243) and Playa Hotels (0001193125-25-033511), quoted
+    # from CureVac's Item 4.
+    text = (
+        "resolved, on the terms and subject to the conditions set forth in the Purchase Agreement, "
+        "to support the Offer and the Transactions and to recommend acceptance of the Offer by the "
+        "shareholders of the Company"
+    )
+    assert classify_recommendation(text) == "accept"
+
+
 @pytest.mark.fast
 def test_schedule14d9_wrong_form_raises():
     filing = _mock_filing(form="SC TO-T", html="<html></html>")
