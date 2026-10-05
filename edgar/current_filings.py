@@ -4,7 +4,7 @@ from typing import Optional
 
 import pyarrow as pa
 import pyarrow.compute as pc
-from httpx import Timeout
+from httpx2 import Timeout
 from lxml import etree
 from rich import box
 from rich.console import Group

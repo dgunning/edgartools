@@ -40,9 +40,11 @@ except EdgarError as e:
 
 Catch the branch, not the leaf. `except NotFoundError` covers a missing company, filing, statement, section and attachment; you rarely need `CompanyNotFoundError` specifically, and naming the branch means new leaf types do not slip past your handler.
 
-### Do not catch httpx types
+### Do not catch httpx or httpx2 types
 
 You may have written `except httpx.ReadTimeout` around an edgartools call, because that is what used to come out. It worked by accident: a dependency's exception was reaching you through our public surface, which meant any change to how we make HTTP requests was a breaking change for your code.
+
+That change has now happened. edgartools 6.0 makes its requests with `httpx2`, the maintained fork of `httpx`, whose exceptions have the same names but are different classes, so `except httpx.ReadTimeout` no longer catches anything edgartools raises. Switching it to `except httpx2.ReadTimeout` would work, and would break again the next time the HTTP library changes. See [the upgrade guide](../upgrade/6.0.md#the-http-client-moved-from-httpx-to-httpx2) for the details.
 
 `TransportError` is ours, and it is what you should catch:
 
@@ -60,7 +62,7 @@ except TransportError as e:
         print(f"SEC answered {e.status_code} for {e.url}")
 ```
 
-`status_code is None` is the meaningful distinction: it means we never got an HTTP answer at all. The original httpx exception is still on `e.__cause__` if you need it while debugging.
+`status_code is None` is the meaningful distinction: it means we never got an HTTP answer at all. The original `httpx2` exception is still on `e.__cause__` if you need it while debugging.
 
 `TransportError` also covers the rate limiter (`TooManyRequestsError`), TLS problems (`SSLVerificationError`) and a missing identity (`IdentityNotSetError`) — all of which mean "no answer from SEC", however different their causes.
 
@@ -95,7 +97,7 @@ A few calls still return `None` for something that is really a failure. Each of 
 | `find("123456-99")` (malformed accession) | warns, returns `None` | raises `ValidationError` |
 | `filing.obj()` on a modelled form with unreadable data | warns, returns `None` | raises `DataObjectError` |
 | `tenk.document` when the parser fails | warns, returns `None` | raises the parser's `ParsingError` |
-| any httpx failure out of the network layer | propagates as an httpx type | raises `TransportError` |
+| any HTTP failure out of the network layer | propagates as an `httpx2` type | raises `TransportError` |
 
 Where the raising form is the only form, there is now a non-raising one beside it. `report.get(item, default)` is to `report[item]` what `dict.get` is to `dict[...]`, and it never warns:
 

@@ -42,8 +42,8 @@ below pin as regressions:
   its data requests to the base rule set -- reproducing this very bug for
   mirror users while fixing it for sec.gov.
 * The host must come from the SAME parser that produces it at match time
-  (`request.url.host`, i.e. httpx). A hand-rolled `https?://([^/]+)` regex
-  keeps case, port, `user@` and percent-encoding that httpx normalises away,
+  (`request.url.host`, i.e. httpx2). A hand-rolled `https?://([^/]+)` regex
+  keeps case, port, `user@` and percent-encoding that httpx2 normalises away,
   so a perfectly valid mirror URL yields a key that cannot match any real
   request.
 
@@ -259,7 +259,7 @@ class TestHostKeyUsesTheSameParserAsTheMatcher:
     @pytest.mark.parametrize(
         ("data_url", "request_host"),
         [
-            ("https://DATA.mirror.example.org", "data.mirror.example.org"),  # httpx lowercases the host
+            ("https://DATA.mirror.example.org", "data.mirror.example.org"),  # httpx2 lowercases the host
             ("https://data.mirror.example.org:8443", "data.mirror.example.org"),  # ...the port is not part of it
             ("https://user:pw@data.mirror.example.org", "data.mirror.example.org"),  # ...nor are credentials
             ("https://mirr%C3%B6r.example.org", "mirr%c3%b6r.example.org"),  # ...and percent-encoding is lowercased

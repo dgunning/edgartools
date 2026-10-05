@@ -17,7 +17,7 @@ Updated inspect_response() to accept both 200 and 304 as successful responses.
 """
 import pytest
 from unittest.mock import Mock, patch
-from httpx import Response
+from httpx2 import Response
 
 from edgar.httprequests import inspect_response, download_file, download_json
 
