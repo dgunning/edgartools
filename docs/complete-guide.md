@@ -382,7 +382,7 @@ EdgarTools includes a built-in MCP (Model Context Protocol) server, enabling AI 
 edgartools-mcp
 
 # Or with uvx (no install needed)
-uvx edgartools-mcp
+uvx --from "edgartools[ai]" edgartools-mcp
 ```
 
 Once connected, you can ask an AI assistant questions like "What was Apple's revenue last year?" or "Show me Elon Musk's recent stock sales" and it will use edgartools to fetch and analyze the data.

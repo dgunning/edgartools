@@ -1,0 +1,46 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.dgunning/edgartools",
+  "description": "Open-source SEC EDGAR toolkit — 13 tools, 7 prompts, every filing type. No API key required.",
+  "title": "EdgarTools",
+  "repository": {
+    "url": "https://github.com/dgunning/edgartools",
+    "source": "github"
+  },
+  "version": "5.61.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "edgartools",
+      "version": "5.61.0",
+      "runtimeHint": "uvx",
+      "runtimeArguments": [
+        {
+          "type": "named",
+          "name": "--with",
+          "value": "edgartools[ai]==5.61.0",
+          "description": "Install the [ai] extra, which carries the MCP SDK"
+        }
+      ],
+      "packageArguments": [
+        {
+          "type": "positional",
+          "value": "mcp",
+          "valueHint": "command",
+          "description": "Run the MCP server subcommand"
+        }
+      ],
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "description": "Your name and email for SEC EDGAR API identification (e.g. 'Your Name your.email@example.com')",
+          "isRequired": true,
+          "format": "string",
+          "name": "EDGAR_IDENTITY"
+        }
+      ]
+    }
+  ]
+}
