@@ -1,0 +1,586 @@
+"""
+Tests for Schedule 14D-9 (tender offer solicitation/recommendation statement).
+
+Ground truth, all hand-verified against the primary document:
+- Lisata Therapeutics, Inc. (CIK 320017), SC 14D9 filed 2026-06-10,
+  accession 0001140361-26-024737 -- board recommended ACCEPT.
+  https://www.sec.gov/Archives/edgar/data/320017/000114036126024737/ny20069664x1_sc14d9.htm
+- Moody National REIT II, Inc. (CIK 1615222), SC 14D9 filed 2023-06-21,
+  accession 0001387131-23-007870 -- board recommended REJECT.
+  https://www.sec.gov/Archives/edgar/data/1615222/000138713123007870/mnrtii-sc14d9_062123.htm
+- Moody National REIT II, Inc. (CIK 1615222), SC 14D9 filed 2024-05-08,
+  accession 0001999371-24-005776 -- board recommended NEUTRAL (explicitly
+  "express no opinion and remain neutral with respect to the Offer").
+  https://www.sec.gov/Archives/edgar/data/1615222/000199937124005776/mnrtii-sc14d9_050824.htm
+"""
+
+from datetime import date
+from unittest.mock import Mock
+
+import pytest
+
+from edgar.exceptions import DataObjectError
+from edgar.tender_offers.schedule14d9 import (
+    Schedule14D9,
+    _find_real_item_starts,
+    _recommendation_window,
+    classify_recommendation,
+    extract_item_section,
+)
+from tests.paths import DATA_DIR
+
+TEST_DATA_DIR = DATA_DIR / "tender_offers"
+LISATA_SC14D9_PATH = TEST_DATA_DIR / "sc14d9_lisata_therapeutics.htm"
+MOODY_REJECT_PATH = TEST_DATA_DIR / "sc14d9_moody_national_reit_ii_reject.htm"
+MOODY_NEUTRAL_PATH = TEST_DATA_DIR / "sc14d9_moody_national_reit_ii_neutral.htm"
+
+
+def _mock_filing(
+    form="SC 14D9", html=None, company="Lisata Therapeutics, Inc.", cik="320017", accession_no="0001140361-26-024737", filing_date=date(2026, 6, 10)
+):
+    filing = Mock()
+    filing.form = form
+    filing.company = company
+    filing.cik = cik
+    filing.accession_no = accession_no
+    filing.filing_date = filing_date
+    filing.html = Mock(return_value=html)
+    return filing
+
+
+@pytest.mark.fast
+def test_schedule14d9_from_filing_ground_truth_accept():
+    """Ground-truth assertion against a real, hand-verified filing."""
+    html = LISATA_SC14D9_PATH.read_text()
+    filing = _mock_filing(html=html)
+
+    schedule = Schedule14D9.from_filing(filing)
+
+    assert isinstance(schedule, Schedule14D9)
+    assert schedule.company_name == "Lisata Therapeutics, Inc."
+    assert schedule.cik == "320017"
+    assert schedule.is_amendment is False
+    # The board's actual, hand-verified recommendation on this filing.
+    assert schedule.recommendation == "accept"
+    assert "unanimously recommends" in schedule.item4_text.lower()
+
+
+@pytest.mark.fast
+def test_schedule14d9_from_filing_ground_truth_reject():
+    """Second ground truth: a real, unambiguous REJECT recommendation."""
+    html = MOODY_REJECT_PATH.read_text()
+    filing = _mock_filing(
+        html=html,
+        company="Moody National REIT II, Inc.",
+        cik="1615222",
+        accession_no="0001387131-23-007870",
+        filing_date=date(2023, 6, 21),
+    )
+
+    schedule = Schedule14D9.from_filing(filing)
+
+    assert schedule.company_name == "Moody National REIT II, Inc."
+    assert schedule.recommendation == "reject"
+    assert "reject the offer" in schedule.recommendation_text.lower()
+
+
+@pytest.mark.fast
+def test_schedule14d9_from_filing_ground_truth_neutral():
+    """Third ground truth: a real, unambiguous NEUTRAL recommendation."""
+    html = MOODY_NEUTRAL_PATH.read_text()
+    filing = _mock_filing(
+        html=html,
+        company="Moody National REIT II, Inc.",
+        cik="1615222",
+        accession_no="0001999371-24-005776",
+        filing_date=date(2024, 5, 8),
+    )
+
+    schedule = Schedule14D9.from_filing(filing)
+
+    assert schedule.recommendation == "neutral"
+    assert "remain neutral" in schedule.recommendation_text.lower()
+
+
+CIM_REJECT_PATH = TEST_DATA_DIR / "sc14d9_cim_real_estate_finance_trust_reject.htm"
+TURNSTONE_ACCEPT_PATH = TEST_DATA_DIR / "sc14d9_turnstone_biologics_accept.htm"
+CNL_REJECT_PATH = TEST_DATA_DIR / "sc14d9_cnl_healthcare_properties_reject.htm"
+
+
+@pytest.mark.fast
+def test_reject_the_tender_offer_is_a_rejection_not_an_acceptance():
+    """CIM Real Estate Finance Trust (CIK 1498547), SC 14D9 filed 2025-02-03,
+    accession 0001498547-25-000009: "The Company's board of directors recommends
+    that the stockholders reject the tender offer by Comrit to purchase their
+    shares". The reject pattern required "reject the offer" exactly, and the
+    accept pattern "recommends ... tender ... shares" then matched the same
+    sentence, so a rejection came back as "accept"."""
+    filing = _mock_filing(
+        html=CIM_REJECT_PATH.read_text(),
+        company="CIM Real Estate Finance Trust, Inc.",
+        cik="1498547",
+        accession_no="0001498547-25-000009",
+        filing_date=date(2025, 2, 3),
+    )
+
+    schedule = Schedule14D9.from_filing(filing)
+
+    assert schedule.recommendation == "reject"
+    assert "recommends that the stockholders reject the tender offer by Comrit" in schedule.recommendation_text
+
+
+@pytest.mark.fast
+def test_past_tense_recommended_is_read_as_a_recommendation():
+    """Turnstone Biologics (CIK 1764974), SC 14D9 filed 2025-07-11, accession
+    0001193125-25-157832: "(iv) recommended that Turnstone Company's
+    stockholders accept the Offer and tender their Shares". ``recommends?``
+    cannot match "recommended", so this clear acceptance read as None. The
+    filing also sets its heading in capitals ("ITEM 4. THE SOLICITATION OR
+    RECOMMENDATION"), which is the real-document check on the case-insensitive
+    heading match."""
+    filing = _mock_filing(
+        html=TURNSTONE_ACCEPT_PATH.read_text(),
+        company="Turnstone Biologics Corp.",
+        cik="1764974",
+        accession_no="0001193125-25-157832",
+        filing_date=date(2025, 7, 11),
+    )
+
+    schedule = Schedule14D9.from_filing(filing)
+
+    assert schedule.recommendation_text.startswith("ITEM 4. THE SOLICITATION OR RECOMMENDATION")
+    assert schedule.recommendation == "accept"
+    assert "recommended that Turnstone Company’s stockholders accept the Offer" in schedule.recommendation_text
+
+
+@pytest.mark.fast
+def test_reject_the_named_offer_is_a_rejection():
+    """CNL Healthcare Properties (CIK 1496454), SC 14D9 filed 2025-02-05,
+    accession 0001193125-25-020527: "to recommend that the Company's
+    stockholders REJECT the West 4 Offer". The bidder's name between "the" and
+    "Offer" defeated "reject the offer", so this read as None."""
+    filing = _mock_filing(
+        html=CNL_REJECT_PATH.read_text(),
+        company="CNL Healthcare Properties, Inc.",
+        cik="1496454",
+        accession_no="0001193125-25-020527",
+        filing_date=date(2025, 2, 5),
+    )
+
+    schedule = Schedule14D9.from_filing(filing)
+
+    assert schedule.recommendation == "reject"
+    assert "REJECT the West 4 Offer" in schedule.recommendation_text
+
+
+@pytest.mark.fast
+def test_recommend_acceptance_of_the_offer_is_an_acceptance():
+    # The Dutch-law phrasing in CureVac (0001104659-25-101286), LAVA
+    # (0001104659-25-079243) and Playa Hotels (0001193125-25-033511), quoted
+    # from CureVac's Item 4.
+    text = (
+        "resolved, on the terms and subject to the conditions set forth in the Purchase Agreement, "
+        "to support the Offer and the Transactions and to recommend acceptance of the Offer by the "
+        "shareholders of the Company"
+    )
+    assert classify_recommendation(text) == "accept"
+
+
+@pytest.mark.fast
+def test_schedule14d9_wrong_form_raises():
+    filing = _mock_filing(form="SC TO-T", html="<html></html>")
+    with pytest.raises(AssertionError):
+        Schedule14D9.from_filing(filing)
+
+
+@pytest.mark.fast
+def test_schedule14d9_missing_item4_raises_not_silent():
+    """Silence check for an *original* SC 14D9: no Item 4 is a genuine parse
+    failure there (unlike an amendment, see the tests below), so it must fail
+    loudly rather than return a Schedule14D9 with a quietly-wrong
+    `recommendation`."""
+    filing = _mock_filing(form="SC 14D9", html="<html><body>Not a real filing document.</body></html>")
+    with pytest.raises(DataObjectError, match="Could not locate Item 4"):
+        Schedule14D9.from_filing(filing)
+
+
+@pytest.mark.fast
+def test_schedule14d9_amendment_missing_item4_does_not_raise():
+    """Of 229 SC 14D9 filings in 2025, 174 were amendments, and amendments
+    routinely restate only the items they changed -- so a missing Item 4 there
+    is the normal case, not a parse failure, and must not raise."""
+    filing = _mock_filing(form="SC 14D9/A", html="<html><body>Amends only Item 6.</body></html>")
+
+    schedule = Schedule14D9.from_filing(filing)
+
+    assert schedule.is_amendment is True
+    assert schedule.item4_text is None
+    assert schedule.recommendation is None
+    assert schedule.recommendation_text is None
+    assert schedule.recommendation_text_truncated is None
+
+
+BLUEBIRD_AMENDMENT_PATH = TEST_DATA_DIR / "sc14d9a_bluebird_bio_restates_accept.htm"
+REGIONAL_AMENDMENT_PATH = TEST_DATA_DIR / "sc14d9a_regional_health_restates_reject.htm"
+HILLEVAX_AMENDMENT_PATH = TEST_DATA_DIR / "sc14d9a_hillevax_not_restated.htm"
+
+
+@pytest.mark.fast
+def test_a_real_amendment_that_restates_the_recommendation_is_classified():
+    """bluebird bio (CIK 1293971), SC 14D9/A filed 2025-05-14, accession
+    0001193125-25-119441, restates Item 4 after the merger agreement was
+    amended: "...as amended by the Merger Agreement Amendment, recommended that
+    the Company's stockholders accept the Offer and tender their Shares"."""
+    filing = _mock_filing(
+        form="SC 14D9/A",
+        html=BLUEBIRD_AMENDMENT_PATH.read_text(),
+        company="bluebird bio, Inc.",
+        cik="1293971",
+        accession_no="0001193125-25-119441",
+        filing_date=date(2025, 5, 14),
+    )
+
+    schedule = Schedule14D9.from_filing(filing)
+
+    assert schedule.is_amendment is True
+    assert schedule.recommendation == "accept"
+    assert "as amended by the Merger Agreement Amendment, recommended that the Company’s stockholders accept the Offer" in (
+        schedule.recommendation_text
+    )
+
+
+@pytest.mark.fast
+def test_a_real_amendment_that_adds_a_rejection_is_classified():
+    """Regional Health Properties (CIK 1004724), SC 14D9/A filed 2025-08-18,
+    accession 0001641172-25-024506. The original said only that the board's
+    recommendation "effectively was a rejection" (None, correctly); this
+    amendment supplements Item 4 with "to recommend that the Company's
+    shareholders REJECT the Offer"."""
+    filing = _mock_filing(
+        form="SC 14D9/A",
+        html=REGIONAL_AMENDMENT_PATH.read_text(),
+        company="Regional Health Properties, Inc",
+        cik="1004724",
+        accession_no="0001641172-25-024506",
+        filing_date=date(2025, 8, 18),
+    )
+
+    schedule = Schedule14D9.from_filing(filing)
+
+    assert schedule.recommendation == "reject"
+    assert "to recommend that the Company’s shareholders REJECT the Offer" in schedule.recommendation_text
+
+
+@pytest.mark.fast
+def test_a_real_amendment_that_does_not_restate_item4():
+    """HilleVax (CIK 1888012), SC 14D9/A filed 2025-09-17, accession
+    0001193125-25-205600, amends only Item 8 and Item 9 and never mentions
+    Item 4 -- the shape of 136 of the 174 SC 14D9/A filings made in 2025."""
+    filing = _mock_filing(
+        form="SC 14D9/A",
+        html=HILLEVAX_AMENDMENT_PATH.read_text(),
+        company="HilleVax, Inc.",
+        cik="1888012",
+        accession_no="0001193125-25-205600",
+        filing_date=date(2025, 9, 17),
+    )
+
+    schedule = Schedule14D9.from_filing(filing)
+
+    assert schedule.item4_text is None
+    assert schedule.recommendation is None
+    assert "NOT RESTATED" in repr(schedule)
+    assert "UNCLEAR" not in repr(schedule)
+
+
+_AMENDMENT_RESTATING_ITEM4 = (
+    "<html><body><p>{heading}</p>"
+    "<p>Item 4 of the Schedule 14D-9 is hereby amended and restated: the Board now unanimously "
+    "recommends that stockholders reject the Offer and not tender their Shares.</p>"
+    "<p>Item 8. Additional Information</p></body></html>"
+)
+
+
+@pytest.mark.fast
+@pytest.mark.parametrize(
+    "heading",
+    [
+        "Item 4 (The Solicitation or Recommendation)",
+        "Item 4 – The Solicitation or Recommendation",
+        "Item 4: The Solicitation or Recommendation",
+    ],
+)
+def test_an_amendment_heading_in_another_spelling_is_read(heading):
+    """Case (d) on an amendment: an Item 4 heading the parser could not read
+    used to be reported as "not restated", silently, because an amendment with
+    no Item 4 section is allowed to build. These spellings are now read. The
+    parenthesised form is how Merus N.V. sets the headings of its 2025
+    amendment (0001193125-25-312785)."""
+    filing = _mock_filing(form="SC 14D9/A", html=_AMENDMENT_RESTATING_ITEM4.format(heading=heading))
+
+    schedule = Schedule14D9.from_filing(filing)
+
+    assert schedule.item4_text is not None
+    assert schedule.recommendation == "reject"
+
+
+@pytest.mark.fast
+def test_an_amendment_with_an_unreadable_item4_heading_raises_rather_than_reporting_not_restated():
+    """A block that begins "Item 4" with no punctuation the heading match
+    accepts: the amendment restates Item 4, the parser cannot read it, and the
+    only honest answer is an error. Over the 174 SC 14D9/A filings of 2025 this
+    guard raises on none."""
+    html = _AMENDMENT_RESTATING_ITEM4.format(heading="ITEM 4 THE SOLICITATION OR RECOMMENDATION").replace("Item 4 of the Schedule", "The Schedule")
+    filing = _mock_filing(form="SC 14D9/A", html=html)
+
+    with pytest.raises(DataObjectError, match="has a block beginning 'Item 4'"):
+        Schedule14D9.from_filing(filing)
+
+
+@pytest.mark.fast
+def test_an_xml_encoding_declaration_does_not_escape_as_a_raw_valueerror():
+    """lxml refuses a str carrying an encoding declaration with a raw
+    ValueError, which would escape filing.obj() outside the edgar.exceptions
+    hierarchy."""
+    html = '<?xml version="1.0" encoding="utf-8"?>\n' + _AMENDMENT_RESTATING_ITEM4.format(heading="Item 4. The Solicitation or Recommendation")
+    filing = _mock_filing(form="SC 14D9", html=html)
+
+    schedule = Schedule14D9.from_filing(filing)
+
+    assert schedule.recommendation == "reject"
+
+
+@pytest.mark.fast
+def test_whitespace_only_html_raises_data_object_error():
+    filing = _mock_filing(html="   \n  ")
+    with pytest.raises(DataObjectError, match="No HTML document"):
+        Schedule14D9.from_filing(filing)
+
+
+@pytest.mark.fast
+def test_schedule14d9_amendment_missing_item4_renders_without_crashing():
+    """The rich rendering path must handle item4_text=None -- a real caller
+    reaches this via repr()/print(), not just direct attribute access."""
+    filing = _mock_filing(form="SC 14D9/A", html="<html><body>Amends only Item 6.</body></html>")
+    schedule = Schedule14D9.from_filing(filing)
+
+    rendered = repr(schedule)
+
+    assert "Not restated" in rendered
+
+
+@pytest.mark.fast
+def test_schedule14d9_no_html_raises():
+    filing = _mock_filing(html=None)
+    with pytest.raises(DataObjectError, match="No HTML document"):
+        Schedule14D9.from_filing(filing)
+
+
+@pytest.mark.fast
+def test_recommendation_text_truncated_flag():
+    """A window ended by a section heading is complete, however much of Item 4
+    follows it. Lisata's Item 4 is 125,815 characters and the window is 1,066 —
+    a flag that measured Item 4's length would call that truncated, and would
+    do so for nearly every real filing, since Item 4 carries the whole
+    background narrative."""
+    html = LISATA_SC14D9_PATH.read_text()
+    schedule = Schedule14D9.from_filing(_mock_filing(html=html))
+
+    assert schedule.recommendation_text_truncated is False
+    assert len(schedule.recommendation_text) < len(schedule.item4_text)
+
+
+@pytest.mark.fast
+def test_recommendation_text_truncated_when_the_cap_makes_the_cut():
+    """The case the flag is actually for: no boundary heading anywhere, so the
+    window ends at ``_RECOMMENDATION_WINDOW_CHARS`` and the statement may
+    genuinely continue past it."""
+    schedule = Schedule14D9(
+        filing=_mock_filing(),
+        item4_text="The Board recommends that holders accept the Offer. " + ("filler text " * 400),
+    )
+
+    assert schedule.recommendation_text_truncated is True
+
+
+@pytest.mark.fast
+def test_recommendation_text_not_truncated_when_item4_is_short():
+    schedule = Schedule14D9(
+        filing=_mock_filing(),
+        item4_text="The Board unanimously recommends that holders accept the Offer.",
+    )
+    assert schedule.recommendation_text_truncated is False
+    assert schedule.recommendation_text == schedule.item4_text
+
+
+@pytest.mark.fast
+@pytest.mark.parametrize(
+    "text,expected",
+    [
+        ("the Board unanimously recommends that the holders of Shares accept the Offer", "accept"),
+        ("the Board recommends that stockholders reject the Offer", "reject"),
+        ("the Board expresses no opinion and remains neutral with respect to the Offer", "neutral"),
+        ("the Board has determined to defer any recommendation pending further review", None),
+        # A real rejection that never uses the words "reject" or "tender" at all
+        # (Woodbridge Liquidation Trust, accession 0001140361-20-000734).
+        ("the Supervisory Board unanimously recommends that the Interestholders not accept the Offer", "reject"),
+        # A recommendation split across a line wrap mid-sentence, as HTML text
+        # extraction produces in practice (Genco Shipping, accession
+        # 0000930413-26-001621) -- must not be defeated by the embedded newline.
+        ("the Genco Board unanimously recommends that holders of Shares\nREJECT the Offer and NOT TENDER any Shares", "reject"),
+        ("", None),
+    ],
+)
+def test_classify_recommendation(text, expected):
+    assert classify_recommendation(text) == expected
+
+
+@pytest.mark.fast
+def test_classify_recommendation_ignores_background_section_hedging():
+    """Regression test for the real defect found in review of PR #940: classifying
+    against the whole Item 4 section let a hedging phrase in the Background
+    narrative outrank the board's actual, current recommendation."""
+    text = (
+        "The Board unanimously recommends that stockholders accept the Offer "
+        "and tender their Shares. "
+        "Background of the Offer. At the January meeting, the Board determined "
+        "to express no opinion pending further review."
+    )
+    assert classify_recommendation(text) == "accept"
+
+
+@pytest.mark.fast
+def test_recommendation_window_cuts_at_background_heading():
+    text = "The Board unanimously recommends that holders accept the Offer. Background of the Offer. Many years of history follow here."
+    window = _recommendation_window(text)
+    assert window == "The Board unanimously recommends that holders accept the Offer."
+    assert "Background" not in window
+
+
+@pytest.mark.fast
+def test_recommendation_window_falls_back_to_fixed_cap_when_no_heading():
+    text = "word " * 1000  # no "background of the" / "reasons for the recommendation" heading
+    window = _recommendation_window(text)
+    assert len(window) <= 2500
+
+
+@pytest.mark.fast
+def test_extract_item_section_ignores_quoted_cross_references():
+    """A quoted cross-reference to 'Item 4' elsewhere in the document must not
+    be mistaken for the real section heading (the same failure mode as the
+    fabricated item-anchor bug in GH #918)."""
+    text = (
+        "As described in “Item 4. The Solicitation or Recommendation” above, "
+        "the officers are listed here. "
+        "Item 4. The Solicitation or Recommendation. "
+        "The Board unanimously recommends that holders accept the Offer. "
+        "Item 5. Persons Retained."
+    )
+    section = extract_item_section(text, 4, 5)
+    assert section is not None
+    assert section.startswith("Item 4. The Solicitation or Recommendation.")
+    assert "unanimously recommends" in section
+
+
+@pytest.mark.fast
+def test_extract_item_section_returns_none_when_absent():
+    assert extract_item_section("nothing relevant here", 4, 5) is None
+
+
+@pytest.mark.fast
+@pytest.mark.parametrize(
+    "heading",
+    [
+        "ITEM 4. THE SOLICITATION OR RECOMMENDATION",
+        "ITEM 4.THE SOLICITATION OR RECOMMENDATION",
+        "Item 4. The Solicitation or Recommendation",
+        "item 4. the solicitation or recommendation",
+    ],
+)
+def test_item_headings_are_found_whatever_their_case(heading):
+    """Filers set this heading in caps at least as often as in title case, and
+    a case-sensitive match found no candidate at all in those documents — the
+    only "Item 4" left was a quoted cross-reference, which the quote filter
+    then discarded, so the whole filing raised.
+
+    Real examples of the uppercase spelling: Tourmaline Bio
+    (0001104659-25-094103), IGM Biosciences (0001193125-25-159860) and Allakos
+    (0001140361-25-013949), all SC 14D9 originals filed in 2025. Measured over
+    25 such filings, 9 failed to parse before the match was made
+    case-insensitive and 1 after.
+    """
+    text = (
+        f"{heading}\n"
+        "The Board unanimously recommends that holders of Shares accept the Offer.\n"
+        "Background of the Offer\n"
+        "Narrative that must not be classified.\n"
+        "ITEM 5. PERSON/ASSETS, RETAINED, EMPLOYED, COMPENSATED OR USED\n"
+    )
+
+    section = extract_item_section(text, 4, 5)
+
+    assert section is not None, f"heading not found: {heading!r}"
+    assert "accept the Offer" in section
+    assert "ITEM 5." not in section
+    assert classify_recommendation(section) == "accept"
+
+
+@pytest.mark.fast
+def test_an_item_heading_at_the_very_start_is_not_read_as_quoted():
+    """`"" in _QUOTE_CHARS` is True — the empty string is a substring of every
+    string — so the quote filter used to discard a heading at offset 0, which
+    has no preceding character at all. Text extracted from a document fragment
+    or an already-sliced section starts exactly there."""
+    text = "Item 4. The Solicitation or Recommendation\nThe Board recommends that holders accept the Offer.\nItem 5. Person/Assets\n"
+
+    section = extract_item_section(text, 4, 5)
+
+    assert section is not None, "a heading at offset 0 was discarded as quoted"
+    assert classify_recommendation(section) == "accept"
+
+
+@pytest.mark.fast
+def test_a_genuinely_quoted_cross_reference_is_still_skipped():
+    """The filter must keep doing its job: the guard above widens it by exactly
+    one position and must not let a real cross-reference through."""
+    text = (
+        "Item 4. The Solicitation or Recommendation\n"
+        "The Board recommends that holders accept the Offer.\n"
+        "See the section captioned “Item 4. The Solicitation or Recommendation — Opinion”.\n"
+        "Item 5. Person/Assets\n"
+    )
+
+    starts = _find_real_item_starts(text, 4)
+
+    assert starts == [0], f"expected only the real heading, got {starts}"
+
+
+@pytest.mark.fast
+def test_documented_example():
+    """Execute the Schedule 14D-9 example in docs/data-objects.md, unchanged,
+    against CIM Real Estate Finance Trust's filing (0001498547-25-000009) with
+    no SEC I/O: ``filing.obj()`` goes through the real ``edgar.obj`` dispatch."""
+    from edgar import obj
+    from tests.paths import REPO_ROOT
+
+    page = REPO_ROOT / "docs" / "data-objects.md"
+    section = page.read_text().split("## Tender Offer Recommendations (Schedule 14D-9)", 1)[1]
+    example = section.split("```python\n", 1)[1].split("```", 1)[0]
+
+    filing = _mock_filing(
+        html=CIM_REJECT_PATH.read_text(),
+        company="CIM Real Estate Finance Trust, Inc.",
+        cik="1498547",
+        accession_no="0001498547-25-000009",
+        filing_date=date(2025, 2, 3),
+    )
+    filing.obj = lambda: obj(filing)
+    namespace = {"filing": filing}
+
+    exec(compile(example, str(page), "exec"), namespace)  # noqa: S102
+
+    schedule = namespace["schedule"]
+    assert isinstance(schedule, Schedule14D9)
+    assert schedule.recommendation == "reject"
+    assert schedule.is_amendment is False
+    assert schedule.recommendation_text.startswith("Item 4. The Solicitation or Recommendation.(a) Recommendation.")
