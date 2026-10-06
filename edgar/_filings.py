@@ -2291,7 +2291,9 @@ class Filing:
 
     @property
     def homepage_url(self) -> str:
-        return f"{SEC_ARCHIVE_URL}/data/{self.cik}/{self.accession_no}-index.html"
+        # The index page inside the accession folder. SEC answers the shorter
+        # /data/<cik>/<accession>-index.html with a 403 "Access Denied" (GH #1421).
+        return f"{self.base_dir}/{self.accession_no}-index.html"
 
     @property
     def text_url(self) -> str:

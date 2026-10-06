@@ -403,8 +403,9 @@ def _parse_args(argv: list[str] | None = None):
     )
     parser.add_argument(
         "--host",
-        default="0.0.0.0",
-        help="Host to bind HTTP server (default: 0.0.0.0)",
+        default="127.0.0.1",
+        help="Host to bind HTTP server (default: 127.0.0.1; use 0.0.0.0 to accept "
+             "connections from other machines, e.g. in a container)",
     )
     parser.add_argument(
         "--port",
@@ -467,6 +468,34 @@ def _run_stdio(version: str):
     asyncio.run(run_server())
 
 
+_LOOPBACK_HOSTS = ("127.0.0.1", "localhost", "::1")
+
+
+def _transport_security(host: str, port: int):
+    """DNS-rebinding protection for a server bound to this machine only.
+
+    A loopback server is reachable from any web page the user opens unless it checks
+    the Host and Origin headers, as the MCP transport spec asks. A server bound to
+    another address is reached through names this process cannot know, so it runs
+    without the check and says it is unauthenticated.
+    """
+    from mcp.server.transport_security import TransportSecuritySettings
+
+    if host in _LOOPBACK_HOSTS:
+        names = ["127.0.0.1", "localhost", "[::1]"]
+        return TransportSecuritySettings(
+            enable_dns_rebinding_protection=True,
+            allowed_hosts=[f"{name}:{port}" for name in names],
+            allowed_origins=[f"http://{name}:{port}" for name in names],
+        )
+    logger.warning(
+        "Binding to %s: the MCP endpoint is reachable from other machines and has no "
+        "authentication. Run it behind an authenticating proxy or on a trusted network.",
+        host,
+    )
+    return TransportSecuritySettings(enable_dns_rebinding_protection=False)
+
+
 def _run_http(host: str, port: int, version: str):
     """Run the server with Streamable HTTP transport."""
     import contextlib
@@ -486,6 +515,7 @@ def _run_http(host: str, port: int, version: str):
         app=app,
         json_response=True,
         stateless=True,
+        security_settings=_transport_security(host, port),
     )
 
     # Wrap handle_request in an ASGI class so Starlette's Route treats it
