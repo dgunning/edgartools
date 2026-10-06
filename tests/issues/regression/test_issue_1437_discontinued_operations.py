@@ -5,9 +5,8 @@ discontinued-operations results, the tax on them and a disposal group's own
 revenue as extraordinary items: IBM's FY2024 segment revenue reconciliation
 showed $35 million of revenue from divested businesses that way.
 
-This slice is the 28 rows of #1437. A null row is a deleted entry: no concept
-fits, so ``lookup()`` returns ``None``. Later slices append rows to
-``issue_1417_expected.json``.
+The expected table holds the 28 rows of #1437. A null row is a deleted entry:
+no concept fits, so ``lookup()`` returns ``None``.
 
 GitHub Issue: https://github.com/dgunning/edgartools/issues/1437
 GitHub Issue: https://github.com/dgunning/edgartools/issues/1417
@@ -22,7 +21,9 @@ from edgar.xbrl import XBRL
 from edgar.xbrl.standardization import reverse_index as reverse_index_module
 from edgar.xbrl.standardization.reverse_index import get_reverse_index
 
-EXPECTED = json.loads((Path(__file__).parents[2] / "fixtures" / "standardization" / "issue_1417_expected.json").read_text(encoding="utf-8"))
+EXPECTED = json.loads(
+    (Path(__file__).parents[2] / "fixtures" / "standardization" / "issue_1437_discontinued_operations_expected.json").read_text(encoding="utf-8")
+)
 _STANDARDIZATION = Path(reverse_index_module.__file__).parent
 DISPLAY_NAMES = json.loads((_STANDARDIZATION / "display_names.json").read_text(encoding="utf-8"))
 GAAP_MAPPINGS = json.loads((_STANDARDIZATION / "gaap_mappings.json").read_text(encoding="utf-8"))
