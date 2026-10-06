@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.61.0] - 2026-10-06
+
+### Added
+
+- **`Schedule14D9` for SC 14D-9 tender-offer recommendations.** `filing.obj()` on a target board's solicitation/recommendation statement returns its position as `accept`, `reject`, `neutral`, or `None` when the wording is hedged, with the Item 4 text it was read from; an `SC 14D9/A` that does not restate Item 4 builds with `item4_text=None`. Classified 52 of the 55 SC 14D-9 originals filed in 2025, each checked against the filing.
+
+### Changed
+
+- **The sync and async get/post request functions now share one implementation of their 429, redirect, SSL-error and identity handling.** Each of those branches had been written out four times (twice for identity), and all of them are now single helpers in `edgar.httprequests`. Behaviour is unchanged: the fast suite passes the same 7,927 tests before and after, and 26 new tests check each branch for each of the four callers. (bead edgartools-fx90)
+
+### Removed
+
+- **The `edgar-test` console script was removed.** It pointed at `tests.harness.cli`, which ships in no wheel and left the repository when the harness moved, so it failed on every install. Run the harness with `python -m scripts.harness.cli` from a checkout. (bead edgartools-deq9)
+
+### Fixed
+
+- **`Filing.html()` and anything else that reads a filing's index page returned None or raised, because SEC now refuses the index URL EdgarTools built.** The short `/data/<cik>/<accession>-index.html` form answers 403 Access Denied for every filing tried; `Filing.homepage_url` now uses the index page inside the accession folder, which answers 200. (GH #1421)
+- **Installing EdgarTools from the Official MCP Registry launched a command that does not exist.** The listing pinned 5.21.1, and registry clients run `uvx edgartools@<version>`, but the package shipped no `edgartools` executable. A new `edgartools mcp` command and a committed `server.json` make that launch start the server with all 13 tools. (GH #1413, bead edgartools-deq9)
+- **`Section.markdown()` dropped a section's own heading when the TOC anchor is nested inside it.** The slicer started collecting after the anchor, by which point the heading's block had already begun. On Google's FY2004 10-K (0001193125-05-065298) 0 of 18 item sections began with their "ITEM N." heading; all 18 do now. (GH #1369)
+
 ## [5.60.0] - 2026-10-02
 
 ### Added

@@ -1,1 +1,0 @@
-**The `edgar-test` console script was removed.** It pointed at `tests.harness.cli`, which ships in no wheel and left the repository when the harness moved, so it failed on every install. Run the harness with `python -m scripts.harness.cli` from a checkout. (bead edgartools-deq9)
