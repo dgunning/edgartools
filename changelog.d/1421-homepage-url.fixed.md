@@ -1,1 +1,0 @@
-**`Filing.html()` and anything else that reads a filing's index page returned None or raised, because SEC now refuses the index URL EdgarTools built.** The short `/data/<cik>/<accession>-index.html` form answers 403 Access Denied for every filing tried; `Filing.homepage_url` now uses the index page inside the accession folder, which answers 200. (GH #1421)
