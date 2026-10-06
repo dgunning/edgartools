@@ -133,14 +133,14 @@ synonyms.register_group(
 ### JSON Import/Export
 
 ```python
-# Export to JSON
-synonyms.to_json('my_synonyms.json')
+# Export to JSON (user-defined groups only; include_builtin=True exports all)
+synonyms.export_to_json('my_synonyms.json')
 
-# Import from JSON
-synonyms = SynonymGroups.from_json('my_synonyms.json')
+# Import from JSON (built-in groups plus the file's groups)
+synonyms = SynonymGroups.from_file('my_synonyms.json')
 
-# Export to dict (for programmatic use)
-data = synonyms.to_dict()
+# Export a group to dict (for programmatic use)
+data = synonyms.get_group('custom_capex').to_dict()
 ```
 
 ### Unregister Groups

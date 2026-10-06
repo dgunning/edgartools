@@ -105,7 +105,7 @@ Access to all XBRL facts with querying capabilities.
 **Example:**
 ```python
 # Query facts by concept
-revenue_facts = xbrl.facts.by_concept("Revenue")
+revenue_facts = xbrl.facts.query().by_concept("Revenue")
 
 # Convert to DataFrame for analysis
 facts_df = xbrl.facts.to_dataframe()
@@ -170,7 +170,7 @@ Return the filing's calculation linkbase as a DataFrame of parent → child arcs
 | `weight` | float | Signed calc weight (`+1.0`, `-1.0`) — **do not flatten the sign** |
 | `role_uri` | str | Full extended-link role URI |
 | `role_short` | str | Human-readable role title from the schema |
-| `menucat` | str \| None | SEC report tier when available (`S`=Statement, `D`=Details, `N`=Notes, `T`=Tables, `P`=Policies, `C`=Cover) |
+| `menucat` | str \| None | SEC report tier when available: the FilingSummary `MenuCategory` name (`Statements`, `Details`, `Notes`, `Tables`, `Policies`, `Cover`) |
 | `is_abstract` | bool | True for structural/grouping concepts |
 | `label` | str | Standard label from the label linkbase |
 
@@ -328,14 +328,21 @@ Get the comprehensive income statement.
 ```python
 statements = xbrl.statements
 
+# A Statement has no per-concept getter; read values from its DataFrame.
+# Standardized line items carry a standard_concept; period columns start with the date.
+def latest_value(statement, standard_concept):
+    df = statement.to_dataframe()
+    period = max(c for c in df.columns if c.startswith("20"))  # newest period
+    return df[df["standard_concept"] == standard_concept].iloc[0][period]
+
 # Access different statement types
 if statements.balance_sheet():
     bs = statements.balance_sheet()
-    print(f"Total Assets: {bs.get_concept_value('Assets')}")
+    print(f"Total Assets: {latest_value(bs, 'Assets')}")
 
 if statements.income_statement():
     is_stmt = statements.income_statement()
-    print(f"Revenue: {is_stmt.get_concept_value('Revenue')}")
+    print(f"Revenue: {latest_value(is_stmt, 'Revenue')}")
 ```
 
 ### Statement
@@ -470,16 +477,9 @@ for arc in cash_flow.extension_arcs(include_values=True):
 
 See the [Calculation Linkbase guide](../xbrl/guides/calculation-linkbase.md) for the longer walkthrough and rationale.
 
-#### get_concept_value()
-```python
-def get_concept_value(self, concept: str) -> Optional[Any]
-```
-Get the value for a specific concept.
+#### Reading values
 
-**Parameters:**
-- `concept`: Concept name to look up
-
-**Returns:** Concept value or None
+`Statement` has no per-concept getter. Read values from `to_dataframe()`: every row carries its `concept`, rows mapped to a standardized concept carry it in `standard_concept`, and each period is a column whose name starts with the period's end date (for example `2025-09-27 (FY)`).
 
 **Example:**
 ```python
@@ -492,9 +492,10 @@ print(rendered)
 # Convert to DataFrame
 df = statement.to_dataframe()
 
-# Get specific values
-revenue = statement.get_concept_value("Revenue")
-net_income = statement.get_concept_value("NetIncomeLoss")
+# Get specific values from the newest period
+period = max(c for c in df.columns if c.startswith("20"))
+revenue = df[df["standard_concept"] == "Revenue"].iloc[0][period]
+net_income = df[df["concept"] == "us-gaap_NetIncomeLoss"].iloc[0][period]
 ```
 
 ## Facts Querying
@@ -510,77 +511,40 @@ class FactsView:
 
 #### Query Methods
 
-#### by_concept()
+#### query()
 ```python
-def by_concept(self, pattern: str, exact: bool = False) -> FactQuery
+def query(self) -> FactQuery
 ```
-Filter facts by concept name.
+Start a query over all facts. The `by_*` filters (`by_concept()`, `by_label()`, `by_value()`, `by_date_range()`, ...) are `FactQuery` methods, documented below, not `FactsView` methods. `xbrl.query()` starts the same query.
 
-**Parameters:**
-- `pattern`: Pattern to match against concept names
-- `exact`: If True, require exact match; otherwise, use regex
-
-**Returns:** `FactQuery` object for further filtering
-
-#### by_label()
-```python
-def by_label(self, pattern: str, exact: bool = False) -> FactQuery
-```
-Filter facts by element label.
-
-**Parameters:**
-- `pattern`: Pattern to match against labels
-- `exact`: If True, require exact match; otherwise, use regex
-
-**Returns:** `FactQuery` object for further filtering
-
-#### by_value()
-```python
-def by_value(self, min_value: float = None, max_value: float = None) -> FactQuery
-```
-Filter facts by value range.
-
-**Parameters:**
-- `min_value`: Minimum value threshold
-- `max_value`: Maximum value threshold
-
-**Returns:** `FactQuery` object for further filtering
-
-#### by_period()
-```python
-def by_period(self, start_date: str = None, end_date: str = None) -> FactQuery
-```
-Filter facts by period range.
-
-**Parameters:**
-- `start_date`: Start date (YYYY-MM-DD format)
-- `end_date`: End date (YYYY-MM-DD format)
-
-**Returns:** `FactQuery` object for further filtering
+**Returns:** `FactQuery` object for filtering
 
 #### Analysis Methods
 
 #### pivot_by_period()
 ```python
-def pivot_by_period(self, concepts: List[str] = None) -> pd.DataFrame
+def pivot_by_period(self, concept_pattern: Optional[str] = None,
+                    statement_type: Optional[str] = None) -> pd.DataFrame
 ```
 Create a pivot table showing concepts by period.
 
 **Parameters:**
-- `concepts`: List of concepts to include (default: all)
+- `concept_pattern`: Regex matched against concept names, as in `by_concept()` (default: all)
+- `statement_type`: Statement type to filter by (default: all)
 
 **Returns:** DataFrame with concepts as rows and periods as columns
 
 #### time_series()
 ```python
-def time_series(self, concept: str) -> pd.Series
+def time_series(self, concept: str, exact: bool = True) -> pd.DataFrame
 ```
 Get time series data for a specific concept.
 
 **Parameters:**
 - `concept`: Concept name
+- `exact`: If True, require exact match; otherwise, use regex
 
-**Returns:** pandas Series with time series data
+**Returns:** DataFrame with time series data
 
 #### Data Conversion
 
@@ -597,19 +561,19 @@ Convert facts to pandas DataFrame.
 facts = xbrl.facts
 
 # Query by concept
-revenue_query = facts.by_concept("Revenue")
+revenue_query = facts.query().by_concept("Revenue")
 revenue_facts = revenue_query.execute()
 
 # Query by label and value
-large_expenses = facts.by_label("expense").by_value(min_value=1000000)
+large_expenses = facts.query().by_label("expense").by_value(lambda v: v >= 1_000_000)
 expense_facts = large_expenses.to_dataframe()
 
-# Time series analysis
-revenue_ts = facts.time_series("Revenue")
+# Time series analysis (exact concept name by default)
+revenue_ts = facts.time_series("us-gaap:Revenues")
 print(revenue_ts.head())
 
-# Pivot analysis
-pivot_df = facts.pivot_by_period(["Revenue", "NetIncomeLoss"])
+# Pivot analysis (concept_pattern is a regex)
+pivot_df = facts.pivot_by_period("Revenue|NetIncomeLoss")
 ```
 
 ### FactQuery
@@ -637,17 +601,20 @@ def by_label(self, pattern: str, exact: bool = False) -> FactQuery
 
 #### by_value()
 ```python
-def by_value(self, min_value: float = None, max_value: float = None) -> FactQuery
+def by_value(self, value_filter: Union[Callable, str, int, float, list, tuple]) -> FactQuery
 ```
+Filter by numeric value: a predicate such as `lambda v: v > 1_000_000`, an exact value, or a `(min, max)` tuple.
 
-#### by_period()
+#### by_date_range()
 ```python
-def by_period(self, start_date: str = None, end_date: str = None) -> FactQuery
+def by_date_range(self, start_date: Optional[str] = None, end_date: Optional[str] = None,
+                  exact: bool = False) -> FactQuery
 ```
+Filter duration facts by period start and end dates (YYYY-MM-DD format).
 
-#### by_statement()
+#### by_statement_type()
 ```python
-def by_statement(self, statement_type: str) -> FactQuery
+def by_statement_type(self, statement_type: str) -> FactQuery
 ```
 Filter facts by statement type.
 
@@ -674,35 +641,18 @@ Execute the query and return results as DataFrame.
 
 **Returns:** DataFrame with query results
 
-#### first()
-```python
-def first(self) -> Optional[Dict]
-```
-Get the first matching fact.
-
-**Returns:** First fact dictionary or None
-
-#### count()
-```python
-def count(self) -> int
-```
-Count matching facts without retrieving them.
-
-**Returns:** Number of matching facts
-
 **Example:**
 ```python
 # Chain multiple filters
-query = (xbrl.facts
+query = (xbrl.query()
          .by_concept("Revenue")
-         .by_period(start_date="2023-01-01")
-         .by_value(min_value=1000000))
+         .by_date_range(start_date="2023-01-01")
+         .by_value(lambda v: v >= 1_000_000))
 
 # Execute in different ways
 facts_list = query.execute()
 facts_df = query.to_dataframe()
-first_fact = query.first()
-count = query.count()
+count = len(facts_list)
 ```
 
 ## Multi-Period Analysis
@@ -937,18 +887,14 @@ filing = company.latest("10-K")
 xbrl = XBRL.from_filing(filing)
 
 # Complex query with multiple filters
-high_value_revenue = (xbrl.facts
+high_value_revenue = (xbrl.query()
                      .by_concept("Revenue")
-                     .by_value(min_value=50000000000)  # $50B+
-                     .by_period(start_date="2023-01-01")
+                     .by_value(lambda v: v >= 50000000000)  # $50B+
+                     .by_date_range(start_date="2023-01-01")
                      .to_dataframe())
 
-# Pivot analysis
-pivot_df = xbrl.facts.pivot_by_period([
-    "Revenue", 
-    "NetIncomeLoss", 
-    "OperatingIncomeLoss"
-])
+# Pivot analysis (concept_pattern is a regex)
+pivot_df = xbrl.facts.pivot_by_period("Revenue|NetIncomeLoss|OperatingIncomeLoss")
 ```
 
 ### Statement Comparison
@@ -971,13 +917,15 @@ for stmt in statements:
     df = stmt.to_dataframe()
     comparison_data.append(df)
 
-# Analyze key metrics across companies
-key_metrics = ["Revenue", "NetIncomeLoss", "OperatingIncomeLoss"]
+# Analyze key metrics across companies (standard_concept names)
+key_metrics = ["Revenue", "NetIncome", "OperatingIncomeLoss"]
 for metric in key_metrics:
     print(f"\n{metric} Comparison:")
-    for i, stmt in enumerate(statements):
-        value = stmt.get_concept_value(metric)
-        if value:
+    for i, df in enumerate(comparison_data):
+        period = max(c for c in df.columns if c.startswith("20"))  # newest period
+        rows = df[df["standard_concept"] == metric]
+        if not rows.empty:
+            value = rows.iloc[0][period]
             print(f"  {companies[i]}: ${value/1e9:.1f}B")
 ```
 

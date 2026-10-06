@@ -179,13 +179,13 @@ else:
 2. **Try different concept names**:
 ```python
 # Try alternative concept names
-try:
-    revenue = income_stmt.get_value("Revenues")
-except:
-    try:
-        revenue = income_stmt.get_value("RevenueFromContractWithCustomerExcludingAssessedTax")
-    except:
-        revenue = income_stmt.get_value("SalesRevenueNet")
+df = income_stmt.to_dataframe()
+period = max(c for c in df.columns if c.startswith("20"))  # most recent period
+for concept in ["Revenues", "RevenueFromContractWithCustomerExcludingAssessedTax", "SalesRevenueNet"]:
+    rows = df[df["concept"] == f"us-gaap_{concept}"]
+    if not rows.empty:
+        revenue = rows.iloc[0][period]
+        break
 ```
 
 3. **For older filings** (pre-2009), XBRL data may not be available.
