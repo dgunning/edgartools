@@ -13494,22 +13494,6 @@
     "first_year": 2021,
     "last_year": 2024
   },
-  "CapitalLeaseObligationsIncurred": {
-    "standard_tags": [
-      "NetCashFromFinancingActivities"
-    ],
-    "display_name": "Net Cash from Financing Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.316,
-    "company_count": 243,
-    "occurrence_rate": 0.027,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
-  },
   "CapitalLeaseObligationsNoncurrent": {
     "standard_tags": [
       "LongTermDebt"
@@ -14395,237 +14379,19 @@
   },
   "CashAcquiredFromAcquisition": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "AcquisitionsNet"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Acquisitions, Net of Cash",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.336,
+    "section": "Investing Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 536,
     "occurrence_rate": 0.06,
     "temporal_consistency": 0.583,
     "years_present": 7,
     "first_year": 2016,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Agric": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Beer": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.994
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.943
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "CashAndBankBalancesAtCentralBanks": {
     "standard_tags": [
@@ -16055,13 +15821,13 @@
   },
   "CashDivestedFromDeconsolidation": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "DivestitureProceeds"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Divestitures",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.309,
+    "confidence": 0.9,
     "company_count": 139,
     "occurrence_rate": 0.015,
     "temporal_consistency": 0.417,
@@ -16520,573 +16286,6 @@
         "section": null,
         "is_total": false,
         "confidence": 0.951
-      }
-    }
-  },
-  "CashProvidedByUsedInFinancingActivitiesDiscontinuedOperations": {
-    "standard_tags": [
-      "NetCashFromFinancingActivities"
-    ],
-    "display_name": "Net Cash from Financing Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.326,
-    "company_count": 388,
-    "occurrence_rate": 0.043,
-    "temporal_consistency": 0.667,
-    "years_present": 8,
-    "first_year": 2012,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Beer": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.978
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.97
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.933
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.961
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "FabPr": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.962
-      },
-      "Food": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.95
-      },
-      "Telcm": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.935
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
-  },
-  "CashProvidedByUsedInInvestingActivitiesDiscontinuedOperations": {
-    "standard_tags": [
-      "NetCashFromInvestingActivities"
-    ],
-    "display_name": "Net Cash from Investing Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.335,
-    "company_count": 527,
-    "occurrence_rate": 0.059,
-    "temporal_consistency": 0.583,
-    "years_present": 7,
-    "first_year": 2012,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Aero": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Agric": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.985
-      },
-      "Beer": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.966
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.949
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.973
-      },
-      "Comps": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.958
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.935
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "FabPr": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.859
-      },
-      "Food": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.969
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.976
-      },
-      "LabEq": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.867
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.967
-      },
-      "Rubbr": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Steel": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.926
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
       }
     }
   },
@@ -78534,13 +77733,13 @@
   },
   "MinorityInterestDecreaseFromDistributionsToNoncontrollingInterestHolders": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DividendsEquity"
     ],
-    "display_name": "Net Cash from Financing Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
+    "display_name": "Dividends (Equity)",
+    "statement": "StatementOfEquity",
+    "section": "Equity Changes",
     "is_total": false,
-    "confidence": 0.365,
+    "confidence": 0.9,
     "company_count": 979,
     "occurrence_rate": 0.109,
     "temporal_consistency": 0.583,
@@ -78779,22 +77978,6 @@
     "years_present": 0,
     "first_year": null,
     "last_year": null
-  },
-  "NetCashProvidedByUsedInDiscontinuedOperations": {
-    "standard_tags": [
-      "NetChangeInCash"
-    ],
-    "display_name": "Net Change in Cash",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.312,
-    "company_count": 177,
-    "occurrence_rate": 0.02,
-    "temporal_consistency": 0.667,
-    "years_present": 8,
-    "first_year": 2012,
-    "last_year": 2025
   },
   "NetCashProvidedByUsedInFinancingActivities": {
     "standard_tags": [
@@ -81798,22 +80981,6 @@
         "confidence": 1.0
       }
     }
-  },
-  "NotesIssued1": {
-    "standard_tags": [
-      "NetCashFromInvestingActivities"
-    ],
-    "display_name": "Net Cash from Investing Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.32,
-    "company_count": 293,
-    "occurrence_rate": 0.033,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2020,
-    "last_year": 2025
   },
   "NotesPayable": {
     "standard_tags": [
@@ -96625,31 +95792,15 @@
       }
     }
   },
-  "PaymentForContingentConsiderationLiabilityFinancingActivities": {
-    "standard_tags": [
-      "NetCashFromFinancingActivities"
-    ],
-    "display_name": "Net Cash from Financing Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.345,
-    "company_count": 669,
-    "occurrence_rate": 0.074,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2020,
-    "last_year": 2025
-  },
   "PaymentOfFinancingAndStockIssuanceCosts": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "PaymentsOfDebtIssuanceCosts"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Payments of Debt Issuance Costs",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Financing Activities",
     "is_total": false,
-    "confidence": 0.312,
+    "confidence": 0.9,
     "company_count": 182,
     "occurrence_rate": 0.02,
     "temporal_consistency": 0.5,
@@ -96659,13 +95810,13 @@
   },
   "PaymentsForCapitalImprovements": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "CapitalExpenses"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Capital Expenditures",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.311,
+    "confidence": 0.9,
     "company_count": 167,
     "occurrence_rate": 0.019,
     "temporal_consistency": 0.417,
@@ -96687,22 +95838,6 @@
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025
-  },
-  "PaymentsForDerivativeInstrumentFinancingActivities": {
-    "standard_tags": [
-      "NetCashFromFinancingActivities"
-    ],
-    "display_name": "Net Cash from Financing Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.309,
-    "company_count": 138,
-    "occurrence_rate": 0.015,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
     "last_year": 2025
   },
   "PaymentsForOriginationAndPurchasesOfLoansHeldForSale": {
@@ -96771,120 +95906,19 @@
   },
   "PaymentsForProceedsFromInvestments": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentPurchases"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Purchases of Investments",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.313,
+    "section": "Investing Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 193,
     "occurrence_rate": 0.021,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "PaymentsForProceedsFromLoansAndLeases": {
     "standard_tags": [
@@ -96904,562 +95938,45 @@
   },
   "PaymentsForProceedsFromLoansReceivable": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentPurchases"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Purchases of Investments",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.312,
+    "section": "Investing Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 180,
     "occurrence_rate": 0.02,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.918
-      },
-      "Fun": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
-  },
-  "PaymentsForProceedsFromOtherInvestingActivities": {
-    "standard_tags": [
-      "NetCashFromInvestingActivities"
-    ],
-    "display_name": "Net Cash from Investing Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.397,
-    "company_count": 1450,
-    "occurrence_rate": 0.161,
-    "temporal_consistency": 0.583,
-    "years_present": 7,
-    "first_year": 2019,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Aero": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Agric": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Beer": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Books": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Boxes": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Clths": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Coal": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Food": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Gold": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.995
-      },
-      "Other": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Paper": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.988
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rubbr": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Steel": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "PaymentsForProceedsFromProductiveAssets": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "CapitalExpenses"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Capital Expenditures",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.308,
+    "section": "Investing Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 123,
     "occurrence_rate": 0.014,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.98
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "PaymentsForProceedsFromShortTermInvestments": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentPurchases"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Purchases of Investments",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.311,
+    "confidence": 0.9,
     "company_count": 172,
     "occurrence_rate": 0.019,
     "temporal_consistency": 0.417,
@@ -97942,13 +96459,13 @@
   },
   "PaymentsForRepurchaseOfInitialPublicOffering": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "StockRepurchasePayments"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Stock Repurchase Payments",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Financing Activities",
     "is_total": false,
-    "confidence": 0.308,
+    "confidence": 0.9,
     "company_count": 124,
     "occurrence_rate": 0.014,
     "temporal_consistency": 0.5,
@@ -97990,13 +96507,13 @@
   },
   "PaymentsForRepurchaseOfRedeemableNoncontrollingInterest": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DistributionsToMinorityInterests"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Distributions to Minority Interests",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Financing Activities",
     "is_total": false,
-    "confidence": 0.313,
+    "confidence": 0.9,
     "company_count": 200,
     "occurrence_rate": 0.022,
     "temporal_consistency": 0.417,
@@ -98054,13 +96571,13 @@
   },
   "PaymentsOfCapitalDistribution": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "CommonDividendsPaid"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Dividends Paid",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Financing Activities",
     "is_total": false,
-    "confidence": 0.314,
+    "confidence": 0.9,
     "company_count": 208,
     "occurrence_rate": 0.023,
     "temporal_consistency": 0.417,
@@ -98070,13 +96587,13 @@
   },
   "PaymentsOfDebtExtinguishmentCosts": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtRepayments"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Repayments of Debt",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Financing Activities",
     "is_total": false,
-    "confidence": 0.334,
+    "confidence": 0.9,
     "company_count": 505,
     "occurrence_rate": 0.056,
     "temporal_consistency": 0.583,
@@ -98102,13 +96619,13 @@
   },
   "PaymentsOfDistributionsToAffiliates": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "CommonDividendsPaid"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Dividends Paid",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Financing Activities",
     "is_total": false,
-    "confidence": 0.313,
+    "confidence": 0.9,
     "company_count": 188,
     "occurrence_rate": 0.021,
     "temporal_consistency": 0.5,
@@ -98460,363 +96977,19 @@
   },
   "PaymentsOfDividendsCommonStock": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "CommonDividendsPaid"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Dividends Paid",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.387,
+    "section": "Financing Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 1309,
     "occurrence_rate": 0.146,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Aero": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Agric": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Books": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Boxes": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Clths": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.999
-      },
-      "Food": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Other": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Paper": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rubbr": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Steel": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "PaymentsOfDividendsMinorityInterest": {
     "standard_tags": [
@@ -98836,13 +97009,13 @@
   },
   "PaymentsOfDividendsPreferredStockAndPreferenceStock": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "CommonDividendsPaid"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Dividends Paid",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Financing Activities",
     "is_total": false,
-    "confidence": 0.329,
+    "confidence": 0.9,
     "company_count": 439,
     "occurrence_rate": 0.049,
     "temporal_consistency": 0.5,
@@ -99147,13 +97320,13 @@
   },
   "PaymentsOfLoanCosts": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "PaymentsOfDebtIssuanceCosts"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Payments of Debt Issuance Costs",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Financing Activities",
     "is_total": false,
-    "confidence": 0.307,
+    "confidence": 0.9,
     "company_count": 101,
     "occurrence_rate": 0.011,
     "temporal_consistency": 0.417,
@@ -99163,13 +97336,13 @@
   },
   "PaymentsOfMergerRelatedCostsFinancingActivities": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "PaymentsOfDebtIssuanceCosts"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Payments of Debt Issuance Costs",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Financing Activities",
     "is_total": false,
-    "confidence": 0.308,
+    "confidence": 0.9,
     "company_count": 123,
     "occurrence_rate": 0.014,
     "temporal_consistency": 0.417,
@@ -99179,115 +97352,18 @@
   },
   "PaymentsOfOrdinaryDividends": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "CommonDividendsPaid"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Dividends Paid",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.308,
+    "section": "Financing Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 123,
     "occurrence_rate": 0.014,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.9
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.988
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
-  },
-  "PaymentsOfStockIssuanceCosts": {
-    "standard_tags": [
-      "NetCashFromFinancingActivities"
-    ],
-    "display_name": "Net Cash from Financing Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.425,
-    "company_count": 1876,
-    "occurrence_rate": 0.209,
-    "temporal_consistency": 0.583,
-    "years_present": 7,
-    "first_year": 2019,
-    "last_year": 2025
-  },
-  "PaymentsRelatedToTaxWithholdingForShareBasedCompensation": {
-    "standard_tags": [
-      "NetCashFromFinancingActivities"
-    ],
-    "display_name": "Net Cash from Financing Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.429,
-    "company_count": 1935,
-    "occurrence_rate": 0.215,
-    "temporal_consistency": 0.583,
-    "years_present": 7,
-    "first_year": 2019,
     "last_year": 2025
   },
   "PaymentsToAcquireAvailableForSaleSecuritiesDebt": {
@@ -100398,13 +98474,13 @@
   },
   "PaymentsToAcquireInterestInJointVenture": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentPurchases"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Purchases of Investments",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.31,
+    "confidence": 0.9,
     "company_count": 157,
     "occurrence_rate": 0.017,
     "temporal_consistency": 0.417,
@@ -100414,13 +98490,13 @@
   },
   "PaymentsToAcquireInterestInSubsidiariesAndAffiliates": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentPurchases"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Purchases of Investments",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.313,
+    "confidence": 0.9,
     "company_count": 202,
     "occurrence_rate": 0.022,
     "temporal_consistency": 0.5,
@@ -100736,13 +98812,13 @@
   },
   "PaymentsToAcquireLifeInsurancePolicies": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentPurchases"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Purchases of Investments",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.315,
+    "confidence": 0.9,
     "company_count": 226,
     "occurrence_rate": 0.025,
     "temporal_consistency": 0.417,
@@ -100768,111 +98844,19 @@
   },
   "PaymentsToAcquireLoansReceivable": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentPurchases"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Purchases of Investments",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.314,
+    "section": "Investing Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 210,
     "occurrence_rate": 0.023,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Autos": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.984
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.991
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "PaymentsToAcquireLongtermInvestments": {
     "standard_tags": [
@@ -100892,84 +98876,19 @@
   },
   "PaymentsToAcquireMachineryAndEquipment": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "CapitalExpenses"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Capital Expenditures",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.308,
+    "section": "Investing Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 124,
     "occurrence_rate": 0.014,
     "temporal_consistency": 0.583,
     "years_present": 7,
     "first_year": 2019,
-    "last_year": 2025,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.877
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "PaymentsToAcquireMarketableSecurities": {
     "standard_tags": [
@@ -100989,13 +98908,13 @@
   },
   "PaymentsToAcquireNotesReceivable": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentPurchases"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Purchases of Investments",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.317,
+    "confidence": 0.9,
     "company_count": 261,
     "occurrence_rate": 0.029,
     "temporal_consistency": 0.417,
@@ -101935,13 +99854,13 @@
   },
   "PaymentsToAcquireRealEstate": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "CapitalExpenses"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Capital Expenditures",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.307,
+    "confidence": 0.9,
     "company_count": 106,
     "occurrence_rate": 0.012,
     "temporal_consistency": 0.417,
@@ -101999,13 +99918,13 @@
   },
   "PaymentsToFundLongtermLoansToRelatedParties": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentPurchases"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Purchases of Investments",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.313,
+    "confidence": 0.9,
     "company_count": 197,
     "occurrence_rate": 0.022,
     "temporal_consistency": 0.417,
@@ -104645,13 +102564,13 @@
   },
   "ProceedsFromCollectionOfLoansReceivable": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentProceeds"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Investments",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.309,
+    "confidence": 0.9,
     "company_count": 130,
     "occurrence_rate": 0.014,
     "temporal_consistency": 0.417,
@@ -104661,13 +102580,13 @@
   },
   "ProceedsFromCollectionOfLongtermLoansToRelatedParties": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentProceeds"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Investments",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.308,
+    "confidence": 0.9,
     "company_count": 118,
     "occurrence_rate": 0.013,
     "temporal_consistency": 0.417,
@@ -104677,13 +102596,13 @@
   },
   "ProceedsFromCollectionOfNotesReceivable": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentProceeds"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Investments",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.314,
+    "confidence": 0.9,
     "company_count": 209,
     "occurrence_rate": 0.023,
     "temporal_consistency": 0.417,
@@ -104693,13 +102612,13 @@
   },
   "ProceedsFromContributedCapital": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "StockIssuanceProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Stock Issuance",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Financing Activities",
     "is_total": false,
-    "confidence": 0.318,
+    "confidence": 0.9,
     "company_count": 274,
     "occurrence_rate": 0.03,
     "temporal_consistency": 0.5,
@@ -104709,13 +102628,13 @@
   },
   "ProceedsFromContributionsFromAffiliates": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "StockIssuanceProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Stock Issuance",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Financing Activities",
     "is_total": false,
-    "confidence": 0.311,
+    "confidence": 0.9,
     "company_count": 165,
     "occurrence_rate": 0.018,
     "temporal_consistency": 0.5,
@@ -104725,93 +102644,19 @@
   },
   "ProceedsFromContributionsFromParent": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "StockIssuanceProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Stock Issuance",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.309,
+    "section": "Financing Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 132,
     "occurrence_rate": 0.015,
     "temporal_consistency": 0.667,
     "years_present": 8,
     "first_year": 2017,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.925
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "ProceedsFromConvertibleDebt": {
     "standard_tags": [
@@ -104831,111 +102676,19 @@
   },
   "ProceedsFromDebtNetOfIssuanceCosts": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Debt Issuance",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.313,
+    "section": "Financing Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 199,
     "occurrence_rate": 0.022,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.99
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.95
-      },
-      "Comps": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.927
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.943
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "ProceedsFromDispositionOfInvestmentOperatingActivity": {
     "standard_tags": [
@@ -105558,13 +103311,13 @@
   },
   "ProceedsFromEquityMethodInvestmentDividendsOrDistributionsReturnOfCapital": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentProceeds"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Investments",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.325,
+    "confidence": 0.9,
     "company_count": 375,
     "occurrence_rate": 0.042,
     "temporal_consistency": 0.583,
@@ -105638,13 +103391,13 @@
   },
   "ProceedsFromInsuranceSettlementInvestingActivities": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "ProceedsFromSaleOfPPE"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Sale of PP&E",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.32,
+    "confidence": 0.9,
     "company_count": 296,
     "occurrence_rate": 0.033,
     "temporal_consistency": 0.417,
@@ -105654,300 +103407,19 @@
   },
   "ProceedsFromIssuanceInitialPublicOffering": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "StockIssuanceProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Stock Issuance",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.387,
+    "section": "Financing Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 1307,
     "occurrence_rate": 0.145,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Agric": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Beer": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Food": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.924
-      },
-      "Meals": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Toys": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "ProceedsFromIssuanceOfCommonStock": {
     "standard_tags": [
@@ -107122,237 +104594,19 @@
   },
   "ProceedsFromIssuanceOfPrivatePlacement": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "StockIssuanceProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Stock Issuance",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.369,
+    "section": "Financing Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 1039,
     "occurrence_rate": 0.116,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Aero": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Agric": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.991
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.92
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Other": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "ProceedsFromIssuanceOfRedeemableConvertiblePreferredStock": {
     "standard_tags": [
@@ -108054,13 +105308,13 @@
   },
   "ProceedsFromLifeInsurancePolicies": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentProceeds"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Investments",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.32,
+    "confidence": 0.9,
     "company_count": 303,
     "occurrence_rate": 0.034,
     "temporal_consistency": 0.417,
@@ -108070,13 +105324,13 @@
   },
   "ProceedsFromLinesOfCredit": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Debt Issuance",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Financing Activities",
     "is_total": false,
-    "confidence": 0.378,
+    "confidence": 0.9,
     "company_count": 1175,
     "occurrence_rate": 0.131,
     "temporal_consistency": 0.5,
@@ -108230,13 +105484,13 @@
   },
   "ProceedsFromOtherEquity": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "StockIssuanceProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Stock Issuance",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Financing Activities",
     "is_total": false,
-    "confidence": 0.315,
+    "confidence": 0.9,
     "company_count": 226,
     "occurrence_rate": 0.025,
     "temporal_consistency": 0.5,
@@ -108260,491 +105514,21 @@
     "first_year": 2020,
     "last_year": 2025
   },
-  "ProceedsFromPaymentsForOtherFinancingActivities": {
-    "standard_tags": [
-      "NetCashFromFinancingActivities"
-    ],
-    "display_name": "Net Cash from Financing Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.395,
-    "company_count": 1425,
-    "occurrence_rate": 0.158,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Aero": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Agric": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Beer": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Boxes": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Clths": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Coal": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Food": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Gold": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Other": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Paper": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.983
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rubbr": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Ships": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Smoke": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Steel": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.975
-      },
-      "Toys": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
-  },
   "ProceedsFromPaymentsToMinorityShareholders": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "StockIssuanceProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Stock Issuance",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.31,
+    "section": "Financing Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 153,
     "occurrence_rate": 0.017,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Autos": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "ProceedsFromRelatedPartyDebt": {
     "standard_tags": [
@@ -108764,220 +105548,29 @@
   },
   "ProceedsFromRepaymentsOfLinesOfCredit": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Debt Issuance",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.322,
+    "section": "Financing Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 327,
     "occurrence_rate": 0.036,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.918
-      },
-      "Telcm": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.886
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.944
-      }
-    }
+    "last_year": 2025
   },
   "ProceedsFromRepaymentsOfNotesPayable": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Debt Issuance",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Financing Activities",
     "is_total": false,
-    "confidence": 0.317,
+    "confidence": 0.9,
     "company_count": 260,
     "occurrence_rate": 0.029,
     "temporal_consistency": 0.5,
@@ -108987,534 +105580,51 @@
   },
   "ProceedsFromRepaymentsOfOtherDebt": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Debt Issuance",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.308,
+    "section": "Financing Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 124,
     "occurrence_rate": 0.014,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "ProceedsFromRepaymentsOfRelatedPartyDebt": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Debt Issuance",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.339,
+    "section": "Financing Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 586,
     "occurrence_rate": 0.065,
     "temporal_consistency": 0.833,
     "years_present": 10,
     "first_year": 2016,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Aero": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Agric": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Food": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Other": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rubbr": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "ProceedsFromRepaymentsOfShortTermDebt": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Debt Issuance",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.325,
+    "section": "Financing Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 375,
     "occurrence_rate": 0.042,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Autos": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Food": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Steel": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromFinancingActivities"
-        ],
-        "display_name": "Net Cash from Financing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "ProceedsFromSaleAndMaturityOfAvailableForSaleSecurities": {
     "standard_tags": [
@@ -109617,13 +105727,13 @@
   },
   "ProceedsFromSaleAndMaturityOfHeldToMaturitySecurities": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentProceeds"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Investments",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.307,
+    "confidence": 0.9,
     "company_count": 100,
     "occurrence_rate": 0.011,
     "temporal_consistency": 0.417,
@@ -109649,93 +105759,19 @@
   },
   "ProceedsFromSaleAndMaturityOfOtherInvestments": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentProceeds"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Investments",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.31,
+    "section": "Investing Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 157,
     "occurrence_rate": 0.017,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.994
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "ProceedsFromSaleMaturityAndCollectionOfShorttermInvestments": {
     "standard_tags": [
@@ -109755,174 +105791,19 @@
   },
   "ProceedsFromSaleMaturityAndCollectionsOfInvestments": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentProceeds"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Investments",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.323,
+    "section": "Investing Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 347,
     "occurrence_rate": 0.039,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Autos": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "ProceedsFromSaleOfAvailableForSaleSecurities": {
     "standard_tags": [
@@ -109958,220 +105839,29 @@
   },
   "ProceedsFromSaleOfEquityMethodInvestments": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentProceeds"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Investments",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.321,
+    "section": "Investing Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 316,
     "occurrence_rate": 0.035,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Autos": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.953
-      },
-      "Telcm": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "ProceedsFromSaleOfEquitySecuritiesFvNi": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentProceeds"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Investments",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.316,
+    "confidence": 0.9,
     "company_count": 236,
     "occurrence_rate": 0.026,
     "temporal_consistency": 0.417,
@@ -110197,13 +105887,13 @@
   },
   "ProceedsFromSaleOfForeclosedAssets": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentProceeds"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Investments",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.309,
+    "confidence": 0.9,
     "company_count": 142,
     "occurrence_rate": 0.016,
     "temporal_consistency": 0.417,
@@ -110213,13 +105903,13 @@
   },
   "ProceedsFromSaleOfIntangibleAssets": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "ProceedsFromSaleOfPPE"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Sale of PP&E",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.308,
+    "confidence": 0.9,
     "company_count": 115,
     "occurrence_rate": 0.013,
     "temporal_consistency": 0.5,
@@ -110313,13 +106003,13 @@
   },
   "ProceedsFromSaleOfOtherRealEstate": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentProceeds"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Investments",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.312,
+    "confidence": 0.9,
     "company_count": 184,
     "occurrence_rate": 0.02,
     "temporal_consistency": 0.5,
@@ -110786,48 +106476,19 @@
   },
   "ProceedsFromSaleOfRealEstateHeldforinvestment": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentProceeds"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Investments",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.313,
+    "section": "Investing Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 188,
     "occurrence_rate": 0.021,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.992
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "ProceedsFromSaleOfShortTermInvestments": {
     "standard_tags": [
@@ -110860,85 +106521,6 @@
     "years_present": 5,
     "first_year": 2021,
     "last_year": 2025
-  },
-  "ProceedsFromSalesOfAssetsInvestingActivities": {
-    "standard_tags": [
-      "NetCashFromInvestingActivities"
-    ],
-    "display_name": "Net Cash from Investing Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.307,
-    "company_count": 107,
-    "occurrence_rate": 0.012,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
-  },
-  "ProceedsFromSalesOfBusinessAffiliateAndProductiveAssets": {
-    "standard_tags": [
-      "NetCashFromInvestingActivities"
-    ],
-    "display_name": "Net Cash from Investing Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.307,
-    "company_count": 102,
-    "occurrence_rate": 0.011,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
   },
   "ProceedsFromSalesOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities": {
     "standard_tags": [
@@ -111006,13 +106588,13 @@
   },
   "ProceedsFromWarrantExercises": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "StockIssuanceProceeds"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Proceeds from Stock Issuance",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Financing Activities",
     "is_total": false,
-    "confidence": 0.361,
+    "confidence": 0.9,
     "company_count": 911,
     "occurrence_rate": 0.101,
     "temporal_consistency": 0.5,
@@ -115281,13 +110863,13 @@
   },
   "RepaymentOfNotesReceivableFromRelatedParties": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentProceeds"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Investments",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.309,
+    "confidence": 0.9,
     "company_count": 129,
     "occurrence_rate": 0.014,
     "temporal_consistency": 0.417,
@@ -115913,13 +111495,13 @@
   },
   "RepaymentsOfLinesOfCredit": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "DebtRepayments"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Repayments of Debt",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Financing Activities",
     "is_total": false,
-    "confidence": 0.376,
+    "confidence": 0.9,
     "company_count": 1132,
     "occurrence_rate": 0.126,
     "temporal_consistency": 0.5,
@@ -118355,13 +113937,13 @@
   },
   "RestrictedStockValueSharesIssuedNetOfTaxWithholdings": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "StockCompensationEquityImpact"
     ],
-    "display_name": "Net Cash from Financing Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
+    "display_name": "Stock-Based Compensation (Equity)",
+    "statement": "StatementOfEquity",
+    "section": "Equity Changes",
     "is_total": false,
-    "confidence": 0.313,
+    "confidence": 0.9,
     "company_count": 194,
     "occurrence_rate": 0.022,
     "temporal_consistency": 0.417,
@@ -127109,364 +122691,6 @@
           "NetCashFromOperatingActivities"
         ],
         "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
-  },
-  "StockIssued1": {
-    "standard_tags": [
-      "NetCashFromFinancingActivities"
-    ],
-    "display_name": "Net Cash from Financing Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.396,
-    "company_count": 1446,
-    "occurrence_rate": 0.161,
-    "temporal_consistency": 0.75,
-    "years_present": 9,
-    "first_year": 2012,
-    "last_year": 2025
-  },
-  "StockIssuedDuringPeriodSharesAcquisitions": {
-    "standard_tags": [
-      "NetCashFromInvestingActivities"
-    ],
-    "display_name": "Net Cash from Investing Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.399,
-    "company_count": 1487,
-    "occurrence_rate": 0.165,
-    "temporal_consistency": 0.917,
-    "years_present": 11,
-    "first_year": 2015,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Aero": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Agric": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Beer": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.996
-      },
-      "Food": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Gold": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Guns": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.982
-      },
-      "LabEq": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Other": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Toys": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromInvestingActivities"
-        ],
-        "display_name": "Net Cash from Investing Activities",
         "section": null,
         "is_total": false,
         "confidence": 1.0
