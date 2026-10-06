@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.61.1] - 2026-10-06
+
+### Security
+
+- **The MCP server's HTTP transport listened on every interface with no authentication.** `--transport streamable-http` now binds `127.0.0.1` and rejects foreign `Host` (421) and `Origin` (403) headers there, which blocks DNS rebinding from a web page. Pass `--host 0.0.0.0` to serve other machines, such as from a container; it logs that the endpoint is unauthenticated. stdio is unchanged.
+- **Dependency floors no longer admit releases with known advisories.** The declared minimums allowed pyarrow 17.0.0, lxml 4.4, orjson 3.6.0, pydantic 2.0.0, jinja2 3.1.0, tqdm 4.62.0, and in `[ai]` starlette 0.36.0 and mcp 1.12.3, which pip-audit flags; a fresh install already resolved past them. The floors are now each package's first patched release, so 0 advisories at the minimums.
+
 ## [5.61.0] - 2026-10-06
 
 ### Added
