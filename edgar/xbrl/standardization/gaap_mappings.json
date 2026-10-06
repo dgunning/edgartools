@@ -2126,120 +2126,19 @@
   },
   "AccountsReceivableRelatedPartiesCurrent": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "TradeReceivables"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Accounts Receivable",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 174,
     "occurrence_rate": 0.019,
     "temporal_consistency": 0.333,
     "years_present": 4,
     "first_year": 2020,
-    "last_year": 2023,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.9
-      },
-      "Chems": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2023
   },
   "AccountsReceivableRelatedPartiesNoncurrent": {
     "standard_tags": [
@@ -2991,13 +2890,13 @@
   },
   "AccruedInvestmentIncomeReceivable": {
     "standard_tags": [
-      "Assets"
+      "OtherNonOperatingCurrentAssets"
     ],
-    "display_name": "Total Assets",
+    "display_name": "Other Non-Operating Current Assets",
     "statement": "BalanceSheet",
-    "section": "Totals",
+    "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.31,
+    "confidence": 0.9,
     "company_count": 153,
     "occurrence_rate": 0.017,
     "temporal_consistency": 0.5,
@@ -9411,13 +9310,13 @@
   },
   "AllowanceForNotesAndLoansReceivableCurrent": {
     "standard_tags": [
-      "TradeReceivables"
+      "AllowanceForDoubtfulAccounts"
     ],
-    "display_name": "Accounts Receivable",
+    "display_name": "Allowance for Doubtful Accounts",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 65,
     "occurrence_rate": 0.007,
     "temporal_consistency": 0.417,
@@ -9427,13 +9326,13 @@
   },
   "AllowanceForNotesAndLoansReceivableNoncurrent": {
     "standard_tags": [
-      "OtherNonOperatingNonCurrentAssets"
+      "LoanLossReserve"
     ],
-    "display_name": "Other Non-Operating Non-Current Assets",
+    "display_name": "Allowance for Loan and Lease Losses",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 35,
     "occurrence_rate": 0.004,
     "temporal_consistency": 0.417,
@@ -10909,59 +10808,19 @@
   },
   "AssetsHeldForSaleNotPartOfDisposalGroup": {
     "standard_tags": [
-      "OtherNonOperatingNonCurrentAssets",
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Non-Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 106,
     "occurrence_rate": 0.012,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "ambiguous": true,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "OtherNonOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 0.936
-      },
-      "Drugs": {
-        "standard_tags": [
-          "OtherNonOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "OtherNonOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 0.893
-      },
-      "Trans": {
-        "standard_tags": [
-          "OtherNonOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 0.93
-      }
-    }
+    "last_year": 2025
   },
   "AssetsHeldForSaleNotPartOfDisposalGroupCurrent": {
     "standard_tags": [
@@ -11136,13 +10995,13 @@
   },
   "AssetsHeldForSaleNotPartOfDisposalGroupCurrentOther": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 10,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
@@ -11268,21 +11127,19 @@
   },
   "AssetsOfDisposalGroupIncludingDiscontinuedOperation": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets",
-      "OtherNonOperatingNonCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Non-Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 166,
     "occurrence_rate": 0.018,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "ambiguous": true
+    "last_year": 2025
   },
   "AssetsOfDisposalGroupIncludingDiscontinuedOperationCurrent": {
     "standard_tags": [
@@ -21268,13 +21125,13 @@
   },
   "ConstructionContractorReceivableRetainage": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "TradeReceivables"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Accounts Receivable",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 2,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.417,
@@ -21540,13 +21397,13 @@
   },
   "ContractReceivableRetainageDueOneYearOrLess": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "TradeReceivables"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Accounts Receivable",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -21572,31 +21429,29 @@
   },
   "ContractWithCustomerAssetAccumulatedAllowanceForCreditLoss": {
     "standard_tags": [
-      "TradeReceivables",
-      "OtherOperatingNonCurrentAssets"
+      "ContractAssets"
     ],
-    "display_name": "Accounts Receivable",
+    "display_name": "Contract Assets",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 11,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "ambiguous": true
+    "last_year": 2025
   },
   "ContractWithCustomerAssetAccumulatedAllowanceForCreditLossCurrent": {
     "standard_tags": [
-      "OtherOperatingCurrentAssets"
+      "ContractAssets"
     ],
-    "display_name": "Other Current Assets",
+    "display_name": "Contract Assets",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 19,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.417,
@@ -21606,13 +21461,13 @@
   },
   "ContractWithCustomerAssetGrossCurrent": {
     "standard_tags": [
-      "OtherOperatingCurrentAssets"
+      "ContractAssets"
     ],
-    "display_name": "Other Current Assets",
+    "display_name": "Contract Assets",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 21,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.417,
@@ -21665,246 +21520,35 @@
   },
   "ContractWithCustomerAssetNetCurrent": {
     "standard_tags": [
-      "OtherOperatingCurrentAssets"
+      "ContractAssets"
     ],
-    "display_name": "Other Current Assets",
+    "display_name": "Contract Assets",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 396,
     "occurrence_rate": 0.044,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Aero": {
-        "standard_tags": [
-          "OtherOperatingCurrentAssets"
-        ],
-        "display_name": "Other Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.877
-      },
-      "Banks": {
-        "standard_tags": [
-          "OtherOperatingCurrentAssets"
-        ],
-        "display_name": "Other Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.938
-      },
-      "BldMt": {
-        "standard_tags": [
-          "OtherOperatingCurrentAssets"
-        ],
-        "display_name": "Other Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.953
-      },
-      "BusSv": {
-        "standard_tags": [
-          "OtherOperatingCurrentAssets"
-        ],
-        "display_name": "Other Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.949
-      },
-      "Chems": {
-        "standard_tags": [
-          "OtherOperatingCurrentAssets"
-        ],
-        "display_name": "Other Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "OtherOperatingCurrentAssets"
-        ],
-        "display_name": "Other Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.916
-      },
-      "Comps": {
-        "standard_tags": [
-          "OtherOperatingCurrentAssets"
-        ],
-        "display_name": "Other Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "OtherOperatingCurrentAssets"
-        ],
-        "display_name": "Other Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "OtherOperatingCurrentAssets"
-        ],
-        "display_name": "Other Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.909
-      },
-      "Fin": {
-        "standard_tags": [
-          "OtherOperatingCurrentAssets"
-        ],
-        "display_name": "Other Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Guns": {
-        "standard_tags": [
-          "OtherOperatingCurrentAssets"
-        ],
-        "display_name": "Other Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.872
-      },
-      "LabEq": {
-        "standard_tags": [
-          "OtherOperatingCurrentAssets"
-        ],
-        "display_name": "Other Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "OtherOperatingCurrentAssets"
-        ],
-        "display_name": "Other Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.842
-      },
-      "MedEq": {
-        "standard_tags": [
-          "OtherOperatingCurrentAssets"
-        ],
-        "display_name": "Other Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.92
-      },
-      "RlEst": {
-        "standard_tags": [
-          "OtherOperatingCurrentAssets"
-        ],
-        "display_name": "Other Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.891
-      },
-      "Steel": {
-        "standard_tags": [
-          "OtherOperatingCurrentAssets"
-        ],
-        "display_name": "Other Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.958
-      },
-      "Telcm": {
-        "standard_tags": [
-          "OtherOperatingCurrentAssets"
-        ],
-        "display_name": "Other Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "OtherOperatingCurrentAssets"
-        ],
-        "display_name": "Other Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.867
-      },
-      "Util": {
-        "standard_tags": [
-          "OtherOperatingCurrentAssets"
-        ],
-        "display_name": "Other Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.886
-      }
-    }
+    "last_year": 2025
   },
   "ContractWithCustomerAssetNetNoncurrent": {
     "standard_tags": [
-      "OtherOperatingNonCurrentAssets"
+      "ContractAssets"
     ],
-    "display_name": "Other Non-Current Assets",
+    "display_name": "Contract Assets",
     "statement": "BalanceSheet",
-    "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 97,
     "occurrence_rate": 0.011,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "OtherOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 0.946
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "OtherOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "OtherOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "OtherOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "ContractWithCustomerLiability": {
     "standard_tags": [
@@ -22592,13 +22236,13 @@
   },
   "ContractWithCustomerReceivableBeforeAllowanceForCreditLossCurrent": {
     "standard_tags": [
-      "TradeReceivables"
+      "AccountsReceivableGross"
     ],
-    "display_name": "Accounts Receivable",
+    "display_name": "Accounts Receivable, Gross",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 1,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.333,
@@ -25985,13 +25629,13 @@
   },
   "CostsInExcessOfBillingsOnUncompletedContractsOrProgramsExpectedToBeCollectedWithinOneYear": {
     "standard_tags": [
-      "OtherOperatingCurrentAssets"
+      "ContractAssets"
     ],
-    "display_name": "Other Current Assets",
+    "display_name": "Contract Assets",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 1,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.167,
@@ -38957,13 +38601,13 @@
   },
   "DisposalGroupIncludingDiscontinuedOperationAccountsNotesAndLoansReceivableNet": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Non-Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 4,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.25,
@@ -39130,13 +38774,13 @@
   },
   "DisposalGroupIncludingDiscontinuedOperationCapitalLeasedAssetsCurrent": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -39162,13 +38806,13 @@
   },
   "DisposalGroupIncludingDiscontinuedOperationCash": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 15,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.417,
@@ -39178,13 +38822,13 @@
   },
   "DisposalGroupIncludingDiscontinuedOperationCashAndCashEquivalents": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 111,
     "occurrence_rate": 0.012,
     "temporal_consistency": 0.5,
@@ -39244,13 +38888,13 @@
   },
   "DisposalGroupIncludingDiscontinuedOperationDeferredTaxAssetCurrent": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -39374,13 +39018,13 @@
   },
   "DisposalGroupIncludingDiscontinuedOperationGoodwillCurrent": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -39440,13 +39084,13 @@
   },
   "DisposalGroupIncludingDiscontinuedOperationIntangibleAssetsCurrent": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 3,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.25,
@@ -39504,13 +39148,13 @@
   },
   "DisposalGroupIncludingDiscontinuedOperationInventoryCurrent": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 1,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.083,
@@ -39552,13 +39196,13 @@
   },
   "DisposalGroupIncludingDiscontinuedOperationLongLivedAssetsCurrent": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -39634,13 +39278,13 @@
   },
   "DisposalGroupIncludingDiscontinuedOperationOtherCurrentAssets": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Non-Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 8,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
@@ -39871,13 +39515,13 @@
   },
   "DisposalGroupIncludingDiscontinuedOperationPrepaidAndOtherAssetsCurrent": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Non-Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 1,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.083,
@@ -39887,31 +39531,29 @@
   },
   "DisposalGroupIncludingDiscontinuedOperationPropertyPlantAndEquipment": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets",
-      "OtherNonOperatingNonCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Non-Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 11,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
     "years_present": 4,
     "first_year": 2021,
-    "last_year": 2024,
-    "ambiguous": true
+    "last_year": 2024
   },
   "DisposalGroupIncludingDiscontinuedOperationPropertyPlantAndEquipmentCurrent": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Non-Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 6,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.167,
@@ -48458,13 +48100,13 @@
   },
   "FinancingReceivableExcludingAccruedInterestAfterAllowanceForCreditLossNoncurrent": {
     "standard_tags": [
-      "OtherOperatingNonCurrentAssets"
+      "NotesReceivableNonCurrent"
     ],
-    "display_name": "Other Non-Current Assets",
+    "display_name": "Notes Receivable, Non-Current",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 23,
     "occurrence_rate": 0.003,
     "temporal_consistency": 0.333,
@@ -68893,13 +68535,13 @@
   },
   "InventoriesPropertyHeldForSaleCurrent": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -73382,13 +73024,13 @@
   },
   "LoansHeldForSaleCommercialAndIndustrial": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -73398,13 +73040,13 @@
   },
   "LoansHeldForSaleCommercialRealEstate": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -73414,13 +73056,13 @@
   },
   "LoansHeldForSaleConsumerCreditCard": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -73430,13 +73072,13 @@
   },
   "LoansHeldForSaleConsumerHomeEquity": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -73446,13 +73088,13 @@
   },
   "LoansHeldForSaleConsumerInstallmentStudent": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -73462,13 +73104,13 @@
   },
   "LoansHeldForSaleMortgages": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -73478,13 +73120,13 @@
   },
   "LoansHeldForSaleOther": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -73834,59 +73476,35 @@
   },
   "LoansReceivableHeldForSaleNet": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets",
-      "LongtermInvestments"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
     "years_present": 0,
     "first_year": null,
-    "last_year": null,
-    "ambiguous": true
+    "last_year": null
   },
   "LoansReceivableHeldForSaleNetNotPartOfDisposalGroup": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets",
-      "LongtermInvestments"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Non-Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 181,
     "occurrence_rate": 0.02,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2018,
-    "last_year": 2025,
-    "ambiguous": true,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.977
-      },
-      "Fin": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.848
-      }
-    }
+    "last_year": 2025
   },
   "LoansReceivableNet": {
     "standard_tags": [
@@ -81472,13 +81090,13 @@
   },
   "NotesAndLoansReceivableGrossCurrent": {
     "standard_tags": [
-      "OtherOperatingCurrentAssets"
+      "TradeReceivables"
     ],
-    "display_name": "Other Current Assets",
+    "display_name": "Accounts Receivable",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 10,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.417,
@@ -81488,13 +81106,13 @@
   },
   "NotesAndLoansReceivableGrossNoncurrent": {
     "standard_tags": [
-      "OtherNonOperatingNonCurrentAssets"
+      "NotesReceivableNonCurrent"
     ],
-    "display_name": "Other Non-Operating Non-Current Assets",
+    "display_name": "Notes Receivable, Non-Current",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 9,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.417,
@@ -102440,22 +102058,6 @@
     "first_year": null,
     "last_year": null
   },
-  "PledgedAssetsSeparatelyReportedFinanceReceivablesPledgedAsCollateralAtFairValue": {
-    "standard_tags": [
-      "TradeReceivables"
-    ],
-    "display_name": "Accounts Receivable",
-    "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
   "PledgedAssetsSeparatelyReportedOtherAssetsPledgedAsCollateralAtFairValue": {
     "standard_tags": [
       "OtherNonOperatingCurrentAssets"
@@ -117720,129 +117322,19 @@
   },
   "RestrictedCashAndCashEquivalentsNoncurrent": {
     "standard_tags": [
-      "OtherOperatingNonCurrentAssets"
+      "RestrictedCashNonCurrent"
     ],
-    "display_name": "Other Non-Current Assets",
+    "display_name": "Restricted Cash, Non-Current",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 202,
     "occurrence_rate": 0.022,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "OtherOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "OtherOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "OtherOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "OtherOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "OtherOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "OtherOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "OtherOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "OtherOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "OtherOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "OtherOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "OtherOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 0.893
-      },
-      "Util": {
-        "standard_tags": [
-          "OtherOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "RestrictedCashAndInvestments": {
     "standard_tags": [
@@ -117891,13 +117383,13 @@
   },
   "RestrictedCashAndInvestmentsNoncurrent": {
     "standard_tags": [
-      "RestrictedCashNonCurrent"
+      "OtherOperatingNonCurrentAssets"
     ],
-    "display_name": "Restricted Cash, Non-Current",
+    "display_name": "Other Non-Current Assets",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 41,
     "occurrence_rate": 0.005,
     "temporal_consistency": 0.5,
@@ -118213,40 +117705,29 @@
   },
   "RestrictedCashEquivalentsCurrent": {
     "standard_tags": [
-      "OtherOperatingCurrentAssets"
+      "RestrictedCashCurrent"
     ],
-    "display_name": "Other Current Assets",
+    "display_name": "Restricted Cash, Current",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 15,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.333,
     "years_present": 4,
     "first_year": 2021,
-    "last_year": 2024,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "OtherOperatingCurrentAssets"
-        ],
-        "display_name": "Other Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.95
-      }
-    }
+    "last_year": 2024
   },
   "RestrictedCashEquivalentsNoncurrent": {
     "standard_tags": [
-      "OtherOperatingNonCurrentAssets"
+      "RestrictedCashNonCurrent"
     ],
-    "display_name": "Other Non-Current Assets",
+    "display_name": "Restricted Cash, Non-Current",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 10,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
@@ -131651,13 +131132,13 @@
   },
   "TradeAndLoansReceivablesHeldForSaleNetNotPartOfDisposalGroup": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 12,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.417,
@@ -131933,13 +131414,13 @@
   },
   "TradeReceivablesHeldForSaleNet": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "AssetsHeldForSale"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Assets Held for Sale",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,

@@ -1,0 +1,147 @@
+{
+  "ContractWithCustomerAssetNetCurrent": [
+    "ContractAssets"
+  ],
+  "RestrictedCashAndCashEquivalentsNoncurrent": [
+    "RestrictedCashNonCurrent"
+  ],
+  "LoansReceivableHeldForSaleNetNotPartOfDisposalGroup": [
+    "AssetsHeldForSale"
+  ],
+  "AccountsReceivableRelatedPartiesCurrent": [
+    "TradeReceivables"
+  ],
+  "AssetsOfDisposalGroupIncludingDiscontinuedOperation": [
+    "AssetsHeldForSale"
+  ],
+  "DisposalGroupIncludingDiscontinuedOperationCashAndCashEquivalents": [
+    "AssetsHeldForSale"
+  ],
+  "AssetsHeldForSaleNotPartOfDisposalGroup": [
+    "AssetsHeldForSale"
+  ],
+  "ContractWithCustomerAssetNetNoncurrent": [
+    "ContractAssets"
+  ],
+  "AllowanceForNotesAndLoansReceivableCurrent": [
+    "AllowanceForDoubtfulAccounts"
+  ],
+  "RestrictedCashAndInvestmentsNoncurrent": [
+    "OtherOperatingNonCurrentAssets"
+  ],
+  "AllowanceForNotesAndLoansReceivableNoncurrent": [
+    "LoanLossReserve"
+  ],
+  "FinancingReceivableExcludingAccruedInterestAfterAllowanceForCreditLossNoncurrent": [
+    "NotesReceivableNonCurrent"
+  ],
+  "ContractWithCustomerAssetGrossCurrent": [
+    "ContractAssets"
+  ],
+  "ContractWithCustomerAssetAccumulatedAllowanceForCreditLossCurrent": [
+    "ContractAssets"
+  ],
+  "DisposalGroupIncludingDiscontinuedOperationCash": [
+    "AssetsHeldForSale"
+  ],
+  "RestrictedCashEquivalentsCurrent": [
+    "RestrictedCashCurrent"
+  ],
+  "TradeAndLoansReceivablesHeldForSaleNetNotPartOfDisposalGroup": [
+    "AssetsHeldForSale"
+  ],
+  "ContractWithCustomerAssetAccumulatedAllowanceForCreditLoss": [
+    "ContractAssets"
+  ],
+  "DisposalGroupIncludingDiscontinuedOperationPropertyPlantAndEquipment": [
+    "AssetsHeldForSale"
+  ],
+  "AssetsHeldForSaleNotPartOfDisposalGroupCurrentOther": [
+    "AssetsHeldForSale"
+  ],
+  "NotesAndLoansReceivableGrossCurrent": [
+    "TradeReceivables"
+  ],
+  "RestrictedCashEquivalentsNoncurrent": [
+    "RestrictedCashNonCurrent"
+  ],
+  "NotesAndLoansReceivableGrossNoncurrent": [
+    "NotesReceivableNonCurrent"
+  ],
+  "DisposalGroupIncludingDiscontinuedOperationOtherCurrentAssets": [
+    "AssetsHeldForSale"
+  ],
+  "DisposalGroupIncludingDiscontinuedOperationPropertyPlantAndEquipmentCurrent": [
+    "AssetsHeldForSale"
+  ],
+  "DisposalGroupIncludingDiscontinuedOperationAccountsNotesAndLoansReceivableNet": [
+    "AssetsHeldForSale"
+  ],
+  "DisposalGroupIncludingDiscontinuedOperationIntangibleAssetsCurrent": [
+    "AssetsHeldForSale"
+  ],
+  "ConstructionContractorReceivableRetainage": [
+    "TradeReceivables"
+  ],
+  "ContractWithCustomerReceivableBeforeAllowanceForCreditLossCurrent": [
+    "AccountsReceivableGross"
+  ],
+  "CostsInExcessOfBillingsOnUncompletedContractsOrProgramsExpectedToBeCollectedWithinOneYear": [
+    "ContractAssets"
+  ],
+  "DisposalGroupIncludingDiscontinuedOperationInventoryCurrent": [
+    "AssetsHeldForSale"
+  ],
+  "DisposalGroupIncludingDiscontinuedOperationPrepaidAndOtherAssetsCurrent": [
+    "AssetsHeldForSale"
+  ],
+  "ContractReceivableRetainageDueOneYearOrLess": [
+    "TradeReceivables"
+  ],
+  "DisposalGroupIncludingDiscontinuedOperationCapitalLeasedAssetsCurrent": [
+    "AssetsHeldForSale"
+  ],
+  "DisposalGroupIncludingDiscontinuedOperationDeferredTaxAssetCurrent": [
+    "AssetsHeldForSale"
+  ],
+  "DisposalGroupIncludingDiscontinuedOperationGoodwillCurrent": [
+    "AssetsHeldForSale"
+  ],
+  "DisposalGroupIncludingDiscontinuedOperationLongLivedAssetsCurrent": [
+    "AssetsHeldForSale"
+  ],
+  "InventoriesPropertyHeldForSaleCurrent": [
+    "AssetsHeldForSale"
+  ],
+  "LoansHeldForSaleCommercialAndIndustrial": [
+    "AssetsHeldForSale"
+  ],
+  "LoansHeldForSaleCommercialRealEstate": [
+    "AssetsHeldForSale"
+  ],
+  "LoansHeldForSaleConsumerCreditCard": [
+    "AssetsHeldForSale"
+  ],
+  "LoansHeldForSaleConsumerHomeEquity": [
+    "AssetsHeldForSale"
+  ],
+  "LoansHeldForSaleConsumerInstallmentStudent": [
+    "AssetsHeldForSale"
+  ],
+  "LoansHeldForSaleMortgages": [
+    "AssetsHeldForSale"
+  ],
+  "LoansHeldForSaleOther": [
+    "AssetsHeldForSale"
+  ],
+  "LoansReceivableHeldForSaleNet": [
+    "AssetsHeldForSale"
+  ],
+  "PledgedAssetsSeparatelyReportedFinanceReceivablesPledgedAsCollateralAtFairValue": null,
+  "TradeReceivablesHeldForSaleNet": [
+    "AssetsHeldForSale"
+  ],
+  "AccruedInvestmentIncomeReceivable": [
+    "OtherNonOperatingCurrentAssets"
+  ]
+}
