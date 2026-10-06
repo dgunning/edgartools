@@ -55,7 +55,9 @@ def test_the_flag_produces_standardization(cash_flow):
     df = cash_flow.render(standard=True).to_dataframe()
 
     assert "standard_concept" in df.columns
-    assert df["standard_concept"].notna().sum() >= 20
+    # 21 on this branch. Apple's FY2023 cash flow goes from 23 standardized
+    # rows to 21 once the two "Other" investing and financing lines are unmapped.
+    assert df["standard_concept"].notna().sum() >= 21
 
 
 def test_standard_false_carries_no_standard_column(cash_flow):
