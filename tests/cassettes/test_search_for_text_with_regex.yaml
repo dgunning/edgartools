@@ -3478,7 +3478,7 @@ interactions:
       Host:
       - www.sec.gov
     method: GET
-    uri: https://www.sec.gov/Archives/edgar/data/72333/0000072333-23-000015-index.html
+    uri: https://www.sec.gov/Archives/edgar/data/72333/000007233323000015/0000072333-23-000015-index.html
   response:
     body:
       string: "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n<html
@@ -6037,7 +6037,7 @@ interactions:
       Host:
       - www.sec.gov
     method: GET
-    uri: https://www.sec.gov/Archives/edgar/data/1364742/0001193125-23-048785-index.html
+    uri: https://www.sec.gov/Archives/edgar/data/1364742/000119312523048785/0001193125-23-048785-index.html
   response:
     body:
       string: "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n<html

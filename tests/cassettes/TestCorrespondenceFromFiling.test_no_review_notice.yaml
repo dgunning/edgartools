@@ -340,7 +340,7 @@ interactions:
       Host:
       - www.sec.gov
     method: GET
-    uri: https://www.sec.gov/Archives/edgar/data/1875558/0000000000-26-001655-index.html
+    uri: https://www.sec.gov/Archives/edgar/data/1875558/000000000026001655/0000000000-26-001655-index.html
   response:
     body:
       string: "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n<html
