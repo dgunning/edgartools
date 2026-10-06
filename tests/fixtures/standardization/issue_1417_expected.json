@@ -1,0 +1,159 @@
+{
+  "ShareBasedCompensation": [
+    "StockBasedCompensationCF"
+  ],
+  "PaymentsOfDividends": [
+    "CommonDividendsPaid"
+  ],
+  "IncreaseDecreaseInOperatingLeaseLiability": [
+    "ChangeInOtherWorkingCapital"
+  ],
+  "OperatingLeaseRightOfUseAssetAmortizationExpense": [
+    "OtherNonCashItemsCF"
+  ],
+  "IncreaseDecreaseInOtherNoncurrentAssets": [
+    "ChangeInOtherWorkingCapital"
+  ],
+  "IncreaseDecreaseInOtherNoncurrentLiabilities": [
+    "ChangeInOtherWorkingCapital"
+  ],
+  "IncreaseDecreaseInInterestPayableNet": [
+    "ChangeInAccruedLiabilities"
+  ],
+  "OtherOperatingActivitiesCashFlowStatement": [
+    "OtherNonCashItemsCF"
+  ],
+  "IncreaseDecreaseInDeferredIncomeTaxes": [
+    "DeferredIncomeTaxCF"
+  ],
+  "IncreaseDecreaseInDueToRelatedParties": [
+    "ChangeInPayables"
+  ],
+  "CashProvidedByUsedInOperatingActivitiesDiscontinuedOperations": null,
+  "IncreaseDecreaseInContractWithCustomerAsset": [
+    "ChangeInOtherWorkingCapital"
+  ],
+  "EquityMethodInvestmentDividendsOrDistributions": [
+    "OtherNonCashItemsCF"
+  ],
+  "IncreaseDecreaseInDueFromRelatedParties": [
+    "ChangeInReceivables"
+  ],
+  "OtherNoncashExpense": [
+    "OtherNonCashItemsCF"
+  ],
+  "IncreaseDecreaseInDepositOtherAssets": [
+    "ChangeInOtherWorkingCapital"
+  ],
+  "IncreaseDecreaseInDueToRelatedPartiesCurrent": [
+    "ChangeInPayables"
+  ],
+  "GainLossOnTerminationOfLease": [
+    "GainLossOnDispositions"
+  ],
+  "IncreaseDecreaseInDeferredCharges": [
+    "ChangeInOtherWorkingCapital"
+  ],
+  "IncreaseDecreaseInIncomeTaxes": [
+    "ChangeInAccruedLiabilities"
+  ],
+  "ProceedsFromSaleOfLoansHeldForSale": null,
+  "IncreaseDecreaseInDueFromRelatedPartiesCurrent": [
+    "ChangeInReceivables"
+  ],
+  "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivities": null,
+  "GainLossOnSalesOfLoansNet": [
+    "GainLossOnAssetSalesCF"
+  ],
+  "IncreaseDecreaseInDerivativeLiabilities": [
+    "ChangeInOtherWorkingCapital"
+  ],
+  "PaymentsForOriginationOfMortgageLoansHeldForSale": null,
+  "IncreaseDecreaseInSecurityDeposits": [
+    "ChangeInOtherWorkingCapital"
+  ],
+  "IncreaseDecreaseInDueToAffiliates": [
+    "ChangeInPayables"
+  ],
+  "PaymentsForOriginationAndPurchasesOfLoansHeldForSale": null,
+  "IncreaseDecreaseInDeferredLiabilities": [
+    "ChangeInOtherWorkingCapital"
+  ],
+  "AmortizationOfDeferredLoanOriginationFeesNet": [
+    "OtherNonCashItemsCF"
+  ],
+  "PaymentsForPurchaseOfInvestmentOperatingActivity": null,
+  "StockOptionPlanExpense": [
+    "StockBasedCompensationCF"
+  ],
+  "IncreaseDecreaseInOtherNoncurrentAssetsAndLiabilitiesNet": [
+    "ChangeInOtherWorkingCapital"
+  ],
+  "ProceedsFromDispositionOfInvestmentOperatingActivity": null,
+  "IncreaseDecreaseInInterestAndDividendsReceivable": [
+    "ChangeInReceivables"
+  ],
+  "ProceedsFromSaleOfMortgageLoansHeldForSale": null,
+  "IncreaseDecreaseInDeferredCompensation": [
+    "ChangeInOtherWorkingCapital"
+  ],
+  "IncreaseDecreaseInPensionAndPostretirementObligations": [
+    "ChangeInAccruedLiabilities"
+  ],
+  "IncreaseDecreaseDueFromAffiliates": [
+    "ChangeInReceivables"
+  ],
+  "IncreaseDecreaseInPropertyAndOtherTaxesPayable": [
+    "ChangeInAccruedLiabilities"
+  ],
+  "AmortizationOfDeferredHedgeGains": [
+    "OtherNonCashItemsCF"
+  ],
+  "RightOfUseAssetObtainedInExchangeForOperatingLeaseLiability": null,
+  "StockIssuedDuringPeriodValueIssuedForServices": [
+    "StockCompensationEquityImpact"
+  ],
+  "StockIssuedDuringPeriodSharesIssuedForServices": null,
+  "StockIssuedDuringPeriodValueOther": [
+    "StockIssuancesEquity"
+  ],
+  "AdjustmentsToAdditionalPaidInCapitalWarrantIssued": [
+    "StockIssuancesEquity"
+  ],
+  "StockIssuedDuringPeriodValueRestrictedStockAwardNetOfForfeitures": [
+    "StockCompensationEquityImpact"
+  ],
+  "AdjustmentsToAdditionalPaidInCapitalStockIssuedIssuanceCosts": [
+    "StockIssuancesEquity"
+  ],
+  "AdjustmentsToAdditionalPaidInCapitalOther": null,
+  "StockIssuedDuringPeriodValueConversionOfUnits": [
+    "StockIssuancesEquity"
+  ],
+  "IssuanceOfStockAndWarrantsForServicesOrClaims": [
+    "StockBasedCompensationCF"
+  ],
+  "StockRedeemedOrCalledDuringPeriodValue": [
+    "StockRepurchasesEquity"
+  ],
+  "ConversionOfStockAmountConverted1": null,
+  "DebtConversionConvertedInstrumentAmount1": null,
+  "RightOfUseAssetObtainedInExchangeForFinanceLeaseLiability": null,
+  "AdjustmentsToAdditionalPaidInCapitalConvertibleDebtWithConversionFeature": null,
+  "DebtIssuanceCostsIncurredDuringNoncashOrPartialNoncashTransaction": null,
+  "LiabilitiesAssumed1": null,
+  "FairValueOfAssetsAcquired": null,
+  "NoncashOrPartNoncashAcquisitionFixedAssetsAcquired1": null,
+  "StockGrantedDuringPeriodValueSharebasedCompensation": [
+    "StockCompensationEquityImpact"
+  ],
+  "ConversionOfStockAmountIssued1": null,
+  "StockAndWarrantsIssuedDuringPeriodValuePreferredStockAndWarrants": [
+    "StockIssuancesEquity"
+  ],
+  "NoncashOrPartNoncashAcquisitionIntangibleAssetsAcquired1": null,
+  "EmployeeServiceShareBasedCompensationAllocationOfRecognizedPeriodCostsCapitalizedAmount": null,
+  "IncreaseDecreaseInEquitySecuritiesFvNi": [
+    "ChangeInOtherWorkingCapital"
+  ]
+}
