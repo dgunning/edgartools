@@ -41,6 +41,7 @@ from edgar.core import (
     YearAndQuarters,
     Years,
     cache_except_none,
+    has_html_content,
     is_probably_html,
     listify,
     log,
@@ -1613,7 +1614,9 @@ class Filing:
             return document.download()
         if html.endswith("</PDF>"):
             return None
-        if html.startswith("<?xml"):
+        # Inline XBRL is XHTML, often opened with an XML declaration, and is already
+        # the HTML. Only a primary document that is XML needs rendering (GH #1421).
+        if html.startswith("<?xml") and not has_html_content(html):
             if self.form in ['3', '3/A', '4', '4/A', '5', '5/A']:
                 from edgar.ownership import Ownership
                 ownership: Ownership = self.obj()
