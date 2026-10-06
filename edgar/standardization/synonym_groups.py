@@ -262,7 +262,6 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
                 'OperatingExpenses',
                 'OperatingCostsAndExpenses',
                 'NoninterestExpense',
-                'CostsAndExpenses',
             ],
             description='Total operating expenses',
             category='income_statement'
@@ -281,8 +280,6 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
             synonyms=[
                 'SellingGeneralAndAdministrativeExpense',
                 'GeneralAndAdministrativeExpense',
-                'SellingAndMarketingExpense',
-                'SellingExpense',
                 'AdministrativeExpense',
             ],
             description='Selling, general and administrative expenses',
@@ -305,7 +302,6 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
             synonyms=[
                 'InterestExpense',
                 'InterestAndDebtExpense',
-                'InterestIncomeExpenseNet',
                 'InterestExpenseOperating',
                 'InterestExpenseNonoperating',
             ],
@@ -338,7 +334,6 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
             name='income_tax_expense',
             synonyms=[
                 'IncomeTaxExpenseBenefit',
-                'IncomeTaxesPaidNet',
                 # IFRS variant
                 'IncomeTaxExpenseContinuingOperations',
             ],
@@ -408,8 +403,6 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
             name='cash_and_equivalents',
             synonyms=[
                 'CashAndCashEquivalentsAtCarryingValue',
-                'CashCashEquivalentsAndShortTermInvestments',
-                'CashEquivalentsAtCarryingValue',
                 'Cash',
             ],
             description='Cash and cash equivalents',
@@ -449,7 +442,6 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
         SynonymGroup(
             name='prepaid_expenses',
             synonyms=[
-                'PrepaidExpenseAndOtherAssetsCurrent',
                 'PrepaidExpenseCurrent',
                 'PrepaidExpense',
             ],
@@ -468,7 +460,6 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
             name='property_plant_equipment',
             synonyms=[
                 'PropertyPlantAndEquipmentNet',
-                'PropertyPlantAndEquipmentGross',
                 'FixedAssets',
             ],
             description='Property, plant and equipment',
@@ -486,7 +477,6 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
             name='intangible_assets',
             synonyms=[
                 'IntangibleAssetsNetExcludingGoodwill',
-                'IntangibleAssetsNetIncludingGoodwill',
                 'FiniteLivedIntangibleAssetsNet',
             ],
             description='Intangible assets',
@@ -678,7 +668,6 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
             name='common_shares_outstanding',
             synonyms=[
                 'CommonStockSharesOutstanding',
-                'WeightedAverageNumberOfSharesOutstandingBasic',
                 # IFRS variant
                 'NumberOfSharesOutstanding',
             ],
@@ -732,7 +721,6 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
             synonyms=[
                 'PaymentsOfDividends',
                 'PaymentsOfDividendsCommonStock',
-                'DividendsPaid',
             ],
             description='Dividends paid',
             category='cash_flow'
@@ -741,7 +729,6 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
             name='share_repurchases',
             synonyms=[
                 'PaymentsForRepurchaseOfCommonStock',
-                'StockRepurchasedDuringPeriodValue',
                 'PaymentsForRepurchaseOfEquity',
             ],
             description='Share repurchases/buybacks',
@@ -784,8 +771,6 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
             synonyms=[
                 'OperatingLeasePayments',
                 'PaymentsForOperatingLeases',
-                'LesseeOperatingLeaseLiabilityPaymentsDue',
-                'OperatingLeasesFutureMinimumPaymentsDue',
             ],
             description='Operating lease payments (Phil Oakley framework)',
             category='cash_flow'
@@ -794,8 +779,6 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
             name='operating_lease_liability',
             synonyms=[
                 'OperatingLeaseLiability',
-                'OperatingLeaseLiabilityCurrent',
-                'OperatingLeaseLiabilityNoncurrent',
             ],
             description='Operating lease liability',
             category='balance_sheet'
@@ -804,7 +787,6 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
             name='operating_lease_right_of_use_asset',
             synonyms=[
                 'OperatingLeaseRightOfUseAsset',
-                'RightOfUseAssetObtainedInExchangeForOperatingLeaseLiability',
             ],
             description='Operating lease right-of-use asset',
             category='balance_sheet'
