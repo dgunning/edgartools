@@ -118,7 +118,9 @@ def test_tenk_items_are_read_from_the_submission(apple_10k, refused_index_page):
     tenk = TenK(apple_10k)
 
     assert "Item 7" in tenk.items
-    assert MDA_HEADING in tenk["Item 7"][:200]
+    item_7 = tenk["Item 7"]
+    assert item_7 is not None
+    assert MDA_HEADING in item_7[:200]
 
 
 def test_an_xml_primary_document_still_gets_the_index_page_rendering():
@@ -132,7 +134,8 @@ def test_an_xml_primary_document_still_gets_the_index_page_rendering():
         accession_no="0002002260-24-000001",
     )
     filing._sgml = FilingSGML.from_source(Path("data/sgml/0002002260-24-000001.nc"))
-    assert filing.sgml().html().startswith("<?xml"), "fixture no longer has an XML primary document"
+    primary = filing.sgml().html()
+    assert primary is not None and primary.startswith("<?xml"), "fixture no longer has an XML primary document"
 
     class _Rendering:
         empty = False
