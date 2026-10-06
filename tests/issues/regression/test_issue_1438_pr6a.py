@@ -6,9 +6,10 @@ Non-Operating Current Assets", and contract assets as "Other Operating Current A
 FY2024 balance sheet put $900 million of short-term financing receivables held for sale in that
 bucket.
 
-This slice is the 51 rows of #1438 PR-6a (49 distinct elements; two elements have two rows each).
-A null row is a deleted entry: no concept fits, so ``lookup()`` returns ``None``. Later slices
-append rows to ``issue_1417_expected.json``.
+This is the first of three pull requests for #1438. It corrects 49 elements; the issue's table
+lists two of them twice, once per old candidate concept. A null value in
+``issue_1438_pr6a_expected.json`` is a deleted entry: no concept fits, so ``lookup()`` returns
+``None``.
 
 GitHub Issue: https://github.com/dgunning/edgartools/issues/1438
 GitHub Issue: https://github.com/dgunning/edgartools/issues/1417
@@ -23,12 +24,12 @@ from edgar.xbrl import XBRL
 from edgar.xbrl.standardization import reverse_index as reverse_index_module
 from edgar.xbrl.standardization.reverse_index import get_reverse_index
 
-EXPECTED = json.loads((Path(__file__).parents[2] / "fixtures" / "standardization" / "issue_1417_expected.json").read_text(encoding="utf-8"))
+EXPECTED = json.loads((Path(__file__).parents[2] / "fixtures" / "standardization" / "issue_1438_pr6a_expected.json").read_text(encoding="utf-8"))
 _STANDARDIZATION = Path(reverse_index_module.__file__).parent
 DISPLAY_NAMES = json.loads((_STANDARDIZATION / "display_names.json").read_text(encoding="utf-8"))
 GAAP_MAPPINGS = json.loads((_STANDARDIZATION / "gaap_mappings.json").read_text(encoding="utf-8"))
 
-# These 7 rows repeated the old concept in every industry override.
+# These 7 entries repeated the old concept in every industry override.
 HAD_OVERRIDES = [
     "AccountsReceivableRelatedPartiesCurrent",
     "AssetsHeldForSaleNotPartOfDisposalGroup",
@@ -76,6 +77,13 @@ def test_no_industry_brings_the_old_concept_back(index, tag, industry):
 def test_no_corrected_entry_keeps_an_industry_override():
     """The guard above samples nine industries; an override left in any other would hide there."""
     assert [tag for tag in EXPECTED if "industry_overrides" in GAAP_MAPPINGS.get(tag, {})] == []
+
+
+def test_single_concept_entries_are_not_ambiguous(index):
+    """A corrected entry with one concept is not ambiguous. Taking #1432's side of the
+    merge conflict would leave "ambiguous": true on two of them."""
+    flagged = [t for t, c in EXPECTED.items() if c and len(c) == 1 and index.is_ambiguous(t)]
+    assert flagged == []
 
 
 def test_single_candidate_display_name_matches_the_catalog():
