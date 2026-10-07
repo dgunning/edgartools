@@ -27,10 +27,11 @@ from types import SimpleNamespace
 
 import pytest
 
+from edgar.exceptions import StatementNotFoundError
 from edgar.xbrl import XBRL
 from edgar.xbrl.period_selector import select_periods
 from edgar.xbrl.presentation import StatementView
-from edgar.xbrl.statement_resolver import StatementResolver
+from edgar.xbrl.statement_resolver import StatementResolver, statement_registry
 from edgar.xbrl.statements import Statement, Statements
 
 pytestmark = [pytest.mark.fast, pytest.mark.regression]
@@ -621,3 +622,160 @@ def test_untyped_ibm_note_keeps_filed_facts_without_an_inferred_primary_kind():
     rows = [row for row in statement.get_raw_data(view=StatementView.SUMMARY) if row["concept"] == "us-gaap_DebtInstrumentUnamortizedDiscount"]
     assert len(rows) == 1
     assert [rows[0]["values"]["instant_" + period] for period in ("2024-12-31", "2023-12-31")] == [824_000_000, 838_000_000]
+
+
+# Synthetic catalogue controls exercise the actual resolver, including registry
+# families without a filed parenthetical role in the Apple fixture. They assert
+# selection policy, rather than claiming that these are filed Apple statements.
+PARENTHETICAL_REGISTRY_KINDS = (
+    "BalanceSheet",
+    "IncomeStatement",
+    "CashFlowStatement",
+    "StatementOfEquity",
+    "ComprehensiveIncome",
+    "Notes",
+    "AccountingPolicies",
+    "Disclosures",
+    "SegmentDisclosure",
+    "CoverPage",
+    "ScheduleOfInvestments",
+    "FinancialHighlights",
+)
+PARENTHETICAL_FILTER_SUPPORTED = {
+    "BalanceSheet",
+    "IncomeStatement",
+    "StatementOfEquity",
+    "ComprehensiveIncome",
+    "ScheduleOfInvestments",
+}
+PARENTHETICAL_MATCHERS = (
+    "_match_by_primary_concept",
+    "_match_by_concept_pattern",
+    "_match_by_role_pattern",
+)
+
+
+def _real_resolver_catalogue(kind, *, ordinary=True, parenthetical=True):
+    entry = statement_registry[kind]
+    concept = "us-gaap_StatementOfComprehensiveIncomeAbstract" if kind == "ComprehensiveIncome" else entry.primary_concepts[0]
+    rows = []
+    if ordinary:
+        rows.append({"role": f"https://example.test/role/{kind}", "role_name": kind, "definition": kind, "primary_concept": concept, "type": None})
+    if parenthetical:
+        rows.append(
+            {
+                "role": f"https://example.test/role/{kind}Parenthetical",
+                "role_name": kind + "Parenthetical",
+                "definition": kind + " (Parenthetical)",
+                "primary_concept": concept,
+                "type": None,
+            }
+        )
+    trees = {row["role"]: SimpleNamespace(all_nodes={concept: object()}) for row in rows}
+    return StatementResolver(SimpleNamespace(get_all_statements=lambda: rows, presentation_trees=trees))
+
+
+@pytest.mark.parametrize("kind", PARENTHETICAL_REGISTRY_KINDS)
+@pytest.mark.parametrize("matcher", PARENTHETICAL_MATCHERS)
+@pytest.mark.parametrize("parenthetical", (False, True))
+def test_real_resolver_matchers_honour_positive_parenthetical_requests(kind, matcher, parenthetical):
+    resolver = _real_resolver_catalogue(kind)
+    matched, role, _confidence = getattr(resolver, matcher)(kind, parenthetical)
+    expected = f"https://example.test/role/{kind}" + ("Parenthetical" if parenthetical else "")
+    assert role == expected
+    expected_roles = [expected]
+    if not parenthetical and kind not in PARENTHETICAL_FILTER_SUPPORTED:
+        expected_roles.append(f"https://example.test/role/{kind}Parenthetical")
+    assert [row["role"] for row in matched] == expected_roles
+
+
+@pytest.mark.parametrize("kind", PARENTHETICAL_REGISTRY_KINDS)
+@pytest.mark.parametrize("matcher", PARENTHETICAL_MATCHERS)
+def test_real_resolver_matchers_reject_ordinary_only_parenthetical_requests(kind, matcher):
+    resolver = _real_resolver_catalogue(kind, parenthetical=False)
+    assert getattr(resolver, matcher)(kind, True) == ([], None, 0.0)
+
+
+@pytest.mark.parametrize("kind", PARENTHETICAL_REGISTRY_KINDS)
+@pytest.mark.parametrize("matcher", PARENTHETICAL_MATCHERS)
+def test_real_resolver_matchers_preserve_default_unsupported_family_policy(kind, matcher):
+    resolver = _real_resolver_catalogue(kind, ordinary=False)
+    matched, role, confidence = getattr(resolver, matcher)(kind, False)
+    if kind in PARENTHETICAL_FILTER_SUPPORTED:
+        assert (matched, role, confidence) == ([], None, 0.0)
+    else:
+        assert role == f"https://example.test/role/{kind}Parenthetical"
+        assert [row["role"] for row in matched] == [role]
+
+
+@pytest.mark.parametrize("kind", PARENTHETICAL_REGISTRY_KINDS)
+def test_real_resolver_keeps_marked_parenthetical_without_exact_type_bucket(kind):
+    resolver = _real_resolver_catalogue(kind)
+    matched, role, actual_type, _confidence = resolver.find_statement(kind, True)
+    assert role == f"https://example.test/role/{kind}Parenthetical"
+    assert [row["role"] for row in matched] == [role]
+    assert matched[0]["type"] is None
+    assert actual_type == kind
+
+
+def _real_filing_without_parenthetical_roles(xbrl):
+    isolated = deepcopy(xbrl)
+    catalogue = [
+        row
+        for row in isolated.get_all_statements()
+        if "parenthetical" not in " ".join(str(row.get(key, "")) for key in ("role", "role_name", "definition", "type")).lower()
+    ]
+    isolated.parser.presentation_trees = {
+        role: tree for role, tree in isolated.presentation_trees.items() if "parenthetical" not in (role + " " + str(tree.definition)).lower()
+    }
+    isolated.get_all_statements = lambda: catalogue
+    isolated._statement_resolver = None
+    for name, value in list(vars(isolated).items()):
+        if name.startswith("_statement") and isinstance(value, dict):
+            setattr(isolated, name, {})
+    isolated._all_statements_cached = catalogue
+    return isolated
+
+
+@pytest.mark.parametrize("accessor, kind", NAMED_ACCESSORS)
+@pytest.mark.parametrize("route", ("helper", "finder", "render"))
+def test_real_apple_missing_parenthetical_families_never_return_ordinary_roles(apple, accessor, kind, route):
+    """Retain actual nonempty Apple catalogue/trees, with parentheticals removed in memory."""
+    isolated = _real_filing_without_parenthetical_roles(apple)
+    assert isolated.get_all_statements()
+    if route == "helper":
+        assert getattr(isolated.statements, accessor)(parenthetical=True) is None
+    elif route == "finder":
+        with pytest.raises(StatementNotFoundError):
+            isolated.find_statement(kind, True)
+    else:
+        with pytest.raises(StatementNotFoundError):
+            isolated.render_statement(kind, parenthetical=True)
+
+
+@pytest.fixture(scope="module")
+def apple_2010_parenthetical_boundary():
+    return XBRL.from_directory(FIXTURES / "aapl" / "10k_2010")
+
+
+@pytest.mark.parametrize("route", ("helper", "finder", "render"))
+def test_real_apple_2010_missing_parenthetical_ci_does_not_substitute_equity(apple_2010_parenthetical_boundary, route):
+    """Apple FY2010 embeds ordinary comprehensive income in its equity statement."""
+    isolated = _real_filing_without_parenthetical_roles(apple_2010_parenthetical_boundary)
+    if route == "helper":
+        assert isolated.statements.comprehensive_income(parenthetical=True) is None
+    elif route == "finder":
+        with pytest.raises(StatementNotFoundError):
+            isolated.find_statement("ComprehensiveIncome", True)
+    else:
+        with pytest.raises(StatementNotFoundError):
+            isolated.render_statement("ComprehensiveIncome", parenthetical=True)
+
+
+def test_real_apple_2010_ordinary_ci_keeps_filed_equity_role(apple_2010_parenthetical_boundary):
+    expected = "http://www.apple.com/taxonomy/role/StatementOfShareholdersEquityAndOtherComprehensiveIncome"
+    matched, role, actual_type = apple_2010_parenthetical_boundary.find_statement("ComprehensiveIncome")
+    assert role == expected
+    assert actual_type == "ComprehensiveIncome"
+    assert matched[0]["role"] == expected
+    assert apple_2010_parenthetical_boundary.statements.comprehensive_income().role_or_type == expected
