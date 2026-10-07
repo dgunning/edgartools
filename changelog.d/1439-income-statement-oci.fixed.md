@@ -1,0 +1,1 @@
+**`ReverseIndex.lookup()` misclassified income, comprehensive income and related disclosures.** 27 entries are remapped and 26 without a fitting concept are removed. ExxonMobil's FY2022 10-K (0000034088-23-000020) showed $1,025M of exploration expense as `ResearchAndDevelopmentExpenses`; the same amount now maps to `OtherOperatingExpense`. (GH #1439)
