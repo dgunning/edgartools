@@ -1,0 +1,58 @@
+{
+  "captured_at": "2026-10-07T09:41:27.349735+00:00",
+  "commit": "c663767f8932bee259dbb3f9aaaf6a2937078b02",
+  "import_source": "/workspace/.cloud-onboarding/baselines/c663767f/edgar/__init__.py",
+  "library_version": "5.61.1",
+  "ticker": "AMZN",
+  "cik": 1018724,
+  "company": "AMAZON COM INC",
+  "form": "10-Q",
+  "accession": "0001018724-26-000026",
+  "filing_date": "2026-07-31",
+  "attachments": [
+    {
+      "document": "amzn-20260630.xsd",
+      "document_type": "EX-101.SCH",
+      "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.xsd",
+      "bytes": 66633,
+      "sha256": "8ba9a32616b4b6435fe12f93541af634e42d0be49838dc8357e8b795975ed299"
+    },
+    {
+      "document": "amzn-20260630_cal.xml",
+      "document_type": "EX-101.CAL",
+      "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630_cal.xml",
+      "bytes": 148074,
+      "sha256": "acd3997b82b6696353668c954dcd6cedfb275fec8fd26448277cb9f4ca1ab9ee"
+    },
+    {
+      "document": "amzn-20260630_def.xml",
+      "document_type": "EX-101.DEF",
+      "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630_def.xml",
+      "bytes": 337445,
+      "sha256": "15b8f13e90e99cf04fa518b02cde12a00eb1275b573b0f1818ccd611bdc58805"
+    },
+    {
+      "document": "amzn-20260630_lab.xml",
+      "document_type": "EX-101.LAB",
+      "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630_lab.xml",
+      "bytes": 809439,
+      "sha256": "b9f086c96b076324eabb477596512fd78e907bbf54e639efc7f1e029574328b3"
+    },
+    {
+      "document": "amzn-20260630_pre.xml",
+      "document_type": "EX-101.PRE",
+      "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630_pre.xml",
+      "bytes": 544813,
+      "sha256": "0753e315209d8203035edc5561d6bbf8dbc27d3fa69991d276cca9adec775554"
+    },
+    {
+      "document": "amzn-20260630_htm.xml",
+      "document_type": "XML",
+      "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630_htm.xml",
+      "bytes": 1628033,
+      "sha256": "28cbec6d6a191a9cd561ede66f9c7d373884dc580550f147ab6e1d31d2c4a50a"
+    }
+  ],
+  "homepage_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/0001018724-26-000026-index.html",
+  "period_of_report": "2026-06-30"
+}

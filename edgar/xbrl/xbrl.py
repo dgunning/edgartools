@@ -2800,6 +2800,13 @@ class XBRL:
 
         # Find the statement using the unified statement finder with parenthetical support
         matching_statements, found_role, actual_statement_type = self.find_statement(statement_type, parenthetical)
+        statement_identifier = statement_type
+        if parenthetical:
+            if not found_role:
+                return None
+            statement_identifier = found_role
+            # Resolve the selected role's own kind rather than the primary name.
+            matching_statements, _, actual_statement_type = self.find_statement(found_role)
 
         # Get statement definition from matching statements
         role_definition = ""
@@ -2812,7 +2819,7 @@ class XBRL:
         should_display_dimensions = True
 
         # Get the statement data with all dimensional data, passing view for filtering
-        statement_data = self.get_statement(statement_type, period_filter, should_display_dimensions, view=view)
+        statement_data = self.get_statement(statement_identifier, period_filter, should_display_dimensions, view=view)
         if not statement_data:
             return None
 
@@ -2834,7 +2841,7 @@ class XBRL:
                 statement_title = statement_type
 
         # Add "Parenthetical" to the title if appropriate
-        if parenthetical:
+        if parenthetical and 'parenthetical' not in statement_title.lower():
             statement_title = f"{statement_title} (Parenthetical)"
 
         # Get periods to display using unified period selection

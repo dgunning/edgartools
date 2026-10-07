@@ -1,0 +1,57 @@
+{
+  "captured_at": "2026-10-07T09:27:42.582068+00:00",
+  "commit": "c663767f8932bee259dbb3f9aaaf6a2937078b02",
+  "import_source": "/workspace/.cloud-onboarding/baselines/c663767f/edgar/__init__.py",
+  "library_version": "5.61.1",
+  "cik": 6201,
+  "company": "American Airlines Group Inc.",
+  "form": "10-Q",
+  "accession": "0000006201-26-000052",
+  "filing_date": "2026-07-23",
+  "attachments": [
+    {
+      "document": "aal-20260630.xsd",
+      "document_type": "EX-101.SCH",
+      "url": "https://www.sec.gov/Archives/edgar/data/4515/000000620126000052/aal-20260630.xsd",
+      "bytes": 54585,
+      "sha256": "f0804b307aa12982e8265f2822f5e0d8a57d3e4566667107b201c36ad1eb777d"
+    },
+    {
+      "document": "aal-20260630_cal.xml",
+      "document_type": "EX-101.CAL",
+      "url": "https://www.sec.gov/Archives/edgar/data/4515/000000620126000052/aal-20260630_cal.xml",
+      "bytes": 80855,
+      "sha256": "eb7ccb652aabf2110967042a1f33cbb0a4e7ac9b8e208c987fc90acf2e0b72f8"
+    },
+    {
+      "document": "aal-20260630_def.xml",
+      "document_type": "EX-101.DEF",
+      "url": "https://www.sec.gov/Archives/edgar/data/4515/000000620126000052/aal-20260630_def.xml",
+      "bytes": 533401,
+      "sha256": "1a390557867e5c232fb0b047d424b0024705d9ce96f4e717fdaf83bcc4af0dfb"
+    },
+    {
+      "document": "aal-20260630_lab.xml",
+      "document_type": "EX-101.LAB",
+      "url": "https://www.sec.gov/Archives/edgar/data/4515/000000620126000052/aal-20260630_lab.xml",
+      "bytes": 631792,
+      "sha256": "f8de7ae543335fcd96e16d18c091849b6e9a2a093ceaffecbee62017092e8e7f"
+    },
+    {
+      "document": "aal-20260630_pre.xml",
+      "document_type": "EX-101.PRE",
+      "url": "https://www.sec.gov/Archives/edgar/data/4515/000000620126000052/aal-20260630_pre.xml",
+      "bytes": 649858,
+      "sha256": "46a58f0c4d2b436296415426f448a35874b030c297fd7d9aaf7a81c07df1ca7a"
+    },
+    {
+      "document": "aal-20260630_htm.xml",
+      "document_type": "XML",
+      "url": "https://www.sec.gov/Archives/edgar/data/4515/000000620126000052/aal-20260630_htm.xml",
+      "bytes": 1822174,
+      "sha256": "52d937ec558ae984392194163682e274dba695c8e9e8fffc80b0ad3c55e4bc31"
+    }
+  ],
+  "homepage_url": "https://www.sec.gov/Archives/edgar/data/6201/000000620126000052/0000006201-26-000052-index.html",
+  "period_of_report": "2026-06-30"
+}

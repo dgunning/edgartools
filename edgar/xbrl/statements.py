@@ -440,7 +440,8 @@ class Statement:
             xbrl: XBRL object containing parsed data
             role_or_type: Role URI, statement type, or statement short name
             canonical_type: Optional canonical statement type (e.g., "BalanceSheet", "IncomeStatement")
-                         If provided, this type will be used for specialized processing logic
+                         If provided, selects the canonical statement of this kind.
+                         Kind-specific processing uses classified_type.
             skip_concept_check: If True, skip checking for required concepts (useful for testing)
             include_dimensions: Deprecated. Use view parameter instead.
                               Default setting for whether to include dimensional segment data
@@ -490,7 +491,12 @@ class Statement:
         for stmt in getattr(self.xbrl, 'get_all_statements', list)() or []:
             if stmt.get('role') == self.role_or_type:
                 statement_type = stmt.get('type')
-                return statement_type if statement_type in statement_to_concepts else None
+                if statement_type in statement_to_concepts:
+                    return statement_type
+                if statement_type and statement_type.endswith('Parenthetical'):
+                    if statement_type.removesuffix('Parenthetical') in statement_to_concepts:
+                        return statement_type
+                return None
         return None
 
     @property
@@ -710,8 +716,8 @@ class Statement:
         If the axis only has aggregates (Total Stockholders' Equity, Noncontrolling Interests),
         the statement should be rendered as a list, not a matrix.
         """
-        # Check if this is an equity statement by canonical type OR role URI
-        statement_type = self.canonical_type if self.canonical_type else ''
+        # Check the resolver's kind, including role-selected equity statements.
+        statement_type = self.classified_type or ''
         role_lower = self.role_or_type.lower() if self.role_or_type else ''
 
         is_equity_by_type = statement_type in (
@@ -1078,9 +1084,9 @@ class Statement:
 
         # === FULL ===
         # Statement metadata
-        if self.canonical_type:
+        if self.classified_type:
             lines.append("")
-            lines.append(f"Statement Type: {self.canonical_type}")
+            lines.append(f"Statement Type: {self.classified_type}")
         if self.is_segmented():
             lines.append("Segmented: Yes")
 
@@ -1267,8 +1273,8 @@ class Statement:
         if not raw_data:
             return pd.DataFrame()
 
-        # Determine which periods to display
-        statement_type = self.canonical_type if self.canonical_type else self.role_or_type
+        # Processing rules use the resolver's kind without changing the selected role.
+        statement_type = self.classified_type or self.role_or_type
 
         # Issue #583: Apply label standardization if requested
         # This transforms labels like "Ending balances" → "Total Stockholders' Equity"
@@ -1360,7 +1366,7 @@ class Statement:
                     continue
                 # STANDARD view: skip only breakdown dimensions
                 if view == StatementView.STANDARD and item.get('is_dimension'):
-                    if is_breakdown_dimension(item, statement_type=self.canonical_type,
+                    if is_breakdown_dimension(item, statement_type=statement_type,
                                               xbrl=self.xbrl, role_uri=self.role_or_type):
                         continue
                 concept = item.get('concept', '')
@@ -1385,7 +1391,7 @@ class Statement:
                 elif view == StatementView.STANDARD:
                     # STANDARD view: hide only breakdown dimensions (geographic, segment, acquisition)
                     # Keep classification dimensions (PPE type, equity) on face
-                    if is_breakdown_dimension(item, statement_type=self.canonical_type,
+                    if is_breakdown_dimension(item, statement_type=statement_type,
                                               xbrl=self.xbrl, role_uri=self.role_or_type):
                         continue
                 # DETAILED view: keep all dimensional items (no filtering)
@@ -1535,7 +1541,7 @@ class Statement:
             # Issue #569: Add is_breakdown to distinguish breakdown vs face dimensions
             # Issue #577/cf9o: Pass xbrl and role_uri for definition linkbase-based filtering
             row['is_breakdown'] = is_breakdown_dimension(
-                item, statement_type=self.canonical_type,
+                item, statement_type=statement_type,
                 xbrl=self.xbrl, role_uri=self.role_or_type
             ) if item.get('is_dimension') else False
 
@@ -1980,7 +1986,7 @@ class Statement:
         }
         validation_level = level_map.get(level.lower(), ValidationLevel.FUNDAMENTAL)
 
-        return validate_statement(self, self.canonical_type, level=validation_level)
+        return validate_statement(self, self.classified_type, level=validation_level)
 
     def calculate_ratios(self, period: Optional[str] = None) -> Dict[str, float]:
         """Calculate common financial ratios for this statement.
@@ -2003,8 +2009,8 @@ class Statement:
         """
         ratios = {}
 
-        # Use canonical type if available, otherwise use role_or_type
-        statement_type = self.canonical_type if self.canonical_type else self.role_or_type
+        # Analysis depends on the statement kind, not how its role was selected.
+        statement_type = self.classified_type or self.role_or_type
 
         period = period or self._default_ratio_period(statement_type)
         if period is None:
@@ -2100,8 +2106,8 @@ class Statement:
         """Analyze trends in key metrics over time."""
         trends = {}
 
-        # Use canonical type if available, otherwise use role_or_type
-        statement_type = self.canonical_type if self.canonical_type else self.role_or_type
+        # Analysis depends on the statement kind, not how its role was selected.
+        statement_type = self.classified_type or self.role_or_type
 
         # Get data for multiple periods
         period_views = self.xbrl.get_period_views(statement_type)
@@ -2687,13 +2693,16 @@ class Statements:
         """
         if isinstance(item, int):
             if 0 <= item < len(self.statements):
-                stmt = self.statements[item]
-                # Get the canonical type if available
-                canonical_type = None
-                if stmt.get('type') in statement_to_concepts:
-                    canonical_type = stmt.get('type')
-                return Statement(self.xbrl, stmt['role'], canonical_type=canonical_type)
+                return self._make_statement(self.statements[item])
         elif isinstance(item, str):
+            # HTTP(S) identifiers request a literal role, not a canonical-name guess.
+            if item.lower().startswith(('http://', 'https://')):
+                if item in getattr(self.xbrl, 'presentation_trees', {}) or any(
+                    stmt.get('role') == item for stmt in self.statements
+                ):
+                    return Statement(self.xbrl, item)
+                return None
+
             # Check if it's a standard statement type with a specific concept marker
             if item in statement_to_concepts:
                 # Get the statement role using the primary concept
@@ -2706,7 +2715,7 @@ class Statements:
 
             # If it's a statement type with multiple statements, return the first one
             if item in self.statement_by_type and self.statement_by_type[item]:
-                return Statement(self.xbrl, item, canonical_type=item)
+                return self._make_statement(self.statement_by_type[item][0])
 
             # A known ROLE is never typed by sniffing its name. The resolver has
             # already classified every role, and `canonical_type` is not a
@@ -2720,6 +2729,10 @@ class Statements:
             # without selecting a role.
             if any(stmt.get('role') == item for stmt in self.statements):
                 return Statement(self.xbrl, item)
+
+            # A missing parenthetical kind must not fall back to its primary kind.
+            if item.endswith('Parenthetical') and item.removesuffix('Parenthetical') in statement_to_concepts:
+                return None
 
             # Not a role: a bare statement name, where the name is all there is
             # to go on.
@@ -3038,13 +3051,16 @@ class Statements:
         try:
             role = self.find_statement_by_primary_concept("BalanceSheet", is_parenthetical=parenthetical)
             if role:
-                return Statement(self.xbrl, role, canonical_type="BalanceSheet", view=effective_view)
+                return Statement(self.xbrl, role, canonical_type=None if parenthetical else "BalanceSheet", view=effective_view)
 
             # Try using the xbrl.render_statement with parenthetical parameter
             if hasattr(self.xbrl, 'find_statement'):
                 matching_statements, found_role, _ = self.xbrl.find_statement("BalanceSheet", parenthetical)
                 if found_role:
-                    return Statement(self.xbrl, found_role, canonical_type="BalanceSheet", view=effective_view)
+                    return Statement(self.xbrl, found_role, canonical_type=None if parenthetical else "BalanceSheet", view=effective_view)
+
+            if parenthetical:
+                return None
 
             return Statement(self.xbrl, "BalanceSheet", canonical_type="BalanceSheet", view=effective_view)
         except Exception as e:
@@ -3076,9 +3092,12 @@ class Statements:
             if hasattr(self.xbrl, 'find_statement'):
                 matching_statements, found_role, _ = self.xbrl.find_statement("IncomeStatement", parenthetical)
                 if found_role:
-                    return Statement(self.xbrl, found_role, canonical_type="IncomeStatement",
+                    return Statement(self.xbrl, found_role, canonical_type=None if parenthetical else "IncomeStatement",
                                    skip_concept_check=skip_concept_check,
                                    view=effective_view)
+
+            if parenthetical:
+                return None
 
             return Statement(self.xbrl, "IncomeStatement", canonical_type="IncomeStatement",
                            skip_concept_check=skip_concept_check,
@@ -3111,8 +3130,11 @@ class Statements:
             if hasattr(self.xbrl, 'find_statement'):
                 matching_statements, found_role, _ = self.xbrl.find_statement("CashFlowStatement", parenthetical)
                 if found_role:
-                    return Statement(self.xbrl, found_role, canonical_type="CashFlowStatement",
+                    return Statement(self.xbrl, found_role, canonical_type=None if parenthetical else "CashFlowStatement",
                                    view=effective_view)
+
+            if parenthetical:
+                return None
 
             return Statement(self.xbrl, "CashFlowStatement", canonical_type="CashFlowStatement",
                            view=effective_view)
@@ -3159,8 +3181,11 @@ class Statements:
             if hasattr(self.xbrl, 'find_statement'):
                 matching_statements, found_role, _ = self.xbrl.find_statement("StatementOfEquity", parenthetical)
                 if found_role:
-                    return Statement(self.xbrl, found_role, canonical_type="StatementOfEquity",
+                    return Statement(self.xbrl, found_role, canonical_type=None if parenthetical else "StatementOfEquity",
                                    view=effective_view, include_dimensions=effective_include_dimensions)
+
+            if parenthetical:
+                return None
 
             return Statement(self.xbrl, "StatementOfEquity", canonical_type="StatementOfEquity",
                            view=effective_view, include_dimensions=effective_include_dimensions)
@@ -3200,8 +3225,11 @@ class Statements:
             if hasattr(self.xbrl, 'find_statement'):
                 matching_statements, found_role, _ = self.xbrl.find_statement("ComprehensiveIncome", parenthetical)
                 if found_role:
-                    return Statement(self.xbrl, found_role, canonical_type="ComprehensiveIncome",
+                    return Statement(self.xbrl, found_role, canonical_type=None if parenthetical else "ComprehensiveIncome",
                                    view=effective_view, include_dimensions=effective_include_dimensions)
+
+            if parenthetical:
+                return None
 
             return Statement(self.xbrl, "ComprehensiveIncome", canonical_type="ComprehensiveIncome",
                            view=effective_view, include_dimensions=effective_include_dimensions)
@@ -3228,7 +3256,10 @@ class Statements:
                     "ScheduleOfInvestments", parenthetical
                 )
                 if found_role:
-                    return Statement(self.xbrl, found_role, canonical_type="ScheduleOfInvestments")
+                    return Statement(self.xbrl, found_role, canonical_type=None if parenthetical else "ScheduleOfInvestments")
+
+            if parenthetical:
+                return None
 
             return self["ScheduleOfInvestments"]
         except Exception as e:
@@ -3284,9 +3315,8 @@ class Statements:
         return self.get_by_category('disclosure')
 
     def _make_statement(self, stmt: dict) -> Statement:
-        """Create a Statement from a statement dict, resolving canonical type."""
-        canonical_type = stmt.get('type') if stmt.get('type') in statement_to_concepts else None
-        return Statement(self.xbrl, stmt['role'], canonical_type=canonical_type)
+        """Create a Statement for the selected role, preserving its identity."""
+        return Statement(self.xbrl, stmt['role'])
 
     def all(self, category: str = None) -> List[Statement]:
         """
@@ -3375,6 +3405,9 @@ class Statements:
         # Tier 1: Exact type match
         for stmt in self.statements:
             if (stmt.get('type') or '').lower() == name_lower:
+                # An explicit canonical name requests selection by statement kind.
+                if stmt.get('type') in statement_to_concepts:
+                    return Statement(self.xbrl, stmt['role'], canonical_type=stmt['type'])
                 return self._make_statement(stmt)
 
         # Tier 2: role_name contains (case-insensitive)
