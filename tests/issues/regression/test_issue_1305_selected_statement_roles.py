@@ -29,6 +29,7 @@ import pytest
 
 from edgar.xbrl import XBRL
 from edgar.xbrl.presentation import StatementView
+from edgar.xbrl.statement_resolver import StatementResolver
 from edgar.xbrl.statements import Statement, Statements
 
 pytestmark = [pytest.mark.fast, pytest.mark.regression]
@@ -342,26 +343,90 @@ def test_apple_parenthetical_keeps_filed_share_and_par_value_instants(apple, sel
     assert [issue.code for issue in validation.issues] == ["NO_VALIDATOR"]
 
 
-@pytest.mark.parametrize("uri", ("https://example.test/role/BalanceSheetParenthetical", "http://example.test/role/BalanceSheet"))
-def test_missing_literal_role_uri_does_not_select_the_primary_balance_sheet(apple, uri):
+def _reset_statement_selection(apple, monkeypatch):
+    monkeypatch.setattr(apple, "_statement_resolver", None)
+    monkeypatch.setattr(apple, "_all_statements_cached", None)
+    for name in (
+        "_statement_indices",
+        "_statement_by_standard_name",
+        "_statement_by_primary_concept",
+        "_statement_by_role_uri",
+        "_statement_by_role_name",
+    ):
+        monkeypatch.setattr(apple, name, {})
+
+
+@pytest.mark.parametrize(
+    "uri", ("https://example.test/role/CONSOLIDATEDBALANCESHEETSParenthetical", "http://example.test/role/CONSOLIDATEDBALANCESHEETS")
+)
+def test_missing_literal_role_uri_does_not_select_the_primary_balance_sheet(apple, monkeypatch, uri):
+    _reset_statement_selection(apple, monkeypatch)
     assert uri not in apple.presentation_trees
     assert apple.statements[uri] is None
+    matching, selected_role, _kind = apple.find_statement(uri)
+    assert matching == []
+    assert selected_role is None
+    assert apple.get_statement(uri) == []
+    for standard in (False, True):
+        assert apple.render_statement(uri, standard=standard) is None
+        statement = Statement(apple, uri)
+        assert statement.get_raw_data() == []
+        assert statement.render(standard=standard) is None
 
 
-def test_literal_role_uri_keeps_the_presentation_role_without_a_catalog_entry(apple, monkeypatch):
+@pytest.mark.parametrize("catalog_state", ("normal", "warm", "fresh", "fresh_indexes"))
+def test_literal_role_uri_keeps_the_presentation_role_without_a_catalog_entry(apple, monkeypatch, catalog_state):
     entries = apple.get_all_statements()
-    assert APPLE_PARENTHETICAL in apple.presentation_trees
-    for catalogued in (True, False):
-        if not catalogued:
-            monkeypatch.setattr(apple, "get_all_statements", lambda: [entry for entry in entries if entry["role"] != APPLE_PARENTHETICAL])
-        statement = Statements(apple)[APPLE_PARENTHETICAL]
+    original = next(entry for entry in entries if entry["role"] == APPLE_PARENTHETICAL)
+    tree = apple.presentation_trees[APPLE_PARENTHETICAL]
+    if catalog_state != "normal":
+        monkeypatch.setattr(apple, "_statement_resolver", StatementResolver(apple))
+        monkeypatch.setattr(apple, "get_all_statements", lambda: [entry for entry in entries if entry["role"] != APPLE_PARENTHETICAL])
+        if catalog_state == "fresh":
+            monkeypatch.setattr(apple, "_statement_resolver", None)
+        elif catalog_state == "fresh_indexes":
+            _reset_statement_selection(apple, monkeypatch)
+    expected_kind = "BalanceSheetParenthetical" if catalog_state == "normal" else None
+    matching, selected_role, actual_kind = apple.find_statement(APPLE_PARENTHETICAL)
+    assert selected_role == APPLE_PARENTHETICAL
+    assert actual_kind == expected_kind
+    assert len(matching) == 1
+    assert matching[0]["role"] == APPLE_PARENTHETICAL
+    assert matching[0]["definition"] == original["definition"]
+    assert matching[0]["element_count"] == len(tree.all_nodes)
+    if catalog_state == "normal":
+        assert matching[0] == original
+    expected_concepts = [
+        "us-gaap_CommonStockParOrStatedValuePerShare",
+        "us-gaap_CommonStockSharesAuthorized",
+        "us-gaap_CommonStockSharesIssued",
+        "us-gaap_CommonStockSharesOutstanding",
+    ]
+    for statement in (Statements(apple)[APPLE_PARENTHETICAL], Statement(apple, APPLE_PARENTHETICAL)):
         assert statement is not None
         assert statement.role_or_type == APPLE_PARENTHETICAL
         assert statement.canonical_type is None
+        assert statement.classified_type == expected_kind
         raw = statement.get_raw_data(view=StatementView.SUMMARY)
+        assert [row["concept"] for row in raw if not row.get("is_abstract") and not row.get("is_dimension")] == expected_concepts
         row = next(row for row in raw if row["concept"] == "us-gaap_CommonStockSharesOutstanding")
         assert [row["values"]["instant_" + date] for date in ("2023-09-30", "2022-09-24")] == [15_550_061_000, 15_943_425_000]
         assert [row["units"]["instant_" + date] for date in ("2023-09-30", "2022-09-24")] == ["shares", "shares"]
+        assert apple.get_statement(APPLE_PARENTHETICAL, view=StatementView.SUMMARY) == raw
+        for standard in (False, True):
+            rendered = statement.render(standard=standard, view="summary")
+            assert rendered.title == "CONSOLIDATED BALANCE SHEETS (Parenthetical)"
+            assert rendered.statement_type == expected_kind
+            assert [row.metadata["concept"] for row in rendered.rows] == expected_concepts
+            direct = apple.render_statement(APPLE_PARENTHETICAL, standard=standard, view="summary")
+            assert direct is not None
+            assert direct.title == rendered.title
+            assert [row.metadata["concept"] for row in direct.rows] == expected_concepts
+            if expected_kind:
+                assert [period.key for period in rendered.periods] == ["instant_2023-09-30", "instant_2022-09-24"]
+            else:
+                # An uncatalogued tree stays untyped, including its generic periods.
+                assert all(period.key.startswith("duration_") for period in rendered.periods)
 
 
 @pytest.mark.parametrize("kind", ("BalanceSheet", "CashFlowStatement", "StatementOfEquity"))
@@ -481,7 +546,7 @@ def test_role_selected_equity_matrix_and_context_keep_the_resolver_kind(apple, m
     assert "Statement Type: StatementOfEquity" in statement.to_context(detail="full")
 
 
-@pytest.mark.parametrize("selection", ("canonical", "uri"))
+@pytest.mark.parametrize("selection", ("canonical", "uri", "uri_parenthetical"))
 def test_direct_parenthetical_render_keeps_filed_share_and_par_value_instants(apple, selection):
     name = "BalanceSheet" if selection == "canonical" else APPLE_PARENTHETICAL
     expected = {
@@ -491,7 +556,7 @@ def test_direct_parenthetical_render_keeps_filed_share_and_par_value_instants(ap
         "us-gaap_CommonStockSharesOutstanding": [15_550_061_000, 15_943_425_000],
     }
     for standard in (False, True):
-        rendered = apple.render_statement(name, parenthetical=selection == "canonical", standard=standard, view="summary")
+        rendered = apple.render_statement(name, parenthetical=selection != "uri", standard=standard, view="summary")
         assert rendered is not None
         assert rendered.title == "CONSOLIDATED BALANCE SHEETS (Parenthetical)"
         assert rendered.statement_type == "BalanceSheetParenthetical"

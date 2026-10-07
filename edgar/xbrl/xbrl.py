@@ -2688,6 +2688,25 @@ class XBRL:
                 - Found role URI (or None if not found)
                 - Actual statement type (may be different from input if matched by role/name)
         """
+        # Literal role identifiers must not enter canonical/name guessing.
+        if statement_type.lower().startswith(('http://', 'https://')):
+            tree = self.presentation_trees.get(statement_type)
+            if tree is None:
+                return [], None, statement_type
+            matching_statements = [
+                stmt for stmt in self.get_all_statements()
+                if stmt.get('role') == statement_type
+            ]
+            if not matching_statements:
+                # A tree can be available without catalog classification.
+                matching_statements = [{
+                    'role': statement_type,
+                    'definition': tree.definition,
+                    'element_count': len(tree.all_nodes),
+                    'type': None,
+                }]
+            return matching_statements, statement_type, matching_statements[0]['type']
+
         # Initialize statement resolver if not already done
         if self._statement_resolver is None:
             self._statement_resolver = StatementResolver(self)
