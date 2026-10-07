@@ -11393,13 +11393,13 @@
   },
   "AvailableForSaleSecuritiesCurrent": {
     "standard_tags": [
-      "CashAndMarketableSecurities"
+      "ShortTermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Short-Term Investments",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 7,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.167,
@@ -11495,14 +11495,14 @@
   },
   "AvailableForSaleSecuritiesDebtSecurities": {
     "standard_tags": [
-      "CashAndMarketableSecurities",
-      "LongtermInvestments"
+      "LongtermInvestments",
+      "ShortTermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Long-Term Investments",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.953,
+    "section": "Non-Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 493,
     "occurrence_rate": 0.055,
     "temporal_consistency": 0.417,
@@ -11720,13 +11720,13 @@
   },
   "AvailableForSaleSecuritiesEquitySecuritiesCurrent": {
     "standard_tags": [
-      "CashAndMarketableSecurities"
+      "ShortTermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Short-Term Investments",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 1,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.083,
@@ -11882,13 +11882,13 @@
   },
   "AvailableforsaleSecuritiesRestrictedNoncurrent": {
     "standard_tags": [
-      "OtherOperatingNonCurrentAssets"
+      "LongtermInvestments"
     ],
-    "display_name": "Other Non-Current Assets",
+    "display_name": "Long-Term Investments",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -28764,14 +28764,14 @@
   },
   "DebtSecuritiesAvailableForSaleExcludingAccruedInterest": {
     "standard_tags": [
-      "CashAndMarketableSecurities",
-      "OtherNonOperatingNonCurrentAssets"
+      "LongtermInvestments",
+      "ShortTermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Long-Term Investments",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Non-Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 260,
     "occurrence_rate": 0.029,
     "temporal_consistency": 0.417,
@@ -28782,75 +28782,35 @@
   },
   "DebtSecuritiesAvailableForSaleExcludingAccruedInterestCurrent": {
     "standard_tags": [
-      "CashAndMarketableSecurities"
+      "ShortTermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Short-Term Investments",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 71,
     "occurrence_rate": 0.008,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "CashAndMarketableSecurities"
-        ],
-        "display_name": "Cash and Cash Equivalents",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.927
-      },
-      "Drugs": {
-        "standard_tags": [
-          "CashAndMarketableSecurities"
-        ],
-        "display_name": "Cash and Cash Equivalents",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "DebtSecuritiesAvailableForSaleExcludingAccruedInterestNoncurrent": {
     "standard_tags": [
-      "OtherNonOperatingNonCurrentAssets"
+      "LongtermInvestments"
     ],
-    "display_name": "Other Non-Operating Non-Current Assets",
+    "display_name": "Long-Term Investments",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 25,
     "occurrence_rate": 0.003,
     "temporal_consistency": 0.333,
     "years_present": 4,
     "first_year": 2022,
-    "last_year": 2025,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "OtherNonOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "OtherNonOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "DebtSecuritiesAvailableForSaleRealizedGain": {
     "standard_tags": [
@@ -28940,30 +28900,19 @@
   },
   "DebtSecuritiesCurrent": {
     "standard_tags": [
-      "CashAndMarketableSecurities"
+      "ShortTermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Short-Term Investments",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 16,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Drugs": {
-        "standard_tags": [
-          "CashAndMarketableSecurities"
-        ],
-        "display_name": "Cash and Cash Equivalents",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.893
-      }
-    }
+    "last_year": 2025
   },
   "DebtSecuritiesGainLoss": {
     "standard_tags": [
@@ -28992,32 +28941,16 @@
       }
     }
   },
-  "DebtSecuritiesHeldToMaturityAllowanceForCreditLossCurrent": {
-    "standard_tags": [
-      "CashAndMarketableSecurities"
-    ],
-    "display_name": "Cash and Cash Equivalents",
-    "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 2,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.167,
-    "years_present": 2,
-    "first_year": 2023,
-    "last_year": 2024
-  },
   "DebtSecuritiesHeldToMaturityAmortizedCostAfterAllowanceForCreditLoss": {
     "standard_tags": [
-      "CashAndMarketableSecurities",
-      "OtherNonOperatingNonCurrentAssets"
+      "LongtermInvestments",
+      "ShortTermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Long-Term Investments",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Non-Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 82,
     "occurrence_rate": 0.009,
     "temporal_consistency": 0.417,
@@ -29028,13 +28961,13 @@
   },
   "DebtSecuritiesHeldToMaturityAmortizedCostAfterAllowanceForCreditLossCurrent": {
     "standard_tags": [
-      "CashAndMarketableSecurities"
+      "ShortTermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Short-Term Investments",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 20,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.333,
@@ -29044,13 +28977,13 @@
   },
   "DebtSecuritiesHeldToMaturityAmortizedCostAfterAllowanceForCreditLossNoncurrent": {
     "standard_tags": [
-      "OtherNonOperatingNonCurrentAssets"
+      "LongtermInvestments"
     ],
-    "display_name": "Other Non-Operating Non-Current Assets",
+    "display_name": "Long-Term Investments",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 8,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
@@ -29060,13 +28993,13 @@
   },
   "DebtSecuritiesHeldToMaturityExcludingAccruedInterestAfterAllowanceForCreditLoss": {
     "standard_tags": [
-      "Assets"
+      "LongtermInvestments"
     ],
-    "display_name": "Total Assets",
+    "display_name": "Long-Term Investments",
     "statement": "BalanceSheet",
-    "section": "Totals",
-    "is_total": true,
-    "confidence": 0.309,
+    "section": "Non-Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 131,
     "occurrence_rate": 0.015,
     "temporal_consistency": 0.417,
@@ -29076,13 +29009,13 @@
   },
   "DebtSecuritiesHeldToMaturityExcludingAccruedInterestAfterAllowanceForCreditLossCurrent": {
     "standard_tags": [
-      "CashAndMarketableSecurities"
+      "ShortTermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Short-Term Investments",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 8,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
@@ -29092,13 +29025,13 @@
   },
   "DebtSecuritiesHeldToMaturityExcludingAccruedInterestAfterAllowanceForCreditLossNoncurrent": {
     "standard_tags": [
-      "OtherNonOperatingNonCurrentAssets"
+      "LongtermInvestments"
     ],
-    "display_name": "Other Non-Operating Non-Current Assets",
+    "display_name": "Long-Term Investments",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 3,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.25,
@@ -29108,13 +29041,13 @@
   },
   "DebtSecuritiesNoncurrent": {
     "standard_tags": [
-      "OtherNonOperatingNonCurrentAssets"
+      "LongtermInvestments"
     ],
-    "display_name": "Other Non-Operating Non-Current Assets",
+    "display_name": "Long-Term Investments",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 12,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
@@ -46050,86 +45983,21 @@
   },
   "EquitySecuritiesFvNi": {
     "standard_tags": [
-      "CashAndMarketableSecurities",
+      "ShortTermInvestments",
       "LongtermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Short-Term Investments",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 254,
     "occurrence_rate": 0.028,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
     "last_year": 2025,
-    "ambiguous": true,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "CashAndMarketableSecurities"
-        ],
-        "display_name": "Cash and Cash Equivalents",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.99
-      },
-      "Drugs": {
-        "standard_tags": [
-          "CashAndMarketableSecurities"
-        ],
-        "display_name": "Cash and Cash Equivalents",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "CashAndMarketableSecurities"
-        ],
-        "display_name": "Cash and Cash Equivalents",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.927
-      },
-      "Gold": {
-        "standard_tags": [
-          "CashAndMarketableSecurities"
-        ],
-        "display_name": "Cash and Cash Equivalents",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "CashAndMarketableSecurities"
-        ],
-        "display_name": "Cash and Cash Equivalents",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.987
-      },
-      "RlEst": {
-        "standard_tags": [
-          "CashAndMarketableSecurities"
-        ],
-        "display_name": "Cash and Cash Equivalents",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "CashAndMarketableSecurities"
-        ],
-        "display_name": "Cash and Cash Equivalents",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "ambiguous": true
   },
   "EquitySecuritiesFvNiCurrentAndNoncurrent": {
     "standard_tags": [
@@ -55150,13 +55018,13 @@
   },
   "HeldToMaturitySecuritiesCurrent": {
     "standard_tags": [
-      "CashAndMarketableSecurities"
+      "ShortTermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Short-Term Investments",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 24,
     "occurrence_rate": 0.003,
     "temporal_consistency": 0.333,
@@ -77012,14 +76880,14 @@
   },
   "MarketableSecurities": {
     "standard_tags": [
-      "CashAndMarketableSecurities",
-      "OtherNonOperatingNonCurrentAssets"
+      "LongtermInvestments",
+      "ShortTermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Long-Term Investments",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Non-Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 179,
     "occurrence_rate": 0.02,
     "temporal_consistency": 0.5,
@@ -77246,13 +77114,13 @@
   },
   "MarketableSecuritiesEquitySecuritiesCurrent": {
     "standard_tags": [
-      "CashAndMarketableSecurities"
+      "ShortTermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Short-Term Investments",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -77262,13 +77130,13 @@
   },
   "MarketableSecuritiesFixedMaturitiesCurrent": {
     "standard_tags": [
-      "CashAndMarketableSecurities"
+      "ShortTermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Short-Term Investments",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -77359,111 +77227,19 @@
   },
   "MarketableSecuritiesNoncurrent": {
     "standard_tags": [
-      "OtherNonOperatingNonCurrentAssets"
+      "LongtermInvestments"
     ],
-    "display_name": "Other Non-Operating Non-Current Assets",
+    "display_name": "Long-Term Investments",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 265,
     "occurrence_rate": 0.029,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Autos": {
-        "standard_tags": [
-          "OtherNonOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 0.916
-      },
-      "BusSv": {
-        "standard_tags": [
-          "OtherNonOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 0.982
-      },
-      "Chems": {
-        "standard_tags": [
-          "OtherNonOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "OtherNonOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "OtherNonOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "OtherNonOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 0.996
-      },
-      "Fin": {
-        "standard_tags": [
-          "OtherNonOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "OtherNonOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "OtherNonOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "OtherNonOperatingNonCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Non-Current Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "MarketableSecuritiesRealizedGainLoss": {
     "standard_tags": [
@@ -77571,13 +77347,13 @@
   },
   "MarketableSecuritiesRestrictedNoncurrent": {
     "standard_tags": [
-      "OtherOperatingNonCurrentAssets"
+      "LongtermInvestments"
     ],
-    "display_name": "Other Non-Current Assets",
+    "display_name": "Long-Term Investments",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -92847,13 +92623,13 @@
   },
   "OtherMarketableSecuritiesCurrent": {
     "standard_tags": [
-      "CashAndMarketableSecurities"
+      "ShortTermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Short-Term Investments",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -96265,66 +96041,19 @@
   },
   "OtherShortTermInvestments": {
     "standard_tags": [
-      "CashAndMarketableSecurities"
+      "ShortTermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Short-Term Investments",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 116,
     "occurrence_rate": 0.013,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "CashAndMarketableSecurities"
-        ],
-        "display_name": "Cash and Cash Equivalents",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "CashAndMarketableSecurities"
-        ],
-        "display_name": "Cash and Cash Equivalents",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "CashAndMarketableSecurities"
-        ],
-        "display_name": "Cash and Cash Equivalents",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "CashAndMarketableSecurities"
-        ],
-        "display_name": "Cash and Cash Equivalents",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.872
-      },
-      "Insur": {
-        "standard_tags": [
-          "CashAndMarketableSecurities"
-        ],
-        "display_name": "Cash and Cash Equivalents",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "OtherSundryLiabilitiesCurrent": {
     "standard_tags": [
@@ -131949,105 +131678,63 @@
   },
   "TradingSecurities": {
     "standard_tags": [
-      "CashAndMarketableSecurities",
+      "ShortTermInvestments",
       "LongtermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Short-Term Investments",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 54,
     "occurrence_rate": 0.006,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
     "last_year": 2025,
-    "ambiguous": true,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "CashAndMarketableSecurities"
-        ],
-        "display_name": "Cash and Cash Equivalents",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.865
-      }
-    }
+    "ambiguous": true
   },
   "TradingSecuritiesDebt": {
     "standard_tags": [
-      "CashAndMarketableSecurities"
+      "ShortTermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Short-Term Investments",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 77,
     "occurrence_rate": 0.009,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "CashAndMarketableSecurities"
-        ],
-        "display_name": "Cash and Cash Equivalents",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.944
-      },
-      "Fin": {
-        "standard_tags": [
-          "CashAndMarketableSecurities"
-        ],
-        "display_name": "Cash and Cash Equivalents",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.976
-      },
-      "Insur": {
-        "standard_tags": [
-          "CashAndMarketableSecurities"
-        ],
-        "display_name": "Cash and Cash Equivalents",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.903
-      }
-    }
+    "last_year": 2025
   },
   "TradingSecuritiesEquity": {
     "standard_tags": [
-      "CashAndMarketableSecurities",
-      "LongtermInvestments"
+      "ShortTermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Short-Term Investments",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 1,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.083,
     "years_present": 1,
     "first_year": 2021,
-    "last_year": 2021,
-    "ambiguous": true
+    "last_year": 2021
   },
   "TradingSecuritiesOther": {
     "standard_tags": [
-      "CashAndMarketableSecurities"
+      "ShortTermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Short-Term Investments",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,

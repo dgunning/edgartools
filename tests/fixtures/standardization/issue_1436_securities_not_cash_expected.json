@@ -1,0 +1,93 @@
+{
+  "AvailableForSaleSecuritiesCurrent": [
+    "ShortTermInvestments"
+  ],
+  "AvailableForSaleSecuritiesDebtSecurities": [
+    "LongtermInvestments",
+    "ShortTermInvestments"
+  ],
+  "AvailableForSaleSecuritiesEquitySecuritiesCurrent": [
+    "ShortTermInvestments"
+  ],
+  "AvailableforsaleSecuritiesRestrictedNoncurrent": [
+    "LongtermInvestments"
+  ],
+  "DebtSecuritiesAvailableForSaleExcludingAccruedInterest": [
+    "LongtermInvestments",
+    "ShortTermInvestments"
+  ],
+  "DebtSecuritiesAvailableForSaleExcludingAccruedInterestCurrent": [
+    "ShortTermInvestments"
+  ],
+  "DebtSecuritiesAvailableForSaleExcludingAccruedInterestNoncurrent": [
+    "LongtermInvestments"
+  ],
+  "DebtSecuritiesCurrent": [
+    "ShortTermInvestments"
+  ],
+  "DebtSecuritiesHeldToMaturityAllowanceForCreditLossCurrent": null,
+  "DebtSecuritiesHeldToMaturityAmortizedCostAfterAllowanceForCreditLoss": [
+    "LongtermInvestments",
+    "ShortTermInvestments"
+  ],
+  "DebtSecuritiesHeldToMaturityAmortizedCostAfterAllowanceForCreditLossCurrent": [
+    "ShortTermInvestments"
+  ],
+  "DebtSecuritiesHeldToMaturityAmortizedCostAfterAllowanceForCreditLossNoncurrent": [
+    "LongtermInvestments"
+  ],
+  "DebtSecuritiesHeldToMaturityExcludingAccruedInterestAfterAllowanceForCreditLoss": [
+    "LongtermInvestments"
+  ],
+  "DebtSecuritiesHeldToMaturityExcludingAccruedInterestAfterAllowanceForCreditLossCurrent": [
+    "ShortTermInvestments"
+  ],
+  "DebtSecuritiesHeldToMaturityExcludingAccruedInterestAfterAllowanceForCreditLossNoncurrent": [
+    "LongtermInvestments"
+  ],
+  "DebtSecuritiesNoncurrent": [
+    "LongtermInvestments"
+  ],
+  "EquitySecuritiesFvNi": [
+    "ShortTermInvestments",
+    "LongtermInvestments"
+  ],
+  "HeldToMaturitySecuritiesCurrent": [
+    "ShortTermInvestments"
+  ],
+  "MarketableSecurities": [
+    "LongtermInvestments",
+    "ShortTermInvestments"
+  ],
+  "MarketableSecuritiesEquitySecuritiesCurrent": [
+    "ShortTermInvestments"
+  ],
+  "MarketableSecuritiesFixedMaturitiesCurrent": [
+    "ShortTermInvestments"
+  ],
+  "MarketableSecuritiesNoncurrent": [
+    "LongtermInvestments"
+  ],
+  "MarketableSecuritiesRestrictedNoncurrent": [
+    "LongtermInvestments"
+  ],
+  "OtherMarketableSecuritiesCurrent": [
+    "ShortTermInvestments"
+  ],
+  "OtherShortTermInvestments": [
+    "ShortTermInvestments"
+  ],
+  "TradingSecurities": [
+    "ShortTermInvestments",
+    "LongtermInvestments"
+  ],
+  "TradingSecuritiesDebt": [
+    "ShortTermInvestments"
+  ],
+  "TradingSecuritiesEquity": [
+    "ShortTermInvestments"
+  ],
+  "TradingSecuritiesOther": [
+    "ShortTermInvestments"
+  ]
+}

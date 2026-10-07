@@ -1,0 +1,1 @@
+**`ReverseIndex.lookup()` mixed investment securities with cash or unrelated asset concepts.** 28 securities tags now map to short- or long-term investments, and one unmatched allowance tag is removed. On Auburn National's FY2023 10-K (`0001193125-24-067944`), excluding $270.910M of securities reduces the standardized cash group from $310.867M to $39.957M. (GH #1436)
