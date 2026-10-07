@@ -28,6 +28,7 @@ from types import SimpleNamespace
 import pytest
 
 from edgar.xbrl import XBRL
+from edgar.xbrl.period_selector import select_periods
 from edgar.xbrl.presentation import StatementView
 from edgar.xbrl.statement_resolver import StatementResolver
 from edgar.xbrl.statements import Statement, Statements
@@ -357,7 +358,15 @@ def _reset_statement_selection(apple, monkeypatch):
 
 
 @pytest.mark.parametrize(
-    "uri", ("https://example.test/role/CONSOLIDATEDBALANCESHEETSParenthetical", "http://example.test/role/CONSOLIDATEDBALANCESHEETS")
+    "uri",
+    (
+        "https://example.test/role/CONSOLIDATEDBALANCESHEETSParenthetical",
+        "http://example.test/role/CONSOLIDATEDBALANCESHEETS",
+        "HTTP://example.test/role/CONSOLIDATEDBALANCESHEETS",
+        "HtTpS://example.test/role/CONSOLIDATEDBALANCESHEETS",
+        "HTTP://example.test/role/CONSOLIDATEDBALANCESHEETSParenthetical",
+        "HtTpS://example.test/role/CONSOLIDATEDBALANCESHEETSParenthetical",
+    ),
 )
 def test_missing_literal_role_uri_does_not_select_the_primary_balance_sheet(apple, monkeypatch, uri):
     _reset_statement_selection(apple, monkeypatch)
@@ -372,6 +381,16 @@ def test_missing_literal_role_uri_does_not_select_the_primary_balance_sheet(appl
         statement = Statement(apple, uri)
         assert statement.get_raw_data() == []
         assert statement.render(standard=standard) is None
+
+
+@pytest.mark.parametrize("statement_type", ("ScheduleOfInvestmentsParenthetical", "FinancialHighlightsParenthetical"))
+def test_other_instant_statement_parenthetical_types_keep_generic_duration_policy(apple, statement_type):
+    """Synthetic type boundaries use Apple's actual periods, without claiming filed roles."""
+    assert [key for key, _label in select_periods(apple, statement_type)] == [
+        "duration_2022-09-25_2023-09-30",
+        "duration_2021-09-26_2022-09-24",
+        "duration_2020-09-27_2021-09-25",
+    ]
 
 
 @pytest.mark.parametrize("catalog_state", ("normal", "warm", "fresh", "fresh_indexes"))
