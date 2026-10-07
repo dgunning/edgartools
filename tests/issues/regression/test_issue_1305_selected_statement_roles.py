@@ -83,6 +83,12 @@ def apple():
     return XBRL.from_directory(FIXTURES / "aapl" / "10k_2023")
 
 
+@pytest.fixture
+def fresh_apple():
+    """Getter and catalogue patches must own their XBRL caches."""
+    return XBRL.from_directory(FIXTURES / "aapl" / "10k_2023")
+
+
 @pytest.fixture(scope="module")
 def amazon():
     return XBRL.from_directory(FIXTURES / "amzn" / "10q_2026q2")
@@ -369,7 +375,8 @@ def _reset_statement_selection(apple, monkeypatch):
         "HtTpS://example.test/role/CONSOLIDATEDBALANCESHEETSParenthetical",
     ),
 )
-def test_missing_literal_role_uri_does_not_select_the_primary_balance_sheet(apple, monkeypatch, uri):
+def test_missing_literal_role_uri_does_not_select_the_primary_balance_sheet(fresh_apple, monkeypatch, uri):
+    apple = fresh_apple
     _reset_statement_selection(apple, monkeypatch)
     assert uri not in apple.presentation_trees
     assert apple.statements[uri] is None
@@ -395,7 +402,8 @@ def test_other_instant_statement_parenthetical_types_keep_generic_duration_polic
 
 
 @pytest.mark.parametrize("catalog_state", ("normal", "warm", "fresh", "fresh_indexes"))
-def test_literal_role_uri_keeps_the_presentation_role_without_a_catalog_entry(apple, monkeypatch, catalog_state):
+def test_literal_role_uri_keeps_the_presentation_role_without_a_catalog_entry(fresh_apple, monkeypatch, catalog_state):
+    apple = fresh_apple
     entries = apple.get_all_statements()
     original = next(entry for entry in entries if entry["role"] == APPLE_PARENTHETICAL)
     tree = apple.presentation_trees[APPLE_PARENTHETICAL]
@@ -536,7 +544,8 @@ def test_missing_parenthetical_does_not_fall_back_to_an_ordinary_statement(acces
     assert statements.get(kind + "Parenthetical") is None
 
 
-def test_role_selected_validation_uses_the_resolver_kind(apple, monkeypatch):
+def test_role_selected_validation_uses_the_resolver_kind(fresh_apple, monkeypatch):
+    apple = fresh_apple
     role = "https://example.test/role/Position"
     original_get_statement = apple.get_statement
     primary_role = apple.statements.balance_sheet().role_or_type
@@ -549,7 +558,8 @@ def test_role_selected_validation_uses_the_resolver_kind(apple, monkeypatch):
     assert "fundamental_equation" in result.checks_performed
 
 
-def test_role_selected_equity_matrix_and_context_keep_the_resolver_kind(apple, monkeypatch):
+def test_role_selected_equity_matrix_and_context_keep_the_resolver_kind(fresh_apple, monkeypatch):
+    apple = fresh_apple
     role = "https://example.test/role/CapitalChanges"
     original_get_statement = apple.get_statement
     equity_role = apple.statements.statement_of_equity().role_or_type
@@ -586,7 +596,8 @@ def test_direct_parenthetical_render_keeps_filed_share_and_par_value_instants(ap
             assert [cell.value for cell in row.cells] == expected[row.metadata["concept"]]
 
 
-def test_direct_missing_parenthetical_does_not_retrieve_primary_rows(apple, monkeypatch):
+def test_direct_missing_parenthetical_does_not_retrieve_primary_rows(fresh_apple, monkeypatch):
+    apple = fresh_apple
     original_find_statement = apple.find_statement
 
     def no_parenthetical(name, is_parenthetical=False):
@@ -598,8 +609,9 @@ def test_direct_missing_parenthetical_does_not_retrieve_primary_rows(apple, monk
     assert apple.render_statement("BalanceSheet", parenthetical=True) is None
 
 
-def test_parenthetical_processing_keeps_primary_presentation_signs_inactive(apple, monkeypatch):
+def test_parenthetical_processing_keeps_primary_presentation_signs_inactive(fresh_apple, monkeypatch):
     """A single synthetic sign isolates the gate; original Apple values are positive."""
+    apple = fresh_apple
     concept = "us-gaap_CommonStockSharesIssued"
     raw = deepcopy(next(row for row in apple.statements[APPLE_PARENTHETICAL].get_raw_data(view=StatementView.SUMMARY) if row["concept"] == concept))
     raw["preferred_signs"] = {key: -1 for key in raw["values"]}
