@@ -892,6 +892,12 @@ class StatementResolver:
         # Get registry information
         registry_entry = statement_registry[registry_type]
         role_patterns = registry_entry.role_patterns
+        if is_parenthetical and registry_type == "CashFlowStatement":
+            # A family name is distinct from cash-flow hedge disclosure names.
+            role_patterns = [
+                r"^(?:.*/)?(?:(?:[Cc]ondensed|[Cc]onsolidated))*[Cc]ash[Ff]lows?(?:[Ss]tatements?)?[Pp]arentheticals?$",
+                *role_patterns[1:],
+            ]
 
         if not role_patterns:
             return [], None, 0.0

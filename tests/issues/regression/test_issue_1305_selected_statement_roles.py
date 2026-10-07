@@ -779,3 +779,136 @@ def test_real_apple_2010_ordinary_ci_keeps_filed_equity_role(apple_2010_parenthe
     assert actual_type == "ComprehensiveIncome"
     assert matched[0]["role"] == expected
     assert apple_2010_parenthetical_boundary.statements.comprehensive_income().role_or_type == expected
+
+
+CASH_FLOW_PARENTHETICAL_FAMILY_NAMES = (
+    "CashFlowParenthetical",
+    "CashFlowsParenthetical",
+    "CashFlowParentheticals",
+    "CashFlowsParentheticals",
+    "CashFlowStatementParenthetical",
+    "CashFlowsStatementParenthetical",
+    "CashFlowStatementsParentheticals",
+    "ConsolidatedCashFlowParenthetical",
+    "CondensedConsolidatedCashFlowsParenthetical",
+    "StatementOfCashFlowsParenthetical",
+    "ConsolidatedStatementsOfCashFlowsParenthetical",
+    "CONSOLIDATEDSTATEMENTOFCASHFLOWSParenthetical",
+    "ConsolidatedStatementsofCashFlowsunauditedParenthetical",
+    "CondensedConsolidatedStatementsofCashFlowsAmericanAirlinesGroupIncParenthetical",
+)
+CASH_FLOW_PARENTHETICAL_OTHER_NAMES = (
+    "CashFlowHedgesParenthetical",
+    "CashFlowsHedgesParenthetical",
+    "DisclosureGainsLossesRelatedToCashFlowHedgesParenthetical",
+    "DisclosurePreTaxEffectOfDerivativeInstrumentsDesignatedAsCashFlowAndNetInvestmentHedgesParenthetical",
+    "GainsLossesRelatedToCashFlowParenthetical",
+    "DerivativeInstrumentsCashFlowsParenthetical",
+    "NotCashFlowParenthetical",
+    "CashFlowHedgeStatementParenthetical",
+    "CashFlowParentheticalHedgeDetails",
+)
+
+
+def _untyped_cash_flow_name_resolver(name, form="both"):
+    """A synthetic supplementary tree proves only family-name resolution."""
+    role = "https://example.test/role/" + name
+    role_name = name
+    if form == "role_name_only":
+        role = "https://example.test/role/UnclassifiedParenthetical"
+    elif form in ("http_uri_only", "https_uri_only"):
+        role = ("http://" if form == "http_uri_only" else "https://") + "example.test/role/" + name
+        role_name = ""
+    concept = "us-gaap_CommonStockNumberOfSharesParValueAndOtherDisclosuresAbstract"
+    row = {"role": role, "role_name": role_name, "definition": name, "primary_concept": concept, "type": None}
+    tree = SimpleNamespace(all_nodes={concept: object()})
+    return StatementResolver(SimpleNamespace(get_all_statements=lambda: [row], presentation_trees={role: tree})), row
+
+
+@pytest.mark.parametrize("name", CASH_FLOW_PARENTHETICAL_FAMILY_NAMES)
+@pytest.mark.parametrize("form", ("role_name_only", "http_uri_only", "https_uri_only"))
+def test_untyped_cash_flow_parenthetical_family_names_need_no_main_totals(name, form):
+    resolver, row = _untyped_cash_flow_name_resolver(name, form)
+    matched, role, _confidence = resolver._match_by_role_pattern("CashFlowStatement", True)
+    assert matched == [row]
+    assert role == row["role"]
+    matched, role, actual_type, _confidence = resolver.find_statement("CashFlowStatement", True)
+    assert matched == [row]
+    assert role == row["role"]
+    assert actual_type == "CashFlowStatement"
+    assert row["type"] is None
+
+
+@pytest.mark.parametrize("name", CASH_FLOW_PARENTHETICAL_OTHER_NAMES)
+@pytest.mark.parametrize("form", ("role_name_only", "http_uri_only", "https_uri_only"))
+def test_untyped_cash_flow_mentions_do_not_identify_parenthetical_family(name, form):
+    resolver, _row = _untyped_cash_flow_name_resolver(name, form)
+    assert resolver._match_by_role_pattern("CashFlowStatement", True) == ([], None, 0.0)
+    with pytest.raises(StatementNotFoundError):
+        resolver.find_statement("CashFlowStatement", True)
+
+
+def test_cash_flow_default_role_pattern_preserves_legacy_substring_policy():
+    """This synthetic matcher control preserves False policy, not a full statement classification."""
+    resolver, row = _untyped_cash_flow_name_resolver("DisclosureGainsLossesRelatedToCashFlowHedgesParenthetical")
+    matched, role, _confidence = resolver._match_by_role_pattern("CashFlowStatement", False)
+    assert matched == [row]
+    assert role == row["role"]
+
+
+@pytest.fixture(scope="module", params=("aapl", "msft"))
+def real_cash_flow_hedge_note_filing(request):
+    company = request.param
+    year = "10k_2010" if company == "aapl" else "10k_2015"
+    xbrl = XBRL.from_directory(FIXTURES / company / year)
+    stem = "http://www.apple.com/taxonomy/role/" if company == "aapl" else "http://www.microsoft.com/taxonomy/role/"
+    note_name = (
+        "DisclosurePreTaxEffectOfDerivativeInstrumentsDesignatedAsCashFlowAndNetInvestmentHedgesParenthetical"
+        if company == "aapl"
+        else "DisclosureGainsLossesRelatedToCashFlowHedgesParenthetical"
+    )
+    return xbrl, stem + note_name, stem + "StatementOfCashFlowsIndirect"
+
+
+@pytest.mark.parametrize("route", ("helper", "finder", "render_plain", "render_standard"))
+def test_real_cash_flow_parenthetical_request_does_not_select_hedge_note(real_cash_flow_hedge_note_filing, route):
+    """Unmodified Apple FY2010 and Microsoft FY2015 contain parenthetical hedge notes."""
+    xbrl, note_role, _ordinary_role = real_cash_flow_hedge_note_filing
+    metadata = next(row for row in xbrl.get_all_statements() if row["role"] == note_role)
+    assert metadata["type"] == "Disclosures"
+    assert metadata["category"] == "disclosure"
+    assert note_role in xbrl.presentation_trees
+    if route == "helper":
+        assert xbrl.statements.cash_flow_statement(parenthetical=True) is None
+    elif route == "finder":
+        with pytest.raises(StatementNotFoundError):
+            xbrl.find_statement("CashFlowStatement", True)
+    else:
+        with pytest.raises(StatementNotFoundError):
+            xbrl.render_statement("CashFlowStatement", parenthetical=True, standard=route == "render_standard")
+
+
+def test_real_cash_flow_ordinary_request_keeps_filed_statement_role(real_cash_flow_hedge_note_filing):
+    xbrl, _note_role, ordinary_role = real_cash_flow_hedge_note_filing
+    matched, role, actual_type = xbrl.find_statement("CashFlowStatement", False)
+    assert matched[0]["role"] == role == ordinary_role
+    assert actual_type == "CashFlowStatement"
+    assert xbrl.statements.cash_flow_statement().role_or_type == ordinary_role
+
+
+@pytest.mark.parametrize("parenthetical", (False, True))
+@pytest.mark.parametrize("standard", (False, True))
+def test_real_cash_flow_hedge_note_literal_role_remains_exact(real_cash_flow_hedge_note_filing, parenthetical, standard):
+    xbrl, note_role, _ordinary_role = real_cash_flow_hedge_note_filing
+    matched, role, actual_type = xbrl.find_statement(note_role, parenthetical)
+    assert matched[0]["role"] == role == note_role
+    assert actual_type == "Disclosures"
+    expected = xbrl.render_statement(note_role, parenthetical=False, standard=standard)
+    actual = xbrl.render_statement(note_role, parenthetical=parenthetical, standard=standard)
+    assert expected is not None
+    assert actual is not None
+    assert actual.title == expected.title
+    assert actual.statement_type == expected.statement_type == "Disclosures"
+    assert [period.key for period in actual.periods] == [period.key for period in expected.periods]
+    assert [row.metadata.get("concept") for row in actual.rows] == [row.metadata.get("concept") for row in expected.rows]
+    assert [[cell.value for cell in row.cells] for row in actual.rows] == [[cell.value for cell in row.cells] for row in expected.rows]
