@@ -1,0 +1,86 @@
+{
+  "ContractWithCustomerLiabilityCurrent": [
+    "DeferredRevenueCurrent"
+  ],
+  "LiabilitiesNoncurrent": [
+    "NonCurrentLiabilitiesTotal"
+  ],
+  "DeferredIncomeCurrent": [
+    "DeferredRevenueCurrent"
+  ],
+  "LiabilitiesOtherThanLongtermDebtNoncurrent": null,
+  "CustomerAdvancesCurrent": [
+    "CustomerAdvances"
+  ],
+  "CustomerDepositsCurrent": [
+    "CustomerAdvances"
+  ],
+  "AccruedRoyaltiesCurrent": [
+    "OtherOperatingCurrentLiabilities"
+  ],
+  "ContractWithCustomerRefundLiabilityCurrent": [
+    "OtherOperatingCurrentLiabilities"
+  ],
+  "ConstructionPayableCurrent": [
+    "TradePayables"
+  ],
+  "DeferredCompensationSharebasedArrangementsLiabilityClassifiedNoncurrent": [
+    "DeferredCompensationNonCurrent"
+  ],
+  "CustomerAdvancesAndDepositsCurrent": [
+    "CustomerAdvances"
+  ],
+  "AccruedParticipationLiabilitiesDueInNextOperatingCycle": [
+    "OtherOperatingCurrentLiabilities"
+  ],
+  "DeferredCompensationCashbasedArrangementsLiabilityClassifiedNoncurrent": [
+    "DeferredCompensationNonCurrent"
+  ],
+  "CommitmentsAndContingencies": null,
+  "SecuredDebt": [
+    "LongTermDebt"
+  ],
+  "SubordinatedDebt": [
+    "LongTermDebt"
+  ],
+  "SharesSubjectToMandatoryRedemptionSettlementTermsFairValueOfShares": null,
+  "ContractWithCustomerLiabilityNoncurrent": [
+    "DeferredRevenueNonCurrent"
+  ],
+  "OperatingLeaseLiability": null,
+  "DeferredIncomeNoncurrent": [
+    "DeferredRevenueNonCurrent"
+  ],
+  "DerivativeInstrumentsAndHedgesLiabilities": [
+    "OtherNonOperatingCurrentLiabilities"
+  ],
+  "AssetRetirementObligation": [
+    "AssetRetirementObligations"
+  ],
+  "WorkersCompensationLiabilityCurrent": [
+    "SelfInsuranceReserve"
+  ],
+  "DeferredRevenueAndCreditsNoncurrent": [
+    "DeferredRevenueNonCurrent"
+  ],
+  "DisposalGroupIncludingDiscontinuedOperationAccruedIncomeTaxPayableNoncurrent": [
+    "OtherNonOperatingNonCurrentLiabilities"
+  ],
+  "DisposalGroupIncludingDiscontinuedOperationPensionPlanBenefitObligationCurrent": [
+    "OtherNonOperatingCurrentLiabilities"
+  ],
+  "DisposalGroupIncludingDiscontinuedOperationPostretirementPlanBenefitObligationCurrent": [
+    "OtherNonOperatingCurrentLiabilities"
+  ],
+  "DebtLongtermAndShorttermCombinedAmount": null,
+  "DebtInstrumentCarryingAmount": [
+    "LongTermDebt"
+  ],
+  "DebtInstrumentFaceAmount": null,
+  "LongTermDebtAndCapitalLeaseObligationsIncludingCurrentMaturities": [
+    "LongTermDebt"
+  ],
+  "TemporaryEquityLiquidationPreference": null,
+  "DebtInstrumentIncreaseDecreaseForPeriodNet": null,
+  "OperatingLeaseLiabilityStatementOfFinancialPositionExtensibleList": null
+}

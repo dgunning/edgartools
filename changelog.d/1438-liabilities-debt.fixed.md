@@ -1,0 +1,1 @@
+**`ReverseIndex.lookup()` misclassified liabilities and debt disclosures.** 25 entries are remapped and nine without a fitting concept are removed. Apple's FY2023 10-K (0000320193-23-000106) showed $8,061M of deferred revenue as `OtherOperatingCurrentLiabilities`; the same amount now maps to `DeferredRevenueCurrent`. (GH #1438)
