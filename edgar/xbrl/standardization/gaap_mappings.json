@@ -10259,21 +10259,19 @@
   },
   "AmountOfDeferredCostsRelatedToLongTermContracts": {
     "standard_tags": [
-      "OtherOperatingCurrentAssets",
-      "OtherOperatingNonCurrentAssets"
+      "Inventories"
     ],
-    "display_name": "Other Current Assets",
+    "display_name": "Inventory",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 1,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.333,
     "years_present": 4,
     "first_year": 2021,
-    "last_year": 2024,
-    "ambiguous": true
+    "last_year": 2024
   },
   "AociBeforeTaxAttributableToParent": {
     "standard_tags": [
@@ -27914,24 +27912,6 @@
     "first_year": null,
     "last_year": null
   },
-  "CustomerAdvancesAndProgressPaymentsForLongTermContractsOrPrograms": {
-    "standard_tags": [
-      "OtherOperatingCurrentAssets",
-      "OtherOperatingCurrentLiabilities"
-    ],
-    "display_name": "Other Current Assets",
-    "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null,
-    "ambiguous": true
-  },
   "CustomerAdvancesCurrent": {
     "standard_tags": [
       "OtherOperatingCurrentLiabilities"
@@ -36908,24 +36888,6 @@
         "confidence": 0.88
       }
     }
-  },
-  "DerivativeAssetsLiabilitiesAtFairValueNet": {
-    "standard_tags": [
-      "LongtermInvestments",
-      "LongTermDebt"
-    ],
-    "display_name": "Long-Term Investments",
-    "statement": "BalanceSheet",
-    "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.333,
-    "years_present": 4,
-    "first_year": 2021,
-    "last_year": 2024,
-    "ambiguous": true
   },
   "DerivativeAssetsNoncurrent": {
     "standard_tags": [
@@ -46529,22 +46491,6 @@
     "first_year": 2021,
     "last_year": 2024
   },
-  "EquitySecuritiesWithoutReadilyDeterminableFairValueUpwardPriceAdjustmentCumulativeAmount": {
-    "standard_tags": [
-      "LongtermInvestments"
-    ],
-    "display_name": "Long-Term Investments",
-    "statement": "BalanceSheet",
-    "section": "Non-Current Assets",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
   "EscrowDeposit": {
     "standard_tags": [
       "OtherNonOperatingCurrentAssets"
@@ -46563,13 +46509,13 @@
   },
   "EstimatedInsuranceRecoveries": {
     "standard_tags": [
-      "OtherOperatingCurrentAssets"
+      "OtherNonOperatingNonCurrentAssets"
     ],
-    "display_name": "Other Current Assets",
+    "display_name": "Other Non-Operating Non-Current Assets",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.4,
+    "section": "Non-Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -48506,13 +48452,13 @@
   },
   "FiniteLivedCustomerListsGross": {
     "standard_tags": [
-      "IntangibleAssets"
+      "IntangibleAssetsGross"
     ],
-    "display_name": "Intangible Assets",
+    "display_name": "Intangible Assets, Gross",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 1,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.083,
@@ -48522,13 +48468,13 @@
   },
   "FiniteLivedCustomerRelationshipsGross": {
     "standard_tags": [
-      "IntangibleAssets"
+      "IntangibleAssetsGross"
     ],
-    "display_name": "Intangible Assets",
+    "display_name": "Intangible Assets, Gross",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 4,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.333,
@@ -48538,13 +48484,13 @@
   },
   "FiniteLivedIntangibleAssetOffMarketLeaseFavorableGross": {
     "standard_tags": [
-      "IntangibleAssets"
+      "IntangibleAssetsGross"
     ],
-    "display_name": "Intangible Assets",
+    "display_name": "Intangible Assets, Gross",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 2,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.333,
@@ -48926,13 +48872,13 @@
   },
   "FiniteLivedNoncompeteAgreementsGross": {
     "standard_tags": [
-      "IntangibleAssets"
+      "IntangibleAssetsGross"
     ],
-    "display_name": "Intangible Assets",
+    "display_name": "Intangible Assets, Gross",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 1,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.167,
@@ -48942,13 +48888,13 @@
   },
   "FiniteLivedPatentsGross": {
     "standard_tags": [
-      "IntangibleAssets"
+      "IntangibleAssetsGross"
     ],
-    "display_name": "Intangible Assets",
+    "display_name": "Intangible Assets, Gross",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 15,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.333,
@@ -48958,13 +48904,13 @@
   },
   "FiniteLivedTradeNamesGross": {
     "standard_tags": [
-      "IntangibleAssets"
+      "IntangibleAssetsGross"
     ],
-    "display_name": "Intangible Assets",
+    "display_name": "Intangible Assets, Gross",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 1,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.25,
@@ -48974,13 +48920,13 @@
   },
   "FiniteLivedTrademarksGross": {
     "standard_tags": [
-      "IntangibleAssets"
+      "IntangibleAssetsGross"
     ],
-    "display_name": "Intangible Assets",
+    "display_name": "Intangible Assets, Gross",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 9,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.417,
@@ -63988,13 +63934,13 @@
   },
   "IndefiniteLivedContractualRights": {
     "standard_tags": [
-      "Goodwill"
+      "IntangibleAssets"
     ],
-    "display_name": "Goodwill",
+    "display_name": "Intangible Assets",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 5,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.417,
@@ -64004,13 +63950,13 @@
   },
   "IndefiniteLivedFranchiseRights": {
     "standard_tags": [
-      "Goodwill"
+      "IntangibleAssets"
     ],
-    "display_name": "Goodwill",
+    "display_name": "Intangible Assets",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 11,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
@@ -64065,67 +64011,45 @@
   },
   "IndefiniteLivedLicenseAgreements": {
     "standard_tags": [
-      "Goodwill"
+      "IntangibleAssets"
     ],
-    "display_name": "Goodwill",
+    "display_name": "Intangible Assets",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 28,
     "occurrence_rate": 0.003,
     "temporal_consistency": 0.333,
     "years_present": 4,
     "first_year": 2021,
-    "last_year": 2024,
-    "industry_overrides": {
-      "Telcm": {
-        "standard_tags": [
-          "Goodwill"
-        ],
-        "display_name": "Goodwill",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 0.964
-      }
-    }
+    "last_year": 2024
   },
   "IndefiniteLivedTradeNames": {
     "standard_tags": [
-      "Goodwill"
+      "IntangibleAssets"
     ],
-    "display_name": "Goodwill",
+    "display_name": "Intangible Assets",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 17,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.333,
     "years_present": 4,
     "first_year": 2021,
-    "last_year": 2024,
-    "industry_overrides": {
-      "Rtail": {
-        "standard_tags": [
-          "Goodwill"
-        ],
-        "display_name": "Goodwill",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2024
   },
   "IndefiniteLivedTrademarks": {
     "standard_tags": [
-      "Goodwill"
+      "IntangibleAssets"
     ],
-    "display_name": "Goodwill",
+    "display_name": "Intangible Assets",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 24,
     "occurrence_rate": 0.003,
     "temporal_consistency": 0.5,
@@ -64423,39 +64347,19 @@
   },
   "IntangibleAssetsCurrent": {
     "standard_tags": [
-      "IntangibleAssets"
+      "OtherOperatingCurrentAssets"
     ],
-    "display_name": "Intangible Assets",
+    "display_name": "Other Current Assets",
     "statement": "BalanceSheet",
-    "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 51,
     "occurrence_rate": 0.006,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Fin": {
-        "standard_tags": [
-          "IntangibleAssets"
-        ],
-        "display_name": "Intangible Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "IntangibleAssets"
-        ],
-        "display_name": "Intangible Assets",
-        "section": "Non-Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "IntangibleAssetsGrossExcludingGoodwill": {
     "standard_tags": [
@@ -71858,13 +71762,13 @@
   },
   "LandAvailableForDevelopment": {
     "standard_tags": [
-      "OtherOperatingNonCurrentAssets"
+      "RealEstateInvestments"
     ],
-    "display_name": "Other Non-Current Assets",
+    "display_name": "Real Estate Investments",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 21,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.333,
@@ -90846,13 +90750,13 @@
   },
   "OtherFiniteLivedIntangibleAssetsGross": {
     "standard_tags": [
-      "IntangibleAssets"
+      "IntangibleAssetsGross"
     ],
-    "display_name": "Intangible Assets",
+    "display_name": "Intangible Assets, Gross",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 10,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.417,
@@ -91227,13 +91131,13 @@
   },
   "OtherIndefiniteLivedIntangibleAssets": {
     "standard_tags": [
-      "Goodwill"
+      "IntangibleAssets"
     ],
-    "display_name": "Goodwill",
+    "display_name": "Intangible Assets",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 8,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.417,
@@ -95332,93 +95236,19 @@
   },
   "OtherPrepaidExpenseCurrent": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "PrepaidExpenses"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Prepaid Expenses",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 118,
     "occurrence_rate": 0.013,
     "temporal_consistency": 0.583,
     "years_present": 7,
     "first_year": 2019,
-    "last_year": 2025,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.979
-      },
-      "Chips": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.981
-      },
-      "Fin": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.924
-      },
-      "Rtail": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.92
-      },
-      "Trans": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "OtherRealEstateRevenue": {
     "standard_tags": [
@@ -103439,13 +103269,13 @@
   },
   "PrepaidAdvertising": {
     "standard_tags": [
-      "OtherOperatingCurrentAssets"
+      "PrepaidExpenses"
     ],
-    "display_name": "Other Current Assets",
+    "display_name": "Prepaid Expenses",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 2,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.333,
@@ -104258,13 +104088,13 @@
   },
   "PrepaidInsurance": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "PrepaidExpenses"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Prepaid Expenses",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 54,
     "occurrence_rate": 0.006,
     "temporal_consistency": 0.417,
@@ -104274,13 +104104,13 @@
   },
   "PrepaidInterest": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "PrepaidExpenses"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Prepaid Expenses",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 3,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.333,
@@ -104322,13 +104152,13 @@
   },
   "PrepaidRent": {
     "standard_tags": [
-      "OtherOperatingCurrentAssets"
+      "PrepaidExpenses"
     ],
-    "display_name": "Other Current Assets",
+    "display_name": "Prepaid Expenses",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 14,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.333,
@@ -104338,39 +104168,35 @@
   },
   "PrepaidRoyalties": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets",
-      "OtherNonOperatingNonCurrentAssets"
+      "PrepaidExpenses"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Prepaid Expenses",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 6,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "ambiguous": true
+    "last_year": 2025
   },
   "PrepaidTaxes": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets",
-      "OtherNonOperatingNonCurrentAssets"
+      "PrepaidExpenses"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Prepaid Expenses",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 159,
     "occurrence_rate": 0.018,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "ambiguous": true
+    "last_year": 2025
   },
   "Prepayments": {
     "standard_tags": [
@@ -112421,13 +112247,13 @@
   },
   "PropertySubjectToOrAvailableForOperatingLeaseAccumulatedDepreciation": {
     "standard_tags": [
-      "Inventories"
+      "AccumulatedDepreciation"
     ],
-    "display_name": "Inventory",
+    "display_name": "Accumulated Depreciation",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 8,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
@@ -112437,13 +112263,13 @@
   },
   "PropertySubjectToOrAvailableForOperatingLeaseGross": {
     "standard_tags": [
-      "PlantPropertyEquipmentNet"
+      "GrossPropertyPlantEquipment"
     ],
-    "display_name": "Property, Plant and Equipment",
+    "display_name": "Property, Plant & Equipment, Gross",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 7,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
@@ -112453,13 +112279,13 @@
   },
   "PropertySubjectToOrAvailableForOperatingLeaseNet": {
     "standard_tags": [
-      "Inventories"
+      "PlantPropertyEquipmentNet"
     ],
-    "display_name": "Inventory",
+    "display_name": "Property, Plant and Equipment",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Non-Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 30,
     "occurrence_rate": 0.003,
     "temporal_consistency": 0.417,
@@ -130084,39 +129910,19 @@
   },
   "Supplies": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "PrepaidExpenses"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Prepaid Expenses",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 73,
     "occurrence_rate": 0.008,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Drugs": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.916
-      },
-      "Rtail": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentAssets"
-        ],
-        "display_name": "Other Non-Operating Current Assets",
-        "section": "Current Assets",
-        "is_total": false,
-        "confidence": 0.945
-      }
-    }
+    "last_year": 2025
   },
   "SyntheticFuelCosts": {
     "standard_tags": [
@@ -133887,22 +133693,6 @@
     "display_name": "Other Non-Operating Current Assets",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "VariableInterestEntityConsolidatedCarryingAmountAssets": {
-    "standard_tags": [
-      "MinorityInterestBalance"
-    ],
-    "display_name": "Noncontrolling Interest",
-    "statement": "BalanceSheet",
-    "section": "Equity",
     "is_total": false,
     "confidence": 0.4,
     "company_count": 0,

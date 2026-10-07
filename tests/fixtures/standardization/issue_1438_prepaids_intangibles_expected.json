@@ -1,0 +1,93 @@
+{
+  "OtherPrepaidExpenseCurrent": [
+    "PrepaidExpenses"
+  ],
+  "Supplies": [
+    "PrepaidExpenses"
+  ],
+  "PrepaidInsurance": [
+    "PrepaidExpenses"
+  ],
+  "LandAvailableForDevelopment": [
+    "RealEstateInvestments"
+  ],
+  "PrepaidRent": [
+    "PrepaidExpenses"
+  ],
+  "PrepaidInterest": [
+    "PrepaidExpenses"
+  ],
+  "PrepaidAdvertising": [
+    "PrepaidExpenses"
+  ],
+  "AmountOfDeferredCostsRelatedToLongTermContracts": [
+    "Inventories"
+  ],
+  "VariableInterestEntityConsolidatedCarryingAmountAssets": null,
+  "PrepaidTaxes": [
+    "PrepaidExpenses"
+  ],
+  "IntangibleAssetsCurrent": [
+    "OtherOperatingCurrentAssets"
+  ],
+  "PropertySubjectToOrAvailableForOperatingLeaseNet": [
+    "PlantPropertyEquipmentNet"
+  ],
+  "IndefiniteLivedLicenseAgreements": [
+    "IntangibleAssets"
+  ],
+  "IndefiniteLivedTrademarks": [
+    "IntangibleAssets"
+  ],
+  "IndefiniteLivedTradeNames": [
+    "IntangibleAssets"
+  ],
+  "FiniteLivedPatentsGross": [
+    "IntangibleAssetsGross"
+  ],
+  "IndefiniteLivedFranchiseRights": [
+    "IntangibleAssets"
+  ],
+  "OtherFiniteLivedIntangibleAssetsGross": [
+    "IntangibleAssetsGross"
+  ],
+  "FiniteLivedTrademarksGross": [
+    "IntangibleAssetsGross"
+  ],
+  "OtherIndefiniteLivedIntangibleAssets": [
+    "IntangibleAssets"
+  ],
+  "PropertySubjectToOrAvailableForOperatingLeaseAccumulatedDepreciation": [
+    "AccumulatedDepreciation"
+  ],
+  "PropertySubjectToOrAvailableForOperatingLeaseGross": [
+    "GrossPropertyPlantEquipment"
+  ],
+  "PrepaidRoyalties": [
+    "PrepaidExpenses"
+  ],
+  "IndefiniteLivedContractualRights": [
+    "IntangibleAssets"
+  ],
+  "FiniteLivedCustomerRelationshipsGross": [
+    "IntangibleAssetsGross"
+  ],
+  "FiniteLivedIntangibleAssetOffMarketLeaseFavorableGross": [
+    "IntangibleAssetsGross"
+  ],
+  "FiniteLivedCustomerListsGross": [
+    "IntangibleAssetsGross"
+  ],
+  "FiniteLivedNoncompeteAgreementsGross": [
+    "IntangibleAssetsGross"
+  ],
+  "FiniteLivedTradeNamesGross": [
+    "IntangibleAssetsGross"
+  ],
+  "CustomerAdvancesAndProgressPaymentsForLongTermContractsOrPrograms": null,
+  "EstimatedInsuranceRecoveries": [
+    "OtherNonOperatingNonCurrentAssets"
+  ],
+  "DerivativeAssetsLiabilitiesAtFairValueNet": null,
+  "EquitySecuritiesWithoutReadilyDeterminableFairValueUpwardPriceAdjustmentCumulativeAmount": null
+}
