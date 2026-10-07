@@ -58,7 +58,7 @@ class TableMatrix:
         # as if it described the rows now being measured.
         self.matrix = []
 
-        # Store header row count for later use
+        # Set before placement so numeric alignment can distinguish header and data rows.
         self.header_row_count = len(header_rows)
 
         # Combine all rows for processing

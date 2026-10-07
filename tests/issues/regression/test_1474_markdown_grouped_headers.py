@@ -159,6 +159,29 @@ def test_apple_equity_component_headers_and_values_are_preserved(render_rich_fir
             id="numeric-year-keeps-duration",
         ),
         pytest.param(
+            '<tr><th rowspan="2">Business</th><th colspan="2">2024</th></tr>'
+            "<tr><th>2024</th><th>2023</th></tr>"
+            "<tr><td>Cloud</td><td>10</td><td>8</td></tr>",
+            ["Business", "2024 2024", "2024 2023"],
+            [["Cloud", "10", "8"]],
+            id="distinct-matching-year-labels",
+        ),
+        pytest.param(
+            '<tr><th rowspan="3">Metric</th><th colspan="2">Current year</th><th colspan="2">Prior year</th></tr>'
+            "<tr><th>Three Months Ended</th><th>Year Ended</th><th>Three Months Ended</th><th>Year Ended</th></tr>"
+            "<tr><th>Dec. 31, 2025</th><th>Dec. 31, 2025</th><th>Dec. 31, 2024</th><th>Dec. 31, 2024</th></tr>"
+            "<tr><td>Sales</td><td>10</td><td>40</td><td>8</td><td>30</td></tr>",
+            [
+                "Metric",
+                "Current year Three Months Ended Dec. 31, 2025",
+                "Current year Year Ended Dec. 31, 2025",
+                "Prior year Three Months Ended Dec. 31, 2024",
+                "Prior year Year Ended Dec. 31, 2024",
+            ],
+            [["Sales", "10", "40", "8", "30"]],
+            id="three-level-period-duration-date",
+        ),
+        pytest.param(
             '<tr><th rowspan="3">Business</th><th colspan="2">Revenue</th><th rowspan="3">Profit</th></tr>'
             '<tr><th colspan="2">Revenue</th></tr>'
             "<tr><th>2026</th><th>2025</th></tr>"

@@ -282,6 +282,8 @@ class MarkdownRenderer:
             combined_headers = self._combine_multi_row_headers(expanded_headers)
             filtered_headers = [combined_headers[i] if i < len(combined_headers) else "" for i in content_columns]
 
+            # Keep flat-header output compatible, including its existing escape
+            # limitations; escape the newly flattened grouped header paths.
             if len(node.headers) >= 2:
                 filtered_headers = [header.replace('\\', '\\\\').replace('|', '\\|')
                                     for header in filtered_headers]
@@ -516,6 +518,7 @@ class MarkdownRenderer:
         # span for the header matrix without modifying the original cells.
         header_rows = [[replace(cell, rowspan=len(node.headers) - row_index) if cell.rowspan == 0 else cell
                         for cell in row] for row_index, row in enumerate(node.headers)]
+        # Use the matrix only for headers; retain the body expansion below.
         matrix = TableMatrix().build_from_rows(header_rows, [])
         max_columns = max(matrix.col_count, max((sum(cell.colspan for cell in row.cells)
                                                for row in node.rows), default=0))
@@ -616,6 +619,8 @@ class MarkdownRenderer:
             column_values = []
             for row in header_rows:
                 if col < len(row) and row[col].strip():
+                    # Equal labels can come from distinct cells. Expansion
+                    # already suppresses repeated appearances of one rowspan.
                     column_values.append(" ".join(row[col].split()))
             combined[col] = " ".join(column_values)
 
