@@ -127,9 +127,13 @@ class ElementCatalog:
 
     Attributes:
         name: The name of the element (e.g., "us-gaap_NetIncome")
-        data_type: The data type of the element (e.g., "monetary", "string", etc.)
-        period_type: The period type of the element (e.g., "instant", "duration")
-        balance: The balance type of the element (e.g., "debit", "credit", or None)
+        data_type: The data type of the element (e.g., "monetary", "string", etc.),
+            or None when the declaring schema is not part of the filing
+        period_type: The period type of the element ("instant" or "duration"). For
+            an element declared outside the filing (us-gaap, dei, srt) it is read
+            from the element's facts, and is None when the element has no facts
+        balance: The balance type of the element (e.g., "debit", "credit", or None).
+            None also when the declaring schema is not part of the filing
         abstract: Whether the element is abstract (True/False)
         labels: A dictionary of labels for the element, keyed by role URI
         substitution_group: The declared substitutionGroup, which is what marks
@@ -141,8 +145,8 @@ class ElementCatalog:
 
     def __init__(self,
                  name: str,
-                 data_type: str,
-                 period_type: str,
+                 data_type: Optional[str],
+                 period_type: Optional[str],
                  balance: Optional[str] = None,
                  abstract: bool = False,
                  labels: Optional[Dict[str, str]] = None,
