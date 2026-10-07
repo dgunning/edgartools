@@ -16,8 +16,8 @@ import pytest
 from lxml import html as lxml_html
 from markdown_it import MarkdownIt
 
-from edgar.documents import HTMLParser, ParserConfig
-from edgar.documents.table_nodes import Cell, Row
+from edgar.documents import Document, HTMLParser, ParserConfig
+from edgar.documents.table_nodes import Cell, Row, TableNode
 from edgar.documents.utils.table_matrix import TableMatrix
 from edgar.richtools import rich_to_text
 
@@ -34,6 +34,15 @@ PERIODS = [
 
 def parse_document(source):
     return HTMLParser(ParserConfig(form="10-Q")).parse(source)
+
+
+def first_table(document: Document) -> TableNode:
+    """Require the parsed fixture to expose its first table."""
+    tables = document.tables
+    assert tables is not None
+    table = tables[0]
+    assert table is not None
+    return table
 
 
 def first_markdown_table(document):
@@ -68,7 +77,7 @@ def test_apple_duration_date_headers_match_the_filed_amounts(report, label, amou
 def test_rich_header_padding_does_not_add_a_markdown_column(report):
     document = parse_document((APPLE_REPORTS / f"{report}.htm").read_text(encoding="utf-8"))
     before = first_markdown_table(document)
-    rich_to_text(document.tables[0].render(width=500), width=500)
+    rich_to_text(first_table(document).render(width=500), width=500)
     after = first_markdown_table(document)
 
     assert after == before
@@ -80,7 +89,7 @@ def test_rich_header_padding_does_not_add_a_markdown_column(report):
 def test_apple_equity_component_headers_and_values_are_preserved(render_rich_first):
     document = parse_document((APPLE_REPORTS / "R6.htm").read_text(encoding="utf-8"))
     if render_rich_first:
-        rich_to_text(document.tables[0].render(width=500), width=500)
+        rich_to_text(first_table(document).render(width=500), width=500)
     headers, rows = first_markdown_table(document)
 
     assert headers[0].startswith("CONDENSED CONSOLIDATED STATEMENTS OF SHAREHOLDERS' EQUITY")
@@ -221,7 +230,7 @@ def test_headerless_body_rendering_is_unchanged():
     document = parse_document(
         "<html><body><table><tr><td>Cloud</td><td>10</td><td>8</td></tr><tr><td>Other</td><td>3</td><td>4</td></tr></table></body></html>"
     )
-    assert document.tables[0].headers == []
+    assert first_table(document).headers == []
     assert document.to_markdown() == "| Cloud | 10 | 8 |\n| Other | 3 | 4 |"
 
 
@@ -240,7 +249,9 @@ def test_existing_numeric_data_span_placement_is_preserved(header_count):
         row_index = header_count + index
         number_column = 2 if row_index > 1 else 1
         expanded = matrix.get_expanded_row(row_index)
-        assert expanded[number_column].text() == "1,000"
+        cell = expanded[number_column]
+        assert cell is not None
+        assert cell.text() == "1,000"
         assert expanded[3 - number_column] is None
 
 
@@ -264,7 +275,7 @@ def test_existing_numeric_data_span_placement_is_preserved(header_count):
 )
 def test_zero_rowspan_headers_preserve_labels_alignment_and_original_cells(header_html, headers, data_html, row):
     document = parse_document(f"<html><body><table><thead>{header_html}</thead><tbody>{data_html}</tbody></table></body></html>")
-    table = document.tables[0]
+    table = first_table(document)
     original = table.headers[0][0]
     cells = [cell for header in table.headers for cell in header] + [cell for data in table.rows for cell in data.cells]
     before = [(id(cell), cell.text(), cell.rowspan, cell.colspan) for cell in cells]
