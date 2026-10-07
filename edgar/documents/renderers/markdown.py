@@ -2,12 +2,14 @@
 Markdown renderer for parsed documents.
 """
 
+from dataclasses import replace
 from typing import Dict, List, Optional, Set
 from urllib.parse import urljoin
 
 from edgar.documents.document import Document
 from edgar.documents.nodes import HeadingNode, ImageNode, ListItemNode, ListNode, Node, ParagraphNode, TextNode
 from edgar.documents.table_nodes import TableNode
+from edgar.documents.utils.table_matrix import TableMatrix
 
 
 class MarkdownRenderer:
@@ -275,12 +277,13 @@ class MarkdownRenderer:
 
         rows = []
 
-        # Render headers with intelligent multi-row combination
+        # Flatten each column's complete header path in source order.
         if expanded_headers:
             combined_headers = self._combine_multi_row_headers(expanded_headers)
             filtered_headers = [combined_headers[i] if i < len(combined_headers) else "" for i in content_columns]
 
-            row_md = "| " + " | ".join(filtered_headers) + " |"
+            row_md = "| " + " | ".join(header.replace('\\', '\\\\').replace('|', '\\|')
+                                      for header in filtered_headers) + " |"
             rows.append(row_md)
 
             # Add separator
@@ -495,36 +498,36 @@ class MarkdownRenderer:
 
     def _expand_table_structure(self, node: TableNode) -> tuple:
         """
-        Expand table structure to handle column spanning properly.
+        Align header cells using their spans and preserve body expansion.
         Returns (expanded_headers, expanded_data_rows).
         """
-        # Calculate the logical column count from colspan
-        max_columns = 0
+        # HTML rowspan=0 reaches the end of the header group. Project that
+        # span for the header matrix without modifying the original cells.
+        header_rows = [[replace(cell, rowspan=len(node.headers) - row_index) if cell.rowspan == 0 else cell
+                        for cell in row] for row_index, row in enumerate(node.headers)]
+        matrix = TableMatrix().build_from_rows(header_rows, [])
+        max_columns = max(matrix.col_count, max((sum(cell.colspan for cell in row.cells)
+                                               for row in node.rows), default=0))
 
-        # Check all rows for maximum column span
-        all_rows = []
-        if node.headers:
-            for header_row in node.headers:
-                all_rows.append(header_row)
-        for row in node.rows:
-            all_rows.append(row.cells)
-
-        for row in all_rows:
-            column_count = sum(cell.colspan for cell in row)
-            max_columns = max(max_columns, column_count)
-
-        # Expand headers
+        # Find content columns before copying group labels across their spans,
+        # so a header over empty SEC spacing columns does not keep those columns.
         expanded_headers = []
-        if node.headers:
-            for header_row in node.headers:
-                expanded = self._expand_row_to_columns(header_row, max_columns)
-                expanded_headers.append(expanded)
+        for row_index in range(matrix.header_row_count):
+            expanded = [cell.text().strip() if cell else "" for cell in matrix.get_expanded_row(row_index)]
+            expanded.extend([""] * (max_columns - len(expanded)))
+            expanded_headers.append(expanded)
+        expanded_data_rows = [self._expand_row_to_columns(row.cells, max_columns) for row in node.rows]
+        content_columns = self._identify_content_columns(expanded_headers, expanded_data_rows)
 
-        # Expand data rows
-        expanded_data_rows = []
-        for row in node.rows:
-            expanded = self._expand_row_to_columns(row.cells, max_columns)
-            expanded_data_rows.append(expanded)
+        for row_index, expanded in enumerate(expanded_headers):
+            for column in content_columns:
+                if column >= matrix.col_count:
+                    continue
+                entry = matrix.matrix[row_index][column]
+                # A horizontal span contributes to each covered column. A
+                # vertical span contributes only once, at its source row.
+                if entry.original_cell and entry.row_origin == row_index:
+                    expanded[column] = entry.original_cell.text().strip()
 
         return expanded_headers, expanded_data_rows
 
@@ -589,10 +592,7 @@ class MarkdownRenderer:
         return content_columns
 
     def _combine_multi_row_headers(self, header_rows: List[List[str]]) -> List[str]:
-        """
-        Combine multi-row headers intelligently for SEC filing tables.
-        Prioritizes specific dates/periods over generic labels.
-        """
+        """Join each column's group and leaf labels without discarding levels."""
         if not header_rows:
             return []
 
@@ -600,46 +600,10 @@ class MarkdownRenderer:
         combined = [""] * num_columns
 
         for col in range(num_columns):
-            # Collect all values for this column across header rows
             column_values = []
             for row in header_rows:
                 if col < len(row) and row[col].strip():
-                    column_values.append(row[col].strip())
-
-            if column_values:
-                # Prioritize date-like values over generic labels
-                date_values = [v for v in column_values if self._looks_like_date(v)]
-                if date_values:
-                    # Clean up line breaks in dates
-                    combined[col] = date_values[0].replace('\n', ' ')
-                elif len(column_values) == 1:
-                    combined[col] = column_values[0].replace('\n', ' ')
-                else:
-                    # Skip generic terms like "Year Ended" if we have something more specific
-                    specific_values = [v for v in column_values
-                                     if v.lower() not in ['year ended', 'years ended']]
-                    if specific_values:
-                        combined[col] = specific_values[0].replace('\n', ' ')
-                    else:
-                        combined[col] = column_values[0].replace('\n', ' ')
+                    column_values.append(" ".join(row[col].split()))
+            combined[col] = " ".join(column_values)
 
         return combined
-
-    def _looks_like_date(self, text: str) -> bool:
-        """Check if text looks like a date."""
-        import re
-
-        # Common date patterns in SEC filings
-        date_patterns = [
-            r'\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s*\d{4}',
-            r'\d{1,2}/\d{1,2}/\d{4}',
-            r'\d{4}-\d{2}-\d{2}',
-            r'^\d{4}$',  # Just a year
-        ]
-
-        text_clean = text.replace('\n', ' ').strip()
-        for pattern in date_patterns:
-            if re.search(pattern, text_clean, re.IGNORECASE):
-                return True
-
-        return False
