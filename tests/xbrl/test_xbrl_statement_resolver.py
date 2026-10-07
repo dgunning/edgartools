@@ -116,20 +116,31 @@ def test_find_statement_by_type(tsla_xbrl):
 
 
 def test_render_statement_with_parenthetical(tsla_xbrl):
-    """Test rendering statements with parenthetical parameter."""
-    # Try to render non-parenthetical balance sheet
+    """Render this fixture's filed parenthetical role and its share facts."""
     regular_stmt = tsla_xbrl.render_statement("BalanceSheet", parenthetical=False)
-    
-    # Try to render parenthetical balance sheet
-    try:
-        paren_stmt = tsla_xbrl.render_statement("BalanceSheet", parenthetical=True)
-        # Check titles to make sure they're different
-        assert paren_stmt is not None
-        assert "(Parenthetical)" in paren_stmt.title
-        assert regular_stmt.title != paren_stmt.title
-    except:
-        # Skip if no parenthetical statement found
-        pytest.skip("No parenthetical balance sheet in the sample data")
+    paren_stmt = tsla_xbrl.render_statement("BalanceSheet", parenthetical=True)
+
+    assert regular_stmt is not None
+    assert paren_stmt is not None
+    assert paren_stmt.title == "ConsolidatedBalanceSheetsParenthetical"
+    assert paren_stmt.statement_type == "BalanceSheetParenthetical"
+    assert [period.key for period in paren_stmt.periods] == [
+        "instant_2024-06-30", "instant_2023-12-31"
+    ]
+    expected = {
+        "us-gaap_PreferredStockParOrStatedValuePerShare": [0.001, 0.001],
+        "us-gaap_PreferredStockSharesAuthorized": [100_000_000, 100_000_000],
+        "us-gaap_PreferredStockSharesIssued": [0, 0],
+        "us-gaap_PreferredStockSharesOutstanding": [0, 0],
+        "us-gaap_CommonStockParOrStatedValuePerShare": [0.001, 0.001],
+        "us-gaap_CommonStockSharesAuthorized": [6_000_000_000, 6_000_000_000],
+        "us-gaap_CommonStockSharesIssued": [3_194_000_000, 3_185_000_000],
+        "us-gaap_CommonStockSharesOutstanding": [3_194_000_000, 3_185_000_000],
+    }
+    assert [row.metadata["concept"] for row in paren_stmt.rows] == list(expected)
+    for row in paren_stmt.rows:
+        assert [cell.value for cell in row.cells] == expected[row.metadata["concept"]]
+    assert regular_stmt.title != paren_stmt.title
 
 
 def test_custom_namespace_detection(simple_resolver):
