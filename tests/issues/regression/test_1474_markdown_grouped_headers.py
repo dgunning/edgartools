@@ -275,3 +275,26 @@ def test_zero_rowspan_headers_preserve_labels_alignment_and_original_cells(heade
     assert table.headers[0][0] is original
     after_cells = [cell for header in table.headers for cell in header] + [cell for data in table.rows for cell in data.cells]
     assert [(id(cell), cell.text(), cell.rowspan, cell.colspan) for cell in after_cells] == before
+
+
+@pytest.mark.parametrize(
+    ("header_html", "data_html", "headers", "rows"),
+    [
+        (
+            "<tr><th>Metric</th><th>Amount</th></tr>",
+            "<tr><td>Cloud</td><td>10</td><td>8</td></tr>",
+            ["Metric", "Amount", ""],
+            [["Cloud", "10", "8"]],
+        ),
+        (
+            "<tr><th>Metric</th><th>Current</th><th>Comparative</th></tr>",
+            "<tr><td>Cloud</td><td>10</td></tr>",
+            ["Metric", "Current", "Comparative"],
+            [["Cloud", "10", ""]],
+        ),
+    ],
+    ids=["body-wider-than-headers", "body-narrower-than-headers"],
+)
+def test_unequal_header_body_widths_preserve_amounts_and_padding(header_html, data_html, headers, rows):
+    document = parse_document(f"<html><body><table><thead>{header_html}</thead><tbody>{data_html}</tbody></table></body></html>")
+    assert first_markdown_table(document) == (headers, rows)
