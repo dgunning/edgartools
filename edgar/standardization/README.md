@@ -210,7 +210,8 @@ SynonymGroups handles **tag identity** only - mapping XBRL tags to canonical con
 ### Normalization
 
 - Concept names are normalized to lowercase with underscores
-- Namespace prefixes (e.g., `us-gaap:`) are stripped from tags
+- Standard taxonomy prefixes (`us-gaap`, `ifrs-full`, `dei`, `srt`) are stripped from tags, as `us-gaap:Revenues` or `us-gaap_Revenues`
+- Any other prefix, such as a filer's extension (`orcl:Revenues`), names a different concept, so the tag is kept whole and matches no builtin synonym
 - Duplicate synonyms are removed while preserving order
 
 ## See Also
