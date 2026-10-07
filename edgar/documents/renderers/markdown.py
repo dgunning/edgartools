@@ -282,8 +282,10 @@ class MarkdownRenderer:
             combined_headers = self._combine_multi_row_headers(expanded_headers)
             filtered_headers = [combined_headers[i] if i < len(combined_headers) else "" for i in content_columns]
 
-            row_md = "| " + " | ".join(header.replace('\\', '\\\\').replace('|', '\\|')
-                                      for header in filtered_headers) + " |"
+            if len(node.headers) >= 2:
+                filtered_headers = [header.replace('\\', '\\\\').replace('|', '\\|')
+                                    for header in filtered_headers]
+            row_md = "| " + " | ".join(filtered_headers) + " |"
             rows.append(row_md)
 
             # Add separator
@@ -501,6 +503,15 @@ class MarkdownRenderer:
         Align header cells using their spans and preserve body expansion.
         Returns (expanded_headers, expanded_data_rows).
         """
+        # Flat/headerless tables retain their original column and whitespace policy.
+        if len(node.headers) < 2:
+            all_rows = [*node.headers, *(row.cells for row in node.rows)]
+            max_columns = max((sum(cell.colspan for cell in row) for row in all_rows), default=0)
+            return (
+                [self._expand_row_to_columns(row, max_columns) for row in node.headers],
+                [self._expand_row_to_columns(row.cells, max_columns) for row in node.rows],
+            )
+
         # HTML rowspan=0 reaches the end of the header group. Project that
         # span for the header matrix without modifying the original cells.
         header_rows = [[replace(cell, rowspan=len(node.headers) - row_index) if cell.rowspan == 0 else cell
@@ -595,6 +606,8 @@ class MarkdownRenderer:
         """Join each column's group and leaf labels without discarding levels."""
         if not header_rows:
             return []
+        if len(header_rows) == 1:
+            return [value.strip().replace('\n', ' ') for value in header_rows[0]]
 
         num_columns = len(header_rows[0])
         combined = [""] * num_columns

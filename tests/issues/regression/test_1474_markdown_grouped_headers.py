@@ -92,7 +92,12 @@ def test_apple_equity_component_headers_and_values_are_preserved(render_rich_fir
         rich_to_text(first_table(document).render(width=500), width=500)
     headers, rows = first_markdown_table(document)
 
-    assert headers[0].startswith("CONDENSED CONSOLIDATED STATEMENTS OF SHAREHOLDERS' EQUITY")
+    # The parser currently includes this abstract stub among the header rows;
+    # header detection is a separate reported limitation, pinned exactly here.
+    assert headers[0] == (
+        "CONDENSED CONSOLIDATED STATEMENTS OF SHAREHOLDERS' EQUITY (Unaudited) - USD ($) $ in Millions "
+        "Increase (Decrease) in Stockholders' Equity [Roll Forward]"
+    )
     assert headers[1:] == [
         "Total",
         "Common stock and additional paid-in capital",
@@ -309,3 +314,54 @@ def test_zero_rowspan_headers_preserve_labels_alignment_and_original_cells(heade
 def test_unequal_header_body_widths_preserve_amounts_and_padding(header_html, data_html, headers, rows):
     document = parse_document(f"<html><body><table><thead>{header_html}</thead><tbody>{data_html}</tbody></table></body></html>")
     assert first_markdown_table(document) == (headers, rows)
+
+
+@pytest.mark.parametrize(
+    ("header_html", "data_html", "header_override", "expected"),
+    [
+        (
+            '<tr><th>Metric</th><th colspan="2">USD ($)   $ in Millions</th></tr>',
+            "<tr><td>Revenue</td><td>10</td><td>8</td></tr>",
+            "USD ($)   $ in Millions",
+            "| Metric | USD ($)   $ in Millions |  |\n| --- | --- | --- |\n| Revenue | 10 | 8 |",
+        ),
+        (
+            "<tr><th>Metric</th><th>USD ($)   $ in Millions<br/>Amount</th></tr>",
+            "<tr><td>Revenue</td><td>10</td></tr>",
+            None,
+            "| Metric | USD ($) $ in Millions   Amount |\n| --- | --- |\n| Revenue | 10 |",
+        ),
+        (
+            "<tr><th>Metric</th><th>Revenue | margin\\_forecast</th></tr>",
+            "<tr><td>Revenue</td><td>10</td></tr>",
+            None,
+            "| Metric | Revenue | margin\\_forecast |\n| --- | --- |\n| Revenue | 10 |",
+        ),
+    ],
+    ids=["flat-colspan-and-whitespace", "flat-whitespace-and-line-break", "flat-existing-escape-policy"],
+)
+def test_single_header_row_retains_original_markdown_bytes(header_html, data_html, header_override, expected):
+    """Pin existing flat-header bytes; this does not assert Markdown escape correctness. The whitespace colspan case uses a controlled post-parser Cell."""
+    document = parse_document(f"<html><body><table><thead>{header_html}</thead><tbody>{data_html}</tbody></table></body></html>")
+    table = first_table(document)
+    if header_override is not None:
+        table.headers[0][1].content = header_override
+    assert len(table.headers) == 1
+    assert document.to_markdown() == expected
+
+
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        (
+            '<tr><td colspan="2">Cloud   team</td><td>10</td><td>8</td></tr><tr><td>Other</td><td>3</td><td>4</td><td>5</td></tr>',
+            "| Cloud team |  | 10 | 8 |\n| Other | 3 | 4 | 5 |",
+        ),
+        ('<tr><td>Cloud</td><td colspan="2">10</td></tr><tr><td>Other</td><td>3</td><td>4</td></tr>', "| Cloud | 10 |  |\n| Other | 3 | 4 |"),
+    ],
+    ids=["headerless-span-and-whitespace", "headerless-ragged-spans"],
+)
+def test_headerless_spans_and_spacing_retain_original_markdown_bytes(source, expected):
+    document = parse_document(f"<html><body><table>{source}</table></body></html>")
+    assert first_table(document).headers == []
+    assert document.to_markdown() == expected
