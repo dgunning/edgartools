@@ -15,7 +15,7 @@ USD 1,095.689B / 818.042B. Its role-URI DataFrame dropped the prior-year instant
 The AAL subsidiary Assets checks use its AmericanAirlinesInc member row; the
 separate contamination of its plain totals is outside these assertions.
 
-The fixture manifests identify the original unedited SEC XBRL files. Apple's
+The fixture manifests pin the original SEC XBRL files and byte-preserved subsets. Apple's
 FY2023 10-K 0000320193-23-000106 supplies parenthetical shares/par-value,
 signs, equity and analysis controls. Parenthetical selection must retain its
 own role and instant comparison, without primary-statement sign processing.

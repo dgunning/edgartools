@@ -213,8 +213,7 @@ class TestStatementTypeEnumCompatibility:
     @pytest.mark.fast
     def test_unknown_string_passes_through(self, tsla_xbrl):
         """Unknown strings are not mangled by the normalization."""
-        from edgar.xbrl.exceptions import StatementNotFound
-        with pytest.raises(StatementNotFound):
+        with pytest.raises(StatementNotFoundError):
             tsla_xbrl.find_statement("SomethingUnknown")
 
 

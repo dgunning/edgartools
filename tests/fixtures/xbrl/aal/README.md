@@ -1,8 +1,10 @@
 # American Airlines combined-filing role fixtures
 
-These are original, unedited SEC XBRL attachments captured October 7, 2026.
-The per-directory `manifest.json` files record original URLs, byte counts,
-SHA256 hashes, capture times and exact filing accessions. No cassette is involved.
+These are compact, byte-preserved subsets of SEC XBRL attachments captured
+October 7, 2026. The per-directory `manifest.json` files pin the complete originals
+at Git commit `6f1f9cd1e446f6f7d84cc3873fe9746a63475d41`, their SEC URLs, byte counts,
+SHA256 hashes and capture times, and the compact files' own sizes and hashes.
+No cassette is involved.
 
 | Directory | Filing | Report date | Filing date |
 |---|---|---|---|
@@ -10,12 +12,14 @@ SHA256 hashes, capture times and exact filing accessions. No cassette is involve
 | `10q_2026q2` | `0000006201-26-000052`, 10-Q | 2026-06-30 | 2026-07-23 |
 
 The filings contain separate balance-sheet presentation roles for American
-Airlines Group Inc. and American Airlines, Inc. The original issuer schema,
-extracted instance, presentation, label, definition and calculation linkbases
-are retained. A numeric role-selection reproduction needs the instance and
-presentation; the regression contract also retains schema, labels and definition
-for classified processing, filed display and dimension behavior. Calculation is
-retained to keep the complete parsed metadata.
+Airlines Group Inc. and American Airlines, Inc. The selected parent and subsidiary balance-sheet
+presentation roles and available matching definition/calculation blocks are
+retained whole. Their
+facts, contexts, units, labels and issuer declarations remain exact original XML
+fragments; container whitespace may change. DEI facts, dimension-free contexts and
+all original unique reporting-period signatures retain filing and period controls.
+Other roles and unrelated facts are omitted. These are focused balance-sheet
+fixtures, not complete filing packages.
 
 Independent primary-HTML sources:
 
