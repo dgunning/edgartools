@@ -297,3 +297,158 @@ def test_socketpair_scope_does_not_leak_to_other_threads_or_copied_context():
         assert errors.empty(), 'socketpair or denial worker failed'
         assert calls == []
     """)
+
+
+@pytest.mark.parametrize("started_before_configure", [True, False], ids=["in-flight", "captured-alias"])
+def test_original_socketpair_crosses_hook_activation(started_before_configure):
+    _run_child(f"""
+        entered = threading.Event()
+        release = threading.Event()
+        results = Queue()
+        errors = Queue()
+        calls = []
+        marker = object()
+        def connect(sock, address):
+            calls.append((sock, address))
+            return marker
+        socket.socket.connect = connect
+        def pair():
+            entered.set()
+            assert release.wait(5), 'original pair was never released'
+            return socket.socket.connect(proxy4, ('127.0.0.1', 9))
+        socket.socketpair = pair
+        from tests import _offline_harness as harness
+        original = socket.socketpair
+        def run_original():
+            try:
+                results.put(original())
+            except BaseException as exc:
+                errors.put(exc)
+        worker = threading.Thread(target=run_original)
+        try:
+            if {started_before_configure!r}:
+                worker.start()
+                assert entered.wait(5), 'original pair did not enter before activation'
+            with offline():
+                if not {started_before_configure!r}:
+                    worker.start()
+                    assert entered.wait(5), 'captured alias did not enter'
+                # Another thread has an original pair frame; this caller does not.
+                expect_denied(harness, lambda: socket.socket.connect(proxy4, ('127.0.0.1', 9)))
+                release.set()
+                worker.join(5)
+                assert not worker.is_alive(), 'original pair worker did not finish'
+                assert errors.empty(), 'original pair was blocked or errored'
+                assert results.get(timeout=5) is marker
+                assert calls == [(proxy4, ('127.0.0.1', 9))]
+                expect_denied(harness, lambda: socket.socket.connect(proxy4, ('127.0.0.1', 9)))
+        finally:
+            release.set()
+            if worker.ident is not None:
+                worker.join(5)
+    """)
+
+
+@pytest.mark.parametrize(
+    "call",
+    [
+        "socket.socket.connect(proxy4, ('203.0.113.1', 443))",
+        "socket.socket.connect(proxy6, ('2001:db8::1', 443))",
+        "socket.socket.connect(proxy4, ('::1', 9))",
+        "socket.socket.connect_ex(proxy4, ('127.0.0.1', 9))",
+        "socket.getaddrinfo('example.invalid', 443)",
+        "socket.create_connection(('example.invalid', 443))",
+    ],
+    ids=["ipv4", "ipv6", "family-mismatch", "connect-ex", "dns", "create-connection"],
+)
+def test_captured_original_keeps_numeric_and_other_hook_denials(call):
+    _run_child(f"""
+        calls = []
+        marker = object()
+        def spy(*args, **kwargs):
+            calls.append((args, kwargs))
+            return 0
+        socket.socket.connect = spy
+        socket.socket.connect_ex = spy
+        socket.getaddrinfo = spy
+        socket.create_connection = spy
+        def pair():
+            try:
+                {call}
+            except harness.NetworkBlockedError:
+                return marker
+            raise AssertionError('captured original admitted a denied call')
+        socket.socketpair = pair
+        with offline() as harness:
+            assert harness._real_socketpair() is marker
+            assert calls == []
+    """)
+
+
+@pytest.mark.parametrize("kind", ["same-name", "ancestor-only"], ids=["same-name", "ancestor-only"])
+def test_original_caller_recovery_requires_exact_immediate_code(kind):
+    _run_child(f"""
+        calls = []
+        kind = {kind!r}
+        def connect(*args):
+            calls.append(args)
+        socket.socket.connect = connect
+        def indirect():
+            socket.socket.connect(proxy4, ('127.0.0.1', 9))
+        def pair():
+            if kind == 'ancestor-only':
+                return indirect()
+            socket.socket.connect(proxy4, ('127.0.0.1', 9))
+        socket.socketpair = pair
+        from tests import _offline_harness as harness
+        from types import FunctionType
+        original_code = harness._real_socketpair.__code__
+        # Same name/globals/metadata and equal contents, but distinct identity.
+        lookalike = FunctionType(original_code.replace(), globals())
+        assert lookalike.__code__ == original_code
+        assert lookalike.__code__ is not original_code
+        with offline():
+            candidate = lookalike if kind == 'same-name' else harness._real_socketpair
+            expect_denied(harness, candidate)
+            assert calls == []
+    """)
+
+
+@pytest.mark.parametrize(
+    "guard",
+    ["missing-code", "missing-getframe", "noncallable-getframe", "missing-frame-code", "shallow-frame"],
+    ids=["missing-code", "missing-getframe", "noncallable-getframe", "missing-frame-code", "shallow-frame"],
+)
+def test_unavailable_caller_inspection_denies_alias_and_keeps_wrapper(guard):
+    _run_child(f"""
+        calls = []
+        marker = object()
+        def connect(sock, address):
+            calls.append((sock, address))
+            return marker
+        socket.socket.connect = connect
+        def pair(nested=False):
+            if nested:
+                assert socket.socketpair() is marker
+            return socket.socket.connect(proxy4, ('127.0.0.1', 9))
+        socket.socketpair = pair
+        from tests import _offline_harness as harness
+        guard = {guard!r}
+        if guard == 'missing-code':
+            harness._real_socketpair_code = None
+            harness._getframe = lambda depth: SimpleNamespace(f_code=None)
+        elif guard == 'missing-getframe':
+            harness._getframe = None
+        elif guard == 'noncallable-getframe':
+            harness._getframe = object()
+        elif guard == 'missing-frame-code':
+            harness._getframe = lambda depth: object()
+        else:
+            def shallow(depth):
+                raise ValueError('no caller frame')
+            harness._getframe = shallow
+        with offline():
+            expect_denied(harness, harness._real_socketpair)
+            assert socket.socketpair(nested=True) is marker
+            assert calls == [(proxy4, ('127.0.0.1', 9))] * 2
+    """)

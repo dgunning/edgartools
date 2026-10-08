@@ -68,6 +68,8 @@ _real_connect_ex = socket.socket.connect_ex
 _real_getaddrinfo = socket.getaddrinfo
 _real_create_connection = socket.create_connection
 _real_socketpair = socket.socketpair
+_real_socketpair_code = getattr(_real_socketpair, "__code__", None)
+_getframe = getattr(sys, "_getframe", None)
 _socketpair_call = threading.local()
 
 
@@ -79,9 +81,20 @@ def _blocked(*args, **kwargs):
     )
 
 
+def _is_saved_socketpair_caller():
+    if _real_socketpair_code is None or not callable(_getframe):
+        return False
+    try:
+        # helper -> _connect -> its immediate caller; never inspect ancestors.
+        return _getframe(2).f_code is _real_socketpair_code
+    except (AttributeError, ValueError):
+        return False
+
+
 def _connect(sock, address):
     if (
-        getattr(_socketpair_call, "active", False)
+        # An original pair already in flight can bypass the installed wrapper.
+        (getattr(_socketpair_call, "active", False) or _is_saved_socketpair_caller())
         and isinstance(address, tuple)
         and bool(address)
         and ((sock.family == socket.AF_INET and address[0] == "127.0.0.1") or (sock.family == socket.AF_INET6 and address[0] == "::1"))
