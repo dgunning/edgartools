@@ -429,9 +429,9 @@ def _fetch_page(params: dict, offset: int = 0, limit: int = 100):
         request_params["from"] = offset
 
     response = get_with_retry(EFTS_BASE_URL, params=request_params)
-    data = orjson.loads(response.content)
+    data = _efts_payload(orjson.loads(response.content), request_params)
 
-    hits = data.get("hits", {})
+    hits = data["hits"]
     total = hits.get("total", {}).get("value", 0)
     results = []
 
@@ -444,6 +444,24 @@ def _fetch_page(params: dict, offset: int = 0, limit: int = 100):
     aggregations = _parse_aggregations(data.get("aggregations", {}))
 
     return results, total, aggregations
+
+
+def _efts_payload(data: dict, params: dict) -> dict:
+    """Return an EFTS response body, raising when it is an error instead of results.
+
+    EFTS reports a failed query with HTTP 200 and a body like
+    ``{"errorType": "ResponseError", "errorMessage": "..."}`` (an invalid date
+    such as ``2024-13-01``, or ``from`` past 10,000). Read with ``.get("hits", {})``
+    that body is indistinguishable from a search with no matches.
+    """
+    if "hits" in data:
+        return data
+
+    from edgar.exceptions import TransportError
+
+    message = data.get("errorMessage") or f"EFTS returned no 'hits' block (keys: {sorted(data)})"
+    raise TransportError(f"EFTS search failed: {message[:300]}", context={"params": params},
+                         url=EFTS_BASE_URL, status_code=200)
 
 
 def _parse_hit(hit: dict) -> EFTSResult:
@@ -685,8 +703,9 @@ def resolve_accession(accession_number: str) -> Optional[dict]:
     normalized = accession_number.replace("-", "")
 
     try:
-        response = get_with_retry(EFTS_BASE_URL, params={"q": f'"{accession_number}"'})
-        hits = orjson.loads(response.content).get("hits", {}).get("hits", [])
+        params = {"q": f'"{accession_number}"'}
+        response = get_with_retry(EFTS_BASE_URL, params=params)
+        hits = _efts_payload(orjson.loads(response.content), params)["hits"].get("hits", [])
     except TRANSPORT_ERRORS:
         # Let the caller see the outage (bead edgartools-07lk.10, closing the
         # tg7y follow-up). The `return None` below means "EFTS has no filing at
