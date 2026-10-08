@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--XBRL Document Created with the Workiva Platform-->
+<!--Copyright 2026 Workiva-->
+<!--r:0eb74482-b577-4d25-a261-7bcf43b86c83,g:b3ad5cfa-d6a2-4f3e-8726-336e151c15d7-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:aal="http://www.aa.com/20251231" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:dtr-types="http://www.xbrl.org/dtr/type/2024-01-31" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.aa.com/20251231">
+<xs:import namespace="http://fasb.org/srt/2025" schemaLocation="https://xbrl.fasb.org/srt/2025/elts/srt-2025.xsd"/>
+<xs:import namespace="http://fasb.org/us-gaap/2025" schemaLocation="https://xbrl.fasb.org/us-gaap/2025/elts/us-gaap-2025.xsd"/>
+<xs:import namespace="http://www.xbrl.org/2003/instance" schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd"/>
+<xs:import namespace="http://www.xbrl.org/2003/linkbase" schemaLocation="http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd"/>
+<xs:import namespace="http://www.xbrl.org/dtr/type/2024-01-31" schemaLocation="https://www.xbrl.org/dtr/type/2024-01-31/types.xsd"/>
+<xs:import namespace="http://xbrl.org/2005/xbrldt" schemaLocation="http://www.xbrl.org/2005/xbrldt-2005.xsd"/>
+<xs:import namespace="http://xbrl.sec.gov/cyd-af-sub/2025" schemaLocation="https://xbrl.sec.gov/cyd/2025/cyd-af-sub-2025.xsd"/>
+<xs:import namespace="http://xbrl.sec.gov/dei/2025" schemaLocation="https://xbrl.sec.gov/dei/2025/dei-2025.xsd"/>
+<xs:import namespace="http://xbrl.sec.gov/ecd/2025" schemaLocation="https://xbrl.sec.gov/ecd/2025/ecd-2025.xsd"/>
+<xs:annotation>
+<xs:appinfo>
+<link:roleType id="ConsolidatedBalanceSheetsAmericanAirlinesGroupInc" roleURI="http://www.aa.com/role/ConsolidatedBalanceSheetsAmericanAirlinesGroupInc">
+        <link:definition>9952153 - Statement - Consolidated Balance Sheets - American Airlines Group Inc.</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+<link:roleType id="ConsolidatedBalanceSheetsAmericanAirlinesInc" roleURI="http://www.aa.com/role/ConsolidatedBalanceSheetsAmericanAirlinesInc">
+        <link:definition>9952161 - Statement - Consolidated Balance Sheets - American Airlines, Inc.</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+</xs:appinfo>
+</xs:annotation>
+<xs:element id="aal_AmericanAirlinesIncMember" abstract="true" name="AmericanAirlinesIncMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_AirTrafficMember" abstract="true" name="AirTrafficMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_LoyaltyProgramMember" abstract="true" name="LoyaltyProgramMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_FuelFinancingArrangementMember" abstract="true" name="FuelFinancingArrangementMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_GroundPropertyAndEquipmentGross" abstract="false" name="GroundPropertyAndEquipmentGross" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+<xs:element id="aal_AircraftEnginesAndRelatedRotablePartsMember" abstract="true" name="AircraftEnginesAndRelatedRotablePartsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_PayrollSupportProgramOneWarrantsCARESActMember" abstract="true" name="PayrollSupportProgramOneWarrantsCARESActMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_PayrollSupportProgramOneWarrantsAndTreasuryLoanWarrantAgreementCARESActMember" abstract="true" name="PayrollSupportProgramOneWarrantsAndTreasuryLoanWarrantAgreementCARESActMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_PayrollSupportProgramTwoWarrantsCARESActMember" abstract="true" name="PayrollSupportProgramTwoWarrantsCARESActMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_CreditFacility2013Member" abstract="true" name="CreditFacility2013Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_CreditFacility2014Member" abstract="true" name="CreditFacility2014Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_CreditFacility2023Member" abstract="true" name="CreditFacility2023Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_A725SeniorSecuredNotesDue2028Member" abstract="true" name="A725SeniorSecuredNotesDue2028Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_A850SeniorSecuredNotesDue2029Member" abstract="true" name="A850SeniorSecuredNotesDue2029Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_SeniorNote550Matures2026Member" abstract="true" name="SeniorNote550Matures2026Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_SeniorNote575Matures2029Member" abstract="true" name="SeniorNote575Matures2029Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_A2025AAdvantageTermLoanFacilityMember" abstract="true" name="A2025AAdvantageTermLoanFacilityMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_ConvertibleSeniorNotes650Due2025Member" abstract="true" name="ConvertibleSeniorNotes650Due2025Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_A20132014And2023CreditFacilitiesMember" abstract="true" name="A20132014And2023CreditFacilitiesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_TermLoanMember" abstract="true" name="TermLoanMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_A1075SeniorSecuredNotesMember" abstract="true" name="A1075SeniorSecuredNotesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_AAdvantageTermLoanFacilitySecondAmendmentMember" abstract="true" name="AAdvantageTermLoanFacilitySecondAmendmentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_AAdvantageTermLoanFacilityThirdAmendmentMember" abstract="true" name="AAdvantageTermLoanFacilityThirdAmendmentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_A20251AircraftEnhancedEquipmentTrustCertificateEETCsMember" abstract="true" name="A20251AircraftEnhancedEquipmentTrustCertificateEETCsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_InternationalAssociationOfMachinistsAndAerospaceWorkersNationalPensionFundMember" abstract="true" name="InternationalAssociationOfMachinistsAndAerospaceWorkersNationalPensionFundMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_TulsaMunicipalAirportTrustTMATMember" abstract="true" name="TulsaMunicipalAirportTrustTMATMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_A2025TulsaMunicipalAirportTrustTMATBondsMember" abstract="true" name="A2025TulsaMunicipalAirportTrustTMATBondsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_SpecialFacilityRevenueBondsMaturingDecember12035Member" abstract="true" name="SpecialFacilityRevenueBondsMaturingDecember12035Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_LAXModernizationProjectMember" abstract="true" name="LAXModernizationProjectMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_PrivatePartyAntitrustActionsRelatedToTheNortheastAllianceMember" abstract="true" name="PrivatePartyAntitrustActionsRelatedToTheNortheastAllianceMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_RegionalAirportsImprovementCorporationMember" abstract="true" name="RegionalAirportsImprovementCorporationMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="aal_A2023IncentiveAwardPlanMember" abstract="true" name="A2023IncentiveAwardPlanMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+</xs:schema>

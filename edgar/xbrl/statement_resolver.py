@@ -669,7 +669,7 @@ class StatementResolver:
             if concept in self._statement_by_primary_concept:
                 for stmt in self._statement_by_primary_concept[concept]:
                     # Handle parenthetical check
-                    if registry_entry.supports_parenthetical:
+                    if is_parenthetical or registry_entry.supports_parenthetical:
                         role_def = stmt.get('definition', '').lower()
                         is_role_parenthetical = 'parenthetical' in role_def
 
@@ -731,7 +731,7 @@ class StatementResolver:
             for pattern in concept_patterns:
                 if re.match(pattern, primary_concept):
                     # For parenthetical statements, check the role definition
-                    if registry_entry.supports_parenthetical:
+                    if is_parenthetical or registry_entry.supports_parenthetical:
                         role_def = stmt.get('definition', '').lower()
                         is_role_parenthetical = 'parenthetical' in role_def
 
@@ -892,6 +892,12 @@ class StatementResolver:
         # Get registry information
         registry_entry = statement_registry[registry_type]
         role_patterns = registry_entry.role_patterns
+        if is_parenthetical and registry_type == "CashFlowStatement":
+            # A family name is distinct from cash-flow hedge disclosure names.
+            role_patterns = [
+                r"^(?:.*/)?(?:(?:[Cc]ondensed|[Cc]onsolidated))*[Cc]ash[Ff]lows?(?:[Ss]tatements?)?[Pp]arentheticals?$",
+                *role_patterns[1:],
+            ]
 
         if not role_patterns:
             return [], None, 0.0
@@ -910,7 +916,7 @@ class StatementResolver:
                 if (re.search(pattern, role, re.IGNORECASE) or
                    (role_name and re.search(pattern, role_name, re.IGNORECASE))):
                     # For parenthetical statements, check the role definition
-                    if registry_entry.supports_parenthetical:
+                    if is_parenthetical or registry_entry.supports_parenthetical:
                         role_def = stmt.get('definition', '').lower()
                         is_role_parenthetical = 'parenthetical' in role_def
 
@@ -1278,7 +1284,7 @@ class StatementResolver:
         # NOTE: We use a broad search for equity candidates because older filings may use
         # non-standard primary concepts (e.g., us-gaap_IncreaseDecreaseInStockholdersEquityRollForward
         # used by GE 2010) that are not recognized in the type index.
-        if statement_type == 'ComprehensiveIncome':
+        if statement_type == 'ComprehensiveIncome' and not is_parenthetical:
             # Gather equity statement candidates from multiple sources:
             # 1. Statements already typed as StatementOfEquity
             # 2. Statements with any known equity primary concept (handles GE-style roll-forward concept)

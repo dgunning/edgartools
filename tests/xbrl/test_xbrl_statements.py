@@ -379,15 +379,18 @@ def test_render_statement_preserves_types(tsla_xbrl):
 
     # Make sure rendering worked (this would fail if statement type wasn't recognized)
     assert statement is not None
+    assert statement.statement_type == "IncomeStatement"
 
-    # Try a balance sheet with parenthetical flag
-    try:
-        paren_statement = tsla_xbrl.render_statement("BalanceSheet", parenthetical=True)
-        if paren_statement:
-            assert "(Parenthetical)" in paren_statement.title
-    except:
-        # Not all test data has parenthetical statements
-        pytest.skip("No parenthetical balance sheet found in test data")
+    # This same local Tesla fixture declares a real parenthetical balance sheet.
+    paren_statement = tsla_xbrl.render_statement("BalanceSheet", parenthetical=True)
+    assert paren_statement is not None
+    assert paren_statement.title == "ConsolidatedBalanceSheetsParenthetical"
+    assert paren_statement.statement_type == "BalanceSheetParenthetical"
+    assert [period.key for period in paren_statement.periods] == [
+        "instant_2024-06-30", "instant_2023-12-31"
+    ]
+    assert len(paren_statement.rows) == 8
+    assert statement.title != paren_statement.title
 
 @pytest.mark.network
 def test_statement_with_canonical_type(tsla_xbrl):
