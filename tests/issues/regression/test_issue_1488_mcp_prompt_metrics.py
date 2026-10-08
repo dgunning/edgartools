@@ -15,6 +15,7 @@ interpretation by an LLM.
 import json
 import re
 import socket
+from collections.abc import Iterator
 from datetime import timedelta
 
 import pytest
@@ -152,6 +153,13 @@ def _explicit_uses(prompt: GetPromptResult) -> list[tuple[int, str, str]]:
     return uses
 
 
+def _assert_recognized_literals(instruction: str, matches: list[re.Match[str]]) -> None:
+    for literal in JSON_LITERAL.finditer(instruction):
+        assert any(match.start(2) <= literal.start() and literal.end() <= match.end(2) for match in matches), "Unrecognized explicit JSON literal"
+    remainder = LITERAL_ARGUMENT.sub("", instruction)
+    assert re.search(r"\b[a-z_]+\s*=", remainder) is None, "Unrecognized explicit assignment"
+
+
 def _literal_arguments(instruction: str, fields: str, *, query_alternatives: bool = False) -> list[dict[str, object]]:
     matches = list(LITERAL_ARGUMENT.finditer(instruction))
     values: dict[str, list[object]] = {}
@@ -160,10 +168,7 @@ def _literal_arguments(instruction: str, fields: str, *, query_alternatives: boo
         assert field not in values or (query_alternatives and field == "query"), "Unrecognized repeated argument"
         values.setdefault(field, []).append(json.loads(match.group(2)))
     assert set(values) == set(fields.split()), "Every explicit argument needs a recognized field"
-    for literal in JSON_LITERAL.finditer(instruction):
-        assert any(match.start(2) <= literal.start() and literal.end() <= match.end(2) for match in matches), "Unrecognized explicit JSON literal"
-    remainder = LITERAL_ARGUMENT.sub("", instruction)
-    assert re.search(r"\b[a-z_]+\s*=", remainder) is None, "Unrecognized explicit assignment"
+    _assert_recognized_literals(instruction, matches)
 
     # Only the activist search clause supplies repeated 'query=...' alternatives.
     count = len(values.get("query", [None]))
@@ -174,6 +179,84 @@ def _match(instruction: str, pattern: str) -> re.Match[str]:
     match = re.search(pattern, instruction)
     assert match is not None, "The per-line recognizer no longer matches the rendered instruction"
     return match
+
+
+def _prior_requests(tool: str, prior: list[tuple[str, dict[str, object]]]) -> Iterator[dict[str, object]]:
+    return (previous for previous_tool, previous in prior if previous_tool == tool)
+
+
+def _due_diligence_requests(step: int, instruction: str, request: dict[str, object]) -> list[dict[str, object]]:
+    if step == 2:
+        request["periods"] = int(_match(instruction, r"over (\d+) years").group(1))
+    elif step == 3:
+        match = _match(instruction, r"latest (\S+) (\w+) section")
+        request.update(form=match.group(1), sections=[match.group(2)])
+    elif step == 4:
+        request["form"] = _match(instruction, r"latest (\S+) for material events").group(1)
+    return [request]
+
+
+def _earnings_analysis_requests(step: int, instruction: str, request: dict[str, object]) -> list[dict[str, object]]:
+    if step == 2:
+        match = _match(instruction, r"for both (\w+) \((\d+) years\) and (\w+) \((\d+) quarters\)")
+        return [dict(request, period=match.group(index), periods=int(match.group(index + 1))) for index in (1, 3)]
+    if step == 3:
+        identifier = _match(instruction, r"with (\S+) and \d+-\d+ peer companies").group(1)
+        request["identifiers"] = [identifier, "SYNTH_PEER_B", "SYNTH_PEER_C"]
+    elif step == 4:
+        match = _match(instruction, r"latest (\S+) or (\S+), sections")
+        return [dict(request, form=match.group(index)) for index in (1, 2)]
+    return [request]
+
+
+def _fund_analysis_requests(step: int, request: dict[str, object]) -> list[dict[str, object]]:
+    if step == 4:
+        request["identifier"] = "SYNTH_HOLDING_A"
+    elif step == 5:
+        request.pop("identifier")
+        request["query"] = "synthetic fund family"
+    return [request]
+
+
+def _period_comparison_requests(
+    step: int,
+    tool: str,
+    instruction: str,
+    request: dict[str, object],
+    prior: list[tuple[str, dict[str, object]]],
+) -> list[dict[str, object]]:
+    if step == 2 and tool == "edgar_read":
+        assert "with the same identifier and form" in instruction
+        filing = next(_prior_requests("edgar_filing", prior))
+        request.update(identifier=filing["identifier"], form=filing["form"])
+    elif step == 3 and tool == "edgar_read":
+        assert "with that accession_number" in instruction
+        request.pop("identifier")
+        request["accession_number"] = "0000000001-26-000001"  # Synthetic earlier-search result.
+    elif step == 4:
+        request["periods"] = int(_match(instruction, r"over (\d+) periods").group(1))
+    return [request]
+
+
+def _company_comparison_requests(
+    step: int,
+    instruction: str,
+    request: dict[str, object],
+    prior: list[tuple[str, dict[str, object]]],
+) -> list[dict[str, object]]:
+    if step == 1:
+        match = _match(instruction, r"for both (\S+) and (\S+) with include")
+        return [dict(request, identifier=match.group(index)) for index in (1, 2)]
+    if step == 3:
+        assert "Read the same sections" in instruction
+        filing_a = next(_prior_requests("edgar_read", prior))
+        request["sections"] = filing_a["sections"]
+    elif step == 5:
+        assert "for both companies" in instruction
+        identifiers = [previous["identifier"] for previous in _prior_requests("edgar_company", prior)]
+        assert len(identifiers) == 2
+        return [dict(request, identifier=identifier) for identifier in identifiers]
+    return [request]
 
 
 def _complete_requests(
@@ -192,60 +275,17 @@ def _complete_requests(
         request.setdefault("identifier", subject)
 
     if key == "due_diligence":
-        if step == 2:
-            request["periods"] = int(_match(instruction, r"over (\d+) years").group(1))
-        elif step == 3:
-            match = _match(instruction, r"latest (\S+) (\w+) section")
-            request.update(form=match.group(1), sections=[match.group(2)])
-        elif step == 4:
-            request["form"] = _match(instruction, r"latest (\S+) for material events").group(1)
-
+        return _due_diligence_requests(step, instruction, request)
     elif key == "earnings_analysis":
-        if step == 2:
-            match = _match(instruction, r"for both (\w+) \((\d+) years\) and (\w+) \((\d+) quarters\)")
-            return [dict(request, period=match.group(index), periods=int(match.group(index + 1))) for index in (1, 3)]
-        if step == 3:
-            identifier = _match(instruction, r"with (\S+) and \d+-\d+ peer companies").group(1)
-            request["identifiers"] = [identifier, "SYNTH_PEER_B", "SYNTH_PEER_C"]
-        elif step == 4:
-            match = _match(instruction, r"latest (\S+) or (\S+), sections")
-            return [dict(request, form=match.group(index)) for index in (1, 2)]
-
+        return _earnings_analysis_requests(step, instruction, request)
     elif key == "industry_overview" and tool == "edgar_compare":
         request["identifiers"] = ["SYNTH_SCREEN_A", "SYNTH_SCREEN_B", "SYNTH_SCREEN_C"]
-
     elif key == "fund_analysis":
-        if step == 4:
-            request["identifier"] = "SYNTH_HOLDING_A"
-        elif step == 5:
-            request.pop("identifier")
-            request["query"] = "synthetic fund family"
-
+        return _fund_analysis_requests(step, request)
     elif key == "filing_comparison_periods":
-        if step == 2 and tool == "edgar_read":
-            assert "with the same identifier and form" in instruction
-            filing = next(previous for previous_tool, previous in prior if previous_tool == "edgar_filing")
-            request.update(identifier=filing["identifier"], form=filing["form"])
-        elif step == 3 and tool == "edgar_read":
-            assert "with that accession_number" in instruction
-            request.pop("identifier")
-            request["accession_number"] = "0000000001-26-000001"  # Synthetic earlier-search result.
-        elif step == 4:
-            request["periods"] = int(_match(instruction, r"over (\d+) periods").group(1))
-
+        return _period_comparison_requests(step, tool, instruction, request, prior)
     elif key == "filing_comparison_companies":
-        if step == 1:
-            match = _match(instruction, r"for both (\S+) and (\S+) with include")
-            return [dict(request, identifier=match.group(index)) for index in (1, 2)]
-        if step == 3:
-            assert "Read the same sections" in instruction
-            filing_a = next(previous for previous_tool, previous in prior if previous_tool == "edgar_read")
-            request["sections"] = filing_a["sections"]
-        elif step == 5:
-            assert "for both companies" in instruction
-            identifiers = [previous["identifier"] for previous_tool, previous in prior if previous_tool == "edgar_company"]
-            assert len(identifiers) == 2
-            return [dict(request, identifier=identifier) for identifier in identifiers]
+        return _company_comparison_requests(step, instruction, request, prior)
 
     return [request]
 
@@ -271,6 +311,42 @@ def _record_accepted_request(name: str, calls: list[tuple[str, dict[str, object]
     return handler
 
 
+async def _registered_prompt_requests(client, name, arguments):
+    registered = await client.list_prompts()
+    assert {prompt.name for prompt in registered.prompts} == {case_name for case_name, _ in CASES}
+    tools = {tool.name: tool for tool in (await client.list_tools()).tools}
+    prompt = await client.get_prompt(name, arguments)
+    requests = _requests(name, arguments, prompt)
+    assert requests
+    return tools, requests
+
+
+async def _assert_admitted_request(client, tools, name, tool, request):
+    # MCP permits extra properties, so do not let **kwargs hide an unknown field.
+    assert set(request) <= set(tools[tool].inputSchema["properties"])
+    result = await client.call_tool(tool, request)
+    assert result.isError is False, (name, tool, request, result.content)
+    assert len(result.content) == 1 and isinstance(result.content[0], TextContent)
+    assert json.loads(result.content[0].text) == {
+        "success": True,
+        "data": {"accepted_tool": tool, "accepted_arguments": request},
+    }
+
+
+def _assert_compare_metrics(name: str, requests: list[tuple[str, dict[str, object]]]) -> None:
+    metrics = next(request["metrics"] for tool, request in requests if tool == "edgar_compare")
+    assert isinstance(metrics, list)
+    assert "margins" in metrics
+    if name == "industry_overview":
+        assert "assets" in metrics  # Valid for edgar_compare, unlike edgar_trends.
+
+
+def _assert_period_concepts(requests: list[tuple[str, dict[str, object]]]) -> None:
+    concepts = next(request["concepts"] for tool, request in requests if tool == "edgar_trends")
+    assert isinstance(concepts, list)
+    assert "total_assets" in concepts
+
+
 @pytest.mark.parametrize(
     ("name", "arguments"),
     [pytest.param(name, arguments, id=_workflow_key(name, arguments)) for name, arguments in CASES],
@@ -279,38 +355,19 @@ async def test_explicit_prompt_requests_pass_registered_input_validation(name, a
     server._import_tools()
     calls = []
     async with create_connected_server_and_client_session(server.app, read_timeout_seconds=timedelta(seconds=5)) as client:
-        registered = await client.list_prompts()
-        assert {prompt.name for prompt in registered.prompts} == {case_name for case_name, _ in CASES}
-        tools = {tool.name: tool for tool in (await client.list_tools()).tools}
-        prompt = await client.get_prompt(name, arguments)
-        requests = _requests(name, arguments, prompt)
-        assert requests
+        tools, requests = await _registered_prompt_requests(client, name, arguments)
         with monkeypatch.context() as handlers:
             for tool in {tool for tool, _ in requests}:
                 handlers.setitem(TOOLS[tool], "handler", _record_accepted_request(tool, calls))
             for tool, request in requests:
-                # MCP permits extra properties, so do not let **kwargs hide an unknown field.
-                assert set(request) <= set(tools[tool].inputSchema["properties"])
-                result = await client.call_tool(tool, request)
-                assert result.isError is False, (name, tool, request, result.content)
-                assert len(result.content) == 1 and isinstance(result.content[0], TextContent)
-                assert json.loads(result.content[0].text) == {
-                    "success": True,
-                    "data": {"accepted_tool": tool, "accepted_arguments": request},
-                }
+                await _assert_admitted_request(client, tools, name, tool, request)
             assert calls == requests
 
         # Keep the requested analyses; deleting a rejected field is not the fix.
         if name in {"earnings_analysis", "industry_overview"}:
-            metrics = next(request["metrics"] for tool, request in requests if tool == "edgar_compare")
-            assert isinstance(metrics, list)
-            assert "margins" in metrics
-            if name == "industry_overview":
-                assert "assets" in metrics  # Valid for edgar_compare, unlike edgar_trends.
+            _assert_compare_metrics(name, requests)
         elif _workflow_key(name, arguments) == "filing_comparison_periods":
-            concepts = next(request["concepts"] for tool, request in requests if tool == "edgar_trends")
-            assert isinstance(concepts, list)
-            assert "total_assets" in concepts
+            _assert_period_concepts(requests)
 
 
 async def test_sdk_rejects_unsupported_input_names_before_downstream_handlers(monkeypatch, network_attempts):
