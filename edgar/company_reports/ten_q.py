@@ -13,7 +13,6 @@ from edgar.company_reports._base import CompanyReport, report_lookup_miss
 from edgar.company_reports._structures import FilingStructure
 from edgar.display.formatting import datefmt
 from edgar.documents import HTMLParser, ParserConfig
-from edgar.files.htmltools import ChunkedDocument
 
 __all__ = ['TenQ']
 
@@ -418,13 +417,6 @@ class TenQ(CompanyReport):
                         return self.sections[key].text()
 
         return None
-
-    @cached_property
-    def _chunked_document(self):
-        # Construction only — the deprecation warning lives on the public
-        # `chunked_document` in CompanyReport. Overriding that one here is what
-        # previously cost TenQ users their warning entirely.
-        return ChunkedDocument(self._filing.html(), prefix_src=self._filing.base_dir)
 
     def get_structure(self):
         # Create the main tree

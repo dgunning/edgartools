@@ -39,33 +39,8 @@ download_time = time.time() - start
 print(f"✓ HTML downloaded in {download_time:.2f}s")
 print(f"  HTML size: {len(html):,} bytes ({len(html) / 1024 / 1024:.2f} MB)")
 
-# Step 2: Test with ChunkedDocument (old parser)
 print("\n" + "-" * 80)
-print("STEP 2: Testing with ChunkedDocument (old parser)...")
-print("-" * 80)
-start = time.time()
-try:
-    from edgar.files.htmltools import ChunkedDocument
-    chunked_doc = ChunkedDocument(html, prefix_src=filing.base_dir)
-    old_parser_time = time.time() - start
-    print(f"✓ ChunkedDocument created in {old_parser_time:.2f}s")
-
-    # Try to get an item
-    start = time.time()
-    item1 = chunked_doc['Item 1']
-    item_time = time.time() - start
-    if item1:
-        print(f"✓ Item 1 extracted in {item_time:.2f}s ({len(item1):,} chars)")
-    else:
-        print("✗ Item 1 not found")
-except Exception as e:
-    print(f"✗ ChunkedDocument failed: {e}")
-    import traceback
-    traceback.print_exc()
-
-# Step 3: Test with new HTMLParser
-print("\n" + "-" * 80)
-print("STEP 3: Testing with HTMLParser (new parser)...")
+print("STEP 2: Testing with HTMLParser (new parser)...")
 print("WARNING: This may hang! Press Ctrl+C to interrupt.")
 print("-" * 80)
 
@@ -130,13 +105,7 @@ print("\n" + "=" * 80)
 print("Reproduction complete!")
 print("=" * 80)
 print("\nSummary:")
-print(f"  Old parser (ChunkedDocument): {old_parser_time:.2f}s")
 if 'new_parser_time' in locals():
     print(f"  New parser (HTMLParser):      {new_parser_time:.2f}s")
-    speedup = old_parser_time / new_parser_time if new_parser_time > 0 else 0
-    if speedup > 1:
-        print(f"  Speedup: {speedup:.2f}x faster")
-    else:
-        print(f"  Slowdown: {1/speedup:.2f}x slower")
 else:
     print("  New parser (HTMLParser):      HUNG/FAILED")

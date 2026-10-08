@@ -5,7 +5,6 @@ from rich import print
 
 from edgar import Filing
 from edgar.company_reports import EightK, PressRelease, PressReleases
-from edgar.files.htmltools import ChunkedDocument
 
 
 def test_eightk_repr():
@@ -22,13 +21,13 @@ def test_items_for_8k_filing():
                     company='ALPINE 4 HOLDINGS, INC.',
                     cik=1606698,
                     accession_no='0001628280-23-039016')
-    chunked_df = ChunkedDocument(filing.html())._chunked_data
     eightk = EightK(filing)
-    doc = eightk.doc
 
     assert eightk.items == ['Item 1.01', 'Item 2.03', 'Item 9.01']
 
-    item_901 = doc['Item 9.01']
+    # Read through eightk.doc (the legacy ChunkedDocument) until 6.0, where
+    # .doc became the parsed document like on every other report class.
+    item_901 = eightk['Item 9.01']
     assert "Merchant Cash Advance" in item_901
 
 def test_detect_iems_for_eightk_with_bold_tags():

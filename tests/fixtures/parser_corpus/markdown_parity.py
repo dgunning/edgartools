@@ -97,10 +97,22 @@ The corpus is shared with ``parity_benchmark.py`` (``build_corpus``), so the sam
 caveat applies: ``text_boundary_corpus`` is gitignored, a CI run therefore
 measures fewer fixtures than a local one, and a filing that is not present is
 UNMEASURED, never passing.
+
+THE LEGACY SIDE IS FROZEN. ``edgar.files`` was deleted in 6.0, so the legacy
+renderer can no longer be run. Before the deletion, every corpus fixture was
+rendered once through ``get_clean_html`` + ``edgar.files.markdown.to_markdown``,
+and what this harness reads from that output — the distinct numbers and the word
+multiset of ``comparable(markdown)``, the ``structure`` counts, and the degraded
+and error flags — was written to ``legacy_frozen/markdown.json.gz``: 128
+fixtures, none degraded, none erroring. ``measure_markdown`` reads the legacy
+column from there and renders only the new side, so every recall figure means
+what it meant before the deletion. A fixture added afterwards has no frozen
+record and is left unscored.
 """
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 import re
 import sys
@@ -116,15 +128,26 @@ _REPO_ROOT = FIXTURES.parent.parent
 sys.path.insert(0, str(_REPO_ROOT))
 sys.path.insert(0, str(_CORPUS_DIR))
 
-# The legacy parser warns on every construction by design.
 warnings.filterwarnings("ignore")
 
 from parity_benchmark import GATE_FORMS, build_corpus  # noqa: E402
 
 from edgar.documents.config import ParserConfig  # noqa: E402
 from edgar.documents.parser import HTMLParser  # noqa: E402
-from edgar.files.html_documents import get_clean_html  # noqa: E402
-from edgar.files.markdown import to_markdown  # noqa: E402
+
+# What the deleted legacy renderer produced on each fixture, keyed
+# "<form>|<label>". See "THE LEGACY SIDE IS FROZEN" in the module docstring.
+LEGACY_FROZEN = _CORPUS_DIR / "legacy_frozen" / "markdown.json.gz"
+_legacy_records: Optional[Dict[str, dict]] = None
+
+
+def legacy_record(form: str, label: str) -> Optional[dict]:
+    """The frozen legacy rendering summary for one fixture, or None."""
+    global _legacy_records
+    if _legacy_records is None:
+        with gzip.open(LEGACY_FROZEN, "rt", encoding="utf-8") as fh:
+            _legacy_records = json.load(fh)
+    return _legacy_records.get(f"{form}|{label}")
 
 # The gate. Numbers only — see the module docstring for why words are advisory.
 NUMBER_RECALL_GATE = 1.00
@@ -134,28 +157,8 @@ WORD_REVIEW_THRESHOLD = 0.98
 
 
 # ---------------------------------------------------------------------------
-# Rendering — each pipeline exactly as Filing.markdown() would reach it.
+# Rendering — the new pipeline exactly as Filing.markdown() reaches it.
 # ---------------------------------------------------------------------------
-
-def render_legacy(html: str) -> Tuple[Optional[str], bool, Optional[str]]:
-    """Render via the legacy pipeline. Returns (markdown, degraded, error).
-
-    Mirrors ``Filing.markdown()`` (``_filings.py:1756-1766``) rather than calling
-    it, because that method needs a live ``Filing`` and this harness is offline.
-    ``degraded`` marks the ``<pre>``-wrapped fallback, which is not markdown and
-    must not be scored — see trap 1 in the module docstring.
-    """
-    try:
-        clean = get_clean_html(html)
-        if not clean:
-            return None, True, None
-        md = to_markdown(clean)
-        if not md:
-            return None, True, None
-        return md, False, None
-    except Exception as exc:  # noqa: BLE001 — a crash is a result, not a stop
-        return None, False, f"{type(exc).__name__}: {exc}"[:200]
-
 
 def render_new(html: str, form: str) -> Tuple[Optional[str], Optional[str]]:
     """Render via the new pipeline: ``HTMLParser.parse(...).to_markdown()``."""
@@ -308,23 +311,25 @@ def measure_markdown(entry: dict) -> dict:
     form = entry["form"]
     html = entry["path"].read_text(errors="ignore")
 
-    legacy_md, degraded, legacy_error = render_legacy(html)
+    record = legacy_record(form, entry["label"])
     new_md, new_error = render_new(html, form)
+    legacy_rendered = bool(record and record["numbers"] is not None)
 
     row = {
         "form": form,
         "era": entry["era"],
         "label": entry["label"],
         "size": len(html),
-        "legacy_degraded": degraded,
-        "legacy_error": legacy_error,
+        "legacy_degraded": bool(record and record["degraded"]),
+        "legacy_error": record["legacy_error"] if record else None,
+        "legacy_frozen": record is not None,
         "new_error": new_error,
-        "scored": bool(legacy_md and new_md),
+        "scored": bool(legacy_rendered and new_md),
     }
 
     if not row["scored"]:
         row.update({
-            "legacy": structure(legacy_md) if legacy_md else None,
+            "legacy": record["structure"] if legacy_rendered else None,
             "new": structure(new_md) if new_md else None,
             "number_recall": None,
             "word_recall": None,
@@ -337,9 +342,9 @@ def measure_markdown(entry: dict) -> dict:
         })
         return row
 
-    legacy_cmp, new_cmp = comparable(legacy_md), comparable(new_md)
-    legacy_nums, new_nums = numbers(legacy_cmp), numbers(new_cmp)
-    legacy_words, new_words = words(legacy_cmp), words(new_cmp)
+    new_cmp = comparable(new_md)
+    legacy_nums, new_nums = set(record["numbers"]), numbers(new_cmp)
+    legacy_words, new_words = Counter(record["words"]), words(new_cmp)
     missing_nums = legacy_nums - new_nums
     missing_words = {w: c - new_words[w] for w, c in legacy_words.items()
                      if c > new_words[w]}
@@ -357,7 +362,7 @@ def measure_markdown(entry: dict) -> dict:
     )
 
     row.update({
-        "legacy": structure(legacy_md),
+        "legacy": record["structure"],
         "new": structure(new_md),
         "number_recall": _recall(legacy_nums, new_nums),
         "word_recall_raw": word_recall,

@@ -1,7 +1,8 @@
 """Regression test for GitHub issue #844 (binary-classification half).
 
-The TypeError crash is fixed in ``html_documents.get_root`` (PR #845, see
-``test_issue_844.py``). This test covers the *complementary* root cause: 6-K
+The TypeError crash was fixed in the legacy ``html_documents.get_root`` (PR
+#845); since 6.0 that decoding rule lives in
+``edgar.sgml.text_extraction.html_to_text`` (see ``test_issue_844.py``). This test covers the *complementary* root cause: 6-K
 attachment lists include XBRL viewer artifacts such as ``Financial_Report.xlsx``
 and ``<accession>-xbrl.zip``, and ``binary_extensions`` previously omitted
 ``.xlsx`` / ``.zip``. Those artifacts therefore reported ``is_binary() == False``,
