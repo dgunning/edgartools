@@ -350,8 +350,13 @@ msft_statements = msft_xbrl.statements.income_statement()
 aapl_statements = aapl_xbrl.statements.income_statement()
 
 # Both show R&D as positive values for proper comparison
-msft_rnd = msft_statements.get_concept_value("ResearchAndDevelopmentExpense")  # $32.5B (positive)
-aapl_rnd = aapl_statements.get_concept_value("ResearchAndDevelopmentExpense")  # $31.4B (positive)
+def rnd(statement):
+    df = statement.to_dataframe()
+    period = max(c for c in df.columns if c.startswith("20"))  # most recent year
+    return df[df["concept"] == "us-gaap_ResearchAndDevelopmentExpense"].iloc[0][period]
+
+msft_rnd = rnd(msft_statements)  # $32.5B (positive)
+aapl_rnd = rnd(aapl_statements)  # $31.4B (positive)
 ```
 
 !!! tip "Need help building an XBRL pipeline?"

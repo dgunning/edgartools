@@ -51,15 +51,15 @@ def run(session, form, sample, year, date_range, companies, test_type, db_path):
 
       \b
       # Run validation on 20 random 10-K filings from 2024
-      edgar-test run --form 10-K --sample 20 --year 2024
+      python -m scripts.harness.cli run --form 10-K --sample 20 --year 2024
 
       \b
       # Test specific companies
-      edgar-test run --form 10-Q --companies AAPL,MSFT,GOOGL
+      python -m scripts.harness.cli run --form 10-Q --companies AAPL,MSFT,GOOGL
 
       \b
       # Test filings in a date range
-      edgar-test run --form 8-K --date-range 2024-01-01:2024-03-31
+      python -m scripts.harness.cli run --form 8-K --date-range 2024-01-01:2024-03-31
     """
     # Initialize storage
     storage_path = Path(db_path) if db_path else None
@@ -180,15 +180,15 @@ def show(session, run, limit, db_path):
 
       \b
       # Show all sessions
-      edgar-test show
+      python -m scripts.harness.cli show
 
       \b
       # Show runs in a session
-      edgar-test show --session 1
+      python -m scripts.harness.cli show --session 1
 
       \b
       # Show results from a specific run
-      edgar-test show --run 5 --limit 50
+      python -m scripts.harness.cli show --run 5 --limit 50
     """
     storage_path = Path(db_path) if db_path else None
     storage = HarnessStorage(storage_path)
@@ -229,7 +229,7 @@ def compare(run1, run2, db_path):
     Example:
 
       \b
-      edgar-test compare --run1 5 --run2 6
+      python -m scripts.harness.cli compare --run1 5 --run2 6
     """
     storage_path = Path(db_path) if db_path else None
     storage = HarnessStorage(storage_path)
@@ -248,7 +248,7 @@ def trends(test_name, limit, db_path):
     Example:
 
       \b
-      edgar-test trends --test-name "10-K validation" --limit 30
+      python -m scripts.harness.cli trends --test-name "10-K validation" --limit 30
     """
     storage_path = Path(db_path) if db_path else None
     storage = HarnessStorage(storage_path)

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# ruff: noqa: T201, S603 -- CLI output and an argument-list pytest subprocess.
 """Ratchet: no NEW test may need the SEC while claiming to be `fast`.
 
 THE RULE: run the offline harness over the `fast` lane and compare the tests
@@ -50,13 +51,20 @@ Usage::
     python scripts/check_offline_audit.py --write    # refresh the baseline
     python scripts/check_offline_audit.py --report FILE   # check an existing run
 """
+
 from __future__ import annotations
 
 import argparse
+import json
 import re
+import shlex
 import subprocess
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from _pytest.terminal import TerminalReporter
 
 ROOT = Path(__file__).resolve().parent.parent
 BASELINE_PATH = ROOT / "tests" / "offline_audit_baseline.txt"
@@ -66,24 +74,105 @@ BASELINE_PATH = ROOT / "tests" / "offline_audit_baseline.txt"
 # succeeds on a retry, it just triples the cost of the failures we are counting.
 # Both are explained at `test-offline-audit` in pyproject.toml.
 AUDIT_CMD = [
-    sys.executable, "-m", "pytest",
-    "-p", "tests._offline_harness",
-    "-p", "no:pytest-retry",
-    "-p", "no:randomly",
-    "-m", "fast",
-    "-q", "--no-header", "--tb=no",
+    sys.executable,
+    "-m",
+    "pytest",
+    "-p",
+    "tests._offline_harness",
+    "-p",
+    "scripts.check_offline_audit",
+    "-p",
+    "no:pytest-retry",
+    "-p",
+    "no:randomly",
+    "-m",
+    "fast",
+    "-q",
+    "--no-header",
+    "--tb=no",
 ]
 
 # pytest's short summary: "FAILED nodeid - message" / "ERROR nodeid - message".
 # Only lines whose node id starts with `tests/` — the harness also logs an
 # `ERROR edgar.core:...` line for every blocked fetch, which is not a node id.
-SUMMARY_RE = re.compile(r"^(?:FAILED|ERROR)\s+(tests/\S+)")
+SUMMARY_RE = re.compile(r"^(?:FAILED|ERROR)\s+(tests/.+)$")
+MACHINE_REPORT_PREFIX = "OFFLINE_AUDIT_NODEIDS: "
 
 
-def parse_report(text: str) -> set[str]:
-    """Node ids pytest reported as failed or errored."""
-    return {m.group(1).split(" - ")[0] for m in
-            (SUMMARY_RE.match(line) for line in text.splitlines()) if m}
+def pytest_terminal_summary(terminalreporter: TerminalReporter) -> None:
+    """Emit exact native report IDs when this script is loaded as a plugin."""
+    nodeids = {
+        report.nodeid for outcome in ("failed", "error") for report in terminalreporter.getreports(outcome) if report.nodeid.startswith("tests/")
+    }
+    payload = {"version": 1, "nodeids": sorted(nodeids)}
+    terminalreporter.write_line(MACHINE_REPORT_PREFIX + json.dumps(payload))
+
+
+def _complete_legacy_nodeid(nodeid: str) -> bool:
+    """Recognize conventional Python test names and balanced parameter IDs."""
+    header, bracket, params = nodeid.partition("[")
+    path, *names = header.split("::")
+    if not path.endswith(".py") or any(not name.isidentifier() for name in names):
+        return False
+    if not bracket:
+        return True
+    if not names:
+        return False
+    depth = 1
+    for index, char in enumerate(params):
+        if char == "[":
+            depth += 1
+        elif char == "]":
+            depth -= 1
+            if depth == 0 and index != len(params) - 1:
+                return False
+    return depth == 0
+
+
+def _legacy_summary_nodeid(summary: str) -> str:
+    """Read a conventional Python summary; reject ambiguous old report text.
+
+    Pytest concatenates arbitrary IDs and `` - message`` without escaping.
+    The compatibility path accepts ordinary Python names and balanced IDs,
+    not custom collectors or arbitrary unmatched brackets. New audit runs
+    use exact native report IDs emitted by our pytest hook instead.
+    """
+    ends = [len(summary), *(match.start() for match in re.finditer(" - ", summary))]
+    candidates = {summary[:end] for end in ends if _complete_legacy_nodeid(summary[:end])}
+    if len(candidates) == 1:
+        nodeid = candidates.pop()
+        tail = summary[len(nodeid) :]
+        if not tail or "[" not in nodeid or (not summary.endswith("]") and "] - " not in tail[3:]):
+            return nodeid
+    raise ValueError("Ambiguous or unsupported node ID in a plain pytest summary; rerun the offline audit to obtain its exact machine report.")
+
+
+def parse_report(text: str, *, require_machine_report: bool = False) -> set[str]:
+    """Failed/error IDs, preferring exact native reports over legacy summaries."""
+    machine = [line[len(MACHINE_REPORT_PREFIX) :] for line in text.splitlines() if line.startswith(MACHINE_REPORT_PREFIX)]
+    if machine:
+        if len(machine) != 1:
+            raise ValueError("Expected one offline-audit machine report.")
+        try:
+            payload = json.loads(machine[0])
+        except json.JSONDecodeError as exc:
+            raise ValueError("Invalid offline-audit machine report JSON.") from exc
+        if (
+            not isinstance(payload, dict)
+            or set(payload) != {"version", "nodeids"}
+            or type(payload.get("version")) is not int
+            or payload["version"] != 1
+        ):
+            raise ValueError("Unsupported offline-audit machine report format.")
+        nodeids = payload.get("nodeids")
+        if not isinstance(nodeids, list) or any(not isinstance(node, str) or not node.startswith("tests/") for node in nodeids):
+            raise ValueError("Invalid node IDs in offline-audit machine report.")
+        if any("\n" in node or "\r" in node for node in nodeids):
+            raise ValueError("A node ID contains a line break and cannot fit in the baseline.")
+        return set(nodeids)
+    if require_machine_report:
+        raise ValueError("Pytest did not produce the required offline-audit machine report.")
+    return {_legacy_summary_nodeid(match.group(1)) for line in text.splitlines() if (match := SUMMARY_RE.match(line))}
 
 
 def nothing_to_audit(text: str) -> bool:
@@ -96,45 +185,60 @@ def nothing_to_audit(text: str) -> bool:
     while letting such a PR through. The first PR to edit only a network test
     file (#1393, test_eightK.py) failed the gate here with exit 2.
     """
-    return (bool(re.search(r"\b\d+ deselected\b", text))
-            and not re.search(r"\b\d+ (?:passed|failed|errors?)\b", text))
+    return bool(re.search(r"\b\d+ deselected\b", text)) and not re.search(r"\b\d+ (?:passed|failed|errors?)\b", text)
 
 
 def read_baseline() -> set[str]:
     if not BASELINE_PATH.exists():
         return set()
-    return {line.strip() for line in BASELINE_PATH.read_text().splitlines()
-            if line.strip() and not line.startswith("#")}
+    # Only the baseline's actual newline separates IDs. Native collector names
+    # may contain other Unicode line separators or end in whitespace.
+    return {line for line in BASELINE_PATH.read_text().split("\n") if line.strip() and not line.startswith("#")}
 
 
 def run_audit(paths: list[str]) -> str:
     proc = subprocess.run(AUDIT_CMD + paths, cwd=ROOT, capture_output=True, text=True)
-    return proc.stdout + proc.stderr
+    text = proc.stdout + proc.stderr
+    if proc.returncode not in {0, 1, 5}:
+        raise ValueError(f"Pytest exited with status {proc.returncode}:\n{text[-2000:]}")
+    return text
 
 
 def in_scope(node: str, paths: list[str]) -> bool:
     """Whether a baseline node id lies under one of the audited paths."""
     if not paths:
         return True
-    return any(node == p or node.startswith(p.rstrip("/") + "/") or
-               node.split("::", 1)[0] == p for p in paths)
+    return any(node == p or node.startswith(p.rstrip("/") + "/") or node.split("::", 1)[0] == p for p in paths)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--report", type=Path,
-                        help="Parse an existing pytest report instead of running the audit.")
-    parser.add_argument("--write", action="store_true",
-                        help="Rewrite the baseline from this run. Review the diff before committing.")
-    parser.add_argument("paths", nargs="*",
-                        help="Limit the audit to these paths (default: the whole fast lane).")
+    parser.add_argument(
+        "--report",
+        type=Path,
+        help="Parse an existing audit report or legacy plain pytest summary.",
+    )
+    parser.add_argument(
+        "--write",
+        action="store_true",
+        help="Rewrite the baseline from this run. Review the diff before committing.",
+    )
+    parser.add_argument(
+        "paths",
+        nargs="*",
+        help="Limit the audit to these paths (default: the whole fast lane).",
+    )
     args = parser.parse_args()
 
     if args.write and args.paths:
         parser.error("--write rewrites the whole baseline, so it cannot be scoped to paths.")
 
-    text = args.report.read_text() if args.report else run_audit(args.paths)
-    failing = parse_report(text)
+    try:
+        text = args.report.read_text() if args.report else run_audit(args.paths)
+        failing = parse_report(text, require_machine_report=args.report is None)
+    except ValueError as exc:
+        print(f"Invalid audit report: {exc}", file=sys.stderr)
+        return 2
 
     if not failing and not args.report:
         # A run that collected nothing also reports no failures. Tell them apart.
@@ -142,7 +246,10 @@ def main() -> int:
             print("OK: no `fast` tests in the audited paths; nothing to audit.")
             return 0
         if "passed" not in text:
-            print("Audit produced no result — pytest output was:\n" + text[-2000:], file=sys.stderr)
+            print(
+                "Audit produced no result — pytest output was:\n" + text[-2000:],
+                file=sys.stderr,
+            )
             return 2
 
     if args.write:
@@ -170,7 +277,7 @@ def main() -> int:
         print(
             "\nRe-run them WITHOUT the harness before doing anything else — failing\n"
             "offline and being broken are different facts:\n"
-            f"\n    python -m pytest {new[0]}\n"
+            f"\n    python -m pytest {shlex.quote(new[0])}\n"
             "\nIf it passes on the network, it needs a cassette or an offline fixture\n"
             "(tests/_offline_filings.py). Marking it `network` relocates it out of the\n"
             "pull-request lane and is not the fix — see the script docstring.\n"

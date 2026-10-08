@@ -142,11 +142,17 @@ class LabelsParser(BaseParser):
                     if catalog_entry:
                         catalog_entry.labels.update(element_labels)
                     else:
-                        # Create placeholder in catalog
+                        # A labeled element the filing's own schema does not
+                        # declare comes from a schema the filing imports but does
+                        # not contain (us-gaap, dei, srt), so its type, period
+                        # type and balance are unknown. None says so; "" and
+                        # "duration" read as answers, and "duration" is wrong for
+                        # every instant concept. The parser fills the period type
+                        # in from the facts once the instance is read.
                         self.element_catalog[element_id] = ElementCatalog(
                             name=element_id,
-                            data_type="",
-                            period_type="duration",
+                            data_type=None,
+                            period_type=None,
                             labels=element_labels
                         )
 

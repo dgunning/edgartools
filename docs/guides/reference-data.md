@@ -13,7 +13,7 @@ EdgarTools ships with a comprehensive set of SEC reference data — ticker-to-CI
 | **~10,600 tickers with CIK and exchange** | Bundled parquet | No | `Company("AAPL")`, `find_cik("AAPL")` |
 | **CUSIP-to-ticker mapping** | Bundled parquet | No | `cusip_ticker_mapping()`, `get_ticker_from_cusip()` |
 | **SEC form descriptions** | Bundled CSV | No | `describe_form("10-K")` |
-| **Place codes (states/countries)** | Bundled CSV | No | `get_place_name()`, `get_filer_type()` |
+| **Place codes (states/countries)** | Bundled CSV | No | `get_place_name()`, `get_place_country_code()`, `get_filer_type()` |
 | **Popular stock lists** | Bundled CSV | No | `get_popular_companies()`, `get_faang_companies()` |
 | **Full SEC ticker universe** | SEC API / local download | Yes (once) | `download_edgar_data(reference=True)` |
 
@@ -207,6 +207,7 @@ The SEC uses internal codes for states and countries. EdgarTools decodes these a
 ```python
 from edgar.reference import (
     get_place_name,
+    get_place_country_code,
     get_filer_type,
     is_us_company,
     is_foreign_company,
@@ -216,7 +217,12 @@ from edgar.reference import (
 # Decode place codes
 get_place_name("DE")    # "Delaware"
 get_place_name("X0")    # "United Kingdom"
-get_place_name("A6")    # "Alberta, Canada"
+get_place_name("A6")    # "Ontario Canada"
+
+# ISO 3166-1 alpha-2 country codes
+get_place_country_code("DE")    # "US"
+get_place_country_code("A6")    # "CA"
+get_place_country_code("E9")    # "KY" (Cayman Islands)
 
 # Classify filer type
 get_filer_type("DE")    # "Domestic"
@@ -346,6 +352,7 @@ cusip_ticker_mapping()                      # Full mapping DataFrame
 
 # ── Place codes ──
 get_place_name("DE")                        # "Delaware"
+get_place_country_code("E9")                # "KY"
 get_filer_type("DE")                        # "Domestic"
 is_us_company("DE")                         # True
 

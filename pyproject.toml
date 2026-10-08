@@ -44,21 +44,21 @@ dependencies = [
   "httpx>=0.25.0,<0.29",
   "pandas>=2.0.0",
   "tabulate>=0.9.0",
-  "pyarrow>=17.0.0",
+  "pyarrow>=23.0.1",
   "beautifulsoup4>=4.10.0",
-  "lxml>=4.4",
+  "lxml>=6.1.0",
   "rich>=13.8.0",
   "humanize>=4.0.0",
   "stamina>=24.2.0",
-  "orjson>=3.6.0",
+  "orjson>=3.11.6",
   "textdistance>=4.5.0",
   "rank_bm25>=0.2.1",
   "rapidfuzz>=3.5.0",
   "unidecode>=1.2.0",
-  "pydantic>=2.0.0",
-  "tqdm>=4.62.0",
+  "pydantic>=2.4.0",
+  "tqdm>=4.66.3",
   "nest-asyncio>=1.5.1",
-  "jinja2>=3.1.0",
+  "jinja2>=3.1.6",
   "pyrate-limiter>=3.0.0",
   # The [httpx] extra is required, not decorative: from 0.6.0 httpxthrottlecache
   # declares httpx and httpx2 as optional extras and installs neither by default.
@@ -81,9 +81,9 @@ ai = [
     # import time, so an unpinned resolve breaks `edgartools-mcp` outright and
     # fails test collection. Lift the cap once server.py is ported to the 2.0
     # API (add_request_handler / FastMCP).
-    "mcp>=1.12.3,<2.0.0",   # Model Context Protocol
+    "mcp>=1.28.1,<2.0.0",   # Model Context Protocol
     "tiktoken>=0.10.0",     # Token counting for OpenAI models
-    "starlette>=0.36.0",    # ASGI framework for HTTP transport
+    "starlette>=1.3.1",    # ASGI framework for HTTP transport
     "uvicorn>=0.27.0",      # ASGI server for HTTP transport
 ]
 
@@ -136,8 +136,8 @@ Source = "https://github.com/dgunning/edgartools"
 Changelog = "https://github.com/dgunning/edgartools/releases"
 
 [project.scripts]
+edgartools = "edgar._cli:main"
 edgartools-mcp = "edgar.ai.mcp.server:main"
-edgar-test = "tests.harness.cli:cli"
 
 [tool.hatch.version]
 path = "edgar/__about__.py"

@@ -45,6 +45,7 @@ from edgar.reference.company_subsets import (
 )
 from edgar.reference._codes import (
     get_filer_type,
+    get_place_country_code,
     get_place_name,
     get_place_type,
     is_canadian_company,

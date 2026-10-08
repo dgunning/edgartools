@@ -252,6 +252,7 @@ class XBRLParser:
             for instance_file in instance_files:
                 log.debug(f"Parsing instance: {instance_file}")
                 self.instance_parser.parse_instance(instance_file)
+            self._fill_period_types_from_facts()
 
             log.info(f"Successfully parsed XBRL directory with {len(self.facts)} facts")
 
@@ -319,11 +320,41 @@ class XBRLParser:
 
     def parse_instance(self, file_path: Union[str, Path]) -> None:
         """Parse instance document file and extract contexts, facts, and units."""
-        return self.instance_parser.parse_instance(file_path)
+        self.instance_parser.parse_instance(file_path)
+        self._fill_period_types_from_facts()
 
     def parse_instance_content(self, content: str) -> None:
         """Parse instance document content and extract contexts, facts, and units."""
-        return self.instance_parser.parse_instance_content(content)
+        self.instance_parser.parse_instance_content(content)
+        self._fill_period_types_from_facts()
+
+    def _fill_period_types_from_facts(self) -> None:
+        """
+        Give each catalog entry that has no period type the one its facts carry.
+
+        An element declared in a schema the filing does not contain (us-gaap,
+        dei, srt) reaches the catalog only through its labels, with no period
+        type. XBRL 2.1 (5.1.1.1) requires every fact of an instant element to
+        have an instant context, and every fact of a duration element a duration
+        or forever one, so the facts are the filing's own statement of it. An
+        element with no facts, or whose facts disagree, keeps None.
+        """
+        period_types: Dict[str, Optional[str]] = {}
+        for fact in self.facts.values():
+            context = self.contexts.get(fact.context_ref)
+            period_type = context.period.get('type') if context else None
+            if period_type == 'forever':
+                period_type = 'duration'
+            if period_type not in ('instant', 'duration'):
+                continue
+            element_id = fact.element_id.replace(':', '_', 1)
+            if period_types.setdefault(element_id, period_type) != period_type:
+                period_types[element_id] = None
+
+        for element_id, period_type in period_types.items():
+            entry = self.element_catalog.get(element_id)
+            if entry is not None and entry.period_type is None:
+                entry.period_type = period_type
 
     def count_facts(self, content: str) -> tuple:
         """Count the number of facts in the instance document."""

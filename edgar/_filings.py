@@ -41,6 +41,7 @@ from edgar.core import (
     YearAndQuarters,
     Years,
     cache_except_none,
+    has_html_content,
     is_probably_html,
     listify,
     log,
@@ -1613,7 +1614,9 @@ class Filing:
             return document.download()
         if html.endswith("</PDF>"):
             return None
-        if html.startswith("<?xml"):
+        # Inline XBRL is XHTML, often opened with an XML declaration, and is already
+        # the HTML. Only a primary document that is XML needs rendering (GH #1421).
+        if html.startswith("<?xml") and not has_html_content(html):
             if self.form in ['3', '3/A', '4', '4/A', '5', '5/A']:
                 from edgar.ownership import Ownership
                 ownership: Ownership = self.obj()
@@ -2288,7 +2291,9 @@ class Filing:
 
     @property
     def homepage_url(self) -> str:
-        return f"{SEC_ARCHIVE_URL}/data/{self.cik}/{self.accession_no}-index.html"
+        # The index page inside the accession folder. SEC answers the shorter
+        # /data/<cik>/<accession>-index.html with a 403 "Access Denied" (GH #1421).
+        return f"{self.base_dir}/{self.accession_no}-index.html"
 
     @property
     def text_url(self) -> str:
