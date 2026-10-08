@@ -20869,339 +20869,6 @@
     "first_year": 2019,
     "last_year": 2025
   },
-  "ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest": {
-    "standard_tags": [
-      "MinorityInterestIncomeExpense"
-    ],
-    "display_name": "Net Income Attributable to Noncontrolling Interest",
-    "statement": "IncomeStatement",
-    "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.982,
-    "company_count": 1043,
-    "occurrence_rate": 0.116,
-    "temporal_consistency": 0.583,
-    "years_present": 7,
-    "first_year": 2019,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Aero": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.881
-      },
-      "Agric": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.918
-      },
-      "Banks": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.945
-      },
-      "BldMt": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Boxes": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.871
-      },
-      "Chems": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.908
-      },
-      "Chips": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Clths": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.886
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.92
-      },
-      "Comps": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.911
-      },
-      "Drugs": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.895
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.914
-      },
-      "FabPr": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.921
-      },
-      "Food": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.987
-      },
-      "Fun": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.925
-      },
-      "Insur": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.962
-      },
-      "LabEq": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.959
-      },
-      "Mach": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.939
-      },
-      "Meals": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.956
-      },
-      "MedEq": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.932
-      },
-      "Mines": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.909
-      },
-      "Other": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.955
-      },
-      "RlEst": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.906
-      },
-      "Rtail": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.943
-      },
-      "Steel": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.95
-      },
-      "Telcm": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.962
-      },
-      "Util": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.957
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "MinorityInterestIncomeExpense"
-        ],
-        "display_name": "Net Income Attributable to Noncontrolling Interest",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.874
-      }
-    }
-  },
   "ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest": {
     "standard_tags": [
       "ComprehensiveIncomeNet"
@@ -22784,22 +22451,6 @@
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025
-  },
-  "ConversionOfStockSharesConverted1": {
-    "standard_tags": [
-      "SharesFullyDilutedAverage"
-    ],
-    "display_name": "Weighted Average Shares Outstanding, Diluted",
-    "statement": "PerShareData",
-    "section": "Shares Outstanding",
-    "is_total": false,
-    "confidence": 0.315,
-    "company_count": 232,
-    "occurrence_rate": 0.026,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2020,
     "last_year": 2025
   },
   "ConvertibleDebt": {
@@ -28282,22 +27933,6 @@
     "temporal_consistency": 0.583,
     "years_present": 7,
     "first_year": 2012,
-    "last_year": 2025
-  },
-  "DebtConversionConvertedInstrumentSharesIssued1": {
-    "standard_tags": [
-      "SharesFullyDilutedAverage"
-    ],
-    "display_name": "Weighted Average Shares Outstanding, Diluted",
-    "statement": "PerShareData",
-    "section": "Shares Outstanding",
-    "is_total": false,
-    "confidence": 0.307,
-    "company_count": 100,
-    "occurrence_rate": 0.011,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2020,
     "last_year": 2025
   },
   "DebtCurrent": {
@@ -34474,13 +34109,13 @@
   },
   "DefinedBenefitPlanInterestCost": {
     "standard_tags": [
-      "InterestExpense"
+      "PensionExpense"
     ],
-    "display_name": "Interest Expense",
+    "display_name": "Net Periodic Pension Cost",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
+    "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -34618,13 +34253,13 @@
   },
   "DefinedContributionPlanCostRecognized": {
     "standard_tags": [
-      "OtherOperatingExpense"
+      "PensionExpense"
     ],
-    "display_name": "Other Operating Expense",
+    "display_name": "Net Periodic Pension Cost",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 3,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.167,
@@ -46445,22 +46080,6 @@
     "first_year": 2021,
     "last_year": 2024
   },
-  "EquitySecuritiesWithoutReadilyDeterminableFairValueDownwardPriceAdjustmentCumulativeAmount": {
-    "standard_tags": [
-      "NonoperatingIncomeExpense"
-    ],
-    "display_name": "Non-Operating Income (Expense)",
-    "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
   "EquitySecuritiesWithoutReadilyDeterminableFairValueImpairmentLossAnnualAmount": {
     "standard_tags": [
       "NonoperatingIncomeExpense"
@@ -46496,22 +46115,6 @@
         "confidence": 1.0
       }
     }
-  },
-  "EquitySecuritiesWithoutReadilyDeterminableFairValueImpairmentLossCumulativeAmount": {
-    "standard_tags": [
-      "NonoperatingIncomeExpense"
-    ],
-    "display_name": "Non-Operating Income (Expense)",
-    "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
   },
   "EquitySecuritiesWithoutReadilyDeterminableFairValueUpwardPriceAdjustmentAnnualAmount": {
     "standard_tags": [
@@ -46781,48 +46384,19 @@
   },
   "ExplorationExpense": {
     "standard_tags": [
-      "ResearchAndDevelopmentExpenses"
+      "OtherOperatingExpense"
     ],
-    "display_name": "Research and Development Expense",
+    "display_name": "Other Operating Expense",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 88,
     "occurrence_rate": 0.01,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Gold": {
-        "standard_tags": [
-          "ResearchAndDevelopmentExpenses"
-        ],
-        "display_name": "Research and Development Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.954
-      },
-      "Mines": {
-        "standard_tags": [
-          "ResearchAndDevelopmentExpenses"
-        ],
-        "display_name": "Research and Development Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.906
-      },
-      "Oil": {
-        "standard_tags": [
-          "ResearchAndDevelopmentExpenses"
-        ],
-        "display_name": "Research and Development Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.994
-      }
-    }
+    "last_year": 2025
   },
   "ExplorationExpenseMining": {
     "standard_tags": [
@@ -48738,22 +48312,6 @@
     "last_year": null
   },
   "FiniteLivedIntangibleAssetsAmortizationExpenseNextTwelveMonths": {
-    "standard_tags": [
-      "ForecastedIntangibleAmortizationYear1"
-    ],
-    "display_name": "Forecasted Amortization, Year 1",
-    "statement": "Commitments",
-    "section": "Amortization Forecasts",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "FiniteLivedIntangibleAssetsAmortizationExpenseRemainderOfFiscalYear": {
     "standard_tags": [
       "ForecastedIntangibleAmortizationYear1"
     ],
@@ -52670,409 +52228,29 @@
   },
   "GainsLossesOnExtinguishmentOfDebt": {
     "standard_tags": [
-      "InterestExpense"
+      "LossOnDebtExtinguishment"
     ],
-    "display_name": "Interest Expense",
+    "display_name": "Loss on Debt Extinguishment",
     "statement": "IncomeStatement",
     "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 1.0,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 2516,
     "occurrence_rate": 0.28,
     "temporal_consistency": 0.75,
     "years_present": 9,
     "first_year": 2017,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Aero": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Agric": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Beer": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.988
-      },
-      "Boxes": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.992
-      },
-      "Chems": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Clths": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Coal": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.946
-      },
-      "Drugs": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.993
-      },
-      "Food": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.978
-      },
-      "Fun": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.992
-      },
-      "Gold": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Guns": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.948
-      },
-      "Insur": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.991
-      },
-      "Meals": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.987
-      },
-      "Mines": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.995
-      },
-      "Other": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Paper": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.989
-      },
-      "Rubbr": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Steel": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.971
-      },
-      "Telcm": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Toys": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.993
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "GainsLossesOnExtinguishmentOfDebtBeforeWriteOffOfDeferredDebtIssuanceCost": {
     "standard_tags": [
-      "InterestExpense"
+      "LossOnDebtExtinguishment"
     ],
-    "display_name": "Interest Expense",
+    "display_name": "Loss on Debt Extinguishment",
     "statement": "IncomeStatement",
     "section": "Non-Operating Items",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 52,
     "occurrence_rate": 0.006,
     "temporal_consistency": 0.333,
@@ -56062,22 +55240,6 @@
     "first_year": 2019,
     "last_year": 2023
   },
-  "IncomeLossFromContinuingOperationsBeforeIncomeTaxesDomestic": {
-    "standard_tags": [
-      "PretaxIncomeLoss"
-    ],
-    "display_name": "Income Before Tax",
-    "statement": "IncomeStatement",
-    "section": "Income Before Tax",
-    "is_total": true,
-    "confidence": 0.308,
-    "company_count": 125,
-    "occurrence_rate": 0.014,
-    "temporal_consistency": 0.667,
-    "years_present": 8,
-    "first_year": 2018,
-    "last_year": 2025
-  },
   "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest": {
     "standard_tags": [
       "PretaxIncomeLoss"
@@ -56112,13 +55274,13 @@
   },
   "IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest": {
     "standard_tags": [
-      "ProfitLoss"
+      "IncomeLossContinuingOperations"
     ],
-    "display_name": "Profit or Loss",
+    "display_name": "Income from Continuing Operations",
     "statement": "IncomeStatement",
     "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.965,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 671,
     "occurrence_rate": 0.075,
     "temporal_consistency": 0.5,
@@ -64151,13 +63313,13 @@
   },
   "InformationTechnologyAndDataProcessing": {
     "standard_tags": [
-      "OtherOperatingExpense"
+      "CommunicationAndTechnologyExpense"
     ],
-    "display_name": "Other Operating Expense",
+    "display_name": "Communication and Technology Expense",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 285,
     "occurrence_rate": 0.032,
     "temporal_consistency": 0.417,
@@ -65046,22 +64208,6 @@
       }
     }
   },
-  "InterestCostsCapitalized": {
-    "standard_tags": [
-      "InterestExpense"
-    ],
-    "display_name": "Interest Expense",
-    "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 39,
-    "occurrence_rate": 0.004,
-    "temporal_consistency": 0.333,
-    "years_present": 4,
-    "first_year": 2021,
-    "last_year": 2024
-  },
   "InterestCostsCapitalizedAdjustment": {
     "standard_tags": [
       "InterestExpense"
@@ -65109,22 +64255,6 @@
     "confidence": 0.5,
     "company_count": 17,
     "occurrence_rate": 0.002,
-    "temporal_consistency": 0.333,
-    "years_present": 4,
-    "first_year": 2021,
-    "last_year": 2024
-  },
-  "InterestCostsIncurredCapitalized": {
-    "standard_tags": [
-      "InterestExpense"
-    ],
-    "display_name": "Interest Expense",
-    "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 2,
-    "occurrence_rate": 0.0,
     "temporal_consistency": 0.333,
     "years_present": 4,
     "first_year": 2021,
@@ -66693,300 +65823,19 @@
   },
   "InterestIncomeExpenseNonoperatingNet": {
     "standard_tags": [
-      "InterestExpense"
+      "NetInterestIncome"
     ],
-    "display_name": "Interest Expense",
+    "display_name": "Net Interest Income",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.97,
+    "section": "Banking Revenue",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 893,
     "occurrence_rate": 0.099,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Aero": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Agric": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.916
-      },
-      "Banks": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.92
-      },
-      "Chems": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.873
-      },
-      "Chips": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.853
-      },
-      "Clths": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.94
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.969
-      },
-      "Food": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.925
-      },
-      "Guns": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.965
-      },
-      "Hlth": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.892
-      },
-      "LabEq": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.879
-      },
-      "MedEq": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.962
-      },
-      "Mines": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.905
-      },
-      "PerSv": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.855
-      },
-      "Rtail": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.9
-      },
-      "Rubbr": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Steel": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.956
-      },
-      "Toys": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.976
-      },
-      "Trans": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.978
-      },
-      "Util": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.902
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "InterestExpense"
-        ],
-        "display_name": "Interest Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.92
-      }
-    }
+    "last_year": 2025
   },
   "InterestIncomeForeignDeposits": {
     "standard_tags": [
@@ -68841,13 +67690,13 @@
   },
   "InterestRevenueExpenseNet": {
     "standard_tags": [
-      "InterestExpense"
+      "NetInterestIncome"
     ],
-    "display_name": "Interest Expense",
+    "display_name": "Net Interest Income",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Banking Revenue",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 39,
     "occurrence_rate": 0.004,
     "temporal_consistency": 0.417,
@@ -72588,13 +71437,13 @@
   },
   "LicenseAndMaintenanceRevenue": {
     "standard_tags": [
-      "RoyaltyRevenue"
+      "LicensingRevenue"
     ],
-    "display_name": "Royalty Revenue",
+    "display_name": "Licensing Revenue",
     "statement": "IncomeStatement",
     "section": "Revenue",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -72633,22 +71482,6 @@
     "years_present": 0,
     "first_year": null,
     "last_year": null
-  },
-  "LicenseMember": {
-    "standard_tags": [
-      "LicensingRevenue"
-    ],
-    "display_name": "Licensing Revenue",
-    "statement": "IncomeStatement",
-    "section": "Revenue",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 132,
-    "occurrence_rate": 0.015,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
   },
   "LicensesRevenue": {
     "standard_tags": [
@@ -73248,13 +72081,13 @@
   },
   "LitigationSettlementInterest": {
     "standard_tags": [
-      "InterestIncome"
+      "OtherOperatingExpense"
     ],
-    "display_name": "Interest Income",
+    "display_name": "Other Operating Expense",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
+    "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 3,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.25,
@@ -78516,22 +77349,6 @@
       }
     }
   },
-  "MinorityInterestChangeInRedemptionValue": {
-    "standard_tags": [
-      "NetIncomeToCommonShareholders"
-    ],
-    "display_name": "Net Income to Common Shareholders",
-    "statement": "IncomeStatement",
-    "section": "Net Income",
-    "is_total": false,
-    "confidence": 0.308,
-    "company_count": 120,
-    "occurrence_rate": 0.013,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
-  },
   "MinorityInterestDecreaseFromDistributionsToNoncontrollingInterestHolders": {
     "standard_tags": [
       "NetCashFromFinancingActivities"
@@ -78546,22 +77363,6 @@
     "temporal_consistency": 0.583,
     "years_present": 7,
     "first_year": 2019,
-    "last_year": 2025
-  },
-  "MinorityInterestDecreaseFromRedemptions": {
-    "standard_tags": [
-      "OtherComprehensiveIncomeLoss"
-    ],
-    "display_name": "Other Comprehensive Income (Loss)",
-    "statement": "ComprehensiveIncome",
-    "section": "OCI Components",
-    "is_total": false,
-    "confidence": 0.341,
-    "company_count": 620,
-    "occurrence_rate": 0.069,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2020,
     "last_year": 2025
   },
   "MinorityInterestInJointVentures": {
@@ -78611,78 +77412,6 @@
     "years_present": 5,
     "first_year": 2019,
     "last_year": 2024
-  },
-  "MinorityInterestPeriodIncreaseDecrease": {
-    "standard_tags": [
-      "NetIncomeToCommonShareholders"
-    ],
-    "display_name": "Net Income to Common Shareholders",
-    "statement": "IncomeStatement",
-    "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.308,
-    "company_count": 127,
-    "occurrence_rate": 0.014,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Fin": {
-        "standard_tags": [
-          "NetIncomeToCommonShareholders"
-        ],
-        "display_name": "Net Income to Common Shareholders",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetIncomeToCommonShareholders"
-        ],
-        "display_name": "Net Income to Common Shareholders",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.985
-      },
-      "LabEq": {
-        "standard_tags": [
-          "NetIncomeToCommonShareholders"
-        ],
-        "display_name": "Net Income to Common Shareholders",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetIncomeToCommonShareholders"
-        ],
-        "display_name": "Net Income to Common Shareholders",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetIncomeToCommonShareholders"
-        ],
-        "display_name": "Net Income to Common Shareholders",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetIncomeToCommonShareholders"
-        ],
-        "display_name": "Net Income to Common Shareholders",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
   },
   "MoneyMarketFundsAtCarryingValue": {
     "standard_tags": [
@@ -79588,13 +78317,13 @@
   },
   "NetIncomeLossAvailableToCommonStockholdersDiluted": {
     "standard_tags": [
-      "ComprehensiveIncomeNet"
+      "NetIncomeToCommonShareholders"
     ],
-    "display_name": "Comprehensive Income, Net",
-    "statement": "ComprehensiveIncome",
-    "section": "Comprehensive Income Totals",
-    "is_total": true,
-    "confidence": 0.321,
+    "display_name": "Net Income to Common Shareholders",
+    "statement": "IncomeStatement",
+    "section": "Net Income",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 316,
     "occurrence_rate": 0.035,
     "temporal_consistency": 0.5,
@@ -79620,156 +78349,19 @@
   },
   "NetIncomeLossIncludingPortionAttributableToNonredeemableNoncontrollingInterest": {
     "standard_tags": [
-      "ComprehensiveIncomeNet"
+      "ProfitLoss"
     ],
-    "display_name": "Comprehensive Income, Net",
-    "statement": "ComprehensiveIncome",
-    "section": "Comprehensive Income Totals",
-    "is_total": true,
-    "confidence": 0.315,
+    "display_name": "Profit or Loss",
+    "statement": "IncomeStatement",
+    "section": "Net Income",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 228,
     "occurrence_rate": 0.025,
     "temporal_consistency": 0.667,
     "years_present": 8,
     "first_year": 2016,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Autos": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 0.95
-      },
-      "BusSv": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 0.924
-      },
-      "Chips": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 0.961
-      },
-      "Fun": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 0.911
-      },
-      "Insur": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 0.964
-      },
-      "Oil": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 0.9
-      },
-      "RlEst": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 0.973
-      },
-      "Trans": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "NetInvestmentInLeaseCurrent": {
     "standard_tags": [
@@ -80026,22 +78618,6 @@
     "confidence": 0.309,
     "company_count": 132,
     "occurrence_rate": 0.015,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2020,
-    "last_year": 2025
-  },
-  "NoncontrollingInterestDecreaseFromDeconsolidation": {
-    "standard_tags": [
-      "RestructuringExpenseBenefit"
-    ],
-    "display_name": "Restructuring Expense",
-    "statement": "IncomeStatement",
-    "section": "Operating Expenses",
-    "is_total": false,
-    "confidence": 0.319,
-    "company_count": 283,
-    "occurrence_rate": 0.031,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
@@ -86733,130 +85309,29 @@
   },
   "OtherComprehensiveIncomeDefinedBenefitPlansNetUnamortizedGainLossArisingDuringPeriodNetOfTax": {
     "standard_tags": [
-      "OtherComprehensiveIncomeLoss"
+      "PensionAndRetirementAdjustments"
     ],
-    "display_name": "Other Comprehensive Income (Loss)",
+    "display_name": "Pension and Retirement Adjustments",
     "statement": "ComprehensiveIncome",
     "section": "OCI Components",
-    "is_total": true,
-    "confidence": 0.316,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 244,
     "occurrence_rate": 0.027,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "BldMt": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.911
-      },
-      "Chems": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.926
-      },
-      "Chips": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.985
-      },
-      "Fin": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.927
-      },
-      "MedEq": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.867
-      },
-      "Oil": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.918
-      },
-      "Trans": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.957
-      }
-    }
+    "last_year": 2025
   },
   "OtherComprehensiveIncomeDefinedBenefitPlansNetUnamortizedGainLossArisingDuringPeriodTax": {
     "standard_tags": [
-      "OtherComprehensiveIncomeLoss"
+      "PensionAndRetirementAdjustments"
     ],
-    "display_name": "Other Comprehensive Income (Loss)",
+    "display_name": "Pension and Retirement Adjustments",
     "statement": "ComprehensiveIncome",
     "section": "OCI Components",
     "is_total": false,
-    "confidence": 0.31,
+    "confidence": 0.9,
     "company_count": 149,
     "occurrence_rate": 0.017,
     "temporal_consistency": 0.417,
@@ -87415,178 +85890,34 @@
   },
   "OtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax": {
     "standard_tags": [
-      "OtherComprehensiveIncomeLoss"
+      "UnrealizedGainsLossesSecurities"
     ],
-    "display_name": "Other Comprehensive Income (Loss)",
+    "display_name": "Unrealized Gains/Losses on Securities",
     "statement": "ComprehensiveIncome",
     "section": "OCI Components",
-    "is_total": true,
-    "confidence": 0.327,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 408,
     "occurrence_rate": 0.045,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.851
-      },
-      "Chems": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.867
-      },
-      "Chips": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.88
-      },
-      "Drugs": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.933
-      },
-      "Fin": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.908
-      },
-      "Hlth": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.943
-      },
-      "Hshld": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.916
-      },
-      "Mach": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.862
-      },
-      "Util": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "OtherComprehensiveIncomeLossAvailableForSaleSecuritiesTax": {
     "standard_tags": [
-      "OtherComprehensiveIncomeLoss"
+      "UnrealizedGainsLossesSecurities"
     ],
-    "display_name": "Other Comprehensive Income (Loss)",
+    "display_name": "Unrealized Gains/Losses on Securities",
     "statement": "ComprehensiveIncome",
     "section": "OCI Components",
-    "is_total": true,
-    "confidence": 0.308,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 120,
     "occurrence_rate": 0.013,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.911
-      }
-    }
-  },
-  "OtherComprehensiveIncomeLossBeforeTax": {
-    "standard_tags": [
-      "OtherComprehensiveIncomeLoss"
-    ],
-    "display_name": "Other Comprehensive Income (Loss)",
-    "statement": "ComprehensiveIncome",
-    "section": "OCI Components",
-    "is_total": true,
-    "confidence": 0.311,
-    "company_count": 162,
-    "occurrence_rate": 0.018,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
-  },
-  "OtherComprehensiveIncomeLossBeforeTaxPortionAttributableToParent": {
-    "standard_tags": [
-      "OtherComprehensiveIncomeLoss"
-    ],
-    "display_name": "Other Comprehensive Income (Loss)",
-    "statement": "ComprehensiveIncome",
-    "section": "OCI Components",
-    "is_total": true,
-    "confidence": 0.308,
-    "company_count": 121,
-    "occurrence_rate": 0.013,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2020,
     "last_year": 2025
   },
   "OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax": {
@@ -88183,13 +86514,13 @@
   },
   "OtherComprehensiveIncomeLossCashFlowHedgeGainLossBeforeReclassificationTax": {
     "standard_tags": [
-      "OtherComprehensiveIncomeLoss"
+      "HedgingGainsLosses"
     ],
-    "display_name": "Other Comprehensive Income (Loss)",
+    "display_name": "Hedging Gains/Losses",
     "statement": "ComprehensiveIncome",
     "section": "OCI Components",
     "is_total": false,
-    "confidence": 0.314,
+    "confidence": 0.9,
     "company_count": 210,
     "occurrence_rate": 0.023,
     "temporal_consistency": 0.417,
@@ -88199,210 +86530,19 @@
   },
   "OtherComprehensiveIncomeLossCashFlowHedgeGainLossReclassificationAfterTax": {
     "standard_tags": [
-      "OtherComprehensiveIncomeLoss"
+      "HedgingGainsLosses"
     ],
-    "display_name": "Other Comprehensive Income (Loss)",
+    "display_name": "Hedging Gains/Losses",
     "statement": "ComprehensiveIncome",
     "section": "OCI Components",
-    "is_total": true,
-    "confidence": 0.326,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 388,
     "occurrence_rate": 0.043,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "BldMt": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.943
-      },
-      "BusSv": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.864
-      },
-      "Chems": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.861
-      },
-      "Chips": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.927
-      },
-      "Comps": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.956
-      },
-      "Fin": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.947
-      },
-      "LabEq": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.931
-      },
-      "Meals": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.877
-      },
-      "MedEq": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.872
-      },
-      "Other": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.927
-      },
-      "RlEst": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.881
-      },
-      "Telcm": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.95
-      }
-    }
+    "last_year": 2025
   },
   "OtherComprehensiveIncomeLossCashFlowHedgeGainLossReclassificationBeforeTax": {
     "standard_tags": [
@@ -88422,13 +86562,13 @@
   },
   "OtherComprehensiveIncomeLossCashFlowHedgeGainLossReclassificationTax": {
     "standard_tags": [
-      "OtherComprehensiveIncomeLoss"
+      "HedgingGainsLosses"
     ],
-    "display_name": "Other Comprehensive Income (Loss)",
+    "display_name": "Hedging Gains/Losses",
     "statement": "ComprehensiveIncome",
     "section": "OCI Components",
     "is_total": false,
-    "confidence": 0.314,
+    "confidence": 0.9,
     "company_count": 205,
     "occurrence_rate": 0.023,
     "temporal_consistency": 0.417,
@@ -88843,84 +86983,19 @@
   },
   "OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationReclassificationAdjustmentFromAOCIRealizedUponSaleOrLiquidationNetOfTax": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "AOCIReclassifications"
     ],
-    "display_name": "Non-Operating Income (Expense)",
-    "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.5,
+    "display_name": "AOCI Reclassification Adjustments",
+    "statement": "ComprehensiveIncome",
+    "section": "OCI Components",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 131,
     "occurrence_rate": 0.015,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "OtherComprehensiveIncomeLossForeignCurrencyTranslationAdjustmentTax": {
     "standard_tags": [
@@ -89126,87 +87201,6 @@
     "years_present": 10,
     "first_year": 2016,
     "last_year": 2025
-  },
-  "OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToNoncontrollingInterest": {
-    "standard_tags": [
-      "ComprehensiveIncomeNet"
-    ],
-    "display_name": "Comprehensive Income, Net",
-    "statement": "ComprehensiveIncome",
-    "section": "Comprehensive Income Totals",
-    "is_total": true,
-    "confidence": 0.308,
-    "company_count": 117,
-    "occurrence_rate": 0.013,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 0.977
-      },
-      "Fun": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "ComprehensiveIncomeNet"
-        ],
-        "display_name": "Comprehensive Income, Net",
-        "section": "Comprehensive Income Totals",
-        "is_total": false,
-        "confidence": 0.886
-      }
-    }
   },
   "OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent": {
     "standard_tags": [
@@ -89663,78 +87657,6 @@
         "section": "OCI Components",
         "is_total": false,
         "confidence": 0.989
-      }
-    }
-  },
-  "OtherComprehensiveIncomeLossTax": {
-    "standard_tags": [
-      "OtherComprehensiveIncomeLoss"
-    ],
-    "display_name": "Other Comprehensive Income (Loss)",
-    "statement": "ComprehensiveIncome",
-    "section": "OCI Components",
-    "is_total": true,
-    "confidence": 0.314,
-    "company_count": 216,
-    "occurrence_rate": 0.024,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Autos": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.877
-      },
-      "Hlth": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.964
-      },
-      "Oil": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
-  },
-  "OtherComprehensiveIncomeLossTaxPortionAttributableToParent1": {
-    "standard_tags": [
-      "OtherComprehensiveIncomeLoss"
-    ],
-    "display_name": "Other Comprehensive Income (Loss)",
-    "statement": "ComprehensiveIncome",
-    "section": "OCI Components",
-    "is_total": true,
-    "confidence": 0.309,
-    "company_count": 136,
-    "occurrence_rate": 0.015,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Comps": {
-        "standard_tags": [
-          "OtherComprehensiveIncomeLoss"
-        ],
-        "display_name": "Other Comprehensive Income (Loss)",
-        "section": "OCI Components",
-        "is_total": false,
-        "confidence": 0.88
       }
     }
   },
@@ -95232,13 +93154,13 @@
   },
   "OtherPostretirementBenefitExpense": {
     "standard_tags": [
-      "OtherOperatingExpense"
+      "PensionExpense"
     ],
-    "display_name": "Other Operating Expense",
+    "display_name": "Net Periodic Pension Cost",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 7,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.417,
@@ -95915,13 +93837,13 @@
   },
   "OtherRecurringIncome": {
     "standard_tags": [
-      "OtherOperatingExpense"
+      "OtherIncomeIS"
     ],
-    "display_name": "Other Operating Expense",
+    "display_name": "Other Income",
     "statement": "IncomeStatement",
-    "section": "Operating Expenses",
+    "section": "Non-Operating Items",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 2,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.333,
@@ -96736,22 +94658,6 @@
     "years_present": 5,
     "first_year": 2021,
     "last_year": 2025
-  },
-  "PaymentsForOtherTaxes": {
-    "standard_tags": [
-      "OtherOperatingExpense"
-    ],
-    "display_name": "Other Operating Expense",
-    "statement": "IncomeStatement",
-    "section": "Operating Expenses",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 3,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.25,
-    "years_present": 3,
-    "first_year": 2022,
-    "last_year": 2024
   },
   "PaymentsForProceedsFromFederalHomeLoanBankStock": {
     "standard_tags": [
@@ -102378,13 +100284,13 @@
   },
   "PensionExpense": {
     "standard_tags": [
-      "OtherOperatingExpense"
+      "PensionExpense"
     ],
-    "display_name": "Other Operating Expense",
+    "display_name": "Net Periodic Pension Cost",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 34,
     "occurrence_rate": 0.004,
     "temporal_consistency": 0.417,
@@ -108036,22 +105942,6 @@
       }
     }
   },
-  "ProceedsFromLegalSettlements": {
-    "standard_tags": [
-      "NonoperatingIncomeExpense"
-    ],
-    "display_name": "Non-Operating Income (Expense)",
-    "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 14,
-    "occurrence_rate": 0.002,
-    "temporal_consistency": 0.333,
-    "years_present": 4,
-    "first_year": 2021,
-    "last_year": 2024
-  },
   "ProceedsFromLifeInsurancePolicies": {
     "standard_tags": [
       "NetCashFromInvestingActivities"
@@ -113122,13 +111012,13 @@
   },
   "ProvisionForOtherCreditLosses": {
     "standard_tags": [
-      "OtherOperatingExpense"
+      "ProvisionForCreditLosses"
     ],
-    "display_name": "Other Operating Expense",
+    "display_name": "Provision for Credit Losses",
     "statement": "IncomeStatement",
-    "section": "Operating Expenses",
+    "section": "Banking Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 186,
     "occurrence_rate": 0.021,
     "temporal_consistency": 0.5,
@@ -127473,382 +125363,6 @@
       }
     }
   },
-  "StockIssuedDuringPeriodSharesConversionOfConvertibleSecurities": {
-    "standard_tags": [
-      "SharesFullyDilutedAverage"
-    ],
-    "display_name": "Weighted Average Shares Outstanding, Diluted",
-    "statement": "PerShareData",
-    "section": "Shares Outstanding",
-    "is_total": true,
-    "confidence": 0.438,
-    "company_count": 2073,
-    "occurrence_rate": 0.23,
-    "temporal_consistency": 0.833,
-    "years_present": 10,
-    "first_year": 2012,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Aero": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Agric": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Beer": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Clths": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 0.999
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Food": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Gold": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Guns": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Other": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rubbr": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Toys": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 0.911
-      },
-      "Trans": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "SharesFullyDilutedAverage"
-        ],
-        "display_name": "Weighted Average Shares Outstanding, Diluted",
-        "section": "Shares Outstanding",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
-  },
-  "StockIssuedDuringPeriodSharesEmployeeBenefitPlan": {
-    "standard_tags": [
-      "OtherOperatingExpense"
-    ],
-    "display_name": "Other Operating Expense",
-    "statement": "IncomeStatement",
-    "section": "Operating Expenses",
-    "is_total": false,
-    "confidence": 0.313,
-    "company_count": 188,
-    "occurrence_rate": 0.021,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2020,
-    "last_year": 2025
-  },
   "StockIssuedDuringPeriodSharesIssuedForServices": {
     "standard_tags": [
       "NetCashFromOperatingActivities"
@@ -127863,22 +125377,6 @@
     "temporal_consistency": 1.0,
     "years_present": 12,
     "first_year": 2012,
-    "last_year": 2025
-  },
-  "StockIssuedDuringPeriodSharesRestrictedStockAwardGross": {
-    "standard_tags": [
-      "SharesFullyDilutedAverage"
-    ],
-    "display_name": "Weighted Average Shares Outstanding, Diluted",
-    "statement": "PerShareData",
-    "section": "Shares Outstanding",
-    "is_total": false,
-    "confidence": 0.356,
-    "company_count": 844,
-    "occurrence_rate": 0.094,
-    "temporal_consistency": 0.667,
-    "years_present": 8,
-    "first_year": 2018,
     "last_year": 2025
   },
   "StockIssuedDuringPeriodValue": {
@@ -130809,22 +128307,6 @@
     "first_year": null,
     "last_year": null
   },
-  "TemporaryEquityAccretionToRedemptionValue": {
-    "standard_tags": [
-      "NetIncome"
-    ],
-    "display_name": "Net Income",
-    "statement": "IncomeStatement",
-    "section": "Net Income",
-    "is_total": false,
-    "confidence": 0.324,
-    "company_count": 365,
-    "occurrence_rate": 0.041,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2020,
-    "last_year": 2025
-  },
   "TemporaryEquityAccretionToRedemptionValueAdjustment": {
     "standard_tags": [
       "PreferredDividendExpense"
@@ -131336,22 +128818,6 @@
     "first_year": 2021,
     "last_year": 2024
   },
-  "TemporaryEquityForeignCurrencyTranslationAdjustments": {
-    "standard_tags": [
-      "MinorityInterestIncomeExpense"
-    ],
-    "display_name": "Net Income Attributable to Noncontrolling Interest",
-    "statement": "IncomeStatement",
-    "section": "Net Income",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 80,
-    "occurrence_rate": 0.009,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
-  },
   "TemporaryEquityLiquidationPreference": {
     "standard_tags": [
       "CurrentLiabilitiesTotal"
@@ -131370,84 +128836,19 @@
   },
   "TemporaryEquityNetIncome": {
     "standard_tags": [
-      "NetIncome"
+      "MinorityInterestIncomeExpense"
     ],
-    "display_name": "Net Income",
+    "display_name": "Net Income Attributable to Noncontrolling Interest",
     "statement": "IncomeStatement",
     "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.309,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 128,
     "occurrence_rate": 0.014,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "NetIncome"
-        ],
-        "display_name": "Net Income",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetIncome"
-        ],
-        "display_name": "Net Income",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "NetIncome"
-        ],
-        "display_name": "Net Income",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetIncome"
-        ],
-        "display_name": "Net Income",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetIncome"
-        ],
-        "display_name": "Net Income",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetIncome"
-        ],
-        "display_name": "Net Income",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetIncome"
-        ],
-        "display_name": "Net Income",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.962
-      }
-    }
+    "last_year": 2025
   },
   "TemporaryEquityValueExcludingAdditionalPaidInCapital": {
     "standard_tags": [
@@ -135343,13 +132744,13 @@
   },
   "WriteOffOfDeferredDebtIssuanceCost": {
     "standard_tags": [
-      "InterestExpense"
+      "LossOnDebtExtinguishment"
     ],
-    "display_name": "Interest Expense",
+    "display_name": "Loss on Debt Extinguishment",
     "statement": "IncomeStatement",
     "section": "Non-Operating Items",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 128,
     "occurrence_rate": 0.014,
     "temporal_consistency": 0.5,
