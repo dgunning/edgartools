@@ -6,7 +6,10 @@ Eaton's 2024 10-K (0001551182-25-000006, table 28) and 2026 Q1 10-Q
 (0001551182-26-000013, tables 22/23) place a blank physical row between
 rowspanning equity groups and their Shares/Dollars leaves. The fixtures are
 exact table fragments from those primary documents; provenance.json records
-their source offsets. The smaller examples below are synthetic boundaries.
+their source offsets. The SO combined filing's Georgia Power equity table also
+checks shared-matrix DataFrame column placement; its early transaction rows remain classified as
+headers, which is a separate detector limitation. The smaller examples below
+are synthetic boundaries.
 """
 
 from copy import deepcopy
@@ -232,3 +235,33 @@ def test_directly_constructed_table_has_no_parser_geometry_requirement():
     )
     document = Document(root=table)
     assert markdown_table(document) == (["Business", "Revenue 2026", "Revenue 2025"], [["Cloud", "10", "8"]])
+
+
+def equity_component_columns(columns, component):
+    positions = [index for index, path in enumerate(columns) if path[0] == component]
+    assert len(positions) == 3, (component, columns)
+    assert positions == list(range(positions[0], positions[0] + 3))
+    return positions
+
+
+def test_georgia_power_equity_dataframe_keeps_filed_component_columns():
+    """Pin filed transaction spans and closing balances within equity components."""
+    filing = EATON.parent / "so" / "10k" / "so-10-k-2026-02-19.html"
+    document = parse(filing.read_bytes(), "10-K")
+    tables = document.tables
+    assert tables is not None
+    frame = tables[102].to_dataframe()
+    assert frame.columns.nlevels > 1
+    # Early transactions remain promoted into headers. Their colspan=2 cells
+    # start at the left of each three-column component; body amounts use the
+    # middle numeric slot. Keep both origins and the currency/spacer slots.
+    paths = list(frame.columns)
+    closing = frame.loc["Balance at December 31, 2023"]
+    for component, amounts, balance in (
+        ("Paid-In Capital", ("—", "2,297"), 17_923),
+        ("Retained Earnings", ("2,080", "—"), 3_071),
+        ("Total", ("2,080", "2,297"), 21_383),
+    ):
+        columns = equity_component_columns(paths, component)
+        assert [paths[index][2:4] for index in columns] == [amounts, ("", ""), ("", "")]
+        assert closing.iloc[columns[1]] == balance
